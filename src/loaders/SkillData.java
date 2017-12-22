@@ -1,0 +1,188 @@
+package loaders;
+
+import client.character.skills.Skill;
+import client.character.skills.SkillInfo;
+import client.character.skills.SkillStat;
+import constants.ServerConstants;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import util.Loader;
+import util.Saver;
+import util.Util;
+import util.XMLApi;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created on 12/20/2017.
+ */
+public class SkillData {
+
+    private static Map<Integer, SkillInfo> skills = new HashMap<>();
+
+    @Saver(varName = "skills")
+    public static void saveSkills(File file) {
+        DataOutputStream dataOutputStream = null;
+        try {
+            dataOutputStream = new DataOutputStream(new FileOutputStream(file));
+            dataOutputStream.writeShort(skills.size());
+            for(Map.Entry<Integer, SkillInfo> entry : skills.entrySet()) {
+                SkillInfo si = entry.getValue();
+                dataOutputStream.writeInt(si.getSkillId());
+                dataOutputStream.writeInt(si.getRootId());
+                dataOutputStream.writeInt(si.getMaxLevel());
+                dataOutputStream.writeShort(si.getSkillStatInfo().size());
+                for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
+                    dataOutputStream.writeUTF(ssEntry.getKey().toString());
+                    if (ssEntry.getValue() == null) {
+                        dataOutputStream.writeUTF("");
+                    } else {
+                        dataOutputStream.writeUTF(ssEntry.getValue());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                dataOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Loader(varName = "skills")
+    public static void loadEquips(File file, boolean exists) {
+        if(!exists) {
+            loadSkillsFromWz();
+            saveSkills(file);
+        } else {
+            DataInputStream dataInputStream;
+            try {
+                dataInputStream = new DataInputStream(new FileInputStream(file));
+                short size = dataInputStream.readShort();
+                for (int i = 0; i < size; i++) {
+                    SkillInfo skillInfo = new SkillInfo();
+                    skillInfo.setSkillId(dataInputStream.readInt());
+                    skillInfo.setRootId(dataInputStream.readInt());
+                    skillInfo.setMaxLevel(dataInputStream.readInt());
+                    short ssSize = dataInputStream.readShort();
+                    for (int j = 0; j < ssSize; j++) {
+                        skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
+                                dataInputStream.readUTF()), dataInputStream.readUTF());
+                    }
+                    getSkillInfos().put(skillInfo.getSkillId(), skillInfo);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void loadSkillsFromWz(){
+        String wzDir = ServerConstants.WZ_DIR + "\\Skill.wz";
+        File dir = new File(wzDir);
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            Document doc = XMLApi.getRoot(file);
+            Node node = doc;
+            if(node == null) {
+                continue;
+            }
+            List<Node> nodes = XMLApi.getAllChildren(node);
+            for (Node mainNode : nodes) {
+                Map<String, String> attributes = XMLApi.getAttributes(mainNode);
+                String name = attributes.get("name").replace(".img","");
+                int rootId;
+                if(Util.isNumber(name)) {
+                    rootId = Integer.parseInt(name);
+                } else {
+                    System.err.println(name + " is not a number.");
+                    continue;
+                }
+                Node skillChild = XMLApi.getFirstChildByNameBF(mainNode, "skill");
+                for(Node skillNode : XMLApi.getAllChildren(skillChild)) {
+                    Map<String, String> skillAttributes = XMLApi.getAttributes(skillNode);
+                    String skillIdName = skillAttributes.get("name").replace(".img","");
+                    int skillId;
+                    if(Util.isNumber(skillIdName)) {
+                        SkillInfo skill = new SkillInfo();
+                        skill.setRootId(rootId);
+                        if(Util.isNumber(skillIdName)) {
+                            skillId = Integer.parseInt(skillIdName);
+                            skill.setSkillId(skillId);
+                        } else {
+                            System.err.println(name + " is not a number.");
+                            continue;
+                        }
+                        // start main level info
+                        Node invis = XMLApi.getFirstChildByNameBF(skillNode, "invisible");
+                        boolean invisible = false;
+                        if(invis != null) {
+                            invisible = Integer.parseInt(XMLApi.getAttributes(invis).get("value")) == 1;
+                        }
+                        if(invisible) {
+//                            continue;
+                        }
+                        // end main level info
+                        // start "common" level info
+                        Node common = XMLApi.getFirstChildByNameBF(skillNode, "common");
+                        Map<String, String> values = new HashMap<>();
+                        if(common != null) {
+                            for(Node commonNode : XMLApi.getAllChildren(common)) {
+                                if(common.getNodeName().equals("vector")) {
+
+                                } else {
+                                    Map<String, String> commonAttr = XMLApi.getAttributes(commonNode);
+                                    values.put(commonAttr.get("name"), commonAttr.get("value"));
+                                }
+                            }
+                        }
+                        for(Map.Entry<String, String> entry : values.entrySet()) {
+                            String statName = entry.getKey();
+                            String statValue = entry.getValue();
+                            if(statName.equals("maxLevel")) {
+                                skill.setMaxLevel(Integer.parseInt(statValue));
+                            } else {
+                                SkillStat skillStat = SkillStat.getSkillStatByString(statName);
+                                if(skillStat == null) {
+                                    System.err.println("Unknown SkillStat " + statName);
+                                } else {
+                                    skill.addSkillStatInfo(skillStat, statValue);
+                                }
+                            }
+                        }
+                        // end "common" level info
+                        skills.put(skillId, skill);
+                    }
+                }
+            }
+        }
+    }
+
+    public static Map<Integer, SkillInfo> getSkillInfos() {
+        return skills;
+    }
+
+    public static SkillInfo getSkillInfoById(int skillId) {
+        return getSkillInfos().get(skillId);
+    }
+
+    public static Skill getNewSkillById(int skillId) {
+        SkillInfo si = getSkillInfoById(skillId);
+        if(si == null) {
+            return null;
+        }
+        Skill skill = new Skill();
+
+        skill.setRootId(si.getRootId());
+        skill.setMaxLevel(si.getMaxLevel());
+        skill.setCurrentLevel(0);
+
+        return skill;
+    }
+}
