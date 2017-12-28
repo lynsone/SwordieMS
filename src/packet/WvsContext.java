@@ -5,6 +5,8 @@ import client.character.Char;
 import client.character.CharacterCard;
 import client.character.ExtendSP;
 import client.character.NonCombatStatDayLimit;
+import client.character.items.Equip;
+import client.character.items.Inventory;
 import client.character.items.Item;
 import connection.OutPacket;
 import enums.InvType;
@@ -114,19 +116,56 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket inventoryOperation(Char chr, boolean exclRequestSent, short oldPos, short newPos,
-                                               InvType invType, short quantity, boolean notRemoveAddInfo) {
+    public static OutPacket inventoryOperation(Char chr, boolean exclRequestSent, byte type, short oldPos, short newPos,
+                                               InvType invType, short quantity, boolean notRemoveAddInfo, int bagPos) {
         OutPacket outPacket = new OutPacket(OutHeader.INVENTORY_OPERATION);
+        Inventory inv = chr.getInventoryByInvType(invType);
+        Item item = inv.getItemBySlot(oldPos);
 
         outPacket.encodeByte(exclRequestSent);
         outPacket.encodeByte(1); // size
         outPacket.encodeByte(notRemoveAddInfo);
 
-        outPacket.encodeByte(2); // move
+        outPacket.encodeByte(type); // move
         outPacket.encodeByte(invType.getVal());
         outPacket.encodeShort(oldPos);
-        outPacket.encodeShort(newPos);
+        switch(type) {
+            case 0:
+                item.encode(outPacket);
+                break;
+            case 1:
+                outPacket.encodeShort(newPos);
+                break;
+            case 2:  // move
+                outPacket.encodeShort(newPos);
+                if (invType == InvType.EQUIP && (oldPos < 0 || newPos < 0)) {
+                    outPacket.encodeByte(item.getCashItemSerialNumber() > 0);
+                }
+                break;
+            case 3:
+                break;
+            case 4:
+                outPacket.encodeLong(item.getCashItemSerialNumber()); // I think?
+                break;
+            case 5:
+                outPacket.encodeInt(bagPos);
+                break;
+            case 6:
+                outPacket.encodeShort(newPos); // Probably wrong
+                break;
+            case 7:
+                break;
+            case 8:
+                outPacket.encodeShort(bagPos);
+                break;
+            case 9:
+                item.encode(outPacket);
+                break;
+            case 10:
+                break;
 
+
+        }
         return outPacket;
     }
 }

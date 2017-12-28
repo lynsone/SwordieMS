@@ -120,7 +120,7 @@ public class Item implements Serializable {
     }
 
     public void setBagIndex(int bagIndex) {
-        this.bagIndex = bagIndex;
+        this.bagIndex = Math.abs(bagIndex);
     }
 
     public long getCashItemSerialNumber() {

@@ -9,6 +9,7 @@ import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.DBChar;
+import enums.InvType;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import server.Server;
@@ -1163,6 +1164,25 @@ public class Char {
     public List<Inventory> getInventories() {
         return new ArrayList<>(Arrays.asList(getEquippedInventory(), getEquipInventory(),
                 getConsumeInventory(), getEtcInventory(), getInstallInventory(), getCashInventory()));
+    }
+
+    public Inventory getInventoryByInvType(InvType invType) {
+        switch(invType) {
+            case EQUIPPED:
+                return getEquippedInventory();
+            case EQUIP:
+                return getEquipInventory();
+            case USE:
+                return getConsumeInventory();
+            case ETC:
+                return getEtcInventory();
+            case SETUP:
+                return getInstallInventory();
+            case CASH:
+                return getCashInventory();
+            default:
+                return null;
+        }
     }
 
     public Client getClient() {

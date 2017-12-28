@@ -140,4 +140,13 @@ public class SkillConstants {
             return skillId == 2121009;
         }
     }
+
+    public static boolean isKeyDownSkill(int skillId) {
+        return skillId == 2321001 || skillId == 80001836;
+    }
+
+    public static boolean isEvanForceSkill(int skillId) {
+        return skillId == 22110022 || skillId == 22110023 || skillId == 22141011 || skillId == 22140022 ||
+                skillId == 22171062 || skillId == 80001849;
+    }
 }
