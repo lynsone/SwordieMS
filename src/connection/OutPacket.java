@@ -3,6 +3,7 @@ package connection;
 import handling.OutHeader;
 import net.Packet;
 import util.FileTime;
+import util.Point;
 import util.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -220,5 +221,10 @@ public class OutPacket extends Packet {
 
     public void encodeFT(FileTime fileTime) {
         fileTime.encode(this);
+    }
+
+    public void encodePoint(Point point) {
+        encodeShort(point.getX());
+        encodeShort(point.getY());
     }
 }

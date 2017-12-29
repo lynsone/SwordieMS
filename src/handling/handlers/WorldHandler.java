@@ -7,6 +7,7 @@ import client.character.commands.AdminCommands;
 import client.character.commands.Command;
 import client.character.items.Item;
 import client.character.skills.AttackInfo;
+import client.character.skills.MobAttackInfo;
 import client.field.Field;
 import connection.InPacket;
 import constants.SkillConstants;
@@ -76,7 +77,7 @@ public class WorldHandler {
         AttackInfo attackInfo = new AttackInfo();
         boolean fieldKey = inPacket.decodeByte() == 1;
         byte mask = inPacket.decodeByte();
-        byte idkkk = (byte) (mask & 0xFFFF);
+        byte hits = (byte) (mask & 0xF);
         byte mobCount = (byte) (mask >>> 4);
         int skillId = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
@@ -102,7 +103,7 @@ public class WorldHandler {
         int psdTargetPlus = inPacket.decodeInt();
         int id = inPacket.decodeInt();
         attackInfo.fieldKey = fieldKey;
-        attackInfo.idkkk = idkkk;
+        attackInfo.hits = hits;
         attackInfo.mobCount = mobCount;
         attackInfo.skillId = skillId;
         attackInfo.slv = slv;
@@ -117,6 +118,7 @@ public class WorldHandler {
         attackInfo.psdTargetPlus = psdTargetPlus;
         attackInfo.someId = id;
         for (int i = 0; i < mobCount; i++) {
+            MobAttackInfo mai = new MobAttackInfo();
             int mobId = inPacket.decodeInt();
             byte idk1 = inPacket.decodeByte();
             byte idk2 = inPacket.decodeByte();
@@ -144,33 +146,61 @@ public class WorldHandler {
                     damages[j] = inPacket.decodeInt();
                 }
             }
+            // TODO damage here? I thought it was the above thing
             int mobUpDownYRange = inPacket.decodeInt();
             inPacket.decodeInt(); // mob crc
             // Begin PACKETMAKER::MakeAttackInfoPacket
             byte type = inPacket.decodeByte();
+            String currentAnimationName = "";
+            int animationDeltaL = 0;
+            String[] hitPartRunTimes = new String[0];
             if (type == 1) {
-                String str = inPacket.decodeString();
-                int animationDeltaL = inPacket.decodeInt();
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
                 int hitPartRunTimesSize = inPacket.decodeInt();
-                String[] hitPartRunTimes = new String[hitPartRunTimesSize];
+                hitPartRunTimes = new String[hitPartRunTimesSize];
                 for (int j = 0; j < hitPartRunTimesSize; j++) {
                     hitPartRunTimes[j] = inPacket.decodeString();
                 }
             } else if (type == 2) {
-                String currentAnimationName = inPacket.decodeString();
-                int animationDeltaL = inPacket.decodeInt();
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
             }
             // End PACKETMAKER::MakeAttackInfoPacket
+            mai.mobId = mobId;
+            mai.idk1 = idk1;
+            mai.idk2 = idk2;
+            mai.idk3 = idk3;
+            mai.idk4 = idk4;
+            mai.idk5 = idk5;
+            mai.idk6 = idk6;
+            mai.calcDamageStatIndex = calcDamageStatIndex;
+            mai.rcDstX = rcDstX;
+            mai.rectRight = rectRight;
+            mai.oldPosX = oldPosX;
+            mai.oldPosY = oldPosY;
+            mai.hpPerc = hpPerc;
+            mai.damages = damages;
+            mai.mobUpDownYRange = mobUpDownYRange;
+            mai.type = type;
+            mai.currentAnimationName = currentAnimationName;
+            mai.animationDeltaL = animationDeltaL;
+            mai.hitPartRunTimes = hitPartRunTimes;
+            attackInfo.mobAttackInfo.add(mai);
         }
         if (skillId > 27111303) {
             if (skillId == 27121052 || skillId == 80001837) {
                 int x = inPacket.decodeShort();
                 int y = inPacket.decodeShort();
+                attackInfo.x = x;
+                attackInfo.y = y;
             }
         } else if (skillId != 32111016) {
             short forcedX = inPacket.decodeShort();
             short forcedY = inPacket.decodeShort();
             boolean dragon = inPacket.decodeByte() != 0;
+            attackInfo.forcedX = forcedX;
+            attackInfo.forcedY = forcedY;
             if(dragon) {
                 short rcDstRight = inPacket.decodeShort();
                 short rectRight = inPacket.decodeShort();
@@ -179,9 +209,14 @@ public class WorldHandler {
                 inPacket.decodeByte(); // always 0
                 inPacket.decodeByte(); // -1
                 inPacket.decodeByte(); // 0
+                attackInfo.rcDstRight = rcDstRight;
+                attackInfo.rectRight = rectRight;
+                attackInfo.x = x;
+                attackInfo.y = y;
             }
             if(skillId == 12100029) {
                 int option = inPacket.decodeInt();
+                attackInfo.option = option;
             } else {
                 switch(skillId) {
                     case 2121003:
@@ -190,13 +225,17 @@ public class WorldHandler {
                         for (int i = 0; i < size; i++) {
                             idkArr[i] = inPacket.decodeInt();
                         }
+                        attackInfo.idkArr = idkArr;
                         break;
                     case 2111003:
                         boolean force = inPacket.decodeByte() != 0;
                         short forcedXSh = inPacket.decodeShort();
                         short forcedYSh = inPacket.decodeShort();
+                        attackInfo.force = force;
+                        attackInfo.forcedXSh = forcedXSh;
+                        attackInfo.forcedYSh = forcedYSh;
                         break;
-                    case 80001835:
+                    case 80001835: // unreachable?
                         byte sizeB = inPacket.decodeByte();
                         int[] idkArr2 = new int[sizeB];
                         short[] shortArr2 = new short[sizeB];
@@ -205,6 +244,9 @@ public class WorldHandler {
                             shortArr2[i] = inPacket.decodeShort();
                         }
                         short delay = inPacket.decodeShort();
+                        attackInfo.idkArr = idkArr2;
+                        attackInfo.shortArr = shortArr2;
+                        attackInfo.delay = delay;
                 }
             }
         }

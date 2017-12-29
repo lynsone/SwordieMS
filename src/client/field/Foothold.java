@@ -1,6 +1,7 @@
 package client.field;
 
 public class Foothold {
+    private int id;
     private int layerId;
     private int groupId;
     private int x1;
@@ -12,7 +13,8 @@ public class Foothold {
     private int force;
     private boolean forbidFallDown;
 
-    public Foothold(int layerId, int groupId, int x1, int y1, int x2, int y2, int next, int prev, int force) {
+    public Foothold(int id, int layerId, int groupId, int x1, int y1, int x2, int y2, int next, int prev, int force) {
+        this.id = id;
         this.layerId = layerId;
         this.groupId = groupId;
         this.x1 = x1;
@@ -102,5 +104,13 @@ public class Foothold {
 
     public void setForbidFallDown(boolean forbidFallDown) {
         this.forbidFallDown = forbidFallDown;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
