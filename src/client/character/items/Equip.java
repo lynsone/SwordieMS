@@ -909,46 +909,117 @@ public class Equip extends Item {
 //        getEquippedDate().encode(outPacket);
 //        outPacket.encodeInt(getPrevBonusExpRate());
         // GW_ItemSlotEquipBase
-        int mask = 0;
-        outPacket.encodeInt(mask); // str
-//        outPacket.encodeShort(getTuc());
-//        outPacket.encodeShort(getCuc());
-//        outPacket.encodeShort(getiStr());
-//        outPacket.encodeShort(getiDex());
-//        outPacket.encodeShort(getiInt());
-//        outPacket.encodeShort(getiLuk());
-//        outPacket.encodeShort(getiMaxHp());
-//        outPacket.encodeShort(getiMaxMp());
-//        outPacket.encodeShort(getiPad());
-//        outPacket.encodeShort(getiMad());
-//        outPacket.encodeShort(getiPDD());
-//        outPacket.encodeShort(getiMDD());
-//        outPacket.encodeShort(getiAcc());
-//        outPacket.encodeShort(getiEva());
-//        outPacket.encodeShort(getiCraft());
-//        outPacket.encodeShort(getiSpeed());
-//        outPacket.encodeShort(getiJump());
-//        outPacket.encodeShort(getAttribute());
-//        outPacket.encodeByte(getLevelUpType());
-//        outPacket.encodeByte(getLevel());
-//        outPacket.encodeLong(getExp());
-//        outPacket.encodeInt(getDurability());
-//        outPacket.encodeInt(getIuc()); // hammer
-//        outPacket.encodeShort(getiPvpDamage());
-////        outPacket.encodeByte(getiReduceReq()); // not in gms?
-//        outPacket.encodeShort(getSpecialAttribute());
-//        outPacket.encodeInt(getDurabilityMax());
-//        outPacket.encodeByte(getrLevel());
-//        outPacket.encodeByte(getGrowthEnchant()); // ygg
-//        outPacket.encodeByte(getPsEnchant()); // final strike
-//        outPacket.encodeByte(getBdr()); // bd
-//        outPacket.encodeByte(getImdr()); // ied
-        outPacket.encodeInt(0); // mask 2
-//        outPacket.encodeByte(getDamR()); // td
-//        outPacket.encodeByte(getStatR()); // as
-//        outPacket.encodeByte(getCuttable()); // soc
-//        outPacket.encodeLong(getExGradeOption());
-//        outPacket.encodeInt(getItemState());
+        int mask0 = getStatMask(0);
+        outPacket.encodeInt(mask0);
+        if(hasStat(EquipBaseStat.ruc)) {
+            outPacket.encodeShort(getTuc());
+        }
+        if(hasStat(EquipBaseStat.cuc)) {
+            outPacket.encodeShort(getCuc());
+        }
+        if(hasStat(EquipBaseStat.iStr)) {
+            outPacket.encodeShort(getiStr());
+        }
+        if(hasStat(EquipBaseStat.iDex)) {
+            outPacket.encodeShort(getiDex());
+        }
+        if(hasStat(EquipBaseStat.iInt)) {
+            outPacket.encodeShort(getiInt());
+        }
+        if(hasStat(EquipBaseStat.iLuk)) {
+            outPacket.encodeShort(getiLuk());
+        }
+        if(hasStat(EquipBaseStat.iMaxHP)) {
+            outPacket.encodeShort(getiMaxHp());
+        }
+        if(hasStat(EquipBaseStat.iMaxMP)) {
+            outPacket.encodeShort(getiMaxMp());
+        }
+        if(hasStat(EquipBaseStat.iPAD)) {
+            outPacket.encodeShort(getiPad());
+        }
+        if(hasStat(EquipBaseStat.iMAD)) {
+            outPacket.encodeShort(getiMad());
+        }
+        if(hasStat(EquipBaseStat.iPDD)) {
+            outPacket.encodeShort(getiPDD());
+        }
+        if(hasStat(EquipBaseStat.iMDD)) {
+            outPacket.encodeShort(getiMDD());
+        }
+        if(hasStat(EquipBaseStat.iACC)) {
+            outPacket.encodeShort(getiAcc());
+        }
+        if(hasStat(EquipBaseStat.iEVA)) {
+            outPacket.encodeShort(getiEva());
+        }
+        if(hasStat(EquipBaseStat.iCraft)) {
+            outPacket.encodeShort(getiCraft());
+        }
+        if(hasStat(EquipBaseStat.iSpeed)) {
+            outPacket.encodeShort(getiSpeed());
+        }
+        if(hasStat(EquipBaseStat.iJump)) {
+            outPacket.encodeShort(getiJump());
+        }
+        if(hasStat(EquipBaseStat.attribute)) {
+            outPacket.encodeShort(getAttribute());
+        }
+        if(hasStat(EquipBaseStat.levelUpType)) {
+            outPacket.encodeByte(getLevelUpType());
+        }
+        if(hasStat(EquipBaseStat.level)) {
+            outPacket.encodeByte(getLevel());
+        }
+        if(hasStat(EquipBaseStat.exp)) {
+            outPacket.encodeLong(getExp());
+        }
+        if(hasStat(EquipBaseStat.durability)) {
+            outPacket.encodeInt(getDurability());
+        }
+        if(hasStat(EquipBaseStat.iuc)) {
+            outPacket.encodeInt(getIuc()); // hammer
+        }
+        if(hasStat(EquipBaseStat.iPvpDamage)) {
+            outPacket.encodeShort(getiPvpDamage());
+        }
+        if(hasStat(EquipBaseStat.specialAttribute)) {
+            outPacket.encodeShort(getSpecialAttribute());
+        }
+        if(hasStat(EquipBaseStat.durabilityMax)) {
+            outPacket.encodeInt(getDurabilityMax());
+        }
+        if(hasStat(EquipBaseStat.iIncReq)) {
+            outPacket.encodeByte(getrLevel());
+        }
+        if(hasStat(EquipBaseStat.growthEnchant)) {
+            outPacket.encodeByte(getGrowthEnchant()); // ygg
+        }
+        if(hasStat(EquipBaseStat.psEnchant)) {
+            outPacket.encodeByte(getPsEnchant()); // final strike
+        }
+        if(hasStat(EquipBaseStat.bdr)) {
+            outPacket.encodeByte(getBdr()); // bd
+        }
+        if(hasStat(EquipBaseStat.imdr)) {
+            outPacket.encodeByte(getImdr()); // ied
+        }
+        outPacket.encodeInt(getStatMask(1)); // mask 2
+        if(hasStat(EquipBaseStat.damR)) {
+            outPacket.encodeByte(getDamR()); // td
+        }
+        if(hasStat(EquipBaseStat.statR)) {
+            outPacket.encodeByte(getStatR()); // as
+        }
+        if(hasStat(EquipBaseStat.cuttable)) {
+            outPacket.encodeByte(getCuttable()); // soc
+        }
+        if(hasStat(EquipBaseStat.exGradeOption)) {
+            outPacket.encodeLong(getExGradeOption());
+        }
+        if(hasStat(EquipBaseStat.itemState)) {
+            outPacket.encodeInt(getItemState());
+        }
         // GW_ItemSlotEquipOpt
         outPacket.encodeString(getOwner());
         outPacket.encodeByte(getGrade());
@@ -974,14 +1045,19 @@ public class Equip extends Item {
         outPacket.encodeShort(getSoulOption());
     }
 
+    private boolean hasStat(EquipBaseStat ebs) {
+        return getBaseStat(ebs) != 0;
+    }
+
     private int getStatMask(int pos) {
         int mask = 0;
         for (EquipBaseStat ebs : EquipBaseStat.values()) {
             if (getBaseStat(ebs) != 0 && ebs.getPos() == pos) {
                 mask |= ebs.getVal();
+//                System.out.println(ebs);
             }
         }
-
+//        System.out.println("Mask for item " + itemId + " at pos " + pos + ": " + mask);
         return mask;
     }
 

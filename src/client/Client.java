@@ -19,6 +19,7 @@ public class Client extends NettyClient {
     private Account account;
     private byte channel;
     private byte worldId;
+    private boolean authorized;
 
     public Client(Channel channel, byte[] sendSeq, byte[] recvSeq) {
         super(channel, sendSeq, recvSeq);
@@ -68,5 +69,13 @@ public class Client extends NettyClient {
 
     public void setChr(Char chr) {
         this.chr = chr;
+    }
+
+    public void setAuthorized(boolean authorized) {
+        this.authorized = authorized;
+    }
+
+    public boolean isAuthorized() {
+        return authorized;
     }
 }

@@ -117,10 +117,9 @@ public class WvsContext {
     }
 
     public static OutPacket inventoryOperation(Char chr, boolean exclRequestSent, byte type, short oldPos, short newPos,
-                                               InvType invType, short quantity, boolean notRemoveAddInfo, int bagPos) {
+                                               InvType invType, short quantity, boolean notRemoveAddInfo, int bagPos,
+                                               Item item) {
         OutPacket outPacket = new OutPacket(OutHeader.INVENTORY_OPERATION);
-        Inventory inv = chr.getInventoryByInvType(invType);
-        Item item = inv.getItemBySlot(oldPos);
 
         outPacket.encodeByte(exclRequestSent);
         outPacket.encodeByte(1); // size
@@ -166,6 +165,21 @@ public class WvsContext {
 
 
         }
+        return outPacket;
+    }
+
+    public static OutPacket updateEventNameTag(int[] tags) {
+        OutPacket outPacket = new OutPacket(OutHeader.EVENT_NAME_TAG);
+
+        for (int i = 0; i < 5; i++) {
+            outPacket.encodeString("");
+            if(i >= tags.length) {
+                outPacket.encodeByte(-1);
+            } else {
+                outPacket.encodeByte(tags[i]);
+            }
+        }
+
         return outPacket;
     }
 }

@@ -9,13 +9,17 @@ import client.character.items.Item;
 import client.character.skills.AttackInfo;
 import client.character.skills.MobAttackInfo;
 import client.field.Field;
+import client.field.Portal;
 import connection.InPacket;
 import constants.SkillConstants;
 import enums.InvType;
+import loaders.FieldData;
 import packet.Stage;
 import packet.WvsContext;
 
 import java.lang.reflect.InvocationTargetException;
+
+import static enums.InvType.*;
 
 /**
  * Created on 12/14/2017.
@@ -24,10 +28,11 @@ public class WorldHandler {
     public static void handleCharLogin(Client c, InPacket inPacket) {
         int worldId = inPacket.decodeInt();
         int charId = inPacket.decodeInt(); // does not properly get sent to us?
-        Char chr = Char.getFromDBById(2);
+        Char chr = Char.getFromDBById(charId);
         chr.setClient(c);
         c.setChr(chr);
-        Field field = new Field(100000000, 1);
+        Field field = new Field(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID(), c.getChannel());
+        c.write(WvsContext.updateEventNameTag(new int[]{}));
         c.write(Stage.setField(chr, field, c.getChannel(), false, 0, true, false,
                 (byte) 0, false, 100, null, true, -1));
 
@@ -58,17 +63,28 @@ public class WorldHandler {
 
     public static void handleInventoryOperation(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        inPacket.decodeInt();
-        InvType invTypeFrom = InvType.getInvTypeByVal(inPacket.decodeByte());
+        inPacket.decodeInt(); // update tick
+        InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
         short oldPos = inPacket.decodeShort();
         short newPos = inPacket.decodeShort();
         short quantity = inPacket.decodeShort();
-        Item item = chr.getInventoryByInvType(invTypeFrom).getItemBySlot(oldPos);
+        Item item = chr.getInventoryByInvType(invType).getItemBySlot(oldPos);
         if(item == null) {
-            return;
+            item = chr.getInventoryByInvType(EQUIPPED).getItemBySlot(oldPos);
+            if (item == null) {
+                return; // needs more null checks
+            }
         }
         item.setBagIndex(newPos);
-        c.write(WvsContext.inventoryOperation(c.getChr(), true, (byte) 2, oldPos, newPos, invTypeFrom, quantity, false, 0));
+        if(invType == EQUIP) {
+            InvType invTypeFrom = oldPos < 0 ? EQUIPPED : EQUIP;
+            InvType invTypeTo = newPos < 0 ? EQUIPPED : EQUIP;
+            chr.getInventoryByInvType(invTypeFrom).removeItem(item);
+            chr.getInventoryByInvType(invTypeTo).addItem(item);
+        }
+         // TODO dropping items
+        c.write(WvsContext.inventoryOperation(c.getChr(), true, (byte) 2, oldPos, newPos, invType, quantity,
+                false, 0, item));
 
 
     }
@@ -250,5 +266,22 @@ public class WorldHandler {
                 }
             }
         }
+    }
+
+    public static void handleChangeFieldRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        byte idk = inPacket.decodeByte();
+        int idk1 = inPacket.decodeInt();
+        int x = inPacket.decodeShort();
+        int y = inPacket.decodeShort();
+        String portalName = inPacket.decodeString();
+        int fieldId = chr.getFieldID();
+        Field field = FieldData.getFieldById(fieldId);
+        Portal portal = field.getPortalByName(portalName);
+        Field toField = FieldData.getFieldById(portal.getTargetMapId());
+        chr.setFieldID(toField.getId());
+        Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
+        c.write(Stage.setField(chr, toField, c.getChannel(), false, 0, false, chr.hasBuffProtector(),
+                (byte) toPortal.getId(), false, 100, null, false, -1));
     }
 }

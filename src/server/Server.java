@@ -19,9 +19,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created on 2/18/2017.
@@ -108,7 +106,7 @@ public class Server extends Properties{
     }
 
     public void loadWzData() throws IllegalAccessException, InvocationTargetException {
-        String datFolder = "D:\\SwordieMS\\swordiems\\dat";
+        String datFolder = "D:\\SwordieMS\\Swordie\\dat";
         for(Class c : DataClasses.dataClasses) {
             for(Method method : c.getMethods()) {
                 String name;
@@ -123,13 +121,16 @@ public class Server extends Properties{
                     if(exists) {
                         System.out.println("[Info] Took " + total + "ms to load from " + file.getName());
                     } else {
-                        System.out.println("Took " + total +"ms to load using " + method.getName());
+                        System.out.println("[Info] Took " + total +"ms to load using " + method.getName());
                     }
                 }
             }
         }
     }
 
+    private Map<String, Integer> getAccs() {
+        return ipToAccount;
+    }
     public static void main(String[] args) {
         getInstance().init();
     }

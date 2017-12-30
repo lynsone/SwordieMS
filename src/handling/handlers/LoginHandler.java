@@ -118,6 +118,7 @@ public class LoginHandler {
 
         c.setWorldId(worldId);
         c.setChannel(channel);
+//        c.write(Login.sendAccountInfo(c.getAccount()));
         c.write(Login.sendCharacterList(c.getAccount(), worldId, channel, code));
     }
 
@@ -165,6 +166,7 @@ public class LoginHandler {
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
+        chr.setFieldID(100000000);
         chr.updateDB();
         c.getAccount().updateDB();
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
@@ -180,7 +182,7 @@ public class LoginHandler {
     }
 
     public static void handleDeleteChar(Client c, InPacket inPacket) {
-        if (handleAuthSecondPassword(c, inPacket, false)) {
+        if (handleAuthSecondPassword(c, inPacket)) {
             int charId = inPacket.decodeInt();
             Char chr = Char.getFromDBById(charId);
             chr.deleteFromDB();
@@ -249,22 +251,22 @@ public class LoginHandler {
         byte worldId = c.getWorldId();
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
-//        c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
+        if (c.isAuthorized()) {
+            c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
+        }
     }
 
-    public static boolean handleAuthSecondPassword(Client c, InPacket inPacket, boolean loginIfCorrect) {
+    public static boolean handleAuthSecondPassword(Client c, InPacket inPacket) {
         boolean success = false;
         String pic = inPacket.decodeString();
 //        int userId = inPacket.decodeInt();
         // after this: 2 strings indicating pc info. Not interested in that rn
         if (c.getAccount().getPic().equals(pic)) {
             success = true;
-            if (loginIfCorrect) {
-                c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, 8585, 10));
-            }
         } else {
             c.write(Login.selectCharacterResult(LoginType.INVALID_PASSWORD, (byte) 0, 0, 0));
         }
+        c.setAuthorized(success);
         return success;
     }
 }

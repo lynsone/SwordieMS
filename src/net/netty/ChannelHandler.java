@@ -31,6 +31,10 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("[ChannelHandler] | Channel inactive.");
+        Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
+        if(c != null && c.getChr() != null) {
+            c.getChr().updateDB();
+        }
         NettyClient o = ctx.channel().attr(CLIENT_KEY).get();
         if (o != null) {
             o.close();
@@ -75,13 +79,14 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case WORLD_LIST_REQUEST:
                 case WORLD_LIST_RE_REQUEST:
+                case WORLD_LIST_REQ:
                     LoginHandler.handleWorldRequest(c, inPacket);
                     break;
                 case CHARLIST_REQUEST:
                     LoginHandler.handleCharListRequest(c, inPacket);
                     break;
                 case AUTH_SECOND_PASSWORD:
-                    LoginHandler.handleAuthSecondPassword(c, inPacket, true);
+                    LoginHandler.handleAuthSecondPassword(c, inPacket);
                     break;
                 case CHECK_DUPLICATE_ID:
                     LoginHandler.handleCheckCharName(c, inPacket);
@@ -116,6 +121,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case INVENTORY_OPERATION:
                     WorldHandler.handleInventoryOperation(c, inPacket);
+                    break;
+                case CHANGE_FIELD_REQUEST:
+                    WorldHandler.handleChangeFieldRequest(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

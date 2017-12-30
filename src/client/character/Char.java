@@ -93,6 +93,8 @@ public class Char {
     private MonsterBattleLadder monsterBattleLadder;
     @Transient
     private MonsterBattleRankInfo monsterBattleRankInfo;
+    @Column(name = "fieldID")
+    private int fieldID;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1191,5 +1193,18 @@ public class Char {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public int getFieldID() {
+        return fieldID;
+    }
+
+    public void setFieldID(int fieldID) {
+        this.fieldID = fieldID;
+    }
+
+    public boolean hasBuffProtector() {
+        // TODO
+        return false;
     }
 }

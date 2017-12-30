@@ -26,6 +26,12 @@ public class Foothold {
         this.force = force;
     }
 
+    public Foothold(int id, int layerId, int groupId) {
+        this.id = id;
+        this.layerId = layerId;
+        this.groupId = groupId;
+    }
+
     public int getLayerId() {
         return layerId;
     }

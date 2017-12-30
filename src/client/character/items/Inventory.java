@@ -88,6 +88,10 @@ public class Inventory {
         session.close();
     }
 
+    public void removeItem(Item item) {
+        getItems().remove(item);
+    }
+
     public enum Type {
         EQUIPPED,
         EQUIP,

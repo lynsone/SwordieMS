@@ -12,7 +12,8 @@ public class DataClasses {
     static {
         dataClasses.addAll(Arrays.asList(
                 ItemData.class,
-                SkillData.class
+                SkillData.class,
+                FieldData.class
                 )
         );
     }

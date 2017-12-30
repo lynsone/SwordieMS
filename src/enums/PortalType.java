@@ -1,5 +1,7 @@
 package enums;
 
+import java.util.Arrays;
+
 public enum PortalType {
     // http://mapleref.wikia.com/wiki/Portal
     StartPoint(0),
@@ -16,7 +18,8 @@ public enum PortalType {
     PortalScriptHidden(11),
     PortalCollisionJump(12),
     PortalCollisionCustom(13),
-    PortalCollisionInvisibleChangable(14) // ?
+    PortalCollisionInvisibleChangable(14), // ?
+    PortalUnk(15), // ? On map ID 910800200
     ;
     private byte val;
 
@@ -30,5 +33,9 @@ public enum PortalType {
 
     public byte getVal() {
         return val;
+    }
+
+    public static PortalType getTypeByInt(int i) {
+        return Arrays.stream(values()).filter(p -> p.getVal() == i).findFirst().orElse(null);
     }
 }

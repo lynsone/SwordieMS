@@ -239,7 +239,7 @@ public class CharacterStat {
     }
 
     public int getCharacterIdForLog() {
-        return characterIdForLog;
+        return characterId;
     }
 
     public int getFace() {
@@ -371,8 +371,8 @@ public class CharacterStat {
     }
 
     public void encode(OutPacket outPacket) {
-        outPacket.encodeInt(getCharacterId());
-        outPacket.encodeInt(getCharacterIdForLog());
+        outPacket.encodeInt(getId());
+        outPacket.encodeInt(getId());
         outPacket.encodeInt(getWorldIdForLog());
         outPacket.encodeString(getName(), 13);
         outPacket.encodeByte(getGender());

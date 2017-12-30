@@ -4,21 +4,23 @@ import enums.PortalType;
 
 public class Portal {
     private PortalType type;
-    private String name;
+    private String name = "";
     private int targetMapId;
-    private String targetPortalName;
+    private String targetPortalName = "";
     private int x;
     private int y;
     private int horizontalImpact;
     private int verticalImpact;
-    private String script;
+    private String script = "";
     private boolean onlyOnce;
     private boolean hideTooltip;
     private int delay;
+    private int id;
 
-    public Portal(PortalType type, String name, int targetMapId, String targetPortalName, int x, int y,
+    public Portal(int id, PortalType type, String name, int targetMapId, String targetPortalName, int x, int y,
                   int horizontalImpact, int verticalImpact, String script, boolean onlyOnce, boolean hideTooltip,
                   int delay) {
+        this.id = id;
         this.type = type;
         this.name = name;
         this.targetMapId = targetMapId;
@@ -31,6 +33,10 @@ public class Portal {
         this.onlyOnce = onlyOnce;
         this.hideTooltip = hideTooltip;
         this.delay = delay;
+    }
+
+    public Portal(int id) {
+        this.id = id;
     }
 
     public PortalType getType() {
@@ -127,5 +133,9 @@ public class Portal {
 
     public void setDelay(int delay) {
         this.delay = delay;
+    }
+
+    public int getId() {
+        return id;
     }
 }

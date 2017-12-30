@@ -312,7 +312,6 @@ public class Account {
         this.id = id;
     }
 
-
     public void updateDB() {
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();

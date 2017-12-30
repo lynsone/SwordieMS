@@ -33,7 +33,7 @@ public class XMLApi {
     /**
      * Returns a list of Nodes containing all children of a given Node. Filters out all text elements.
      * @param node The Node of which the children are requested.
-     * @return The list of children nodes of <code>node</code>.
+     * @return The list of children nodes of <code>node</code>. An empty list if there are none.
      */
     public static List<Node> getAllChildren(Node node) {
         List<Node> result = new ArrayList<>();
@@ -46,7 +46,7 @@ public class XMLApi {
             childNode = childNode.getNextSibling();
         }
 
-        return result;
+        return result == null ? new ArrayList<>() : result;
     }
 
     /**
@@ -133,5 +133,9 @@ public class XMLApi {
             }
         }
         return null;
+    }
+
+    public static String getNamedAttribute(Node node, String name) {
+        return getAttributes(node).get(name);
     }
 }

@@ -12,10 +12,15 @@ import java.util.stream.Collectors;
  */
 public class Field {
     private Rectangle rect;
-    private int id;
+    private double mobRate;
+    private int id, returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
+    private int consumeItemCoolTime, link;
     private long uniqueId;
+    private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
     private Set<Portal> portals;
     private Set<Foothold> footholds;
+    private String onFirstUserEnter = "", onUserEnter = "";
+    private int fixedMobCapacity;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -69,6 +74,158 @@ public class Field {
         getPortals().add(portal);
     }
 
+    public int getReturnMap() {
+        return returnMap;
+    }
+
+    public void setReturnMap(int returnMap) {
+        this.returnMap = returnMap;
+    }
+
+    public int getForcedReturn() {
+        return forcedReturn;
+    }
+
+    public void setForcedReturn(int forcedReturn) {
+        this.forcedReturn = forcedReturn;
+    }
+
+    public double getMobRate() {
+        return mobRate;
+    }
+
+    public void setMobRate(double mobRate) {
+        this.mobRate = mobRate;
+    }
+
+    public int getCreateMobInterval() {
+        return createMobInterval;
+    }
+
+    public void setCreateMobInterval(int createMobInterval) {
+        this.createMobInterval = createMobInterval;
+    }
+
+    public int getTimeOut() {
+        return timeOut;
+    }
+
+    public void setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
+    }
+
+    public int getTimeLimit() {
+        return timeLimit;
+    }
+
+    public void setTimeLimit(int timeLimit) {
+        this.timeLimit = timeLimit;
+    }
+
+    public int getLvLimit() {
+        return lvLimit;
+    }
+
+    public void setLvLimit(int lvLimit) {
+        this.lvLimit = lvLimit;
+    }
+
+    public int getLvForceMove() {
+        return lvForceMove;
+    }
+
+    public void setLvForceMove(int lvForceMove) {
+        this.lvForceMove = lvForceMove;
+    }
+
+    public int getConsumeItemCoolTime() {
+        return consumeItemCoolTime;
+    }
+
+    public void setConsumeItemCoolTime(int consumeItemCoolTime) {
+        this.consumeItemCoolTime = consumeItemCoolTime;
+    }
+
+    public int getLink() {
+        return link;
+    }
+
+    public void setLink(int link) {
+        this.link = link;
+    }
+
+    public boolean isTown() {
+        return town;
+    }
+
+    public void setTown(boolean town) {
+        this.town = town;
+    }
+
+    public boolean isSwim() {
+        return swim;
+    }
+
+    public void setSwim(boolean swim) {
+        this.swim = swim;
+    }
+
+    public boolean isFly() {
+        return fly;
+    }
+
+    public void setFly(boolean fly) {
+        this.fly = fly;
+    }
+
+    public boolean isReactorShuffle() {
+        return reactorShuffle;
+    }
+
+    public void setReactorShuffle(boolean reactorShuffle) {
+        this.reactorShuffle = reactorShuffle;
+    }
+
+    public boolean isExpeditionOnly() {
+        return expeditionOnly;
+    }
+
+    public void setExpeditionOnly(boolean expeditionONly) {
+        this.expeditionOnly = expeditionONly;
+    }
+
+    public boolean isPartyOnly() {
+        return partyOnly;
+    }
+
+    public void setPartyOnly(boolean partyOnly) {
+        this.partyOnly = partyOnly;
+    }
+
+    public boolean isNeedSkillForFly() {
+        return needSkillForFly;
+    }
+
+    public void setNeedSkillForFly(boolean needSkillForFly) {
+        this.needSkillForFly = needSkillForFly;
+    }
+
+    public String getOnFirstUserEnter() {
+        return onFirstUserEnter;
+    }
+
+    public void setOnFirstUserEnter(String onFirstUserEnter) {
+        this.onFirstUserEnter = onFirstUserEnter;
+    }
+
+    public String getOnUserEnter() {
+        return onUserEnter;
+    }
+
+    public void setOnUserEnter(String onUserEnter) {
+        this.onUserEnter = onUserEnter;
+    }
+
     public Portal getPortalByName(String name) {
         return getPortals().stream().filter(portal -> portal.getName().equals(name)).findAny().orElse(null);
     }
@@ -107,5 +264,13 @@ public class Field {
 
     public void addFoothold(Foothold foothold) {
         getFootholds().add(foothold);
+    }
+
+    public void setFixedMobCapacity(int fixedMobCapacity) {
+        this.fixedMobCapacity = fixedMobCapacity;
+    }
+
+    public int getFixedMobCapacity() {
+        return fixedMobCapacity;
     }
 }

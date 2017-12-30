@@ -13,6 +13,7 @@ import server.Channel;
 import server.Server;
 import server.World;
 import util.FileTime;
+import util.Util;
 
 import java.util.List;
 
@@ -82,7 +83,7 @@ public class Login {
             outPacket.encodeByte(account.getGradeCode());
             outPacket.encodeInt(-1);
             outPacket.encodeByte(0); // idk
-            outPacket.encodeByte(0); // idk
+            outPacket.encodeByte(0); // ^
             outPacket.encodeLong(account.getCreationDate()); // account creation date
         } else{
             outPacket.encodeByte(error);
@@ -130,25 +131,29 @@ public class Login {
         return outPacket;
     }
 
-    @Deprecated
-    public static Packet sendAccountInfo(int id) {
-        Account account = Account.getFromDBById(id);
+    public static Packet sendAccountInfo(Account account) {
         OutPacket outPacket = new OutPacket(OutHeader.ACCOUNT_INFO_RESULT);
 
         outPacket.encodeByte(0); // succeed
         outPacket.encodeInt(account.getId());
-        outPacket.encodeInt(account.getGender());
+        outPacket.encodeByte(account.getGender());
         outPacket.encodeByte(account.getGradeCode());
         outPacket.encodeInt(account.getAccountType());
         outPacket.encodeInt(account.getVipGrade());
-        outPacket.encodeInt(account.getAge());
+//        outPacket.encodeInt(account.getAge());
         outPacket.encodeByte(account.getPurchaseExp());
+        outPacket.encodeString(account.getUsername());
         outPacket.encodeByte(account.getnBlockReason());
+        outPacket.encodeByte(0); // ?
         outPacket.encodeLong(account.getChatUnblockDate());
-        outPacket.encodeString(""); //v23 = CInPacket::DecodeStr(iPacket_1, &nVIPGrade)->_m_pStr;
         outPacket.encodeString(account.getCensoredNxLoginID());
+        outPacket.encodeLong(0);
+        outPacket.encodeInt(28);
+        outPacket.encodeLong(0);
         outPacket.encodeString(""); //v25 = CInPacket::DecodeStr(iPacket_1, &nAge);
-        // INCOMPLETE
+        JobConstants.encode(outPacket);
+        outPacket.encodeByte(0);
+        outPacket.encodeInt(-1);
 
         return outPacket;
     }
@@ -189,11 +194,11 @@ public class Login {
         }
         boolean isEdited = false;
         outPacket.encodeByte(isEdited);
-//        outPacket.encodeInt(0); //nSecond, only in kmst
         List<Char> chars = account.getCharacters();
-        outPacket.encodeInt(chars.size());
-        for(Char ch : chars) {
-            outPacket.encodeInt(ch.getId());
+        int nSecond = chars.size();
+        outPacket.encodeInt(nSecond); // nSecond
+        for (Char chr : chars) {
+            outPacket.encodeInt(chr.getId());
         }
 
         outPacket.encodeByte(chars.size());
@@ -211,8 +216,7 @@ public class Login {
         outPacket.encodeInt(account.getCharacterSlots());
         outPacket.encodeInt(0); // buying char slots
         outPacket.encodeInt(-1); // nEventNewCharJob
-        outPacket.encodeInt(0);
-        outPacket.encodeInt(0);
+        outPacket.encodeFT(new FileTime(System.currentTimeMillis()));
         outPacket.encodeByte(0); // nRenameCount
         outPacket.encodeByte(0);
         return outPacket;
@@ -260,14 +264,13 @@ public class Login {
             // chat stuff
             outPacket.encodeInt(0);
             outPacket.encodeShort(0);
-            outPacket.encodeInt(0);
-            outPacket.encodeShort(0);
+
             outPacket.encodeInt(characterId);
             outPacket.encodeByte(0);
             outPacket.encodeInt(0); // ulArgument
             outPacket.encodeByte(0);
-            outPacket.encodeInt(1627419692);
-            outPacket.encodeInt(1795187456);
+            outPacket.encodeInt(0);
+            outPacket.encodeInt(0);
             outPacket.encodeByte(0);
         }
 
