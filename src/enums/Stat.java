@@ -1,5 +1,7 @@
 package enums;
 
+import java.util.Arrays;
+
 /**
  * Created on 12/22/2017.
  */
@@ -45,5 +47,9 @@ public enum Stat {
 
     public int getVal() {
         return val;
+    }
+
+    public static Stat getByVal(int stat) {
+        return Arrays.stream(values()).filter(s -> s.getVal() == stat).findFirst().orElse(null);
     }
 }

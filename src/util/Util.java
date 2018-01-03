@@ -2,6 +2,8 @@ package util;
 
 import io.netty.buffer.ByteBuf;
 
+import java.io.File;
+
 /**
  * Created on 2/28/2017.
  */
@@ -21,7 +23,7 @@ public class Util {
         return data;
     }
 
-    public static String ReadableByteArray(byte[] arr) {
+    public static String readableByteArray(byte[] arr) {
         StringBuilder res = new StringBuilder();
         for(byte b : arr) {
             res.append(String.format("%02X ",b));
@@ -29,12 +31,12 @@ public class Util {
         return res.toString();
     }
 
-    public static String ReadableByteArrayFromByteBuf(ByteBuf buf) {
+    public static String readableByteArrayFromByteBuf(ByteBuf buf) {
         byte[] bytes = new byte[buf.capacity()];
         for(int i = buf.readableBytes(); i < buf.capacity(); i++) {
             bytes[i] = buf.getByte(i);
         }
-        return Util.ReadableByteArray(bytes);
+        return Util.readableByteArray(bytes);
     }
 
     public static byte[] IntToByteArrayLE(int n) {
@@ -44,5 +46,12 @@ public class Util {
         res[2] = (byte) (n >>> 16);
         res[3] = (byte) (n >>> 24);
         return res;
+    }
+
+    public static void makeDirIfAbsent(String dir) {
+        File file = new File(dir);
+        if(!file.exists()) {
+            file.mkdir();
+        }
     }
 }

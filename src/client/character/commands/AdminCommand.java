@@ -5,6 +5,9 @@ package client.character.commands;
  */
 public abstract class AdminCommand implements Command {
 
+    public AdminCommand() {
+    }
+
     private static char prefix = '!';
 
     public static char getPrefix() {

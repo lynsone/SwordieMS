@@ -13,7 +13,6 @@ import server.Channel;
 import server.Server;
 import server.World;
 import util.FileTime;
-import util.Util;
 
 import java.util.List;
 
@@ -82,8 +81,8 @@ public class Login {
             JobConstants.encode(outPacket);
             outPacket.encodeByte(account.getGradeCode());
             outPacket.encodeInt(-1);
-            outPacket.encodeByte(0); // idk
-            outPacket.encodeByte(0); // ^
+            outPacket.encodeByte(1); // idk
+            outPacket.encodeByte(1); // ^
             outPacket.encodeLong(account.getCreationDate()); // account creation date
         } else{
             outPacket.encodeByte(error);

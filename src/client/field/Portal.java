@@ -138,4 +138,9 @@ public class Portal {
     public int getId() {
         return id;
     }
+
+    public Portal deepCopy() {
+        Portal copy = new Portal(getId(), getType(), getName(), getTargetMapId(), getTargetPortalName(), getX(), getY(), getHorizontalImpact(), getVerticalImpact(), getScript(), isOnlyOnce(), isHideTooltip(), getDelay());
+        return copy;
+    }
 }

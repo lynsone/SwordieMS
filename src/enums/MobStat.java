@@ -9,6 +9,7 @@ public enum MobStat {
     EVA(0x20, 0),
     Speed(0x40, 0),
     Stun(0x80, 0),
+
     Freeze(0x100, 0),
     Poison(0x200, 0),
     Seal(0x400, 0),
@@ -17,6 +18,7 @@ public enum MobStat {
     MagicUp(0x2000, 0),
     PGuardUp(0x4000, 0),
     MGuardUp(0x8000, 0),
+
     PImmune(0x10000, 0),
     MImmune(0x20000, 0),
     Web(0x40000, 0),
@@ -25,6 +27,7 @@ public enum MobStat {
     Venom(0x200000, 0),
     Blind(0x400000, 0),
     SealSkill(0x800000, 0),
+
     Dazzle(0x1000000, 0),
     PCounter(0x2000000, 0),
     MCounter(0x4000000, 0),
@@ -33,6 +36,7 @@ public enum MobStat {
     Weakness(0x20000000, 0),
     Showdown(0x40000000, 0),
     MagicCrash(0x80000000, 0),
+
     DamagedElemAttr(0x1, 1),
     Dark(0x2, 1),
     Mystery(0x4, 1),
@@ -65,6 +69,8 @@ public enum MobStat {
     PsychicForce(0x20000000, 1),
     MultiPMDR(0x40000000, 1),
     ElementResetBySummon(0x80000000, 1),
+
+
     BahamutLightElemAddDam(0x1, 2), // 0000 0000 | 0000 0001 | 0000 0000 | 0000 0000
     BossPropPlus(0x2, 2),
     MultiDamSkill(0x4, 2),

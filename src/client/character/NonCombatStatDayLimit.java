@@ -137,7 +137,7 @@ public class NonCombatStatDayLimit {
 
     public void updateDB(Session session, Transaction tx) {
         getFtLastUpdateCharmByCashPR().updateDB(session, tx);
-        session.update(this);
+        session.saveOrUpdate(this);
     }
 
     public void createInDB(Session session, Transaction tx) {

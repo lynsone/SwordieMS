@@ -6,6 +6,7 @@ import client.character.*;
 import client.character.items.Equip;
 import client.character.items.Inventory;
 import client.character.items.Item;
+import client.character.skills.Skill;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -42,6 +43,7 @@ public class DatabaseManager {
                 Item.class,
                 Equip.class,
                 Test.class,
+                Skill.class
 
         };
         for(Class clazz : dbClasses) {

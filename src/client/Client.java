@@ -20,6 +20,7 @@ public class Client extends NettyClient {
     private byte channel;
     private byte worldId;
     private boolean authorized;
+    private server.Channel channelInstance;
 
     public Client(Channel channel, byte[] sendSeq, byte[] recvSeq) {
         super(channel, sendSeq, recvSeq);
@@ -77,5 +78,13 @@ public class Client extends NettyClient {
 
     public boolean isAuthorized() {
         return authorized;
+    }
+
+    public void setChannelInstance(server.Channel channelInstance) {
+        this.channelInstance = channelInstance;
+    }
+
+    public server.Channel getChannelInstance() {
+        return channelInstance;
     }
 }

@@ -77,7 +77,9 @@ public class Inventory {
     }
 
     public void addItem(Item item) {
-        getItems().add(item);
+        if(getItems().size() < getSlots()) {
+            getItems().add(item);
+        }
     }
 
     public void updateDB() {
@@ -89,7 +91,18 @@ public class Inventory {
     }
 
     public void removeItem(Item item) {
-        getItems().remove(item);
+        if(getItems().contains(item)) {
+            getItems().remove(item);
+        }
+    }
+
+    public int getFirstOpenSlot() {
+        for (int i = 1; i <= getItems().size(); i++) {
+            if(getItemBySlot(i) == null) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     public enum Type {

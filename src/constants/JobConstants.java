@@ -261,6 +261,10 @@ public class JobConstants {
         public short getJobId() {
             return jobId;
         }
+
+        public static JobEnum getJobById(short id) {
+            return Arrays.stream(values()).filter(j -> j.getJobId() == id).findFirst().orElse(null);
+        }
     }
 
     public enum LoginJob {

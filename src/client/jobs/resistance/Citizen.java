@@ -1,6 +1,9 @@
 package client.jobs.resistance;
 
+import client.Client;
+import client.character.skills.AttackInfo;
 import client.jobs.Job;
+import connection.InPacket;
 import constants.JobConstants;
 
 /**
@@ -9,7 +12,17 @@ import constants.JobConstants;
 public class Citizen extends Job {
 
     @Override
-    public JobConstants.JobEnum getJobEnum() {
-        return JobConstants.JobEnum.CITIZEN;
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+
+    }
+
+    @Override
+    public void handleSkill(Client c, InPacket inPacket) {
+
+    }
+
+    @Override
+    public boolean isHandlerOfJob(short job) {
+        return false;
     }
 }

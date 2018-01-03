@@ -1,0 +1,1004 @@
+void __userpurge CWvsContext::OnPacket(_DWORD *a1@<ecx>, int edx0@<edx>, int a2, int a3, int **a4)
+{
+  switch ( a3 )
+  {
+    case 71:
+      CWvsContext::OnInventoryOperation(a1, a4);
+      break;
+    case 72:
+      CWvsContext::OnInventoryGrow(a4);
+      break;
+    case 73:
+      CWvsContext::OnStatChanged(a4);
+      break;
+    case 74:
+      CWvsContext::OnTemporaryStatSet(a4);
+      break;
+    case 75:
+      CWvsContext::OnTemporaryStatReset(a4);
+      break;
+    case 76:
+      CWvsContext::OnForcedStatSet(a4);
+      break;
+    case 77:
+      CWvsContext::OnForcedStatReset(a4);
+      break;
+    case 78:
+      CWvsContext::OnChangeSkillRecordResult(a4);
+      break;
+    case 79:
+      CWvsContext::OnChangeStealMemoryResult(a4);
+      break;
+    case 80:
+      CWvsContext::OnUserDamageOnFallingCheck(a4);
+      break;
+    case 81:
+      CWvsContext::OnPersonalShopBuyCheck(a4);
+      break;
+    case 82:
+      CWvsContext::OnMobDropMesoPickup(a4);
+      break;
+    case 83:
+      CWvsContext::OnBreakTimeFieldEnter(a4);
+      break;
+    case 84:
+      CWvsContext::OnRuneActSuccess(a4);
+      break;
+    case 85:
+      CWvsContext::OnResultStealSkillList(a4);
+      break;
+    case 86:
+      CWvsContext::OnSkillUseResult(a4);
+      break;
+    case 87:
+      CWvsContext::OnExclRequest(a4);
+      break;
+    case 88:
+      CWvsContext::OnGivePopularityResult(a4);
+      break;
+    case 89:
+      CWvsContext::OnMessage(a4);
+      break;
+    case 90:
+      CWvsContext::OnMemoResult(a4);
+      break;
+    case 91:
+      CWvsContext::OnMapTransferResult(a4);
+      break;
+    case 92:
+      CWvsContext::OnAntiMacroResult(a4);
+      break;
+    case 93:
+      CWvsContext::OnAntiMacroBombResult(a4);
+      break;
+    case 95:
+      CWvsContext::OnClaimResult(a4);
+      break;
+    case 96:
+      CWvsContext::OnSetClaimSvrAvailableTime(a4);
+      break;
+    case 97:
+      CWvsContext::OnClaimSvrStatusChanged(a4);
+      break;
+    case 98:
+      CWvsContext::OnStarPlanetUserCount(a4);
+      break;
+    case 99:
+      CWvsContext::OnSetTamingMobInfo(a4);
+      break;
+    case 100:
+      CWvsContext::OnQuestClear(a4);
+      break;
+    case 101:
+      CWvsContext::OnEntrustedShopCheckResult(a4);
+      break;
+    case 102:
+      CWvsContext::OnSkillLearnItemResult(a4);
+      break;
+    case 103:
+      CWvsContext::OnSkillResetItemResult(a4);
+      break;
+    case 104:
+      CWvsContext::OnAbilityResetItemResult(a4);
+      break;
+    case 105:
+      CWvsContext::OnExpConsumeItemResult(a4);
+      break;
+    case 106:
+      CWvsContext::OnExpItemGetResult(a4);
+      break;
+    case 107:
+      CWvsContext::OnCharSlotIncResult(a4);
+      break;
+    case 108:
+      CWvsContext::OnCharRenameResult(a4);
+      break;
+    case 109:
+      CWvsContext::OnGatherItemResult(a4);
+      break;
+    case 110:
+      CWvsContext::OnSortItemResult(a4);
+      break;
+    case 113:
+      CWvsContext::OnCharacterInfo(a4);
+      break;
+    case 114:
+      CWvsContext::OnPartyResult(a4);
+      break;
+    case 115:
+      CWvsContext::OnPartyMemberCandidateResult(a4);
+      break;
+    case 116:
+      CWvsContext::OnUrusPartyMemberCandidateResult(a4);
+      break;
+    case 117:
+      CWvsContext::OnPartyCandidateResult(a4);
+      break;
+    case 118:
+      CWvsContext::OnUrusPartyResult(a4);
+      break;
+    case 119:
+      CWvsContext::OnIntrusionFriendCandidateResult(a4);
+      break;
+    case 120:
+      CWvsContext::OnIntrusionLobbyCandidateResult(a4);
+      break;
+    case 122:
+      CWvsContext::OnExpedtionResult(a4);
+      break;
+    case 123:
+      CWvsContext::OnFriendResult(a1, a4);
+      break;
+    case 124:
+      CWvsContext::OnStarFriendResult(a4);
+      break;
+    case 125:
+      CWvsContext::OnLoadAccountIDOfCharacterFriendResult(a4);
+      break;
+    case 126:
+      CWvsContext::OnGuildRequest(a1, a4);
+      break;
+    case 127:
+      CWvsContext::OnGuildResult(a4);
+      break;
+    case 128:
+      CWvsContext::OnAllianceResult(a4);
+      break;
+    case 129:
+      CWvsContext::OnTownPortal(a4);
+      break;
+    case 130:
+      CWvsContext::OnBroadcastMsg(a1, a4);
+      break;
+    case 132:
+      CWvsContext::OnIncubatorResult(a4);
+      break;
+    case 133:
+      CWvsContext::OnIncubatorHotItemResult(a4);
+      break;
+    case 134:
+      CWvsContext::OnShopScannerResult(a4);
+      break;
+    case 135:
+      CWvsContext::OnShopLinkResult(a4);
+      break;
+    case 136:
+      CWvsContext::OnAuctionResult(a4);
+      break;
+    case 137:
+      CWvsContext::OnAuctionMessage(a4);
+      break;
+    case 138:
+      CWvsContext::OnMarriageRequest(a4);
+      break;
+    case 139:
+      CWvsContext::OnMarriageResult(a4);
+      break;
+    case 140:
+      CWvsContext::OnWeddingGiftResult(a4);
+      break;
+    case 141:
+      CWvsContext::OnNotifyMarriedPartnerMapTransfer(a4);
+      break;
+    case 142:
+      CWvsContext::OnCashPetFoodResult(a4);
+      break;
+    case 143:
+      CWvsContext::OnCashPetPickUpOnOffResult(a4);
+      break;
+    case 144:
+      CWvsContext::OnCashPetSkillSettingResult(a4);
+      break;
+    case 145:
+      CWvsContext::OnCashLookChangeResult(a4);
+      break;
+    case 146:
+      CWvsContext::OnCashPetDyeingResult(a4);
+      break;
+    case 147:
+      CWvsContext::OnSetWeekEventMessage(a4);
+      break;
+    case 148:
+      CWvsContext::OnSetPotionDiscountRate(a4);
+      break;
+    case 149:
+      CWvsContext::OnBridleMobCatchFail(a4);
+      break;
+    case 150:
+      CWvsContext::SomeDecode1(a4);
+      break;
+    case 151:
+      CWvsContext::OnImitatedNPCData(a4);
+      break;
+    case 153:
+      CWvsContext::OnLimitedNPCDisableInfo(a4);
+      break;
+    case 154:
+      CWvsContext::OnMonsterBookSetCard(a4);
+      break;
+    case 155:
+      CWvsContext::OnMonsterBookSetCover(a4);
+      break;
+    case 156:
+      CWvsContext::OnHourChanged(a4);
+      break;
+    case 157:
+      CWvsContext::OnMiniMapOnOff(a4);
+      break;
+    case 158:
+      CWvsContext::OnConsultAuthkeyUpdate(a4);
+      break;
+    case 159:
+      CWvsContext::OnClassCompetitionAuthkeyUpdate(a4);
+      break;
+    case 160:
+      CWvsContext::OnWebBoardAuthkeyUpdate(a4);
+      break;
+    case 161:
+      CWvsContext::OnSessionValue(a4);
+      break;
+    case 162:
+      CWvsContext::OnPartyValue(a4);
+      break;
+    case 163:
+      CWvsContext::OnFieldSetVariable(a4);
+      break;
+    case 164:
+      CWvsContext::OnFieldValue(a4);
+      break;
+    case 165:
+      CWvsContext::OnBonusExpRateChanged(a4);
+      break;
+    case 166:
+      CWvsContext::OnFamilyChartResult(a4);
+      break;
+    case 167:
+      CWvsContext::OnFamilyInfoResult(a4);
+      break;
+    case 168:
+      CWvsContext::OnFamilyResult(a4);
+      break;
+    case 169:
+      CWvsContext::OnFamilyJoinRequest(a4);
+      break;
+    case 170:
+      CWvsContext::OnFamilyJoinRequestResult(a4);
+      break;
+    case 171:
+      CWvsContext::OnFamilyJoinAccepted(a4);
+      break;
+    case 172:
+      CWvsContext::OnFamilyPrivilegeList(a4);
+      break;
+    case 173:
+      CWvsContext::OnFamilyFamousPointIncResult(a4);
+      break;
+    case 174:
+      CWvsContext::OnFamilyNotifyLoginOrLogout(a4);
+      break;
+    case 175:
+      CWvsContext::OnFamilySetPrivilege(a1, a4);
+      break;
+    case 176:
+      CWvsContext::OnFamilySummonRequest(a4);
+      break;
+    case 177:
+      CWvsContext::OnNotifyLevelUp(a4);
+      break;
+    case 178:
+      CWvsContext::OnNotifyWedding(a4);
+      break;
+    case 179:
+      CWvsContext::OnNotifyJobChange(a4);
+      break;
+    case 180:
+      CWvsContext::OnSetBuyEquipExt(a1, a4);
+      break;
+    case 181:
+      CWvsContext::OnSetPassenserRequest(a4);
+      break;
+    case 182:
+      CWvsContext::OnScriptProgressMessageBySoul(a4);
+      break;
+    case 183:
+      CWvsContext::OnScriptProgressMessage(a4);
+      break;
+    case 184:
+      CWvsContext::OnScriptProgressItemMessage(a4);
+      break;
+    case 185:
+      CWvsContext::OnStaticScreenMessage(a1, a4);
+      break;
+    case 186:
+      CNoticeQuestProgress::OffStaticScreenMessage(a4);
+      break;
+    case 187:
+      CWvsContext::OnWeatherEffectNotice(a4);
+      break;
+    case 188:
+      CWvsContext::OnWeatherEffectNoticeY(a4);
+      break;
+    case 189:
+      CWvsContext::OnProgressMessageFont(a4);
+      break;
+    case 190:
+      CWvsContext::OnDataCRCCheckFailed(a4);
+      break;
+    case 191:
+      CWvsContext::OnShowSlotMessage(a4);
+      break;
+    case 192:
+      CWvsContext::OnWildHunterInfo(a4);
+      break;
+    case 193:
+      CWvsContext::OnZeroInfo(a4);
+      break;
+    case 194:
+      CWvsContext::OnZeroWP(a4);
+      break;
+    case 195:
+      CWvsContext::OnZeroInfoSubHP(a4);
+      break;
+    case 196:
+      CWvsContext::UI_Open(a4);
+      break;
+    case 197:
+      CWvsContext::ClearAnnouncedQuest(a4);
+      break;
+    case 198:
+      CWvsContext::OnResultInstanceTable(a4);
+      break;
+    case 199:
+      CWvsContext::OnCoolTimeSet(a4);
+      break;
+    case 200:
+      CWvsContext::OnItemPotChange(a4);
+      break;
+    case 201:
+      CWvsContext::OnSetItemCoolTime(a4);
+      break;
+    case 202:
+      CWvsContext::OnSetAdDisplayInfo(a4);
+      break;
+    case 203:
+      CWvsContext::OnSetAdDisplayStatus(a4);
+      break;
+    case 204:
+      CWvsContext::OnSetSonOfLinkedSkillResult(a4);
+      break;
+    case 205:
+      CWvsContext::OnSetMapleStyleInfo(a4);
+      break;
+    case 206:
+      CWvsContext::OnSetBuyLimitCount(a4);
+      break;
+    case 207:
+      CWvsContext::OnResetBuyLimitCount(a4);
+      break;
+    case 208:
+      CWvsContext::OnUpdateUIEventListInfo(a4);
+      break;
+    case 209:
+      CWvsContext::OnDojangRankingResult(a4);
+      break;
+    case 210:
+    case 211:
+    case 220:
+    case 263:
+      return;
+    case 212:
+      CWvsContext::OnShutdownMessage(a4);
+      break;
+    case 213:
+      CWvsContext::OnResultSetStealSkill(a4);
+      break;
+    case 214:
+      CWvsContext::OnSlashCommand(a4);
+      break;
+    case 215:
+      CWvsContext::OnStartNavigation(a4);
+      break;
+    case 216:
+      CWvsContext::OnFunckeySetByScript(a4);
+      break;
+    case 217:
+      CWvsContext::OnCharacterPotentialSet(a4);
+      break;
+    case 218:
+      CWvsContext::OnCharacterPotentialReset(a4);
+      break;
+    case 219:
+      CWvsContext::OnCharacterHonorExp(a4);
+      break;
+    case 221:
+      CWvsContext::OnAswanResult(a1, a4);
+      break;
+    case 222:
+      CWvsContext::OnReadyForRespawn(a4);
+      break;
+    case 223:
+      CWvsContext::OnReadyForRespawnByPoint(a4);
+      break;
+    case 224:
+      CWvsContext::OpenReadyForRespawnUI(a4);
+      break;
+    case 225:
+      CWvsContext::OnCharacterHonorGift(a4);
+      break;
+    case 226:
+      CWvsContext::OnCrossHunterCompleteResult(a1, a4);
+      break;
+    case 227:
+      CWvsContext::OnCrossHunterShopResult(a1, a4);
+      break;
+    case 228:
+      CWvsContext::OnSetCashItemNotice(a4);
+      break;
+    case 229:
+      CWvsContext::OnSetSpecialCashItem(a4);
+      break;
+    case 230:
+      CWvsContext::OnShowEventNotice(a4);
+      break;
+    case 231:
+      CWvsContext::OnBoardGameResult(a4);
+      break;
+    case 232:
+      CWvsContext::OnYutGameResult(a4);
+      break;
+    case 233:
+      CWvsContext::OnValuePackResult(a4);
+      break;
+    case 234:
+      CWvsContext::OnNaviFlyingResult(a4);
+      break;
+    case 235:
+      CWvsContext::SetExclRequestSent(0);       // CWvsContext::OnMapleStyleResult
+      break;
+    case 236:
+      CWvsContext::OnCheckWeddingExResult(a4);
+      break;
+    case 237:
+      CWvsContext::OnBingoResult(a1, a4);
+      break;
+    case 238:
+      CWvsContext::OnBingoCassandraResult(a4);
+      break;
+    case 239:
+      CWvsContext::OnUpdateVIPGrade(a4);
+      break;
+    case 240:
+      CWvsContext::OnMesoRangerResult(a4);
+      break;
+    case 241:
+      CWvsContext::OnSetMaplePoint(a4);
+      break;
+    case 242:
+      ADDITIONALCASHINFO::Decode(a4);
+      break;
+    case 243:
+      CWvsContext::OnSetMiracleTimeInfo(a4);
+      break;
+    case 244:
+      CWvsContext::OnHyperSkillResetResult(a4);
+      break;
+    case 245:
+      CWvsContext::OnGetServerTime(a4);
+      break;
+    case 246:
+      CWvsContext::OnGetCharacterPosition(a4);
+      break;
+    case 248:
+      CWvsContext::OnReturnEffectConfirm(a1, a4);
+      break;
+    case 249:
+      CWvsContext::OnReturnEffectModified(a4);
+      break;
+    case 250:
+      CWvsContext::OnWhiteAddtionalCubeResult(a4);
+      break;
+    case 251:
+      CWvsContext::OnBlackCubeResult(a4);
+      break;
+    case 252:
+      CWvsContext::OnMemorialCubeResult(a4);
+      break;
+    case 253:
+      CWvsContext::OnMemorialCubeModified(a4);
+      break;
+    case 254:
+      CWvsContext::OnDressUpInfoModified(a4);
+      break;
+    case 255:
+      CWvsContext::OnResetOnStateForOnOffSkill(a4);
+      break;
+    case 256:
+      CWvsContext::OnSetOffStateForOnOffSkill(a1, a4);
+      break;
+    case 257:
+      CWvsContext::OnIssueReloginCookie(a4);
+      break;
+    case 258:
+      CWvsContext::OnAvatarPackTest(a4);
+      break;
+    case 259:
+      CWvsContext::OnEvolvingResult(a4);
+      break;
+    case 260:
+      CWvsContext::OnActionBarResult(a4);
+      break;
+    case 261:
+      CUIGuildContentRank::OnPacket(a4);
+      break;
+    case 262:
+      CWvsContext::OnGuildSearchResult(a1, a4);
+      break;
+    case 264:
+      CWvsContext::OnHalloweenCandyRankingResult(a1, a4);
+      break;
+    case 265:
+      CWvsContext::OnGetRewardResult(a4);
+      break;
+    case 266:
+      CWvsContext::OnMentoring(a4);
+      break;
+    case 267:
+      CWvsContext::OnGetLotteryResult(a4);
+      break;
+    case 268:
+      CWvsContext::OnCheckProcessResult(a4);
+      break;
+    case 269:
+      CWvsContext::OnCompleteNpcSpeechSuccess(a4);
+      break;
+    case 270:
+      CWvsContext::OnCompleteSpecialCheckSuccess(a4);
+      break;
+    case 271:
+      CWvsContext::OnSetAccountInfo(a4);
+      break;
+    case 272:
+      CWvsContext::OnSetGachaponFeverTimeInfo(a4);
+      break;
+    case 273:
+      CWvsContext::OnAvatarMegaphoneRes(a4);
+      break;
+    case 274:
+      CWvsContext::OnSetAvatarMegaphone(a1, a4);
+      break;
+    case 275:
+      CWvsContext::OnClearAvatarMegaphone(a4);
+      break;
+    case 276:
+      CWvsContext::OnRequestEventList(a4);
+      break;
+    case 277:
+      CWvsContext::OnLikePoint(a4);
+      break;
+    case 278:
+      CWvsContext::OnSignErrorAck(a4);
+      break;
+    case 279:
+      CWvsContext::OnAskAfterErrorAck(a4);
+      break;
+    case 280:
+      CWvsContext::OnEventNameTag(a4);
+      break;
+    case 281:
+      CWvsContext::OnAcquireEventNameTag(a4);
+      break;
+    case 282:
+      CWvsContext::OnJobFreeChangeResult(a4);
+      break;
+    case 283:
+      CWvsContext::OnEventLotteryOpen(a1, a4);
+      break;
+    case 284:
+      CWvsContext::OnEventLotteryResult(a4);
+      break;
+    case 292:
+      CWvsContext::OnTradeBlockForSnapShot(a4);
+      break;
+    case 293:
+      CWvsContext::OnLimitGoodsNoticeResult(a4);
+      break;
+    case 295:
+      CWvsContext::OnMonsterBattleSystemResult(a1, a4);
+      break;
+    case 296:
+      CWvsContext::OnMonsterBattleCombatResult(a4);
+      break;
+    case 298:
+      CWvsContext::OnUniverseBossImpossible(a1, a4);
+      break;
+    case 299:
+      CWvsContext::OnCashShopPreviewInfo(a1, a4);
+      break;
+    case 300:
+      CWvsContext::OnChangeSoulCollectionResult(a4);
+      break;
+    case 301:
+      CWvsContext::OnSelectSoulCollectionResult(a4);
+      break;
+    case 302:
+      CWvsContext::OnMasterPieceReward(a4);
+      break;
+    case 303:
+      CWvsContext::OnPendantSlotIncResult(a4);
+      break;
+    case 304:
+      CWvsContext::OnBossArenaMatchSuccess(a4);
+      break;
+    case 305:
+      CWvsContext::OnBossArenaMatchFail(a4);
+      break;
+    case 306:
+      CWvsContext::OnBossArenaMatchRequestDone(a4);
+      break;
+    case 307:
+      CWvsContext::OnUserSoulMatching(a4);
+      break;
+    case 308:
+      CWvsContext::OnCatapultUpgradeSkill(a4);
+      break;
+    case 309:
+      CWvsContext::OnCatapultResetSkill(a4);
+      break;
+    case 310:
+      CWvsContext::OnPartyQuestRankingResult(a4);
+      break;
+    case 311:
+      CWvsContext::OnSetCoordinationContestInfo(a4);
+      break;
+    case 312:
+      CWvsContext::OnWorldTransferResult(a4);
+      break;
+    case 313:
+      CWvsContext::OnTrunkSlotIncResult(a4);
+      break;
+    case 314:
+      CWvsContext::OnEliteMobWMI(a4);
+      break;
+    case 315:
+      CWvsContext::OnRandomPortalNotice(a4);
+      break;
+    case 316:
+      CWvsContext::OnNotifyWorldTransferHelper(a4);
+      break;
+    case 317:
+      CUIEquipmentEnchant::OnPacket(a4);
+      break;
+    case 318:
+      CWvsContext::OnTopTowerRankResult(a4);
+      break;
+    case 319:
+      CWvsContext::OnFriendTowerRankResult(a4);
+      break;
+    case 320:
+      CWvsContext::OnTowerResultUIOpen(a4);
+      break;
+    case 321:
+      CWvsContext::OnMannequinResult(a4);
+      break;
+    case 322:
+      CWvsContext::OnIronBoxPacket(a4);
+      break;
+    case 323:
+      CWvsContext::OnCreateKoreanJumpingGame(a4);
+      break;
+    case 324:
+      CWvsContext::OnCreateSwingGame(a4);
+      break;
+    case 325:
+      CWvsContext::OnUpdateMapleTVShowTime(a4);
+      break;
+    case 326:
+      CWvsContext::OnReturnToTitle(a4);
+      break;
+    case 327:
+      CWvsContext::OnReturnToCharacterSelect(a4);
+      break;
+    case 328:
+      CWvsContext::OnFlameWizardFlameWalkEffect(a4);
+      break;
+    case 329:
+      CWvsContext::OnFlameWizardFlareBlink(a4);
+      break;
+    case 330:
+      CWvsContext::OnSummonedAvatarSync(a4);
+      break;
+    case 331:
+      CWvsContext::OnCashShopEventInfo(a4);
+      break;
+    case 332:
+      CWvsContext::OnBlackList(a4);
+      break;
+    case 333:
+      CWvsContext::OnOpenUITest(a4);
+      break;
+    case 334:
+      CWvsContext::OnSwitchBlackListView(a1, a4);
+      break;
+    case 335:
+      CWvsContext::OnScrollUpgradeFeverTime(a4);
+      break;
+    case 336:
+      CWvsContext::OnTextEquipInfo(a4);
+      break;
+    case 337:
+      CWvsContext::OnTextEquipUIOpen(a4);
+      break;
+    case 338:
+      CWvsContext::OnUIStarPlanetMiniGameResult(a4);
+      break;
+    case 339:
+      CWvsContext::OnUIStarPlanetTrendShop(a4);
+      break;
+    case 340:
+      CWvsContext::OnUIStarPlanetMiniGameQueue(a4);
+      break;
+    case 342:
+      CWvsContext::OnStarPlanetRoundInfo(a4);
+      break;
+    case 343:
+      CWvsContext::OnStarPlanetResult(a4);
+      break;
+    case 344:
+      CWvsContext::OnBackSpeedCtrl(a4);
+      break;
+    case 345:
+      CWvsContext::OnSetMazeArea(a4);
+      break;
+    case 346:
+      CWvsContext::OnCharacterBurning(a4);
+      break;
+    case 347:
+      CWvsContext::OnBattleStatCoreInfo(a4);
+      break;
+    case 348:
+      CWvsContext::OnBattleStatCoreAck(a4);
+      break;
+    case 349:
+      CWvsContext::OnGachaponTestResult(a4);
+      break;
+    case 350:
+      CWvsContext::OnMasterPieceTestResult(a1, edx0, a4);
+      break;
+    case 351:
+      CWvsContext::OnRoyalStyleTestResult(a4);
+      break;
+    case 352:
+      CWvsContext::OnBeautyCouponTestResult(a4);
+      break;
+    case 353:
+      CWvsContext::OnNickSkillExpired(a4);
+      break;
+    case 354:
+      CWvsContext::OnRandomMissionResult(a4);
+      break;
+    case 355:
+      CWvsContext::On12thTresureResult(a4);
+      break;
+    case 356:
+      CWvsContext::On12thTresureBuff(a4);
+      break;
+    case 357:
+      CWvsContext::OnItemCollectionResult(a4);
+      break;
+    case 358:
+      CWvsContext::OnCheckCollectionCompleteResult(a4);
+      break;
+    case 359:
+      CWvsContext::OnItemCollectionList(a4);
+      break;
+    case 360:
+      CWvsContext::OnReceiveToadsHammerRequestResult(a4);
+      break;
+    case 361:
+      CWvsContext::OnReceiveHyperStatSkillResetResult(a4);
+      break;
+    case 362:
+      CWvsContext::OnInventoryOperationResult(a4);
+      break;
+    case 363:
+      CWvsContext::OnGetSavedUrusSkill(a4);
+      break;
+    case 364:
+      CWvsContext::OnSetRolePlayingCharacterInfo(a4);
+      break;
+    case 365:
+      CWvsContext::OnMVPAlarm(a4);
+      break;
+    case 366:
+      CWvsContext::OnMonsterCollectionResult(a4);
+      break;
+    case 367:
+      CWvsContext::OnTowerChairSettingResult(a4);
+      break;
+    case 368:
+      CWvsContext::OnNeedClientResponse(a4);
+      break;
+    case 369:
+      CWvsContext::OnCharacterModified(a4);
+      break;
+    case 370:
+      CWvsContext::OnTradeKingShopItem(a4);
+      break;
+    case 371:
+      CWvsContext::OnTradeKingShopRes(a4);
+      break;
+    case 372:
+      CWvsContext::OnPlatFormarEnterResult(a4);
+      break;
+    case 373:
+      CWvsContext::OnPlatFormarOxyzen(a4);
+      break;                                    // End kmst
+    case 374:
+      sub_1A01F20(a4);
+      break;
+    case 375:
+      sub_19F1060(a4);
+      break;
+    case 376:
+      sub_1A0DF60(a4);
+      break;
+    case 378:
+      sub_19FE9F0(a4);
+      break;
+    case 379:
+      sub_19F2EA0(a4);
+      break;
+    case 380:
+      sub_1A266E0(a4);
+      break;
+    case 382:
+      sub_19F7A60(a4);
+      break;
+    case 383:
+      sub_19F2F20(a4);
+      break;
+    case 384:
+      sub_1970550(a4);
+      break;
+    case 385:
+      sub_1974650(a4);
+      break;
+    case 386:
+      sub_19DCD80(a4);
+      break;
+    case 387:
+      sub_1970470(a4);
+      break;
+    case 388:
+      sub_1974550(a4);
+      break;
+    case 389:
+      sub_19C60C0(a4);
+      break;
+    case 390:
+      sub_19C6290(a4);
+      break;
+    case 391:
+      sub_19AB600(a4);
+      break;
+    case 392:
+      sub_19F2E40(a4);
+      break;
+    case 393:
+      sub_19C6D60(a4);
+      break;
+    case 395:
+      sub_1A0E590(a4);
+      break;
+    case 396:
+      sub_1A0C200(a4);
+      break;
+    case 397:
+      sub_1A0C3E0(a4);
+      break;
+    case 398:
+      sub_1A0C4F0(a4);
+      break;
+    case 399:
+      sub_19FE5F0(a4);
+      break;
+    case 400:
+      sub_1A0C920(a4);
+      break;
+    case 401:
+      sub_1A0D060(a4);
+      break;
+    case 403:
+      sub_1A44100(a4);
+      break;
+    case 404:
+      sub_1A26430(a4);
+      break;
+    case 405:
+      sub_19FE930(a4);
+      break;
+    case 406:
+      sub_19DCE50(a4);
+      break;
+    case 407:
+      sub_19AB4A0(a4);
+      break;
+    case 408:
+      sub_19DCF50(a4);
+      break;
+    case 409:
+      sub_199DCE0(a4);
+      break;
+    case 410:
+      sub_1A26590(a4);
+      break;
+    case 411:
+      sub_19F1A60(a4);
+      break;
+    case 412:
+      sub_19AFAE0(a4);
+      break;
+    case 413:
+      sub_19DBD70(a4);
+      break;
+    case 414:
+      sub_1A42360(a4);
+      break;
+    case 415:
+      sub_1A3F220(a4);
+      break;
+    case 416:
+      sub_1A404C0(a4);
+      break;
+    case 417:
+      CWvsContext::OnCharacterModified_OLD(a4);
+      break;
+    case 418:
+      sub_1984010(a4);
+      break;
+    case 419:
+      sub_1A134D0(a4);
+      break;
+    case 420:
+      sub_19F2EC0(a4);
+      break;
+    case 422:
+      sub_1984630(a4);
+      break;
+    case 423:
+      sub_1A17D80(a4);
+      break;
+    case 424:
+      sub_19FE8D0(a4);
+      break;
+    case 425:
+      sub_19FE900(a4);
+      break;
+    case 426:
+      sub_19F1050(a4);
+      break;
+    case 427:
+      sub_19F16C0(a4);
+      break;
+  }
+}

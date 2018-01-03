@@ -160,15 +160,16 @@ public class LoginHandler {
         JobConstants.JobEnum job = JobConstants.LoginJob.getLoginJobById(curSelectedRace).getBeginJob();
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
-        chr.createInDB();
+//        chr.createInDB();
         c.getAccount().addCharacter(chr);
 //        chr.setAccId(c.getAccount().getId());
+//        chr.updateDB();
+        c.getAccount().updateDB();
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
-        chr.setFieldID(100000000);
+        cs.setPosMap(100000000);
         chr.updateDB();
-        c.getAccount().updateDB();
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromId(i);
             if (equip != null) {
@@ -252,6 +253,7 @@ public class LoginHandler {
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
         if (c.isAuthorized()) {
+            Server.getInstance().getWorldById(worldId).getChannelById(worldId).addClientInTransfer(channelId, characterId ,c.getAccount());
             c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
         }
     }

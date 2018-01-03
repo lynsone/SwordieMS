@@ -315,6 +315,9 @@ public class Account {
     public void updateDB() {
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
+        for(Char c : getCharacters()) {
+            c.updateDB();
+        }
         session.update(this);
         tx.commit();
         session.close();

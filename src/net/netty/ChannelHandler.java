@@ -1,6 +1,7 @@
 package net.netty;
 
 import client.Client;
+import client.jobs.JobManager;
 import connection.InPacket;
 import handling.InHeader;
 import handling.handlers.LoginHandler;
@@ -8,6 +9,8 @@ import handling.handlers.WorldHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import packet.WvsContext;
+import server.World;
 
 import static net.netty.NettyClient.CLIENT_KEY;
 
@@ -64,6 +67,15 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case CLIENT_START:
                     LoginHandler.handleClientStart(c, inPacket);
+                    break;
+                case CRASH:
+                    if(c != null && c.getAccount() != null) {
+                        c.getAccount().updateDB();
+                    }
+                    break;
+                case SKILL:
+                    JobManager.handleSkill(c, inPacket);
+                    WvsContext.dispose(c, c.getChr());
                     break;
                 case PONG:
                     LoginHandler.handlePong(c, inPacket);
@@ -122,8 +134,29 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case INVENTORY_OPERATION:
                     WorldHandler.handleInventoryOperation(c, inPacket);
                     break;
+                case ABILITY_POINT_DISTRIBUTE:
+                    WorldHandler.handleAbilityPointDistribute(c, inPacket);
+                    break;
+                case AUTO_ABILITY_POINT_DISTRIBUTE:
+                    WorldHandler.handleAutoAbilityPointDistribute(c, inPacket);
+                    break;
+                case SKILL_RECORD_UPDATE_REQUEST:
+                    WorldHandler.handleSkillRecordUpdateRequest(c, inPacket);
+                    break;
+                case MELEE_ATTACK:
+                    WorldHandler.handleMeleeAttack(c, inPacket);
+                    break;
+                case MAGIC_ATTACK:
+                    WorldHandler.handleMagicAttack(c, inPacket);
+                    break;
                 case CHANGE_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
+                    break;
+                case MOVE:
+                    WorldHandler.handleMove(c, inPacket);
+                    break;
+                case MOVE_LIFE:
+                    WorldHandler.handleMoveLife(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);
@@ -135,7 +168,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handleUnknown(InPacket inPacket, short opCode) {
-        System.out.println("Unhandled opcode " + opCode + ", packet " + inPacket);
+        System.out.println("Unhandled opcode " + opCode + "/0x" + Integer.toHexString(opCode) + ", packet " + inPacket);
     }
 
     @Override

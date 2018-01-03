@@ -4,10 +4,7 @@ import client.character.items.Equip;
 import constants.ServerConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import util.FileTime;
-import util.Loader;
-import util.Saver;
-import util.XMLApi;
+import util.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -61,31 +58,105 @@ public class ItemData {
      * <code>itemId</code>.
      */
     public static Equip getEquipDeepCopyFromId(int itemId) {
-        Equip ret = null;
-        for(Equip eq : getEquips()) {
-            if(eq.getItemId() == itemId) {
-                ret = eq.deepCopy();
-            }
+        Equip ret = getEquipById(itemId);
+        if(ret != null) {
+            ret = ret.deepCopy();
         }
         return ret;
     }
 
     public static Equip getEquipById(int itemId) {
-        for(Equip eq : getEquips()) {
-            if(eq.getItemId() == itemId) {
-                return eq;
-            }
+        return getEquips().stream().filter(eq -> eq.getItemId() == itemId).findFirst().orElse(getEquipFromFile(itemId));
+    }
+
+    private static Equip getEquipFromFile(int itemId) {
+        String fieldDir = ServerConstants.DAT_DIR + "\\equips\\" + itemId + ".dat";
+        File file = new File(fieldDir);
+        if(!file.exists()) {
+            System.err.println("Could not find equip " + itemId);
+            return null;
+        } else {
+            return readEquipFromFile(file);
         }
-        return null;
+    }
+
+    private static Equip readEquipFromFile(File file) {
+        Equip equip = null;
+        try {
+            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+            int itemId = dataInputStream.readInt();
+            String islot = dataInputStream.readUTF();
+            String vslot = dataInputStream.readUTF();
+            short rJob = dataInputStream.readShort();
+            short rLevel = dataInputStream.readShort();
+            short rStr = dataInputStream.readShort();
+            short rDex = dataInputStream.readShort();
+            short rInt = dataInputStream.readShort();
+            short rLuk = dataInputStream.readShort();
+            short rPop = dataInputStream.readShort();
+            short iStr = dataInputStream.readShort();
+            short iDex = dataInputStream.readShort();
+            short iInt = dataInputStream.readShort();
+            short iLuk = dataInputStream.readShort();
+            short iPDD = dataInputStream.readShort();
+            short iMDD = dataInputStream.readShort();
+            short iMaxHp = dataInputStream.readShort();
+            short iMaxMp = dataInputStream.readShort();
+            short iPad = dataInputStream.readShort();
+            short iMad = dataInputStream.readShort();
+            short iEva = dataInputStream.readShort();
+            short iAcc = dataInputStream.readShort();
+            short iCraft = dataInputStream.readShort();
+            short iSpeed = dataInputStream.readShort();
+            short iJump = dataInputStream.readShort();
+            short damR = dataInputStream.readShort();
+            short statR = dataInputStream.readShort();
+            short tuc = dataInputStream.readShort();
+            int charmEXP = dataInputStream.readInt();
+            int setItemID = dataInputStream.readInt();
+            int price = dataInputStream.readInt();
+            int attackSpeed = dataInputStream.readInt();
+            boolean cash = dataInputStream.readBoolean();
+            boolean expireOnLogout = dataInputStream.readBoolean();
+            boolean exItem = dataInputStream.readBoolean();
+            boolean notSale = dataInputStream.readBoolean();
+            boolean only = dataInputStream.readBoolean();
+            boolean tradeBlock = dataInputStream.readBoolean();
+            boolean equipTradeBlock = dataInputStream.readBoolean();
+            boolean fixedPotential = dataInputStream.readBoolean();
+            short optionLength = dataInputStream.readShort();
+            List<Integer> options = new ArrayList<>(optionLength);
+            for (int i = 0; i < optionLength; i++) {
+                options.add(dataInputStream.readInt());
+            }
+            for (int i = 0; i < 7 - optionLength; i++) {
+                options.add(0);
+            }
+            int fixedGrade = dataInputStream.readInt();
+            int specialGrade = dataInputStream.readInt();
+            equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
+                    null, new FileTime(-1), 0, (short) 0, (short) 0, iStr, iDex, iInt,
+                    iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
+                    iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
+                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
+                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
+                    rLuk, rLevel, rJob, rPop, cash,
+                    islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
+                    notSale, attackSpeed, price, tuc, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
+            equips.add(equip);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return equip;
     }
 
     @Saver(varName = "equips")
-    public static void saveEquips(File file) {
+    public static void saveEquips(String dir) {
+        Util.makeDirIfAbsent(dir);
         DataOutputStream dataOutputStream;
         try {
-            dataOutputStream = new DataOutputStream(new FileOutputStream(file));
-            dataOutputStream.writeShort(getEquips().size());
             for (Equip equip : getEquips()) {
+                dataOutputStream = new DataOutputStream(new FileOutputStream(dir + "\\" + equip.getItemId() + ".dat"));
                 dataOutputStream.writeInt(equip.getItemId());
                 dataOutputStream.writeUTF(equip.getiSlot());
                 dataOutputStream.writeUTF(equip.getvSlot());
@@ -138,11 +209,11 @@ public class ItemData {
         }
     }
 
-    @Loader(varName = "equips")
+//    @Loader(varName = "equips")
     public static void loadEquips(File file, boolean exists) {
         if(!exists) {
             loadEquipsFromWz();
-            saveEquips(file);
+            saveEquips(ServerConstants.DAT_DIR + "\\equips");
         } else {
             try {
                 DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
@@ -475,13 +546,8 @@ public class ItemData {
         }
     }
 
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        for(int i : list) {
-            System.out.println(i);
-        }
+    public static void generateDatFiles(){
         loadEquipsFromWz();
-        saveEquips(new File("D:\\SwordieMS\\swordiems\\dat\\equips.dat"));
+        saveEquips(ServerConstants.DAT_DIR + "\\equips");
     }
-
 }

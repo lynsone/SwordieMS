@@ -1,15 +1,30 @@
 package client.character.skills;
 
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import javax.persistence.*;
 import java.util.Map;
 
 /**
  * Created on 12/20/2017.
  */
+@Entity
+@Table(name = "skills")
 public class Skill {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private int id;
+    @Column(name = "charId")
+    private int charId;
+    @Column(name = "skillId")
     private int skillId;
+    @Column(name = "rootId")
     private int rootId;
+    @Column(name = "maxLevel")
     private int maxLevel;
+    @Column(name = "currentLevel")
     private int currentLevel;
 
     public int getSkillId() {
@@ -45,4 +60,19 @@ public class Skill {
     }
 
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getCharId() {
+        return charId;
+    }
+
+    public void setCharId(int charId) {
+        this.charId = charId;
+    }
 }

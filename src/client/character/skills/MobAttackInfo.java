@@ -7,17 +7,19 @@ public class MobAttackInfo {
     public byte idk3;
     public byte idk4;
     public byte idk5;
-    public int idk6;
     public byte calcDamageStatIndex;
     public short rcDstX;
     public short rectRight;
     public short oldPosX;
     public short oldPosY;
-    public byte hpPerc;
+    public short hpPerc;
     public int[] damages;
     public int mobUpDownYRange;
     public byte type;
     public String currentAnimationName;
     public int animationDeltaL;
     public String[] hitPartRunTimes;
+    public int templateID;
+    public short idk6;
+    public boolean isResWarriorLiftPress;
 }

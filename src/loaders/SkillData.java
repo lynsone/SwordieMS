@@ -56,7 +56,7 @@ public class SkillData {
     }
 
     @Loader(varName = "skills")
-    public static void loadEquips(File file, boolean exists) {
+    public static void loadSkills(File file, boolean exists) {
         if(!exists) {
             loadSkillsFromWz();
             saveSkills(file);
@@ -172,13 +172,13 @@ public class SkillData {
         return getSkillInfos().get(skillId);
     }
 
-    public static Skill getNewSkillById(int skillId) {
+    public static Skill getSkillDeepCopyById(int skillId) {
         SkillInfo si = getSkillInfoById(skillId);
         if(si == null) {
             return null;
         }
         Skill skill = new Skill();
-
+        skill.setSkillId(si.getSkillId());
         skill.setRootId(si.getRootId());
         skill.setMaxLevel(si.getMaxLevel());
         skill.setCurrentLevel(0);

@@ -65,7 +65,7 @@ public class AvatarData {
     public void updateDB(Session session, Transaction tx) {
         getAvatarLook().updateDB(session, tx);
         getCharacterStat().updateDB(session, tx);
-        session.update(this);
+        session.saveOrUpdate(this);
     }
 
     public void createInDB(Session session, Transaction tx) {

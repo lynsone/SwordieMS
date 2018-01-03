@@ -111,7 +111,6 @@ public class ForcedMobStat {
     }
 
     public void encode(OutPacket outPacket) {
-
         outPacket.encodeInt((int) getMaxHP());
         outPacket.encodeInt((int) getMaxMP());
         outPacket.encodeInt((int) getExp());
@@ -125,5 +124,23 @@ public class ForcedMobStat {
         outPacket.encodeInt(getSpeed());
         outPacket.encodeInt(getLevel());
         outPacket.encodeInt(getUserCount());
+    }
+
+    public ForcedMobStat deepCopy() {
+        ForcedMobStat copy = new ForcedMobStat();
+        copy.setMaxHP((int) getMaxHP());
+        copy.setMaxMP((int) getMaxMP());
+        copy.setExp((int) getExp());
+        copy.setPad(getPad());
+        copy.setMad(getMad());
+        copy.setPdr(getPdr());
+        copy.setMdr(getMdr());
+        copy.setAcc(getAcc());
+        copy.setEva(getEva());
+        copy.setPushed(getPushed());
+        copy.setSpeed(getSpeed());
+        copy.setLevel(getLevel());
+        copy.setUserCount(getUserCount());
+        return copy;
     }
 }

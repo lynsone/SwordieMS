@@ -2,10 +2,9 @@ package connection;
 
 import io.netty.buffer.*;
 import net.Packet;
+import util.Position;
 import util.Util;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
@@ -104,11 +103,15 @@ public class InPacket extends Packet {
 
     @Override
     public String toString() {
-        return Util.ReadableByteArray(Arrays.copyOfRange(getData(), 2, getData().length));
+        return Util.readableByteArray(Arrays.copyOfRange(getData(), 2, getData().length));
     }
 
 
     public long decodeLong() {
         return byteBuf.readLongLE();
+    }
+
+    public Position decodePosition() {
+        return new Position(decodeShort(), decodeShort());
     }
 }

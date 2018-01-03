@@ -1,5 +1,7 @@
 package client.field;
 
+import util.Position;
+
 public class Foothold {
     private int id;
     private int layerId;
@@ -118,5 +120,16 @@ public class Foothold {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Foothold deepCopy() {
+        Foothold copy = new Foothold(getId(), getLayerId(), getGroupId(), getX1(), getY1(), getX2(), getY2(), getNext(), getPrev(), getForce());
+        copy.setForbidFallDown(isForbidFallDown());
+        return copy;
+    }
+
+    @Override
+    public String toString() {
+        return "Id: " + getId() + ", Start = " + new Position(getX1(), getY1()) + ", End = " + new Position(getX2(), getY2());
     }
 }

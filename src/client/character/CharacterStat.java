@@ -2,14 +2,11 @@ package client.character;
 
 import connection.OutPacket;
 import constants.JobConstants;
-import net.db.DBObject;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import server.Server;
 import util.SystemTime;
 
 import util.FileTime;
-import util.Util;
 
 import javax.persistence.*;
 
@@ -143,7 +140,7 @@ public class CharacterStat {
     private int gachExp;
 
     public CharacterStat() {
-        extendSP = new ExtendSP(4);
+        extendSP = new ExtendSP(5);
         nonCombatStatDayLimit = new NonCombatStatDayLimit();
         albaStartTime = new FileTime(0);
         lastLogout = new FileTime(0);
@@ -174,7 +171,7 @@ public class CharacterStat {
         return (short) hp;
     }
 
-    public short getInte() {
+    public short getInt() {
         return (short) inte;
     }
 
@@ -371,8 +368,8 @@ public class CharacterStat {
     }
 
     public void encode(OutPacket outPacket) {
-        outPacket.encodeInt(getId());
-        outPacket.encodeInt(getId());
+        outPacket.encodeInt(getCharacterId());
+        outPacket.encodeInt(getCharacterIdForLog());
         outPacket.encodeInt(getWorldIdForLog());
         outPacket.encodeString(getName(), 13);
         outPacket.encodeByte(getGender());
@@ -386,7 +383,7 @@ public class CharacterStat {
         outPacket.encodeShort(getJob());
         outPacket.encodeShort(getStr());
         outPacket.encodeShort(getDex());
-        outPacket.encodeShort(getInte());
+        outPacket.encodeShort(getInt());
         outPacket.encodeShort(getLuk());
         outPacket.encodeInt(getHp());
         outPacket.encodeInt(getMaxHp());
@@ -685,7 +682,7 @@ public class CharacterStat {
         getLastLogout().updateDB(session, tx);
         getNonCombatStatDayLimit().updateDB(session, tx);
         getAccountLastLogout().updateDB(session, tx);
-        session.update(this);
+        session.saveOrUpdate(this);
     }
 
     public void createInDB(Session session, Transaction tx) {

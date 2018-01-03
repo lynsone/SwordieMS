@@ -5,27 +5,32 @@ import client.character.Char;
 import client.character.CharacterCard;
 import client.character.ExtendSP;
 import client.character.NonCombatStatDayLimit;
-import client.character.items.Equip;
-import client.character.items.Inventory;
 import client.character.items.Item;
+import client.character.skills.Skill;
+import client.life.movement.*;
+import connection.InPacket;
 import connection.OutPacket;
 import enums.InvType;
+import enums.MobStat;
 import enums.Stat;
 import handling.OutHeader;
+import util.FileTime;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created on 12/22/2017.
  */
 public class WvsContext {
 
-    public static void dipose(Client c, Char chr) {
+    public static void dispose(Client c, Char chr) {
         c.write(statChanged(new HashMap<>(), true, (byte) chr.getAvatarData().getCharacterStat().getMixBaseHairColor(),
                 (byte) chr.getAvatarData().getCharacterStat().getMixAddHairColor(), (byte) chr.getAvatarData().getCharacterStat().getMixHairBaseProb(),
                 (byte) 0, false, 0 , 0));
+    }
+
+    public static OutPacket statChanged(Map<Stat, Object> stats, boolean exclRequestSent) {
+        return statChanged(stats, exclRequestSent, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats, boolean exclRequestSent, byte mixBaseHairColor,
@@ -40,6 +45,9 @@ public class WvsContext {
             mask |= stat.getVal();
         }
         outPacket.encodeLong(mask);
+        Comparator statComper = Comparator.comparingInt(o -> ((Stat) o).getVal());
+        TreeMap<Stat, Object> sortedStats = new TreeMap<>(statComper);
+        sortedStats.putAll(stats);
         for(Map.Entry<Stat, Object> entry : stats.entrySet()) {
             Stat stat = entry.getKey();
             Object value = entry.getValue();
@@ -116,8 +124,8 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket inventoryOperation(Char chr, boolean exclRequestSent, byte type, short oldPos, short newPos,
-                                               InvType invType, short quantity, boolean notRemoveAddInfo, int bagPos,
+    public static OutPacket inventoryOperation(Char chr, boolean exclRequestSent, boolean notRemoveAddInfo, byte type, short oldPos, short newPos,
+                                               InvType invType, short quantity, int bagPos,
                                                Item item) {
         OutPacket outPacket = new OutPacket(OutHeader.INVENTORY_OPERATION);
 
@@ -129,7 +137,7 @@ public class WvsContext {
         outPacket.encodeByte(invType.getVal());
         outPacket.encodeShort(oldPos);
         switch(type) {
-            case 0:
+            case 0: // new
                 item.encode(outPacket);
                 break;
             case 1:
@@ -181,5 +189,133 @@ public class WvsContext {
         }
 
         return outPacket;
+    }
+
+    public static OutPacket changeSkillRecordResult(List<Skill> skills, boolean exclRequestSent, boolean showResult,
+                                                    boolean removeLinkSkill, boolean sn) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHANGE_SKILL_RECORD_RESULT);
+
+        outPacket.encodeByte(exclRequestSent);
+        outPacket.encodeByte(showResult);
+        outPacket.encodeByte(removeLinkSkill);
+        outPacket.encodeShort(skills.size());
+        for(Skill skill : skills) {
+            outPacket.encodeInt(skill.getSkillId());
+            outPacket.encodeInt(skill.getCurrentLevel());
+            outPacket.encodeInt(skill.getMaxLevel());
+            outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+        }
+        outPacket.encodeByte(sn);
+
+        return outPacket;
+    }
+
+    public static List<Movement> parseMovement(InPacket inPacket) {
+        List<Movement> res = new ArrayList<>();
+        byte size = inPacket.decodeByte();
+        for (int i = 0; i < size; i++) {
+            byte type = inPacket.decodeByte();
+            switch (type) {
+                case 0:
+                case 8:
+                case 15:
+                case 17:
+                case 19:
+                case 67:
+                case 68:
+                case 69:
+                    res.add(new Movement1(inPacket, type));
+                    break;
+                case 56:
+                case 66:
+                case 85:
+                    res.add(new Movement2(inPacket, type));
+                    break;
+                case 1:
+                case 2:
+                case 18:
+                case 21:
+                case 22:
+                case 24:
+                case 62:
+                case 63:
+                case 64:
+                case 65:
+                    res.add(new Movement3(inPacket, type));
+                    break;
+                case 29:
+                case 30:
+                case 31:
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                case 36:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 41:
+                case 42:
+                case 43:
+                case 44:
+                case 45:
+                case 46:
+                case 47:
+                case 48:
+                case 49:
+                case 50:
+                case 51:
+                case 57:
+                case 58:
+                case 59:
+                case 60:
+                case 70:
+                case 71:
+                case 72:
+                case 74:
+                case 79:
+                case 81:
+                case 83:
+                    res.add(new Movement4(inPacket, type));
+                    break;
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 9:
+                case 10:
+                case 11:
+                case 13:
+                case 26:
+                case 27:
+                case 52:
+                case 53:
+                case 54:
+                case 61:
+                case 76:
+                case 77:
+                case 78:
+                case 80:
+                case 82:
+                    res.add(new Movement5(inPacket, type));
+                    break;
+                case 14:
+                case 16:
+                    res.add(new Movement6(inPacket, type));
+                    break;
+                case 23:
+                    res.add(new Movement7(inPacket, type));
+                    break;
+                case 12:
+                    res.add(new Movement8(inPacket, type));
+                    break;
+                default:
+                    System.out.printf("The type (%s) is unhandled. %n", type);
+                    break;
+            }
+        }
+        return res;
     }
 }

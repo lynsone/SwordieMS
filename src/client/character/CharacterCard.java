@@ -31,7 +31,7 @@ public class CharacterCard {
     }
 
     public int getCharacterId() {
-        return characterId;
+        return getId();
     }
 
     public void setCharacterId(int characterId) {
@@ -72,7 +72,7 @@ public class CharacterCard {
     }
 
     public void updateDB(Session session, Transaction tx) {
-        session.update(this);
+        session.saveOrUpdate(this);
     }
 
     public void createInDB(Session session, Transaction tx) {

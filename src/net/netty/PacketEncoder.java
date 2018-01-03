@@ -40,7 +40,7 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
         MapleCrypto mCr = chc.channel().attr(NettyClient.CRYPTO_KEY).get();
 
         if (c != null) {
-            if(!OutHeader.isSpamHeader(OutHeader.getOutHeaderByOp(data[0] + (data[1] >> 4)))) {
+            if(!OutHeader.isSpamHeader(OutHeader.getOutHeaderByOp(in.getHeader()))) {
                 System.out.println("[Out]\t| " + in);
             }
             byte[] iv = c.getSendIV();

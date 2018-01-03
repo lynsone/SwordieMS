@@ -3,7 +3,7 @@ package connection;
 import handling.OutHeader;
 import net.Packet;
 import util.FileTime;
-import util.Point;
+import util.Position;
 import util.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -208,7 +208,7 @@ public class OutPacket extends Packet {
 
     @Override
     public String toString() {
-        return OutHeader.getOutHeaderByOp(op) + ", " + op + "/" + Integer.toHexString(op) + "\t| " + Util.ReadableByteArray(Arrays.copyOfRange(getData(), 2, getData().length));
+        return OutHeader.getOutHeaderByOp(op) + ", " + op + "/0x" + Integer.toHexString(op) + "\t| " + Util.readableByteArray(Arrays.copyOfRange(getData(), 2, getData().length));
     }
 
     public void encodeShort(int value) {
@@ -223,8 +223,8 @@ public class OutPacket extends Packet {
         fileTime.encode(this);
     }
 
-    public void encodePoint(Point point) {
-        encodeShort(point.getX());
-        encodeShort(point.getY());
+    public void encodePosition(Position position) {
+        encodeShort(position.getX());
+        encodeShort(position.getY());
     }
 }

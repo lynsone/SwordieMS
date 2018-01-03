@@ -1,10 +1,13 @@
 package client.field;
 
-import util.Point;
+import client.character.Char;
+import client.life.Life;
+import client.life.Mob;
+import packet.CField;
+import util.Position;
 
 import java.awt.Rectangle;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -13,12 +16,16 @@ import java.util.stream.Collectors;
 public class Field {
     private Rectangle rect;
     private double mobRate;
-    private int id, returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
+    private int id;
+    private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
     private int consumeItemCoolTime, link;
     private long uniqueId;
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
     private Set<Portal> portals;
     private Set<Foothold> footholds;
+    private List<Life> lifes;
+    private List<Char> chars;
+    private Map<Life, Char> lifeToControllers;
     private String onFirstUserEnter = "", onUserEnter = "";
     private int fixedMobCapacity;
 
@@ -28,6 +35,15 @@ public class Field {
         this.rect = new Rectangle(800,600);
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
+        this.lifes = new ArrayList<>();
+        this.chars = new ArrayList<>();
+        this.lifeToControllers = new HashMap<>();
+    }
+
+    public void initLifes() {
+        for(Life life : getLifes()) {
+            life.setObjectId(1000000 + getLifes().indexOf(life));
+        }
     }
 
     public Rectangle getRect() {
@@ -230,10 +246,10 @@ public class Field {
         return getPortals().stream().filter(portal -> portal.getName().equals(name)).findAny().orElse(null);
     }
 
-    public Foothold findFootHoldBelow(Point pos) {
+    public Foothold findFootHoldBelow(Position pos) {
         Set<Foothold> footholds = getFootholds().stream().filter(fh -> fh.getX1() <= pos.getX() && fh.getX2() >= pos.getX()).collect(Collectors.toSet());
         Foothold res = null;
-        int lastY = Integer.MIN_VALUE;
+        int lastY = Integer.MAX_VALUE;
         for(Foothold fh : footholds) {
             if(res == null) {
                 res = fh;
@@ -243,9 +259,9 @@ public class Field {
                 int x2 = fh.getX2() - x1;
                 int x = pos.getX() - x1;
                 double perc = (double) x / (double) x2;
-                System.out.println("Percentage: " + perc);
+//                System.out.println("Percentage: " + perc);
                 int y = (int) (fh.getY1() + (perc * (fh.getY1() - fh.getY2())));
-                if(y > lastY && y <= pos.getY()) {
+                if(y < lastY && y >= pos.getY()) {
                     res = fh;
                     lastY = y;
                 }
@@ -272,5 +288,126 @@ public class Field {
 
     public int getFixedMobCapacity() {
         return fixedMobCapacity;
+    }
+
+    public List<Life> getLifes() {
+        return lifes;
+    }
+
+    public void setLifes(List<Life> lifes) {
+        this.lifes = lifes;
+    }
+
+    public void addLife(Life life) {
+        if(!getLifes().contains(life)) {
+            getLifes().add(life);
+        }
+    }
+
+    public void spawnLife(Life life, Char onlyChar) {
+        addLife(life);
+        if(life.getObjectId() < 0) {
+            life.setObjectId(1000000 + getLifes().indexOf(life));
+        }
+        if (getChars().size() > 0) {
+            Char controller = null;
+            if(getLifeToControllers().containsKey(life)) {
+                controller = getLifeToControllers().get(life);
+            }
+            if(controller == null) {
+                controller = getChars().get(0);
+                addLifeController(life, controller);
+            }
+            Mob mob = null;
+            if(life instanceof Mob) {
+                mob = (Mob) life;
+            }
+            if (mob != null) {
+                Position pos = mob.getPosition();
+                Foothold fh = getFootholdById(mob.getFh());
+                if(fh == null) {
+                    fh = findFootHoldBelow(pos);
+                }
+                mob.setHomeFoothold(fh.deepCopy());
+                mob.setCurFoodhold(fh.deepCopy());
+                if(onlyChar == null) {
+                    for (Char chr : getChars()) {
+                        chr.getClient().write(CField.mobEnterField(mob, false));
+                        chr.getClient().write(CField.mobChangeController(mob, false, controller == chr));
+                    }
+                } else {
+                    onlyChar.getClient().write(CField.mobEnterField(mob, false));
+                    onlyChar.getClient().write(CField.mobChangeController(mob, false, controller == onlyChar));
+                }
+            }
+        }
+    }
+
+    private void removeLife(Life life) {
+        if(getLifes().contains(life)) {
+            getLifes().remove(life);
+        }
+    }
+
+    private Foothold getFootholdById(int fh) {
+        return getFootholds().stream().filter(f -> f.getId() == fh).findFirst().orElse(null);
+    }
+
+    public List<Char> getChars() {
+        return chars;
+    }
+
+    public void addChar(Char chr) {
+        if(!getChars().contains(chr)) {
+            getChars().add(chr);
+        }
+    }
+
+    public void removeChar(Char chr) {
+        if(getChars().contains(chr)) {
+            getChars().remove(chr);
+        }
+        for(Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
+            if(entry.getValue() == chr) { // yes, ==
+                addLifeController(entry.getKey(), null);
+            }
+        }
+    }
+
+    public Map<Life, Char> getLifeToControllers() {
+        return lifeToControllers;
+    }
+
+    public void setLifeToControllers(Map<Life, Char> lifeToControllers) {
+        this.lifeToControllers = lifeToControllers;
+    }
+
+    public void addLifeController(Life life, Char chr) {
+        getLifeToControllers().put(life, chr);
+    }
+
+    public void changeLifeController(Life life) {
+
+    }
+
+    public Life getLifeByObjectID(int mobId) {
+        return getLifes().stream().filter(mob -> mob.getObjectId() == mobId).findFirst().orElse(null);
+    }
+
+    public void spawnLifesForChar(Char chr) {
+        for(Life life : getLifes()) {
+            spawnLife(life, chr);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "" + getId();
+    }
+
+    public void respawn(Mob mob) {
+        mob.setHp(mob.getMaxHp());
+        mob.setMp(mob.getMaxMp());
+        spawnLife(mob, null);
     }
 }

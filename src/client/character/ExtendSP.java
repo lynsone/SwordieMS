@@ -65,7 +65,7 @@ public class ExtendSP {
         for(SPSet spSet : getSpSet()) {
             spSet.updateDB(session, tx);
         }
-        session.update(this);
+        session.saveOrUpdate(this);
     }
 
     public void createInDB(Session session, Transaction tx) {
@@ -80,5 +80,20 @@ public class ExtendSP {
             spSet.deleteFromDB(session, tx);
         }
         session.delete(this);
+    }
+
+    public void setSpToJobLevel(int jobLevel, int sp) {
+        SPSet spSet = getSpSet().stream().filter(sps -> sps.getJobLevel() == jobLevel).findFirst().orElse(null);
+        if(spSet != null) {
+            spSet.setSp(sp);
+        }
+    }
+
+    public int getSpByJobLevel(byte jobLevel) {
+        SPSet spSet = getSpSet().stream().filter(sps -> sps.getJobLevel() == jobLevel).findFirst().orElse(null);
+        if(spSet != null) {
+            return spSet.getSp();
+        }
+        return -1;
     }
 }

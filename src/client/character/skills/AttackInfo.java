@@ -1,5 +1,7 @@
 package client.character.skills;
 
+import util.Position;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,4 +35,20 @@ public class AttackInfo {
     public boolean force;
     public short delay;
     public short[] shortArr;
+    public byte addAttackProc;
+    public int grenadeId;
+    public byte zero;
+    public int bySummonedID;
+    public Position ptTarget = new Position();
+    public int finalAttackLastSkillID;
+    public byte finalAttackByte;
+    public boolean ignorePCounter;
+    public int spiritCoreEnhance;
+    public Position ptAttackRefPoint = new Position();
+    public Position idkPos = new Position();
+    public Position pos = new Position();
+    public byte fh;
+    public Position teleportPt = new Position();
+    public short Vx;
+    public Position grenadePos;
 }

@@ -12,7 +12,7 @@ import java.util.TimerTask;
  */
 public class EventManager {
 
-    public static void addEvent(Object clazz, String methodName, long delay, Object... args) {
+    public static void addEvent(Object clazz, String methodName, long delay) {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -20,6 +20,21 @@ public class EventManager {
                     Class c = clazz.getClass();
                     Method method = c.getMethod(methodName);
                     method.invoke(clazz);
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, delay);
+    }
+
+    public static void addEvent(Object clazz, String methodName, long delay, Object arg) {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Class c = clazz.getClass();
+                    Method method = c.getMethod(methodName, arg.getClass());
+                    method.invoke(clazz, arg);
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
                 }

@@ -1,6 +1,15 @@
 package server;
 
+import client.Account;
+import client.field.Field;
 import constants.ServerConstants;
+import loaders.FieldData;
+import util.Tuple;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created on 11/2/2017.
@@ -11,6 +20,8 @@ public class Channel {
     private String name;
     private int gaugePx, worldId, channelId;
     private boolean adultChannel;
+    private List<Field> fields;
+    private Map<Integer, Tuple<Byte, Account>> transfers;
 
     private Channel(String name, int gaugePx, World world, int channelId, boolean adultChannel) {
         this.name = name;
@@ -19,6 +30,8 @@ public class Channel {
         this.channelId = channelId;
         this.adultChannel = adultChannel;
         this.port = ServerConstants.LOGIN_PORT + 100 + channelId;
+        this.fields = new ArrayList<>();
+        this.transfers = new HashMap<>();
     }
 
     public Channel(World world, int channelId) {
@@ -32,6 +45,8 @@ public class Channel {
         this.channelId = channelId;
         this.adultChannel = false;
         this.port = ServerConstants.LOGIN_PORT + 100 + channelId;
+        this.fields = new ArrayList<>();
+        this.transfers = new HashMap<>();
     }
 
     public String getName() {
@@ -64,5 +79,38 @@ public class Channel {
 
     public int getPort() {
         return port;
+    }
+
+    public List<Field> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<Field> fields) {
+        this.fields = fields;
+    }
+
+    public Field getField(int id) {
+        return getFields().stream().filter(field -> field.getId() == id).findFirst().orElse(createAndReturnNewField(id));
+    }
+
+    private Field createAndReturnNewField(int id) {
+        Field newField = FieldData.getFieldCopyById(id);
+        getFields().add(newField);
+        return newField;
+    }
+
+    public Map<Integer, Tuple<Byte, Account>> getTransfers() {
+        if(transfers == null) {
+            transfers = new HashMap<>();
+        }
+        return transfers;
+    }
+
+    public void addClientInTransfer(byte channelId, int characterId, Account account) {
+        getTransfers().put(characterId, new Tuple<>(channelId, account));
+    }
+
+    public void removeClientFromTransfer(int characterId) {
+        getTransfers().remove(characterId);
     }
 }

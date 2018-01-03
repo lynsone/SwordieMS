@@ -39,6 +39,7 @@ public enum InHeader {
     CLIENT_START(152),
     SERVERSTATUS_REQUEST(-1), // disconnects upon sending message (no error given)
     LOAD(154),
+    CRASH(155),
     WORLD_STATUS_REQUEST(157),
     WORLD_LIST_REQUEST(160),
     WORLD_LIST_REQ(162),
@@ -49,10 +50,20 @@ public enum InHeader {
     // Field
     CHANGE_FIELD_REQUEST(175),
     CHANGE_CHANNEL_REQUEST(176),
+    MOVE(190),
+    MELEE_ATTACK(195),
+    SHOOT_ATTACK(196),
+    MAGIC_ATTACK(197),
 
     CHAT(203),
     INVENTORY_OPERATION(241),
+    ABILITY_POINT_DISTRIBUTE(298),
+    AUTO_ABILITY_POINT_DISTRIBUTE(299),
+    STAT_RECOVERY(301),
+    SKILL_RECORD_UPDATE_REQUEST(304),
+    SKILL(305),
     USE_BUTTON(587),
+    MOVE_LIFE(825),
 
     ;
     /**
@@ -79,11 +90,13 @@ public enum InHeader {
 
     public static boolean isSpamHeader(InHeader inHeaderByOp) {
         List<InHeader> spam = Arrays.asList(
-                InHeader.USE_BUTTON,
-                InHeader.PONG,
-                InHeader.LOAD,
-                InHeader.LOCALE,
-                InHeader.HEARTBEAT_REQUEST
+                USE_BUTTON,
+                PONG,
+                LOAD,
+                LOCALE,
+                HEARTBEAT_REQUEST,
+                MOVE_LIFE,
+                MOVE
         );
         return spam.contains(inHeaderByOp);
     }

@@ -59,7 +59,7 @@ public class Packet implements Cloneable {
     @Override
     public String toString() {
         if (data == null) return "";
-        return "[Pck] | " + Util.ReadableByteArray(data);
+        return "[Pck] | " + Util.readableByteArray(data);
     }
     
     @Override

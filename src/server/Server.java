@@ -14,6 +14,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import util.Loader;
 import loaders.DataClasses;
+import util.Tuple;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -127,10 +128,6 @@ public class Server extends Properties{
             }
         }
     }
-
-    private Map<String, Integer> getAccs() {
-        return ipToAccount;
-    }
     public static void main(String[] args) {
         getInstance().init();
     }
@@ -145,5 +142,14 @@ public class Server extends Properties{
 
     public List<Account> getAccounts() {
         return accounts;
+    }
+
+    public Tuple<Byte, Account> getChannelFromTransfer(int charId, int worldId) {
+        for(Channel c : getWorldById(worldId).getChannels()) {
+            if(c.getTransfers().containsKey(charId)) {
+                return c.getTransfers().get(charId);
+            }
+        }
+        return null;
     }
 }

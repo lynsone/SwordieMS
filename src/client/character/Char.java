@@ -4,17 +4,23 @@ import client.Client;
 import client.character.items.*;
 import client.character.skills.Core;
 import client.character.skills.Skill;
+import client.field.Field;
 import connection.OutPacket;
-import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
+import enums.ChatMsgColour;
 import enums.DBChar;
 import enums.InvType;
+import enums.Stat;
+import loaders.SkillData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.annotations.Cascade;
+import packet.UserLocal;
 import server.Server;
 import util.FileTime;
 import loaders.ItemData;
+import util.Position;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -67,6 +73,11 @@ public class Char {
     @OneToOne
     private AvatarData avatarData;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "charId")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
+    private List<Skill> skills;
+
     @Transient
     private Ranking ranking;
     @Transient
@@ -93,8 +104,14 @@ public class Char {
     private MonsterBattleLadder monsterBattleLadder;
     @Transient
     private MonsterBattleRankInfo monsterBattleRankInfo;
-    @Column(name = "fieldID")
-    private int fieldID;
+    @Transient
+    private Position position;
+    @Transient
+    private Position oldPosition;
+    @Transient
+    private Field field;
+    @Transient
+    private byte moveAction;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -155,6 +172,7 @@ public class Char {
         itemPots = new ArrayList<>();
         friends = new ArrayList<>();
         expConsumeItems = new ArrayList<>();
+        skills = new ArrayList<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -168,7 +186,7 @@ public class Char {
         for (Inventory inventory : getInventories()) {
             inventory.updateDB(session, tx);
         }
-        session.update(this);
+        session.saveOrUpdate(this);
         tx.commit();
         session.close();
     }
@@ -227,12 +245,6 @@ public class Char {
         this.ranking = ranking;
     }
 
-    public void setId(int id) {
-        this.id = id;
-        getAvatarData().getCharacterStat().setCharacterId(id);
-        getAvatarData().getCharacterStat().setCharacterIdForLog(id);
-    }
-
     public int getAccId() {
         return accId;
     }
@@ -249,6 +261,7 @@ public class Char {
         Inventory inventory = getInventoryByType(type);
         if(inventory != null) {
             item.setInventoryId(inventory.getId());
+            item.setBagIndex(inventory.getFirstOpenSlot());
             inventory.addItem(item);
         }
     }
@@ -337,11 +350,9 @@ public class Char {
             outPacket.encodeLong(0); // pInfo
         }
         outPacket.encodeByte(0); // again unsure
-        //outPacket.encodeBytes(Util.getByteArrayByString("01 00 00 00 01 00 00 00 00 00 00 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 01 B1 4F 00 00 31 75 00 00 FF 00 00 01 B8 0B 0C 00 05 00 04 00 04 00 32 00 00 00 32 00 00 00 32 00 00 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C0 EE 7D 37 00 00 00 00 00 00 00 00 4A D7 3A 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 84 7A D3 01 20 16 2B 70 00 14 01 04 00 61 64 61 64 01 04 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 20 20 20 20 3C 00 40 E0 FD 3B 37 4F 01 00 05 00 01 45 06 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 82 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 07 00 01 A6 5B 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 82 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 01 F0 DD 13 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 82 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 37 00 01 20 E2 11 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 3C 00 00 00 01 00 01 00 01 00 01 00 1C 00 00 00 FF 83 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 01 00 00 00 00 01 09 00 5F 38 00 00 B2 7A D3 01 2C 3B 00 00 B2 7A D3 01 FA 49 00 00 B2 7A D3 01 A5 81 00 00 B2 7A D3 01 A6 81 00 00 B2 7A D3 01 DB 81 00 00 B2 7A D3 01 F1 81 00 00 B2 7A D3 01 F3 81 00 00 B2 7A D3 01 B2 99 00 00 B2 7A D3 01 00 00 00 00 00 00 00 00 FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
 
         if (mask.isInMask(DBChar.Character)) {
             getAvatarData().getCharacterStat().encode(outPacket);
-            //outPacket.encodeBytes(Util.getByteArrayByString("14 01 04 00 61 64 61 64 01 04 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 20 20 20 20 3C 00 40 E0 FD 3B 37 4F 01 00 05 00 01 45 06 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 82 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 07 00 01 A6 5B 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 82 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 01 F0 DD 13 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 82 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 37 00 01 20 E2 11 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 3C 00 00 00 01 00 01 00 01 00 01 00 1C 00 00 00 FF 83 06 10 7B 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 01 00 00 00 00 01 09 00 5F 38 00 00 B2 7A D3 01 2C 3B 00 00 B2 7A D3 01 FA 49 00 00 B2 7A D3 01 A5 81 00 00 B2 7A D3 01 A6 81 00 00 B2 7A D3 01 DB 81 00 00 B2 7A D3 01 F1 81 00 00 B2 7A D3 01 F3 81 00 00 B2 7A D3 01 B2 99 00 00 B2 7A D3 01 00 00 00 00 00 00 00 00 FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));
 
             outPacket.encodeByte(getFriends().size());
             boolean hasBlessingOfFairy = getBlessingOfFairy() != null;
@@ -1196,15 +1207,157 @@ public class Char {
     }
 
     public int getFieldID() {
-        return fieldID;
+        return (int) getAvatarData().getCharacterStat().getPosMap();
     }
 
-    public void setFieldID(int fieldID) {
-        this.fieldID = fieldID;
+    private void setFieldID(long fieldId) {
+        setFieldID((int) fieldId);
+    }
+
+    private void setFieldID(int fieldID) {
+        getAvatarData().getCharacterStat().setPosMap(fieldID);
     }
 
     public boolean hasBuffProtector() {
         // TODO
         return false;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+
+    public void setField(Field field) {
+        this.field = field;
+        setFieldID(field.getId());
+    }
+
+    public Field getField() {
+        return field;
+    }
+
+    public void setJob(int id) {
+        getAvatarData().getCharacterStat().setJob(id);
+    }
+
+    public short getJob() {
+        return getAvatarData().getCharacterStat().getJob();
+    }
+
+    public void setSpToCurrentJob(int num) {
+        if(JobConstants.isExtendSpJob(getJob())) {
+            byte jobLevel = (byte) JobConstants.getJobLevel(getJob());
+            getAvatarData().getCharacterStat().getExtendSP().setSpToJobLevel(jobLevel, num);
+        } else {
+            getAvatarData().getCharacterStat().setSp(num);
+        }
+
+    }
+
+    public List<Skill> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<Skill> skills) {
+        this.skills = skills;
+    }
+
+    public void addSkill(Skill skill) {
+        skill.setCharId(getId());
+        getSkills().add(skill);
+    }
+
+    public Skill getSkill(int id) {
+        return getSkills().stream().filter(s -> s.getSkillId() == id).findFirst().orElse(createAndReturnSkill(id));
+    }
+
+    private Skill createAndReturnSkill(int id) {
+        Skill skill = SkillData.getSkillDeepCopyById(id);
+        addSkill(skill);
+        return skill;
+    }
+    
+    public void setStat(Stat charStat, short amount) {
+        switch(charStat) {
+            case str:
+                getAvatarData().getCharacterStat().setStr(amount);
+                break;
+            case dex:
+                getAvatarData().getCharacterStat().setDex(amount);
+                break;
+            case inte:
+                getAvatarData().getCharacterStat().setInt(amount);
+                break;
+            case luk:
+                getAvatarData().getCharacterStat().setLuk(amount);
+                break;
+            case hp:
+                getAvatarData().getCharacterStat().setHp(amount);
+                break;
+            case mhp:
+                getAvatarData().getCharacterStat().setMaxHp(amount);
+                break;
+            case mp:
+                getAvatarData().getCharacterStat().setMp(amount);
+                break;
+            case mmp:
+                getAvatarData().getCharacterStat().setMaxMp(amount);
+                break;
+            case ap:
+                getAvatarData().getCharacterStat().setAp(amount);
+                break;
+        }
+    }
+    
+    public short getStat(Stat charStat) {
+        switch(charStat) {
+            case str:
+                return getAvatarData().getCharacterStat().getStr();
+            case dex:
+                return getAvatarData().getCharacterStat().getDex();
+            case inte:
+                return getAvatarData().getCharacterStat().getInt();
+            case luk:
+                return getAvatarData().getCharacterStat().getLuk();
+            case hp:
+                return getAvatarData().getCharacterStat().getHp();
+            case mhp:
+                return getAvatarData().getCharacterStat().getMaxHp();
+            case mp:
+                return getAvatarData().getCharacterStat().getMp();
+            case mmp:
+                return getAvatarData().getCharacterStat().getMaxMp();
+            case ap:
+                return getAvatarData().getCharacterStat().getAp();
+        }
+        return -1;
+    }
+    
+    public void addStat(Stat charStat, short amount) {
+        setStat(charStat, (short) (getStat(charStat) + amount));
+    }
+
+    public Position getOldPosition() {
+        return oldPosition;
+    }
+
+    public void setOldPosition(Position oldPosition) {
+        this.oldPosition = oldPosition;
+    }
+
+    public void setMoveAction(byte moveAction) {
+        this.moveAction = moveAction;
+    }
+
+    public byte getMoveAction() {
+        return moveAction;
+    }
+
+    public void chatMessage(ChatMsgColour clr, String msg) {
+        getClient().write(UserLocal.chatMsg(clr, msg));
     }
 }
