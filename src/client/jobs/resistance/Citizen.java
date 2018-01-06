@@ -22,7 +22,7 @@ public class Citizen extends Job {
     }
 
     @Override
-    public boolean isHandlerOfJob(short job) {
-        return false;
+    public boolean isHandlerOfJob(short id) {
+        return id == JobConstants.JobEnum.CITIZEN.getJobId();
     }
 }

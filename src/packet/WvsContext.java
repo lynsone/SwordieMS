@@ -7,11 +7,11 @@ import client.character.ExtendSP;
 import client.character.NonCombatStatDayLimit;
 import client.character.items.Item;
 import client.character.skills.Skill;
+import client.character.skills.TemporaryStatManager;
 import client.life.movement.*;
 import connection.InPacket;
 import connection.OutPacket;
 import enums.InvType;
-import enums.MobStat;
 import enums.Stat;
 import handling.OutHeader;
 import util.FileTime;
@@ -48,7 +48,7 @@ public class WvsContext {
         Comparator statComper = Comparator.comparingInt(o -> ((Stat) o).getVal());
         TreeMap<Stat, Object> sortedStats = new TreeMap<>(statComper);
         sortedStats.putAll(stats);
-        for(Map.Entry<Stat, Object> entry : stats.entrySet()) {
+        for(Map.Entry<Stat, Object> entry : sortedStats.entrySet()) {
             Stat stat = entry.getKey();
             Object value = entry.getValue();
             switch(stat) {
@@ -200,10 +200,14 @@ public class WvsContext {
         outPacket.encodeByte(removeLinkSkill);
         outPacket.encodeShort(skills.size());
         for(Skill skill : skills) {
+            System.out.println("Skill: " + skill.getSkillId() + ", " + skill.getCurrentLevel() + ", " + skill.getMasterLevel());
+            if(skill.getSkillId() <= 0 || skill.getCurrentLevel() < 0 || skill.getMasterLevel() <= 0) {
+                System.out.println("Help!");
+            }
             outPacket.encodeInt(skill.getSkillId());
             outPacket.encodeInt(skill.getCurrentLevel());
-            outPacket.encodeInt(skill.getMaxLevel());
-            outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+            outPacket.encodeInt(skill.getMasterLevel());
+            outPacket.encodeFT(new FileTime(0));
         }
         outPacket.encodeByte(sn);
 
@@ -317,5 +321,38 @@ public class WvsContext {
             }
         }
         return res;
+    }
+
+    public static OutPacket temporaryStatSet(TemporaryStatManager tsm) {
+        OutPacket outPacket = new OutPacket(OutHeader.TEMPORARY_STAT_SET);
+
+        tsm.encodeForLocal(outPacket);
+
+        outPacket.encodeShort(1);
+        outPacket.encodeByte(0);
+        outPacket.encodeByte(0);
+        outPacket.encodeByte(0);
+        outPacket.encodeInt(0); // ?
+        if(tsm.hasNewMovingEffectingStat()) {
+            outPacket.encodeByte(0);
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket temporaryStatReset(TemporaryStatManager temporaryStatManager, boolean demount) {
+        OutPacket outPacket = new OutPacket(OutHeader.TEMPORARY_STAT_RESET);
+
+        for(int i : temporaryStatManager.getRemovedMask()) {
+            outPacket.encodeInt(i);
+        }
+        temporaryStatManager.getRemovedStats().forEach((cts, option) -> outPacket.encodeInt(0));
+        if(temporaryStatManager.hasRemovedMovingEffectingStat()) {
+            outPacket.encodeByte(0);
+        }
+        outPacket.encodeByte(0); // ?
+        outPacket.encodeByte(demount);
+
+        return outPacket;
     }
 }

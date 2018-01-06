@@ -1,6 +1,10 @@
 package client.life;
 
+import client.Client;
+import client.field.Field;
 import client.field.Foothold;
+import packet.CField;
+import server.EventManager;
 import util.Position;
 
 public class Mob extends Life {
@@ -87,7 +91,7 @@ public class Mob extends Life {
         super(objectId);
         super.templateId = templateId;
         forcedMobStat = new ForcedMobStat();
-        temporaryStat = new MobTemporaryStat();
+        temporaryStat = new MobTemporaryStat(this);
         scale = 100;
         calcDamageIndex = 1;
     }
@@ -1023,5 +1027,22 @@ public class Mob extends Life {
 
     public int getCharismaEXP() {
         return charismaEXP;
+    }
+
+    public void damage(Long totalDamage) {
+        long oldHp = getHp();
+        Field field = getField();
+        long newHp = oldHp - totalDamage;
+        setHp(newHp);
+        double percDamage = ((double) newHp / getMaxHp());
+        if(newHp <= 0) {
+            getField().broadcastPacket(CField.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
+            if(!isNotRespawnable()) { // double negative
+                EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), this);
+            }
+            field.addLifeController(this, null);
+        } else {
+            getField().broadcastPacket(CField.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
+        }
     }
 }

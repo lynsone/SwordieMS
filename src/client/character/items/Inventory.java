@@ -18,7 +18,7 @@ public class Inventory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventoryId")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Item> items;
@@ -56,7 +56,6 @@ public class Inventory {
 
     public void updateDB(Session session, Transaction tx) {
         for(Item item : getItems()) {
-            session.saveOrUpdate(item.getDateExpire());
             item.updateDB(session, tx);
         }
         session.saveOrUpdate(this);
@@ -97,7 +96,7 @@ public class Inventory {
     }
 
     public int getFirstOpenSlot() {
-        for (int i = 1; i <= getItems().size(); i++) {
+        for (int i = 1; i <= getSlots(); i++) {
             if(getItemBySlot(i) == null) {
                 return i;
             }

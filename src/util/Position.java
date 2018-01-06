@@ -38,4 +38,10 @@ public class Position {
     public void setY(int y) {
         this.y = y;
     }
+
+    public Rect getRectAround(Rect rect) {
+        int x = getX();
+        int y = getY();
+        return new Rect(x + rect.getLeft(), y + rect.getTop(), x + rect.getRight(), y + rect.getBottom());
+    }
 }

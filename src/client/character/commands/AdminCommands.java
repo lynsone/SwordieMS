@@ -9,6 +9,7 @@ import client.life.Mob;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
 import enums.Stat;
+import handling.OutHeader;
 import loaders.ItemData;
 import loaders.MobData;
 import packet.CField;
@@ -37,28 +38,40 @@ public class AdminCommands {
 //                sb.append(s);
 //            }
 //            outPacket.encodeBytes(Util.getByteArrayByString(sb.toString()));
-            outPacket.encodeShort(720);
-            outPacket.encodeShort(Short.parseShort(args[1]));
-            outPacket.encodeString("Ayyyyy");
+            outPacket.encodeShort(OutHeader.RETURN_TO_TITLE.getValue());
+//            outPacket.encodeShort(Short.parseShort(args[1]));
+//            outPacket.encodeString("Ayyyyy");
 
             chr.getClient().write(outPacket);
         }
     }
 
 
-    public static class SpawnMob extends AdminCommand {
+    public static class Spawn extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
-            Mob mob = MobData.getMobDeepCopyById(id);
-            Field field = chr.getField();
-            Position pos = chr.getPosition();
-            mob.setPosition(pos.deepCopy());
-            mob.setPrevPos(pos.deepCopy());
-            mob.setPosition(pos.deepCopy());
-            mob.setNotRespawnable(true);
-            field.spawnLife(mob, null);
+            int count = 1;
+            if(args.length > 2) {
+                count = Integer.parseInt(args[2]);
+            }
+            for (int i = 0; i < count; i++) {
+                Mob mob = MobData.getMobDeepCopyById(id);
+                Field field = chr.getField();
+                Position pos = chr.getPosition();
+                mob.setPosition(pos.deepCopy());
+                mob.setPrevPos(pos.deepCopy());
+                mob.setPosition(pos.deepCopy());
+                mob.getForcedMobStat().setMaxMP(Integer.MAX_VALUE);
+                mob.setMaxHp(Integer.MAX_VALUE);
+                mob.setHp(Integer.MAX_VALUE);
+                mob.setNotRespawnable(true);
+                if(mob.getField() == null) {
+                    mob.setField(field);
+                }
+                field.spawnLife(mob, null);
 
-            System.out.println("Mob has id " + mob.getObjectId());
+                System.out.println("Mob has id " + mob.getObjectId());
+            }
         }
     }
 
@@ -69,7 +82,7 @@ public class AdminCommands {
             if(item == null) {
 
             } else {
-                chr.addItemToInventory(Inventory.Type.EQUIP, item);
+                chr.addItemToInventory(Inventory.Type.EQUIP, item, false);
                 chr.getClient().write(WvsContext.inventoryOperation(chr, false, false,
                         (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) 1,
                         0, item));
@@ -133,7 +146,7 @@ public class AdminCommands {
             int num = Integer.parseInt(args[1]);
             if(num >= 0) {
                 chr.setStat(Stat.mp, (short) num);
-                chr.setStat(Stat.mhp, (short) num);
+                chr.setStat(Stat.mmp, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.mp, num);
                 stats.put(Stat.mmp, num);
@@ -146,6 +159,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if(num >= 0) {
+                chr.setStat(Stat.level, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.level, (byte) num);
                 chr.getClient().write(WvsContext.statChanged(stats, false));

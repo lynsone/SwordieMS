@@ -1,5 +1,8 @@
 package client.character.skills;
 
+import util.Position;
+import util.Rect;
+
 public class MobAttackInfo {
     public int mobId;
     public byte idk1;
@@ -22,4 +25,8 @@ public class MobAttackInfo {
     public int templateID;
     public short idk6;
     public boolean isResWarriorLiftPress;
+    public Position pos1;
+    public Position pos2;
+    public Rect rect;
+    public int idkInt;
 }

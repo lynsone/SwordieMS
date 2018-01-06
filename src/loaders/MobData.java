@@ -1,10 +1,10 @@
 package loaders;
 
+import client.character.skills.Option;
 import client.life.ForcedMobStat;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import constants.ServerConstants;
-import enums.MobStat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.Util;
@@ -62,13 +62,13 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getTemplateId());
                 dataOutputStream.writeInt(fms.getLevel());
                 dataOutputStream.writeInt(mob.getFirstAttack());
-                dataOutputStream.writeInt(mts.getSingleStatValue(BodyAttack, "nBodyAttack"));
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(BodyAttack).nOption);
                 dataOutputStream.writeLong(fms.getMaxHP());
                 dataOutputStream.writeLong(fms.getMaxMP());
                 dataOutputStream.writeInt(fms.getPad());
-                dataOutputStream.writeInt(mts.getSingleStatValue(PDR, "nPDR"));
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PDR).nOption);
                 dataOutputStream.writeInt(fms.getMad());
-                dataOutputStream.writeInt(mts.getSingleStatValue(MDR, "nMDR"));
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(MDR).nOption);
                 dataOutputStream.writeInt(fms.getAcc());
                 dataOutputStream.writeInt(fms.getEva());
                 dataOutputStream.writeInt(fms.getPushed());
@@ -137,7 +137,7 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getSealedCooltime());
                 dataOutputStream.writeInt(mob.getWillEXP());
                 dataOutputStream.writeUTF(mob.getFixedMoveDir());
-                dataOutputStream.writeInt(mts.getSingleStatValue(PImmune, "nPImmune"));
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PImmune).nOption);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -158,13 +158,23 @@ public class MobData {
             MobTemporaryStat mts = mob.getTemporaryStat();
             fms.setLevel(dataInputStream.readInt());
             mob.setFirstAttack(dataInputStream.readInt());
-            mts.addStatVal(BodyAttack, "nBodyAttack", dataInputStream.readInt());
+            Option bodyOpt = new Option();
+            bodyOpt.nOption = dataInputStream.readInt();
+//            mts.addStatOptions(BodyAttack, bodyOpt);
             fms.setMaxHP(dataInputStream.readLong());
             fms.setMaxMP(dataInputStream.readLong());
             fms.setPad(dataInputStream.readInt());
-            mts.addStatVal(PDR, "nPDR", dataInputStream.readInt());
+
+            Option pdrOpt = new Option();
+            pdrOpt.nOption = dataInputStream.readInt();
+//            mts.addStatOptions(PDR, pdrOpt);
+
             fms.setMad(dataInputStream.readInt());
-            mts.addStatVal(MDR, "nMDR", dataInputStream.readInt());
+
+            Option mdrOpt = new Option();
+            mdrOpt.nOption = dataInputStream.readInt();
+//            mts.addStatOptions(MDR, mdrOpt);
+
             fms.setAcc(dataInputStream.readInt());
             fms.setEva(dataInputStream.readInt());
             fms.setPushed(dataInputStream.readInt());
@@ -233,7 +243,11 @@ public class MobData {
             mob.setSealedCooltime(dataInputStream.readInt());
             mob.setWillEXP(dataInputStream.readInt());
             mob.setFixedMoveDir(dataInputStream.readUTF());
-            mts.addStatVal(PImmune, "nPImmune", dataInputStream.readInt());
+
+            Option pImmuneOpt = new Option();
+            pImmuneOpt.nOption = dataInputStream.readInt();
+//            mts.addStatOptions(PImmune, pImmuneOpt);
+
             mob.setAppearType((byte) -2); // new spawn
             mob.setAfterAttack(-1);
             mob.setCurrentAction(-1);
@@ -241,7 +255,6 @@ public class MobData {
             mob.setMoveAction((byte) 5); // normal monster?
             mob.setHp(fms.getMaxHP());
             mob.setMaxHp(fms.getMaxHP());
-            mts = new MobTemporaryStat();
             addMob(mob);
         } catch (IOException e) {
             e.printStackTrace();
@@ -288,7 +301,9 @@ public class MobData {
                         break;
                     case "bodyAttack":
                     case "bodyattack": // ...
-                        mts.addStatVal(BodyAttack, "nBodyAttack", Integer.parseInt(value));
+                        Option bodyOpt = new Option();
+                        bodyOpt.nOption = Integer.parseInt(value);
+                        mts.addStatOptions(BodyAttack, bodyOpt);
                         break;
                     case "maxHP":
                     case "finalmaxHP":
@@ -305,19 +320,23 @@ public class MobData {
                         fms.setPad(Integer.parseInt(value));
                         break;
                     case "PDDamage":
-//                            mts.addStatVal(PDR, "nPDR", Integer.parseInt(value));
+//                            mts.addStatOptions(PDR, "nPDR", Integer.parseInt(value));
                         break;
                     case "PDRate":
-                        mts.addStatVal(PDR, "nPDR", Integer.parseInt(value));
+                        Option pdrOpt = new Option();
+                        pdrOpt.nOption = Integer.parseInt(value);
+                        mts.addStatOptions(PDR, pdrOpt);
                         break;
                     case "MADamage":
                         fms.setMad(Integer.parseInt(value));
                         break;
                     case "MDDamage":
-//                            mts.addStatVal(PDR, "nMDR", Integer.parseInt(value));
+//                            mts.addStatOptions(PDR, "nMDR", Integer.parseInt(value));
                         break;
                     case "MDRate":
-                        mts.addStatVal(MDR, "nMDR", Integer.parseInt(value));
+                        Option mdrOpt = new Option();
+                        mdrOpt.nOption = Integer.parseInt(value);
+                        mts.addStatOptions(PDR, mdrOpt);
                         break;
                     case "acc":
                         fms.setAcc(Integer.parseInt(value));
@@ -530,7 +549,9 @@ public class MobData {
                         mob.setFixedMoveDir(value);
                         break;
                     case "PImmune":
-                        mts.addStatVal(PImmune, "nPImmune", Integer.parseInt(value));
+                        Option immOpt = new Option();
+                        immOpt.nOption = Integer.parseInt(value);
+                        mts.addStatOptions(PImmune, immOpt);
                         break;
                     case "patrol":
                         mob.setPatrolMob(true);

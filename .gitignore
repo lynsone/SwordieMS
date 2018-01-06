@@ -6,3 +6,4 @@ info txts/
 dat/
 config.properties
 bin/classes/headerText.txt
+bin/classes/decodeforlocal.txt

@@ -98,7 +98,10 @@ public class OutPacket extends Packet {
     }
 
     public void encodeIntBE(int i) {
-        baos.write(i);
+        baos.write((byte) (i >>> 24));
+        baos.write((byte) (i >>> 16));
+        baos.write((byte) (i >>> 8));
+        baos.write((byte) i);
     }
 
     /**

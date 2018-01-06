@@ -6,12 +6,10 @@ import client.character.skills.SkillStat;
 import constants.ServerConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import util.Loader;
-import util.Saver;
-import util.Util;
-import util.XMLApi;
+import util.*;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +32,9 @@ public class SkillData {
                 dataOutputStream.writeInt(si.getSkillId());
                 dataOutputStream.writeInt(si.getRootId());
                 dataOutputStream.writeInt(si.getMaxLevel());
+                dataOutputStream.writeInt(si.getMasterLevel());
+                dataOutputStream.writeInt(si.getFixLevel());
+                dataOutputStream.writeBoolean(si.isInvisible());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -42,6 +43,13 @@ public class SkillData {
                     } else {
                         dataOutputStream.writeUTF(ssEntry.getValue());
                     }
+                }
+                dataOutputStream.writeShort(si.getRects().size());
+                for (Rect r : si.getRects()) {
+                    dataOutputStream.writeInt(r.getLeft());
+                    dataOutputStream.writeInt(r.getTop());
+                    dataOutputStream.writeInt(r.getRight());
+                    dataOutputStream.writeInt(r.getBottom());
                 }
             }
         } catch (IOException e) {
@@ -70,10 +78,21 @@ public class SkillData {
                     skillInfo.setSkillId(dataInputStream.readInt());
                     skillInfo.setRootId(dataInputStream.readInt());
                     skillInfo.setMaxLevel(dataInputStream.readInt());
+                    skillInfo.setMasterLevel(dataInputStream.readInt());
+                    skillInfo.setFixLevel(dataInputStream.readInt());
+                    skillInfo.setInvisible(dataInputStream.readBoolean());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
                                 dataInputStream.readUTF()), dataInputStream.readUTF());
+                    }
+                    short rectSize = dataInputStream.readShort();
+                    for (int j = 0; j < rectSize; j++) {
+                        int left = dataInputStream.readInt();
+                        int top = dataInputStream.readInt();
+                        int right = dataInputStream.readInt();
+                        int bottom = dataInputStream.readInt();
+                        skillInfo.addRect(new Rect(left, top, right, bottom));
                     }
                     getSkillInfos().put(skillInfo.getSkillId(), skillInfo);
                 }
@@ -120,24 +139,40 @@ public class SkillData {
                             continue;
                         }
                         // start main level info
+                        Node masterLevel = XMLApi.getFirstChildByNameBF(skillNode, "masterLevel");
+                        int masterLevelInt = -1;
+                        if(masterLevel != null) {
+                            masterLevelInt = Integer.parseInt(XMLApi.getAttributes(masterLevel).get("value"));
+                        }
+                        skill.setMasterLevel(masterLevelInt);
+                        Node fixLv = XMLApi.getFirstChildByNameBF(skillNode, "fixLevel");
+                        int fixLevel = -1;
+                        if(fixLv != null) {
+                            fixLevel = Integer.parseInt(XMLApi.getAttributes(fixLv).get("value"));
+                        }
+                        skill.setFixLevel(fixLevel);
                         Node invis = XMLApi.getFirstChildByNameBF(skillNode, "invisible");
                         boolean invisible = false;
                         if(invis != null) {
                             invisible = Integer.parseInt(XMLApi.getAttributes(invis).get("value")) == 1;
                         }
-                        if(invisible) {
-//                            continue;
-                        }
+                        skill.setInvisible(invisible);
                         // end main level info
                         // start "common" level info
                         Node common = XMLApi.getFirstChildByNameBF(skillNode, "common");
                         Map<String, String> values = new HashMap<>();
                         if(common != null) {
                             for(Node commonNode : XMLApi.getAllChildren(common)) {
-                                if(common.getNodeName().equals("vector")) {
-
+                                Map<String, String> commonAttr = XMLApi.getAttributes(commonNode);
+                                String nodeName = commonAttr.get("name");
+                                if(nodeName.contains("lt") && nodeName.length() <= 3) {
+                                    Node rbNode = XMLApi.getFirstChildByNameBF(common, nodeName.replace("lt", "rb"));
+                                    int left = Integer.parseInt(XMLApi.getNamedAttribute(commonNode, "x"));
+                                    int top = Integer.parseInt(XMLApi.getNamedAttribute(commonNode, "y"));
+                                    int right = Integer.parseInt(XMLApi.getNamedAttribute(rbNode, "x"));
+                                    int bottom = Integer.parseInt(XMLApi.getNamedAttribute(rbNode, "y"));
+                                    skill.addRect(new Rect(left, top, right, bottom));
                                 } else {
-                                    Map<String, String> commonAttr = XMLApi.getAttributes(commonNode);
                                     values.put(commonAttr.get("name"), commonAttr.get("value"));
                                 }
                             }
@@ -180,9 +215,30 @@ public class SkillData {
         Skill skill = new Skill();
         skill.setSkillId(si.getSkillId());
         skill.setRootId(si.getRootId());
+        skill.setMasterLevel(si.getMasterLevel());
         skill.setMaxLevel(si.getMaxLevel());
-        skill.setCurrentLevel(0);
-
+        if(si.getMasterLevel() < 0) {
+            skill.setMasterLevel(skill.getMaxLevel());
+        }
+        if(si.getFixLevel() > 0) {
+            skill.setCurrentLevel(si.getFixLevel());
+        } else {
+            skill.setCurrentLevel(0);
+        }
         return skill;
+    }
+
+    public static List<Skill> getSkillsByJob(short id) {
+        List<Skill> res = new ArrayList<>();
+        getSkillInfos().forEach((key, si) -> {
+            if (si.getRootId() == id && !si.isInvisible()) {
+                res.add(getSkillDeepCopyById(key));
+            }
+        });
+        return res;
+    }
+
+    public static void main(String[] args) {
+        loadSkillsFromWz();
     }
 }

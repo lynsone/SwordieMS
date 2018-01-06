@@ -4,6 +4,7 @@ import client.Account;
 import client.Client;
 import client.character.Char;
 import client.character.CharacterStat;
+import client.character.FuncKeyMap;
 import client.character.items.Equip;
 import client.character.items.Inventory;
 import connection.InPacket;
@@ -123,9 +124,9 @@ public class LoginHandler {
     }
 
     public static void handleCheckCharName(Client c, InPacket inPacket) {
-        String name = inPacket.decodeString().toLowerCase();
+        String name = inPacket.decodeString();
         CharNameResult code = CharNameResult.OK;
-        if (name.contains("virtual") || name.contains("kernel")) {
+        if (name.toLowerCase().contains("virtual") || name.toLowerCase().contains("kernel")) {
             code = CharNameResult.INVALID_NAME;
         } else {
             Connection connection = Server.getInstance().getDatabaseConnection();
@@ -160,6 +161,7 @@ public class LoginHandler {
         JobConstants.JobEnum job = JobConstants.LoginJob.getLoginJobById(curSelectedRace).getBeginJob();
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
+        chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
 //        chr.createInDB();
         c.getAccount().addCharacter(chr);
 //        chr.setAccId(c.getAccount().getId());
@@ -172,10 +174,10 @@ public class LoginHandler {
         chr.updateDB();
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromId(i);
-            if (equip != null) {
+            if (equip != null && equip.getItemId() >= 1000000) {
                 equip.setBagIndex(ItemConstants.getBodyPartFromItem(
                         equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
-                chr.addItemToInventory(EQUIPPED, equip);
+                chr.addItemToInventory(EQUIPPED, equip, true);
             }
         }
         chr.getInventoryByType(EQUIPPED).updateDB();

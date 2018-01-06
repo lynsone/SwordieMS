@@ -1,6 +1,7 @@
 package client.character.skills;
 
 import util.Position;
+import util.Rect;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class AttackInfo {
     public int[] idkArr;
     public short forcedYSh;
     public short forcedXSh;
-    public boolean force;
+    public byte force;
     public short delay;
     public short[] shortArr;
     public byte addAttackProc;
@@ -51,4 +52,11 @@ public class AttackInfo {
     public Position teleportPt = new Position();
     public short Vx;
     public Position grenadePos;
+    public Rect rect;
+    public int elemAttr;
+    public int areaPAD;
+    public int attackCount;
+    public int wt;
+    public int ar01Mad;
+    public Position pos3;
 }

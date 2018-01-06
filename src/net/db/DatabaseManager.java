@@ -43,8 +43,9 @@ public class DatabaseManager {
                 Item.class,
                 Equip.class,
                 Test.class,
-                Skill.class
-
+                Skill.class,
+                FuncKeyMap.class,
+                Keymapping.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

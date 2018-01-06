@@ -1,7 +1,9 @@
 package client.life;
 
+import client.field.Field;
 import loaders.MobData;
 import util.Position;
+import util.Rect;
 
 public class Life {
     private Position position;
@@ -21,6 +23,7 @@ public class Life {
     private boolean mobTimeOnDie;
     private boolean notRespawnable;
     private byte moveAction;
+    private Field field;
 
     public Life(int objectId) {
         this.objectId = objectId;
@@ -295,5 +298,19 @@ public class Life {
 
     public byte getMoveAction() {
         return moveAction;
+    }
+
+    public Field getField() {
+        return field;
+    }
+
+    public void setField(Field field) {
+        this.field = field;
+    }
+
+    public Rect getRectAround(Rect rect) {
+        int x = getPosition().getX();
+        int y = getPosition().getY();
+        return new Rect(x + rect.getLeft(), y + rect.getTop(), x + rect.getRight(), y + rect.getBottom());
     }
 }

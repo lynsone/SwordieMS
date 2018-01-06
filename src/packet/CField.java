@@ -1,10 +1,15 @@
 package packet;
 
-import client.life.ForcedMobStat;
-import client.life.Mob;
-import client.life.ShootingMoveStat;
+import client.character.FuncKeyMap;
+import client.character.skills.AttackInfo;
+import client.life.*;
 import connection.OutPacket;
+import constants.SkillConstants;
+import enums.MobStat;
 import handling.OutHeader;
+import loaders.SkillData;
+
+import java.util.List;
 
 public class CField {
 
@@ -225,12 +230,51 @@ public class CField {
 
     public static OutPacket mobStatSet(Mob mob, short delay) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_STAT_SET);
-
+        MobTemporaryStat mts = mob.getTemporaryStat();
+        boolean hasMovementStat = mts.hasNewMovementAffectingStat();
         outPacket.encodeInt(mob.getObjectId());
-        mob.getTemporaryStat().encode(outPacket);
+        mts.encode(outPacket);
         outPacket.encodeShort(delay);
         outPacket.encodeByte(1); // nCalcDamageStatIndex
+        if(hasMovementStat) {
+            outPacket.encodeByte(0); // ?
+        }
 
+        return outPacket;
+    }
+
+    public static OutPacket mobStatReset(Mob mob, byte byteCalcDamageStatIndex, boolean sn) {
+        return mobStatReset(mob, byteCalcDamageStatIndex, sn, null);
+    }
+
+    public static OutPacket mobStatReset(Mob mob, byte calcDamageStatIndex, boolean sn, List<BurnedInfo> biList) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_STAT_RESET);
+        MobTemporaryStat resetStats = mob.getTemporaryStat();
+        int[] mask = resetStats.getRemovedMask();
+        outPacket.encodeInt(mob.getObjectId());
+        for (int i = 0; i < 3; i++) {
+            outPacket.encodeIntBE(mask[i]);
+        }
+        if(resetStats.hasRemovedMobStat(MobStat.BurnedInfo)) {
+            if(biList == null) {
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+            } else {
+                int dotCount = biList.stream().mapToInt(BurnedInfo::getDotCount).sum();
+                outPacket.encodeInt(dotCount);
+                outPacket.encodeInt(biList.size());
+                for(BurnedInfo bi : biList) {
+                    outPacket.encodeInt(bi.getCharacterId());
+                    outPacket.encodeInt(bi.getSuperPos());
+                }
+            }
+            resetStats.getBurnedInfos().clear();
+        }
+        outPacket.encodeByte(calcDamageStatIndex);
+        if(resetStats.hasRemovedMovementAffectingStat()) {
+        outPacket.encodeByte(sn);
+        }
+        resetStats.getRemovedStatVals().clear();
         return outPacket;
     }
 
@@ -241,6 +285,50 @@ public class CField {
         outPacket.encodeInt(skillID);
         outPacket.encodeInt(charId);
         outPacket.encodeShort(tHit);
+
+        return outPacket;
+    }
+
+    public static OutPacket funcKeyMappedManInit(FuncKeyMap funcKeyMap) {
+        OutPacket outPacket = new OutPacket(OutHeader.FUNC_KEY_MAPPED_MAN_INIT);
+
+        funcKeyMap.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket affectedAreaCreated(AffectedArea aa) {
+        OutPacket outPacket = new OutPacket(OutHeader.AFFECTED_AREA_CREATED);
+
+        outPacket.encodeInt(aa.getObjectId());
+        outPacket.encodeByte(aa.getMobOrigin());
+        outPacket.encodeInt(aa.getCharID());
+        outPacket.encodeInt(aa.getSkillID());
+        outPacket.encodeByte(aa.getSlv());
+        outPacket.encodeShort(aa.getDelay());
+        aa.getRect().encode(outPacket);
+        outPacket.encodeInt(aa.getElemAttr());
+        outPacket.encodeInt(aa.getElemAttr()); // ?
+        outPacket.encodePosition(aa.getPosition());
+        outPacket.encodeInt(aa.getForce());
+        outPacket.encodeInt(aa.getOption());
+        outPacket.encodeByte(aa.getOption() != 0);
+        outPacket.encodeInt(0); // ?
+        if(SkillConstants.isFlipAffectAreaSkill(aa.getSkillID())) {
+            outPacket.encodeByte(aa.isFlip());
+        }
+        outPacket.encodeInt(0); // ?
+
+        return outPacket;
+    }
+
+    public static OutPacket affectedAreaRemoved(AffectedArea aa, boolean mistEruption) {
+        OutPacket outPacket = new OutPacket(OutHeader.AFFECTED_AREA_REMOVED);
+
+        outPacket.encodeInt(aa.getObjectId());
+        if(aa.getSkillID() == 2111003) {
+            outPacket.encodeByte(mistEruption);
+        }
 
         return outPacket;
     }

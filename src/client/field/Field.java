@@ -1,8 +1,11 @@
 package client.field;
 
 import client.character.Char;
+import client.life.AffectedArea;
 import client.life.Life;
 import client.life.Mob;
+import client.life.MobTemporaryStat;
+import connection.OutPacket;
 import packet.CField;
 import util.Position;
 
@@ -38,12 +41,6 @@ public class Field {
         this.lifes = new ArrayList<>();
         this.chars = new ArrayList<>();
         this.lifeToControllers = new HashMap<>();
-    }
-
-    public void initLifes() {
-        for(Life life : getLifes()) {
-            life.setObjectId(1000000 + getLifes().indexOf(life));
-        }
     }
 
     public Rectangle getRect() {
@@ -247,6 +244,7 @@ public class Field {
     }
 
     public Foothold findFootHoldBelow(Position pos) {
+        pos.setY(pos.getY() - 10);
         Set<Foothold> footholds = getFootholds().stream().filter(fh -> fh.getX1() <= pos.getX() && fh.getX2() >= pos.getX()).collect(Collectors.toSet());
         Foothold res = null;
         int lastY = Integer.MAX_VALUE;
@@ -301,15 +299,19 @@ public class Field {
     public void addLife(Life life) {
         if(!getLifes().contains(life)) {
             getLifes().add(life);
+            life.setField(this);
+            if(life.getObjectId() < 0) {
+                life.setObjectId(1000000 + getLifes().indexOf(life));
+            }
         }
     }
 
     public void spawnLife(Life life, Char onlyChar) {
         addLife(life);
-        if(life.getObjectId() < 0) {
-            life.setObjectId(1000000 + getLifes().indexOf(life));
-        }
         if (getChars().size() > 0) {
+            if(life.getObjectId() < 0) {
+                life.setObjectId(1000000 + getLifes().indexOf(life));
+            }
             Char controller = null;
             if(getLifeToControllers().containsKey(life)) {
                 controller = getLifeToControllers().get(life);
@@ -321,6 +323,7 @@ public class Field {
             Mob mob = null;
             if(life instanceof Mob) {
                 mob = (Mob) life;
+                mob.setTemporaryStat(new MobTemporaryStat(mob));
             }
             if (mob != null) {
                 Position pos = mob.getPosition();
@@ -409,5 +412,16 @@ public class Field {
         mob.setHp(mob.getMaxHp());
         mob.setMp(mob.getMaxMp());
         spawnLife(mob, null);
+    }
+
+    public void broadcastPacket(OutPacket outPacket) {
+        for(Char c : getChars()) {
+            c.getClient().write(outPacket);
+        }
+    }
+
+    public void spawnAffectedArea(AffectedArea aa) {
+        addLife(aa);
+        broadcastPacket(CField.affectedAreaCreated(aa));
     }
 }

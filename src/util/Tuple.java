@@ -1,5 +1,9 @@
 package util;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 /**
  * Created on 1/1/2018.
  */

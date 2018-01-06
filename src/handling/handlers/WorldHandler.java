@@ -7,11 +7,10 @@ import client.character.ExtendSP;
 import client.character.commands.AdminCommand;
 import client.character.commands.AdminCommands;
 import client.character.items.Item;
-import client.character.skills.AttackInfo;
-import client.character.skills.MobAttackInfo;
-import client.character.skills.Skill;
+import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
+import client.jobs.JobManager;
 import client.life.DeathType;
 import client.life.Life;
 import client.life.Mob;
@@ -19,6 +18,7 @@ import client.life.movement.Movement;
 import connection.InPacket;
 import constants.JobConstants;
 import constants.SkillConstants;
+import enums.ChatMsgColour;
 import enums.InvType;
 import enums.Stat;
 import packet.CField;
@@ -27,6 +27,7 @@ import packet.WvsContext;
 import server.EventManager;
 import server.Server;
 import util.Position;
+import util.Rect;
 import util.Tuple;
 
 import java.lang.reflect.InvocationTargetException;
@@ -54,6 +55,7 @@ public class WorldHandler {
         Char chr = Char.getFromDBById(charId);
         chr.setClient(c);
         c.setChr(chr);
+        chr.setJobHandler(JobManager.getJobById(chr.getJob()));
         Field field = c.getChannelInstance().getField(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
         field.addChar(chr);
         chr.setField(field);
@@ -61,6 +63,7 @@ public class WorldHandler {
         c.write(Stage.setField(chr, field, c.getChannel(), false, 0, true, false,
                 (byte) 0, false, 100, null, true, -1));
         c.write(WvsContext.changeSkillRecordResult(chr.getSkills(), true, false, false, false));
+        c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
         field.spawnLifesForChar(chr);
     }
 
@@ -87,9 +90,9 @@ public class WorldHandler {
         if (msg.length() > 0 && msg.charAt(0) == '@') {
             if (msg.equalsIgnoreCase("@check")) {
                 WvsContext.dispose(c, c.getChr());
-                System.out.println(String.format("X=%d, Y=%d", chr.getPosition().getX(), chr.getPosition().getY()));
+                chr.chatMessage(ChatMsgColour.YELLOW, String.format("X=%d, Y=%d", chr.getPosition().getX(), chr.getPosition().getY()));
             } else if(msg.equalsIgnoreCase("@save")){
-                c.getChr().updateDB();
+                chr.updateDB();
             }
         } else if (msg.charAt(0) == AdminCommand.getPrefix()) {
             for (Class clazz : AdminCommands.class.getClasses()) {
@@ -115,20 +118,24 @@ public class WorldHandler {
         short oldPos = inPacket.decodeShort();
         short newPos = inPacket.decodeShort();
         short quantity = inPacket.decodeShort();
-        Item item = chr.getInventoryByInvType(invType).getItemBySlot(oldPos);
+        InvType invTypeFrom = invType == EQUIP ? oldPos < 0 ? EQUIPPED : EQUIP : invType;
+        InvType invTypeTo = invType == EQUIP ?  newPos < 0 ? EQUIPPED : EQUIP : invType;
+        Item item = chr.getInventoryByInvType(invTypeFrom).getItemBySlot(oldPos);
         if(item == null) {
-            item = chr.getInventoryByInvType(EQUIPPED).getItemBySlot(oldPos);
-            if (item == null) {
-                return; // needs more null checks
-            }
+            return;
         }
+        chr.chatMessage(ChatMsgColour.YELLOW, "ItemID = " + item.getItemId() + ", Inventory ID = " + item.getInventoryId());
         item.setBagIndex(newPos);
-        if(invType == EQUIP) {
-            InvType invTypeFrom = oldPos < 0 ? EQUIPPED : EQUIP;
-            InvType invTypeTo = newPos < 0 ? EQUIPPED : EQUIP;
-            chr.getInventoryByInvType(invTypeFrom).removeItem(item);
-            chr.getInventoryByInvType(invTypeTo).addItem(item);
+        if(invType == EQUIP && invTypeFrom != invTypeTo) {
+            if(invTypeFrom == EQUIPPED) {
+                chr.unequip(item);
+            } else {
+                chr.equip(item);
+            }
+//            Inventory to = chr.getInventoryByInvType(invTypeTo);
+//            item.setInventoryId(to.getId());
         }
+        chr.chatMessage(ChatMsgColour.YELLOW, "ItemID = " + item.getItemId() + ", Inventory ID = " + item.getInventoryId());
          // TODO dropping items
         c.write(WvsContext.inventoryOperation(c.getChr(), true, false, (byte) 2, oldPos, newPos, invType, quantity,
                 0, item));
@@ -287,8 +294,8 @@ public class WorldHandler {
                         }
                         attackInfo.idkArr = idkArr;
                         break;
-                    case 2111003:
-                        boolean force = inPacket.decodeByte() != 0;
+                    case 2111003: // poison mist
+                        byte force = inPacket.decodeByte();
                         short forcedXSh = inPacket.decodeShort();
                         short forcedYSh = inPacket.decodeShort();
                         attackInfo.force = force;
@@ -314,28 +321,19 @@ public class WorldHandler {
     }
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
+        c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
-            long oldHp = mob.getHp();
             long totalDamage = 0;
             for(int dmg : mai.damages) {
                 totalDamage += dmg;
             }
-            long newHp = oldHp - totalDamage;
-            mob.setHp(newHp);
-            double percDamage = ((double) newHp / mob.getMaxHp());
-            if(newHp <= 0) {
-                c.write(CField.mobLeaveField(mob.getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
-                if(!mob.isNotRespawnable()) { // double negative
-                    EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), mob);
-                }
-                field.addLifeController(mob, null);
-            } else {
-                c.write(CField.mobHpIndicator(mob.getObjectId(), (byte) (percDamage * 100)));
-            }
+            mob.damage(totalDamage);
         }
+        c.getChr().getJobHandler().handleAttack(c, attackInfo);
     }
+
 
     public static void handleChangeFieldRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
@@ -361,7 +359,7 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
         int amount = inPacket.decodeInt();
-        Skill skill = chr.getSkill(skillID);
+        Skill skill = chr.getSkill(skillID, true);
         byte jobLevel = (byte) JobConstants.getJobLevel((short) skill.getRootId());
         Map<Stat, Object> stats = null;
         if(JobConstants.isExtendSpJob(chr.getJob())) {
@@ -392,13 +390,14 @@ public class WorldHandler {
             c.write(WvsContext.statChanged(stats, true));
             List<Skill> skills = new ArrayList<>();
             skills.add(skill);
+            chr.addSkill(skill);
             c.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
     }
 
     public static void handleMeleeAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
-        boolean fieldKey = inPacket.decodeByte() == 1;
+        ai.fieldKey = inPacket.decodeByte() == 1;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (byte) (mask >>> 4);
@@ -551,6 +550,70 @@ public class WorldHandler {
         handleAttack(c, ai);
     }
 
+    public static void handleBodyAttack(Client c, InPacket inPacket) {
+        AttackInfo ai = new AttackInfo();
+        ai.fieldKey = inPacket.decodeByte() != 0;
+        byte mask = inPacket.decodeByte();
+        ai.hits = (byte) (mask & 0xF);
+        ai.mobCount = (byte) (mask >>> 4);
+        ai.skillId = inPacket.decodeInt();
+        ai.slv = inPacket.decodeByte();
+        inPacket.decodeInt(); // crc
+        ai.areaPAD = inPacket.decodeByte() >>> 3;
+        byte nul = inPacket.decodeByte(); // encoded as 0
+        ai.left = ((inPacket.decodeShort() >>> 15) & 1) != 0;
+        ai.attackCount = inPacket.decodeInt();
+        ai.attackSpeed = inPacket.decodeByte(); // encoded as 0
+        ai.wt = inPacket.decodeInt();
+        ai.ar01Mad = inPacket.decodeInt(); // only done if mage skill
+        byte idk2 = inPacket.decodeByte();
+
+        if(ai.skillId > 0) {
+            for (int i = 0; i < ai.mobCount; i++) {
+                MobAttackInfo mai = new MobAttackInfo();
+                mai.mobId = inPacket.decodeInt();
+                mai.idkInt = inPacket.decodeInt();
+                mai.calcDamageStatIndex = inPacket.decodeByte();
+                mai.templateID = inPacket.decodeInt();
+                mai.rect = new Rect(inPacket.decodePosition(), inPacket.decodePosition());
+                mai.idk6 = inPacket.decodeShort();
+                mai.idk1 = inPacket.decodeByte();
+                int[] damages = new int[ai.hits];
+                for (int j = 0; j < ai.hits; j++) {
+                    damages[j] = inPacket.decodeInt();
+                }
+                mai.damages = damages;
+                mai.mobUpDownYRange = inPacket.decodeInt();
+                inPacket.decodeInt(); // crc
+                // Begin PACKETMAKER::MakeAttackInfoPacket
+                byte type = inPacket.decodeByte();
+                String currentAnimationName = "";
+                int animationDeltaL = 0;
+                String[] hitPartRunTimes = new String[0];
+                if (type == 1) {
+                    currentAnimationName = inPacket.decodeString();
+                    animationDeltaL = inPacket.decodeInt();
+                    int hitPartRunTimesSize = inPacket.decodeInt();
+                    hitPartRunTimes = new String[hitPartRunTimesSize];
+                    for (int j = 0; j < hitPartRunTimesSize; j++) {
+                        hitPartRunTimes[j] = inPacket.decodeString();
+                    }
+                } else if (type == 2) {
+                    currentAnimationName = inPacket.decodeString();
+                    animationDeltaL = inPacket.decodeInt();
+                }
+                // End PACKETMAKER::MakeAttackInfoPacket
+                mai.type = type;
+                mai.currentAnimationName = currentAnimationName;
+                mai.animationDeltaL = animationDeltaL;
+                mai.hitPartRunTimes = hitPartRunTimes;
+                ai.mobAttackInfo.add(mai);
+            }
+        }
+        ai.pos = inPacket.decodePosition();
+        handleAttack(c, ai);
+    }
+
     public static void handleAbilityPointDistribute(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         if(chr.getStat(Stat.ap) <= 0) {
@@ -652,6 +715,31 @@ public class WorldHandler {
                 life.setPosition(p);
                 life.setMoveAction(m.getMoveAction());
             }
+        }
+    }
+
+    public static void handleTemporaryStatResetRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int skillId = inPacket.decodeInt();
+        Map<CharacterTemporaryStat, Option> removedMap = new HashMap<>();
+        for(CharacterTemporaryStat cts : tsm.getCurrentStats().keySet()) {
+            if(tsm.getOption(cts).rOption == skillId || tsm.getOption(cts).nReason == skillId) {
+                removedMap.put(cts, tsm.getOption(cts));
+            }
+        }
+        removedMap.forEach((cts, opt) -> tsm.removeStat(cts, false));
+        c.write(WvsContext.temporaryStatReset(chr.getTemporaryStatManager(), false));
+    }
+
+    public static void handleKeymapUpdateRequest(Client c, InPacket inPacket) {
+        inPacket.decodeInt(); // 0
+        int size = inPacket.decodeInt();
+        for (int i = 0; i < size; i++) {
+            int index = inPacket.decodeInt();
+            byte type = inPacket.decodeByte();
+            int value = inPacket.decodeInt();
+            c.getChr().getFuncKeyMap().putKeyBinding(index, type, value);
         }
     }
 }

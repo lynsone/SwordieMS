@@ -218,8 +218,11 @@ public class SkillConstants {
                 return true;
             default:
                 return false;
-
-
         }
+    }
+
+    public static boolean isFlipAffectAreaSkill(int skillID) {
+        return skillID == 33111013 || skillID == 33121016 || skillID == 33121012 || skillID == 131001207 ||
+                skillID == 131001107 || skillID == 4121015 || skillID == 51120057;
     }
 }

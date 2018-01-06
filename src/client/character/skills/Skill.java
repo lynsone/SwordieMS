@@ -26,6 +26,8 @@ public class Skill {
     private int maxLevel;
     @Column(name = "currentLevel")
     private int currentLevel;
+    @Column(name = "masterLevel")
+    private int masterLevel;
 
     public int getSkillId() {
         return skillId;
@@ -74,5 +76,17 @@ public class Skill {
 
     public void setCharId(int charId) {
         this.charId = charId;
+    }
+
+    public void updateDB(Session session, Transaction tx) {
+        session.saveOrUpdate(this);
+    }
+
+    public void setMasterLevel(int masterLevel) {
+        this.masterLevel = masterLevel;
+    }
+
+    public int getMasterLevel() {
+        return masterLevel;
     }
 }

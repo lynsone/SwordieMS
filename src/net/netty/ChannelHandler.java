@@ -10,7 +10,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import packet.WvsContext;
-import server.World;
 
 import static net.netty.NettyClient.CLIENT_KEY;
 
@@ -74,8 +73,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     }
                     break;
                 case SKILL:
-                    JobManager.handleSkill(c, inPacket);
+                    inPacket.decodeInt(); // crc
+                    c.getChr().getJobHandler().handleSkill(c, inPacket);
                     WvsContext.dispose(c, c.getChr());
+                    break;
+                case TEMPORARY_STAT_RESET_REQUEST:
+                    WorldHandler.handleTemporaryStatResetRequest(c, inPacket);
                     break;
                 case PONG:
                     LoginHandler.handlePong(c, inPacket);
@@ -134,6 +137,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case INVENTORY_OPERATION:
                     WorldHandler.handleInventoryOperation(c, inPacket);
                     break;
+                case KEYMAP_UPDATE_REQUEST:
+                    WorldHandler.handleKeymapUpdateRequest(c, inPacket);
+                    break;
                 case ABILITY_POINT_DISTRIBUTE:
                     WorldHandler.handleAbilityPointDistribute(c, inPacket);
                     break;
@@ -148,6 +154,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case MAGIC_ATTACK:
                     WorldHandler.handleMagicAttack(c, inPacket);
+                    break;
+                case BODY_ATTACK:
+                    WorldHandler.handleBodyAttack(c, inPacket);
                     break;
                 case CHANGE_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
@@ -168,7 +177,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handleUnknown(InPacket inPacket, short opCode) {
-        System.out.println("Unhandled opcode " + opCode + "/0x" + Integer.toHexString(opCode) + ", packet " + inPacket);
+        if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(opCode))) {
+            System.out.println("Unhandled opcode " + opCode + "/0x" + Integer.toHexString(opCode) + ", packet " + inPacket);
+        }
     }
 
     @Override

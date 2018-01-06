@@ -3,6 +3,7 @@ package client.jobs;
 import client.Client;
 import client.character.CharacterStat;
 import client.character.skills.AttackInfo;
+import client.character.skills.SkillInfo;
 import client.jobs.adventurer.*;
 import client.jobs.cygnus.*;
 import client.jobs.legend.*;
@@ -13,6 +14,7 @@ import client.jobs.sengoku.Hayato;
 import client.jobs.sengoku.Kanna;
 import connection.InPacket;
 import constants.JobConstants;
+import loaders.SkillData;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -118,5 +120,20 @@ public class JobManager {
 
     public void setId(short id) {
         this.id = id;
+    }
+
+    public static Job getJobById(short id) {
+        Job job = null;
+        for(Class clazz : jobClasses) {
+            try {
+                job = (Job) clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            if(job != null && job.isHandlerOfJob(id)) {
+                return job;
+            }
+        }
+        return job;
     }
 }

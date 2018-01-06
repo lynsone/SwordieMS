@@ -4,6 +4,7 @@ import client.Client;
 import client.character.skills.AttackInfo;
 import client.jobs.Job;
 import connection.InPacket;
+import constants.JobConstants;
 
 /**
  * Created on 12/14/2017.
@@ -20,7 +21,7 @@ public class Legend extends Job {
     }
 
     @Override
-    public boolean isHandlerOfJob(short job) {
-        return false;
+    public boolean isHandlerOfJob(short id) {
+        return id >= JobConstants.JobEnum.LEGEND.getJobId();
     }
 }

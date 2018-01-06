@@ -41,7 +41,7 @@ public class Client extends NettyClient {
 
     public void sendPing() {
         write(Login.sendPing());
-        EventManager.addEvent(this, "sendPing", 60000);
+        EventManager.addEvent(this, "sendPing", 10000);
     }
 
     public Account getAccount() {

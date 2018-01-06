@@ -54,6 +54,7 @@ public enum InHeader {
     MELEE_ATTACK(195),
     SHOOT_ATTACK(196),
     MAGIC_ATTACK(197),
+    BODY_ATTACK(198),
 
     CHAT(203),
     INVENTORY_OPERATION(241),
@@ -62,6 +63,8 @@ public enum InHeader {
     STAT_RECOVERY(301),
     SKILL_RECORD_UPDATE_REQUEST(304),
     SKILL(305),
+    TEMPORARY_STAT_RESET_REQUEST(306),
+    KEYMAP_UPDATE_REQUEST(414),
     USE_BUTTON(587),
     MOVE_LIFE(825),
 
@@ -96,7 +99,8 @@ public enum InHeader {
                 LOCALE,
                 HEARTBEAT_REQUEST,
                 MOVE_LIFE,
-                MOVE
+                MOVE,
+                STAT_RECOVERY
         );
         return spam.contains(inHeaderByOp);
     }

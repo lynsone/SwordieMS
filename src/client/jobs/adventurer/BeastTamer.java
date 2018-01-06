@@ -4,6 +4,7 @@ import client.Client;
 import client.character.skills.AttackInfo;
 import client.jobs.Job;
 import connection.InPacket;
+import constants.JobConstants;
 
 /**
  * Created on 12/14/2017.
@@ -20,7 +21,16 @@ public class BeastTamer extends Job {
     }
 
     @Override
-    public boolean isHandlerOfJob(short job) {
-        return false;
+    public boolean isHandlerOfJob(short id) {
+        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
+        switch (job) {
+            case BEAST_TAMER_1:
+            case BEAST_TAMER_2:
+            case BEAST_TAMER_3:
+            case BEAST_TAMER_4:
+                return true;
+            default:
+                return false;
+        }
     }
 }

@@ -4,6 +4,7 @@ import client.Client;
 import client.character.skills.AttackInfo;
 import client.jobs.Job;
 import connection.InPacket;
+import constants.JobConstants;
 
 /**
  * Created on 12/14/2017.
@@ -20,7 +21,8 @@ public class Kaiser extends Job {
     }
 
     @Override
-    public boolean isHandlerOfJob(short job) {
-        return false;
+    public boolean isHandlerOfJob(short id) {
+        return id == JobConstants.JobEnum.KAISER.getJobId() ||
+                (id >= JobConstants.JobEnum.KAISER1.getJobId() && id <= JobConstants.JobEnum.KAISER4.getJobId());
     }
 }

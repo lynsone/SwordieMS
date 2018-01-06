@@ -4,6 +4,7 @@ import client.Client;
 import client.character.skills.AttackInfo;
 import client.jobs.Job;
 import connection.InPacket;
+import constants.JobConstants;
 
 /**
  * Created on 12/14/2017.
@@ -20,7 +21,8 @@ public class AngelicBuster extends Job {
     }
 
     @Override
-    public boolean isHandlerOfJob(short job) {
-        return false;
+    public boolean isHandlerOfJob(short id) {
+        return id == JobConstants.JobEnum.ANGELIC_BUSTER.getJobId() ||
+                (id >= JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId() && id <= JobConstants.JobEnum.ANGELIC_BUSTER4.getJobId());
     }
 }

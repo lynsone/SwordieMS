@@ -2,9 +2,13 @@ package client.character;
 
 import client.Client;
 import client.character.items.*;
+import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.Core;
 import client.character.skills.Skill;
+import client.character.skills.TemporaryStatManager;
 import client.field.Field;
+import client.jobs.Job;
+import client.jobs.JobManager;
 import connection.OutPacket;
 import constants.JobConstants;
 import constants.SkillConstants;
@@ -17,16 +21,18 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.Cascade;
 import packet.UserLocal;
+import packet.WvsContext;
 import server.Server;
 import util.FileTime;
 import loaders.ItemData;
 import util.Position;
+import util.Rect;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+
+import static enums.InvType.EQUIP;
+import static enums.InvType.EQUIPPED;
 
 /**
  * Created on 11/17/2017.
@@ -72,8 +78,10 @@ public class Char {
     @JoinColumn(name = "avatarData")
     @OneToOne
     private AvatarData avatarData;
+    @OneToOne
+    private FuncKeyMap funcKeyMap;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "charId")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Skill> skills;
@@ -112,6 +120,10 @@ public class Char {
     private Field field;
     @Transient
     private byte moveAction;
+    @Transient
+    private TemporaryStatManager temporaryStatManager;
+    @Transient
+    private Job jobHandler;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -127,7 +139,6 @@ public class Char {
         avatarLook.setSkin(skin);
         avatarLook.setFace(items.length > 0 ? items[0] : 0);
         avatarLook.setHair(items.length > 1 ? items[1] : 0);
-        this.id = 1;
         List<Integer> hairEquips = new ArrayList<>();
         for(int itemId : items) {
             Equip equip = ItemData.getEquipDeepCopyFromId(itemId);
@@ -173,6 +184,7 @@ public class Char {
         friends = new ArrayList<>();
         expConsumeItems = new ArrayList<>();
         skills = new ArrayList<>();
+        temporaryStatManager = new TemporaryStatManager(this);
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -183,8 +195,12 @@ public class Char {
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
         getAvatarData().updateDB(session, tx);
+        getFuncKeyMap().updateDB(session, tx);
         for (Inventory inventory : getInventories()) {
             inventory.updateDB(session, tx);
+        }
+        for(Skill s : getSkills()) {
+            s.updateDB(session, tx);
         }
         session.saveOrUpdate(this);
         tx.commit();
@@ -257,11 +273,13 @@ public class Char {
         return equippedInventory;
     }
 
-    public void addItemToInventory(Inventory.Type type, Item item) {
+    public void addItemToInventory(Inventory.Type type, Item item, boolean hasCorrectBagIndex) {
         Inventory inventory = getInventoryByType(type);
         if(inventory != null) {
             item.setInventoryId(inventory.getId());
-            item.setBagIndex(inventory.getFirstOpenSlot());
+            if(!hasCorrectBagIndex) {
+                item.setBagIndex(inventory.getFirstOpenSlot());
+            }
             inventory.addItem(item);
         }
     }
@@ -1241,7 +1259,15 @@ public class Char {
     }
 
     public void setJob(int id) {
+        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById((short) id);
+        if(job == null) {
+            return;
+        }
+        setJobHandler(JobManager.getJobById(getJob()));
         getAvatarData().getCharacterStat().setJob(id);
+        List<Skill> skills = SkillData.getSkillsByJob((short) id);
+        skills.forEach(this::addSkill);
+        getClient().write(WvsContext.changeSkillRecordResult(skills, false, false, false, false));
     }
 
     public short getJob() {
@@ -1268,11 +1294,22 @@ public class Char {
 
     public void addSkill(Skill skill) {
         skill.setCharId(getId());
-        getSkills().add(skill);
+        if(getSkills().stream().noneMatch(s -> s.getSkillId() == skill.getSkillId())) {
+            getSkills().add(skill);
+        }
+    }
+
+    public boolean hasSkill(int id) {
+        return getSkills().stream().anyMatch(s -> s.getSkillId() == id) && getSkill(id, false).getCurrentLevel() > 0;
     }
 
     public Skill getSkill(int id) {
-        return getSkills().stream().filter(s -> s.getSkillId() == id).findFirst().orElse(createAndReturnSkill(id));
+        return getSkill(id, false);
+    }
+
+    public Skill getSkill(int id, boolean createIfNull) {
+        return getSkills().stream().filter(s -> s.getSkillId() == id).findFirst().orElse(
+                createIfNull ? createAndReturnSkill(id) : null);
     }
 
     private Skill createAndReturnSkill(int id) {
@@ -1309,6 +1346,9 @@ public class Char {
                 break;
             case ap:
                 getAvatarData().getCharacterStat().setAp(amount);
+                break;
+            case level:
+                getAvatarData().getCharacterStat().setLevel(amount);
                 break;
         }
     }
@@ -1359,5 +1399,57 @@ public class Char {
 
     public void chatMessage(ChatMsgColour clr, String msg) {
         getClient().write(UserLocal.chatMsg(clr, msg));
+    }
+
+    public void unequip(Item item) {
+        getInventoryByInvType(EQUIPPED).removeItem(item);
+        getInventoryByInvType(EQUIP).addItem(item);
+        List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
+        if(hairEquips.contains(item.getItemId())) {
+            hairEquips.remove((Integer) item.getItemId());
+        }
+    }
+
+    public void equip(Item item) {
+        getInventoryByInvType(EQUIP).removeItem(item);
+        getInventoryByInvType(EQUIPPED).addItem(item);
+        List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
+        if(!hairEquips.contains(item.getItemId())) {
+            hairEquips.add(item.getItemId());
+        }
+    }
+
+    public TemporaryStatManager getTemporaryStatManager() {
+        return temporaryStatManager;
+    }
+
+    public void setTemporaryStatManager(TemporaryStatManager temporaryStatManager) {
+        this.temporaryStatManager = temporaryStatManager;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setJobHandler(Job jobHandler) {
+        this.jobHandler = jobHandler;
+    }
+
+    public Job getJobHandler() {
+        return jobHandler;
+    }
+
+    public FuncKeyMap getFuncKeyMap() {
+        return funcKeyMap;
+    }
+
+    public void setFuncKeyMap(FuncKeyMap funcKeyMap) {
+        this.funcKeyMap = funcKeyMap;
+    }
+
+    public Rect getRectAround(Rect rect) {
+        int x = getPosition().getX();
+        int y = getPosition().getY();
+        return new Rect(x + rect.getLeft(), y + rect.getTop(), x + rect.getRight(), y + rect.getBottom());
     }
 }

@@ -3,11 +3,36 @@ package util;
 import io.netty.buffer.ByteBuf;
 
 import java.io.File;
+import java.util.Random;
 
 /**
  * Created on 2/28/2017.
  */
 public class Util {
+    public static boolean succeedProp(int chance) {
+        Random random = new Random();
+        return random.nextInt(100) < chance;
+    }
+
+    // https://www.programcreek.com/2014/03/leetcode-reverse-bits-java/
+    public static int reverseBits(int n) {
+        for (int i = 0; i < 16; i++) {
+            n = swapBits(n, i, 32 - i - 1);
+        }
+
+        return n;
+    }
+
+    private static int swapBits(int n, int i, int j) {
+        int a = (n >> i) & 1;
+        int b = (n >> j) & 1;
+
+        if ((a ^ b) != 0) {
+            n ^= (1 << i) | (1 << j);
+        }
+        return n;
+    }
+
     public static boolean isNumber(String string) {
         return string.matches("-?\\d+(\\.\\d+)?");
     }
