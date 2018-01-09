@@ -2,6 +2,8 @@ package client.character.items;
 
 import connection.OutPacket;
 import enums.InvType;
+import enums.ScrollStat;
+import jdk.nashorn.internal.runtime.ScriptObject;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.FileTime;
@@ -9,6 +11,8 @@ import util.FileTime;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * GW_ItemSlotBase
@@ -41,6 +45,18 @@ public class Item implements Serializable {
     protected Type type;
     @Column(name = "isCash")
     protected boolean isCash;
+    private int price;
+    private int slotMax;
+    private boolean tradeBlock;
+    private boolean notSale;
+    private String path;
+    private boolean noCursed;
+    private int successRate;
+    private boolean quest;
+    private int bagType;
+    private Map<ScrollStat, Integer> scrollStats = new HashMap<>();
+    private int reqQuestOnProgress;
+    private int charmEXP;
 
     public int getId() {
         return id;
@@ -71,6 +87,106 @@ public class Item implements Serializable {
     public void deleteInDB(Session session, Transaction tx) {
         getDateExpire().deleteFromDB(session, tx);
         session.delete(this);
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setSlotMax(int slotMax) {
+        this.slotMax = slotMax;
+    }
+
+    public int getSlotMax() {
+        return slotMax;
+    }
+
+    public void setTradeBlock(boolean tradeBlock) {
+        this.tradeBlock = tradeBlock;
+    }
+
+    public boolean isTradeBlock() {
+        return tradeBlock;
+    }
+
+    public void setNotSale(boolean notSale) {
+        this.notSale = notSale;
+    }
+
+    public boolean isNotSale() {
+        return notSale;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setNoCursed(boolean noCursed) {
+        this.noCursed = noCursed;
+    }
+
+    public boolean isNoCursed() {
+        return noCursed;
+    }
+
+    public void setSuccessRate(int successRate) {
+        this.successRate = successRate;
+    }
+
+    public int getSuccessRate() {
+        return successRate;
+    }
+
+    public void setQuest(boolean quest) {
+        this.quest = quest;
+    }
+
+    public boolean isQuest() {
+        return quest;
+    }
+
+    public void setBagType(int bagType) {
+        this.bagType = bagType;
+    }
+
+    public int getBagType() {
+        return bagType;
+    }
+
+    public void putScrollStat(ScrollStat scrollStat, int value) {
+        getScrollStats().put(scrollStat, value);
+    }
+
+    public Map<ScrollStat, Integer> getScrollStats() {
+        return scrollStats;
+    }
+
+    public void setScrollStats(Map<ScrollStat, Integer> scrollStats) {
+        this.scrollStats = scrollStats;
+    }
+
+    public void setReqQuestOnProgress(int reqQuestOnProgress) {
+        this.reqQuestOnProgress = reqQuestOnProgress;
+    }
+
+    public int getReqQuestOnProgress() {
+        return reqQuestOnProgress;
+    }
+
+    public void setCharmEXP(int charmEXP) {
+        this.charmEXP = charmEXP;
+    }
+
+    public int getCharmEXP() {
+        return charmEXP;
     }
 
     public enum Type {
@@ -160,5 +276,29 @@ public class Item implements Serializable {
             outPacket.encodeShort(0); // flag
             // if is throwing star/bullet/ /10000 == 287, write long
         }
+    }
+
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
+    }
+
+    public void setCashItemSerialNumber(long cashItemSerialNumber) {
+        this.cashItemSerialNumber = cashItemSerialNumber;
+    }
+
+    public void setDateExpire(FileTime dateExpire) {
+        this.dateExpire = dateExpire;
+    }
+
+    public void setInvType(InvType invType) {
+        this.invType = invType;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public void setCash(boolean cash) {
+        isCash = cash;
     }
 }

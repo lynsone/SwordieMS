@@ -468,7 +468,23 @@ public class MobTemporaryStat {
         this.mob = mob;
     }
 
-    public void createAndAddBurnedInfo(int charId, Skill skill, Option option) {
+    public void clear() {
+        for(Timer t : getBurnTimers().values()) {
+            t.cancel();
+        }
+        getBurnTimers().clear();
+        for(Timer t : getBurnCancelTimers().values()) {
+            t.cancel();
+        }
+        getBurnCancelTimers().clear();
+        for(Timer t : getTimers().values()) {
+            t.cancel();
+        }
+        getTimers().clear();
+        getCurrentStatVals().forEach((ms, o) -> removeMobStat(ms, false));
+    }
+
+    public void createAndAddBurnedInfo(int charId, Skill skill, int max) {
         BurnedInfo bu = getBurnedInfos().stream().
                 filter(b -> b.getSkillId() == skill.getId() && b.getCharacterId() == charId)
                 .findFirst().orElse(null);
@@ -477,7 +493,7 @@ public class MobTemporaryStat {
         BurnedInfo bi = new BurnedInfo();
         bi.setCharacterId(charId);
         bi.setSkillId(skill.getSkillId());
-        bi.setDamage(si.getValue(damage, slv));
+        bi.setDamage(0); //si.getValue(dot, slv));
         bi.setInterval(si.getValue(dotInterval, slv) * 1000);
         int time = si.getValue(dotTime, slv) * 1000;
         bi.setEnd((int) (System.currentTimeMillis() + time));
@@ -495,7 +511,7 @@ public class MobTemporaryStat {
             getBurnCancelTimers().get(charId).cancel();
         }
         getBurnedInfos().add(bi);
-        addStatOptionsAndBroadcast(MobStat.BurnedInfo, option);
+        addStatOptionsAndBroadcast(MobStat.BurnedInfo, new Option());
         Timer t = EventManager.addEvent(this, "removeBurnedInfo", time, charId, true);
         Timer burn = EventManager.addRecurringEvent(getMob(), "damage", bi.getInterval(), bi.getDotCount(),
                 (long) bi.getDamage());

@@ -4,6 +4,7 @@ import handling.OutHeader;
 import net.Packet;
 import util.FileTime;
 import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -229,5 +230,17 @@ public class OutPacket extends Packet {
     public void encodePosition(Position position) {
         encodeShort(position.getX());
         encodeShort(position.getY());
+    }
+
+    public void encodeRectInt(Rect rect) {
+        encodeInt(rect.getLeft());
+        encodeInt(rect.getTop());
+        encodeInt(rect.getRight());
+        encodeInt(rect.getBottom());
+    }
+
+    public void encodePositionInt(Position position) {
+        encodeInt(position.getX());
+        encodeInt(position.getY());
     }
 }

@@ -15,6 +15,7 @@ import enums.InvType;
 import enums.Stat;
 import handling.OutHeader;
 import util.FileTime;
+import util.Position;
 
 import java.util.*;
 
@@ -201,9 +202,6 @@ public class WvsContext {
         outPacket.encodeShort(skills.size());
         for(Skill skill : skills) {
             System.out.println("Skill: " + skill.getSkillId() + ", " + skill.getCurrentLevel() + ", " + skill.getMasterLevel());
-            if(skill.getSkillId() <= 0 || skill.getCurrentLevel() < 0 || skill.getMasterLevel() <= 0) {
-                System.out.println("Help!");
-            }
             outPacket.encodeInt(skill.getSkillId());
             outPacket.encodeInt(skill.getCurrentLevel());
             outPacket.encodeInt(skill.getMasterLevel());
@@ -352,6 +350,26 @@ public class WvsContext {
         }
         outPacket.encodeByte(0); // ?
         outPacket.encodeByte(demount);
+
+        return outPacket;
+    }
+
+    public static OutPacket skillUseResult(boolean stillGoing) {
+        OutPacket outPacket = new OutPacket(OutHeader.SKILL_USE_RESULT);
+        // 2221011 - Frozen Breath
+        outPacket.encodeByte(stillGoing);
+
+        return outPacket;
+    }
+
+    public static OutPacket explosionAttack(int skillID, Position pos, int mobID, int count) {
+        OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
+
+        outPacket.encodeInt(skillID);
+        outPacket.encodeInt(pos.getX());
+        outPacket.encodeInt(pos.getY());
+        outPacket.encodeInt(mobID);
+        outPacket.encodeInt(count);
 
         return outPacket;
     }

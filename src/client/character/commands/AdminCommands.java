@@ -3,7 +3,10 @@ package client.character.commands;
 import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Inventory;
+import client.character.skills.ForceAtomInfo;
+import client.character.skills.Skill;
 import client.field.Field;
+import client.field.Portal;
 import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
@@ -12,14 +15,19 @@ import enums.Stat;
 import handling.OutHeader;
 import loaders.ItemData;
 import loaders.MobData;
+import loaders.SkillData;
 import packet.CField;
+import packet.Stage;
 import packet.WvsContext;
 import util.Position;
-import util.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static enums.ChatMsgColour.GAME_NOTICE;
+import static enums.ChatMsgColour.YELLOW;
 
 /**
  * Created on 12/22/2017.
@@ -29,7 +37,6 @@ public class AdminCommands {
     public static class PacketCommand extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            OutPacket outPacket = new OutPacket();
 
 //            String[] fin = new String[args.length - 1];
 //            System.arraycopy(args, 1, fin, 0, args.length - 1);
@@ -38,11 +45,21 @@ public class AdminCommands {
 //                sb.append(s);
 //            }
 //            outPacket.encodeBytes(Util.getByteArrayByString(sb.toString()));
-            outPacket.encodeShort(OutHeader.RETURN_TO_TITLE.getValue());
-//            outPacket.encodeShort(Short.parseShort(args[1]));
-//            outPacket.encodeString("Ayyyyy");
 
-            chr.getClient().write(outPacket);
+//            Option option = new Option();
+//            option.nOption = 0;
+//            option.rOption = 37110009;
+//            option.cOption = 2;
+//            chr.getTemporaryStatManager().putCharacterStatValue(CharacterTemporaryStat.RWCombination, option);
+//            chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
+            OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
+
+            int skillID = 37000008;
+            Position pos = chr.getPosition();
+            int mobID = chr.getField().getLifes().get(chr.getField().getLifes().size() - 1).getObjectId();
+            int count = 1;
+
+            chr.getClient().write(WvsContext.explosionAttack(skillID, pos, mobID, count));
         }
     }
 
@@ -98,7 +115,7 @@ public class AdminCommands {
                 chr.setJob(id);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.subJob, id);
-                chr.getClient().write(WvsContext.statChanged(stats, false, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+                chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
             }
         }
     }
@@ -110,7 +127,7 @@ public class AdminCommands {
                 chr.setSpToCurrentJob(num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-                chr.getClient().write(WvsContext.statChanged(stats, false, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+                chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
             }
         }
     }
@@ -191,4 +208,57 @@ public class AdminCommands {
             chr.getClient().write(CField.mobStatSet(mob, (short) 0));
         }
     }
-}
+
+    public static class SetMap extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+
+            Field field = chr.getField();
+            Field toField = chr.getClient().getChannelInstance().getField(Integer.parseInt(args[1]));
+            chr.setField(toField);
+            Portal toPortal = toField.getPortalByID(0);
+            field.removeChar(chr);
+            toField.addChar(chr);
+            chr.getClient().write(Stage.setField(chr, toField, chr.getClient().getChannel(), false, 0, false, chr.hasBuffProtector(),
+                    (byte) toPortal.getId(), false, 100, null, false, -1));
+            toField.spawnLifesForChar(chr);
+        }
+    }
+
+    public static class Atom extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, 1, 3, 3, 0, 0, (int) System.currentTimeMillis(), 1,
+                    0, new Position());
+            Mob mob = (Mob) chr.getField().getLifes().get( chr.getField().getLifes().size() - 1);
+            int mobId = mob.getObjectId();
+            chr.getClient().write(CField.createForceAtom(false, 0, mobId, 2, true, mobId, mobId, forceAtomInfo,
+                    null, 0, 300, mob.getPosition(), 0, mob.getPosition()));
+
+        }
+    }
+
+    public static class GetSkill extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            if(args.length < 4) {
+                chr.chatMessage(GAME_NOTICE, "Needs more args! <id> <cur> <max>");
+                return;
+            }
+            int id = Integer.parseInt(args[1]);
+            int cur = Integer.parseInt(args[2]);
+            int max = Integer.parseInt(args[3]);
+            Skill skill = chr.getSkill(Integer.parseInt(args[1]));
+            if(skill == null) {
+                skill = SkillData.getSkillDeepCopyById(Integer.parseInt(args[1]));
+            }
+            if(skill == null) {
+                chr.chatMessage(YELLOW, "No such skill found.");
+                return;
+            }
+            skill.setCurrentLevel(cur);
+            skill.setMasterLevel(max);
+            List<Skill> list = new ArrayList<>();
+            list.add(skill);
+            chr.addSkill(skill);
+            chr.getClient().write(WvsContext.changeSkillRecordResult(list, false, false, false, false));
+        }
+    }
+ }

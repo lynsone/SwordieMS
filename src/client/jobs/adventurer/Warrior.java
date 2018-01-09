@@ -3,10 +3,11 @@ package client.jobs.adventurer;
 import client.Client;
 import client.character.Char;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
-import client.life.BurnedInfo;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
+import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
@@ -18,7 +19,6 @@ import packet.WvsContext;
 import util.Util;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -28,36 +28,42 @@ import static client.character.skills.SkillStat.*;
  */
 public class Warrior extends Job {
 
-    private static final int WEAPON_BOOSTER_FIGHTER = 1101004;
-    private static final int COMBO_ATTACK = 1101013;
-    private static final int RAGE = 1101006;
-    private static final int MAPLE_WARRIOR_HERO = 1121000;
-    private static final int WEAPON_BOOSTER_PAGE = 1201004;
-    private static final int COMBO_FURY = 1101012;
-    private static final int COMBO_FURY_DOWN = 1100012;
-    private static final int PANIC = 1111003;
-    private static final int CLOSE_COMBAT = 1201013;
-    private static final int ELEMENTAL_CHARGE = 1200014;
-    private static final int FLAME_CHARGE = 1201011;
-    private static final int BLIZZARD_CHARGE = 1201012;
-    private static final int LIGHTNING_CHARGE = 1211008;
-    private static final int HP_RECOVERY = 1211010;
-    private static final int COMBAT_ORDERS = 1211011;
-    private static final int PARASHOCK_GUARD = 1211014;
-    private static final int DIVINE_CHARGE = 1221004;
-    private static final int ELEMENTAL_FORCE = 1221015;
-    private static final int MAPLE_WARRIOR_PALADIN = 1221000;
-    private static final int GUARDIAN = 1221016;
-    private static final int BLAST = 1221009;
-    private static final int SPEAR_SWEEP = 1301012;
-    private static final int WEAPON_BOOSTER_SPEARMAN = 1301004;
-    private static final int IRON_WILL = 1301006;
-    private static final int HYPER_BODY = 1301007;
-    private static final int EVIL_EYE = 1301013;
-    private static final int CROSS_SURGE = 1311015;
-    private static final int LORD_OF_DARKNESS = 1310009;
-    private static final int MAPLE_WARRIOR_DARK_KNIGHT = 1321000;
-    private static final int FINAL_PACT = 1320016;
+    public static final int WEAPON_BOOSTER_FIGHTER = 1101004;
+    public static final int COMBO_ATTACK = 1101013;
+    public static final int RAGE = 1101006;
+    public static final int FINAL_ATTACK_FIGHTER = 1100002;
+    public static final int FINAL_ATTACK_PAGE = 1200002;
+    public static final int FINAL_ATTACK_SPEARMAN = 1300002;
+    public static final int MAPLE_WARRIOR_HERO = 1121000;
+    public static final int WEAPON_BOOSTER_PAGE = 1201004;
+    public static final int COMBO_FURY = 1101012;
+    public static final int COMBO_FURY_DOWN = 1100012;
+    public static final int PANIC = 1111003;
+    public static final int SHOUT_DOWN = 1111014;
+    public static final int ADVANCED_FINAL_ATTACK = 1120013;
+    public static final int ENRAGE = 1121010;
+    public static final int CLOSE_COMBAT = 1201013;
+    public static final int ELEMENTAL_CHARGE = 1200014;
+    public static final int FLAME_CHARGE = 1201011;
+    public static final int BLIZZARD_CHARGE = 1201012;
+    public static final int LIGHTNING_CHARGE = 1211008;
+    public static final int HP_RECOVERY = 1211010;
+    public static final int COMBAT_ORDERS = 1211011;
+    public static final int PARASHOCK_GUARD = 1211014;
+    public static final int DIVINE_CHARGE = 1221004;
+    public static final int ELEMENTAL_FORCE = 1221015;
+    public static final int MAPLE_WARRIOR_PALADIN = 1221000;
+    public static final int GUARDIAN = 1221016;
+    public static final int BLAST = 1221009;
+    public static final int SPEAR_SWEEP = 1301012;
+    public static final int WEAPON_BOOSTER_SPEARMAN = 1301004;
+    public static final int IRON_WILL = 1301006;
+    public static final int HYPER_BODY = 1301007;
+    public static final int EVIL_EYE = 1301013;
+    public static final int CROSS_SURGE = 1311015;
+    public static final int LORD_OF_DARKNESS = 1310009;
+    public static final int MAPLE_WARRIOR_DARK_KNIGHT = 1321000;
+    public static final int FINAL_PACT = 1320016;
 
     private final int[] buffs = new int[]{
             WEAPON_BOOSTER_FIGHTER, // Weapon Booster - Fighter
@@ -71,13 +77,21 @@ public class Warrior extends Job {
             ELEMENTAL_FORCE,
             GUARDIAN,
             EVIL_EYE,
+            IRON_WILL,
+            HYPER_BODY,
+            CROSS_SURGE,
     };
     private long lastPanicHit = Long.MIN_VALUE;
     private long lastHpRecovery = Long.MIN_VALUE;
     private int lastCharge = 0;
     private int recoveryAmount = 0;
 
+    public Warrior(Char chr) {
+        super(chr);
+    }
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+        Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
         Option o1 = new Option();
@@ -90,79 +104,85 @@ public class Warrior extends Job {
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(Booster, o1);
+                tsm.putCharacterStatValue(Booster, o1);
                 break;
             case RAGE:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indiePad, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
-                tsm.addCharacterStatValue(IndiePAD, o1);
+                tsm.putCharacterStatValue(IndiePAD, o1);
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(PowerGuard, o2);
+                tsm.putCharacterStatValue(PowerGuard, o2);
                 break;
             case COMBO_ATTACK:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
-                tsm.addCharacterStatValue(ComboCounter, o1);
+                tsm.putCharacterStatValue(ComboCounter, o1);
+                break;
+            case ENRAGE:
+                removeCombo(chr, 4);
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(Enrage, o1);
                 break;
             case COMBAT_ORDERS:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(CombatOrders, o1);
+                tsm.putCharacterStatValue(CombatOrders, o1);
                 break;
             case PARASHOCK_GUARD:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indiePad, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
-                tsm.addCharacterStatValue(IndiePAD, o1);
+                tsm.putCharacterStatValue(IndiePAD, o1);
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indiePddR, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
-                tsm.addCharacterStatValue(IndiePDDR, o1);
+                tsm.putCharacterStatValue(IndiePDDR, o1);
                 o3.nOption = si.getValue(z, slv);
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(Guard, o3);
+                tsm.putCharacterStatValue(Guard, o3);
                 break;
             case ELEMENTAL_FORCE:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
-                tsm.addCharacterStatValue(IndieDamR, o1);
+                tsm.putCharacterStatValue(IndieDamR, o1);
                 break;
             case GUARDIAN:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(Invincible, o1);
+                tsm.putCharacterStatValue(Invincible, o1);
                 break;
             case IRON_WILL:
                 o1.nOption = si.getValue(pdd, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(PDD, o1);
+                tsm.putCharacterStatValue(PDD, o1);
                 o2.nOption = si.getValue(mdd, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(MDD, o2);
+                tsm.putCharacterStatValue(MDD, o2);
                 break;
             case HYPER_BODY:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(MaxHP, o1);
+                tsm.putCharacterStatValue(MaxHP, o1);
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(MaxMP, o2);
+                tsm.putCharacterStatValue(MaxMP, o2);
                 break;
             case CROSS_SURGE:
                 int total = c.getChr().getStat(Stat.mhp);
@@ -170,26 +190,40 @@ public class Warrior extends Job {
                 o1.nOption = (int) ((si.getValue(x, slv) * ((double) current) / total) * 100);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(DamR, o1);
+                tsm.putCharacterStatValue(DamR, o1);
                 o2.nOption = (int) Math.min((0.08 * total - current), si.getValue(z, slv));
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.addCharacterStatValue(PDD, o2);
+                tsm.putCharacterStatValue(PDD, o2);
                 break;
             case EVIL_EYE:
-
+                Summon summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                Field field = c.getChr().getField();
+                field.addLife(summon);
+                summon.setCharLevel((byte) chr.getStat(Stat.level));
+                summon.setPosition(chr.getPosition().deepCopy());
+                summon.setMoveAction((byte) 1);
+                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setMoveAbility((byte) 1);
+                summon.setAssistType((byte) 0);
+                summon.setEnterType((byte) 1);
+                summon.setBeforeFirstAttack(false);
+                summon.setTemplateId(skillID);
+                summon.setAttackActive(false);
+                c.write(CField.summonedCreated(chr.getId(), summon));
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(PDD, o2);
                 break;
             case MAPLE_WARRIOR_HERO:
             case MAPLE_WARRIOR_PALADIN:
             case MAPLE_WARRIOR_DARK_KNIGHT:
-//                o1.nOption = si.getValue(x, slv);
-//                o1.rOption = skillID;
-//                o1.tOption = si.getValue(time, slv);
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(x, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
-                tsm.addCharacterStatValue(AsrR, o1);
+                tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -212,6 +246,9 @@ public class Warrior extends Job {
             si = SkillData.getSkillInfoById(skill.getSkillId());
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            handleFinalAttack(chr, attackInfo);
         }
         int comboProp = getComboProp(chr);
         if (hasHitMobs && Util.succeedProp(comboProp)) {
@@ -243,16 +280,15 @@ public class Warrior extends Job {
                 break;
             case COMBO_FURY_DOWN:
                 if (hasHitMobs) {
-                    removeCombo(chr);
+                    removeCombo(chr, 1);
                 }
                 break;
             case PANIC:
                 if (hasHitMobs) {
-                    removeCombo(chr);
-                    removeCombo(chr);
+                    removeCombo(chr, 2);
                     int allowedTime = si.getValue(subTime, slv);
                     if (lastPanicHit + allowedTime * 1000 > System.currentTimeMillis()) {
-                        removeCombo(chr);
+                        removeCombo(chr, 1);
                     }
                     lastPanicHit = System.currentTimeMillis();
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -270,6 +306,23 @@ public class Warrior extends Job {
                             mts.addStatOptions(MobStat.ACC, o2);
                         }
                         c.write(CField.mobStatSet(mob, (short) 0));
+                    }
+                }
+                break;
+            case SHOUT_DOWN:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(mob.isBoss()) {
+                        o1.nOption = si.getValue(x, slv);
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Weakness, o1);
+                    } else {
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
                 break;
@@ -291,7 +344,7 @@ public class Warrior extends Job {
                     if(Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, o1);
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }
                 }
                 break;
@@ -319,7 +372,7 @@ public class Warrior extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, o1);
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }
                 }
                 break;
@@ -344,15 +397,15 @@ public class Warrior extends Job {
                     o1.nOption = si.getValue(cr, slv);
                     o1.rOption = skillID;
                     o1.tOption = t;
-                    tsm.addCharacterStatValue(CriticalBuff, o1);
+                    tsm.putCharacterStatValue(CriticalBuff, o1);
                     o2.nOption = si.getValue(ignoreMobpdpR, slv);
                     o2.rOption = skillID;
                     o2.tOption = t;
-                    tsm.addCharacterStatValue(IgnoreMobpdpR, o2);
+                    tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                     o3.nOption = si.getValue(damR, slv);
                     o3.rOption = skillID;
                     o3.tOption = t;
-                    tsm.addCharacterStatValue(DamR, o3);
+                    tsm.putCharacterStatValue(DamR, o3);
                     c.write(WvsContext.temporaryStatReset(tsm, false));
                 }
                 break;
@@ -367,6 +420,17 @@ public class Warrior extends Job {
                 }
                 handleCharges(skill.getSkillId(), tsm, c);
                 break;
+            case FINAL_ATTACK_FIGHTER:
+            case FINAL_ATTACK_SPEARMAN:
+            case FINAL_ATTACK_PAGE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    long dmg = 0;
+                    for (int i = 0; i < mai.damages.length; i++) {
+                        dmg += mai.damages[i];
+                    }
+                    c.write(CField.mobDamaged(mob.getObjectId(),dmg, mob.getTemplateId(), (byte) 1,(int)  mob.getHp(), (int) mob.getMaxHp()));
+                }
         }
     }
 
@@ -408,19 +472,21 @@ public class Warrior extends Job {
             Option o = new Option();
             o.nOption = currentCount + 1;
             o.rOption = 1101013;
-            chr.getTemporaryStatManager().addCharacterStatValue(ComboCounter, o);
+            chr.getTemporaryStatManager().putCharacterStatValue(ComboCounter, o);
             chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
         }
     }
 
-    private void removeCombo(Char chr) {
+    private void removeCombo(Char chr, int count) {
         int currentCount = getComboCount(chr);
         Option o = new Option();
-        if (currentCount > 1) {
-            o.nOption = currentCount - 1;
+        if (currentCount > count + 1) {
+            o.nOption = currentCount - count;
+        } else {
+            o.nOption = 0;
         }
         o.rOption = 1101013;
-        chr.getTemporaryStatManager().addCharacterStatValue(ComboCounter, o);
+        chr.getTemporaryStatManager().putCharacterStatValue(ComboCounter, o);
         chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
     }
 
@@ -500,12 +566,46 @@ public class Warrior extends Job {
         o.wOption = amount * chargeInfo.getValue(w, 1); // elemental charge
         o.uOption = amount * chargeInfo.getValue(u, 1);
         o.zOption = amount * chargeInfo.getValue(z, 1);
-        tsm.addCharacterStatValue(ElementalCharge, o);
+        tsm.putCharacterStatValue(ElementalCharge, o);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     private void resetCharges(Client c, TemporaryStatManager tsm) {
         tsm.removeStat(ElementalCharge, false);
         c.write(WvsContext.temporaryStatReset(tsm, false));
+    }
+
+    private Skill getFinalAttackSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
+            skill = chr.getSkill(FINAL_ATTACK_FIGHTER);
+        } else if(chr.hasSkill(FINAL_ATTACK_PAGE)) {
+            skill = chr.getSkill(FINAL_ATTACK_PAGE);
+        } else if(chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
+            skill = chr.getSkill(FINAL_ATTACK_SPEARMAN);
+        }
+        return skill;
+    }
+
+    private void handleFinalAttack(Char chr, AttackInfo attackInfo) {
+        Skill skill = getFinalAttackSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        if(skill == null || attackInfo.skillId == skill.getSkillId()) {
+            return;
+        }
+        for(MobAttackInfo mai: attackInfo.mobAttackInfo) {
+            if(Util.succeedProp(si.getValue(prop, skill.getCurrentLevel()))) {
+                chr.getClient().write(CField.finalAttackRequest(chr, attackInfo.skillId, skill.getSkillId(), 10000,
+                        mai.mobId, (int) System.currentTimeMillis()));
+                Skill adv = chr.getSkill(ADVANCED_FINAL_ATTACK);
+                if(adv != null) {
+                    SkillInfo siAdv = SkillData.getSkillInfoById(ADVANCED_FINAL_ATTACK);
+                    if(Util.succeedProp(siAdv.getValue(prop, adv.getCurrentLevel()))) {
+                        chr.getClient().write(CField.finalAttackRequest(chr, attackInfo.skillId, adv.getSkillId(), 10000,
+                                mai.mobId, (int) System.currentTimeMillis()));
+                    }
+                }
+            }
+        }
     }
 }

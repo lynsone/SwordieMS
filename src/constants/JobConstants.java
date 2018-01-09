@@ -31,6 +31,11 @@ public class JobConstants {
         return job / 100 == 33;
     }
 
+    public static boolean isAngelicBuster(int id) {
+        return id == JobConstants.JobEnum.ANGELIC_BUSTER.getJobId() ||
+                (id >= JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId() && id <= JobConstants.JobEnum.ANGELIC_BUSTER4.getJobId());
+    }
+
     public enum JobEnum {
         BEGINNER(0),
         WARRIOR(100),
@@ -215,14 +220,6 @@ public class JobConstants {
         KINESIS_2(14210),
         KINESIS_3(14211),
         KINESIS_4(14212),
-        NOT_BLASTER_0(15000), // Jk, no blaster
-        NOT_BLASTER_1(15001),
-        NOT_BLASTER_2(15100),
-        NOT_BLASTER_3(15101),
-        NOT_BLASTER_4(15110),
-        NOT_BLASTER_7(15111),
-        NOT_BLASTER_8(15120),
-        NOT_BLASTER_5(15121),
         EMPTY_0(30000),
         V_SKILLS(40000),
         EMPTY_2(40001),

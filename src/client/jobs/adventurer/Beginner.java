@@ -1,6 +1,7 @@
 package client.jobs.adventurer;
 
 import client.Client;
+import client.character.Char;
 import client.character.skills.AttackInfo;
 import client.jobs.Job;
 import connection.InPacket;
@@ -10,9 +11,12 @@ import constants.JobConstants;
  * Created on 12/14/2017.
  */
 public class Beginner extends Job {
+    public Beginner(Char chr) {
+        super(chr);
+    }
+
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
-
 
     }
 
@@ -24,11 +28,6 @@ public class Beginner extends Job {
     @Override
     public boolean isHandlerOfJob(short id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case BEGINNER:
-                return true;
-            default:
-                return false;
-        }
+        return job == JobConstants.JobEnum.BEGINNER;
     }
 }

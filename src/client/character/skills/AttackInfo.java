@@ -1,5 +1,6 @@
 package client.character.skills;
 
+import client.life.Summon;
 import util.Position;
 import util.Rect;
 
@@ -59,4 +60,13 @@ public class AttackInfo {
     public int wt;
     public int ar01Mad;
     public Position pos3;
+    public Summon summon;
+    public int updateTime;
+    public int bulletID;
+    public short mobMove;
+    public boolean isJablin;
+    public int bulletCount;
+    public Position bodyRelMove;
+    public Position keyDownRectMoveXY;
+    public int tick;
 }

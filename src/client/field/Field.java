@@ -31,6 +31,7 @@ public class Field {
     private Map<Life, Char> lifeToControllers;
     private String onFirstUserEnter = "", onUserEnter = "";
     private int fixedMobCapacity;
+    private int objectIDCounter = 1000000;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -242,6 +243,9 @@ public class Field {
     public Portal getPortalByName(String name) {
         return getPortals().stream().filter(portal -> portal.getName().equals(name)).findAny().orElse(null);
     }
+    public Portal getPortalByID(int id) {
+        return getPortals().stream().filter(portal -> portal.getId() == id).findAny().orElse(null);
+    }
 
     public Foothold findFootHoldBelow(Position pos) {
         pos.setY(pos.getY() - 10);
@@ -301,7 +305,7 @@ public class Field {
             getLifes().add(life);
             life.setField(this);
             if(life.getObjectId() < 0) {
-                life.setObjectId(1000000 + getLifes().indexOf(life));
+                life.setObjectId(getNewObjectID());
             }
         }
     }
@@ -310,7 +314,7 @@ public class Field {
         addLife(life);
         if (getChars().size() > 0) {
             if(life.getObjectId() < 0) {
-                life.setObjectId(1000000 + getLifes().indexOf(life));
+                life.setObjectId(getNewObjectID());
             }
             Char controller = null;
             if(getLifeToControllers().containsKey(life)) {
@@ -423,5 +427,13 @@ public class Field {
     public void spawnAffectedArea(AffectedArea aa) {
         addLife(aa);
         broadcastPacket(CField.affectedAreaCreated(aa));
+    }
+
+    public void setObjectIDCounter(int idCounter) {
+        objectIDCounter = idCounter;
+    }
+
+    public int getNewObjectID() {
+        return objectIDCounter++;
     }
 }

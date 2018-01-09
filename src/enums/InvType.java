@@ -31,4 +31,26 @@ public enum InvType {
     public static InvType getInvTypeByVal(int val) {
         return Arrays.stream(InvType.values()).filter(t -> t.getVal() == val).findFirst().orElse(null);
     }
+
+    public static InvType getInvTypeByString(String subMap) {
+        subMap = subMap.toLowerCase();
+        InvType res = null;
+        switch(subMap) {
+            case "cash":
+            case "pet":
+                res = CASH;
+                break;
+            case "consume":
+            case "special":
+                res = USE;
+                break;
+            case "etc":
+                res = ETC;
+                break;
+            case "install":
+                res = SETUP;
+                break;
+        }
+        return res;
+    }
 }

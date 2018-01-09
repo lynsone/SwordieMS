@@ -8,6 +8,7 @@ import server.Server;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created on 11/23/2017.
@@ -111,6 +112,10 @@ public class Inventory {
         ETC,
         INSTALL,
         CASH
+    }
+
+    public List<Item> getItemsByBodyPart(BodyPart bodyPart) {
+        return getItems().stream().filter(item -> item.getBagIndex() == bodyPart.getVal()).collect(Collectors.toList());
     }
 
     public List<Item> getItems() {

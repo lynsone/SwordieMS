@@ -1263,7 +1263,7 @@ public class Char {
         if(job == null) {
             return;
         }
-        setJobHandler(JobManager.getJobById(getJob()));
+        setJobHandler(JobManager.getJobById(getJob(), this));
         getAvatarData().getCharacterStat().setJob(id);
         List<Skill> skills = SkillData.getSkillsByJob((short) id);
         skills.forEach(this::addSkill);
@@ -1296,6 +1296,10 @@ public class Char {
         skill.setCharId(getId());
         if(getSkills().stream().noneMatch(s -> s.getSkillId() == skill.getSkillId())) {
             getSkills().add(skill);
+        } else {
+            Skill oldSkill = getSkill(skill.getSkillId());
+            oldSkill.setCurrentLevel(skill.getCurrentLevel());
+            oldSkill.setMasterLevel(skill.getMasterLevel());
         }
     }
 
@@ -1451,5 +1455,10 @@ public class Char {
         int x = getPosition().getX();
         int y = getPosition().getY();
         return new Rect(x + rect.getLeft(), y + rect.getTop(), x + rect.getRight(), y + rect.getBottom());
+    }
+
+    public Item getEquippedItemByBodyPart(BodyPart bodyPart) {
+        List<Item> items = getEquippedInventory().getItemsByBodyPart(bodyPart);
+        return items.size() > 0 ? items.get(0) : null;
     }
 }

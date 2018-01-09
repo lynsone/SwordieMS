@@ -3,6 +3,7 @@ package connection;
 import io.netty.buffer.*;
 import net.Packet;
 import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
@@ -113,5 +114,9 @@ public class InPacket extends Packet {
 
     public Position decodePosition() {
         return new Position(decodeShort(), decodeShort());
+    }
+
+    public Rect decodeShortRect() {
+        return new Rect(decodePosition(), decodePosition());
     }
 }

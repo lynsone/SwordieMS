@@ -225,4 +225,103 @@ public class SkillConstants {
         return skillID == 33111013 || skillID == 33121016 || skillID == 33121012 || skillID == 131001207 ||
                 skillID == 131001107 || skillID == 4121015 || skillID == 51120057;
     }
+
+    public static boolean isShootSkillNotConsumingBullets(int skillID) {
+        int job = skillID / 10000;
+        if (skillID / 10000 == 8000) {
+            job = skillID / 100;
+        }
+        switch (skillID) {
+            case 80001279:
+            case 80001914:
+            case 80001915:
+            case 80001880:
+            case 80001629:
+            case 33121052:
+            case 33101002:
+            case 14101006:
+            case 13101020:
+            case 1078:
+                return true;
+            default:
+                return getDummyBulletItemIDForJob(job, 0, 0) > 0
+                        || isShootSkillNotUsingShootingWeapon(skillID, false)
+                        || isFieldAttackObjSkill(skillID);
+
+        }
+    }
+
+    private static boolean isShootSkillNotUsingShootingWeapon(int skillID, boolean bySteal) {
+        if(bySteal || (skillID >= 80001848 && skillID <= 80001850)) {
+            return true;
+        }
+        switch (skillID) {
+            case 80001863:
+            case 80001880:
+            case 80001914:
+            case 80001915:
+            case 80001939:
+            case 101110204:
+            case 101110201:
+            case 101000202:
+            case 101100202:
+            case 80001858:
+            case 80001629:
+            case 80001829:
+            case 80001838:
+            case 80001856:
+            case 80001587:
+            case 80001418:
+            case 80001387:
+            case 61111215:
+            case 80001279:
+            case 61001101:
+            case 51121008:
+            case 51111007:
+            case 36121001:
+            case 51001004:
+            case 36111010:
+            case 36101009:
+            case 31111005:
+            case 31111006: // ? was 26803624, guessing it's just a +1
+            case 31101000:
+            case 22110024:
+            case 22110014:
+            case 21120006:
+            case 21100007:
+            case 21110027:
+            case 21001009:
+            case 21000004:
+            case 5121013:
+            case 1078:
+            case 1079:
+                return true;
+            default:
+                return false;
+
+        }
+    }
+
+    private static int getDummyBulletItemIDForJob(int job, int subJob, int skillID) {
+        if ( job / 100 == 35 )
+            return 2333000;
+        if ( job / 10 == 53 || job == 501 || (job / 1000) == 0 && subJob == 2 )
+            return 2333001;
+        if ( JobConstants.isMercedes((short) job) )
+            return 2061010;
+        if ( JobConstants.isAngelicBuster(job) )
+            return 2333001;
+        // TODO:
+//        if ( !JobConstants.isPhantom((short) job)
+//                || !is_useable_stealedskill(skillID)
+//                || (result = get_vari_dummy_bullet_by_cane(skillID), result <= 0) )
+//        {
+//            result = 0;
+//        }
+        return 0;
+    }
+
+    public static boolean isKeydownSkillRectMoveXY(int skillID) {
+        return skillID == 13111020;
+    }
 }

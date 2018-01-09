@@ -10,6 +10,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import packet.WvsContext;
+import server.World;
 
 import static net.netty.NettyClient.CLIENT_KEY;
 
@@ -140,6 +141,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case KEYMAP_UPDATE_REQUEST:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);
                     break;
+                case SUMMONED_ATTACK:
+                    WorldHandler.handleSummonedAttack(c, inPacket);
+                    break;
                 case ABILITY_POINT_DISTRIBUTE:
                     WorldHandler.handleAbilityPointDistribute(c, inPacket);
                     break;
@@ -151,6 +155,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case MELEE_ATTACK:
                     WorldHandler.handleMeleeAttack(c, inPacket);
+                    break;
+                case SHOOT_ATTACK:
+                    WorldHandler.handleShootAttack(c, inPacket);
                     break;
                 case MAGIC_ATTACK:
                     WorldHandler.handleMagicAttack(c, inPacket);

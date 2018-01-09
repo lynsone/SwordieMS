@@ -35,7 +35,7 @@ public class TemporaryStatManager {
         this.chr = chr;
     }
 
-    public void addCharacterStatValue(CharacterTemporaryStat cts, Option option) {
+    public void putCharacterStatValue(CharacterTemporaryStat cts, Option option) {
         option.tOption *= 1000;
         option.tTerm *= 1000;
         if(cts == CombatOrders) {

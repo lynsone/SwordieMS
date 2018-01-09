@@ -536,6 +536,7 @@ public class FieldData {
         for(Life l : field.getLifes()) {
             copy.addLife(l.deepCopy());
         }
+        copy.setObjectIDCounter(field.getNewObjectID());
         return copy;
     }
 }

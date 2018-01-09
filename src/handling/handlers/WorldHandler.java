@@ -11,9 +11,9 @@ import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
 import client.jobs.JobManager;
-import client.life.DeathType;
 import client.life.Life;
 import client.life.Mob;
+import client.life.Summon;
 import client.life.movement.Movement;
 import connection.InPacket;
 import constants.JobConstants;
@@ -21,10 +21,10 @@ import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.InvType;
 import enums.Stat;
+import loaders.SkillData;
 import packet.CField;
 import packet.Stage;
 import packet.WvsContext;
-import server.EventManager;
 import server.Server;
 import util.Position;
 import util.Rect;
@@ -55,7 +55,7 @@ public class WorldHandler {
         Char chr = Char.getFromDBById(charId);
         chr.setClient(c);
         c.setChr(chr);
-        chr.setJobHandler(JobManager.getJobById(chr.getJob()));
+        chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
         Field field = c.getChannelInstance().getField(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
         field.addChar(chr);
         chr.setField(field);
@@ -397,7 +397,7 @@ public class WorldHandler {
 
     public static void handleMeleeAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
-        ai.fieldKey = inPacket.decodeByte() == 1;
+        ai.fieldKey = inPacket.decodeByte() != 0;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (byte) (mask >>> 4);
@@ -426,7 +426,7 @@ public class WorldHandler {
         inPacket.decodeInt(); // crc
         ai.attackActionType = inPacket.decodeByte();
         ai.idk0 = inPacket.decodeByte();
-        int idkInt = inPacket.decodeInt();
+        ai.tick = inPacket.decodeInt();
         ai.ptTarget.setY(inPacket.decodeInt());
         ai.finalAttackLastSkillID = inPacket.decodeInt();
         if(ai.finalAttackLastSkillID > 0) {
@@ -508,6 +508,8 @@ public class WorldHandler {
             mai.hitPartRunTimes = hitPartRunTimes;
             mai.isResWarriorLiftPress = isResWarriorLiftPress;
             ai.mobAttackInfo.add(mai);
+            c.getChr().chatMessage(ChatMsgColour.YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
+            + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", idk4 = " + idk4 + ", idk5 = " + idk5);
         }
         if(skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
             ai.ptTarget.setX(inPacket.decodeShort());
@@ -547,6 +549,7 @@ public class WorldHandler {
                 ai.grenadePos.setY(inPacket.decodeShort());
             }
         }
+        c.getChr().chatMessage(ChatMsgColour.YELLOW, "aap = " + ai.addAttackProc);
         handleAttack(c, ai);
     }
 
@@ -741,5 +744,186 @@ public class WorldHandler {
             int value = inPacket.decodeInt();
             c.getChr().getFuncKeyMap().putKeyBinding(index, type, value);
         }
+    }
+
+    public static void handleSummonedAttack(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+        AttackInfo ai = new AttackInfo();
+        int summonedID = inPacket.decodeInt();
+        ai.summon = (Summon) field.getLifeByObjectID(summonedID);
+        ai.updateTime = inPacket.decodeInt();
+        ai.skillId = inPacket.decodeInt();
+        int nul = inPacket.decodeInt();
+        byte maskIdk = inPacket.decodeByte();
+        byte idk = (byte) (maskIdk & 0x7F);
+        byte idk2 = (byte) (maskIdk >>> 8);
+        byte mask = inPacket.decodeByte();
+        ai.hits = (byte) (mask & 0xF);
+        ai.mobCount = (byte) (mask >>> 4);
+        byte nul2 = inPacket.decodeByte();
+        ai.attackAction = inPacket.decodeShort();
+        ai.attackCount = inPacket.decodeShort();
+        ai.pos = inPacket.decodePosition();
+        int minOne = inPacket.decodeInt();
+        short idk3 = inPacket.decodeShort();
+        int idk4 = inPacket.decodeInt();
+        int nul3 = inPacket.decodeInt();
+        ai.bulletID = inPacket.decodeInt();
+        for (int i = 0; i < ai.mobCount; i++) {
+            MobAttackInfo mai = new MobAttackInfo();
+            mai.mobId = inPacket.decodeInt();
+            mai.templateID = inPacket.decodeInt();
+            byte byteIdk1 = inPacket.decodeByte();
+            byte byteIdk2 = inPacket.decodeByte();
+            byte byteIdk3 = inPacket.decodeByte();
+            byte byteIdk4 = inPacket.decodeByte();
+            byte byteIdk5 = inPacket.decodeByte();
+            int idk5 = inPacket.decodeInt(); // another template id, same as the one above
+            byte byteIdk6 = inPacket.decodeByte();
+            mai.rect = inPacket.decodeShortRect();
+            short idk6 = inPacket.decodeShort();
+            int[] damages = new int[ai.hits];
+            for (int j = 0; j < ai.hits; j++) {
+                damages[j] = inPacket.decodeInt();
+            }
+            mai.damages = damages;
+            mai.mobUpDownYRange = inPacket.decodeInt();
+//            inPacket.decodeInt(); // crc
+            // Begin PACKETMAKER::MakeAttackInfoPacket
+            byte type = inPacket.decodeByte();
+            String currentAnimationName = "";
+            int animationDeltaL = 0;
+            String[] hitPartRunTimes = new String[0];
+            if (type == 1) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+                int hitPartRunTimesSize = inPacket.decodeInt();
+                hitPartRunTimes = new String[hitPartRunTimesSize];
+                for (int j = 0; j < hitPartRunTimesSize; j++) {
+                    hitPartRunTimes[j] = inPacket.decodeString();
+                }
+            } else if (type == 2) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+            }
+            // End PACKETMAKER::MakeAttackInfoPacket
+            mai.type = type;
+            mai.currentAnimationName = currentAnimationName;
+            mai.animationDeltaL = animationDeltaL;
+            mai.hitPartRunTimes = hitPartRunTimes;
+            ai.mobAttackInfo.add(mai);
+        }
+        handleAttack(c, ai);
+    }
+
+    public static void handleShootAttack(Client c, InPacket inPacket) {
+        AttackInfo ai = new AttackInfo();
+        byte nul = inPacket.decodeByte();
+        ai.fieldKey = inPacket.decodeByte() != 0;
+        byte mask = inPacket.decodeByte();
+        ai.hits = (byte) (mask & 0xF);
+        ai.mobCount = (byte) (mask >>> 4);
+        ai.skillId = inPacket.decodeInt();
+        ai.slv = inPacket.decodeByte();
+        ai.addAttackProc = inPacket.decodeByte();
+        inPacket.decodeInt(); // crc
+        int skillID = ai.skillId;
+        if(SkillConstants.isKeyDownSkill(skillID) || SkillConstants.isSuperNovaSkill(skillID)) {
+            ai.keyDown = inPacket.decodeInt();
+        }
+        if(SkillConstants.isZeroSkill(skillID)) {
+            ai.zero = inPacket.decodeByte();
+        }
+        if(SkillConstants.isUsercloneSummonedAbleSkill(skillID)) {
+            ai.bySummonedID = inPacket.decodeInt();
+        }
+        byte idk = inPacket.decodeByte();
+        byte idk2 = inPacket.decodeByte();
+        int idk3 = inPacket.decodeInt();
+        ai.isJablin = inPacket.decodeByte() != 0;
+        short maskie = inPacket.decodeShort();
+        ai.left = ((maskie >> 15) & 1) != 0;
+        ai.attackAction = (short) (maskie & 0x7FFF);
+        int idk4 = inPacket.decodeInt();
+        ai.attackActionType = inPacket.decodeByte();
+        if(skillID == 23111001 || skillID == 80001915 || skillID == 36111010) {
+            int idk5 = inPacket.decodeInt();
+            int x = inPacket.decodeInt();
+            int y = inPacket.decodeInt();
+        }
+        byte bulletCountMabye1 = inPacket.decodeByte();
+        int idk6 = inPacket.decodeInt();
+        int idk7 = inPacket.decodeInt();
+        short idk8 = inPacket.decodeShort();
+        ai.attackAction = inPacket.decodeShort();
+        ai.attackActionType = inPacket.decodeByte();
+        if(!SkillConstants.isShootSkillNotConsumingBullets(skillID)) {
+            ai.bulletCount = inPacket.decodeInt();
+        }
+        ai.rect = inPacket.decodeShortRect();
+        for (int i = 0; i < ai.mobCount; i++) {
+            MobAttackInfo mai = new MobAttackInfo();
+            mai.mobId = inPacket.decodeInt();
+            byte byteIdk1 = inPacket.decodeByte();
+            byte byteIdk2 = inPacket.decodeByte();
+            byte byteIdk3 = inPacket.decodeByte();
+            byte byteIdk4 = inPacket.decodeByte();
+            byte byteIdk5 = inPacket.decodeByte();
+            mai.templateID = inPacket.decodeInt();
+            mai.calcDamageStatIndex = (byte) (inPacket.decodeByte() & 0x7F);
+            mai.rect = inPacket.decodeShortRect();
+            short idk1 = inPacket.decodeShort();
+            int[] damages = new int[ai.hits];
+            for (int j = 0; j < ai.hits; j++) {
+                damages[j] = inPacket.decodeInt();
+            }
+            mai.damages = damages;
+            mai.mobUpDownYRange = inPacket.decodeInt();
+            inPacket.decodeInt(); // crc
+            // Begin PACKETMAKER::MakeAttackInfoPacket
+            byte type = inPacket.decodeByte();
+            String currentAnimationName = "";
+            int animationDeltaL = 0;
+            String[] hitPartRunTimes = new String[0];
+            if (type == 1) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+                int hitPartRunTimesSize = inPacket.decodeInt();
+                hitPartRunTimes = new String[hitPartRunTimesSize];
+                for (int j = 0; j < hitPartRunTimesSize; j++) {
+                    hitPartRunTimes[j] = inPacket.decodeString();
+                }
+            } else if (type == 2) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+            }
+            // End PACKETMAKER::MakeAttackInfoPacket
+            mai.type = type;
+            mai.currentAnimationName = currentAnimationName;
+            mai.animationDeltaL = animationDeltaL;
+            mai.hitPartRunTimes = hitPartRunTimes;
+            ai.mobAttackInfo.add(mai);
+            if(SkillConstants.isScreenCenterAttackSkill(skillID)) {
+                ai.forcedX = inPacket.decodeShort();
+                ai.forcedY = inPacket.decodeShort();
+            }
+            ai.idkPos = inPacket.decodePosition();
+            if(SkillConstants.isAranFallingStopSkill(skillID)) {
+                ai.fh = inPacket.decodeByte();
+            }
+            if(skillID > 0) {
+                if (SkillData.getSkillInfoById(skillID).getRootId() / 100 == 33) {
+                    ai.bodyRelMove = inPacket.decodePosition();
+                }
+            }
+            if(SkillConstants.isKeydownSkillRectMoveXY(skillID)) {
+                ai.keyDownRectMoveXY = inPacket.decodePosition();
+            }
+            if(skillID == 23121002 || skillID == 80001914) {
+                ai.fh = inPacket.decodeByte();
+            }
+        }
+        handleAttack(c, ai);
     }
 }

@@ -214,4 +214,11 @@ public class ItemConstants {
         int prefix = nItemID / 10000;
         return prefix % 100 != 56 && prefix % 100 != 57;
     }
+
+    public static int getWeaponType(int itemID) {
+        if(itemID / 1000000 != 1) {
+            return 0;
+        }
+        return itemID / 10000 % 100;
+    }
 }

@@ -107,7 +107,7 @@ public class Server extends Properties{
     }
 
     public void loadWzData() throws IllegalAccessException, InvocationTargetException {
-        String datFolder = "D:\\SwordieMS\\Swordie\\dat";
+        String datFolder = ServerConstants.DAT_DIR;
         for(Class c : DataClasses.dataClasses) {
             for(Method method : c.getMethods()) {
                 String name;

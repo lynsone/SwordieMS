@@ -1,6 +1,7 @@
 package client.jobs;
 
 import client.Client;
+import client.character.Char;
 import client.character.CharacterStat;
 import client.character.skills.AttackInfo;
 import client.character.skills.SkillInfo;
@@ -16,6 +17,7 @@ import connection.InPacket;
 import constants.JobConstants;
 import loaders.SkillData;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,12 +124,12 @@ public class JobManager {
         this.id = id;
     }
 
-    public static Job getJobById(short id) {
+    public static Job getJobById(short id, Char chr) {
         Job job = null;
         for(Class clazz : jobClasses) {
             try {
-                job = (Job) clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                job = (Job) clazz.getConstructor(Char.class).newInstance(chr);
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 e.printStackTrace();
             }
             if(job != null && job.isHandlerOfJob(id)) {
