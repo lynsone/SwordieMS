@@ -1,5 +1,6 @@
 package client.character.items;
 
+import enums.InvType;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.Cascade;
@@ -24,16 +25,16 @@ public class Inventory {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Item> items;
     @Column(name = "type")
-    private Type type;
+    private InvType type;
     @Column(name = "slots")
     private byte slots;
 
     public Inventory() {
         items = new ArrayList<>();
-        type = Type.EQUIP;
+        type = InvType.EQUIP;
     }
 
-    public Inventory(Type t, int slots) {
+    public Inventory(InvType t, int slots) {
         this.type = t;
         items = new ArrayList<>();
         this.slots = (byte) slots;
@@ -105,14 +106,6 @@ public class Inventory {
         return 0;
     }
 
-    public enum Type {
-        EQUIPPED,
-        EQUIP,
-        CONSUME,
-        ETC,
-        INSTALL,
-        CASH
-    }
 
     public List<Item> getItemsByBodyPart(BodyPart bodyPart) {
         return getItems().stream().filter(item -> item.getBagIndex() == bodyPart.getVal()).collect(Collectors.toList());
@@ -126,11 +119,11 @@ public class Inventory {
         this.items = items;
     }
 
-    public Type getType() {
+    public InvType getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(InvType type) {
         this.type = type;
     }
 

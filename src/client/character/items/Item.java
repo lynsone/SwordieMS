@@ -1,6 +1,7 @@
 package client.character.items;
 
 import connection.OutPacket;
+import constants.ItemConstants;
 import enums.InvType;
 import enums.ScrollStat;
 import jdk.nashorn.internal.runtime.ScriptObject;
@@ -25,7 +26,7 @@ public class Item implements Serializable {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int id;
+    private long id;
     @Column(name = "inventoryId")
     protected int inventoryId;
     @Column(name = "itemId")
@@ -45,24 +46,16 @@ public class Item implements Serializable {
     protected Type type;
     @Column(name = "isCash")
     protected boolean isCash;
-    private int price;
-    private int slotMax;
-    private boolean tradeBlock;
-    private boolean notSale;
-    private String path;
-    private boolean noCursed;
-    private int successRate;
-    private boolean quest;
-    private int bagType;
-    private Map<ScrollStat, Integer> scrollStats = new HashMap<>();
-    private int reqQuestOnProgress;
-    private int charmEXP;
+    @Column(name = "quantity")
+    protected int quantity;
+    @Column(name = "owner")
+    private String owner = "";
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -89,104 +82,12 @@ public class Item implements Serializable {
         session.delete(this);
     }
 
-    public void setPrice(int price) {
-        this.price = price;
+    public String getOwner() {
+        return owner;
     }
 
-    public int getPrice() {
-        return price;
-    }
-
-    public void setSlotMax(int slotMax) {
-        this.slotMax = slotMax;
-    }
-
-    public int getSlotMax() {
-        return slotMax;
-    }
-
-    public void setTradeBlock(boolean tradeBlock) {
-        this.tradeBlock = tradeBlock;
-    }
-
-    public boolean isTradeBlock() {
-        return tradeBlock;
-    }
-
-    public void setNotSale(boolean notSale) {
-        this.notSale = notSale;
-    }
-
-    public boolean isNotSale() {
-        return notSale;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setNoCursed(boolean noCursed) {
-        this.noCursed = noCursed;
-    }
-
-    public boolean isNoCursed() {
-        return noCursed;
-    }
-
-    public void setSuccessRate(int successRate) {
-        this.successRate = successRate;
-    }
-
-    public int getSuccessRate() {
-        return successRate;
-    }
-
-    public void setQuest(boolean quest) {
-        this.quest = quest;
-    }
-
-    public boolean isQuest() {
-        return quest;
-    }
-
-    public void setBagType(int bagType) {
-        this.bagType = bagType;
-    }
-
-    public int getBagType() {
-        return bagType;
-    }
-
-    public void putScrollStat(ScrollStat scrollStat, int value) {
-        getScrollStats().put(scrollStat, value);
-    }
-
-    public Map<ScrollStat, Integer> getScrollStats() {
-        return scrollStats;
-    }
-
-    public void setScrollStats(Map<ScrollStat, Integer> scrollStats) {
-        this.scrollStats = scrollStats;
-    }
-
-    public void setReqQuestOnProgress(int reqQuestOnProgress) {
-        this.reqQuestOnProgress = reqQuestOnProgress;
-    }
-
-    public int getReqQuestOnProgress() {
-        return reqQuestOnProgress;
-    }
-
-    public void setCharmEXP(int charmEXP) {
-        this.charmEXP = charmEXP;
-    }
-
-    public int getCharmEXP() {
-        return charmEXP;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public enum Type {
@@ -263,18 +164,21 @@ public class Item implements Serializable {
         outPacket.encodeByte(getType().getVal());
         // GW_ItemSlotBase
         outPacket.encodeInt(getItemId());
-        boolean hasSN = getCashItemSerialNumber() > 0;
+        boolean hasSN = false; //getId() > 0;
         outPacket.encodeByte(hasSN);
-        if(hasSN) {
-            outPacket.encodeLong(getCashItemSerialNumber());
+        if (hasSN) {
+            outPacket.encodeLong(getId());
         }
         getDateExpire().encode(outPacket);
         outPacket.encodeInt(-1); // bagindex?
-        if(getType() != Type.EQUIP) {
-            outPacket.encodeShort(1); // nQuantity
-            outPacket.encodeString(""); // sOwner
+        if (getType() != Type.EQUIP) {
+            outPacket.encodeShort(getQuantity()); // nQuantity
+            outPacket.encodeString(getOwner()); // sOwner
             outPacket.encodeShort(0); // flag
-            // if is throwing star/bullet/ /10000 == 287, write long
+            if (ItemConstants.isThrowingStar(getItemId()) || ItemConstants.isBullet(getItemId()) ||
+                    ItemConstants.isFamiliar(getItemId())) {
+                outPacket.encodeLong(getInventoryId());
+            }
         }
     }
 
@@ -300,5 +204,18 @@ public class Item implements Serializable {
 
     public void setCash(boolean cash) {
         isCash = cash;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "Id: " + getItemId() + ", Qty: " + getQuantity();
     }
 }

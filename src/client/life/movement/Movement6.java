@@ -18,6 +18,7 @@ public class Movement6 extends MovementBase {
         vPosition = new Position(xv, xy);
 
         // I'm not sure about this, it' needs testing. <- mushy
+        // Should be fallStart (foothold fall start)?
         footStart = inPacket.decodeShort();
 
         moveAction = inPacket.decodeByte();

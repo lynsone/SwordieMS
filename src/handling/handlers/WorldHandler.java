@@ -16,19 +16,24 @@ import client.life.Mob;
 import client.life.Summon;
 import client.life.movement.Movement;
 import connection.InPacket;
+import connection.OutPacket;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.InvType;
 import enums.Stat;
+import handling.OutHeader;
 import loaders.SkillData;
 import packet.CField;
 import packet.Stage;
 import packet.WvsContext;
+import server.Channel;
 import server.Server;
+import server.World;
 import util.Position;
 import util.Rect;
 import util.Tuple;
+import util.Util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,8 +65,11 @@ public class WorldHandler {
         field.addChar(chr);
         chr.setField(field);
         c.write(WvsContext.updateEventNameTag(new int[]{}));
-        c.write(Stage.setField(chr, field, c.getChannel(), false, 0, true, false,
+        c.write(Stage.setField(chr, field, c.getChannel(), true, 0, true, false,
                 (byte) 0, false, 100, null, true, -1));
+//        OutPacket outPacket = new OutPacket(OutHeader.SET_FIELD);
+//        outPacket.encodeBytes(Util.getByteArrayByString("00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 20 03 00 00 58 02 00 00 01 00 00 01 EE 1F 90 01 EE 1F 90 01 EE 1F 90 FF FF FF FF FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 01 00 00 00 00 00 00 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 01 B1 4F 00 00 31 75 00 00 FF 00 00 01 08 09 0C 00 05 00 04 00 04 00 32 00 00 00 32 00 00 00 32 00 00 00 32 00 00 00 00 00 01 04 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C0 EE 7D 37 00 00 00 00 00 00 00 00 79 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 8C 89 D3 01 30 4A BF B7 00 14 01 04 00 61 64 61 64 01 04 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 20 20 20 20 3C 00 40 E0 FD 3B 37 4F 01 00 05 00 01 45 06 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 54 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 07 00 01 A6 5B 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 55 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 01 F0 DD 13 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 55 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 37 00 01 20 E2 11 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 3C 00 00 00 01 00 01 00 01 00 01 00 1C 00 00 00 FF 56 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 01 00 00 00 00 01 09 00 5F 38 00 00 B2 7A D3 01 2C 3B 00 00 B2 7A D3 01 FA 49 00 00 B2 7A D3 01 A5 81 00 00 B2 7A D3 01 A6 81 00 00 B2 7A D3 01 DB 81 00 00 B2 7A D3 01 F1 81 00 00 B2 7A D3 01 F3 81 00 00 B2 7A D3 01 B2 99 00 00 B2 7A D3 01 00 00 00 00 00 00 00 00 FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 70 E6 BF B7 8C 89 D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));
+//                c.write(outPacket);
         c.write(WvsContext.changeSkillRecordResult(chr.getSkills(), true, false, false, false));
         c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
         field.spawnLifesForChar(chr);
@@ -120,11 +128,10 @@ public class WorldHandler {
         short quantity = inPacket.decodeShort();
         InvType invTypeFrom = invType == EQUIP ? oldPos < 0 ? EQUIPPED : EQUIP : invType;
         InvType invTypeTo = invType == EQUIP ?  newPos < 0 ? EQUIPPED : EQUIP : invType;
-        Item item = chr.getInventoryByInvType(invTypeFrom).getItemBySlot(oldPos);
+        Item item = chr.getInventoryByType(invTypeFrom).getItemBySlot(oldPos);
         if(item == null) {
             return;
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "ItemID = " + item.getItemId() + ", Inventory ID = " + item.getInventoryId());
         item.setBagIndex(newPos);
         if(invType == EQUIP && invTypeFrom != invTypeTo) {
             if(invTypeFrom == EQUIPPED) {
@@ -132,10 +139,7 @@ public class WorldHandler {
             } else {
                 chr.equip(item);
             }
-//            Inventory to = chr.getInventoryByInvType(invTypeTo);
-//            item.setInventoryId(to.getId());
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "ItemID = " + item.getItemId() + ", Inventory ID = " + item.getInventoryId());
          // TODO dropping items
         c.write(WvsContext.inventoryOperation(c.getChr(), true, false, (byte) 2, oldPos, newPos, invType, quantity,
                 0, item));
@@ -634,7 +638,7 @@ public class WorldHandler {
         Map<Stat, Object> stats = new HashMap<>();
         stats.put(charStat, chr.getStat(charStat));
         stats.put(Stat.ap, chr.getStat(Stat.ap));
-        c.write(WvsContext.statChanged(stats, false));
+        c.write(WvsContext.statChanged(stats, true));
         WvsContext.dispose(c, chr);
     }
 
@@ -667,7 +671,7 @@ public class WorldHandler {
         Map<Stat, Object> stats = new HashMap<>();
         stats.put(charStat, chr.getStat(charStat));
         stats.put(Stat.ap, chr.getStat(Stat.ap));
-        c.write(WvsContext.statChanged(stats, false));
+        c.write(WvsContext.statChanged(stats, true));
         WvsContext.dispose(c, chr);
     }
 
@@ -925,5 +929,19 @@ public class WorldHandler {
             }
         }
         handleAttack(c, ai);
+    }
+
+    public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        c.getAccount().updateDB();
+        int worldID = chr.getClient().getChannelInstance().getWorldId();
+        World world = Server.getInstance().getWorldById(worldID);
+        Field field = chr.getField();
+        field.removeChar(chr);
+        byte channelID = (byte) (inPacket.decodeByte() + 1);
+        Channel channel = world.getChannelById(channelID);
+        channel.addClientInTransfer((byte) (channelID - 1), chr.getId(), c.getAccount());
+        short port = (short) channel.getPort();
+        c.write(ClientSocket.migrateCommand(true, port));
     }
 }

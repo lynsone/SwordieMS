@@ -7,6 +7,7 @@ import org.hibernate.Transaction;
 import util.SystemTime;
 
 import util.FileTime;
+import util.Util;
 
 import javax.persistence.*;
 
@@ -368,6 +369,7 @@ public class CharacterStat {
     }
 
     public void encode(OutPacket outPacket) {
+//        outPacket.encodeBytes(Util.getByteArrayByString("01 00 00 00 01 00 00 00 00 00 00 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 01 B1 4F 00 00 31 75 00 00 FF 00 00 01 08 09 0C 00 05 00 04 00 04 00 32 00 00 00 32 00 00 00 32 00 00 00 32 00 00 00 00 00 01 04 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C0 EE 7D 37 00 00 00 00 00 00 00 00 7B 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
         outPacket.encodeInt(getCharacterId());
         outPacket.encodeInt(getCharacterIdForLog());
         outPacket.encodeInt(getWorldIdForLog());
@@ -379,7 +381,8 @@ public class CharacterStat {
         outPacket.encodeByte(getMixBaseHairColor());
         outPacket.encodeByte(getMixAddHairColor());
         outPacket.encodeByte(getMixHairBaseProb());
-        outPacket.encodeByte(getLevel());
+//        outPacket.encodeBytes(Util.getByteArrayByString("01 08 09 0C 00 05 00 04 00 04 00 32 00 00 00 32 00 00 00 32 00 00 00 32 00 00 00 00 00 01 04 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C0 EE 7D 37 00 00 00 00 00 00 00 00 7B 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
+                outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getJob());
         outPacket.encodeShort(getStr());
         outPacket.encodeShort(getDex());
@@ -390,16 +393,19 @@ public class CharacterStat {
         outPacket.encodeInt(getMp());
         outPacket.encodeInt(getMaxMp());
         outPacket.encodeShort(getAp());
+//        outPacket.encodeBytes(Util.getByteArrayByString("01 04 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C0 EE 7D 37 00 00 00 00 00 00 00 00 7B 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
         if (JobConstants.isExtendSpJob(getJob())) {
             getExtendSP().encode(outPacket);
         } else {
             outPacket.encodeShort(getSp());
         }
-        outPacket.encodeLong(getExp());
+//        outPacket.encodeBytes(Util.getByteArrayByString("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C0 EE 7D 37 00 00 00 00 00 00 00 00 7B 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
+         outPacket.encodeLong(getExp());
         outPacket.encodeInt(getPop());
         outPacket.encodeInt(getWp()); // Waru
         outPacket.encodeInt(getGachExp());
         outPacket.encodeInt((int) getPosMap());
+//        outPacket.encodeBytes(Util.getByteArrayByString("00 00 00 00 00 00 00 00 7B 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
         outPacket.encodeByte(getPortal());
         outPacket.encodeInt(0); // TODO figure out
         outPacket.encodeShort(getSubJob());
@@ -407,6 +413,7 @@ public class CharacterStat {
             outPacket.encodeInt(getDefFaceAcc());
         }
         outPacket.encodeByte(getFatigue());
+//        outPacket.encodeBytes(Util.getByteArrayByString("7B 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
         outPacket.encodeInt(getLastFatigueUpdateTime());
         outPacket.encodeInt(getCharismaExp());
         outPacket.encodeInt(getInsightExp());
@@ -414,21 +421,28 @@ public class CharacterStat {
         outPacket.encodeInt(getCraftExp());
         outPacket.encodeInt(getSenseExp());
         outPacket.encodeInt(getCharmExp());
+//        outPacket.encodeBytes(Util.getByteArrayByString("00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
         getNonCombatStatDayLimit().encode(outPacket);
+//        outPacket.encodeBytes(Util.getByteArrayByString("00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
 
         outPacket.encodeInt(getPvpExp());
         outPacket.encodeByte(getPvpGrade());
         outPacket.encodeInt(getPvpPoint());
-        outPacket.encodeByte(getPvpModeLevel());
+        outPacket.encodeByte(2);
+        /* Fuck that, setting the above byte lower than 2 will make all 3rd and 4th job that have the property
+         ((skillID % 10000) / 10000 == 0) be bugged (you see the level, but can't actually use it). ?????????????*/
+
         outPacket.encodeByte(getPvpModeType());
         outPacket.encodeInt(getEventPoint());
         outPacket.encodeByte(getAlbaActivityID()); // part time job
-        getAlbaStartTime().encode(outPacket);
+//        outPacket.encodeBytes(Util.getByteArrayByString("FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9A 89 D3 01 B0 7B FE 86 00"));/*
+getAlbaStartTime().encode(outPacket);
         outPacket.encodeInt(getAlbaDuration());
         outPacket.encodeByte(getAlbaSpecialReward());
         getCharacterCard().encode(outPacket);
         getLastLogout().encode(outPacket);
         outPacket.encodeByte(isBurning()); // bBurning
+//        */
     }
 
     public FileTime getLastLogout() {

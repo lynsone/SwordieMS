@@ -123,7 +123,7 @@ public class Archer extends Job {
                         chr.setStat(Stat.hp, (short) newHP);
                         Map<Stat, Object> stats = new HashMap<>();
                         stats.put(Stat.hp, newHP);
-                        c.write(WvsContext.statChanged(stats, true));
+                        c.write(WvsContext.statChanged(stats, false));
                     }
                     break;
                 case 2:

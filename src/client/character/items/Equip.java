@@ -161,8 +161,6 @@ public class Equip extends Item {
     private String vSlot;
     @Column(name = "fixedGrade")
     private int fixedGrade;
-    @Column(name = "owner")
-    private String owner;
 
     public Equip() {
         super();
@@ -251,7 +249,7 @@ public class Equip extends Item {
         this.setItemID = setItemID;
         this.exItem = exItem;
         equipTradeBlock = hasEquipTradeBlock;
-        this.owner = owner;
+        this.setOwner(owner);
     }
 
     public Equip deepCopy() {
@@ -326,7 +324,7 @@ public class Equip extends Item {
         ret.setItemID = setItemID;
         ret.exItem = exItem;
         ret.equipTradeBlock = equipTradeBlock;
-        ret.owner = owner;
+        ret.setOwner(getOwner());
         ret.itemId = itemId;
         ret.cashItemSerialNumber = cashItemSerialNumber;
         ret.dateExpire = dateExpire.deepCopy();
@@ -337,7 +335,7 @@ public class Equip extends Item {
     }
 
     public long getSerialNumber() {
-        return serialNumber;
+        return getId();
     }
 
     public String getTitle() {
@@ -896,10 +894,6 @@ public class Equip extends Item {
         this.fixedGrade = fixedGrade;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
     public void encode(OutPacket outPacket) {
         // GW_ItemSlotBase
         super.encode(outPacket);
@@ -1139,10 +1133,6 @@ public class Equip extends Item {
                 return getItemState();
             default: return 0;
         }
-    }
-
-    public String getOwner() {
-        return owner;
     }
 
     @Override

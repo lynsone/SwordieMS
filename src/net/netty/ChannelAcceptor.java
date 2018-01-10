@@ -44,10 +44,8 @@ public class ChannelAcceptor implements Runnable{
                     // remove after debug stage
                     System.out.printf("[Debug] Opened session with %s on channel %d%n", c.getIP(), channel.getChannelId());
                     c.write(Login.sendConnect(riv, siv));
-//                  c.write("hi".getBytes());
 
                     channelPool.put(c.getIP(), ch);
-
 
                     ch.attr(CLIENT_KEY).set(c);
                     ch.attr(Client.CRYPTO_KEY).set(new MapleCrypto());

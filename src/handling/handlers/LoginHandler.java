@@ -6,7 +6,6 @@ import client.character.Char;
 import client.character.CharacterStat;
 import client.character.FuncKeyMap;
 import client.character.items.Equip;
-import client.character.items.Inventory;
 import connection.InPacket;
 import constants.ItemConstants;
 import constants.JobConstants;
@@ -26,7 +25,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static client.character.items.Inventory.Type.EQUIPPED;
+import static enums.InvType.EQUIPPED;
 
 /**
  * Created on 4/28/2017.
@@ -72,7 +71,7 @@ public class LoginHandler {
         Account account = null;
 
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE username = ?");
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM accounts WHERE username = ?");
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {

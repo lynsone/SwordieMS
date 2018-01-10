@@ -8,9 +8,9 @@ import java.util.Arrays;
 public enum InvType {
     EQUIPPED(-1),
     EQUIP(1),
-    USE(2),
+    CONSUME(2),
     ETC(3),
-    SETUP(4),
+    INSTALL(4),
     CASH(5)
     ;
 
@@ -42,13 +42,15 @@ public enum InvType {
                 break;
             case "consume":
             case "special":
-                res = USE;
+            case "use":
+                res = CONSUME;
                 break;
             case "etc":
                 res = ETC;
                 break;
             case "install":
-                res = SETUP;
+            case "setup":
+                res = INSTALL;
                 break;
         }
         return res;

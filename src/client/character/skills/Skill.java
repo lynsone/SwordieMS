@@ -61,7 +61,6 @@ public class Skill {
         this.currentLevel = currentLevel;
     }
 
-
     public int getId() {
         return id;
     }
@@ -88,5 +87,10 @@ public class Skill {
 
     public int getMasterLevel() {
         return masterLevel;
+    }
+
+    @Override
+    public String toString() {
+        return "id = " + getSkillId() + ", cur = " + getCurrentLevel() + ", master = " + getMasterLevel();
     }
 }

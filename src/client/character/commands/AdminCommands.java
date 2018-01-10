@@ -3,6 +3,7 @@ package client.character.commands;
 import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Inventory;
+import client.character.items.Item;
 import client.character.skills.ForceAtomInfo;
 import client.character.skills.Skill;
 import client.field.Field;
@@ -11,6 +12,7 @@ import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
+import enums.InvType;
 import enums.Stat;
 import handling.OutHeader;
 import loaders.ItemData;
@@ -92,17 +94,26 @@ public class AdminCommands {
         }
     }
 
-    public static class Item extends AdminCommand {
+    public static class GetItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
-            Equip item = ItemData.getEquipDeepCopyFromId(id);
-            if(item == null) {
-
-            } else {
-                chr.addItemToInventory(Inventory.Type.EQUIP, item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(chr, false, false,
-                        (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) 1,
+            Equip equip = ItemData.getEquipDeepCopyFromId(id);
+            if(equip == null) {
+                Item item = ItemData.getItemDeepCopy(id);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                short quant = 1;
+                if(args.length > 2) {
+                    quant = Short.parseShort(args[2]);
+                }
+                item.setQuantity(quant);
+                chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
+                        (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) item.getQuantity(),
                         0, item));
+            } else {
+                chr.addItemToInventory(InvType.EQUIP, equip, false);
+                chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
+                        (byte) 0, (short) equip.getBagIndex(), (byte) -1, equip.getInvType(), (byte) 1,
+                        0, equip));
             }
         }
     }
@@ -139,7 +150,7 @@ public class AdminCommands {
                 chr.setStat(Stat.ap, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.ap, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats, false));
+                chr.getClient().write(WvsContext.statChanged(stats, true));
             }
         }
     }
@@ -153,7 +164,7 @@ public class AdminCommands {
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.hp, num);
                 stats.put(Stat.mhp, num);
-                chr.getClient().write(WvsContext.statChanged(stats, false));
+                chr.getClient().write(WvsContext.statChanged(stats, true));
             }
         }
     }
@@ -167,7 +178,7 @@ public class AdminCommands {
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.mp, num);
                 stats.put(Stat.mmp, num);
-                chr.getClient().write(WvsContext.statChanged(stats, false));
+                chr.getClient().write(WvsContext.statChanged(stats, true));
             }
         }
     }
@@ -179,7 +190,7 @@ public class AdminCommands {
                 chr.setStat(Stat.level, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.level, (byte) num);
-                chr.getClient().write(WvsContext.statChanged(stats, false));
+                chr.getClient().write(WvsContext.statChanged(stats, true));
             }
         }
     }
@@ -258,7 +269,7 @@ public class AdminCommands {
             List<Skill> list = new ArrayList<>();
             list.add(skill);
             chr.addSkill(skill);
-            chr.getClient().write(WvsContext.changeSkillRecordResult(list, false, false, false, false));
+            chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
         }
     }
  }

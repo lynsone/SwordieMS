@@ -221,4 +221,16 @@ public class ItemConstants {
         }
         return itemID / 10000 % 100;
     }
+
+    public static boolean isThrowingStar(int itemId) {
+        return itemId / 10000 == 207;
+    }
+
+    public static boolean isBullet(int itemId) {
+        return itemId / 10000 == 233;
+    }
+
+    public static boolean isFamiliar(int itemId) {
+        return itemId / 10000 == 287;
+    }
 }

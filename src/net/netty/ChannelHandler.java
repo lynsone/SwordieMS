@@ -168,6 +168,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case CHANGE_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
                     break;
+                case CHANGE_CHANNEL_REQUEST:
+                    WorldHandler.handleChangeChannelRequest(c, inPacket);
+                    break;
                 case MOVE:
                     WorldHandler.handleMove(c, inPacket);
                     break;

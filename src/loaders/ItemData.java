@@ -1,7 +1,11 @@
 package loaders;
 
 import client.character.items.Equip;
+import client.character.items.Item;
 import constants.ServerConstants;
+import enums.InvType;
+import enums.ScrollStat;
+import enums.SpecStat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.*;
@@ -11,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static client.character.items.Item.Type.ITEM;
+import static enums.ScrollStat.*;
+
 /**
  * Created on 11/17/2017.
  */
@@ -18,8 +25,9 @@ public class ItemData {
     public static List<Integer> itemIds = new ArrayList<>();
     public static List<Equip> equips = new ArrayList<>();
     public static List<Integer> equipItemIds = new ArrayList<>();
+    public static List<ItemInfo> items = new ArrayList<>();
 
-//    @Loader(varName = "itemIds")
+    //    @Loader(varName = "itemIds")
     public static void loadItemIDs() {
         String wzDir = ServerConstants.WZ_DIR + "\\Item.wz";
         String[] subMaps = new String[]{"Cash", "Consume", "Etc", "Install", "Pet", "Special"};
@@ -53,14 +61,16 @@ public class ItemData {
 
     /**
      * Creates a new Equip given an itemId.
+     *
      * @param itemId The itemId of the wanted equip.
      * @return A deep copy of the default values of the corresponding Equip, or null if there is no equip with itemId
      * <code>itemId</code>.
      */
     public static Equip getEquipDeepCopyFromId(int itemId) {
         Equip ret = getEquipById(itemId);
-        if(ret != null) {
+        if (ret != null) {
             ret = ret.deepCopy();
+            ret.setQuantity(1);
         }
         return ret;
     }
@@ -72,7 +82,7 @@ public class ItemData {
     private static Equip getEquipFromFile(int itemId) {
         String fieldDir = ServerConstants.DAT_DIR + "\\equips\\" + itemId + ".dat";
         File file = new File(fieldDir);
-        if(!file.exists()) {
+        if (!file.exists()) {
             System.err.println("Could not find equip " + itemId);
             return null;
         } else {
@@ -198,7 +208,7 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isEquipTradeBlock());
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
                 dataOutputStream.writeShort(equip.getOptions().size());
-                for(int i : equip.getOptions()) {
+                for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
                 }
                 dataOutputStream.writeInt(equip.getFixedGrade());
@@ -209,9 +219,9 @@ public class ItemData {
         }
     }
 
-//    @Loader(varName = "equips")
+    //    @Loader(varName = "equips")
     public static void loadEquips(File file, boolean exists) {
-        if(!exists) {
+        if (!exists) {
             loadEquipsFromWz();
             saveEquips(ServerConstants.DAT_DIR + "\\equips");
         } else {
@@ -289,7 +299,7 @@ public class ItemData {
     public static void loadEquipsFromWz() {
         String wzDir = ServerConstants.WZ_DIR + "\\Character.wz";
         String[] subMaps = new String[]{"Accessory", "Android", "Cap", "Cape", "Coat", "Dragon", "Face", "Glove",
-            "Longcoat", "Mechanic", "Pants", "PetEquip", "Ring", "Shield", "Shoes", "Totem", "Weapon"};
+                "Longcoat", "Mechanic", "Pants", "PetEquip", "Ring", "Shield", "Shoes", "Totem", "Weapon"};
         for (String subMap : subMaps) {
             File subDir = new File(wzDir + "\\" + subMap);
             File[] files = subDir.listFiles();
@@ -345,159 +355,159 @@ public class ItemData {
                         List<Integer> options = new ArrayList<>(7);
                         int fixedGrade = 0;
                         int specialGrade = 0;
-                        for(Node n : XMLApi.getAllChildren(XMLApi.getFirstChildByNameBF(mainNode, "info"))) {
+                        for (Node n : XMLApi.getAllChildren(XMLApi.getFirstChildByNameBF(mainNode, "info"))) {
                             attributes = XMLApi.getAttributes(n);
                             boolean hasISlot = attributes.get("name").equals("islot");
-                            if(hasISlot) {
+                            if (hasISlot) {
                                 islot = attributes.get("value");
                             }
                             boolean hasVSlot = attributes.get("name").equals("vslot");
-                            if(hasVSlot) {
+                            if (hasVSlot) {
                                 vslot = attributes.get("value");
                             }
                             boolean hasReqJob = attributes.get("name").equals("reqJob");
-                            if(hasReqJob) {
+                            if (hasReqJob) {
                                 reqJob = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasReqLevel = attributes.get("name").equals("reqLevel");
-                            if(hasReqLevel) {
+                            if (hasReqLevel) {
                                 reqLevel = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasReqStr = attributes.get("name").equals("reqSTR");
-                            if(hasReqStr) {
+                            if (hasReqStr) {
                                 reqStr = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasReqDex = attributes.get("name").equals("reqDex");
-                            if(hasReqDex) {
+                            if (hasReqDex) {
                                 reqDex = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasReqInt = attributes.get("name").equals("reqInt");
-                            if(hasReqInt) {
+                            if (hasReqInt) {
                                 reqInt = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasReqLuk = attributes.get("name").equals("reqLuk");
-                            if(hasReqLuk) {
+                            if (hasReqLuk) {
                                 reqLuk = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasreqPOP = attributes.get("name").equals("reqPOP");
-                            if(hasreqPOP) {
+                            if (hasreqPOP) {
                                 reqPop = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasIncStr = attributes.get("name").equals("incStr");
-                            if(hasIncStr) {
+                            if (hasIncStr) {
                                 incStr = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincDex = attributes.get("name").equals("incDex");
-                            if(hasincDex) {
+                            if (hasincDex) {
                                 incDex = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincInt = attributes.get("name").equals("reqincInt");
-                            if(hasincInt) {
+                            if (hasincInt) {
                                 incInt = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincLuk = attributes.get("name").equals("incLuk");
-                            if(hasincLuk) {
+                            if (hasincLuk) {
                                 incLuk = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincPDD = attributes.get("name").equals("incPDD");
-                            if(hasincPDD) {
+                            if (hasincPDD) {
                                 incPDD = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincMDD = attributes.get("name").equals("incMDD");
-                            if(hasincMDD) {
+                            if (hasincMDD) {
                                 incMDD = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincMHP = attributes.get("name").equals("incMHP");
-                            if(hasincMHP) {
+                            if (hasincMHP) {
                                 incMHP = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincMMP = attributes.get("name").equals("incMMP");
-                            if(hasincMMP) {
+                            if (hasincMMP) {
                                 incMMP = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincPAD = attributes.get("name").equals("incPAD");
-                            if(hasincPAD) {
+                            if (hasincPAD) {
                                 incPAD = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincMAD = attributes.get("name").equals("incMAD");
-                            if(hasincMAD) {
+                            if (hasincMAD) {
                                 incMAD = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincEVA = attributes.get("name").equals("incEVA");
-                            if(hasincEVA) {
+                            if (hasincEVA) {
                                 incEVA = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincACC = attributes.get("name").equals("incACC");
-                            if(hasincACC) {
+                            if (hasincACC) {
                                 incACC = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincSpeed = attributes.get("name").equals("incSpeed");
-                            if(hasincSpeed) {
+                            if (hasincSpeed) {
                                 incSpeed = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasincJump = attributes.get("name").equals("incJump");
-                            if(hasincJump) {
+                            if (hasincJump) {
                                 incJump = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasdamR = attributes.get("name").equals("damR");
-                            if(hasdamR) {
+                            if (hasdamR) {
                                 damR = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasstatR = attributes.get("name").equals("statR");
-                            if(hasstatR) {
+                            if (hasstatR) {
                                 statR = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hastuc = attributes.get("name").equals("tuc");
-                            if(hastuc) {
+                            if (hastuc) {
                                 tuc = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hassetItemID = attributes.get("name").equals("setItemID");
-                            if(hassetItemID) {
+                            if (hassetItemID) {
                                 setItemID = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasprice = attributes.get("name").equals("price");
-                            if(hasprice) {
+                            if (hasprice) {
                                 price = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasattackSpeed = attributes.get("name").equals("attackSpeed");
-                            if(hasattackSpeed) {
+                            if (hasattackSpeed) {
                                 attackSpeed = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hascash = attributes.get("name").equals("cash");
-                            if(hascash) {
+                            if (hascash) {
                                 cash = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hasexpireOnLogout = attributes.get("name").equals("expireOnLogout");
-                            if(hasexpireOnLogout) {
+                            if (hasexpireOnLogout) {
                                 expireOnLogout = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hasexItem = attributes.get("name").equals("exItem");
-                            if(hasexItem) {
+                            if (hasexItem) {
                                 exItem = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hasnotSale = attributes.get("name").equals("notSale");
-                            if(hasnotSale) {
+                            if (hasnotSale) {
                                 notSale = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hasonly = attributes.get("name").equals("only");
-                            if(hasonly) {
+                            if (hasonly) {
                                 only = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hastradeBlock = attributes.get("name").equals("tradeBlock");
-                            if(hastradeBlock) {
+                            if (hastradeBlock) {
                                 tradeBlock = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hasequipTradeBlock = attributes.get("name").equals("equipTradeBlock");
-                            if(hasequipTradeBlock) {
+                            if (hasequipTradeBlock) {
                                 equipTradeBlock = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hasfixedPotential = attributes.get("name").equals("fixedPotential");
-                            if(hasfixedPotential) {
+                            if (hasfixedPotential) {
                                 fixedPotential = Integer.parseInt(attributes.get("value")) == 1;
                             }
                             boolean hasOptions = attributes.get("name").equals("option");
-                            if(hasOptions) {
-                                for(Node whichOptionNode : XMLApi.getAllChildren(n)) {
+                            if (hasOptions) {
+                                for (Node whichOptionNode : XMLApi.getAllChildren(n)) {
                                     attributes = XMLApi.getAttributes(whichOptionNode);
                                     int index = Integer.parseInt(attributes.get("name"));
                                     Node optionNode = XMLApi.getFirstChildByNameBF(whichOptionNode, "option");
@@ -510,11 +520,11 @@ public class ItemData {
                             }
 
                             boolean hasfixedGrade = attributes.get("name").equals("fixedGrade");
-                            if(hasfixedGrade) {
+                            if (hasfixedGrade) {
                                 fixedGrade = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hasspecialGrade = attributes.get("name").equals("specialGrade");
-                            if(hasspecialGrade) {
+                            if (hasspecialGrade) {
                                 specialGrade = Integer.parseInt(attributes.get("value"));
                             }
                         }
@@ -536,18 +546,591 @@ public class ItemData {
         }
     }
 
+    public static ItemInfo loadItemByFile(File file) {
+        ItemInfo itemInfo = null;
+        try {
+            itemInfo = new ItemInfo();
+            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+            itemInfo.setItemId(dataInputStream.readInt());
+            itemInfo.setInvType(InvType.getInvTypeByString(dataInputStream.readUTF()));
+            itemInfo.setCash(dataInputStream.readBoolean());
+            itemInfo.setPrice(dataInputStream.readInt());
+            itemInfo.setSlotMax(dataInputStream.readInt());
+            itemInfo.setTradeBlock(dataInputStream.readBoolean());
+            itemInfo.setNotSale(dataInputStream.readBoolean());
+            itemInfo.setPath(dataInputStream.readUTF());
+            itemInfo.setNoCursed(dataInputStream.readBoolean());
+            itemInfo.setBagType(dataInputStream.readInt());
+            itemInfo.setCharmEXP(dataInputStream.readInt());
+            itemInfo.setSenseEXP(dataInputStream.readInt());
+            itemInfo.setQuest(dataInputStream.readBoolean());
+            itemInfo.setReqQuestOnProgress(dataInputStream.readInt());
+            itemInfo.setQuestID(dataInputStream.readInt());
+            itemInfo.setNotConsume(dataInputStream.readBoolean());
+            itemInfo.setMonsterBook(dataInputStream.readBoolean());
+            itemInfo.setMobID(dataInputStream.readInt());
+            itemInfo.setNpcID(dataInputStream.readInt());
+            itemInfo.setLinkedID(dataInputStream.readInt());
+            short size = dataInputStream.readShort();
+            for (int i = 0; i < size; i++) {
+                ScrollStat ss = ScrollStat.getScrollStatByString(dataInputStream.readUTF());
+                int val = dataInputStream.readInt();
+                itemInfo.putScrollStat(ss, val);
+            }
+            size = dataInputStream.readShort();
+            for (int i = 0; i < size; i++) {
+                SpecStat ss = SpecStat.getSpecStatByName(dataInputStream.readUTF());
+                int val = dataInputStream.readInt();
+                itemInfo.putSpecStat(ss, val);
+            }
+            getItems().add(itemInfo);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return itemInfo;
+
+    }
+
+    public static void saveItems(String dir) {
+        Util.makeDirIfAbsent(dir);
+        DataOutputStream dataOutputStream;
+        try {
+            for (ItemInfo ii : getItems()) {
+                dataOutputStream = new DataOutputStream(new FileOutputStream(new File(dir + "\\" + ii.getItemId() + ".dat")));
+                dataOutputStream.writeInt(ii.getItemId());
+                dataOutputStream.writeUTF(ii.getInvType().toString());
+                dataOutputStream.writeBoolean(ii.isCash());
+                dataOutputStream.writeInt(ii.getPrice());
+                dataOutputStream.writeInt(ii.getSlotMax());
+                dataOutputStream.writeBoolean(ii.isTradeBlock());
+                dataOutputStream.writeBoolean(ii.isNotSale());
+                dataOutputStream.writeUTF(ii.getPath());
+                dataOutputStream.writeBoolean(ii.isNoCursed());
+                dataOutputStream.writeInt(ii.getBagType());
+                dataOutputStream.writeInt(ii.getCharmEXP());
+                dataOutputStream.writeInt(ii.getSenseEXP());
+                dataOutputStream.writeBoolean(ii.isQuest());
+                dataOutputStream.writeInt(ii.getReqQuestOnProgress());
+                dataOutputStream.writeInt(ii.getQuestID());
+                dataOutputStream.writeBoolean(ii.isNotConsume());
+                dataOutputStream.writeBoolean(ii.isMonsterBook());
+                dataOutputStream.writeInt(ii.getMobID());
+                dataOutputStream.writeInt(ii.getNpcID());
+                dataOutputStream.writeInt(ii.getLinkedID());
+                dataOutputStream.writeShort(ii.getScrollStats().size());
+                for (Map.Entry<ScrollStat, Integer> entry : ii.getScrollStats().entrySet()) {
+                    dataOutputStream.writeUTF(entry.getKey().toString());
+                    dataOutputStream.writeInt(entry.getValue());
+                }
+                dataOutputStream.writeShort(ii.getSpecStats().size());
+                for (Map.Entry<SpecStat, Integer> entry : ii.getSpecStats().entrySet()) {
+                    dataOutputStream.writeUTF(entry.getKey().toString());
+                    dataOutputStream.writeInt(entry.getValue());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void loadItemsFromWZ() {
+        String wzDir = ServerConstants.WZ_DIR + "\\Item.wz";
+        String[] subMaps = new String[]{"Cash", "Consume", "Etc", "Install", "Special"}; // not pet
+        for (String subMap : subMaps) {
+            File subDir = new File(wzDir + "\\" + subMap);
+            File[] files = subDir.listFiles();
+            for (File file : files) {
+                Document doc = XMLApi.getRoot(file);
+                Node node = doc;
+                List<Node> nodes = XMLApi.getAllChildren(node);
+                for (Node mainNode : XMLApi.getAllChildren(nodes.get(0))) {
+                    String nodeName = XMLApi.getNamedAttribute(mainNode, "name");
+                    if (!Util.isNumber(nodeName)) {
+                        System.err.println(nodeName + " is not a number.");
+                        continue;
+                    }
+                    int id = Integer.parseInt(nodeName);
+                    ItemInfo item = new ItemInfo();
+                    item.setItemId(id);
+                    item.setInvType(InvType.getInvTypeByString(subMap));
+                    Node infoNode = XMLApi.getFirstChildByNameBF(mainNode, "info");
+                    if (infoNode != null) {
+                        for (Node info : XMLApi.getAllChildren(infoNode)) {
+                            String name = XMLApi.getNamedAttribute(info, "name");
+                            String value = XMLApi.getNamedAttribute(info, "value");
+                            switch (name) {
+                                case "cash":
+                                    item.setCash(Integer.parseInt(value) != 0);
+                                    break;
+                                case "price":
+                                    item.setPrice(Integer.parseInt(value));
+                                    break;
+                                case "slotMax":
+                                    item.setSlotMax(Integer.parseInt(value));
+                                    break;
+                                // info not currently interesting. May be interesting in the future.
+                                case "icon":
+                                case "iconRaw":
+                                case "iconD":
+                                case "iconReward":
+                                case "iconShop":
+                                case "recoveryHP":
+                                case "recoveryMP":
+                                case "sitAction":
+                                case "bodyRelMove":
+                                case "only":
+                                case "noDrop":
+                                case "timeLimited":
+                                case "accountSharable":
+                                case "nickTag":
+                                case "nickSkill":
+                                case "endLotteryDate":
+                                case "noFlip":
+                                case "noMoveToLocker":
+                                case "soldInform":
+                                case "purchaseShop":
+                                case "flatRate":
+                                case "limitMin":
+                                case "protectTime":
+                                case "maxDays":
+                                case "reset":
+                                case "replace":
+                                case "expireOnLogout":
+                                case "max":
+                                case "lvOptimum":
+                                case "lvRange":
+                                case "limitedLv":
+                                case "tradeReward":
+                                case "type":
+                                case "floatType":
+                                case "message":
+                                case "pquest":
+                                case "bonusEXPRate":
+                                case "notExtend":
+                                case "skill":
+                                case "reqSkillLevel":
+                                case "masterLevel":
+                                case "stateChangeItem":
+                                case "direction":
+                                case "reqEquipLevelMax":
+                                case "exGrade":
+                                case "exGradeWeight":
+                                case "effect":
+                                case "bigSize":
+                                case "nickSkillTimeLimited":
+                                case "StarPlanet":
+                                case "useTradeBlock":
+                                case "commerce":
+                                case "invisibleWeapon":
+                                case "sitEmotion":
+                                case "sitLeft":
+                                case "tamingMob":
+                                case "textInfo":
+                                case "lv":
+                                case "tradeAvailable":
+                                case "pickUpBlock":
+                                case "rewardItemID":
+                                case "autoPrice":
+                                case "selectedSlot":
+                                case "minusLevel":
+                                case "addTime":
+                                case "reqLevel":
+                                case "waittime":
+                                case "buffchair":
+                                case "cooltime":
+                                case "consumeitem":
+                                case "distanceX":
+                                case "distanceY":
+                                case "maxDiff":
+                                case "maxDX":
+                                case "levelDX":
+                                case "maxLevel":
+                                case "exp":
+                                case "dropBlock":
+                                case "dropExpireTime":
+                                case "animation_create":
+                                case "animation_dropped":
+                                case "noCancelMouse":
+                                case "soulItemType":
+                                case "Rate":
+                                case "unitPrice":
+                                case "delayMsg":
+                                case "bridlePropZeroMsg":
+                                case "create":
+                                case "nomobMsg":
+                                case "bridleProp":
+                                case "bridlePropChg":
+                                case "bridleMsgType":
+                                case "mobHP":
+                                case "left":
+                                case "right":
+                                case "top":
+                                case "bottom":
+                                case "useDelay":
+                                case "name":
+                                case "uiData":
+                                case "grade":
+                                case "UI":
+                                case "recoveryRate":
+                                case "itemMsg":
+                                case "noRotateIcon":
+                                case "endUseDate":
+                                case "noSound":
+                                case "slotMat":
+                                case "isBgmOrEffect":
+                                case "bgmPath":
+                                case "repeat":
+                                case "NoCancel":
+                                case "rotateSpeed":
+                                case "gender":
+                                case "life":
+                                case "pickupItem":
+                                case "add":
+                                case "consumeHP":
+                                case "longRange":
+                                case "dropSweep":
+                                case "pickupAll":
+                                case "ignorePickup":
+                                case "consumeMP":
+                                case "autoBuff":
+                                case "smartPet":
+                                case "giantPet":
+                                case "shop":
+                                case "recall":
+                                case "autoSpeaking":
+                                case "consumeCure":
+                                case "meso":
+                                case "maplepoint":
+                                case "rate":
+                                case "overlap":
+                                case "lt":
+                                case "rb":
+                                case "path4Top":
+                                case "jumplevel":
+                                case "slotIndex":
+                                case "addDay":
+                                case "incLEV":
+                                case "cashTradeBlock":
+                                case "dressUpgrade":
+                                case "skillEffectID":
+                                case "emotion":
+                                case "tradBlock":
+                                case "tragetBlock":
+                                case "scanTradeBlock":
+                                case "mobPotion":
+                                case "ignoreTendencyStatLimit":
+                                case "effectByItemID":
+                                case "pachinko":
+                                case "iconEnter":
+                                case "iconLeave":
+                                case "noMoveIcon":
+                                case "noShadow":
+                                case "preventslip":
+                                case "recover":
+                                case "warmsupport":
+                                case "randstat":
+                                case "reqCUC":
+                                case "incCraft":
+                                case "reqEquipLevelMin":
+                                case "incRandVol":
+                                case "noNegative":
+                                case "incPVPDamage":
+                                case "successRates":
+                                case "enchantCategory":
+                                case "additionalSuccess":
+                                case "level":
+                                case "specialItem":
+                                case "createType":
+                                case "exNew":
+                                case "cuttable":
+                                case "setItemCategory":
+                                case "perfectReset":
+                                case "resetRUC":
+                                case "incMax":
+                                case "noSuperior":
+                                case "noRecovery":
+                                case "reqMap":
+                                case "random":
+                                case "limit":
+                                case "cantAccountSharable":
+                                case "LvUpWarning":
+                                case "canAccountSharable":
+                                case "canUseJob":
+                                case "createPeriod":
+                                case "iconLarge":
+                                case "morphItem":
+                                case "consumableFrom":
+                                case "noExpend":
+                                case "sample":
+                                case "notPickUpByPet":
+                                case "sharableOnce":
+                                case "bonusStageItem":
+                                case "sampleOffsetY":
+                                case "runOnPickup":
+                                case "noSale":
+                                case "skillCast":
+                                case "activateCardSetID":
+                                case "summonSoulMobID":
+                                case "cursor":
+                                case "karma":
+                                case "pointCost":
+                                case "itemPoint":
+                                case "sharedStatCostGrade":
+                                case "levelVariation":
+                                case "accountShareable":
+                                case "extendLimit":
+                                case "showMessage":
+                                case "mcType":
+                                case "consumeItem":
+                                case "hybrid":
+                                case "mobId":
+                                case "lvMin":
+                                case "lvMax":
+                                case "picture":
+                                case "ratef":
+                                case "time":
+                                case "reqGuildLevel":
+                                case "guild":
+                                case "randEffect":
+                                case "accountShareTag":
+                                case "removeEffect":
+                                case "forcingItem":
+                                case "fixFrameIdx":
+                                case "buffItemID":
+                                case "removeCharacterInfo":
+                                case "nameInfo":
+                                case "bgmInfo":
+                                case "flip":
+                                case "pos":
+                                case "randomChair":
+                                case "maxLength":
+                                case "continuity":
+                                case "specificDX":
+                                case "groupTWInfo":
+                                case "face":
+                                case "removeBody":
+                                case "mesoChair":
+                                case "towerBottom":
+                                case "towerTop":
+                                case "topOffset":
+                                case "craftEXP":
+                                case "willEXP":
+                                    break;
+                                case "tradeBlock":
+                                    item.setTradeBlock(Integer.parseInt(value) != 0);
+                                    break;
+                                case "notSale":
+                                    item.setNotSale(Integer.parseInt(value) != 0);
+                                    break;
+                                case "path":
+                                    item.setPath(value);
+                                    break;
+                                case "noCursed":
+                                    item.setNoCursed(Integer.parseInt(value) != 0);
+                                    break;
+                                case "success":
+                                    item.putScrollStat(success, Integer.parseInt(value));
+                                    break;
+                                case "incSTR":
+                                    item.putScrollStat(incSTR, Integer.parseInt(value));
+                                    break;
+                                case "incDEX":
+                                    item.putScrollStat(incDEX, Integer.parseInt(value));
+                                    break;
+                                case "incINT":
+                                    item.putScrollStat(incINT, Integer.parseInt(value));
+                                    break;
+                                case "incLUK":
+                                    item.putScrollStat(incLUK, Integer.parseInt(value));
+                                    break;
+                                case "incPAD":
+                                    item.putScrollStat(incPAD, Integer.parseInt(value));
+                                    break;
+                                case "incMAD":
+                                    item.putScrollStat(incMAD, Integer.parseInt(value));
+                                    break;
+                                case "incPDD":
+                                    item.putScrollStat(incPDD, Integer.parseInt(value));
+                                    break;
+                                case "incMDD":
+                                    item.putScrollStat(incMDD, Integer.parseInt(value));
+                                    break;
+                                case "incEVA":
+                                    item.putScrollStat(incEVA, Integer.parseInt(value));
+                                    break;
+                                case "incACC":
+                                    item.putScrollStat(incACC, Integer.parseInt(value));
+                                    break;
+                                case "incPERIOD":
+                                    item.putScrollStat(incPERIOD, Integer.parseInt(value));
+                                    break;
+                                case "incMHP":
+                                case "incMaxHP":
+                                    item.putScrollStat(incMHP, Integer.parseInt(value));
+                                    break;
+                                case "incMMP":
+                                case "incMaxMP":
+                                    item.putScrollStat(incMMP, Integer.parseInt(value));
+                                    break;
+                                case "incSpeed":
+                                    item.putScrollStat(incSpeed, Integer.parseInt(value));
+                                    break;
+                                case "incJump":
+                                    item.putScrollStat(incJump, Integer.parseInt(value));
+                                    break;
+                                case "incReqLevel":
+                                    item.putScrollStat(incReqLevel, Integer.parseInt(value));
+                                    break;
+                                case "randOption":
+                                    item.putScrollStat(randOption, Integer.parseInt(value));
+                                    break;
+                                case "randStat":
+                                    item.putScrollStat(randStat, Integer.parseInt(value));
+                                    break;
+                                case "tuc":
+                                    item.putScrollStat(tuc, Integer.parseInt(value));
+                                    break;
+                                case "incIUC":
+                                    item.putScrollStat(incIUC, Integer.parseInt(value));
+                                    break;
+                                case "speed":
+                                    item.putScrollStat(speed, Integer.parseInt(value));
+                                    break;
+                                case "forceUpgrade":
+                                    item.putScrollStat(forceUpgrade, Integer.parseInt(value));
+                                    break;
+                                case "cursed":
+                                    item.putScrollStat(cursed, Integer.parseInt(value));
+                                    break;
+                                case "maxSuperiorEqp":
+                                    item.putScrollStat(maxSuperiorEqp, Integer.parseInt(value));
+                                    break;
+                                case "reqRUC":
+                                    item.putScrollStat(reqRUC, Integer.parseInt(value));
+                                    break;
+                                case "bagType":
+                                    item.setBagType(Integer.parseInt(value));
+                                    break;
+                                case "charmEXP":
+                                case "charismaEXP":
+                                    item.setCharmEXP(Integer.parseInt(value));
+                                    break;
+                                case "senseEXP":
+                                    item.setSenseEXP(Integer.parseInt(value));
+                                    break;
+                                case "quest":
+                                    item.setQuest(Integer.parseInt(value) != 0);
+                                    break;
+                                case "reqQuestOnProgress":
+                                    item.setReqQuestOnProgress(Integer.parseInt(value));
+                                    break;
+                                case "qid":
+                                case "questId":
+                                    if (value.contains(".") && value.split("[.]").length > 0) {
+                                        item.setQuestID(Integer.parseInt(value.split("[.]")[0]));
+                                    } else {
+                                        item.setQuestID(Integer.parseInt(value));
+                                    }
+                                    break;
+                                case "notConsume":
+                                    item.setNotConsume(Integer.parseInt(value) != 0);
+                                    break;
+                                case "monsterBook":
+                                    item.setMonsterBook(Integer.parseInt(value) != 0);
+                                    break;
+                                case "mob":
+                                    item.setMobID(Integer.parseInt(value));
+                                    break;
+                                case "npc":
+                                    item.setNpcID(Integer.parseInt(value));
+                                    break;
+                                case "linkedID":
+                                    item.setLinkedID(Integer.parseInt(value));
+                                    break;
+                                case "spec":
+                                    break;
+                                default:
+                                    System.out.println(item.getItemId());
+                                    System.out.println("Unkown node: " + name + ", value = " + value);
+                            }
+                        }
+                    }
+                    Node spec = XMLApi.getFirstChildByNameBF(mainNode, "spec");
+                    if (spec != null) {
+                        for (Node specNode : XMLApi.getAllChildren(spec)) {
+                            String name = XMLApi.getNamedAttribute(specNode, "name");
+                            String value = XMLApi.getNamedAttribute(specNode, "value");
+                            switch (name) {
+                                case "script":
+                                    item.setScript(value);
+                                default:
+                                    SpecStat ss = SpecStat.getSpecStatByName(name);
+                                    if (ss != null && value != null) {
+                                        item.putSpecStat(ss, Integer.parseInt(value));
+                                    }
+                            }
+                        }
+                    }
+                    getItems().add(item);
+                }
+            }
+        }
+    }
+
+    public static Item getDeepCopyByItemInfo(ItemInfo itemInfo) {
+        if(itemInfo == null) {
+            return null;
+        }
+        Item res = new Item();
+        res.setItemId(itemInfo.getItemId());
+        res.setQuantity(1);
+        res.setType(ITEM);
+        res.setInvType(itemInfo.getInvType());
+        return res;
+    }
+
+    public static Item getItemDeepCopy(int id) {
+        ItemInfo ii = getItemByID(id);
+        if(ii == null) {
+            File file = new File(ServerConstants.DAT_DIR + "\\items\\" + id + ".dat");
+            if(!file.exists()) {
+                return null;
+            } else {
+                ii = loadItemByFile(file);
+            }
+        }
+        return getDeepCopyByItemInfo(ii);
+    }
+
+    public static ItemInfo getItemByID(int itemID) {
+        return getItems().stream().filter(i -> i.getItemId() == itemID).findFirst().orElse(null);
+    }
+
     public static List<Equip> getEquips() {
         return equips;
     }
 
     public static void init() {
-        for(Equip equip : getEquips()) {
+        for (Equip equip : getEquips()) {
             equipItemIds.add(equip.getItemId());
         }
     }
 
-    public static void generateDatFiles(){
-        loadEquipsFromWz();
-        saveEquips(ServerConstants.DAT_DIR + "\\equips");
+    public static void generateDatFiles() {
+//        loadEquipsFromWz();
+//        saveEquips(ServerConstants.DAT_DIR + "\\equips");
+        loadItemsFromWZ();
+        saveItems(ServerConstants.DAT_DIR + "\\items");
+    }
+
+    public static void main(String[] args) {
+//        generateDatFiles();
+        Item item = getItemDeepCopy(2060000);
+        System.out.println(item);
+    }
+
+    public static List<ItemInfo> getItems() {
+        return items;
     }
 }

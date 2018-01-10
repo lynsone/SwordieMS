@@ -7,7 +7,7 @@ public class SkillConstants {
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
-                || skillId / 1000000 == 92 && (skillId % 10000 == 0)
+                || (skillId / 1000000 == 92 && (skillId % 10000 == 0))
                 || isMakingSkillRecipe(skillId)
                 || isCommonSkill(skillId)
                 || isNoviceSkill(skillId)
