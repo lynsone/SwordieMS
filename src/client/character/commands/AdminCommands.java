@@ -4,8 +4,7 @@ import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Inventory;
 import client.character.items.Item;
-import client.character.skills.ForceAtomInfo;
-import client.character.skills.Skill;
+import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
 import client.life.Life;
@@ -15,13 +14,12 @@ import constants.JobConstants.JobEnum;
 import enums.InvType;
 import enums.Stat;
 import handling.OutHeader;
-import loaders.ItemData;
-import loaders.MobData;
-import loaders.SkillData;
+import loaders.*;
 import packet.CField;
 import packet.Stage;
 import packet.WvsContext;
 import util.Position;
+import util.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,14 +52,12 @@ public class AdminCommands {
 //            option.cOption = 2;
 //            chr.getTemporaryStatManager().putCharacterStatValue(CharacterTemporaryStat.RWCombination, option);
 //            chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
-            OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o = new Option();
+            o.nOption = 31;
+            tsm.putCharacterStatValue(CharacterTemporaryStat.KinesisPsychicPoint, o);
+            chr.getClient().write(WvsContext.temporaryStatSet(tsm));
 
-            int skillID = 37000008;
-            Position pos = chr.getPosition();
-            int mobID = chr.getField().getLifes().get(chr.getField().getLifes().size() - 1).getObjectId();
-            int count = 1;
-
-            chr.getClient().write(WvsContext.explosionAttack(skillID, pos, mobID, count));
         }
     }
 
@@ -70,7 +66,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
             int count = 1;
-            if(args.length > 2) {
+            if (args.length > 2) {
                 count = Integer.parseInt(args[2]);
             }
             for (int i = 0; i < count; i++) {
@@ -84,7 +80,7 @@ public class AdminCommands {
                 mob.setMaxHp(Integer.MAX_VALUE);
                 mob.setHp(Integer.MAX_VALUE);
                 mob.setNotRespawnable(true);
-                if(mob.getField() == null) {
+                if (mob.getField() == null) {
                     mob.setField(field);
                 }
                 field.spawnLife(mob, null);
@@ -98,11 +94,11 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
             Equip equip = ItemData.getEquipDeepCopyFromId(id);
-            if(equip == null) {
+            if (equip == null) {
                 Item item = ItemData.getItemDeepCopy(id);
                 chr.addItemToInventory(item.getInvType(), item, false);
                 short quant = 1;
-                if(args.length > 2) {
+                if (args.length > 2) {
                     quant = Short.parseShort(args[2]);
                 }
                 item.setQuantity(quant);
@@ -122,7 +118,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             short id = Short.parseShort(args[1]);
             JobEnum job = JobEnum.getJobById(id);
-            if(job != null) {
+            if (job != null) {
                 chr.setJob(id);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.subJob, id);
@@ -134,7 +130,7 @@ public class AdminCommands {
     public static class Sp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
-            if(num >= 0) {
+            if (num >= 0) {
                 chr.setSpToCurrentJob(num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
@@ -146,7 +142,7 @@ public class AdminCommands {
     public static class Ap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
-            if(num >= 0) {
+            if (num >= 0) {
                 chr.setStat(Stat.ap, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.ap, (short) num);
@@ -158,7 +154,7 @@ public class AdminCommands {
     public static class Hp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
-            if(num >= 0) {
+            if (num >= 0) {
                 chr.setStat(Stat.hp, (short) num);
                 chr.setStat(Stat.mhp, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
@@ -172,7 +168,7 @@ public class AdminCommands {
     public static class Mp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
-            if(num >= 0) {
+            if (num >= 0) {
                 chr.setStat(Stat.mp, (short) num);
                 chr.setStat(Stat.mmp, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
@@ -186,7 +182,7 @@ public class AdminCommands {
     public static class Level extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
-            if(num >= 0) {
+            if (num >= 0) {
                 chr.setStat(Stat.level, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.level, (byte) num);
@@ -212,7 +208,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             List<Life> lifes = chr.getField().getLifes();
             Life l = lifes.get(lifes.size() - 1);
-            if(l == null || !(l instanceof Mob)) {
+            if (l == null || !(l instanceof Mob)) {
                 return;
             }
             Mob mob = (Mob) l;
@@ -239,7 +235,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, 1, 3, 3, 0, 0, (int) System.currentTimeMillis(), 1,
                     0, new Position());
-            Mob mob = (Mob) chr.getField().getLifes().get( chr.getField().getLifes().size() - 1);
+            Mob mob = (Mob) chr.getField().getLifes().get(chr.getField().getLifes().size() - 1);
             int mobId = mob.getObjectId();
             chr.getClient().write(CField.createForceAtom(false, 0, mobId, 2, true, mobId, mobId, forceAtomInfo,
                     null, 0, 300, mob.getPosition(), 0, mob.getPosition()));
@@ -249,7 +245,7 @@ public class AdminCommands {
 
     public static class GetSkill extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            if(args.length < 4) {
+            if (args.length < 4) {
                 chr.chatMessage(GAME_NOTICE, "Needs more args! <id> <cur> <max>");
                 return;
             }
@@ -257,10 +253,10 @@ public class AdminCommands {
             int cur = Integer.parseInt(args[2]);
             int max = Integer.parseInt(args[3]);
             Skill skill = chr.getSkill(Integer.parseInt(args[1]));
-            if(skill == null) {
+            if (skill == null) {
                 skill = SkillData.getSkillDeepCopyById(Integer.parseInt(args[1]));
             }
-            if(skill == null) {
+            if (skill == null) {
                 chr.chatMessage(YELLOW, "No such skill found.");
                 return;
             }
@@ -272,4 +268,44 @@ public class AdminCommands {
             chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
         }
     }
- }
+
+    public static class Lookup extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 3) {
+                chr.chatMessage(GAME_NOTICE, "Needs more args! <what to lookup> <id>");
+                return;
+            }
+            String query = args[2].toLowerCase();
+            System.out.println("Query: " + query);
+            boolean isNumber = Util.isNumber(query);
+            if ("skill".equalsIgnoreCase(args[1])) {
+                SkillStringInfo ssi;
+                int id;
+                if (isNumber) {
+                    id = Integer.parseInt(query);
+                    ssi = StringData.getSkillStringById(id);
+                    if (ssi == null) {
+                        chr.chatMessage(YELLOW, "Cannot find skill " + id);
+                        return;
+                    }
+                    chr.chatMessage(YELLOW, "Name: " + ssi.getName());
+                    chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
+                    chr.chatMessage(YELLOW, "h: " + ssi.getH());
+                } else {
+                    Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query);
+                    if(map.size() == 0) {
+                        chr.chatMessage(YELLOW, "No skills found for query " + query);
+                    }
+                    for (Map.Entry<Integer, SkillStringInfo> entry : map.entrySet()) {
+                        id = entry.getKey();
+                        ssi = entry.getValue();
+                        chr.chatMessage(YELLOW, "Id: " + id);
+                        chr.chatMessage(YELLOW, "Name: " + ssi.getName());
+                        chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
+                        chr.chatMessage(YELLOW, "h: " + ssi.getH());
+                    }
+                }
+            }
+        }
+    }
+}

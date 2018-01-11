@@ -135,6 +135,8 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case CHAR_LOGIN:
                     WorldHandler.handleCharLogin(c, inPacket);
                     break;
+                case HIT:
+                    c.getChr().getJobHandler().handleHit(c, inPacket);
                 case CHAT:
                     WorldHandler.handleChat(c, inPacket);
                     break;

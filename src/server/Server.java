@@ -4,6 +4,8 @@ import client.Account;
 import client.character.Char;
 import constants.ServerConfig;
 import constants.ServerConstants;
+import loaders.SkillStringInfo;
+import loaders.StringData;
 import net.crypto.MapleCrypto;
 import net.db.DatabaseConnection;
 import net.db.DatabaseManager;
@@ -67,33 +69,16 @@ public class Server extends Properties{
         DatabaseManager.init();
         System.out.println("[Info] Finished loading Hibernate in " +  (System.currentTimeMillis() - startNow) +  "ms");
 
-//        Char chr = new Char();
-//        Session session = getNewDatabaseSession();
-//        Transaction tx = session.beginTransaction();
-//        session.save(chr);
-//        tx.commit();
-//        session.close();
-//
-//        session = getNewDatabaseSession();
-//        tx = session.beginTransaction();
-//        String query = "FROM " + Char.class.getName() + " WHERE id = 1";
-//        Query sql = session.createQuery(query);
-//        List res = sql.list();
-//        tx.commit();
-//        session.close();
-//
-//        chr = (Char) res.get(0);
-
         try {
             loadWzData();
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-//        ItemData.init();
+        StringData.loadStringsFromWz();
 
         MapleCrypto.initialize(ServerConstants.VERSION);
         new Thread(new LoginAcceptor()).start();
-        worldList.add(new World(1, "Je Moeder", 3));
+        worldList.add(new World(1, "Je Moeder", 8));
 
         for(World world : getWorlds()) {
             for(Channel channel : world.getChannels()) {

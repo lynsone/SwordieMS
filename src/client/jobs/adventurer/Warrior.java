@@ -5,6 +5,7 @@ import client.character.Char;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -16,6 +17,7 @@ import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
@@ -54,6 +56,7 @@ public class Warrior extends Job {
     public static final int COMBAT_ORDERS = 1211011;
     public static final int PARASHOCK_GUARD = 1211014;
     public static final int DIVINE_CHARGE = 1221004;
+    public static final int THREATEN = 1211013;
     public static final int ELEMENTAL_FORCE = 1221015;
     public static final int MAPLE_WARRIOR_PALADIN = 1221000;
     public static final int GUARDIAN = 1221016;
@@ -473,6 +476,9 @@ public class Warrior extends Job {
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
             switch(skillID) {
                 case HP_RECOVERY:
                     int t = 1000 * si.getValue(time, slv);
@@ -483,6 +489,29 @@ public class Warrior extends Job {
                         recoveryAmount = Math.max(si.getValue(y, slv), (int) (recoveryAmount * (si.getValue(z, slv)/100D)));
                     }
                     lastHpRecovery = cur;
+                    break;
+                case THREATEN:
+                    Rect rect = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
+                    , inPacket.decodeShort(), inPacket.decodeShort());
+                    for(Life life : chr.getField().getLifesInRect(rect)) {
+                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                            Mob mob = (Mob) life;
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            if(Util.succeedProp(si.getValue(prop, slv))) {
+                                o1.nOption = si.getValue(x, slv);
+                                o1.rOption = skillID;
+                                o1.tOption = si.getValue(time, slv);
+                                mts.addStatOptions(MobStat.PAD, o1);
+                                mts.addStatOptions(MobStat.MAD, o1);
+                                mts.addStatOptions(MobStat.PDR, o1);
+                                mts.addStatOptions(MobStat.MDR, o1);
+                                o2.nOption = -si.getValue(z, slv);
+                                o2.rOption = skillID;
+                                o2.tOption = si.getValue(subTime, slv);
+                                mts.addStatOptionsAndBroadcast(MobStat.Darkness, o2);
+                            }
+                        }
+                    }
                     break;
             }
         }

@@ -932,6 +932,7 @@ public class WorldHandler {
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         c.getAccount().updateDB();
+        chr.updateDB();
         int worldID = chr.getClient().getChannelInstance().getWorldId();
         World world = Server.getInstance().getWorldById(worldID);
         Field field = chr.getField();

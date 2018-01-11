@@ -8,6 +8,7 @@ import client.life.MobTemporaryStat;
 import connection.OutPacket;
 import packet.CField;
 import util.Position;
+import util.Rect;
 
 import java.awt.Rectangle;
 import java.util.*;
@@ -435,5 +436,19 @@ public class Field {
 
     public int getNewObjectID() {
         return objectIDCounter++;
+    }
+
+    public List<Life> getLifesInRect(Rect rect) {
+        List<Life> lifes = new ArrayList<>();
+        for(Life life : getLifes()) {
+            Position position = life.getPosition();
+            int x = position.getX();
+            int y = position.getY();
+            if(x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                lifes.add(life);
+            }
+        }
+        return lifes;
     }
 }
