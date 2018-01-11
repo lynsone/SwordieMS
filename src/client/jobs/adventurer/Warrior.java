@@ -39,9 +39,12 @@ public class Warrior extends Job {
     public static final int COMBO_FURY = 1101012;
     public static final int COMBO_FURY_DOWN = 1100012;
     public static final int PANIC = 1111003;
+    public static final int SHOUT = 1111008;
     public static final int SHOUT_DOWN = 1111014;
     public static final int ADVANCED_FINAL_ATTACK = 1120013;
     public static final int ENRAGE = 1121010;
+    public static final int PUNCTURE = 1121015;
+
     public static final int CLOSE_COMBAT = 1201013;
     public static final int ELEMENTAL_CHARGE = 1200014;
     public static final int FLAME_CHARGE = 1201011;
@@ -55,6 +58,7 @@ public class Warrior extends Job {
     public static final int MAPLE_WARRIOR_PALADIN = 1221000;
     public static final int GUARDIAN = 1221016;
     public static final int BLAST = 1221009;
+
     public static final int SPEAR_SWEEP = 1301012;
     public static final int WEAPON_BOOSTER_SPEARMAN = 1301004;
     public static final int IRON_WILL = 1301006;
@@ -80,6 +84,7 @@ public class Warrior extends Job {
             IRON_WILL,
             HYPER_BODY,
             CROSS_SURGE,
+            ENRAGE,
     };
     private long lastPanicHit = Long.MIN_VALUE;
     private long lastHpRecovery = Long.MIN_VALUE;
@@ -124,10 +129,16 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(ComboCounter, o1);
                 break;
             case ENRAGE:
-                removeCombo(chr, 4);
-                o1.nOption = si.getValue(x, slv);
+                removeCombo(chr, 1);
+                o1.nOption = 1;
                 o1.rOption = skillID;
-                tsm.putCharacterStatValue(Enrage, o1);
+                tsm.putCharacterStatValue(Enrage, o1); // max mobs hit
+                o2.nOption = si.getValue(y, slv);
+                o2.rOption = skillID;
+                tsm.putCharacterStatValue(EnrageCrDamMin, o2);
+                o3.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                tsm.putCharacterStatValue(EnrageCr, o3);
                 break;
             case COMBAT_ORDERS:
                 o1.nOption = si.getValue(x, slv);
@@ -247,9 +258,6 @@ public class Warrior extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        if(hasHitMobs) {
-            handleFinalAttack(chr, attackInfo);
-        }
         int comboProp = getComboProp(chr);
         if (hasHitMobs && Util.succeedProp(comboProp)) {
             addCombo(chr);
@@ -310,19 +318,38 @@ public class Warrior extends Job {
                 }
                 break;
             case SHOUT_DOWN:
+                Skill orig = chr.getSkill(SHOUT);
+                slv = orig.getCurrentLevel();
+                si = SkillData.getSkillInfoById(SHOUT_DOWN);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(mob.isBoss()) {
                         o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skill.getSkillId();
+                        o1.rOption = SHOUT_DOWN;
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Weakness, o1);
                     } else {
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
+                        o1.rOption = SHOUT_DOWN;
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+            case PUNCTURE:
+                if(hasHitMobs) {
+                    removeCombo(chr, si.getValue(y, slv));
+                }
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(y, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptions(MobStat.AddDamParty, o1);
+                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }
                 }
                 break;
@@ -435,16 +462,14 @@ public class Warrior extends Job {
     }
 
     @Override
-    public void handleSkill(Client c, InPacket inPacket) {
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         Char chr = c.getChr();
-        int skillID = inPacket.decodeInt();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        byte slv = inPacket.decodeByte();
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -465,7 +490,7 @@ public class Warrior extends Job {
 
     private void addCombo(Char chr) {
         int currentCount = getComboCount(chr);
-        if (currentCount <= 0) {
+        if (currentCount < 0) {
             return;
         }
         if (currentCount < getMaxCombo(chr)) {

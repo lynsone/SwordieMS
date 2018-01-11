@@ -111,7 +111,9 @@ public class JobManager {
             }
             if(job != null && job.isHandlerOfJob(c.getChr().getJob())) {
                 inPacket.decodeInt(); // crc
-                job.handleSkill(c, inPacket);
+                int skillID = inPacket.decodeInt();
+                byte slv = inPacket.decodeByte();
+                job.handleSkill(c, skillID, slv, inPacket);
             }
         }
     }

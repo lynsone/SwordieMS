@@ -19,7 +19,7 @@ public abstract class Job {
 
     public abstract void handleAttack(Client c, AttackInfo attackInfo);
 
-    public abstract void handleSkill(Client c, InPacket inPacket);
+    public abstract void handleSkill(Client c, int skillID, byte slv, InPacket inPacket);
 
     public abstract boolean isHandlerOfJob(short id);
 

@@ -493,7 +493,7 @@ public class MobTemporaryStat {
         BurnedInfo bi = new BurnedInfo();
         bi.setCharacterId(charId);
         bi.setSkillId(skill.getSkillId());
-        bi.setDamage(0); //si.getValue(dot, slv));
+        bi.setDamage(si.getValue(dot, slv));
         bi.setInterval(si.getValue(dotInterval, slv) * 1000);
         int time = si.getValue(dotTime, slv) * 1000;
         bi.setEnd((int) (System.currentTimeMillis() + time));
@@ -506,9 +506,7 @@ public class MobTemporaryStat {
         bi.setStartTime((int) System.currentTimeMillis());
         bi.setLastUpdate((int) System.currentTimeMillis());
         if(bu != null) {
-            getBurnedInfos().remove(bu);
-            getBurnTimers().get(charId).cancel();
-            getBurnCancelTimers().get(charId).cancel();
+            removeBurnedInfo(charId, false);
         }
         getBurnedInfos().add(bi);
         addStatOptionsAndBroadcast(MobStat.BurnedInfo, new Option());

@@ -22,7 +22,7 @@ public class Citizen extends Job {
     }
 
     @Override
-    public void handleSkill(Client c, InPacket inPacket) {
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
 
     }
 

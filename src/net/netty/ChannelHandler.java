@@ -75,7 +75,10 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case SKILL:
                     inPacket.decodeInt(); // crc
-                    c.getChr().getJobHandler().handleSkill(c, inPacket);
+                    int skillID = inPacket.decodeInt();
+                    byte slv = inPacket.decodeByte();
+                    System.out.println("SkillID: " + skillID);
+                    c.getChr().getJobHandler().handleSkill(c, skillID, slv, inPacket);
                     WvsContext.dispose(c, c.getChr());
                     break;
                 case TEMPORARY_STAT_RESET_REQUEST:

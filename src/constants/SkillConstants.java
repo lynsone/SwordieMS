@@ -49,7 +49,6 @@ public class SkillConstants {
         if (prefix == 8000) {
             prefix = skillId / 100;
         }
-        System.out.println(String.format("Job of %d is %d.", skillId, prefix));
         return prefix;
     }
 
@@ -323,5 +322,84 @@ public class SkillConstants {
 
     public static boolean isKeydownSkillRectMoveXY(int skillID) {
         return skillID == 13111020;
+    }
+
+    public static int getOriginalOfLinkedSkill(int skillID) {
+        int result = 0;
+        switch(skillID) {
+            case 80001040:
+                result = 20021110;
+                break;
+            case 80001140:
+                result = 50001214;
+                break;
+            case 80001155:
+                result = 60011219;
+                break;
+            case 80000378:
+                result = 30000077;
+                break;
+            case 80000334:
+                result = 30000075;
+                break;
+            case 80000335:
+                result = 30000076;
+                break;
+            case 80000369:
+                result = 20010294;
+                break;
+            case 80000370:
+                result = 20000297;
+                break;
+            case 80000333:
+                result = 30000074;
+                break;
+            case 80000000:
+                result = 110;
+                break;
+            case 80000001:
+//                result = &_unwindfunclet___1CField_PvP__UAE_XZ_13;
+                break;
+            case 80000002:
+                result = 20030204;
+                break;
+            case 80000005:
+                result = 20040218;
+                break;
+            case 80000006:
+                result = 60000222;
+                break;
+            case 80000047:
+//                result = &_unwindfunclet__ShowOneTimeEffect_CField_RhythmGame__AAEXV__ZXString_G___Z_8 + 1;
+                break;
+            case 80000050:
+                result = 30010241;
+                break;
+            case 80000066:
+                result = 10000255;
+                break;
+            case 80000067:
+                result = 10000256;
+                break;
+            case 80000068:
+                result = 10000257;
+                break;
+            case 80000069:
+                result = 10000258;
+                break;
+            case 80000070:
+                result = 10000259;
+                break;
+            case 80000110:
+                result = 100000271;
+                break;
+            case 80000169:
+                result = 20050286;
+                break;
+            case 80000188:
+                result = 140000292;
+                break;
+        }
+        return result;
     }
 }

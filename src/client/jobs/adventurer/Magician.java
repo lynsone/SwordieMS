@@ -162,16 +162,14 @@ public class Magician extends Job {
     }
 
     @Override
-    public void handleSkill(Client c, InPacket inPacket) {
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         Char chr = c.getChr();
-        int skillID = inPacket.decodeInt();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        byte slv = inPacket.decodeByte();
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {

@@ -39,7 +39,7 @@ public class WvsContext {
                                         int hpRecovery, int mpRecovery) {
         OutPacket outPacket = new OutPacket(OutHeader.STAT_CHANGED);
 
-        outPacket.encodeByte(false);
+        outPacket.encodeByte(exclRequestSent);
         // GW_CharacterStat::DecodeChangeStat
         int mask = 0;
         for(Stat stat : stats.keySet()) {
@@ -196,12 +196,11 @@ public class WvsContext {
                                                     boolean removeLinkSkill, boolean sn) {
         OutPacket outPacket = new OutPacket(OutHeader.CHANGE_SKILL_RECORD_RESULT);
 
-        outPacket.encodeByte(false);
+        outPacket.encodeByte(exclRequestSent);
         outPacket.encodeByte(showResult);
         outPacket.encodeByte(removeLinkSkill);
         outPacket.encodeShort(skills.size());
         for(Skill skill : skills) {
-            System.out.println("Skill: " + skill.getSkillId() + ", " + skill.getCurrentLevel() + ", " + skill.getMasterLevel());
             outPacket.encodeInt(skill.getSkillId());
             outPacket.encodeInt(skill.getCurrentLevel());
             outPacket.encodeInt(skill.getMasterLevel());
