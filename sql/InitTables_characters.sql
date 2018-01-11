@@ -1,7 +1,10 @@
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS test;
+DROP TABLE IF EXISTS skills;
 DROP TABLE IF EXISTS characters;
 DROP TABLE IF EXISTS avatarData;
+DROP TABLE IF EXISTS keymaps;
+DROP TABLE IF EXISTS funckeymap;
 DROP TABLE IF EXISTS characterStats;
 DROP TABLE IF exists hairEquips;
 DROP TABLE IF EXISTS unseenEquips;
@@ -35,7 +38,7 @@ CREATE TABLE inventories (
 );
 
 CREATE TABLE items (
-	id int NOT NULL AUTO_INCREMENT,
+	id bigint NOT NULL AUTO_INCREMENT,
     inventoryId int,
     itemId int,
     bagIndex int,
@@ -44,13 +47,15 @@ CREATE TABLE items (
     invType int,
     type int,
     isCash boolean,
+    quantity int,
+    owner varchar(255),
     PRIMARY KEY (id),
     FOREIGN KEY (inventoryId) REFERENCES inventories(id) ON DELETE CASCADE
 );
 
 CREATE TABLE equips (
 	serialNumber bigint,
-    itemId int,
+    itemId bigint,
     title varchar(255),
     equippedDate int,
     prevBonusExpRate int,
@@ -119,7 +124,6 @@ CREATE TABLE equips (
     iSlot varchar(255),
     vSlot varchar(255),
     fixedGrade int,
-    owner varchar(255),
     PRIMARY KEY (itemId),
     FOREIGN KEY (itemId) REFERENCES items(id),
     FOREIGN KEY (equippedDate) REFERENCES filetimes(id)
@@ -127,7 +131,7 @@ CREATE TABLE equips (
 
 CREATE TABLE options (
 	id int NOT NULL AUTO_INCREMENT,
-    equipId int,
+    equipId bigint,
     optionId int,
     PRIMARY KEY (id),
     FOREIGN KEY (equipId) REFERENCES equips(itemId)
@@ -305,6 +309,22 @@ CREATE TABLE avatarData (
     FOREIGN KEY (avatarLook) REFERENCES avatarlook(id)
 );
 
+CREATE TABLE funckeymap (
+	id int NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE keymaps (
+	id int NOT NULL AUTO_INCREMENT,
+    fkMapId int,
+    idx int,
+    type tinyint,
+    val int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (fkMapId) REFERENCES funckeymap(id)
+);
+
+
 CREATE TABLE characters (
 	id int NOT NULL AUTO_INCREMENT,
     accId int,
@@ -315,6 +335,8 @@ CREATE TABLE characters (
     etcInventory int,
     installInventory int,
     cashInventory int,
+    funcKeyMap_id int,
+    fieldID int,
 	PRIMARY KEY (id),
     FOREIGN KEY (avatarData) REFERENCES avatarData(id) ON DELETE CASCADE,
     FOREIGN KEY (equippedInventory) REFERENCES inventories(id) ON DELETE CASCADE,
@@ -322,10 +344,23 @@ CREATE TABLE characters (
     FOREIGN KEY (consumeInventory) REFERENCES inventories(id) ON DELETE CASCADE,
     FOREIGN KEY (etcInventory) REFERENCES inventories(id) ON DELETE CASCADE,
     FOREIGN KEY (installInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (cashInventory) REFERENCES inventories(id) ON DELETE CASCADE
+    FOREIGN KEY (cashInventory) REFERENCES inventories(id) ON DELETE CASCADE,
+    FOREIGN KEY (funcKeyMap_id) REFERENCES funckeymap(id) ON DELETE CASCADE
 );
 
-CREATE TABLE users (
+CREATE TABLE skills (
+	id int NOT NULL AUTO_INCREMENT,
+    charId int,
+    skillId int,
+    rootId int,
+    maxLevel int,
+    currentLevel int,
+    masterLevel int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (charId) REFERENCES characters(id) ON DELETE CASCADE
+);
+
+CREATE TABLE accounts (
 	id int NOT NULL AUTO_INCREMENT,
 	username VARCHAR(255),
 	password VARCHAR(255),
@@ -365,4 +400,4 @@ CREATE TABLE users (
 #);
 
 
-INSERT INTO `users` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`) VALUES ('admin', 'admin', '7', '0', '0', '111111');
+INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('admin', 'admin', '7', '0', '0', '111111', '40');

@@ -2,6 +2,7 @@ package client.jobs.adventurer;
 
 import client.Client;
 import client.character.Char;
+import client.character.HitInfo;
 import client.character.skills.AttackInfo;
 import client.jobs.Job;
 import connection.InPacket;
@@ -22,6 +23,11 @@ public class PinkBean extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+
+    }
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
     }
 

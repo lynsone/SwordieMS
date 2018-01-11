@@ -2,6 +2,7 @@ package client.jobs.adventurer;
 
 import client.Client;
 import client.character.Char;
+import client.character.HitInfo;
 import client.character.skills.*;
 import client.jobs.Job;
 import client.life.Mob;
@@ -226,6 +227,11 @@ public class Archer extends Job {
             switch(skillID) {
             }
         }
+    }
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
     }
 
     private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

@@ -2,6 +2,7 @@ package client.jobs.adventurer;
 
 import client.Client;
 import client.character.Char;
+import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
@@ -176,6 +177,11 @@ public class Magician extends Job {
             switch(skillID) {
             }
         }
+    }
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
     }
 
     private boolean isBuff(int skillID) {

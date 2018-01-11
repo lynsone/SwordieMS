@@ -26,7 +26,7 @@ public abstract class Job {
 
     }
 
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo){};
+    public abstract void handleHit(Client c, InPacket inPacket, HitInfo hitInfo);
 
     public abstract boolean isHandlerOfJob(short id);
 

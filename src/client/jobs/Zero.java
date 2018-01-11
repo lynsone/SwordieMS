@@ -2,6 +2,7 @@ package client.jobs;
 
 import client.Client;
 import client.character.Char;
+import client.character.HitInfo;
 import client.character.skills.AttackInfo;
 import connection.InPacket;
 import constants.JobConstants;
@@ -22,6 +23,11 @@ public class Zero extends Job {
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
 
+    }
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        
     }
 
     @Override

@@ -2,6 +2,7 @@ package client.jobs.adventurer;
 
 import client.Client;
 import client.character.Char;
+import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
@@ -515,6 +516,11 @@ public class Warrior extends Job {
                     break;
             }
         }
+    }
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
     }
 
     private void addCombo(Char chr) {

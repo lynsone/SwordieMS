@@ -2,6 +2,7 @@ package client.jobs.resistance;
 
 import client.Client;
 import client.character.Char;
+import client.character.HitInfo;
 import client.character.skills.*;
 import client.jobs.Job;
 import connection.InPacket;
@@ -58,6 +59,12 @@ public class Blaster extends Job {
             }
         }
     }
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
+    }
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
