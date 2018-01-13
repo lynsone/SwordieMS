@@ -449,7 +449,6 @@ public class Warrior extends Job {
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
-                handleCharges(skill.getSkillId(), tsm, c);
                 break;
             case FINAL_ATTACK_FIGHTER:
             case FINAL_ATTACK_SPEARMAN:
