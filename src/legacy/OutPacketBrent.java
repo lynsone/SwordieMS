@@ -167,7 +167,7 @@ public final class OutPacketBrent {
 
     @Override
     public final String toString() {
-        return "[SndBEREWRE] | " + getData()[0] + " | Data: " + Util.ReadableByteArray(getData());
+        return "[SndBEREWRE] | " + getData()[0] + " | Data: " + Util.readableByteArray(getData());
 
     }
 
