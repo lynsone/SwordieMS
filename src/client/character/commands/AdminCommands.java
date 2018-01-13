@@ -275,7 +275,11 @@ public class AdminCommands {
                 chr.chatMessage(GAME_NOTICE, "Needs more args! <what to lookup> <id>");
                 return;
             }
-            String query = args[2].toLowerCase();
+            String query = "";
+            for (int i = 2; i < args.length; i++) {
+                query += args[i].toLowerCase() + " ";
+            }
+            query = query.substring(0, query.length() - 1);
             System.out.println("Query: " + query);
             boolean isNumber = Util.isNumber(query);
             if ("skill".equalsIgnoreCase(args[1])) {

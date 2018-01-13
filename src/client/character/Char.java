@@ -1290,7 +1290,7 @@ public class Char {
         return skill;
     }
     
-    public void setStat(Stat charStat, short amount) {
+    public void setStat(Stat charStat, int amount) {
         switch(charStat) {
             case str:
                 getAvatarData().getCharacterStat().setStr(amount);
@@ -1325,7 +1325,7 @@ public class Char {
         }
     }
     
-    public short getStat(Stat charStat) {
+    public int getStat(Stat charStat) {
         switch(charStat) {
             case str:
                 return getAvatarData().getCharacterStat().getStr();
@@ -1349,8 +1349,8 @@ public class Char {
         return -1;
     }
     
-    public void addStat(Stat charStat, short amount) {
-        setStat(charStat, (short) (getStat(charStat) + amount));
+    public void addStat(Stat charStat, int amount) {
+        setStat(charStat, getStat(charStat) + amount);
     }
 
     public Position getOldPosition() {

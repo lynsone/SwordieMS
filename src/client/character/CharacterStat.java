@@ -168,8 +168,8 @@ public class CharacterStat {
         return (short) dex;
     }
 
-    public short getHp() {
-        return (short) hp;
+    public int getHp() {
+        return hp;
     }
 
     public short getInt() {
@@ -192,16 +192,16 @@ public class CharacterStat {
         return (short) luk;
     }
 
-    public short getMaxHp() {
-        return (short) maxHp;
+    public int getMaxHp() {
+        return maxHp;
     }
 
-    public short getMaxMp() {
-        return (short) maxMp;
+    public int getMaxMp() {
+        return maxMp;
     }
 
-    public short getMp() {
-        return (short) mp;
+    public int getMp() {
+        return mp;
     }
 
     public short getPop() {

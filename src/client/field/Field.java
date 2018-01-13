@@ -1,12 +1,11 @@
 package client.field;
 
 import client.character.Char;
-import client.life.AffectedArea;
-import client.life.Life;
-import client.life.Mob;
-import client.life.MobTemporaryStat;
+import client.life.*;
 import connection.OutPacket;
+import enums.LeaveType;
 import packet.CField;
+import server.EventManager;
 import util.Position;
 import util.Rect;
 
@@ -30,6 +29,7 @@ public class Field {
     private List<Life> lifes;
     private List<Char> chars;
     private Map<Life, Char> lifeToControllers;
+    private Map<Life, Timer> lifeTimers;
     private String onFirstUserEnter = "", onUserEnter = "";
     private int fixedMobCapacity;
     private int objectIDCounter = 1000000;
@@ -43,6 +43,7 @@ public class Field {
         this.lifes = new ArrayList<>();
         this.chars = new ArrayList<>();
         this.lifeToControllers = new HashMap<>();
+        this.lifeTimers = new HashMap<>();
     }
 
     public Rectangle getRect() {
@@ -302,21 +303,38 @@ public class Field {
     }
 
     public void addLife(Life life) {
+        if(life.getObjectId() < 0) {
+            life.setObjectId(getNewObjectID());
+        }
         if(!getLifes().contains(life)) {
             getLifes().add(life);
             life.setField(this);
-            if(life.getObjectId() < 0) {
-                life.setObjectId(getNewObjectID());
-            }
         }
+    }
+
+    public void removeLife(int id) {
+        Life life = getLifeByObjectID(id);
+        if(life == null) {
+            return;
+        }
+        getLifes().remove(life);
+    }
+
+    public void spawnSummon(Summon summon) {
+        Summon oldSummon = (Summon) getLifes().stream()
+                .filter(s -> s instanceof Summon &&
+                        ((Summon) s).getCharID() == summon.getCharID() &&
+                        ((Summon) s).getSkillID() == summon.getSkillID())
+                .findFirst().orElse(null);
+        if(oldSummon != null) {
+            removeSummon(oldSummon.getObjectId(), false);
+        }
+        spawnLife(summon, null);
     }
 
     public void spawnLife(Life life, Char onlyChar) {
         addLife(life);
         if (getChars().size() > 0) {
-            if(life.getObjectId() < 0) {
-                life.setObjectId(getNewObjectID());
-            }
             Char controller = null;
             if(getLifeToControllers().containsKey(life)) {
                 controller = getLifeToControllers().get(life);
@@ -347,6 +365,14 @@ public class Field {
                     onlyChar.getClient().write(CField.mobEnterField(mob, false));
                     onlyChar.getClient().write(CField.mobChangeController(mob, false, controller == onlyChar));
                 }
+            }
+            if(life instanceof Summon) {
+                Summon summon = (Summon) life;
+                if(summon.getSummonTerm() > 0) {
+                    Timer t = EventManager.addEvent(this, "removeSummon", summon.getSummonTerm(), summon.getObjectId(), true);
+                    addLifeTimer(summon, t);
+                }
+                broadcastPacket(CField.summonedCreated(summon.getCharID(), summon));
             }
         }
     }
@@ -450,5 +476,34 @@ public class Field {
             }
         }
         return lifes;
+    }
+
+    public synchronized void removeSummon(Integer id, Boolean fromTimer) {
+        Life life = getLifeByObjectID(id);
+        if(life == null || !(life instanceof Summon)) {
+            return;
+        }
+        Summon summon = (Summon) life;
+        removeLife(id);
+        removeTimer(life, fromTimer);
+        broadcastPacket(CField.summonedRemoved(summon, LeaveType.ANIMATION));
+    }
+
+    public Map<Life, Timer> getLifeTimers() {
+        return lifeTimers;
+    }
+
+    public void addLifeTimer(Life life, Timer timer) {
+        getLifeTimers().put(life, timer);
+    }
+
+    public void removeTimer(Life life, boolean fromTimer) {
+        if(!getLifeTimers().containsKey(life)) {
+            return;
+        }
+        if(!fromTimer) {
+            getLifeTimers().get(life).cancel();
+        }
+        getLifeTimers().remove(life);
     }
 }

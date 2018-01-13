@@ -11,6 +11,7 @@ import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
 import client.jobs.JobManager;
+import client.life.AffectedArea;
 import client.life.Life;
 import client.life.Mob;
 import client.life.Summon;
@@ -89,7 +90,7 @@ public class WorldHandler {
         }
     }
 
-    public static void handleChat(Client c, InPacket inPacket) {
+    public static void handleUserChat(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt();
         String msg = inPacket.decodeString();
@@ -324,6 +325,7 @@ public class WorldHandler {
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         c.getChr().chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
+        System.out.println("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
@@ -356,7 +358,7 @@ public class WorldHandler {
         toField.spawnLifesForChar(chr);
     }
 
-    public static void handleSkillRecordUpdateRequest(Client c, InPacket inPacket) {
+    public static void handleUserSkillUpRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
@@ -619,7 +621,7 @@ public class WorldHandler {
         handleAttack(c, ai);
     }
 
-    public static void handleAbilityPointDistribute(Client c, InPacket inPacket) {
+    public static void handleUserAbilityUpRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         if(chr.getStat(Stat.ap) <= 0) {
             return;
@@ -634,13 +636,13 @@ public class WorldHandler {
         chr.addStat(charStat, amount);
         chr.addStat(Stat.ap, (short) -1);
         Map<Stat, Object> stats = new HashMap<>();
-        stats.put(charStat, chr.getStat(charStat));
-        stats.put(Stat.ap, chr.getStat(Stat.ap));
+        stats.put(charStat, (short) chr.getStat(charStat));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
         c.write(WvsContext.statChanged(stats, true));
         WvsContext.dispose(c, chr);
     }
 
-    public static void handleAutoAbilityPointDistribute(Client c, InPacket inPacket) {
+    public static void handleUserAbilityMassUpRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt(); // tick
         int type = inPacket.decodeInt();
@@ -667,13 +669,13 @@ public class WorldHandler {
         chr.addStat(charStat, addStat);
         chr.addStat(Stat.ap, (short) -amount);
         Map<Stat, Object> stats = new HashMap<>();
-        stats.put(charStat, chr.getStat(charStat));
-        stats.put(Stat.ap, chr.getStat(Stat.ap));
+        stats.put(charStat, (short) chr.getStat(charStat));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
         c.write(WvsContext.statChanged(stats, true));
         WvsContext.dispose(c, chr);
     }
 
-    public static void handleMoveLife(Client c, InPacket inPacket) {
+    public static void handleMoveMob(Client c, InPacket inPacket) {
         Field field = c.getChr().getField();
         int objectID = inPacket.decodeInt();
         Life life = field.getLifeByObjectID(objectID);
@@ -729,11 +731,25 @@ public class WorldHandler {
         int skillId = inPacket.decodeInt();
         Map<CharacterTemporaryStat, Option> removedMap = new HashMap<>();
         for(CharacterTemporaryStat cts : tsm.getCurrentStats().keySet()) {
-            if(tsm.getOption(cts).rOption == skillId || tsm.getOption(cts).nReason == skillId) {
+            Option checkOpt = new Option(skillId);
+            if(cts.isIndie() && tsm.getOptions(cts).contains(checkOpt)) {
+                Option o = tsm.getOptions(cts).stream().filter(opt -> opt.equals(checkOpt)).findFirst().orElse(null);
+                if(o == null) {
+                    System.err.println("Found option null, yet the options contained it?");
+                } else {
+                    removedMap.put(cts, o);
+                }
+            } else if(tsm.getOption(cts).rOption == skillId || tsm.getOption(cts).nReason == skillId) {
                 removedMap.put(cts, tsm.getOption(cts));
             }
         }
-        removedMap.forEach((cts, opt) -> tsm.removeStat(cts, false));
+        removedMap.forEach((cts, opt) -> {
+            if(cts.isIndie()) {
+                tsm.removeIndieStat(cts, opt, false);
+            } else {
+                tsm.removeStat(cts, false);
+            }
+        });
         c.write(WvsContext.temporaryStatReset(chr.getTemporaryStatManager(), false));
     }
 
@@ -942,5 +958,115 @@ public class WorldHandler {
         channel.addClientInTransfer((byte) (channelID - 1), chr.getId(), c.getAccount());
         short port = (short) channel.getPort();
         c.write(ClientSocket.migrateCommand(true, port));
+    }
+
+    public static void handleUserChangeStatRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        int mask = inPacket.decodeInt();
+        List<Stat> stats = Stat.getStatsByFlag(mask); // should be in correct order
+        inPacket.decodeInt();
+        HashMap hashMap = new HashMap();
+        for(Stat stat : stats) {
+            hashMap.put(stat, inPacket.decodeShort()); // always short?
+        }
+        Map<Stat, Object> newStats = new HashMap<>();
+        byte option = inPacket.decodeByte();
+        if(hashMap.containsKey(Stat.hp)) {
+            int curHP = chr.getStat(Stat.hp);
+            int maxHP = chr.getStat(Stat.mhp);
+            short extra = (short) hashMap.get(Stat.hp);
+            int newHP = curHP + extra > maxHP ? maxHP : curHP + extra;
+            chr.setStat(Stat.hp, newHP);
+            newStats.put(Stat.hp, newHP);
+        } else if(hashMap.containsKey(Stat.mp)) {
+            int curMP = chr.getStat(Stat.mp);
+            int maxMP = chr.getStat(Stat.mmp);
+            short extra = (short) hashMap.get(Stat.mp);
+            int newMP = curMP + extra > maxMP ? maxMP : curMP + extra;
+            chr.setStat(Stat.mp, newMP);
+            newStats.put(Stat.mp, newMP);
+        }
+
+        c.write(WvsContext.statChanged(newStats, true));
+    }
+
+    public static void handleCreateKinesisPsychicArea(Client c, InPacket inPacket) {
+        PsychicArea pa = new PsychicArea();
+        pa.action = inPacket.decodeInt();
+        pa.actionSpeed = inPacket.decodeInt();
+        pa.localPsychicAreaKey = inPacket.decodeInt();
+        pa.psychicAreaKey = inPacket.decodeInt();
+        pa.skillID = inPacket.decodeInt();
+        pa.slv = inPacket.decodeShort();
+        pa.duration = inPacket.decodeInt();
+        pa.isLeft = inPacket.decodeByte() != 0;
+        pa.skeletonFilePathIdx = inPacket.decodeShort();
+        pa.skeletonAniIdx = inPacket.decodeShort();
+        pa.skeletonLoop = inPacket.decodeShort();
+        pa.start = inPacket.decodePositionInt();
+        c.write(CField.createPsychicArea(true, pa));
+//        AffectedArea aa = new AffectedArea(-1);
+//        aa.setSkillID(pa.skillID);
+//        aa.setSlv((byte) pa.slv);
+//        aa.setMobOrigin((byte) 0);
+//        aa.setCharID(c.getChr().getId());
+//        int x = pa.start.getX();
+//        int y = pa.start.getY();
+//        aa.setPosition(new Position(x, y));
+//        aa.setFlip(pa.isLeft);
+//        aa.setElemAttr(1);
+//        aa.setOption(1);
+//        SkillInfo si = SkillData.getSkillInfoById(pa.skillID);
+//        aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+//        c.getChr().getField().spawnAffectedArea(aa);
+    }
+
+    public static void handleReleasePsychicArea(Client c, InPacket inPacket) {
+        int localPsychicAreaKey = inPacket.decodeInt();
+        c.write(CField.releasePsychicArea(localPsychicAreaKey));
+    }
+
+    public static void handleCreatePsychicLock(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field f = chr.getField();
+        PsychicLock pl = new PsychicLock();
+        pl.skillID = inPacket.decodeInt();
+        pl.slv = inPacket.decodeShort();
+        pl.action = inPacket.decodeInt();
+        pl.actionSpeed = inPacket.decodeInt();
+        while(inPacket.decodeByte() != 0) {
+            PsychicLockBall plb = new PsychicLockBall();
+            plb.localKey = inPacket.decodeInt();
+            plb.psychicLockKey = inPacket.decodeInt();
+            int mobID = inPacket.decodeInt();
+            plb.mob = (Mob) f.getLifeByObjectID(mobID);
+            plb.stuffID = inPacket.decodeShort();
+            plb.usableCount = inPacket.decodeShort();
+            plb.posRelID = inPacket.decodeByte();
+            plb.start = inPacket.decodePositionInt();
+            plb.rel = inPacket.decodePositionInt();
+        }
+        // TODO can't attack after this, gotta fix
+    }
+
+    public static void handleReleasePsychicLock(Client c, InPacket inPacket) {
+        int skillID = inPacket.decodeInt();
+        short slv = inPacket.decodeShort();
+        short count = inPacket.decodeShort();
+        int id = inPacket.decodeInt();
+        int mobID = inPacket.decodeInt();
+        if(mobID != 0) {
+            List<Integer> l = new ArrayList<>();
+            l.add(mobID);
+            c.write(CField.releasePsychicLockMob(l));
+        } else {
+            c.write(CField.releasePsychicLock(id));
+        }
+    }
+
+    public static void handleSummonedRemove(Client c, InPacket inPacket) {
+        int id = inPacket.decodeInt();
+        c.getChr().getField().removeSummon(id, false);
     }
 }

@@ -31,4 +31,13 @@ public class Tuple<L, R> {
     public void setRight(R right) {
         this.right = right;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Tuple)) {
+            return false;
+        }
+        Tuple tuple = (Tuple) obj;
+        return tuple.getLeft().equals(left) && tuple.getRight().equals(right);
+    }
 }

@@ -119,4 +119,8 @@ public class InPacket extends Packet {
     public Rect decodeShortRect() {
         return new Rect(decodePosition(), decodePosition());
     }
+
+    public Position decodePositionInt() {
+        return new Position(decodeInt(), decodeInt());
+    }
 }

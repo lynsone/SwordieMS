@@ -1,8 +1,8 @@
 package net.netty;
 
 import client.Client;
-import client.jobs.JobManager;
 import connection.InPacket;
+import enums.ChatMsgColour;
 import handling.InHeader;
 import handling.handlers.LoginHandler;
 import handling.handlers.WorldHandler;
@@ -10,7 +10,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import packet.WvsContext;
-import server.World;
 
 import static net.netty.NettyClient.CLIENT_KEY;
 
@@ -68,20 +67,21 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case CLIENT_START:
                     LoginHandler.handleClientStart(c, inPacket);
                     break;
-                case CRASH:
+                case WVS_CRASH_CALLBACK:
                     if(c != null && c.getAccount() != null) {
                         c.getAccount().updateDB();
                     }
                     break;
-                case SKILL:
+                case USER_SKILL_USE_REQUEST:
                     inPacket.decodeInt(); // crc
                     int skillID = inPacket.decodeInt();
                     byte slv = inPacket.decodeByte();
                     System.out.println("SkillID: " + skillID);
+                    c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
                     c.getChr().getJobHandler().handleSkill(c, skillID, slv, inPacket);
                     WvsContext.dispose(c, c.getChr());
                     break;
-                case TEMPORARY_STAT_RESET_REQUEST:
+                case USER_SKILL_CANCEL_REQUEST:
                     WorldHandler.handleTemporaryStatResetRequest(c, inPacket);
                     break;
                 case PONG:
@@ -128,59 +128,79 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case CHAR_SELECT:
                     LoginHandler.handleCharSelect(c, inPacket);
                     break;
-                case USE_BUTTON:
-                case LOAD:
+                case UPDATE_CLIENT_ENVIRONMENT:
+                case WVS_SET_UP_STEP:
                 case LOCALE:
+                case USER_EMOTION:
                     break;
                 case CHAR_LOGIN:
                     WorldHandler.handleCharLogin(c, inPacket);
                     break;
-                case HIT:
+                case USER_HIT:
                     c.getChr().getJobHandler().handleHit(c, inPacket);
-                case CHAT:
-                    WorldHandler.handleChat(c, inPacket);
                     break;
-                case INVENTORY_OPERATION:
+                case USER_CHAT:
+                    WorldHandler.handleUserChat(c, inPacket);
+                    break;
+                case USER_CHANGE_SLOT_POSITIREQUEST:
                     WorldHandler.handleInventoryOperation(c, inPacket);
                     break;
-                case KEYMAP_UPDATE_REQUEST:
+                case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);
+                    break;
+                case SUMMONED_REMOVE:
+                    WorldHandler.handleSummonedRemove(c, inPacket);
                     break;
                 case SUMMONED_ATTACK:
                     WorldHandler.handleSummonedAttack(c, inPacket);
                     break;
-                case ABILITY_POINT_DISTRIBUTE:
-                    WorldHandler.handleAbilityPointDistribute(c, inPacket);
+                case USER_ABILITY_UP_REQUEST:
+                    WorldHandler.handleUserAbilityUpRequest(c, inPacket);
                     break;
-                case AUTO_ABILITY_POINT_DISTRIBUTE:
-                    WorldHandler.handleAutoAbilityPointDistribute(c, inPacket);
+                case USER_ABILITY_MASS_UP_REQUEST:
+                    WorldHandler.handleUserAbilityMassUpRequest(c, inPacket);
                     break;
-                case SKILL_RECORD_UPDATE_REQUEST:
-                    WorldHandler.handleSkillRecordUpdateRequest(c, inPacket);
+                case USER_CHANGE_STAT_REQUEST:
+                    WorldHandler.handleUserChangeStatRequest(c, inPacket);
                     break;
-                case MELEE_ATTACK:
+                case USER_SKILL_UP_REQUEST:
+                    WorldHandler.handleUserSkillUpRequest(c, inPacket);
+                    break;
+                case USER_MELEE_ATTACK:
                     WorldHandler.handleMeleeAttack(c, inPacket);
                     break;
-                case SHOOT_ATTACK:
+                case USER_SHOOT_ATTACK:
                     WorldHandler.handleShootAttack(c, inPacket);
                     break;
-                case MAGIC_ATTACK:
+                case USER_MAGIC_ATTACK:
                     WorldHandler.handleMagicAttack(c, inPacket);
                     break;
-                case BODY_ATTACK:
+                case USER_BODY_ATTACK:
                     WorldHandler.handleBodyAttack(c, inPacket);
                     break;
-                case CHANGE_FIELD_REQUEST:
+                case USER_TRANSFER_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
                     break;
-                case CHANGE_CHANNEL_REQUEST:
+                case USER_TRANSFER_CHANNEL_REQUEST:
                     WorldHandler.handleChangeChannelRequest(c, inPacket);
                     break;
-                case MOVE:
+                case USER_MOVE:
                     WorldHandler.handleMove(c, inPacket);
                     break;
-                case MOVE_LIFE:
-                    WorldHandler.handleMoveLife(c, inPacket);
+                case MOB_MOVE:
+                    WorldHandler.handleMoveMob(c, inPacket);
+                    break;
+                case CREATE_PSYCHIC_LOCK:
+                    WorldHandler.handleCreatePsychicLock(c, inPacket);
+                    break;
+                case RELEASE_PSYCHIC_LOCK:
+                    WorldHandler.handleReleasePsychicLock(c, inPacket);
+                    break;
+                case CREATE_KINESIS_PSYCHIC_AREA:
+                    WorldHandler.handleCreateKinesisPsychicArea(c, inPacket);
+                    break;
+                case RELEASE_PSYCHIC_AREA:
+                    WorldHandler.handleReleasePsychicArea(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

@@ -122,7 +122,41 @@ public class MetaProgramming {
         }
     }
 
+    public static void makeInHeaders() {
+        File file = new File("D:\\SwordieMS\\Swordie\\src\\ins.txt");
+        int change = 16;
+        try {
+            Scanner scanner = new Scanner(file);
+            String s = "";
+            int num = 0;
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] split = line.split(" = ");
+                String op = split[0].replace(" ", "");
+                if(op.contains("BEGIN_PET")) {
+                    change = 15;
+                } else if(op.contains("BEGIN_MOB")) {
+                    change = 102;
+                }
+                num = Integer.parseInt(split[1], 16) + change;
+                StringBuilder newOp = new StringBuilder();
+                for(char c : op.toCharArray()) {
+                    if(Character.isUpperCase(c)) {
+                        newOp.append("_").append(c);
+                    } else {
+                        newOp.append(c);
+                    }
+                }
+                String fin = newOp.toString().toUpperCase().substring(1).replace("ON_","");
+                s += fin + "(" + num + "), \r\n";
+                }
+            System.out.println(s);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
-        makeHeaders();
+        makeInHeaders();
     }
 }

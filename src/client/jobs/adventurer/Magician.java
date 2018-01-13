@@ -18,6 +18,7 @@ import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
+import server.EventManager;
 import util.Position;
 import util.Util;
 
@@ -39,14 +40,28 @@ public class Magician extends Job {
     public static final int BURNING_MAGIC = 2110000;
     public static final int POISON_MIST = 2111003;
     public static final int TELEPORT_MASTERY_FP = 2111007;
-    public static final int ELEMENTAL_DECREASE = 2111008;
+    public static final int ELEMENTAL_DECREASE_FP = 2111008;
     public static final int VIRAL_SLIME = 2111010;
     public static final int PARALYZE = 2121006;
     public static final int MIST_ERUPTION = 2121003;
     public static final int FLAME_HAZE = 2121011;
-    public static final int INFINITY = 2121004;
+    public static final int INFINITY_FP = 2121004;
     public static final int IFRIT = 2121005;
     public static final int MAPLE_WARRIOR_FP = 2121000;
+    public static final int CHILLING_STEP = 2201009;
+    public static final int COLD_BEAM = 2201008;
+    public static final int MAGIC_BOOSTER_IL = 2201010;
+    public static final int MEDITATION_IL = 2201001;
+    public static final int ICE_STRIKE = 2211002;
+    public static final int GLACIER_CHAIN = 2211010;
+    public static final int THUNDER_STORM = 2211011;
+    public static final int TELEPORT_MASTERY_IL = 2211007;
+    public static final int ELEMENTAL_DECREASE_IL = 2211008;
+    public static final int CHAIN_LIGHTNING = 2221006;
+    public static final int FREEZING_BREATH = 2221011;
+    public static final int INFINITY_IL = 2221004;
+    public static final int ELQUINES = 2221005;
+    public static final int MAPLE_WARRIOR_IL = 2221000;
 
 
     private final int[] buffs = new int[]{
@@ -55,11 +70,20 @@ public class Magician extends Job {
             MAGIC_BOOSTER_FP,
             MEDITATION_FP,
             TELEPORT_MASTERY_FP,
-            ELEMENTAL_DECREASE,
-            INFINITY,
+            ELEMENTAL_DECREASE_FP,
+            INFINITY_FP,
             IFRIT,
             MAPLE_WARRIOR_FP,
             MEDITATION_FP,
+            CHILLING_STEP,
+            MAGIC_BOOSTER_IL,
+            MEDITATION_IL,
+            THUNDER_STORM,
+            TELEPORT_MASTERY_IL,
+            ELEMENTAL_DECREASE_IL,
+            INFINITY_IL,
+            ELQUINES,
+            MAPLE_WARRIOR_IL,
     };
 
     public Magician(Char chr) {
@@ -141,6 +165,39 @@ public class Magician extends Job {
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                 }
                 break;
+            case PARALYZE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                }
+                break;
+            case COLD_BEAM:
+            case ICE_STRIKE:
+            case GLACIER_CHAIN:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
+                }
+                break;
+            case TELEPORT_MASTERY_IL:
+            case CHAIN_LIGHTNING:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+
         }
 
     }
@@ -175,13 +232,29 @@ public class Magician extends Job {
             handleBuff(c, inPacket, skillID, slv);
         } else {
             switch(skillID) {
+                case FREEZING_BREATH:
+
+                    break;
+                case CHILLING_STEP:
+                    break;
+
             }
         }
     }
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(MagicGuard)) {
+            Skill skill = chr.getSkill(MAGIC_GUARD);
+            SkillInfo si = SkillData.getSkillInfoById(MAGIC_GUARD);
+            int dmgPerc = si.getValue(x, skill.getCurrentLevel());
+            int dmg = hitInfo.HPDamage;
+            int mpDmg = (int) (dmg * (dmgPerc / 100D));
+            mpDmg = chr.getStat(Stat.mp) - mpDmg < 0 ? chr.getStat(Stat.mp) : mpDmg;
+            hitInfo.HPDamage = dmg - mpDmg;
+            hitInfo.MPDamage = mpDmg;
+        }
     }
 
     private boolean isBuff(int skillID) {
@@ -195,6 +268,8 @@ public class Magician extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Summon summon;
+        Field field;
         switch (skillID) {
             case MAGIC_GUARD:
                 o1.nOption = si.getValue(x, slv);
@@ -203,6 +278,7 @@ public class Magician extends Job {
                 tsm.putCharacterStatValue(MagicGuard, o1);
                 break;
             case MAGIC_BOOSTER_FP:
+            case MAGIC_BOOSTER_IL:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -213,6 +289,7 @@ public class Magician extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case MEDITATION_FP:
+            case MEDITATION_IL:
                 o1.nValue = si.getValue(indieMad, slv);
                 o1.nReason = skillID;
                 o1.tStart = (int) System.currentTimeMillis();
@@ -225,28 +302,31 @@ public class Magician extends Job {
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(WizardIgnite, o1);
                 break;
-            case ELEMENTAL_DECREASE:
+            case ELEMENTAL_DECREASE_FP:
+            case ELEMENTAL_DECREASE_IL:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ElementalReset, o1);
                 break;
             case TELEPORT_MASTERY_FP:
+            case TELEPORT_MASTERY_IL:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(TeleportMasteryOn, o1);
                 break;
-            case INFINITY:
+            case INFINITY_FP:
+            case INFINITY_IL:
                 o1.nOption = si.getValue(damage, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Infinity, o1);
                 break;
             case IFRIT:
-                Summon summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field = c.getChr().getField();
-                field.addLife(summon);
+            case ELQUINES:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
                 summon.setCharLevel((byte) chr.getStat(Stat.level));
                 summon.setPosition(chr.getPosition().deepCopy());
                 summon.setMoveAction((byte) 1);
@@ -257,14 +337,39 @@ public class Magician extends Job {
                 summon.setBeforeFirstAttack(false);
                 summon.setTemplateId(skillID);
                 summon.setAttackActive(true);
-                c.write(CField.summonedCreated(chr.getId(), summon));
+                field.spawnSummon(summon);
                 break;
             case MAPLE_WARRIOR_FP:
+            case MAPLE_WARRIOR_IL:
                 o1.nValue = si.getValue(x, slv);
                 o1.nReason = skillID;
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+            case THUNDER_STORM:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setCharLevel((byte) chr.getStat(Stat.level));
+                summon.setPosition(chr.getPosition().deepCopy());
+                summon.setMoveAction((byte) 1);
+                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setMoveAbility((byte) 1);
+                summon.setAssistType((byte) 1);
+                summon.setEnterType((byte) 1);
+                summon.setBeforeFirstAttack(false);
+                summon.setTemplateId(skillID);
+                summon.setAttackActive(true);
+                summon.setFlyMob(true);
+                field.spawnSummon(summon);
+//                o1.nReason = skillID;
+//                o1.tTerm = si.getValue(time, slv);
+//                tsm.putCharacterStatValue(IndieDamR, o1);
+                break;
+            case CHILLING_STEP:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(ChillingStep, o1);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

@@ -1,6 +1,9 @@
 package enums;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created on 12/22/2017.
@@ -51,5 +54,17 @@ public enum Stat {
 
     public static Stat getByVal(int stat) {
         return Arrays.stream(values()).filter(s -> s.getVal() == stat).findFirst().orElse(null);
+    }
+
+    public static List<Stat> getStatsByFlag(int mask) {
+        List<Stat> stats = new ArrayList<>();
+        List<Stat> allStats = Arrays.asList(values());
+        Collections.sort(allStats);
+        for(Stat stat : allStats) {
+            if((stat.getVal() & mask) != 0) {
+                stats.add(stat);
+            }
+        }
+        return stats;
     }
 }

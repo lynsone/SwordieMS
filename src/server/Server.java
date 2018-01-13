@@ -78,7 +78,7 @@ public class Server extends Properties{
 
         MapleCrypto.initialize(ServerConstants.VERSION);
         new Thread(new LoginAcceptor()).start();
-        worldList.add(new World(1, "Je Moeder", 8));
+        worldList.add(new World(1, "Je Moeder", 3));
 
         for(World world : getWorlds()) {
             for(Channel channel : world.getChannels()) {

@@ -28,6 +28,13 @@ public class Option {
     public int pOption;
     public List<Option> extraOpts = new ArrayList<>();
 
+    public Option(int skillID) {
+        this.nReason = skillID;
+        this.rOption = skillID;
+    }
+
+    public Option(){}
+
     public Option deepCopy() {
         Option copy = new Option();
         copy.nOption = nOption;
@@ -51,5 +58,21 @@ public class Option {
         copy.tTerm = tTerm;
         extraOpts.forEach(o -> extraOpts.add(o.deepCopy()));
         return copy;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Option &&
+                ((((Option) obj).rOption == rOption && ((Option) obj).rOption > 0) ||
+                ((((Option) obj).nReason == nReason && ((Option) obj).nReason > 0)));
+    }
+
+    @Override
+    public String toString() {
+        if(nReason == 0) {
+            return "Indie: false, skill: " + rOption + ", val: " + nOption + ", time: " + tOption;
+        } else {
+            return "Indie: true, skill: " + nReason + ", val: " + nValue + ", time: " + tTerm;
+        }
     }
 }

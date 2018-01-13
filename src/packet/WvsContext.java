@@ -343,13 +343,15 @@ public class WvsContext {
         for(int i : temporaryStatManager.getRemovedMask()) {
             outPacket.encodeInt(i);
         }
-        temporaryStatManager.getRemovedStats().forEach((cts, option) -> outPacket.encodeInt(0));
+//        temporaryStatManager.getRemovedStats().forEach((cts, option) -> outPacket.encodeInt(0));
+        temporaryStatManager.encodeRemovedIndieTempStat(outPacket);
         if(temporaryStatManager.hasRemovedMovingEffectingStat()) {
             outPacket.encodeByte(0);
         }
         outPacket.encodeByte(0); // ?
         outPacket.encodeByte(demount);
 
+        temporaryStatManager.getCurrentStats().clear();
         return outPacket;
     }
 

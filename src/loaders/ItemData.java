@@ -1118,8 +1118,8 @@ public class ItemData {
     }
 
     public static void generateDatFiles() {
-//        loadEquipsFromWz();
-//        saveEquips(ServerConstants.DAT_DIR + "\\equips");
+        loadEquipsFromWz();
+        saveEquips(ServerConstants.DAT_DIR + "\\equips");
         loadItemsFromWZ();
         saveItems(ServerConstants.DAT_DIR + "\\items");
     }

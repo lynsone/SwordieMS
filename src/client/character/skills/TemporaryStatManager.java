@@ -4,11 +4,9 @@ import client.character.Char;
 import connection.OutPacket;
 import packet.WvsContext;
 import server.EventManager;
+import util.Tuple;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -17,10 +15,11 @@ import static client.character.skills.CharacterTemporaryStat.*;
  * Created on 1/3/2018.
  */
 public class TemporaryStatManager {
-    private Map<CharacterTemporaryStat, Option> currentStats = new HashMap<>();
-    private Map<CharacterTemporaryStat, Option> newStats = new HashMap<>();
-    private Map<CharacterTemporaryStat, Option> removedStats = new HashMap<>();
+    private Map<CharacterTemporaryStat, List<Option>> currentStats = new HashMap<>();
+    private Map<CharacterTemporaryStat, List<Option>> newStats = new HashMap<>();
+    private Map<CharacterTemporaryStat, List<Option>> removedStats = new HashMap<>();
     private Map<CharacterTemporaryStat, Timer> timers = new HashMap<>();
+    private HashMap<Tuple<CharacterTemporaryStat, Option>, Timer> indieTimers = new HashMap<>();
     private int pvpDamage;
     private byte defenseState;
     private byte defenseAtt;
@@ -36,23 +35,62 @@ public class TemporaryStatManager {
     }
 
     public void putCharacterStatValue(CharacterTemporaryStat cts, Option option) {
+        boolean indie = cts.isIndie();
         option.tOption *= 1000;
         option.tTerm *= 1000;
         if(cts == CombatOrders) {
             chr.setCombatOrders(option.nOption);
         }
-        getNewStats().put(cts, option);
-        getCurrentStats().put(cts, option);
-        if(option.tOption > 0) {
-            if(getTimers().containsKey(cts)) {
-                getTimers().get(cts).cancel();
+        if(!indie) {
+            List<Option> optList = new ArrayList<>();
+            optList.add(option);
+            getNewStats().put(cts, optList);
+            getCurrentStats().put(cts, optList);
+            if (option.tOption > 0) {
+                if (getTimers().containsKey(cts)) {
+                    getTimers().get(cts).cancel();
+                }
+                Timer t = EventManager.addEvent(this, "removeStat", option.tOption, cts, true);
+                getTimers().put(cts, t);
             }
-            Timer t = EventManager.addEvent(this, "removeStat", option.tOption, cts, true);
-            getTimers().put(cts, t);
+        } else {
+            List<Option> optList;
+            if(hasStat(cts)) {
+                optList = getCurrentStats().get(cts);
+            } else {
+                optList = new ArrayList<>();
+            }
+            if(optList.contains(option)) {
+                optList.remove(getOptByCTSAndSkill(cts, option.nReason));
+            }
+            optList.add(option);
+            getNewStats().put(cts, optList);
+            getCurrentStats().put(cts, optList);
+            if (option.tTerm > 0) {
+                Tuple tuple = new Tuple(cts, option);
+                if (getIndieTimers().containsKey(tuple)) {
+                    getIndieTimers().get(tuple).cancel();
+                }
+                Timer t = EventManager.addEvent(this, "removeIndieStat", option.tTerm, cts, option, true);
+                getIndieTimers().put(tuple, t);
+            }
         }
     }
 
-    public void removeStat(CharacterTemporaryStat cts, Boolean fromTimer) {
+    public Option getOptByCTSAndSkill(CharacterTemporaryStat cts, int skillID) {
+        Option res = null;
+        if(getCurrentStats().containsKey(cts)) {
+            for (Option o : getCurrentStats().get(cts)) {
+                if(o.rOption == skillID || o.nReason == skillID) {
+                    res = o;
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    public synchronized void removeStat(CharacterTemporaryStat cts, Boolean fromTimer) {
         if(cts == CombatOrders) {
             chr.setCombatOrders(0);
         }
@@ -66,6 +104,25 @@ public class TemporaryStatManager {
         }
     }
 
+    public synchronized void removeIndieStat(CharacterTemporaryStat cts, Option option, Boolean fromTimer) {
+        List<Option> optList = new ArrayList<>();
+        optList.add(option);
+        getRemovedStats().put(cts, optList);
+        if(getCurrentStats().containsKey(cts)) {
+            getCurrentStats().get(cts).remove(option);
+            if(getCurrentStats().get(cts).size() == 0) {
+                getCurrentStats().remove(cts);
+            }
+        }
+        getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
+        Tuple tuple = new Tuple(cts, option);
+        if(!fromTimer && getIndieTimers().containsKey(tuple)) {
+            getIndieTimers().get(tuple).cancel();
+        } else {
+            getIndieTimers().remove(tuple);
+        }
+    }
+
     public boolean hasNewStat(CharacterTemporaryStat cts) {
         return newStats.containsKey(cts);
     }
@@ -76,12 +133,21 @@ public class TemporaryStatManager {
 
     public Option getOption(CharacterTemporaryStat cts) {
         if(hasStat(cts)) {
-            return getCurrentStats().get(cts);
+            return getCurrentStats().get(cts).get(0);
         }
         return new Option();
     }
 
-    public int[] getMaskByCollection(Map<CharacterTemporaryStat, Option> map) {
+    public List<Option> getOptions(CharacterTemporaryStat cts) {
+        if(hasStat(cts)) {
+            return getCurrentStats().get(cts);
+        }
+        List<Option> res = new ArrayList<>();
+        res.add(new Option());
+        return res;
+    }
+
+    public int[] getMaskByCollection(Map<CharacterTemporaryStat, List<Option>> map) {
         int[] res = new int[CharacterTemporaryStat.length];
         for(int i = 0; i < res.length; i++) {
             for(CharacterTemporaryStat cts : map.keySet()) {
@@ -2254,21 +2320,72 @@ public class TemporaryStatManager {
     }
 
     private void encodeIndieTempStat(OutPacket outPacket) {
-        Map<CharacterTemporaryStat, Option> stats = getCurrentStats().entrySet().stream()
+        Map<CharacterTemporaryStat, List<Option>> stats = getCurrentStats().entrySet().stream()
                 .filter(stat -> stat.getKey().isIndie())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        for(Map.Entry<CharacterTemporaryStat, Option> stat : stats.entrySet()) {
-            Option option = stat.getValue();
-            outPacket.encodeInt(1); // the size of the array.
-            outPacket.encodeInt(option.nReason);
-            outPacket.encodeInt(option.nValue);
-            outPacket.encodeInt(option.nKey); // nKey
-            outPacket.encodeInt(1);
-            outPacket.encodeInt(option.tTerm); // tTerm
-            outPacket.encodeInt(0); // size
-            // pw.writeInt(0); // nMValueKey
-            // pw.writeInt(0); // nMValue
+        for(Map.Entry<CharacterTemporaryStat, List<Option>> stat : stats.entrySet()) {
+            int curTime = (int) System.currentTimeMillis();
+            List<Option> options = stat.getValue();
+            if(options == null) {
+                outPacket.encodeInt(0);
+                continue;
+            }
+            outPacket.encodeInt(options.size());
+            for(Option option : options) {
+                outPacket.encodeInt(option.nReason);
+                outPacket.encodeInt(option.nValue);
+                outPacket.encodeInt(option.nKey); // nKey
+                outPacket.encodeInt(curTime - option.tStart);
+                outPacket.encodeInt(option.tTerm); // tTerm
+                outPacket.encodeInt(0); // size
+                // pw.writeInt(0); // nMValueKey
+                // pw.writeInt(0); // nMValue
+            }
+        }
+    }
+
+    public void encodeRemovedIndieTempStat(OutPacket outPacket) {
+        Map<CharacterTemporaryStat, List<Option>> stats = getRemovedStats().entrySet().stream()
+                .filter(stat -> stat.getKey().isIndie())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        for(Map.Entry<CharacterTemporaryStat, List<Option>> stat : stats.entrySet()) {
+            int curTime = (int) System.currentTimeMillis();
+//            List<Option> options = stat.getValue();
+//            if(options == null) {
+//                outPacket.encodeInt(0);
+//                continue;
+//            }
+//            outPacket.encodeInt(options.size());
+//            for(Option option : options) {
+//                outPacket.encodeInt(option.nReason);
+//                outPacket.encodeInt(option.nValue);
+//                outPacket.encodeInt(option.nKey); // nKey
+//                outPacket.encodeInt(curTime - option.tStart);
+//                outPacket.encodeInt(option.tTerm); // tTerm
+//                outPacket.encodeInt(0); // size
+//                // pw.writeInt(0); // nMValueKey
+//                // pw.writeInt(0); // nMValue
+//            }
+            // encode remaining stats
+            CharacterTemporaryStat key = stat.getKey();
+            List<Option> options = getOptions(key);
+            if(options == null) {
+                outPacket.encodeInt(0);
+                continue;
+            }
+            outPacket.encodeInt(options.size());
+            for(Option option : options) {
+                outPacket.encodeInt(option.nReason);
+                outPacket.encodeInt(option.nValue);
+                outPacket.encodeInt(option.nKey); // nKey
+                outPacket.encodeInt(curTime - option.tStart);
+                outPacket.encodeInt(option.tTerm); // tTerm
+                outPacket.encodeInt(0); // size
+                // pw.writeInt(0); // nMValueKey
+                // pw.writeInt(0); // nMValue
+            }
         }
     }
 
@@ -2284,15 +2401,15 @@ public class TemporaryStatManager {
         return getRemovedStats().keySet().stream().anyMatch(CharacterTemporaryStat::isMovingEffectingStat);
     }
 
-    public Map<CharacterTemporaryStat, Option> getCurrentStats() {
+    public Map<CharacterTemporaryStat, List<Option>> getCurrentStats() {
         return currentStats;
     }
 
-    public Map<CharacterTemporaryStat, Option> getNewStats() {
+    public Map<CharacterTemporaryStat, List<Option>> getNewStats() {
         return newStats;
     }
 
-    public Map<CharacterTemporaryStat, Option> getRemovedStats() {
+    public Map<CharacterTemporaryStat, List<Option>> getRemovedStats() {
         return removedStats;
     }
 
@@ -2366,5 +2483,9 @@ public class TemporaryStatManager {
 
     public Map<CharacterTemporaryStat, Timer> getTimers() {
         return timers;
+    }
+
+    public Map<Tuple<CharacterTemporaryStat, Option>, Timer> getIndieTimers() {
+        return indieTimers;
     }
 }

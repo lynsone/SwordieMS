@@ -6,13 +6,16 @@ import client.character.FuncKeyMap;
 import client.character.items.BodyPart;
 import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.ForceAtomInfo;
+import client.character.skills.PsychicArea;
 import client.character.skills.Skill;
 import client.life.*;
 import connection.OutPacket;
 import constants.ItemConstants;
 import constants.SkillConstants;
+import enums.LeaveType;
 import enums.MobStat;
 import handling.OutHeader;
+import handling.handlers.PsychicLock;
 import loaders.ItemData;
 import util.Position;
 import util.Rect;
@@ -262,7 +265,7 @@ public class CField {
         int[] mask = resetStats.getRemovedMask();
         outPacket.encodeInt(mob.getObjectId());
         for (int i = 0; i < 3; i++) {
-            outPacket.encodeIntBE(mask[i]);
+            outPacket.encodeInt(mask[i]);
         }
         if(resetStats.hasRemovedMobStat(MobStat.BurnedInfo)) {
             if(biList == null) {
@@ -316,13 +319,13 @@ public class CField {
         outPacket.encodeByte(aa.getSlv());
         outPacket.encodeShort(aa.getDelay());
         aa.getRect().encode(outPacket);
-        outPacket.encodeInt(aa.getElemAttr());
-        outPacket.encodeInt(aa.getElemAttr()); // ?
+        outPacket.encodeInt(15);
+        outPacket.encodeInt(15); // ?
         outPacket.encodePosition(aa.getPosition());
         outPacket.encodeInt(aa.getForce());
-        outPacket.encodeInt(aa.getOption());
-        outPacket.encodeByte(aa.getOption() != 0);
-        outPacket.encodeInt(0); // ?
+        outPacket.encodeInt(15);
+        outPacket.encodeByte(15);
+        outPacket.encodeInt(15); // ?
         if(SkillConstants.isFlipAffectAreaSkill(aa.getSkillID())) {
             outPacket.encodeByte(aa.isFlip());
         }
@@ -385,6 +388,17 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket summonedRemoved(Summon summon, LeaveType leaveType) {
+        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_REMOVED);
+
+        outPacket.encodeInt(summon.getCharID());
+
+        outPacket.encodeInt(summon.getObjectId());
+        outPacket.encodeByte(leaveType.getVal());
+
+        return outPacket;
+    }
+
     public static OutPacket createForceAtom(boolean byMob, int userOwner, int targetID, int forceAtomType, boolean toMob,
                                      int targets, int target, ForceAtomInfo fai, Rect rect, int arriveDir, int arriveRange,
                                      Position forcedTargetPos, int bulletID, Position pos) {
@@ -396,7 +410,7 @@ public class CField {
                 rect, arriveDir, arriveRange, forcedTargetPos, bulletID, pos);
     }
 
-    public static OutPacket createForceAtom(boolean byMob, int userOwner, int targetID, int forceAtomType, boolean toMob,
+    public static OutPacket createForceAtom(boolean byMob, int userOwner, int charID, int forceAtomType, boolean toMob,
                                      List<Integer> targets, int target, List<ForceAtomInfo> faiList, Rect rect, int arriveDir, int arriveRange,
                                      Position forcedTargetPos, int bulletID, Position pos) {
         OutPacket outPacket = new OutPacket(OutHeader.CREATE_FORCE_ATOM);
@@ -405,7 +419,7 @@ public class CField {
         if(byMob) {
             outPacket.encodeInt(userOwner);
         }
-        outPacket.encodeInt(targetID);
+        outPacket.encodeInt(charID);
         outPacket.encodeInt(forceAtomType);
         if(forceAtomType != 0 && forceAtomType != 9 && forceAtomType != 14) {
             outPacket.encodeByte(toMob);
@@ -491,6 +505,68 @@ public class CField {
         OutPacket outPacket = new OutPacket(OutHeader.SET_AMMO);
 
         outPacket.encodeInt(ammo);
+
+        return outPacket;
+    }
+
+    public static OutPacket createPsychicArea(boolean approved, PsychicArea psychicArea) {
+        OutPacket outPacket = new OutPacket(OutHeader.CREATE_PSYCHIC_AREA);
+
+        outPacket.encodeByte(approved);
+        if(approved) {
+            outPacket.encodeInt(psychicArea.action);
+            outPacket.encodeInt(psychicArea.actionSpeed);
+            outPacket.encodeInt(psychicArea.localPsychicAreaKey);
+            outPacket.encodeInt(psychicArea.skillID);
+            outPacket.encodeShort(psychicArea.slv);
+            outPacket.encodeInt(psychicArea.psychicAreaKey);
+            outPacket.encodeInt(psychicArea.duration);
+            outPacket.encodeByte(psychicArea.isLeft);
+            outPacket.encodeShort(psychicArea.skeletonFilePathIdx);
+            outPacket.encodeShort(psychicArea.skeletonAniIdx);
+            outPacket.encodeShort(psychicArea.skeletonLoop);
+            outPacket.encodePositionInt(psychicArea.start);
+        } else {
+            outPacket.encodeInt(psychicArea.localPsychicAreaKey);
+        }
+        return outPacket;
+    }
+
+    public static OutPacket releasePsychicArea(int localAreaKey) {
+        OutPacket outPacket = new OutPacket(OutHeader.RELEASE_PSYCHIC_AREA);
+
+        outPacket.encodeInt(localAreaKey);
+
+        return outPacket;
+    }
+
+    public static OutPacket createPsychicLock(boolean approved, PsychicLock pl) {
+        OutPacket outPacket = new OutPacket(OutHeader.CREATE_PSYCHIC_LOCK);
+
+        outPacket.encodeByte(approved);
+        if(approved) {
+            pl.encode(outPacket);
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket releasePsychicLock(int id) {
+        OutPacket outPacket = new OutPacket(OutHeader.RELEASE_PSYCHIC_LOCK);
+
+        outPacket.encodeInt(id);
+
+        return outPacket;
+    }
+
+    public static OutPacket releasePsychicLockMob(List<Integer> ids) {
+        OutPacket outPacket = new OutPacket(OutHeader.RELEASE_PSYCHIC_LOCK_MOB);
+
+        for(int i : ids) {
+            outPacket.encodeByte(1);
+            outPacket.encodeInt(i);
+        }
+        outPacket.encodeByte(0);
 
         return outPacket;
     }

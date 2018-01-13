@@ -80,7 +80,7 @@ public class MobTemporaryStat {
         int[] mask = getNewMask();
         System.out.println(outPacket);
         for (int i = 0; i < mask.length; i++) {
-            outPacket.encodeIntBE(mask[i]);
+            outPacket.encodeInt(mask[i]);
         }
 //        outPacket.encodeIntBE(0x1);
 //        outPacket.encodeInt(0);

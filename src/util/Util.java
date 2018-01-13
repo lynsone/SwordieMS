@@ -9,6 +9,11 @@ import java.util.Random;
  * Created on 2/28/2017.
  */
 public class Util {
+
+    public static int getCurrentTime() {
+        return (int) System.currentTimeMillis();
+    }
+
     public static boolean succeedProp(int chance) {
         Random random = new Random();
         return random.nextInt(100) < chance;

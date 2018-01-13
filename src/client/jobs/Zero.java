@@ -27,7 +27,7 @@ public class Zero extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        
+
     }
 
     @Override

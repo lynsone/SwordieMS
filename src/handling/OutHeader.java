@@ -813,7 +813,8 @@ public enum OutHeader {
                 HEARTBEAT_RESPONSE,
                 MOB_CONTROL_ACK,
                 CHAT_MSG,
-                MOB_HP_INDICATOR
+                MOB_HP_INDICATOR,
+                STAT_CHANGED
 
                 );
         return spam.contains(outHeader);
