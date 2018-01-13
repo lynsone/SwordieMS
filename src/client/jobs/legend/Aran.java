@@ -12,6 +12,21 @@ import constants.JobConstants;
  * Created on 12/14/2017.
  */
 public class Aran extends Job {
+
+    public static final int POLEARM_BOOSTER = 21001003; //Buff
+    public static final int BODY_PRESSURE = 21001008; //Buff (on/off)
+
+    public static final int SNOW_CHARGE = 21101006; //Buff
+    public static final int MAHA_BLESSING = 21111012; //Buff
+    public static final int MAPLE_WARRIOR_ARAN = 21121000; //Buff
+    /*public static final int
+    public static final int
+    public static final int
+    public static final int
+    public static final int
+    public static final int*/
+
+
     public Aran(Char chr) {
         super(chr);
     }
