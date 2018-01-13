@@ -95,4 +95,10 @@ public class Rect {
         outPacket.encodeInt(getRight());
         outPacket.encodeInt(getBottom());
     }
+
+    public boolean hasPositionInside(Position position) {
+        int x = position.getX();
+        int y = position.getY();
+        return x >= left && y >= top && x <= right && x <= bottom;
+    }
 }
