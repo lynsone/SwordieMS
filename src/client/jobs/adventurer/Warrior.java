@@ -99,6 +99,7 @@ public class Warrior extends Job {
         super(chr);
     }
 
+    
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
