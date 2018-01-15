@@ -11,6 +11,7 @@ import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
+import enums.ForceAtomEnum;
 import enums.InvType;
 import enums.Stat;
 import handling.OutHeader;
@@ -54,8 +55,9 @@ public class AdminCommands {
 //            chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
-            o.nOption = 31;
-            tsm.putCharacterStatValue(CharacterTemporaryStat.KinesisPsychicPoint, o);
+            o.nOption = 5;
+            o.rOption = 3110001;
+            tsm.putCharacterStatValue(CharacterTemporaryStat.BowMasterMortalBlow, o);
             chr.getClient().write(WvsContext.temporaryStatSet(tsm));
 
         }
@@ -233,12 +235,21 @@ public class AdminCommands {
 
     public static class Atom extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, 1, 3, 3, 0, 0, (int) System.currentTimeMillis(), 1,
-                    0, new Position());
+            int charID = chr.getId();
+            ForceAtomInfo forceAtomInfo1 = new ForceAtomInfo(142110011, ForceAtomEnum.KINESIS_ORB_REAL.getInc(), 3, 3, 0, 0, (int) System.currentTimeMillis(), 1,
+                    142110011, new Position());
+            ForceAtomInfo forceAtomInfo2 = new ForceAtomInfo(142110011, ForceAtomEnum.KINESIS_ORB_REAL.getInc(), 3, 3, 0, 0, (int) System.currentTimeMillis(), 1,
+                    142110011, new Position());
+            List<ForceAtomInfo> fais = new ArrayList<>();
+            fais.add(forceAtomInfo1);
+            fais.add(forceAtomInfo2);
+
             Mob mob = (Mob) chr.getField().getLifes().get(chr.getField().getLifes().size() - 1);
-            int mobId = mob.getObjectId();
-            chr.getClient().write(CField.createForceAtom(false, 0, mobId, 2, true, mobId, mobId, forceAtomInfo,
-                    null, 0, 300, mob.getPosition(), 0, mob.getPosition()));
+            List<Integer> mobs = new ArrayList<>();
+            int mobID = mob.getObjectId();
+            mobs.add(mobID);
+            chr.getClient().write(CField.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
+                    true, mobs, 142110011, fais,null, 0, 0, null, 142110011, mob.getPosition()));
 
         }
     }

@@ -187,6 +187,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_MOVE:
                     WorldHandler.handleMove(c, inPacket);
                     break;
+                case USER_FORCE_ATOM_COLLISION:
+                    WorldHandler.handleForceAtomCollision(c, inPacket);
+                    break;
                 case MOB_MOVE:
                     WorldHandler.handleMoveMob(c, inPacket);
                     break;

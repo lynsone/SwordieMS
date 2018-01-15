@@ -250,7 +250,6 @@ public class Field {
     }
 
     public Foothold findFootHoldBelow(Position pos) {
-        pos.setY(pos.getY() - 10);
         Set<Foothold> footholds = getFootholds().stream().filter(fh -> fh.getX1() <= pos.getX() && fh.getX2() >= pos.getX()).collect(Collectors.toSet());
         Foothold res = null;
         int lastY = Integer.MAX_VALUE;
@@ -263,8 +262,7 @@ public class Field {
                 int x2 = fh.getX2() - x1;
                 int x = pos.getX() - x1;
                 double perc = (double) x / (double) x2;
-//                System.out.println("Percentage: " + perc);
-                int y = (int) (fh.getY1() + (perc * (fh.getY1() - fh.getY2())));
+                int y = (int) (fh.getY1() + (perc * (fh.getY2() - fh.getY1())));
                 if(y < lastY && y >= pos.getY()) {
                     res = fh;
                     lastY = y;
@@ -391,6 +389,10 @@ public class Field {
         return chars;
     }
 
+    public Char getCharByID(int id) {
+        return getChars().stream().filter(c -> c.getId() == id).findFirst().orElse(null);
+    }
+
     public void addChar(Char chr) {
         if(!getChars().contains(chr)) {
             getChars().add(chr);
@@ -505,5 +507,18 @@ public class Field {
             getLifeTimers().get(life).cancel();
         }
         getLifeTimers().remove(life);
+    }
+
+    public List<AffectedArea> getAffectedAreas() {
+        List<Life> lifes = getLifes().stream().filter(life -> life instanceof AffectedArea).collect(Collectors.toList());
+        return lifes.stream().map(life -> (AffectedArea) life).collect(Collectors.toList());
+    }
+
+    public void checkMobInAffectedAreas(Mob mob) {
+        for(AffectedArea aa : getAffectedAreas()) {
+            if(aa.getRect().hasPositionInside(mob.getPosition())) {
+                aa.handleMobInside(mob);
+            }
+        }
     }
 }

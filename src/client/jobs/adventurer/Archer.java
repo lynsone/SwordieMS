@@ -4,9 +4,11 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
+import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ForceAtomEnum;
@@ -37,6 +39,7 @@ public class Archer extends Job {
     public static final int ARROW_BOMB = 3101005;
     public static final int BOW_BOOSTER = 3101002;
     public static final int QUIVER_CARTRIDGE = 3101009;
+    public static final int QUIVER_CARTRIDGE_ATOM = 3100010;
     public static final int FLAME_SURGE = 3111003;
     public static final int PHOENIX = 3111005;
     public static final int RECKLESS_HUNT_BOW = 3111011;
@@ -50,6 +53,7 @@ public class Archer extends Job {
     private QuiverCartridge quiverCartridge;
 
     private int[] buffs = new int[]{
+            BOW_BOOSTER,
             SOUL_ARROW_BOW,
             QUIVER_CARTRIDGE,
             PHOENIX,
@@ -140,7 +144,7 @@ public class Archer extends Job {
                                 0, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
                         chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
-                                true, mobId, mobId, forceAtomInfo, new Rect(), 0, 300,
+                                true, mobId, QUIVER_CARTRIDGE_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), 0, mob.getPosition()));
                         break;
                     }
@@ -154,7 +158,7 @@ public class Archer extends Job {
         private int blood; // 1
         private int poison; // 2
         private int magic; // 3
-        private int type = 1;
+        private int type;
         private Char chr;
 
         public QuiverCartridge(Char chr) {
@@ -244,20 +248,25 @@ public class Archer extends Job {
         int curTime = (int) System.currentTimeMillis();
         switch (skillID) {
             case SOUL_ARROW_BOW:
-                o1.nOption = 10; //si.getValue(x, slv);
+                o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(SoulArrow, o1);
                 o2.nOption = si.getValue(epad, slv);
-                o2.nOption = skillID;
+                o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(EPAD, o2);
+                o1.nOption = 1; //si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(NoBulletConsume, o3);
                 break;
             case BOW_BOOSTER:
                 o1.nValue = si.getValue(x, slv);
                 o1.nReason = skillID;
                 o1.tStart = curTime;
                 o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBooster, o1);
                 break;
             case QUIVER_CARTRIDGE:
                 if(quiverCartridge == null) {
@@ -270,12 +279,20 @@ public class Archer extends Job {
                 tsm.putCharacterStatValue(QuiverCatridge, o1);
                 break;
             case PHOENIX:
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, 1, 15, 15, 0, 0,
-                        (int) System.currentTimeMillis(), 1, 0, new Position(0, 0));
-                Mob mob = (Mob) chr.getField().getLifes().get( chr.getField().getLifes().size() - 1);
-                int mobId = mob.getObjectId();
-                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), 10, true, mobId, mobId, forceAtomInfo,
-                        new Rect(), 0, 300, mob.getPosition(), 0, mob.getPosition()));
+                Summon summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                Field field = c.getChr().getField();
+                summon.setCharLevel((byte) chr.getStat(Stat.level));
+                summon.setPosition(chr.getPosition().deepCopy());
+                summon.setMoveAction((byte) 1);
+                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setMoveAbility((byte) 1);
+                summon.setAssistType((byte) 1);
+                summon.setEnterType((byte) 1);
+                summon.setBeforeFirstAttack(false);
+                summon.setTemplateId(skillID);
+                summon.setAttackActive(true);
+                summon.setFlyMob(true);
+                field.spawnSummon(summon);
                 break;
 
         }

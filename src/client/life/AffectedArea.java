@@ -1,7 +1,12 @@
 package client.life;
 
+import client.character.Char;
 import client.character.skills.AttackInfo;
 import client.character.skills.Skill;
+import client.character.skills.SkillInfo;
+import client.jobs.adventurer.Magician;
+import enums.MobStat;
+import loaders.SkillData;
 import util.Position;
 import util.Rect;
 
@@ -125,5 +130,24 @@ public class AffectedArea extends Life {
         aa.setForce(attackInfo.force);
         aa.setOption(attackInfo.option);
         return aa;
+    }
+
+    public void handleMobInside(Mob mob) {
+        Char chr = getField().getCharByID(getCharID());
+        if(chr == null) {
+            return;
+        }
+        int skillID = getSkillID();
+        Skill skill = chr.getSkill(getSkillID());
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        MobTemporaryStat mts = mob.getTemporaryStat();
+        switch(skillID) {
+            case Magician.POISON_MIST:
+                if(!mts.hasBurnFromSkill(skillID)) {
+                    mts.createAndAddBurnedInfo(getCharID(), skill, 1);
+                }
+                break;
+        }
     }
 }

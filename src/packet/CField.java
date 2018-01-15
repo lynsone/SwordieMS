@@ -319,13 +319,13 @@ public class CField {
         outPacket.encodeByte(aa.getSlv());
         outPacket.encodeShort(aa.getDelay());
         aa.getRect().encode(outPacket);
-        outPacket.encodeInt(15);
-        outPacket.encodeInt(15); // ?
+        outPacket.encodeInt(aa.getElemAttr());
+        outPacket.encodeInt(aa.getElemAttr()); // ?
         outPacket.encodePosition(aa.getPosition());
         outPacket.encodeInt(aa.getForce());
-        outPacket.encodeInt(15);
-        outPacket.encodeByte(15);
-        outPacket.encodeInt(15); // ?
+        outPacket.encodeInt(aa.getOption());
+        outPacket.encodeByte(aa.getOption() != 0);
+        outPacket.encodeInt(aa.getIdk()); // ?
         if(SkillConstants.isFlipAffectAreaSkill(aa.getSkillID())) {
             outPacket.encodeByte(aa.isFlip());
         }
@@ -392,7 +392,6 @@ public class CField {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_REMOVED);
 
         outPacket.encodeInt(summon.getCharID());
-
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(leaveType.getVal());
 
@@ -400,18 +399,18 @@ public class CField {
     }
 
     public static OutPacket createForceAtom(boolean byMob, int userOwner, int targetID, int forceAtomType, boolean toMob,
-                                     int targets, int target, ForceAtomInfo fai, Rect rect, int arriveDir, int arriveRange,
+                                     int targets, int skillID, ForceAtomInfo fai, Rect rect, int arriveDir, int arriveRange,
                                      Position forcedTargetPos, int bulletID, Position pos) {
         List<Integer> integers = new ArrayList<>();
         integers.add(targets);
         List<ForceAtomInfo> forceAtomInfos = new ArrayList<>();
         forceAtomInfos.add(fai);
-        return createForceAtom(byMob, userOwner, targetID, forceAtomType, toMob, integers, target, forceAtomInfos,
+        return createForceAtom(byMob, userOwner, targetID, forceAtomType, toMob, integers, skillID, forceAtomInfos,
                 rect, arriveDir, arriveRange, forcedTargetPos, bulletID, pos);
     }
 
     public static OutPacket createForceAtom(boolean byMob, int userOwner, int charID, int forceAtomType, boolean toMob,
-                                     List<Integer> targets, int target, List<ForceAtomInfo> faiList, Rect rect, int arriveDir, int arriveRange,
+                                     List<Integer> targets, int skillID, List<ForceAtomInfo> faiList, Rect rect, int arriveDir, int arriveRange,
                                      Position forcedTargetPos, int bulletID, Position pos) {
         OutPacket outPacket = new OutPacket(OutHeader.CREATE_FORCE_ATOM);
 
@@ -446,7 +445,7 @@ public class CField {
                     outPacket.encodeInt(targets.get(0));
                     break;
             }
-            outPacket.encodeInt(target);
+            outPacket.encodeInt(skillID);
         }
         for(ForceAtomInfo fai : faiList) {
             outPacket.encodeByte(1);

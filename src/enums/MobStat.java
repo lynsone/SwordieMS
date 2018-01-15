@@ -85,7 +85,7 @@ public enum MobStat {
     Invincible(0x800000, 2),
     Explosion(0x400000, 2),
     HangOver(0x200000, 2),
-    BurnedInfo(0x40000, 2), // 0x1000
+    BurnedInfo(0x40000, 2), // 0x1000 -> 0x400
     InvincibleBalog(0x40000, 2), // 0x800
     ExchangeAttack(0x40000, 2),
     ExtraBuffStat(0x20000, 2),
@@ -112,7 +112,7 @@ public enum MobStat {
 
     public int getVal() {
         if(this == BurnedInfo) {
-            return 0x400;
+            return 0x40000;
         }
         return val;
     }

@@ -16,6 +16,7 @@ import packet.WvsContext;
 import util.Position;
 import util.Util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static client.character.skills.SkillStat.*;
@@ -28,22 +29,29 @@ public class Kinesis extends Job {
     public final static int PSYCHIC_FORCE = 142001000;
     public final static int MENTAL_SHIELD = 142001007;
     public final static int ESP_BOOSTER = 142001003;
+    public final static int ULTIMATE_METAL_PRESS = 142001002;
     public final static int PSYCHIC_BLAST_FWD = 142100000;
     public final static int PSYCHIC_BLAST_DOWN = 142100001;
     public final static int PSYCHIC_ASSAULT_FWD = 142110000;
     public final static int PSYCHIC_ASSAULT_DOWN = 142110001;
     public final static int PSYCHIC_DRAIN = 142101009; // TODO, AffectedArea?
     public final static int PSYCHIC_ARMOR = 142101004;
+    public final static int ULTIMATE_DEEP_IMPACT = 142101003;
     public final static int PSYCHIC_BULWARK = 142110009;
     public final static int PURE_POWER = 142101005;
     public final static int PSYCHIC_REINFORCEMENT = 142111008;
     public final static int KINETIC_JAUNT = 142111010;
+    public final static int ULTIMATE_TRAINWRECK = 142111007;
     public final static int KINETIC_COMBO = 142110011;
     public final static int MIND_BREAK = 142121004;
+    public final static int ULTIMATE_PSYCHIC_SHOT = 142120002;
+    public final static int ULTIMATE_BPM = 142120002;
     public final static int PRESIDENTS_ORDERS = 142121016;
     public final static int PSYCHIC_CHARGER = 142121008;
     public final static int TELEPATH_TACTICS = 142121006;
-    public final static int MAX_PP = 30;
+    public final static int MENTAL_TEMPEST = 142121030;
+
+    private final static int MAX_PP = 30;
 
     private final int[] buffs = new int[]{
             ESP_BOOSTER,
@@ -55,6 +63,18 @@ public class Kinesis extends Job {
             PRESIDENTS_ORDERS,
             TELEPATH_TACTICS,
             KINETIC_JAUNT,
+    };
+
+    private final int[] nonOrbSkills = new int[] {
+            ULTIMATE_METAL_PRESS,
+            ULTIMATE_BPM,
+            ULTIMATE_DEEP_IMPACT,
+            ULTIMATE_PSYCHIC_SHOT,
+            ULTIMATE_TRAINWRECK,
+            PSYCHIC_FORCE,
+            PSYCHIC_DRAIN,
+            MENTAL_TEMPEST,
+            KINETIC_COMBO,
     };
 
     public Kinesis(Char chr) {
@@ -129,6 +149,9 @@ public class Kinesis extends Job {
     }
 
     private void handleOrb(int skillID, byte slv, AttackInfo attackInfo) {
+        if(Arrays.asList(nonOrbSkills).contains(skillID)) {
+            return;
+        }
         SkillInfo si = SkillData.getSkillInfoById(KINETIC_COMBO);
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(prop, slv))) {
@@ -137,8 +160,8 @@ public class Kinesis extends Job {
                 int curTime = Util.getCurrentTime();
                 ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), 15, 15,
                         0, 0, curTime, 0, skillID, new Position(0, 0));
-                c.write(CField.createForceAtom(false, chr.getId(), chr.getId(), fae.getForceAtomType(), true,
-                        chr.getId(), chr.getId(), fai, null, 0, 0, null, 0, null));
+                c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
+                        mobID, KINETIC_COMBO, fai, null, 0, 0, null, 0, null));
             }
         }
     }

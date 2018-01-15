@@ -78,17 +78,9 @@ public class MobTemporaryStat {
     public void encode(OutPacket outPacket) {
         // DecodeBuffer(12) + MobStat::DecodeTemporary
         int[] mask = getNewMask();
-        System.out.println(outPacket);
         for (int i = 0; i < mask.length; i++) {
             outPacket.encodeInt(mask[i]);
         }
-//        outPacket.encodeIntBE(0x1);
-//        outPacket.encodeInt(0);
-//        outPacket.encodeInt(0);
-//        outPacket.encodeInt(1);
-//        outPacket.encodeInt(1101012);
-//        outPacket.encodeShort(10);
-//        outPacket.encodeByte(90);
 
         for (Map.Entry<MobStat, Option> entry : getNewStatVals().entrySet()) {
             MobStat mobStat = entry.getKey();
@@ -350,6 +342,20 @@ public class MobTemporaryStat {
 
     public boolean hasCurrentMobStat(MobStat mobStat) {
         return getCurrentStatVals().keySet().contains(mobStat);
+    }
+
+    public boolean hasBurnFromSkill(int skillID) {
+        return getBurnBySkill(skillID) != null;
+    }
+
+    public BurnedInfo getBurnBySkill(int skillID) {
+        BurnedInfo res = null;
+        for(BurnedInfo bi : getBurnedInfos()) {
+            if(bi.getSkillId() == skillID) {
+                res = bi;
+            }
+        }
+        return res; // wow no lambda for once
     }
 
     public boolean hasRemovedMobStat(MobStat mobStat) {

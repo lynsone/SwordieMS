@@ -11,19 +11,15 @@ import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
 import client.jobs.JobManager;
-import client.life.AffectedArea;
 import client.life.Life;
 import client.life.Mob;
 import client.life.Summon;
 import client.life.movement.Movement;
 import connection.InPacket;
-import connection.OutPacket;
 import constants.JobConstants;
 import constants.SkillConstants;
-import enums.ChatMsgColour;
 import enums.InvType;
 import enums.Stat;
-import handling.OutHeader;
 import loaders.SkillData;
 import packet.CField;
 import packet.Stage;
@@ -34,7 +30,6 @@ import server.World;
 import util.Position;
 import util.Rect;
 import util.Tuple;
-import util.Util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -69,7 +64,6 @@ public class WorldHandler {
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         c.write(Stage.setField(chr, field, c.getChannel(), true, 0, true, false,
                 (byte) 0, false, 100, null, true, -1));
-//        c.write(WvsContext.changeSkillRecordResult(chr.getSkills(), true, false, false, false));
         c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
         field.spawnLifesForChar(chr);
     }
@@ -87,6 +81,7 @@ public class WorldHandler {
             chr.setOldPosition(chr.getPosition());
             chr.setPosition(pos);
             chr.setMoveAction(m.getMoveAction());
+            chr.setLeft(m.getMoveAction() % 2 == 1);
         }
     }
 
@@ -289,15 +284,15 @@ public class WorldHandler {
                 attackInfo.option = option;
             } else {
                 switch(skillId) {
-                    case 2121003:
+                    case 2121003: // Mist Eruption
                         byte size = inPacket.decodeByte();
-                        int[] idkArr = new int[size];
+                        int[] mists = new int[size];
                         for (int i = 0; i < size; i++) {
-                            idkArr[i] = inPacket.decodeInt();
+                            mists[i] = inPacket.decodeInt();
                         }
-                        attackInfo.idkArr = idkArr;
+                        attackInfo.mists = mists;
                         break;
-                    case 2111003: // poison mist
+                    case 2111003: // Poison Mist
                         byte force = inPacket.decodeByte();
                         short forcedXSh = inPacket.decodeShort();
                         short forcedYSh = inPacket.decodeShort();
@@ -305,7 +300,7 @@ public class WorldHandler {
                         attackInfo.forcedXSh = forcedXSh;
                         attackInfo.forcedYSh = forcedYSh;
                         break;
-                    case 80001835: // unreachable?
+                    case 80001835: // Soul Shear, but unreachable?
                         byte sizeB = inPacket.decodeByte();
                         int[] idkArr2 = new int[sizeB];
                         short[] shortArr2 = new short[sizeB];
@@ -314,7 +309,7 @@ public class WorldHandler {
                             shortArr2[i] = inPacket.decodeShort();
                         }
                         short delay = inPacket.decodeShort();
-                        attackInfo.idkArr = idkArr2;
+                        attackInfo.mists = idkArr2;
                         attackInfo.shortArr = shortArr2;
                         attackInfo.delay = delay;
                 }
@@ -716,11 +711,13 @@ public class WorldHandler {
         if(movements.size() > 0) {
             if(life instanceof Mob) {
                 c.write(CField.mobCtrlAck((Mob) life, true, moveID, skillID, (byte) slv));
+                field.checkMobInAffectedAreas((Mob) life);
             }
             for(Movement m : movements) {
                 Position p = m.getPosition();
                 life.setPosition(p);
                 life.setMoveAction(m.getMoveAction());
+
             }
         }
     }
@@ -1068,5 +1065,18 @@ public class WorldHandler {
     public static void handleSummonedRemove(Client c, InPacket inPacket) {
         int id = inPacket.decodeInt();
         c.getChr().getField().removeSummon(id, false);
+    }
+
+    public static void handleForceAtomCollision(Client c, InPacket inPacket) {
+        int idk1 = inPacket.decodeInt();
+        int idk2 = inPacket.decodeInt();
+        int idk3 = inPacket.decodeInt();
+        byte idk4 = inPacket.decodeByte();
+        int mobID = inPacket.decodeInt();
+        Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
+        if(mob != null) {
+//            mob.damage((long) 133337);
+//            c.write(CField.mobDamaged(mobID, (long) 133337, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
+        }
     }
 }

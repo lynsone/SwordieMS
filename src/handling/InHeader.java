@@ -1020,7 +1020,8 @@ public enum InHeader {
                 USER_MOVE,
                 PASSIVESKILL_INFO_UPDATE,
                 USER_CHANGE_STAT_REQUEST,
-                SUMMONED_MOVE
+                SUMMONED_MOVE,
+                USER_TEMPORARY_STAT_UPDATE_REQUEST
         );
         return spam.contains(inHeaderByOp);
     }

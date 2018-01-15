@@ -124,6 +124,8 @@ public class Char {
     private TemporaryStatManager temporaryStatManager;
     @Transient
     private Job jobHandler;
+    @Transient
+    private boolean left;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1428,5 +1430,13 @@ public class Char {
     public Item getEquippedItemByBodyPart(BodyPart bodyPart) {
         List<Item> items = getEquippedInventory().getItemsByBodyPart(bodyPart);
         return items.size() > 0 ? items.get(0) : null;
+    }
+
+    public void setLeft(boolean left) {
+        this.left = left;
+    }
+
+    public boolean isLeft() {
+        return left;
     }
 }

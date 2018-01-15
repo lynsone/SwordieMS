@@ -84,6 +84,7 @@ public class Magician extends Job {
             INFINITY_IL,
             ELQUINES,
             MAPLE_WARRIOR_IL,
+            VIRAL_SLIME,
     };
 
     public Magician(Char chr) {
@@ -170,6 +171,10 @@ public class Magician extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
                 break;
             case COLD_BEAM:
@@ -178,7 +183,7 @@ public class Magician extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
+                    o1.nOption = 5;
                     o1.rOption = skillID;
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
@@ -197,7 +202,12 @@ public class Magician extends Job {
                     }
                 }
                 break;
-
+            case MIST_ERUPTION:
+                for(int id : attackInfo.mists) {
+                    Field field = chr.getField();
+                    field.removeLife(id);
+                }
+                break;
         }
 
     }
@@ -325,6 +335,7 @@ public class Magician extends Job {
                 break;
             case IFRIT:
             case ELQUINES:
+            case VIRAL_SLIME:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setCharLevel((byte) chr.getStat(Stat.level));

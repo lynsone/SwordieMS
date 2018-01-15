@@ -31,7 +31,7 @@ public class AttackInfo {
     public short rcDstRight;
     public short rectRight;
     public int option;
-    public int[] idkArr;
+    public int[] mists;
     public short forcedYSh;
     public short forcedXSh;
     public byte force;
