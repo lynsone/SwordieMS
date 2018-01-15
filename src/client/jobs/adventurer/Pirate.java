@@ -11,11 +11,15 @@ import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
+import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
+import util.Util;
+
+import java.util.Arrays;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -30,17 +34,17 @@ public class Pirate extends Job {
 
 
     //Buccaneer
-    public static final int TORNADO_UPPERCUT = 5101012; //Special Attack
+    public static final int TORNADO_UPPERCUT = 5101012; //Special Attack TODO (Uses Force)
     public static final int KNUCKLE_BOOSTER = 5101006; //Buff
 
     public static final int ROLL_OF_THE_DICE_BUCC = 5111007; //Buff
-    public static final int ENERGY_BURST = 5111002; //Special Attack  (Uses Force)
-    public static final int STATIC_THUMPER = 5111012; //Special Attack
+    public static final int ENERGY_BURST = 5111002; //Special Attack  TODO (Uses Force)
+    public static final int STATIC_THUMPER = 5111012; //Special Attack TODO (Uses Force)
 
-    public static final int OCTOPUNCH = 5121007; //Special Attack  (Uses Force)
-    public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack / Buff
-    public static final int DRAGON_STRIKE = 5121001; //Special Attack  (Uses Force)
-    public static final int BUCCANEER_BLAST = 5121016; //Special Attack   (Uses Force)
+    public static final int OCTOPUNCH = 5121007; //Special Attack  TODO (Uses Force)
+    public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack / Buff TODO Special Buff
+    public static final int DRAGON_STRIKE = 5121001; //Special Attack  TODO (Uses Force)
+    public static final int BUCCANEER_BLAST = 5121016; //Special Attack   TODO (Uses Force)
     public static final int CROSSBONES = 5121015; //Buff
     public static final int SPEED_INFUSION = 5121009; //Buff
     public static final int TIME_LEAP = 5121010; //Special Move / Buff
@@ -55,9 +59,9 @@ public class Pirate extends Job {
     public static final int ROLL_OF_THE_DICE_SAIR = 5211007; //Buff
     public static final int OCTO_CANNON = 5211014; //Summon
 
-    public static final int QUICKDRAW = 5221021; //Buff
+    public static final int QUICKDRAW = 5221021; //Buff TODO Special Buff
     public static final int PARROTARGETTING = 5221015; //Special Attack
-    public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff
+    public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
 
@@ -68,15 +72,13 @@ public class Pirate extends Job {
     public static final int MONKEY_MAGIC = 5301003; //Buff
     public static final int CANNON_BOOSTER = 5301002; //Buff
 
-    public static final int MONKEY_FURY = 5311010; //Special Attack
-    public static final int MONKEY_FURY_XPLOSION = 5310011; //Special Attack (Bomb Explosion from Monkey Fury)
     public static final int MONKEY_WAVE = 5311002; //Special Attack
     public static final int BARREL_ROULETTE = 5311004; //Buff
     public static final int LUCK_OF_THE_DIE = 5311005; //Buff
 
     public static final int ANCHOR_AWEIGH = 5321003; //Summon
     public static final int MONKEY_MALITIA = 5320011; //Summon
-    public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff
+    public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff TODO Special Buff
     public static final int PIRATE_SPIRIT = 5321010; //Buff
     public static final int MAPLE_WARRIOR_CANNON = 5321005; //Buff
 
@@ -84,7 +86,7 @@ public class Pirate extends Job {
     public static final int GALACTIC_MIGHT = 5081023; //Buff
 
     public static final int BOUNTY_CHASER = 5701013; //Buff
-    public static final int STARLINE_TWO = 5701010; //Special Attack
+    public static final int STARLINE_TWO = 5701010; //Special Attack (Stun Debuff)
 
     public static final int TURRET_DEPLOYMENT = 5711001; //Summon
     public static final int SLIPSTREAM_SUIT = 5711024; //Buff
@@ -127,6 +129,7 @@ public class Pirate extends Job {
             HIGH_GRAVITY,
             MAPLE_WARRIOR_JETT,
     };
+
 
     public Pirate(Char chr) {
         super(chr);
@@ -387,7 +390,10 @@ public class Pirate extends Job {
 
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+    }
 
+    private boolean isBuff(int skillID) {
+        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -410,12 +416,27 @@ public class Pirate extends Job {
         switch (attackInfo.skillId) {
             case BLAST_BACK:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = si.getValue(z, slv);
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    }
+                }
+                break;
+            case MONKEY_WAVE:
+            case STARLINE_TWO:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
                 }
                 break;
         }
@@ -423,7 +444,25 @@ public class Pirate extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case TIME_LEAP:
+                    //TODO
+                    break;
+            }
+        }
     }
 
     @Override
@@ -433,7 +472,6 @@ public class Pirate extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        //return id >= JobConstants.JobEnum.PIRATE.getJobId() && id <= JobConstants.JobEnum.CANNON_MASTER.getJobId();
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
         switch (job) {
             case PIRATE:

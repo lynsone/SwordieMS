@@ -11,12 +11,14 @@ import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
+import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.Stat;
 import loaders.SkillData;
-import packet.CField;
 import packet.WvsContext;
 import util.Util;
+
+import java.util.Arrays;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -47,7 +49,7 @@ public class Thief extends Job {
 
 
     // Shadower
-    public static final int STEAL = 4201004; //Special Attack
+    public static final int STEAL = 4201004; //Special Attack (Steal Debuff)?
     public static final int DAGGER_BOOSTER = 4201002; //Buff
     public static final int MESOGUARD = 4201011; //Buff
 
@@ -55,9 +57,7 @@ public class Thief extends Job {
     public static final int DARK_FLARE_SHAD = 4211007; //Summon
     public static final int PICK_POCKET = 4211003; //Buff
 
-    public static final int ASSASSINATE_FIRST = 4221014; //Special Attack
-    public static final int ASSASSINATE_FINISHER = 4221016; //Special Attack
-    public static final int BOOMERANG_STAB = 4221007; //Special Attack
+    public static final int BOOMERANG_STAB = 4221007; //Special Attack (Stun Debuff)
     public static final int MAPLE_WARRIOR_SHAD = 4221000; //Buff
     public static final int SHADOWER_INSTINCT = 4221013; //Buff
     public static final int SUDDEN_RAID_SHAD = 4221010; //Special Attack
@@ -68,10 +68,10 @@ public class Thief extends Job {
 
     public static final int KATARA_BOOSTER = 4311009; //Buff
 
-    public static final int FLYING_ASSAULTER = 4321006; //Special Attack
+    public static final int FLYING_ASSAULTER = 4321006; //Special Attack (Stun Debuff)
     public static final int FLASHBANG = 4321002; //Special Attack
 
-    public static final int CHAINS_OF_HELL = 4331006; //Special Attack
+    public static final int CHAINS_OF_HELL = 4331006; //Special Attack (Stun Debuff)
     public static final int MIRROR_IMAGE = 4331002; //Buff
 
     public static final int FINAL_CUT = 4341002; //Special Attack
@@ -102,6 +102,7 @@ public class Thief extends Job {
             SELF_HASTE,
             KATARA_BOOSTER,
             MIRROR_IMAGE,
+            FINAL_CUT,
             MIRRORED_TARGET,
             MAPLE_WARRIOR_DB,
     };
@@ -128,6 +129,19 @@ public class Thief extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (attackInfo.skillId) {
+                case STEAL:
+                    for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        if (Util.succeedProp(si.getValue(prop, slv))) {
+                            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            //mts.addStatOptionsAndBroadcast(MobStat.STEAL, o1); //TODO Steal MobStat
+                            // Unsure
+                        }
+                    }
+                    break;
                 case SHADOW_WEB:
                     for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         if (Util.succeedProp(si.getValue(prop, slv))) {
@@ -145,7 +159,15 @@ public class Thief extends Job {
                     }
                     break;
                 case SHOWDOWN:
-                    // TODO Unknown/Unsure
+                    for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Showdown, o1);
+                            // Unsure
+                    }
                     break;
                 case SUDDEN_RAID_DB:
                 case SUDDEN_RAID_SHAD:
@@ -156,12 +178,54 @@ public class Thief extends Job {
                             mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }       // TODO DoT  or  Affect on Hit Effect?
                     break;
+                case FLASHBANG:
+                    for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        if (Util.succeedProp(si.getValue(prop, slv))) {
+                            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = si.getValue(x, slv); //TODO -x?   ("Decreases Acc by 20%", but WzFile has 20 as positive)
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
+                        }
+                    }
+                    break;
+                case BOOMERANG_STAB:
+                case FLYING_ASSAULTER:
+                case CHAINS_OF_HELL:
+                    for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        if (Util.succeedProp(si.getValue(prop, slv))) {
+                            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                    break;
             }
         }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                //case
+            }
+        }
     }
 
     @Override
@@ -177,6 +241,8 @@ public class Thief extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         int curTime = (int) System.currentTimeMillis();
+        Summon summon;
+        Field field;
         switch (skillID) {
             case HASTE:
             case SELF_HASTE:
@@ -235,65 +301,70 @@ public class Thief extends Job {
                 // Unsure about this Buff
                 break;
             case MESOGUARD:
-                o1.rOption = si.getValue(x, slv);
-                o1.nOption = skillID;
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(MesoGuard, o1);
                 break;
             case PICK_POCKET:
-                o1.rOption = si.getValue(x, slv);
-                o1.nOption = skillID;
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(PickPocket, o1);
                 // Unsure about this Buff
                 break;
             case SHADOWER_INSTINCT:
-                /*
-                o1.rOption = si.getValue(kp, slv);
-                o1.nOption = skillID;
+                o1.nOption = si.getValue(kp, slv);
+                o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(ShadowerInstinct, o1);
-                */
+                //tsm.putCharacterStatValue(ShadowerInstinct, o1);
                 // TODO: Shadower Instinct  Temp Stat req
+                break;
+            case FINAL_CUT:
+                o1.nOption = si.getValue(w, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(FinalCut, o1);
+                // TODO add 3 sec Invincibility to Final Cut Buff (3sec time = v
                 break;
 
             case MIRRORED_TARGET:
-                Summon MirTarget = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field = c.getChr().getField();
-                field.addLife(MirTarget);
-                MirTarget.setCharLevel((byte) chr.getStat(Stat.level));
-                MirTarget.setPosition(chr.getPosition().deepCopy());
-                MirTarget.setMoveAction((byte) 1);
-                MirTarget.setCurFoothold((short) field.findFootHoldBelow(MirTarget.getPosition()).getId());
-                MirTarget.setMoveAbility((byte) 0);
-                MirTarget.setAssistType((byte) 1);
-                MirTarget.setEnterType((byte) 1);
-                MirTarget.setBeforeFirstAttack(false);
-                MirTarget.setTemplateId(skillID);
-                MirTarget.setAttackActive(false);
-                c.write(CField.summonedCreated(chr.getId(), MirTarget));
-                // Unsure
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setCharLevel((byte) chr.getStat(Stat.level));
+                summon.setPosition(chr.getPosition().deepCopy());
+                summon.setMoveAction((byte) 1);
+                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
+                summon.setAssistType((byte) 1);
+                summon.setEnterType((byte) 1);
+                summon.setBeforeFirstAttack(false);
+                summon.setTemplateId(skillID);
+                summon.setAttackActive(false); // false = Doesn't Attack | true = Attacks
+                field.spawnSummon(summon);
                 break;
             case DARK_FLARE_NL:
             case DARK_FLARE_SHAD:
-                Summon DrkFlare = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field2 = c.getChr().getField();
-                field2.addLife(DrkFlare);
-                DrkFlare.setCharLevel((byte) chr.getStat(Stat.level));
-                DrkFlare.setPosition(chr.getPosition().deepCopy());
-                DrkFlare.setMoveAction((byte) 1);
-                DrkFlare.setCurFoothold((short) field2.findFootHoldBelow(DrkFlare.getPosition()).getId());
-                DrkFlare.setMoveAbility((byte) 0);
-                DrkFlare.setAssistType((byte) 1);
-                DrkFlare.setEnterType((byte) 1);
-                DrkFlare.setBeforeFirstAttack(false);
-                DrkFlare.setTemplateId(skillID);
-                DrkFlare.setAttackActive(true);
-                c.write(CField.summonedCreated(chr.getId(), DrkFlare));
-                // Unsure
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setCharLevel((byte) chr.getStat(Stat.level));
+                summon.setPosition(chr.getPosition().deepCopy());
+                summon.setMoveAction((byte) 1);
+                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
+                summon.setAssistType((byte) 1);
+                summon.setEnterType((byte) 1);
+                summon.setBeforeFirstAttack(false);
+                summon.setTemplateId(skillID);
+                summon.setAttackActive(true); // false = Doesn't Attack | true = Attacks
+                field.spawnSummon(summon);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private boolean isBuff(int skillID) {
+        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
