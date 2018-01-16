@@ -190,8 +190,8 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_FORCE_ATOM_COLLISION:
                     WorldHandler.handleForceAtomCollision(c, inPacket);
                     break;
-                case MOB_MOVE:
-                    WorldHandler.handleMoveMob(c, inPacket);
+                case REQUEST_ARROW_PLATER_OBJ:
+                    WorldHandler.handleRequestArrowPlatterObj(c, inPacket);
                     break;
                 case CREATE_PSYCHIC_LOCK:
                     WorldHandler.handleCreatePsychicLock(c, inPacket);
@@ -204,6 +204,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case RELEASE_PSYCHIC_AREA:
                     WorldHandler.handleReleasePsychicArea(c, inPacket);
+                    break;
+                case MOB_MOVE:
+                    WorldHandler.handleMoveMob(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

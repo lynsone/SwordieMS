@@ -111,19 +111,19 @@ public class Life {
     }
 
     public int getX() {
-        return x;
+        return getPosition().getX();
     }
 
     public void setX(int x) {
-        this.x = x;
+        getPosition().setX(x);
     }
 
     public int getY() {
-        return y;
+        return getPosition().getY();
     }
 
     public void setY(int y) {
-        this.y = y;
+        getPosition().setY(y);
     }
 
     public String getLifeType() {
@@ -312,5 +312,9 @@ public class Life {
         int x = getPosition().getX();
         int y = getPosition().getY();
         return new Rect(x + rect.getLeft(), y + rect.getTop(), x + rect.getRight(), y + rect.getBottom());
+    }
+
+    public void setCurFoothold() {
+
     }
 }

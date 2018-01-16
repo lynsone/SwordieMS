@@ -351,7 +351,7 @@ public class WvsContext {
         outPacket.encodeByte(0); // ?
         outPacket.encodeByte(demount);
 
-        temporaryStatManager.getCurrentStats().clear();
+        temporaryStatManager.getRemovedStats().clear();
         return outPacket;
     }
 

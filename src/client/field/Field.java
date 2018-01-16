@@ -1,9 +1,11 @@
 package client.field;
 
 import client.character.Char;
+import client.character.skills.SkillInfo;
 import client.life.*;
 import connection.OutPacket;
 import enums.LeaveType;
+import loaders.SkillData;
 import packet.CField;
 import server.EventManager;
 import util.Position;
@@ -12,6 +14,8 @@ import util.Rect;
 import java.awt.Rectangle;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static client.character.skills.SkillStat.time;
 
 /**
  * Created on 12/14/2017.
@@ -325,7 +329,7 @@ public class Field {
                         ((Summon) s).getSkillID() == summon.getSkillID())
                 .findFirst().orElse(null);
         if(oldSummon != null) {
-            removeSummon(oldSummon.getObjectId(), false);
+            removeLife(oldSummon.getObjectId(), false);
         }
         spawnLife(summon, null);
     }
@@ -367,7 +371,7 @@ public class Field {
             if(life instanceof Summon) {
                 Summon summon = (Summon) life;
                 if(summon.getSummonTerm() > 0) {
-                    Timer t = EventManager.addEvent(this, "removeSummon", summon.getSummonTerm(), summon.getObjectId(), true);
+                    Timer t = EventManager.addEvent(this, "removeLife", summon.getSummonTerm(), summon.getObjectId(), true);
                     addLifeTimer(summon, t);
                 }
                 broadcastPacket(CField.summonedCreated(summon.getCharID(), summon));
@@ -455,6 +459,11 @@ public class Field {
 
     public void spawnAffectedArea(AffectedArea aa) {
         addLife(aa);
+        SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
+        if(si != null) {
+            int duration = si.getValue(time, aa.getSlv());
+            EventManager.addEvent(this, "removeLife", duration, aa.getObjectId(), true);
+        }
         broadcastPacket(CField.affectedAreaCreated(aa));
     }
 
@@ -480,15 +489,17 @@ public class Field {
         return lifes;
     }
 
-    public synchronized void removeSummon(Integer id, Boolean fromTimer) {
+    public synchronized void removeLife(Integer id, Boolean fromTimer) {
         Life life = getLifeByObjectID(id);
-        if(life == null || !(life instanceof Summon)) {
+        if(life == null) {
             return;
         }
-        Summon summon = (Summon) life;
         removeLife(id);
         removeTimer(life, fromTimer);
-        broadcastPacket(CField.summonedRemoved(summon, LeaveType.ANIMATION));
+        if(life instanceof Summon) {
+            Summon summon = (Summon) life;
+            broadcastPacket(CField.summonedRemoved(summon, LeaveType.ANIMATION));
+        }
     }
 
     public Map<Life, Timer> getLifeTimers() {

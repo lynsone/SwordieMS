@@ -11,6 +11,7 @@ import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
 import client.jobs.JobManager;
+import client.jobs.adventurer.Archer;
 import client.life.Life;
 import client.life.Mob;
 import client.life.Summon;
@@ -324,11 +325,13 @@ public class WorldHandler {
         Field field = c.getChr().getField();
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
-            long totalDamage = 0;
-            for(int dmg : mai.damages) {
-                totalDamage += dmg;
+            if(mob == null || mob.getHp() < 0) {
+                long totalDamage = 0;
+                for (int dmg : mai.damages) {
+                    totalDamage += dmg;
+                }
+                mob.damage(totalDamage);
             }
-            mob.damage(totalDamage);
         }
         c.getChr().getJobHandler().handleAttack(c, attackInfo);
     }
@@ -717,7 +720,7 @@ public class WorldHandler {
                 Position p = m.getPosition();
                 life.setPosition(p);
                 life.setMoveAction(m.getMoveAction());
-
+                life.setFh(m.getFh());
             }
         }
     }
@@ -860,6 +863,11 @@ public class WorldHandler {
         short maskie = inPacket.decodeShort();
         ai.left = ((maskie >> 15) & 1) != 0;
         ai.attackAction = (short) (maskie & 0x7FFF);
+        if(skillID == Archer.ARROW_PLATTER) { // very unsure
+            short idk9 = inPacket.decodeShort();
+            int idk10 = inPacket.decodeInt();
+            short idk11 = inPacket.decodeShort();
+        }
         int idk4 = inPacket.decodeInt();
         ai.attackActionType = inPacket.decodeByte();
         if(skillID == 23111001 || skillID == 80001915 || skillID == 36111010) {
@@ -867,7 +875,7 @@ public class WorldHandler {
             int x = inPacket.decodeInt();
             int y = inPacket.decodeInt();
         }
-        byte bulletCountMabye1 = inPacket.decodeByte();
+        ai.attackSpeed = inPacket.decodeByte();
         int idk6 = inPacket.decodeInt();
         int idk7 = inPacket.decodeInt();
         short idk8 = inPacket.decodeShort();
@@ -923,7 +931,10 @@ public class WorldHandler {
                 ai.forcedX = inPacket.decodeShort();
                 ai.forcedY = inPacket.decodeShort();
             }
-            ai.idkPos = inPacket.decodePosition();
+            if(false) {
+                // not called?
+                ai.idkPos = inPacket.decodePosition();
+            }
             if(SkillConstants.isAranFallingStopSkill(skillID)) {
                 ai.fh = inPacket.decodeByte();
             }
@@ -1064,7 +1075,7 @@ public class WorldHandler {
 
     public static void handleSummonedRemove(Client c, InPacket inPacket) {
         int id = inPacket.decodeInt();
-        c.getChr().getField().removeSummon(id, false);
+        c.getChr().getField().removeLife(id, false);
     }
 
     public static void handleForceAtomCollision(Client c, InPacket inPacket) {
@@ -1078,5 +1089,9 @@ public class WorldHandler {
 //            mob.damage((long) 133337);
 //            c.write(CField.mobDamaged(mobID, (long) 133337, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
         }
+    }
+
+    public static void handleRequestArrowPlatterObj(Client c, InPacket inPacket) {
+
     }
 }

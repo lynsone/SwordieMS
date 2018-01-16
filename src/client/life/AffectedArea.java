@@ -4,6 +4,7 @@ import client.character.Char;
 import client.character.skills.AttackInfo;
 import client.character.skills.Skill;
 import client.character.skills.SkillInfo;
+import client.jobs.adventurer.Archer;
 import client.jobs.adventurer.Magician;
 import enums.MobStat;
 import loaders.SkillData;
@@ -144,6 +145,7 @@ public class AffectedArea extends Life {
         MobTemporaryStat mts = mob.getTemporaryStat();
         switch(skillID) {
             case Magician.POISON_MIST:
+            case Archer.FLAME_SURGE:
                 if(!mts.hasBurnFromSkill(skillID)) {
                     mts.createAndAddBurnedInfo(getCharID(), skill, 1);
                 }

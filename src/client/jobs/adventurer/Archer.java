@@ -5,7 +5,9 @@ import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
+import client.field.Foothold;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -27,7 +29,6 @@ import java.util.Map;
 
 import static client.character.skills.SkillStat.*;
 import static client.character.skills.CharacterTemporaryStat.*;
-import static enums.ChatMsgColour.YELLOW;
 
 
 /**
@@ -43,10 +44,14 @@ public class Archer extends Job {
     public static final int FLAME_SURGE = 3111003;
     public static final int PHOENIX = 3111005;
     public static final int RECKLESS_HUNT_BOW = 3111011;
+    public static final int FOCUSED_FURY = 3110012;
+    public static final int ARROW_PLATTER = 3111013;
+    public static final int EVASION_BOOST = 3110007;
     public static final int PUPPET = 3111002;
     public static final int SHARP_EYES_BOW = 3121002;
-    public static final int ILLUSION_STEP = 3121007;
+    public static final int ILLUSION_STEP_BOW = 3121007;
     public static final int ENCHANTED_QUIVER = 3121016;
+    public static final int BINDING_SHOT = 3121014;
     public static final int MAPLE_WARRIOR_BOW = 3121000;
     public static final int MAPLE_WARRIOR_XBOW = 3221000;
 
@@ -59,7 +64,7 @@ public class Archer extends Job {
             PHOENIX,
             RECKLESS_HUNT_BOW,
             SHARP_EYES_BOW,
-            ILLUSION_STEP,
+            ILLUSION_STEP_BOW,
             ENCHANTED_QUIVER,
             MAPLE_WARRIOR_BOW,
             MAPLE_WARRIOR_XBOW,
@@ -85,12 +90,14 @@ public class Archer extends Job {
         }
         if(hasHitMobs) {
             handleQuiverCartridge(c, chr.getTemporaryStatManager(), attackInfo, slv);
+            handleFocusedFury();
         }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case ARROW_BOMB:
+            case PHOENIX:
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -102,7 +109,61 @@ public class Archer extends Job {
                     }
                 }
                 break;
+            case FLAME_SURGE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    int x = mob.getX();
+                    int y = mob.getY();
+                    Foothold fh = mob.getCurFoodhold();
+                    aa.setPosition(new Position(x, y));
+                    Rect rect = si.getRects().get(0);
+                    if(rect.getLeft() > fh.getX1()) {
+                        rect.setLeft(fh.getX1());
+                    } else if(rect.getRight() > fh.getX2()) {
+                        rect.setRight(fh.getX2());
+                    }
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    chr.getField().spawnAffectedArea(aa);
+                }
+                break;
+            case BINDING_SHOT:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o2.nOption = -si.getValue(x, slv);
+                    o2.rOption = skillID;
+                    o2.tOption = si.getValue(time, slv);
+//                    mts.addStatOptions(MobStat.Re) // TODO hp recovery?
+                    o1.nOption = si.getValue(s, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                }
+                break;
         }
+    }
+
+    private void handleFocusedFury() {
+        if(!chr.hasSkill(FOCUSED_FURY)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = tsm.getOptByCTSAndSkill(AsrR, FOCUSED_FURY);
+        if(o == null) {
+            o = new Option();
+            o.nOption = 0;
+            o.rOption = FOCUSED_FURY;
+        }
+        Skill skill = chr.getSkill(FOCUSED_FURY);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(FOCUSED_FURY);
+        o.nOption = Math.min(o.nOption + si.getValue(x, slv), 100);
+        o.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(AsrR, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     private void handleQuiverCartridge(Client c, TemporaryStatManager tsm, AttackInfo attackInfo, int slv) {
@@ -118,7 +179,7 @@ public class Archer extends Job {
             MobTemporaryStat mts = mob.getTemporaryStat();
             int mobId = mai.mobId;
             switch (quiverCartridge.getType()) {
-                case 1:
+                case 1: // Blood
                     if(Util.succeedProp(si.getValue(w, slv))) {
                         quiverCartridge.decrementAmount();
                         int maxHP = chr.getStat(Stat.mhp);
@@ -131,11 +192,11 @@ public class Archer extends Job {
                         c.write(WvsContext.statChanged(stats, false));
                     }
                     break;
-                case 2:
+                case 2: // Poison
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     quiverCartridge.decrementAmount();
                     break;
-                case 3:
+                case 3: // Magic
                     if(Util.succeedProp(si.getValue(u, slv))) {
                         quiverCartridge.decrementAmount();
                         int inc = ForceAtomEnum.BM_ARROW.getInc();
@@ -146,15 +207,32 @@ public class Archer extends Job {
                         chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobId, QUIVER_CARTRIDGE_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), 0, mob.getPosition()));
-                        break;
                     }
+                    break;
             }
         }
         tsm.putCharacterStatValue(QuiverCatridge, quiverCartridge.getOption());
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    public enum QCType {
+        BLOOD(1),
+        POISON(2),
+        MAGIC(3),
+        ;
+        private byte val;
+
+        QCType(int val) {
+            this.val = (byte) val;
+        }
+
+        public byte getVal() {
+            return val;
+        }
+    }
+
     public class QuiverCartridge{
+
         private int blood; // 1
         private int poison; // 2
         private int magic; // 3
@@ -162,33 +240,36 @@ public class Archer extends Job {
         private Char chr;
 
         public QuiverCartridge(Char chr) {
-            blood = getMaxNumberOfArrows(chr, (byte) 1);
-            poison = getMaxNumberOfArrows(chr, (byte) 2);
-            magic = getMaxNumberOfArrows(chr, (byte) 3);
+            blood = getMaxNumberOfArrows(chr, QCType.BLOOD.getVal());
+            poison = getMaxNumberOfArrows(chr, QCType.POISON.getVal());
+            magic = getMaxNumberOfArrows(chr, QCType.MAGIC.getVal());
             type = 1;
             this.chr = chr;
         }
 
         public void decrementAmount() {
+            if(chr.getTemporaryStatManager().hasStat(AdvancedQuiver)) {
+                return;
+            }
             switch(type) {
                 case 1:
                     blood--;
                     if(blood == 0) {
-                        blood = getMaxNumberOfArrows(chr, 1);
+                        blood = getMaxNumberOfArrows(chr, QCType.BLOOD.getVal());
                         incType();
                     }
                     break;
                 case 2:
                     poison--;
                     if(poison == 0) {
-                        poison = getMaxNumberOfArrows(chr, 2);
+                        poison = getMaxNumberOfArrows(chr, QCType.POISON.getVal());
                         incType();
                     }
                     break;
                 case 3:
                     magic--;
                     if(magic == 0) {
-                        magic = getMaxNumberOfArrows(chr, 3);
+                        magic = getMaxNumberOfArrows(chr, QCType.MAGIC.getVal());
                         incType();
                     }
                     break;
@@ -197,7 +278,6 @@ public class Archer extends Job {
 
         public void incType() {
             type = (type % 3) + 1;
-            chr.chatMessage(YELLOW, "New type: " + type);
         }
 
         public int getTotal() {
@@ -235,7 +315,21 @@ public class Archer extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
+        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+            // Dodged
+            if(chr.hasSkill(EVASION_BOOST)) {
+                Skill skill = chr.getSkill(EVASION_BOOST);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(EVASION_BOOST);
+                TemporaryStatManager tsm = chr.getTemporaryStatManager();
+                Option o = new Option();
+                o.nOption = 100;
+                o.rOption = EVASION_BOOST;
+                o.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CriticalBuff, o);
+                c.write(WvsContext.temporaryStatSet(tsm));
+            }
+        }
     }
 
     private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -294,6 +388,54 @@ public class Archer extends Job {
                 summon.setFlyMob(true);
                 field.spawnSummon(summon);
                 break;
+            case RECKLESS_HUNT_BOW:
+                o1.nValue = -si.getValue(x, slv);
+                o1.nReason = skillID;
+                tsm.putCharacterStatValue(IndiePADR, o1);
+                tsm.putCharacterStatValue(IndieMADR, o1);
+                o2.nValue = si.getValue(indieDamR, slv);
+                o2.nReason = skillID;
+                tsm.putCharacterStatValue(IndieDamR, o2);
+                o3.nOption = si.getValue(padX, slv);
+                o3.rOption = skillID;
+                tsm.putCharacterStatValue(PAD, o3);
+                break;
+            case SHARP_EYES_BOW:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CriticalBuff, o1);
+                o2.nOption = si.getValue(y, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+//                o2.mOption = si.getValue(x, slv); mOption is for the hyper passive
+                tsm.putCharacterStatValue(SharpEyes, o2);
+                break;
+            case ILLUSION_STEP_BOW:
+                o1.nOption = si.getValue(dex, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DEX, o1);
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(EVAR, o2);
+                break;
+            case MAPLE_WARRIOR_BOW:
+            case MAPLE_WARRIOR_XBOW:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(x, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+            case ENCHANTED_QUIVER:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AdvancedQuiver, o1);
+                break;
+
 
         }
         c.write(WvsContext.temporaryStatSet(tsm));

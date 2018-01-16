@@ -7,6 +7,7 @@ import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
+import client.jobs.adventurer.Archer;
 import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
@@ -56,8 +57,9 @@ public class AdminCommands {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
             o.nOption = 5;
-            o.rOption = 3110001;
-            tsm.putCharacterStatValue(CharacterTemporaryStat.BowMasterMortalBlow, o);
+            o.rOption = Archer.FOCUSED_FURY;
+            o.tOption = 5;
+            tsm.putCharacterStatValue(CharacterTemporaryStat.AsrR, o);
             chr.getClient().write(WvsContext.temporaryStatSet(tsm));
 
         }
