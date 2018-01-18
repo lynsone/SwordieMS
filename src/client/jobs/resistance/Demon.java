@@ -108,7 +108,16 @@ public class Demon extends Job {
         Option o3 = new Option();
         switch (skillID) {
             case OVERLOAD_RELEASE:
-                //TODO
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(x, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMHPR, o1);
+                o2.nOption = si.getValue(indiePMdR, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePMdR, o2);
+                // TODO  Resets EXCEED to 0
                 break;
 
             case BATTLE_PACT_DA:
@@ -157,7 +166,7 @@ public class Demon extends Job {
                 o2.nOption = si.getValue(x, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Regen, o2); //TODO HP regen?
+                tsm.putCharacterStatValue(DiabolikRecovery, o2); //TODO HP regen?
                 break;
             case MAPLE_WARRIOR_DA:
             case MAPLE_WARRIOR_DS:
@@ -257,7 +266,7 @@ public class Demon extends Job {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(x, slv);
+                        o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
                 }
                 break;

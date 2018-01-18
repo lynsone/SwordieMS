@@ -106,7 +106,7 @@ public class Mihile extends Job {
                 o3.nOption = si.getValue(y, slv);
                 o3.rOption = skillID;
                 o3.tOption = 0;
-                tsm.putCharacterStatValue(IncCriticalDamMin, o3);
+                tsm.putCharacterStatValue(IncCriticalDamMin, o3); //Doens't increase Min crit Dmg
                 break;
             case CALL_OF_CYGNUS_MIHILE:
                 o1.nValue = si.getValue(x, slv);
@@ -142,8 +142,8 @@ public class Mihile extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case FOUR_POINT_ASSAULT:
-                if (Util.succeedProp(si.getValue(prop, slv))) {
-                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = si.getValue(x, slv);
@@ -154,8 +154,8 @@ public class Mihile extends Job {
                 }
                 break;
             case RADIANT_CROSS:
-                if (Util.succeedProp(si.getValue(y, slv))) {
-                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(y, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = si.getValue(x, slv);

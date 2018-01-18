@@ -107,21 +107,21 @@ public class WindArcher extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1); //Indie
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(indieCr, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieCr, o1); //Indie
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(indieMhp, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieMHP, o1); //Indie
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(indiePad, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndiePAD, o1); //Indie
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieCr, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieCr, o2); //Indie
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indieMhp, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMHP, o3); //Indie
+                o4.nReason = skillID;
+                o4.nValue = si.getValue(indiePad, slv);
+                o4.tStart = (int) System.currentTimeMillis();
+                o4.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o4); //Indie
                 break;
             case SHARP_EYES: // x = crit rate    y = max crit dmg
                 o1.nOption = si.getValue(x, slv);

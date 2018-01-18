@@ -32,7 +32,7 @@ public class BlazeWizard extends Job {
     public static final int CINDER_MAELSTROM = 12111022; //Special Skill
     public static final int PHOENIX_RUN = 12111023; //Special Buff
 
-    public static final int BURNING_CONDUIT = 12121005; // TODO AoE Skill
+    public static final int BURNING_CONDUIT = 12121005;  //TODO Area of Effect Skill
     public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff
     public static final int FIRES_OF_CREATION_LION = 12120013; //Buff
     public static final int FLAME_BARRIER = 12121003; //Buff

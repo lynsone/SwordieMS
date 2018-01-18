@@ -30,7 +30,7 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Warrior extends Job {
-
+    //Hero
     public static final int WEAPON_BOOSTER_FIGHTER = 1101004;
     public static final int COMBO_ATTACK = 1101013;
     public static final int RAGE = 1101006;
@@ -47,7 +47,9 @@ public class Warrior extends Job {
     public static final int ADVANCED_FINAL_ATTACK = 1120013;
     public static final int ENRAGE = 1121010;
     public static final int PUNCTURE = 1121015;
+    public static final int MAGIC_CRASH_HERO = 1121016;
 
+    //Paladin
     public static final int CLOSE_COMBAT = 1201013;
     public static final int ELEMENTAL_CHARGE = 1200014;
     public static final int FLAME_CHARGE = 1201011;
@@ -62,7 +64,9 @@ public class Warrior extends Job {
     public static final int MAPLE_WARRIOR_PALADIN = 1221000;
     public static final int GUARDIAN = 1221016;
     public static final int BLAST = 1221009;
+    public static final int MAGIC_CRASH_PALLY = 1221014;
 
+    //Dark Knight
     public static final int SPEAR_SWEEP = 1301012;
     public static final int WEAPON_BOOSTER_SPEARMAN = 1301004;
     public static final int IRON_WILL = 1301006;
@@ -72,6 +76,7 @@ public class Warrior extends Job {
     public static final int LORD_OF_DARKNESS = 1310009;
     public static final int MAPLE_WARRIOR_DARK_KNIGHT = 1321000;
     public static final int FINAL_PACT = 1320016;
+    public static final int MAGIC_CRASH_DRK = 1321014;
 
     private final int[] buffs = new int[]{
             WEAPON_BOOSTER_FIGHTER, // Weapon Booster - Fighter
@@ -88,6 +93,7 @@ public class Warrior extends Job {
             IRON_WILL,
             HYPER_BODY,
             CROSS_SURGE,
+            BLAST,
             ENRAGE,
     };
     private long lastPanicHit = Long.MIN_VALUE;
@@ -240,6 +246,20 @@ public class Warrior extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+            case BLAST: //TODO Doesn't give Buff
+                o1.nOption = si.getValue(cr, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CriticalBuff, o1);
+                o2.nOption = si.getValue(damR, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamR, o2);
+                o3.nOption = si.getValue(ignoreMobpdpR, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnoreMobpdpR, o3);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -510,6 +530,24 @@ public class Warrior extends Job {
                                 o2.rOption = skillID;
                                 o2.tOption = si.getValue(subTime, slv);
                                 mts.addStatOptionsAndBroadcast(MobStat.Darkness, o2);
+                            }
+                        }
+                    }
+                    break;
+                case MAGIC_CRASH_DRK: //TODO Correct?
+                case MAGIC_CRASH_HERO:
+                case MAGIC_CRASH_PALLY:
+                    Rect rect2 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
+                    , inPacket.decodeShort(), inPacket.decodeShort());
+                    for(Life life : chr.getField().getLifesInRect(rect2)) {
+                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                            Mob mob = (Mob) life;
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            if(Util.succeedProp(si.getValue(prop, slv))) {
+                                o1.nOption = 1;
+                                o1.rOption = skillID;
+                                o1.tOption = si.getValue(time, slv);
+                                mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
                             }
                         }
                     }

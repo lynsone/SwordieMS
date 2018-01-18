@@ -12,6 +12,9 @@ import constants.JobConstants;
  * Created on 12/14/2017.
  */
 public class Hayato extends Job {
+
+    //TODO Hayato's Broken
+
     public Hayato(Char chr) {
         super(chr);
     }

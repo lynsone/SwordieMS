@@ -12,6 +12,9 @@ import constants.JobConstants;
  * Created on 12/14/2017.
  */
 public class BeastTamer extends Job {
+
+    //TODO Beast Tamer's broken
+
     public BeastTamer(Char chr) {
         super(chr);
     }

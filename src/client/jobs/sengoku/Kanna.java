@@ -12,6 +12,9 @@ import constants.JobConstants;
  * Created on 12/14/2017.
  */
 public class Kanna extends Job {
+
+    //TODO Kanna's Broken
+
     public Kanna(Char chr) {
         super(chr);
     }
