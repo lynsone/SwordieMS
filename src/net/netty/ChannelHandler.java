@@ -132,6 +132,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case WVS_SET_UP_STEP:
                 case LOCALE:
                 case USER_EMOTION:
+                case USER_CALC_DAMAGE_STAT_SET_REQUEST:
                     break;
                 case CHAR_LOGIN:
                     WorldHandler.handleCharLogin(c, inPacket);
@@ -142,7 +143,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_CHAT:
                     WorldHandler.handleUserChat(c, inPacket);
                     break;
-                case USER_CHANGE_SLOT_POSITIREQUEST:
+                case USER_CHANGE_SLOT_POSITION_REQUEST:
                     WorldHandler.handleInventoryOperation(c, inPacket);
                     break;
                 case FUNC_KEY_MAPPED_MODIFIED:
@@ -153,6 +154,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case SUMMONED_ATTACK:
                     WorldHandler.handleSummonedAttack(c, inPacket);
+                    break;
+                case SUMMONED_HIT:
+                    WorldHandler.handleSummonedHit(c, inPacket);
                     break;
                 case USER_ABILITY_UP_REQUEST:
                     WorldHandler.handleUserAbilityUpRequest(c, inPacket);
@@ -178,6 +182,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_BODY_ATTACK:
                     WorldHandler.handleBodyAttack(c, inPacket);
                     break;
+                case USER_CHARACTER_INFO_REQUEST:
+                    WorldHandler.handleUserCharacterInfoRequest(c, inPacket);
+                    break;
                 case USER_TRANSFER_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
                     break;
@@ -192,6 +199,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case REQUEST_ARROW_PLATER_OBJ:
                     WorldHandler.handleRequestArrowPlatterObj(c, inPacket);
+                    break;
+                case USER_FLAME_ORB_REQUEST:
+                    WorldHandler.handleUserFlameOrbRequest(c, inPacket);
                     break;
                 case CREATE_PSYCHIC_LOCK:
                     WorldHandler.handleCreatePsychicLock(c, inPacket);

@@ -12,6 +12,7 @@ import client.field.Field;
 import client.field.Portal;
 import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
+import client.jobs.cygnus.BlazeWizard;
 import client.life.Life;
 import client.life.Mob;
 import client.life.Summon;
@@ -19,8 +20,7 @@ import client.life.movement.Movement;
 import connection.InPacket;
 import constants.JobConstants;
 import constants.SkillConstants;
-import enums.InvType;
-import enums.Stat;
+import enums.*;
 import loaders.SkillData;
 import packet.CField;
 import packet.Stage;
@@ -31,6 +31,7 @@ import server.World;
 import util.Position;
 import util.Rect;
 import util.Tuple;
+import util.Util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.ChatMsgColour.YELLOW;
 import static enums.InvType.*;
 
@@ -111,6 +113,8 @@ public class WorldHandler {
                     e.printStackTrace();
                 }
             }
+        } else {
+            chr.getField().broadcastPacket(CField.chat(chr.getId(), ChatType.USER, msg, false, 0, c.getWorldId()));
         }
     }
 
@@ -127,13 +131,22 @@ public class WorldHandler {
         if(item == null) {
             return;
         }
+        Item swapItem = chr.getInventoryByType(invTypeTo).getItemBySlot(newPos);
         item.setBagIndex(newPos);
         if(invType == EQUIP && invTypeFrom != invTypeTo) {
             if(invTypeFrom == EQUIPPED) {
                 chr.unequip(item);
             } else {
                 chr.equip(item);
+                if(swapItem != null) {
+                    chr.unequip(swapItem);
+                }
             }
+        }
+        if(swapItem != null) {
+            swapItem.setBagIndex(oldPos);
+            c.write(WvsContext.inventoryOperation(c.getChr(), true, false, (byte) 2, newPos, oldPos, invTypeTo, quantity,
+                    0, swapItem));
         }
          // TODO dropping items
         c.write(WvsContext.inventoryOperation(c.getChr(), true, false, (byte) 2, oldPos, newPos, invType, quantity,
@@ -845,6 +858,7 @@ public class WorldHandler {
         ai.skillId = inPacket.decodeInt();
         ai.slv = inPacket.decodeByte();
         ai.addAttackProc = inPacket.decodeByte();
+        c.getChr().chatMessage(YELLOW, "addAttackProc: " + ai.addAttackProc);
         inPacket.decodeInt(); // crc
         int skillID = ai.skillId;
         if(SkillConstants.isKeyDownSkill(skillID) || SkillConstants.isSuperNovaSkill(skillID)) {
@@ -1093,5 +1107,69 @@ public class WorldHandler {
 
     public static void handleRequestArrowPlatterObj(Client c, InPacket inPacket) {
 
+    }
+
+    public static void handleUserCharacterInfoRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+        inPacket.decodeInt(); // tick
+        int requestID = inPacket.decodeInt();
+        Char requestChar = field.getCharByID(requestID);
+        if(requestChar == null) {
+            chr.chatMessage(GAME_MESSAGE, "The character you tried to find could not be found.");
+        } else {
+            c.write(CField.characterInfo(requestChar));
+        }
+    }
+
+    public static void handleSummonedHit(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+        int id = inPacket.decodeInt();
+        Life life = field.getLifeByObjectID(id);
+        if(life == null || !(life instanceof Summon)) {
+            return;
+        }
+    }
+
+    public static void handleUserFlameOrbRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int skillID = inPacket.decodeInt();
+        byte slv = inPacket.decodeByte();
+        short dir = inPacket.decodeShort();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        int range = si.getValue(SkillStat.range, slv);
+        ForceAtomEnum fae;
+        switch(skillID) {
+            case BlazeWizard.FINAL_ORBITAL_FLAME:
+                fae = ForceAtomEnum.ORBITAL_FLAME_4;
+                break;
+            case BlazeWizard.GRAND_ORBITAL_FLAME:
+                fae = ForceAtomEnum.ORBITAL_FLAME_3;
+                break;
+            case BlazeWizard.GREATER_ORBITAL_FLAME:
+                fae = ForceAtomEnum.ORBITAL_FLAME_2;
+                break;
+            default:
+                fae = ForceAtomEnum.ORBITAL_FLAME_1;
+                break;
+        }
+        int curTime = Util.getCurrentTime();
+        int angle = 0;
+        switch(dir) {
+            case 1:
+                angle = 180;
+                break;
+            case 2:
+                angle = 270;
+                break;
+            case 3:
+                angle = 90;
+                break;
+        }
+        ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), 15, 3,
+                angle, 0, curTime, 0, skillID, new Position(0, 0));
+        c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
+                chr.getId(), skillID, fai, null, dir, range, null, 0, null));
     }
 }
