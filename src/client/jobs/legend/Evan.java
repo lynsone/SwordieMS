@@ -144,4 +144,9 @@ public class Evan extends Job {
                 return false;
         }
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

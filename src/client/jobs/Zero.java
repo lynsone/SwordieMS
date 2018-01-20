@@ -200,4 +200,9 @@ public class Zero extends Job {
     public boolean isHandlerOfJob(short id) {
         return id >= JobConstants.JobEnum.ZERO.getJobId() && id <= JobConstants.JobEnum.ZERO4.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

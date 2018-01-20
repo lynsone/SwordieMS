@@ -314,6 +314,11 @@ public class Kinesis extends Job {
         }
     }
 
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
     public int getPp() {
         return pp;
     }

@@ -159,8 +159,8 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.hp, (short) num);
-                chr.setStat(Stat.mhp, (short) num);
+                chr.setStat(Stat.hp, num);
+                chr.setStat(Stat.mhp, num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.hp, num);
                 stats.put(Stat.mhp, num);
@@ -173,8 +173,8 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.mp, (short) num);
-                chr.setStat(Stat.mmp, (short) num);
+                chr.setStat(Stat.mp, num);
+                chr.setStat(Stat.mmp, num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.mp, num);
                 stats.put(Stat.mmp, num);
@@ -320,6 +320,30 @@ public class AdminCommands {
                         chr.chatMessage(YELLOW, "Name: " + ssi.getName());
                         chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
                         chr.chatMessage(YELLOW, "h: " + ssi.getH());
+                    }
+                }
+            } else if("item".equalsIgnoreCase(args[1])) {
+                int id;
+                String name;
+                if(isNumber) {
+                    id = Integer.parseInt(query);
+                    name = StringData.getItemStringById(id);
+                    if(name == null) {
+                        chr.chatMessage(YELLOW, "Cannot find item " + id);
+                        return;
+                    }
+                    chr.chatMessage(YELLOW, "Name: " + name);
+                } else {
+
+                    Map<Integer, String> map = StringData.getItemStringByName(query);
+                    if(map.size() == 0) {
+                        chr.chatMessage(YELLOW, "No skills found for query " + query);
+                    }
+                    for (Map.Entry<Integer, String> entry : map.entrySet()) {
+                        id = entry.getKey();
+                        name = entry.getValue();
+                        chr.chatMessage(YELLOW, "Id: " + id);
+                        chr.chatMessage(YELLOW, "Name: " + name);
                     }
                 }
             }

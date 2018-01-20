@@ -36,4 +36,9 @@ public class Citizen extends Job {
     public boolean isHandlerOfJob(short id) {
         return id == JobConstants.JobEnum.CITIZEN.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

@@ -594,6 +594,11 @@ public class Archer extends Job {
         }
     }
 
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
     public int getMaxNumberOfArrows(Char chr, int type) {
         int num = 0;
         Skill firstSkill = chr.getSkill(QUIVER_CARTRIDGE);

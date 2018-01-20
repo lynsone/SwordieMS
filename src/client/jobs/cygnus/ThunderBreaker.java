@@ -160,4 +160,9 @@ public class ThunderBreaker extends Job {
                 return false;
         }
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

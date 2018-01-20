@@ -39,4 +39,9 @@ public class Kanna extends Job {
         return id == JobConstants.JobEnum.KANNA.getJobId() ||
                 (id >= JobConstants.JobEnum.KANNA1.getJobId() && id <= JobConstants.JobEnum.KANNA4.getJobId());
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

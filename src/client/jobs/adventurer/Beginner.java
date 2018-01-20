@@ -36,4 +36,9 @@ public class Beginner extends Job {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
         return job == JobConstants.JobEnum.BEGINNER;
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

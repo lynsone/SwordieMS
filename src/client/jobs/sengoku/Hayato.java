@@ -39,4 +39,9 @@ public class Hayato extends Job {
         return id == JobConstants.JobEnum.HAYATO.getJobId() ||
                 (id >= JobConstants.JobEnum.HAYATO1.getJobId() && id <= JobConstants.JobEnum.HAYATO4.getJobId());
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

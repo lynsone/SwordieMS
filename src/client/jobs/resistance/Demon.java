@@ -315,4 +315,9 @@ public class Demon extends Job {
     public boolean isHandlerOfJob(short id) {
         return id >= JobConstants.JobEnum.DEMON_SLAYER.getJobId() && id <= JobConstants.JobEnum.DEMON_AVENGER4.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

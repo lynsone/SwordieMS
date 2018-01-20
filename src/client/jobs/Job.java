@@ -101,4 +101,6 @@ public abstract class Job {
     protected Char getChar() {
         return chr;
     }
+
+    public abstract int getFinalAttackSkill();
 }

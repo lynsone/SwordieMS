@@ -390,4 +390,9 @@ public class Thief extends Job {
         }
     }
 
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
 }

@@ -10,6 +10,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import packet.WvsContext;
+import server.World;
 
 import java.io.IOException;
 
@@ -140,11 +141,17 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_HIT:
                     c.getChr().getJobHandler().handleHit(c, inPacket);
                     break;
+                case USER_FINAL_ATTACK_REQUEST:
+                    WorldHandler.handleUserFinalAttackRequest(c, inPacket);
+                    break;
                 case USER_CHAT:
                     WorldHandler.handleUserChat(c, inPacket);
                     break;
                 case USER_CHANGE_SLOT_POSITION_REQUEST:
                     WorldHandler.handleInventoryOperation(c, inPacket);
+                    break;
+                case USER_CONSUME_CASH_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserConsumeCashItemUseRequest(c, inPacket);
                     break;
                 case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);
@@ -217,6 +224,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case MOB_MOVE:
                     WorldHandler.handleMoveMob(c, inPacket);
+                    break;
+                case MOB_APPLY_CTRL:
+//                    WorldHandler.handleMobApplyCtrl(c, inPacket);
                     break;
                 case USER_PORTAL_SCROLL_USE_REQUEST:
                     WorldHandler.handleUserPortalScrollUseRequest(c, inPacket);

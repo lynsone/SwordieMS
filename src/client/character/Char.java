@@ -6,6 +6,7 @@ import client.character.skills.Core;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.field.Field;
+import client.field.Portal;
 import client.jobs.Job;
 import client.jobs.JobManager;
 import connection.OutPacket;
@@ -19,6 +20,7 @@ import loaders.SkillData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.Cascade;
+import packet.Stage;
 import packet.UserLocal;
 import packet.WvsContext;
 import server.Server;
@@ -1448,5 +1450,18 @@ public class Char {
 
     public void setMarriageRecord(MarriageRecord marriageRecord) {
         this.marriageRecord = marriageRecord;
+    }
+
+    public void warp(Field toField) {
+        warp(toField, toField.getPortalByName("sp"));
+    }
+
+    public void warp(Field toField, Portal portal) {
+        setField(toField);
+        field.removeChar(this);
+        toField.addChar(this);
+        getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, false, hasBuffProtector(),
+                (byte) portal.getId(), false, 100, null, false, -1));
+        toField.spawnLifesForChar(this);
     }
 }

@@ -172,4 +172,9 @@ public class DawnWarrior extends Job {
                 return false;
         }
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

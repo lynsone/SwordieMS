@@ -160,4 +160,9 @@ public class Mechanic extends Job {
     public boolean isHandlerOfJob(short id) {
         return id >= JobConstants.JobEnum.MECHANIC_1.getJobId() && id <= JobConstants.JobEnum.MECHANIC_4.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

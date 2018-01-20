@@ -623,6 +623,20 @@ public class Warrior extends Job {
         }
     }
 
+    @Override
+    public int getFinalAttackSkill() {
+        if(chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
+            return FINAL_ATTACK_FIGHTER;
+        }
+        if(chr.hasSkill(FINAL_ATTACK_PAGE)) {
+            return FINAL_ATTACK_PAGE;
+        }
+        if(chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
+            return FINAL_ATTACK_SPEARMAN;
+        }
+        return 0;
+    }
+
     public int getComboCount(Char c) {
         TemporaryStatManager tsm = c.getTemporaryStatManager();
         if (tsm.hasStat(ComboCounter)) {

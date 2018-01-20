@@ -238,6 +238,19 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket mobCtrlChange(Char chr, Mob mob, boolean isController) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_CHANGE_CONTROLLER);
+
+        outPacket.encodeByte(isController);
+        outPacket.encodeInt(mob.getObjectId());
+        if(isController) {
+            outPacket.encodeByte(1); // controlling type
+        }
+
+        return outPacket;
+
+    }
+
     public static OutPacket mobStatSet(Mob mob, short delay) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_STAT_SET);
         MobTemporaryStat mts = mob.getTemporaryStat();

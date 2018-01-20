@@ -86,6 +86,11 @@ public class Blaster extends Job {
         return id >= JobConstants.JobEnum.BLASTER_1.getJobId() && id <= JobConstants.JobEnum.BLASTER_4.getJobId();
     }
 
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
     public void updateCylinder() {
         Option o = new Option();
         o.nOption = 1;

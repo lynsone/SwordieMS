@@ -6,6 +6,7 @@ import client.character.Char;
 import client.character.ExtendSP;
 import client.character.commands.AdminCommand;
 import client.character.commands.AdminCommands;
+import client.character.items.Inventory;
 import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
@@ -340,7 +341,7 @@ public class WorldHandler {
         Field field = c.getChr().getField();
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
-            if(mob == null || mob.getHp() < 0) {
+            if(mob != null && mob.getHp() > 0) {
                 long totalDamage = 0;
                 for (int dmg : mai.damages) {
                     totalDamage += dmg;
@@ -362,13 +363,7 @@ public class WorldHandler {
         Field field = chr.getField();
         Portal portal = field.getPortalByName(portalName);
         Field toField = c.getChannelInstance().getField(portal.getTargetMapId());
-        chr.setField(toField);
-        Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
-        field.removeChar(chr);
-        toField.addChar(chr);
-        c.write(Stage.setField(chr, toField, c.getChannel(), false, 0, false, chr.hasBuffProtector(),
-                (byte) toPortal.getId(), false, 100, null, false, -1));
-        toField.spawnLifesForChar(chr);
+        chr.warp(toField, portal);
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
@@ -417,12 +412,7 @@ public class WorldHandler {
                 System.out.println("Unhandled Return Scroll: " + itemID + " in WorldHandler.java");
                 break;
         }
-        chr.setField(toField);
-        field.removeChar(chr);
-        toField.addChar(chr);
-        c.write(Stage.setField(chr, toField, c.getChannel(), false, 0, false, chr.hasBuffProtector(),
-                (byte) toField.getPortalByName("sp").getId(), false, 100, null, false, -1));
-        toField.spawnLifesForChar(chr);
+        chr.warp(toField);
     }
 
     public static void handleUserUpgradeItemUseRequest(Client c, InPacket inPacket) {
@@ -749,6 +739,14 @@ public class WorldHandler {
         stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
         c.write(WvsContext.statChanged(stats, true));
         WvsContext.dispose(c, chr);
+    }
+
+    public static void handleMobApplyCtrl(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+        int mobID = inPacket.decodeInt();
+        Mob mob = (Mob) field.getLifeByObjectID(mobID);
+        c.write(CField.mobChangeController(mob, true, true));
     }
 
     public static void handleMoveMob(Client c, InPacket inPacket) {
@@ -1236,5 +1234,30 @@ public class WorldHandler {
                 angle, 0, curTime, 0, skillID, new Position(0, 0));
         c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
                 chr.getId(), skillID, fai, null, dir, range, null, 0, null));
+    }
+
+    public static void handleUserConsumeCashItemUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Inventory cashInv = chr.getInventoryByType(InvType.CASH);
+        inPacket.decodeInt(); // tick
+        short pos = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
+        switch(itemID) {
+            case 5040004: // Hyper Teleport Rock
+                short idk = inPacket.decodeShort();
+                int mapID = inPacket.decodeInt();
+                Field field = c.getChannelInstance().getField(mapID);
+                chr.warp(field);
+                break;
+        }
+    }
+
+    public static void handleUserFinalAttackRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int skillID = inPacket.decodeInt();
+        int pSkill = inPacket.decodeInt();
+        int targetID = inPacket.decodeInt();
+        int requestTime = inPacket.decodeInt();
+        c.write(CField.finalAttackRequest(chr, skillID, chr.getJobHandler().getFinalAttackSkill(), 0, targetID, requestTime));
     }
 }

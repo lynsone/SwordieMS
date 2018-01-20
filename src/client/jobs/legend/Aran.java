@@ -212,4 +212,9 @@ public class Aran extends Job {
                 return false;
         }
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

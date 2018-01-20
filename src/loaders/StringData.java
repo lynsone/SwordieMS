@@ -22,6 +22,50 @@ import static enums.ChatMsgColour.YELLOW;
  */
 public class StringData {
     public static Map<Integer, SkillStringInfo> skillString = new HashMap<>();
+    public static Map<Integer, String> itemStrings = new HashMap<>();
+
+    public static void loadItemStringsFromWz() {
+        long start = System.currentTimeMillis();
+        String wzDir = ServerConstants.WZ_DIR + "\\String.wz\\";
+        String[] files = new String[]{"Cash", "Consume", "Eqp", "Ins", "Pet", "Etc"};
+        for(String fileDir : files) {
+            File file = new File(wzDir + fileDir + ".img.xml");
+            Document doc = XMLApi.getRoot(file);
+            Node node = doc;
+            List<Node> nodes = XMLApi.getAllChildren(node);
+            for (Node topNode : nodes) {
+                if(!fileDir.equalsIgnoreCase("eqp") &&
+                        !fileDir.equalsIgnoreCase("etc")) {
+                    for (Node mainNode : XMLApi.getAllChildren(topNode)) {
+                        int id = Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name"));
+                        String name = XMLApi.getNamedAttribute(XMLApi.getFirstChildByNameBF(mainNode, "name"), "value");
+                        itemStrings.put(id, name);
+                    }
+                } else if(fileDir.equalsIgnoreCase("etc")) {
+                    for (Node category : XMLApi.getAllChildren(topNode)) {
+                        for (Node mainNode : XMLApi.getAllChildren(category)) {
+                            int id = Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name"));
+                            if(XMLApi.getFirstChildByNameBF(mainNode, "name") != null) {
+                                String name = XMLApi.getNamedAttribute(XMLApi.getFirstChildByNameBF(mainNode, "name"), "value");
+                                itemStrings.put(id, name);
+                            }
+                        }
+                    }
+                } else {
+                    for(Node n : XMLApi.getAllChildren(topNode)) {
+                        for (Node category : XMLApi.getAllChildren(n)) {
+                            for (Node mainNode : XMLApi.getAllChildren(category)) {
+                                int id = Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name"));
+                                String name = XMLApi.getNamedAttribute(XMLApi.getFirstChildByNameBF(mainNode, "name"), "value");
+                                itemStrings.put(id, name);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("[Info] Loaded item strings from wz in " + (System.currentTimeMillis() - start) + "ms.");
+    }
 
     public static void loadStringsFromWz() {
         long start = System.currentTimeMillis();
@@ -57,7 +101,7 @@ public class StringData {
                 skillString.put(Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name")), ssi);
             }
         }
-        System.out.println("Loaded skill strings in " + (System.currentTimeMillis() - start) + "ms.");
+        System.out.println("[Info] Loaded skill strings in " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     public static Map<Integer, SkillStringInfo> getSkillString() {
@@ -66,15 +110,19 @@ public class StringData {
 
     public static void generateDat() {
         loadStringsFromWz();
+        loadItemStringsFromWz();
         saveSkillStrings(ServerConstants.DAT_DIR + "\\strings");
+        saveItemStrings(ServerConstants.DAT_DIR + "\\strings");
     }
 
     private static void saveSkillStrings(String dir) {
         Util.makeDirIfAbsent(dir);
-        File file = new File(dir + "\\skills");
+//        String fileDir = dir + "\\skills";
+//        Util.makeDirIfAbsent(fileDir);
         try {
+            File file = new File(dir + "\\skills.dat");
             DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
-            dataOutputStream.writeShort(getSkillString().size());
+            dataOutputStream.writeInt(getSkillString().size());
             for(Map.Entry<Integer, SkillStringInfo> entry : getSkillString().entrySet()) {
                 int id = entry.getKey();
                 SkillStringInfo ssi = entry.getValue();
@@ -88,8 +136,64 @@ public class StringData {
         }
     }
 
+    public static void loadSkillStrings() {
+        long start = System.currentTimeMillis();
+        File file = new File(ServerConstants.DAT_DIR + "\\strings\\skills.dat");
+        try {
+            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+            int size = dataInputStream.readInt();
+            for (int i = 0; i < size; i++) {
+                int id = dataInputStream.readInt();
+                SkillStringInfo ssi = new SkillStringInfo();
+                ssi.setName(dataInputStream.readUTF());
+                ssi.setDesc(dataInputStream.readUTF());
+                ssi.setH(dataInputStream.readUTF());
+                getSkillString().put(id, ssi);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("[Info] Loaded skill strings from data file in " + (System.currentTimeMillis() - start) + "ms.");
+    }
+
+    private static void saveItemStrings(String dir) {
+        Util.makeDirIfAbsent(dir);
+        try {
+            File file = new File(dir + "\\items.dat");
+            DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
+            dataOutputStream.writeInt(itemStrings.size());
+            for(Map.Entry<Integer, String> entry : itemStrings.entrySet()) {
+                int id = entry.getKey();
+                String ssi = entry.getValue();
+                dataOutputStream.writeInt(id);
+                dataOutputStream.writeUTF(ssi);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void loadItemStrings() {
+        long start = System.currentTimeMillis();
+        File file = new File(ServerConstants.DAT_DIR + "\\strings\\items.dat");
+        try {
+            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+            int size = dataInputStream.readInt();
+            for (int i = 0; i < size; i++) {
+                int id = dataInputStream.readInt();
+                String name = dataInputStream.readUTF();
+                itemStrings.put(id, name);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("[Info] Loaded item strings from data file in " + (System.currentTimeMillis() - start) + "ms.");
+    }
+
     public static void main(String[] args) {
-        generateDat();
+//        generateDat();
+        loadSkillStrings();
+        loadItemStrings();
     }
 
 
@@ -101,6 +205,33 @@ public class StringData {
         }
         return null;
     }
+
+    public static String getItemStringById(int id) {
+        for(int key : getSkillString().keySet()) {
+            if(key == id) {
+                return itemStrings.get(key);
+            }
+        }
+        return null;
+    }
+
+    public static Map<Integer, String> getItemStringByName(String query) {
+        query = query.toLowerCase();
+        Map<Integer, String> res = new HashMap<>();
+        for (Map.Entry<Integer, String> entry : itemStrings.entrySet()) {
+            int id = entry.getKey();
+            String ssi = entry.getValue();
+            if(ssi == null) {
+                continue;
+            }
+            String ssName = ssi.toLowerCase();
+            if (ssName.contains(query)) {
+                res.put(id, ssi);
+            }
+        }
+        return res;
+    }
+
 
     public static Map<Integer, SkillStringInfo> getSkillStringByName(String query) {
         Map<Integer, SkillStringInfo> res = new HashMap<>();

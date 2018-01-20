@@ -317,4 +317,9 @@ public class WildHunter extends Job {
     public boolean isHandlerOfJob(short id) {
         return id >= JobConstants.JobEnum.WILD_HUNTER_1.getJobId() && id <= JobConstants.JobEnum.WILD_HUNTER_4.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

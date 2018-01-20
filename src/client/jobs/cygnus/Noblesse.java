@@ -35,4 +35,9 @@ public class Noblesse extends Job {
     public boolean isHandlerOfJob(short id) {
         return id == JobConstants.JobEnum.NOBLESSE.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

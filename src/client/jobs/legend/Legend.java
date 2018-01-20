@@ -35,4 +35,9 @@ public class Legend extends Job {
     public boolean isHandlerOfJob(short id) {
         return id == JobConstants.JobEnum.LEGEND.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

@@ -249,4 +249,9 @@ public class BattleMage extends Job {
     public boolean isHandlerOfJob(short id) {
         return id >= JobConstants.JobEnum.BATTLE_MAGE_1.getJobId() && id <= JobConstants.JobEnum.BATTLE_MAGE_4.getJobId();
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

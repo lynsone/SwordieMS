@@ -210,4 +210,9 @@ public class Mihile extends Job {
                 return false;
         }
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }

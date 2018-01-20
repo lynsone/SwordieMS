@@ -244,4 +244,9 @@ public class AngelicBuster extends Job {
                 return false;
         }
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
 }
