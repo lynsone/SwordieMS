@@ -6,6 +6,7 @@ import client.character.Char;
 import client.character.ExtendSP;
 import client.character.commands.AdminCommand;
 import client.character.commands.AdminCommands;
+import client.character.items.Equip;
 import client.character.items.Inventory;
 import client.character.items.Item;
 import client.character.skills.*;
@@ -22,6 +23,7 @@ import connection.InPacket;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
+import loaders.ItemData;
 import loaders.SkillData;
 import packet.CField;
 import packet.Stage;
@@ -416,11 +418,18 @@ public class WorldHandler {
     }
 
     public static void handleUserUpgradeItemUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
         inPacket.decodeInt(); //tick
         short nUPOS = inPacket.decodeShort(); //Use Position
         short nEPOS = inPacket.decodeShort(); //Eqp Position
         byte bEnchantSkill = inPacket.decodeByte(); //no clue what this means exactly
-        short idk = inPacket.decodeShort(); //No clue what this is, stayed 00 00 throughout different tests
+        short idk = inPacket.decodeShort(); //No clue what this is, stayed  00 00  throughout different tests
+        Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(nEPOS);
+        Item scroll = chr.getConsumeInventory().getItemBySlot(nUPOS);
+        int eqID = equip.getItemId();
+        int scrollID = scroll.getItemId();
+        ItemData.getItemByID(scrollID).getScrollStats();
+
 
     }
 
