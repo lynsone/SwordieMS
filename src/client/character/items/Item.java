@@ -2,6 +2,7 @@ package client.character.items;
 
 import connection.OutPacket;
 import constants.ItemConstants;
+import enums.EquipBaseStat;
 import enums.InvType;
 import enums.ScrollStat;
 import jdk.nashorn.internal.runtime.ScriptObject;
@@ -218,4 +219,5 @@ public class Item implements Serializable {
     public String toString() {
         return "Id: " + getItemId() + ", Qty: " + getQuantity();
     }
+
 }

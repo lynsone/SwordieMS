@@ -424,12 +424,25 @@ public class WorldHandler {
         short nEPOS = inPacket.decodeShort(); //Eqp Position
         byte bEnchantSkill = inPacket.decodeByte(); //no clue what this means exactly
         short idk = inPacket.decodeShort(); //No clue what this is, stayed  00 00  throughout different tests
+        InvType invType = EQUIP;
         Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(nEPOS);
+        if(equip == null) {
+            invType = EQUIPPED;
+            equip = (Equip) chr.getEquippedInventory().getItemBySlot(nEPOS);
+        }
         Item scroll = chr.getConsumeInventory().getItemBySlot(nUPOS);
         int eqID = equip.getItemId();
         int scrollID = scroll.getItemId();
-        ItemData.getItemByID(scrollID).getScrollStats();
-
+        Map<ScrollStat, Integer> vals = ItemData.getItemByID(scrollID).getScrollStats();
+        for(Map.Entry<ScrollStat, Integer> entry : vals.entrySet()) {
+            ScrollStat ss = entry.getKey();
+            int val = entry.getValue();
+            if(ss.getEquipStat() != null) {
+                equip.addStat(ss.getEquipStat(), val);
+            }
+        }
+        c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 9, nEPOS, (short) 0,
+                invType, (short) 1, 0, equip));
 
     }
 

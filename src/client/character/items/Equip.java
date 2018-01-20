@@ -1055,6 +1055,85 @@ public class Equip extends Item {
         return mask;
     }
 
+    public void setBaseStat(EquipBaseStat equipBaseStat, long amount) {
+        switch(equipBaseStat){
+            case ruc:
+                setRuc((short) amount);
+            case cuc:
+                setCuc((short) amount);
+            case iStr:
+                setiStr((short) amount);
+            case iDex:
+                setiDex((short) amount);
+            case iInt:
+                setiInt((short) amount);
+            case iLuk:
+                setiLuk((short) amount);
+            case iMaxHP:
+                setiMaxHp((short) amount);
+            case iMaxMP:
+                setiMaxMp((short) amount);
+            case iPAD:
+                setiPad((short) amount);
+            case iMAD:
+                setiMad((short) amount);
+            case iPDD:
+                setiPDD((short) amount);
+            case iMDD:
+                setiMDD((short) amount);
+            case iACC:
+                setiAcc((short) amount);
+            case iEVA:
+                setiEva((short) amount);
+            case iCraft:
+                setiCraft((short) amount);
+            case iSpeed:
+                setiSpeed((short) amount);
+            case iJump:
+                setiJump((short) amount);
+            case attribute:
+                setAttribute((short) amount);
+            case levelUpType:
+                setLevelUpType((short) amount);
+            case level:
+                setLevel((short) amount);
+            case exp:
+                setExp((short) amount);
+            case durability:
+                setDurability((short) amount);
+            case iuc:
+                setIuc((short) amount);
+            case iPvpDamage:
+                setiPvpDamage((short) amount);
+            case iReduceReq:
+                setiReduceReq((short) amount);
+            case specialAttribute:
+                setSpecialAttribute((short) amount);
+            case durabilityMax:
+                setDurabilityMax((short) amount);
+            case iIncReq:
+                setiIncReq((short) amount);
+            case growthEnchant:
+                setGrowthEnchant((short) amount);
+            case psEnchant:
+                setPsEnchant((short) amount);
+            case bdr:
+                setBdr((short) amount);
+            case imdr:
+                setImdr((short) amount);
+            case damR:
+                setDamR((short) amount);
+            case statR:
+                setStatR((short) amount);
+            case cuttable:
+                setCuttable((short) amount);
+            case exGradeOption:
+                setExGradeOption((short) amount);
+            case itemState:
+                setItemState((short) amount);
+        }
+    }
+
     public long getBaseStat(EquipBaseStat equipBaseStat) {
         switch(equipBaseStat){
             case ruc:
@@ -1140,4 +1219,11 @@ public class Equip extends Item {
         super.updateDB(session, tx);
         getEquippedDate().updateDB(session, tx);
     }
+
+    public void addStat(EquipBaseStat stat, int amount) {
+        int cur = (int) getBaseStat(stat);
+        int newStat = cur + amount >= 0 ? cur + amount : 0; // stat cannot be negative
+        setBaseStat(stat, newStat);
+    }
+    
 }
