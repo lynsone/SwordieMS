@@ -40,7 +40,9 @@ import java.util.List;
 import java.util.Map;
 
 import static enums.ChatMsgColour.YELLOW;
-import static enums.InvType.*;
+import static enums.InvType.EQUIP;
+import static enums.InvType.EQUIPPED;
+import static enums.Stat.sp;
 
 /**
  * Created on 12/14/2017.
@@ -356,6 +358,69 @@ public class WorldHandler {
         toField.spawnLifesForChar(chr);
     }
 
+    public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); //tick
+        short slot = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
+        Field field = chr.getField();
+        Field toField;
+        switch (itemID) {
+            case 2030000: //Return to Nearest Town
+                toField = c.getChannelInstance().getField(field.getReturnMap());
+                break;
+            case 2030001: //Return to Lith Harbor
+                toField = c.getChannelInstance().getField(104000000);
+                break;
+            case 2030002: //Return to Ellinia
+                toField = c.getChannelInstance().getField(101000000);
+                break;
+            case 2030003: //Return to Perion
+                toField = c.getChannelInstance().getField(102000000);
+                break;
+            case 2030004: //Return to Henesys
+                toField = c.getChannelInstance().getField(100000000);
+                break;
+            case 2030005: //Return to Kerning City
+                toField = c.getChannelInstance().getField(103000000);
+                break;
+            case 2030006: //Return to Sleepy Wood
+                toField = c.getChannelInstance().getField(105000000);
+                break;
+            case 2030007: //Return to Dead Mine (Map = Ice Valley II)
+                toField = c.getChannelInstance().getField(211040200);
+                break;
+            case 2030019: //Return to Nautilus
+                toField = c.getChannelInstance().getField(120000000);
+                break;
+            case 2030020: //Return to New Leaf City
+                toField = c.getChannelInstance().getField(600000000);
+                break;
+            case 2030025: //Return to Elluel
+                toField = c.getChannelInstance().getField(101050000);
+                break;
+            default:
+                toField = c.getChannelInstance().getField(field.getReturnMap());
+                System.out.println("Unhandled Return Scroll: " + itemID + " in WorldHandler.java");
+                break;
+        }
+        chr.setField(toField);
+        field.removeChar(chr);
+        toField.addChar(chr);
+        c.write(Stage.setField(chr, toField, c.getChannel(), false, 0, false, chr.hasBuffProtector(),
+                (byte) toField.getPortalByName("sp").getId(), false, 100, null, false, -1));
+        toField.spawnLifesForChar(chr);
+    }
+
+    public static void handleUserUpgradeItemUseRequest(Client c, InPacket inPacket) {
+        inPacket.decodeInt(); //tick
+        short nUPOS = inPacket.decodeShort(); //Use Position
+        short nEPOS = inPacket.decodeShort(); //Eqp Position
+        byte bEnchantSkill = inPacket.decodeByte(); //no clue what this means exactly
+        short idk = inPacket.decodeShort(); //No clue what this is, stayed 00 00 throughout different tests
+
+    }
+
     public static void handleUserSkillUpRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt(); // tick
@@ -374,7 +439,7 @@ public class WorldHandler {
                 skill.setCurrentLevel(newLevel);
                 esp.setSpToJobLevel(jobLevel, currentSp - amount);
                 stats = new HashMap<>();
-                stats.put(Stat.sp, esp);
+                stats.put(sp, esp);
             }
         } else {
             int currentSp = chr.getAvatarData().getCharacterStat().getSp();
@@ -385,7 +450,7 @@ public class WorldHandler {
                 skill.setCurrentLevel(newLevel);
                 chr.getAvatarData().getCharacterStat().setSp(currentSp - amount);
                 stats = new HashMap<>();
-                stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getSp());
+                stats.put(sp, chr.getAvatarData().getCharacterStat().getSp());
             }
         }
         if(stats != null) {

@@ -11,9 +11,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import packet.WvsContext;
 
-import static net.netty.NettyClient.CLIENT_KEY;
-
 import java.io.IOException;
+
+import static net.netty.NettyClient.CLIENT_KEY;
 
 
 /**
@@ -207,6 +207,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case MOB_MOVE:
                     WorldHandler.handleMoveMob(c, inPacket);
+                    break;
+                case USER_PORTAL_SCROLL_USE_REQUEST:
+                    WorldHandler.handleUserPortalScrollUseRequest(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);
