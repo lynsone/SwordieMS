@@ -10,11 +10,16 @@ import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import enums.Stat;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import server.EventManager;
+import util.Position;
+import util.Util;
 
-import java.util.Arrays;
+import java.util.*;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -23,30 +28,51 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Xenon extends Job {
+    public static final int SUPPLY_SURPLUS = 30020232;
+    public static final int MULTILATERAL_I = 30020234;
+    public static final int MODAL_SHIFT = 30021236;
+    public static final int LIBERTY_BOOSTERS = 30021236;
+    public static final int MIMIC_PROTOCOL = 30020240;
+    public static final int PROMESSA_ESCAPE = 30021235;
 
-    public static final int CIRCUIT_SURGE = 36001002; //Buff                        //TODO Supply Energy (SkillInfo = powerCon)
-    public static final int PINPOINT_SALVO = 36001005; //Special Attack             //TODO Supply Energy
+    public static final int CIRCUIT_SURGE = 36001002; //Buff
+    public static final int PINPOINT_SALVO = 36001005; //Special Attack
 
     public static final int XENON_BOOSTER = 36101004; //Buff
     public static final int EFFICIENCY_STREAMLINE = 36101003; //Buff
-    public static final int ION_THRUST = 36101001; //Special Attack                 //TODO Supply Energy
+    public static final int ION_THRUST = 36101001; //Special Attack
     public static final int PINPOINT_SALVO_REDESIGN_A = 36100010; //Special Attack Upgrade  (Passive Upgrade)
 
-    public static final int HYBRID_DEFENSES = 36111003; //Buff                      //TODO Supply Energy
+    public static final int HYBRID_DEFENSES = 36111003; //Buff
     public static final int AEGIS_SYSTEM = 36111004; //Special Buff (ON/OFF)
+    public static final int AEGIS_SYSTEM_ATOM = 36110004; //Special Buff (ON/OFF)
     public static final int MANIFEST_PROJECTOR = 36111006; //Special Buff (Special Duration)
-    public static final int EMERGENCY_RESUPPLY = 36111008; //Special Skill          //TODO Supply Energy
+    public static final int EMERGENCY_RESUPPLY = 36111008; //Special Skill
     public static final int PINPOINT_SALVO_REDESIGN_B = 36110012; //Special Attack Upgrade  (Passive Upgrade)
 
     public static final int HYPOGRAM_FIELD_FORCE_FIELD = 36121002;                  //TODO Summon/Area of Effect?
     public static final int HYPOGRAM_FIELD_PENETRATE = 36121013;                    //TODO Summon/Area of Effect?
     public static final int HYPOGRAM_FIELD_SUPPORT = 36121014;                      //TODO Summon/Area of Effect?
     public static final int TEMPORAL_POD = 36121007;                                //TODO Area of Effect
-    public static final int OOPARTS_CODE = 36121003; //Buff                         //TODO Supply Energy
+    public static final int OOPARTS_CODE = 36121003; //Buff
     public static final int MAPLE_WARRIOR_XENON = 36121008; //Buff
     public static final int PINPOINT_SALVO_PERFECT_DESIGN = 36120015; //Sp. Attack Upgrade  (Passive Upgrade)
 
-    private int[] buffs = new int[] {
+    private final int MAX_SUPPLY = 20;
+    private int supply;
+    private int supplyProp;
+    private int hybridDefenseCount;
+
+    private int[] addedSkills = new int[]{
+            SUPPLY_SURPLUS,
+            MULTILATERAL_I,
+            MODAL_SHIFT,
+            LIBERTY_BOOSTERS,
+            MIMIC_PROTOCOL,
+            PROMESSA_ESCAPE,
+    };
+
+    private int[] buffs = new int[]{
             CIRCUIT_SURGE,
             XENON_BOOSTER,
             EFFICIENCY_STREAMLINE,
@@ -63,6 +89,15 @@ public class Xenon extends Job {
 
     public Xenon(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
+        supplyProp = SkillData.getSkillInfoById(SUPPLY_SURPLUS).getValue(prop, 1);
+        supplyInterval();
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -75,7 +110,7 @@ public class Xenon extends Job {
         Summon summon;
         Field field;
         switch (skillID) {
-            case CIRCUIT_SURGE: //TODO Costs Supply
+            case CIRCUIT_SURGE:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indiePad, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -100,11 +135,17 @@ public class Xenon extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMMPR, o2);
                 break;
-            case HYBRID_DEFENSES: //TODO Costs Supply
-                //TODO
+            case HYBRID_DEFENSES:
+                o1.nOption = si.getValue(prop, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(EVAR, o1);
+                hybridDefenseCount = si.getValue(x, slv);
                 break;
             case AEGIS_SYSTEM:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(XenonAegisSystem, o1);
                 break;
             case MANIFEST_PROJECTOR:
                 o1.nOption = si.getValue(y, slv);
@@ -112,7 +153,7 @@ public class Xenon extends Job {
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(ShadowPartner, o1);
                 break;
-            case OOPARTS_CODE: //TODO Costs Supply
+            case OOPARTS_CODE:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -151,6 +192,40 @@ public class Xenon extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    private void handleSupplyCost(int skillID, byte slv, SkillInfo si) {
+        if(si == null) {
+            return;
+        }
+        if (si.getValue(powerCon, slv) > 0) {
+            supply -= si.getValue(powerCon, slv);
+            supply = Math.max(0, supply);
+        }
+        updateSupply();
+    }
+
+    public void incrementSupply() {
+        incrementSupply(1);
+    }
+
+
+    private void incrementSupply(int amount) {
+        supply += amount;
+        supply = Math.min(MAX_SUPPLY, supply);
+        updateSupply();
+    }
+
+    public void supplyInterval() {
+        incrementSupply();
+        EventManager.addEvent(this, "supplyInterval", 4000);
+    }
+
+    private void updateSupply() {
+        Option o = new Option();
+        o.nOption = supply;
+        chr.getTemporaryStatManager().putCharacterStatValue(SurplusSupply, o);
+        chr.getTemporaryStatManager().sendSetStatPacket();
+    }
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -169,6 +244,12 @@ public class Xenon extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        if (hasHitMobs) {
+            if (Util.succeedProp(supplyProp)) {
+                incrementSupply();
+            }
+        }
+        handleSupplyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -182,10 +263,11 @@ public class Xenon extends Job {
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
-        if(skill != null) {
+        if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        handleSupplyCost(skillID, slv, si);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -194,7 +276,7 @@ public class Xenon extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case EMERGENCY_RESUPPLY:
-                    //TODO
+                    incrementSupply(si.getValue(x, slv));
                     break;
                 case TEMPORAL_POD:
                     //TODO
@@ -205,7 +287,51 @@ public class Xenon extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
 
+        Skill hybrid = chr.getSkill(HYBRID_DEFENSES);
+        Option o1 = tsm.getOptByCTSAndSkill(EVAR, HYBRID_DEFENSES);
+        if (hybrid != null && o1 != null) {
+            SkillInfo si = SkillData.getSkillInfoById(HYBRID_DEFENSES);
+            byte slv = (byte) hybrid.getCurrentLevel();
+            if (hitInfo.HPDamage > 0) {
+                o1.nOption -= si.getValue(y, slv);
+                hitInfo.HPDamage -= hitInfo.HPDamage * 0.05;
+                tsm.putCharacterStatValue(EVAR, o1);
+                tsm.sendSetStatPacket();
+            } else {
+                hybridDefenseCount--;
+                if (hybridDefenseCount <= 0) {
+                    tsm.removeStat(EVAR, false);
+                    tsm.sendResetStatPacket();
+                }
+            }
+        }
+        Skill aegis = chr.getSkill(AEGIS_SYSTEM);
+        if (tsm.hasStat(XenonAegisSystem) && aegis != null) {
+            SkillInfo si = SkillData.getSkillInfoById(AEGIS_SYSTEM);
+            byte slv = (byte) aegis.getCurrentLevel();
+            if (Util.succeedProp(si.getValue(prop, slv))) {
+                int mobID = hitInfo.mobID;
+                ForceAtomEnum fae = ForceAtomEnum.XENON_ROCKET_1;
+                int curTime = Util.getCurrentTime();
+                List<ForceAtomInfo> faiList = new ArrayList<>();
+                List<Integer> mobList = new ArrayList<>();
+                Random random = new Random();
+                for (int i = 0; i < si.getValue(x, slv); i++) {
+                    int firstImpact = 5 + random.nextInt(6);
+                    int secondImpact = 5 + random.nextInt(6);
+                    int angle = random.nextInt(180);
+                    ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), firstImpact, secondImpact,
+                            angle, 0, curTime, 0, AEGIS_SYSTEM_ATOM, new Position(0, 0));
+                    faiList.add(fai);
+                    mobList.add(mobID);
+                }
+                c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
+                        mobList, AEGIS_SYSTEM_ATOM, faiList, null, 0, 0,
+                        null, 0, null));
+            }
+        }
     }
 
     @Override

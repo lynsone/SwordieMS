@@ -6,6 +6,8 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.Mob;
+import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
@@ -13,6 +15,7 @@ import enums.ChatMsgColour;
 import enums.Stat;
 import loaders.SkillData;
 import packet.WvsContext;
+import util.Util;
 
 import java.util.Arrays;
 
@@ -23,6 +26,11 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class BlazeWizard extends Job {
+
+    public static final int ORBITAL_FLAME = 12001020;
+    public static final int GREATER_ORBITAL_FLAME = 12100020;
+    public static final int GRAND_ORBITAL_FLAME = 12110020;
+    public static final int FINAL_ORBITAL_FLAME = 12120006;
 
     public static final int IGNITION = 12101024; //Buff TODO (DoT&AoE)
     public static final int FLASHFIRE = 12101025; //Special Skill
@@ -94,7 +102,11 @@ public class BlazeWizard extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
-
+            case IGNITION:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(WizardIgnite, o1);
+                break;
             case FIRES_OF_CREATION_FOX:
             case FIRES_OF_CREATION_LION:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -121,7 +133,43 @@ public class BlazeWizard extends Job {
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            handleIgnite(attackInfo);
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
 
+        }
+    }
+
+    private void handleIgnite(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(WizardIgnite)) {
+            Skill skill = chr.getSkill(IGNITION);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(si.getValue(prop, slv))) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                }
+            }
+        }
     }
 
     @Override

@@ -83,7 +83,6 @@ public class ItemData {
         String fieldDir = ServerConstants.DAT_DIR + "\\equips\\" + itemId + ".dat";
         File file = new File(fieldDir);
         if (!file.exists()) {
-            System.err.println("Could not find equip " + itemId);
             return null;
         } else {
             return readEquipFromFile(file);

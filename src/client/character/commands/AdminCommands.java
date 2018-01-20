@@ -57,9 +57,9 @@ public class AdminCommands {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
             o.nOption = 5;
-            o.rOption = Archer.FOCUSED_FURY;
-            o.tOption = 5;
-            tsm.putCharacterStatValue(CharacterTemporaryStat.AsrR, o);
+            o.rOption = 0;
+            o.tOption = 0;
+            tsm.putCharacterStatValue(CharacterTemporaryStat.SurplusSupply, o);
             chr.getClient().write(WvsContext.temporaryStatSet(tsm));
 
         }

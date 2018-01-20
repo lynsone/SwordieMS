@@ -282,9 +282,6 @@ public class FieldData {
                             }
                         }
                         field.addPortal(portal);
-                        if(portal.getType() == null) {
-                            System.out.println();
-                        }
                     }
                 }
                 Node lifeNode = XMLApi.getFirstChildByNameBF(node, "life");

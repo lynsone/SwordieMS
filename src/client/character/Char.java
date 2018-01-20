@@ -126,6 +126,8 @@ public class Char {
     private Job jobHandler;
     @Transient
     private boolean left;
+    @Transient
+    private MarriageRecord marriageRecord;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1438,5 +1440,13 @@ public class Char {
 
     public boolean isLeft() {
         return left;
+    }
+
+    public MarriageRecord getMarriageRecord() {
+        return marriageRecord;
+    }
+
+    public void setMarriageRecord(MarriageRecord marriageRecord) {
+        this.marriageRecord = marriageRecord;
     }
 }

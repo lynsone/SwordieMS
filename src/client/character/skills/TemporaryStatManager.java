@@ -2488,4 +2488,12 @@ public class TemporaryStatManager {
     public Map<Tuple<CharacterTemporaryStat, Option>, Timer> getIndieTimers() {
         return indieTimers;
     }
+
+    public void sendSetStatPacket() {
+        getChr().getClient().write(WvsContext.temporaryStatSet(this));
+    }
+
+    public void sendResetStatPacket() {
+        getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
+    }
 }

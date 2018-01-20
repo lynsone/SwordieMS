@@ -5,6 +5,7 @@ import client.character.Char;
 import client.character.skills.Skill;
 import client.character.skills.SkillInfo;
 import client.character.skills.SkillStat;
+import enums.Stat;
 import loaders.SkillData;
 import util.Position;
 
@@ -34,6 +35,8 @@ public class Summon extends Life {
     List<Position> teslaCoilPositions = new ArrayList<>();
     private byte moveAbility;
     private Position[] kishinPositions = new Position[2];
+    private int maxHP;
+    private int hp;
 
     public Summon(int objectId) {
         super(objectId);
@@ -182,6 +185,16 @@ public class Summon extends Life {
         summon.setSkillID(skillID);
         summon.setSlv(slv);
         summon.setSummonTerm(si.getValue(SkillStat.time, slv));
+        summon.setCharLevel((byte) chr.getStat(Stat.level));
+        summon.setPosition(chr.getPosition().deepCopy());
+        summon.setMoveAction((byte) 1);
+        summon.setCurFoothold((short) chr.getField().findFootHoldBelow(summon.getPosition()).getId());
+        summon.setMoveAbility((byte) 1);
+        summon.setAssistType((byte) 1);
+        summon.setEnterType((byte) 1);
+        summon.setBeforeFirstAttack(false);
+        summon.setTemplateId(skillID);
+        summon.setAttackActive(true);
         return summon;
     }
 
@@ -191,5 +204,21 @@ public class Summon extends Life {
 
     public void setKishinPositions(Position[] kishinPositions) {
         this.kishinPositions = kishinPositions;
+    }
+
+    public void setMaxHP(int maxHP) {
+        this.maxHP = maxHP;
+    }
+
+    public int getMaxHP() {
+        return maxHP;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
     }
 }

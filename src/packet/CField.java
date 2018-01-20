@@ -1,22 +1,20 @@
 package packet;
 
-import client.character.AvatarLook;
-import client.character.Char;
-import client.character.FuncKeyMap;
+import client.character.*;
 import client.character.items.BodyPart;
-import client.character.skills.CharacterTemporaryStat;
+import client.character.items.Equip;
 import client.character.skills.ForceAtomInfo;
 import client.character.skills.PsychicArea;
-import client.character.skills.Skill;
 import client.life.*;
 import connection.OutPacket;
 import constants.ItemConstants;
 import constants.SkillConstants;
+import enums.ChatType;
 import enums.LeaveType;
 import enums.MobStat;
+import enums.Stat;
 import handling.OutHeader;
 import handling.handlers.PsychicLock;
-import loaders.ItemData;
 import util.Position;
 import util.Rect;
 
@@ -566,6 +564,76 @@ public class CField {
             outPacket.encodeInt(i);
         }
         outPacket.encodeByte(0);
+
+        return outPacket;
+    }
+
+    public static OutPacket chat(int charID, ChatType type, String msg, boolean onlyBalloon, int idk, int worldID) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHAT);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(type.getVal());
+        outPacket.encodeString(msg);
+        outPacket.encodeByte(onlyBalloon);
+        outPacket.encodeByte(idk);
+        outPacket.encodeByte(worldID);
+
+        return outPacket;
+    }
+
+    public static OutPacket characterInfo(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHARACTER_INFO);
+
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodeByte(false); // Star Planet
+        outPacket.encodeByte(chr.getStat(Stat.level));
+        outPacket.encodeShort(chr.getJob());
+        outPacket.encodeShort(chr.getStat(Stat.subJob));
+        outPacket.encodeByte(cs.getPvpGrade());
+        outPacket.encodeInt(cs.getPop());
+        MarriageRecord mr = chr.getMarriageRecord();
+        outPacket.encodeByte(mr != null);
+        if(mr != null) {
+            mr.encode(outPacket);
+        }
+        outPacket.encodeByte(0); // size(byte) of productSkill(short); stuff like mining, herblore, etc...
+        outPacket.encodeString("Community");
+        outPacket.encodeString("Best guild EU");
+        outPacket.encodeByte(0); // Forced pet IDx
+        outPacket.encodeByte(0); // User state (?)
+        outPacket.encodeByte(false); // pet activated
+        outPacket.encodeByte(0); // CUIUserInfo::SetPetInfo
+        outPacket.encodeByte(0); // Wish list
+        // MedalAchievementInfo::Decode
+        Equip medal = (Equip) chr.getEquippedItemByBodyPart(BodyPart.MEDAL);
+        outPacket.encodeInt(medal == null ? 0 : medal.getItemId());
+        outPacket.encodeShort(0); // medal size
+        // for each medal, encode stuff (check ida)
+        // End MedalAchievementInfo::Decode
+        // DamageSkinSaveInfo::Decode
+        outPacket.encodeByte(0); // size
+        // check ida for structure
+        // End DamageSkinSaveInfo::Decode
+        outPacket.encodeByte(cs.getNonCombatStatDayLimit().getCharisma());
+        outPacket.encodeByte(cs.getNonCombatStatDayLimit().getInsight());
+        outPacket.encodeByte(cs.getNonCombatStatDayLimit().getWill());
+        outPacket.encodeByte(cs.getNonCombatStatDayLimit().getCraft());
+        outPacket.encodeByte(cs.getNonCombatStatDayLimit().getSense());
+        outPacket.encodeByte(cs.getNonCombatStatDayLimit().getCharm());
+        outPacket.encodeInt(chr.getAccId());
+        // FarmUserInfo::Decode
+        outPacket.encodeString("Best farm eu");
+        outPacket.encodeInt(13); // nFarmPoint
+        outPacket.encodeInt(13); // nFarmLevel
+        outPacket.encodeInt(13); // nFarmExp
+        outPacket.encodeInt(13); // nFarmPoint
+        outPacket.encodeInt(13); // nFarmCash
+        outPacket.encodeByte(13); // nFarmGender
+        outPacket.encodeInt(13); // nFarmTheme
+        outPacket.encodeInt(13); // nFarmSlotExtend
+        outPacket.encodeInt(13); // nFarmLockerSlotCount
+        // End FarmUserInfo::Decode
 
         return outPacket;
     }

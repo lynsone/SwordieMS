@@ -15,6 +15,7 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ForceAtomEnum;
 import enums.MobStat;
+import enums.MoveAbility;
 import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
@@ -37,37 +38,58 @@ import static client.character.skills.CharacterTemporaryStat.*;
 public class Archer extends Job {
 
     public static final int SOUL_ARROW_BOW = 3101004;
+    public static final int SOUL_ARROW_XBOW = 3201004;
     public static final int ARROW_BOMB = 3101005;
     public static final int BOW_BOOSTER = 3101002;
+    public static final int XBOW_BOOSTER = 3201002;
     public static final int QUIVER_CARTRIDGE = 3101009;
     public static final int QUIVER_CARTRIDGE_ATOM = 3100010;
     public static final int FLAME_SURGE = 3111003;
     public static final int PHOENIX = 3111005;
+    public static final int FREEZER = 3211005;
     public static final int RECKLESS_HUNT_BOW = 3111011;
     public static final int FOCUSED_FURY = 3110012;
+    public static final int MORTAL_BLOW_BOW = 3110001;
     public static final int ARROW_PLATTER = 3111013;
     public static final int EVASION_BOOST = 3110007;
-    public static final int PUPPET = 3111002;
     public static final int SHARP_EYES_BOW = 3121002;
     public static final int ILLUSION_STEP_BOW = 3121007;
     public static final int ENCHANTED_QUIVER = 3121016;
     public static final int BINDING_SHOT = 3121014;
     public static final int MAPLE_WARRIOR_BOW = 3121000;
+    public static final int NET_TOSS = 3201008;
+    public static final int PAIN_KILLER = 3211011;
+    public static final int RECKLESS_HUNT_XBOW = 3211012;
+    public static final int MORTAL_BLOW_XBOW = 3210001;
+    public static final int AGGRESSIVE_RESISTANCE = 3210013;
+    public static final int EVASION_BOOST_XBOW = 3210007;
     public static final int MAPLE_WARRIOR_XBOW = 3221000;
+    public static final int ARROW_ILLUSION = 3221014;
+    public static final int SHARP_EYES_XBOW = 3221002;
+    public static final int ILLUSION_STEP_XBOW = 3221006;
 
     private QuiverCartridge quiverCartridge;
 
     private int[] buffs = new int[]{
             BOW_BOOSTER,
+            XBOW_BOOSTER,
             SOUL_ARROW_BOW,
+            SOUL_ARROW_XBOW,
             QUIVER_CARTRIDGE,
             PHOENIX,
+            FREEZER,
             RECKLESS_HUNT_BOW,
+            RECKLESS_HUNT_XBOW,
             SHARP_EYES_BOW,
+            SHARP_EYES_XBOW,
             ILLUSION_STEP_BOW,
+            ILLUSION_STEP_XBOW,
             ENCHANTED_QUIVER,
             MAPLE_WARRIOR_BOW,
             MAPLE_WARRIOR_XBOW,
+            PAIN_KILLER,
+            AGGRESSIVE_RESISTANCE,
+            ARROW_ILLUSION,
     };
 
     public Archer(Char chr) {
@@ -91,6 +113,8 @@ public class Archer extends Job {
         if(hasHitMobs) {
             handleQuiverCartridge(c, chr.getTemporaryStatManager(), attackInfo, slv);
             handleFocusedFury();
+            handleMortalBlow();
+            handleAggresiveResistance(attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -120,11 +144,11 @@ public class Archer extends Job {
                     Foothold fh = mob.getCurFoodhold();
                     aa.setPosition(new Position(x, y));
                     Rect rect = si.getRects().get(0);
-                    if(rect.getLeft() > fh.getX1()) {
-                        rect.setLeft(fh.getX1());
-                    } else if(rect.getRight() > fh.getX2()) {
-                        rect.setRight(fh.getX2());
-                    }
+//                    if(rect.getLeft() > fh.getX1()) {
+//                        rect.setLeft(fh.getX1());
+//                    } else if(rect.getRight() > fh.getX2()) {
+//                        rect.setRight(fh.getX2());
+//                    }
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     chr.getField().spawnAffectedArea(aa);
                 }
@@ -143,6 +167,87 @@ public class Archer extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
                 }
                 break;
+            case NET_TOSS:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        if(mob.isBoss()) {
+                            o1.nOption = si.getValue(x, slv);
+                            o1.tOption = si.getValue(time, slv) / 2;
+                        } else {
+                            o1.nOption = si.getValue(y, slv);
+                            o1.tOption = si.getValue(time, slv);
+                        }
+                        o1.rOption = skillID;
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    }
+                }
+                break;
+            case ARROW_ILLUSION:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(subTime, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+        }
+    }
+
+    private void handleAggresiveResistance(AttackInfo ai) {
+        if(!chr.hasSkill(AGGRESSIVE_RESISTANCE)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(AGGRESSIVE_RESISTANCE);
+        SkillInfo si = SkillData.getSkillInfoById(AGGRESSIVE_RESISTANCE);
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o = tsm.getOptByCTSAndSkill(DamAbsorbShield, AGGRESSIVE_RESISTANCE);
+        long totalDamage = 0;
+        for(MobAttackInfo mai : ai.mobAttackInfo) {
+            for(int dmg : mai.damages) {
+                totalDamage += dmg;
+            }
+        }
+        if(o == null) {
+            o = new Option();
+            o.nOption = 0;
+            o.rOption = AGGRESSIVE_RESISTANCE;
+        }
+        o.nOption = (int) Math.min((int) totalDamage * (si.getValue(y, slv) / 100D) + o.nOption,
+                chr.getStat(Stat.mhp) / (si.getValue(z, slv) / 100D));
+        o.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(DamR, o);
+        tsm.sendSetStatPacket();
+    }
+
+    private void handleMortalBlow() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill;
+        SkillInfo si;
+        byte slv;
+        if(chr.hasSkill(MORTAL_BLOW_BOW)) {
+            skill = chr.getSkill(MORTAL_BLOW_BOW);
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            Option o;
+            if(!tsm.hasStat(BowMasterMortalBlow)) {
+                o = new Option();
+                o.rOption = MORTAL_BLOW_BOW;
+            } else {
+                o = tsm.getOption(BowMasterMortalBlow);
+            }
+            o.nOption = (o.nOption + 1) % (si.getValue(x, slv) + 1);
+            c.write(WvsContext.temporaryStatSet(tsm));
+        } else if(chr.hasSkill(MORTAL_BLOW_XBOW)) {
+            skill = chr.getSkill(MORTAL_BLOW_BOW);
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
         }
     }
 
@@ -317,14 +422,17 @@ public class Archer extends Job {
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
             // Dodged
-            if(chr.hasSkill(EVASION_BOOST)) {
+            if(chr.hasSkill(EVASION_BOOST) || chr.hasSkill(EVASION_BOOST_XBOW)) {
                 Skill skill = chr.getSkill(EVASION_BOOST);
+                if(skill == null) {
+                    skill = chr.getSkill(EVASION_BOOST_XBOW);
+                }
                 byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(EVASION_BOOST);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 TemporaryStatManager tsm = chr.getTemporaryStatManager();
                 Option o = new Option();
                 o.nOption = 100;
-                o.rOption = EVASION_BOOST;
+                o.rOption = skill.getSkillId();
                 o.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(CriticalBuff, o);
                 c.write(WvsContext.temporaryStatSet(tsm));
@@ -339,9 +447,12 @@ public class Archer extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Summon summon;
+        Field field;
         int curTime = (int) System.currentTimeMillis();
         switch (skillID) {
             case SOUL_ARROW_BOW:
+            case SOUL_ARROW_XBOW:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -356,11 +467,12 @@ public class Archer extends Job {
                 tsm.putCharacterStatValue(NoBulletConsume, o3);
                 break;
             case BOW_BOOSTER:
+            case XBOW_BOOSTER:
                 o1.nValue = si.getValue(x, slv);
                 o1.nReason = skillID;
                 o1.tStart = curTime;
                 o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieBooster, o1);
+                tsm.putCharacterStatValue(Booster, o1);
                 break;
             case QUIVER_CARTRIDGE:
                 if(quiverCartridge == null) {
@@ -373,18 +485,9 @@ public class Archer extends Job {
                 tsm.putCharacterStatValue(QuiverCatridge, o1);
                 break;
             case PHOENIX:
-                Summon summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 1);
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true);
+            case FREEZER:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
                 summon.setFlyMob(true);
                 field.spawnSummon(summon);
                 break;
@@ -400,7 +503,28 @@ public class Archer extends Job {
                 o3.rOption = skillID;
                 tsm.putCharacterStatValue(PAD, o3);
                 break;
+            case PAIN_KILLER:
+                o1.nOption = 100;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AsrR, o1);
+                break;
+            case RECKLESS_HUNT_XBOW:
+                o1.nOption = -si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(EVAR, o1);
+                o2.nOption = si.getValue(y, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IncCriticalDamMax, o2);
+                o3.nOption = si.getValue(z, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IncCriticalDamMin, o2);
+                break;
             case SHARP_EYES_BOW:
+            case SHARP_EYES_XBOW:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -412,6 +536,7 @@ public class Archer extends Job {
                 tsm.putCharacterStatValue(SharpEyes, o2);
                 break;
             case ILLUSION_STEP_BOW:
+            case ILLUSION_STEP_XBOW:
                 o1.nOption = si.getValue(dex, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -435,10 +560,17 @@ public class Archer extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(AdvancedQuiver, o1);
                 break;
+            case ARROW_ILLUSION:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMaxHP(si.getValue(x, slv));
+                field = c.getChr().getField();
+                field.spawnSummon(summon);
+                break;
 
 
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private boolean isBuff(int skillID) {
