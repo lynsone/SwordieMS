@@ -40,6 +40,10 @@ public class WildHunter extends Job {
     public static final int JAGUAR_RIDER_CRIMSON = 33001015;        //Dmg Absorption +10%
 
 
+    public static final int SECRET_ASSEMBLY = 30001281;
+    public static final int CAPTURE = 30001068;
+    public static final int CALL_OF_THE_HUNTER = 30001062;
+
     public static final int SUMMON_JAGUAR = 33001001; //Special Buff
     public static final int SWIPE = 33001016 ; //Special Attack (Bite Debuff)
 
@@ -58,6 +62,12 @@ public class WildHunter extends Job {
     public static final int DRILL_SALVO = 33121016; //Summon
     public static final int SHARP_EYES = 33121004; //Buff
     public static final int MAPLE_WARRIOR_WH = 33121007; //Buff
+
+    private int[] addedSkills = new int[] {
+            SECRET_ASSEMBLY,
+            CAPTURE,
+            CALL_OF_THE_HUNTER,
+    };
 
     private int[] buffs = new int[] {
             JAGUAR_RIDER_GREY,
@@ -82,6 +92,13 @@ public class WildHunter extends Job {
 
     public WildHunter(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

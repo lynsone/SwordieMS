@@ -24,6 +24,15 @@ import static client.character.skills.SkillStat.*;
  */
 public class Zero extends Job {
 
+    public static final int DUAL_COMBAT = 100001270;
+    public static final int DUAL_COMBAT_2 = 100001282;
+    public static final int TEMPLE_RECALL = 100001262;
+    public static final int RESOLUTION_TIME = 100000279;
+    public static final int BURST_JUMP = 100001265;
+    public static final int BURST_STEP = 100001266;
+    public static final int BURST_LEAP = 100001269;
+
+
     public static final int DIVINE_FORCE = 100001263; //Aura (Unlimited Duration)
     public static final int DIVINE_SPEED = 100001264; //Aura (Unlimited Duration)
     public static final int RHINNES_PROTECTION = 100001268; //Buff
@@ -33,6 +42,16 @@ public class Zero extends Job {
     public static final int ADV_EARTH_BREAK = 101120105; //Special Attack (Shock Field)
     public static final int ADV_STORM_BREAK = 101120204; //Special Attack (Shock Field)
 
+    private int[] addedSkills = new int[] {
+            DUAL_COMBAT,
+            DUAL_COMBAT_2,
+            TEMPLE_RECALL,
+            RESOLUTION_TIME,
+            BURST_STEP,
+            BURST_JUMP,
+            BURST_LEAP,
+    };
+
     private int[] buffs = new int[] {
             DIVINE_FORCE,
             DIVINE_SPEED,
@@ -41,6 +60,13 @@ public class Zero extends Job {
 
     public Zero(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

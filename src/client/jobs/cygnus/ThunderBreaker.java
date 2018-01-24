@@ -10,19 +10,26 @@ import constants.JobConstants;
 import enums.ChatMsgColour;
 import loaders.SkillData;
 import packet.WvsContext;
+import util.Util;
 
 import java.util.Arrays;
 
 import static client.character.skills.CharacterTemporaryStat.*;
-import static client.character.skills.SkillStat.time;
-import static client.character.skills.SkillStat.x;
+import static client.character.skills.SkillStat.*;
 
 /**
  * Created on 12/14/2017.
  */
 public class ThunderBreaker extends Job {
 
-    public static final int LIGHTNING_ELEMENTAL = 15001022; //Buff (Charge)
+    public static final int IMPERIAL_RECALL = 10001245;
+    public static final int ELEMENTAL_EXPERT = 10000250;
+    public static final int ELEMENTAL_SLASH = 10001244;
+    public static final int NOBLE_MIND = 10000202;
+    public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_HARMONY_STR = 10000246;
+
+    public static final int LIGHTNING_ELEMENTAL = 15001022; //Buff (Charge) //Stackable Charge
 
     public static final int KNUCKLE_BOOSTER = 15101022; //Buff
 
@@ -32,6 +39,15 @@ public class ThunderBreaker extends Job {
     public static final int ARC_CHARGER = 15121004; //Buff
     public static final int SPEED_INFUSION = 15121005; //Buff
     public static final int CALL_OF_CYGNUS_TB = 15121000; //Buff
+
+    private int[] addedSkills = new int[] {
+            ELEMENTAL_HARMONY_STR,
+            IMPERIAL_RECALL,
+            ELEMENTAL_EXPERT,
+            ELEMENTAL_SLASH,
+            NOBLE_MIND,
+            ELEMENTAL_SHIFT,
+    };
 
     private int[] buffs = new int[] {
             LIGHTNING_ELEMENTAL,
@@ -44,6 +60,13 @@ public class ThunderBreaker extends Job {
 
     public ThunderBreaker(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -55,7 +78,14 @@ public class ThunderBreaker extends Job {
         Option o3 = new Option();
         switch (skillID) {
             case LIGHTNING_ELEMENTAL:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CygnusElementSkill, o1);
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                 break;
             case KNUCKLE_BOOSTER:
                 o1.nOption = si.getValue(x, slv);
@@ -63,17 +93,18 @@ public class ThunderBreaker extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
-            case ARC_CHARGER: // y = - y seconds Cooltime per Lightning Buff
+            case ARC_CHARGER: //TODO   y = - y seconds Cooltime per Lightning Buff
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowPartner, o1);
                 break;
             case SPEED_INFUSION:
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv); // TODO
-                tsm.putCharacterStatValue(Booster, o1);
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(x, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv); //Unlimited duration?  needs to be fixed
+                tsm.putCharacterStatValue(IndieBooster, o1); //Indie, so that it stacks with Knuckle_Booster
                 break;
             case CALL_OF_CYGNUS_TB:
                 o1.nReason = skillID;
@@ -94,6 +125,76 @@ public class ThunderBreaker extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    // TODO             Changed TempStat from ChargeBuff to StackBuff as to you mOption,  yet still doesn't UP the counter
+
+    // Lightning Buff Chance: prop
+    // Buff Duration: y
+    // Monster DEF Ignored: x
+    // Max Accumulation: v
+    private void handleLightning(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        SkillInfo lightningInfo = SkillData.getSkillInfoById(15001022);
+        int amount = 1;
+        if(tsm.hasStat(IgnoreTargetDEF)) {
+            amount = tsm.getOption(IgnoreTargetDEF).mOption;
+            if(amount < getMaxCharge(chr)) {
+                amount++;
+            } else {
+            }
+        }
+        o.nOption = 1;
+        o.mOption = amount;
+        o.rOption = 15001022;
+        o.tOption = lightningInfo.getValue(y, lightningInfo.getCurrentLevel());
+        // TODO Stat per charge/stack
+        tsm.putCharacterStatValue(IgnoreTargetDEF, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private int getChargeProp(Char chr) { //TODO  to be used in HandleAttack
+        int prop = 0;
+        if (chr.hasSkill(15001022)) { //Lightning Elemental
+            prop += 10;
+
+        }
+        if (chr.hasSkill(15000023)) { //Electrified
+            prop += 20;
+
+        }
+        if (chr.hasSkill(15100025)) { //Lightning Boost
+            prop += 20;
+
+        }
+        if (chr.hasSkill(15110026)) { //Light Lord
+            prop += 30;
+
+        }
+        if (chr.hasSkill(15120008)) { //Thunder God
+            prop += 20;
+        }
+        return prop;
+    }
+
+    private int getMaxCharge(Char c) {
+        int num = 0;
+        if (chr.hasSkill(15001022)) { //Lightning Elemental
+            num += 1;
+        }
+        if (chr.hasSkill(15000023)) { //Electrified
+            num += 1;
+        }
+        if (chr.hasSkill(15100025)) { //Lightning Boost
+            num += 1;
+        }
+        if (chr.hasSkill(15110026)) { //Light Lord
+            num += 1;
+        }
+        if (chr.hasSkill(15120008)) { //Thunder God
+            num += 1;
+        }
+        return num;
+    }
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -111,6 +212,12 @@ public class ThunderBreaker extends Job {
             si = SkillData.getSkillInfoById(skill.getSkillId());
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
+        }
+        int chargeProp = getChargeProp(chr);
+        if (tsm.hasStat(CygnusElementSkill)) {
+            if (hasHitMobs && Util.succeedProp(chargeProp)) {
+                handleLightning(skill.getSkillId(), tsm, c);
+            }
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -150,7 +257,6 @@ public class ThunderBreaker extends Job {
     public boolean isHandlerOfJob(short id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
         switch (job) {
-            case NOBLESSE:
             case THUNDERBREAKER1:
             case THUNDERBREAKER2:
             case THUNDERBREAKER3:

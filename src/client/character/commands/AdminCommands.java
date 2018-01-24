@@ -2,20 +2,16 @@ package client.character.commands;
 
 import client.character.Char;
 import client.character.items.Equip;
-import client.character.items.Inventory;
 import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
-import client.jobs.adventurer.Archer;
 import client.life.Life;
 import client.life.Mob;
-import connection.OutPacket;
 import constants.JobConstants.JobEnum;
 import enums.ForceAtomEnum;
 import enums.InvType;
 import enums.Stat;
-import handling.OutHeader;
 import loaders.*;
 import packet.CField;
 import packet.Stage;
@@ -115,6 +111,39 @@ public class AdminCommands {
                         (byte) 0, (short) equip.getBagIndex(), (byte) -1, equip.getInvType(), (byte) 1,
                         0, equip));
             }
+        }
+    }
+
+    public static class GetProjectiles extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int subi = 2070000;
+            int arrowBow = 2060000;
+            int arrowXBow = 2061001;
+            int bullet = 2330000;
+            Item item = ItemData.getItemDeepCopy(subi);
+            chr.addItemToInventory(item.getInvType(), item, false);
+            Item item2 = ItemData.getItemDeepCopy(arrowBow);
+            chr.addItemToInventory(item.getInvType(), item2, false);
+            Item item3 = ItemData.getItemDeepCopy(arrowXBow);
+            chr.addItemToInventory(item.getInvType(), item3, false);
+            Item item4 = ItemData.getItemDeepCopy(bullet);
+            chr.addItemToInventory(item.getInvType(), item4, false);
+            item.setQuantity(2000);
+            item2.setQuantity(2000);
+            item3.setQuantity(2000);
+            item4.setQuantity(2000);
+            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
+                    (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) item.getQuantity(),
+                    0, item));
+            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
+                    (byte) 0, (short) item2.getBagIndex(), (byte) -1, item2.getInvType(), (byte) item2.getQuantity(),
+                    0, item2));
+            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
+                    (byte) 0, (short) item3.getBagIndex(), (byte) -1, item3.getInvType(), (byte) item3.getQuantity(),
+                    0, item3));
+            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
+                    (byte) 0, (short) item4.getBagIndex(), (byte) -1, item4.getInvType(), (byte) item4.getQuantity(),
+                    0, item4));
         }
     }
 

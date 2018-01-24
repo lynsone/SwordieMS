@@ -24,6 +24,8 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Shade extends Job {
+    public static final int SPIRIT_BOND_I = 20050285;
+    public static final int FOX_TROT = 20051284;
 
     public static final int FOX_SPIRITS = 25101009; //Buff (ON/OFF)
     public static final int GROUND_POUND_FIRST = 25101000; //Special Attack (Slow Debuff)
@@ -38,6 +40,11 @@ public class Shade extends Job {
     public static final int DEATH_MARK = 25121006; //Special Attack (Mark Debuff)
     public static final int SOUL_SPLITTER = 25121007; //Special Attack (Split)
 
+    private int[] addedSkills = new int[] {
+            SPIRIT_BOND_I,
+            FOX_TROT,
+    };
+
     private final int[] buffs = new int[]{
             FOX_SPIRITS,
             SUMMON_OTHER_SPIRIT,
@@ -48,6 +55,13 @@ public class Shade extends Job {
 
     public Shade(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

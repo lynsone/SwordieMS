@@ -27,6 +27,13 @@ import static client.character.skills.SkillStat.*;
  */
 public class BlazeWizard extends Job {
 
+    public static final int IMPERIAL_RECALL = 10001245;
+    public static final int ELEMENTAL_EXPERT = 10000250;
+    public static final int ELEMENTAL_SLASH = 10001244;
+    public static final int NOBLE_MIND = 10000202;
+    public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_HARMONY_INT = 10000248;
+
     public static final int ORBITAL_FLAME = 12001020;
     public static final int GREATER_ORBITAL_FLAME = 12100020;
     public static final int GRAND_ORBITAL_FLAME = 12110020;
@@ -46,6 +53,15 @@ public class BlazeWizard extends Job {
     public static final int FLAME_BARRIER = 12121003; //Buff
     public static final int CALL_OF_CYGNUS_BW = 12121000; //Buff
 
+    private int[] addedSkills = new int[] {
+            ELEMENTAL_HARMONY_INT,
+            IMPERIAL_RECALL,
+            ELEMENTAL_EXPERT,
+            ELEMENTAL_SLASH,
+            NOBLE_MIND,
+            ELEMENTAL_SHIFT,
+    };
+
     private int[] buffs = new int[] {
             IGNITION,
             WORD_OF_FIRE,
@@ -59,6 +75,13 @@ public class BlazeWizard extends Job {
 
     public BlazeWizard(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -81,7 +104,7 @@ public class BlazeWizard extends Job {
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamageReduce, o1);
+                tsm.putCharacterStatValue(FireBarrier, o1); //TODO Correct?
                 break;
             case BURNING_CONDUIT: //TODO Area of Effect Buff
                 o1.nReason = skillID;
@@ -115,7 +138,7 @@ public class BlazeWizard extends Job {
                 summon.setPosition(chr.getPosition().deepCopy());
                 summon.setMoveAction((byte) 1);
                 summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
+                summon.setMoveAbility((byte) 1); // 0 = Stationary | 1 = Moves with Player
                 summon.setAssistType((byte) 1);
                 summon.setEnterType((byte) 1);
                 summon.setBeforeFirstAttack(false);
@@ -211,7 +234,6 @@ public class BlazeWizard extends Job {
     public boolean isHandlerOfJob(short id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
         switch (job) {
-            case NOBLESSE:
             case BLAZEWIZARD1:
             case BLAZEWIZARD2:
             case BLAZEWIZARD3:

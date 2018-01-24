@@ -24,6 +24,14 @@ import static client.character.skills.SkillStat.*;
  */
 public class WindArcher extends Job {
 
+
+    public static final int IMPERIAL_RECALL = 10001245;
+    public static final int ELEMENTAL_EXPERT = 10000250;
+    public static final int ELEMENTAL_SLASH = 10001244;
+    public static final int NOBLE_MIND = 10000202;
+    public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_HARMONY_DEX = 10000247;
+
     public static final int STORM_ELEMENTAL = 13001022; //Buff
 
     public static final int TRIFLING_WIND_I = 13101022; //Special Buff (Proc) (ON/OFF)
@@ -40,6 +48,15 @@ public class WindArcher extends Job {
     public static final int SHARP_EYES = 13121005; //Buff
     public static final int TOUCH_OF_THE_WIND = 13121004; //Buff
     public static final int CALL_OF_CYGNUS_WA = 13121000; //Buff
+
+    private int[] addedSkills = new int[] {
+            ELEMENTAL_HARMONY_DEX,
+            IMPERIAL_RECALL,
+            ELEMENTAL_EXPERT,
+            ELEMENTAL_SLASH,
+            NOBLE_MIND,
+            ELEMENTAL_SHIFT,
+    };
 
     private int[] buffs = new int[] {
             STORM_ELEMENTAL,
@@ -59,6 +76,13 @@ public class WindArcher extends Job {
 
     public WindArcher(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -230,7 +254,6 @@ public class WindArcher extends Job {
     public boolean isHandlerOfJob(short id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
         switch (job) {
-            case NOBLESSE:
             case WINDARCHER1:
             case WINDARCHER2:
             case WINDARCHER3:

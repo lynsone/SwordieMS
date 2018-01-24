@@ -21,6 +21,11 @@ import static client.character.skills.SkillStat.*;
  */
 public class Phantom extends Job {
 
+    public static final int SKILL_SWIPE = 20031207;
+    public static final int LOADOUT = 20031208;
+    public static final int TO_THE_SKIES = 20031203;
+    public static final int DEXTEROUS_TRAINING = 20030206;
+
     public static final int IMPECCABLE_MEMORY_I = 24001001; //TODO
 
     public static final int IMPECCABLE_MEMORY_II = 24101001; //TODO
@@ -35,6 +40,12 @@ public class Phantom extends Job {
     public static final int VOL_DAME = 24121007; // Special Buff TODO
     public static final int MAPLE_WARRIOR_PH = 24121008; //Buff
 
+    private int[] addedSkills = new int[] {
+            SKILL_SWIPE,
+            LOADOUT,
+            TO_THE_SKIES,
+            DEXTEROUS_TRAINING,
+    };
 
     private final int[] buffs = new int[] {
             IMPECCABLE_MEMORY_I,
@@ -51,6 +62,13 @@ public class Phantom extends Job {
 
     public Phantom(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

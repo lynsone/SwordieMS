@@ -21,6 +21,9 @@ import static client.character.skills.SkillStat.*;
  */
 public class Evan extends Job {
 
+    public static final int INHERITED_WILL = 20010194;
+    public static final int BACK_TO_NATURE = 20011293;
+
     public static final int MAGIC_GUARD = 22001012; //Buff
 
     public static final int MAGIC_BOOSTER = 22111020; //Buff
@@ -29,6 +32,11 @@ public class Evan extends Job {
 
     public static final int BLESSING_OF_THE_ONYX = 22181000; //Buff
     public static final int MAPLE_WARRIOR_EVAN = 22171000; //Buff
+
+    private int[] addedSkills = new int[] {
+            INHERITED_WILL,
+            BACK_TO_NATURE,
+    };
 
     private final int[] buffs = new int[]{
             MAGIC_GUARD,
@@ -40,6 +48,13 @@ public class Evan extends Job {
 
     public Evan(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

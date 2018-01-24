@@ -444,6 +444,7 @@ public class Warrior extends Job {
             case BLAST:
                 int charges = tsm.getOption(ElementalCharge).mOption;
                 if(charges == SkillData.getSkillInfoById(ELEMENTAL_CHARGE).getValue(z, 1)) {
+                    if(tsm.getOptByCTSAndSkill(DamR, 1221009) == null) {
                     resetCharges(c, tsm);
                     int t = si.getValue(time, slv);
                     o1.nOption = si.getValue(cr, slv);
@@ -458,7 +459,8 @@ public class Warrior extends Job {
                     o3.rOption = skillID;
                     o3.tOption = t;
                     tsm.putCharacterStatValue(DamR, o3);
-                    c.write(WvsContext.temporaryStatReset(tsm, false));
+                    c.write(WvsContext.temporaryStatSet(tsm));
+                    } else {}
                 }
                 break;
             case SPEAR_SWEEP:
@@ -601,6 +603,24 @@ public class Warrior extends Job {
         return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
     }
 
+    public int getComboCount(Char c) {
+        TemporaryStatManager tsm = c.getTemporaryStatManager();
+        if (tsm.hasStat(ComboCounter)) {
+            return tsm.getOption(ComboCounter).nOption;
+        }
+        return -1;
+    }
+
+    private int getMaxCombo(Char chr) {
+        int num = 0;
+        if (chr.hasSkill(1101013)) {
+            num = 6;
+        }
+        if (chr.hasSkill(1120003)) {
+            num = 11;
+        }
+        return num;
+    }
 
 
     @Override
@@ -637,43 +657,25 @@ public class Warrior extends Job {
         return 0;
     }
 
-    public int getComboCount(Char c) {
-        TemporaryStatManager tsm = c.getTemporaryStatManager();
-        if (tsm.hasStat(ComboCounter)) {
-            return tsm.getOption(ComboCounter).nOption;
-        }
-        return -1;
-    }
-
-    private int getMaxCombo(Char chr) {
-        int num = 0;
-        if (chr.hasSkill(1101013)) {
-            num = 6;
-        }
-        if (chr.hasSkill(1120003)) {
-            num = 11;
-        }
-        return num;
-    }
-
     private void handleCharges(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         SkillInfo chargeInfo = SkillData.getSkillInfoById(1200014);
         int amount = 1;
         if(tsm.hasStat(ElementalCharge)) {
+            amount = tsm.getOption(ElementalCharge).mOption;
             if (lastCharge == skillId) {
                 return;
             }
             if(amount < chargeInfo.getValue(z, 1)) {
-                amount = tsm.getOption(ElementalCharge).mOption + 1;
+                amount++;
             } else {
-                amount = tsm.getOption(ElementalCharge).mOption;
+
             }
         }
         lastCharge = skillId;
         o.nOption = 1;
         o.rOption = 1200014;
-        o.tOption = chargeInfo.getValue(time, 1); // elemental charge
+        o.tOption = (10 * chargeInfo.getValue(time, 1)); // elemental charge  // 10x actual duration
         o.mOption = amount;
         o.wOption = amount * chargeInfo.getValue(w, 1); // elemental charge
         o.uOption = amount * chargeInfo.getValue(u, 1);

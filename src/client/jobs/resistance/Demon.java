@@ -25,7 +25,15 @@ import static client.character.skills.SkillStat.*;
  */
 public class Demon extends Job {
 
+    //Demon Skills
+    public static final int DARK_WINDS = 30010110;
+    public static final int DEMONIC_BLOOD = 30010185;
+    public static final int SECRET_ASSEMBLY = 30001281;
+
+
     //Demon Slayer
+    public static final int CURSE_OF_FURY = 30010111;
+
     public static final int GRIM_SCYTHE = 31001000; //Special Attack            //TODO (Demon Force)
     public static final int BATTLE_PACT_DS = 31001001; //Buff
 
@@ -50,12 +58,17 @@ public class Demon extends Job {
 
 
     //Demon Avenger
+    public static final int BLOOD_PACT = 30010242;
+    public static final int EXCEED = 30010230;
+    public static final int HYPER_POTION_MASTERY = 30010231;
+    public static final int STAR_FORCE_CONVERSION = 30010232;
+
     public static final int EXCEED_DOUBLE_SLASH_1 = 31011000; //Special Attack  //TODO (EXCEED System)
     public static final int EXCEED_DOUBLE_SLASH_2 = 31011004; //Special Attack  //TODO (EXCEED System)
     public static final int EXCEED_DOUBLE_SLASH_3 = 31011005; //Special Attack  //TODO (EXCEED System)
     public static final int EXCEED_DOUBLE_SLASH_4 = 31011006; //Special Attack  //TODO (EXCEED System)
     public static final int EXCEED_DOUBLE_SLASH_PURPLE = 31011007; //Special Attack //TODO (EXCEED System)
-    public static final int OVERLOAD_RELEASE = 31011001; // Special Buff
+    public static final int OVERLOAD_RELEASE = 31011001; // Special Buff                                //TODO TempStat: ExceedOverload
 
     public static final int EXCEED_DEMON_STRIKE_1 = 31201000; //Special Attack  //TODO (EXCEED System)
     public static final int EXCEED_DEMON_STRIKE_2 = 31201007; //Special Attack  //TODO (EXCEED System)
@@ -82,6 +95,23 @@ public class Demon extends Job {
     public static final int BLOOD_PRISON = 31221003; // Special Attack (Stun Debuff)
     public static final int MAPLE_WARRIOR_DA = 31221008; //Buff
 
+    private int[] addedSkillsDS = new int[] {
+            SECRET_ASSEMBLY,
+            DARK_WINDS,
+            DEMONIC_BLOOD,
+            CURSE_OF_FURY,
+    };
+
+    private int[] addedSkillsDA = new int[] {
+            SECRET_ASSEMBLY,
+            DARK_WINDS,
+            DEMONIC_BLOOD,
+            EXCEED,
+            BLOOD_PACT,
+            HYPER_POTION_MASTERY,
+            STAR_FORCE_CONVERSION,
+    };
+
     private int[] buffs = new int[] {
             BATTLE_PACT_DS,
             BATTLE_PACT_DA,
@@ -97,6 +127,25 @@ public class Demon extends Job {
 
     public Demon(Char chr) {
         super(chr);
+        if (chr.getJob() == 3100 || chr.getJob() == 3110 || chr.getJob() == 3111 || chr.getJob() == 3112) {
+            for (int id : addedSkillsDS) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
+            }
+
+        } else if (chr.getJob() == 3101 || chr.getJob() == 3120 || chr.getJob() == 3121 || chr.getJob() == 3122) {
+            for (int id : addedSkillsDA) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
+            }
+
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -282,7 +331,40 @@ public class Demon extends Job {
                     }
                 }
                 break;
+
+            case EXCEED_DEMON_STRIKE_1:
+            case EXCEED_DEMON_STRIKE_2:
+            case EXCEED_DEMON_STRIKE_3:
+            case EXCEED_DEMON_STRIKE_4:
+            case EXCEED_DEMON_STRIKE_PURPLE:
+                handleExceed(skill.getSkillId(), tsm, c);
+                break;
         }
+    }
+
+    // TODO  OverloadCount is the correct TempStat  | Duration gotta be 0
+    public void handleExceed(int skillid, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        SkillInfo exceedInfo = SkillData.getSkillInfoById(30010230);
+        int amount = 1;
+        if(tsm.hasStat(Exceed)){
+            if(amount < exceedInfo.getValue(x, exceedInfo.getCurrentLevel())){
+                amount = tsm.getOption(Exceed).nOption + 1;
+            } else {
+                amount = tsm.getOption(Exceed).nOption;
+            }
+        }
+        o.nOption = amount;
+        o.rOption = 30010230;
+        o.tOption = 0;
+        //o.mOption = amount;
+        tsm.putCharacterStatValue(Exceed, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private void resetExceed(Client c, TemporaryStatManager tsm) {
+        tsm.removeStat(Exceed, false);
+        c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
     @Override

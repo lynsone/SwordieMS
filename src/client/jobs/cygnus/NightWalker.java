@@ -27,20 +27,42 @@ import static client.character.skills.SkillStat.*;
  */
 public class NightWalker extends Job {
 
+    public static final int IMPERIAL_RECALL = 10001245;
+    public static final int ELEMENTAL_EXPERT = 10000250;
+    public static final int ELEMENTAL_SLASH = 10001244;
+    public static final int NOBLE_MIND = 10000202;
+    public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_HARMONY_LUK = 10000249;
+
+    public static final int LUCKY_SEVEN = 14001020;
     public static final int DARK_ELEMENTAL = 14001021; //Buff (Mark of Darkness)
     public static final int HASTE = 14001022; //Buff
     public static final int DARK_SIGHT = 14001023; //Buff
     public static final int SHADOW_BAT = 14001027; //Buff (Shadow Bats) (ON/OFF)
 
     public static final int THROWING_BOOSTER = 14101022; //Buff
+    public static final int TRIPLE_THROW = 14101020;
 
     public static final int DARK_SERVANT = 14111024; //Buff
     public static final int SPIRIT_PROJECTION = 14111025; //Buff
     public static final int DARKNESS_ASCENDING = 14110030; //Special Buff
+    public static final int QUAD_STAR = 14111020;
+    public static final int SHADOW_SPARK = 14111023;
 
     public static final int DARK_OMEN = 14121003; //Summon
     public static final int SHADOW_STITCH = 14121004; //Special Attack (Bind Debuff)
     public static final int CALL_OF_CYGNUS_NW = 14121000; //Buff
+    public static final int QUINT_THROW = 14121001;
+    public static final int VITALITY_SIPHON = 14120009;
+
+    private int[] addedSkills = new int[] {
+            ELEMENTAL_HARMONY_LUK,
+            IMPERIAL_RECALL,
+            ELEMENTAL_EXPERT,
+            ELEMENTAL_SLASH,
+            NOBLE_MIND,
+            ELEMENTAL_SHIFT,
+    };
 
     private int[] buffs = new int[] {
             DARK_ELEMENTAL,
@@ -57,6 +79,13 @@ public class NightWalker extends Job {
 
     public NightWalker(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -70,7 +99,16 @@ public class NightWalker extends Job {
         Field field;
         switch (skillID) {
             case DARK_ELEMENTAL:
+                // 'prop' % to create a mark of darkness (Debuff on Mobs)
+                // stacks 'x' times
+                // 'y' %DEF ignored
+                // 'time' duration
                 //TODO
+
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ElementDarkness, o1);
                 break;
             case HASTE:
                 o1.nOption = si.getValue(speed, slv);
@@ -112,7 +150,10 @@ public class NightWalker extends Job {
                 tsm.putCharacterStatValue(NoBulletConsume, o1);
                 break;
             case DARKNESS_ASCENDING:
-                //TODO
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DarknessAscension, o1);
                 break;
             case CALL_OF_CYGNUS_NW:
                 o1.nReason = skillID;
@@ -123,7 +164,18 @@ public class NightWalker extends Job {
                 break;
             case SHADOW_BAT:
                 //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(NightWalkerBat, o1);
                 break;
+          /*case VITALITY_SIPHON:
+                o1.nOption = si.getValue(y, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(MaxHP, o1);
+                break;
+          */
 
             case DARK_OMEN:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -148,6 +200,23 @@ public class NightWalker extends Job {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
+/*
+    private void handleBat(int skillID, int slv, AttackInfo attackInfo) {
+        SkillInfo si = SkillData.getSkillInfoById(SHADOW_BAT);
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if (Util.succeedProp(si.getValue(prop, slv))) {
+                int mobID = mai.mobId;
+                ForceAtomEnum fae = ForceAtomEnum.NIGHT_WALKER_BAT;
+                int curTime = Util.getCurrentTime();
+                ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), 15, 15,
+                        0, 0, curTime, 0, skillID, new Position(0, 0));
+                c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
+                        mobID, SHADOW_BAT, fai, new Rect(), 0, 0, null, 0, null));
+            }
+        }
+    } //TODO gives Error
+*/
+
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
@@ -162,6 +231,9 @@ public class NightWalker extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+      //if(hasHitMobs) {
+      //    handleBat(skillID, slv, attackInfo);
+      //} //TODO uncomment once bats are fixed
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -174,6 +246,20 @@ public class NightWalker extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+
+                        handleSiphonVitality(skill.getSkillId(), tsm, c);
+                }
+                break;
+
+            case LUCKY_SEVEN:
+            case TRIPLE_THROW:
+            case QUAD_STAR:
+            case SHADOW_SPARK:
+            case DARK_OMEN:
+            case QUINT_THROW:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    handleSiphonVitality(skill.getSkillId(), tsm, c);
                 }
                 break;
         }
@@ -205,11 +291,39 @@ public class NightWalker extends Job {
 
     }
 
+
+    private void handleSiphonVitality(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        Option o1 = new Option();
+        SkillInfo siphonInfo = SkillData.getSkillInfoById(14120009);
+        int amount = 1;
+        if(tsm.hasStat(ElementDarkness)) {
+            if (tsm.hasStat(SiphonVitality)) {
+                amount = tsm.getOption(SiphonVitality).nOption;
+                if (amount < siphonInfo.getValue(x, siphonInfo.getCurrentLevel())) { //TODO  add a Max Stacks Method
+                    amount = tsm.getOption(SiphonVitality).nOption + 1;
+                } else {
+                    amount = tsm.getOption(SiphonVitality).nOption;
+                }
+            }
+            o.nOption = amount;
+            o.rOption = 14120009;
+            o.tOption = siphonInfo.getValue(time, siphonInfo.getCurrentLevel());
+            o.xOption = amount * siphonInfo.getValue(x, siphonInfo.getCurrentLevel()); //max Stack
+            tsm.putCharacterStatValue(SiphonVitality, o);
+            o1.nOption = (amount * siphonInfo.getValue(y, siphonInfo.getCurrentLevel()));
+            o1.rOption = 14120009;
+            o1.tOption = siphonInfo.getValue(time, siphonInfo.getCurrentLevel());
+            tsm.putCharacterStatValue(MaxHP, o1);
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+
     @Override
     public boolean isHandlerOfJob(short id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
         switch (job) {
-            case NOBLESSE:
             case NIGHTWALKER1:
             case NIGHTWALKER2:
             case NIGHTWALKER3:

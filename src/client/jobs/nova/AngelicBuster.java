@@ -24,6 +24,13 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class AngelicBuster extends Job {
+    public static final int DRESS_UP = 60011222;
+    public static final int SOUL_BUSTER = 60011216;
+    public static final int HYPER_COORDINATE = 60011221;
+    public static final int GRAPPLING_HEART = 60011218;
+    public static final int DAY_DREAMER = 60011220;
+    public static final int TRUE_HEART_INHERITANCE = 60010217;
+
     public static final int AB_NORMAL_ATTACK = 60011216; //TODO Recharge Attack
 
     public static final int STAR_BUBBLE = 65001100; //TODO Recharge Attack
@@ -44,6 +51,15 @@ public class AngelicBuster extends Job {
     public static final int STAR_GAZER = 65121004; //Buff
     public static final int NOVA_WARRIOR_AB = 65121009; //Buff
 
+    private int[] addedSkills = new int[] {
+            DRESS_UP,
+            SOUL_BUSTER,
+            HYPER_COORDINATE,
+            GRAPPLING_HEART,
+            DAY_DREAMER,
+            TRUE_HEART_INHERITANCE,
+    };
+
     private final int[] buffs = new int[]{
             MELODY_CROSS,
             POWER_TRANSFER,
@@ -54,6 +70,13 @@ public class AngelicBuster extends Job {
 
     public AngelicBuster(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

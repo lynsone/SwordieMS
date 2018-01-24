@@ -25,6 +25,8 @@ import static client.character.skills.SkillStat.*;
  */
 public class BattleMage extends Job {
 
+    public static final int SECRET_ASSEMBLY = 30001281;
+
     public static final int CONDEMNATION = 32001014; //Special Buff (ON/OFF) //TODO
     public static final int HASTY_AURA = 32001016; //Buff (Unlimited Duration)
 
@@ -45,6 +47,10 @@ public class BattleMage extends Job {
     public static final int BATTLE_RAGE = 32121010; //Buff (ON/OFF)
     public static final int MAPLE_WARRIOR_BAM = 32121007; //Buff
 
+    private int[] addedSkills = new int[] {
+            SECRET_ASSEMBLY,
+    };
+
     private int[] buffs = new int[] {
             CONDEMNATION,
             CONDEMNATION_I,
@@ -64,6 +70,13 @@ public class BattleMage extends Job {
 
     public BattleMage(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

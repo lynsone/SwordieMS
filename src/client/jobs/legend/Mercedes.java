@@ -28,11 +28,15 @@ import static client.character.skills.SkillStat.*;
  */
 public class Mercedes extends Job {
 
+    public static final int ELVEN_GRACE = 20020112;
+    public static final int UPDRAFT = 20020111;
+    public static final int ELVEN_HEALING = 20020109;
+
     public static final int DUAL_BOWGUN_BOOSTER = 23101002; //Buff
 
     public static final int STUNNING_STRIKES = 23111000; //Special Attack
     public static final int UNICORN_SPIKE = 23111002; //Special Attack
-    public static final int IGNIS_ROAR = 23111004; //Buff
+    public static final int IGNIS_ROAR = 23111004; //Buff //Stacks
     public static final int WATER_SHIELD = 23111005; //Buff
     public static final int ELEMENTAL_KNIGHTS = 23111008; //Summon
 
@@ -40,6 +44,12 @@ public class Mercedes extends Job {
     public static final int STAGGERING_STRIKES = 23120013; //Special Attack
     public static final int ANCIENT_WARDING = 23121004; //Buff
     public static final int MAPLE_WARRIOR_MERC = 23121005; //Buff
+
+    private int[] addedSkills = new int[] {
+            ELVEN_GRACE,
+            UPDRAFT,
+            ELVEN_HEALING,
+    };
 
     private final int[] buffs = new int[]{
             DUAL_BOWGUN_BOOSTER,
@@ -52,6 +62,13 @@ public class Mercedes extends Job {
 
     public Mercedes(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -71,12 +88,20 @@ public class Mercedes extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case IGNIS_ROAR:
-                o1.nValue = si.getValue(indiePad, slv);
-                o1.nReason = skillID;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndiePAD, o1);
-                //TODO Final Damage% increase by stacks
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnisRore, o1);
+                o2.nValue = si.getValue(indiePad, slv);
+                o2.nReason = skillID;
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o2);
+              //o1.nValue = si.getValue(indiePad, slv);
+              //o1.nReason = skillID;
+              //o1.tStart = (int) System.currentTimeMillis();
+              //o1.tTerm = si.getValue(time, slv);
+              //tsm.putCharacterStatValue(IndiePAD, o1);
                 break;
             case WATER_SHIELD:
                 o1.nOption = si.getValue(asrR, slv);
@@ -125,6 +150,35 @@ public class Mercedes extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    // y = stack | lasts subTime,  Final Dmg increase per stack = x
+    private void handleIgnisRoar(int skillid, TemporaryStatManager tsm, Client c) { //TODO Gain 1 stack by using Combo Skills
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(23111004);
+        int amount = 1;
+        if(tsm.hasStat(RpSiksin)){ //TODO IgnisRore or Rpsiksin
+            amount = tsm.getOption(RpSiksin).nOption; //TODO RpSiksin
+            if(amount < ignisRoarInfo.getValue(y, ignisRoarInfo.getCurrentLevel())) {
+                amount++;
+            } else {}
+        }
+        o.nOption = amount;
+        o.rOption = 23111004;
+        o.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
+        tsm.putCharacterStatValue(RpSiksin, o); //TODO RpSiksin
+        o1.nOption = (amount * ignisRoarInfo.getValue(x, ignisRoarInfo.getCurrentLevel()));
+        o1.rOption = 23111004;
+        o1.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
+        tsm.putCharacterStatValue(DamR, o1);
+        o2.nValue = ignisRoarInfo.getValue(indiePad, ignisRoarInfo.getCurrentLevel());
+        o2.nReason = 23111004;
+        o2.tStart = (int) System.currentTimeMillis();
+        o2.tTerm = ignisRoarInfo.getValue(time, ignisRoarInfo.getCurrentLevel());
+        tsm.putCharacterStatValue(IndiePAD, o2);
+        // TODO     Not giving stack icon/buff
+    }
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -143,10 +197,13 @@ public class Mercedes extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        if (hasHitMobs) {
+            handleIgnisRoar(skill.getSkillId(), tsm, c);
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        switch (attackInfo.skillId) {
+        switch (attackInfo.skillId) {  // TODO gives NPE
             case STUNNING_STRIKES:
             case STAGGERING_STRIKES:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
