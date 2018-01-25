@@ -103,4 +103,9 @@ public abstract class Job {
     }
 
     public abstract int getFinalAttackSkill();
+
+    public void handleLevelUp() {
+        chr.addStat(Stat.mhp, 500);
+        chr.addStat(Stat.mmp, 500);
+    }
 }

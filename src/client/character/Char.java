@@ -10,6 +10,7 @@ import client.field.Portal;
 import client.jobs.Job;
 import client.jobs.JobManager;
 import connection.OutPacket;
+import constants.GameConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.ChatMsgColour;
@@ -1332,25 +1333,28 @@ public class Char {
     }
     
     public int getStat(Stat charStat) {
+        CharacterStat cs = getAvatarData().getCharacterStat();
         switch(charStat) {
             case str:
-                return getAvatarData().getCharacterStat().getStr();
+                return cs.getStr();
             case dex:
-                return getAvatarData().getCharacterStat().getDex();
+                return cs.getDex();
             case inte:
-                return getAvatarData().getCharacterStat().getInt();
+                return cs.getInt();
             case luk:
-                return getAvatarData().getCharacterStat().getLuk();
+                return cs.getLuk();
             case hp:
-                return getAvatarData().getCharacterStat().getHp();
+                return cs.getHp();
             case mhp:
-                return getAvatarData().getCharacterStat().getMaxHp();
+                return cs.getMaxHp();
             case mp:
-                return getAvatarData().getCharacterStat().getMp();
+                return cs.getMp();
             case mmp:
-                return getAvatarData().getCharacterStat().getMaxMp();
+                return cs.getMaxMp();
             case ap:
-                return getAvatarData().getCharacterStat().getAp();
+                return cs.getAp();
+            case level:
+                return cs.getLevel();
         }
         return -1;
     }
@@ -1463,5 +1467,32 @@ public class Char {
         getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, false, hasBuffProtector(),
                 (byte) portal.getId(), false, 100, null, false, -1));
         toField.spawnLifesForChar(this);
+    }
+
+    public void addExp(long amount) {
+        CharacterStat cs = getAvatarData().getCharacterStat();
+        long curExp = cs.getExp();
+        int level = getStat(Stat.level);
+        long newExp = curExp + amount;
+        Map<Stat, Object> stats = new HashMap<>();
+        while(newExp > GameConstants.charExp[level]) {
+            newExp -= GameConstants.charExp[level];
+            addStat(Stat.level, 1);
+            stats.put(Stat.level, getStat(Stat.level));
+            getJobHandler().handleLevelUp();
+            level++;
+        }
+        cs.setExp(newExp);
+        stats.put(Stat.exp, newExp);
+
+        getClient().write(WvsContext.statChanged(stats, true));
+    }
+
+    public void write(OutPacket outPacket) {
+        getClient().write(outPacket);
+    }
+
+    public ExpIncreaseInfo getExpIncreaseInfo() {
+        return new ExpIncreaseInfo();
     }
 }

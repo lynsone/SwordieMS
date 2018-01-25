@@ -1,10 +1,7 @@
 package packet;
 
 import client.Client;
-import client.character.Char;
-import client.character.CharacterCard;
-import client.character.ExtendSP;
-import client.character.NonCombatStatDayLimit;
+import client.character.*;
 import client.character.items.Item;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
@@ -12,12 +9,15 @@ import client.life.movement.*;
 import connection.InPacket;
 import connection.OutPacket;
 import enums.InvType;
+import enums.MessageType;
 import enums.Stat;
 import handling.OutHeader;
 import util.FileTime;
 import util.Position;
 
 import java.util.*;
+
+import static enums.MessageType.*;
 
 /**
  * Created on 12/22/2017.
@@ -371,6 +371,132 @@ public class WvsContext {
         outPacket.encodeInt(pos.getY());
         outPacket.encodeInt(mobID);
         outPacket.encodeInt(count);
+
+        return outPacket;
+    }
+
+    public static OutPacket dropPickupMessage(Item item, byte type) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(DROP_PICKUP_MESSAGE.getVal());
+        outPacket.encodeByte(type);
+        // also error (?) codes -2, ,-3, -4, -5, <default>
+        switch (type) {
+            case 1:
+                outPacket.encodeByte(0); // idk
+                outPacket.encodeInt(item.getItemId());
+                outPacket.encodeShort(1);
+                outPacket.encodeShort(2);
+                break;
+            case 0:
+                outPacket.encodeInt(item.getItemId());
+                outPacket.encodeInt(1); // ?
+                break;
+            case 2:
+                outPacket.encodeInt(item.getItemId());
+                break;
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket questRecordMessage(int qrKey, byte state, boolean validCheck) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        if(validCheck) {
+            outPacket.encodeByte(QUEST_RECORD_MESSAGE_ADD_VALID_CHECK.getVal());
+            outPacket.encodeInt(qrKey);
+            outPacket.encodeByte(validCheck);
+            outPacket.encodeByte(state);
+        } else {
+            outPacket.encodeByte(QUEST_RECORD_MESSAGE.getVal());
+            outPacket.encodeInt(qrKey);
+            outPacket.encodeByte(state);
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket incExpMessage(ExpIncreaseInfo eii) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(INC_EXP_MESSAGE.getVal());
+        eii.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket incSpMessage(short job, byte amount) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(INC_SP_MESSAGE.getVal());
+        outPacket.encodeShort(job);
+        outPacket.encodeByte(amount);
+
+        return outPacket;
+    }
+
+    public static OutPacket incMoneyMessage(String clientName, int amount, int charID) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(INC_MONEY_MESSAGE.getVal());
+        outPacket.encodeString(clientName);
+        outPacket.encodeInt(amount);
+        outPacket.encodeInt(charID);
+
+        return outPacket;
+    }
+
+    public static OutPacket message(MessageType mt, List<Integer> items) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(mt.getVal());
+        switch(mt) {
+            case GENERAL_ITEM_EXPIRE_MESSAGE:
+            case ITEM_PROTECT_EXPIRE_MESSAGE:
+            case ITEM_ABILITY_TIME_LIMITED_EXPIRE_MESSAGE:
+            case SKILL_EXPIRE_MESSAGE:
+                outPacket.encodeByte(items.size());
+                items.forEach(outPacket::encodeInt);
+                break;
+        }
+        return outPacket;
+    }
+
+    public static OutPacket itemExpireReplaceMessage(List<String> strings) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(ITEM_EXPIRE_REPLACE_MESSAGE.getVal());
+        outPacket.encodeByte(strings.size());
+        strings.forEach(outPacket::encodeString);
+
+        return outPacket;
+    }
+
+    public static OutPacket message(MessageType mt, long num, String string, byte type) {
+        int i = (int) num;
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(mt.getVal());
+        switch(mt) {
+            case CASH_ITEM_EXPIRE_MESSAGE:
+            case INC_POP_MESSAGE:
+            case INC_GP_MESSAGE:
+            case GIVE_BUFF_MESSAGE:
+                outPacket.encodeInt(i);
+                break;
+            case INC_COMMITMENT_MESSAGE:
+                outPacket.encodeInt(i);
+                outPacket.encodeByte(type);
+                break;
+            case SYSTEM_MESSAGE:
+                outPacket.encodeString(string);
+                break;
+            case QUEST_RECORD_EX_MESSAGE:
+            case WORLD_SHARE_RECORD_MESSAGE:
+                outPacket.encodeInt(i);
+                outPacket.encodeString(string);
+        }
 
         return outPacket;
     }

@@ -38,10 +38,7 @@ import util.Util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.ChatMsgColour.YELLOW;
@@ -338,16 +335,15 @@ public class WorldHandler {
     }
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
-        c.getChr().chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
+        Char chr = c.getChr();
+        chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
         System.out.println("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
             if(mob != null && mob.getHp() > 0) {
-                long totalDamage = 0;
-                for (int dmg : mai.damages) {
-                    totalDamage += dmg;
-                }
+                long totalDamage = Arrays.stream(mai.damages).sum();
+                mob.addDamage(chr, totalDamage);
                 mob.damage(totalDamage);
             }
         }

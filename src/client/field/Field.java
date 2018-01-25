@@ -343,7 +343,7 @@ public class Field {
             }
             if(controller == null) {
                 controller = getChars().get(0);
-                addLifeController(life, controller);
+                putLifeController(life, controller);
             }
             Mob mob = null;
             if(life instanceof Mob) {
@@ -409,7 +409,7 @@ public class Field {
         }
         for(Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
             if(entry.getValue() == chr) { // yes, ==
-                addLifeController(entry.getKey(), null);
+                putLifeController(entry.getKey(), null);
             }
         }
     }
@@ -422,7 +422,7 @@ public class Field {
         this.lifeToControllers = lifeToControllers;
     }
 
-    public void addLifeController(Life life, Char chr) {
+    public void putLifeController(Life life, Char chr) {
         getLifeToControllers().put(life, chr);
     }
 

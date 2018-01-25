@@ -39,29 +39,21 @@ public class AdminCommands {
     public static class PacketCommand extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
+//            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+//            Option o = new Option();
+//            o.nOption = 5;
+//            o.rOption = 0;
+//            o.tOption = 0;
+//            tsm.putCharacterStatValue(CharacterTemporaryStat.SurplusSupply, o);
+//            chr.getClient().write(WvsContext.temporaryStatSet(tsm));
 
-//            String[] fin = new String[args.length - 1];
-//            System.arraycopy(args, 1, fin, 0, args.length - 1);
-//            StringBuilder sb = new StringBuilder();
-//            for(String s : fin) {
-//                sb.append(s);
-//            }
-//            outPacket.encodeBytes(Util.getByteArrayByString(sb.toString()));
+            OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
 
-//            Option option = new Option();
-//            option.nOption = 0;
-//            option.rOption = 37110009;
-//            option.cOption = 2;
-//            chr.getTemporaryStatManager().putCharacterStatValue(CharacterTemporaryStat.RWCombination, option);
-//            chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            Option o = new Option();
-            o.nOption = 5;
-            o.rOption = 0;
-            o.tOption = 0;
-            tsm.putCharacterStatValue(CharacterTemporaryStat.SurplusSupply, o);
-            chr.getClient().write(WvsContext.temporaryStatSet(tsm));
+            outPacket.encodeByte(47);
 
+            outPacket.encodeByte(0);
+
+            chr.write(outPacket);
         }
     }
 
@@ -334,7 +326,6 @@ public class AdminCommands {
                     }
                     chr.chatMessage(YELLOW, "Name: " + name);
                 } else {
-
                     Map<Integer, String> map = StringData.getItemStringByName(query);
                     if(map.size() == 0) {
                         chr.chatMessage(YELLOW, "No skills found for query " + query);

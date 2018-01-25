@@ -1,11 +1,16 @@
 package client.life;
 
-import client.Client;
+import client.character.Char;
+import client.character.ExpIncreaseInfo;
 import client.field.Field;
 import client.field.Foothold;
 import packet.CField;
+import packet.WvsContext;
 import server.EventManager;
 import util.Position;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Mob extends Life {
 
@@ -86,6 +91,7 @@ public class Mob extends Life {
     private boolean noDebuff;
     private boolean targetFromSvr;
     private int charismaEXP;
+    private Map<Char, Long> damageDone = new HashMap<>();
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -1040,9 +1046,41 @@ public class Mob extends Life {
             if(!isNotRespawnable()) { // double negative
                 EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), this);
             }
-            field.addLifeController(this, null);
+            field.putLifeController(this, null);
+            distributeExp();
         } else {
             getField().broadcastPacket(CField.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
+        }
+    }
+
+    public Map<Char, Long> getDamageDone() {
+        return damageDone;
+    }
+
+    public void addDamage(Char chr, long damage) {
+        long cur = 0;
+        if(getDamageDone().containsKey(chr)) {
+            cur = getDamageDone().get(chr);
+        }
+        if(damage <= getHp()) {
+            cur += damage;
+        } else {
+            cur += getHp();
+        }
+        getDamageDone().put(chr, cur);
+    }
+
+    public void distributeExp() {
+        long exp = getForcedMobStat().getExp();
+        long totalDamage = getDamageDone().values().stream().mapToLong(l -> l).sum();
+        for(Char chr : getDamageDone().keySet()) {
+            double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
+            long appliedExp = (long) (exp * damagePerc);
+            ExpIncreaseInfo eii = chr.getExpIncreaseInfo();
+            eii.setLastHit(true);
+            eii.setIncEXP(appliedExp > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) appliedExp);
+            chr.write(WvsContext.incExpMessage(eii));
+            chr.addExp(appliedExp);
         }
     }
 }

@@ -356,155 +356,155 @@ public class ItemData {
                         int specialGrade = 0;
                         for (Node n : XMLApi.getAllChildren(XMLApi.getFirstChildByNameBF(mainNode, "info"))) {
                             attributes = XMLApi.getAttributes(n);
-                            boolean hasISlot = attributes.get("name").equals("islot");
+                            boolean hasISlot = attributes.get("name").equalsIgnoreCase("islot");
                             if (hasISlot) {
                                 islot = attributes.get("value");
                             }
-                            boolean hasVSlot = attributes.get("name").equals("vslot");
+                            boolean hasVSlot = attributes.get("name").equalsIgnoreCase("vslot");
                             if (hasVSlot) {
                                 vslot = attributes.get("value");
                             }
-                            boolean hasReqJob = attributes.get("name").equals("reqJob");
+                            boolean hasReqJob = attributes.get("name").equalsIgnoreCase("reqJob");
                             if (hasReqJob) {
                                 reqJob = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasReqLevel = attributes.get("name").equals("reqLevel");
+                            boolean hasReqLevel = attributes.get("name").equalsIgnoreCase("reqLevel");
                             if (hasReqLevel) {
                                 reqLevel = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasReqStr = attributes.get("name").equals("reqSTR");
+                            boolean hasReqStr = attributes.get("name").equalsIgnoreCase("reqSTR");
                             if (hasReqStr) {
                                 reqStr = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasReqDex = attributes.get("name").equals("reqDex");
+                            boolean hasReqDex = attributes.get("name").equalsIgnoreCase("reqDex");
                             if (hasReqDex) {
                                 reqDex = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasReqInt = attributes.get("name").equals("reqInt");
+                            boolean hasReqInt = attributes.get("name").equalsIgnoreCase("reqInt");
                             if (hasReqInt) {
                                 reqInt = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasReqLuk = attributes.get("name").equals("reqLuk");
+                            boolean hasReqLuk = attributes.get("name").equalsIgnoreCase("reqLuk");
                             if (hasReqLuk) {
                                 reqLuk = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasreqPOP = attributes.get("name").equals("reqPOP");
+                            boolean hasreqPOP = attributes.get("name").equalsIgnoreCase("reqPOP");
                             if (hasreqPOP) {
                                 reqPop = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasIncStr = attributes.get("name").equals("incStr");
+                            boolean hasIncStr = attributes.get("name").equalsIgnoreCase("incStr");
                             if (hasIncStr) {
                                 incStr = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincDex = attributes.get("name").equals("incDex");
+                            boolean hasincDex = attributes.get("name").equalsIgnoreCase("incDex");
                             if (hasincDex) {
                                 incDex = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincInt = attributes.get("name").equals("reqincInt");
+                            boolean hasincInt = attributes.get("name").equalsIgnoreCase("incInt");
                             if (hasincInt) {
                                 incInt = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincLuk = attributes.get("name").equals("incLuk");
+                            boolean hasincLuk = attributes.get("name").equalsIgnoreCase("incLuk");
                             if (hasincLuk) {
                                 incLuk = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincPDD = attributes.get("name").equals("incPDD");
+                            boolean hasincPDD = attributes.get("name").equalsIgnoreCase("incPDD");
                             if (hasincPDD) {
                                 incPDD = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincMDD = attributes.get("name").equals("incMDD");
+                            boolean hasincMDD = attributes.get("name").equalsIgnoreCase("incMDD");
                             if (hasincMDD) {
                                 incMDD = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincMHP = attributes.get("name").equals("incMHP");
+                            boolean hasincMHP = attributes.get("name").equalsIgnoreCase("incMHP");
                             if (hasincMHP) {
                                 incMHP = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincMMP = attributes.get("name").equals("incMMP");
+                            boolean hasincMMP = attributes.get("name").equalsIgnoreCase("incMMP");
                             if (hasincMMP) {
                                 incMMP = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincPAD = attributes.get("name").equals("incPAD");
+                            boolean hasincPAD = attributes.get("name").equalsIgnoreCase("incPAD");
                             if (hasincPAD) {
                                 incPAD = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincMAD = attributes.get("name").equals("incMAD");
+                            boolean hasincMAD = attributes.get("name").equalsIgnoreCase("incMAD");
                             if (hasincMAD) {
                                 incMAD = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincEVA = attributes.get("name").equals("incEVA");
+                            boolean hasincEVA = attributes.get("name").equalsIgnoreCase("incEVA");
                             if (hasincEVA) {
                                 incEVA = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincACC = attributes.get("name").equals("incACC");
+                            boolean hasincACC = attributes.get("name").equalsIgnoreCase("incACC");
                             if (hasincACC) {
                                 incACC = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincSpeed = attributes.get("name").equals("incSpeed");
+                            boolean hasincSpeed = attributes.get("name").equalsIgnoreCase("incSpeed");
                             if (hasincSpeed) {
                                 incSpeed = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasincJump = attributes.get("name").equals("incJump");
+                            boolean hasincJump = attributes.get("name").equalsIgnoreCase("incJump");
                             if (hasincJump) {
                                 incJump = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasdamR = attributes.get("name").equals("damR");
+                            boolean hasdamR = attributes.get("name").equalsIgnoreCase("damR");
                             if (hasdamR) {
                                 damR = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasstatR = attributes.get("name").equals("statR");
+                            boolean hasstatR = attributes.get("name").equalsIgnoreCase("statR");
                             if (hasstatR) {
                                 statR = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hastuc = attributes.get("name").equals("tuc");
+                            boolean hastuc = attributes.get("name").equalsIgnoreCase("tuc");
                             if (hastuc) {
                                 tuc = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hassetItemID = attributes.get("name").equals("setItemID");
+                            boolean hassetItemID = attributes.get("name").equalsIgnoreCase("setItemID");
                             if (hassetItemID) {
                                 setItemID = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasprice = attributes.get("name").equals("price");
+                            boolean hasprice = attributes.get("name").equalsIgnoreCase("price");
                             if (hasprice) {
                                 price = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasattackSpeed = attributes.get("name").equals("attackSpeed");
+                            boolean hasattackSpeed = attributes.get("name").equalsIgnoreCase("attackSpeed");
                             if (hasattackSpeed) {
                                 attackSpeed = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hascash = attributes.get("name").equals("cash");
+                            boolean hascash = attributes.get("name").equalsIgnoreCase("cash");
                             if (hascash) {
                                 cash = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hasexpireOnLogout = attributes.get("name").equals("expireOnLogout");
+                            boolean hasexpireOnLogout = attributes.get("name").equalsIgnoreCase("expireOnLogout");
                             if (hasexpireOnLogout) {
                                 expireOnLogout = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hasexItem = attributes.get("name").equals("exItem");
+                            boolean hasexItem = attributes.get("name").equalsIgnoreCase("exItem");
                             if (hasexItem) {
                                 exItem = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hasnotSale = attributes.get("name").equals("notSale");
+                            boolean hasnotSale = attributes.get("name").equalsIgnoreCase("notSale");
                             if (hasnotSale) {
                                 notSale = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hasonly = attributes.get("name").equals("only");
+                            boolean hasonly = attributes.get("name").equalsIgnoreCase("only");
                             if (hasonly) {
                                 only = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hastradeBlock = attributes.get("name").equals("tradeBlock");
+                            boolean hastradeBlock = attributes.get("name").equalsIgnoreCase("tradeBlock");
                             if (hastradeBlock) {
                                 tradeBlock = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hasequipTradeBlock = attributes.get("name").equals("equipTradeBlock");
+                            boolean hasequipTradeBlock = attributes.get("name").equalsIgnoreCase("equipTradeBlock");
                             if (hasequipTradeBlock) {
                                 equipTradeBlock = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hasfixedPotential = attributes.get("name").equals("fixedPotential");
+                            boolean hasfixedPotential = attributes.get("name").equalsIgnoreCase("fixedPotential");
                             if (hasfixedPotential) {
                                 fixedPotential = Integer.parseInt(attributes.get("value")) == 1;
                             }
-                            boolean hasOptions = attributes.get("name").equals("option");
+                            boolean hasOptions = attributes.get("name").equalsIgnoreCase("option");
                             if (hasOptions) {
                                 for (Node whichOptionNode : XMLApi.getAllChildren(n)) {
                                     attributes = XMLApi.getAttributes(whichOptionNode);
@@ -518,11 +518,11 @@ public class ItemData {
                                 options.add(0);
                             }
 
-                            boolean hasfixedGrade = attributes.get("name").equals("fixedGrade");
+                            boolean hasfixedGrade = attributes.get("name").equalsIgnoreCase("fixedGrade");
                             if (hasfixedGrade) {
                                 fixedGrade = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hasspecialGrade = attributes.get("name").equals("specialGrade");
+                            boolean hasspecialGrade = attributes.get("name").equalsIgnoreCase("specialGrade");
                             if (hasspecialGrade) {
                                 specialGrade = Integer.parseInt(attributes.get("value"));
                             }
@@ -1124,9 +1124,7 @@ public class ItemData {
     }
 
     public static void main(String[] args) {
-//        generateDatFiles();
-        Item item = getItemDeepCopy(2060000);
-        System.out.println(item);
+        generateDatFiles();
     }
 
     public static List<ItemInfo> getItems() {
