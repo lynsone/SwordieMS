@@ -26,6 +26,10 @@ import static client.character.skills.SkillStat.x;
  */
 public class Mechanic extends Job {
 
+    public static final int SECRET_ASSEMBLY = 30001281;
+    public static final int MECHANIC_DASH = 30001068;
+    public static final int HIDDEN_PEACE = 30000227;
+
     public static final int HUMANOID_MECH = 35001002; //Mech Suit
     public static final int TANK_MECH = 35111003; //Tank Mech Suit
 
@@ -40,6 +44,12 @@ public class Mechanic extends Job {
 
     public static final int BOTS_N_TOTS = 35121009; //Special Summon
     public static final int MAPLE_WARRIOR_MECH = 35121007; //Buff
+
+    private int[] addedSkills = new int[] {
+            SECRET_ASSEMBLY,
+            MECHANIC_DASH,
+            HIDDEN_PEACE,
+    };
 
     private int[] buffs = new int[] {
             HUMANOID_MECH,
@@ -60,6 +70,13 @@ public class Mechanic extends Job {
 
     public Mechanic(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

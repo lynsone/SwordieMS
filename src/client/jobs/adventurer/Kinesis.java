@@ -16,11 +16,10 @@ import packet.WvsContext;
 import util.Position;
 import util.Util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
-import static client.character.skills.SkillStat.*;
 import static client.character.skills.CharacterTemporaryStat.*;
+import static client.character.skills.SkillStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -186,14 +185,14 @@ public class Kinesis extends Job {
         int curTime = (int) System.currentTimeMillis();
         switch (skillID) {
             case ESP_BOOSTER:
-//                o1.nValue = si.getValue(indieBooster, slv);
-//                o1.nReason = skillID;
-//                o1.tStart = curTime;
-//                o1.tTerm = si.getValue(time, slv);
-//                tsm.putCharacterStatValue(IndieBooster, o1);
-                o1.nOption = si.getValue(indieBooster, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
+                o1.nValue = si.getValue(indieBooster, slv);
+                o1.nReason = skillID;
+                o1.tStart = curTime;
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBooster, o1);
+//                o1.nOption = si.getValue(indieBooster, slv);
+//                o1.rOption = skillID;
+//                o1.tOption = si.getValue(time, slv);
                 break;
             case MENTAL_SHIELD:
                 o1.nOption = si.getValue(x, slv);
@@ -256,7 +255,7 @@ public class Kinesis extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(NewFlying, o1);
+                tsm.putCharacterStatValue(NewFlying, o1); //38s
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

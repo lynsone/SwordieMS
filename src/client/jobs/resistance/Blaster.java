@@ -9,25 +9,38 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import loaders.SkillData;
-import packet.CField;
 import packet.WvsContext;
 
 import java.util.Arrays;
-import static client.character.skills.CharacterTemporaryStat.*;
+
+import static client.character.skills.CharacterTemporaryStat.Booster;
+import static client.character.skills.CharacterTemporaryStat.IndieStatR;
+import static client.character.skills.CharacterTemporaryStat.RWCylinder;
+import static client.character.skills.SkillStat.time;
+import static client.character.skills.SkillStat.x;
 
 /**
  * Created on 12/14/2017.
  */
 public class Blaster extends Job {
 
+    public static final int SECRET_ASSEMBLY = 30001281;
+
     public static final int REVOLVING_CANNON = 37001001;
     public static final int REVOLVING_CANNON_RELOAD = 37000010;
     public static final int HAMMER_SMASH = 37111000;
     public static final int HAMMER_SMASH_CHARGE = 37110001;
 
+    public static final int ARM_CANNON_BOOST = 37101003;
+    public static final int MAPLE_WARRIOR_BLASTER = 37121006;
+
+    private int[] addedSkills = new int[] {
+            SECRET_ASSEMBLY,
+    };
 
     private int[] buffs = new int[] {
-
+            ARM_CANNON_BOOST,
+            MAPLE_WARRIOR_BLASTER,
     };
     private int ammo = getMaxAmmo();
 
@@ -36,6 +49,13 @@ public class Blaster extends Job {
     public Blaster(Char chr) {
         super(chr);
         updateCylinder();
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     @Override
@@ -77,8 +97,21 @@ public class Blaster extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         switch (skillID) {
-
+            case ARM_CANNON_BOOST:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Booster, o1);
+                break;
+            case MAPLE_WARRIOR_BLASTER:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(x, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
         }
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     @Override

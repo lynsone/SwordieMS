@@ -161,7 +161,7 @@ public class Xenon extends Job {
                 tsm.putCharacterStatValue(IndieDamR, o1);
                 o2.nOption = si.getValue(x, slv);
                 o2.rOption = skillID;
-                o2.tOption = 0;
+                o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(BdR, o2);
                 break;
             case MAPLE_WARRIOR_XENON:

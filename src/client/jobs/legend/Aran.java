@@ -25,6 +25,10 @@ import static client.character.skills.SkillStat.*;
  */
 public class Aran extends Job {
 
+    public static final int COMBAT_STEP = 20001295;
+    public static final int REGAINED_MEMORY = 20000194;
+    public static final int RETURN_TO_RIEN = 20001296;
+
     public static final int POLEARM_BOOSTER = 21001003; //Buff
     public static final int BODY_PRESSURE = 21001008; //Buff (ON/OFF)
 
@@ -43,6 +47,12 @@ public class Aran extends Job {
 
     public static final int MAPLE_WARRIOR_ARAN = 21121000; //Buff
 
+    private int[] addedSkills = new int[] {
+            COMBAT_STEP,
+            REGAINED_MEMORY,
+            RETURN_TO_RIEN,
+    };
+
     private final int[] buffs = new int[] {
             POLEARM_BOOSTER,
             BODY_PRESSURE,
@@ -54,6 +64,13 @@ public class Aran extends Job {
 
     public Aran(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

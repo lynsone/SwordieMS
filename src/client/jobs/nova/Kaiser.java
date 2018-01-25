@@ -28,8 +28,14 @@ import static client.character.skills.SkillStat.*;
  */
 public class Kaiser extends Job {
 
+    public static final int REALIGN_ATTACKER_MODE = 60001217; //Unlimited Duration
+    public static final int REALIGN_DEFENDER_MODE = 60001216; //Unlimited Duration
+    public static final int VERTICAL_GRAPPLE = 60001218;
+    public static final int TRANSFIGURATION = 60000219; //Morph Gauge
+    public static final int DRAGON_LINK = 60001225;
+
     public static final int PIERCING_BLAZE = 61101101; //Special Attack (Stun Debuff)
-    public static final int TEMPEST_BLADES_THREE = 61101002; //Special Buff (w/ Icon) 3
+    public static final int TEMPEST_BLADES_THREE = 61101002; //TODO Special Buff (w/ Icon) 3
     public static final int BLAZE_ON = 61101004; //Buff
 
     public static final int WING_BEAT = 61111100; //Special Attack (Speed Debuff)
@@ -39,13 +45,23 @@ public class Kaiser extends Job {
     public static final int CURSEBITE = 61111003; //Buff
 
     public static final int GIGA_WAVE = 61121100; //Special Attack (Speed Debuff)
-    public static final int INFERNO_BREATH = 61121105; //Special Attack (Flames AoE)
+    public static final int INFERNO_BREATH = 61121105; //Special Attack //TODO (Flames AoE)
     public static final int FINAL_FORM_FOURTH = 61120008; //Buff 4rd Job
-    public static final int TEMPEST_BLADES_FIVE = 61120007; //Special Buff (w/ Icon) 5
+    public static final int TEMPEST_BLADES_FIVE = 61120007; //TODO  Special Buff (w/ Icon) 5
     public static final int GRAND_ARMOR = 61121009; //Buff
     public static final int NOVA_WARRIOR_KAISER = 61121014; //Buff
 
+    private final int[] addedSkills = new int[]{
+            REALIGN_ATTACKER_MODE,
+            REALIGN_DEFENDER_MODE,
+            VERTICAL_GRAPPLE,
+            TRANSFIGURATION,
+            DRAGON_LINK,
+    };
+
     private final int[] buffs = new int[]{
+            REALIGN_ATTACKER_MODE,
+            REALIGN_DEFENDER_MODE,
             TEMPEST_BLADES_THREE,
             BLAZE_ON,
             FINAL_FORM_THIRD,
@@ -59,6 +75,13 @@ public class Kaiser extends Job {
 
     public Kaiser(Char chr) {
         super(chr);
+        for (int id : addedSkills) {
+            if (!chr.hasSkill(id)) {
+                Skill skill = SkillData.getSkillDeepCopyById(id);
+                skill.setCurrentLevel(skill.getMasterLevel());
+                chr.addSkill(skill);
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -74,6 +97,39 @@ public class Kaiser extends Job {
         Summon summon;
         Field field;
         switch (skillID) {
+            case REALIGN_ATTACKER_MODE:
+                o1.nOption = si.getValue(bdR, slv);
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(BdR, o1);
+                o2.nOption = si.getValue(cr, slv);
+                o2.rOption = skillID;
+                o2.tOption = 0;
+                tsm.putCharacterStatValue(CriticalBuff, o2);
+                o3.nOption = si.getValue(padX, slv);
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(PAD, o3);
+                break;
+            case REALIGN_DEFENDER_MODE:
+                o1.nOption = si.getValue(accX, slv);
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(ACC, o1);
+                o2.nOption = si.getValue(mddX, slv);
+                o2.rOption = skillID;
+                o2.tOption = 0;
+                tsm.putCharacterStatValue(MDD, o2);
+                o3.nOption = si.getValue(pddX, slv);
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(PDD, o3);
+                o4.nReason = skillID;
+                o4.nValue = si.getValue(mhpR, slv);
+                o4.tStart = (int) System.currentTimeMillis();
+                o4.tTerm = 0;
+                tsm.putCharacterStatValue(IndieMHPR, o4);
+                break;
             case BLAZE_ON:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
@@ -251,3 +307,6 @@ public class Kaiser extends Job {
         return 0;
     }
 }
+
+
+// TODO  SmashStack is kaiser's Gauge TempStat

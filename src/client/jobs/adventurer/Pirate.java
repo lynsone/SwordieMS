@@ -36,6 +36,7 @@ public class Pirate extends Job {
     //Buccaneer
     public static final int TORNADO_UPPERCUT = 5101012; //Special Attack TODO (Uses Force)
     public static final int KNUCKLE_BOOSTER = 5101006; //Buff
+    public static final int ENERGY_CHARGE = 5100015; //Energy Gauge TODO fix UI + system
 
     public static final int ROLL_OF_THE_DICE_BUCC = 5111007; //Buff
     public static final int ENERGY_BURST = 5111002; //Special Attack  TODO (Uses Force)
@@ -93,6 +94,7 @@ public class Pirate extends Job {
 
     public static final int HIGH_GRAVITY = 5721066; //Buff
     public static final int MAPLE_WARRIOR_JETT = 5721000; //Buff
+
 
     private int[] buffs = new int[]{
             DASH,
@@ -387,7 +389,6 @@ public class Pirate extends Job {
                 AnchorAweigh.setAttackActive(false);
                 c.write(CField.summonedCreated(chr.getId(), AnchorAweigh));
                 break;
-
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }

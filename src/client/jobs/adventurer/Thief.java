@@ -59,7 +59,7 @@ public class Thief extends Job {
 
     public static final int BOOMERANG_STAB = 4221007; //Special Attack (Stun Debuff)
     public static final int MAPLE_WARRIOR_SHAD = 4221000; //Buff
-    public static final int SHADOWER_INSTINCT = 4221013; //Buff
+    public static final int SHADOWER_INSTINCT = 4221013; //Buff //Stacks (Body Count)
     public static final int SUDDEN_RAID_SHAD = 4221010; //Special Attack
 
 
