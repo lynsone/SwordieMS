@@ -157,16 +157,24 @@ public class Demon extends Job {
         Option o3 = new Option();
         switch (skillID) {
             case OVERLOAD_RELEASE:
-                o1.nReason = skillID;
+                int overloadcount = tsm.getOption(OverloadCount).nOption;
+                if(overloadcount > 19) { //20 overload count  for the buff
+/*                o1.nReason = skillID;
                 o1.nValue = si.getValue(x, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieMHPR, o1);
-                o2.nOption = si.getValue(indiePMdR, slv);
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndiePMdR, o2);
-                // TODO  Resets EXCEED to 0
+                tsm.putCharacterStatValue(IndieMHPR, o1);  */
+                    o2.nOption = si.getValue(indiePMdR, slv);
+                    o2.rOption = skillID;
+                    o2.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndiePMdR, o2);
+                    o3.nOption = 1;
+                    o3.rOption = skillID;
+                    o3.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(ExceedOverload, o3);
+                    // TODO  Resets EXCEED to 0
+                    resetExceed(c, tsm);
+                }
                 break;
 
             case BATTLE_PACT_DA:
@@ -286,6 +294,7 @@ public class Demon extends Job {
                         mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }
                 }
+                break;
             case DEMON_CRY:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
@@ -332,38 +341,92 @@ public class Demon extends Job {
                 }
                 break;
 
+
+            case EXCEED_DOUBLE_SLASH_1:
+                handleOverloadCount(31011000, tsm, c);
+                break;
+            case EXCEED_DOUBLE_SLASH_2:
+                handleOverloadCount(31011004, tsm, c);
+                break;
+            case EXCEED_DOUBLE_SLASH_3:
+                handleOverloadCount(31011005, tsm, c);
+                break;
+            case EXCEED_DOUBLE_SLASH_4:
+                handleOverloadCount(31011006, tsm, c);
+                break;
+            case EXCEED_DOUBLE_SLASH_PURPLE:
+                handleOverloadCount(31011007, tsm, c);
+                break;
+
             case EXCEED_DEMON_STRIKE_1:
+                handleOverloadCount(31201000, tsm, c);
+                break;
             case EXCEED_DEMON_STRIKE_2:
+                handleOverloadCount(31201007, tsm, c);
+                break;
             case EXCEED_DEMON_STRIKE_3:
+                handleOverloadCount(31201008, tsm, c);
+                break;
             case EXCEED_DEMON_STRIKE_4:
+                handleOverloadCount(31201009, tsm, c);
+                break;
             case EXCEED_DEMON_STRIKE_PURPLE:
-                handleExceed(skill.getSkillId(), tsm, c);
+                handleOverloadCount(31201010, tsm, c);
+                break;
+
+            case EXCEED_LUNAR_SLASH_1:
+                handleOverloadCount(31211000, tsm, c);
+                break;
+            case EXCEED_LUNAR_SLASH_2:
+                handleOverloadCount(31211007, tsm, c);
+                break;
+            case EXCEED_LUNAR_SLASH_3:
+                handleOverloadCount(31211008, tsm, c);
+                break;
+            case EXCEED_LUNAR_SLASH_4:
+                handleOverloadCount(31211009, tsm, c);
+                break;
+            case EXCEED_LUNAR_SLASH_PURPLE:
+                handleOverloadCount(31211010, tsm, c);
+                break;
+
+            case EXCEED_EXECUTION_1:
+                handleOverloadCount(31221000, tsm, c);
+                break;
+            case EXCEED_EXECUTION_2:
+                handleOverloadCount(31221009, tsm, c);
+                break;
+            case EXCEED_EXECUTION_3:
+                handleOverloadCount(31221010, tsm, c);
+                break;
+            case EXCEED_EXECUTION_4:
+                handleOverloadCount(31221011, tsm, c);
+                break;
+            case EXCEED_EXECUTION_PURPLE:
+                handleOverloadCount(31221012, tsm, c);
                 break;
         }
     }
 
-    // TODO  OverloadCount is the correct TempStat  | Duration gotta be 0
-    public void handleExceed(int skillid, TemporaryStatManager tsm, Client c) {
+    public void handleOverloadCount(int skillid, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         SkillInfo exceedInfo = SkillData.getSkillInfoById(30010230);
         int amount = 1;
-        if(tsm.hasStat(Exceed)){
+        if(tsm.hasStat(OverloadCount)){
+            amount = tsm.getOption(OverloadCount).nOption;
             if(amount < exceedInfo.getValue(x, exceedInfo.getCurrentLevel())){
-                amount = tsm.getOption(Exceed).nOption + 1;
-            } else {
-                amount = tsm.getOption(Exceed).nOption;
+                amount++;
             }
         }
         o.nOption = amount;
         o.rOption = 30010230;
         o.tOption = 0;
-        //o.mOption = amount;
-        tsm.putCharacterStatValue(Exceed, o);
+        tsm.putCharacterStatValue(OverloadCount, o);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     private void resetExceed(Client c, TemporaryStatManager tsm) {
-        tsm.removeStat(Exceed, false);
+        tsm.removeStat(OverloadCount, false);
         c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 

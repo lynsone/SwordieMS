@@ -92,6 +92,8 @@ public class Mechanic extends Job {
         Field field;
         switch (skillID) {
             case HUMANOID_MECH:
+                //TODO
+                break;
             case TANK_MECH:
                 //TODO
                 break;

@@ -460,7 +460,7 @@ public class Warrior extends Job {
                     o3.tOption = t;
                     tsm.putCharacterStatValue(DamR, o3);
                     c.write(WvsContext.temporaryStatSet(tsm));
-                    } else {}
+                    }
                 }
                 break;
             case SPEAR_SWEEP:
@@ -668,8 +668,6 @@ public class Warrior extends Job {
             }
             if(amount < chargeInfo.getValue(z, 1)) {
                 amount++;
-            } else {
-
             }
         }
         lastCharge = skillId;

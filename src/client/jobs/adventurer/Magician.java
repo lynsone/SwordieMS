@@ -16,9 +16,7 @@ import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.Stat;
 import loaders.SkillData;
-import packet.CField;
 import packet.WvsContext;
-import server.EventManager;
 import util.Position;
 import util.Util;
 
@@ -62,6 +60,9 @@ public class Magician extends Job {
     public static final int INFINITY_IL = 2221004;
     public static final int ELQUINES = 2221005;
     public static final int MAPLE_WARRIOR_IL = 2221000;
+    public static final int ARCANE_AIM_FP = 2120010;
+    public static final int ARCANE_AIM_IL = 2220010;
+    public static final int ARCANE_AIM_BISH = 2320011;
 
 
     private final int[] buffs = new int[]{
@@ -106,6 +107,13 @@ public class Magician extends Job {
             skillID = skill.getSkillId();
         }
         handleIgnite(attackInfo, chr, tsm, slv);
+
+        int arcaneAimProp = getArcaneAimProp(chr);
+        if (hasHitMobs && Util.succeedProp(arcaneAimProp)) {
+            handleArcaneAimBishop(2320011, tsm, c);
+            handleArcaneAimFirePoison(2120010, tsm, c);
+            handleArcaneAimIceLightning(2220010, tsm, c);
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -210,6 +218,109 @@ public class Magician extends Job {
                 break;
         }
 
+    }
+
+    private void handleArcaneAimFirePoison(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(2120010);
+        int amount = 1;
+        if (chr.hasSkill(2120010)) {
+            if (tsm.hasStat(ArcaneAim)) {
+                amount = tsm.getOption(ArcaneAim).nOption;
+                if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
+                    amount++;
+                }
+            }
+            o.nOption = amount;
+            o.rOption = 2120010;
+            o.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(ArcaneAim, o);
+            o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
+            o1.rOption = 2120010;
+            o1.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
+            o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
+            o2.rOption = 2120010;
+            o2.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(DamR, o2); //TODO Damage%?
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+    private void handleArcaneAimIceLightning(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(2220010);
+        int amount = 1;
+        if (chr.hasSkill(2220010)) {
+            if (tsm.hasStat(ArcaneAim)) {
+                amount = tsm.getOption(ArcaneAim).nOption;
+                if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
+                    amount++;
+                }
+            }
+            o.nOption = amount;
+            o.rOption = 2220010;
+            o.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(ArcaneAim, o);
+            o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
+            o1.rOption = 2220011;
+            o1.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
+            o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
+            o2.rOption = 2220010;
+            o2.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(DamR, o2); //TODO Damage%?
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+    private void handleArcaneAimBishop(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(2320011);
+        int amount = 1;
+        if (chr.hasSkill(2320011)) {
+            if (tsm.hasStat(ArcaneAim)) {
+                amount = tsm.getOption(ArcaneAim).nOption;
+                if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
+                    amount++;
+                }
+            }
+            o.nOption = amount;
+            o.rOption = 2320011;
+            o.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(ArcaneAim, o);
+            o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
+            o1.rOption = 2320011;
+            o1.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
+            o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
+            o2.rOption = 2320011;
+            o2.tOption = 10; // No Time Variable
+            tsm.putCharacterStatValue(DamR, o2); //TODO Damage%?
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+    private int getArcaneAimProp(Char chr) {
+        if (chr.hasSkill(2120010)) {
+            Skill skill = chr.getSkill(2120010);
+            return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
+        }
+        else if (chr.hasSkill(2220010)) {
+            Skill skill = chr.getSkill(2220010);
+            return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
+        }
+        else if (chr.hasSkill(2320011)) {
+            Skill skill = chr.getSkill(2320011);
+            return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
+        }
+        return 0;
     }
 
     private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm, int slv) {

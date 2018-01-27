@@ -300,16 +300,13 @@ public class NightWalker extends Job {
         if(tsm.hasStat(ElementDarkness)) {
             if (tsm.hasStat(SiphonVitality)) {
                 amount = tsm.getOption(SiphonVitality).nOption;
-                if (amount < siphonInfo.getValue(x, siphonInfo.getCurrentLevel())) { //TODO  add a Max Stacks Method
-                    amount = tsm.getOption(SiphonVitality).nOption + 1;
-                } else {
-                    amount = tsm.getOption(SiphonVitality).nOption;
+                if (amount < getMaxSiphon(chr)) {
+                    amount++;
                 }
             }
             o.nOption = amount;
             o.rOption = 14120009;
             o.tOption = siphonInfo.getValue(time, siphonInfo.getCurrentLevel());
-            o.xOption = amount * siphonInfo.getValue(x, siphonInfo.getCurrentLevel()); //max Stack
             tsm.putCharacterStatValue(SiphonVitality, o);
             o1.nOption = (amount * siphonInfo.getValue(y, siphonInfo.getCurrentLevel()));
             o1.rOption = 14120009;
@@ -317,6 +314,14 @@ public class NightWalker extends Job {
             tsm.putCharacterStatValue(MaxHP, o1);
             c.write(WvsContext.temporaryStatSet(tsm));
         }
+    }
+
+    private int getMaxSiphon(Char chr) { //TODO Doesn't function correctly      stays at 5 stacks
+        Skill skill = null;
+        if (chr.hasSkill(14120009)) {
+            skill = chr.getSkill(14120009);
+        }
+        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
 

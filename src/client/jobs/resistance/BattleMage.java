@@ -92,7 +92,10 @@ public class BattleMage extends Job {
             case CONDEMNATION_I:
             case CONDEMNATION_II:
             case CONDEMNATION_III:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(BMageDeath, o1); //TODO  Reaper = TempStat or Summon?
                 break;
 
             case STAFF_BOOST:

@@ -132,7 +132,7 @@ public class Pirate extends Job {
             MAPLE_WARRIOR_JETT,
     };
 
-
+    
     public Pirate(Char chr) {
         super(chr);
     }
