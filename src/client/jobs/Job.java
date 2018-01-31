@@ -107,5 +107,6 @@ public abstract class Job {
     public void handleLevelUp() {
         chr.addStat(Stat.mhp, 500);
         chr.addStat(Stat.mmp, 500);
+        chr.addStat(Stat.ap, 5);
     }
 }

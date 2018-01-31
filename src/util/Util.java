@@ -14,6 +14,16 @@ public class Util {
         return (int) System.currentTimeMillis();
     }
 
+    public static int getRandom(int inclBound) {
+        Random random = new Random();
+        return random.nextInt(inclBound + 1);
+    }
+
+    public static boolean succeedProp(int chance, int max) {
+        Random random = new Random();
+        return random.nextInt(max) < chance;
+    }
+
     public static boolean succeedProp(int chance) {
         Random random = new Random();
         return random.nextInt(100) < chance;

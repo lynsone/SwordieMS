@@ -4,6 +4,7 @@ package constants;
  * Created on 1/23/2018.
  */
 public class GameConstants {
+    public static final long MAX_MONEY = 10_000_000_000L;
     public static long[] charExp = new long[251];
 
     static {

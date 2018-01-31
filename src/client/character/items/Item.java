@@ -8,6 +8,7 @@ import enums.ScrollStat;
 import jdk.nashorn.internal.runtime.ScriptObject;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import server.Server;
 import util.FileTime;
 
 import javax.persistence.*;
@@ -68,6 +69,14 @@ public class Item implements Serializable {
         this.inventoryId = inventoryId;
     }
 
+    public void updateDB() {
+        Session session = Server.getInstance().getNewDatabaseSession();
+        Transaction tx = session.beginTransaction();
+        updateDB(session, tx);
+        tx.commit();
+        session.close();
+    }
+
     public void updateDB(Session session, Transaction tx) {
         getDateExpire().updateDB(session, tx);
         session.saveOrUpdate(this);
@@ -89,6 +98,10 @@ public class Item implements Serializable {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public void drop() {
+        setBagIndex(0);
     }
 
     public enum Type {
@@ -142,7 +155,7 @@ public class Item implements Serializable {
     }
 
     public long getCashItemSerialNumber() {
-        return cashItemSerialNumber;
+        return getId();
     }
 
     public FileTime getDateExpire() {
@@ -217,7 +230,8 @@ public class Item implements Serializable {
 
     @Override
     public String toString() {
-        return "Id: " + getItemId() + ", Qty: " + getQuantity();
+        return "Id: " + getId() + ", ItemId: " + getItemId() + ", Qty: " + getQuantity() + ", InvType: " + getInvType()
+                + ", BagIndex: " + getBagIndex();
     }
 
 }

@@ -8,10 +8,12 @@ import client.field.Field;
 import client.field.Portal;
 import client.life.Life;
 import client.life.Mob;
+import connection.OutPacket;
 import constants.JobConstants.JobEnum;
 import enums.ForceAtomEnum;
 import enums.InvType;
 import enums.Stat;
+import handling.OutHeader;
 import loaders.*;
 import packet.CField;
 import packet.Stage;
@@ -211,6 +213,7 @@ public class AdminCommands {
                 chr.setStat(Stat.level, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.level, (byte) num);
+                stats.put(Stat.exp, (long) 0);
                 chr.getClient().write(WvsContext.statChanged(stats, true));
             }
         }
@@ -357,7 +360,7 @@ public class AdminCommands {
                 } else {
                     Map<Integer, String> map = StringData.getItemStringByName(query);
                     if(map.size() == 0) {
-                        chr.chatMessage(YELLOW, "No skills found for query " + query);
+                        chr.chatMessage(YELLOW, "No items found for query " + query);
                     }
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
                         id = entry.getKey();
@@ -367,6 +370,13 @@ public class AdminCommands {
                     }
                 }
             }
+        }
+    }
+
+    public static class Mesos extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            long mesos = Long.parseLong(args[1]);
+           chr.addMoney(mesos);
         }
     }
 }

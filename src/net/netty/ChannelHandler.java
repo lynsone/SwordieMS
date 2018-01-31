@@ -80,7 +80,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("SkillID: " + skillID);
                     c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
                     c.getChr().getJobHandler().handleSkill(c, skillID, slv, inPacket);
-                    WvsContext.dispose(c, c.getChr());
+                    WvsContext.dispose(c.getChr());
                     break;
                 case USER_SKILL_CANCEL_REQUEST:
                     WorldHandler.handleTemporaryStatResetRequest(c, inPacket);
@@ -153,6 +153,15 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_CONSUME_CASH_ITEM_USE_REQUEST:
                     WorldHandler.handleUserConsumeCashItemUseRequest(c, inPacket);
                     break;
+                case USER_ITEM_OPTION_UPGRADE_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserItemOptionUpgradeItemUseRequest(c, inPacket);
+                    break;
+                case USER_ADDITIONAL_OPT_UPGRADE_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserAdditionalOptUpgradeItemUseRequest(c, inPacket);
+                    break;
+                case USER_ITEM_RELEASE_REQUEST:
+                    WorldHandler.handleUserItemReleaseRequest(c, inPacket);
+                    break;
                 case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);
                     break;
@@ -192,8 +201,17 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_CHARACTER_INFO_REQUEST:
                     WorldHandler.handleUserCharacterInfoRequest(c, inPacket);
                     break;
+                case USER_PORTAL_SCROLL_USE_REQUEST:
+                    WorldHandler.handleUserPortalScrollUseRequest(c, inPacket);
+                    break;
                 case USER_TRANSFER_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
+                    break;
+                case USER_UPGRADE_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserUpgradeItemUseRequest(c, inPacket);
+                    break;
+                case USER_UPGRADE_ASSIST_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserUpgradeAssistItemUseRequest(c, inPacket);
                     break;
                 case USER_TRANSFER_CHANNEL_REQUEST:
                     WorldHandler.handleChangeChannelRequest(c, inPacket);
@@ -227,9 +245,6 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case MOB_APPLY_CTRL:
 //                    WorldHandler.handleMobApplyCtrl(c, inPacket);
-                    break;
-                case USER_PORTAL_SCROLL_USE_REQUEST:
-                    WorldHandler.handleUserPortalScrollUseRequest(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

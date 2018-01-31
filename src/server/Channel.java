@@ -1,6 +1,7 @@
 package server;
 
 import client.Account;
+import client.Client;
 import client.field.Field;
 import constants.ServerConstants;
 import loaders.FieldData;
@@ -21,7 +22,7 @@ public class Channel {
     private int gaugePx, worldId, channelId;
     private boolean adultChannel;
     private List<Field> fields;
-    private Map<Integer, Tuple<Byte, Account>> transfers;
+    private Map<Integer, Tuple<Byte, Client>> transfers;
 
     private Channel(String name, int gaugePx, World world, int channelId, boolean adultChannel) {
         this.name = name;
@@ -99,15 +100,15 @@ public class Channel {
         return newField;
     }
 
-    public Map<Integer, Tuple<Byte, Account>> getTransfers() {
+    public Map<Integer, Tuple<Byte, Client>> getTransfers() {
         if(transfers == null) {
             transfers = new HashMap<>();
         }
         return transfers;
     }
 
-    public void addClientInTransfer(byte channelId, int characterId, Account account) {
-        getTransfers().put(characterId, new Tuple<>(channelId, account));
+    public void addClientInTransfer(byte channelId, int characterId, Client client) {
+        getTransfers().put(characterId, new Tuple<>(channelId, client));
     }
 
     public void removeClientFromTransfer(int characterId) {

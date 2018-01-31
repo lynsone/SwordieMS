@@ -1,9 +1,12 @@
 package server;
 
 import client.Account;
+import client.Client;
 import client.character.Char;
+import client.character.items.Equip;
 import constants.ServerConfig;
 import constants.ServerConstants;
+import loaders.ItemData;
 import loaders.SkillStringInfo;
 import loaders.StringData;
 import net.crypto.MapleCrypto;
@@ -27,7 +30,7 @@ import java.util.*;
 /**
  * Created on 2/18/2017.
  */
-public class Server extends Properties{
+public class Server extends Properties {
 
     private static final Server server = new Server();
 
@@ -55,7 +58,7 @@ public class Server extends Properties{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for(String s : properties.stringPropertyNames()) {
+        for (String s : properties.stringPropertyNames()) {
             System.setProperty(s, properties.getProperty(s));
         }
 
@@ -67,7 +70,7 @@ public class Server extends Properties{
 
         long startNow = System.currentTimeMillis();
         DatabaseManager.init();
-        System.out.println("[Info] Finished loading Hibernate in " +  (System.currentTimeMillis() - startNow) +  "ms");
+        System.out.println("[Info] Finished loading Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
 
         try {
             loadWzData();
@@ -81,39 +84,40 @@ public class Server extends Properties{
         new Thread(new LoginAcceptor()).start();
         worldList.add(new World(1, "Je Moeder", 3));
 
-        for(World world : getWorlds()) {
-            for(Channel channel : world.getChannels()) {
+        for (World world : getWorlds()) {
+            for (Channel channel : world.getChannels()) {
                 ChannelAcceptor ca = new ChannelAcceptor();
                 ca.channel = channel;
                 new Thread(ca).start();
             }
         }
         long end = System.currentTimeMillis();
-        System.out.println("[Info] Finished loading server in " +  (end - start) +  "ms");
+        System.out.println("[Info] Finished loading server in " + (end - start) + "ms");
     }
 
     public void loadWzData() throws IllegalAccessException, InvocationTargetException {
         String datFolder = ServerConstants.DAT_DIR;
-        for(Class c : DataClasses.dataClasses) {
-            for(Method method : c.getMethods()) {
+        for (Class c : DataClasses.dataClasses) {
+            for (Method method : c.getMethods()) {
                 String name;
                 Loader annotation = method.getAnnotation(Loader.class);
-                if(annotation != null) {
+                if (annotation != null) {
                     name = annotation.varName();
                     File file = new File(datFolder, name + ".dat");
                     boolean exists = file.exists();
                     long start = System.currentTimeMillis();
                     method.invoke(c, file, exists);
                     long total = System.currentTimeMillis() - start;
-                    if(exists) {
+                    if (exists) {
                         System.out.println("[Info] Took " + total + "ms to load from " + file.getName());
                     } else {
-                        System.out.println("[Info] Took " + total +"ms to load using " + method.getName());
+                        System.out.println("[Info] Took " + total + "ms to load using " + method.getName());
                     }
                 }
             }
         }
     }
+
     public static void main(String[] args) {
         getInstance().init();
     }
@@ -130,9 +134,9 @@ public class Server extends Properties{
         return accounts;
     }
 
-    public Tuple<Byte, Account> getChannelFromTransfer(int charId, int worldId) {
-        for(Channel c : getWorldById(worldId).getChannels()) {
-            if(c.getTransfers().containsKey(charId)) {
+    public Tuple<Byte, Client> getChannelFromTransfer(int charId, int worldId) {
+        for (Channel c : getWorldById(worldId).getChannels()) {
+            if (c.getTransfers().containsKey(charId)) {
                 return c.getTransfers().get(charId);
             }
         }

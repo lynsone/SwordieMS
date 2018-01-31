@@ -24,8 +24,8 @@ import static enums.MessageType.*;
  */
 public class WvsContext {
 
-    public static void dispose(Client c, Char chr) {
-        c.write(statChanged(new HashMap<>(), true, (byte) chr.getAvatarData().getCharacterStat().getMixBaseHairColor(),
+    public static void dispose(Char chr) {
+        chr.write(statChanged(new HashMap<>(), true, (byte) chr.getAvatarData().getCharacterStat().getMixBaseHairColor(),
                 (byte) chr.getAvatarData().getCharacterStat().getMixAddHairColor(), (byte) chr.getAvatarData().getCharacterStat().getMixHairBaseProb(),
                 (byte) 0, false, 0 , 0));
     }
@@ -138,7 +138,7 @@ public class WvsContext {
         outPacket.encodeByte(invType.getVal());
         outPacket.encodeShort(oldPos);
         switch(type) {
-            case 0: // new
+            case 0: // new or update
                 item.encode(outPacket);
                 break;
             case 1:
@@ -166,7 +166,7 @@ public class WvsContext {
             case 8:
                 outPacket.encodeShort(bagPos);
                 break;
-            case 9:
+            case 9: // update?
                 item.encode(outPacket);
                 break;
             case 10:

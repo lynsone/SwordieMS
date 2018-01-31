@@ -34,11 +34,16 @@ public enum ScrollStat {
     forceUpgrade,
     cursed,
     maxSuperiorEqp,
-    ;
+    noNegative;
+
     public static ScrollStat getScrollStatByString(String name) {
         return Arrays.stream(values()).filter(ss -> ss.toString().equalsIgnoreCase(name))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static EquipBaseStat[] getRandStats() {
+        return new EquipBaseStat[]{iStr, iDex, iInt, iLuk, iACC, iEVA, iPAD, iMAD, iPDD, iMDD};
     }
 
     public EquipBaseStat getEquipStat() {

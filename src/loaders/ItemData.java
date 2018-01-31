@@ -2,12 +2,17 @@ package loaders;
 
 import client.character.items.Equip;
 import client.character.items.Item;
+import client.character.items.ItemOption;
+import client.character.items.ItemState;
 import constants.ServerConstants;
 import enums.InvType;
 import enums.ScrollStat;
 import enums.SpecStat;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import server.Server;
 import util.*;
 
 import java.io.*;
@@ -26,6 +31,7 @@ public class ItemData {
     public static List<Equip> equips = new ArrayList<>();
     public static List<Integer> equipItemIds = new ArrayList<>();
     public static List<ItemInfo> items = new ArrayList<>();
+    public static List<ItemOption> itemOptions = new ArrayList<>();
 
     //    @Loader(varName = "itemIds")
     public static void loadItemIDs() {
@@ -67,15 +73,17 @@ public class ItemData {
      * <code>itemId</code>.
      */
     public static Equip getEquipDeepCopyFromId(int itemId) {
-        Equip ret = getEquipById(itemId);
+        Equip e = getEquipById(itemId);
+        Equip ret = e == null ? null : e.deepCopy();
         if (ret != null) {
-            ret = ret.deepCopy();
             ret.setQuantity(1);
+            ret.setCuttable((short) -1);
+            ret.setItemState((short) ItemState.ENHANCABLE.getVal());
         }
         return ret;
     }
 
-    public static Equip getEquipById(int itemId) {
+    private static Equip getEquipById(int itemId) {
         return getEquips().stream().filter(eq -> eq.getItemId() == itemId).findFirst().orElse(getEquipFromFile(itemId));
     }
 
@@ -120,7 +128,7 @@ public class ItemData {
             short iJump = dataInputStream.readShort();
             short damR = dataInputStream.readShort();
             short statR = dataInputStream.readShort();
-            short tuc = dataInputStream.readShort();
+            short ruc = dataInputStream.readShort();
             int charmEXP = dataInputStream.readInt();
             int setItemID = dataInputStream.readInt();
             int price = dataInputStream.readInt();
@@ -144,14 +152,14 @@ public class ItemData {
             int fixedGrade = dataInputStream.readInt();
             int specialGrade = dataInputStream.readInt();
             equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                    null, new FileTime(-1), 0, (short) 0, (short) 0, iStr, iDex, iInt,
+                    null, new FileTime(-1), 0, ruc, (short) 0, iStr, iDex, iInt,
                     iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
                     iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
                     (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
-                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
+                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
                     rLuk, rLevel, rJob, rPop, cash,
                     islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
-                    notSale, attackSpeed, price, tuc, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
+                    notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
             equips.add(equip);
         } catch (IOException e) {
             e.printStackTrace();
@@ -193,7 +201,7 @@ public class ItemData {
                 dataOutputStream.writeShort(equip.getiJump());
                 dataOutputStream.writeShort(equip.getDamR());
                 dataOutputStream.writeShort(equip.getStatR());
-                dataOutputStream.writeShort(equip.getTuc());
+                dataOutputStream.writeShort(equip.getRuc());
                 dataOutputStream.writeInt(equip.getCharmEXP());
                 dataOutputStream.writeInt(equip.getSetItemID());
                 dataOutputStream.writeInt(equip.getPrice());
@@ -255,7 +263,7 @@ public class ItemData {
                     short iJump = dataInputStream.readShort();
                     short damR = dataInputStream.readShort();
                     short statR = dataInputStream.readShort();
-                    short tuc = dataInputStream.readShort();
+                    short ruc = dataInputStream.readShort();
                     int charmEXP = dataInputStream.readInt();
                     int setItemID = dataInputStream.readInt();
                     int price = dataInputStream.readInt();
@@ -279,14 +287,14 @@ public class ItemData {
                     int fixedGrade = dataInputStream.readInt();
                     int specialGrade = dataInputStream.readInt();
                     Equip equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                            null, new FileTime(-1), 0, (short) 0, (short) 0, iStr, iDex, iInt,
+                            null, new FileTime(-1), 0, ruc, (short) 0, iStr, iDex, iInt,
                             iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
                             iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
                             (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
-                            (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
+                            (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
                             rLuk, rLevel, rJob, rPop, cash,
                             islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
-                            notSale, attackSpeed, price, tuc, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
+                            notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
                     equips.add(equip);
                 }
             } catch (IOException e) {
@@ -336,7 +344,7 @@ public class ItemData {
                         int incCraft = 0;
                         int incSpeed = 0;
                         int incJump = 0;
-                        int tuc = 0;
+                        int ruc = 0;
                         int price = 0;
                         int attackSpeed = 0;
                         int damR = 0;
@@ -456,9 +464,9 @@ public class ItemData {
                             if (hasstatR) {
                                 statR = Integer.parseInt(attributes.get("value"));
                             }
-                            boolean hastuc = attributes.get("name").equalsIgnoreCase("tuc");
-                            if (hastuc) {
-                                tuc = Integer.parseInt(attributes.get("value"));
+                            boolean hasruc = attributes.get("name").equalsIgnoreCase("tuc");
+                            if (hasruc) {
+                                ruc = Integer.parseInt(attributes.get("value"));
                             }
                             boolean hassetItemID = attributes.get("name").equalsIgnoreCase("setItemID");
                             if (hassetItemID) {
@@ -528,20 +536,18 @@ public class ItemData {
                             }
                         }
                         Equip equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                                null, new FileTime(-1), 0, (short) 0, (short) 0, (short) incStr, (short) incDex, (short) incInt,
+                                null, new FileTime(-1), 0, (short) ruc, (short) 0, (short) incStr, (short) incDex, (short) incInt,
                                 (short) incLuk, (short) incMHP, (short) incMMP, (short) incPAD, (short) incMAD, (short) incPDD, (short) incMDD, (short) incACC, (short) incEVA, (short) incCraft,
                                 (short) incSpeed, (short) incJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
                                 (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) damR, (short) statR, (short) 0, (short) 0,
-                                (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) reqStr, (short) reqDex, (short) reqInt,
+                                (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) reqStr, (short) reqDex, (short) reqInt,
                                 (short) reqLuk, (short) reqLevel, (short) reqJob, (short) reqPop, cash,
                                 islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
-                                notSale, attackSpeed, price, tuc, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
+                                notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
                         equips.add(equip);
                     }
-
                 }
             }
-
         }
     }
 
@@ -833,7 +839,6 @@ public class ItemData {
                                 case "incCraft":
                                 case "reqEquipLevelMin":
                                 case "incRandVol":
-                                case "noNegative":
                                 case "incPVPDamage":
                                 case "successRates":
                                 case "enchantCategory":
@@ -927,6 +932,9 @@ public class ItemData {
                                     break;
                                 case "noCursed":
                                     item.setNoCursed(Integer.parseInt(value) != 0);
+                                    break;
+                                case "noNegative":
+                                    item.putScrollStat(noNegative, Integer.parseInt(value));
                                     break;
                                 case "success":
                                     item.putScrollStat(success, Integer.parseInt(value));
@@ -1090,29 +1098,104 @@ public class ItemData {
     }
 
     public static Item getItemDeepCopy(int id) {
-        ItemInfo ii = getItemByID(id);
+        return getDeepCopyByItemInfo(getItemByID(id));
+    }
+
+    public static ItemInfo getItemByID(int itemID) {
+        ItemInfo ii =  getItems().stream().filter(i -> i.getItemId() == itemID).
+                findFirst().
+                orElse(null);
         if(ii == null) {
-            File file = new File(ServerConstants.DAT_DIR + "\\items\\" + id + ".dat");
+            File file = new File(ServerConstants.DAT_DIR + "\\items\\" + itemID + ".dat");
             if(!file.exists()) {
                 return null;
             } else {
                 ii = loadItemByFile(file);
             }
         }
-        return getDeepCopyByItemInfo(ii);
-    }
-
-    public static ItemInfo getItemByID(int itemID) {
-        return getItems().stream().filter(i -> i.getItemId() == itemID).findFirst().orElse(null);
+        return ii;
     }
 
     public static List<Equip> getEquips() {
         return equips;
     }
 
-    public static void init() {
-        for (Equip equip : getEquips()) {
-            equipItemIds.add(equip.getItemId());
+    public static void loadItemOptionsFromWZ() {
+        String wzDir = ServerConstants.WZ_DIR + "\\Item.wz";
+        String itemOptionDir = wzDir + "\\ItemOption.img.xml";
+        File file = new File(itemOptionDir);
+        Document doc = XMLApi.getRoot(file);
+        Node node = doc;
+        List<Node> nodes = XMLApi.getAllChildren(node);
+        for (Node mainNode : XMLApi.getAllChildren(nodes.get(0))) {
+            ItemOption io = new ItemOption();
+            String nodeName = XMLApi.getNamedAttribute(mainNode, "name");
+            io.setId(Integer.parseInt(nodeName));
+            int optionType = 0;
+            Node typeNode = XMLApi.getFirstChildByNameBF(mainNode, "optionType");
+            if(typeNode != null) {
+                optionType = Integer.parseInt(XMLApi.getNamedAttribute(typeNode, "value"));
+            }
+            int weight = 0;
+            Node weightNode = XMLApi.getFirstChildByNameBF(mainNode, "weight");
+            if(weightNode != null) {
+                weight = Integer.parseInt(XMLApi.getNamedAttribute(weightNode, "value"));
+            }
+            int reqLevel = 0;
+            Node reqLevelNode = XMLApi.getFirstChildByNameBF(mainNode, "reqLevel");
+            if(reqLevelNode != null) {
+                reqLevel = Integer.parseInt(XMLApi.getNamedAttribute(reqLevelNode, "value"));
+            }
+            io.setOptionType(optionType);
+            io.setWeight(weight);
+            io.setReqLevel(reqLevel);
+            if(weight == 0) {
+                io.setWeight(1);
+            }
+            getItemOptions().add(io);
+        }
+    }
+
+    public static List<ItemOption> getItemOptions() {
+        return itemOptions;
+    }
+
+    public static void saveItemOptions(String dir) {
+        File file = new File(dir + "\\itemOptions.dat");
+        try {
+            DataOutputStream dos = new DataOutputStream(new FileOutputStream(file));
+            dos.writeInt(getItemOptions().size());
+            for(ItemOption io : getItemOptions()) {
+                dos.writeInt(io.getId());
+                dos.writeInt(io.getOptionType());
+                dos.writeInt(io.getWeight());
+                dos.writeInt(io.getReqLevel());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Loader(varName = "itemOptions")
+    public static void loadItemOptions(File file, boolean exists) {
+        if(!exists) {
+            loadItemOptionsFromWZ();
+            saveItemOptions(ServerConstants.DAT_DIR);
+        } else {
+            try {
+                DataInputStream dis = new DataInputStream(new FileInputStream(file));
+                int size = dis.readInt();
+                for (int i = 0; i < size; i++) {
+                    ItemOption io = new ItemOption();
+                    io.setId(dis.readInt());
+                    io.setOptionType(dis.readInt());
+                    io.setWeight(dis.readInt());
+                    io.setReqLevel(dis.readInt());
+                    getItemOptions().add(io);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1121,10 +1204,15 @@ public class ItemData {
         saveEquips(ServerConstants.DAT_DIR + "\\equips");
         loadItemsFromWZ();
         saveItems(ServerConstants.DAT_DIR + "\\items");
+        loadItemOptionsFromWZ();
+        saveItemOptions(ServerConstants.DAT_DIR);
     }
 
     public static void main(String[] args) {
-        generateDatFiles();
+        loadItemOptionsFromWZ();
+        saveItemOptions(ServerConstants.DAT_DIR);
+        loadItemOptions(new File(ServerConstants.DAT_DIR + "\\itemOptions.dat"), true);
+        System.out.println(getItemOptions());
     }
 
     public static List<ItemInfo> getItems() {

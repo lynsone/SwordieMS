@@ -80,6 +80,7 @@ public class Inventory {
     public void addItem(Item item) {
         if(getItems().size() < getSlots()) {
             getItems().add(item);
+            item.setInvType(getType());
         }
     }
 

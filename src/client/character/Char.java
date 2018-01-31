@@ -106,8 +106,6 @@ public class Char {
     @Transient
     private List<FriendRecord> friends;
     @Transient
-    private long money;
-    @Transient
     private List<ExpConsumeItem> expConsumeItems;
     @Transient
     private List<MonsterBattleMobInfo> monsterBattleMobInfos;
@@ -288,6 +286,9 @@ public class Char {
                 item.setBagIndex(inventory.getFirstOpenSlot());
             }
             inventory.addItem(item);
+            if(item.getId() == 0) {
+                item.updateDB();
+            }
         }
     }
 
@@ -511,28 +512,28 @@ public class Char {
         }
         if (mask.isInMask(DBChar.ItemSlotConsume)) {
             for (Item item : getConsumeInventory().getItems()) {
-                outPacket.encodeShort(item.getBagIndex());
+                outPacket.encodeByte(item.getBagIndex());
                 item.encode(outPacket);
             }
             outPacket.encodeByte(0);
         }
         if (mask.isInMask(DBChar.ItemSlotInstall)) {
             for (Item item : getInstallInventory().getItems()) {
-                outPacket.encodeShort(item.getBagIndex());
+                outPacket.encodeByte(item.getBagIndex());
                 item.encode(outPacket);
             }
             outPacket.encodeByte(0);
         }
         if (mask.isInMask(DBChar.ItemSlotEtc)) {
             for (Item item : getEtcInventory().getItems()) {
-                outPacket.encodeShort(item.getBagIndex());
+                outPacket.encodeByte(item.getBagIndex());
                 item.encode(outPacket);
             }
             outPacket.encodeByte(0);
         }
         if (mask.isInMask(DBChar.ItemSlotCash)) {
             for (Item item : getConsumeInventory().getItems()) {
-                outPacket.encodeShort(item.getBagIndex());
+                outPacket.encodeByte(item.getBagIndex());
                 item.encode(outPacket);
             }
             outPacket.encodeByte(0);
@@ -1125,11 +1126,7 @@ public class Char {
     }
 
     public long getMoney() {
-        return money;
-    }
-
-    public void setMoney(long money) {
-        this.money = money;
+        return getAvatarData().getCharacterStat().getMoney();
     }
 
     public List<ExpConsumeItem> getExpConsumeItems() {
@@ -1363,6 +1360,31 @@ public class Char {
         setStat(charStat, getStat(charStat) + amount);
     }
 
+    /**
+     * Adds a certain amount of money to the current character. Also sends the packet to update the client's state.
+     * @param amount The amount of money to add. May be negative.
+     */
+    public void addMoney(long amount) {
+        CharacterStat cs = getAvatarData().getCharacterStat();
+        long money = cs.getMoney();
+        long newMoney = money + amount;
+        if(newMoney >= 0) {
+            newMoney = Math.min(GameConstants.MAX_MONEY, newMoney);
+            Map<Stat, Object> stats = new HashMap<>();
+            cs.setMoney(newMoney);
+            stats.put(Stat.money, newMoney);
+            write(WvsContext.statChanged(stats, true));
+        }
+    }
+
+    /**
+     * The same as addMoney, but negates the amount.
+     * @param amount The money to deduct. May be negative.
+     */
+    public void deductMoney(long amount) {
+        addMoney(-amount);
+    }
+
     public Position getOldPosition() {
         return oldPosition;
     }
@@ -1478,7 +1500,7 @@ public class Char {
         while(newExp > GameConstants.charExp[level]) {
             newExp -= GameConstants.charExp[level];
             addStat(Stat.level, 1);
-            stats.put(Stat.level, getStat(Stat.level));
+            stats.put(Stat.level, (byte) getStat(Stat.level));
             getJobHandler().handleLevelUp();
             level++;
         }

@@ -9,10 +9,7 @@ import client.life.*;
 import connection.OutPacket;
 import constants.ItemConstants;
 import constants.SkillConstants;
-import enums.ChatType;
-import enums.LeaveType;
-import enums.MobStat;
-import enums.Stat;
+import enums.*;
 import handling.OutHeader;
 import handling.handlers.PsychicLock;
 import util.Position;
@@ -20,6 +17,7 @@ import util.Rect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 public class CField {
 
@@ -647,6 +645,71 @@ public class CField {
         outPacket.encodeInt(13); // nFarmSlotExtend
         outPacket.encodeInt(13); // nFarmLockerSlotCount
         // End FarmUserInfo::Decode
+
+        return outPacket;
+    }
+
+    public static OutPacket showItemUpgradeEffect(int charID, boolean success, boolean enchantDlg, int uItemID, int eItemID) {
+        OutPacket outPacket = new OutPacket(OutHeader.SHOW_ITEM_UPGRADE_EFFECT);
+
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeByte(success);
+        outPacket.encodeByte(enchantDlg);
+        outPacket.encodeInt(uItemID);
+        outPacket.encodeInt(eItemID);
+
+        outPacket.encodeInt(0);
+        outPacket.encodeByte(0);
+        outPacket.encodeByte(0);
+
+        return outPacket;
+    }
+
+    public static OutPacket showItemReleaseEffect(int charID, short pos, boolean bonus) {
+        OutPacket outPacket = new OutPacket(OutHeader.SHOW_ITEM_RELEASE_EFFECT);
+
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeShort(pos);
+        outPacket.encodeByte(bonus);
+
+        return outPacket;
+    }
+
+    public static OutPacket hyperUpgradeDisplay(Equip equip, boolean downgradeable, long meso, long beforeMVP, int successChance,
+                                                int destroyChance, boolean chanceTime, int flag) {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+
+        outPacket.encodeByte(EquipmentEnchantType.HyperUpgradeDisplay.getVal());
+        outPacket.encodeByte(downgradeable);
+        outPacket.encodeLong(meso);
+        outPacket.encodeLong(beforeMVP);
+        outPacket.encodeInt(successChance);
+        outPacket.encodeInt(destroyChance);
+        outPacket.encodeByte(chanceTime);
+        outPacket.encodeInt(flag);
+        TreeMap<EnchantStat, Integer> vals =  equip.getHyperUpgradeStats();
+        int mask = 0;
+        for(EnchantStat es : vals.keySet()) {
+            mask |= es.getVal();
+        }
+        outPacket.encodeInt(mask);
+        vals.forEach((es, val) -> outPacket.encodeInt(val));
+        // TODO incomplete
+
+        return outPacket;
+    }
+
+    public static OutPacket redCubeResult(int charID, boolean upgrade, int cubeID, int ePos, Equip equip) {
+        OutPacket outPacket = new OutPacket(OutHeader.RED_CUBE_RESULT);
+
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeByte(upgrade);
+        outPacket.encodeInt(cubeID);
+        outPacket.encodeInt(ePos);
+        equip.encode(outPacket);
 
         return outPacket;
     }

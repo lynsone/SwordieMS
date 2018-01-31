@@ -1,15 +1,19 @@
 package client.character.items;
 
 import connection.OutPacket;
+import constants.ItemConstants;
+import enums.EnchantStat;
 import enums.EquipBaseStat;
 import enums.InvType;
+import enums.ItemGrade;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.annotations.Cascade;
 import util.FileTime;
+import util.Util;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created on 11/23/2017.
@@ -23,6 +27,7 @@ public class Equip extends Item {
     @Column(name = "title")
     private String title;
     @JoinColumn(name = "equippedDate")
+    @Cascade(value = org.hibernate.annotations.CascadeType.MERGE)
     @OneToOne
     private FileTime equippedDate = new FileTime();
     @Column(name = "prevBonusExpRate")
@@ -101,8 +106,6 @@ public class Equip extends Item {
     private short exGradeOption;
     @Column(name = "itemState")
     private short itemState;
-    @Column(name = "grade")
-    private short grade;
     @Column(name = "chuc")
     private short chuc;
     @Column(name = "soulOptionId")
@@ -143,8 +146,6 @@ public class Equip extends Item {
     private int attackSpeed;
     @Column(name = "price")
     private int price;
-    @Column(name = "tuc")
-    private int tuc;
     @Column(name = "charmEXP")
     private int charmEXP;
     @Column(name = "expireOnLogout")
@@ -173,10 +174,10 @@ public class Equip extends Item {
                  short levelUpType, short level, short exp, short durability, short iuc, short iPvpDamage,
                  short iReduceReq, short specialAttribute, short durabilityMax, short iIncReq, short growthEnchant,
                  short psEnchant, short bdr, short imdr, short damR, short statR, short cuttable, short exGradeOption,
-                 short itemState, short grade, short chuc, short soulOptionId, short soulSocketId, short soulOption,
+                 short itemState, short chuc, short soulOptionId, short soulSocketId, short soulOption,
                  short rStr, short rDex, short rInt, short rLuk, short rLevel, short rJob, short rPop, boolean isCash,
                  String iSlot, String vSlot, int fixedGrade, List<Integer> options, int specialGrade, boolean fixedPotential,
-                 boolean tradeBlock, boolean only, boolean notSale, int attackSpeed, int price, int tuc, int charmEXP,
+                 boolean tradeBlock, boolean only, boolean notSale, int attackSpeed, int price, int charmEXP,
                  boolean expireOnLogout, int setItemID, boolean exItem, boolean hasEquipTradeBlock, String owner) {
         super(itemId, bagIndex, cashItemSerialNumber, dateExpire, InvType.EQUIP, isCash, Type.EQUIP);
         this.serialNumber = serialNumber;
@@ -220,7 +221,6 @@ public class Equip extends Item {
         this.cuttable = cuttable;
         this.exGradeOption = exGradeOption;
         this.itemState = itemState;
-        this.grade = grade;
         this.chuc = chuc;
         this.soulOptionId = soulOptionId;
         this.soulSocketId = soulSocketId;
@@ -243,7 +243,6 @@ public class Equip extends Item {
         this.notSale = notSale;
         this.attackSpeed = attackSpeed;
         this.price = price;
-        this.tuc = tuc;
         this.charmEXP = charmEXP;
         this.expireOnLogout = expireOnLogout;
         this.setItemID = setItemID;
@@ -295,7 +294,6 @@ public class Equip extends Item {
         ret.cuttable = cuttable;
         ret.exGradeOption = exGradeOption;
         ret.itemState = itemState;
-        ret.grade = grade;
         ret.chuc = chuc;
         ret.soulOptionId = soulOptionId;
         ret.soulSocketId = soulSocketId;
@@ -318,7 +316,6 @@ public class Equip extends Item {
         ret.notSale = notSale;
         ret.attackSpeed = attackSpeed;
         ret.price = price;
-        ret.tuc = tuc;
         ret.charmEXP = charmEXP;
         ret.expireOnLogout = expireOnLogout;
         ret.setItemID = setItemID;
@@ -494,6 +491,12 @@ public class Equip extends Item {
         this.attribute = attribute;
     }
 
+    public void addAttribute(EquipAttribute ea) {
+        short attr = getAttribute();
+        attr |= ea.getVal();
+        setAttribute(attr);
+    }
+
     public short getLevelUpType() {
         return levelUpType;
     }
@@ -556,6 +559,12 @@ public class Equip extends Item {
 
     public void setSpecialAttribute(short specialAttribute) {
         this.specialAttribute = specialAttribute;
+    }
+
+    public void addSpecialAttribute(EquipSpecialAttribute esa) {
+        short attr = getSpecialAttribute();
+        attr |= esa.getVal();
+        setSpecialAttribute(attr);
     }
 
     public short getExGradeOption() {
@@ -647,12 +656,25 @@ public class Equip extends Item {
     }
 
     public short getGrade() {
-        return grade;
+        ItemGrade ig = ItemGrade.getGradeByVal(Math.min(getBaseGrade(), getBonusGrade()));
+        switch(ig) {
+            case HIDDEN_RARE:
+            case HIDDEN_EPIC:
+            case HIDDEN_UNIQUE:
+            case HIDDEN_LEGENDARY:
+                return ig.getVal();
+        }
+        return (short) Math.max(getBaseGrade(), getBonusGrade());
     }
 
-    public void setGrade(short grade) {
-        this.grade = grade;
+    public short getBaseGrade() {
+        return ItemGrade.getGradeByOption(getOptionBase(0)).getVal();
     }
+
+    public short getBonusGrade() {
+        return ItemGrade.getGradeByOption(getOptionBonus(0)).getVal();
+    }
+
 
     public short getChuc() {
         return chuc;
@@ -794,10 +816,6 @@ public class Equip extends Item {
         return price;
     }
 
-    public int getTuc() {
-        return tuc;
-    }
-
     public int getCharmEXP() {
         return charmEXP;
     }
@@ -866,10 +884,6 @@ public class Equip extends Item {
         this.price = price;
     }
 
-    public void setTuc(int tuc) {
-        this.tuc = tuc;
-    }
-
     public void setCharmEXP(int charmEXP) {
         this.charmEXP = charmEXP;
     }
@@ -906,10 +920,10 @@ public class Equip extends Item {
         int mask0 = getStatMask(0);
         outPacket.encodeInt(mask0);
         if(hasStat(EquipBaseStat.ruc)) {
-            outPacket.encodeShort(getTuc());
+            outPacket.encodeByte(getRuc());
         }
         if(hasStat(EquipBaseStat.cuc)) {
-            outPacket.encodeShort(getCuc());
+            outPacket.encodeByte(getCuc());
         }
         if(hasStat(EquipBaseStat.iStr)) {
             outPacket.encodeShort(getiStr());
@@ -1021,7 +1035,7 @@ public class Equip extends Item {
         for (int i = 0; i < 7; i++) {
             outPacket.encodeShort(getOptions().get(i)); // 7x, last is fusion anvil
         }
-        outPacket.encodeShort(-1); // socket state
+        outPacket.encodeShort(0); // socket state
         for(int i = 0; i < 3; i++) {
             outPacket.encodeShort(-1); // sockets 0 through 2 (-1 = none, 0 = empty, >0 = filled
         }
@@ -1059,78 +1073,115 @@ public class Equip extends Item {
         switch(equipBaseStat){
             case ruc:
                 setRuc((short) amount);
+                break;
             case cuc:
                 setCuc((short) amount);
+                break;
             case iStr:
                 setiStr((short) amount);
+                break;
             case iDex:
                 setiDex((short) amount);
+                break;
             case iInt:
                 setiInt((short) amount);
+                break;
             case iLuk:
                 setiLuk((short) amount);
+                break;
             case iMaxHP:
                 setiMaxHp((short) amount);
+                break;
             case iMaxMP:
                 setiMaxMp((short) amount);
+                break;
             case iPAD:
                 setiPad((short) amount);
+                break;
             case iMAD:
                 setiMad((short) amount);
+                break;
             case iPDD:
                 setiPDD((short) amount);
+                break;
             case iMDD:
                 setiMDD((short) amount);
+                break;
             case iACC:
                 setiAcc((short) amount);
+                break;
             case iEVA:
                 setiEva((short) amount);
+                break;
             case iCraft:
                 setiCraft((short) amount);
+                break;
             case iSpeed:
                 setiSpeed((short) amount);
+                break;
             case iJump:
                 setiJump((short) amount);
+                break;
             case attribute:
                 setAttribute((short) amount);
+                break;
             case levelUpType:
                 setLevelUpType((short) amount);
+                break;
             case level:
                 setLevel((short) amount);
+                break;
             case exp:
                 setExp((short) amount);
+                break;
             case durability:
                 setDurability((short) amount);
+                break;
             case iuc:
                 setIuc((short) amount);
+                break;
             case iPvpDamage:
                 setiPvpDamage((short) amount);
+                break;
             case iReduceReq:
                 setiReduceReq((short) amount);
+                break;
             case specialAttribute:
                 setSpecialAttribute((short) amount);
+                break;
             case durabilityMax:
                 setDurabilityMax((short) amount);
+                break;
             case iIncReq:
                 setiIncReq((short) amount);
+                break;
             case growthEnchant:
                 setGrowthEnchant((short) amount);
+                break;
             case psEnchant:
                 setPsEnchant((short) amount);
+                break;
             case bdr:
                 setBdr((short) amount);
+                break;
             case imdr:
                 setImdr((short) amount);
+                break;
             case damR:
                 setDamR((short) amount);
+                break;
             case statR:
                 setStatR((short) amount);
+                break;
             case cuttable:
                 setCuttable((short) amount);
+                break;
             case exGradeOption:
                 setExGradeOption((short) amount);
+                break;
             case itemState:
                 setItemState((short) amount);
+                break;
         }
     }
 
@@ -1225,5 +1276,113 @@ public class Equip extends Item {
         int newStat = cur + amount >= 0 ? cur + amount : 0; // stat cannot be negative
         setBaseStat(stat, newStat);
     }
-    
+
+    public boolean hasAttribute(EquipAttribute equipAttribute) {
+        return (getAttribute() & equipAttribute.getVal()) != 0;
+    }
+
+    public boolean hasSpecialAttribute(EquipSpecialAttribute equipSpecialAttribute) {
+        return (getSpecialAttribute() & equipSpecialAttribute.getVal()) != 0;
+    }
+
+    public void removeAttribute(EquipAttribute equipAttribute) {
+        if(!hasAttribute(equipAttribute)) {
+            return;
+        }
+        short attr = getAttribute();
+        attr ^= equipAttribute.getVal();
+        setAttribute(attr);
+    }
+
+    public void removeSpecialAttribute(EquipSpecialAttribute equipSpecialAttribute) {
+        if(!hasSpecialAttribute(equipSpecialAttribute)) {
+            return;
+        }
+        short attr = getSpecialAttribute();
+        attr ^= equipSpecialAttribute.getVal();
+        setSpecialAttribute(attr);
+    }
+
+    public TreeMap<EnchantStat, Integer> getHyperUpgradeStats() {
+        Comparator<EnchantStat> comparator = Comparator.comparingInt(EnchantStat::getVal);
+        TreeMap<EnchantStat, Integer> res = new TreeMap<>(comparator);
+        return res;
+    }
+
+    public int[] getOptionBase() {
+        return new int[] {getOptions().get(0), getOptions().get(1), getOptions().get(2)};
+    }
+
+    public int getOptionBase(int num) {
+        return getOptions().get(num);
+    }
+
+    public int setOptionBase(int num, int val) {
+        return getOptions().set(num, val);
+    }
+
+    public int[] getOptionBonus() {
+        return new int[] {getOptions().get(3), getOptions().get(4), getOptions().get(5)};
+    }
+
+    public int getOptionBonus(int num) {
+        return getOptions().get(num + 3);
+    }
+
+    public int setOptionBonus(int num, int val) {
+        return getOptions().set(num + 3, val);
+    }
+
+    public int getRandomOption(boolean bonus) {
+        List<Integer> data = ItemConstants.getWeightedOptionsByEquip(this, bonus);
+        return data.get(Util.getRandom(data.size() - 1));
+    }
+
+    /**
+     * Resets the potential of this equip's base options. Takes the value of an ItemGrade (1-4), and sets the appropriate values.
+     * Also calculates if a third line should be added.
+     * @param val The value of the item's grade (HIDDEN_RARE~HIDDEN_LEGENDARY).getVal().
+     * @param thirdLineChance The chance of a third line being added.
+     */
+    public void setHiddenOptionBase(short val, int thirdLineChance) {
+        int max = 3;
+        if(getOptionBase(3) == 0) {
+            // If this equip did not have a 3rd line already, thirdLineChance to get it
+            if(Util.succeedProp(100 - thirdLineChance)) {
+                max = 2;
+            }
+        }
+        for (int i = 0; i < max; i++) {
+            setOptionBase(i, -val);
+        }
+    }
+
+    public void setHiddenOptionBonus(short val, int thirdLineChance) {
+        int max = 3;
+        if(getOptionBonus(3) == 0) {
+            // If this equip did not have a 3rd line already, thirdLineChance to get it
+            if(Util.succeedProp(100 - thirdLineChance)) {
+                max = 2;
+            }
+        }
+        for (int i = 0; i < max; i++) {
+            setOptionBonus(i, -val);
+        }
+    }
+
+    public void releaseOptions(boolean bonus) {
+        if(bonus) {
+            for (int i = 0; i < 3; i++) {
+                if(getOptionBonus(i) != 0) {
+                    setOptionBonus(i, getRandomOption(bonus));
+                }
+            }
+        } else {
+            for (int i = 0; i < 3; i++) {
+                if(getOptionBase(i) != 0) {
+                    setOptionBase(i, getRandomOption(bonus));
+                }
+            }
+        }
+    }
 }
