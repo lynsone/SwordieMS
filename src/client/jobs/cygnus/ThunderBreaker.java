@@ -58,6 +58,8 @@ public class ThunderBreaker extends Job {
             CALL_OF_CYGNUS_TB,
     };
 
+    private int lastAttackSkill = 0;
+
     public ThunderBreaker(Char chr) {
         super(chr);
         for (int id : addedSkills) {
@@ -125,12 +127,21 @@ public class ThunderBreaker extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    // TODO             Changed TempStat from ChargeBuff to StackBuff as to you mOption,  yet still doesn't UP the counter
+    private void handleLinkMastery(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        SkillInfo linkInfo = SkillData.getSkillInfoById(15110025);
+        if (lastAttackSkill == skillId) {
+            return;
+        } else {
+            lastAttackSkill = skillId;
+            o.nOption = linkInfo.getValue(x, linkInfo.getCurrentLevel());
+            o.rOption = 15110025;
+            o.tOption = 10;
+            tsm.putCharacterStatValue(DamR, o);
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
 
-    // Lightning Buff Chance: prop
-    // Buff Duration: y
-    // Monster DEF Ignored: x
-    // Max Accumulation: v
     private void handleLightning(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         SkillInfo lightningInfo = SkillData.getSkillInfoById(15001022);
@@ -146,12 +157,12 @@ public class ThunderBreaker extends Job {
         o.mOption = amount;
         o.rOption = 15001022;
         o.tOption = lightningInfo.getValue(y, lightningInfo.getCurrentLevel());
-        // TODO Stat per charge/stack
+        // Stat per charge/stack
         tsm.putCharacterStatValue(IgnoreTargetDEF, o);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private int getChargeProp(Char chr) { //TODO  to be used in HandleAttack
+    private int getChargeProp(Char chr) {
         int prop = 0;
         if (chr.hasSkill(15001022)) { //Lightning Elemental
             prop += 10;
@@ -217,6 +228,11 @@ public class ThunderBreaker extends Job {
         if (tsm.hasStat(CygnusElementSkill)) {
             if (hasHitMobs && Util.succeedProp(chargeProp)) {
                 handleLightning(skill.getSkillId(), tsm, c);
+            }
+        }
+        if(chr.hasSkill(15110025)) {
+            if (hasHitMobs) {
+                handleLinkMastery(skill.getSkillId(), tsm, c);
             }
         }
         Option o1 = new Option();

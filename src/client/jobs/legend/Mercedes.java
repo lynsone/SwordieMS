@@ -157,8 +157,8 @@ public class Mercedes extends Job {
         Option o2 = new Option();
         SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(23111004);
         int amount = 1;
-        if(tsm.hasStat(RpSiksin)){ //TODO IgnisRore or Rpsiksin
-            amount = tsm.getOption(RpSiksin).nOption; //TODO RpSiksin
+        if(tsm.hasStat(IgnisRore)){
+            amount = tsm.getOption(IgnisRore).nOption;
             if(amount < ignisRoarInfo.getValue(y, ignisRoarInfo.getCurrentLevel())) {
                 amount++;
             } else {}
@@ -166,7 +166,7 @@ public class Mercedes extends Job {
         o.nOption = amount;
         o.rOption = 23111004;
         o.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
-        tsm.putCharacterStatValue(RpSiksin, o); //TODO RpSiksin
+        tsm.putCharacterStatValue(IgnisRore, o);
         o1.nOption = (amount * ignisRoarInfo.getValue(x, ignisRoarInfo.getCurrentLevel()));
         o1.rOption = 23111004;
         o1.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
@@ -176,7 +176,7 @@ public class Mercedes extends Job {
         o2.tStart = (int) System.currentTimeMillis();
         o2.tTerm = ignisRoarInfo.getValue(time, ignisRoarInfo.getCurrentLevel());
         tsm.putCharacterStatValue(IndiePAD, o2);
-        // TODO     Not giving stack icon/buff
+
     }
 
     private boolean isBuff(int skillID) {
@@ -203,7 +203,7 @@ public class Mercedes extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        switch (attackInfo.skillId) {  // TODO gives NPE
+        switch (attackInfo.skillId) {
             case STUNNING_STRIKES:
             case STAGGERING_STRIKES:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {

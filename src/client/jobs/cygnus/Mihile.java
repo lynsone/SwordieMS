@@ -92,6 +92,16 @@ public class Mihile extends Job {
                 tsm.putCharacterStatValue(TerR, o3);
                 break;
             case SOUL_LINK: // (ON/OFF)
+
+                // dot = healing duration
+                // indieDamR = dmg% per member
+                // q = receive 20%s of party's dmg which can be nullified with Royal Guard
+                // s = HP% recovery
+                // w = DEF% from enduring Spirit
+                // x = Att/M.att%
+                // y = AsrR
+                // z = 4000  //TODO  idk
+
                 // TODO
                 break;
             case ROILING_SOUL: // (ON/OFF)
