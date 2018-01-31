@@ -532,7 +532,7 @@ public class Char {
             outPacket.encodeByte(0);
         }
         if (mask.isInMask(DBChar.ItemSlotCash)) {
-            for (Item item : getConsumeInventory().getItems()) {
+            for (Item item : getCashInventory().getItems()) {
                 outPacket.encodeByte(item.getBagIndex());
                 item.encode(outPacket);
             }
