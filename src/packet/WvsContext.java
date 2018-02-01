@@ -1,6 +1,5 @@
 package packet;
 
-import client.Client;
 import client.character.*;
 import client.character.items.Item;
 import client.character.skills.Skill;
@@ -499,5 +498,12 @@ public class WvsContext {
         }
 
         return outPacket;
+    }
+
+    public static OutPacket updateCombo(int value) {
+        OutPacket oPacket = new OutPacket(80);
+        oPacket.encodeShort(OutHeader.MOD_COMBO_RESPONSE.getValue());
+        oPacket.encodeInt(value);
+        return oPacket;
     }
 }
