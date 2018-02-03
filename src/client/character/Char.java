@@ -9,6 +9,8 @@ import client.field.Field;
 import client.field.Portal;
 import client.jobs.Job;
 import client.jobs.JobManager;
+import client.jobs.resistance.WildHunter;
+import client.jobs.resistance.WildHunterInfo;
 import connection.OutPacket;
 import constants.GameConstants;
 import constants.JobConstants;
@@ -129,6 +131,16 @@ public class Char {
     private boolean left;
     @Transient
     private MarriageRecord marriageRecord;
+    @Transient
+    private WildHunterInfo wildHunterInfo;
+    @Transient
+    private int nickItem;
+    @Transient
+    private int damageSkin;
+    @Transient
+    private int premiumDamageSkin;
+    @Transient
+    private boolean partyInvitable;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -397,7 +409,7 @@ public class Char {
         if (mask.isInMask(DBChar.MonsterBattleInfo)) {
             int count = 0; // MonsterBattle_MobInfo
             outPacket.encodeInt(count);
-            if(getMonsterBattleMobInfos() != null) {
+            if (getMonsterBattleMobInfos() != null) {
                 for (MonsterBattleMobInfo mbmi : getMonsterBattleMobInfos()) {
                     mbmi.encode(outPacket);
                     // int int int int int int byte int int
@@ -488,7 +500,7 @@ public class Char {
             outPacket.encodeShort(0);
             for (Item item : getEquippedInventory().getItems()) {
                 Equip equip = (Equip) item;
-                if (item.getBagIndex() >= 1200) {
+                if (item.getBagIndex() >= 1200 && item.getBagIndex() <= 1300) {
                     outPacket.encodeShort(equip.getBagIndex());
                     equip.encode(outPacket);
                 }
@@ -589,11 +601,11 @@ public class Char {
             if (encodeSkills) {
                 short size = (short) getSkills().size();
                 outPacket.encodeShort(size);
-                for(Skill skill : getSkills()) {
+                for (Skill skill : getSkills()) {
                     outPacket.encodeInt(skill.getSkillId());
                     outPacket.encodeInt(skill.getCurrentLevel());
                     outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
-                    if(SkillConstants.isSkillNeedMasterLevel(skill.getSkillId())) {
+                    if (SkillConstants.isSkillNeedMasterLevel(skill.getSkillId())) {
                         outPacket.encodeInt(skill.getMasterLevel());
                     }
                 }
@@ -803,7 +815,7 @@ public class Char {
         }
         if (mask.isInMask(DBChar.WildHunterInfo)) {
             if (JobConstants.isWildHunter(getAvatarData().getCharacterStat().getJob())) {
-//                getWildHunterInfo().encode(outPacket); // GW_WildHunterInfo::Decode
+                getWildHunterInfo().encode(outPacket); // GW_WildHunterInfo::Decode
             }
         }
         if (mask.isInMask(DBChar.ZeroInfo)) {
@@ -866,10 +878,10 @@ public class Char {
                 outPacket.encodeByte(0); // nGrade
             }
         }
-        if(mask.isInMask(DBChar.SoulCollection)) {
+        if (mask.isInMask(DBChar.SoulCollection)) {
             short size = 0;
             outPacket.encodeShort(size);
-            for(int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++) {
                 outPacket.encodeInt(0); //
                 outPacket.encodeInt(0); //
             }
@@ -1516,5 +1528,45 @@ public class Char {
 
     public ExpIncreaseInfo getExpIncreaseInfo() {
         return new ExpIncreaseInfo();
+    }
+
+    public WildHunterInfo getWildHunterInfo() {
+        return wildHunterInfo;
+    }
+
+    public void setWildHunterInfo(WildHunterInfo wildHunterInfo) {
+        this.wildHunterInfo = wildHunterInfo;
+    }
+
+    public int getNickItem() {
+        return nickItem;
+    }
+
+    public void setNickItem(int nickItem) {
+        this.nickItem = nickItem;
+    }
+
+    public void setDamageSkin(int damageSkin) {
+        this.damageSkin = damageSkin;
+    }
+
+    public int getDamageSkin() {
+        return damageSkin;
+    }
+
+    public int getPremiumDamageSkin() {
+        return premiumDamageSkin;
+    }
+
+    public void setPremiumDamageSkin(int premiumDamageSkin) {
+        this.premiumDamageSkin = premiumDamageSkin;
+    }
+
+    public void setPartyInvitable(boolean partyInvitable) {
+        this.partyInvitable = partyInvitable;
+    }
+
+    public boolean isPartyInvitable() {
+        return partyInvitable;
     }
 }

@@ -4,6 +4,7 @@ import client.character.*;
 import client.character.items.Item;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
+import client.jobs.resistance.WildHunterInfo;
 import client.life.movement.*;
 import connection.InPacket;
 import connection.OutPacket;
@@ -500,10 +501,19 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket updateCombo(int value) {
-        OutPacket oPacket = new OutPacket(80);
-        oPacket.encodeShort(OutHeader.MOD_COMBO_RESPONSE.getValue());
-        oPacket.encodeInt(value);
-        return oPacket;
+    public static OutPacket modComboResponse(int combo) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOD_COMBO_RESPONSE);
+
+        outPacket.encodeInt(combo);
+
+        return outPacket;
+    }
+
+    public static OutPacket wildHunterInfo(WildHunterInfo whi) {
+        OutPacket outPacket = new OutPacket(OutHeader.WILD_HUNTER_INFO);
+
+        whi.encode(outPacket);
+
+        return outPacket;
     }
 }

@@ -25,6 +25,8 @@ import static client.character.skills.SkillStat.*;
  */
 public class Aran extends Job {
 
+
+    public static final int COMBO_ABILITY = 21000000;
     public static final int COMBAT_STEP = 20001295;
     public static final int REGAINED_MEMORY = 20000194;
     public static final int RETURN_TO_RIEN = 20001296;
@@ -94,6 +96,8 @@ public class Aran extends Job {
             MAPLE_WARRIOR_ARAN,
     };
 
+    private int combo;
+
     public Aran(Char chr) {
         super(chr);
         for (int id : addedSkills) {
@@ -162,22 +166,26 @@ public class Aran extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleComboAbility(int skillId, TemporaryStatManager tsm, Client c) {
+    private void handleComboAbility(TemporaryStatManager tsm, AttackInfo attackInfo) {
         Option o = new Option();
-        SkillInfo comboInfo = SkillData.getSkillInfoById(21000000);
+        SkillInfo comboInfo = SkillData.getSkillInfoById(COMBO_ABILITY);
         int amount = 1;
-        if(chr.hasSkill(21000000)) {
+        if(!chr.hasSkill(COMBO_ABILITY)) {
+            return;
+        }
+        if(tsm.hasStat(ComboAbilityBuff)) {
             amount = tsm.getOption(ComboAbilityBuff).nOption;
-            if(amount < 30000) {
-                amount++;
-            } else {
+            if(amount < comboInfo.getValue(s2, chr.getSkill(COMBO_ABILITY).getCurrentLevel())) {
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    amount++;
+                }
             }
         }
         o.nOption = amount;
-        o.rOption = 21000000;
+        o.rOption = COMBO_ABILITY;
         o.tOption = 0;
         tsm.putCharacterStatValue(ComboAbilityBuff, o);
-        c.write(WvsContext.updateCombo(amount));
+        setCombo(amount);
     }
 
     private void handleAdrenalinRush(int skillId, TemporaryStatManager tsm, Client c) {
@@ -220,7 +228,7 @@ public class Aran extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        //handleComboAbility(skill.getSkillId(), tsm, c);       // TODO  causes NPE
+        handleComboAbility(tsm, attackInfo);
         if(chr.hasSkill(21110016)) {
             if (tsm.getOption(ComboAbilityBuff).nOption > 999) {
                 handleAdrenalinRush(skill.getSkillId(), tsm, c);
@@ -230,7 +238,6 @@ public class Aran extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
-
             case FINAL_CHARGE:
                 handleSwingStudies(21101011, tsm, c);
                 break;
@@ -439,5 +446,14 @@ public class Aran extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    private int getCombo() {
+        return combo;
+    }
+
+    private void setCombo(int combo) {
+        this.combo = combo;
+        c.write(WvsContext.modComboResponse(getCombo()));
     }
 }

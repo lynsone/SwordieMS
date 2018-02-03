@@ -17,4 +17,20 @@ public class UserLocal {
 
         return outPacket;
     }
+
+    public static OutPacket jaguarActive(boolean active) {
+        OutPacket outPacket = new OutPacket(OutHeader.JAGUAR_ACTIVE);
+
+        outPacket.encodeByte(active);
+
+        return outPacket;
+    }
+
+    public static OutPacket jaguarSkill(int skillID) {
+        OutPacket outPacket = new OutPacket(OutHeader.JAGUAR_SKILL);
+
+        outPacket.encodeInt(skillID);
+
+        return outPacket;
+    }
 }

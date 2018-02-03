@@ -15,6 +15,7 @@ import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.Stat;
 import loaders.SkillData;
+import packet.UserLocal;
 import packet.WvsContext;
 import util.Util;
 
@@ -29,28 +30,30 @@ import static client.character.skills.SkillStat.*;
 public class WildHunter extends Job {
 
     //Jaguars       Unknown which ID stands for which jaguar (just guesses atm)
-    public static final int JAGUAR_RIDER_GREY = 33001007;           //No Special Jaguar Stats
-    public static final int JAGUAR_RIDER_YELLOW = 33001008;         //No Special Jaguar Stats
-    public static final int JAGUAR_RIDER_RED = 33001009;            //No Special Jaguar Stats
-    public static final int JAGUAR_RIDER_PURPLE = 33001010;         //No Special Jaguar Stats
-    public static final int JAGUAR_RIDER_BLUE = 33001011;           //No Special Jaguar Stats
-    public static final int JAGUAR_RIDER_JAIRA = 33001012;          //Critical Rate +5%
-    public static final int JAGUAR_RIDER_SNOW_WHITE = 33001013;     //Buff Duration +10%
-    public static final int JAGUAR_RIDER_ONYX = 33001014;           //Buff Duration +10%
-    public static final int JAGUAR_RIDER_CRIMSON = 33001015;        //Dmg Absorption +10%
+    public static final int SUMMON_JAGUAR_GREY = 33001007;           //No Special Jaguar Stats
+    public static final int SUMMON_JAGUAR_YELLOW = 33001008;         //No Special Jaguar Stats
+    public static final int SUMMON_JAGUAR_RED = 33001009;            //No Special Jaguar Stats
+    public static final int SUMMON_JAGUAR_PURPLE = 33001010;         //No Special Jaguar Stats
+    public static final int SUMMON_JAGUAR_BLUE = 33001011;           //No Special Jaguar Stats
+    public static final int SUMMON_JAGUAR_JAIRA = 33001012;          //Critical Rate +5%
+    public static final int SUMMON_JAGUAR_SNOW_WHITE = 33001013;     //Buff Duration +10%
+    public static final int SUMMON_JAGUAR_ONYX = 33001014;           //Buff Duration +10%
+    public static final int SUMMON_JAGUAR_CRIMSON = 33001015;        //Dmg Absorption +10%
 
 
     public static final int SECRET_ASSEMBLY = 30001281;
-    public static final int CAPTURE = 30001068;
+    public static final int CAPTURE = 30001061;
     public static final int CALL_OF_THE_HUNTER = 30001062;
 
-    public static final int SUMMON_JAGUAR = 33001001; //Special Buff
+    public static final int RIDE_JAGUAR = 33001001; //Special Buff
     public static final int SWIPE = 33001016 ; //Special Attack (Bite Debuff)
+    public static final int WILD_LURE = 33001025 ;
+    public static final int ANOTHER_BITE = 33000036;
 
     public static final int SOUL_ARROW_CROSSBOW = 33101003; //Buff
     public static final int CROSSBOW_BOOSTER = 33101012; //Buff
     public static final int CALL_OF_THE_WILD = 33101005; //Buff
-    public static final int DASH_N_SLASH_JAGUAR_OFF = 33101115; //Special Attack (Stun Debuff) + (Bite Debuff)
+    public static final int DASH_N_SLASH_JAGUAR_SUMMONED = 33101115; //Special Attack (Stun Debuff) + (Bite Debuff)
     public static final int DASH_N_SLASH_JAGUAR_ON = 33101215; //Special Attack (Stun Debuff) + (Bite Debuff)
 
     public static final int FELINE_BERSERK = 33111007; //Buff
@@ -70,17 +73,17 @@ public class WildHunter extends Job {
     };
 
     private int[] buffs = new int[] {
-            JAGUAR_RIDER_GREY,
-            JAGUAR_RIDER_YELLOW,
-            JAGUAR_RIDER_RED,
-            JAGUAR_RIDER_PURPLE,
-            JAGUAR_RIDER_BLUE,
-            JAGUAR_RIDER_JAIRA,
-            JAGUAR_RIDER_SNOW_WHITE,
-            JAGUAR_RIDER_ONYX,
-            JAGUAR_RIDER_CRIMSON,
+            SUMMON_JAGUAR_GREY,
+            SUMMON_JAGUAR_YELLOW,
+            SUMMON_JAGUAR_RED,
+            SUMMON_JAGUAR_PURPLE,
+            SUMMON_JAGUAR_BLUE,
+            SUMMON_JAGUAR_JAIRA,
+            SUMMON_JAGUAR_SNOW_WHITE,
+            SUMMON_JAGUAR_ONYX,
+            SUMMON_JAGUAR_CRIMSON,
 
-            SUMMON_JAGUAR,
+            RIDE_JAGUAR,
             SOUL_ARROW_CROSSBOW,
             CROSSBOW_BOOSTER,
             CALL_OF_THE_WILD,
@@ -90,8 +93,13 @@ public class WildHunter extends Job {
             MAPLE_WARRIOR_WH,
     };
 
+    private int lastUsedSkill = 0;
+
     public WildHunter(Char chr) {
         super(chr);
+        if(chr.getWildHunterInfo() == null) {
+            chr.setWildHunterInfo(new WildHunterInfo());
+        }
         for (int id : addedSkills) {
             if (!chr.hasSkill(id)) {
                 Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -111,22 +119,40 @@ public class WildHunter extends Job {
         Summon summon;
         Field field;
         switch (skillID) {
-            case JAGUAR_RIDER_GREY:
-            case JAGUAR_RIDER_YELLOW:
-            case JAGUAR_RIDER_RED:
-            case JAGUAR_RIDER_PURPLE:
-            case JAGUAR_RIDER_BLUE:
-            case JAGUAR_RIDER_JAIRA:
-            case JAGUAR_RIDER_SNOW_WHITE:
-            case JAGUAR_RIDER_ONYX:
-            case JAGUAR_RIDER_CRIMSON:
-                //TODO
+            case SUMMON_JAGUAR_GREY:
+            case SUMMON_JAGUAR_YELLOW:
+            case SUMMON_JAGUAR_RED:
+            case SUMMON_JAGUAR_PURPLE:
+            case SUMMON_JAGUAR_BLUE:
+            case SUMMON_JAGUAR_JAIRA:
+            case SUMMON_JAGUAR_SNOW_WHITE:
+            case SUMMON_JAGUAR_ONYX:
+            case SUMMON_JAGUAR_CRIMSON:
+                summon = Summon.getSummonBy(chr, skillID, (byte) 1);
+                summon.setSummonTerm(0);
+                field = c.getChr().getField();
+                field.spawnSummon(summon);
+                c.write(UserLocal.jaguarActive(true));
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(JaguarSummoned, o1);
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(JaguarCount, o1);
                 break;
-            case SUMMON_JAGUAR:
-                //TODO
+            case RIDE_JAGUAR:
+                o1.nOption = 0;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(JaguarSummoned, o1);
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(JaguarCount, o1);
+//                o1.nOption =
                 break;
-
-
             case SOUL_ARROW_CROSSBOW:
                 o1.nOption = 10; //si.getValue(x, slv);
                 o1.rOption = skillID;
@@ -222,6 +248,10 @@ public class WildHunter extends Job {
     public void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(attackInfo.skillId >= SUMMON_JAGUAR_GREY && attackInfo.skillId <= SUMMON_JAGUAR_CRIMSON) {
+            attackInfo.skillId = lastUsedSkill;
+            lastUsedSkill = 0;
+        }
         Skill skill = chr.getSkill(attackInfo.skillId);
         int skillID = 0;
         SkillInfo si = null;
@@ -235,15 +265,21 @@ public class WildHunter extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        int jaguarBleedingTime = SkillData.getSkillInfoById(SUMMON_JAGUAR_GREY).getValue(time, 1);
         switch (attackInfo.skillId) {
             case DASH_N_SLASH_JAGUAR_ON: //(33101115)  //Stun + Bite Debuff
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
+                        int amount = 0;
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
+                        if(mts.hasCurrentMobStat(MobStat.JaguarBleeding)) {
+                            amount = mts.getCurrentOptionsByMobStat(MobStat.JaguarBleeding).nOption;
+                        }
+                        amount = amount + 1 > 3 ? 3 : amount + 1;
+                        o1.nOption = amount;
                         o1.rOption = skill.getSkillId();
-                        o1.tOption = 5; //si.getValue(time, slv);  //TODO time isn't given in the WzFiles, but in the 'Summon Jaguar' descr. it says that the debuff is 5sec
+                        o1.tOption = jaguarBleedingTime;
                         mts.addStatOptionsAndBroadcast(MobStat.JaguarBleeding, o1);
                         o2.nOption = 1;
                         o2.rOption = skill.getSkillId();
@@ -259,7 +295,7 @@ public class WildHunter extends Job {
                     }
                 }
                 break;
-            case DASH_N_SLASH_JAGUAR_OFF: //(33101215)   //Stun Debuff
+            case DASH_N_SLASH_JAGUAR_SUMMONED: //(33101215)   //Stun Debuff
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -274,11 +310,16 @@ public class WildHunter extends Job {
             case SWIPE: //Bite Debuff
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
+                        int amount = 0;
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = 5; //si.getValue(time, slv);  //TODO time isn't given in the WzFiles, but in the 'Summon Jaguar' descr. it says that the debuff is 5sec
+                        if(mts.hasCurrentMobStat(MobStat.JaguarBleeding)) {
+                            amount = mts.getCurrentOptionsByMobStat(MobStat.JaguarBleeding).nOption;
+                        }
+                        amount = amount + 1 > 3 ? 3 : amount + 1;
+                        o1.nOption = amount;
+                        o1.rOption = ANOTHER_BITE;
+                        o1.tOption = jaguarBleedingTime;
                         mts.addStatOptionsAndBroadcast(MobStat.JaguarBleeding, o1);
                     }
                 }
@@ -286,11 +327,16 @@ public class WildHunter extends Job {
             case JAGUAR_SOUL: //(Stun Debuff) + (Bite Debuff) + (Magic Crash Debuff)
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
+                        int amount = 0;
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = 5; //si.getValue(time, slv);  //TODO time isn't given in the WzFiles, but in the 'Summon Jaguar' descr. it says that the debuff is 5sec
+                        if(mts.hasCurrentMobStat(MobStat.JaguarBleeding)) {
+                            amount = mts.getCurrentOptionsByMobStat(MobStat.JaguarBleeding).nOption;
+                        }
+                        amount = amount + 1 > 3 ? 3 : amount + 1;
+                        o1.nOption = amount;
+                        o1.rOption = ANOTHER_BITE;
+                        o1.tOption = jaguarBleedingTime;
                         mts.addStatOptionsAndBroadcast(MobStat.JaguarBleeding, o1);
                         o2.nOption = 1;
                         o2.rOption = skill.getSkillId();
@@ -320,7 +366,13 @@ public class WildHunter extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-
+                case WILD_LURE:
+                case SWIPE:
+                case DASH_N_SLASH_JAGUAR_SUMMONED:
+                case SONIC_ROAR:
+                    lastUsedSkill = skillID;
+                    c.write(UserLocal.jaguarSkill(skillID));
+                    break;
             }
         }
     }
