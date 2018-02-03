@@ -10,14 +10,19 @@ import client.life.MobTemporaryStat;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import enums.MobStat;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.Random;
 
-import static client.character.skills.CharacterTemporaryStat.IndieStatR;
+import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
 
 /**
@@ -28,10 +33,12 @@ public class Shade extends Job {
     public static final int FOX_TROT = 20051284;
 
     public static final int FOX_SPIRITS = 25101009; //Buff (ON/OFF)
+    public static final int FOX_SPIRITS_ATOM = 25100010;
+    public static final int FOX_SPIRITS_ATOM_2 = 25120115; //Upgrade
     public static final int GROUND_POUND_FIRST = 25101000; //Special Attack (Slow Debuff)
     public static final int GROUND_POUND_SECOND = 25100001; //Special Attack (Slow Debuff)
 
-    public static final int SUMMON_OTHER_SPIRIT = 25111209; //Passive Buff (Icon) TODO
+    public static final int SUMMON_OTHER_SPIRIT = 25111209; //Passive Buff (Icon)
     public static final int SPIRIT_TRAP = 25111206; //Summon
 
     public static final int SPIRIT_WARD = 25121209; //Special Buff
@@ -73,9 +80,16 @@ public class Shade extends Job {
         Option o3 = new Option();
         switch (skillID) {
             case FOX_SPIRITS:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(ChangeFoxMan, o1);
                 break;
             case SUMMON_OTHER_SPIRIT:
-                // TODO
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(SpiritGuard, o1);
                 break;
             case SPIRIT_WARD:
                 // TODO (needs a handler, i believe)
@@ -88,8 +102,67 @@ public class Shade extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
             case SPIRIT_TRAP:
-                // TODO
+                // TODO AoE
                 break;
+        }
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private void handleFoxSpirits(int skillID, byte slv, AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(ChangeFoxMan)) {
+            SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
+            int anglenum = new Random().nextInt(90) + 10; //randomisation
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                int TW1prop = 100;//  SkillData.getSkillInfoById(FOX_SPIRITS_ATOM).getValue(prop, slv); //TODO Change
+                if (Util.succeedProp(TW1prop)) {
+                    if(chr.hasSkill(25120110)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.RED_RABBIT_ORB.getInc(); //4th Job
+                        int type = ForceAtomEnum.RED_RABBIT_ORB.getForceAtomType(); //4th Job
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position());
+                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, FOX_SPIRITS_ATOM_2, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), FOX_SPIRITS_ATOM_2, mob.getPosition()));
+                    } else {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.BLUE_RABBIT_ORB.getInc(); //2nd Job
+                        int type = ForceAtomEnum.BLUE_RABBIT_ORB.getForceAtomType(); //2nd Job
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position());
+                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), FOX_SPIRITS_ATOM, mob.getPosition()));
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleFoxSpiritMobToMob(int skillID, byte slv, AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(ChangeFoxMan)) {
+            SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
+            //int anglenum = new Random().nextInt(90) + 10; //randomisation
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                int TW1prop = 60;//  SkillData.getSkillInfoById(FOX_SPIRITS_ATOM).getValue(prop, slv); //TODO Change
+                if (Util.succeedProp(TW1prop)) {
+                    int mobID = mai.mobId;
+                    int inc = ForceAtomEnum.BLUE_RABBIT_ORB.getInc(); //2nd Job
+                    int type = ForceAtomEnum.BLUE_RABBIT_ORB.getForceAtomType(); //2nd Job
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                            0, 0, (int) System.currentTimeMillis(), 1, 0,
+                            new Position());
+                    chr.getClient().write(CField.createForceAtom(true, mobID, mobID, type, //TODO  atm Player -> Mob     |      Change to Mob -> Mob
+                            true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                            mob.getPosition(), FOX_SPIRITS_ATOM, mob.getPosition()));
+                }
+            }
         }
     }
 
@@ -101,11 +174,21 @@ public class Shade extends Job {
         int skillID = 0;
         SkillInfo si = null;
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
+        byte slv = 0;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
+            slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            if (skillID == FOX_SPIRITS_ATOM_2) { //TODO
+                handleFoxSpiritMobToMob(skillID, slv, attackInfo);
+            } else if (skillID == FOX_SPIRITS_ATOM){ //TODO
+                return;
+            }
+            else {
+                handleFoxSpirits(skillID, slv, attackInfo);
+            }
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -163,10 +246,12 @@ public class Shade extends Job {
             Option o1 = new Option();
             Option o2 = new Option();
             Option o3 = new Option();
-            switch(skillID) {
+            switch (skillID) {
+
             }
         }
     }
+
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {

@@ -5,13 +5,20 @@ import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
 import client.jobs.Job;
+import client.life.Mob;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import util.Position;
+import util.Rect;
+import util.Util;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -30,15 +37,20 @@ public class Phantom extends Job {
 
     public static final int IMPECCABLE_MEMORY_II = 24101001; //TODO
     public static final int CANE_BOOSTER = 24101005; //Buff
+    public static final int CARTE_BLANCHE = 24100003;
 
     public static final int IMPECCABLE_MEMORY_III = 24111001; //TODO
     public static final int FINAL_FEINT = 24111002; //Buff (Unlimited Duration) Gone upon Death
     public static final int BAD_LUCK_WARD = 24111003; //Buff
+    public static final int CLAIR_DE_LUNE = 24111005; //Buff
 
     public static final int IMPECCABLE_MEMORY_IV = 24121001; //TODO
     public static final int PRIERE_DARIA = 24121004; //Buff
     public static final int VOL_DAME = 24121007; // Special Buff TODO
     public static final int MAPLE_WARRIOR_PH = 24121008; //Buff
+    public static final int CARTE_NOIR = 24120002;
+
+    public static final int CARTE_ATOM = 80001890; //TODO maybe
 
     private int[] addedSkills = new int[] {
             SKILL_SWIPE,
@@ -54,6 +66,7 @@ public class Phantom extends Job {
             IMPECCABLE_MEMORY_III,
             FINAL_FEINT,
             BAD_LUCK_WARD,
+            CLAIR_DE_LUNE,
             IMPECCABLE_MEMORY_IV,
             PRIERE_DARIA,
             VOL_DAME,
@@ -109,6 +122,18 @@ public class Phantom extends Job {
                 o4.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(TerR, o4);
                 break;
+            case CLAIR_DE_LUNE:
+                o1.nValue = si.getValue(indiePad, slv);
+                o1.nReason = skillID;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o1);
+                o2.nValue = si.getValue(indieAcc, slv);
+                o2.nReason = skillID;
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieACC, o2);
+                break;
             case PRIERE_DARIA:
                 o1.nOption = si.getValue(damR, slv);
                 o1.rOption = skillID;
@@ -130,13 +155,90 @@ public class Phantom extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    private void handleCarte(int skillID, byte slv, AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        //if (chr.hasSkill(CARTE_BLANCHE)) {
+            SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
+            int anglenum = new Random().nextInt(300) + 290;
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                int TW1prop = 100;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change
+                if (Util.succeedProp(TW1prop)) {
+                    if(chr.hasSkill(CARTE_BLANCHE)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
+                        int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position()); //Slightly behind the player
+                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
+                    } else if (chr.hasSkill(CARTE_NOIR)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();    //TODO doesn't show the CarteNoir Image,  shows Carte Blanche
+                        int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position()); //Slightly behind the player
+                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
+                    }
+                    else {
+                        return;
+                    }
+                }
+            }
+        //}
+    }
+
+    private void handleCardDeck(int skillId, TemporaryStatManager tsm, Client c) { //TODO 38s (TEMPORARY_STAT_SET / 74)
+        Option o = new Option();
+        int amount = 1;
+        if(chr.hasSkill(20030206)) {
+            amount = tsm.getOption(Judgement).xOption;
+            if(amount < 40) {
+                amount++;
+            }
+        }
+        o.nOption = 1;
+        o.rOption = 0;
+        o.tOption = 0;
+        o.xOption = amount;
+        tsm.putCharacterStatValue(Judgement, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
-
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        //handleCardDeck(skill.getSkillId(), tsm, c);
+        if(hasHitMobs) {
+            if(skillID != CARTE_NOIR || skillID != CARTE_BLANCHE) {
+                handleCarte(skillID, slv, attackInfo);
+            }
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+        }
     }
 
     @Override
@@ -164,6 +266,9 @@ public class Phantom extends Job {
                 case IMPECCABLE_MEMORY_IV:
               //case IMPECCABLE_MEMORY_H
                     //TODO
+                    break;
+                case TO_THE_SKIES:
+                    //TODO Map: 150000000
                     break;
             }
         }

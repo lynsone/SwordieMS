@@ -105,8 +105,8 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
 
-
-            case HASTY_AURA: // TODO what's BMageAura TempStat for?
+                    //TODO  Auras 38
+            case HASTY_AURA:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieSpeed, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -117,12 +117,20 @@ public class BattleMage extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = 0;
                 tsm.putCharacterStatValue(IndieBooster, o2);
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case DRAINING_AURA:
                 o1.nOption = si.getValue(killRecoveryR, slv);
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(Regen, o1); //TODO  HP Recovery on Kill
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case BLUE_AURA:
                 o1.nOption = si.getValue(asrR, slv);
@@ -137,6 +145,10 @@ public class BattleMage extends Job {
                 o3.rOption = skillID;
                 o3.tOption = 0;
                 tsm.putCharacterStatValue(IgnoreMobDamR, o3);
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case DARK_AURA:
                 o1.nReason = skillID;
@@ -144,8 +156,16 @@ public class BattleMage extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case WEAKENING_AURA:
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(BMageAura, o3);
                 //TODO
                 break;
 

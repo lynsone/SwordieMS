@@ -17,11 +17,8 @@ import util.Util;
 
 import java.util.Arrays;
 
-import static client.character.skills.CharacterTemporaryStat.Booster;
-import static client.character.skills.CharacterTemporaryStat.IndieStatR;
-import static client.character.skills.SkillStat.prop;
-import static client.character.skills.SkillStat.time;
-import static client.character.skills.SkillStat.x;
+import static client.character.skills.CharacterTemporaryStat.*;
+import static client.character.skills.SkillStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -85,9 +82,11 @@ public class DawnWarrior extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
         switch (skillID) {
             case SOUL_ELEMENT:
                 //TODO
+
                 break;
             case SOUL_SPEED:
                 o1.nOption = si.getValue(x, slv);
@@ -96,13 +95,57 @@ public class DawnWarrior extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case FALLING_MOON:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(PoseType, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieCr, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 0;
+                tsm.putCharacterStatValue(IndieCr, o2); //Indie
+                o3.nOption = si.getValue(x, slv);
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(AddAttackCount, o3); //TODO Doesn't give extra lines
                 break;
             case RISING_SUN:
-                //TODO
+                o1.nOption = 2;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(PoseType, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieDamR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 0;
+                tsm.putCharacterStatValue(IndieDamR, o2); //Indie
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indieBooster, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = 0;
+                tsm.putCharacterStatValue(IndieBooster, o3); //Indie
                 break;
             case EQUINOX_CYCLE:
-                //TODO
+                //TODO PoseType = ?
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1); //Indie
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieBooster, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indieCr, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieCr, o3); //Indie
+                o4.nOption = si.getValue(x, slv);
+                o4.rOption = skillID;
+                o4.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AddAttackCount, o4);
                 break;
             case CALL_OF_CYGNUS_DW:
                 o1.nReason = skillID;
@@ -138,8 +181,8 @@ public class DawnWarrior extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case IMPALING_RAYS:
-                if (Util.succeedProp(si.getValue(prop, slv))) {
-                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -148,6 +191,9 @@ public class DawnWarrior extends Job {
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
+                break;
+            case TRUE_SIGHT:
+                //TODO
                 break;
         }
     }

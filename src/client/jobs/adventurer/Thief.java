@@ -23,6 +23,10 @@ import java.util.Arrays;
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
 
+//TODO Final Cut
+//TODO Shadower - Critical Growth
+//TODO DB - Mirror Image
+
 /**
  * Created on 12/14/2017.
  */
@@ -125,6 +129,19 @@ public class Thief extends Job {
                 slv = skill.getCurrentLevel();
                 skillID = skill.getSkillId();
             }
+            if (chr.getJob() == 422) {
+                if (chr.hasSkill(4221013)) {
+                    if (tsm.hasStat(IgnoreMobpdpR)) {
+                        if(hasHitMobs) {
+                            if(skill == null) {
+                                handleShadowerInstinct(4221016, tsm, c);
+                            }
+                            handleShadowerInstinct(skill.getSkillId(), tsm, c);
+                        }
+                    }
+                }
+            }
+
             Option o1 = new Option();
             Option o2 = new Option();
             Option o3 = new Option();
@@ -204,6 +221,14 @@ public class Thief extends Job {
                         }
                     }
                     break;
+
+                case FINAL_CUT:
+                    o1.nOption = si.getValue(w, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(FinalCut, o1);
+                    // TODO add 3 sec Invincibility to Final Cut Buff (3sec time = v
+                    break;
             }
         }
 
@@ -244,7 +269,7 @@ public class Thief extends Job {
         Summon summon;
         Field field;
         switch (skillID) {
-            case HASTE:
+            case HASTE: //TODO 38s
             case SELF_HASTE:
                 o1.nOption = si.getValue(speed, slv);
                 o1.rOption = skillID;
@@ -314,21 +339,16 @@ public class Thief extends Job {
                 // Unsure about this Buff
                 break;
             case SHADOWER_INSTINCT:
-                o1.nOption = si.getValue(kp, slv);
+                o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                //tsm.putCharacterStatValue(ShadowerInstinct, o1);
-                // TODO: Shadower Instinct  Temp Stat req
+                tsm.putCharacterStatValue(PAD, o1);
+                o2.nOption = si.getValue(ignoreMobpdpR, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                 break;
-            case FINAL_CUT:
-                o1.nOption = si.getValue(w, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(FinalCut, o1);
-                // TODO add 3 sec Invincibility to Final Cut Buff (3sec time = v
-                break;
-
-            case MIRRORED_TARGET:
+            case MIRRORED_TARGET: //TODO Crashes
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setCharLevel((byte) chr.getStat(Stat.level));
@@ -360,6 +380,28 @@ public class Thief extends Job {
                 field.spawnSummon(summon);
                 break;
         }
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private void handleShadowerInstinct(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        Option o1 = new Option();
+        SkillInfo InstinctInfo = SkillData.getSkillInfoById(4221013);
+        int amount = 1;
+        if (tsm.hasStat(KillingPoint)) {
+            if (chr.hasSkill(4221013)) {
+                amount = tsm.getOption(KillingPoint).nOption;
+                if (amount < 5) {
+                    amount++;
+                }
+            }
+        }
+        o.nOption = amount;
+        tsm.putCharacterStatValue(KillingPoint, o);
+        o1.nOption = (amount * InstinctInfo.getValue(kp, InstinctInfo.getCurrentLevel()));
+        o1.rOption = 4221013;
+        o1.tOption = InstinctInfo.getValue(time, InstinctInfo.getCurrentLevel());
+        tsm.putCharacterStatValue(PAD, o1);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 

@@ -24,6 +24,13 @@ import java.util.Arrays;
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
 
+//TODO Stun Mastery
+//TODO Dash & Monkey Magic  38
+//TODO Scurvy Summons
+//TODO Roll of Dice
+//TODO Octo-Cannon
+//TODO CM - Barrel Roulette
+
 /**
  * Created on 12/14/2017.
  */
@@ -132,7 +139,7 @@ public class Pirate extends Job {
             MAPLE_WARRIOR_JETT,
     };
 
-    
+
     public Pirate(Char chr) {
         super(chr);
     }
@@ -153,11 +160,11 @@ public class Pirate extends Job {
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Speed, o1);
+                tsm.putCharacterStatValue(Speed, o1); //TODO 38s
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Jump, o2);
+                tsm.putCharacterStatValue(Jump, o2); //TODO 38s
                 break;
             case KNUCKLE_BOOSTER:
             case GUN_BOOSTER:
@@ -205,7 +212,7 @@ public class Pirate extends Job {
                 o4.nValue = si.getValue(indieJump, slv);
                 o4.tStart = (int) System.currentTimeMillis();
                 o4.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieJump, o4);
+                tsm.putCharacterStatValue(IndieJump, o4); //TODO 38s
                 o5.nReason = skillID;
                 o5.nValue = si.getValue(indieMhp, slv);
                 o5.tStart = (int) System.currentTimeMillis();
@@ -220,7 +227,7 @@ public class Pirate extends Job {
                 o7.nValue = si.getValue(indieSpeed, slv);
                 o7.tStart = (int) System.currentTimeMillis();
                 o7.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieSpeed, o7);
+                tsm.putCharacterStatValue(IndieSpeed, o7); //TODO 38s
                 break;
             case BOUNTY_CHASER:
                 o1.nOption = si.getValue(dexX, slv);

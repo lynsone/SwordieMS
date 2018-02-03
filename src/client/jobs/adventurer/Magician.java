@@ -25,6 +25,11 @@ import java.util.Arrays;
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
 
+//TODO Bishop Skills
+//TODO FP - Ignite doens't create AoE
+//TODO FP - Viral Slime shouldnt follow like a Summon
+//TODO IL&FP - Elemental Adaptation - Buff
+
 /**
  * Created on 12/14/2017.
  */
@@ -59,6 +64,19 @@ public class Magician extends Job {
     public static final int FREEZING_BREATH = 2221011;
     public static final int INFINITY_IL = 2221004;
     public static final int ELQUINES = 2221005;
+    public static final int HEAL = 2301002;
+    public static final int MAGIC_BOOSTER_BISH = 2301008;
+    public static final int BLESS = 2301004;
+    public static final int HOLY_MAGIC_SHELL = 2311009;
+    public static final int TELEPORT_MASTERY_BISH = 2311007;
+    public static final int HOLY_FOUNTAIN = 2311011;
+    public static final int DIVINE_PROTECTION = 2311012;
+    public static final int MYSTIC_DOOR = 2311002;
+    public static final int HOLY_SYMBOL = 2311003;
+    public static final int ADV_BLESSING = 2321005;
+    public static final int BAHAMUT = 2321003;
+    public static final int INFINITY_BISH = 2321004;
+    public static final int MAPLE_WARRIOR_BISH = 2321000;
     public static final int MAPLE_WARRIOR_IL = 2221000;
     public static final int ARCANE_AIM_FP = 2120010;
     public static final int ARCANE_AIM_IL = 2220010;
@@ -86,6 +104,17 @@ public class Magician extends Job {
             ELQUINES,
             MAPLE_WARRIOR_IL,
             VIRAL_SLIME,
+            MAGIC_BOOSTER_BISH,
+            BLESS,
+            HOLY_MAGIC_SHELL,
+            TELEPORT_MASTERY_BISH,
+            HOLY_FOUNTAIN,
+            DIVINE_PROTECTION,
+            MYSTIC_DOOR,
+            HOLY_SYMBOL,
+            ADV_BLESSING,
+            MAPLE_WARRIOR_BISH,
+            INFINITY_BISH,
     };
 
     public Magician(Char chr) {
@@ -108,11 +137,9 @@ public class Magician extends Job {
         }
         handleIgnite(attackInfo, chr, tsm, slv);
 
-        int arcaneAimProp = getArcaneAimProp(chr);
+        int arcaneAimProp = SkillData.getSkillInfoById(2320011).getValue(prop, skill.getCurrentLevel());
         if (hasHitMobs && Util.succeedProp(arcaneAimProp)) {
-            handleArcaneAimBishop(2320011, tsm, c);
-            handleArcaneAimFirePoison(2120010, tsm, c);
-            handleArcaneAimIceLightning(2220010, tsm, c);
+            handleArcaneAim(2320011, tsm, c);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -216,75 +243,20 @@ public class Magician extends Job {
                     field.removeLife(id);
                 }
                 break;
+            case HEAL:
+                //TODO doesn't heal
+                break;
         }
 
     }
 
-    private void handleArcaneAimFirePoison(int skillId, TemporaryStatManager tsm, Client c) {
-        Option o = new Option();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(2120010);
-        int amount = 1;
-        if (chr.hasSkill(2120010)) {
-            if (tsm.hasStat(ArcaneAim)) {
-                amount = tsm.getOption(ArcaneAim).nOption;
-                if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
-                    amount++;
-                }
-            }
-            o.nOption = amount;
-            o.rOption = 2120010;
-            o.tOption = 10; // No Time Variable
-            tsm.putCharacterStatValue(ArcaneAim, o);
-            o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
-            o1.rOption = 2120010;
-            o1.tOption = 10; // No Time Variable
-            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
-            o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
-            o2.rOption = 2120010;
-            o2.tOption = 10; // No Time Variable
-            tsm.putCharacterStatValue(DamR, o2); //TODO Damage%?
-            c.write(WvsContext.temporaryStatSet(tsm));
-        }
-    }
-
-    private void handleArcaneAimIceLightning(int skillId, TemporaryStatManager tsm, Client c) {
-        Option o = new Option();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(2220010);
-        int amount = 1;
-        if (chr.hasSkill(2220010)) {
-            if (tsm.hasStat(ArcaneAim)) {
-                amount = tsm.getOption(ArcaneAim).nOption;
-                if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
-                    amount++;
-                }
-            }
-            o.nOption = amount;
-            o.rOption = 2220010;
-            o.tOption = 10; // No Time Variable
-            tsm.putCharacterStatValue(ArcaneAim, o);
-            o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
-            o1.rOption = 2220011;
-            o1.tOption = 10; // No Time Variable
-            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
-            o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
-            o2.rOption = 2220010;
-            o2.tOption = 10; // No Time Variable
-            tsm.putCharacterStatValue(DamR, o2); //TODO Damage%?
-            c.write(WvsContext.temporaryStatSet(tsm));
-        }
-    }
-
-    private void handleArcaneAimBishop(int skillId, TemporaryStatManager tsm, Client c) {
+    private void handleArcaneAim(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
         SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(2320011);
         int amount = 1;
-        if (chr.hasSkill(2320011)) {
+        if (chr.hasSkill(2120010) || chr.hasSkill(2220010) || chr.hasSkill(2320011)) {
             if (tsm.hasStat(ArcaneAim)) {
                 amount = tsm.getOption(ArcaneAim).nOption;
                 if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
@@ -293,34 +265,18 @@ public class Magician extends Job {
             }
             o.nOption = amount;
             o.rOption = 2320011;
-            o.tOption = 10; // No Time Variable
+            o.tOption = 5; // No Time Variable
             tsm.putCharacterStatValue(ArcaneAim, o);
             o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
             o1.rOption = 2320011;
-            o1.tOption = 10; // No Time Variable
+            o1.tOption = 5; // No Time Variable
             tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
             o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
             o2.rOption = 2320011;
-            o2.tOption = 10; // No Time Variable
-            tsm.putCharacterStatValue(DamR, o2); //TODO Damage%?
+            o2.tOption = 5; // No Time Variable
+            tsm.putCharacterStatValue(DamR, o2);
             c.write(WvsContext.temporaryStatSet(tsm));
         }
-    }
-
-    private int getArcaneAimProp(Char chr) {
-        if (chr.hasSkill(2120010)) {
-            Skill skill = chr.getSkill(2120010);
-            return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
-        }
-        else if (chr.hasSkill(2220010)) {
-            Skill skill = chr.getSkill(2220010);
-            return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
-        }
-        else if (chr.hasSkill(2320011)) {
-            Skill skill = chr.getSkill(2320011);
-            return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
-        }
-        return 0;
     }
 
     private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm, int slv) {
@@ -400,6 +356,7 @@ public class Magician extends Job {
                 break;
             case MAGIC_BOOSTER_FP:
             case MAGIC_BOOSTER_IL:
+            case MAGIC_BOOSTER_BISH:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -447,6 +404,7 @@ public class Magician extends Job {
             case IFRIT:
             case ELQUINES:
             case VIRAL_SLIME:
+            case BAHAMUT:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setCharLevel((byte) chr.getStat(Stat.level));

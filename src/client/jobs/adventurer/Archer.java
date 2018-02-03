@@ -27,10 +27,12 @@ import util.Util;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static client.character.skills.SkillStat.*;
 import static client.character.skills.CharacterTemporaryStat.*;
 
+//TODO MM/BM - Passives
 
 /**
  * Created on 12/14/2017.
@@ -43,7 +45,7 @@ public class Archer extends Job {
     public static final int BOW_BOOSTER = 3101002;
     public static final int XBOW_BOOSTER = 3201002;
     public static final int QUIVER_CARTRIDGE = 3101009;
-    public static final int QUIVER_CARTRIDGE_ATOM = 3100010;
+    public static final int QUIVER_CARTRIDGE_ATOM = 13100027; //3100010;
     public static final int FLAME_SURGE = 3111003;
     public static final int PHOENIX = 3111005;
     public static final int FREEZER = 3211005;
@@ -302,12 +304,18 @@ public class Archer extends Job {
                     quiverCartridge.decrementAmount();
                     break;
                 case 3: // Magic
+                    int num;
+                    if (new Random().nextBoolean()) {
+                    num = 50;
+                    } else {
+                    num = 130;
+                    }
                     if(Util.succeedProp(si.getValue(u, slv))) {
                         quiverCartridge.decrementAmount();
                         int inc = ForceAtomEnum.BM_ARROW.getInc();
                         int type = ForceAtomEnum.BM_ARROW.getForceAtomType();
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 15,
-                                0, 0, (int) System.currentTimeMillis(), 1, 0,
+                                num, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
                         chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobId, QUIVER_CARTRIDGE_ATOM, forceAtomInfo, new Rect(), 0, 300,
@@ -468,10 +476,9 @@ public class Archer extends Job {
                 break;
             case BOW_BOOSTER:
             case XBOW_BOOSTER:
-                o1.nValue = si.getValue(x, slv);
-                o1.nReason = skillID;
-                o1.tStart = curTime;
-                o1.tTerm = si.getValue(time, slv);
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case QUIVER_CARTRIDGE:
@@ -489,6 +496,7 @@ public class Archer extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
+                summon.setMoveAction((byte) 0);
                 field.spawnSummon(summon);
                 break;
             case RECKLESS_HUNT_BOW:
@@ -521,7 +529,7 @@ public class Archer extends Job {
                 o3.nOption = si.getValue(z, slv);
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IncCriticalDamMin, o2);
+                tsm.putCharacterStatValue(IncCriticalDamMin, o3);
                 break;
             case SHARP_EYES_BOW:
             case SHARP_EYES_XBOW:

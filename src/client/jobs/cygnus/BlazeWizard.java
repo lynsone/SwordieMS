@@ -34,23 +34,23 @@ public class BlazeWizard extends Job {
     public static final int ELEMENTAL_SHIFT = 10001254;
     public static final int ELEMENTAL_HARMONY_INT = 10000248;
 
-    public static final int ORBITAL_FLAME = 12001020;
+    public static final int ORBITAL_FLAME = 12001020; //TODO
     public static final int GREATER_ORBITAL_FLAME = 12100020;
     public static final int GRAND_ORBITAL_FLAME = 12110020;
     public static final int FINAL_ORBITAL_FLAME = 12120006;
 
     public static final int IGNITION = 12101024; //Buff TODO (DoT&AoE)
-    public static final int FLASHFIRE = 12101025; //Special Skill
+    public static final int FLASHFIRE = 12101025; //Special Skill //TODO
     public static final int WORD_OF_FIRE = 12101023; //Buff
-    public static final int CONTROLLED_BURN = 121010232; //Special Skill
+    public static final int CONTROLLED_BURN = 121010232; //Special Skill //TODO
 
-    public static final int CINDER_MAELSTROM = 12111022; //Special Skill
-    public static final int PHOENIX_RUN = 12111023; //Special Buff
+    public static final int CINDER_MAELSTROM = 12111022; //Special Skill //TODO
+    public static final int PHOENIX_RUN = 12111023; //Special Buff //TODO
 
     public static final int BURNING_CONDUIT = 12121005;  //TODO Area of Effect Skill
-    public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff
-    public static final int FIRES_OF_CREATION_LION = 12120013; //Buff
-    public static final int FLAME_BARRIER = 12121003; //Buff
+    public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff //TODO give a buff
+    public static final int FIRES_OF_CREATION_LION = 12120013; //Buff //TODO give a buff
+    public static final int FLAME_BARRIER = 12121003; //Buff //TODO gives Kanna's Flame Barrier
     public static final int CALL_OF_CYGNUS_BW = 12121000; //Buff
 
     private int[] addedSkills = new int[] {

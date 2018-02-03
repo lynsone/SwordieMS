@@ -3,7 +3,8 @@ package client.character.commands;
 import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Item;
-import client.character.skills.*;
+import client.character.skills.ForceAtomInfo;
+import client.character.skills.Skill;
 import client.field.Field;
 import client.field.Portal;
 import client.life.Life;
@@ -306,6 +307,20 @@ public class AdminCommands {
         }
     }
 
+    public static class MaxSkills extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            for (Skill skill : chr.getSkills()) {
+                byte maxLevel = (byte) skill.getMaxLevel();
+                skill.setCurrentLevel(maxLevel);
+                skill.setMasterLevel(maxLevel);
+                List<Skill> list = new ArrayList<>();
+                list.add(skill);
+                chr.addSkill(skill);
+                chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+            }
+        }
+    }
+
     public static class Lookup extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 3) {
@@ -379,4 +394,5 @@ public class AdminCommands {
            chr.addMoney(mesos);
         }
     }
+
 }

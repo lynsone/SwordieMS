@@ -6,15 +6,22 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.Mob;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import enums.Stat;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import util.Position;
+import util.Rect;
+import util.Util;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -34,17 +41,16 @@ public class WindArcher extends Job {
 
     public static final int STORM_ELEMENTAL = 13001022; //Buff
 
-    public static final int TRIFLING_WIND_I = 13101022; //Special Buff (Proc) (ON/OFF)
+    public static final int TRIFLING_WIND_I = 13101022; //Special Buff (Proc) (ON/OFF) //TODO
+    public static final int TRIFLING_WIND_ATOM = 13100027;              //TODO correct?  may be 13100022
     public static final int BOW_BOOSTER = 13101023; //Buff
     public static final int SYLVAN_AID = 13101024; //Buff
 
-    public static final int TRIFLING_WIND_II = 13110022; //Special Buff Upgrade //TODO Should this be included?
-    public static final int TRIFLING_WIND_II_2 = 13110027; //Special Buff Upgrade2 //TODO Should this be included?
-    public static final int ALBATROSS = 13111023; //Buff
+    public static final int TRIFLING_WIND_II = 13110022; //Special Buff Upgrade
+    public static final int ALBATROSS = 13111023; //Buff //TODO new ID upon levelling the 4th Job upgrade
     public static final int EMERALD_FLOWER = 13111024; //Summon (Stationary, No Attack, Aggros)
 
-    public static final int TRIFLING_WIND_III = 13120003; //Special Buff Upgrade //TODO Should this be included?
-    public static final int TRIFLING_WIND_III_2 = 13120010; //Special Buff Upgrade2 //TODO Should this be included?
+    public static final int TRIFLING_WIND_III = 13120003; //Special Buff Upgrade
     public static final int SHARP_EYES = 13121005; //Buff
     public static final int TOUCH_OF_THE_WIND = 13121004; //Buff
     public static final int CALL_OF_CYGNUS_WA = 13121000; //Buff
@@ -67,11 +73,7 @@ public class WindArcher extends Job {
             SHARP_EYES,
             TOUCH_OF_THE_WIND,
             CALL_OF_CYGNUS_WA,
-            TRIFLING_WIND_I,
-            TRIFLING_WIND_II, //TODO Should this be included?
-            TRIFLING_WIND_II_2, //TODO Should this be included?
-            TRIFLING_WIND_III, //TODO Should this be included?
-            TRIFLING_WIND_III_2, //TODO Should this be included?
+            TRIFLING_WIND_I, //ON/OFF Skill
     };
 
     public WindArcher(Char chr) {
@@ -120,7 +122,7 @@ public class WindArcher extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(CriticalBuff, o2);
-                o3.nOption = 1; //TODO Correct?
+                o3.nOption = 1;
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(SoulArrow, o3);
@@ -155,8 +157,7 @@ public class WindArcher extends Job {
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IncCriticalDamMax, o2);
-                // TODO What about the SharpEyes TempStat?
+                tsm.putCharacterStatValue(SharpEyes, o2);
                 break;
             case TOUCH_OF_THE_WIND: // x = Dex%   avoid/acc = y
                 o1.nReason = skillID;
@@ -190,6 +191,13 @@ public class WindArcher extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
 
+            case TRIFLING_WIND_I:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(TriflingWhimOnOff, o1);
+                break;
+
             case EMERALD_FLOWER:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
@@ -209,13 +217,120 @@ public class WindArcher extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    private void handleTriflingWind(int skillID, byte slv, AttackInfo attackInfo) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            if (tsm.hasStat(TriflingWhimOnOff)) {
+                SkillInfo si = SkillData.getSkillInfoById(TRIFLING_WIND_I);
+                int anglenum;
+                if (new Random().nextBoolean()) {
+                    anglenum = 0;
+                } else {
+                    anglenum = 180;
+                }
+                int delaynum = new Random().nextInt(90); //Random delay between 0~90ms
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    int TW2subprop = getSubProp(chr);
+                    int TW1prop = getProp(chr);
+                    if (Util.succeedProp(TW1prop)) {
+                        if (Util.succeedProp(TW2subprop)) {
+                            int mobID = mai.mobId;
+                            int inc = ForceAtomEnum.WA_ARROW_2.getInc();
+                            int type = ForceAtomEnum.WA_ARROW_2.getForceAtomType();
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 65, 15,
+                                    anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
+                                    new Position(35, 0)); //Slightly behind the player
+                            chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                    true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                                    mob.getPosition(), 0, mob.getPosition()));
+                        } else {
+                            int mobID = mai.mobId;
+                            int inc = ForceAtomEnum.WA_ARROW_1.getInc();
+                            int type = ForceAtomEnum.WA_ARROW_1.getForceAtomType();
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 65, 15,
+                                    anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
+                                    new Position(35, 0)); //Slightly behind the player
+                            chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                    true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                                    mob.getPosition(), 0, mob.getPosition()));
+                        }
+                    }
+                }
+            }
+    }
+
+    private int getProp(Char chr) {
+        Skill skill = null;
+        if (chr.hasSkill(TRIFLING_WIND_I)) {
+            skill = chr.getSkill(TRIFLING_WIND_I);
+        } else if (chr.hasSkill(TRIFLING_WIND_II)) {
+            skill = chr.getSkill(TRIFLING_WIND_II);
+        } else if (chr.hasSkill(TRIFLING_WIND_III)) {
+            skill = chr.getSkill(TRIFLING_WIND_III);
+        }
+        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
+    }
+
+    private int getSubProp(Char chr) {
+        Skill skill = null;
+        if (chr.hasSkill(TRIFLING_WIND_I)) {
+            skill = chr.getSkill(TRIFLING_WIND_I);
+        }
+        if (chr.hasSkill(TRIFLING_WIND_II)) {
+            skill = chr.getSkill(TRIFLING_WIND_II);
+        }
+        if (chr.hasSkill(TRIFLING_WIND_III)) {
+            skill = chr.getSkill(TRIFLING_WIND_III);
+        }
+        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(subProp, skill.getCurrentLevel());
+    }
+
+    private int getMaxTriffling(Char chr) {
+        Skill skill = null;
+        if (chr.hasSkill(TRIFLING_WIND_I)) {
+            skill = chr.getSkill(TRIFLING_WIND_I);
+        }
+        if (chr.hasSkill(TRIFLING_WIND_II)) {
+            skill = chr.getSkill(TRIFLING_WIND_II);
+        }
+        if (chr.hasSkill(TRIFLING_WIND_III)) {
+            skill = chr.getSkill(TRIFLING_WIND_III);
+        }
+        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
+    }
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            if (skillID != 0) {
+                int maxtrif = getMaxTriffling(chr);
+                for (int i = 0; i < maxtrif; i++) {
+                    handleTriflingWind(skillID, slv, attackInfo);
+                }
+            }
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
 
+        }
     }
 
     @Override
@@ -234,13 +349,7 @@ public class WindArcher extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
-                case TRIFLING_WIND_I:
-                case TRIFLING_WIND_II:
-                case TRIFLING_WIND_II_2:
-                case TRIFLING_WIND_III:
-                case TRIFLING_WIND_III_2:
-                    // TODO
-                    break;
+
             }
         }
     }

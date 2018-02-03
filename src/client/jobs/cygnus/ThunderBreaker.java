@@ -150,7 +150,6 @@ public class ThunderBreaker extends Job {
             amount = tsm.getOption(IgnoreTargetDEF).mOption;
             if(amount < getMaxCharge(chr)) {
                 amount++;
-            } else {
             }
         }
         o.nOption = 1;

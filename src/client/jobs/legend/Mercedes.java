@@ -113,7 +113,7 @@ public class Mercedes extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(TerR, o2);
                 break;
-            case ANCIENT_WARDING:
+            case ANCIENT_WARDING: //TODO 38s unsure what TempStat causes it
                 o1.nOption = si.getValue(emhp, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -131,7 +131,7 @@ public class Mercedes extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-            case ELEMENTAL_KNIGHTS:
+            case ELEMENTAL_KNIGHTS: //TODO allow for different summons (blue/red/purple)
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setCharLevel((byte) chr.getStat(Stat.level));

@@ -134,12 +134,12 @@ public class Luminous extends Job {
         int amount = 1;
         if(chr.hasSkill(20040216)) {
             amount = tsm.getOption(Larkness).nOption;
-            if(amount < larknessInfo.getValue(y, 1)) {
-                amount = tsm.getOption(Larkness).nOption + 10;
+            if(amount < 10000/*larknessInfo.getValue(y, 1)*/) {
+                amount = tsm.getOption(Larkness).nOption + 1000;
             }
         }
 
-        o.nOption = 1;
+        o.nOption = amount;
         o.rOption = 20040216;
         o.tOption = 0;
         tsm.putCharacterStatValue(Larkness, o);
@@ -147,6 +147,7 @@ public class Luminous extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    //TODO handle LifeTidal (Skill : LunarTide)
 
     private void handleDarkCrescendo(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
@@ -185,13 +186,12 @@ public class Luminous extends Job {
         return SkillData.getSkillInfoById(27121005).getValue(prop, chr.getSkill(27121005).getCurrentLevel());
     }
 
-    private int getMaxStack(Char chr) { //TODO Doesn't function correctly stays at 5
+    private int getMaxStack(Char chr) {
         Skill skill = null;
         if (chr.hasSkill(27121005)) {
             skill = chr.getSkill(27121005);
         }
         return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
-        // x formula = 5 + d(1/3)       hence why it may stay at 5
     }
 
     private boolean isBuff(int skillID) {

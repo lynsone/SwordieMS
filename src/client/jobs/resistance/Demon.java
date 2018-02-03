@@ -255,6 +255,9 @@ public class Demon extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        if (chr.getJob() == 3101 || chr.getJob() == 3120 || chr.getJob() == 3121 || chr.getJob() == 3122) {
+            handleOverloadCount(skill.getSkillId(), tsm, c);
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -343,7 +346,7 @@ public class Demon extends Job {
 
 
             case EXCEED_DOUBLE_SLASH_1:
-                handleOverloadCount(31011000, tsm, c);
+                handleOverloadCount(skill.getSkillId(), tsm, c);
                 break;
             case EXCEED_DOUBLE_SLASH_2:
                 handleOverloadCount(31011004, tsm, c);
@@ -405,6 +408,7 @@ public class Demon extends Job {
             case EXCEED_EXECUTION_PURPLE:
                 handleOverloadCount(31221012, tsm, c);
                 break;
+
         }
     }
 

@@ -16,6 +16,7 @@ import enums.MobStat;
 import enums.Stat;
 import loaders.SkillData;
 import packet.WvsContext;
+import util.Util;
 
 import java.util.Arrays;
 
@@ -169,13 +170,6 @@ public class NightWalker extends Job {
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(NightWalkerBat, o1);
                 break;
-          /*case VITALITY_SIPHON:
-                o1.nOption = si.getValue(y, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(MaxHP, o1);
-                break;
-          */
 
             case DARK_OMEN:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -234,6 +228,12 @@ public class NightWalker extends Job {
       //if(hasHitMobs) {
       //    handleBat(skillID, slv, attackInfo);
       //} //TODO uncomment once bats are fixed
+
+        if (chr.hasSkill(14120009)) {
+            if (hasHitMobs && Util.succeedProp(SkillData.getSkillInfoById(14001021).getValue(prop, slv))) { //TODO get Mark of Darkness Prop (needs a handler)
+                handleSiphonVitality(skill.getSkillId(), tsm, c);
+            }
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -251,17 +251,7 @@ public class NightWalker extends Job {
                 }
                 break;
 
-            case LUCKY_SEVEN:
-            case TRIPLE_THROW:
-            case QUAD_STAR:
-            case SHADOW_SPARK:
-            case DARK_OMEN:
-            case QUINT_THROW:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    handleSiphonVitality(skill.getSkillId(), tsm, c);
-                }
-                break;
+            //TODO case All attacks give DoT debuff
         }
     }
 

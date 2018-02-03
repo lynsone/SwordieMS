@@ -25,6 +25,8 @@ import java.util.Arrays;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
+//TODO Paladin Divine Shield & Guardian
+//TODO DarkKnight Sacrifice & Evil Eye
 
 /**
  * Created on 12/14/2017.
@@ -184,7 +186,7 @@ public class Warrior extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Invincible, o1);
+                tsm.putCharacterStatValue(Invincible, o1); //TODO Doesn't actually give invincibility
                 break;
             case IRON_WILL:
                 o1.nOption = si.getValue(pdd, slv);
@@ -347,6 +349,7 @@ public class Warrior extends Job {
                 slv = orig.getCurrentLevel();
                 si = SkillData.getSkillInfoById(SHOUT_DOWN);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    removeCombo(chr, 1);
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(mob.isBoss()) {
@@ -536,7 +539,7 @@ public class Warrior extends Job {
                         }
                     }
                     break;
-                case MAGIC_CRASH_DRK: //TODO Correct?
+                case MAGIC_CRASH_DRK:
                 case MAGIC_CRASH_HERO:
                 case MAGIC_CRASH_PALLY:
                     Rect rect2 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()

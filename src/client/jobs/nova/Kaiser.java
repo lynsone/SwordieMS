@@ -259,7 +259,7 @@ public class Kaiser extends Job {
 
                 // Note:  Higher Morph IDs = Different Colour Trimmings on Kaiser's Final Form
 
-            case STONE_DRAGON:      // Also Pulls mobs
+            case STONE_DRAGON:
             case STONE_DRAGON_FINAL_FORM:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
@@ -369,13 +369,20 @@ public class Kaiser extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        /*int rootSkill = skill.getRootId();
+        if (skill == null) {
+            handleMorphGauge(rootSkill, tsm, c, 100);
+        } else {
+            handleMorphGauge(skill.getSkillId(), tsm, c, 100);
+        }*/
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
+            //  morph gauge increases by    [increment]    every mob hit with this skill
             case DRAGON_SLASH_1:
                 if(hasHitMobs) {
-                    handleMorphGauge(61001000, tsm, c, 3 * attackInfo.mobAttackInfo.size());    //morph gauge increases by    [increment]    every mob hit with this skill
+                    handleMorphGauge(61001000, tsm, c, 3 * attackInfo.mobAttackInfo.size());
                 }
                 break;
             case DRAGON_SLASH_2:

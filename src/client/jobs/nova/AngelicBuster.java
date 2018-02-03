@@ -10,12 +10,17 @@ import client.life.MobTemporaryStat;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import enums.MobStat;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -41,6 +46,7 @@ public class AngelicBuster extends Job {
     public static final int POWER_TRANSFER = 65101002; //Buff
 
     public static final int SOUL_SEEKER = 65111100; //TODO Recharge Attack
+    public static final int SOUL_SEEKER_ATOM = 65111007;
     public static final int SHINING_STAR_BURST = 65111101; //TODO Recharge Attack
     public static final int HEAVENLY_CRASH = 65111002; //TODO Recharge Attack
     public static final int IRON_BLOSSOM = 65111004; //Buff
@@ -50,6 +56,7 @@ public class AngelicBuster extends Job {
     public static final int FINALE_RIBBON = 65121002; //TODO Recharge Attack + (DmgUp Debuff)
     public static final int STAR_GAZER = 65121004; //Buff
     public static final int NOVA_WARRIOR_AB = 65121009; //Buff
+    public static final int SOUL_SEEKER_EXPERT = 65121011; //ON/OFF Buff
 
     private int[] addedSkills = new int[] {
             DRESS_UP,
@@ -66,6 +73,7 @@ public class AngelicBuster extends Job {
             IRON_BLOSSOM,
             STAR_GAZER,
             NOVA_WARRIOR_AB,
+            SOUL_SEEKER_EXPERT,
     };
 
     public AngelicBuster(Char chr) {
@@ -111,7 +119,7 @@ public class AngelicBuster extends Job {
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IncCriticalDamMax, o1);
+                tsm.putCharacterStatValue(SharpEyes, o1); //Changed IncCriticalDamMax to SharpEyes
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
@@ -124,8 +132,43 @@ public class AngelicBuster extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
+            case SOUL_SEEKER_EXPERT:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(AngelicBursterSoulSeeker, o1);
+                break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private void handleSoulSeekerExpert(int skillID, byte slv, AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(AngelicBursterSoulSeeker)) {
+            SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT);
+            int anglenum;
+            if (new Random().nextBoolean()) {
+                anglenum = 50;
+            } else {
+                anglenum = 130;
+            }
+            int delaynum = new Random().nextInt(50); //Random delay between 0~90ms
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                int TW1prop = 100;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change
+                if (Util.succeedProp(TW1prop)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.AB_ORB.getInc();
+                        int type = ForceAtomEnum.AB_ORB.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                                anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
+                                new Position(5, 0)); //Slightly behind the player
+                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
+                }
+            }
+        }
     }
 
     private boolean isBuff(int skillID) {
@@ -140,20 +183,26 @@ public class AngelicBuster extends Job {
         int skillID = 0;
         SkillInfo si = null;
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
+        byte slv = 0;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
+            slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            if (skillID != SOUL_SEEKER_ATOM) {
+                handleSoulSeekerExpert(skillID, slv, attackInfo);
+            }
         }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case AB_NORMAL_ATTACK:
+                handleSoulSeekerExpert(60011216, slv, attackInfo);
+                break;
             case STAR_BUBBLE:
             case PINK_PUMMEL:
-            case SOUL_SEEKER:
             case SHINING_STAR_BURST:
             case HEAVENLY_CRASH:
             case TRINITY:           //Only Recharge
@@ -176,7 +225,7 @@ public class AngelicBuster extends Job {
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.SoulExplosion, o1); //TODO Look for exact Debuff
+                        //mts.addStatOptionsAndBroadcast(MobStat.SoulExplosion, o1); //TODO Look for exact Debuff
                     } else if(Util.succeedProp(si.getValue(OnActive, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat(); //TODO Replace with Character Temp Stat
@@ -224,6 +273,9 @@ public class AngelicBuster extends Job {
                         //mts.addStatOptionsAndBroadcast(AB Recharge, o1); //TODO AB Recharge Temp Stat/Method
                     }
                 }
+                break;
+            case SOUL_SEEKER:
+                handleSoulSeekerExpert(65111100, slv, attackInfo); //TODO
                 break;
         }
     }
