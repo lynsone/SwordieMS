@@ -602,20 +602,20 @@ public class CField {
         outPacket.encodeShort(chr.getJob());
         outPacket.encodeShort(chr.getStat(Stat.subJob));
         outPacket.encodeByte(cs.getPvpGrade());
-        outPacket.encodeInt(cs.getPop());
-        MarriageRecord mr = chr.getMarriageRecord();
-        outPacket.encodeByte(mr != null);
-        if(mr != null) {
-            mr.encode(outPacket);
+        outPacket.encodeInt(cs.getPop()); //Fame
+        MarriageRecord marriage = chr.getMarriageRecord();
+        outPacket.encodeByte(marriage != null);
+        if(marriage != null) {
+            marriage.encode(outPacket);
         }
-        outPacket.encodeByte(0); // size(byte) of productSkill(short); stuff like mining, herblore, etc...
-        outPacket.encodeString("Community");
-        outPacket.encodeString("Best guild EU");
-        outPacket.encodeByte(0); // Forced pet IDx
+        outPacket.encodeByte(0); // size(byte) of productSkill(Professions)(short); stuff like mining, herblore, etc...
+        outPacket.encodeString("-");
+        outPacket.encodeString("");
+        outPacket.encodeByte(-1); // Forced pet IDx
         outPacket.encodeByte(0); // User state (?)
         outPacket.encodeByte(false); // pet activated
         outPacket.encodeByte(0); // CUIUserInfo::SetPetInfo
-        outPacket.encodeByte(0); // Wish list
+        outPacket.encodeByte(0); // old Wish list
         // MedalAchievementInfo::Decode
         Equip medal = (Equip) chr.getEquippedItemByBodyPart(BodyPart.MEDAL);
         outPacket.encodeInt(medal == null ? 0 : medal.getItemId());
@@ -623,8 +623,18 @@ public class CField {
         // for each medal, encode stuff (check ida)
         // End MedalAchievementInfo::Decode
         // DamageSkinSaveInfo::Decode
-        outPacket.encodeByte(0); // size
+        outPacket.encodeByte(1); // size
         // check ida for structure
+        outPacket.encodeInt(0);
+        outPacket.encodeInt(2431965);
+        outPacket.encodeByte(0);
+        outPacket.encodeString("This is a basic Damage Skin.\r\n\r\n\r\n\r\n\r\n");
+        outPacket.encodeInt(-1);
+        outPacket.encodeInt(0);
+        outPacket.encodeByte(1);;
+        outPacket.encodeString("");
+        outPacket.encodeShort(0);
+        outPacket.encodeShort(0);
         // End DamageSkinSaveInfo::Decode
         outPacket.encodeByte(cs.getNonCombatStatDayLimit().getCharisma());
         outPacket.encodeByte(cs.getNonCombatStatDayLimit().getInsight());
@@ -645,6 +655,14 @@ public class CField {
         outPacket.encodeInt(13); // nFarmSlotExtend
         outPacket.encodeInt(13); // nFarmLockerSlotCount
         // End FarmUserInfo::Decode
+        outPacket.encodeInt(0);
+        outPacket.encodeInt(0);
+        //Chairs
+        outPacket.encodeInt(0); //chair amount(size)
+        outPacket.encodeInt(0);
+        outPacket.encodeInt(30);
+        outPacket.encodeInt(0);
+
 
         return outPacket;
     }

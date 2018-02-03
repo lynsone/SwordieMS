@@ -806,6 +806,23 @@ public class WorldHandler {
         }
     }
 
+    public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket){
+        Char chr = c.getChr();
+        Field field = chr.getField();
+    System.out.println("Gets into handleUserGrowthRequestHelper");
+    inPacket.decodeShort();
+    int mapleGuideMapId = inPacket.decodeInt();
+        Field toField = chr.getClient().getChannelInstance().getField(mapleGuideMapId);
+        chr.setField(toField);
+        Portal toPortal = toField.getPortalByID(0);
+        field.removeChar(chr);
+        toField.addChar(chr);
+        chr.getClient().write(Stage.setField(chr, toField, chr.getClient().getChannel(), false, 0, false, chr.hasBuffProtector(),
+                (byte) toPortal.getId(), false, 100, null, false, -1));
+        toField.spawnLifesForChar(chr);
+    System.out.println(mapleGuideMapId);
+
+    }
     public static void handleTemporaryStatResetRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();

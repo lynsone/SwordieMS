@@ -18,11 +18,11 @@ public class MarriageRecord {
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getMarriageNo());
         outPacket.encodeInt(getGroomId());
-        outPacket.encodeInt(getBridgeId());
+        outPacket.encodeInt(getBrideId());
         outPacket.encodeShort(getStatus());
         outPacket.encodeInt(getGroomItemId());
         outPacket.encodeInt(getBrideItemId());
-        outPacket.encodeString(getGroomName(), 13);
+        outPacket.encodeString(getGroomName(), 13); //max length 13
         outPacket.encodeString(getBridgeName(), 13);
     }
 
@@ -42,7 +42,7 @@ public class MarriageRecord {
         this.groomId = groomId;
     }
 
-    public int getBridgeId() {
+    public int getBrideId() {
         return brideId;
     }
 

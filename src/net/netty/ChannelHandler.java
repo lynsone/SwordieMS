@@ -246,6 +246,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case MOB_APPLY_CTRL:
 //                    WorldHandler.handleMobApplyCtrl(c, inPacket);
                     break;
+                case USER_GROWTH_HELPER_REQUEST:
+                    WorldHandler.handleUserGrowthRequestHelper(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

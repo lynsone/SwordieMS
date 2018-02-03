@@ -204,7 +204,7 @@ public class CharacterStat {
         return mp;
     }
 
-    public short getPop() {
+    public short getPop() { //Fame
         return (short) pop;
     }
 
