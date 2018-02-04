@@ -2,14 +2,12 @@ package client.character;
 
 import client.Client;
 import client.character.items.*;
-import client.character.skills.Core;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.field.Field;
 import client.field.Portal;
 import client.jobs.Job;
 import client.jobs.JobManager;
-import client.jobs.resistance.WildHunter;
 import client.jobs.resistance.WildHunterInfo;
 import connection.OutPacket;
 import constants.GameConstants;
@@ -31,7 +29,6 @@ import util.FileTime;
 import loaders.ItemData;
 import util.Position;
 import util.Rect;
-import util.Util;
 
 import javax.persistence.*;
 import java.util.*;
@@ -49,7 +46,8 @@ public class Char {
     @Transient
     private Client client;
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
@@ -134,6 +132,8 @@ public class Char {
     @Transient
     private WildHunterInfo wildHunterInfo;
     @Transient
+    private ZeroInfo zeroInfo;
+    @Transient
     private int nickItem;
     @Transient
     private int damageSkin;
@@ -157,12 +157,12 @@ public class Char {
         avatarLook.setFace(items.length > 0 ? items[0] : 0);
         avatarLook.setHair(items.length > 1 ? items[1] : 0);
         List<Integer> hairEquips = new ArrayList<>();
-        for(int itemId : items) {
+        for (int itemId : items) {
             Equip equip = ItemData.getEquipDeepCopyFromId(itemId);
-            if(equip != null) {
+            if (equip != null) {
                 hairEquips.add(itemId);
-                if(equip.getiSlot().equals("Wp")) {
-                    if(!equip.isCash()) {
+                if (equip.getiSlot().equals("Wp")) {
+                    if (!equip.isCash()) {
                         avatarLook.setWeaponId(itemId);
                     } else {
                         avatarLook.setWeaponStickerId(itemId);
@@ -191,7 +191,7 @@ public class Char {
         getAvatarData().setCharacterStat(characterStat);
         ranking = new Ranking();
         pets = new ArrayList<>();
-        for(int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             pets.add(new Pet());
         }
         stolenSkills = new ArrayList<>();
@@ -216,7 +216,7 @@ public class Char {
         for (Inventory inventory : getInventories()) {
             inventory.updateDB(session, tx);
         }
-        for(Skill s : getSkills()) {
+        for (Skill s : getSkills()) {
             s.updateDB(session, tx);
         }
         session.saveOrUpdate(this);
@@ -260,7 +260,7 @@ public class Char {
 
     public AvatarData getAvatarData() {
         return avatarData;
-}
+    }
 
     public Ranking getRanking() {
         return ranking;
@@ -292,13 +292,13 @@ public class Char {
 
     public void addItemToInventory(InvType type, Item item, boolean hasCorrectBagIndex) {
         Inventory inventory = getInventoryByType(type);
-        if(inventory != null) {
+        if (inventory != null) {
             item.setInventoryId(inventory.getId());
-            if(!hasCorrectBagIndex) {
+            if (!hasCorrectBagIndex) {
                 item.setBagIndex(inventory.getFirstOpenSlot());
             }
             inventory.addItem(item);
-            if(item.getId() == 0) {
+            if (item.getId() == 0) {
                 item.updateDB();
             }
         }
@@ -348,7 +348,8 @@ public class Char {
         this.cashInventory = cashInventory;
     }
 
-    public void encode(OutPacket outPacket, DBChar mask) {
+    public void encode(OutPacket outPacket, DBChar mask, Char chr) {
+
         // CharacterData::Decode
         outPacket.encodeLong(mask.get());
         outPacket.encodeByte(getCombatOrders());
@@ -798,6 +799,7 @@ public class Char {
             }
         }
         if (mask.isInMask(DBChar.Avatar)) {
+
             short size = 0;
             outPacket.encodeShort(size);
             for (int i = 0; i < size; i++) {
@@ -820,7 +822,7 @@ public class Char {
         }
         if (mask.isInMask(DBChar.ZeroInfo)) {
             if (JobConstants.isZero(getAvatarData().getCharacterStat().getJob())) {
-//                getZeroInfo().encode(outPacket);
+                getZeroInfo().encode(outPacket); //ZeroInfo::Decode
             }
         }
         if (mask.isInMask(DBChar.ShopBuyLimit)) {
@@ -1179,7 +1181,7 @@ public class Char {
     }
 
     public Inventory getInventoryByType(InvType invType) {
-        switch(invType) {
+        switch (invType) {
             case EQUIPPED:
                 return getEquippedInventory();
             case EQUIP:
@@ -1241,7 +1243,7 @@ public class Char {
 
     public void setJob(int id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById((short) id);
-        if(job == null) {
+        if (job == null) {
             return;
         }
         setJobHandler(JobManager.getJobById(getJob(), this));
@@ -1256,7 +1258,7 @@ public class Char {
     }
 
     public void setSpToCurrentJob(int num) {
-        if(JobConstants.isExtendSpJob(getJob())) {
+        if (JobConstants.isExtendSpJob(getJob())) {
             byte jobLevel = (byte) JobConstants.getJobLevel(getJob());
             getAvatarData().getCharacterStat().getExtendSP().setSpToJobLevel(jobLevel, num);
         } else {
@@ -1274,7 +1276,7 @@ public class Char {
 
     public void addSkill(Skill skill) {
         skill.setCharId(getId());
-        if(getSkills().stream().noneMatch(s -> s.getSkillId() == skill.getSkillId())) {
+        if (getSkills().stream().noneMatch(s -> s.getSkillId() == skill.getSkillId())) {
             getSkills().add(skill);
         } else {
             Skill oldSkill = getSkill(skill.getSkillId());
@@ -1305,9 +1307,9 @@ public class Char {
         addSkill(skill);
         return skill;
     }
-    
+
     public void setStat(Stat charStat, int amount) {
-        switch(charStat) {
+        switch (charStat) {
             case str:
                 getAvatarData().getCharacterStat().setStr(amount);
                 break;
@@ -1340,10 +1342,10 @@ public class Char {
                 break;
         }
     }
-    
+
     public int getStat(Stat charStat) {
         CharacterStat cs = getAvatarData().getCharacterStat();
-        switch(charStat) {
+        switch (charStat) {
             case str:
                 return cs.getStr();
             case dex:
@@ -1367,30 +1369,32 @@ public class Char {
         }
         return -1;
     }
-    
+
     public void addStat(Stat charStat, int amount) {
         setStat(charStat, getStat(charStat) + amount);
     }
 
     /**
      * Adds a certain amount of money to the current character. Also sends the packet to update the client's state.
+     *
      * @param amount The amount of money to add. May be negative.
      */
     public void addMoney(long amount) {
         CharacterStat cs = getAvatarData().getCharacterStat();
         long money = cs.getMoney();
         long newMoney = money + amount;
-        if(newMoney >= 0) {
+        if (newMoney >= 0) {
             newMoney = Math.min(GameConstants.MAX_MONEY, newMoney);
             Map<Stat, Object> stats = new HashMap<>();
             cs.setMoney(newMoney);
             stats.put(Stat.money, newMoney);
-            write(WvsContext.statChanged(stats, true));
+            write(WvsContext.statChanged(stats));
         }
     }
 
     /**
      * The same as addMoney, but negates the amount.
+     *
      * @param amount The money to deduct. May be negative.
      */
     public void deductMoney(long amount) {
@@ -1421,7 +1425,7 @@ public class Char {
         getInventoryByType(EQUIPPED).removeItem(item);
         getInventoryByType(EQUIP).addItem(item);
         List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-        if(hairEquips.contains(item.getItemId())) {
+        if (hairEquips.contains(item.getItemId())) {
             hairEquips.remove((Integer) item.getItemId());
         }
     }
@@ -1430,7 +1434,7 @@ public class Char {
         getInventoryByType(EQUIP).removeItem(item);
         getInventoryByType(EQUIPPED).addItem(item);
         List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-        if(!hairEquips.contains(item.getItemId())) {
+        if (!hairEquips.contains(item.getItemId())) {
             hairEquips.add(item.getItemId());
         }
     }
@@ -1509,7 +1513,7 @@ public class Char {
         int level = getStat(Stat.level);
         long newExp = curExp + amount;
         Map<Stat, Object> stats = new HashMap<>();
-        while(newExp > GameConstants.charExp[level]) {
+        while (newExp > GameConstants.charExp[level]) {
             newExp -= GameConstants.charExp[level];
             addStat(Stat.level, 1);
             stats.put(Stat.level, (byte) getStat(Stat.level));
@@ -1519,7 +1523,7 @@ public class Char {
         cs.setExp(newExp);
         stats.put(Stat.exp, newExp);
 
-        getClient().write(WvsContext.statChanged(stats, true));
+        getClient().write(WvsContext.statChanged(stats));
     }
 
     public void write(OutPacket outPacket) {
@@ -1534,8 +1538,17 @@ public class Char {
         return wildHunterInfo;
     }
 
+
     public void setWildHunterInfo(WildHunterInfo wildHunterInfo) {
         this.wildHunterInfo = wildHunterInfo;
+    }
+
+    public ZeroInfo getZeroInfo() {
+        return zeroInfo;
+    }
+
+    public void setZeroInfo(ZeroInfo zeroInfo) {
+        this.zeroInfo = zeroInfo;
     }
 
     public int getNickItem() {
@@ -1568,5 +1581,54 @@ public class Char {
 
     public boolean isPartyInvitable() {
         return partyInvitable;
+    }
+
+    public boolean isZeroBeta() {
+        return getZeroInfo() != null && getZeroInfo().isZeroBetaState();
+    }
+
+    /**
+     * Zero only.
+     * Goes into Beta form if Alpha, and into Alpha if Beta.
+     */
+    public void swapZeroState() {
+        if(!(JobConstants.isZero(getJob())) || getZeroInfo() == null) {
+            return;
+        }
+        ZeroInfo oldInfo = getZeroInfo().deepCopy();
+        ZeroInfo currentInfo = getZeroInfo();
+        CharacterStat cs = getAvatarData().getCharacterStat();
+        currentInfo.setZeroBetaState(!oldInfo.isZeroBetaState());
+        AvatarLook newLook = getAvatarData().getAvatarLook(currentInfo.isZeroBetaState());
+        currentInfo.setSubHP(cs.getHp());
+        currentInfo.setSubMHP(cs.getMaxHp());
+        currentInfo.setSubMP(cs.getMp());
+        currentInfo.setSubMMP(cs.getMaxMp());
+        currentInfo.setSubSkin(newLook.getSkin());
+        currentInfo.setSubFace(newLook.getFace());
+        currentInfo.setSubHair(newLook.getHair());
+        cs.setHp(oldInfo.getSubHP());
+        cs.setMaxHp(oldInfo.getSubMHP());
+        cs.setMp(oldInfo.getSubMP());
+        cs.setMaxMp(oldInfo.getSubMMP());
+        cs.setSkin(oldInfo.getSubSkin());
+        cs.setHair(oldInfo.getSubHair());
+        cs.setFace(oldInfo.getSubFace());
+        Map<Stat, Object> updatedStats = new HashMap<>();
+        updatedStats.put(Stat.hp, cs.getHp());
+        updatedStats.put(Stat.mhp, cs.getHp());
+        updatedStats.put(Stat.mp, cs.getHp());
+        updatedStats.put(Stat.mmp, cs.getHp());
+        write(WvsContext.statChanged(updatedStats));
+        write(WvsContext.zeroInfo(currentInfo));
+    }
+
+    public void initZeroInfo() {
+        ZeroInfo zeroInfo = new ZeroInfo();
+        CharacterStat cs = getAvatarData().getCharacterStat();
+        zeroInfo.setSubHP(cs.getHp());
+        zeroInfo.setSubMHP(cs.getMaxHp());
+        zeroInfo.setSubMP(cs.getMp());
+        zeroInfo.setSubMMP(cs.getMaxMp());
     }
 }

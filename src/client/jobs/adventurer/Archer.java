@@ -296,7 +296,7 @@ public class Archer extends Job {
                         chr.setStat(Stat.hp, (short) newHP);
                         Map<Stat, Object> stats = new HashMap<>();
                         stats.put(Stat.hp, newHP);
-                        c.write(WvsContext.statChanged(stats, false));
+                        c.write(WvsContext.statChanged(stats));
                     }
                     break;
                 case 2: // Poison

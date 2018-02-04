@@ -17,7 +17,6 @@ import javax.persistence.*;
 @Table(name = "avatarData")
 public class AvatarData {
 
-    //private AvatarLook zeroAvatarLook; // TODO DB This
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
@@ -27,8 +26,9 @@ public class AvatarData {
     @JoinColumn(name = "avatarLook")
     @OneToOne
     private AvatarLook avatarLook;
-
-
+    @JoinColumn(name = "zeroAvatarLook")
+    @OneToOne
+    private AvatarLook zeroAvatarLook;
 
     public AvatarLook getAvatarLook() {
         return avatarLook;
@@ -38,11 +38,19 @@ public class AvatarData {
         return characterStat;
     }
 
+    public AvatarLook getZeroAvatarLook() {
+        return zeroAvatarLook;
+    }
+
+    public void setZeroAvatarLook(AvatarLook zeroAvatarLook) {
+        this.zeroAvatarLook = zeroAvatarLook;
+    }
+
     public void encode(OutPacket outPacket) {
         characterStat.encode(outPacket);
         avatarLook.encode(outPacket);
         if(JobConstants.isZero(getCharacterStat().getJob())) {
-            //zeroAvatarLook.encode(outPacket); TODO
+            zeroAvatarLook.encode(outPacket);
         }
     }
 
@@ -64,19 +72,32 @@ public class AvatarData {
 
     public void updateDB(Session session, Transaction tx) {
         getAvatarLook().updateDB(session, tx);
+        if(getZeroAvatarLook() != null) {
+            getZeroAvatarLook().updateDB(session, tx);
+        }
         getCharacterStat().updateDB(session, tx);
         session.saveOrUpdate(this);
     }
 
     public void createInDB(Session session, Transaction tx) {
         getAvatarLook().createInDB(session, tx);
+        if(getZeroAvatarLook() != null) {
+            getZeroAvatarLook().createInDB(session, tx);
+        }
         getCharacterStat().createInDB(session, tx);
         session.save(this);
     }
 
     public void deleteFromDB(Session session, Transaction tx) {
         getAvatarLook().deleteFromDB(session, tx);
+        if(getZeroAvatarLook() != null) {
+            getZeroAvatarLook().deleteFromDB(session, tx);
+        }
         getCharacterStat().deleteFromDB(session, tx);
         session.delete(this);
+    }
+
+    public AvatarLook getAvatarLook(boolean zeroBetaState) {
+        return zeroBetaState ? getZeroAvatarLook() : getAvatarLook();
     }
 }

@@ -30,8 +30,8 @@ public class WvsContext {
                 (byte) 0, false, 0 , 0));
     }
 
-    public static OutPacket statChanged(Map<Stat, Object> stats, boolean exclRequestSent) {
-        return statChanged(stats, exclRequestSent, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
+    public static OutPacket statChanged(Map<Stat, Object> stats) {
+        return statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats, boolean exclRequestSent, byte mixBaseHairColor,
@@ -513,6 +513,14 @@ public class WvsContext {
         OutPacket outPacket = new OutPacket(OutHeader.WILD_HUNTER_INFO);
 
         whi.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket zeroInfo(ZeroInfo currentInfo) {
+        OutPacket outPacket = new OutPacket(OutHeader.ZERO_INFO);
+
+        currentInfo.encode(outPacket);
 
         return outPacket;
     }

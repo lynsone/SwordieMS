@@ -179,20 +179,20 @@ public class Login {
     public static OutPacket sendCharacterList(Account account, byte worldId, byte channel, byte code) {
         OutPacket outPacket = new OutPacket(OutHeader.SELECT_WORLD_RESULT);
 
-        outPacket.encodeByte(code);
+        outPacket.encodeByte(code); //nDay
         outPacket.encodeString("normal"); // not sure what this stands for
         outPacket.encodeInt(1); // refCount
         outPacket.encodeByte(0); // bBurningEventBlock
         int reserved = 0;
-        outPacket.encodeInt(reserved);
-        FileTime.getFTFromLong(0).encode(outPacket);
+        outPacket.encodeInt(reserved); //character locations
+        FileTime.getFTFromLong(0).encode(outPacket); //Timestamp
         for(int i = 0; i < reserved; i++) {
             FileTime ft = FileTime.getFTFromLong(0);
             outPacket.encodeInt(ft.getLowDateTime());
             ft.encode(outPacket);
         }
         boolean isEdited = false;
-        outPacket.encodeByte(isEdited);
+        outPacket.encodeByte(isEdited); //edited characters
         List<Char> chars = account.getCharacters();
         int nSecond = chars.size();
         outPacket.encodeInt(nSecond); // nSecond

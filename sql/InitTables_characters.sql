@@ -150,6 +150,7 @@ CREATE TABLE avatarLook (
     drawElfEar boolean,
     demonSlayerDefFaceAcc int,
     xenonDefFaceAcc int,
+	beastTamerDefFaceAcc int,
     isZeroBetaLook boolean,
     mixedHairColor int,
     mixHairPercent int,
@@ -304,9 +305,11 @@ CREATE TABLE avatarData (
 	id int NOT NULL AUTO_INCREMENT,
     characterStat int,
     avatarLook int,
+    zeroAvatarLook int,
     PRIMARY KEY (id),
     FOREIGN KEY (characterStat) REFERENCES characterstats(id),
-    FOREIGN KEY (avatarLook) REFERENCES avatarlook(id)
+    FOREIGN KEY (avatarLook) REFERENCES avatarlook(id),
+    FOREIGN KEY (zeroAvatarLook) REFERENCES avatarlook(id)
 );
 
 CREATE TABLE funckeymap (
