@@ -517,8 +517,8 @@ public enum CharacterTemporaryStat {
     Stigma(0x2000000, 14),
     EnergyCharged(0x1000000, 14),
 
-    Dash_Speed(0x800000, 14),
-    Dash_Jump(0x400000, 14),
+    DashSpeed(0x800000, 14),
+    DashJump(0x400000, 14),
     RideVehicle(0x200000, 14),
     PartyBooster(0x100000, 14),
     GuidedBullet(0x80000, 14),
@@ -573,8 +573,8 @@ public enum CharacterTemporaryStat {
             case Ghost:
             case BasicStatUp:
             case Attract:
-            case Dash_Speed:
-            case Dash_Jump:
+            case DashSpeed:
+            case DashJump:
             case Flying:
             case Frozen:
             case Frozen2:

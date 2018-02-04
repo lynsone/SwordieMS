@@ -73,6 +73,23 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                         c.getAccount().updateDB();
                     }
                     break;
+                case USER_ACTIVATE_NICK_ITEM:
+                    WorldHandler.handleUserActiveNickItem(c, inPacket);
+                    break;
+                case USER_ACTIVATE_DAMAGE_SKIN:
+                    WorldHandler.handleUserActivateDanageSkin(c, inPacket);
+                    break;
+                case EVENT_UI_REQ:
+                    WorldHandler.handleEventUiReq(c, inPacket);
+                    break;
+                case USER_ACTIVATE_DAMAGE_SKIN__PREMIUM:
+                    WorldHandler.handleUserActivateDamageSkinPremium(c, inPacket);
+                    break;
+                case FISHING_INFO:
+                    break;
+                case PARTY_INVITABLE_SET:
+                    WorldHandler.handlePartyInvitableSet(c, inPacket);
+                    break;
                 case USER_SKILL_USE_REQUEST:
                     inPacket.decodeInt(); // crc
                     int skillID = inPacket.decodeInt();
@@ -221,6 +238,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_FORCE_ATOM_COLLISION:
                     WorldHandler.handleForceAtomCollision(c, inPacket);
+                    break;
+                case LIKE_POINT:
+                    WorldHandler.handleLikePoint(c, inPacket);
                     break;
                 case REQUEST_ARROW_PLATER_OBJ:
                     WorldHandler.handleRequestArrowPlatterObj(c, inPacket);

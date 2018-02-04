@@ -16,6 +16,10 @@ public class OutPacket extends Packet {
     private boolean encryptedByShanda = false;
     private short op;
 
+    /**
+     * Creates a new OutPacket with a given op. Immediately encodes the op.
+     * @param op The opcode of this OutPacket.
+     */
     public OutPacket(short op) {
         super(new byte[]{});
         baos = new ByteArrayOutputStream();
@@ -23,30 +27,53 @@ public class OutPacket extends Packet {
         this.op = op;
     }
 
+    /**
+     * Creates a new OutPacket with a given op. Immediately encodes the op.
+     * @param op The opcode of this OutPacket.
+     */
     public OutPacket(int op) {
         this((short) op);
     }
 
+    /**
+     * Creates a new OutPacket, and initializes the data as empty.
+     */
     public OutPacket() {
         super(new byte[]{});
         baos = new ByteArrayOutputStream();
     }
 
+    /**
+     * Creates a new OutPacket with given data.
+     * @param data The data this packet has to be initialized with.
+     */
     public OutPacket(byte[] data) {
         super(data);
         baos = new ByteArrayOutputStream();
         encodeBytes(data);
     }
 
+    /**
+     * Creates a new OutPacket with a given header. Immediately encodes the header's short value.
+     * @param header The header of this OutPacket.
+     */
     public OutPacket(OutHeader header) {
         this(header.getValue());
     }
 
+    /**
+     * Returns the header of this OutPacket.
+     * @return the header of this OutPacket.
+     */
     @Override
     public int getHeader() {
         return op;
     }
 
+    /**
+     * Encodes a single byte to this OutPacket.
+     * @param b The int to encode as a byte. Will be downcast, so be careful.
+     */
     public void encodeByte(int b) {
         encodeByte((byte) b);
     }
@@ -242,5 +269,9 @@ public class OutPacket extends Packet {
     public void encodePositionInt(Position position) {
         encodeInt(position.getX());
         encodeInt(position.getY());
+    }
+
+    public void encodeFT(long currentTime) {
+        encodeFT(new FileTime(currentTime));
     }
 }

@@ -24,9 +24,7 @@ import constants.SkillConstants;
 import enums.*;
 import loaders.ItemData;
 import loaders.SkillData;
-import packet.CField;
-import packet.Stage;
-import packet.WvsContext;
+import packet.*;
 import server.Channel;
 import server.Server;
 import server.World;
@@ -1557,5 +1555,40 @@ public class WorldHandler {
         c.write(CField.showItemReleaseEffect(chr.getId(), ePos, bonus));
         c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 0, ePos, (short) 0,
                 invType, (short) 1, 0, equip));
+    }
+
+    public static void handleUserActiveNickItem(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int nickItem = inPacket.decodeInt();
+        chr.setNickItem(nickItem);
+        chr.getField().broadcastPacket(UserRemote.setActiveNickItem(chr));
+    }
+
+
+    public static void handleLikePoint(Client c, InPacket inPacket) {
+        //TODO
+    }
+
+    public static void handleUserActivateDanageSkin(Client c, InPacket inPacket) {
+        int damageSkin = inPacket.decodeInt();
+        Char chr = c.getChr();
+        chr.setDamageSkin(damageSkin);
+        c.write(User.setDamageSkin(chr));
+    }
+
+
+    public static void handleUserActivateDamageSkinPremium(Client c, InPacket inPacket) {
+        int damageSkin = inPacket.decodeInt();
+        Char chr = c.getChr();
+        chr.setPremiumDamageSkin(damageSkin);
+        c.write(User.setPremiumDamageSkin(chr));
+    }
+
+    public static void handleEventUiReq(Client c, InPacket inPacket) {
+        //TODO: get opcodes for CUIContext::OnPacket
+    }
+
+    public static void handlePartyInvitableSet(Client c, InPacket inPacket) {
+        c.getChr().setPartyInvitable(inPacket.decodeByte() != 0);
     }
 }

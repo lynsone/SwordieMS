@@ -10,6 +10,14 @@ import java.util.Random;
  */
 public class Util {
 
+    public static int[] bitwiseOr(int[] arr1, int[] arr2) {
+        int[] res = new int[arr1.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = arr1[i] | arr2[i];
+        }
+        return res;
+    }
+
     public static int getCurrentTime() {
         return (int) System.currentTimeMillis();
     }

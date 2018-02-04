@@ -22,6 +22,10 @@ public class FileTime implements Serializable {
     @Column(name = "highDateTime")
     private int highDateTime;
 
+    public long getLongValue() {
+        return getLowDateTime() + (long) getHighDateTime() << 32;
+    }
+
     public enum Type {
         // Mushy
         MAX_TIME(150842304000000000L),
