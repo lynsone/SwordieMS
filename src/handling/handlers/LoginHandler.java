@@ -2,6 +2,7 @@ package handling.handlers;
 
 import client.Account;
 import client.Client;
+import client.character.AvatarLook;
 import client.character.Char;
 import client.character.CharacterStat;
 import client.character.FuncKeyMap;
@@ -152,7 +153,7 @@ public class LoginHandler {
         JobConstants.JobEnum job = JobConstants.LoginJob.getLoginJobById(curSelectedRace).getBeginJob();
         short curSelectedSubJob = inPacket.decodeShort();
         byte gender = inPacket.decodeByte();
-       byte skin = inPacket.decodeByte();
+        byte skin = inPacket.decodeByte();
 
         byte itemLength = inPacket.decodeByte();
         int[] items = new int[itemLength]; //face, hair, markings, skin, overall, top, bottom, cape, boots, weapon
@@ -164,19 +165,26 @@ public class LoginHandler {
 
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
-        if (curSelectedRace == 5){ //Mercedes
-            //Set ears to true
+        // Start job specific handling ----------------------------------------------------------------
+        if (curSelectedRace == 5) { //Mercedes
             chr.getAvatarData().getAvatarLook().setDrawElfEar(true);
         }
-        if (curSelectedRace == 15){ //Zero
-            chr.getAvatarData().getAvatarLook().setSecondGender(1);
-            chr.getAvatarData().getAvatarLook().setSecondSkin(chr.getAvatarData().getAvatarLook().getSkin());
-            chr.getAvatarData().getAvatarLook().setSecondFace(21290);
-            chr.getAvatarData().getAvatarLook().setSecondHair(37623);
+        if (curSelectedRace == 15) { //Zero
+            chr.getAvatarData().getAvatarLook().setWeaponId(1572000);
+            chr.getAvatarData().getAvatarLook().setSubWeaponId(1562000);
+            chr.getAvatarData().getZeroAvatarLook().setWeaponId(1562000);
+            chr.getAvatarData().getZeroAvatarLook().setSubWeaponId(1572000);
+            chr.getAvatarData().getZeroAvatarLook().setGender(1);
+            chr.getAvatarData().getZeroAvatarLook().setSkin(chr.getAvatarData().getAvatarLook().getSkin());
+            chr.getAvatarData().getZeroAvatarLook().setFace(21290);
+            chr.getAvatarData().getZeroAvatarLook().setHair(37623);
             chr.getAvatarData().getCharacterStat().setJob(10112);
             chr.getAvatarData().getCharacterStat().setLevel(100);
             chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats
         }
+
+        // End job specific handling ------------------------------------------------------------------
+
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
 //        chr.createInDB();
         chr.getAvatarData().getAvatarLook().setDemonSlayerDefFaceAcc(1012279);
@@ -273,7 +281,7 @@ public class LoginHandler {
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
         if (c.isAuthorized()) {
-            Server.getInstance().getWorldById(worldId).getChannelById(worldId).addClientInTransfer(channelId, characterId ,c);
+            Server.getInstance().getWorldById(worldId).getChannelById(worldId).addClientInTransfer(channelId, characterId, c);
             c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
         }
     }

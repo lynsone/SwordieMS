@@ -80,7 +80,7 @@ public abstract class Job {
         }
         chr.setStat(Stat.mp, curMP);
         stats.put(Stat.mp, curMP);
-        c.write(WvsContext.statChanged(stats, true));
+        c.write(WvsContext.statChanged(stats));
     }
 
     /**

@@ -140,13 +140,9 @@ CREATE TABLE options (
 CREATE TABLE avatarLook (
 	id int NOT NULL AUTO_INCREMENT,
     gender int,
-	secondGender int,
     skin int,
-	secondSkin int,
     face int,
-	secondFace int,
     hair int,
-	secondHair int,
     weaponStickerId int,
     weaponId int,
     subWeaponId int,

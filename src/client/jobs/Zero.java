@@ -67,6 +67,9 @@ public class Zero extends Job {
                 chr.addSkill(skill);
             }
         }
+        if(chr.getZeroInfo() == null) {
+            chr.initZeroInfo();
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

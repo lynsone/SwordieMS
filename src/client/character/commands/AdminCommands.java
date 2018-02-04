@@ -174,7 +174,7 @@ public class AdminCommands {
                 chr.setStat(Stat.ap, (short) num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.ap, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats, true));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
@@ -188,7 +188,7 @@ public class AdminCommands {
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.hp, num);
                 stats.put(Stat.mhp, num);
-                chr.getClient().write(WvsContext.statChanged(stats, true));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
@@ -202,7 +202,7 @@ public class AdminCommands {
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.mp, num);
                 stats.put(Stat.mmp, num);
-                chr.getClient().write(WvsContext.statChanged(stats, true));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
@@ -215,7 +215,7 @@ public class AdminCommands {
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.level, (byte) num);
                 stats.put(Stat.exp, (long) 0);
-                chr.getClient().write(WvsContext.statChanged(stats, true));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
@@ -229,7 +229,7 @@ public class AdminCommands {
             Map<Stat, Object> stats = new HashMap<>();
             stats.put(Stat.hp, maxHp);
             stats.put(Stat.mp, maxMp);
-            chr.getClient().write(WvsContext.statChanged(stats, true));
+            chr.getClient().write(WvsContext.statChanged(stats));
         }
     }
 

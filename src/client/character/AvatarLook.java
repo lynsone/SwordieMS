@@ -22,20 +22,12 @@ public class AvatarLook {
     private int id;
     @Column(name = "gender")
     private int gender;
-    @Column(name = "secondGender")
-    private int secondGender;
     @Column(name = "skin")
     private int skin;
-    @Column(name = "secondSkin")
-    private int secondSkin;
     @Column(name = "face")
     private int face;
-    @Column(name = "secondFace")
-    private int secondFace;
     @Column(name = "hair")
     private int hair;
-    @Column(name = "secondHair")
-    private int secondHair;
     @Column(name = "weaponStickerId")
     private int weaponStickerId;
 
@@ -96,15 +88,6 @@ public class AvatarLook {
     public void setGender(int gender) {
         this.gender = gender;
     }
-
-    public int getSecondGender() {
-        return secondGender;
-    }
-
-    public void setSecondGender(int secondGender) {
-        this.secondGender = secondGender;
-    }
-
     public int getSkin() {
         return skin;
     }
@@ -113,28 +96,12 @@ public class AvatarLook {
         this.skin = skin;
     }
 
-    public int getSecondSkin() {
-        return secondSkin;
-    }
-
-    public void setSecondSkin(int secondSkin) {
-        this.secondSkin = secondSkin;
-    }
-
     public int getFace() {
         return face;
     }
 
     public void setFace(int face) {
         this.face = face;
-    }
-
-    public int getSecondFace() {
-        return secondFace;
-    }
-
-    public void setSecondFace(int secondFace) {
-        this.secondFace = secondFace;
     }
 
     public int getWeaponStickerId() {
@@ -249,21 +216,13 @@ public class AvatarLook {
         this.mixHairPercent = mixHairPercent;
     }
 
-    public void encode(OutPacket outPacket, boolean mega, boolean isZeroBetaLook) {
-      //  outPacket.encodeByte(getGender());
-
-        outPacket.encodeByte(isZeroBetaLook ? getSecondGender() : getGender());
-
-      //  System.out.println(getSecondGender());
-      //  System.out.println(getGender());
-        //outPacket.encodeByte(getSkin());
-        outPacket.encodeByte(isZeroBetaLook ? getSecondSkin() : getSkin());
-       // outPacket.encodeInt(getFace());
-        outPacket.encodeInt(isZeroBetaLook ? getSecondFace() : getFace());
+    public void encode(OutPacket outPacket) {
+        outPacket.encodeByte(getGender());
+        outPacket.encodeByte(getSkin());
+        outPacket.encodeInt(getFace());
         outPacket.encodeInt(getJob());
-        outPacket.encodeByte(mega ? 0 : 1); // ?
-        //outPacket.encodeInt(getHair());
-        outPacket.encodeInt(isZeroBetaLook ? getSecondHair() : getHair());
+        outPacket.encodeByte(isZeroBetaLook()); // ?
+        outPacket.encodeInt(getHair());
 
         for (int i = 1; i < getHairEquips().size(); i++) {
             int itemId = getHairEquips().get(i);
@@ -284,24 +243,15 @@ public class AvatarLook {
         }
         outPacket.encodeByte(-1); //original, testing stuff
         outPacket.encodeInt(getWeaponStickerId());
-        //outPacket.encodeInt(getWeaponId());
-
-       if(!JobConstants.isZero((short) getJob())) {
-            outPacket.encodeInt(getWeaponId());
-            outPacket.encodeInt(getSubWeaponId());
-        }else{
-            outPacket.encodeInt(getWeaponId());
-            System.out.println(getWeaponId());
-            System.out.println(getSubWeaponId());
-        }
+        outPacket.encodeInt(getWeaponId());
+        outPacket.encodeInt(getSubWeaponId());
         outPacket.encodeByte(isDrawElfEar());
         // outPacket.encodeByte(-1); //smth to do with a new class
         for (int i = 0; i < 3; i++) {
             outPacket.encodeInt(getPetIDs().get(i)); // always 3
         }
         if (JobConstants.isZero((short) getJob())) {
-             outPacket.encodeByte(isZeroBetaLook);
-          //  outPacket.encodeByte(1);
+             outPacket.encodeByte(isZeroBetaLook());
         }
         if (JobConstants.isXenon((short) getJob())) {
             outPacket.encodeInt(getXenonDefFaceAcc());
@@ -328,14 +278,6 @@ public class AvatarLook {
 
     public void setHair(int hair) {
         this.hair = hair;
-    }
-
-    public int getSecondHair() {
-        return secondHair;
-    }
-
-    public void setSecondHair(int secondHair) {
-        this.secondHair = secondHair;
     }
 
     public List<Integer> getTotems() {

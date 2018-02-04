@@ -462,7 +462,7 @@ public class WorldHandler {
             }
         }
         if (stats != null) {
-            c.write(WvsContext.statChanged(stats, true));
+            c.write(WvsContext.statChanged(stats));
             List<Skill> skills = new ArrayList<>();
             skills.add(skill);
             chr.addSkill(skill);
@@ -709,7 +709,7 @@ public class WorldHandler {
         Map<Stat, Object> stats = new HashMap<>();
         stats.put(charStat, (short) chr.getStat(charStat));
         stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
-        c.write(WvsContext.statChanged(stats, true));
+        c.write(WvsContext.statChanged(stats));
         WvsContext.dispose(chr);
     }
 
@@ -742,7 +742,7 @@ public class WorldHandler {
         Map<Stat, Object> stats = new HashMap<>();
         stats.put(charStat, (short) chr.getStat(charStat));
         stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
-        c.write(WvsContext.statChanged(stats, true));
+        c.write(WvsContext.statChanged(stats));
         WvsContext.dispose(chr);
     }
 
@@ -1097,7 +1097,7 @@ public class WorldHandler {
             newStats.put(Stat.mp, newMP);
         }
 
-        c.write(WvsContext.statChanged(newStats, true));
+        c.write(WvsContext.statChanged(newStats));
     }
 
     public static void handleCreateKinesisPsychicArea(Client c, InPacket inPacket) {
