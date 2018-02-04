@@ -21,6 +21,9 @@ public class JobConstants {
         return job == JobEnum.BEAST_TAMER_1.getJobId() || job == JobEnum.BEAST_TAMER_2.getJobId() ||
                 job == JobEnum.BEAST_TAMER_2.getJobId() || job == JobEnum.BEAST_TAMER_3.getJobId();
     }
+    public static boolean isPinkBean(short job){
+        return job == JobEnum.PINK_BEAN_0.getJobId() || job == JobEnum.PINK_BEAN_1.getJobId();
+    }
 
     public static JobEnum getJobEnumById(short jobId) {
         return Arrays.stream(JobEnum.values()).filter(job -> job.getJobId() == jobId)
@@ -445,23 +448,7 @@ public class JobConstants {
     }
 
     public static boolean isExtendSpJob(short jobId) {
-        return isAdventurerWarrior(jobId)
-                || isAdventurerMage(jobId)
-                || isAdventurerArcher(jobId)
-                || isAdventurerThief(jobId)
-                || isAdventurerPirate(jobId)
-                || isCygnus(jobId)
-                || isResistance(jobId)
-                || isEvan(jobId)
-                || isMercedes(jobId)
-                || isPhantom(jobId)
-                || isLeader(jobId)
-                || isLuminous(jobId)
-                || isKaiser(jobId)
-                || isZero(jobId)
-                || isHidden(jobId)
-                || isAran(jobId)
-                || isKenesis(jobId);
+        return !isBeastTamer(jobId) || !isPinkBean(jobId);
     }
 
     public static boolean isDemon(short jobId) {

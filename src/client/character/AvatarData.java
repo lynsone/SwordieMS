@@ -28,8 +28,6 @@ public class AvatarData {
     @OneToOne
     private AvatarLook avatarLook;
 
-
-
     public AvatarLook getAvatarLook() {
         return avatarLook;
     }
@@ -40,9 +38,10 @@ public class AvatarData {
 
     public void encode(OutPacket outPacket) {
         characterStat.encode(outPacket);
-        avatarLook.encode(outPacket);
+        avatarLook.encode(outPacket, true, false);
         if(JobConstants.isZero(getCharacterStat().getJob())) {
-            //zeroAvatarLook.encode(outPacket); TODO
+           // avatarLook.encode(outPacket, true, true);
+            avatarLook.encode(outPacket, true, true);
         }
     }
 

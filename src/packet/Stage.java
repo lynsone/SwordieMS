@@ -55,7 +55,7 @@ public class Stage {
             outPacket.encodeInt(s2);
             outPacket.encodeInt(s3);
 
-            chr.encode(outPacket, DBChar.All);
+            chr.encode(outPacket, DBChar.All, chr);
             // unk sub (not in kmst)
             // logout event (mushy)
             int idOrSomething = 0;

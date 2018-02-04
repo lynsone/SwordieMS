@@ -43,13 +43,13 @@ public class Zero extends Job {
     public static final int ADV_STORM_BREAK = 101120204; //Special Attack (Shock Field)
 
     private int[] addedSkills = new int[] {
-            DUAL_COMBAT,
+      /*      DUAL_COMBAT,
             DUAL_COMBAT_2,
             TEMPLE_RECALL,
             RESOLUTION_TIME,
             BURST_STEP,
             BURST_JUMP,
-            BURST_LEAP,
+            BURST_LEAP,*/
     };
 
     private int[] buffs = new int[] {

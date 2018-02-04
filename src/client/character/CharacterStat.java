@@ -404,7 +404,7 @@ public class CharacterStat {
         outPacket.encodeByte(getPortal());
         outPacket.encodeInt(0); // TODO figure out
         outPacket.encodeShort(getSubJob());
-        if (JobConstants.isDemon(getJob()) || JobConstants.isXenon(getJob())) {
+        if (JobConstants.isDemon(getJob()) || JobConstants.isXenon(getJob()) || JobConstants.isBeastTamer(getJob())) {
             outPacket.encodeInt(getDefFaceAcc());
         }
         outPacket.encodeByte(getFatigue());

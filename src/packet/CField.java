@@ -377,7 +377,7 @@ public class CField {
         AvatarLook al = summon.getAvatarLook();
         outPacket.encodeByte(al != null);
         if(al != null) {
-            al.encode(outPacket);
+            al.encode(outPacket, true, false);
         }
         if(summon.getSkillID() == 35111002) { // Tesla Coil
             outPacket.encodeByte(summon.getTeslaCoilState());

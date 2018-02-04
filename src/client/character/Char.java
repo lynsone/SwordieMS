@@ -2,14 +2,13 @@ package client.character;
 
 import client.Client;
 import client.character.items.*;
-import client.character.skills.Core;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.field.Field;
 import client.field.Portal;
 import client.jobs.Job;
 import client.jobs.JobManager;
-import client.jobs.resistance.WildHunter;
+import client.jobs.ZeroInfo;
 import client.jobs.resistance.WildHunterInfo;
 import connection.OutPacket;
 import constants.GameConstants;
@@ -31,7 +30,6 @@ import util.FileTime;
 import loaders.ItemData;
 import util.Position;
 import util.Rect;
-import util.Util;
 
 import javax.persistence.*;
 import java.util.*;
@@ -133,6 +131,8 @@ public class Char {
     private MarriageRecord marriageRecord;
     @Transient
     private WildHunterInfo wildHunterInfo;
+    @Transient
+    private ZeroInfo zeroInfo;
     @Transient
     private int nickItem;
     @Transient
@@ -348,7 +348,8 @@ public class Char {
         this.cashInventory = cashInventory;
     }
 
-    public void encode(OutPacket outPacket, DBChar mask) {
+    public void encode(OutPacket outPacket, DBChar mask, Char chr) {
+
         // CharacterData::Decode
         outPacket.encodeLong(mask.get());
         outPacket.encodeByte(getCombatOrders());
@@ -798,11 +799,12 @@ public class Char {
             }
         }
         if (mask.isInMask(DBChar.Avatar)) {
+
             short size = 0;
             outPacket.encodeShort(size);
             for (int i = 0; i < size; i++) {
                 outPacket.encodeInt(0); // sValue
-                new AvatarLook().encode(outPacket);
+                new AvatarLook().encode(outPacket, true, false);
             }
         }
         if (mask.isInMask(DBChar.MapTransfer)) {
@@ -820,7 +822,7 @@ public class Char {
         }
         if (mask.isInMask(DBChar.ZeroInfo)) {
             if (JobConstants.isZero(getAvatarData().getCharacterStat().getJob())) {
-//                getZeroInfo().encode(outPacket);
+                getZeroInfo().encode(outPacket, chr); //ZeroInfo::Decode
             }
         }
         if (mask.isInMask(DBChar.ShopBuyLimit)) {
@@ -1534,8 +1536,15 @@ public class Char {
         return wildHunterInfo;
     }
 
+
     public void setWildHunterInfo(WildHunterInfo wildHunterInfo) {
         this.wildHunterInfo = wildHunterInfo;
+    }
+    public ZeroInfo getZeroInfo(){
+        return  zeroInfo;
+    }
+    public void setZeroInfo(ZeroInfo zeroInfo){
+        this.zeroInfo = zeroInfo;
     }
 
     public int getNickItem() {

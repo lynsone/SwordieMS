@@ -7,9 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created on 2/18/2017.
@@ -18,18 +16,26 @@ import java.util.List;
 @Table(name = "avatarlook")
 public class AvatarLook {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-
     @Column(name = "gender")
     private int gender;
+    @Column(name = "secondGender")
+    private int secondGender;
     @Column(name = "skin")
     private int skin;
+    @Column(name = "secondSkin")
+    private int secondSkin;
     @Column(name = "face")
     private int face;
+    @Column(name = "secondFace")
+    private int secondFace;
     @Column(name = "hair")
     private int hair;
+    @Column(name = "secondHair")
+    private int secondHair;
     @Column(name = "weaponStickerId")
     private int weaponStickerId;
 
@@ -58,6 +64,8 @@ public class AvatarLook {
     private int demonSlayerDefFaceAcc;
     @Column(name = "xenonDefFaceAcc")
     private int xenonDefFaceAcc;
+    @Column(name = "beastTamerDefFaceAcc")
+    private int beastTamerDefFaceAcc;
     @Column(name = "isZeroBetaLook")
     private boolean isZeroBetaLook;
     @Column(name = "mixedHairColor")
@@ -76,10 +84,9 @@ public class AvatarLook {
     public AvatarLook() {
         hairEquips = new ArrayList<>();
         unseenEquips = new ArrayList<>();
-        petIDs = Arrays.asList(0,0,0);
+        petIDs = Arrays.asList(0, 0, 0);
         totems = new ArrayList<>();
     }
-
 
 
     public int getGender() {
@@ -90,6 +97,14 @@ public class AvatarLook {
         this.gender = gender;
     }
 
+    public int getSecondGender() {
+        return secondGender;
+    }
+
+    public void setSecondGender(int secondGender) {
+        this.secondGender = secondGender;
+    }
+
     public int getSkin() {
         return skin;
     }
@@ -98,12 +113,28 @@ public class AvatarLook {
         this.skin = skin;
     }
 
+    public int getSecondSkin() {
+        return secondSkin;
+    }
+
+    public void setSecondSkin(int secondSkin) {
+        this.secondSkin = secondSkin;
+    }
+
     public int getFace() {
         return face;
     }
 
     public void setFace(int face) {
         this.face = face;
+    }
+
+    public int getSecondFace() {
+        return secondFace;
+    }
+
+    public void setSecondFace(int secondFace) {
+        this.secondFace = secondFace;
     }
 
     public int getWeaponStickerId() {
@@ -186,6 +217,14 @@ public class AvatarLook {
         this.xenonDefFaceAcc = xenonDefFaceAcc;
     }
 
+    public int getBeastTamerFaceAcc() {
+        return beastTamerDefFaceAcc;
+    }
+
+    public void setBeastTamerDefFaceAcc() {
+        this.beastTamerDefFaceAcc = beastTamerDefFaceAcc;
+    }
+
     public boolean isZeroBetaLook() {
         return isZeroBetaLook;
     }
@@ -210,13 +249,22 @@ public class AvatarLook {
         this.mixHairPercent = mixHairPercent;
     }
 
-    public void encode(OutPacket outPacket) {
-        outPacket.encodeByte(getGender());
-        outPacket.encodeByte(getSkin());
-        outPacket.encodeInt(getFace());
+    public void encode(OutPacket outPacket, boolean mega, boolean isZeroBetaLook) {
+      //  outPacket.encodeByte(getGender());
+
+        outPacket.encodeByte(isZeroBetaLook ? getSecondGender() : getGender());
+
+      //  System.out.println(getSecondGender());
+      //  System.out.println(getGender());
+        //outPacket.encodeByte(getSkin());
+        outPacket.encodeByte(isZeroBetaLook ? getSecondSkin() : getSkin());
+       // outPacket.encodeInt(getFace());
+        outPacket.encodeInt(isZeroBetaLook ? getSecondFace() : getFace());
         outPacket.encodeInt(getJob());
-        outPacket.encodeByte(0); // ?
-        outPacket.encodeInt(getHair());
+        outPacket.encodeByte(mega ? 0 : 1); // ?
+        //outPacket.encodeInt(getHair());
+        outPacket.encodeInt(isZeroBetaLook ? getSecondHair() : getHair());
+
         for (int i = 1; i < getHairEquips().size(); i++) {
             int itemId = getHairEquips().get(i);
             outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
@@ -234,16 +282,26 @@ public class AvatarLook {
             outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender()));
             outPacket.encodeInt(itemId);
         }
-        outPacket.encodeByte(-1);
+        outPacket.encodeByte(-1); //original, testing stuff
         outPacket.encodeInt(getWeaponStickerId());
-        outPacket.encodeInt(getWeaponId());
-        outPacket.encodeInt(getSubWeaponId());
+        //outPacket.encodeInt(getWeaponId());
+
+       if(!JobConstants.isZero((short) getJob())) {
+            outPacket.encodeInt(getWeaponId());
+            outPacket.encodeInt(getSubWeaponId());
+        }else{
+            outPacket.encodeInt(getWeaponId());
+            System.out.println(getWeaponId());
+            System.out.println(getSubWeaponId());
+        }
         outPacket.encodeByte(isDrawElfEar());
+        // outPacket.encodeByte(-1); //smth to do with a new class
         for (int i = 0; i < 3; i++) {
             outPacket.encodeInt(getPetIDs().get(i)); // always 3
         }
         if (JobConstants.isZero((short) getJob())) {
-            outPacket.encodeByte(isZeroBetaLook());
+             outPacket.encodeByte(isZeroBetaLook);
+          //  outPacket.encodeByte(1);
         }
         if (JobConstants.isXenon((short) getJob())) {
             outPacket.encodeInt(getXenonDefFaceAcc());
@@ -254,6 +312,7 @@ public class AvatarLook {
         if (JobConstants.isBeastTamer((short) getJob())) {
             boolean hasEars = getEars() > 0;
             boolean hasTail = getTail() > 0;
+            outPacket.encodeInt(getBeastTamerFaceAcc());
             outPacket.encodeByte(hasEars);
             outPacket.encodeInt(getEars());
             outPacket.encodeByte(hasTail);
@@ -269,6 +328,14 @@ public class AvatarLook {
 
     public void setHair(int hair) {
         this.hair = hair;
+    }
+
+    public int getSecondHair() {
+        return secondHair;
+    }
+
+    public void setSecondHair(int secondHair) {
+        this.secondHair = secondHair;
     }
 
     public List<Integer> getTotems() {

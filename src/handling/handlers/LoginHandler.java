@@ -149,23 +149,42 @@ public class LoginHandler {
         int keySettingType = inPacket.decodeInt();
         int eventNewCharSaleJob = inPacket.decodeInt();
         int curSelectedRace = inPacket.decodeInt();
+        JobConstants.JobEnum job = JobConstants.LoginJob.getLoginJobById(curSelectedRace).getBeginJob();
         short curSelectedSubJob = inPacket.decodeShort();
         byte gender = inPacket.decodeByte();
-        byte skin = inPacket.decodeByte();
+       byte skin = inPacket.decodeByte();
+
         byte itemLength = inPacket.decodeByte();
-        int[] items = new int[itemLength];
+        int[] items = new int[itemLength]; //face, hair, markings, skin, overall, top, bottom, cape, boots, weapon
         for (int i = 0; i < itemLength; i++) {
             items[i] = inPacket.decodeInt();
+            System.out.println(items[i]);
         }
-        JobConstants.JobEnum job = JobConstants.LoginJob.getLoginJobById(curSelectedRace).getBeginJob();
+        System.out.println(curSelectedRace);
+
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
+        if (curSelectedRace == 5){ //Mercedes
+            //Set ears to true
+            chr.getAvatarData().getAvatarLook().setDrawElfEar(true);
+        }
+        if (curSelectedRace == 15){ //Zero
+            chr.getAvatarData().getAvatarLook().setSecondGender(1);
+            chr.getAvatarData().getAvatarLook().setSecondSkin(chr.getAvatarData().getAvatarLook().getSkin());
+            chr.getAvatarData().getAvatarLook().setSecondFace(21290);
+            chr.getAvatarData().getAvatarLook().setSecondHair(37623);
+            chr.getAvatarData().getCharacterStat().setJob(10112);
+            chr.getAvatarData().getCharacterStat().setLevel(100);
+            chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats
+        }
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
 //        chr.createInDB();
+        chr.getAvatarData().getAvatarLook().setDemonSlayerDefFaceAcc(1012279);
         c.getAccount().addCharacter(chr);
 //        chr.setAccId(c.getAccount().getId());
 //        chr.updateDB();
         c.getAccount().updateDB();
+
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
