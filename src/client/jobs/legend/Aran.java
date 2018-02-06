@@ -13,6 +13,7 @@ import enums.ChatMsgColour;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.WvsContext;
+import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
@@ -38,10 +39,10 @@ public class Aran extends Job {
     public static final int DRAIN = 21101005; //Special Skill (HP Recovery) (ON/OFF)
 
     public static final int MAHA_BLESSING = 21111012; //Buff
+    public static final int ADRENALINE_RUSH = 21110016; //at 1000 combo activated
     public static final int AERO_SWING = 21110026; //Passive that activates when Combo'ing in Air TODO
 
     public static final int MAPLE_WARRIOR_ARAN = 21121000; //Buff
-
 
 
     //Attacking Skills:
@@ -51,7 +52,7 @@ public class Aran extends Job {
     public static final int SMASH_SWING_1 = 21001010;
     public static final int SMASH_SWING_2 = 21000006;
     public static final int SMASH_SWING_3 = 21000007;
-
+    public static final int SMASH_SWING_2_FINAL_BLOW = 21120025;
 
     public static final int FINAL_CHARGE = 21101011;
     public static final int FINAL_CHARGE_COMBO = 21100002; //Special Attack (Stun Debuff) (Special Skill from Key-Command)
@@ -62,13 +63,13 @@ public class Aran extends Job {
     public static final int ROLLING_SPIN = 21101017;
     public static final int ROLLING_SPIN_COMBO = 21100013; //Special Attack (Stun Debuff) (Special Skill from Key-Command)
 
-
     public static final int GATHERING_HOOK = 21111019;
     public static final int GATHERING_HOOK_COMBO = 21110018;
 
     public static final int FINAL_BLOW = 21111021;
     public static final int FINAL_BLOW_COMBO = 21110020; //Special Attack (Stun Debuff) (Special Skill from Key-Command)
-    public static final int FINAL_BLOW_SWING_COMBO = 21110028; //Special Attack (Stun Debuff) (Special Skill from Key-Command)
+    public static final int FINAL_BLOW_SMASH_SWING_COMBO = 21110028; //Special Attack (Stun Debuff) (Special Skill from Key-Command)
+    public static final int FINAL_BLOW_ADRENALINE_SHOCKWAVE = 21110027; //Shockwave after final blow when in Adrenaline Rush
 
     public static final int JUDGEMENT_DRAW = 21111017;
     public static final int JUDGEMENT_DRAW_COMBO_DOWN = 21110011; //Special Attack (Freeze Debuff) (Special Skill from Key-Command)
@@ -79,6 +80,23 @@ public class Aran extends Job {
     public static final int BEYOND_BLADE_2 = 21121016;
     public static final int BEYOND_BLADE_3 = 21121017;
 
+
+    //Finisher
+    public static final int FINISHER_HUNTER_PREY = 21120019;
+
+
+    public static int getOriginalSkillByID(int skillID) {
+        switch(skillID) {
+            case SMASH_WAVE_COMBO:
+                return SMASH_WAVE;
+
+            case FINAL_BLOW_COMBO:
+            case FINAL_BLOW_SMASH_SWING_COMBO:
+                return FINAL_BLOW;
+
+        }
+        return skillID; // no original skill linked with this one
+    }
 
 
     private int[] addedSkills = new int[] {
@@ -127,7 +145,7 @@ public class Aran extends Job {
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = 0;
-                tsm.putCharacterStatValue(BodyPressure, o1); // TODO Unsure
+                tsm.putCharacterStatValue(BodyPressure, o1);
                 break;
             case DRAIN:
                 o1.nOption = si.getValue(x, slv);
@@ -141,7 +159,10 @@ public class Aran extends Job {
                 tsm.putCharacterStatValue(IndieMHPR, o2);
                 break;
             case SNOW_CHARGE:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(WeaponCharge, o1); //TODO  Finish gives slow debuff to mobs and half duration to bosses
                 break;
             case MAHA_BLESSING:
                 o1.nReason = skillID;
@@ -175,11 +196,12 @@ public class Aran extends Job {
         }
         if(tsm.hasStat(ComboAbilityBuff)) {
             amount = tsm.getOption(ComboAbilityBuff).nOption;
-            if(amount < comboInfo.getValue(s2, chr.getSkill(COMBO_ABILITY).getCurrentLevel())) {
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if (amount < comboInfo.getValue(s2, chr.getSkill(COMBO_ABILITY).getCurrentLevel())) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     amount++;
                 }
             }
+
         }
         o.nOption = amount;
         o.rOption = COMBO_ABILITY;
@@ -189,18 +211,24 @@ public class Aran extends Job {
     }
 
     private void handleAdrenalinRush(int skillId, TemporaryStatManager tsm, Client c) {
-        Option o = new Option();
-        int amount = tsm.getOption(ComboAbilityBuff).nOption;
+        SkillInfo adrenalinInfo = SkillData.getSkillInfoById(ADRENALINE_RUSH);
+        if (chr.hasSkill(ADRENALINE_RUSH)) {
+            Option o = new Option();
             o.nOption = 1;
-            o.rOption = 21110016;
-            o.tOption = 15;
+            o.rOption = ADRENALINE_RUSH;
+            o.tOption = adrenalinInfo.getValue(time, adrenalinInfo.getCurrentLevel());
+            o.cOption = 1;
             tsm.putCharacterStatValue(AdrenalinBoost, o);
             c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+    public void adrenalinInterval() {   //TODO
+        EventManager.addEvent(this, "adrenalinInterval", 15000);
     }
 
     private void handleSwingStudies(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
-        SkillInfo swingStudiesInfo = SkillData.getSkillInfoById(21100015);
         if (chr.hasSkill(21100015)) {
             o.nOption = 1;
             o.rOption = 21100015;
@@ -208,6 +236,11 @@ public class Aran extends Job {
             tsm.putCharacterStatValue(NextAttackEnhance, o);
             c.write(WvsContext.temporaryStatSet(tsm));
         }
+    }
+
+    private void comboAfterAdrenalin() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.getOption(ComboAbilityBuff).nOption = 500;
     }
 
     private boolean isBuff(int skillID) {
@@ -228,91 +261,99 @@ public class Aran extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleComboAbility(tsm, attackInfo);
-        if(chr.hasSkill(21110016)) {
-            if (tsm.getOption(ComboAbilityBuff).nOption > 999) {
-                handleAdrenalinRush(skill.getSkillId(), tsm, c);
+        if(hasHitMobs) {
+            handleComboAbility(tsm, attackInfo);
+        }
+        if (hasHitMobs) {
+            if(chr.hasSkill(21110016)) {
+               if (tsm.getOption(ComboAbilityBuff).nOption > 999) {
+                   if(chr.hasSkill(ADRENALINE_RUSH)) {
+                       handleAdrenalinRush(getOriginalSkillByID(skillID), tsm, c);
+                       //adrenalinInterval();
+                       comboAfterAdrenalin();
+                   }
+               }
             }
         }
+        handleSwingStudies(getOriginalSkillByID(skillID), tsm, c);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
-            case FINAL_CHARGE:
-                handleSwingStudies(21101011, tsm, c);
+            case FINISHER_HUNTER_PREY:
+                int t = si.getValue(subTime, slv);
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = t;
+                tsm.putCharacterStatValue(AranBoostEndHunt, o1);
+                c.write(WvsContext.temporaryStatSet(tsm));
                 break;
-            case FINAL_CHARGE_COMBO:
+            case FINAL_CHARGE_COMBO: //TODO  Leaves an ice trail behind that freezes enemies
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                    int hcProp = 5; //hcProp is defined yet still gives NPEs
+                    int hcTime = 10; //hcTime is defined yet still gives NPEs
+                    if (Util.succeedProp(hcProp)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = hcTime;
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
-                handleSwingStudies(21100002, tsm, c);
-                break;
-
-            case ROLLING_SPIN:
-                handleSwingStudies(21101017, tsm, c);
                 break;
             case ROLLING_SPIN_COMBO:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                    int prop = 30; //Prop value never given, so I decided upon 30%.
+                    int time = 3; //Time value never given, so I decided upon 3 seconds.
+                    if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = time;
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
-                handleSwingStudies(21100013, tsm, c);
-                break;
-
-            case FINAL_BLOW:
-                handleSwingStudies(21111021, tsm, c);
                 break;
             case FINAL_BLOW_COMBO:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                    int prop = 30; //Prop value never given, so I decided upon 30%.
+                    int time = 3; //Time value never given, so I decided upon 3 seconds.
+                    if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = time;
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
-                handleSwingStudies(21110020, tsm, c);
                 break;
-            case FINAL_BLOW_SWING_COMBO:
+            case FINAL_BLOW_SMASH_SWING_COMBO:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                    int prop = 30; //Prop value never given, so I decided upon 30%.
+                    int time = 3; //Time value never given, so I decided upon 3 seconds.
+                    if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = time;
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
-                handleSwingStudies(21110028, tsm, c);
-                break;
-
-            case JUDGEMENT_DRAW:
-                handleSwingStudies(21111017, tsm, c);
                 break;
             case JUDGEMENT_DRAW_COMBO_DOWN:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                    int hcProp = 5; //hcProp is defined yet still gives NPEs
+                    int hcTime = 2; //hcTime is defined yet still gives NPE
+                    if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = hcTime;    //si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -320,16 +361,17 @@ public class Aran extends Job {
                         mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }
                 }
-                handleSwingStudies(21110011, tsm, c);
                 break;
             case JUDGEMENT_DRAW_COMBO_LEFT:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                    int hcProp = 5; //hcProp is defined yet still gives NPE
+                    int hcTime = 2; //hcTime is defined yet still gives NPE
+                    if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = hcTime;    //si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -337,16 +379,17 @@ public class Aran extends Job {
                         mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }
                 }
-                handleSwingStudies(21110024,tsm, c);
                 break;
             case JUDGEMENT_DRAW_COMBO_RIGHT:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                    int hcProp = 5; //hcProp is defined yet still gives NPEs
+                    int hcTime = 2; //hcTime is defined yet still gives NPE
+                    if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = hcTime;    //si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -354,48 +397,6 @@ public class Aran extends Job {
                         mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                     }
                 }
-                handleSwingStudies(21110025, tsm, c);
-                break;
-
-            case SMASH_WAVE:
-                handleSwingStudies(21001009, tsm, c);
-                break;
-            case SMASH_WAVE_COMBO:
-                handleSwingStudies(21000004, tsm ,c);
-                break;
-
-            case SMASH_SWING_1:
-                handleSwingStudies(21001010, tsm, c);
-                break;
-            case SMASH_SWING_2:
-                handleSwingStudies(21000006, tsm, c);
-                break;
-            case SMASH_SWING_3:
-                handleSwingStudies(21000007, tsm, c);
-                break;
-
-            case FINAL_TOSS:
-                handleSwingStudies(21100015, tsm, c);
-                break;
-            case FINAL_TOSS_COMBO:
-                handleSwingStudies(21100012, tsm, c);
-                break;
-
-            case GATHERING_HOOK:
-                handleSwingStudies(21111019, tsm, c);
-                break;
-            case GATHERING_HOOK_COMBO:
-                handleSwingStudies(21110018, tsm, c);
-                break;
-
-            case BEYOND_BLADE_1:
-                handleSwingStudies(21120022, tsm, c);
-                break;
-            case BEYOND_BLADE_2:
-                handleSwingStudies(21121016, tsm, c);
-                break;
-            case BEYOND_BLADE_3:
-                handleSwingStudies(21121017, tsm, c);
                 break;
         }
     }

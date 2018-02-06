@@ -53,7 +53,7 @@ public class Kaiser extends Job {
     public static final int DRAGON_SLASH_1 = 61001000; //First Swing
     public static final int DRAGON_SLASH_2 = 61001004; //2nd Swing
     public static final int DRAGON_SLASH_3 = 61001005; //Last Swing
-    public static final int DRAGON_SLASH_1_FINAL_FORM = 61120219; //Swing
+    public static final int DRAGON_SLASH_1_FINAL_FORM = 61120219; //Swing Final Form
 
     public static final int FLAME_SURGE = 61001101;
     public static final int FLAME_SURGE_FINAL_FORM = 61111215;
@@ -81,6 +81,43 @@ public class Kaiser extends Job {
     public static final int BLADE_BURST_FINAL_FORM = 61121221;
 
 
+    public static int getOriginalSkillByID(int skillID) {
+        switch(skillID) {
+            case DRAGON_SLASH_1_FINAL_FORM:
+                return DRAGON_SLASH_1;
+
+            case FLAME_SURGE_FINAL_FORM:
+                return FLAME_SURGE;
+
+            case IMPACT_WAVE_FINAL_FORM:
+                return IMPACT_WAVE;
+
+            case PIERCING_BLAZE_FINAL_FORM:
+                return PIERCING_BLAZE;
+
+            case WING_BEAT_FINAL_FORM:
+                return WING_BEAT;
+
+            case PRESSURE_CHAIN_FINAL_FORM:
+                return PRESSURE_CHAIN;
+
+            case GIGA_WAVE_FINAL_FORM:
+                return GIGA_WAVE;
+
+            case INFERNO_BREATH_FINAL_FORM:
+                return INFERNO_BREATH;
+
+            case DRAGON_BARRAGE_FINAL_FORM:
+                return DRAGON_BARRAGE;
+
+            case BLADE_BURST_FINAL_FORM:
+                return BLADE_BURST;
+
+        }
+        return skillID; // no original skill linked with this one
+    }
+
+
     private final int[] addedSkills = new int[]{
             REALIGN_ATTACKER_MODE,
             REALIGN_DEFENDER_MODE,
@@ -102,6 +139,40 @@ public class Kaiser extends Job {
             TEMPEST_BLADES_FIVE,
             GRAND_ARMOR,
             NOVA_WARRIOR_KAISER,
+    };
+
+    private final int[][] getGaugeIncrements2 = new int[][] {
+            {DRAGON_SLASH_1, 2},
+            {DRAGON_SLASH_2, 4},
+            {DRAGON_SLASH_3, 5},
+            {DRAGON_SLASH_1_FINAL_FORM, 4},
+
+            {FLAME_SURGE, 7},
+            {FLAME_SURGE_FINAL_FORM, 0},
+
+            {IMPACT_WAVE, 5},
+            {IMPACT_WAVE_FINAL_FORM, 0},
+
+            {PIERCING_BLAZE, 5},
+            {PIERCING_BLAZE_FINAL_FORM, 0},
+
+            {WING_BEAT, 2},
+            {WING_BEAT_FINAL_FORM, 1},
+
+            {PRESSURE_CHAIN, 8},
+            {PRESSURE_CHAIN_FINAL_FORM, 0},
+
+            {GIGA_WAVE, 8},
+            {GIGA_WAVE_FINAL_FORM, 0},
+
+            {INFERNO_BREATH, 14},
+            {INFERNO_BREATH_FINAL_FORM, 0},
+
+            {DRAGON_BARRAGE, 6},
+            {DRAGON_BARRAGE_FINAL_FORM, 0},
+
+            {BLADE_BURST, 6},
+            {BLADE_BURST_FINAL_FORM, 0},
     };
 
     public Kaiser(Char chr) {
@@ -279,6 +350,77 @@ public class Kaiser extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    private int getGaugeIncrement(AttackInfo attackInfo) { //TODO  Use a Array, not Switch case
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        int slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        switch (getOriginalSkillByID(skillID)) {
+            case DRAGON_SLASH_1:
+                return 2;
+            case DRAGON_SLASH_2:
+                return 4;
+            case DRAGON_SLASH_3:
+                return 5;
+            case DRAGON_SLASH_1_FINAL_FORM:
+                return 4;
+
+            case FLAME_SURGE:
+                return 7;
+            case FLAME_SURGE_FINAL_FORM:
+                return 0;
+
+            case IMPACT_WAVE:
+                return 5;
+            case IMPACT_WAVE_FINAL_FORM:
+                return 0;
+
+            case PIERCING_BLAZE:
+                return 5;
+            case PIERCING_BLAZE_FINAL_FORM:
+                return 0;
+
+            case WING_BEAT:
+                return 2;
+            case WING_BEAT_FINAL_FORM:
+                return 1;
+
+            case PRESSURE_CHAIN:
+                return 8;
+            case PRESSURE_CHAIN_FINAL_FORM:
+                return 0;
+
+            case GIGA_WAVE:
+                return 8;
+            case GIGA_WAVE_FINAL_FORM:
+                return 0;
+
+            case INFERNO_BREATH:
+                return 14;
+            case INFERNO_BREATH_FINAL_FORM:
+                return 0;
+
+            case DRAGON_BARRAGE:
+                return 6;
+            case DRAGON_BARRAGE_FINAL_FORM:
+                return 0;
+
+            case BLADE_BURST:
+                return 6;
+            case BLADE_BURST_FINAL_FORM:
+                return 0;
+        }
+        return 0;
+    }
+
     private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
         Option o = new Option();
         Option o1 = new Option();
@@ -369,61 +511,14 @@ public class Kaiser extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        /*int rootSkill = skill.getRootId();
-        if (skill == null) {
-            handleMorphGauge(rootSkill, tsm, c, 100);
-        } else {
-            handleMorphGauge(skill.getSkillId(), tsm, c, 100);
-        }*/
+        if(hasHitMobs) {
+            handleMorphGauge(getOriginalSkillByID(skillID), tsm, c, 20); //TODO change increment depending on skill (with an Array)
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
-            //  morph gauge increases by    [increment]    every mob hit with this skill
-            case DRAGON_SLASH_1:
-                if(hasHitMobs) {
-                    handleMorphGauge(61001000, tsm, c, 3 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case DRAGON_SLASH_2:
-                if(hasHitMobs) {
-                    handleMorphGauge(61001004, tsm, c, 3 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case DRAGON_SLASH_3:
-                if(hasHitMobs) {
-                    handleMorphGauge(61001005, tsm, c, 4 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case DRAGON_SLASH_1_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61120219, tsm, c, 2 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case FLAME_SURGE:
-                if(hasHitMobs) {
-                    handleMorphGauge(61001101, tsm, c, 4 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case FLAME_SURGE_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61111215, tsm, c, 0 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case IMPACT_WAVE:
-                if(hasHitMobs) {
-                    handleMorphGauge(61101100, tsm, c, 5 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case IMPACT_WAVE_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61111216, tsm, c, 0 * attackInfo.mobAttackInfo.size());
-                }
-                break;
             case PIERCING_BLAZE:
-                if(hasHitMobs) {
-                    handleMorphGauge(61101101, tsm, c, 5 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -436,9 +531,6 @@ public class Kaiser extends Job {
                 }
                 break;
             case PIERCING_BLAZE_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61111217, tsm, c, 0 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
@@ -449,9 +541,6 @@ public class Kaiser extends Job {
                 }
                 break;
             case WING_BEAT:
-                if(hasHitMobs) {
-                    handleMorphGauge(61111100, tsm, c, 3 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {     //TODO creates NPE
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -464,9 +553,6 @@ public class Kaiser extends Job {
                 }
                 break;
             case WING_BEAT_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61111111, tsm, c, 1 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
@@ -477,9 +563,6 @@ public class Kaiser extends Job {
                 }
                 break;
             case PRESSURE_CHAIN:
-                if(hasHitMobs) {
-                    handleMorphGauge(61111101, tsm, c, 12 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -492,9 +575,6 @@ public class Kaiser extends Job {
                 }
                 break;
             case PRESSURE_CHAIN_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61111219, tsm, c, 0 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
@@ -505,9 +585,6 @@ public class Kaiser extends Job {
                 }
                 break;
             case GIGA_WAVE:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121100, tsm, c, 10 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -520,49 +597,17 @@ public class Kaiser extends Job {
                 }
                 break;
             case GIGA_WAVE_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121201, tsm, c, 0 * attackInfo.mobAttackInfo.size());
-                }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
+                    int slowvalue = -30;
+                    int time = 3;
+                    o1.nOption = slowvalue; //si.getValue(x, slv); //TODO Returns NPE
                     o1.rOption = 61121201;
-                    o1.tOption = si.getValue(time, slv);
+                    o1.tOption = time; //si.getValue(time, slv);  //TODO Returns NPE
                     mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
                 }
                 break;
-            case DRAGON_BARRAGE:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121102, tsm, c, 10 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case DRAGON_BARRAGE_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121203, tsm, c, 0 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case BLADE_BURST:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121104, tsm, c, 8 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case BLADE_BURST_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121221, tsm, c, 0 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case INFERNO_BREATH:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121105, tsm, c, 20 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-            case INFERNO_BREATH_FINAL_FORM:
-                if(hasHitMobs) {
-                    handleMorphGauge(61121222, tsm, c, 5 * attackInfo.mobAttackInfo.size());
-                }
-                break;
-
 
             case STONE_DRAGON:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {

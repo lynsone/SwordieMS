@@ -354,6 +354,16 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket summonedSummonAttackActive(int charID, Summon summon) {
+        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_SUMMON_ATTACK_ACTIVE);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(summon.getObjectId());
+        outPacket.encodeByte(summon.isAttackActive());
+
+        return outPacket;
+    }
+
     public static OutPacket summonedCreated(int charID, Summon summon) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_CREATED);
 

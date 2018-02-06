@@ -155,6 +155,7 @@ public class Demon extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
         switch (skillID) {
             case OVERLOAD_RELEASE:
                 int overloadcount = tsm.getOption(OverloadCount).nOption;
@@ -204,6 +205,10 @@ public class Demon extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(PowerGuard, o3);
+                o4.nOption = 1;
+                o4.rOption = skillID;
+                o4.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DevilishPower, o4);
                 break;
             case BOUNDLESS_RAGE:
                 // TODO

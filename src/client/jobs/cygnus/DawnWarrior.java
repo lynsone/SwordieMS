@@ -41,7 +41,7 @@ public class DawnWarrior extends Job {
     public static final int RISING_SUN = 11111022; //Buff (Unlimited Duration)
     public static final int TRUE_SIGHT = 11111023; //Buff (Mob Def Debuff & Final DmgUp Debuff)
 
-    public static final int EQUINOX_CYCLE = 11121012; //Buff
+    public static final int EQUINOX_CYCLE = 11121005; //Buff
     public static final int IMPALING_RAYS = 11121004; //Special Attack (Incapacitate Debuff)
     public static final int CALL_OF_CYGNUS_DW = 11121000; //Buff
 
@@ -83,6 +83,7 @@ public class DawnWarrior extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         Option o4 = new Option();
+        Option o5 = new Option();
         switch (skillID) {
             case SOUL_ELEMENT:
                 //TODO
@@ -107,7 +108,7 @@ public class DawnWarrior extends Job {
                 o3.nOption = si.getValue(x, slv);
                 o3.rOption = skillID;
                 o3.tOption = 0;
-                tsm.putCharacterStatValue(AddAttackCount, o3); //TODO Doesn't give extra lines
+                tsm.putCharacterStatValue(BuckShot, o3); //TODO  doubles lines, but even without Master of the Sword
                 break;
             case RISING_SUN:
                 o1.nOption = 2;
@@ -126,7 +127,6 @@ public class DawnWarrior extends Job {
                 tsm.putCharacterStatValue(IndieBooster, o3); //Indie
                 break;
             case EQUINOX_CYCLE:
-                //TODO PoseType = ?
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -136,7 +136,7 @@ public class DawnWarrior extends Job {
                 o2.nValue = si.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
+                tsm.putCharacterStatValue(IndieBooster, o2); //Indie //TODO something wrong
                 o3.nReason = skillID;
                 o3.nValue = si.getValue(indieCr, slv);
                 o3.tStart = (int) System.currentTimeMillis();
@@ -145,7 +145,11 @@ public class DawnWarrior extends Job {
                 o4.nOption = si.getValue(x, slv);
                 o4.rOption = skillID;
                 o4.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(AddAttackCount, o4);
+                tsm.putCharacterStatValue(BuckShot, o4);
+                o5.nOption = 1;
+                o5.rOption = skillID;
+                o5.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(GlimmeringTime, o5);
                 break;
             case CALL_OF_CYGNUS_DW:
                 o1.nReason = skillID;
@@ -156,6 +160,17 @@ public class DawnWarrior extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private void handleEquinox(TemporaryStatManager tsm) {
+        if(tsm.hasStat(GlimmeringTime)) {
+            int posetype = tsm.getOption(PoseType).nOption;
+            if (posetype == 1) {
+                posetype = 2;
+            } else if (posetype == 2) {
+                posetype = 1;
+            }
+        }
     }
 
     private boolean isBuff(int skillID) {
@@ -176,12 +191,13 @@ public class DawnWarrior extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        handleEquinox(tsm);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case IMPALING_RAYS:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) { //TODO
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
