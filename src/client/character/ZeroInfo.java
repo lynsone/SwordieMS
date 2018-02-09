@@ -130,18 +130,18 @@ public class ZeroInfo {
     }
 
     public void encode(OutPacket outPacket) {
-        short mask = 0xFF;
+        short mask = 0x1 | 0x2 | 0x4 | 0x40 | 0x80;
         outPacket.encodeShort(mask);
-        if((mask & 1) != 0){
-            outPacket.encodeByte(isZeroBetaState());
+        if((mask & 0x1) != 0){
+            outPacket.encodeByte(true);
         }
-        if ((mask & 2) != 0) {
-            outPacket.encodeInt(getSubHP());
+        if ((mask & 0x2) != 0) {
+            outPacket.encodeInt(getSubHP() / 2);
         }
-        if ((mask & 4) != 0) {
-            outPacket.encodeInt(getSubMP());
+        if ((mask & 0x4) != 0) {
+            outPacket.encodeInt(getSubMP() / 3);
         }
-        if ((mask & 8) != 0) {
+        if ((mask & 0x8) != 0) {
             outPacket.encodeByte(getSubSkin());
         }
         if ((mask & 0x10) != 0) {

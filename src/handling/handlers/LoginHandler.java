@@ -170,15 +170,15 @@ public class LoginHandler {
             chr.getAvatarData().getAvatarLook().setDrawElfEar(true);
         }
         if (curSelectedRace == 15) { //Zero
-            chr.getAvatarData().getAvatarLook().setWeaponId(1572000);
-            chr.getAvatarData().getAvatarLook().setSubWeaponId(1562000);
+            chr.getAvatarData().setZeroAvatarLook(chr.getAvatarData().getAvatarLook().deepCopy());
+            chr.getAvatarData().getAvatarLook().getHairEquips().remove(new Integer(1562000));
+            chr.getAvatarData().getZeroAvatarLook().getHairEquips().remove(new Integer(1572000));
             chr.getAvatarData().getZeroAvatarLook().setWeaponId(1562000);
-            chr.getAvatarData().getZeroAvatarLook().setSubWeaponId(1572000);
             chr.getAvatarData().getZeroAvatarLook().setGender(1);
             chr.getAvatarData().getZeroAvatarLook().setSkin(chr.getAvatarData().getAvatarLook().getSkin());
             chr.getAvatarData().getZeroAvatarLook().setFace(21290);
             chr.getAvatarData().getZeroAvatarLook().setHair(37623);
-            chr.getAvatarData().getCharacterStat().setJob(10112);
+            chr.getAvatarData().getZeroAvatarLook().setZeroBetaLook(true);
             chr.getAvatarData().getCharacterStat().setLevel(100);
             chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats
         }
@@ -205,6 +205,12 @@ public class LoginHandler {
                         equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
                 chr.addItemToInventory(EQUIPPED, equip, true);
             }
+        }
+        if(curSelectedRace == 15) { // Zero hack for adding 2nd weapon (removing it in hairequips for zero look)
+            Equip equip = ItemData.getEquipDeepCopyFromId(1562000);
+            equip.setBagIndex(ItemConstants.getBodyPartFromItem(
+                    equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
+            chr.addItemToInventory(EQUIPPED, equip, true);
         }
         chr.getInventoryByType(EQUIPPED).updateDB();
         c.write(Login.createNewCharacterResult(LoginType.SUCCESS, chr));

@@ -2312,6 +2312,7 @@ public class TemporaryStatManager {
         if (hasNewStat(Stigma)) {
             outPacket.encodeInt(getOption(Stigma).bOption);
         }
+        //TODO TwoState here
         encodeIndieTempStat(outPacket);
         if (hasNewStat(UsingScouter)) {
             outPacket.encodeShort(getOption(UsingScouter).nOption);

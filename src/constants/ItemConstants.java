@@ -211,7 +211,7 @@ public class ItemConstants {
                     bodyPartList.add(11);
                     bodyPartList.add(1507);
                 } else {
-                    System.out.println("Unkown type? id = " + nItemID);
+                    System.out.println("Unknown type? id = " + nItemID);
                 }
                 break;
         }
@@ -220,7 +220,7 @@ public class ItemConstants {
 
     private static boolean isLongOrBigSword(int nItemID) {
         int prefix = nItemID / 10000;
-        return prefix % 100 != 56 && prefix % 100 != 57;
+        return prefix % 100 == 56 || prefix % 100 == 57;
     }
 
     public static int getWeaponType(int itemID) {

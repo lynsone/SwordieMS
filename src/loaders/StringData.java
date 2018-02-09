@@ -1,5 +1,6 @@
 package loaders;
 
+import client.character.skills.Skill;
 import client.character.skills.SkillStat;
 import constants.ServerConstants;
 import org.w3c.dom.Document;

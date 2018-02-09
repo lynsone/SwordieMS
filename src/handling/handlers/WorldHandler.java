@@ -59,7 +59,7 @@ public class WorldHandler {
         c.setChannelInstance(Server.getInstance().getWorldById(worldId).getChannelById(channel));
 //        Char chr = Char.getFromDBById(charId);
         Char chr = c.getChr();
-        if(chr == null || chr.getId() != charId) {
+        if (chr == null || chr.getId() != charId) {
             chr = Char.getFromDBById(charId);
         }
         chr.setClient(c);
@@ -141,7 +141,7 @@ public class WorldHandler {
             item.drop();
         } else {
             Item swapItem = chr.getInventoryByType(invTypeTo).getItemBySlot(newPos);
-            if(swapItem != null) {
+            if (swapItem != null) {
                 chr.chatMessage(YELLOW, "SwapItem before: " + swapItem);
             }
             item.setBagIndex(newPos);
@@ -804,23 +804,24 @@ public class WorldHandler {
         }
     }
 
-    public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket){
-        Char chr = c.getChr();
-        Field field = chr.getField();
-    System.out.println("Gets into handleUserGrowthRequestHelper");
-    inPacket.decodeShort();
-    int mapleGuideMapId = inPacket.decodeInt();
-        Field toField = chr.getClient().getChannelInstance().getField(mapleGuideMapId);
-        chr.setField(toField);
-        Portal toPortal = toField.getPortalByID(0);
-        field.removeChar(chr);
-        toField.addChar(chr);
-        chr.getClient().write(Stage.setField(chr, toField, chr.getClient().getChannel(), false, 0, false, chr.hasBuffProtector(),
-                (byte) toPortal.getId(), false, 100, null, false, -1));
-        toField.spawnLifesForChar(chr);
-    System.out.println(mapleGuideMapId);
+    public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
+//        Char chr = c.getChr();
+//        Field field = chr.getField();
+//        System.out.println("Gets into handleUserGrowthRequestHelper");
+//        inPacket.decodeShort();
+//        int mapleGuideMapId = inPacket.decodeInt();
+//        Field toField = chr.getClient().getChannelInstance().getField(mapleGuideMapId);
+//        chr.setField(toField);
+//        Portal toPortal = toField.getPortalByID(0);
+//        field.removeChar(chr);
+//        toField.addChar(chr);
+//        chr.getClient().write(Stage.setField(chr, toField, chr.getClient().getChannel(), false, 0, false, chr.hasBuffProtector(),
+//                (byte) toPortal.getId(), false, 100, null, false, -1));
+//        toField.spawnLifesForChar(chr);
+//        System.out.println(mapleGuideMapId);
 
     }
+
     public static void handleTemporaryStatResetRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -1052,7 +1053,7 @@ public class WorldHandler {
 
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        if(c.getAccount() != null) {
+        if (c.getAccount() != null) {
             c.getAccount().updateDB();
         }
         chr.updateDB();
@@ -1282,7 +1283,7 @@ public class WorldHandler {
                 int tierUpChance = ItemConstants.getTierUpChance(itemID);
                 short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
                 boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
-                if(tierUp) {
+                if (tierUp) {
                     hiddenValue++;
                 }
                 equip.setHiddenOptionBase(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
@@ -1559,7 +1560,7 @@ public class WorldHandler {
         }
         boolean base = equip.getOptionBase(0) < 0;
         boolean bonus = equip.getOptionBonus(0) < 0;
-        if(base && bonus) {
+        if (base && bonus) {
             equip.releaseOptions(true);
             equip.releaseOptions(false);
         } else {

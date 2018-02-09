@@ -173,6 +173,7 @@ public class Char {
             }
         }
         avatarLook.setHairEquips(hairEquips);
+        avatarLook.setJob(job);
         CharacterStat characterStat = new CharacterStat(name, job);
         characterStat.setLevel(1);
         characterStat.setStr(4);
@@ -822,6 +823,9 @@ public class Char {
         }
         if (mask.isInMask(DBChar.ZeroInfo)) {
             if (JobConstants.isZero(getAvatarData().getCharacterStat().getJob())) {
+                if(getZeroInfo() == null) {
+                    initZeroInfo();
+                }
                 getZeroInfo().encode(outPacket); //ZeroInfo::Decode
             }
         }
@@ -1630,5 +1634,6 @@ public class Char {
         zeroInfo.setSubMHP(cs.getMaxHp());
         zeroInfo.setSubMP(cs.getMp());
         zeroInfo.setSubMMP(cs.getMaxMp());
+        setZeroInfo(zeroInfo);
     }
 }

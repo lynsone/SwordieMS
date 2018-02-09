@@ -80,6 +80,35 @@ public class AvatarLook {
         totems = new ArrayList<>();
     }
 
+    public AvatarLook deepCopy() {
+        AvatarLook res = new AvatarLook();
+        res.setGender(getGender());
+        res.setSkin(getSkin());
+        res.setFace(getFace());
+        res.setHair(getHair());
+        res.setWeaponStickerId(getWeaponStickerId());
+        res.setWeaponId(getWeaponId());
+        res.setSubWeaponId(getSubWeaponId());
+        List<Integer> resHairEquips = new ArrayList<>(getHairEquips());
+        res.setHairEquips(resHairEquips);
+        List<Integer> resUnseenEquips = new ArrayList<>(getUnseenEquips());
+        res.setUnseenEquips(resUnseenEquips);
+        List<Integer> resPetIDs = new ArrayList<>(getPetIDs());
+        res.setUnseenEquips(resPetIDs);
+        res.setJob(getJob());
+        res.setDrawElfEar(isDrawElfEar());
+        res.setDemonSlayerDefFaceAcc(getDemonSlayerDefFaceAcc());
+        res.setXenonDefFaceAcc(getXenonDefFaceAcc());
+        res.setBeastTamerDefFaceAcc(getBeastTamerDefFaceAcc());
+        res.setZeroBetaLook(isZeroBetaLook());
+        res.setMixedHairColor(getMixedHairColor());
+        res.setMixHairPercent(getMixHairPercent());
+        List<Integer> resTotems = new ArrayList<>(getTotems());
+        res.setTotems(resTotems);
+        res.setEars(getEars());
+        res.setTail(getTail());
+        return res;
+    }
 
     public int getGender() {
         return gender;
@@ -184,11 +213,11 @@ public class AvatarLook {
         this.xenonDefFaceAcc = xenonDefFaceAcc;
     }
 
-    public int getBeastTamerFaceAcc() {
+    public int getBeastTamerDefFaceAcc() {
         return beastTamerDefFaceAcc;
     }
 
-    public void setBeastTamerDefFaceAcc() {
+    public void setBeastTamerDefFaceAcc(int beastTamerDefFaceAcc) {
         this.beastTamerDefFaceAcc = beastTamerDefFaceAcc;
     }
 
@@ -262,7 +291,7 @@ public class AvatarLook {
         if (JobConstants.isBeastTamer((short) getJob())) {
             boolean hasEars = getEars() > 0;
             boolean hasTail = getTail() > 0;
-            outPacket.encodeInt(getBeastTamerFaceAcc());
+            outPacket.encodeInt(getBeastTamerDefFaceAcc());
             outPacket.encodeByte(hasEars);
             outPacket.encodeInt(getEars());
             outPacket.encodeByte(hasTail);
@@ -328,4 +357,5 @@ public class AvatarLook {
     public void deleteFromDB(Session session, Transaction tx) {
         session.delete(this);
     }
+
 }
