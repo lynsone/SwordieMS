@@ -19,6 +19,7 @@ import packet.WvsContext;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -36,14 +37,24 @@ public class Mercedes extends Job {
 
     public static final int STUNNING_STRIKES = 23111000; //Special Attack
     public static final int UNICORN_SPIKE = 23111002; //Special Attack
-    public static final int IGNIS_ROAR = 23111004; //Buff //Stacks
+    public static final int IGNIS_ROAR = 23111004; //Buff //TODO Stacks
     public static final int WATER_SHIELD = 23111005; //Buff
-    public static final int ELEMENTAL_KNIGHTS = 23111008; //Summon
+    public static final int ELEMENTAL_KNIGHTS_BLUE = 23111008; //Summon
+    public static final int ELEMENTAL_KNIGHTS_RED = 23111009; //Summon
+    public static final int ELEMENTAL_KNIGHTS_PURPLE = 23111010; //Summon
 
     public static final int SPIKES_ROYALE = 23121002;  //Special Attack
     public static final int STAGGERING_STRIKES = 23120013; //Special Attack
     public static final int ANCIENT_WARDING = 23121004; //Buff
     public static final int MAPLE_WARRIOR_MERC = 23121005; //Buff
+
+    public static int getOriginalSkillByID(int skillID) {
+        switch(skillID) {
+            case STAGGERING_STRIKES:
+                return STUNNING_STRIKES;
+        }
+        return skillID; // no original skill linked with this one
+    }
 
     private int[] addedSkills = new int[] {
             ELVEN_GRACE,
@@ -55,9 +66,17 @@ public class Mercedes extends Job {
             DUAL_BOWGUN_BOOSTER,
             IGNIS_ROAR,
             WATER_SHIELD,
-            ELEMENTAL_KNIGHTS, //Summon
+            ELEMENTAL_KNIGHTS_BLUE, //Summon
+            ELEMENTAL_KNIGHTS_RED, //Summon
+            ELEMENTAL_KNIGHTS_PURPLE, //Summon
             ANCIENT_WARDING,
             MAPLE_WARRIOR_MERC,
+    };
+
+    private final int[] summonAttacks = new int[] {
+            ELEMENTAL_KNIGHTS_BLUE,
+            ELEMENTAL_KNIGHTS_RED,
+            ELEMENTAL_KNIGHTS_PURPLE,
     };
 
     public Mercedes(Char chr) {
@@ -97,11 +116,6 @@ public class Mercedes extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
-              //o1.nValue = si.getValue(indiePad, slv);
-              //o1.nReason = skillID;
-              //o1.tStart = (int) System.currentTimeMillis();
-              //o1.tTerm = si.getValue(time, slv);
-              //tsm.putCharacterStatValue(IndiePAD, o1);
                 break;
             case WATER_SHIELD:
                 o1.nOption = si.getValue(asrR, slv);
@@ -131,8 +145,17 @@ public class Mercedes extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-            case ELEMENTAL_KNIGHTS: //TODO allow for different summons (blue/red/purple)
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+            case ELEMENTAL_KNIGHTS_BLUE: //TODO allow for different summons (blue/red/purple)
+                int element = ELEMENTAL_KNIGHTS_BLUE;
+                int chance = new Random().nextInt(100) +1;
+                if (chance < 32) {
+                    element = ELEMENTAL_KNIGHTS_BLUE;
+                } else if (chance > 32 && chance < 67) {
+                    element = ELEMENTAL_KNIGHTS_RED;
+                } else if (chance > 67 && chance < 100) {
+                    element = ELEMENTAL_KNIGHTS_PURPLE;
+                }
+                summon = Summon.getSummonBy(c.getChr(), element, slv);
                 field = c.getChr().getField();
                 summon.setCharLevel((byte) chr.getStat(Stat.level));
                 summon.setPosition(chr.getPosition().deepCopy());
@@ -151,32 +174,34 @@ public class Mercedes extends Job {
     }
 
     // y = stack | lasts subTime,  Final Dmg increase per stack = x
-    private void handleIgnisRoar(int skillid, TemporaryStatManager tsm, Client c) { //TODO Gain 1 stack by using Combo Skills
-        Option o = new Option();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(23111004);
-        int amount = 1;
-        if(tsm.hasStat(IgnisRore)){
-            amount = tsm.getOption(IgnisRore).nOption;
-            if(amount < ignisRoarInfo.getValue(y, ignisRoarInfo.getCurrentLevel())) {
-                amount++;
-            } else {}
-        }
-        o.nOption = amount;
-        o.rOption = 23111004;
-        o.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
-        tsm.putCharacterStatValue(IgnisRore, o);
-        o1.nOption = (amount * ignisRoarInfo.getValue(x, ignisRoarInfo.getCurrentLevel()));
-        o1.rOption = 23111004;
-        o1.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
-        tsm.putCharacterStatValue(DamR, o1);
-        o2.nValue = ignisRoarInfo.getValue(indiePad, ignisRoarInfo.getCurrentLevel());
-        o2.nReason = 23111004;
-        o2.tStart = (int) System.currentTimeMillis();
-        o2.tTerm = ignisRoarInfo.getValue(time, ignisRoarInfo.getCurrentLevel());
-        tsm.putCharacterStatValue(IndiePAD, o2);
+    private void handleIgnisRoar(int skillID, TemporaryStatManager tsm, Client c) { //TODO Gain 1 stack by using Combo Skills
+        if (Arrays.asList(summonAttacks).contains(skillID)) {
+            return;
+        } else {
+            Option o = new Option();
+            Option o1 = new Option();
+            Option o2 = new Option();
+            SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(23111004);
+            int amount = 1;
+            if (tsm.hasStat(IgnisRore)) {
+                if (tsm.hasStat(AddAttackCount)) {
+                    amount = tsm.getOption(AddAttackCount).nOption;
+                    if (amount < ignisRoarInfo.getValue(y, ignisRoarInfo.getCurrentLevel())) {
+                        amount++;
+                    }
+                }
 
+                o.nOption = amount;
+                o.rOption = 23111004;
+                o.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
+                tsm.putCharacterStatValue(AddAttackCount, o);
+                o1.nOption = (amount * ignisRoarInfo.getValue(x, ignisRoarInfo.getCurrentLevel()));
+                o1.rOption = 23111004;
+                o1.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
+                tsm.putCharacterStatValue(DamR, o1);
+            }
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
     }
 
     private boolean isBuff(int skillID) {
@@ -191,14 +216,14 @@ public class Mercedes extends Job {
         int skillID = 0;
         SkillInfo si = null;
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
+        byte slv = 0;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
+            slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            handleIgnisRoar(skill.getSkillId(), tsm, c);
+            handleIgnisRoar(getOriginalSkillByID(skillID), tsm, c);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -207,11 +232,11 @@ public class Mercedes extends Job {
             case STUNNING_STRIKES:
             case STAGGERING_STRIKES:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                    if(Util.succeedProp(/*si.getValue(prop, slv)*/100)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
+                        o1.rOption = getOriginalSkillByID(skillID);
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
@@ -235,7 +260,7 @@ public class Mercedes extends Job {
                     if(Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(x, slv);;
+                        o1.nOption = si.getValue(x, slv);
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Weakness, o1); // ?
@@ -243,9 +268,26 @@ public class Mercedes extends Job {
                     }
                 }
                 break;
-            case ELEMENTAL_KNIGHTS:
-                //TODO
+            case ELEMENTAL_KNIGHTS_BLUE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(subTime, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
+                    }
+                }
                 break;
+            /*case ELEMENTAL_KNIGHTS_RED:           //TODO fix
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+
+                }
+                break;*/
         }
     }
 

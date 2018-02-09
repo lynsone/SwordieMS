@@ -25,7 +25,7 @@ import static client.character.skills.SkillStat.*;
 public class Zero extends Job {
 
     public static final int DUAL_COMBAT = 100001270;
-    public static final int DUAL_COMBAT_2 = 100001282;
+    public static final int DUAL_COMBAT_2 = 100000282;
     public static final int TEMPLE_RECALL = 100001262;
     public static final int RESOLUTION_TIME = 100000279;
     public static final int BURST_JUMP = 100001265;
@@ -43,13 +43,13 @@ public class Zero extends Job {
     public static final int ADV_STORM_BREAK = 101120204; //Special Attack (Shock Field)
 
     private int[] addedSkills = new int[] {
-      /*      DUAL_COMBAT,
+            DUAL_COMBAT,
             DUAL_COMBAT_2,
             TEMPLE_RECALL,
             RESOLUTION_TIME,
             BURST_STEP,
             BURST_JUMP,
-            BURST_LEAP,*/
+            BURST_LEAP,
     };
 
     private int[] buffs = new int[] {
@@ -82,38 +82,43 @@ public class Zero extends Job {
         Option o4 = new Option();
         Option o5 = new Option();
         Option o6 = new Option();
+        Option o7 = new Option();
         switch (skillID) {
             case DIVINE_FORCE:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieAsrR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
+                o1.tTerm = 0;
                 tsm.putCharacterStatValue(IndieAsrR, o1); //Indie
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieMad, slv);
                 o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = si.getValue(time, slv);
+                o2.tTerm = 0;
                 tsm.putCharacterStatValue(IndieMAD, o2); //Indie
                 o3.nReason = skillID;
                 o3.nValue = si.getValue(indiePad, slv);
                 o3.tStart = (int) System.currentTimeMillis();
-                o3.tTerm = si.getValue(time, slv);
+                o3.tTerm = 0;
                 tsm.putCharacterStatValue(IndiePAD, o3); //Indie
                 o4.nReason = skillID;
                 o4.nValue = si.getValue(indieMdd, slv);
                 o4.tStart = (int) System.currentTimeMillis();
-                o4.tTerm = si.getValue(time, slv);
+                o4.tTerm = 0;
                 tsm.putCharacterStatValue(IndieMDD, o4); //Indie
                 o5.nReason = skillID;
                 o5.nValue = si.getValue(indiePdd, slv);
                 o5.tStart = (int) System.currentTimeMillis();
-                o5.tTerm = si.getValue(time, slv);
+                o5.tTerm = 0;
                 tsm.putCharacterStatValue(IndiePDD, o5); //Indie
                 o6.nReason = skillID;
                 o6.nValue = si.getValue(indieTerR, slv);
                 o6.tStart = (int) System.currentTimeMillis();
-                o6.tTerm = si.getValue(time, slv);
+                o6.tTerm = 0;
                 tsm.putCharacterStatValue(IndieTerR, o6); //Indie
+                o7.nOption = 1;
+                o7.rOption = skillID;
+                o7.tOption = 0;
+                tsm.putCharacterStatValue(ZeroAuraStr, o7);
                 break;
             case DIVINE_SPEED:
                 o1.nReason = skillID;

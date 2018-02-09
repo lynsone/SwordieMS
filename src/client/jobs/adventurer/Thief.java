@@ -227,7 +227,11 @@ public class Thief extends Job {
                     o1.rOption = skillID;
                     o1.tOption = si.getValue(time, slv);
                     tsm.putCharacterStatValue(FinalCut, o1);
-                    // TODO add 3 sec Invincibility to Final Cut Buff (3sec time = v
+                    o2.nOption = 1;
+                    o2.rOption = skillID;
+                    o2.tOption = 3;
+                    tsm.putCharacterStatValue(NotDamaged, o2);
+                    c.write(WvsContext.temporaryStatSet(tsm));
                     break;
             }
         }
@@ -348,7 +352,7 @@ public class Thief extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                 break;
-            case MIRRORED_TARGET: //TODO Crashes
+            case MIRRORED_TARGET: //TODO Crashes - not 38*
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setCharLevel((byte) chr.getStat(Stat.level));

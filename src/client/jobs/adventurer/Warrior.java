@@ -186,7 +186,7 @@ public class Warrior extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Invincible, o1); //TODO Doesn't actually give invincibility
+                tsm.putCharacterStatValue(NotDamaged, o1);
                 break;
             case IRON_WILL:
                 o1.nOption = si.getValue(pdd, slv);
@@ -249,7 +249,7 @@ public class Warrior extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-            case BLAST: //TODO Doesn't give Buff
+            case BLAST:
                 o1.nOption = si.getValue(cr, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
