@@ -565,6 +565,7 @@ public enum CharacterTemporaryStat {
 
     public boolean isMovingEffectingStat() {
         switch (this) {
+            case Speed:
             case Jump:
             case Stun:
             case Weakness:
