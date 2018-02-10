@@ -1616,4 +1616,12 @@ public class WorldHandler {
         int oldTF = inPacket.decodeInt();
         chr.swapZeroState();
     }
+
+    public static void handleBattleRecordOnOffRequest(Client c, InPacket inPacket) {
+        // CBattleRecordMan::RequestOnCalc
+        boolean on = inPacket.decodeByte() != 0;
+        boolean isNew = inPacket.decodeByte() != 0;
+        boolean clear = inPacket.decodeByte() != 0;
+        c.write(BattleRecordMan.serverOnCalcRequestResult(on));
+    }
 }
