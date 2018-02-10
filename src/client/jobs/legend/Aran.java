@@ -4,6 +4,7 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
@@ -441,6 +442,11 @@ public class Aran extends Job {
                     tsm.getOption(ComboAbilityBuff).nOption = 1000;
                     handleAdrenalinRush(skillID, tsm, c);
                     c.write(WvsContext.temporaryStatSet(tsm));
+                    break;
+                case RETURN_TO_RIEN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
                     break;
             }
         }
