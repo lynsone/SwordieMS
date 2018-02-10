@@ -88,7 +88,7 @@ public class Magician extends Job {
     public static final int ABSOLUTE_ZERO_AURA = 2121054;
     public static final int INFERNO_AURA = 2221054;
     public static final int RIGHTEOUSLY_INDIGNANT = 2321054;
-    public static final int HEAVENS_DOOR = 2321055;
+    public static final int HEAVENS_DOOR = 2321052;
 
 
     private final int[] buffs = new int[]{
@@ -504,6 +504,7 @@ public class Magician extends Job {
             case RIGHTEOUSLY_INDIGNANT:
                 //Passive + active  stats
                 break;
+
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
