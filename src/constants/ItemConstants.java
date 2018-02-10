@@ -41,9 +41,9 @@ public class ItemConstants {
         return result;
     }
 
-    public static List<Integer> getBodyPartArrayFromItem(int nItemID, int genderArg) {
-        int gender = getGenderFromId(nItemID);
-        int prefix = nItemID / 10000;
+    public static List<Integer> getBodyPartArrayFromItem(int itemID, int genderArg) {
+        int gender = getGenderFromId(itemID);
+        int prefix = itemID / 10000;
         List<Integer> bodyPartList = new ArrayList<>();
         if (prefix != 119 && prefix != 168) {
             if (gender != 2 && genderArg != 2 && gender != genderArg) {
@@ -207,11 +207,11 @@ public class ItemConstants {
                 bodyPartList.add(1003);
                 break;
             default:
-                if (ItemConstants.isLongOrBigSword(nItemID)) {
+                if (ItemConstants.isLongOrBigSword(itemID) || ItemConstants.isWeapon(itemID)) {
                     bodyPartList.add(11);
                     bodyPartList.add(1507);
                 } else {
-                    System.out.println("Unknown type? id = " + nItemID);
+                    System.out.println("Unknown type? id = " + itemID);
                 }
                 break;
         }
