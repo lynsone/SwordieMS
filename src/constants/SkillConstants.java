@@ -410,4 +410,24 @@ public class SkillConstants {
     public static boolean isZeroBetaSkill(int skillID) {
         return isZeroSkill(skillID) && skillID % 1000 / 100 == 1;
     }
+
+    public static boolean isLightmageSkill(int skillID) {
+        int prefix = skillID / 10000;
+        if(prefix == 8000) {
+            prefix = skillID / 100;
+        }
+        return prefix / 100 == 27 || prefix == 2004;
+    }
+
+    public static boolean isLarknessDarkSkill(int skillID) {
+        return skillID != 20041222 && isLightmageSkill(skillID) && skillID / 100 % 10 == 2;
+    }
+
+    public static boolean isLarknessLightSkill(int skillID) {
+        return skillID != 20041222 && isLightmageSkill(skillID) && skillID / 100 % 10 == 1;
+    }
+
+    public static boolean isEquilibriumSkill(int skillID) {
+        return skillID >= 20040219 && skillID <= 20040220;
+    }
 }

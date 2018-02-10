@@ -8,10 +8,29 @@ import connection.OutPacket;
 public class LarknessInfo {
     private int rLarkness;
     private int tLarkness;
+    private boolean dark;
+
+    public LarknessInfo(boolean dark) {
+        this.dark = dark;
+    }
+
+    public LarknessInfo(int rLarkness, int tLarkness, boolean dark) {
+        this.rLarkness = rLarkness;
+        this.tLarkness = tLarkness;
+        this.dark = dark;
+    }
 
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getrLarkness());
         outPacket.encodeInt(gettLarkness());
+    }
+
+    public boolean isDark() {
+        return dark;
+    }
+
+    public void setDark(boolean dark) {
+        this.dark = dark;
     }
 
     public int getrLarkness() {

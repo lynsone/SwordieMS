@@ -27,7 +27,7 @@ public class TemporaryStatManager {
     private List<Integer> mobZoneStates;
     private int viperEnergyCharge;
     private StopForceAtom stopForceAtom;
-    private List<LarknessInfo> larknessInfos;
+    private LarknessManager larknessManager;
     private Char chr;
 
     public TemporaryStatManager(Char chr){
@@ -2175,13 +2175,10 @@ public class TemporaryStatManager {
             outPacket.encodeByte(getOption(AntiMagicShell).bOption);
         }
         if (hasNewStat(Larkness)) {
-            // Should be of size 2!
-            if (getLarknessInfos().size() != 2) {
-                System.err.println("[ERROR] - Larkness infos' size is not 2!");
-            }
-            for (LarknessInfo li : getLarknessInfos()) {
-                li.encode(outPacket);
-            }
+            getLarknessManager().getDarkInfo().encode(outPacket);
+            getLarknessManager().getLightInfo().encode(outPacket);
+            getLarknessManager().encode(outPacket);
+
         }
         if (hasNewStat(IgnoreTargetDEF)) {
             outPacket.encodeInt(getOption(IgnoreTargetDEF).mOption);
@@ -2470,12 +2467,8 @@ public class TemporaryStatManager {
         this.stopForceAtom = stopForceAtom;
     }
 
-    public List<LarknessInfo> getLarknessInfos() {
-        return larknessInfos;
-    }
-
-    public void setLarknessInfos(List<LarknessInfo> larknessInfos) {
-        this.larknessInfos = larknessInfos;
+    public LarknessManager getLarknessManager() {
+        return larknessManager;
     }
 
     public Char getChr() {
@@ -2496,5 +2489,9 @@ public class TemporaryStatManager {
 
     public void sendResetStatPacket() {
         getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
+    }
+
+    public void setLarknessManager(LarknessManager larknessManager) {
+        this.larknessManager = larknessManager;
     }
 }

@@ -1,5 +1,6 @@
 package packet;
 
+import client.character.skills.LarknessManager;
 import connection.OutPacket;
 import enums.ChatMsgColour;
 import handling.OutHeader;
@@ -30,6 +31,14 @@ public class UserLocal {
         OutPacket outPacket = new OutPacket(OutHeader.JAGUAR_SKILL);
 
         outPacket.encodeInt(skillID);
+
+        return outPacket;
+    }
+
+    public static OutPacket incLarknessReponse(LarknessManager larknessManager) {
+        OutPacket outPacket = new OutPacket(OutHeader.INC_LARKNESS_RESPONSE);
+
+        larknessManager.encode(outPacket);
 
         return outPacket;
     }

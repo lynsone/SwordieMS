@@ -7,9 +7,11 @@ import client.character.skills.*;
 import client.jobs.Job;
 import connection.InPacket;
 import constants.JobConstants;
+import constants.SkillConstants;
 import enums.ChatMsgColour;
 import loaders.SkillData;
 import packet.WvsContext;
+import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
@@ -27,6 +29,7 @@ public class Luminous extends Job {
     public static final int EQUILIBRIUM2 = 20040220; //test
     public static final int INNER_LIGHT = 20040221;
     public static final int FLASH_BLINK = 20041222;
+    public static final int CHANGE_LIGHT_DARK = 20041239;
 
     public static final int MAGIC_BOOSTER = 27101004; //Buff
 
@@ -48,6 +51,7 @@ public class Luminous extends Job {
             //EQUILIBRIUM2,
             INNER_LIGHT,
             FLASH_BLINK,
+            CHANGE_LIGHT_DARK
     };
 
     private final int[] buffs = new int[]{
@@ -72,10 +76,13 @@ public class Luminous extends Job {
                 }
             }
         }
+        if(chr.getTemporaryStatManager().getLarknessManager() == null) {
+            chr.getTemporaryStatManager().setLarknessManager(new LarknessManager(chr));
+        }
+//        changeMode();
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
-        Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
         Option o1 = new Option();
@@ -145,23 +152,14 @@ public class Luminous extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleLarkness(int skillId, TemporaryStatManager tsm, Client c) {  //TODO
-        Option o = new Option();
-        SkillInfo larknessInfo = SkillData.getSkillInfoById(20040216);
-        int amount = 1;
-        if(chr.hasSkill(20040216)) {
-            amount = tsm.getOption(Larkness).nOption;
-            if(amount < 10000/*larknessInfo.getValue(y, 1)*/) {
-                amount = tsm.getOption(Larkness).nOption + 1000;
-            }
+    private void handleLarkness(int skillId) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        LarknessManager lm = tsm.getLarknessManager();
+        if(SkillConstants.isLarknessLightSkill(skillId)) {
+            lm.addGauge(10000, false);
+        } else if(SkillConstants.isLarknessDarkSkill(skillId)) {
+            lm.addGauge(10000, true);
         }
-
-        o.nOption = amount;
-        o.rOption = 20040216;
-        o.tOption = 0;
-        tsm.putCharacterStatValue(Larkness, o);
-
-        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     //TODO handle LifeTidal (Skill : LunarTide)
@@ -229,7 +227,7 @@ public class Luminous extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleLarkness(skill.getSkillId(), tsm, c);
+        handleLarkness(skill.getSkillId());
         int crescendoProp = getCrescendoProp(chr);
         if (tsm.hasStat(StackBuff)) {
             if (hasHitMobs && Util.succeedProp(crescendoProp)) {
@@ -249,6 +247,8 @@ public class Luminous extends Job {
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        LarknessManager lm = tsm.getLarknessManager();
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
@@ -260,9 +260,29 @@ public class Luminous extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
-
+                case ECLIPSE:
+                case SUNFIRE:
+                case CHANGE_LIGHT_DARK:
+                    lm.changeMode();
+                    o1.nOption = 1;
+                    o1.rOption = EQUILIBRIUM;
+//                    o1.tOption = SkillData.getSkillInfoById(EQUILIBRIUM).getValue(time, 1);
+                    tsm.putCharacterStatValue(Larkness, o1);
+                    EventManager.addEvent(this, "changeMode", 10 * 1000);
+                    break;
             }
+            tsm.sendSetStatPacket();
         }
+    }
+
+    public void changeMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        LarknessManager lm = tsm.getLarknessManager();
+        Option o = new Option();
+        o.nOption = 1;
+        o.rOption = lm.isDark() ? ECLIPSE : SUNFIRE;
+        tsm.putCharacterStatValue(Larkness, o);
+        tsm.sendSetStatPacket();
     }
 
     @Override
