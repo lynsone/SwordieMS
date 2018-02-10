@@ -18,7 +18,7 @@ public class JobConstants {
     }
 
     public static boolean isBeastTamer(short job) {
-        return job == JobEnum.BEAST_TAMER_1.getJobId() || job == JobEnum.BEAST_TAMER_2.getJobId() ||
+        return job == JobEnum.BEAST_TAMER.getJobId() || job == JobEnum.BEAST_TAMER_1.getJobId() || job == JobEnum.BEAST_TAMER_2.getJobId() ||
                 job == JobEnum.BEAST_TAMER_2.getJobId() || job == JobEnum.BEAST_TAMER_3.getJobId();
     }
     public static boolean isPinkBean(short job){
@@ -211,7 +211,7 @@ public class JobConstants {
         ZERO2(10110),
         ZERO3(10111),
         ZERO4(10112),
-        CRASH_1(11000),
+        BEAST_TAMER(11000),
         BEAST_TAMER_1(11200),
         BEAST_TAMER_2(11210),
         BEAST_TAMER_3(11211),
@@ -289,7 +289,7 @@ public class JobConstants {
         JETT(17, JobFlag.ENABLED, JobEnum.BEGINNER),
         HAYATO(18, JobFlag.ENABLED, JobEnum.HAYATO),
         KANNA(19, JobFlag.ENABLED, JobEnum.KANNA),
-        CHASE(20, JobFlag.ENABLED, JobEnum.BEAST_TAMER_1),
+        CHASE(20, JobFlag.ENABLED, JobEnum.BEAST_TAMER),
         PINK_BEAN(21, JobFlag.ENABLED, JobEnum.PINK_BEAN_0),
         KINESIS(22, JobFlag.ENABLED, JobEnum.KINESIS_0);
 
@@ -448,7 +448,7 @@ public class JobConstants {
     }
 
     public static boolean isExtendSpJob(short jobId) {
-        return !isBeastTamer(jobId) || !isPinkBean(jobId);
+        return !isBeastTamer(jobId) && !isPinkBean(jobId);
     }
 
     public static boolean isDemon(short jobId) {

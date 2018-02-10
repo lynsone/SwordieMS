@@ -38,6 +38,7 @@ public class BeastTamer extends Job {
     public boolean isHandlerOfJob(short id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
         switch (job) {
+            case BEAST_TAMER:
             case BEAST_TAMER_1:
             case BEAST_TAMER_2:
             case BEAST_TAMER_3:
