@@ -47,6 +47,9 @@ public class Shade extends Job {
     public static final int DEATH_MARK = 25121006; //Special Attack (Mark Debuff)
     public static final int SOUL_SPLITTER = 25121007; //Special Attack (Split)
 
+    public static final int HEROIC_MEMORIES_SH = 25121132;
+    public static final int SPIRIT_BOND_MAX = 25121131;
+
     private int[] addedSkills = new int[] {
             SPIRIT_BOND_I,
             FOX_TROT,
@@ -58,6 +61,8 @@ public class Shade extends Job {
             SPIRIT_TRAP,
             SPIRIT_WARD,
             MAPLE_WARRIOR_SH,
+            HEROIC_MEMORIES_SH,
+            SPIRIT_BOND_MAX,
     };
 
     public Shade(Char chr) {
@@ -80,6 +85,8 @@ public class Shade extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
+        Option o5 = new Option();
         switch (skillID) {
             case FOX_SPIRITS:
                 o1.nOption = 1;
@@ -106,11 +113,50 @@ public class Shade extends Job {
             case SPIRIT_TRAP:
                 // TODO AoE
                 break;
+            case HEROIC_MEMORIES_SH:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+            case SPIRIT_BOND_MAX:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indiePad, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o2);
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indieBDR, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBDR, o3);
+                o4.nReason = skillID;
+                o4.nValue = -1; //Booster
+                o4.tStart = (int) System.currentTimeMillis();
+                o4.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBooster, o4);
+                o5.nReason = skillID;
+                o5.nValue = si.getValue(indieIgnoreMobpdpR, slv);
+                o5.tStart = (int) System.currentTimeMillis();
+                o5.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o5);
+                break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleFoxSpirits(int skillID, byte slv, AttackInfo attackInfo) {
+    private void handleFoxSpirits(int skillID, byte slv, AttackInfo attackInfo) {   //TODO
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(ChangeFoxMan)) {
             SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
@@ -145,7 +191,7 @@ public class Shade extends Job {
         }
     }
 
-    private void handleFoxSpiritMobToMob(int skillID, byte slv, AttackInfo attackInfo) {
+    private void handleFoxSpiritMobToMob(int skillID, byte slv, AttackInfo attackInfo) {    //TODO ReCreate
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(ChangeFoxMan)) {
             SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
@@ -155,8 +201,8 @@ public class Shade extends Job {
                 int TW1prop = 60;//  SkillData.getSkillInfoById(FOX_SPIRITS_ATOM).getValue(prop, slv); //TODO Change
                 if (Util.succeedProp(TW1prop)) {
                     int mobID = mai.mobId;
-                    int inc = ForceAtomEnum.BLUE_RABBIT_ORB.getInc(); //2nd Job
-                    int type = ForceAtomEnum.BLUE_RABBIT_ORB.getForceAtomType(); //2nd Job
+                    int inc = ForceAtomEnum.RABBIT_ORB.getInc(); //2nd Job
+                    int type = ForceAtomEnum.RABBIT_ORB.getForceAtomType(); //2nd Job
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                             0, 0, (int) System.currentTimeMillis(), 1, 0,
                             new Position());
@@ -201,7 +247,7 @@ public class Shade extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = si.getValue(y, slv);
+                    o1.nOption = (-1* si.getValue(y, slv));
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);

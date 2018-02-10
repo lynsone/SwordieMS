@@ -45,6 +45,9 @@ public class DawnWarrior extends Job {
     public static final int IMPALING_RAYS = 11121004; //Special Attack (Incapacitate Debuff)
     public static final int CALL_OF_CYGNUS_DW = 11121000; //Buff
 
+    public static final int SOUL_FORGE = 11121054;
+    public static final int GLORY_OF_THE_GUARDIANS_DW = 11121053;
+
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_STR,
             IMPERIAL_RECALL,
@@ -62,6 +65,8 @@ public class DawnWarrior extends Job {
             TRUE_SIGHT,
             EQUINOX_CYCLE,
             CALL_OF_CYGNUS_DW,
+            SOUL_FORGE,
+            GLORY_OF_THE_GUARDIANS_DW,
     };
 
     public DawnWarrior(Char chr) {
@@ -159,6 +164,31 @@ public class DawnWarrior extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
+                break;
+
+            case SOUL_FORGE:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indiePad, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOver, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOver, o2);
+                break;
+            case GLORY_OF_THE_GUARDIANS_DW:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

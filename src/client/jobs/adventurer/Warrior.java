@@ -80,6 +80,16 @@ public class Warrior extends Job {
     public static final int FINAL_PACT = 1320016;
     public static final int MAGIC_CRASH_DRK = 1321014;
 
+
+    //Hyper Skills
+    public static final int EPIC_ADVENTURE_HERO = 1121053; //Lv200
+    public static final int EPIC_ADVENTURE_PALA = 1221053; //Lv200
+    public static final int EPIC_ADVENTURE_DRK = 1321053; //Lv200
+    public static final int CRY_VALHALLA = 1121054; //Lv150
+    public static final int SACROSANCTITY = 1221054; //Lv150
+    public static final int DARK_THIRST = 1321054; //Lv150
+
+
     private final int[] buffs = new int[]{
             WEAPON_BOOSTER_FIGHTER, // Weapon Booster - Fighter
             COMBO_ATTACK, // Combo Attack
@@ -97,6 +107,13 @@ public class Warrior extends Job {
             CROSS_SURGE,
             BLAST,
             ENRAGE,
+
+            EPIC_ADVENTURE_DRK,
+            EPIC_ADVENTURE_HERO,
+            EPIC_ADVENTURE_PALA,
+            CRY_VALHALLA,
+            SACROSANCTITY,
+            DARK_THIRST,
     };
     private long lastPanicHit = Long.MIN_VALUE;
     private long lastHpRecovery = Long.MIN_VALUE;
@@ -262,6 +279,48 @@ public class Warrior extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IgnoreMobpdpR, o3);
+                break;
+
+                //Hypers
+            case EPIC_ADVENTURE_DRK:
+            case EPIC_ADVENTURE_HERO:
+            case EPIC_ADVENTURE_PALA:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+            case SACROSANCTITY:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                break;
+            case CRY_VALHALLA:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieCr, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieCr, o1);
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AsrR, o2);
+                tsm.putCharacterStatValue(TerR, o2);
+                break;
+            case DARK_THIRST:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indiePad, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o1);
+                //TODO Recovery  x %
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

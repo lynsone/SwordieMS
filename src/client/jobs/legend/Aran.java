@@ -44,6 +44,10 @@ public class Aran extends Job {
 
     public static final int MAPLE_WARRIOR_ARAN = 21121000; //Buff
 
+    public static final int HEROIC_MEMORIES_ARAN = 21121053;
+    public static final int ADRENALINE_BURST = 21121058;
+    public static final int MAHAS_DOMAIN = 21121057; //AoE Effect
+
 
     //Attacking Skills:
     public static final int SMASH_WAVE = 21001009;
@@ -112,6 +116,7 @@ public class Aran extends Job {
             DRAIN,
             MAHA_BLESSING,
             MAPLE_WARRIOR_ARAN,
+            HEROIC_MEMORIES_ARAN,
     };
 
     private int combo;
@@ -184,6 +189,19 @@ public class Aran extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+
+            case HEROIC_MEMORIES_ARAN:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -263,15 +281,14 @@ public class Aran extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        if(hasHitMobs) {
-            handleComboAbility(tsm, attackInfo);
-        }
         if (hasHitMobs) {
+            handleComboAbility(tsm, attackInfo);
             if(chr.hasSkill(21110016)) {
                if (tsm.getOption(ComboAbilityBuff).nOption > 999) {
                    if(chr.hasSkill(ADRENALINE_RUSH)) {
-                       handleAdrenalinRush(getOriginalSkillByID(skillID), tsm, c);
-                       //adrenalinInterval();
+                       tsm.getOption(ComboAbilityBuff).nOption = 1000;
+                       handleAdrenalinRush(skillID, tsm, c);
+                       c.write(WvsContext.temporaryStatSet(tsm));
                        comboAfterAdrenalin();
                    }
                }
@@ -407,6 +424,7 @@ public class Aran extends Job {
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = null;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
@@ -419,8 +437,10 @@ public class Aran extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-                case AERO_SWING:
-                    // TODO  idk
+                case ADRENALINE_BURST:
+                    tsm.getOption(ComboAbilityBuff).nOption = 1000;
+                    handleAdrenalinRush(skillID, tsm, c);
+                    c.write(WvsContext.temporaryStatSet(tsm));
                     break;
             }
         }

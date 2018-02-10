@@ -53,6 +53,8 @@ public class BlazeWizard extends Job {
     public static final int FLAME_BARRIER = 12121003; //Buff //TODO gives Kanna's Flame Barrier
     public static final int CALL_OF_CYGNUS_BW = 12121000; //Buff
 
+    public static final int GLORY_OF_THE_GUARDIANS_BW = 12121053;
+
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_INT,
             IMPERIAL_RECALL,
@@ -71,6 +73,7 @@ public class BlazeWizard extends Job {
             FIRES_OF_CREATION_LION,
             FLAME_BARRIER,
             CALL_OF_CYGNUS_BW,
+            GLORY_OF_THE_GUARDIANS_BW,
     };
 
     public BlazeWizard(Char chr) {
@@ -147,6 +150,19 @@ public class BlazeWizard extends Job {
                 summon.setTemplateId(skillID);
                 summon.setAttackActive(false); // false = Doesn't Attack | true = Attacks
                 field.spawnSummon(summon);
+                break;
+
+            case GLORY_OF_THE_GUARDIANS_BW:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

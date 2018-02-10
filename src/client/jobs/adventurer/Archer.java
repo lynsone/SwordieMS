@@ -70,6 +70,11 @@ public class Archer extends Job {
     public static final int SHARP_EYES_XBOW = 3221002;
     public static final int ILLUSION_STEP_XBOW = 3221006;
 
+    public static final int EPIC_ADVENTURE_XBOW = 3221053;
+    public static final int EPIC_ADVENTURE_BOW = 3121053;
+    public static final int CONCENTRATION = 3121054;
+    public static final int BULLSEYE_SHOT = 3221054;
+
     private QuiverCartridge quiverCartridge;
 
     private int[] buffs = new int[]{
@@ -92,6 +97,10 @@ public class Archer extends Job {
             PAIN_KILLER,
             AGGRESSIVE_RESISTANCE,
             ARROW_ILLUSION,
+            EPIC_ADVENTURE_BOW,
+            EPIC_ADVENTURE_XBOW,
+            CONCENTRATION,
+            BULLSEYE_SHOT,
     };
 
     public Archer(Char chr) {
@@ -576,6 +585,31 @@ public class Archer extends Job {
                 field.spawnSummon(summon);
                 break;
 
+            case EPIC_ADVENTURE_XBOW:
+            case EPIC_ADVENTURE_BOW:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+            case CONCENTRATION: //Fix
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Preparation, o1); //preparation = BD%
+                break;
+            case BULLSEYE_SHOT: //Fix
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(BullsEye, o1);
+                break;
 
         }
         tsm.sendSetStatPacket();

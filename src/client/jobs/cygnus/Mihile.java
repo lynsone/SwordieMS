@@ -39,6 +39,9 @@ public class Mihile extends Job {
     public static final int RADIANT_CROSS = 51121009; //Special Attack (Accuracy Debuff)
     public static final int CALL_OF_CYGNUS_MIHILE = 51121005; //Buff
 
+    public static final int QUEEN_OF_TOMORROW = 51121053;
+    public static final int SACRED_CUBE = 51121054;
+
     private int[] buffs = new int[] {
             ROYAL_GUARD,
             SWORD_BOOSTER,
@@ -47,6 +50,8 @@ public class Mihile extends Job {
             SOUL_LINK,
             ROILING_SOUL,
             CALL_OF_CYGNUS_MIHILE,
+            QUEEN_OF_TOMORROW,
+            SACRED_CUBE,
     };
 
     public Mihile(Char chr) {
@@ -60,9 +65,11 @@ public class Mihile extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
         switch (skillID) {
             case ROYAL_GUARD:
                 // TODO
+                // mRoyalGuard is a stacking buff
                 break;
             case SWORD_BOOSTER:
                 o1.nOption = si.getValue(x, slv);
@@ -124,6 +131,40 @@ public class Mihile extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+
+            case QUEEN_OF_TOMORROW:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case SACRED_CUBE:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMhpR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMHPR, o2);
+                o3.nOption = si.getValue(x, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamageReduce, o3);
+                o4.nOption = 1;
+                o4.rOption = skillID;
+                o4.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamAbsorbShield, o4);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

@@ -48,6 +48,9 @@ public class Mercedes extends Job {
     public static final int ANCIENT_WARDING = 23121004; //Buff
     public static final int MAPLE_WARRIOR_MERC = 23121005; //Buff
 
+    public static final int HEROIC_MEMORIES_MERC = 23121053;
+    public static final int ELVISH_BLESSING = 23121054;
+
     public static int getOriginalSkillByID(int skillID) {
         switch(skillID) {
             case STAGGERING_STRIKES:
@@ -71,6 +74,8 @@ public class Mercedes extends Job {
             ELEMENTAL_KNIGHTS_PURPLE, //Summon
             ANCIENT_WARDING,
             MAPLE_WARRIOR_MERC,
+            HEROIC_MEMORIES_MERC,
+            ELVISH_BLESSING,
     };
 
     private final int[] summonAttacks = new int[] {
@@ -99,6 +104,7 @@ public class Mercedes extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
         Summon summon;
         Field field;
         switch (skillID) {
@@ -128,8 +134,16 @@ public class Mercedes extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(TerR, o2);
+                o3.nOption = si.getValue(x, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnoreMobDamR, o3);
+                o4.nOption = 1;
+                o4.rOption = skillID;
+                o4.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnisRore, o4);   //TODO WaterShield TempStat  ?
                 break;
-            case ANCIENT_WARDING: //TODO 38s unsure what TempStat causes it
+            case ANCIENT_WARDING:
                 o1.nOption = si.getValue(emhp, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -146,6 +160,29 @@ public class Mercedes extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+            case HEROIC_MEMORIES_MERC:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+            case ELVISH_BLESSING:
+                o1.nValue = si.getValue(indiePad, slv);
+                o1.nReason = skillID;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o1);
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Stance, o2);
                 break;
             case ELEMENTAL_KNIGHTS_BLUE: //TODO allow for different summons (blue/red/purple)
                 int element = ELEMENTAL_KNIGHTS_BLUE;

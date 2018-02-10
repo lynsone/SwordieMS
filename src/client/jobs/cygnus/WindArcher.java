@@ -50,10 +50,14 @@ public class WindArcher extends Job {
     public static final int ALBATROSS = 13111023; //Buff //TODO new ID upon levelling the 4th Job upgrade
     public static final int EMERALD_FLOWER = 13111024; //Summon (Stationary, No Attack, Aggros)
 
+    public static final int ALBATROSS_MAX = 23120008; //Upgrade on Albatross
     public static final int TRIFLING_WIND_III = 13120003; //Special Buff Upgrade
     public static final int SHARP_EYES = 13121005; //Buff
     public static final int TOUCH_OF_THE_WIND = 13121004; //Buff
     public static final int CALL_OF_CYGNUS_WA = 13121000; //Buff
+
+    public static final int GLORY_OF_THE_GUARDIANS_WA = 13121053;
+    public static final int STORM_BRINGER = 13121054;
 
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_DEX,
@@ -69,11 +73,14 @@ public class WindArcher extends Job {
             BOW_BOOSTER,
             SYLVAN_AID,
             ALBATROSS,
+            ALBATROSS_MAX,
             EMERALD_FLOWER, //Summon
             SHARP_EYES,
             TOUCH_OF_THE_WIND,
             CALL_OF_CYGNUS_WA,
             TRIFLING_WIND_I, //ON/OFF Skill
+            GLORY_OF_THE_GUARDIANS_WA,
+            STORM_BRINGER,
     };
 
     public WindArcher(Char chr) {
@@ -98,6 +105,8 @@ public class WindArcher extends Job {
         Option o3 = new Option();
         Option o4 = new Option();
         Option o5 = new Option();
+        Option o6 = new Option();
+        Option o7 = new Option();
         Summon summon;
         Field field;
         switch (skillID) {
@@ -150,6 +159,42 @@ public class WindArcher extends Job {
                 o4.tStart = (int) System.currentTimeMillis();
                 o4.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o4); //Indie
+                break;
+            case ALBATROSS_MAX:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indiePad, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o1); //Indie
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieDamR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o2); //Indie
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indieCr, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieCr, o3); //Indie
+                o4.nReason = skillID;
+                o4.nValue = si.getValue(indieAsrR, slv);
+                o4.tStart = (int) System.currentTimeMillis();
+                o4.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieAsrR, o4); //Indie
+                o5.nReason = skillID;
+                o5.nValue = si.getValue(indieAsrR, slv);
+                o5.tStart = (int) System.currentTimeMillis();
+                o5.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieTerR, o5); //Indie
+                o6.nReason = skillID;
+                o6.nValue = -2; //si.getValue(indieBooster, slv);
+                o6.tStart = (int) System.currentTimeMillis();
+                o6.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBooster, o6); //Indie
+                o7.nOption = si.getValue(ignoreMobpdpR, slv);
+                o7.rOption = skillID;
+                o7.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnoreMobpdpR, o7);
                 break;
             case SHARP_EYES: // x = crit rate    y = max crit dmg
                 o1.nOption = si.getValue(x, slv);
@@ -215,6 +260,26 @@ public class WindArcher extends Job {
                 summon.setAttackActive(true); // false = Doesn't Attack | true = Attacks
                 field.spawnSummon(summon);
                 break;
+
+            case GLORY_OF_THE_GUARDIANS_WA:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case STORM_BRINGER:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(StormBringer, o1);
+                break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -259,6 +324,29 @@ public class WindArcher extends Job {
                     }
                 }
             }
+    }
+
+    private void handleStormBringer(int skillID, byte slv, AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(StormBringer)) {
+            SkillInfo si = SkillData.getSkillInfoById(STORM_BRINGER);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                int ranY = new Random().nextInt(150) -100;
+                int hyperprop = si.getValue(prop, 1);
+                if (Util.succeedProp(hyperprop)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.WA_ARROW_HYPER.getInc();
+                        int type = ForceAtomEnum.WA_ARROW_HYPER.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 5, 5,
+                                270, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position(35, ranY)); //Slightly behind the player
+                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, STORM_BRINGER, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), STORM_BRINGER, mob.getPosition()));
+                }
+            }
+        }
     }
 
     private int getProp(Char chr) {
@@ -320,10 +408,13 @@ public class WindArcher extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            if (skillID != 0) {
+            if (skillID != 0 || skillID != STORM_BRINGER || skillID != TRIFLING_WIND_ATOM) { //TODO
+                handleStormBringer(skillID, slv, attackInfo);
+
                 int maxtrif = getMaxTriffling(chr);
                 for (int i = 0; i < maxtrif; i++) {
                     handleTriflingWind(skillID, slv, attackInfo);
+
                 }
             }
         }

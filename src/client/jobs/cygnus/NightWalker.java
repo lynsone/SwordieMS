@@ -56,6 +56,10 @@ public class NightWalker extends Job {
     public static final int QUINT_THROW = 14121001;
     public static final int VITALITY_SIPHON = 14120009;
 
+    public static final int GLORY_OF_THE_GUARDIANS_NW = 14121053;
+    public static final int SHADOW_ILLUSION = 14121054;
+    public static final int DOMINION = 14121052;
+
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_LUK,
             IMPERIAL_RECALL,
@@ -76,6 +80,9 @@ public class NightWalker extends Job {
             DARKNESS_ASCENDING,
             CALL_OF_CYGNUS_NW,
             DARK_OMEN,
+            GLORY_OF_THE_GUARDIANS_NW,
+            SHADOW_ILLUSION,
+            DOMINION,
     };
 
     public NightWalker(Char chr) {
@@ -173,6 +180,25 @@ public class NightWalker extends Job {
                 tsm.putCharacterStatValue(NightWalkerBat, o1);
                 break;
 
+            case GLORY_OF_THE_GUARDIANS_NW:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+            case SHADOW_ILLUSION:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ShadowIllusion, o1);
+                break;
+
             case DARK_OMEN:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
@@ -251,6 +277,14 @@ public class NightWalker extends Job {
 
                         handleSiphonVitality(skill.getSkillId(), tsm, c);
                 }
+                break;
+
+            case DOMINION:  //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time ,slv);
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                c.write(WvsContext.temporaryStatSet(tsm));
                 break;
 
             //TODO case All attacks give DoT debuff

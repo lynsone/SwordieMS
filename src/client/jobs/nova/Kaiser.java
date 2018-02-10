@@ -47,6 +47,9 @@ public class Kaiser extends Job {
     public static final int GRAND_ARMOR = 61121009; //Buff
     public static final int NOVA_WARRIOR_KAISER = 61121014; //Buff
 
+    public static final int FINAL_TRANCE = 61121053;
+    public static final int KAISERS_MAJESTY = 61121054;
+
 
 
     //Attacking Skills
@@ -139,6 +142,8 @@ public class Kaiser extends Job {
             TEMPEST_BLADES_FIVE,
             GRAND_ARMOR,
             NOVA_WARRIOR_KAISER,
+            FINAL_TRANCE,
+            KAISERS_MAJESTY,
     };
 
     private final int[][] getGaugeIncrements2 = new int[][] {
@@ -301,6 +306,8 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(Speed, o5);*/ //TODO 38
                 resetGauge(c, tsm);
                 break;
+
+            case FINAL_TRANCE:
             case FINAL_FORM_FOURTH:
                 o6.nOption = 1201;
                 o6.rOption = skillID;
@@ -315,21 +322,38 @@ public class Kaiser extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePMdR, o2);
-                /*o3.nOption = si.getValue(jump, slv);
+                o3.nOption = si.getValue(jump, slv);
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Jump, o3);*/ //TODO 38
+                //tsm.putCharacterStatValue(Jump, o3); //TODO 38
                 o4.nOption = si.getValue(prop, slv);
                 o4.rOption = skillID;
                 o4.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o4);
-                /*o5.nOption = si.getValue(speed, slv);
+                o5.nOption = si.getValue(speed, slv);
                 o5.rOption = skillID;
                 o5.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Speed, o5);*/ //TODO 38
+                //tsm.putCharacterStatValue(Speed, o5); //TODO 38
                 resetGauge(c, tsm);
                 break;
 
+            case KAISERS_MAJESTY:
+                o1.nReason = skillID;
+                o1.nValue = -1;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBooster, o1);
+                o2.nReason = skillID;
+                o2.nValue = (-1 * si.getValue(indiePad, slv));
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o2);
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ViperTimeLeap, o3);
+
+                break;
                 // Note:  Higher Morph IDs = Different Colour Trimmings on Kaiser's Final Form
 
             case STONE_DRAGON:
