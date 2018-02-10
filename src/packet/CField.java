@@ -354,6 +354,16 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket summonedAssistAttackRequest(int charID, Summon summon) {
+        OutPacket outpacket = new OutPacket(OutHeader.SUMMONED_ASSIST_ATTACK_REQUEST);
+
+        outpacket.encodeInt(charID);
+        outpacket.encodeInt(summon.getObjectId());
+        outpacket.encodeInt(summon.getAssistType());
+
+        return outpacket;
+    }
+
     public static OutPacket summonedSummonAttackActive(int charID, Summon summon) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_SUMMON_ATTACK_ACTIVE);
 
