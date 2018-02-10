@@ -56,6 +56,9 @@ public class Demon extends Job {
     public static final int LEECH_AURA = 31121002; //Buff                       //TODO (Demon Force)
     public static final int MAPLE_WARRIOR_DS = 31121004; //Buff
 
+    public static final int BLUE_BLOOD = 31121054;
+    public static final int DEMONIC_FORTITUDE_DS = 31121053;
+
 
     //Demon Avenger
     public static final int BLOOD_PACT = 30010242;
@@ -95,6 +98,10 @@ public class Demon extends Job {
     public static final int BLOOD_PRISON = 31221003; // Special Attack (Stun Debuff)
     public static final int MAPLE_WARRIOR_DA = 31221008; //Buff
 
+    public static final int DEMONIC_FORTITUDE_DA = 31221053;
+    public static final int FORBIDDEN_CONTRACT = 31221054;
+
+
     private int[] addedSkillsDS = new int[] {
             SECRET_ASSEMBLY,
             DARK_WINDS,
@@ -123,7 +130,40 @@ public class Demon extends Job {
             OVERLOAD_RELEASE,
             DIABOLIC_RECOVERY,
             MAPLE_WARRIOR_DA,
+            BLUE_BLOOD,
+            DEMONIC_FORTITUDE_DS,
+            DEMONIC_FORTITUDE_DA,
+            FORBIDDEN_CONTRACT,
     };
+
+    public static int getOriginalSkillByID(int skillID) {
+        switch(skillID) {
+            case EXCEED_DOUBLE_SLASH_2:
+            case EXCEED_DOUBLE_SLASH_3:
+            case EXCEED_DOUBLE_SLASH_4:
+            case EXCEED_DOUBLE_SLASH_PURPLE:
+                return EXCEED_DOUBLE_SLASH_1;
+
+            case EXCEED_DEMON_STRIKE_2:
+            case EXCEED_DEMON_STRIKE_3:
+            case EXCEED_DEMON_STRIKE_4:
+            case EXCEED_DEMON_STRIKE_PURPLE:
+                return EXCEED_DEMON_STRIKE_1;
+
+            case EXCEED_LUNAR_SLASH_2:
+            case EXCEED_LUNAR_SLASH_3:
+            case EXCEED_LUNAR_SLASH_4:
+            case EXCEED_LUNAR_SLASH_PURPLE:
+                return EXCEED_LUNAR_SLASH_1;
+
+            case EXCEED_EXECUTION_2:
+            case EXCEED_EXECUTION_3:
+            case EXCEED_EXECUTION_4:
+            case EXCEED_EXECUTION_PURPLE:
+                return EXCEED_EXECUTION_1;
+        }
+        return skillID; // no original skill linked with this one
+    }
 
     public Demon(Char chr) {
         super(chr);
@@ -239,6 +279,33 @@ public class Demon extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
+
+            case DEMONIC_FORTITUDE_DS:
+            case DEMONIC_FORTITUDE_DA:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+            case FORBIDDEN_CONTRACT:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                //HP consumption from Skills = 0;
+                break;
+            case BLUE_BLOOD:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(BuckShot, o1);
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -262,7 +329,7 @@ public class Demon extends Job {
             skillID = skill.getSkillId();
         }
         if (chr.getJob() == 3101 || chr.getJob() == 3120 || chr.getJob() == 3121 || chr.getJob() == 3122) {
-            handleOverloadCount(skill.getSkillId(), tsm, c);
+            handleOverloadCount(getOriginalSkillByID(skillID), tsm, c);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -350,7 +417,7 @@ public class Demon extends Job {
                 }
                 break;
 
-
+/*
             case EXCEED_DOUBLE_SLASH_1:
                 handleOverloadCount(skill.getSkillId(), tsm, c);
                 break;
@@ -414,7 +481,7 @@ public class Demon extends Job {
             case EXCEED_EXECUTION_PURPLE:
                 handleOverloadCount(31221012, tsm, c);
                 break;
-
+*/
         }
     }
 

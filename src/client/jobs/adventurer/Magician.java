@@ -82,6 +82,14 @@ public class Magician extends Job {
     public static final int ARCANE_AIM_IL = 2220010;
     public static final int ARCANE_AIM_BISH = 2320011;
 
+    public static final int EPIC_ADVENTURE_FP = 2121053;
+    public static final int EPIC_ADVENTURE_IL = 2221053;
+    public static final int EPIC_ADVENTURE_BISH = 2321053;
+    public static final int ABSOLUTE_ZERO_AURA = 2121054;
+    public static final int INFERNO_AURA = 2221054;
+    public static final int RIGHTEOUSLY_INDIGNANT = 2321054;
+    public static final int HEAVENS_DOOR = 2321052;
+
 
     private final int[] buffs = new int[]{
             MAGIC_GUARD,
@@ -115,6 +123,14 @@ public class Magician extends Job {
             ADV_BLESSING,
             MAPLE_WARRIOR_BISH,
             INFINITY_BISH,
+
+            EPIC_ADVENTURE_FP,
+            EPIC_ADVENTURE_IL,
+            EPIC_ADVENTURE_BISH,
+            ABSOLUTE_ZERO_AURA,
+            INFERNO_AURA,
+            RIGHTEOUSLY_INDIGNANT,
+            HEAVENS_DOOR,
     };
 
     public Magician(Char chr) {
@@ -245,6 +261,13 @@ public class Magician extends Job {
                 break;
             case HEAL:
                 //TODO doesn't heal
+                break;
+            case HEAVENS_DOOR:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(HeavensDoor, o1);
+                c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
 
@@ -458,6 +481,37 @@ public class Magician extends Job {
                 o1.rOption = skillID;
                 tsm.putCharacterStatValue(ChillingStep, o1);
                 break;
+
+            case EPIC_ADVENTURE_FP:
+            case EPIC_ADVENTURE_IL:
+            case EPIC_ADVENTURE_BISH:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+            case ABSOLUTE_ZERO_AURA:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(FireAura, o1);
+                break;
+            case INFERNO_AURA:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(IceAura, o1);
+                break;
+            case RIGHTEOUSLY_INDIGNANT:
+                //Passive + active  stats
+                break;
+
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }

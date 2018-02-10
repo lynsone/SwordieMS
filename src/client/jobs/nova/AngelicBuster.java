@@ -53,6 +53,7 @@ public class AngelicBuster extends Job {
 
     public static final int CELESTIAL_ROAR = 65121100; //TODO Recharge Attack + (Stun Debuff)
     public static final int TRINITY = 65121101; //TODO Recharge Attack
+                                    //65121101 - Trinity -combo count-
     public static final int FINALE_RIBBON = 65121002; //TODO Recharge Attack + (DmgUp Debuff)
     public static final int STAR_GAZER = 65121004; //Buff
     public static final int NOVA_WARRIOR_AB = 65121009; //Buff

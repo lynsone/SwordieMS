@@ -50,6 +50,8 @@ public class Phantom extends Job {
     public static final int MAPLE_WARRIOR_PH = 24121008; //Buff
     public static final int CARTE_NOIR = 24120002;
 
+    public static final int HEROIC_MEMORIES_PH = 24121053;
+
     public static final int CARTE_ATOM = 80001890; //TODO maybe
 
     private int[] addedSkills = new int[] {
@@ -71,6 +73,7 @@ public class Phantom extends Job {
             PRIERE_DARIA,
             VOL_DAME,
             MAPLE_WARRIOR_PH,
+            HEROIC_MEMORIES_PH,
     };
 
     public Phantom(Char chr) {
@@ -152,6 +155,18 @@ public class Phantom extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+            case HEROIC_MEMORIES_PH:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

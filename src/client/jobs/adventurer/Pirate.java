@@ -31,6 +31,7 @@ import static client.character.skills.SkillStat.*;
 //TODO Octo-Cannon
 //TODO CM - Barrel Roulette
 
+//nUnityPower is stack icon
 /**
  * Created on 12/14/2017.
  */
@@ -67,8 +68,8 @@ public class Pirate extends Job {
     public static final int ROLL_OF_THE_DICE_SAIR = 5211007; //Buff
     public static final int OCTO_CANNON = 5211014; //Summon
 
-    public static final int QUICKDRAW = 5221021; //Buff TODO Special Buff
-    public static final int PARROTARGETTING = 5221015; //Special Attack
+    public static final int QUICKDRAW = 5221021; //Buff
+    public static final int PARROTARGETTING = 5221015; //Special Attack //TODO  GuidedBullet TempStat (TwoState)
     public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
@@ -103,6 +104,21 @@ public class Pirate extends Job {
     public static final int MAPLE_WARRIOR_JETT = 5721000; //Buff
 
 
+    //Hyper
+    public static final int EPIC_ADVENTURER_BUCC = 5121053;
+    public static final int EPIC_ADVENTURER_SAIR = 5221053;
+    public static final int EPIC_ADVENTURER_CANNON = 5321053;
+    public static final int EPIC_ADVENTURER_JETT = 5721053;
+
+    public static final int STIMULATING_CONVERSATION = 5121054;
+    public static final int WHALERS_POTION = 5221054;
+    public static final int BUCKSHOT = 5321054;
+    public static final int BIONIC_MAXIMIZER = 5721054;
+
+    public static final int ROLLING_RAINBOW = 5321052;
+    public static final int POWER_UNITY = 5121055;
+
+
     private int[] buffs = new int[]{
             DASH,
             KNUCKLE_BOOSTER,
@@ -117,7 +133,7 @@ public class Pirate extends Job {
             GUN_BOOSTER,
             ROLL_OF_THE_DICE_SAIR, //TODO
             OCTO_CANNON,
-            QUICKDRAW, //TODO
+            QUICKDRAW,
             PARROTARGETTING,
             MAPLE_WARRIOR_SAIR,
             JOLLY_ROGER,
@@ -137,6 +153,19 @@ public class Pirate extends Job {
             SLIPSTREAM_SUIT,
             HIGH_GRAVITY,
             MAPLE_WARRIOR_JETT,
+
+
+            //Hyper
+            EPIC_ADVENTURER_BUCC,
+            EPIC_ADVENTURER_CANNON,
+            EPIC_ADVENTURER_JETT,
+            EPIC_ADVENTURER_SAIR,
+            STIMULATING_CONVERSATION,
+            WHALERS_POTION,
+            BUCKSHOT,
+            BIONIC_MAXIMIZER,
+            ROLLING_RAINBOW,
+            POWER_UNITY,
     };
 
 
@@ -148,6 +177,8 @@ public class Pirate extends Job {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
+        Summon summon;
+        Field field;
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -160,11 +191,11 @@ public class Pirate extends Job {
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Speed, o1); //TODO 38s
+                //tsm.putCharacterStatValue(Speed, o1); //TODO 38s
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Jump, o2); //TODO 38s
+                //tsm.putCharacterStatValue(Jump, o2); //TODO 38s
                 break;
             case KNUCKLE_BOOSTER:
             case GUN_BOOSTER:
@@ -212,7 +243,7 @@ public class Pirate extends Job {
                 o4.nValue = si.getValue(indieJump, slv);
                 o4.tStart = (int) System.currentTimeMillis();
                 o4.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieJump, o4); //TODO 38s
+                //tsm.putCharacterStatValue(IndieJump, o4); //TODO 38s
                 o5.nReason = skillID;
                 o5.nValue = si.getValue(indieMhp, slv);
                 o5.tStart = (int) System.currentTimeMillis();
@@ -227,7 +258,7 @@ public class Pirate extends Job {
                 o7.nValue = si.getValue(indieSpeed, slv);
                 o7.tStart = (int) System.currentTimeMillis();
                 o7.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieSpeed, o7); //TODO 38s
+                //tsm.putCharacterStatValue(IndieSpeed, o7); //TODO 38s
                 break;
             case BOUNTY_CHASER:
                 o1.nOption = si.getValue(dexX, slv);
@@ -262,6 +293,16 @@ public class Pirate extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ACCR, o3);
+                break;
+            case QUICKDRAW: //TODO Fix (see handler)
+                o1.nOption = 2;
+                o1.rOption = skillID;
+                o1.tOption = 10;
+                tsm.putCharacterStatValue(QuickDraw, o1);
+                o2.nOption = si.getValue(damR, slv);
+                o2.rOption = skillID;
+                o2.tOption = 10;
+                tsm.putCharacterStatValue(DamR, o2);
                 break;
             case HIGH_GRAVITY:
                 o1.nOption = si.getValue(prop, slv);
@@ -316,14 +357,70 @@ public class Pirate extends Job {
                 tsm.putCharacterStatValue(IndiePADR, o2);
                 break;
 
+                //Hyper
+            case EPIC_ADVENTURER_BUCC:
+            case EPIC_ADVENTURER_CANNON:
+            case EPIC_ADVENTURER_JETT:
+            case EPIC_ADVENTURER_SAIR:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case STIMULATING_CONVERSATION:
+                //TODO
+                break;
+
+            case BIONIC_MAXIMIZER:
+            case WHALERS_POTION:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieMhpR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMHPR, o1);
+                o2.nOption = si.getValue(y, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AsrR, o2);
+                tsm.putCharacterStatValue(TerR, o2);
+                o3.nOption = si.getValue(w, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamageReduce, o3);
+                break;
+
+            case BUCKSHOT:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(BuckShot, o1);
+                break;
+
+            case ROLLING_RAINBOW:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(true);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
+                field.spawnSummon(summon);
+                break;
+
+                //TODO Clean up Summon Code<<
             case OCTO_CANNON: //Stationary, Attacks
                 Summon OctoCannon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field = c.getChr().getField();
-                field.addLife(OctoCannon);
+                Field field2 = c.getChr().getField();
+                field2.addLife(OctoCannon);
                 OctoCannon.setCharLevel((byte) chr.getStat(Stat.level));
                 OctoCannon.setPosition(chr.getPosition().deepCopy());
                 OctoCannon.setMoveAction((byte) 1);
-                OctoCannon.setCurFoothold((short) field.findFootHoldBelow(OctoCannon.getPosition()).getId());
+                OctoCannon.setCurFoothold((short) field2.findFootHoldBelow(OctoCannon.getPosition()).getId());
                 OctoCannon.setMoveAbility((byte) 0);
                 OctoCannon.setAssistType((byte) 1);
                 OctoCannon.setEnterType((byte) 1);
@@ -334,12 +431,12 @@ public class Pirate extends Job {
                 break;
             case MONKEY_MALITIA: //Stationary, Attacks
                 Summon MonkeyMalitia = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field2 = c.getChr().getField();
-                field2.addLife(MonkeyMalitia);
+                Field field5 = c.getChr().getField();
+                field5.addLife(MonkeyMalitia);
                 MonkeyMalitia.setCharLevel((byte) chr.getStat(Stat.level));
                 MonkeyMalitia.setPosition(chr.getPosition().deepCopy());
                 MonkeyMalitia.setMoveAction((byte) 1);
-                MonkeyMalitia.setCurFoothold((short) field2.findFootHoldBelow(MonkeyMalitia.getPosition()).getId());
+                MonkeyMalitia.setCurFoothold((short) field5.findFootHoldBelow(MonkeyMalitia.getPosition()).getId());
                 MonkeyMalitia.setMoveAbility((byte) 0);
                 MonkeyMalitia.setAssistType((byte) 1);
                 MonkeyMalitia.setEnterType((byte) 1);
@@ -350,12 +447,12 @@ public class Pirate extends Job {
                 break;
             case TURRET_DEPLOYMENT: //Stationary, Attacks
                 Summon TurretDeployment = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field5 = c.getChr().getField();
-                field5.addLife(TurretDeployment);
+                Field field8 = c.getChr().getField();
+                field8.addLife(TurretDeployment);
                 TurretDeployment.setCharLevel((byte) chr.getStat(Stat.level));
                 TurretDeployment.setPosition(chr.getPosition().deepCopy());
                 TurretDeployment.setMoveAction((byte) 1);
-                TurretDeployment.setCurFoothold((short) field5.findFootHoldBelow(TurretDeployment.getPosition()).getId());
+                TurretDeployment.setCurFoothold((short) field8.findFootHoldBelow(TurretDeployment.getPosition()).getId());
                 TurretDeployment.setMoveAbility((byte) 0);
                 TurretDeployment.setAssistType((byte) 1);
                 TurretDeployment.setEnterType((byte) 1);
@@ -400,6 +497,27 @@ public class Pirate extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    private void handleQuickdraw(AttackInfo attackInfo, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        Option o1 = new Option();
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        SkillInfo quickdrawInfo = SkillData.getSkillInfoById(QUICKDRAW);
+        if (tsm.getOption(QuickDraw).nOption == 2) {    //TODO supposed to be reset upon hitting a mob
+            //if(hasHitMobs) {
+            //    c.write(WvsContext.temporaryStatReset(tsm, false));
+            //}
+            return;
+        } else {
+            if (Util.succeedProp(/*quickdrawInfo.getValue(prop, quickdrawInfo.getCurrentLevel())*/50)) {
+                o.nOption = 1;
+                o.rOption = QUICKDRAW;
+                o.tOption = 15;
+                tsm.putCharacterStatValue(QuickDraw, o);
+                c.write(WvsContext.temporaryStatSet(tsm));
+            }
+        }
+
+    }
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -417,6 +535,11 @@ public class Pirate extends Job {
             si = SkillData.getSkillInfoById(skill.getSkillId());
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
+        }
+        if (hasHitMobs) {
+            //if(tsm.getOption(QuickDraw).nOption != 2) {
+                handleQuickdraw(attackInfo, tsm, c);
+            //}
         }
         Option o1 = new Option();
         Option o2 = new Option();

@@ -40,6 +40,9 @@ public class ThunderBreaker extends Job {
     public static final int SPEED_INFUSION = 15121005; //Buff
     public static final int CALL_OF_CYGNUS_TB = 15121000; //Buff
 
+    public static final int GLORY_OF_THE_GUARDIANS_TB = 15121053;
+    public static final int PRIMAL_BOLT = 15121054;
+
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_STR,
             IMPERIAL_RECALL,
@@ -56,6 +59,8 @@ public class ThunderBreaker extends Job {
             ARC_CHARGER,
             SPEED_INFUSION,
             CALL_OF_CYGNUS_TB,
+            GLORY_OF_THE_GUARDIANS_TB,
+            PRIMAL_BOLT,
     };
 
     private int lastAttackSkill = 0;
@@ -123,6 +128,26 @@ public class ThunderBreaker extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamR, o1);
+                break;
+
+            case GLORY_OF_THE_GUARDIANS_TB:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case PRIMAL_BOLT: //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(StrikerHyperElectric, o1);
                 break;
 
         }

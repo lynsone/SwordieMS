@@ -16,6 +16,7 @@ import enums.MobStat;
 import enums.Stat;
 import loaders.SkillData;
 import packet.WvsContext;
+import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
@@ -23,9 +24,10 @@ import java.util.Arrays;
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
 
-//TODO Final Cut
-//TODO Shadower - Critical Growth
+//TODO Shadower - Critical Growth //
 //TODO DB - Mirror Image
+
+//nFlipTheCoin = stack icon
 
 /**
  * Created on 12/14/2017.
@@ -56,6 +58,7 @@ public class Thief extends Job {
     public static final int STEAL = 4201004; //Special Attack (Steal Debuff)?
     public static final int DAGGER_BOOSTER = 4201002; //Buff
     public static final int MESOGUARD = 4201011; //Buff
+    public static final int CRITICAL_GROWTH = 4200013; //Passive Crit increasing buff
 
     public static final int SHADOW_PARTNER_SHAD = 4211008; //Buff
     public static final int DARK_FLARE_SHAD = 4211007; //Summon
@@ -84,6 +87,19 @@ public class Thief extends Job {
     public static final int MIRRORED_TARGET = 4341006; //Summon
 
 
+    //Hyper skills
+    public static final int EPIC_ADVENTURE_NL = 4121053;
+    public static final int EPIC_ADVENTURE_SHAD = 4221053;
+    public static final int EPIC_ADVENTURE_DB = 4341053;
+    public static final int BLEED_DART = 4121054;
+    public static final int FLIP_THE_COIN = 4221054; //TODO Method
+    public static final int BLADE_CLONE = 4341054;
+    public static final int ASURAS_ANGER = 4341053;
+
+
+    private int crit;
+    private final int MAX_CRIT = 100;
+
     private int[] buffs = new int[]{
             HASTE,
             DARK_SIGHT,
@@ -94,6 +110,7 @@ public class Thief extends Job {
             DARK_FLARE_NL,
             FRAILTY_CURSE,
             MAPLE_WARRIOR_NL,
+
 
             DAGGER_BOOSTER,
             MESOGUARD,
@@ -109,10 +126,19 @@ public class Thief extends Job {
             FINAL_CUT,
             MIRRORED_TARGET,
             MAPLE_WARRIOR_DB,
+
+
+            EPIC_ADVENTURE_NL,
+            EPIC_ADVENTURE_SHAD,
+            EPIC_ADVENTURE_DB,
+            BLEED_DART,
+            FLIP_THE_COIN,
+            BLADE_CLONE,
     };
 
     public Thief(Char chr) {
         super(chr);
+        //critinterval();
     }
 
     @Override
@@ -141,6 +167,8 @@ public class Thief extends Job {
                     }
                 }
             }
+
+            //critinterval(); //TODO uncomment
 
             Option o1 = new Option();
             Option o2 = new Option();
@@ -278,11 +306,11 @@ public class Thief extends Job {
                 o1.nOption = si.getValue(speed, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Speed, o1);
+                //tsm.putCharacterStatValue(Speed, o1);
                 o2.nOption = si.getValue(jump, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Jump, o2);
+                //tsm.putCharacterStatValue(Jump, o2);
                 // SpeedMax?
                 break;
             case DARK_SIGHT:
@@ -383,9 +411,75 @@ public class Thief extends Job {
                 summon.setAttackActive(true); // false = Doesn't Attack | true = Attacks
                 field.spawnSummon(summon);
                 break;
+
+            case EPIC_ADVENTURE_DB:
+            case EPIC_ADVENTURE_NL:
+            case EPIC_ADVENTURE_SHAD:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case BLEED_DART:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(BleedingToxin, o1);
+                break;
+
+            case FLIP_THE_COIN:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(FlipTheCoin, o1);
+
+            case BLADE_CLONE:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(WindBreakerFinal, o1);
+                break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
+
+
+    //TODO Fix Critical Growth
+    private void handleCritGrowth(int skillID, TemporaryStatManager tsm, Client c) {    //Crit rate increase = x
+        Option o = new Option();
+        Option o1 = new Option();
+        SkillInfo critGrowthInfo = SkillData.getSkillInfoById(CRITICAL_GROWTH);
+        int amount = 1;
+        if (chr.hasSkill(CRITICAL_GROWTH)) {
+            amount = tsm.getOption(CriticalGrowing).nOption;
+            if(amount < 100) {
+                amount++;
+            } else {
+                amount = 1;
+            }
+        }
+        o.nOption = (critGrowthInfo.getValue(x, critGrowthInfo.getCurrentLevel()) * amount);
+        o.rOption = CRITICAL_GROWTH;
+        o.tOption = 0;
+        tsm.putCharacterStatValue(CriticalGrowing, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+
+    private void critinterval() {
+        int skillID = 0;
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        handleCritGrowth(skillID, tsm, c);
+        EventManager.addEvent(this, "critinterval", 3000);
+    }
+
 
     private void handleShadowerInstinct(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();

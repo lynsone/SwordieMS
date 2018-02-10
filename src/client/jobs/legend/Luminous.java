@@ -39,6 +39,8 @@ public class Luminous extends Job {
     public static final int MAPLE_WARRIOR_LUMI = 27121009; //Buff
     public static final int ENDER = 27121303;
 
+    public static final int HEROIC_MEMORIES_LUMI = 27121053;
+
     private int[] addedSkills = new int[] {
             SUNFIRE,
             ECLIPSE,
@@ -56,6 +58,7 @@ public class Luminous extends Job {
             DARK_CRESCENDO,
             ARCANE_PITCH,
             MAPLE_WARRIOR_LUMI,
+            HEROIC_MEMORIES_LUMI,
     };
 
     public Luminous(Char chr) {
@@ -125,6 +128,18 @@ public class Luminous extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+            case HEROIC_MEMORIES_LUMI:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
