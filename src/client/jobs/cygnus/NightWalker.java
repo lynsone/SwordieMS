@@ -307,7 +307,11 @@ public class NightWalker extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-
+                case IMPERIAL_RECALL:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
             }
         }
     }

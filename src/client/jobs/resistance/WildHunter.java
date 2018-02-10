@@ -66,6 +66,9 @@ public class WildHunter extends Job {
     public static final int SHARP_EYES = 33121004; //Buff
     public static final int MAPLE_WARRIOR_WH = 33121007; //Buff
 
+    public static final int FOR_LIBERTY_WH = 33121053;
+    public static final int SILENT_RAMPAGE = 33121054;
+
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,
             CAPTURE,
@@ -91,6 +94,8 @@ public class WildHunter extends Job {
             BACKSTEP,
             SHARP_EYES,
             MAPLE_WARRIOR_WH,
+            FOR_LIBERTY_WH,
+            SILENT_RAMPAGE,
     };
 
     private int lastUsedSkill = 0;
@@ -221,6 +226,27 @@ public class WildHunter extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
 
+            case FOR_LIBERTY_WH:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case SILENT_RAMPAGE:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                //Final attack x %
+                break;
 
             case HUNTING_ASSISTANT_UNIT:
             case DRILL_SALVO:
@@ -374,6 +400,11 @@ public class WildHunter extends Job {
                 case SONIC_ROAR:
                     lastUsedSkill = skillID;
                     c.write(UserLocal.jaguarSkill(skillID));
+                    break;
+                case SECRET_ASSEMBLY:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
                     break;
             }
         }

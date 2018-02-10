@@ -10,20 +10,22 @@ import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.MoveAbility;
 import loaders.SkillData;
 import packet.WvsContext;
 
 import java.util.Arrays;
 
-import static client.character.skills.CharacterTemporaryStat.Booster;
-import static client.character.skills.CharacterTemporaryStat.IndieStatR;
-import static client.character.skills.CharacterTemporaryStat.PowerGuard;
-import static client.character.skills.SkillStat.time;
-import static client.character.skills.SkillStat.x;
+import static client.character.skills.CharacterTemporaryStat.*;
+import static client.character.skills.CharacterTemporaryStat.IndieMaxDamageOverR;
+import static client.character.skills.SkillStat.*;
 
 /**
  * Created on 12/14/2017.
  */
+
+//TODO  DCes (38 in SET_FIELD)
+
 public class Mechanic extends Job {
 
     public static final int SECRET_ASSEMBLY = 30001281;
@@ -45,6 +47,9 @@ public class Mechanic extends Job {
     public static final int BOTS_N_TOTS = 35121009; //Special Summon
     public static final int MAPLE_WARRIOR_MECH = 35121007; //Buff
 
+    public static final int FOR_LIBERTY_MECH = 35121053;
+    public static final int FULL_SPREAD = 35121055;
+
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,
             MECHANIC_DASH,
@@ -65,6 +70,8 @@ public class Mechanic extends Job {
             ROBO_LAUNCHER_RM7, //Summon
             ROCK_N_SHOCK, //Summon
             BOTS_N_TOTS, //Summon
+            FULL_SPREAD, //Summon
+            FOR_LIBERTY_MECH,
     };
 
 
@@ -139,6 +146,27 @@ public class Mechanic extends Job {
                 //TODO
                 break;
 
+            case FOR_LIBERTY_MECH:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case FULL_SPREAD:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+                field.spawnSummon(summon);
+                break;
+
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -168,7 +196,11 @@ public class Mechanic extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-
+                case SECRET_ASSEMBLY:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
             }
         }
     }

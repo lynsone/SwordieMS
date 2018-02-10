@@ -502,6 +502,14 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket flipTheCoinEnabled(byte enabled) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_FLIP_THE_COIN_ENABLED);
+
+        outPacket.encodeByte(enabled);
+
+        return outPacket;
+    }
+
     public static OutPacket modComboResponse(int combo) {
         OutPacket outPacket = new OutPacket(OutHeader.MOD_COMBO_RESPONSE);
 

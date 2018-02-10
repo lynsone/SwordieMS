@@ -42,7 +42,7 @@ public class WindArcher extends Job {
     public static final int STORM_ELEMENTAL = 13001022; //Buff
 
     public static final int TRIFLING_WIND_I = 13101022; //Special Buff (Proc) (ON/OFF) //TODO
-    public static final int TRIFLING_WIND_ATOM = 13100027;              //TODO correct?  may be 13100022
+    public static final int TRIFLING_WIND_ATOM = 13100027;
     public static final int BOW_BOOSTER = 13101023; //Buff
     public static final int SYLVAN_AID = 13101024; //Buff
 
@@ -442,7 +442,11 @@ public class WindArcher extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
-
+                case IMPERIAL_RECALL:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
             }
         }
     }

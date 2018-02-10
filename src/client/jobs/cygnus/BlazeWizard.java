@@ -238,6 +238,11 @@ public class BlazeWizard extends Job {
                 case CONTROLLED_BURN:
                     //TODO
                     break;
+                case IMPERIAL_RECALL:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
 
             }
         }

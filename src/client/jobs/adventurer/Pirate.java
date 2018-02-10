@@ -36,6 +36,7 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Pirate extends Job {
+    public static final int MAPLE_RETURN = 1281;
 
     //Pirate
     public static final int DASH = 5001005; //Buff
@@ -118,6 +119,9 @@ public class Pirate extends Job {
     public static final int ROLLING_RAINBOW = 5321052;
     public static final int POWER_UNITY = 5121055;
 
+    private int[] addedSkills = new int[] {
+            MAPLE_RETURN,
+    };
 
     private int[] buffs = new int[]{
             DASH,
@@ -171,6 +175,15 @@ public class Pirate extends Job {
 
     public Pirate(Char chr) {
         super(chr);
+        if(isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
+            }
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -591,6 +604,11 @@ public class Pirate extends Job {
             switch (skillID) {
                 case TIME_LEAP:
                     //TODO
+                    break;
+                case MAPLE_RETURN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
                     break;
             }
         }

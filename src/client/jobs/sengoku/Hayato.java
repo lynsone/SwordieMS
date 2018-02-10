@@ -9,6 +9,7 @@ import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
 import constants.JobConstants;
+import enums.ChatMsgColour;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.WvsContext;
@@ -24,10 +25,6 @@ import static client.character.skills.SkillStat.*;
  */
 public class Hayato extends Job {
 
-    //TODO Hayato's Broken
-    //TODO SP doesn't get filled in
-    //TODO 38s on Character Select Menu
-
     public static final int QUICK_DRAW = 40011288; //Linked to hayato's Sword Energy
     public static final int SUMMER_RAIN = 40011289; //Attack+Buff
     public static final int MASTER_OF_BLADES = 40010000;
@@ -39,8 +36,11 @@ public class Hayato extends Job {
     public static final int MILITARY_MIGHT = 41101003; //Buff
 
     public static final int IRON_SKIN = 41121003; //Buff
-    public static final int AKATSUKI_HERO = 41121005; //Buff
+    public static final int AKATSUKI_HERO_HAYATO = 41121005; //Buff
     public static final int TORNADO_BLADE = 41121017; //Attack (Stun Debuff)
+
+    public static final int GOD_OF_BLADES = 41121054;
+    public static final int PRINCESS_VOW_HAYATO = 41121053;
 
     private int[] addedSkills = new int[] {
             QUICK_DRAW,
@@ -56,7 +56,9 @@ public class Hayato extends Job {
             KATANA_BOOSTER,
             MILITARY_MIGHT,
             IRON_SKIN,
-            AKATSUKI_HERO,
+            AKATSUKI_HERO_HAYATO,
+            GOD_OF_BLADES,
+            PRINCESS_VOW_HAYATO,
     };
 
     public Hayato(Char chr) {
@@ -86,6 +88,7 @@ public class Hayato extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
+                //xOption = PowerGuard (DR)
                 tsm.putCharacterStatValue(BladeStance, o1);
                 break;
             case KATANA_BOOSTER:
@@ -135,12 +138,38 @@ public class Hayato extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(TerR, o1);
                 break;
-            case AKATSUKI_HERO:
+            case AKATSUKI_HERO_HAYATO:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(x, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
+                break;
+
+            case PRINCESS_VOW_HAYATO:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOver, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOver, o2);
+                break;
+
+            case GOD_OF_BLADES:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indiePad, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o1); //Indie
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AsrR, o2);
+                tsm.putCharacterStatValue(TerR, o2);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -186,7 +215,23 @@ public class Hayato extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch(skillID) {
 
+            }
+        }
     }
 
     @Override

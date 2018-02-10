@@ -33,6 +33,7 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Thief extends Job {
+    public static final int MAPLE_RETURN = 1281;
 
     // Rogue
     public static final int HASTE = 4001005; //Buff
@@ -100,6 +101,10 @@ public class Thief extends Job {
     private int crit;
     private final int MAX_CRIT = 100;
 
+    private int[] addedSkills = new int[] {
+            MAPLE_RETURN,
+    };
+
     private int[] buffs = new int[]{
             HASTE,
             DARK_SIGHT,
@@ -139,6 +144,15 @@ public class Thief extends Job {
     public Thief(Char chr) {
         super(chr);
         //critinterval();
+        if(isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
+            }
+        }
     }
 
     @Override
@@ -155,6 +169,7 @@ public class Thief extends Job {
                 slv = skill.getCurrentLevel();
                 skillID = skill.getSkillId();
             }
+            handleFlipTheCoin(tsm);
             if (chr.getJob() == 422) {
                 if (chr.hasSkill(4221013)) {
                     if (tsm.hasStat(IgnoreMobpdpR)) {
@@ -261,6 +276,14 @@ public class Thief extends Job {
                     tsm.putCharacterStatValue(NotDamaged, o2);
                     c.write(WvsContext.temporaryStatSet(tsm));
                     break;
+
+                case ASURAS_ANGER:
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 10;
+                    tsm.putCharacterStatValue(Asura, o1);
+                    c.write(WvsContext.temporaryStatSet(tsm));
+                    break;
             }
         }
 
@@ -280,7 +303,11 @@ public class Thief extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-                //case
+                case MAPLE_RETURN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
             }
         }
     }
@@ -306,11 +333,11 @@ public class Thief extends Job {
                 o1.nOption = si.getValue(speed, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                //tsm.putCharacterStatValue(Speed, o1);
+                tsm.putCharacterStatValue(Speed, o1);
                 o2.nOption = si.getValue(jump, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                //tsm.putCharacterStatValue(Jump, o2);
+                tsm.putCharacterStatValue(Jump, o2);
                 // SpeedMax?
                 break;
             case DARK_SIGHT:
@@ -435,10 +462,9 @@ public class Thief extends Job {
                 break;
 
             case FLIP_THE_COIN:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(FlipTheCoin, o1);
+                handleFlipTheCoin(skillID, tsm, c);
+                c.write(WvsContext.flipTheCoinEnabled((byte) 0));
+                break;
 
             case BLADE_CLONE:
                 o1.nOption = 1;
@@ -450,6 +476,49 @@ public class Thief extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    private void handleFlipTheCoin(int skillId, TemporaryStatManager tsm, Client c) {
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        SkillInfo FlipTheCoinInfo = SkillData.getSkillInfoById(FLIP_THE_COIN);
+        int amount = 1;
+        if(tsm.hasStat(FlipTheCoin)) {
+            amount = tsm.getOption(FlipTheCoin).nOption;
+            if(amount < FlipTheCoinInfo.getValue(y, 1)) {
+                amount++;
+            }
+        }
+        o.nOption = amount;
+        o.rOption = FLIP_THE_COIN;
+        o.tOption = FlipTheCoinInfo.getValue(time, FlipTheCoinInfo.getCurrentLevel());
+        tsm.putCharacterStatValue(FlipTheCoin, o);
+
+        //Stats
+        o1.nOption = (amount * FlipTheCoinInfo.getValue(x, 1));
+        o1.rOption = FLIP_THE_COIN;
+        o1.tOption = FlipTheCoinInfo.getValue(time, 1);
+        tsm.putCharacterStatValue(CriticalBuff, o1);
+        o2.nReason = FLIP_THE_COIN;
+        o2.nValue = (amount * FlipTheCoinInfo.getValue(indieDamR, 1));
+        o2.tStart = (int) System.currentTimeMillis();
+        o2.tTerm = FlipTheCoinInfo.getValue(time, 1);
+        tsm.putCharacterStatValue(IndieDamR, o2);
+        o3.nReason = FLIP_THE_COIN;
+        o3.nValue = (amount * FlipTheCoinInfo.getValue(indieMaxDamageOver, 1));
+        o3.tStart = (int) System.currentTimeMillis();
+        o3.tTerm = FlipTheCoinInfo.getValue(time, 1);
+        tsm.putCharacterStatValue(IndieMaxDamageOver, o3);
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private void handleFlipTheCoin(TemporaryStatManager tsm) {    //TODO Change to proc on Critical Hits
+        if(tsm.getOption(FlipTheCoin).nOption < 5) {
+            if (Util.succeedProp(50)) { //Proc on Crit
+                c.write(WvsContext.flipTheCoinEnabled((byte) 1));
+            }
+        }
+    }
 
     //TODO Fix Critical Growth
     private void handleCritGrowth(int skillID, TemporaryStatManager tsm, Client c) {    //Crit rate increase = x

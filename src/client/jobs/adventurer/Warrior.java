@@ -12,9 +12,7 @@ import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
-import enums.ChatMsgColour;
-import enums.MobStat;
-import enums.Stat;
+import enums.*;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -32,6 +30,9 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Warrior extends Job {
+
+    public static final int MAPLE_RETURN = 1281;
+
     //Hero
     public static final int WEAPON_BOOSTER_FIGHTER = 1101004;
     public static final int COMBO_ATTACK = 1101013;
@@ -74,11 +75,13 @@ public class Warrior extends Job {
     public static final int IRON_WILL = 1301006;
     public static final int HYPER_BODY = 1301007;
     public static final int EVIL_EYE = 1301013;
+    public static final int EVIL_EYE_OF_DOMINATION = 1311013; //Beholder TSM
     public static final int CROSS_SURGE = 1311015;
     public static final int LORD_OF_DARKNESS = 1310009;
     public static final int MAPLE_WARRIOR_DARK_KNIGHT = 1321000;
     public static final int FINAL_PACT = 1320016;
     public static final int MAGIC_CRASH_DRK = 1321014;
+    public static final int SACRIFICE = 1321015; //Resets summon
 
 
     //Hyper Skills
@@ -89,6 +92,12 @@ public class Warrior extends Job {
     public static final int SACROSANCTITY = 1221054; //Lv150
     public static final int DARK_THIRST = 1321054; //Lv150
 
+
+    private Summon evilEye;
+
+    private int[] addedSkills = new int[] {
+            MAPLE_RETURN,
+    };
 
     private final int[] buffs = new int[]{
             WEAPON_BOOSTER_FIGHTER, // Weapon Booster - Fighter
@@ -107,6 +116,7 @@ public class Warrior extends Job {
             CROSS_SURGE,
             BLAST,
             ENRAGE,
+            SACRIFICE,
 
             EPIC_ADVENTURE_DRK,
             EPIC_ADVENTURE_HERO,
@@ -122,6 +132,15 @@ public class Warrior extends Job {
 
     public Warrior(Char chr) {
         super(chr);
+        if(isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
+            }
+        }
     }
 
     
@@ -238,24 +257,46 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(PDD, o2);
                 break;
             case EVIL_EYE:
-                Summon summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                /*Summon evilEye = Summon.getSummonBy(c.getChr(), skillID, slv);
                 Field field = c.getChr().getField();
-                field.addLife(summon);
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
+                field.addLife(evilEye);
+                evilEye.setCharLevel((byte) chr.getStat(Stat.level));
                 summon.setPosition(chr.getPosition().deepCopy());
                 summon.setMoveAction((byte) 1);
                 summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 1);
+                summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
                 summon.setAssistType((byte) 0);
                 summon.setEnterType((byte) 1);
                 summon.setBeforeFirstAttack(false);
                 summon.setTemplateId(skillID);
                 summon.setAttackActive(false);
-                c.write(CField.summonedCreated(chr.getId(), summon));
+                c.write(CField.summonedCreated(chr.getId(), summon));*/
+                spawnEvilEye(skillID, slv);
                 o2.nOption = si.getValue(x, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(PDD, o2);
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Beholder, o1);
+                break;
+            case SACRIFICE:
+                if(tsm.hasStat(Beholder)) {
+                    o1.nOption = si.getValue(y, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(Restoration, o1);
+                    o2.nOption = si.getValue(x, slv);
+                    o2.rOption = skillID;
+                    o2.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
+                    o3.nOption = si.getValue(indieBDR, slv);
+                    o3.rOption = skillID;
+                    o3.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieBDR, o3);
+                    removeEvilEye(tsm, c);
+                }
                 break;
             case MAPLE_WARRIOR_HERO:
             case MAPLE_WARRIOR_PALADIN:
@@ -549,6 +590,27 @@ public class Warrior extends Job {
         }
     }
 
+    public void spawnEvilEye(int skillID, byte slv) {
+        Field field;
+        evilEye = Summon.getSummonBy(c.getChr(), skillID, slv);
+        field = c.getChr().getField();
+        evilEye.setFlyMob(true);
+        evilEye.setSummonTerm(0);
+        evilEye.setMoveAction((byte) 1);
+        evilEye.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        evilEye.setAssistType((byte) 0);  //0
+        evilEye.setAttackActive(false); //true
+        evilEye.setBeforeFirstAttack(false);
+        field.spawnSummon(evilEye);
+    }
+
+    public void removeEvilEye(TemporaryStatManager tsm, Client c) {
+
+        tsm.removeStat(Beholder, true);
+        c.write(WvsContext.temporaryStatReset(tsm, false));
+        c.write(CField.summonedRemoved(evilEye, LeaveType.ANIMATION));
+    }
+
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         Char chr = c.getChr();
@@ -565,6 +627,11 @@ public class Warrior extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
+                case MAPLE_RETURN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
                 case HP_RECOVERY:
                     int t = 1000 * si.getValue(time, slv);
                     long cur = System.currentTimeMillis();

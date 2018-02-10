@@ -3,20 +3,46 @@ package client.jobs.adventurer;
 import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
-import client.character.skills.AttackInfo;
+import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
+import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
+import loaders.SkillData;
+import packet.WvsContext;
 
 /**
  * Created on 12/14/2017.
  */
 public class BeastTamer extends Job {
 
-    //TODO Beast Tamer's broken
+    public static final int HOMEWARD_BOUND = 110001514;
+
+    public static final int BEAR_MODE = 110001501; //MobZoneState?
+
+    private int[] buffs = new int[] {
+            BEAR_MODE,
+    };
 
     public BeastTamer(Char chr) {
         super(chr);
+    }
+
+    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+        Char chr = c.getChr();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        int curTime = (int) System.currentTimeMillis();
+        Summon summon;
+        Field field;
+        switch (skillID) {
+
+        }
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     @Override

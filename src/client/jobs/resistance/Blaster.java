@@ -4,6 +4,7 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
 import connection.InPacket;
 import constants.JobConstants;
@@ -13,11 +14,9 @@ import packet.WvsContext;
 
 import java.util.Arrays;
 
-import static client.character.skills.CharacterTemporaryStat.Booster;
-import static client.character.skills.CharacterTemporaryStat.IndieStatR;
-import static client.character.skills.CharacterTemporaryStat.RWCylinder;
-import static client.character.skills.SkillStat.time;
-import static client.character.skills.SkillStat.x;
+import static client.character.skills.CharacterTemporaryStat.*;
+import static client.character.skills.CharacterTemporaryStat.IndieMaxDamageOverR;
+import static client.character.skills.SkillStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -34,6 +33,9 @@ public class Blaster extends Job {
     public static final int ARM_CANNON_BOOST = 37101003;
     public static final int MAPLE_WARRIOR_BLASTER = 37121006;
 
+    public static final int FOR_LIBERTY_BLASTER = 37121053;
+    public static final int CANNON_OVERDRIVE = 37121054;
+
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,
     };
@@ -41,6 +43,8 @@ public class Blaster extends Job {
     private int[] buffs = new int[] {
             ARM_CANNON_BOOST,
             MAPLE_WARRIOR_BLASTER,
+            FOR_LIBERTY_BLASTER,
+            CANNON_OVERDRIVE,
     };
     private int ammo = getMaxAmmo();
 
@@ -77,7 +81,13 @@ public class Blaster extends Job {
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
+            Option o1 = new Option();
             switch(skillID) {
+                case SECRET_ASSEMBLY:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
             }
         }
     }
@@ -111,6 +121,23 @@ public class Blaster extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
+                break;
+
+            case FOR_LIBERTY_BLASTER:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case CANNON_OVERDRIVE:
+                //TODO
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

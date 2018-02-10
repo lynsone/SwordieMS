@@ -38,6 +38,7 @@ import static client.character.skills.CharacterTemporaryStat.*;
  * Created on 12/14/2017.
  */
 public class Archer extends Job {
+    public static final int MAPLE_RETURN = 1281;
 
     public static final int SOUL_ARROW_BOW = 3101004;
     public static final int SOUL_ARROW_XBOW = 3201004;
@@ -77,6 +78,10 @@ public class Archer extends Job {
 
     private QuiverCartridge quiverCartridge;
 
+    private int[] addedSkills = new int[] {
+            MAPLE_RETURN,
+    };
+
     private int[] buffs = new int[]{
             BOW_BOOSTER,
             XBOW_BOOSTER,
@@ -105,6 +110,15 @@ public class Archer extends Job {
 
     public Archer(Char chr) {
         super(chr);
+        if(isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
+            }
+        }
     }
 
     @Override
@@ -430,7 +444,13 @@ public class Archer extends Job {
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
+            Option o1 = new Option();
             switch(skillID) {
+                case MAPLE_RETURN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
             }
         }
     }

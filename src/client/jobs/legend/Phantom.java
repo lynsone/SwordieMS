@@ -4,6 +4,7 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
 import client.life.Mob;
 import connection.InPacket;
@@ -285,7 +286,9 @@ public class Phantom extends Job {
                     //TODO
                     break;
                 case TO_THE_SKIES:
-                    //TODO Map: 150000000
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
                     break;
             }
         }

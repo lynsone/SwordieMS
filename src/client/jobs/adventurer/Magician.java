@@ -34,6 +34,8 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Magician extends Job {
+    public static final int MAPLE_RETURN = 1281;
+
     public static final int MAGIC_GUARD = 2001002;
     public static final int MP_EATER_FP = 2100000;
     public static final int POISON_BREATH = 2101005;
@@ -91,6 +93,10 @@ public class Magician extends Job {
     public static final int HEAVENS_DOOR = 2321052;
 
 
+    private int[] addedSkills = new int[] {
+            MAPLE_RETURN,
+    };
+
     private final int[] buffs = new int[]{
             MAGIC_GUARD,
             IGNITE,
@@ -135,6 +141,15 @@ public class Magician extends Job {
 
     public Magician(Char chr) {
         super(chr);
+        if(isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
+            }
+        }
     }
 
     @Override
@@ -338,7 +353,13 @@ public class Magician extends Job {
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
+            Option o1 = new Option();
             switch(skillID) {
+                case MAPLE_RETURN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
                 case FREEZING_BREATH:
 
                     break;

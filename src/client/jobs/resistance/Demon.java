@@ -416,72 +416,6 @@ public class Demon extends Job {
                     }
                 }
                 break;
-
-/*
-            case EXCEED_DOUBLE_SLASH_1:
-                handleOverloadCount(skill.getSkillId(), tsm, c);
-                break;
-            case EXCEED_DOUBLE_SLASH_2:
-                handleOverloadCount(31011004, tsm, c);
-                break;
-            case EXCEED_DOUBLE_SLASH_3:
-                handleOverloadCount(31011005, tsm, c);
-                break;
-            case EXCEED_DOUBLE_SLASH_4:
-                handleOverloadCount(31011006, tsm, c);
-                break;
-            case EXCEED_DOUBLE_SLASH_PURPLE:
-                handleOverloadCount(31011007, tsm, c);
-                break;
-
-            case EXCEED_DEMON_STRIKE_1:
-                handleOverloadCount(31201000, tsm, c);
-                break;
-            case EXCEED_DEMON_STRIKE_2:
-                handleOverloadCount(31201007, tsm, c);
-                break;
-            case EXCEED_DEMON_STRIKE_3:
-                handleOverloadCount(31201008, tsm, c);
-                break;
-            case EXCEED_DEMON_STRIKE_4:
-                handleOverloadCount(31201009, tsm, c);
-                break;
-            case EXCEED_DEMON_STRIKE_PURPLE:
-                handleOverloadCount(31201010, tsm, c);
-                break;
-
-            case EXCEED_LUNAR_SLASH_1:
-                handleOverloadCount(31211000, tsm, c);
-                break;
-            case EXCEED_LUNAR_SLASH_2:
-                handleOverloadCount(31211007, tsm, c);
-                break;
-            case EXCEED_LUNAR_SLASH_3:
-                handleOverloadCount(31211008, tsm, c);
-                break;
-            case EXCEED_LUNAR_SLASH_4:
-                handleOverloadCount(31211009, tsm, c);
-                break;
-            case EXCEED_LUNAR_SLASH_PURPLE:
-                handleOverloadCount(31211010, tsm, c);
-                break;
-
-            case EXCEED_EXECUTION_1:
-                handleOverloadCount(31221000, tsm, c);
-                break;
-            case EXCEED_EXECUTION_2:
-                handleOverloadCount(31221009, tsm, c);
-                break;
-            case EXCEED_EXECUTION_3:
-                handleOverloadCount(31221010, tsm, c);
-                break;
-            case EXCEED_EXECUTION_4:
-                handleOverloadCount(31221011, tsm, c);
-                break;
-            case EXCEED_EXECUTION_PURPLE:
-                handleOverloadCount(31221012, tsm, c);
-                break;
-*/
         }
     }
 
@@ -491,7 +425,7 @@ public class Demon extends Job {
         int amount = 1;
         if(tsm.hasStat(OverloadCount)){
             amount = tsm.getOption(OverloadCount).nOption;
-            if(amount < exceedInfo.getValue(x, exceedInfo.getCurrentLevel())){
+            if(amount < getMaxExceed(chr)){
                 amount++;
             }
         }
@@ -505,6 +439,14 @@ public class Demon extends Job {
     private void resetExceed(Client c, TemporaryStatManager tsm) {
         tsm.removeStat(OverloadCount, false);
         c.write(WvsContext.temporaryStatReset(tsm, false));
+    }
+
+    private int getMaxExceed(Char chr) {
+        int num = 20;
+        if(chr.hasSkill(31220044)) { //Hyper Skill Boost [ Reduce Overload ]
+            num = 18;
+        }
+        return num;
     }
 
     @Override

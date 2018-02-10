@@ -13,7 +13,7 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
-import enums.Stat;
+import enums.MoveAbility;
 import loaders.SkillData;
 import packet.WvsContext;
 import util.Util;
@@ -28,6 +28,7 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Mercedes extends Job {
+    //Link Skill = return skill
 
     public static final int ELVEN_GRACE = 20020112;
     public static final int UPDRAFT = 20020111;
@@ -37,7 +38,7 @@ public class Mercedes extends Job {
 
     public static final int STUNNING_STRIKES = 23111000; //Special Attack
     public static final int UNICORN_SPIKE = 23111002; //Special Attack
-    public static final int IGNIS_ROAR = 23111004; //Buff //TODO Stacks
+    public static final int IGNIS_ROAR = 23111004; //Buff
     public static final int WATER_SHIELD = 23111005; //Buff
     public static final int ELEMENTAL_KNIGHTS_BLUE = 23111008; //Summon
     public static final int ELEMENTAL_KNIGHTS_RED = 23111009; //Summon
@@ -137,11 +138,7 @@ public class Mercedes extends Job {
                 o3.nOption = si.getValue(x, slv);
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IgnoreMobDamR, o3);
-                o4.nOption = 1;
-                o4.rOption = skillID;
-                o4.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IgnisRore, o4);   //TODO WaterShield TempStat  ?
+                tsm.putCharacterStatValue(DamAbsorbShield, o3);   //IgnoreMobDamR
                 break;
             case ANCIENT_WARDING:
                 o1.nOption = si.getValue(emhp, slv);
@@ -184,30 +181,30 @@ public class Mercedes extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o2);
                 break;
-            case ELEMENTAL_KNIGHTS_BLUE: //TODO allow for different summons (blue/red/purple)
-                int element = ELEMENTAL_KNIGHTS_BLUE;
-                int chance = new Random().nextInt(100) +1;
-                if (chance < 32) {
-                    element = ELEMENTAL_KNIGHTS_BLUE;
-                } else if (chance > 32 && chance < 67) {
-                    element = ELEMENTAL_KNIGHTS_RED;
-                } else if (chance > 67 && chance < 100) {
-                    element = ELEMENTAL_KNIGHTS_PURPLE;
+            case ELEMENTAL_KNIGHTS_BLUE: //TODO allow for different summons (blue/red/purple)   //Requires a method
+                if(tsm.hasStat(DevilCry)){
+                    return;
+                } else {
+                    int element = ELEMENTAL_KNIGHTS_BLUE;
+                    int chance = new Random().nextInt(100) + 1;
+                    if (chance < 32) {
+                        element = ELEMENTAL_KNIGHTS_BLUE;
+                    } else if (chance > 32 && chance < 67) {
+                        element = ELEMENTAL_KNIGHTS_RED;
+                    } else if (chance > 67 && chance < 100) {
+                        element = ELEMENTAL_KNIGHTS_PURPLE;
+                    }
+                    summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                    field = c.getChr().getField();
+                    summon.setFlyMob(true);
+                    summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+                    field.spawnSummon(summon);
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(DevilCry, o1); //Random Stat
+                    break;
                 }
-                summon = Summon.getSummonBy(c.getChr(), element, slv);
-                field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 1);
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true);
-                field.spawnSummon(summon);
-                break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }

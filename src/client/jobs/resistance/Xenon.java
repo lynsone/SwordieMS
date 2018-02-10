@@ -6,11 +6,14 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.Mob;
+import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
+import enums.MobStat;
 import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
@@ -58,6 +61,11 @@ public class Xenon extends Job {
     public static final int MAPLE_WARRIOR_XENON = 36121008; //Buff
     public static final int PINPOINT_SALVO_PERFECT_DESIGN = 36120015; //Sp. Attack Upgrade  (Passive Upgrade)
 
+    public static final int ORBITAL_CATACLYSM = 36121052;
+    public static final int AMARANTH_GENERATOR = 36121054;
+    public static final int ENTANGLISH_LASH = 36121053;
+
+
     private final int MAX_SUPPLY = 20;
     private int supply;
     private int supplyProp;
@@ -85,6 +93,8 @@ public class Xenon extends Job {
             TEMPORAL_POD,
             OOPARTS_CODE,
             MAPLE_WARRIOR_XENON,
+            ORBITAL_CATACLYSM,
+            AMARANTH_GENERATOR,
     };
 
     public Xenon(Char chr) {
@@ -174,6 +184,16 @@ public class Xenon extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
 
+            case AMARANTH_GENERATOR:
+                if (supply >= 20) {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(AmaranthGenerator, o1);
+                }
+                break;
+
+
             case HYPOGRAM_FIELD_FORCE_FIELD: //TODO  Correct?   Is it a Summon or Area Of Effect?
             case HYPOGRAM_FIELD_PENETRATE:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -195,14 +215,19 @@ public class Xenon extends Job {
     }
 
     private void handleSupplyCost(int skillID, byte slv, SkillInfo si) {
-        if(si == null) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(AmaranthGenerator)) {
             return;
+        } else {
+            if (si == null) {
+                return;
+            }
+            if (si.getValue(powerCon, slv) > 0) {
+                supply -= si.getValue(powerCon, slv);
+                supply = Math.max(0, supply);
+            }
+            updateSupply();
         }
-        if (si.getValue(powerCon, slv) > 0) {
-            supply -= si.getValue(powerCon, slv);
-            supply = Math.max(0, supply);
-        }
-        updateSupply();
     }
 
     public void incrementSupply() {
@@ -256,6 +281,30 @@ public class Xenon extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
+            case ENTANGLISH_LASH:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
+                }
+                break;
+            case ORBITAL_CATACLYSM:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                c.write(WvsContext.temporaryStatSet(tsm));
+                break;
 
         }
     }
@@ -282,6 +331,11 @@ public class Xenon extends Job {
                     break;
                 case TEMPORAL_POD:
                     //TODO
+                    break;
+                case PROMESSA_ESCAPE:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
                     break;
             }
         }

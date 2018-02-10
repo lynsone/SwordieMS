@@ -3,8 +3,8 @@ package client.jobs;
 import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
-import client.character.ZeroInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -42,6 +42,12 @@ public class Zero extends Job {
     public static final int DIVINE_SPEED = 100001264; //Aura (Unlimited Duration)
     public static final int RHINNES_PROTECTION = 100001268; //Buff
 
+    public static final int TIME_HOLDING = 100001274;
+    public static final int TIME_DISTORTION = 100001261; //TODO; AoE
+    public static final int REWIND = 100001272;
+    public static final int FOCUSED_TIME = 100001005;
+
+
     public static final int AIR_RIOT = 101000101; //Special Attack (Stun Debuff)
     public static final int THROWING_WEAPON = 101100100; //Special Attack (Throw Sword)
     public static final int ADVANCED_THROWING_WEAPON = 101100101; //Special Attack (Throw Sword)
@@ -65,6 +71,9 @@ public class Zero extends Job {
             DIVINE_FORCE,
             DIVINE_SPEED,
             RHINNES_PROTECTION,
+            TIME_HOLDING,
+            REWIND,
+            FOCUSED_TIME,
     };
 
     public Zero(Char chr) {
@@ -155,7 +164,11 @@ public class Zero extends Job {
                 o5.nValue = si.getValue(indieSpeed, slv);
                 o5.tStart = (int) System.currentTimeMillis();
                 o5.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieJump, o5); //Indie
+                tsm.putCharacterStatValue(IndieSpeed, o5); //Indie
+                o6.nOption = 1;
+                o6.rOption = skillID;
+                o6.tOption = 0;
+                tsm.putCharacterStatValue(ZeroAuraSpd, o6);
                 break;
             case RHINNES_PROTECTION:
                 o1.nReason = skillID;
@@ -163,8 +176,44 @@ public class Zero extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
-
                 break;
+
+            case TIME_HOLDING:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(NotDamaged, o1); //
+
+                //TODO Lv200+ only
+                o2.nOption = si.getValue(y, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(x, slv);
+                tsm.putCharacterStatValue(DamR, o2); //
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(z, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = si.getValue(x, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o3);
+                break;
+            case REWIND:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(HeavensDoor, o1);
+                break;
+            case FOCUSED_TIME:
+                o1.nReason = skillID;
+                o1.nValue = 4;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = 2400;
+                tsm.putCharacterStatValue(IndiePADR, o1); //Indie
+                o2.nReason = skillID;
+                o2.nValue = 4;
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 2400;
+                tsm.putCharacterStatValue(IndieMADR, o2); //Indie
+                break;
+
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -193,7 +242,7 @@ public class Zero extends Job {
         if(isAlpha) {
             handleDivineLeer(attackInfo);
         } else {
-            handleCriticalBind(attackInfo);
+            handleCriticalBind(attackInfo); //TODO
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -240,6 +289,11 @@ public class Zero extends Job {
                     summon.setFlyMob(true);
                     summon.setMoveAbility(MoveAbility.THROW.getVal());
                     chr.getField().spawnSummon(summon);
+                    break;
+                case TEMPLE_RECALL:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
                     break;
             }
         }

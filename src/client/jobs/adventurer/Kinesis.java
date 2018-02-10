@@ -4,6 +4,7 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
@@ -25,6 +26,8 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Kinesis extends Job {
+    public static final int RETURN_KINESIS = 140001290;
+
     public final static int PSYCHIC_FORCE = 142001000;
     public final static int MENTAL_SHIELD = 142001007;
     public final static int ESP_BOOSTER = 142001003;
@@ -272,10 +275,16 @@ public class Kinesis extends Job {
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
+            Option o1 = new Option();
             switch(skillID) {
                 case PSYCHIC_CHARGER:
                     int add = (MAX_PP - getPp()) / 2;
                     addPP(add);
+                    break;
+                case RETURN_KINESIS:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
                     break;
             }
         }

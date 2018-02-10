@@ -367,6 +367,11 @@ public class BattleMage extends Job {
                 case PARTY_SHIELD:
                     //TODO
                     break;
+                case SECRET_ASSEMBLY:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    chr.warp(toField);
+                    break;
             }
         }
     }
