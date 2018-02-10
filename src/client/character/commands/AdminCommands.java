@@ -3,10 +3,12 @@ package client.character.commands;
 import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Item;
-import client.character.skills.ForceAtomInfo;
-import client.character.skills.Skill;
+import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
+import client.jobs.adventurer.Pirate;
+import client.jobs.resistance.WildHunter;
+import client.jobs.resistance.WildHunterInfo;
 import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
@@ -35,22 +37,61 @@ import static enums.ChatMsgColour.YELLOW;
  */
 public class AdminCommands {
 
-    public static class PacketCommand extends AdminCommand {
+    public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-//            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-//            Option o = new Option();
-//            o.nOption = 5;
-//            o.rOption = 0;
-//            o.tOption = 0;
-//            tsm.putCharacterStatValue(CharacterTemporaryStat.SurplusSupply, o);
-//            chr.getClient().write(WvsContext.temporaryStatSet(tsm));
+            WildHunterInfo wi = new WildHunterInfo();
+            wi.setIdx((byte) 1);
+            wi.setRidingType((byte) 1);
+            chr.write(WvsContext.wildHunterInfo(wi));
+//            new TemporaryStatManager(null).encodeForLocal(null);
+            CharacterTemporaryStat cts = CharacterTemporaryStat.RideVehicle;
 
-            OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
+            OutPacket outPacket = new OutPacket(OutHeader.TEMPORARY_STAT_SET);
 
-            outPacket.encodeByte(47);
+//            tsm.encodeForLocal(outPacket);
+            // Start encodeForLocal
+            int[] mask = new int[CharacterTemporaryStat.length];
+            mask[cts.getPos()] |= cts.getVal();
+            for(int i = 0; i < mask.length; i++) {
+                outPacket.encodeInt(mask[i]);
+            }
+            System.out.println("[Out]\t| " + outPacket);
 
+            short size = 0;
+            outPacket.encodeShort(0);
+            for (int i = 0; i < size; i++) {
+                outPacket.encodeInt(0); // nKey
+                outPacket.encodeByte(0); // bEnable
+            }
+            outPacket.encodeByte(0); // defenseAtt
+            outPacket.encodeByte(0); // defenseState
+            outPacket.encodeByte(0); // pvpDamage
+            outPacket.encodeInt(0); // viperCharge
+            // Start TSTS encode
+            outPacket.encodeBytes(new byte[Integer.parseInt(args[2])]);
+            outPacket.encodeInt(1);
+            outPacket.encodeInt(80001001);
+            outPacket.encodeByte(1);
             outPacket.encodeByte(0);
+            outPacket.encodeBytes(new byte[Integer.parseInt(args[1])]);
+//            outPacket.encodeShort(1);
+            // End TSTS encode
+            // End  encodeForLocal
+            outPacket.encodeInt(0); // indie?
+            outPacket.encodeShort(0); // invalid value => "Failed to use the skill for an unknown reason"
+            outPacket.encodeByte(0);
+            outPacket.encodeByte(0);
+            outPacket.encodeByte(0);
+
+
+
+
+//            outPacket.encodeInt(0); // ?
+//            if(tsm.hasNewMovingEffectingStat()) {
+//                outPacket.encodeByte(0);
+//            }
+
 
             chr.write(outPacket);
         }
@@ -355,10 +396,12 @@ public class AdminCommands {
                     for (Map.Entry<Integer, SkillStringInfo> entry : map.entrySet()) {
                         id = entry.getKey();
                         ssi = entry.getValue();
-                        chr.chatMessage(YELLOW, "Id: " + id);
-                        chr.chatMessage(YELLOW, "Name: " + ssi.getName());
-                        chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
-                        chr.chatMessage(YELLOW, "h: " + ssi.getH());
+                        if(SkillData.getSkillInfoById(id) != null) {
+                            chr.chatMessage(YELLOW, "Id: " + id);
+                            chr.chatMessage(YELLOW, "Name: " + ssi.getName());
+                            chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
+                            chr.chatMessage(YELLOW, "h: " + ssi.getH());
+                        }
                     }
                 }
             } else if("item".equalsIgnoreCase(args[1])) {
@@ -380,6 +423,13 @@ public class AdminCommands {
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
+                        Item item = ItemData.getEquipDeepCopyFromId(id);
+                        if (item == null) {
+                            item = ItemData.getItemDeepCopy(id);
+                        }
+                        if(item == null) {
+                            continue;
+                        }
                         chr.chatMessage(YELLOW, "Id: " + id);
                         chr.chatMessage(YELLOW, "Name: " + name);
                     }

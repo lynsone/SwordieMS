@@ -127,24 +127,25 @@ public class Demon extends Job {
 
     public Demon(Char chr) {
         super(chr);
-        if (chr.getJob() == 3100 || chr.getJob() == 3110 || chr.getJob() == 3111 || chr.getJob() == 3112) {
-            for (int id : addedSkillsDS) {
-                if (!chr.hasSkill(id)) {
-                    Skill skill = SkillData.getSkillDeepCopyById(id);
-                    skill.setCurrentLevel(skill.getMasterLevel());
-                    chr.addSkill(skill);
+        if(isHandlerOfJob(chr.getJob())) {
+            if (chr.getJob() == 3100 || chr.getJob() == 3110 || chr.getJob() == 3111 || chr.getJob() == 3112) {
+                for (int id : addedSkillsDS) {
+                    if (!chr.hasSkill(id)) {
+                        Skill skill = SkillData.getSkillDeepCopyById(id);
+                        skill.setCurrentLevel(skill.getMasterLevel());
+                        chr.addSkill(skill);
+                    }
+                }
+
+            } else if (chr.getJob() == 3101 || chr.getJob() == 3120 || chr.getJob() == 3121 || chr.getJob() == 3122) {
+                for (int id : addedSkillsDA) {
+                    if (!chr.hasSkill(id)) {
+                        Skill skill = SkillData.getSkillDeepCopyById(id);
+                        skill.setCurrentLevel(skill.getMasterLevel());
+                        chr.addSkill(skill);
+                    }
                 }
             }
-
-        } else if (chr.getJob() == 3101 || chr.getJob() == 3120 || chr.getJob() == 3121 || chr.getJob() == 3122) {
-            for (int id : addedSkillsDA) {
-                if (!chr.hasSkill(id)) {
-                    Skill skill = SkillData.getSkillDeepCopyById(id);
-                    skill.setCurrentLevel(skill.getMasterLevel());
-                    chr.addSkill(skill);
-                }
-            }
-
         }
     }
 

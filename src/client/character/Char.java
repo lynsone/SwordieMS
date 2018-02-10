@@ -1603,28 +1603,23 @@ public class Char {
         ZeroInfo currentInfo = getZeroInfo();
         CharacterStat cs = getAvatarData().getCharacterStat();
         currentInfo.setZeroBetaState(!oldInfo.isZeroBetaState());
-        AvatarLook newLook = getAvatarData().getAvatarLook(currentInfo.isZeroBetaState());
         currentInfo.setSubHP(cs.getHp());
         currentInfo.setSubMHP(cs.getMaxHp());
         currentInfo.setSubMP(cs.getMp());
         currentInfo.setSubMMP(cs.getMaxMp());
-        currentInfo.setSubSkin(newLook.getSkin());
-        currentInfo.setSubFace(newLook.getFace());
-        currentInfo.setSubHair(newLook.getHair());
         cs.setHp(oldInfo.getSubHP());
         cs.setMaxHp(oldInfo.getSubMHP());
         cs.setMp(oldInfo.getSubMP());
         cs.setMaxMp(oldInfo.getSubMMP());
-        cs.setSkin(oldInfo.getSubSkin());
-        cs.setHair(oldInfo.getSubHair());
-        cs.setFace(oldInfo.getSubFace());
         Map<Stat, Object> updatedStats = new HashMap<>();
         updatedStats.put(Stat.hp, cs.getHp());
         updatedStats.put(Stat.mhp, cs.getHp());
         updatedStats.put(Stat.mp, cs.getHp());
         updatedStats.put(Stat.mmp, cs.getHp());
+        System.out.println("Old = " + oldInfo.isZeroBetaState());
+        System.out.println("New = " + currentInfo.isZeroBetaState());
         write(WvsContext.statChanged(updatedStats));
-        write(WvsContext.zeroInfo(currentInfo));
+//        write(WvsContext.zeroInfo(currentInfo));
     }
 
     public void initZeroInfo() {

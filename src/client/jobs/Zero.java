@@ -3,13 +3,18 @@ package client.jobs;
 import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
+import client.character.ZeroInfo;
 import client.character.skills.*;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
+import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
+import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
+import enums.MoveAbility;
+import enums.Stat;
 import loaders.SkillData;
 import packet.WvsContext;
 import util.Util;
@@ -39,8 +44,12 @@ public class Zero extends Job {
 
     public static final int AIR_RIOT = 101000101; //Special Attack (Stun Debuff)
     public static final int THROWING_WEAPON = 101100100; //Special Attack (Throw Sword)
+    public static final int ADVANCED_THROWING_WEAPON = 101100101; //Special Attack (Throw Sword)
     public static final int ADV_EARTH_BREAK = 101120105; //Special Attack (Shock Field)
     public static final int ADV_STORM_BREAK = 101120204; //Special Attack (Shock Field)
+    public static final int DIVINE_LEER = 101120207;
+    public static final int CRITICAL_BIND = 101120110;
+    public static final int IMMUNE_BARRIER = 101120109;
 
     private int[] addedSkills = new int[] {
             DUAL_COMBAT,
@@ -60,20 +69,21 @@ public class Zero extends Job {
 
     public Zero(Char chr) {
         super(chr);
-        for (int id : addedSkills) {
-            if (!chr.hasSkill(id)) {
-                Skill skill = SkillData.getSkillDeepCopyById(id);
-                skill.setCurrentLevel(skill.getMasterLevel());
-                chr.addSkill(skill);
+        if(isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
             }
-        }
-        if(chr.getZeroInfo() == null) {
-            chr.initZeroInfo();
+            if (chr.getZeroInfo() == null) {
+                chr.initZeroInfo();
+            }
         }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
-        Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
         Option o1 = new Option();
@@ -171,11 +181,19 @@ public class Zero extends Job {
         int skillID = 0;
         SkillInfo si = null;
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
+        byte slv = 0;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
+            slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
+        }
+        System.out.println(SkillConstants.isZeroAlphaSkill(skillID));
+        System.out.println(!chr.getZeroInfo().isZeroBetaState());
+        boolean isAlpha = SkillConstants.isZeroAlphaSkill(skillID) || !chr.getZeroInfo().isZeroBetaState();
+        if(isAlpha) {
+            handleDivineLeer(attackInfo);
+        } else {
+            handleCriticalBind(attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -183,19 +201,15 @@ public class Zero extends Job {
         switch (attackInfo.skillId) {
             case AIR_RIOT:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(u, slv))) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(s, slv);
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
-                break;
-
-            case THROWING_WEAPON:
-                //TODO
                 break;
             case ADV_EARTH_BREAK:
             case ADV_STORM_BREAK:
@@ -220,14 +234,42 @@ public class Zero extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
-                //case
+                case THROWING_WEAPON:
+                case ADVANCED_THROWING_WEAPON:
+                    Summon summon = Summon.getSummonBy(chr, skillID, slv);
+                    summon.setFlyMob(true);
+                    summon.setMoveAbility(MoveAbility.THROW.getVal());
+                    chr.getField().spawnSummon(summon);
+                    break;
             }
         }
     }
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill immuneBarrier = chr.getSkill(IMMUNE_BARRIER);
+        if(immuneBarrier == null) {
+            return;
+        }
+        byte slv = (byte) immuneBarrier.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(IMMUNE_BARRIER);
+        if(Util.succeedProp(si.getValue(prop, slv))) {
+            Option o = new Option(IMMUNE_BARRIER, slv);
+            int max = (int) (chr.getStat(Stat.mhp) * (si.getValue(x, slv) / 100D));
+            o.nOption = max;
+            o.xOption = max;
+            chr.getTemporaryStatManager().putCharacterStatValue(ImmuneBarrier, o);
+        }
+        if(tsm.hasStat(ImmuneBarrier)) {
+            Option o = tsm.getOption(ImmuneBarrier);
+            int maxSoakDamage = o.nOption;
+            int newDamage = hitInfo.HPDamage - maxSoakDamage < 0 ? 0 : hitInfo.HPDamage - maxSoakDamage;
+            o.nOption = maxSoakDamage - (hitInfo.HPDamage - newDamage); // update soak value
+            hitInfo.HPDamage = newDamage;
+            tsm.putCharacterStatValue(ImmuneBarrier, o);
+            tsm.sendSetStatPacket();
+        }
     }
 
     @Override
@@ -238,5 +280,44 @@ public class Zero extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    private boolean isBeta() {
+        return chr.getZeroInfo().isZeroBetaState();
+    }
+
+    private void handleDivineLeer(AttackInfo ai) {
+        Skill skill = chr.getSkill(DIVINE_LEER);
+        if(skill == null) {
+            return;
+        }
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(DIVINE_LEER);
+        for(MobAttackInfo mai : ai.mobAttackInfo) {
+            if(Util.succeedProp(si.getValue(prop, slv))) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                mob.getTemporaryStat().createAndAddBurnedInfo(chr.getId(), skill, 1);
+            }
+        }
+    }
+
+    private void handleCriticalBind(AttackInfo ai) {
+        Skill skill = chr.getSkill(CRITICAL_BIND);
+        if(skill == null) {
+            return;
+        }
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(CRITICAL_BIND);
+        for(MobAttackInfo mai : ai.mobAttackInfo) {
+            if(Util.succeedProp(si.getValue(prop, slv))) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                Option o = new Option();
+                o.nOption = 1;
+                o.rOption = CRITICAL_BIND;
+                o.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+            }
+        }
     }
 }

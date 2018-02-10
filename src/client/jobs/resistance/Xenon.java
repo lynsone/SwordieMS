@@ -89,15 +89,17 @@ public class Xenon extends Job {
 
     public Xenon(Char chr) {
         super(chr);
-        for (int id : addedSkills) {
-            if (!chr.hasSkill(id)) {
-                Skill skill = SkillData.getSkillDeepCopyById(id);
-                skill.setCurrentLevel(skill.getMasterLevel());
-                chr.addSkill(skill);
+        if(isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
             }
+            supplyProp = SkillData.getSkillInfoById(SUPPLY_SURPLUS).getValue(prop, 1);
+            supplyInterval();
         }
-        supplyProp = SkillData.getSkillInfoById(SUPPLY_SURPLUS).getValue(prop, 1);
-        supplyInterval();
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

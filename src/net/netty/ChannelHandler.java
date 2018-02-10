@@ -179,6 +179,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_ITEM_RELEASE_REQUEST:
                     WorldHandler.handleUserItemReleaseRequest(c, inPacket);
                     break;
+                case ZERO_TAG:
+                    WorldHandler.handleZeroTag(c, inPacket);
+                    break;
                 case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);
                     break;

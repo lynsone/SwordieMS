@@ -48,12 +48,14 @@ public class Blaster extends Job {
 
     public Blaster(Char chr) {
         super(chr);
-        updateCylinder();
-        for (int id : addedSkills) {
-            if (!chr.hasSkill(id)) {
-                Skill skill = SkillData.getSkillDeepCopyById(id);
-                skill.setCurrentLevel(skill.getMasterLevel());
-                chr.addSkill(skill);
+        if(isHandlerOfJob(chr.getJob())) {
+            updateCylinder();
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
             }
         }
     }

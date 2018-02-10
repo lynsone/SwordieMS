@@ -7,6 +7,7 @@ import client.character.Char;
 import client.character.CharacterStat;
 import client.character.FuncKeyMap;
 import client.character.items.Equip;
+import client.character.skills.CharacterTemporaryStat;
 import connection.InPacket;
 import constants.ItemConstants;
 import constants.JobConstants;
@@ -251,6 +252,16 @@ public class LoginHandler {
 
         OutHeader opcode = OutHeader.getOutHeaderByOp(op);
         System.err.printf("[Error %s] (%s / %d) Data: %s%n", errortype, opcode, op, inPacket);
+        if(opcode == OutHeader.TEMPORARY_STAT_SET) {
+            for (int i = 0; i < CharacterTemporaryStat.length; i++) {
+                int mask = inPacket.decodeInt();
+                for(CharacterTemporaryStat cts : CharacterTemporaryStat.values()) {
+                    if(cts.getPos() == i && (cts.getVal() & mask) != 0) {
+                        System.err.println("[Error %s] Contained stat " + cts);
+                    }
+                }
+            }
+        }
     }
 
     public static int getId() {

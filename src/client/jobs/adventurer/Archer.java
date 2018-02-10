@@ -496,7 +496,7 @@ public class Archer extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
                 field.spawnSummon(summon);
                 break;
             case RECKLESS_HUNT_BOW:

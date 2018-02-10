@@ -1609,4 +1609,11 @@ public class WorldHandler {
     public static void handlePartyInvitableSet(Client c, InPacket inPacket) {
         c.getChr().setPartyInvitable(inPacket.decodeByte() != 0);
     }
+
+    public static void handleZeroTag(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int newTF = inPacket.decodeInt();
+        int oldTF = inPacket.decodeInt();
+        chr.swapZeroState();
+    }
 }

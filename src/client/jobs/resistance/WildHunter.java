@@ -97,14 +97,16 @@ public class WildHunter extends Job {
 
     public WildHunter(Char chr) {
         super(chr);
-        if(chr.getWildHunterInfo() == null) {
-            chr.setWildHunterInfo(new WildHunterInfo());
-        }
-        for (int id : addedSkills) {
-            if (!chr.hasSkill(id)) {
-                Skill skill = SkillData.getSkillDeepCopyById(id);
-                skill.setCurrentLevel(skill.getMasterLevel());
-                chr.addSkill(skill);
+        if(isHandlerOfJob(chr.getJob())) {
+            if (chr.getWildHunterInfo() == null) {
+                chr.setWildHunterInfo(new WildHunterInfo());
+            }
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMasterLevel());
+                    chr.addSkill(skill);
+                }
             }
         }
     }

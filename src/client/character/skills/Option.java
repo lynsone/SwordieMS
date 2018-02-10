@@ -1,5 +1,7 @@
 package client.character.skills;
 
+import loaders.SkillData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,12 @@ public class Option {
     }
 
     public Option(){}
+
+    public Option(int skillID, byte slv) {
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        rOption = skillID;
+        tOption = si.getValue(SkillStat.time, slv);
+    }
 
     public Option deepCopy() {
         Option copy = new Option();

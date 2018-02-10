@@ -402,4 +402,12 @@ public class SkillConstants {
         }
         return result;
     }
+
+    public static boolean isZeroAlphaSkill(int skillID) {
+        return isZeroSkill(skillID) && skillID % 1000 / 100 == 2;
+    }
+
+    public static boolean isZeroBetaSkill(int skillID) {
+        return isZeroSkill(skillID) && skillID % 1000 / 100 == 1;
+    }
 }
