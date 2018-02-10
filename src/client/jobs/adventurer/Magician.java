@@ -137,9 +137,9 @@ public class Magician extends Job {
         }
         handleIgnite(attackInfo, chr, tsm, slv);
 
-        int arcaneAimProp = SkillData.getSkillInfoById(2320011).getValue(prop, skill.getCurrentLevel());
-        if (hasHitMobs && Util.succeedProp(arcaneAimProp)) {
-            handleArcaneAim(2320011, tsm, c);
+
+        if (hasHitMobs) {
+            handleArcaneAim();
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -250,33 +250,40 @@ public class Magician extends Job {
 
     }
 
-    private void handleArcaneAim(int skillId, TemporaryStatManager tsm, Client c) {
+    private void handleArcaneAim() {
+        Skill skill = chr.getSkill(getArcaneAimSkill());
+        if(skill == null) {
+            return;
+        }
+        SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(skill.getSkillId());
+        int arcaneAimProp = arcaneAimInfo.getValue(prop, skill.getCurrentLevel());
+        if(!Util.succeedProp(arcaneAimProp)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
-        SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(2320011);
         int amount = 1;
-        if (chr.hasSkill(2120010) || chr.hasSkill(2220010) || chr.hasSkill(2320011)) {
-            if (tsm.hasStat(ArcaneAim)) {
-                amount = tsm.getOption(ArcaneAim).nOption;
-                if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
-                    amount++;
-                }
+        if (tsm.hasStat(ArcaneAim)) {
+            amount = tsm.getOption(ArcaneAim).nOption;
+            if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
+                amount++;
             }
-            o.nOption = amount;
-            o.rOption = 2320011;
-            o.tOption = 5; // No Time Variable
-            tsm.putCharacterStatValue(ArcaneAim, o);
-            o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
-            o1.rOption = 2320011;
-            o1.tOption = 5; // No Time Variable
-            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
-            o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
-            o2.rOption = 2320011;
-            o2.tOption = 5; // No Time Variable
-            tsm.putCharacterStatValue(DamR, o2);
-            c.write(WvsContext.temporaryStatSet(tsm));
         }
+        o.nOption = amount;
+        o.rOption = 2320011;
+        o.tOption = 5; // No Time Variable
+        tsm.putCharacterStatValue(ArcaneAim, o);
+        o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
+        o1.rOption = 2320011;
+        o1.tOption = 5; // No Time Variable
+        tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
+        o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
+        o2.rOption = 2320011;
+        o2.tOption = 5; // No Time Variable
+        tsm.putCharacterStatValue(DamR, o2);
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm, int slv) {
@@ -478,5 +485,17 @@ public class Magician extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    private int getArcaneAimSkill() {
+        int res = 0;
+        if (chr.hasSkill(ARCANE_AIM_FP)) {
+            res = ARCANE_AIM_FP;
+        } else if (chr.hasSkill(ARCANE_AIM_IL)) {
+            res =  ARCANE_AIM_IL;
+        } else if (chr.hasSkill(ARCANE_AIM_BISH)) {
+            res =  ARCANE_AIM_BISH;
+        }
+        return res;
     }
 }
