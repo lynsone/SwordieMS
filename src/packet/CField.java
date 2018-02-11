@@ -317,6 +317,11 @@ public class CField {
 
         return outPacket;
     }
+    public static  OutPacket beastTamerFuncKeyMappedManInit(){
+        OutPacket outPacket = new OutPacket();
+        outPacket.encodeShort(0);
+        return  outPacket;
+    }
 
     public static OutPacket affectedAreaCreated(AffectedArea aa) {
         OutPacket outPacket = new OutPacket(OutHeader.AFFECTED_AREA_CREATED);

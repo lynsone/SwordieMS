@@ -71,7 +71,12 @@ public class WorldHandler {
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         c.write(Stage.setField(chr, field, c.getChannel(), true, 0, true, false,
                 (byte) 0, false, 100, null, true, -1));
-        c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
+        if (JobConstants.isBeastTamer(chr.getJob())){
+            c.write(CField.beastTamerFuncKeyMappedManInit());
+
+            }else {
+            c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
+        }
         field.spawnLifesForChar(chr);
     }
 

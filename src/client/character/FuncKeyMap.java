@@ -47,7 +47,7 @@ public class FuncKeyMap {
 
     public void encode(OutPacket outPacket) {
 
-        if(getKeymap().size() > 0) {
+        if(getKeymap().size() == 0) {
             outPacket.encodeByte(true);
         } else {
             outPacket.encodeByte(false);
