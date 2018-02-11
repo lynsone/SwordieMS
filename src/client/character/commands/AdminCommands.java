@@ -6,9 +6,7 @@ import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
-import client.jobs.adventurer.Pirate;
-import client.jobs.resistance.WildHunter;
-import client.jobs.resistance.WildHunterInfo;
+import client.jobs.adventurer.Magician;
 import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
@@ -29,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static client.character.skills.CharacterTemporaryStat.Unk1;
 import static enums.ChatMsgColour.GAME_NOTICE;
 import static enums.ChatMsgColour.YELLOW;
 
@@ -40,13 +39,15 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            WildHunterInfo wi = new WildHunterInfo();
-            wi.setIdx((byte) 1);
-            wi.setRidingType((byte) 1);
-            chr.write(WvsContext.wildHunterInfo(wi));
-//            new TemporaryStatManager(null).encodeForLocal(null);
-            CharacterTemporaryStat cts = CharacterTemporaryStat.RideVehicle;
 
+//            WildHunterInfo wi = new WildHunterInfo();
+//            wi.setIdx((byte) 1);
+//            wi.setRidingType((byte) 1);
+//            chr.write(WvsContext.wildHunterInfo(wi));
+//            new TemporaryStatManager(null).encodeForLocal(null);
+            CharacterTemporaryStat cts = CharacterTemporaryStat.Unk40;
+//            CharacterTemporaryStat cts2 = CharacterTemporaryStat.Speed;
+//
             OutPacket outPacket = new OutPacket(OutHeader.TEMPORARY_STAT_SET);
 
 //            tsm.encodeForLocal(outPacket);
@@ -57,6 +58,10 @@ public class AdminCommands {
                 outPacket.encodeInt(mask[i]);
             }
             System.out.println("[Out]\t| " + outPacket);
+
+            outPacket.encodeShort(1); // n
+            outPacket.encodeInt(Magician.MEDITATION_FP); // r
+            outPacket.encodeInt(10000); // t
 
             short size = 0;
             outPacket.encodeShort(0);
@@ -69,12 +74,12 @@ public class AdminCommands {
             outPacket.encodeByte(0); // pvpDamage
             outPacket.encodeInt(0); // viperCharge
             // Start TSTS encode
-            outPacket.encodeBytes(new byte[Integer.parseInt(args[2])]);
-            outPacket.encodeInt(1);
-            outPacket.encodeInt(80001001);
-            outPacket.encodeByte(1);
-            outPacket.encodeByte(0);
-            outPacket.encodeBytes(new byte[Integer.parseInt(args[1])]);
+//            outPacket.encodeBytes(new byte[Integer.parseInt(args[2])]);
+//            outPacket.encodeInt(1);
+//            outPacket.encodeInt(80001001);
+//            outPacket.encodeByte(1);
+//            outPacket.encodeByte(0);
+//            outPacket.encodeBytes(new byte[Integer.parseInt(args[1])]);
 //            outPacket.encodeShort(1);
             // End TSTS encode
             // End  encodeForLocal
@@ -83,17 +88,11 @@ public class AdminCommands {
             outPacket.encodeByte(0);
             outPacket.encodeByte(0);
             outPacket.encodeByte(0);
-
-
-
-
-//            outPacket.encodeInt(0); // ?
-//            if(tsm.hasNewMovingEffectingStat()) {
-//                outPacket.encodeByte(0);
-//            }
-
-
+            outPacket.encodeByte(0); // movement enhancing
+//            outPacket.encodeBytes(new byte[Integer.parseInt(args[1])]);
             chr.write(outPacket);
+
+
         }
     }
 

@@ -30,8 +30,11 @@ public class Packet implements Cloneable {
 
     private byte[] data;
 
-    public Packet(byte[] nD) {
-        data = nD;
+    public Packet(byte[] data) {
+        this.data = new byte[data.length];
+        for (int i = 0; i < data.length; i++) {
+            this.data[i] = data[i];
+        }
     }
 
     public int getLength() {

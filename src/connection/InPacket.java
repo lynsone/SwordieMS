@@ -16,7 +16,7 @@ public class InPacket extends Packet {
 
     public InPacket(ByteBuf byteBuf) {
         super(byteBuf.array());
-        this.byteBuf = byteBuf;
+        this.byteBuf = byteBuf.copy();
     }
 
     public InPacket(){
