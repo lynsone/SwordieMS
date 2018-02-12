@@ -6,21 +6,19 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
-import client.life.AffectedArea;
-import client.life.Mob;
-import client.life.MobTemporaryStat;
-import client.life.Summon;
+import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
-import enums.ChatMsgColour;
-import enums.MobStat;
-import enums.Stat;
+import enums.*;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
 import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -91,6 +89,8 @@ public class Magician extends Job {
     public static final int INFERNO_AURA = 2221054;
     public static final int RIGHTEOUSLY_INDIGNANT = 2321054;
     public static final int HEAVENS_DOOR = 2321052;
+    public static final int MEGIDDO_FLAME = 2121052;
+    public static final int MEGIDDO_FLAME_ATOM = 2121055;
 
 
     private int[] addedSkills = new int[] {
@@ -122,7 +122,7 @@ public class Magician extends Job {
             BLESS,
             HOLY_MAGIC_SHELL,
             TELEPORT_MASTERY_BISH,
-            HOLY_FOUNTAIN,
+            HOLY_FOUNTAIN, //AoE
             DIVINE_PROTECTION,
             MYSTIC_DOOR,
             HOLY_SYMBOL,
@@ -167,7 +167,7 @@ public class Magician extends Job {
             skillID = skill.getSkillId();
         }
         handleIgnite(attackInfo, chr, tsm, slv);
-
+        //handleMegiddo(attackInfo);
 
         if (hasHitMobs) {
             handleArcaneAim();
@@ -284,8 +284,29 @@ public class Magician extends Job {
                 tsm.putCharacterStatValue(HeavensDoor, o1);
                 c.write(WvsContext.temporaryStatSet(tsm));
                 break;
+
         }
 
+    }
+
+    private void handleMegiddoFlame() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        List<Life> lifes = field.getLifesInRect(rect);
+        for(Life life : lifes) {
+            if(life instanceof Mob) {
+                int mobID = ((Mob) life).getRefImgMobID(); //
+                int inc = ForceAtomEnum.DA_ORB.getInc();
+                int type = ForceAtomEnum.DA_ORB.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                        0, 0, (int) System.currentTimeMillis(), 1, 0,
+                        new Position(0, -100));
+                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        true, mobID, MEGIDDO_FLAME, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), MEGIDDO_FLAME, life.getPosition()));
+            }
+        }
     }
 
     private void handleArcaneAim() {
@@ -364,6 +385,10 @@ public class Magician extends Job {
 
                     break;
                 case CHILLING_STEP:
+                    break;
+
+                case MEGIDDO_FLAME:
+                    handleMegiddoFlame(); //TODO create packet for CreateForceAtomSkills
                     break;
 
             }
@@ -452,9 +477,23 @@ public class Magician extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Infinity, o1);
                 break;
+            case VIRAL_SLIME:   //TODO
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setCharLevel((byte) chr.getStat(Stat.level));
+                summon.setPosition(chr.getPosition().deepCopy());
+                summon.setMoveAction((byte) 1);
+                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
+                summon.setAssistType((byte) 1);
+                summon.setEnterType((byte) 1);
+                summon.setBeforeFirstAttack(false);
+                summon.setTemplateId(skillID);
+                summon.setAttackActive(true);
+                field.spawnSummon(summon);
+                break;
             case IFRIT:
             case ELQUINES:
-            case VIRAL_SLIME:
             case BAHAMUT:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
@@ -530,7 +569,11 @@ public class Magician extends Job {
                 tsm.putCharacterStatValue(IceAura, o1);
                 break;
             case RIGHTEOUSLY_INDIGNANT:
-                //Passive + active  stats
+                //TODO active  stats
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(VengeanceOfAngel, o1);
                 break;
 
         }

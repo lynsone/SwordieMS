@@ -49,7 +49,7 @@ public class Phantom extends Job {
     public static final int PRIERE_DARIA = 24121004; //Buff
     public static final int VOL_DAME = 24121007; // Special Buff TODO
     public static final int MAPLE_WARRIOR_PH = 24121008; //Buff
-    public static final int CARTE_NOIR = 24120002;
+    public static final int CARTE_NOIR = 24120002;              //80001890
 
     public static final int HEROIC_MEMORIES_PH = 24121053;
 
@@ -173,7 +173,7 @@ public class Phantom extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleCarte(int skillID, byte slv, AttackInfo attackInfo) {
+    private void handleCarte(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         //if (chr.hasSkill(CARTE_BLANCHE)) {
             SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
@@ -182,17 +182,7 @@ public class Phantom extends Job {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 int TW1prop = 100;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change
                 if (Util.succeedProp(TW1prop)) {
-                    if(chr.hasSkill(CARTE_BLANCHE)) {
-                        int mobID = mai.mobId;
-                        int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
-                        int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                                new Position()); //Slightly behind the player
-                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
-                                true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
-                    } else if (chr.hasSkill(CARTE_NOIR)) {
+                    if (chr.hasSkill(CARTE_NOIR)) {
                         int mobID = mai.mobId;
                         int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();    //TODO doesn't show the CarteNoir Image,  shows Carte Blanche
                         int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
@@ -202,9 +192,16 @@ public class Phantom extends Job {
                         chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
-                    }
-                    else {
-                        return;
+                    } else if (chr.hasSkill(CARTE_BLANCHE)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
+                        int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position()); //Slightly behind the player
+                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), CARTE_BLANCHE, mob.getPosition())); //TODO NPE on Mille
                     }
                 }
             }
@@ -248,9 +245,7 @@ public class Phantom extends Job {
         }
         //handleCardDeck(skill.getSkillId(), tsm, c);
         if(hasHitMobs) {
-            if(skillID != CARTE_NOIR || skillID != CARTE_BLANCHE) {
-                handleCarte(skillID, slv, attackInfo);
-            }
+                handleCarte(attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();

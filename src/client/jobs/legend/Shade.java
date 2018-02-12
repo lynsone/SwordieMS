@@ -32,7 +32,7 @@ public class Shade extends Job {
     public static final int SPIRIT_BOND_I = 20050285;
     public static final int FOX_TROT = 20051284;
 
-    public static final int FOX_SPIRITS = 25101009; //Buff (ON/OFF)
+    public static final int FOX_SPIRITS = 25101009; //Buff (ON/OFF)                 //HiddenPossesion TempStat
     public static final int FOX_SPIRITS_ATOM = 25100010;
     public static final int FOX_SPIRITS_ATOM_2 = 25120115; //Upgrade
     public static final int GROUND_POUND_FIRST = 25101000; //Special Attack (Slow Debuff)

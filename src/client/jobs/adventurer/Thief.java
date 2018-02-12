@@ -169,7 +169,7 @@ public class Thief extends Job {
                 slv = skill.getCurrentLevel();
                 skillID = skill.getSkillId();
             }
-            handleFlipTheCoin(tsm);
+            handleFlipTheCoinActivation(tsm);
             if (chr.getJob() == 422) {
                 if (chr.hasSkill(4221013)) {
                     if (tsm.hasStat(IgnoreMobpdpR)) {
@@ -462,7 +462,7 @@ public class Thief extends Job {
                 break;
 
             case FLIP_THE_COIN:
-                handleFlipTheCoin(skillID, tsm, c);
+                handleFlipTheCoinStacking(skillID, tsm, c);
                 c.write(WvsContext.flipTheCoinEnabled((byte) 0));
                 break;
 
@@ -476,7 +476,7 @@ public class Thief extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleFlipTheCoin(int skillId, TemporaryStatManager tsm, Client c) {
+    private void handleFlipTheCoinStacking(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -512,7 +512,7 @@ public class Thief extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleFlipTheCoin(TemporaryStatManager tsm) {    //TODO Change to proc on Critical Hits
+    private void handleFlipTheCoinActivation(TemporaryStatManager tsm) {    //TODO Change to proc on Critical Hits
         if(tsm.getOption(FlipTheCoin).nOption < 5) {
             if (Util.succeedProp(50)) { //Proc on Crit
                 c.write(WvsContext.flipTheCoinEnabled((byte) 1));

@@ -334,6 +334,10 @@ public class Field {
         spawnLife(summon, null);
     }
 
+    public void spawnAddSummon(Summon summon) { //Test
+        spawnLife(summon, null);
+    }
+
     public void spawnLife(Life life, Char onlyChar) {
         addLife(life);
         if (getChars().size() > 0) {

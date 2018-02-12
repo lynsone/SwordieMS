@@ -4,7 +4,9 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
+import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -20,6 +22,7 @@ import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -174,6 +177,26 @@ public class AngelicBuster extends Job {
         }
     }
 
+    private void handleSoulSeeker() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        List<Life> lifes = field.getLifesInRect(rect);
+        for(Life life : lifes) {
+            if(life instanceof Mob) {
+                int mobID = ((Mob) life).getRefImgMobID(); //
+                int inc = ForceAtomEnum.AB_ORB.getInc();
+                int type = ForceAtomEnum.AB_ORB.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                        0, 250, (int) System.currentTimeMillis(), 1, 0,
+                        new Position(0, -100));
+                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), SOUL_SEEKER_ATOM, life.getPosition()));
+            }
+        }
+    }
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -277,9 +300,6 @@ public class AngelicBuster extends Job {
                     }
                 }
                 break;
-            case SOUL_SEEKER:
-                handleSoulSeekerExpert(65111100, slv, attackInfo); //TODO
-                break;
         }
     }
 
@@ -299,6 +319,10 @@ public class AngelicBuster extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
+                case SOUL_SEEKER:
+                    handleSoulSeeker();
+                    handleSoulSeeker();
+                    break;
             }
         }
     }
