@@ -12,7 +12,6 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
-import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -248,16 +247,11 @@ public class WindArcher extends Job {
             case EMERALD_FLOWER:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true); // false = Doesn't Attack | true = Attacks
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
+                summon.setAttackActive(false);
+                summon.setAssistType((byte) 0);
                 field.spawnSummon(summon);
                 break;
 

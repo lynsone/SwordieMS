@@ -13,9 +13,8 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
-import enums.Stat;
+import enums.MoveAbility;
 import loaders.SkillData;
-import packet.CField;
 import packet.WvsContext;
 import util.Util;
 
@@ -416,95 +415,53 @@ public class Pirate extends Job {
                 tsm.putCharacterStatValue(BuckShot, o1);
                 break;
 
-            case ROLLING_RAINBOW:
+            case ROLLING_RAINBOW: //Stationary, Attacks
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setFlyMob(true);
+                summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
                 break;
-
-                //TODO Clean up Summon Code<<
             case OCTO_CANNON: //Stationary, Attacks
-                Summon OctoCannon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field2 = c.getChr().getField();
-                field2.addLife(OctoCannon);
-                OctoCannon.setCharLevel((byte) chr.getStat(Stat.level));
-                OctoCannon.setPosition(chr.getPosition().deepCopy());
-                OctoCannon.setMoveAction((byte) 1);
-                OctoCannon.setCurFoothold((short) field2.findFootHoldBelow(OctoCannon.getPosition()).getId());
-                OctoCannon.setMoveAbility((byte) 0);
-                OctoCannon.setAssistType((byte) 1);
-                OctoCannon.setEnterType((byte) 1);
-                OctoCannon.setBeforeFirstAttack(false);
-                OctoCannon.setTemplateId(skillID);
-                OctoCannon.setAttackActive(true);
-                c.write(CField.summonedCreated(chr.getId(), OctoCannon));
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
+                field.spawnSummon(summon);
                 break;
             case MONKEY_MALITIA: //Stationary, Attacks
-                Summon MonkeyMalitia = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field5 = c.getChr().getField();
-                field5.addLife(MonkeyMalitia);
-                MonkeyMalitia.setCharLevel((byte) chr.getStat(Stat.level));
-                MonkeyMalitia.setPosition(chr.getPosition().deepCopy());
-                MonkeyMalitia.setMoveAction((byte) 1);
-                MonkeyMalitia.setCurFoothold((short) field5.findFootHoldBelow(MonkeyMalitia.getPosition()).getId());
-                MonkeyMalitia.setMoveAbility((byte) 0);
-                MonkeyMalitia.setAssistType((byte) 1);
-                MonkeyMalitia.setEnterType((byte) 1);
-                MonkeyMalitia.setBeforeFirstAttack(false);
-                MonkeyMalitia.setTemplateId(skillID);
-                MonkeyMalitia.setAttackActive(true);
-                c.write(CField.summonedCreated(chr.getId(), MonkeyMalitia));
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
+                field.spawnSummon(summon);
                 break;
             case TURRET_DEPLOYMENT: //Stationary, Attacks
-                Summon TurretDeployment = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field8 = c.getChr().getField();
-                field8.addLife(TurretDeployment);
-                TurretDeployment.setCharLevel((byte) chr.getStat(Stat.level));
-                TurretDeployment.setPosition(chr.getPosition().deepCopy());
-                TurretDeployment.setMoveAction((byte) 1);
-                TurretDeployment.setCurFoothold((short) field8.findFootHoldBelow(TurretDeployment.getPosition()).getId());
-                TurretDeployment.setMoveAbility((byte) 0);
-                TurretDeployment.setAssistType((byte) 1);
-                TurretDeployment.setEnterType((byte) 1);
-                TurretDeployment.setBeforeFirstAttack(false);
-                TurretDeployment.setTemplateId(skillID);
-                TurretDeployment.setAttackActive(true);
-                c.write(CField.summonedCreated(chr.getId(), TurretDeployment));
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
+                field.spawnSummon(summon);
                 break;
             case SCURVY_SUMMONS: //Moves, Attacks
-                Summon ScurvySummons = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field3 = c.getChr().getField();
-                field3.addLife(ScurvySummons);
-                ScurvySummons.setCharLevel((byte) chr.getStat(Stat.level));
-                ScurvySummons.setPosition(chr.getPosition().deepCopy());
-                ScurvySummons.setMoveAction((byte) 1);
-                ScurvySummons.setCurFoothold((short) field3.findFootHoldBelow(ScurvySummons.getPosition()).getId());
-                ScurvySummons.setMoveAbility((byte) 1);
-                ScurvySummons.setAssistType((byte) 1);
-                ScurvySummons.setEnterType((byte) 1);
-                ScurvySummons.setBeforeFirstAttack(false);
-                ScurvySummons.setTemplateId(skillID);
-                ScurvySummons.setAttackActive(true);
-                c.write(CField.summonedCreated(chr.getId(), ScurvySummons));
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
+                field.spawnSummon(summon);
                 break;
             case ANCHOR_AWEIGH: //Stationary, Pulls mobs
-                Summon AnchorAweigh = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field4 = c.getChr().getField();
-                field4.addLife(AnchorAweigh);
-                AnchorAweigh.setCharLevel((byte) chr.getStat(Stat.level));
-                AnchorAweigh.setPosition(chr.getPosition().deepCopy());
-                AnchorAweigh.setMoveAction((byte) 1);
-                AnchorAweigh.setCurFoothold((short) field4.findFootHoldBelow(AnchorAweigh.getPosition()).getId());
-                AnchorAweigh.setMoveAbility((byte) 0);
-                AnchorAweigh.setAssistType((byte) 1);
-                AnchorAweigh.setEnterType((byte) 1);
-                AnchorAweigh.setBeforeFirstAttack(false);
-                AnchorAweigh.setTemplateId(skillID);
-                AnchorAweigh.setAttackActive(false);
-                c.write(CField.summonedCreated(chr.getId(), AnchorAweigh));
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
+                field.spawnSummon(summon);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

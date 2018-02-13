@@ -14,7 +14,6 @@ import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
 import enums.MobStat;
-import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -22,7 +21,10 @@ import server.EventManager;
 import util.Position;
 import util.Util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -183,7 +185,6 @@ public class Xenon extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-
             case AMARANTH_GENERATOR:
                 if (supply >= 20) {
                     o1.nOption = 1;
@@ -193,21 +194,13 @@ public class Xenon extends Job {
                 }
                 break;
 
-
-            case HYPOGRAM_FIELD_FORCE_FIELD: //TODO  Correct?   Is it a Summon or Area Of Effect?
+            case HYPOGRAM_FIELD_FORCE_FIELD:
             case HYPOGRAM_FIELD_PENETRATE:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true); // false = Doesn't Attack | true = Attacks
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
                 break;
         }

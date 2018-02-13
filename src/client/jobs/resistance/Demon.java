@@ -4,18 +4,25 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
+import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import enums.MobStat;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -93,7 +100,8 @@ public class Demon extends Job {
     public static final int EXCEED_EXECUTION_3 = 31221010; //Special Attack     //TODO (EXCEED System)
     public static final int EXCEED_EXECUTION_4 = 31221011; //Special Attack     //TODO (EXCEED System)
     public static final int EXCEED_EXECUTION_PURPLE = 31221012; //Special Attack//TODO (EXCEED System)
-    public static final int NETHER_SHIELD = 31220013; //Special Attack          //TODO
+    public static final int NETHER_SHIELD = 31221001; //Special Attack          //TODO
+    public static final int NETHER_SHIELD_ATOM = 31221014; //atom
     public static final int NETHER_SLICE = 31221002; // Special Attack (DefDown Debuff)
     public static final int BLOOD_PRISON = 31221003; // Special Attack (Stun Debuff)
     public static final int MAPLE_WARRIOR_DA = 31221008; //Buff
@@ -419,6 +427,26 @@ public class Demon extends Job {
         }
     }
 
+    private void handleNetherShield() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(NETHER_SHIELD);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        List<Life> lifes = field.getLifesInRect(rect);
+        for(Life life : lifes) {
+            if(life instanceof Mob) {
+                int mobID = ((Mob) life).getRefImgMobID(); //
+                int inc = ForceAtomEnum.NETHER_SHIELD.getInc();
+                int type = ForceAtomEnum.NETHER_SHIELD.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                        0, 500, (int) System.currentTimeMillis(), 1, 0,
+                        new Position(0, -100));
+                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), NETHER_SHIELD_ATOM, life.getPosition()));
+            }
+        }
+    }
+
     public void handleOverloadCount(int skillid, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         SkillInfo exceedInfo = SkillData.getSkillInfoById(30010230);
@@ -465,7 +493,9 @@ public class Demon extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-
+                case NETHER_SHIELD:
+                    handleNetherShield();
+                    break;
             }
         }
     }

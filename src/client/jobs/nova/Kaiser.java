@@ -13,7 +13,6 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
-import enums.Stat;
 import loaders.SkillData;
 import packet.WvsContext;
 import util.Util;
@@ -34,7 +33,7 @@ public class Kaiser extends Job {
     public static final int TRANSFIGURATION = 60000219; //Morph Gauge (SmashStack)
     public static final int DRAGON_LINK = 60001225;
 
-    public static final int TEMPEST_BLADES_THREE = 61101002;    //TODO Special Buff (w/ Icon) 3
+    public static final int TEMPEST_BLADES_THREE = 61101002;    //TODO Special Buff (w/ Icon) 3 //StopForceAtom tempstat?
     public static final int BLAZE_ON = 61101004; //Buff
 
     public static final int FINAL_FORM_THIRD = 61111008; //Buff 3rd Job
@@ -360,35 +359,16 @@ public class Kaiser extends Job {
             case STONE_DRAGON_FINAL_FORM:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true);
                 field.spawnSummon(summon);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private int getGaugeIncrement(AttackInfo attackInfo) { //TODO  Use a Array, not Switch case
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
+    private int getGaugeIncrement(int skillID) { //TODO  Use a Array, not Switch case
         switch (getOriginalSkillByID(skillID)) {
             case DRAGON_SLASH_1:
                 return 2;
@@ -538,7 +518,7 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(getOriginalSkillByID(skillID), tsm, c, 20); //TODO change increment depending on skill (with an Array)
+            handleMorphGauge(getOriginalSkillByID(skillID), tsm, c, 5); //TODO change increment depending on skill (with an Array)
         }
         Option o1 = new Option();
         Option o2 = new Option();

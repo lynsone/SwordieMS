@@ -12,9 +12,11 @@ import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.LeaveType;
 import enums.MobStat;
 import enums.MoveAbility;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
 import util.Util;
 
@@ -84,6 +86,8 @@ public class Mercedes extends Job {
             ELEMENTAL_KNIGHTS_RED,
             ELEMENTAL_KNIGHTS_PURPLE,
     };
+
+    private int summonBoolean = 0;
 
     public Mercedes(Char chr) {
         super(chr);
@@ -181,32 +185,56 @@ public class Mercedes extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o2);
                 break;
-            case ELEMENTAL_KNIGHTS_BLUE: //TODO allow for different summons (blue/red/purple)   //Requires a method
-                if(tsm.hasStat(DevilCry)){
-                    return;
-                } else {
-                    int element = ELEMENTAL_KNIGHTS_BLUE;
-                    int chance = new Random().nextInt(100) + 1;
-                    if (chance < 32) {
-                        element = ELEMENTAL_KNIGHTS_BLUE;
-                    } else if (chance > 32 && chance < 67) {
-                        element = ELEMENTAL_KNIGHTS_RED;
-                    } else if (chance > 67 && chance < 100) {
-                        element = ELEMENTAL_KNIGHTS_PURPLE;
-                    }
-                    summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                    field = c.getChr().getField();
-                    summon.setFlyMob(true);
-                    summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-                    field.spawnSummon(summon);
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(DevilCry, o1); //Random Stat
-                    break;
-                }
+            case ELEMENTAL_KNIGHTS_BLUE:
+                summonEleKnight(slv);
+                break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private void summonEleKnight(byte slv) {    //TODO Need to remove current summon, and spawn a new summon
+
+        Summon summonBlue = Summon.getSummonBy(c.getChr(), ELEMENTAL_KNIGHTS_BLUE, slv);
+        Summon summonRed = Summon.getSummonBy(c.getChr(), ELEMENTAL_KNIGHTS_RED, slv);
+        Summon summonPurple = Summon.getSummonBy(c.getChr(), ELEMENTAL_KNIGHTS_PURPLE, slv);
+        Field field;
+        field = c.getChr().getField();
+        summonBlue.setFlyMob(true);
+        summonBlue.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        summonRed.setFlyMob(true);
+        summonRed.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        summonPurple.setFlyMob(true);
+        summonPurple.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+
+
+        int chance = new Random().nextInt(100) + 1;
+        if (chance < 32) {                                      // Ice Knight
+            //if(summonBoolean == 1) {
+                c.write(CField.summonedRemoved(summonRed, LeaveType.ANIMATION));
+                c.write(CField.summonedRemoved(summonPurple, LeaveType.ANIMATION));
+            //}
+            field.spawnSummon(summonBlue);
+            summonBoolean = 1;
+
+
+        } else if (chance > 32 && chance < 67) {                // Fire Knight
+            //if(summonBoolean == 1) {
+                c.write(CField.summonedRemoved(summonBlue, LeaveType.ANIMATION));
+                c.write(CField.summonedRemoved(summonPurple, LeaveType.ANIMATION));
+            //}
+            field.spawnSummon(summonRed);
+            summonBoolean = 1;
+
+
+        } else if (chance > 67 && chance < 100) {               // Dark Knight
+            //if(summonBoolean == 1) {
+                c.write(CField.summonedRemoved(summonBlue, LeaveType.ANIMATION));
+                c.write(CField.summonedRemoved(summonRed, LeaveType.ANIMATION));
+            //}
+            field.spawnSummon(summonPurple);
+            summonBoolean = 1;
+        }
+
     }
 
     // y = stack | lasts subTime,  Final Dmg increase per stack = x

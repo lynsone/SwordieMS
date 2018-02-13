@@ -12,7 +12,7 @@ import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
-import enums.Stat;
+import enums.MoveAbility;
 import loaders.SkillData;
 import packet.WvsContext;
 import util.Util;
@@ -139,16 +139,16 @@ public class BlazeWizard extends Job {
             case FIRES_OF_CREATION_LION:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 1); // 0 = Stationary | 1 = Moves with Player
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(false); // false = Doesn't Attack | true = Attacks
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                field.spawnSummon(summon);
+                break;
+
+            case CINDER_MAELSTROM:  //Special Summon    //TODO
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
                 break;
 

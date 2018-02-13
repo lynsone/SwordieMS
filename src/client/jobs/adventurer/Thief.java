@@ -13,7 +13,6 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
-import enums.Stat;
 import loaders.SkillData;
 import packet.WvsContext;
 import server.EventManager;
@@ -407,35 +406,23 @@ public class Thief extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                 break;
-            case MIRRORED_TARGET: //TODO Crashes - not 38*
+            case MIRRORED_TARGET: //Special Summon   //TODO Crashes - not 38*
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(false); // false = Doesn't Attack | true = Attacks
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
+                summon.setAssistType((byte) 0);
+                summon.setAttackActive(false);
                 field.spawnSummon(summon);
                 break;
             case DARK_FLARE_NL:
             case DARK_FLARE_SHAD:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true); // false = Doesn't Attack | true = Attacks
+                summon.setFlyMob(false);
+                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
                 break;
 

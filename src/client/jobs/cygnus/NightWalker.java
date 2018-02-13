@@ -234,16 +234,8 @@ public class NightWalker extends Job {
             case DARK_OMEN:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setFlyMob(false);
                 summon.setMoveAbility((byte) 0);
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true);
                 field.spawnSummon(summon);
                 break;
         }
@@ -266,7 +258,7 @@ public class NightWalker extends Job {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         int tw1prop = 100;//  SkillData.getSkillInfoById(SHADOW_BAT).getValue(prop, slv);   //TODO Change
                         if (Util.succeedProp(tw1prop)) {
-                            removeBat();    //TODO Doesn't remove bats
+                            removeBat();    //TODO Doesn't remove bats properly
                             int mobID = mai.mobId;
                             int inc = ForceAtomEnum.NIGHT_WALKER_BAT.getInc();
                             int type = ForceAtomEnum.NIGHT_WALKER_BAT.getForceAtomType();
@@ -312,7 +304,8 @@ public class NightWalker extends Job {
     private void removeBat() {  //TODO doesn't remove bats
         //c.write(CField.summonedRemoved(bats, LeaveType.ANIMATION));
         Field field = c.getChr().getField();
-        field.removeLife(getBatType(chr));
+        c.write(CField.summonedRemoved(bats, LeaveType.ANIMATION));
+        //field.removeLife(getBatType(chr),true);
         batcount = batcount -1;
     }
 
@@ -374,20 +367,13 @@ public class NightWalker extends Job {
                 }
                 break;
 
-            case DOMINION:  //TODO
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time ,slv);
-                tsm.putCharacterStatValue(NotDamaged, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
-                break;
-
             //TODO case All attacks give DoT debuff
         }
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -406,6 +392,13 @@ public class NightWalker extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case DOMINION:  //TODO
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time ,slv);
+                    tsm.putCharacterStatValue(NotDamaged, o1);
+                    c.write(WvsContext.temporaryStatSet(tsm));
                     break;
             }
         }

@@ -595,12 +595,7 @@ public class Warrior extends Job {
         evilEye = Summon.getSummonBy(c.getChr(), skillID, slv);
         field = c.getChr().getField();
         evilEye.setFlyMob(true);
-        evilEye.setSummonTerm(0);
-        evilEye.setMoveAction((byte) 1);
         evilEye.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-        evilEye.setAssistType((byte) 0);  //0
-        evilEye.setAttackActive(false); //true
-        evilEye.setBeforeFirstAttack(false);
         field.spawnSummon(evilEye);
     }
 

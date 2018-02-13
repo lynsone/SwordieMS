@@ -277,14 +277,6 @@ public class Magician extends Job {
             case HEAL:
                 //TODO doesn't heal
                 break;
-            case HEAVENS_DOOR:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(HeavensDoor, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
-                break;
-
         }
 
     }
@@ -364,6 +356,7 @@ public class Magician extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -382,14 +375,20 @@ public class Magician extends Job {
                     chr.warp(toField);
                     break;
                 case FREEZING_BREATH:
-
                     break;
                 case CHILLING_STEP:
                     break;
-
                 case MEGIDDO_FLAME:
                     handleMegiddoFlame(); //TODO create packet for CreateForceAtomSkills
                     break;
+                case HEAVENS_DOOR:
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(HeavensDoor, o1);
+                    c.write(WvsContext.temporaryStatSet(tsm));
+                    break;
+
 
             }
         }
@@ -480,16 +479,8 @@ public class Magician extends Job {
             case VIRAL_SLIME:   //TODO
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
+                summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true);
                 field.spawnSummon(summon);
                 break;
             case IFRIT:
@@ -497,16 +488,8 @@ public class Magician extends Job {
             case BAHAMUT:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 1);
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true);
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
                 field.spawnSummon(summon);
                 break;
             case MAPLE_WARRIOR_FP:
