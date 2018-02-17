@@ -360,6 +360,9 @@ public class WorldHandler {
         Field field = c.getChr().getField();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
+            if(mob == null) {
+                chr.chatMessage(YELLOW, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
+            }
             if (mob != null && mob.getHp() > 0) {
                 long totalDamage = Arrays.stream(mai.damages).sum();
                 mob.addDamage(chr, totalDamage);
@@ -426,7 +429,7 @@ public class WorldHandler {
                 break;
             default:
                 toField = c.getChannelInstance().getField(field.getReturnMap());
-                System.out.println("Unhandled Return Scroll: " + itemID + " in WorldHandler.java");
+                System.out.printf("Unhandled Return Scroll: %d in WorldHandler.java%n", itemID);
                 break;
         }
         chr.warp(toField);
