@@ -62,6 +62,9 @@ public class AngelicBuster extends Job {
     public static final int NOVA_WARRIOR_AB = 65121009; //Buff
     public static final int SOUL_SEEKER_EXPERT = 65121011; //ON/OFF Buff
 
+    public static final int PRETTY_EXALTATION = 65121054;
+    public static final int FINAL_CONTRACT = 65121053;
+
     private int[] addedSkills = new int[] {
             DRESS_UP,
             SOUL_BUSTER,
@@ -78,6 +81,8 @@ public class AngelicBuster extends Job {
             STAR_GAZER,
             NOVA_WARRIOR_AB,
             SOUL_SEEKER_EXPERT,
+            PRETTY_EXALTATION,
+            FINAL_CONTRACT,
     };
 
     public AngelicBuster(Char chr) {
@@ -144,6 +149,34 @@ public class AngelicBuster extends Job {
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(AngelicBursterSoulSeeker, o1);
                 break;
+            case PRETTY_EXALTATION: //TODO extra 15% on Soul Seeker Expert
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieIgnoreMobpdpR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieBDR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBDR, o2);
+                break;
+            case FINAL_CONTRACT:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CriticalBuff, o1);
+                o2.nOption = si.getValue(asrR, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AsrR, o2);
+                tsm.putCharacterStatValue(TerR, o2);
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieStance, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieStance, o1);
+                break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -177,18 +210,19 @@ public class AngelicBuster extends Job {
         }
     }
 
-    private void handleSoulSeeker() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb
+    private void handleSoulSeeker() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb        Re-Creation!
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
         List<Life> lifes = field.getLifesInRect(rect);
         for(Life life : lifes) {
             if(life instanceof Mob) {
+                int anglenum = new Random().nextInt(10);
                 int mobID = ((Mob) life).getRefImgMobID(); //
                 int inc = ForceAtomEnum.AB_ORB.getInc();
                 int type = ForceAtomEnum.AB_ORB.getForceAtomType();
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 250, (int) System.currentTimeMillis(), 1, 0,
+                        anglenum, 250, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, -100));
                 chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
                         true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,

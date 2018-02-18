@@ -336,7 +336,7 @@ public class Kaiser extends Job {
                 resetGauge(c, tsm);
                 break;
 
-            case KAISERS_MAJESTY:
+            case KAISERS_MAJESTY:   //Lowers Range for w/e reason
                 o1.nReason = skillID;
                 o1.nValue = -1;
                 o1.tStart = (int) System.currentTimeMillis();
@@ -350,7 +350,7 @@ public class Kaiser extends Job {
                 o3.nOption = 1;
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(ViperTimeLeap, o3);
+                tsm.putCharacterStatValue(ViperTimeLeap, o3);   //unsure
 
                 break;
                 // Note:  Higher Morph IDs = Different Colour Trimmings on Kaiser's Final Form

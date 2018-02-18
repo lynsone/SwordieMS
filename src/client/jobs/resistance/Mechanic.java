@@ -163,7 +163,7 @@ public class Mechanic extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
                 field.spawnSummon(summon);
                 break;
 

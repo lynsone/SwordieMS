@@ -361,7 +361,10 @@ public class Warrior extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o1);
-                //TODO Recovery  x %
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DotHealHPPerSecond, o2); //TODO   ?  unsure about TempStat
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

@@ -484,6 +484,8 @@ public class Archer extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
+        Option o5 = new Option();
         Summon summon;
         Field field;
         int curTime = (int) System.currentTimeMillis();
@@ -618,19 +620,44 @@ public class Archer extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
-            case CONCENTRATION: //Fix
-                o1.nOption = 1;
+            case CONCENTRATION:
+                o1.nValue = si.getValue(indiePad, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePAD, o1);
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Stance, o2);
+                o3.nOption = si.getValue(y, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Preparation, o3); //preparation = BD%
+                break;
+            case BULLSEYE_SHOT:
+                o1.nOption = 5; //Buff doesn't contain Min Crit but the BullsEye EffectTempStat gives it.
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Preparation, o1); //preparation = BD%
+                tsm.putCharacterStatValue(BullsEye, o1);    //BullsEye = Min Crit Dmg%
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieDamR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o2);
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indieIgnoreMobpdpR, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o3);
+                o4.nOption = si.getValue(y, slv);
+                o4.rOption = skillID;
+                o4.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(SharpEyes, o4);   //Max Crit Dmg%
+                o5.nOption = si.getValue(x, slv);
+                o5.rOption = skillID;
+                o5.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CriticalBuff, o5);
                 break;
-            case BULLSEYE_SHOT: //Fix
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(BullsEye, o1);
-                break;
-
         }
         tsm.sendSetStatPacket();
     }

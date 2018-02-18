@@ -20,6 +20,7 @@ import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -191,6 +192,9 @@ public class NightWalker extends Job {
                 tsm.putCharacterStatValue(NoBulletConsume, o1);
                 break;
             case DARKNESS_ASCENDING:
+                if(tsm.hasStat(DarknessAscension)) {
+                    return;
+                }
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -258,17 +262,16 @@ public class NightWalker extends Job {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         int tw1prop = 100;//  SkillData.getSkillInfoById(SHADOW_BAT).getValue(prop, slv);   //TODO Change
                         if (Util.succeedProp(tw1prop)) {
-                            removeBat();    //TODO Doesn't remove bats properly
                             int mobID = mai.mobId;
-                            int inc = ForceAtomEnum.NIGHT_WALKER_BAT.getInc();
-                            int type = ForceAtomEnum.NIGHT_WALKER_BAT.getForceAtomType();
-                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 30,
-                                    0, 0, (int) System.currentTimeMillis(), 1, 0,
-                                    new Position());
+                            int position = new Random().nextInt(80);
+                            int inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getInc();
+                            int type = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getForceAtomType();
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 3,
+                                    90, 0, (int) System.currentTimeMillis(), 1, 0,
+                                    new Position(-20, position));
                             chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
                                     true, mobID, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                                    mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));    //TODO mob.getPosition()  Gives a NPE on certain Skills
-
+                                    mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));    //TODO mob.getPosition()  QUINT_THROW giving NPE
                         }
                     }
                 }
@@ -278,12 +281,13 @@ public class NightWalker extends Job {
 
     private void handleShadowBat(TemporaryStatManager tsm, int skillID, byte slv, AttackInfo attackInfo) {
         if(tsm.hasStat(NightWalkerBat)) {
-            if(Util.succeedProp(40)) {
+            if(Util.succeedProp(85)) {
                 spawnBat(skillID, slv);
             }
             if(batcount > 0) {
-                if (Util.succeedProp(60)) {
+                if (Util.succeedProp(30)) {
                     handleBatForceAtom(skillID, slv, attackInfo);
+                    removeBat();   //TODO Doesn't remove bats properly
                 }
             }
         }
@@ -301,7 +305,7 @@ public class NightWalker extends Job {
         }
     }
 
-    private void removeBat() {  //TODO doesn't remove bats
+    private void removeBat() {
         //c.write(CField.summonedRemoved(bats, LeaveType.ANIMATION));
         Field field = c.getChr().getField();
         c.write(CField.summonedRemoved(bats, LeaveType.ANIMATION));
@@ -393,11 +397,19 @@ public class NightWalker extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
-                case DOMINION:  //TODO
+                case DOMINION:  //TODO Max Darkness Stack whilst active,
                     o1.nOption = 1;
                     o1.rOption = skillID;
                     o1.tOption = si.getValue(time ,slv);
                     tsm.putCharacterStatValue(NotDamaged, o1);
+                    o2.nOption = 100;
+                    o2.rOption = skillID;
+                    o2.tOption = si.getValue(time ,slv);
+                    tsm.putCharacterStatValue(CriticalBuff, o2);
+                    o3.nOption = 100;
+                    o3.rOption = skillID;
+                    o3.tOption = si.getValue(time ,slv);
+                    tsm.putCharacterStatValue(Stance, o3);
                     c.write(WvsContext.temporaryStatSet(tsm));
                     break;
             }

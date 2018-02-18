@@ -51,7 +51,7 @@ public class BattleMage extends Job {
     public static final int MAPLE_WARRIOR_BAM = 32121007; //Buff
 
     public static final int FOR_LIBERTY_BAM = 32121053;
-    public static final int MASTER_OF_DEATH = 32121056;
+    public static final int MASTER_OF_DEATH = 32121056; //TODO
 
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,

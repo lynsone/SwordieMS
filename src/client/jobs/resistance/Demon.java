@@ -222,7 +222,6 @@ public class Demon extends Job {
                     o3.rOption = skillID;
                     o3.tOption = si.getValue(time, slv);
                     tsm.putCharacterStatValue(ExceedOverload, o3);
-                    // TODO  Resets EXCEED to 0
                     resetExceed(c, tsm);
                 }
                 break;

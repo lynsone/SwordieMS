@@ -53,6 +53,7 @@ public class Magician extends Job {
     public static final int MAPLE_WARRIOR_FP = 2121000;
     public static final int CHILLING_STEP = 2201009;
     public static final int COLD_BEAM = 2201008;
+    public static final int FREEZING_CRUSH = 2200011;   //TODO Set stacks on mobs, gain buff from those stacks
     public static final int MAGIC_BOOSTER_IL = 2201010;
     public static final int MEDITATION_IL = 2201001;
     public static final int ICE_STRIKE = 2211002;
@@ -82,6 +83,7 @@ public class Magician extends Job {
     public static final int ARCANE_AIM_IL = 2220010;
     public static final int ARCANE_AIM_BISH = 2320011;
 
+    //Hypers
     public static final int EPIC_ADVENTURE_FP = 2121053;
     public static final int EPIC_ADVENTURE_IL = 2221053;
     public static final int EPIC_ADVENTURE_BISH = 2321053;
@@ -281,7 +283,7 @@ public class Magician extends Job {
 
     }
 
-    private void handleMegiddoFlame() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb
+    private void handleMegiddoFlame() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -292,11 +294,11 @@ public class Magician extends Job {
                 int inc = ForceAtomEnum.DA_ORB.getInc();
                 int type = ForceAtomEnum.DA_ORB.getForceAtomType();
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 0, (int) System.currentTimeMillis(), 1, 0,
+                        0, 500, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, -100));
                 chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, MEGIDDO_FLAME, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), MEGIDDO_FLAME, life.getPosition()));
+                        true, mobID, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
             }
         }
     }
@@ -379,7 +381,7 @@ public class Magician extends Job {
                 case CHILLING_STEP:
                     break;
                 case MEGIDDO_FLAME:
-                    handleMegiddoFlame(); //TODO create packet for CreateForceAtomSkills
+                    handleMegiddoFlame();
                     break;
                 case HEAVENS_DOOR:
                     o1.nOption = 1;
@@ -420,6 +422,10 @@ public class Magician extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
+        Option o5 = new Option();
+        Option o6 = new Option();
+        Option o7 = new Option();
         Summon summon;
         Field field;
         switch (skillID) {
@@ -464,6 +470,7 @@ public class Magician extends Job {
                 break;
             case TELEPORT_MASTERY_FP:
             case TELEPORT_MASTERY_IL:
+            case TELEPORT_MASTERY_BISH:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
@@ -471,6 +478,7 @@ public class Magician extends Job {
                 break;
             case INFINITY_FP:
             case INFINITY_IL:
+            case INFINITY_BISH:
                 o1.nOption = si.getValue(damage, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -483,6 +491,17 @@ public class Magician extends Job {
                 summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
                 field.spawnSummon(summon);
                 break;
+            case BLESS: //TODO
+                break;
+            case ADV_BLESSING: //TODO
+                break;
+            case HOLY_SYMBOL: //TODO
+                break;
+            case HOLY_MAGIC_SHELL: //TODO
+                //HolyMagicShell
+                break;
+            case HOLY_FOUNTAIN:    //TODO Area of Effect
+                break;
             case IFRIT:
             case ELQUINES:
             case BAHAMUT:
@@ -494,6 +513,7 @@ public class Magician extends Job {
                 break;
             case MAPLE_WARRIOR_FP:
             case MAPLE_WARRIOR_IL:
+            case MAPLE_WARRIOR_BISH:
                 o1.nValue = si.getValue(x, slv);
                 o1.nReason = skillID;
                 o1.tStart = (int) System.currentTimeMillis();
@@ -544,6 +564,19 @@ public class Magician extends Job {
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(FireAura, o1);
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = 0;
+                tsm.putCharacterStatValue(Stance, o2);
+                o3.nOption = si.getValue(y, slv);
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(DamAbsorbShield, o3);
+                o4.nOption = si.getValue(v, slv);
+                o4.rOption = skillID;
+                o4.tOption = 0;
+                tsm.putCharacterStatValue(AsrR, o4);
+                tsm.putCharacterStatValue(TerR, o4);
                 break;
             case INFERNO_AURA:
                 o1.nOption = 1;
@@ -551,12 +584,39 @@ public class Magician extends Job {
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(IceAura, o1);
                 break;
-            case RIGHTEOUSLY_INDIGNANT:
-                //TODO active  stats
+            case RIGHTEOUSLY_INDIGNANT: //TODO recovey amount (Heal?) hp %
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(VengeanceOfAngel, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMad, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 0;
+                tsm.putCharacterStatValue(IndieMAD, o2);
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indiePMdR, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = 0;
+                tsm.putCharacterStatValue(IndiePMdR, o3);
+                o4.nReason = skillID;
+                o4.nValue = si.getValue(indieMaxDamageOver, slv);
+                o4.tStart = (int) System.currentTimeMillis();
+                o4.tTerm = 0;
+                tsm.putCharacterStatValue(IndieMaxDamageOver, o4);
+                o5.nReason = skillID;
+                o5.nValue = si.getValue(indieBooster, slv);
+                o5.tStart = (int) System.currentTimeMillis();
+                o5.tTerm = 0;
+                tsm.putCharacterStatValue(IndieBooster, o5);
+                o6.nOption = si.getValue(ignoreMobpdpR, slv);
+                o6.rOption = skillID;
+                o6.tOption = 0;
+                tsm.putCharacterStatValue(IgnoreMobpdpR, o6);
+                o7.nOption = si.getValue(w, slv);
+                o7.rOption = skillID;
+                o7.tOption = 0;
+                tsm.putCharacterStatValue(ElementalReset, o7);
                 break;
 
         }

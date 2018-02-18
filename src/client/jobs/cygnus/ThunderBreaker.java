@@ -149,6 +149,7 @@ public class ThunderBreaker extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(StrikerHyperElectric, o1);
+
                 break;
 
         }
@@ -172,7 +173,8 @@ public class ThunderBreaker extends Job {
 
     private void handleLightning(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
-        SkillInfo lightningInfo = SkillData.getSkillInfoById(15001022);
+        Option o1 = new Option();
+        SkillInfo lightningInfo = SkillData.getSkillInfoById(LIGHTNING_ELEMENTAL);
         int amount = 1;
         if(tsm.hasStat(IgnoreTargetDEF)) {
             amount = tsm.getOption(IgnoreTargetDEF).mOption;
@@ -182,10 +184,16 @@ public class ThunderBreaker extends Job {
         }
         o.nOption = 1;
         o.mOption = amount;
-        o.rOption = 15001022;
+        o.rOption = LIGHTNING_ELEMENTAL;
         o.tOption = lightningInfo.getValue(y, lightningInfo.getCurrentLevel());
-        // Stat per charge/stack
         tsm.putCharacterStatValue(IgnoreTargetDEF, o);
+        if(tsm.hasStat(StrikerHyperElectric)) { //TODO Needs a Better fix
+            o1.nReason = LIGHTNING_ELEMENTAL;
+            o1.nValue = (amount * 9);
+            o1.tStart = (int) System.currentTimeMillis();
+            o1.tTerm = lightningInfo.getValue(time, lightningInfo.getCurrentLevel());
+            tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o1);
+        }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 

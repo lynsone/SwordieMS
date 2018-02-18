@@ -24,13 +24,16 @@ public enum ForceAtomEnum {
     KANNA_ORB_1(9, 1), // to char
     KANNA_ORB_2(9, 2), // to char
     BM_ARROW(10, 1), //Magic Arrow from Quiver Cartridge
-    GREEN_ORB(11, 1), //Green Orb, idk
+    ASSASSIN_MARK(11, 1), //Assassin's Mark
+    NIGHTLORD_MARK(11, 2), //Night Lord's Mark
     FLYING_MESO(12, 1), //Flying Meso - Shadower's Meso Explosion
     BLUE_RABBIT_ORB(13, 1), //Shade 2nd Job
     RED_RABBIT_ORB(13, 2), //Shade 4th Job upgrade
     YELLOW_ORB_TO_SELF(14, 1), //Looks similar to Demon Slayer's Fury Orbs but it's yellow instead of blue
-    NIGHT_WALKER_BAT(15, 1), //Night Walker Bat
-    NIGHT_WALKER_FROM_MOB(16, 1), //Night Walker Bat from Mob
+    NIGHT_WALKER_BAT(15, 1), //Night Walker Bat  from Mob?
+    NIGHT_WALKER_BAT_4(15, 2), //Night Walker Bats(4th)  from Mob?
+    NIGHT_WALKER_FROM_MOB(16, 1), //Night Walker Bat
+    NIGHT_WALKER_FROM_MOB_4(16, 2), //Night Walker Bats (4th Job)
     ORBITAL_FLAME_1(17, 1), //Blaze Wizard(1)
     ORBITAL_FLAME_3(17, 2), //Blaze Wizard(3)
     ORBITAL_FLAME_2(17, 3), //Blaze Wizard(2)
