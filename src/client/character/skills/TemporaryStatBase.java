@@ -88,12 +88,11 @@ public class TemporaryStatBase {
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getOption().nOption);
         outPacket.encodeInt(getOption().rOption);
-//        outPacket.encodeFT(getLastUpdated());
-//        if(isDynamicTermSet()) {
-//            outPacket.encodeShort(getExpireTerm());
-//        }
         outPacket.encodeByte(isDynamicTermSet());
         outPacket.encodeInt(getExpireTerm());
+        if(isDynamicTermSet()) {
+            outPacket.encodeShort(getExpireTerm());
+        }
     }
 
     public void setNOption(int i) {

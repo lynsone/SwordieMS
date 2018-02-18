@@ -30,7 +30,7 @@ public class Stage {
             outPacket.encodeInt(0);
             outPacket.encodeInt(0);
         }
-        outPacket.encodeInt(channelId);
+        outPacket.encodeInt(channelId - 1); // Damn nexon, randomly switching between starting at 1 and 0...
         outPacket.encodeByte(dev);
         outPacket.encodeInt(oldDriverID);
         outPacket.encodeByte(characterData ? 1 : 2);
@@ -55,7 +55,7 @@ public class Stage {
             outPacket.encodeInt(s2);
             outPacket.encodeInt(s3);
 
-            chr.encode(outPacket, DBChar.All, chr);
+            chr.encode(outPacket, DBChar.All);
             // unk sub (not in kmst)
             // logout event (mushy)
             int idOrSomething = 0;

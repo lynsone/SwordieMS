@@ -2,13 +2,15 @@ package enums;
 
 import client.character.skills.CharacterTemporaryStat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created on 2/3/2018.
  * @author Eric
  */
-public enum TwoStatEnum {
+public enum TSIndex {
     EnergyCharged(0),
     DashSpeed(1),
     DashJump(2),
@@ -18,7 +20,7 @@ public enum TwoStatEnum {
     Undead(6);
     private final int index;
 
-    TwoStatEnum(int index) {
+    TSIndex(int index) {
         this.index = index;
     }
 
@@ -26,8 +28,8 @@ public enum TwoStatEnum {
         return index;
     }
 
-    public static TwoStatEnum getTSEByIndex(int index) {
-        return Arrays.stream(TwoStatEnum.values()).filter(tse -> tse.getIndex() == index).findFirst().orElse(null);
+    public static TSIndex getTSEByIndex(int index) {
+        return Arrays.stream(TSIndex.values()).filter(tse -> tse.getIndex() == index).findFirst().orElse(null);
     }
 
     public static CharacterTemporaryStat getCTSFromTwoStatIndex(int index) {
@@ -51,7 +53,7 @@ public enum TwoStatEnum {
         }
     }
 
-    public static TwoStatEnum getTSEFromCTS(CharacterTemporaryStat cts) {
+    public static TSIndex getTSEFromCTS(CharacterTemporaryStat cts) {
         switch(cts) {
             case EnergyCharged:
                 return EnergyCharged;
@@ -73,5 +75,18 @@ public enum TwoStatEnum {
 
     public static boolean isTwoStat(CharacterTemporaryStat cts) {
         return getTSEFromCTS(cts) != null;
+    }
+
+    /**
+     * Creates a list of all {@link CharacterTemporaryStat CharacterTemporaryStats} that are a TwoState.
+     * Is guaranteed to be sorted by their index.
+     * @return
+     */
+    public static List<CharacterTemporaryStat> getAllCTS() {
+        List<CharacterTemporaryStat> characterTemporaryStats = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            characterTemporaryStats.add(getCTSFromTwoStatIndex(i));
+        }
+        return characterTemporaryStats;
     }
 }

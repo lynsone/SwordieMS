@@ -349,7 +349,12 @@ public class Char {
         this.cashInventory = cashInventory;
     }
 
-    public void encode(OutPacket outPacket, DBChar mask, Char chr) {
+    /**
+     * Encodes this Char's info inside a given {@link OutPacket}, with given info.
+     * @param outPacket The OutPacket this method should encode to.
+     * @param mask Which info should be encoded.
+     */
+    public void encode(OutPacket outPacket, DBChar mask) {
 
         // CharacterData::Decode
         outPacket.encodeLong(mask.get());
@@ -1245,6 +1250,11 @@ public class Char {
         return field;
     }
 
+    /**
+     * Sets the job of this Char with a given id. Does nothing if the id is invalid.
+     * If it is valid, will set this Char's job, add all Skills that the job should have by default, and sends the info to the client.
+     * @param id
+     */
     public void setJob(int id) {
         JobConstants.JobEnum job = JobConstants.JobEnum.getJobById((short) id);
         if (job == null) {
@@ -1261,6 +1271,10 @@ public class Char {
         return getAvatarData().getCharacterStat().getJob();
     }
 
+    /**
+     * Sets the SP to the current job level.
+     * @param num The new SP amount.
+     */
     public void setSpToCurrentJob(int num) {
         if (JobConstants.isExtendSpJob(getJob())) {
             byte jobLevel = (byte) JobConstants.getJobLevel(getJob());
@@ -1278,6 +1292,10 @@ public class Char {
         this.skills = skills;
     }
 
+    /**
+     * Adds a {@link Skill} to this Char. Overrides the old Skill if the Char already had a Skill with the same id.
+     * @param skill The Skill this Char should get.
+     */
     public void addSkill(Skill skill) {
         skill.setCharId(getId());
         if (getSkills().stream().noneMatch(s -> s.getSkillId() == skill.getSkillId())) {
@@ -1289,14 +1307,31 @@ public class Char {
         }
     }
 
+    /**
+     * Returns whether or not this Char has a {@link Skill} with a given id.
+     * @param id The id of the Skill.
+     * @return Whether or not this Char has a Skill with the given id.
+     */
     public boolean hasSkill(int id) {
         return getSkills().stream().anyMatch(s -> s.getSkillId() == id) && getSkill(id, false).getCurrentLevel() > 0;
     }
 
+    /**
+     * Gets a {@link Skill} of this Char with a given id.
+     * @param id The id of the requested Skill.
+     * @return The Skill corresponding to the given id of this Char, or null if there is none.
+     */
     public Skill getSkill(int id) {
         return getSkill(id, false);
     }
 
+    /**
+     * Gets a {@link Skill} with a given ID. If <code>createIfNull</code> is true, creates the Skill if it doesn't exist yet.
+     * If it is false, will return null if this Char does not have the given Skill.
+     * @param id The id of the requested Skill.
+     * @param createIfNull Whether or not this method should create the Skill if it doesn't exist.
+     * @return The Skill that the Char has, or <code>null</code> if there is no such skill and <code>createIfNull</code> is false.
+     */
     public Skill getSkill(int id, boolean createIfNull) {
         for (Skill s : getSkills()) {
             if (s.getSkillId() == id) {
@@ -1306,6 +1341,11 @@ public class Char {
         return createIfNull ? createAndReturnSkill(id) : null;
     }
 
+    /**
+     * Creates a new {@link Skill} for this Char.
+     * @param id The skillID of the Skill to be created.
+     * @return The new Skill.
+     */
     private Skill createAndReturnSkill(int id) {
         Skill skill = SkillData.getSkillDeepCopyById(id);
         addSkill(skill);
@@ -1421,10 +1461,19 @@ public class Char {
         return moveAction;
     }
 
+    /**
+     * Sends a message to this Char with a given {@link ChatMsgColour colour}.
+     * @param clr The Colour this message should be in.
+     * @param msg The message to display.
+     */
     public void chatMessage(ChatMsgColour clr, String msg) {
         getClient().write(UserLocal.chatMsg(clr, msg));
     }
 
+    /**
+     * Unequips an {@link Item}. Ensures that the hairEquips and both inventories get updated.
+     * @param item The Item to equip.
+     */
     public void unequip(Item item) {
         getInventoryByType(EQUIPPED).removeItem(item);
         getInventoryByType(EQUIP).addItem(item);
@@ -1434,6 +1483,10 @@ public class Char {
         }
     }
 
+    /**
+     * Equips an {@link Item}. Ensures that the hairEquips and both inventories get updated.
+     * @param item The Item to equip.
+     */
     public void equip(Item item) {
         getInventoryByType(EQUIP).removeItem(item);
         getInventoryByType(EQUIPPED).addItem(item);
@@ -1471,12 +1524,22 @@ public class Char {
         this.funcKeyMap = funcKeyMap;
     }
 
+    /**
+     * Creates a {@link Rect} with regard to this character. Adds all values to this Char's position.
+     * @param rect The rectangle to use.
+     * @return The new rectangle.
+     */
     public Rect getRectAround(Rect rect) {
         int x = getPosition().getX();
         int y = getPosition().getY();
         return new Rect(x + rect.getLeft(), y + rect.getTop(), x + rect.getRight(), y + rect.getBottom());
     }
 
+    /**
+     * Returns the Equip equipped at a certain {@link BodyPart}.
+     * @param bodyPart The requested bodyPart.
+     * @return The Equip corresponding to <code>bodyPart</code>. Null if there is none.
+     */
     public Item getEquippedItemByBodyPart(BodyPart bodyPart) {
         List<Item> items = getEquippedInventory().getItemsByBodyPart(bodyPart);
         return items.size() > 0 ? items.get(0) : null;
@@ -1498,11 +1561,24 @@ public class Char {
         this.marriageRecord = marriageRecord;
     }
 
+    /**
+     * Warps this character to a given field, at the starting position.
+     * See {@link #warp(Field, Portal) warp}.
+     * @param toField The field to warp to.
+     */
     public void warp(Field toField) {
         warp(toField, toField.getPortalByName("sp"));
     }
 
+    /**
+     * Warps this character to a given field, at a given portal.
+     * Ensures that the previous map does not contain this Char anymore, and that the new field does.
+     * Ensures that all Lifes are immediately spawned for the new player.
+     * @param toField
+     * @param portal
+     */
     public void warp(Field toField, Portal portal) {
+        getField().removeChar(this);
         setField(toField);
         field.removeChar(this);
         toField.addChar(this);
@@ -1511,6 +1587,11 @@ public class Char {
         toField.spawnLifesForChar(this);
     }
 
+    /**
+     * Adds a given amount of exp to this Char. Immediately checks for level-up possibility, and sends the updated
+     * stats to the client. Allows multi-leveling.
+     * @param amount The amount of exp to add.
+     */
     public void addExp(long amount) {
         CharacterStat cs = getAvatarData().getCharacterStat();
         long curExp = cs.getExp();
@@ -1530,6 +1611,10 @@ public class Char {
         getClient().write(WvsContext.statChanged(stats));
     }
 
+    /**
+     * Writes a packet to this Char's client.
+     * @param outPacket The OutPacket to write.
+     */
     public void write(OutPacket outPacket) {
         getClient().write(outPacket);
     }
@@ -1583,10 +1668,18 @@ public class Char {
         this.partyInvitable = partyInvitable;
     }
 
+    /**
+     * Returns if this Char can be invited to a party.
+     * @return Whether or not this Char can be invited to a party.
+     */
     public boolean isPartyInvitable() {
         return partyInvitable;
     }
 
+    /**
+     * Returns if this character is currently in its beta state.
+     * @return true if this Char is in a beta state.
+     */
     public boolean isZeroBeta() {
         return getZeroInfo() != null && getZeroInfo().isZeroBetaState();
     }
@@ -1622,6 +1715,9 @@ public class Char {
 //        write(WvsContext.zeroInfo(currentInfo));
     }
 
+    /**
+     * Initializes zero info with HP values.
+     */
     public void initZeroInfo() {
         ZeroInfo zeroInfo = new ZeroInfo();
         CharacterStat cs = getAvatarData().getCharacterStat();

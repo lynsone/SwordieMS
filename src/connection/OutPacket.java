@@ -274,4 +274,14 @@ public class OutPacket extends Packet {
     public void encodeFT(long currentTime) {
         encodeFT(new FileTime(currentTime));
     }
+
+    public void encodeTime(boolean dynamicTerm, int time) {
+        encodeByte(dynamicTerm);
+        encodeInt(time);
+    }
+
+    public void encodeTime(int time) {
+        encodeByte(false);
+        encodeInt(time);
+    }
 }

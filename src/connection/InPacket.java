@@ -14,15 +14,26 @@ import java.util.Arrays;
 public class InPacket extends Packet {
     private ByteBuf byteBuf;
 
+    /**
+     * Creates a new InPacket with a given buffer.
+     * @param byteBuf The buffer this InPacket has to be initialized with.
+     */
     public InPacket(ByteBuf byteBuf) {
         super(byteBuf.array());
         this.byteBuf = byteBuf.copy();
     }
 
+    /**
+     * Creates a new InPacket with no data.
+     */
     public InPacket(){
         this(Unpooled.buffer());
     }
 
+    /**
+     * Creates a new InPacket with given data.
+     * @param data The data this InPacket has to be initialized with.
+     */
     public InPacket(byte[] data) {
         this(Unpooled.copiedBuffer(data));
     }
@@ -104,22 +115,38 @@ public class InPacket extends Packet {
 
     @Override
     public String toString() {
-        return Util.readableByteArray(Arrays.copyOfRange(getData(), 2, getData().length));
+        return Util.readableByteArray(Arrays.copyOfRange(getData(), 2, getData().length)); // Substring after copy of range xd
     }
 
 
+    /**
+     * Reads and returns a long from this packet.
+     * @return The long that has been read.
+     */
     public long decodeLong() {
         return byteBuf.readLongLE();
     }
 
+    /**
+     * Reads a position (short x, short y) and returns this.
+     * @return The position that has been read.
+     */
     public Position decodePosition() {
         return new Position(decodeShort(), decodeShort());
     }
 
+    /**
+     * Reads a rectangle (short l, short t, short r, short b) and returns this.
+     * @return The rectangle that has been read.
+     */
     public Rect decodeShortRect() {
         return new Rect(decodePosition(), decodePosition());
     }
 
+    /**
+     * Reads a rectangle (int l, int t, int r, int b) and returns this.
+     * @return The rectangle that has been read.
+     */
     public Position decodePositionInt() {
         return new Position(decodeInt(), decodeInt());
     }

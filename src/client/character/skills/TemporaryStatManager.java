@@ -1,7 +1,9 @@
 package client.character.skills;
 
 import client.character.Char;
+import com.sun.istack.internal.NotNull;
 import connection.OutPacket;
+import enums.TSIndex;
 import packet.WvsContext;
 import server.EventManager;
 import util.Tuple;
@@ -29,9 +31,37 @@ public class TemporaryStatManager {
     private StopForceAtom stopForceAtom;
     private LarknessManager larknessManager;
     private Char chr;
+    private List<TemporaryStatBase> twoStates = new ArrayList<>();
 
     public TemporaryStatManager(Char chr){
         this.chr = chr;
+        for(CharacterTemporaryStat cts : TSIndex.getAllCTS()) {
+            switch(cts) {
+                case PartyBooster:
+                    twoStates.add(new PartyBooster());
+                    break;
+                case GuidedBullet:
+                    twoStates.add(new GuidedBullet());
+                    break;
+                case EnergyCharged:
+                    twoStates.add(new TemporaryStatBase(true));
+                    break;
+                case RideVehicle:
+                    twoStates.add(new TwoStateTemporaryStat(false));
+                    break;
+                default:
+                    twoStates.add(new TwoStateTemporaryStat(true));
+                    break;
+            }
+        }
+    }
+
+    public List<TemporaryStatBase> getTwoStates() {
+        return twoStates;
+    }
+
+    public TemporaryStatBase getTSBByTSIndex(@NotNull TSIndex tsi) {
+        return getTwoStates().get(tsi.getIndex());
     }
 
     public void putCharacterStatValue(CharacterTemporaryStat cts, Option option) {
@@ -2126,6 +2156,8 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(Stigma).rOption);
             outPacket.encodeInt(getOption(Stigma).tOption);
         }
+
+
         if (hasNewStat(SoulMP)) {
             outPacket.encodeInt(getOption(SoulMP).xOption);
             outPacket.encodeInt(getOption(SoulMP).rOption);
@@ -2138,6 +2170,12 @@ public class TemporaryStatManager {
         for (int i = 0; i < size; i++) {
             outPacket.encodeInt(0); // nKey
             outPacket.encodeByte(0); // bEnable
+        }
+        if (hasNewStat(Unk6)) {
+            outPacket.encodeInt(getOption(Unk6).xOption);
+        }
+        if (hasNewStat(Unk5)) {
+            outPacket.encodeInt(getOption(Unk5).xOption);
         }
         outPacket.encodeByte(getDefenseAtt());
         outPacket.encodeByte(getDefenseState());
@@ -2309,11 +2347,41 @@ public class TemporaryStatManager {
         if (hasNewStat(Stigma)) {
             outPacket.encodeInt(getOption(Stigma).bOption);
         }
-        //TODO TwoState here
+        for (int i = 0; i < 7; i++) {
+            if(hasNewStat(TSIndex.getCTSFromTwoStatIndex(i))) {
+                getTwoStates().get(i).encode(outPacket);
+            }
+        }
         encodeIndieTempStat(outPacket);
         if (hasNewStat(UsingScouter)) {
-            outPacket.encodeShort(getOption(UsingScouter).nOption);
+            outPacket.encodeInt(getOption(UsingScouter).nOption);
+            outPacket.encodeInt(getOption(UsingScouter).xOption);
         }
+        // from here on: new stats found in 176 idb
+        if (hasNewStat(NewFlying)) {
+            outPacket.encodeInt(getOption(NewFlying).xOption);
+        }
+        if (hasNewStat(Unk6000)) {
+            /* not exactly 2 bytes:
+            c = 0;
+            while(true) {
+                a = decode1();
+                b = (a & 0x7F) << c;
+                if(a >= 0) {
+                    break;
+                }
+                c += 7;
+            }
+             */
+            outPacket.encodeByte(getOption(Unk6000).xOption);
+            outPacket.encodeByte(getOption(Unk6000).yOption);
+        }
+        if (hasNewStat(Unk7000)) {
+            // 1st byte is normal, 2nd one is like in Unk6000
+            outPacket.encodeByte(getOption(Unk7000).xOption);
+            outPacket.encodeByte(getOption(Unk7000).yOption);
+        }
+        outPacket.encodeBytes(new byte[200]);
         getNewStats().clear();
     }
 

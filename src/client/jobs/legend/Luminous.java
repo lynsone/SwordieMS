@@ -227,7 +227,7 @@ public class Luminous extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleLarkness(skill.getSkillId());
+        handleLarkness(skillID);
         int crescendoProp = getCrescendoProp(chr);
         if (tsm.hasStat(StackBuff)) {
             if (hasHitMobs && Util.succeedProp(crescendoProp)) {
