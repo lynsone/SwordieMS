@@ -2,6 +2,7 @@ package client.life;
 
 import client.field.Field;
 import loaders.MobData;
+import loaders.NpcData;
 import util.Position;
 import util.Rect;
 
@@ -316,5 +317,35 @@ public class Life {
 
     public void setCurFoothold() {
 
+    }
+
+    public Npc createNpcFromLife() {
+        Npc npc = null;
+        if("n".equalsIgnoreCase(getLifeType())) {
+            npc = NpcData.getNpcDeepCopyById(getTemplateId());
+            npc.setObjectId(getObjectId());
+            npc.setLifeType(getLifeType());
+            npc.setX(getX());
+            npc.setY(getY());
+            npc.setPosition(new Position(getX(), getY()));
+            npc.setMobTime(getMobTime());
+            npc.setF(getF());
+            npc.setHide(isHide());
+            npc.setFh(getFh());
+            npc.setCy(getCy());
+            npc.setRx0(getRx0());
+            npc.setRx1(getRx1());
+            npc.setLimitedName(getLimitedName());
+            npc.setUseDay(isUseDay());
+            npc.setUseNight(isUseNight());
+            npc.setHold(isHold());
+            npc.setNoFoothold(isNoFoothold());
+            npc.setDummy(isDummy());
+            npc.setSpine(isSpine());
+            npc.setMobTimeOnDie(isMobTimeOnDie());
+            npc.setRegenStart(getRegenStart());
+            npc.setMobAliveReq(getMobAliveReq());
+        }
+        return npc;
     }
 }

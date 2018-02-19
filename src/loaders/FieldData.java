@@ -5,6 +5,7 @@ import client.field.Foothold;
 import client.field.Portal;
 import client.life.Life;
 import client.life.Mob;
+import client.life.Npc;
 import constants.ServerConstants;
 import enums.PortalType;
 import org.w3c.dom.Document;
@@ -482,9 +483,12 @@ public class FieldData {
                 l.setMobTimeOnDie(dataInputStream.readBoolean());
                 l.setRegenStart(dataInputStream.readInt());
                 l.setMobAliveReq(dataInputStream.readInt());
-                if(l.getLifeType().equalsIgnoreCase("m")) {
+                if("m".equalsIgnoreCase(l.getLifeType())) {
                     Mob mob = l.createMobFromLife();
                     field.addLife(mob);
+                } else if ("n".equalsIgnoreCase(l.getLifeType())) {
+                    Npc npc = l.createNpcFromLife();
+                    field.addLife(npc);
                 } else {
                     field.addLife(l);
                 }

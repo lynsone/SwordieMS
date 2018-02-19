@@ -152,11 +152,18 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_EMOTION:
                 case USER_CALC_DAMAGE_STAT_SET_REQUEST:
                     break;
+                // sorted from here ------------------
                 case CHAR_LOGIN:
                     WorldHandler.handleCharLogin(c, inPacket);
                     break;
                 case USER_HIT:
                     c.getChr().getJobHandler().handleHit(c, inPacket);
+                    break;
+                case USER_SELECT_NPC:
+                    WorldHandler.handleUserSelectNpc(c, inPacket);
+                    break;
+                case USER_SCRIPT_MESSAGE_ANSWER:
+                    WorldHandler.handleUserScriptMessageAnswer(c, inPacket);
                     break;
                 case USER_FINAL_ATTACK_REQUEST:
                     WorldHandler.handleUserFinalAttackRequest(c, inPacket);

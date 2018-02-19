@@ -15,6 +15,7 @@ import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
 import client.life.Life;
 import client.life.Mob;
+import client.life.Npc;
 import client.life.Summon;
 import client.life.movement.Movement;
 import connection.InPacket;
@@ -28,6 +29,7 @@ import packet.*;
 import server.Channel;
 import server.Server;
 import server.World;
+import sun.font.Script;
 import util.Position;
 import util.Rect;
 import util.Tuple;
@@ -761,13 +763,14 @@ public class WorldHandler {
     }
 
     public static void handleMoveMob(Client c, InPacket inPacket) {
+        // CMob::GenerateMovePath (line 918 onwards)
         Field field = c.getChr().getField();
         int objectID = inPacket.decodeInt();
         Life life = field.getLifeByObjectID(objectID);
         if (life == null) {
             return;
         }
-        byte idk0 = inPacket.decodeByte();
+        byte idk0 = inPacket.decodeByte(); // check if the templateID / 10000 == 250 or 251. No idea for what it's used
         short moveID = inPacket.decodeShort();
         boolean usedSkill = inPacket.decodeByte() != 0;
         byte skill = inPacket.decodeByte();
@@ -1631,5 +1634,30 @@ public class WorldHandler {
         boolean isNew = inPacket.decodeByte() != 0;
         boolean clear = inPacket.decodeByte() != 0;
         c.write(BattleRecordMan.serverOnCalcRequestResult(on));
+    }
+
+    public static void handleUserSelectNpc(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int npcID = inPacket.decodeInt();
+        short idk1 = inPacket.decodeShort();
+        short idk2 = inPacket.decodeShort();
+        Npc npc = (Npc) chr.getField().getLifeByObjectID(npcID);
+        String script = npc.getScripts().get(0);
+        if(script == null) {
+            script = String.valueOf(npc.getTemplateId());
+        }
+        chr.getScriptManager().startScript(npc.getTemplateId(), script, ScriptType.NPC);
+    }
+
+    public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        NpcMessageType nmt = chr.getScriptManager().getNpcScriptInfo().getMessageType();
+        byte lastType = inPacket.decodeByte();
+        byte action = inPacket.decodeByte();
+        int answer = 0;
+        if(nmt == NpcMessageType.AskMenu && action != -1) {
+            answer = inPacket.decodeInt();
+        }
+        chr.getScriptManager().handleAction(lastType, action, answer);
     }
 }

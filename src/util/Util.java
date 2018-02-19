@@ -3,12 +3,20 @@ package util;
 import io.netty.buffer.ByteBuf;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
 
 /**
  * Created on 2/28/2017.
  */
 public class Util {
+    public static String readFile(String path, Charset encoding) throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded, encoding);
+    }
 
     public static int[] bitwiseOr(int[] arr1, int[] arr2) {
         int[] res = new int[arr1.length];

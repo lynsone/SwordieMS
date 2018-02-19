@@ -73,6 +73,7 @@ public class Server extends Properties {
         System.out.println("[Info] Finished loading Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
 
         try {
+            checkAndCreateDat();
             loadWzData();
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
@@ -93,6 +94,21 @@ public class Server extends Properties {
         }
         long end = System.currentTimeMillis();
         System.out.println("[Info] Finished loading server in " + (end - start) + "ms");
+    }
+
+    private void checkAndCreateDat() {
+        File file = new File(ServerConstants.DAT_DIR + "\\equips");
+        boolean exists = file.exists();
+        if(!exists) {
+            for(Class c : DataClasses.datCreators) {
+                try {
+                    Method m = c.getMethod("generateDatFiles");
+                    m.invoke(null);
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void loadWzData() throws IllegalAccessException, InvocationTargetException {

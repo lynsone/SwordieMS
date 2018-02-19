@@ -7,6 +7,7 @@ import connection.OutPacket;
 import enums.LeaveType;
 import loaders.SkillData;
 import packet.CField;
+import packet.NpcPool;
 import server.EventManager;
 import util.Position;
 import util.Rect;
@@ -300,10 +301,6 @@ public class Field {
         return lifes;
     }
 
-    public void setLifes(List<Life> lifes) {
-        this.lifes = lifes;
-    }
-
     public void addLife(Life life) {
         if(life.getObjectId() < 0) {
             life.setObjectId(getNewObjectID());
@@ -364,8 +361,8 @@ public class Field {
                 mob.setCurFoodhold(fh.deepCopy());
                 if(onlyChar == null) {
                     for (Char chr : getChars()) {
-                        chr.getClient().write(CField.mobEnterField(mob, false));
-                        chr.getClient().write(CField.mobChangeController(mob, false, controller == chr));
+                        chr.write(CField.mobEnterField(mob, false));
+                        chr.write(CField.mobChangeController(mob, false, controller == chr));
                     }
                 } else {
                     onlyChar.getClient().write(CField.mobEnterField(mob, false));
@@ -379,6 +376,13 @@ public class Field {
                     addLifeTimer(summon, t);
                 }
                 broadcastPacket(CField.summonedCreated(summon.getCharID(), summon));
+            }
+            if(life instanceof Npc) {
+                Npc npc = (Npc) life;
+                for(Char chr : getChars()) {
+                    chr.write(NpcPool.npcEnterField(npc));
+                    chr.write(NpcPool.npcChangeController(npc, false));
+                }
             }
         }
     }

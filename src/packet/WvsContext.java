@@ -448,6 +448,16 @@ public class WvsContext {
         return outPacket;
     }
 
+    /**
+     * Returns a packet for messages with the following {@link MessageType}:<br>
+     * GENERAL_ITEM_EXPIRE_MESSAGE<br>
+     * ITEM_PROTECT_EXPIRE_MESSAGE<br>
+     * ITEM_ABILITY_TIME_LIMITED_EXPIRE_MESSAGE<br>
+     * SKILL_EXPIRE_MESSAGE
+     * @param mt The message type.
+     * @param items The list of ints that should be encoded.
+     * @return The message OutPacket.
+     */
     public static OutPacket message(MessageType mt, List<Integer> items) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
@@ -474,8 +484,27 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket message(MessageType mt, long num, String string, byte type) {
-        int i = (int) num;
+    /**
+     * Returns a packet for messages with the following {@link MessageType}:<br>
+     *     int: <br>
+     *     CASH_ITEM_EXPIRE_MESSAGE<br>
+     *     INC_POP_MESSAGE<br>
+     *     INC_GP_MESSAGE<br>
+     *     GIVE_BUFF_MESSAGE<br><br>
+     *     int + byte: <br>
+     *     INC_COMMITMENT_MESSAGE<br><br>
+     *     String: <br>
+     *     SYSTEM_MESSAGE<br><br>
+     *     int + String: <br>
+     *     QUEST_RECORD_EX_MESSAGE<br>
+     *     WORLD_SHARE_RECORD_MESSAGE<br>
+     * @param mt The message type.
+     * @param i The integer to encode.
+     * @param string The String to encode.
+     * @param type The type (byte) to encode.
+     * @return The message OutPacket.
+     */
+    public static OutPacket message(MessageType mt, int i, String string, byte type) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(mt.getVal());

@@ -109,7 +109,7 @@ public class StringData {
         return skillString;
     }
 
-    public static void generateDat() {
+    public static void generateDatFiles() {
         loadStringsFromWz();
         loadItemStringsFromWz();
         saveSkillStrings(ServerConstants.DAT_DIR + "\\strings");
@@ -192,7 +192,7 @@ public class StringData {
     }
 
     public static void main(String[] args) {
-//        generateDat();
+//        generateDatFiles();
         loadSkillStrings();
         loadItemStrings();
     }

@@ -1199,6 +1199,7 @@ public class ItemData {
         }
     }
 
+    @SuppressWarnings("unused") // Reflection
     public static void generateDatFiles() {
         loadEquipsFromWz();
         saveEquips(ServerConstants.DAT_DIR + "\\equips");

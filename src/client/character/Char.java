@@ -141,6 +141,8 @@ public class Char {
     private int premiumDamageSkin;
     @Transient
     private boolean partyInvitable;
+    @Transient
+    private ScriptManager scriptManager = new ScriptManager(this);
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -161,7 +163,7 @@ public class Char {
             Equip equip = ItemData.getEquipDeepCopyFromId(itemId);
             if (equip != null) {
                 hairEquips.add(itemId);
-                if (equip.getiSlot().equals("Wp")) {
+                if ("Wp".equals(equip.getiSlot())) {
                     if (!equip.isCash()) {
                         avatarLook.setWeaponId(itemId);
                     } else {
@@ -1726,5 +1728,9 @@ public class Char {
         zeroInfo.setSubMP(cs.getMp());
         zeroInfo.setSubMMP(cs.getMaxMp());
         setZeroInfo(zeroInfo);
+    }
+
+    public ScriptManager getScriptManager() {
+        return scriptManager;
     }
 }
