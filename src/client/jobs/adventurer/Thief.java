@@ -46,7 +46,9 @@ public class Thief extends Job {
 
 
     // Night Lord
-    public static final int ASSASSINS_MARK = 4101011; //Buff
+    public static final int ASSASSINS_MARK = 4101011; //Buff (ON/OFF)
+    //public static final int ASSASSINS_MARK_ATOM = 4100012;
+    public static final int ASSASSINS_MARK_ATOM = 4120019;
     public static final int CLAW_BOOSTER = 4101003; //Buff
 
     public static final int SHADOW_PARTNER_NL = 4111002; //Buff
@@ -162,7 +164,9 @@ public class Thief extends Job {
                     chr.addSkill(skill);
                 }
             }
-            critInterval();
+            if(chr.getJob() > 419 || chr.getJob() < 425 ) {
+                critInterval();
+            }
         }
 
     }
@@ -175,17 +179,31 @@ public class Thief extends Job {
         int skillID = 0;
         SkillInfo si = null;
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
+        byte slv = 0;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
+            slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        if (chr.getJob() > 409 || chr.getJob() < 413) { //Night Lord
 
-        if (chr.getJob() == 422) {
-            if (chr.hasSkill(4221013)) {
-                if (tsm.hasStat(IgnoreMobpdpR)) {
-                    if(hasHitMobs) {
+            if(hasHitMobs) {
+                handleNightLordMark(skillID, slv, attackInfo);
+            }
+        }
+        if (chr.getJob() > 419 || chr.getJob() < 423) { //Shadower
+            if(hasHitMobs) {
+                //Critical Growth & Prime Critical
+                incrementCritGrowing();
+
+                //Flip of the Coin
+                if(chr.hasSkill(FLIP_THE_COIN)) {
+                    handleFlipTheCoinActivation(tsm);
+                }
+
+                //Shadower Instinct
+                if (chr.hasSkill(SHADOWER_INSTINCT)) {
+                    if (tsm.hasStat(IgnoreMobpdpR)) {
                         if(skill == null) {
                             handleShadowerInstinct(4221016, tsm, c);
                         }
@@ -194,12 +212,12 @@ public class Thief extends Job {
                 }
             }
         }
-        handleFlipTheCoinActivation(tsm);
-        if(hasHitMobs) {
-            incrementCritGrowing();
+
+        if (chr.getJob() > 429 || chr.getJob() < 435) { //Dual Blade
+            if(hasHitMobs) {
+
+            }
         }
-
-
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -235,13 +253,13 @@ public class Thief extends Job {
                 break;
             case SHOWDOWN:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Showdown, o1);
-                        // Unsure
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Showdown, o1);
+                    // Unsure
                 }
                 break;
             case SUDDEN_RAID_DB:
@@ -556,7 +574,6 @@ public class Thief extends Job {
         }
     }
 
-
     private void updatecrit() {
         if(chr.hasSkill(PRIME_CRITICAL)) {
             supposedCrit = supposedCrit + 4;
@@ -564,12 +581,10 @@ public class Thief extends Job {
             supposedCrit = supposedCrit + 2;
         }
         Option o = new Option();
-        Option o1 = new Option();
-        o.nOption = critAmount;
+        int critGrowth = critAmount;
+        o.nOption = (getPrimeCritMulti() * critGrowth);
         o.rOption = getCritGrowIcon();
-        o1.nOption = (getPrimeCritMulti() * critAmount);
         chr.getTemporaryStatManager().putCharacterStatValue(CriticalGrowing, o);
-        chr.getTemporaryStatManager().putCharacterStatValue(CriticalBuff, o1);
         chr.getTemporaryStatManager().sendSetStatPacket();
     }
 
@@ -593,7 +608,6 @@ public class Thief extends Job {
         EventManager.addEvent(this, "critInterval", 2000); //2sec subTime
     }
 
-
     private int getCritGrowIcon() {
         if(chr.hasSkill(PRIME_CRITICAL)) {
             return PRIME_CRITICAL;
@@ -603,13 +617,12 @@ public class Thief extends Job {
     }
 
     private int getPrimeCritMulti() {
-        int multiplier = 1;
+        int multiplier = 2;
         if(chr.hasSkill(PRIME_CRITICAL)) {
-            multiplier = 3;
+            multiplier = 4;
         }
         return multiplier;
     }
-
 
     private void handleShadowerInstinct(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
@@ -631,6 +644,29 @@ public class Thief extends Job {
         o1.tOption = InstinctInfo.getValue(time, InstinctInfo.getCurrentLevel());
         tsm.putCharacterStatValue(PAD, o1);
         c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+
+    private void handleNightLordMark(int skillID, byte slv, AttackInfo attackInfo) {    //From Mob, not Player
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(NightLordMark)) {
+            SkillInfo si = SkillData.getSkillInfoById(ASSASSINS_MARK);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                int TW1prop = 100;//
+                if (Util.succeedProp(TW1prop)) {
+                    int mobID = mai.mobId;
+                    int inc = ForceAtomEnum.ASSASSIN_MARK.getInc();
+                    int type = ForceAtomEnum.ASSASSIN_MARK.getForceAtomType();
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                            0, 100, (int) System.currentTimeMillis(), 1, 0,
+                            new Position());
+                    chr.getClient().write(CField.createForceAtom(false, mobID, chr.getId(), type,
+                            true, mobID, ASSASSINS_MARK_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                            mob.getPosition(), 2070000, mob.getPosition()));
+                }
+            }
+        }
     }
 
     private boolean isBuff(int skillID) {
