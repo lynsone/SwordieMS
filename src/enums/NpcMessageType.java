@@ -4,7 +4,10 @@ package enums;
  * Created on 2/19/2018.
  */
 public enum NpcMessageType {
-    Say(0),
+    SayOk(0, false, false),
+    SayNext(0, false, true),
+    SayPrev(0, true, false),
+    Say(0, true, true),
     SayImage(1),
     AskYesNo(2),
     AskText(3),
@@ -55,6 +58,12 @@ public enum NpcMessageType {
         this.val = (byte) val;
         prevPossible = false;
         nextPossible = false;
+    }
+
+    NpcMessageType(int val, boolean prev, boolean next) {
+        this.val = (byte) val;
+        prevPossible = prev;
+        nextPossible = next;
     }
 
     public byte getVal() {

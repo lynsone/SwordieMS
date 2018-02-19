@@ -90,6 +90,11 @@ public class Channel {
         this.fields = fields;
     }
 
+    /**
+     * Gets a {@link Field} corresponding to a given ID. If it doesn't exist, creates one.
+     * @param id The map ID of the field.
+     * @return The (possibly newly created) Field.
+     */
     public Field getField(int id) {
         return getFields().stream().filter(field -> field.getId() == id).findFirst().orElse(createAndReturnNewField(id));
     }

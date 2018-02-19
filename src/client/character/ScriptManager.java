@@ -1,5 +1,6 @@
 package client.character;
 
+import client.field.Field;
 import constants.ServerConstants;
 import enums.MessageType;
 import enums.NpcMessageType;
@@ -158,24 +159,115 @@ public class ScriptManager implements Observer {
         }
     }
 
+    public NpcScriptInfo getNpcScriptInfo() {
+        return npcScriptInfo;
+    }
+
+    // Start of the sends/asks ----------------------------------------------------------------------
+
+    public void sendSay(String text) {
+        if(text.contains("#L")) {
+            sendGeneralSay(text, AskMenu);
+        } else {
+            sendGeneralSay(text, Say);
+        }
+    }
+
+    private void sendGeneralSay(String text, NpcMessageType nmt) {
+        getNpcScriptInfo().setText(text);
+        if(text.contains("#L")) {
+            nmt = AskMenu;
+        }
+        getNpcScriptInfo().setMessageType(nmt);
+        chr.write(ScriptMan.scriptMessage(this, nmt));
+    }
+
+    public void sendNext(String text) {
+        sendGeneralSay(text, SayNext);
+    }
+
+    public void sendPrev(String text) {
+        sendGeneralSay(text, SayPrev);
+    }
+
+    public void sendSayOkay(String text) {
+        sendGeneralSay(text, SayOk);
+    }
+
+    public void sendSayImage(String[] images) {
+        getNpcScriptInfo().setImages(images);
+        getNpcScriptInfo().setMessageType(SayImage);
+        chr.write(ScriptMan.scriptMessage(this, SayImage));
+    }
+
+    public void sendAskYesNo(String text) {
+        sendGeneralSay(text, AskYesNo);
+    }
+
+    public void sendAskText(String text, String defaultText, short minLength, short maxLength) {
+        getNpcScriptInfo().setMin(minLength);
+        getNpcScriptInfo().setMax(maxLength);
+        getNpcScriptInfo().setDefaultText(defaultText);
+        sendGeneralSay(text, AskText);
+    }
+
+    public void sendAskNumber(String text, int defaultNum, int min, int max) {
+        getNpcScriptInfo().setDefaultNumber(defaultNum);
+        getNpcScriptInfo().setMin(min);
+        getNpcScriptInfo().setMax(max);
+        sendGeneralSay(text, AskNumber);
+    }
+
+    public void sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time) {
+        NpcScriptInfo nsi = getNpcScriptInfo();
+        nsi.setType(type);
+        if(type != 1) {
+            nsi.setTitle(title);
+            nsi.setProblemText(problem);
+            nsi.setHintText(hint);
+            nsi.setMin(min);
+            nsi.setMax(max);
+            nsi.setTime(time);
+        }
+        chr.write(ScriptMan.scriptMessage(this, InitialQuiz));
+    }
+
+    public void sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time) {
+        NpcScriptInfo nsi = getNpcScriptInfo();
+        nsi.setType(type);
+        if(type != 1) {
+            nsi.setQuizType(quizType);
+            nsi.setAnswer(answer);
+            nsi.setCorrectAnswers(correctAnswers);
+            nsi.setRemaining(remaining);
+            nsi.setTime(time);
+        }
+        chr.write(ScriptMan.scriptMessage(this, InitialSpeedQuiz));
+    }
+
+    public void sendICQuiz(byte type, String text, String hintText, int time) {
+        getNpcScriptInfo().setType(type);
+        getNpcScriptInfo().setHintText(hintText);
+        getNpcScriptInfo().setTime(time);
+        sendGeneralSay(text, ICQuiz);
+    }
+
+    public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta) {
+        getNpcScriptInfo().setAngelicBuster(angelicBuster);
+        getNpcScriptInfo().setZeroBeta(zeroBeta);
+        sendGeneralSay(text, AskAvatar);
+    }
+
     // Start helper methods for scripts -------------------------------------------------------------
 
     public void dispose() {
         WvsContext.dispose(chr);
     }
 
-    public NpcScriptInfo getNpcScriptInfo() {
-        return npcScriptInfo;
+    public void warp(int id) {
+        Field field = chr.getClient().getChannelInstance().getField(id);
+        chr.warp(field);
     }
 
-    public void sendSay(String text) {
-        getNpcScriptInfo().setText(text);
-        NpcMessageType mt = Say;
-        if(text.contains("#L")) {
-            mt = AskMenu;
-        }
-        getNpcScriptInfo().setMessageType(mt);
-        chr.write(ScriptMan.scriptMessage(this, mt));
-    }
 
 }

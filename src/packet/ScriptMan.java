@@ -29,14 +29,80 @@ public class ScriptMan {
 
         switch(nmt) {
             case Say:
-            case AskMenu:
+            case SayOk:
+            case SayNext:
+            case SayPrev:
                 if((nsi.getParam() & 4) != 0) {
                     outPacket.encodeInt(nsi.getOverrideSpeakerTemplateID());
                 }
                 outPacket.encodeString(nsi.getText());
-                outPacket.encodeByte(false);
-                outPacket.encodeByte(true);
+                outPacket.encodeByte(nmt.isPrevPossible());
+                outPacket.encodeByte(nmt.isNextPossible());
                 outPacket.encodeInt(nmt.getDelay());
+                break;
+            case AskMenu:
+            case AskYesNo:
+                if((nsi.getParam() & 4) != 0) {
+                    outPacket.encodeInt(nsi.getOverrideSpeakerTemplateID());
+                }
+                outPacket.encodeString(nsi.getText());
+                break;
+            case SayImage:
+                String[] images = nsi.getImages();
+                outPacket.encodeByte(images.length);
+                for(String image : images) {
+                    outPacket.encodeString(image);
+                }
+                break;
+            case AskText:
+                if((nsi.getParam() & 4) != 0) {
+                    outPacket.encodeInt(nsi.getOverrideSpeakerTemplateID());
+                }
+                outPacket.encodeString(nsi.getText());
+                outPacket.encodeString(nsi.getDefaultText());
+                outPacket.encodeShort(nsi.getMin());
+                outPacket.encodeShort(nsi.getMax());
+                break;
+            case AskNumber:
+                outPacket.encodeString(nsi.getText());
+                outPacket.encodeInt(nsi.getDefaultNumber());
+                outPacket.encodeInt(nsi.getMin());
+                outPacket.encodeInt(nsi.getMax());
+                break;
+            case InitialQuiz:
+                outPacket.encodeByte(nsi.getType());
+                if(nsi.getType() != 1) {
+                    outPacket.encodeString(nsi.getTitle());
+                    outPacket.encodeString(nsi.getProblemText());
+                    outPacket.encodeString(nsi.getHintText());
+                    outPacket.encodeInt(nsi.getMin());
+                    outPacket.encodeInt(nsi.getMax());
+                    outPacket.encodeInt(nsi.getTime()); // in seconds
+                }
+                break;
+            case InitialSpeedQuiz:
+                outPacket.encodeByte(nsi.getType());
+                if(nsi.getType() != 1) {
+                    outPacket.encodeInt(nsi.getQuizType());
+                    outPacket.encodeInt(nsi.getAnswer());
+                    outPacket.encodeInt(nsi.getCorrectAnswers());
+                    outPacket.encodeInt(nsi.getRemaining());
+                    outPacket.encodeInt(nsi.getTime()); // in seconds
+                }
+                break;
+            case ICQuiz:
+                outPacket.encodeByte(nsi.getType());
+                if(nsi.getType() != 1) {
+                    outPacket.encodeString(nsi.getText());
+                    outPacket.encodeString(nsi.getHintText());
+                    outPacket.encodeInt(nsi.getTime()); // in seconds
+                }
+                break;
+            case AskAvatar:
+                outPacket.encodeByte(nsi.isAngelicBuster());
+                outPacket.encodeByte(nsi.isZeroBeta());
+                outPacket.encodeString(nsi.getText());
+                outPacket.encodeByte(0); // Some int array, no clue what it stands for
                 break;
         }
 
