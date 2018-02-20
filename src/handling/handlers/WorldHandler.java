@@ -1658,6 +1658,6 @@ public class WorldHandler {
         if(nmt == NpcMessageType.AskMenu && action != -1) {
             answer = inPacket.decodeInt();
         }
-        chr.getScriptManager().handleAction(lastType, action, answer);
+        chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
     }
 }

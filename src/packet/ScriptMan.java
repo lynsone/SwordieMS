@@ -4,6 +4,7 @@ import client.character.NpcScriptInfo;
 import client.character.ScriptManager;
 import connection.OutPacket;
 import enums.NpcMessageType;
+import enums.ScriptType;
 import handling.OutHeader;
 
 /**
@@ -17,7 +18,7 @@ public class ScriptMan {
         OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_MESSAGE);
 
         outPacket.encodeByte(nsi.getSpeakerType());
-        outPacket.encodeInt(sm.getParentID());
+        outPacket.encodeInt(sm.getParentIDByScriptType(ScriptType.NPC));
         int overrideTemplate = nsi.getOverrideSpeakerTemplateID();
         outPacket.encodeByte(overrideTemplate > 0);
         if(overrideTemplate > 0) {
