@@ -44,7 +44,7 @@ public class ScriptManager implements Observer {
     }
 
     public ScriptInfo getScriptInfoByType(ScriptType scriptType) {
-        return scripts.get(scriptType);
+        return scripts.getOrDefault(scriptType, null);
     }
 
     public Char getChr() {
@@ -60,7 +60,7 @@ public class ScriptManager implements Observer {
     }
 
     public int getParentIDByScriptType(ScriptType scriptType) {
-        return getScriptInfoByType(scriptType).getParentID();
+        return getScriptInfoByType(scriptType) != null ? getScriptInfoByType(scriptType).getParentID() : 2007;
     }
 
     public void startScript(int parentID, String scriptName, ScriptType scriptType) {
@@ -82,8 +82,8 @@ public class ScriptManager implements Observer {
                 scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
         boolean exists = new File(dir).exists();
         if(!exists) {
-            System.err.printf("[Error] Could not find script %s.%n", name);
-            chr.chatMessage(YELLOW, "[Script] Could not find script " + name);
+            System.err.printf("[Error] Could not find script %s\\%s.%n", scriptType.toString().toLowerCase(), name);
+            chr.chatMessage(YELLOW, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
             dir = DEFAULT_SCRIPT;
         }
         CompiledScript cs;
@@ -145,7 +145,13 @@ public class ScriptManager implements Observer {
     }
 
     public int getParentID() {
-        return getScriptInfoByType(ScriptType.NPC).getParentID();
+        int res = 0;
+        for(ScriptType type : ScriptType.values()) {
+            if(getScriptInfoByType(type) != null) {
+                res = getScriptInfoByType(type).getParentID();
+            }
+        }
+        return res;
     }
 
 

@@ -255,6 +255,7 @@ public class MobData {
             mob.setMoveAction((byte) 5); // normal monster?
             mob.setHp(fms.getMaxHP());
             mob.setMaxHp(fms.getMaxHP());
+            mob.setDrops(DropData.getDropInfoByID(mob.getTemplateId()));
             addMob(mob);
         } catch (IOException e) {
             e.printStackTrace();

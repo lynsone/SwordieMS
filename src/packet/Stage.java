@@ -125,7 +125,6 @@ public class Stage {
                 outPacket.encodeInt(0);
             }
         }
-        //outPacket.encodeBytes(Util.getByteArrayByString("00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
 
         // 41 bytes below
         outPacket.encodeByte(setWhiteFadeInOut);
@@ -137,7 +136,6 @@ public class Stage {
         if(hasFieldCustom) {
             fieldCustom.encode(outPacket);
         }
-        //outPacket.encodeBytes(Util.getByteArrayByString("00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
         outPacket.encodeByte(false); // is pvp map, deprecated
         outPacket.encodeByte(canNotifyAnnouncedQuest);
         outPacket.encodeByte(stackEventGauge >= 0);
@@ -147,7 +145,6 @@ public class Stage {
         // sub_16A52D0
         outPacket.encodeByte(0); // Star planet, not interesting
         outPacket.encodeByte(0); // more star planet
-//        outPacket.encodeBytes(Util.getByteArrayByString("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
         // CUser::DecodeTextEquipInfo
         int size = 0;
         outPacket.encodeInt(size);

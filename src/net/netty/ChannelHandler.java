@@ -234,6 +234,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_TRANSFER_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
                     break;
+                case USER_PORTAL_SCRIPT_REQUEST:
+                    WorldHandler.handleUserPortalScriptRequest(c, inPacket);
+                    break;
                 case USER_UPGRADE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserUpgradeItemUseRequest(c, inPacket);
                     break;

@@ -374,15 +374,28 @@ public class WorldHandler {
 
     public static void handleChangeFieldRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        byte idk = inPacket.decodeByte();
+        byte fieldKey = inPacket.decodeByte();
         int idk1 = inPacket.decodeInt();
         int x = inPacket.decodeShort();
         int y = inPacket.decodeShort();
         String portalName = inPacket.decodeString();
         Field field = chr.getField();
         Portal portal = field.getPortalByName(portalName);
-        Field toField = c.getChannelInstance().getField(portal.getTargetMapId());
-        chr.warp(toField, portal);
+        if(portal.getScript() != null && !portal.getScript().equals("")) {
+            chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
+        } else {
+            Field toField = c.getChannelInstance().getField(portal.getTargetMapId());
+            chr.warp(toField, portal);
+        }
+    }
+
+    public static void handleUserPortalScriptRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        byte portalID = inPacket.decodeByte();
+        String script = inPacket.decodeString();
+        Portal portal = chr.getField().getPortalByID(portalID);
+        chr.getScriptManager().startScript(portal.getId(), script, ScriptType.PORTAL);
+
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {

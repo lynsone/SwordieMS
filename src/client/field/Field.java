@@ -584,7 +584,6 @@ public class Field {
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
         // TODO make it so that multiple drops get proper posTo
         dropInfos.add(new DropInfo(0, 100, 1000, 0));
-        dropInfos.add(new DropInfo(1382231, 0, 100, 0));
         for(DropInfo dropInfo : dropInfos) {
             drop(dropInfo, position, position, ownerID);
         }

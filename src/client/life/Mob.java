@@ -95,7 +95,7 @@ public class Mob extends Life {
     private boolean targetFromSvr;
     private int charismaEXP;
     private Map<Char, Long> damageDone = new HashMap<>();
-    private Set<DropInfo> dropInfos = new HashSet<>();
+    private Set<DropInfo> drops = new HashSet<>();
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -240,11 +240,16 @@ public class Mob extends Life {
         copy.setCharismaEXP(getCharismaEXP());
         copy.setMp(getMp());
         copy.setMaxMp(getMaxMp());
+        copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
         return copy;
     }
 
-    public Set<DropInfo> getDropInfos() {
-        return dropInfos;
+    public Set<DropInfo> getDrops() {
+        return drops;
+    }
+
+    public void setDrops(Set<DropInfo> drops) {
+        this.drops = drops;
     }
 
     public boolean isSealedInsteadDead() {
@@ -1068,7 +1073,7 @@ public class Mob extends Life {
     }
 
     private void dropDrops() {
-        getField().drop(getDropInfos(), getPosition(), getMostDamageChar().getId());
+        getField().drop(getDrops(), getPosition(), getMostDamageChar().getId());
     }
 
     public Map<Char, Long> getDamageDone() {
