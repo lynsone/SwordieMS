@@ -35,4 +35,9 @@ public class QuestManager {
     public void setQuestList(List<Quest> questList) {
         this.questList = questList;
     }
+
+    public boolean hasQuestInProgress(int questReq) {
+        // TODO
+        return false;
+    }
 }

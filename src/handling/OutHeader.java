@@ -805,6 +805,11 @@ public enum OutHeader {
     NPC_SET_NOTICE_BOARD_INFO(1002),
     NPC_SET_SPECIAL_ACTION(1003),
 
+    // CDropPool::OnPacket
+    DROP_ENTER_FIELD(1009),
+    DROP_LEAVE_FIELD(1011),
+
+
     // CAffectedAreaPool::OnPacket
     AFFECTED_AREA_CREATED(1015),
     INSTALLED_AREA_FIRE(1016),

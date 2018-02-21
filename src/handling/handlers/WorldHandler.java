@@ -13,10 +13,7 @@ import client.field.Portal;
 import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
-import client.life.Life;
-import client.life.Mob;
-import client.life.Npc;
-import client.life.Summon;
+import client.life.*;
 import client.life.movement.Movement;
 import connection.InPacket;
 import constants.ItemConstants;
@@ -1659,5 +1656,23 @@ public class WorldHandler {
             answer = inPacket.decodeInt();
         }
         chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
+    }
+
+    public static void handleDropPickUpRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        boolean isOnField = inPacket.decodeByte() != 0;
+        inPacket.decodeInt(); // tick
+        Position pos = inPacket.decodePosition();
+        int dropID = inPacket.decodeInt();
+        inPacket.decodeInt(); // CliCrc
+        // rest is some info about foreground info, not interested
+        Field field = chr.getField();
+        Life life = field.getLifeByObjectID(dropID);
+        if (life != null && life instanceof Drop) {
+            Drop drop = (Drop) life;
+            chr.addDrop(drop);
+            field.removeDrop(dropID, chr.getId(), false);
+        }
+
     }
 }

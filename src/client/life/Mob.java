@@ -8,9 +8,12 @@ import packet.CField;
 import packet.WvsContext;
 import server.EventManager;
 import util.Position;
+import util.Tuple;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Mob extends Life {
 
@@ -92,6 +95,7 @@ public class Mob extends Life {
     private boolean targetFromSvr;
     private int charismaEXP;
     private Map<Char, Long> damageDone = new HashMap<>();
+    private Set<DropInfo> dropInfos = new HashSet<>();
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -237,6 +241,10 @@ public class Mob extends Life {
         copy.setMp(getMp());
         copy.setMaxMp(getMaxMp());
         return copy;
+    }
+
+    public Set<DropInfo> getDropInfos() {
+        return dropInfos;
     }
 
     public boolean isSealedInsteadDead() {
@@ -1042,15 +1050,25 @@ public class Mob extends Life {
         setHp(newHp);
         double percDamage = ((double) newHp / getMaxHp());
         if(newHp <= 0) {
-            getField().broadcastPacket(CField.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
-            if(!isNotRespawnable()) { // double negative
-                EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), this);
-            }
-            field.putLifeController(this, null);
-            distributeExp();
+            die();
         } else {
             getField().broadcastPacket(CField.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }
+    }
+
+    private void die() {
+        Field field = getField();
+        getField().broadcastPacket(CField.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
+        if(!isNotRespawnable()) { // double negative
+            EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), this);
+        }
+        field.putLifeController(this, null);
+        distributeExp();
+        dropDrops(); // xd
+    }
+
+    private void dropDrops() {
+        getField().drop(getDropInfos(), getPosition(), getMostDamageChar().getId());
     }
 
     public Map<Char, Long> getDamageDone() {
@@ -1082,5 +1100,18 @@ public class Mob extends Life {
             chr.write(WvsContext.incExpMessage(eii));
             chr.addExp(appliedExp);
         }
+    }
+
+    public Char getMostDamageChar() {
+        Tuple<Char, Long> max = new Tuple<>(null, (long) -1);
+        for(Map.Entry<Char, Long> entry : getDamageDone().entrySet()) {
+            Char chr = entry.getKey();
+            long damage = entry.getValue();
+            if(max == null || damage > max.getRight()) {
+                max.setLeft(chr);
+                max.setRight(damage);
+            }
+        }
+        return max.getLeft();
     }
 }

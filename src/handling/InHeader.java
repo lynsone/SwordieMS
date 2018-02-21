@@ -658,9 +658,9 @@ public enum InHeader {
     E_N_D__N_P_C(852),
     E_N_D__L_I_F_E_P_O_O_L(853),
 
-    B_E_G_I_N__D_R_O_P_P_O_O_L(854),
-    DROP_PICK_UP_REQUEST(855),
-    E_N_D__D_R_O_P_P_O_O_L(856),
+    B_E_G_I_N__D_R_O_P_P_O_O_L(855),
+    DROP_PICK_UP_REQUEST(856),
+    E_N_D__D_R_O_P_P_O_O_L(857),
 
     B_E_G_I_N__R_E_A_C_T_O_R_P_O_O_L(857),
     REACTOR_HIT(858),

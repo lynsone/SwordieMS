@@ -9,6 +9,7 @@ import client.field.Portal;
 import client.jobs.Job;
 import client.jobs.JobManager;
 import client.jobs.resistance.WildHunterInfo;
+import client.life.Drop;
 import connection.OutPacket;
 import constants.GameConstants;
 import constants.JobConstants;
@@ -305,6 +306,17 @@ public class Char {
                 item.updateDB();
             }
         }
+    }
+
+    public void addItemToInventoryAndUpdateClient(Item item) {
+        addItemToInventory(item);
+        write(WvsContext.inventoryOperation(this, true, false,
+                (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) 1,
+                0, item));
+    }
+
+    public void addItemToInventory(Item item) {
+        addItemToInventory(item.getInvType(), item, false);
     }
 
     public void setEquippedInventory(Inventory equippedInventory) {
@@ -1732,5 +1744,18 @@ public class Char {
 
     public ScriptManager getScriptManager() {
         return scriptManager;
+    }
+
+    public void addDrop(Drop drop) {
+        if(drop.isMoney()) {
+            addMoney(drop.getMoney());
+        } else {
+            Item item = drop.getItem();
+            addItemToInventoryAndUpdateClient(item);
+        }
+    }
+
+    public boolean hasQuestInProgress(int questReq) {
+        return getQuestManager().hasQuestInProgress(questReq);
     }
 }

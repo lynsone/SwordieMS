@@ -279,6 +279,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_GROWTH_HELPER_REQUEST:
                     WorldHandler.handleUserGrowthRequestHelper(c, inPacket);
                     break;
+                case DROP_PICK_UP_REQUEST:
+                    WorldHandler.handleDropPickUpRequest(c, inPacket);
+                    break;
                 case BATTLE_RECORD_ON_OFF_REQUEST:
                     WorldHandler.handleBattleRecordOnOffRequest(c, inPacket);
                     break;

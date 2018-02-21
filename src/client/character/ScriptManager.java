@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.ChatMsgColour.YELLOW;
 import static enums.NpcMessageType.*;
 
@@ -141,6 +142,10 @@ public class ScriptManager implements Observer {
 
     public Map<ScriptType, ScriptInfo> getScripts() {
         return scripts;
+    }
+
+    public int getParentID() {
+        return getScriptInfoByType(ScriptType.NPC).getParentID();
     }
 
 
@@ -334,6 +339,14 @@ public class ScriptManager implements Observer {
     public void warp(int id) {
         Field field = chr.getClient().getChannelInstance().getField(id);
         chr.warp(field);
+    }
+
+    /**
+     * Sends a message in the main chat box.
+     * @param text
+     */
+    public void chat(String text) {
+        chr.chatMessage(GAME_MESSAGE, text);
     }
 
 

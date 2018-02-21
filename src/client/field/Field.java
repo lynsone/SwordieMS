@@ -1,16 +1,21 @@
 package client.field;
 
 import client.character.Char;
+import client.character.items.Item;
 import client.character.skills.SkillInfo;
 import client.life.*;
 import connection.OutPacket;
 import enums.LeaveType;
+import javafx.geometry.Pos;
+import loaders.ItemData;
 import loaders.SkillData;
 import packet.CField;
+import packet.DropPool;
 import packet.NpcPool;
 import server.EventManager;
 import util.Position;
 import util.Rect;
+import util.Util;
 
 import java.awt.Rectangle;
 import java.util.*;
@@ -386,7 +391,6 @@ public class Field {
             }
         }
     }
-
     private void removeLife(Life life) {
         if(getLifes().contains(life)) {
             getLifes().remove(life);
@@ -510,6 +514,14 @@ public class Field {
         }
     }
 
+    public synchronized void removeDrop(Integer dropID, Integer pickupUserID, Boolean fromTimer) {
+        Life life = getLifeByObjectID(dropID);
+        if(life instanceof Drop) {
+            broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
+            removeLife(dropID, fromTimer);
+        }
+    }
+
     public Map<Life, Timer> getLifeTimers() {
         return lifeTimers;
     }
@@ -538,6 +550,43 @@ public class Field {
             if(aa.getRect().hasPositionInside(mob.getPosition())) {
                 aa.handleMobInside(mob);
             }
+        }
+    }
+
+    public void drop(DropInfo dropInfo, Position posFrom, Position posTo, int ownerID) {
+        if(dropInfo.willDrop()) {
+            int itemID = dropInfo.getItemID();
+            Item item;
+            Drop drop = new Drop(-1);
+            drop.setOwnerID(ownerID);
+            if(itemID != 0) {
+                item = ItemData.getEquipDeepCopyFromId(itemID);
+                if (item == null) {
+                    item = ItemData.getItemDeepCopy(itemID);
+                }
+                drop.setItem(item);
+            } else {
+                drop.setMoney(dropInfo.getMoney());
+            }
+            addLife(drop);
+            for(Char chr : getChars()) {
+                boolean canDrop = true;
+                if (dropInfo.getQuestReq() != 0) {
+                    canDrop = chr.hasQuestInProgress(dropInfo.getQuestReq());
+                }
+                if(canDrop) {
+                    chr.write(DropPool.dropEnterField(drop, posFrom, posTo, chr.getId()));
+                }
+            }
+        }
+    }
+
+    public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
+        // TODO make it so that multiple drops get proper posTo
+        dropInfos.add(new DropInfo(0, 100, 1000, 0));
+        dropInfos.add(new DropInfo(1382231, 0, 100, 0));
+        for(DropInfo dropInfo : dropInfos) {
+            drop(dropInfo, position, position, ownerID);
         }
     }
 }
