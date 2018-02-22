@@ -5,6 +5,7 @@ import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -12,7 +13,9 @@ import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
 import loaders.SkillData;
+import packet.UserLocal;
 import packet.WvsContext;
+import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
@@ -25,7 +28,11 @@ import static client.character.skills.SkillStat.*;
  */
 public class Mihile extends Job {
 
-    public static final int ROYAL_GUARD = 51001006; //Special Buff/Attack // TODO
+    public static final int ROYAL_GUARD = 51001006; //Special Buff/Attack
+    public static final int ROYAL_GUARD_2 = 51001007;
+    public static final int ROYAL_GUARD_3 = 51001008;
+    public static final int ROYAL_GUARD_4 = 51001009;
+    public static final int ROYAL_GUARD_5 = 51001010;
 
     public static final int SWORD_BOOSTER = 51101003; //Buff
     public static final int RALLY = 51101004; //Buff
@@ -33,10 +40,12 @@ public class Mihile extends Job {
     public static final int ENDURING_SPIRIT = 51111004; //Buff
     public static final int SOUL_LINK = 51111008; //Special Buff (ON/OFF)
     public static final int MAGIC_CRASH = 51111005; //Special Skill (Debuff Mobs)
+    public static final int ADVANCED_ROYAL_GUARD = 51110009; //Upgrade on Royal Guard
 
     public static final int ROILING_SOUL = 51121006; //Buff (ON/OFF)
     public static final int FOUR_POINT_ASSAULT = 51121007; //Special Attack (Accuracy Debuff)
-    public static final int RADIANT_CROSS = 51121009; //Special Attack (Accuracy Debuff)
+    public static final int RADIANT_CROSS = 51121009; //Special Attack (Accuracy Debuff)    Creates an Area of Effect
+    public static final int RADIANT_CROSS_AA = 51120057; //Area of Effect,  After Radiant Cross
     public static final int CALL_OF_CYGNUS_MIHILE = 51121005; //Buff
 
     public static final int QUEEN_OF_TOMORROW = 51121053;
@@ -44,6 +53,10 @@ public class Mihile extends Job {
 
     private int[] buffs = new int[] {
             ROYAL_GUARD,
+            ROYAL_GUARD_2,
+            ROYAL_GUARD_3,
+            ROYAL_GUARD_4,
+            ROYAL_GUARD_5,
             SWORD_BOOSTER,
             RALLY,
             ENDURING_SPIRIT,
@@ -67,9 +80,15 @@ public class Mihile extends Job {
         Option o3 = new Option();
         Option o4 = new Option();
         switch (skillID) {
-            case ROYAL_GUARD:
-                // TODO
-                // mRoyalGuard is a stacking buff
+            case ROYAL_GUARD:   //Shield Attack has something to do with this skill
+            case ROYAL_GUARD_2:
+            case ROYAL_GUARD_3:
+            case ROYAL_GUARD_4:
+            case ROYAL_GUARD_5:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 1;
+                tsm.putCharacterStatValue(RoyalGuardPrepare, o1);
                 break;
             case SWORD_BOOSTER:
                 o1.nOption = si.getValue(x, slv);
@@ -85,10 +104,11 @@ public class Mihile extends Job {
                 tsm.putCharacterStatValue(IndiePAD, o1);
                 break;
             case ENDURING_SPIRIT: // PDDR(DEF%) = x  |  AsrR & TerR = y & z
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                //tsm.putCharacterStatValue(PDDR, o1); //TODO PDDR (DEF %) TempStat?
+                o1.nValue = si.getValue(indiePddR, slv);
+                o1.nReason = skillID;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePDDR, o1);
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
@@ -99,7 +119,14 @@ public class Mihile extends Job {
                 tsm.putCharacterStatValue(TerR, o3);
                 break;
             case SOUL_LINK: // (ON/OFF)
-
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                //tsm.putCharacterStatValue(MichaelSoulLink, o1);
+                o2.nOption = 1;
+                o2.rOption = skillID;
+                o2.tOption = 0;
+                //tsm.putCharacterStatValue(BMageAura, o2);
                 // dot = healing duration
                 // indieDamR = dmg% per member
                 // q = receive 20%s of party's dmg which can be nullified with Royal Guard
@@ -123,7 +150,7 @@ public class Mihile extends Job {
                 o3.nOption = si.getValue(y, slv);
                 o3.rOption = skillID;
                 o3.tOption = 0;
-                tsm.putCharacterStatValue(IncCriticalDamMin, o3); //Doens't increase Min crit Dmg
+                tsm.putCharacterStatValue(BullsEye, o3);
                 break;
             case CALL_OF_CYGNUS_MIHILE:
                 o1.nValue = si.getValue(x, slv);
@@ -170,6 +197,80 @@ public class Mihile extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    private void handleRoyalGuard(TemporaryStatManager tsm, Client c) { //TempStat  Shield Attack is Effect
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        SkillInfo rgi = SkillData.getSkillInfoById(ROYAL_GUARD);
+        int amount = 1;
+        if(tsm.hasStat(RoyalGuardState)) {
+            amount = tsm.getOption(RoyalGuardState).xOption;
+            if(amount < royalGuardMaxCounter()) {
+                amount++;
+            }
+        }
+        o2.nOption = 1;
+        o2.rOption = ROYAL_GUARD_2;
+        o2.tOption = 4;
+        tsm.putCharacterStatValue(NotDamaged, o2);
+
+        o.nOption = 1;
+        o.xOption = amount;
+        o.bOption = 4;
+        o.rOption = ROYAL_GUARD;
+        o.tOption = 12;
+        tsm.putCharacterStatValue(RoyalGuardState, o);
+        o1.nOption = getRoyalGuardAttPower();
+        o1.rOption = ROYAL_GUARD;
+        o1.tOption = 12;
+        tsm.putCharacterStatValue(PAD, o1);
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    private int royalGuardMaxCounter() {
+        int num = 3;
+        if(chr.hasSkill(ROYAL_GUARD)) {
+            num = 3;
+        }
+        if(chr.hasSkill(ADVANCED_ROYAL_GUARD)) {
+            num = 5;
+        }
+        return num;
+    }
+
+    private int getRoyalGuardAttPower() {
+        int pad = 0;
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(ROYAL_GUARD);
+        byte slv = (byte) si.getCurrentLevel();
+        if(tsm.getOption(RoyalGuardState).xOption == 1) {
+            pad = 10;
+        }
+        if(tsm.getOption(RoyalGuardState).xOption == 2) {
+            pad = 15;
+        }
+        if(tsm.getOption(RoyalGuardState).xOption == 3) {
+            pad = 20;
+        }
+        if(tsm.getOption(RoyalGuardState).xOption == 4) {
+            pad = 25;
+        }
+        if(tsm.getOption(RoyalGuardState).xOption == 5) {
+            pad = 35;
+        }
+        return pad;
+    }
+
+    public void supplyInterval() {
+        EventManager.addEvent(this, "supplyInterval", 1500);
+        handleRoyalGuardAttack();
+    }
+
+    private void handleRoyalGuardAttack() {
+        c.write(UserLocal.onRoyalGuardAttack(true));
+    }
+
+
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -213,6 +314,41 @@ public class Mihile extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
+
+
+                    }
+                }
+                if(chr.hasSkill(RADIANT_CROSS_AA)) {
+                    SkillInfo rca = SkillData.getSkillInfoById(RADIANT_CROSS_AA); //TODO stay forever, need to dissapear after 7s
+                    AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setSkillID(RADIANT_CROSS_AA);
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
+                    if (chr.isLeft()) {
+                        aa.setFlip(false);
+                    } else {
+                        aa.setFlip(true);
+                    }
+                    aa.setDelay((short) 7); //spawn delay
+                    chr.getField().spawnAffectedArea(aa);
+                }
+                break;
+            case RADIANT_CROSS_AA:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(mob.isBoss()) {
+                        o1.nOption = si.getValue(x, slv);
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = (si.getValue(time, slv) / 2);
+                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
+                    } else {
+                        o1.nOption = si.getValue(x, slv);
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
                     }
                 }
                 break;
@@ -238,13 +374,19 @@ public class Mihile extends Job {
                 case MAGIC_CRASH:
                     // TODO
                     break;
+                case RADIANT_CROSS:
+                    break;
             }
         }
     }
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(RoyalGuardPrepare)) {
+            handleRoyalGuardAttack();
+            handleRoyalGuard(tsm, c);
+        }
     }
 
     @Override

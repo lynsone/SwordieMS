@@ -42,4 +42,12 @@ public class UserLocal {
 
         return outPacket;
     }
+
+    public static OutPacket onRoyalGuardAttack(boolean attack) {
+        OutPacket outPacket = new OutPacket(OutHeader.ROYAL_GUARD_ATTACK);
+
+        outPacket.encodeByte(attack);
+
+        return outPacket;
+    }
 }

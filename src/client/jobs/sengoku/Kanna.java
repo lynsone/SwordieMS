@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
@@ -48,8 +49,6 @@ public class Kanna extends Job {
     private int[] buffs = new int[]{
             RADIANT_PEACOCK,
             KISHIN_SHOUKAN, //summon
-            BLOSSOM_BARRIER, //AoE
-            BELLFLOWER_BARRIER, //AoE
             AKATUSKI_HERO_KANNA,
             NINE_TAILED_FURY,
             PRINCESS_VOW_KANNA,
@@ -89,11 +88,6 @@ public class Kanna extends Job {
                 summon.setFlyMob(true);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
-                break;
-
-            case BLOSSOM_BARRIER:
-            case BELLFLOWER_BARRIER:
-                //TODO :  AoE
                 break;
 
             case AKATUSKI_HERO_KANNA:
@@ -144,7 +138,16 @@ public class Kanna extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-
+                case BLOSSOM_BARRIER:
+                case BELLFLOWER_BARRIER:
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 3);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
             }
         }
     }

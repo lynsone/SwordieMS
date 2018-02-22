@@ -10,7 +10,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import packet.WvsContext;
-import server.World;
 
 import java.io.IOException;
 
@@ -188,6 +187,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case ZERO_TAG:
                     WorldHandler.handleZeroTag(c, inPacket);
+                    break;
+                case REQUEST_SET_BLESS_OF_DARKNESS:
+                    WorldHandler.handleRequestSetBlessOfDarkness(c, inPacket);
                     break;
                 case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);

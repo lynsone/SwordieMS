@@ -1,18 +1,24 @@
 package client.life;
 
 import client.character.Char;
-import client.character.skills.AttackInfo;
-import client.character.skills.Skill;
-import client.character.skills.SkillInfo;
+import client.character.skills.*;
+import client.character.skills.SkillStat;
+import client.jobs.Zero;
 import client.jobs.adventurer.Archer;
 import client.jobs.adventurer.Magician;
+import client.jobs.adventurer.Thief;
+import client.jobs.cygnus.BlazeWizard;
+import client.jobs.legend.Shade;
+import client.jobs.sengoku.Kanna;
 import enums.MobStat;
 import loaders.SkillData;
-import util.Position;
 import util.Rect;
 
-import java.util.ArrayList;
-import java.util.List;
+import static client.character.skills.CharacterTemporaryStat.IndieBooster;
+import static client.character.skills.CharacterTemporaryStat.IndieDamR;
+import static client.character.skills.SkillStat.indieBooster;
+import static client.character.skills.SkillStat.indieDamR;
+import static client.character.skills.SkillStat.time;
 
 /**
  * Created on 1/6/2018.
@@ -133,22 +139,78 @@ public class AffectedArea extends Life {
         return aa;
     }
 
+    public static AffectedArea getPassiveAA(int skillID, byte slv) {
+        AffectedArea aa = new AffectedArea(-1);
+        aa.setSkillID(skillID);
+        aa.setSlv(slv);
+
+        return aa;
+    }
+
     public void handleMobInside(Mob mob) {
         Char chr = getField().getCharByID(getCharID());
         if(chr == null) {
             return;
         }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int skillID = getSkillID();
         Skill skill = chr.getSkill(getSkillID());
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         MobTemporaryStat mts = mob.getTemporaryStat();
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
         switch(skillID) {
             case Magician.POISON_MIST:
             case Archer.FLAME_SURGE:
                 if(!mts.hasBurnFromSkill(skillID)) {
                     mts.createAndAddBurnedInfo(getCharID(), skill, 1);
                 }
+                break;
+            case Shade.SPIRIT_TRAP:
+                o.nOption = 1;
+                o.rOption = skillID;
+                o.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                break;
+            case Thief.FRAILTY_CURSE:
+                o.nOption = si.getValue(SkillStat.y, slv);
+                o.rOption = skillID;
+                o.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.Speed, o);
+                o1.nOption = si.getValue(SkillStat.x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.PAD, o);
+                mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
+                mts.addStatOptionsAndBroadcast(MobStat.MAD, o);
+                mts.addStatOptionsAndBroadcast(MobStat.MDR, o);
+                break;
+            case Zero.TIME_DISTORTION:  //Also adds a benefit to party members in AoE
+                o.nOption = 1;
+                o.rOption = skillID;
+                o.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                break;
+            case BlazeWizard.BURNING_CONDUIT:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1); //Indie
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieBooster, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
+                break;
+            case Kanna.BELLFLOWER_BARRIER:
+                //TODO Party Boost
+                break;
+            case Kanna.BLOSSOM_BARRIER:
+                //TODO Party Boost
                 break;
         }
     }

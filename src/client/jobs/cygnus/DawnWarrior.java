@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -14,6 +15,7 @@ import enums.ChatMsgColour;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.WvsContext;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
@@ -43,6 +45,8 @@ public class DawnWarrior extends Job {
     public static final int TRUE_SIGHT = 11111023; //Buff (Mob Def Debuff & Final DmgUp Debuff)
 
     public static final int EQUINOX_CYCLE = 11121005; //Buff
+    public static final int EQUINOX_CYCLE_MOON = 11121011;
+    public static final int EQUINOX_CYCLE_SUN = 11121012;
     public static final int IMPALING_RAYS = 11121004; //Special Attack (Incapacitate Debuff)
     public static final int CALL_OF_CYGNUS_DW = 11121000; //Buff
 
@@ -95,7 +99,10 @@ public class DawnWarrior extends Job {
         switch (skillID) {
             case SOUL_ELEMENT:
                 //TODO
-
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(SoulMasterFinal, o1);
                 break;
             case SOUL_SPEED:
                 o1.nOption = si.getValue(x, slv);
@@ -116,7 +123,7 @@ public class DawnWarrior extends Job {
                 o3.nOption = si.getValue(x, slv);
                 o3.rOption = skillID;
                 o3.tOption = 0;
-                tsm.putCharacterStatValue(BuckShot, o3); //TODO  doubles lines, but even without Master of the Sword
+                tsm.putCharacterStatValue(AttackCountX, o3); //TODO  doubles lines, but even without Master of the Sword
                 break;
             case RISING_SUN:
                 o1.nOption = 2;
@@ -158,6 +165,37 @@ public class DawnWarrior extends Job {
                 o5.rOption = skillID;
                 o5.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(GlimmeringTime, o5);
+                break;
+            case EQUINOX_CYCLE_MOON:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(PoseType, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieCr, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 0;
+                tsm.putCharacterStatValue(IndieCr, o2); //Indie
+                o3.nOption = si.getValue(x, slv);
+                o3.rOption = skillID;
+                o3.tOption = 0;
+                tsm.putCharacterStatValue(AttackCountX, o3);
+                break;
+            case EQUINOX_CYCLE_SUN:
+                o1.nOption = 2;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(PoseType, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieDamR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 0;
+                tsm.putCharacterStatValue(IndieDamR, o2); //Indie
+                o3.nReason = skillID;
+                o3.nValue = si.getValue(indieBooster, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = 0;
+                tsm.putCharacterStatValue(IndieBooster, o3);
                 break;
             case CALL_OF_CYGNUS_DW:
                 o1.nReason = skillID;
@@ -218,19 +256,21 @@ public class DawnWarrior extends Job {
         int skillID = 0;
         SkillInfo si = null;
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
+        byte slv = 0;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
+            slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleEquinox(tsm);
+        if(tsm.hasStat(SoulMasterFinal)) {
+            handleSoulElement(attackInfo, slv);
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case IMPALING_RAYS:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) { //TODO
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
@@ -238,12 +278,28 @@ public class DawnWarrior extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        o2.nOption = 1;
+                        o2.rOption = skill.getSkillId();
+                        o2.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.SeperateSoulC, o2);
                     }
                 }
                 break;
-            case TRUE_SIGHT:
-                //TODO
-                break;
+        }
+    }
+
+    private void handleSoulElement(AttackInfo attackInfo, byte slv) {
+        Option o1 = new Option();
+        SkillInfo si = SkillData.getSkillInfoById(SOUL_ELEMENT);
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if (Util.succeedProp(si.getValue(prop, slv))) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                o1.nOption = 1;
+                o1.rOption = SOUL_ELEMENT;
+                o1.tOption = si.getValue(subTime, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+            }
         }
     }
 
@@ -264,9 +320,31 @@ public class DawnWarrior extends Job {
             Option o3 = new Option();
             switch(skillID) {
                 case TRUE_SIGHT:
-                    //TODO
-                    // Mob Def = x
-                    // Final Dmg on mob = v
+                    // Mob Def = v
+                    // Final Dmg on mob = s
+                    Rect rect = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
+                            , inPacket.decodeShort(), inPacket.decodeShort());
+                    for(Life life : chr.getField().getLifesInRect(rect)) {
+                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                            Mob mob = (Mob) life;
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            if(Util.succeedProp(si.getValue(prop, slv))) {
+                                o1.nOption = -(si.getValue(v, slv));
+                                o1.rOption = skillID;
+                                o1.tOption = si.getValue(time, slv);
+                                mts.addStatOptions(MobStat.PDR, o1);
+                                mts.addStatOptions(MobStat.MDR, o1);
+                                o2.nOption = si.getValue(s, slv);
+                                o2.rOption = skillID;
+                                o2.tOption = si.getValue(time, slv);
+                                mts.addStatOptions(MobStat.AddDamParty, o2);
+                                o3.nOption = 1;
+                                o3.rOption = skillID;
+                                o3.tOption = si.getValue(time, slv);
+                                mts.addStatOptionsAndBroadcast(MobStat.TrueSight, o3);
+                            }
+                        }
+                    }
                     break;
                 case IMPERIAL_RECALL:
                     o1.nValue = si.getValue(x, slv);

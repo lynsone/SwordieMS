@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import connection.InPacket;
 import constants.JobConstants;
@@ -52,6 +53,7 @@ public class Phantom extends Job {
     public static final int CARTE_NOIR = 24120002;              //80001890
 
     public static final int HEROIC_MEMORIES_PH = 24121053;
+    public static final int CARTE_ROSE_FINALE = 24121052;
 
     public static final int CARTE_ATOM = 80001890; //TODO maybe
 
@@ -251,6 +253,14 @@ public class Phantom extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
+            case CARTE_ROSE_FINALE:
+                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                aa.setMobOrigin((byte) 1);
+                aa.setCharID(chr.getId());
+                aa.setPosition(chr.getPosition());
+                aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                chr.getField().spawnAffectedArea(aa);
+                break;
         }
     }
 

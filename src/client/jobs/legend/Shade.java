@@ -5,6 +5,7 @@ import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -58,7 +59,6 @@ public class Shade extends Job {
     private final int[] buffs = new int[]{
             FOX_SPIRITS,
             SUMMON_OTHER_SPIRIT,
-            SPIRIT_TRAP,
             SPIRIT_WARD,
             MAPLE_WARRIOR_SH,
             HEROIC_MEMORIES_SH,
@@ -109,9 +109,6 @@ public class Shade extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
-                break;
-            case SPIRIT_TRAP:
-                // TODO AoE
                 break;
             case HEROIC_MEMORIES_SH:
                 o1.nReason = skillID;
@@ -295,11 +292,19 @@ public class Shade extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-
+                case SPIRIT_TRAP:   //TODO Doesn't Bind/Stun enemies
+                    SkillInfo fci = SkillData.getSkillInfoById(skillID);
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
+                    aa.setDelay((short) 4);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
             }
         }
     }
-
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {

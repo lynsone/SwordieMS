@@ -1,18 +1,21 @@
 package handling.handlers;
 
-import client.Account;
 import client.Client;
 import client.character.Char;
 import client.character.ExtendSP;
 import client.character.commands.AdminCommand;
 import client.character.commands.AdminCommands;
-import client.character.items.*;
+import client.character.items.Equip;
+import client.character.items.EquipAttribute;
+import client.character.items.Inventory;
+import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
 import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
+import client.jobs.legend.Luminous;
 import client.life.*;
 import client.life.movement.Movement;
 import connection.InPacket;
@@ -26,7 +29,6 @@ import packet.*;
 import server.Channel;
 import server.Server;
 import server.World;
-import sun.font.Script;
 import util.Position;
 import util.Rect;
 import util.Tuple;
@@ -1636,6 +1638,10 @@ public class WorldHandler {
         int newTF = inPacket.decodeInt();
         int oldTF = inPacket.decodeInt();
         chr.swapZeroState();
+    }
+
+    public static void handleRequestSetBlessOfDarkness(Client c, InPacket inPacket) {
+        Luminous.handleBlackBlessingIncrease(c);
     }
 
     public static void handleBattleRecordOnOffRequest(Client c, InPacket inPacket) {

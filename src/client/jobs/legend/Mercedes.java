@@ -245,23 +245,25 @@ public class Mercedes extends Job {
             Option o = new Option();
             Option o1 = new Option();
             Option o2 = new Option();
-            SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(23111004);
+            SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(IGNIS_ROAR);
+            Skill skill = chr.getSkill(IGNIS_ROAR);
+            byte slv = (byte) skill.getCurrentLevel();
             int amount = 1;
             if (tsm.hasStat(IgnisRore)) {
                 if (tsm.hasStat(AddAttackCount)) {
                     amount = tsm.getOption(AddAttackCount).nOption;
-                    if (amount < ignisRoarInfo.getValue(y, ignisRoarInfo.getCurrentLevel())) {
+                    if (amount < ignisRoarInfo.getValue(y, slv)) {
                         amount++;
                     }
                 }
 
                 o.nOption = amount;
-                o.rOption = 23111004;
-                o.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
+                o.rOption = IGNIS_ROAR;
+                o.tOption = ignisRoarInfo.getValue(subTime, slv);
                 tsm.putCharacterStatValue(AddAttackCount, o);
-                o1.nOption = (amount * ignisRoarInfo.getValue(x, ignisRoarInfo.getCurrentLevel()));
-                o1.rOption = 23111004;
-                o1.tOption = ignisRoarInfo.getValue(subTime, ignisRoarInfo.getCurrentLevel());
+                o1.nOption = (amount * ignisRoarInfo.getValue(x, slv));
+                o1.rOption = IGNIS_ROAR;
+                o1.tOption = ignisRoarInfo.getValue(subTime, slv);
                 tsm.putCharacterStatValue(DamR, o1);
             }
             c.write(WvsContext.temporaryStatSet(tsm));

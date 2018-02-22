@@ -13,7 +13,6 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
-import enums.Stat;
 import loaders.SkillData;
 import packet.UserLocal;
 import packet.WvsContext;
@@ -58,7 +57,7 @@ public class WildHunter extends Job {
 
     public static final int FELINE_BERSERK = 33111007; //Buff
     public static final int BACKSTEP = 33111011; //Special Buff (ON/OFF)
-    public static final int HUNTING_ASSISTANT_UNIT = 33111013; //Summon
+    public static final int HUNTING_ASSISTANT_UNIT = 33111013; //Area of Effect
     public static final int SONIC_ROAR = 33111015; //Special Attack (Bite Debuff)
 
     public static final int JAGUAR_SOUL = 33121017; //Special Attack (Stun Debuff) + (Bite Debuff) + (Magic Crash Debuff)
@@ -249,19 +248,14 @@ public class WildHunter extends Job {
                 break;
 
             case HUNTING_ASSISTANT_UNIT:
+                //Tile
+                break;
             case DRILL_SALVO:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 0); // 0 = Stationary | 1 = Moves with Player
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true); // false = Doesn't Attack | true = Attacks
+                summon.setFlyMob(false);
+                summon.setSummonTerm(0);
+                summon.setMoveAction((byte) 0);
                 field.spawnSummon(summon);
                 break;
         }

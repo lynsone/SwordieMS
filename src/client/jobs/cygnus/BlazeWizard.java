@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -68,7 +69,6 @@ public class BlazeWizard extends Job {
             IGNITION,
             WORD_OF_FIRE,
             PHOENIX_RUN,
-            BURNING_CONDUIT,
             FIRES_OF_CREATION_FOX,
             FIRES_OF_CREATION_LION,
             FLAME_BARRIER,
@@ -111,9 +111,10 @@ public class BlazeWizard extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(FireBarrier, o1); //TODO Correct?
                 break;
+            /*
             case BURNING_CONDUIT: //TODO Area of Effect Buff
                 o1.nReason = skillID;
-                o1.nValue = si.getValue(indieDamR, slv);
+                o1.nValue = si.getValue(y, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1); //Indie
@@ -123,6 +124,7 @@ public class BlazeWizard extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o2); //Indie
                 break;
+            */
             case CALL_OF_CYGNUS_BW:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(x, slv);
@@ -243,7 +245,15 @@ public class BlazeWizard extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
-
+                case BURNING_CONDUIT:
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 15);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
             }
         }
     }
