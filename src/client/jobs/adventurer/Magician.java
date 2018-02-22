@@ -55,6 +55,8 @@ public class Magician extends Job {
     public static final int COLD_BEAM = 2201008;
     public static final int FREEZING_CRUSH = 2200011;   //TODO Set stacks on mobs, gain buff from those stacks
     public static final int FROST_CLUTCH = 2220015;
+    public static final int ELEMENTAL_DRAIN = 2100009;
+    public static final int FERVENT_DRAIN = 2120014;
     public static final int MAGIC_BOOSTER_IL = 2201010;
     public static final int MEDITATION_IL = 2201001;
     public static final int ICE_STRIKE = 2211002;
@@ -169,13 +171,36 @@ public class Magician extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleIgnite(attackInfo, chr, tsm, slv);
-        //handleMegiddo(attackInfo);
 
-        if (hasHitMobs) {
+
+        if (hasHitMobs) {                                   //Common
             handleArcaneAim();
-            handleFreezingCrush(attackInfo, slv);
         }
+
+        if(chr.getJob() > 209 && chr.getJob() < 213) {      //Mage - Fire Poison
+            if(hasHitMobs) {
+                //Ignite
+                handleIgnite(attackInfo, chr, tsm, slv);
+
+                //Elemental Drain
+                handleElementalDrain();
+            }
+        }
+
+        if(chr.getJob() > 219 && chr.getJob() < 223) {      //Mage - Ice Lightning
+            if(hasHitMobs) {
+                //Freezing Crush / Frozen Clutch
+                handleFreezingCrush(attackInfo, slv);
+
+            }
+        }
+
+        if(chr.getJob() > 229 && chr.getJob() < 233) {      //Bishop
+            if(hasHitMobs) {
+
+            }
+        }
+
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -357,6 +382,31 @@ public class Magician extends Job {
                 }
             }
         }
+    }
+
+    private void handleElementalDrain() {
+        Skill skill = chr.getSkill(getElementalDrainSkill());
+        SkillInfo edi = SkillData.getSkillInfoById(getElementalDrainSkill());
+        byte slv = (byte) skill.getCurrentLevel();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Option o1 = new Option();
+        int amount = 1;
+        if (tsm.hasStat(DotBasedBuff)) {
+            amount = tsm.getOption(DotBasedBuff).nOption;
+            if (amount < 5) {
+                amount++;
+            }
+        }
+        o.nOption = amount;
+        o.rOption = ELEMENTAL_DRAIN;
+        o.tOption = 0; // No Time Variable
+        tsm.putCharacterStatValue(DotBasedBuff, o);
+        o1.nOption = (amount * 5);
+        o1.rOption = ELEMENTAL_DRAIN;
+        o1.tOption = 0; // No Time Variable
+        tsm.putCharacterStatValue(DamR, o1);
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     @Override
@@ -664,6 +714,16 @@ public class Magician extends Job {
             res =  ARCANE_AIM_IL;
         } else if (chr.hasSkill(ARCANE_AIM_BISH)) {
             res =  ARCANE_AIM_BISH;
+        }
+        return res;
+    }
+
+    private int getElementalDrainSkill() {
+        int res = 0;
+        if (chr.hasSkill(FERVENT_DRAIN)) {
+            res =  FERVENT_DRAIN;
+        } else if (chr.hasSkill(ELEMENTAL_DRAIN)) {
+            res = ELEMENTAL_DRAIN;
         }
         return res;
     }

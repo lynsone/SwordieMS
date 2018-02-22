@@ -9,6 +9,7 @@ import client.jobs.Job;
 import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
+import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
@@ -53,6 +54,7 @@ public class DawnWarrior extends Job {
     public static final int SOUL_FORGE = 11121054;
     public static final int GLORY_OF_THE_GUARDIANS_DW = 11121053;
 
+
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_STR,
             IMPERIAL_RECALL,
@@ -96,6 +98,8 @@ public class DawnWarrior extends Job {
         Option o3 = new Option();
         Option o4 = new Option();
         Option o5 = new Option();
+        Summon summon;
+        Field field;
         switch (skillID) {
             case SOUL_ELEMENT:
                 //TODO

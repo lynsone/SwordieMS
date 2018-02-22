@@ -61,7 +61,7 @@ public class NightWalker extends Job {
 
     //Bats
     public static final int SHADOW_BAT = 14001027; //Buff (Shadow Bats) (ON/OFF)
-    public static final int SHADOW_BAT_ATOM = 14000028; //TODO  or 28 or 29         //28 registers (looks like AffinityI or II
+    public static final int SHADOW_BAT_ATOM = 14000028;
     public static final int BAT_AFFINITY = 14100027; //Summon Upgrade
     public static final int BAT_AFFINITY_II = 14110029; //Summon Upgrade
     public static final int BAT_AFFINITY_III = 14120008; //Summon Upgrade
@@ -145,12 +145,6 @@ public class NightWalker extends Job {
         Field field;
         switch (skillID) {
             case DARK_ELEMENTAL:
-                // 'prop' % to create a mark of darkness (Debuff on Mobs)
-                // stacks 'x' times
-                // 'y' %DEF ignored
-                // 'time' duration
-                //TODO
-
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -188,6 +182,14 @@ public class NightWalker extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowServant, o1);
+
+/*  TODO    WVS_CRASH_CALLBACK error upon summoning
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
+                field.spawnSummon(summon);
+*/
                 break;
             case SPIRIT_PROJECTION:
                 o1.nOption = si.getValue(x, slv);
@@ -237,6 +239,13 @@ public class NightWalker extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowIllusion, o1);
+/*
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
+                field.spawnSummon(summon);
+*/
                 break;
 
             case DARK_OMEN:

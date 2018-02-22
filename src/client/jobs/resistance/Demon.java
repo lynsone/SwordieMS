@@ -86,12 +86,15 @@ public class Demon extends Job {
     public static final int EXCEED_DEMON_STRIKE_4 = 31201009; //Special Attack  //TODO (EXCEED System)
     public static final int EXCEED_DEMON_STRIKE_PURPLE = 31201010; //Special Attack //TODO (EXCEED System)
     public static final int BATTLE_PACT_DA = 31201002; //Buff
+    public static final int BAT_SWARM = 31201001;
 
     public static final int EXCEED_LUNAR_SLASH_1 = 31211000; //Special Attack   //TODO (EXCEED System)
     public static final int EXCEED_LUNAR_SLASH_2 = 31211007; //Special Attack   //TODO (EXCEED System)
     public static final int EXCEED_LUNAR_SLASH_3 = 31211008; //Special Attack   //TODO (EXCEED System)
     public static final int EXCEED_LUNAR_SLASH_4 = 31211009; //Special Attack   //TODO (EXCEED System)
     public static final int EXCEED_LUNAR_SLASH_PURPLE = 31211010; //Special Attack //TODO (EXCEED System)
+    public static final int VITALITY_VEIL = 31211001;
+    public static final int SHIELD_CHARGE_RUSH = 31211002;
     public static final int SHIELD_CHARGE = 31211011; //Special Attack (Stun Debuff)
     public static final int DIABOLIC_RECOVERY = 31211004; //Buff
 
@@ -169,6 +172,8 @@ public class Demon extends Job {
             case EXCEED_EXECUTION_4:
             case EXCEED_EXECUTION_PURPLE:
                 return EXCEED_EXECUTION_1;
+            case SHIELD_CHARGE:
+                return SHIELD_CHARGE_RUSH;
         }
         return skillID; // no original skill linked with this one
     }
@@ -259,7 +264,10 @@ public class Demon extends Job {
                 tsm.putCharacterStatValue(DevilishPower, o4);
                 break;
             case BOUNDLESS_RAGE:
-                // TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(InfinityForce, o1);
                 break;
             case LEECH_AURA: //TODO hp recover = x | w = max recovery | y = requires sec cooldown
                 o1.nOption = si.getValue(x, slv);
@@ -335,9 +343,7 @@ public class Demon extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        if (chr.getJob() == 3101 || chr.getJob() == 3120 || chr.getJob() == 3121 || chr.getJob() == 3122) {
-            handleOverloadCount(getOriginalSkillByID(skillID), tsm, c);
-        }
+        int originalSkill = getOriginalSkillByID(skillID);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -345,17 +351,35 @@ public class Demon extends Job {
             case CHAOS_LOCK: //prop Stun/Bind
             case VENGEANCE: //prop
             case VORTEX_OF_DOOM: //prop
-            case SHIELD_CHARGE: //prop
-            case BLOOD_PRISON: //prop
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+            case BLOOD_PRISON:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
                             o1.rOption = skill.getSkillId();
                             o1.tOption = si.getValue(time, slv);
                             mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
+                }
+                break;
+            case SHIELD_CHARGE:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.tOption = 5;
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
                 break;
             case CARRION_BREATH: //DoT
@@ -380,32 +404,30 @@ public class Demon extends Job {
                 break;
             case DEMON_CRY:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(y, slv);
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.PAD, o1);
-                        mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
-                        mts.addStatOptionsAndBroadcast(MobStat.MAD, o1);
-                        mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
-                        o2.nOption = si.getValue(v, slv);
-                        o2.rOption = skill.getSkillId();
-                        o2.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o2);
-                        o3.nOption = si.getValue(v, slv);
-                        o3.rOption = skill.getSkillId();
-                        o3.tOption = si.getValue(time, slv);
-                        //mts.addStatOptionsAndBroadcast(MobStat.X, o3); //TODO Item Drop Buff
-                    }
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = -si.getValue(y, slv);
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.PAD, o1);
+                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                    mts.addStatOptionsAndBroadcast(MobStat.MAD, o1);
+                    mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
+                    o2.nOption = -si.getValue(z, slv);
+                    o2.rOption = skill.getSkillId();
+                    o2.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.ACC, o2);
+                    o3.nOption = si.getValue(v, slv);
+                    o3.rOption = skill.getSkillId();
+                    o3.tOption = si.getValue(time, slv);
+                    //mts.addStatOptionsAndBroadcast(MobStat.X, o3); //TODO Item Drop Buff & EXP buff       //TODO unlimited duration
                 }
                 break;
             case DEMON_IMPACT:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
+                        o1.nOption = -20;
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
@@ -413,15 +435,42 @@ public class Demon extends Job {
                 break;
             case NETHER_SLICE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
-                    }
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = 10;
+                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                    mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
                 }
+                break;
+
+
+                //Ugly, I know  but it's the only way I got it to work properly
+            case EXCEED_DOUBLE_SLASH_1:
+            case EXCEED_DOUBLE_SLASH_2:
+            case EXCEED_DOUBLE_SLASH_3:
+            case EXCEED_DOUBLE_SLASH_4:
+            case EXCEED_DOUBLE_SLASH_PURPLE:
+
+            case EXCEED_DEMON_STRIKE_1:
+            case EXCEED_DEMON_STRIKE_2:
+            case EXCEED_DEMON_STRIKE_3:
+            case EXCEED_DEMON_STRIKE_4:
+            case EXCEED_DEMON_STRIKE_PURPLE:
+
+            case EXCEED_LUNAR_SLASH_1:
+            case EXCEED_LUNAR_SLASH_2:
+            case EXCEED_LUNAR_SLASH_3:
+            case EXCEED_LUNAR_SLASH_4:
+            case EXCEED_LUNAR_SLASH_PURPLE:
+
+            case EXCEED_EXECUTION_1:
+            case EXCEED_EXECUTION_2:
+            case EXCEED_EXECUTION_3:
+            case EXCEED_EXECUTION_4:
+            case EXCEED_EXECUTION_PURPLE:
+                handleOverloadCount(attackInfo, skillID, tsm, c);
                 break;
         }
     }
@@ -446,13 +495,12 @@ public class Demon extends Job {
         }
     }
 
-    public void handleOverloadCount(int skillid, TemporaryStatManager tsm, Client c) {
+    public void handleOverloadCount(AttackInfo attackInfo, int skillid, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
-        SkillInfo exceedInfo = SkillData.getSkillInfoById(30010230);
         int amount = 1;
-        if(tsm.hasStat(OverloadCount)){
+        if (tsm.hasStat(OverloadCount)) {
             amount = tsm.getOption(OverloadCount).nOption;
-            if(amount < getMaxExceed(chr)){
+            if (amount < getMaxExceed(chr)) {
                 amount++;
             }
         }
