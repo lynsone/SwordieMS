@@ -290,6 +290,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case BATTLE_RECORD_ON_OFF_REQUEST:
                     WorldHandler.handleBattleRecordOnOffRequest(c, inPacket);
                     break;
+                case USER_SIT_REQUEST:
+                    WorldHandler.handleCancelChair(c, inPacket);
+                    break;
+                case USER_PORTABLE_CHAIR_SIT_REQUEST:
+                    WorldHandler.handleShowChair(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

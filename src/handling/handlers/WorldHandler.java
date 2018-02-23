@@ -1694,4 +1694,19 @@ public class WorldHandler {
         }
 
     }
+
+    public static void handleShowChair(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int chrid = chr.getId();
+        int itemid = inPacket.decodeInt();
+
+
+        c.write(CField.showChair(chrid, itemid));
+        WvsContext.dispose(chr);
+    }
+
+    public static void handleCancelChair(Client c, InPacket inpacket) {
+        int chrid = c.getChr().getId();
+        c.write(CField.cancelChair(chrid, -1));
+    }
 }
