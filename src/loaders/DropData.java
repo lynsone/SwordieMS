@@ -116,9 +116,9 @@ public class DropData {
         if(drops == null) {
             File file = new File(String.format("%s\\mobDrops\\%d.dat", ServerConstants.DAT_DIR, mobID));
             if (file.exists()) {
-                return loadDropsFromFile(file);
+                loadDropsFromFile(file);
+                drops = getCachedDropInfoById(mobID);
             }
-            return null;
         }
         return drops;
     }
@@ -127,25 +127,22 @@ public class DropData {
         return getDrops().getOrDefault(mobID, null);
     }
 
-    public static Set<DropInfo> loadDropsFromFile(File file) {
+    public static void loadDropsFromFile(File file) {
         Set<DropInfo> drops = null;
         try {
             DataInputStream dis = new DataInputStream(new FileInputStream(file));
             int mobID = dis.readInt();
             short size = dis.readShort();
-            drops = new HashSet<>();
             for (int i = 0; i < size; i++) {
                 DropInfo dropInfo = new DropInfo();
                 dropInfo.setItemID(dis.readInt());
                 dropInfo.setChance(dis.readInt());
                 dropInfo.setQuestReq(dis.readInt());
                 addDrop(mobID, dropInfo);
-                drops.add(dropInfo);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return drops;
     }
 
     private static void addDrop(int mobID, DropInfo dropInfo) {
@@ -170,7 +167,6 @@ public class DropData {
     }
 
     public static void main(String[] args) {
-        Set<DropInfo> drops = getDropInfoByID(4230113);
-        System.out.println(drops);
+        generateDatFiles();
     }
 }

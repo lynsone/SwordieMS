@@ -135,4 +135,8 @@ public class Inventory {
     private Item getItemBySlot(int bagIndex) {
         return getItems().stream().filter(item -> item.getBagIndex() == bagIndex).findAny().orElse(null);
     }
+
+    public Item getItemByItemID(int itemId) {
+        return getItems().stream().filter(item -> item.getItemId() == itemId).findFirst().orElse(null);
+    }
 }

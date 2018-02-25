@@ -376,25 +376,33 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket dropPickupMessage(Item item, byte type) {
+    public static OutPacket dropPickupMessage(int money, short internetCafeExtra, short smallChangeExtra) {
+        return dropPickupMessage(money, (byte) 1, internetCafeExtra, smallChangeExtra, (short) 0);
+    }
+
+    public static OutPacket dropPickupMessage(Item item, short quantity) {
+        return dropPickupMessage(item.getItemId(), (byte) 0, (short) 0, (short) 0, quantity);
+    }
+
+    public static OutPacket dropPickupMessage(int i, byte type, short internetCafeExtra, short smallChangeExtra, short quantity) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(DROP_PICKUP_MESSAGE.getVal());
         outPacket.encodeByte(type);
         // also error (?) codes -2, ,-3, -4, -5, <default>
         switch (type) {
-            case 1:
-                outPacket.encodeByte(0); // idk
-                outPacket.encodeInt(item.getItemId());
-                outPacket.encodeShort(1);
-                outPacket.encodeShort(2);
+            case 1: // Mesos
+                outPacket.encodeByte(false); // boolean: portion was lost after falling to the ground
+                outPacket.encodeInt(i); // Mesos
+                outPacket.encodeShort(internetCafeExtra); // Internet cafe
+                outPacket.encodeShort(smallChangeExtra); // Spotting small change
                 break;
-            case 0:
-                outPacket.encodeInt(item.getItemId());
-                outPacket.encodeInt(1); // ?
+            case 0: // item
+                outPacket.encodeInt(i);
+                outPacket.encodeInt(quantity); // ?
                 break;
-            case 2:
-                outPacket.encodeInt(item.getItemId());
+            case 2: // ?
+                outPacket.encodeInt(100);
                 break;
         }
 
@@ -441,9 +449,9 @@ public class WvsContext {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(INC_MONEY_MESSAGE.getVal());
-        outPacket.encodeString(clientName);
         outPacket.encodeInt(amount);
-        outPacket.encodeInt(charID);
+        outPacket.encodeInt(1);
+        outPacket.encodeString(clientName);
 
         return outPacket;
     }

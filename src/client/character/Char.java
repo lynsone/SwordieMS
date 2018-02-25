@@ -297,22 +297,30 @@ public class Char {
     public void addItemToInventory(InvType type, Item item, boolean hasCorrectBagIndex) {
         Inventory inventory = getInventoryByType(type);
         if (inventory != null) {
-            item.setInventoryId(inventory.getId());
-            if (!hasCorrectBagIndex) {
-                item.setBagIndex(inventory.getFirstOpenSlot());
-            }
-            inventory.addItem(item);
-            if (item.getId() == 0) {
-                item.updateDB();
+            Item existingItem = inventory.getItemByItemID(item.getItemId());
+            if (existingItem != null && existingItem.getInvType().isStackable()) {
+                existingItem.addQuantity(item.getQuantity());
+                write(WvsContext.inventoryOperation(this, true, false,
+                        (byte) 0, (short) existingItem.getBagIndex(), (byte) -1, existingItem.getInvType(), (byte) 1,
+                        0, existingItem));
+            } else {
+                item.setInventoryId(inventory.getId());
+                if (!hasCorrectBagIndex) {
+                    item.setBagIndex(inventory.getFirstOpenSlot());
+                }
+                inventory.addItem(item);
+                if (item.getId() == 0) {
+                    item.updateDB();
+                }
+                write(WvsContext.inventoryOperation(this, true, false,
+                        (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) 1,
+                        0, item));
             }
         }
     }
 
     public void addItemToInventoryAndUpdateClient(Item item) {
         addItemToInventory(item);
-        write(WvsContext.inventoryOperation(this, true, false,
-                (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) 1,
-                0, item));
     }
 
     public void addItemToInventory(Item item) {
@@ -1749,10 +1757,16 @@ public class Char {
     public void addDrop(Drop drop) {
         if(drop.isMoney()) {
             addMoney(drop.getMoney());
+            write(WvsContext.dropPickupMessage(drop.getMoney(), (short) 0, (short) 0));
         } else {
             Item item = drop.getItem();
             addItemToInventoryAndUpdateClient(item);
+            write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
         }
+    }
+
+    public String getName() {
+        return getAvatarData().getCharacterStat().getName();
     }
 
     public boolean hasQuestInProgress(int questReq) {

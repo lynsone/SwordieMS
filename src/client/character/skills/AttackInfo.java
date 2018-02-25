@@ -10,7 +10,7 @@ import java.util.List;
 public class AttackInfo {
     public boolean fieldKey;
     public byte hits;
-    public byte mobCount;
+    public int mobCount;
     public int skillId;
     public byte slv;
     public int keyDown;

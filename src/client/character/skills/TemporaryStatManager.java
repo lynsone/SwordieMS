@@ -127,6 +127,9 @@ public class TemporaryStatManager {
         getRemovedStats().put(cts, getCurrentStats().get(cts));
         getCurrentStats().remove(cts);
         getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
+        if (TSIndex.isTwoStat(cts)) {
+            getTSBByTSIndex(TSIndex.getTSEFromCTS(cts)).reset();
+        }
         if(!fromTimer && getTimers().containsKey(cts)) {
             getTimers().get(cts).cancel();
         } else {

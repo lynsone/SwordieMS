@@ -70,10 +70,10 @@ public class WorldHandler {
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         c.write(Stage.setField(chr, field, c.getChannel(), true, 0, true, false,
                 (byte) 0, false, 100, null, true, -1));
-        if (JobConstants.isBeastTamer(chr.getJob())){
+        if (JobConstants.isBeastTamer(chr.getJob())) {
             c.write(CField.beastTamerFuncKeyMappedManInit());
 
-            }else {
+        } else {
             c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
         }
         field.spawnLifesForChar(chr);
@@ -143,6 +143,8 @@ public class WorldHandler {
         if (newPos == 0) { // Drop
             chr.getInventoryByType(invTypeFrom).removeItem(item);
             item.drop();
+            Drop drop = new Drop(-1, item);
+            chr.getField().drop(drop, chr.getPosition(), chr.getPosition());
         } else {
             Item swapItem = chr.getInventoryByType(invTypeTo).getItemBySlot(newPos);
             if (swapItem != null) {
@@ -180,7 +182,7 @@ public class WorldHandler {
         boolean fieldKey = inPacket.decodeByte() == 1;
         byte mask = inPacket.decodeByte();
         byte hits = (byte) (mask & 0xF);
-        byte mobCount = (byte) (mask >>> 4);
+        int mobCount = (mask >>> 4) & 0xF;
         int skillId = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
         inPacket.decodeInt(); // crc
@@ -359,7 +361,7 @@ public class WorldHandler {
         Field field = c.getChr().getField();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
-            if(mob == null) {
+            if (mob == null) {
                 chr.chatMessage(YELLOW, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
             }
             if (mob != null && mob.getHp() > 0) {
@@ -381,7 +383,7 @@ public class WorldHandler {
         String portalName = inPacket.decodeString();
         Field field = chr.getField();
         Portal portal = field.getPortalByName(portalName);
-        if(portal.getScript() != null && !portal.getScript().equals("")) {
+        if (portal.getScript() != null && !portal.getScript().equals("")) {
             chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
         } else {
             Field toField = c.getChannelInstance().getField(portal.getTargetMapId());
@@ -826,16 +828,15 @@ public class WorldHandler {
     }
 
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
-       Char chr = c.getChr();
-       Field field = chr.getField();
-       System.out.println("Gets into handleUserGrowthRequestHelper");
+        Char chr = c.getChr();
+        Field field = chr.getField();
         short Status = inPacket.decodeShort();
-        if(Status == 0) {
+        if (Status == 0) {
             int mapleGuideMapId = inPacket.decodeInt();
             Field toField = chr.getClient().getChannelInstance().getField(mapleGuideMapId);
             chr.warp(toField);
         }
-        if (Status == 2){
+        if (Status == 2) {
             //TODO wtf happens here
             //int write 0
             //int something?
@@ -1653,7 +1654,7 @@ public class WorldHandler {
         short idk2 = inPacket.decodeShort();
         Npc npc = (Npc) chr.getField().getLifeByObjectID(npcID);
         String script = npc.getScripts().get(0);
-        if(script == null) {
+        if (script == null) {
             script = String.valueOf(npc.getTemplateId());
         }
         chr.getScriptManager().startScript(npc.getTemplateId(), script, ScriptType.NPC);
@@ -1665,7 +1666,7 @@ public class WorldHandler {
         byte lastType = inPacket.decodeByte();
         byte action = inPacket.decodeByte();
         int answer = 0;
-        if(nmt == NpcMessageType.AskMenu && action != -1) {
+        if (nmt == NpcMessageType.AskMenu && action != -1) {
             answer = inPacket.decodeInt();
         }
         chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
@@ -1673,7 +1674,7 @@ public class WorldHandler {
 
     public static void handleDropPickUpRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        boolean isOnField = inPacket.decodeByte() != 0;
+        byte fieldKey = inPacket.decodeByte();
         inPacket.decodeInt(); // tick
         Position pos = inPacket.decodePosition();
         int dropID = inPacket.decodeInt();

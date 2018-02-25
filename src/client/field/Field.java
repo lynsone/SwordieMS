@@ -553,6 +553,11 @@ public class Field {
         }
     }
 
+    public void drop(Drop drop, Position posFrom, Position posTo) {
+        addLife(drop);
+        broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
+    }
+
     public void drop(DropInfo dropInfo, Position posFrom, Position posTo, int ownerID) {
         if(dropInfo.willDrop()) {
             int itemID = dropInfo.getItemID();
@@ -583,7 +588,9 @@ public class Field {
 
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
         // TODO make it so that multiple drops get proper posTo
-        dropInfos.add(new DropInfo(0, 100, 1000, 0));
+        if(dropInfos.stream().filter(di -> di.getMoney() > 0).findFirst().orElse(null) == null) {
+            dropInfos.add(new DropInfo(0, 100, 1000, 0));
+        }
         for(DropInfo dropInfo : dropInfos) {
             drop(dropInfo, position, position, ownerID);
         }

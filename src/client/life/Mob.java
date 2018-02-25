@@ -1050,7 +1050,6 @@ public class Mob extends Life {
 
     public void damage(Long totalDamage) {
         long oldHp = getHp();
-        Field field = getField();
         long newHp = oldHp - totalDamage;
         setHp(newHp);
         double percDamage = ((double) newHp / getMaxHp());
@@ -1118,5 +1117,14 @@ public class Mob extends Life {
             }
         }
         return max.getLeft();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Mob) {
+            Mob mob = (Mob) obj;
+            return mob.getTemplateId() == getTemplateId() && mob.getObjectId() == getObjectId() && mob.getField().equals(getField());
+        }
+        return false;
     }
 }

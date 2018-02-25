@@ -26,7 +26,8 @@ import java.util.Map;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Item implements Serializable {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
     @Column(name = "inventoryId")
@@ -104,11 +105,22 @@ public class Item implements Serializable {
         setBagIndex(0);
     }
 
+    public void addQuantity(int amount) {
+        if (amount > 0 && amount + getQuantity() > 0) {
+            setQuantity(getQuantity() + amount);
+        }
+    }
+
+    public void removeQuantity(int amount) {
+        if (amount > 0) {
+            setQuantity(Math.max(0, getQuantity() - amount));
+        }
+    }
+
     public enum Type {
         EQUIP(1),
         ITEM(2),
-        PET(3)
-        ;
+        PET(3);
 
         private byte val;
 
@@ -129,7 +141,8 @@ public class Item implements Serializable {
         }
     }
 
-    public Item() {}
+    public Item() {
+    }
 
     public Item(int itemId, int bagIndex, long cashItemSerialNumber, FileTime dateExpire, InvType invType,
                 boolean isCash, Type type) {

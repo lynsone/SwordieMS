@@ -11,7 +11,7 @@ import util.FileTime;
 public class Drop extends Life {
 
     private Item item;
-    private long money;
+    private int money;
     private DropType dropType;
     private int ownerID;
     private boolean explosiveDrop;
@@ -37,7 +37,7 @@ public class Drop extends Life {
         expireTime = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
     }
 
-    public Drop(int objectId, long money) {
+    public Drop(int objectId, int money) {
         super(objectId);
         this.money = money;
         dropType = DropType.MONEY;
@@ -53,11 +53,11 @@ public class Drop extends Life {
         setDropType(DropType.ITEM);
     }
 
-    public long getMoney() {
+    public int getMoney() {
         return money;
     }
 
-    public void setMoney(long money) {
+    public void setMoney(int money) {
         this.money = money;
         setDropType(DropType.MONEY);
     }

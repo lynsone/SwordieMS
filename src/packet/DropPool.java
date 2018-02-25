@@ -39,7 +39,7 @@ public class DropPool {
         outPacket.encodeInt(dropMotionType); // 2 = Horizontal, 4 = Vertical movement
         outPacket.encodeInt(dropSpeed);
         outPacket.encodeInt(rand);
-        outPacket.encodeInt(drop.isMoney() ? (int) drop.getMoney() : drop.getItem().getItemId());
+        outPacket.encodeInt(drop.getItem() == null ? (int) drop.getMoney() : drop.getItem().getItemId());
         outPacket.encodeInt(drop.getOwnerID());
         outPacket.encodeByte(ownType); // 3 = high drop
         outPacket.encodePosition(dropPos);

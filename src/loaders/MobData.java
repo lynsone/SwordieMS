@@ -11,9 +11,7 @@ import util.Util;
 import util.XMLApi;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static enums.MobStat.*;
 
@@ -22,9 +20,9 @@ import static enums.MobStat.*;
  */
 public class MobData {
 
-    private static List<Mob> mobs = new ArrayList<>();
+    private static Set<Mob> mobs = new HashSet<>();
 
-    public static List<Mob> getMobs() {
+    public static Set<Mob> getMobs() {
         return mobs;
     }
 

@@ -55,4 +55,8 @@ public enum InvType {
         }
         return res;
     }
+
+    public boolean isStackable() {
+        return this != EQUIP;
+    }
 }
