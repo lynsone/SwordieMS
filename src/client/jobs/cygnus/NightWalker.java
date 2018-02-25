@@ -61,11 +61,15 @@ public class NightWalker extends Job {
 
     //Bats
     public static final int SHADOW_BAT = 14001027; //Buff (Shadow Bats) (ON/OFF)
-    public static final int SHADOW_BAT_ATOM = 14000028; //TODO  or 28 or 29         //28 registers (looks like AffinityI or II
+    public static final int SHADOW_BAT_ATOM = 14000028;
     public static final int BAT_AFFINITY = 14100027; //Summon Upgrade
     public static final int BAT_AFFINITY_II = 14110029; //Summon Upgrade
     public static final int BAT_AFFINITY_III = 14120008; //Summon Upgrade
 
+    //Dark Elemental
+    public static final int ADAPTIVE_DARKNESS = 14100026;
+    public static final int ADAPTIVE_DARKNESS_II = 14110028;
+    public static final int ADAPTIVE_DARKNESS_III = 14120007;
 
     //Attacks
     public static final int QUINTUPLE_STAR = 14121001;
@@ -141,12 +145,6 @@ public class NightWalker extends Job {
         Field field;
         switch (skillID) {
             case DARK_ELEMENTAL:
-                // 'prop' % to create a mark of darkness (Debuff on Mobs)
-                // stacks 'x' times
-                // 'y' %DEF ignored
-                // 'time' duration
-                //TODO
-
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -184,6 +182,14 @@ public class NightWalker extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowServant, o1);
+
+/*  TODO    WVS_CRASH_CALLBACK error upon summoning
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
+                field.spawnSummon(summon);
+*/
                 break;
             case SPIRIT_PROJECTION:
                 o1.nOption = si.getValue(x, slv);
@@ -233,6 +239,13 @@ public class NightWalker extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowIllusion, o1);
+/*
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
+                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
+                field.spawnSummon(summon);
+*/
                 break;
 
             case DARK_OMEN:
@@ -348,12 +361,12 @@ public class NightWalker extends Job {
             //if(skillID != 0) {  //SkillID of ShadowBat itself = 0
                 handleShadowBat(tsm, getOriginalSkillByID(skillID), slv, attackInfo);
             //}
-        }
-        if (chr.hasSkill(14120009)) {
-            if (hasHitMobs && Util.succeedProp(SkillData.getSkillInfoById(14001021).getValue(prop, slv))) { //TODO get Mark of Darkness Prop (needs a handler)
-                handleSiphonVitality(getOriginalSkillByID(skillID), tsm, c);
+            if(tsm.hasStat(ElementDarkness)) {
+                handleDarkElemental(attackInfo, slv);
             }
         }
+
+
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -366,13 +379,89 @@ public class NightWalker extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-
-                        handleSiphonVitality(skill.getSkillId(), tsm, c);
                 }
                 break;
-
-            //TODO case All attacks give DoT debuff
         }
+    }
+
+    private void handleDarkElemental(AttackInfo attackInfo, byte slv) {
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(ElementDarkness)) {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Skill skill = chr.getSkill(attackInfo.skillId);
+            int skillID = skill.getSkillId();
+            int amount = 1;
+            SkillInfo si = SkillData.getSkillInfoById(DARK_ELEMENTAL);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(getDarkEleProp())) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+
+                    if (mts.hasCurrentMobStat(MobStat.ElementDarkness)) {
+                        amount = mts.getCurrentOptionsByMobStat(MobStat.ElementDarkness).nOption;
+                        if (amount < getMaxDarkEleStack()) {
+                            amount++;
+                        }
+                    }
+                    o1.nOption = amount;
+                    o1.rOption = DARK_ELEMENTAL;
+                    o1.tOption = 15;
+                    mts.addStatOptionsAndBroadcast(MobStat.ElementDarkness, o1);
+
+                    o2.nOption = 1;
+                    o2.rOption = DARK_ELEMENTAL;
+                    o2.tOption = 15; //si.getValue(subTime, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Blind, o2);  //To Show the Stack Effect
+
+                    //mts.createAndAddBurnedInfo(chr.getId(), skill, 1); //TODO Uncomment gives NPE
+
+                    //handle Vitality Siphon
+                    if (chr.hasSkill(VITALITY_SIPHON)) {
+                        handleSiphonVitality(getOriginalSkillByID(skillID), tsm, c);
+                    }
+                }
+            }
+        }
+    }
+
+    private int getMaxDarkEleStack() {
+        int maxStack = 2;
+        if(chr.hasSkill(DARK_ELEMENTAL)) {
+            maxStack = 2;
+        }
+        if(chr.hasSkill(ADAPTIVE_DARKNESS)) {
+            maxStack += 1;
+        }
+        if(chr.hasSkill(ADAPTIVE_DARKNESS_II)) {
+            maxStack += 1;
+        }
+        if(chr.hasSkill(ADAPTIVE_DARKNESS_III)) {
+            maxStack += 1;
+        }
+        return maxStack;
+    }
+
+    private int getDarkEleProp() {
+        SkillInfo dei = SkillData.getSkillInfoById(DARK_ELEMENTAL);
+        SkillInfo ad1 = SkillData.getSkillInfoById(ADAPTIVE_DARKNESS);
+        SkillInfo ad2 = SkillData.getSkillInfoById(ADAPTIVE_DARKNESS_II);
+        SkillInfo ad3 = SkillData.getSkillInfoById(ADAPTIVE_DARKNESS_III);
+        int prop = dei.getValue(SkillStat.prop, dei.getCurrentLevel());
+        if(chr.hasSkill(DARK_ELEMENTAL)) {
+            prop = dei.getValue(SkillStat.prop, dei.getCurrentLevel());
+        }
+        if(chr.hasSkill(ADAPTIVE_DARKNESS)) {
+            prop += ad1.getValue(SkillStat.prop, ad1.getCurrentLevel());
+        }
+        if(chr.hasSkill(ADAPTIVE_DARKNESS_II)) {
+            prop += ad2.getValue(SkillStat.prop, ad1.getCurrentLevel());
+        }
+        if(chr.hasSkill(ADAPTIVE_DARKNESS_III)) {
+            prop += ad3.getValue(SkillStat.prop, ad1.getCurrentLevel());
+        }
+        return prop;
     }
 
     @Override
@@ -425,7 +514,9 @@ public class NightWalker extends Job {
     private void handleSiphonVitality(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
-        SkillInfo siphonInfo = SkillData.getSkillInfoById(14120009);
+        SkillInfo siphonInfo = SkillData.getSkillInfoById(VITALITY_SIPHON);
+        Skill skill = chr.getSkill(VITALITY_SIPHON);
+        byte slv = (byte) skill.getCurrentLevel();
         int amount = 1;
         if(tsm.hasStat(ElementDarkness)) {
             if (tsm.hasStat(SiphonVitality)) {
@@ -435,12 +526,12 @@ public class NightWalker extends Job {
                 }
             }
             o.nOption = amount;
-            o.rOption = 14120009;
-            o.tOption = siphonInfo.getValue(time, siphonInfo.getCurrentLevel());
+            o.rOption = VITALITY_SIPHON;
+            o.tOption = siphonInfo.getValue(time, slv);
             tsm.putCharacterStatValue(SiphonVitality, o);
-            o1.nOption = (amount * siphonInfo.getValue(y, siphonInfo.getCurrentLevel()));
-            o1.rOption = 14120009;
-            o1.tOption = siphonInfo.getValue(time, siphonInfo.getCurrentLevel());
+            o1.nOption = (amount * siphonInfo.getValue(y, slv));
+            o1.rOption = VITALITY_SIPHON;
+            o1.tOption = siphonInfo.getValue(time, slv);
             tsm.putCharacterStatValue(MaxHP, o1);
             c.write(WvsContext.temporaryStatSet(tsm));
         }

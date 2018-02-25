@@ -54,6 +54,9 @@ public class Magician extends Job {
     public static final int CHILLING_STEP = 2201009;
     public static final int COLD_BEAM = 2201008;
     public static final int FREEZING_CRUSH = 2200011;   //TODO Set stacks on mobs, gain buff from those stacks
+    public static final int FROST_CLUTCH = 2220015;
+    public static final int ELEMENTAL_DRAIN = 2100009;
+    public static final int FERVENT_DRAIN = 2120014;
     public static final int MAGIC_BOOSTER_IL = 2201010;
     public static final int MEDITATION_IL = 2201001;
     public static final int ICE_STRIKE = 2211002;
@@ -95,6 +98,7 @@ public class Magician extends Job {
     public static final int MEGIDDO_FLAME_ATOM = 2121055;
 
 
+
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
     };
@@ -124,7 +128,6 @@ public class Magician extends Job {
             BLESS,
             HOLY_MAGIC_SHELL,
             TELEPORT_MASTERY_BISH,
-            HOLY_FOUNTAIN, //AoE
             DIVINE_PROTECTION,
             MYSTIC_DOOR,
             HOLY_SYMBOL,
@@ -162,18 +165,42 @@ public class Magician extends Job {
         int skillID = 0;
         SkillInfo si = null;
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
+        byte slv = 0;
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
+            slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleIgnite(attackInfo, chr, tsm, slv);
-        //handleMegiddo(attackInfo);
 
-        if (hasHitMobs) {
+
+        if (hasHitMobs) {                                   //Common
             handleArcaneAim();
         }
+
+        if(chr.getJob() > 209 && chr.getJob() < 213) {      //Mage - Fire Poison
+            if(hasHitMobs) {
+                //Ignite
+                handleIgnite(attackInfo, chr, tsm, slv);
+
+                //Elemental Drain
+                handleElementalDrain();
+            }
+        }
+
+        if(chr.getJob() > 219 && chr.getJob() < 223) {      //Mage - Ice Lightning
+            if(hasHitMobs) {
+                //Freezing Crush / Frozen Clutch
+                handleFreezingCrush(attackInfo, slv);
+
+            }
+        }
+
+        if(chr.getJob() > 229 && chr.getJob() < 233) {      //Bishop
+            if(hasHitMobs) {
+
+            }
+        }
+
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -309,7 +336,8 @@ public class Magician extends Job {
             return;
         }
         SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(skill.getSkillId());
-        int arcaneAimProp = arcaneAimInfo.getValue(prop, skill.getCurrentLevel());
+        byte slv = (byte) skill.getCurrentLevel();
+        int arcaneAimProp = arcaneAimInfo.getValue(prop, slv);
         if(!Util.succeedProp(arcaneAimProp)) {
             return;
         }
@@ -320,7 +348,7 @@ public class Magician extends Job {
         int amount = 1;
         if (tsm.hasStat(ArcaneAim)) {
             amount = tsm.getOption(ArcaneAim).nOption;
-            if (amount < arcaneAimInfo.getValue(y, arcaneAimInfo.getCurrentLevel())) {
+            if (amount < arcaneAimInfo.getValue(y, slv)) {
                 amount++;
             }
         }
@@ -328,11 +356,11 @@ public class Magician extends Job {
         o.rOption = 2320011;
         o.tOption = 5; // No Time Variable
         tsm.putCharacterStatValue(ArcaneAim, o);
-        o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, arcaneAimInfo.getCurrentLevel());
+        o1.nOption = arcaneAimInfo.getValue(ignoreMobpdpR, slv);
         o1.rOption = 2320011;
         o1.tOption = 5; // No Time Variable
         tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
-        o2.nOption = ( amount * arcaneAimInfo.getValue(x, arcaneAimInfo.getCurrentLevel()));
+        o2.nOption = ( amount * arcaneAimInfo.getValue(x, slv));
         o2.rOption = 2320011;
         o2.tOption = 5; // No Time Variable
         tsm.putCharacterStatValue(DamR, o2);
@@ -354,6 +382,31 @@ public class Magician extends Job {
                 }
             }
         }
+    }
+
+    private void handleElementalDrain() {
+        Skill skill = chr.getSkill(getElementalDrainSkill());
+        SkillInfo edi = SkillData.getSkillInfoById(getElementalDrainSkill());
+        byte slv = (byte) skill.getCurrentLevel();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Option o1 = new Option();
+        int amount = 1;
+        if (tsm.hasStat(DotBasedBuff)) {
+            amount = tsm.getOption(DotBasedBuff).nOption;
+            if (amount < 5) {
+                amount++;
+            }
+        }
+        o.nOption = amount;
+        o.rOption = ELEMENTAL_DRAIN;
+        o.tOption = 0; // No Time Variable
+        tsm.putCharacterStatValue(DotBasedBuff, o);
+        o1.nOption = (amount * 5);
+        o1.rOption = ELEMENTAL_DRAIN;
+        o1.tOption = 0; // No Time Variable
+        tsm.putCharacterStatValue(DamR, o1);
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     @Override
@@ -378,8 +431,6 @@ public class Magician extends Job {
                     break;
                 case FREEZING_BREATH:
                     break;
-                case CHILLING_STEP:
-                    break;
                 case MEGIDDO_FLAME:
                     handleMegiddoFlame();
                     break;
@@ -389,6 +440,15 @@ public class Magician extends Job {
                     o1.tOption = 0;
                     tsm.putCharacterStatValue(HeavensDoor, o1);
                     c.write(WvsContext.temporaryStatSet(tsm));
+                    break;
+                case HOLY_FOUNTAIN: //User_Create_Holidom_Request  needs to be created
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 4);
+                    chr.getField().spawnAffectedArea(aa);
                     break;
 
 
@@ -499,8 +559,6 @@ public class Magician extends Job {
                 break;
             case HOLY_MAGIC_SHELL: //TODO
                 //HolyMagicShell
-                break;
-            case HOLY_FOUNTAIN:    //TODO Area of Effect
                 break;
             case IFRIT:
             case ELQUINES:
@@ -659,4 +717,33 @@ public class Magician extends Job {
         }
         return res;
     }
+
+    private int getElementalDrainSkill() {
+        int res = 0;
+        if (chr.hasSkill(FERVENT_DRAIN)) {
+            res =  FERVENT_DRAIN;
+        } else if (chr.hasSkill(ELEMENTAL_DRAIN)) {
+            res = ELEMENTAL_DRAIN;
+        }
+        return res;
+    }
+
+    private void handleFreezingCrush(AttackInfo attackInfo, byte slv) {
+        Option o1 = new Option();
+        Option o2 = new Option();
+        SkillInfo si = SkillData.getSkillInfoById(FROST_CLUTCH);
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            //if (Util.succeedProp(si.getValue(prop, slv))) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                o1.nOption = 1;
+                o1.rOption = FROST_CLUTCH;
+                o1.tOption = 15; //si.getValue(subTime, slv);
+                o1.mOption = 2; //Should be Amount
+                mts.addStatOptionsAndBroadcast(MobStat.Speed, o1); // IDA says it's Speed, but it doesn't broadcast the Debuff over the mob
+            //}
+        }
+    }
+
 }
+

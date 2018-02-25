@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -69,7 +70,6 @@ public class BattleMage extends Job {
             DARK_SHOCK,
             WEAKENING_AURA,
             STAFF_BOOST,
-            PARTY_SHIELD, //TODO Area of Effect Skill
             BATTLE_RAGE,
             MAPLE_WARRIOR_BAM,
             FOR_LIBERTY_BAM,
@@ -124,18 +124,17 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
 
-                    //TODO  Hasty Aura 38s
             case HASTY_AURA:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieSpeed, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = 0;
-                //tsm.putCharacterStatValue(IndieSpeed, o1);
+                tsm.putCharacterStatValue(IndieSpeed, o1);
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = 0;
-                //tsm.putCharacterStatValue(IndieBooster, o2);
+                tsm.putCharacterStatValue(IndieBooster, o2);
                 o3.nOption = 1;
                 o3.rOption = skillID;
                 o3.tOption = 0;
@@ -365,7 +364,13 @@ public class BattleMage extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case PARTY_SHIELD:
-                    //TODO
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 2);
+                    chr.getField().spawnAffectedArea(aa);
                     break;
                 case SECRET_ASSEMBLY:
                     o1.nValue = si.getValue(x, slv);

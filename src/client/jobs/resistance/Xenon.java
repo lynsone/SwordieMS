@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -196,6 +197,7 @@ public class Xenon extends Job {
 
             case HYPOGRAM_FIELD_FORCE_FIELD:
             case HYPOGRAM_FIELD_PENETRATE:
+            case HYPOGRAM_FIELD_SUPPORT:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
@@ -285,20 +287,6 @@ public class Xenon extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
                 }
                 break;
-            case ORBITAL_CATACLYSM:
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(indieDamR, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieDamR, o1);
-                o2.nReason = skillID;
-                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
-                c.write(WvsContext.temporaryStatSet(tsm));
-                break;
-
         }
     }
 
@@ -311,6 +299,7 @@ public class Xenon extends Job {
             si = SkillData.getSkillInfoById(skillID);
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         handleSupplyCost(skillID, slv, si);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
@@ -323,12 +312,31 @@ public class Xenon extends Job {
                     incrementSupply(si.getValue(x, slv));
                     break;
                 case TEMPORAL_POD:
-                    //TODO
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 4);
+                    chr.getField().spawnAffectedArea(aa);
                     break;
                 case PROMESSA_ESCAPE:
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case ORBITAL_CATACLYSM:
+                    o1.nReason = skillID;
+                    o1.nValue = si.getValue(indieDamR, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieDamR, o1);
+                    o2.nReason = skillID;
+                    o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                    c.write(WvsContext.temporaryStatSet(tsm));
                     break;
             }
         }

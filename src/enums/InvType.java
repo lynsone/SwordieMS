@@ -9,8 +9,8 @@ public enum InvType {
     EQUIPPED(-1),
     EQUIP(1),
     CONSUME(2),
-    ETC(3),
-    INSTALL(4),
+    ETC(4),
+    INSTALL(3),
     CASH(5)
     ;
 

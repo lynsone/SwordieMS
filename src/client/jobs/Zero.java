@@ -5,6 +5,7 @@ import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -43,16 +44,17 @@ public class Zero extends Job {
     public static final int RHINNES_PROTECTION = 100001268; //Buff
 
     public static final int TIME_HOLDING = 100001274;
-    public static final int TIME_DISTORTION = 100001261; //TODO; AoE
+    public static final int TIME_DISTORTION = 100001261;
     public static final int REWIND = 100001272;
     public static final int FOCUSED_TIME = 100001005;
-
 
     public static final int AIR_RIOT = 101000101; //Special Attack (Stun Debuff)
     public static final int THROWING_WEAPON = 101100100; //Special Attack (Throw Sword)
     public static final int ADVANCED_THROWING_WEAPON = 101100101; //Special Attack (Throw Sword)
     public static final int ADV_EARTH_BREAK = 101120105; //Special Attack (Shock Field)
     public static final int ADV_STORM_BREAK = 101120204; //Special Attack (Shock Field)
+    public static final int ADV_EARTH_BREAK_SHOCKWAVE = 101120106;
+    public static final int ADV_STORM_BREAK_SHOCKWAVE = 101120206;
     public static final int DIVINE_LEER = 101120207;
     public static final int CRITICAL_BIND = 101120110;
     public static final int IMMUNE_BARRIER = 101120109;
@@ -261,8 +263,36 @@ public class Zero extends Job {
                 }
                 break;
             case ADV_EARTH_BREAK:
+                SkillInfo aebi = SkillData.getSkillInfoById(ADV_EARTH_BREAK_SHOCKWAVE); //TODO stay forever & should be larger
+                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                aa.setMobOrigin((byte) 0);
+                aa.setCharID(chr.getId());
+                aa.setSkillID(ADV_EARTH_BREAK_SHOCKWAVE);
+                aa.setPosition(chr.getPosition());
+                aa.setRect(aa.getPosition().getRectAround(aebi.getRects().get(0)));
+                if (chr.isLeft()) {
+                    aa.setFlip(false);
+                } else {
+                    aa.setFlip(true);
+                }
+                aa.setDelay((short) 7); //spawn delay
+                chr.getField().spawnAffectedArea(aa);
+                break;
             case ADV_STORM_BREAK:
-                //TODO
+                SkillInfo asbi = SkillData.getSkillInfoById(ADV_STORM_BREAK_SHOCKWAVE); //TODO stay forever & should be larger
+                AffectedArea aa2 = AffectedArea.getAffectedArea(attackInfo);
+                aa2.setMobOrigin((byte) 0);
+                aa2.setCharID(chr.getId());
+                aa2.setSkillID(ADV_STORM_BREAK_SHOCKWAVE);
+                aa2.setPosition(chr.getPosition());
+                aa2.setRect(aa2.getPosition().getRectAround(asbi.getRects().get(0)));
+                if (chr.isLeft()) {
+                    aa2.setFlip(false);
+                } else {
+                    aa2.setFlip(true);
+                }
+                aa2.setDelay((short) 7); //spawn delay
+                chr.getField().spawnAffectedArea(aa2);
                 break;
         }
     }
@@ -294,6 +324,15 @@ public class Zero extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case TIME_DISTORTION:
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 5);
+                    chr.getField().spawnAffectedArea(aa);
                     break;
             }
         }

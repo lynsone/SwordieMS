@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
+
 //TODO Paladin Divine Shield & Guardian
 //TODO DarkKnight Sacrifice & Evil Eye
 
@@ -67,6 +68,7 @@ public class Warrior extends Job {
     public static final int MAPLE_WARRIOR_PALADIN = 1221000;
     public static final int GUARDIAN = 1221016;
     public static final int BLAST = 1221009;
+    public static final int DIVINE_SHIELD = 1210016;
     public static final int MAGIC_CRASH_PALLY = 1221014;
 
     //Dark Knight
@@ -91,6 +93,7 @@ public class Warrior extends Job {
     public static final int CRY_VALHALLA = 1121054; //Lv150
     public static final int SACROSANCTITY = 1221054; //Lv150
     public static final int DARK_THIRST = 1321054; //Lv150
+    public static final int SMITE_SHIELD = 1221052; //Lv170
 
 
     private Summon evilEye;
@@ -129,6 +132,7 @@ public class Warrior extends Job {
     private long lastHpRecovery = Long.MIN_VALUE;
     private int lastCharge = 0;
     private int recoveryAmount = 0;
+    private int divShieldAmount = 0;
 
     public Warrior(Char chr) {
         super(chr);
@@ -151,6 +155,7 @@ public class Warrior extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
         switch (skillID) {
             case WEAPON_BOOSTER_FIGHTER:
             case WEAPON_BOOSTER_PAGE:
@@ -210,6 +215,10 @@ public class Warrior extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Guard, o3);
+                o4.nOption = 1;
+                o4.rOption = skillID;
+                o4.tOption = 0;
+                tsm.putCharacterStatValue(KnightsAura, o4);
                 break;
             case ELEMENTAL_FORCE:
                 o1.nReason = skillID;
@@ -389,7 +398,7 @@ public class Warrior extends Job {
             skillID = skill.getSkillId();
         }
         int comboProp = getComboProp(chr);
-        if (hasHitMobs && Util.succeedProp(comboProp)) {
+/*        if (hasHitMobs && Util.succeedProp(comboProp)) {
             addCombo(chr);
             Skill advCombo = chr.getSkill(COMBO_ATTACK);
             int secondProp = SkillData.getSkillInfoById(advCombo.getSkillId()).getValue(prop, slv);
@@ -397,6 +406,34 @@ public class Warrior extends Job {
                 addCombo(chr);
             }
         }
+*/
+        if(chr.getJob() > 109 && chr.getJob() < 113) {      //Hero
+            if(hasHitMobs) {
+                //Combo
+                if(Util.succeedProp(comboProp)) {
+                    addCombo(chr);
+                    Skill advCombo = chr.getSkill(COMBO_ATTACK);
+                    int secondProp = SkillData.getSkillInfoById(advCombo.getSkillId()).getValue(prop, slv);
+                    if(advCombo != null && Util.succeedProp(secondProp)) {
+                        addCombo(chr);
+                    }
+                }
+
+            }
+        }
+
+        if(chr.getJob() > 119 && chr.getJob() < 123) {      //Paladin
+            if(hasHitMobs) {
+
+            }
+        }
+
+        if(chr.getJob() > 129 && chr.getJob() < 133) {      //Dark Knight
+            if(hasHitMobs) {
+
+            }
+        }
+
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -550,7 +587,7 @@ public class Warrior extends Job {
             case BLAST:
                 int charges = tsm.getOption(ElementalCharge).mOption;
                 if(charges == SkillData.getSkillInfoById(ELEMENTAL_CHARGE).getValue(z, 1)) {
-                    if(tsm.getOptByCTSAndSkill(DamR, 1221009) == null) {
+                    if(tsm.getOptByCTSAndSkill(DamR, BLAST) == null) {
                     resetCharges(c, tsm);
                     int t = si.getValue(time, slv);
                     o1.nOption = si.getValue(cr, slv);
@@ -567,6 +604,16 @@ public class Warrior extends Job {
                     tsm.putCharacterStatValue(DamR, o3);
                     c.write(WvsContext.temporaryStatSet(tsm));
                     }
+                }
+                break;
+            case SMITE_SHIELD:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Smite, o1);
                 }
                 break;
             case SPEAR_SWEEP:
@@ -687,7 +734,45 @@ public class Warrior extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        if(chr.hasSkill(DIVINE_SHIELD)) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            SkillInfo si = SkillData.getSkillInfoById(DIVINE_SHIELD);
+            byte slv = (byte) si.getCurrentLevel();
+            int shieldprop = 50;//      si.getValue(SkillStat.prop, slv);       //TODO should be prop in WzFiles, but it's actually 0
+            Option o1 = new Option();
+            Option o2 = new Option();
 
+            if(tsm.hasStat(BlessingArmor)) {
+                if(divShieldAmount<10) {
+                    divShieldAmount++;
+                } else {
+                    resetDivineShield();
+                    divShieldAmount = 0;
+                }
+            } else {
+                if (Util.succeedProp(shieldprop)) {
+                    o1.nOption = 1;
+                    o1.rOption = DIVINE_SHIELD;
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(BlessingArmor, o1);
+                    o2.nOption = si.getValue(epad, slv);
+                    o2.rOption = DIVINE_SHIELD;
+                    o2.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(PAD, o2);
+                    c.write(WvsContext.temporaryStatSet(tsm));
+                    divShieldAmount = 0;
+                }
+            }
+
+
+        }
+    }
+
+    private void resetDivineShield() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.removeStat(BlessingArmor, false);
+        tsm.removeStat(PAD, false);
+        c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
     private void addCombo(Char chr) {
@@ -698,7 +783,7 @@ public class Warrior extends Job {
         if (currentCount < getMaxCombo(chr)) {
             Option o = new Option();
             o.nOption = currentCount + 1;
-            o.rOption = 1101013;
+            o.rOption = COMBO_ATTACK;
             chr.getTemporaryStatManager().putCharacterStatValue(ComboCounter, o);
             chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
         }
@@ -712,17 +797,17 @@ public class Warrior extends Job {
         } else {
             o.nOption = 0;
         }
-        o.rOption = 1101013;
+        o.rOption = COMBO_ATTACK;
         chr.getTemporaryStatManager().putCharacterStatValue(ComboCounter, o);
         chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
     }
 
     private int getComboProp(Char chr) {
         Skill skill = null;
-        if (chr.hasSkill(1110013)) {
+        if (chr.hasSkill(1110013)) {    //Combo Synergy
             skill = chr.getSkill(1110013);
-        } else if (chr.hasSkill(1101013)) {
-            skill = chr.getSkill(1101013);
+        } else if (chr.hasSkill(COMBO_ATTACK)) {
+            skill = chr.getSkill(COMBO_ATTACK);
         }
         if (skill == null) {
             return 0;
@@ -740,7 +825,7 @@ public class Warrior extends Job {
 
     private int getMaxCombo(Char chr) {
         int num = 0;
-        if (chr.hasSkill(1101013)) {
+        if (chr.hasSkill(COMBO_ATTACK)) {
             num = 6;
         }
         if (chr.hasSkill(1120003)) {

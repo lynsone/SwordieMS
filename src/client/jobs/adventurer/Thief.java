@@ -6,10 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
-import client.life.Life;
-import client.life.Mob;
-import client.life.MobTemporaryStat;
-import client.life.Summon;
+import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
@@ -29,7 +26,6 @@ import java.util.List;
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
 
-//TODO Shadower - Critical Growth //
 //TODO DB - Mirror Image
 
 //nFlipTheCoin = stack icon
@@ -59,7 +55,7 @@ public class Thief extends Job {
     public static final int MAPLE_WARRIOR_NL = 4121000; //Buff
     public static final int SHOWDOWN = 4121017; //Special Attack
     public static final int SUDDEN_RAID_NL = 4121016; //Special Attack
-    public static final int FRAILTY_CURSE = 4121015; //Summon
+    public static final int FRAILTY_CURSE = 4121015; //AoE
 
 
     // Shadower
@@ -104,10 +100,12 @@ public class Thief extends Job {
     public static final int EPIC_ADVENTURE_SHAD = 4221053;
     public static final int EPIC_ADVENTURE_DB = 4341053;
     public static final int BLEED_DART = 4121054;
-    public static final int FLIP_THE_COIN = 4221054; //TODO Method
+    public static final int FLIP_THE_COIN = 4221054;
     public static final int BLADE_CLONE = 4341054;
     public static final int ASURAS_ANGER = 4341053;
 
+
+    //public AffectedArea aa;
 
     private int critAmount;
     private int supposedCrit;
@@ -125,9 +123,7 @@ public class Thief extends Job {
             SHADOW_PARTNER_NL,
             SHADOW_STARS,
             DARK_FLARE_NL,
-            FRAILTY_CURSE,
             MAPLE_WARRIOR_NL,
-
 
             DAGGER_BOOSTER,
             MESOGUARD,
@@ -143,7 +139,6 @@ public class Thief extends Job {
             FINAL_CUT,
             MIRRORED_TARGET,
             MAPLE_WARRIOR_DB,
-
 
             EPIC_ADVENTURE_NL,
             EPIC_ADVENTURE_SHAD,
@@ -185,13 +180,16 @@ public class Thief extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        if (chr.getJob() > 409 || chr.getJob() < 413) { //Night Lord
+
+        if (chr.getJob() > 409 && chr.getJob() < 413) { //Night Lord
 
             if(hasHitMobs) {
                 handleNightLordMark(skillID, slv, attackInfo);
             }
         }
-        if (chr.getJob() > 419 || chr.getJob() < 423) { //Shadower
+
+
+        if (chr.getJob() > 419 && chr.getJob() < 423) { //Shadower
             if(hasHitMobs) {
                 //Critical Growth & Prime Critical
                 incrementCritGrowing();
@@ -342,9 +340,31 @@ public class Thief extends Job {
                     chr.warp(toField);
                     break;
                 case SMOKE_SCREEN:
-                    //TODO
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 4);
+                    chr.getField().spawnAffectedArea(aa);
                     break;
-
+                case FRAILTY_CURSE:
+                    SkillInfo fci = SkillData.getSkillInfoById(skillID);
+                    int lt1 = si.getValue(lt, slv);
+                    int rb1 = si.getValue(rb, slv);
+                    AffectedArea aa2 = AffectedArea.getPassiveAA(skillID, slv);
+                    aa2.setMobOrigin((byte) 0);
+                    aa2.setCharID(chr.getId());
+                    aa2.setPosition(chr.getPosition());
+                    aa2.setRect(aa2.getPosition().getRectAround(fci.getRects().get(0)));
+                    if (chr.isLeft()) {
+                        aa2.setFlip(false);
+                    } else {
+                        aa2.setFlip(true);
+                    }
+                    aa2.setDelay((short) 9);
+                    chr.getField().spawnAffectedArea(aa2);
+                    break;
                 case MESO_EXPLOSION:
                     handleMesoExplosion();
                     break;
@@ -545,7 +565,7 @@ public class Thief extends Job {
         }
         o.nOption = amount;
         o.rOption = FLIP_THE_COIN;
-        o.tOption = FlipTheCoinInfo.getValue(time, FlipTheCoinInfo.getCurrentLevel());
+        o.tOption = FlipTheCoinInfo.getValue(time, 1);
         tsm.putCharacterStatValue(FlipTheCoin, o);
 
         //Stats
@@ -627,10 +647,12 @@ public class Thief extends Job {
     private void handleShadowerInstinct(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
-        SkillInfo InstinctInfo = SkillData.getSkillInfoById(4221013);
+        SkillInfo InstinctInfo = SkillData.getSkillInfoById(SHADOWER_INSTINCT);
+        Skill skill = chr.getSkill(SHADOWER_INSTINCT);
+        byte slv = (byte) skill.getCurrentLevel();
         int amount = 1;
         if (tsm.hasStat(KillingPoint)) {
-            if (chr.hasSkill(4221013)) {
+            if (chr.hasSkill(SHADOWER_INSTINCT)) {
                 amount = tsm.getOption(KillingPoint).nOption;
                 if (amount < 5) {
                     amount++;
@@ -639,9 +661,9 @@ public class Thief extends Job {
         }
         o.nOption = amount;
         tsm.putCharacterStatValue(KillingPoint, o);
-        o1.nOption = (amount * InstinctInfo.getValue(kp, InstinctInfo.getCurrentLevel()));
-        o1.rOption = 4221013;
-        o1.tOption = InstinctInfo.getValue(time, InstinctInfo.getCurrentLevel());
+        o1.nOption = (amount * InstinctInfo.getValue(kp, slv));
+        o1.rOption = SHADOWER_INSTINCT;
+        o1.tOption = InstinctInfo.getValue(time, slv);
         tsm.putCharacterStatValue(PAD, o1);
         c.write(WvsContext.temporaryStatSet(tsm));
     }

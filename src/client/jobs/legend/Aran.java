@@ -14,7 +14,6 @@ import enums.ChatMsgColour;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.WvsContext;
-import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
@@ -242,10 +241,6 @@ public class Aran extends Job {
             tsm.putCharacterStatValue(AdrenalinBoost, o);
             c.write(WvsContext.temporaryStatSet(tsm));
         }
-    }
-
-    public void adrenalinInterval() {   //TODO
-        EventManager.addEvent(this, "adrenalinInterval", 15000);
     }
 
     private void handleSwingStudies(int skillId, TemporaryStatManager tsm, Client c) {
