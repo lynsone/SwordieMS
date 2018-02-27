@@ -7,7 +7,6 @@ import client.life.*;
 import connection.OutPacket;
 import constants.GameConstants;
 import enums.LeaveType;
-import javafx.geometry.Pos;
 import loaders.ItemData;
 import loaders.SkillData;
 import packet.CField;
@@ -16,10 +15,10 @@ import packet.NpcPool;
 import server.EventManager;
 import util.Position;
 import util.Rect;
-import util.Util;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static client.character.skills.SkillStat.time;
@@ -599,5 +598,18 @@ public class Field {
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
             }
         }
+    }
+
+    public List<Portal> getclosestPortal (Rect rect) {
+        List<Portal> portals = new ArrayList<>();
+        for(Portal portals2 : getPortals()) {
+            int x = portals2.getX();
+            int y = portals2.getY();
+            if(x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                portals.add(portals2);
+            }
+        }
+        return portals;
     }
 }
