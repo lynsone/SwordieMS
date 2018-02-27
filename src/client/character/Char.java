@@ -1638,7 +1638,9 @@ public class Char {
      * @param outPacket The OutPacket to write.
      */
     public void write(OutPacket outPacket) {
-        getClient().write(outPacket);
+        if(getClient() != null) {
+            getClient().write(outPacket);
+        }
     }
 
     public ExpIncreaseInfo getExpIncreaseInfo() {
@@ -1771,5 +1773,9 @@ public class Char {
 
     public boolean hasQuestInProgress(int questReq) {
         return getQuestManager().hasQuestInProgress(questReq);
+    }
+
+    public void dispose() {
+        write(WvsContext.exclRequest());
     }
 }

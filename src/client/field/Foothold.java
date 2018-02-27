@@ -132,4 +132,12 @@ public class Foothold {
     public String toString() {
         return "Id: " + getId() + ", Start = " + new Position(getX1(), getY1()) + ", End = " + new Position(getX2(), getY2());
     }
+
+    public int getYFromX(int x) {
+        int x1 = getX1();
+        int x2 = getX2() - x1;
+        x = x - x1;
+        double perc = (double) x / (double) x2;
+        return (int) (getY1() + (perc * (getY2() - getY1())));
+    }
 }

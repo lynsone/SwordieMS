@@ -25,9 +25,11 @@ import static enums.MessageType.*;
 public class WvsContext {
 
     public static void dispose(Char chr) {
-        chr.write(statChanged(new HashMap<>(), true, (byte) chr.getAvatarData().getCharacterStat().getMixBaseHairColor(),
-                (byte) chr.getAvatarData().getCharacterStat().getMixAddHairColor(), (byte) chr.getAvatarData().getCharacterStat().getMixHairBaseProb(),
-                (byte) 0, false, 0 , 0));
+        chr.dispose();
+    }
+
+    public static OutPacket exclRequest() {
+        return new OutPacket(OutHeader.EXCL_REQUEST);
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats) {

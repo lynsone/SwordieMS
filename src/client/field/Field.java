@@ -5,6 +5,7 @@ import client.character.items.Item;
 import client.character.skills.SkillInfo;
 import client.life.*;
 import connection.OutPacket;
+import constants.GameConstants;
 import enums.LeaveType;
 import javafx.geometry.Pos;
 import loaders.ItemData;
@@ -268,11 +269,7 @@ public class Field {
                 res = fh;
             } else {
                 // interpolate between the two foothold ends for the y value below pos.x
-                int x1 = fh.getX1();
-                int x2 = fh.getX2() - x1;
-                int x = pos.getX() - x1;
-                double perc = (double) x / (double) x2;
-                int y = (int) (fh.getY1() + (perc * (fh.getY2() - fh.getY1())));
+                int y = fh.getYFromX(pos.getX());
                 if(y < lastY && y >= pos.getY()) {
                     res = fh;
                     lastY = y;
@@ -559,40 +556,48 @@ public class Field {
     }
 
     public void drop(DropInfo dropInfo, Position posFrom, Position posTo, int ownerID) {
-        if(dropInfo.willDrop()) {
-            int itemID = dropInfo.getItemID();
-            Item item;
-            Drop drop = new Drop(-1);
-            drop.setOwnerID(ownerID);
-            if(itemID != 0) {
-                item = ItemData.getEquipDeepCopyFromId(itemID);
-                if (item == null) {
-                    item = ItemData.getItemDeepCopy(itemID);
-                }
-                drop.setItem(item);
-            } else {
-                drop.setMoney(dropInfo.getMoney());
+        int itemID = dropInfo.getItemID();
+        Item item;
+        Drop drop = new Drop(-1);
+        drop.setOwnerID(ownerID);
+        if(itemID != 0) {
+            item = ItemData.getEquipDeepCopyFromId(itemID);
+            if (item == null) {
+                item = ItemData.getItemDeepCopy(itemID);
             }
-            addLife(drop);
-            for(Char chr : getChars()) {
-                boolean canDrop = true;
-                if (dropInfo.getQuestReq() != 0) {
-                    canDrop = chr.hasQuestInProgress(dropInfo.getQuestReq());
-                }
-                if(canDrop) {
-                    chr.write(DropPool.dropEnterField(drop, posFrom, posTo, chr.getId()));
-                }
+            drop.setItem(item);
+        } else {
+            drop.setMoney(dropInfo.getMoney());
+        }
+        addLife(drop);
+        for(Char chr : getChars()) {
+            boolean canDrop = true;
+            if (dropInfo.getQuestReq() != 0) {
+                canDrop = chr.hasQuestInProgress(dropInfo.getQuestReq());
+            }
+            if(canDrop) {
+                chr.write(DropPool.dropEnterField(drop, posFrom, posTo, chr.getId()));
             }
         }
     }
 
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
-        // TODO make it so that multiple drops get proper posTo
+        Foothold fh = findFootHoldBelow(position);
+        int x = position.getX();
+        int minX = fh.getX1();
+        int maxX = fh.getX2();
+        System.out.printf("Initial x = %d, min = %d, max = %d%n", x, minX, maxX);
+        int diff = 0;
         if(dropInfos.stream().filter(di -> di.getMoney() > 0).findFirst().orElse(null) == null) {
             dropInfos.add(new DropInfo(0, 100, 1000, 0));
         }
         for(DropInfo dropInfo : dropInfos) {
-            drop(dropInfo, position, position, ownerID);
+            if(dropInfo.willDrop()) {
+                x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
+                Position posTo = new Position(x, fh.getYFromX(x));
+                drop(dropInfo, posTo, position, ownerID);
+                diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
+            }
         }
     }
 }

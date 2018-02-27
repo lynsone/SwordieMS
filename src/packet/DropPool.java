@@ -14,19 +14,20 @@ import util.Position;
 public class DropPool {
 
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID) {
-        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100, 0,
+        // TODO: swap to/from drop pos
+        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 0, false);
     }
 
     public static OutPacket dropEnterField(Drop drop, Position dropPositionFrom, Position dropPositionTo, int charID) {
-        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100, 0,
+        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
                 (byte) 2, dropPositionFrom, charID, dropPositionTo, 0, true, (short) 0, false,
                 (byte) 0, 0, false);
     }
 
     public static OutPacket dropEnterField(Drop drop, DropEnterType dropEnterType, int rand, int dropMotionType,
-                                           int dropSpeed, int info, byte ownType, Position dropPos, int sourceID,
+                                           int dropSpeed, byte ownType, Position dropPos, int sourceID,
                                            Position tempPos, int delay, boolean unkBool, short fallingVY,
                                            boolean fadeInEffect, byte makeType, int collisionPickup, boolean prepareCollisionPickUp) {
         OutPacket outPacket = new OutPacket(OutHeader.DROP_ENTER_FIELD);
@@ -39,7 +40,7 @@ public class DropPool {
         outPacket.encodeInt(dropMotionType); // 2 = Horizontal, 4 = Vertical movement
         outPacket.encodeInt(dropSpeed);
         outPacket.encodeInt(rand);
-        outPacket.encodeInt(drop.getItem() == null ? (int) drop.getMoney() : drop.getItem().getItemId());
+        outPacket.encodeInt(drop.getItem() == null ? drop.getMoney() : drop.getItem().getItemId());
         outPacket.encodeInt(drop.getOwnerID());
         outPacket.encodeByte(ownType); // 3 = high drop
         outPacket.encodePosition(dropPos);
