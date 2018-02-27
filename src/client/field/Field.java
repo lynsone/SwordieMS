@@ -394,7 +394,7 @@ public class Field {
         }
     }
 
-    private Foothold getFootholdById(int fh) {
+    public Foothold getFootholdById(int fh) {
         return getFootholds().stream().filter(f -> f.getId() == fh).findFirst().orElse(null);
     }
 
@@ -582,7 +582,10 @@ public class Field {
     }
 
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
-        Foothold fh = findFootHoldBelow(position);
+        drop(dropInfos, findFootHoldBelow(position), position, ownerID);
+    }
+
+    public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID) {
         int x = position.getX();
         int minX = fh.getX1();
         int maxX = fh.getX2();

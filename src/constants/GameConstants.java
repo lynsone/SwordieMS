@@ -5,7 +5,7 @@ package constants;
  */
 public class GameConstants {
     public static final long MAX_MONEY = 10_000_000_000L;
-    public static final int DROP_HEIGHT = 50;
+    public static final int DROP_HEIGHT = 20;
     public static final int DROP_DIFF = 25;
     public static long[] charExp = new long[251];
 

@@ -1072,7 +1072,7 @@ public class Mob extends Life {
     }
 
     private void dropDrops() {
-        getField().drop(getDrops(), getPosition(), getMostDamageChar().getId());
+        getField().drop(getDrops(), getField().getFootholdById(getFh()), getPosition(), getMostDamageChar().getId());
     }
 
     public Map<Char, Long> getDamageDone() {
