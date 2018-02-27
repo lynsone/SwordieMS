@@ -1,14 +1,13 @@
 package client.character.commands;
 
+import client.Client;
 import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Item;
-import client.character.skills.CharacterTemporaryStat;
-import client.character.skills.ForceAtomInfo;
-import client.character.skills.Skill;
+import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
-import client.jobs.adventurer.Magician;
+import client.jobs.nova.Kaiser;
 import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
@@ -23,15 +22,14 @@ import packet.CField;
 import packet.Stage;
 import packet.WvsContext;
 import util.Position;
+import util.Rect;
 import util.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.NumberFormat;
+import java.util.*;
 
-import static enums.ChatMsgColour.GAME_NOTICE;
-import static enums.ChatMsgColour.YELLOW;
+import static client.character.skills.CharacterTemporaryStat.Morph;
+import static enums.ChatMsgColour.*;
 
 /**
  * Created on 12/22/2017.
@@ -47,7 +45,7 @@ public class AdminCommands {
 //            wi.setRidingType((byte) 1);
 //            chr.write(WvsContext.wildHunterInfo(wi));
 //            new TemporaryStatManager(null).encodeForLocal(null);
-            CharacterTemporaryStat cts = CharacterTemporaryStat.Unk3;
+            CharacterTemporaryStat cts = CharacterTemporaryStat.Morph;
 //            CharacterTemporaryStat cts2 = CharacterTemporaryStat.Speed;
 //
             OutPacket outPacket = new OutPacket(OutHeader.TEMPORARY_STAT_SET);
@@ -62,8 +60,8 @@ public class AdminCommands {
             System.out.println("[Out]\t| " + outPacket);
 
             outPacket.encodeShort(1); // n                            //Short / Int
-            outPacket.encodeInt(Magician.MEDITATION_FP); // r
-            outPacket.encodeInt(10000); // t
+            outPacket.encodeInt(Kaiser.FINAL_TRANCE); // r
+            outPacket.encodeInt(30000); // t
 
             //outPacket.encodeInt(0);
 
@@ -97,6 +95,34 @@ public class AdminCommands {
             chr.write(outPacket);
 
 
+        }
+    }
+
+    public static class checkID extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            chr.chatMessage(GM_BLUE_CHAT, "your charID = "+chr.getId()+" \r\nYour accID = "+chr.getAccId());
+        }
+    }
+
+    public static class NP extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            Rect rect = new Rect(
+                    new Position(
+                            chr.getPosition().deepCopy().getX()-30,
+                            chr.getPosition().deepCopy().getY()-30),
+                    new Position(
+                            chr.getPosition().deepCopy().getX()+30,
+                            chr.getPosition().deepCopy().getY()+30)
+            );
+            chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");
+            chr.chatMessage(GM_BLUE_CHAT, "Current Map: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getFieldID()));
+            chr.chatMessage(GM_BLUE_CHAT, ".");
+            for (Portal portal : chr.getField().getclosestPortal(rect)) {
+                chr.chatMessage(GM_BLUE_CHAT, "Portal Name: " + portal.getName());
+                chr.chatMessage(GM_BLUE_CHAT, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
+                chr.chatMessage(GM_BLUE_CHAT, ".");
+            }
+            chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");
         }
     }
 
@@ -215,7 +241,7 @@ public class AdminCommands {
         }
     }
 
-    public static class done extends AdminCommand {
+    public static class Done extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int subi = 2070000;
             int arrowBow = 2060000;
@@ -271,6 +297,17 @@ public class AdminCommands {
             stats.put(Stat.level, (byte) lv);
             stats.put(Stat.exp, (long) 0);
             chr.getClient().write(WvsContext.statChanged(stats));
+        }
+    }
+
+    public static class HyperTP extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int hyperTP = 5040004;
+            Item hyperTP2 = ItemData.getItemDeepCopy(hyperTP);
+            chr.addItemToInventory(hyperTP2.getInvType(), hyperTP2, false);
+            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
+                    (byte) 0, (short) hyperTP2.getBagIndex(), (byte) -1, hyperTP2.getInvType(), (byte) 1,
+                    0, hyperTP2));
         }
     }
 
@@ -410,6 +447,22 @@ public class AdminCommands {
             stats.put(Stat.hp, maxHp);
             stats.put(Stat.mp, maxMp);
             chr.getClient().write(WvsContext.statChanged(stats));
+        }
+    }
+
+    public static class Morph extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int morphID = Integer.parseInt(args[1]);
+            if(args.length < 2) {
+                chr.chatMessage(GAME_NOTICE, "Needs more args! <id>");
+            }
+            Client c = chr.getClient();
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o1 = new Option();
+            o1.nOption = morphID;
+            o1.rOption = Kaiser.FINAL_TRANCE;
+            tsm.putCharacterStatValue(Morph, o1);
+            c.write(WvsContext.temporaryStatSet(tsm));
         }
     }
 

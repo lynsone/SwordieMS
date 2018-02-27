@@ -1,6 +1,7 @@
 package client.character;
 
 import client.field.Field;
+import client.field.Portal;
 import constants.ServerConstants;
 import enums.NpcMessageType;
 import enums.ScriptType;
@@ -336,6 +337,17 @@ public class ScriptManager implements Observer {
      */
     public void dispose() {
         stop(ScriptType.NPC);
+    }
+
+    /**
+     * Warps the client to a given {@link Field} ID.
+     * @param mid The id of the Field.
+     * @param pid The portal
+     */
+    public void warp(int mid, int pid) {
+        Field field = chr.getClient().getChannelInstance().getField(mid);
+        Portal portal = chr.getField().getPortalByID(pid);
+        chr.warp(field, portal);
     }
 
     /**

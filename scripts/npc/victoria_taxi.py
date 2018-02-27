@@ -6,5 +6,5 @@ def init():
 
 def action(response, answer):
     #sm.sendSay("Response was " + str(response) + "\r\rAnswer was " + str(answer))
-    sm.warp(maps[answer])
+    sm.warp(maps[answer], 0)
     sm.dispose()
