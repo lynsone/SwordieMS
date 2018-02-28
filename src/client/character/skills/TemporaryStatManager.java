@@ -1,6 +1,7 @@
 package client.character.skills;
 
 import client.character.Char;
+import client.life.AffectedArea;
 import com.sun.istack.internal.NotNull;
 import connection.OutPacket;
 import enums.TSIndex;
@@ -32,6 +33,7 @@ public class TemporaryStatManager {
     private LarknessManager larknessManager;
     private Char chr;
     private List<TemporaryStatBase> twoStates = new ArrayList<>();
+    private Set<AffectedArea> affectedAreas = new HashSet<>();
 
     public TemporaryStatManager(Char chr){
         this.chr = chr;
@@ -2564,5 +2566,46 @@ public class TemporaryStatManager {
 
     public void setLarknessManager(LarknessManager larknessManager) {
         this.larknessManager = larknessManager;
+    }
+
+    public Set<AffectedArea> getAffectedAreas() {
+        return affectedAreas;
+    }
+
+    public void addAffectedArea(AffectedArea aa) {
+        getAffectedAreas().add(aa);
+    }
+
+    public void removeAffectedArea(AffectedArea aa) {
+        getAffectedAreas().remove(aa);
+        removeStatsBySkill(aa.getSkillID());
+    }
+
+    public boolean hasAffectedArea(AffectedArea affectedArea) {
+        return getAffectedAreas().contains(affectedArea);
+    }
+
+    public void removeStatsBySkill(int skillId) {
+        Map<CharacterTemporaryStat, Option> removedMap = new HashMap<>();
+        for (CharacterTemporaryStat cts : getCurrentStats().keySet()) {
+            Option checkOpt = new Option(skillId);
+            if (cts.isIndie() && getOptions(cts).contains(checkOpt)) {
+                Option o = getOptions(cts).stream().filter(opt -> opt.equals(checkOpt)).findFirst().orElse(null);
+                if (o == null) {
+                    System.err.println("Found option null, yet the options contained it?");
+                } else {
+                    removedMap.put(cts, o);
+                }
+            } else if (getOption(cts).rOption == skillId || getOption(cts).nReason == skillId) {
+                removedMap.put(cts, getOption(cts));
+            }
+        }
+        removedMap.forEach((cts, opt) -> {
+            if (cts.isIndie()) {
+                removeIndieStat(cts, opt, false);
+            } else {
+                removeStat(cts, false);
+            }
+        });
     }
 }

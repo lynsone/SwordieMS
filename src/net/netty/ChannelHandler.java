@@ -44,7 +44,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
             Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
             InPacket inPacket = (InPacket) msg;

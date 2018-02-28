@@ -91,9 +91,6 @@ public class WorldHandler {
         int encodedGatherDuration = inPacket.decodeInt();
         Position oldPos = inPacket.decodePosition();
         Position oldVPos = inPacket.decodePosition();
-//        inPacket.decodeByte();
-//        inPacket.decodeBytes(13);
-//        inPacket.decodeInt();
         Char chr = c.getChr();
         List<Movement> movements = WvsContext.parseMovement(inPacket);
         for (Movement m : movements) {
@@ -858,27 +855,7 @@ public class WorldHandler {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int skillId = inPacket.decodeInt();
-        Map<CharacterTemporaryStat, Option> removedMap = new HashMap<>();
-        for (CharacterTemporaryStat cts : tsm.getCurrentStats().keySet()) {
-            Option checkOpt = new Option(skillId);
-            if (cts.isIndie() && tsm.getOptions(cts).contains(checkOpt)) {
-                Option o = tsm.getOptions(cts).stream().filter(opt -> opt.equals(checkOpt)).findFirst().orElse(null);
-                if (o == null) {
-                    System.err.println("Found option null, yet the options contained it?");
-                } else {
-                    removedMap.put(cts, o);
-                }
-            } else if (tsm.getOption(cts).rOption == skillId || tsm.getOption(cts).nReason == skillId) {
-                removedMap.put(cts, tsm.getOption(cts));
-            }
-        }
-        removedMap.forEach((cts, opt) -> {
-            if (cts.isIndie()) {
-                tsm.removeIndieStat(cts, opt, false);
-            } else {
-                tsm.removeStat(cts, false);
-            }
-        });
+        tsm.removeStatsBySkill(skillId);
         c.write(WvsContext.temporaryStatReset(chr.getTemporaryStatManager(), false));
     }
 

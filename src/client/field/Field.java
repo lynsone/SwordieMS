@@ -3,6 +3,7 @@ package client.field;
 import client.character.Char;
 import client.character.items.Item;
 import client.character.skills.SkillInfo;
+import client.character.skills.TemporaryStatManager;
 import client.life.*;
 import connection.OutPacket;
 import constants.GameConstants;
@@ -470,7 +471,8 @@ public class Field {
         addLife(aa);
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
         if(si != null) {
-            int duration = si.getValue(time, aa.getSlv());
+            int duration = si.getValue(time, aa.getSlv()) * 1000;
+            System.out.println(duration);
             EventManager.addEvent(this, "removeLife", duration, aa.getObjectId(), true);
         }
         broadcastPacket(CField.affectedAreaCreated(aa));
@@ -514,6 +516,9 @@ public class Field {
         if(life instanceof Summon) {
             Summon summon = (Summon) life;
             broadcastPacket(CField.summonedRemoved(summon, LeaveType.ANIMATION));
+        } else if(life instanceof AffectedArea) {
+            AffectedArea aa = (AffectedArea) life;
+            broadcastPacket(CField.affectedAreaRemoved(aa, false));
         }
     }
 
@@ -544,8 +549,7 @@ public class Field {
     }
 
     public List<AffectedArea> getAffectedAreas() {
-        List<Life> lifes = getLifes().stream().filter(life -> life instanceof AffectedArea).collect(Collectors.toList());
-        return lifes.stream().map(life -> (AffectedArea) life).collect(Collectors.toList());
+        return getLifes().stream().filter(life -> life instanceof AffectedArea).map(l -> (AffectedArea) l).collect(Collectors.toList());
     }
 
     public void checkMobInAffectedAreas(Mob mob) {
@@ -557,9 +561,13 @@ public class Field {
     }
 
     public void checkCharInAffectedAreas(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         for(AffectedArea aa : getAffectedAreas()) {
-            if(aa.getRect().hasPositionInside(chr.getPosition())) {
+            boolean isInsideAA = aa.getRect().hasPositionInside(chr.getPosition());
+            if(isInsideAA) {
                 aa.handleCharInside(chr);
+            } else if(tsm.hasAffectedArea(aa) && !isInsideAA) {
+                tsm.removeAffectedArea(aa);
             }
         }
     }

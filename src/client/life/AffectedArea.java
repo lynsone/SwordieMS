@@ -193,6 +193,10 @@ public class AffectedArea extends Life {
 
     public void handleCharInside(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasAffectedArea(this)) {
+            return;
+        }
+        tsm.addAffectedArea(this);
         int skillID = getSkillID();
         Skill skill = chr.getSkill(getSkillID());
         byte slv = (byte) skill.getCurrentLevel();
@@ -208,12 +212,10 @@ public class AffectedArea extends Life {
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1); //Indie
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o2); //Indie
                 break;
             case Kanna.BELLFLOWER_BARRIER:
@@ -223,5 +225,6 @@ public class AffectedArea extends Life {
                 //TODO Party Boost
                 break;
         }
+        tsm.sendSetStatPacket();
     }
 }
