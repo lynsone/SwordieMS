@@ -91,13 +91,6 @@ public class Luminous extends Job {
             if (chr.getTemporaryStatManager().getLarknessManager() == null) {
                 chr.getTemporaryStatManager().setLarknessManager(new LarknessManager(chr));
             }
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            LarknessManager lm = tsm.getLarknessManager();
-            Option o = new Option();
-            o.nOption = 1;
-            o.rOption = lm.isDark() ? ECLIPSE : SUNFIRE;
-            tsm.putCharacterStatValue(Larkness, o);
-            tsm.sendSetStatPacket();
 //        changeMode();
         }
     }
@@ -346,6 +339,14 @@ public class Luminous extends Job {
         handleLarkness(skillID);
         int crescendoProp = getCrescendoProp(chr);
         if (hasHitMobs) {
+            if(!tsm.hasStat(Larkness)) {
+                LarknessManager lm = tsm.getLarknessManager();
+                Option o = new Option();
+                o.nOption = 1;
+                o.rOption = lm.isDark() ? ECLIPSE : SUNFIRE;
+                tsm.putCharacterStatValue(Larkness, o);
+                tsm.sendSetStatPacket();
+            }
             //Dark Crescendo
             if (tsm.hasStat(StackBuff)) {
                 if (Util.succeedProp(crescendoProp)) {

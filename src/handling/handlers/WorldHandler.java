@@ -82,12 +82,19 @@ public class WorldHandler {
     }
 
     public static void handleMove(Client c, InPacket inPacket) {
-        inPacket.decodeByte();
-        inPacket.decodeBytes(13);
+        // CVecCtrlUser::EndUpdateActive
+        byte fieldKey = inPacket.decodeByte();
+        inPacket.decodeInt(); // ? something with field
+        inPacket.decodeInt(); // tick
+        inPacket.decodeByte(); // ? doesn't get set at all
+        // CMovePathCommon::Encode
+        int encodedGatherDuration = inPacket.decodeInt();
         Position oldPos = inPacket.decodePosition();
-        inPacket.decodeInt();
+        Position oldVPos = inPacket.decodePosition();
+//        inPacket.decodeByte();
+//        inPacket.decodeBytes(13);
+//        inPacket.decodeInt();
         Char chr = c.getChr();
-        Position oldPosition = chr.getPosition();
         List<Movement> movements = WvsContext.parseMovement(inPacket);
         for (Movement m : movements) {
             Position pos = m.getPosition();
@@ -96,6 +103,7 @@ public class WorldHandler {
             chr.setMoveAction(m.getMoveAction());
             chr.setLeft(m.getMoveAction() % 2 == 1);
         }
+        chr.getField().checkCharInAffectedAreas(chr);
     }
 
     public static void handleUserChat(Client c, InPacket inPacket) {
