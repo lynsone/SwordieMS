@@ -137,23 +137,28 @@ public class WvsContext {
         outPacket.encodeByte(1); // size
         outPacket.encodeByte(notRemoveAddInfo);
 
-        outPacket.encodeByte(type.getVal()); // move
-        outPacket.encodeByte(item.getInvType().getVal());
+        outPacket.encodeByte(type.getVal());
+        // logic like this in packets :(
+        InvType invType = item.getInvType();
+        if(oldPos > 0 && newPos < 0 && invType == InvType.EQUIPPED) {
+            invType = InvType.EQUIP;
+        }
+        outPacket.encodeByte(invType.getVal());
         outPacket.encodeShort(oldPos);
         switch(type) {
-            case ADD: // new or update
+            case ADD:
                 item.encode(outPacket);
                 break;
-            case UPDATE_QUANTITY: // Quantity change
+            case UPDATE_QUANTITY:
                 outPacket.encodeShort(item.getQuantity());
                 break;
-            case MOVE:  // move
+            case MOVE:
                 outPacket.encodeShort(newPos);
-                if (item.getInvType() == InvType.EQUIP && (oldPos < 0 || newPos < 0)) {
+                if (invType == InvType.EQUIP && (oldPos < 0 || newPos < 0)) {
                     outPacket.encodeByte(item.getCashItemSerialNumber() > 0);
                 }
                 break;
-            case REMOVE: // remove
+            case REMOVE:
                 break;
             case ITEM_EXP:
                 outPacket.encodeLong(((Equip) item).getExp());

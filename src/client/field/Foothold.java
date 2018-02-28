@@ -134,6 +134,7 @@ public class Foothold {
     }
 
     public int getYFromX(int x) {
+        // interpolate between the two foothold ends for the y value below pos.x
         int x1 = getX1();
         int x2 = getX2() - x1;
         x = x - x1;

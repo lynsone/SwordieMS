@@ -267,20 +267,6 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(PDD, o2);
                 break;
             case EVIL_EYE:
-                /*Summon evilEye = Summon.getSummonBy(c.getChr(), skillID, slv);
-                Field field = c.getChr().getField();
-                field.addLife(evilEye);
-                evilEye.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-                summon.setAssistType((byte) 0);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(false);
-                c.write(CField.summonedCreated(chr.getId(), summon));*/
                 spawnEvilEye(skillID, slv);
                 o2.nOption = si.getValue(x, slv);
                 o2.rOption = skillID;

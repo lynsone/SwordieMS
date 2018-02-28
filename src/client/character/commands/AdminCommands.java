@@ -12,13 +12,11 @@ import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
-import enums.EquipBaseStat;
-import enums.ForceAtomEnum;
-import enums.InvType;
-import enums.Stat;
+import enums.*;
 import handling.OutHeader;
 import loaders.*;
 import packet.CField;
+import packet.MobPool;
 import packet.Stage;
 import packet.WvsContext;
 import util.Position;
@@ -30,6 +28,7 @@ import java.util.*;
 
 import static client.character.skills.CharacterTemporaryStat.Morph;
 import static enums.ChatMsgColour.*;
+import static enums.InventoryOperation.ADD;
 
 /**
  * Created on 12/22/2017.
@@ -37,6 +36,42 @@ import static enums.ChatMsgColour.*;
 public class AdminCommands {
 
     public static class Test extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+//            Mob mob = (Mob) chr.getField().getLifes().get(chr.getField().getLifes().size() - 1);
+//            mob.setMp(200);
+//
+//            Option o = new Option();
+//            o.nOption = 143;
+//            o.rOption = 143;
+//            o.tOption = 0;
+//            o.wOption = 100;
+//            o.mOption = 100;
+//            o.nReason = 1;
+//            o.bOption = 0;
+//
+//            mob.getTemporaryStat().addStatOptionsAndBroadcast(MobStat.PCounter, o);
+//
+//            OutPacket outPacket = new OutPacket(OutHeader.MOB_AFFECTED);
+//
+//            outPacket.encodeInt(mob.getObjectId());
+//            outPacket.encodeInt(143);
+//            outPacket.encodeShort(1);
+//            outPacket.encodeByte(false);
+//            outPacket.encodeInt(30);
+//
+//            chr.write(outPacket);
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o = new Option();
+            o.nOption = 5;
+            o.rOption = 2002004;
+            o.tOption = 50;
+            tsm.putCharacterStatValue(CharacterTemporaryStat.INT, o);
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    public static class TestCTS extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
 
@@ -54,7 +89,7 @@ public class AdminCommands {
             // Start encodeForLocal
             int[] mask = new int[CharacterTemporaryStat.length];
             mask[cts.getPos()] |= cts.getVal();
-            for(int i = 0; i < mask.length; i++) {
+            for (int i = 0; i < mask.length; i++) {
                 outPacket.encodeInt(mask[i]);
             }
             System.out.println("[Out]\t| " + outPacket);
@@ -100,7 +135,7 @@ public class AdminCommands {
 
     public static class checkID extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            chr.chatMessage(GM_BLUE_CHAT, "your charID = "+chr.getId()+" \r\nYour accID = "+chr.getAccId());
+            chr.chatMessage(GM_BLUE_CHAT, "your charID = " + chr.getId() + " \r\nYour accID = " + chr.getAccId());
         }
     }
 
@@ -108,11 +143,11 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             Rect rect = new Rect(
                     new Position(
-                            chr.getPosition().deepCopy().getX()-30,
-                            chr.getPosition().deepCopy().getY()-30),
+                            chr.getPosition().deepCopy().getX() - 30,
+                            chr.getPosition().deepCopy().getY() - 30),
                     new Position(
-                            chr.getPosition().deepCopy().getX()+30,
-                            chr.getPosition().deepCopy().getY()+30)
+                            chr.getPosition().deepCopy().getX() + 30,
+                            chr.getPosition().deepCopy().getY() + 30)
             );
             chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");
             chr.chatMessage(GM_BLUE_CHAT, "Current Map: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getFieldID()));
@@ -157,7 +192,7 @@ public class AdminCommands {
 
     public static class ProItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            if(args.length < 5) {
+            if (args.length < 5) {
                 chr.chatMessage(GAME_NOTICE, "Needs more args! <id> <Stat> <Attack> <Flame stats>");
             }
             int id = Integer.parseInt(args[1]);
@@ -177,8 +212,8 @@ public class AdminCommands {
             equip.setBaseStat(EquipBaseStat.statR, flames);
 
             chr.addItemToInventory(InvType.EQUIP, equip, false);
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) equip.getBagIndex(), (byte) -1, equip.getInvType(), (byte) 1,
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) equip.getBagIndex(), (byte) 1,
                     0, equip));
 
         }
@@ -196,14 +231,12 @@ public class AdminCommands {
                     quant = Short.parseShort(args[2]);
                 }
                 item.setQuantity(quant);
-                chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                        (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) item.getQuantity(),
-                        0, item));
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
             } else {
                 chr.addItemToInventory(InvType.EQUIP, equip, false);
-                chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                        (byte) 0, (short) equip.getBagIndex(), (byte) -1, equip.getInvType(), (byte) 1,
-                        0, equip));
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
             }
         }
     }
@@ -226,18 +259,14 @@ public class AdminCommands {
             item2.setQuantity(2000);
             item3.setQuantity(2000);
             item4.setQuantity(2000);
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) item.getQuantity(),
-                    0, item));
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item2.getBagIndex(), (byte) -1, item2.getInvType(), (byte) item2.getQuantity(),
-                    0, item2));
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item3.getBagIndex(), (byte) -1, item3.getInvType(), (byte) item3.getQuantity(),
-                    0, item3));
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item4.getBagIndex(), (byte) -1, item4.getInvType(), (byte) item4.getQuantity(),
-                    0, item4));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item2.getBagIndex(), (byte) -1, 0, item2));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item3.getBagIndex(), (byte) -1, 0, item3));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item4.getBagIndex(), (byte) -1, 0, item4));
         }
     }
 
@@ -259,18 +288,14 @@ public class AdminCommands {
             item2.setQuantity(2000);
             item3.setQuantity(2000);
             item4.setQuantity(2000);
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) item.getQuantity(),
-                    0, item));
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item2.getBagIndex(), (byte) -1, item2.getInvType(), (byte) item2.getQuantity(),
-                    0, item2));
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item3.getBagIndex(), (byte) -1, item3.getInvType(), (byte) item3.getQuantity(),
-                    0, item3));
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) item4.getBagIndex(), (byte) -1, item4.getInvType(), (byte) item4.getQuantity(),
-                    0, item4));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item2.getBagIndex(), (byte) -1, 0, item2));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item3.getBagIndex(), (byte) -1, 0, item3));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item4.getBagIndex(), (byte) -1, 0, item4));
 
 
             int num = 1000;
@@ -305,9 +330,8 @@ public class AdminCommands {
             int hyperTP = 5040004;
             Item hyperTP2 = ItemData.getItemDeepCopy(hyperTP);
             chr.addItemToInventory(hyperTP2.getInvType(), hyperTP2, false);
-            chr.getClient().write(WvsContext.inventoryOperation(chr, true, false,
-                    (byte) 0, (short) hyperTP2.getBagIndex(), (byte) -1, hyperTP2.getInvType(), (byte) 1,
-                    0, hyperTP2));
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) hyperTP2.getBagIndex(), (byte) -1, 0, hyperTP2));
         }
     }
 
@@ -453,7 +477,7 @@ public class AdminCommands {
     public static class Morph extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int morphID = Integer.parseInt(args[1]);
-            if(args.length < 2) {
+            if (args.length < 2) {
                 chr.chatMessage(GAME_NOTICE, "Needs more args! <id>");
             }
             Client c = chr.getClient();
@@ -474,7 +498,7 @@ public class AdminCommands {
                 return;
             }
             Mob mob = (Mob) l;
-            chr.getClient().write(CField.mobStatSet(mob, (short) 0));
+            chr.getClient().write(MobPool.mobStatSet(mob, (short) 0));
         }
     }
 
@@ -509,7 +533,7 @@ public class AdminCommands {
             int mobID = mob.getObjectId();
             mobs.add(mobID);
             chr.getClient().write(CField.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
-                    true, mobs, 142110011, fais,null, 0, 0, null, 142110011, mob.getPosition()));
+                    true, mobs, 142110011, fais, null, 0, 0, null, 142110011, mob.getPosition()));
 
         }
     }
@@ -582,13 +606,13 @@ public class AdminCommands {
                     chr.chatMessage(YELLOW, "h: " + ssi.getH());
                 } else {
                     Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query);
-                    if(map.size() == 0) {
+                    if (map.size() == 0) {
                         chr.chatMessage(YELLOW, "No skills found for query " + query);
                     }
                     for (Map.Entry<Integer, SkillStringInfo> entry : map.entrySet()) {
                         id = entry.getKey();
                         ssi = entry.getValue();
-                        if(SkillData.getSkillInfoById(id) != null) {
+                        if (SkillData.getSkillInfoById(id) != null) {
                             chr.chatMessage(YELLOW, "Id: " + id);
                             chr.chatMessage(YELLOW, "Name: " + ssi.getName());
                             chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
@@ -596,20 +620,20 @@ public class AdminCommands {
                         }
                     }
                 }
-            } else if("item".equalsIgnoreCase(args[1])) {
+            } else if ("item".equalsIgnoreCase(args[1])) {
                 int id;
                 String name;
-                if(isNumber) {
+                if (isNumber) {
                     id = Integer.parseInt(query);
                     name = StringData.getItemStringById(id);
-                    if(name == null) {
+                    if (name == null) {
                         chr.chatMessage(YELLOW, "Cannot find item " + id);
                         return;
                     }
                     chr.chatMessage(YELLOW, "Name: " + name);
                 } else {
                     Map<Integer, String> map = StringData.getItemStringByName(query);
-                    if(map.size() == 0) {
+                    if (map.size() == 0) {
                         chr.chatMessage(YELLOW, "No items found for query " + query);
                     }
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
@@ -619,7 +643,7 @@ public class AdminCommands {
                         if (item == null) {
                             item = ItemData.getItemDeepCopy(id);
                         }
-                        if(item == null) {
+                        if (item == null) {
                             continue;
                         }
                         chr.chatMessage(YELLOW, "Id: " + id);
@@ -633,7 +657,7 @@ public class AdminCommands {
     public static class Mesos extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             long mesos = Long.parseLong(args[1]);
-           chr.addMoney(mesos);
+            chr.addMoney(mesos);
         }
     }
 

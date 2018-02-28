@@ -581,21 +581,8 @@ public class Magician extends Job {
             case THUNDER_STORM:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setCharLevel((byte) chr.getStat(Stat.level));
-                summon.setPosition(chr.getPosition().deepCopy());
-                summon.setMoveAction((byte) 1);
-                summon.setCurFoothold((short) field.findFootHoldBelow(summon.getPosition()).getId());
-                summon.setMoveAbility((byte) 1);
-                summon.setAssistType((byte) 1);
-                summon.setEnterType((byte) 1);
-                summon.setBeforeFirstAttack(false);
-                summon.setTemplateId(skillID);
-                summon.setAttackActive(true);
                 summon.setFlyMob(true);
                 field.spawnSummon(summon);
-//                o1.nReason = skillID;
-//                o1.tTerm = si.getValue(time, slv);
-//                tsm.putCharacterStatValue(IndieDamR, o1);
                 break;
             case CHILLING_STEP:
                 o1.nOption = 1;

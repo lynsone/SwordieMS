@@ -269,8 +269,8 @@ public class Field {
         for(Foothold fh : footholds) {
             if(res == null) {
                 res = fh;
+                lastY = fh.getYFromX(pos.getX());
             } else {
-                // interpolate between the two foothold ends for the y value below pos.x
                 int y = fh.getYFromX(pos.getX());
                 if(y < lastY && y >= pos.getY()) {
                     res = fh;
