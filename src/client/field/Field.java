@@ -550,6 +550,14 @@ public class Field {
         }
     }
 
+    public void checkCharInAffectedAreas(Char chr) {
+        for(AffectedArea aa : getAffectedAreas()) {
+            if(aa.getRect().hasPositionInside(chr.getPosition())) {
+                aa.handleCharInside(chr);
+            }
+        }
+    }
+
     private void broadcastWithPredicate(OutPacket outPacket, Predicate<? super Char> predicate) {
         getChars().stream().filter(predicate).forEach(chr -> chr.write(outPacket));
     }

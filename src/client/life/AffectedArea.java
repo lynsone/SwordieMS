@@ -188,11 +188,21 @@ public class AffectedArea extends Life {
                 mts.addStatOptionsAndBroadcast(MobStat.MAD, o);
                 mts.addStatOptionsAndBroadcast(MobStat.MDR, o);
                 break;
-            case Zero.TIME_DISTORTION:  //Also adds a benefit to party members in AoE
-                o.nOption = 1;
-                o.rOption = skillID;
-                o.tOption = si.getValue(time, slv);
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+        }
+    }
+
+    public void handleCharInside(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int skillID = getSkillID();
+        Skill skill = chr.getSkill(getSkillID());
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch(skillID) {
+            case Zero.TIME_DISTORTION:  // TODO Also adds a benefit to party members in AoE
                 break;
             case BlazeWizard.BURNING_CONDUIT:
                 o1.nReason = skillID;
