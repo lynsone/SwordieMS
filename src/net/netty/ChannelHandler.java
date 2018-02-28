@@ -245,6 +245,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_UPGRADE_ASSIST_ITEM_USE_REQUEST:
                     WorldHandler.handleUserUpgradeAssistItemUseRequest(c, inPacket);
                     break;
+                case USER_DROP_MONEY_REQUEST:
+                    WorldHandler.handleUserDropMoneyRequest(c, inPacket);
+                    break;
                 case USER_TRANSFER_CHANNEL_REQUEST:
                     WorldHandler.handleChangeChannelRequest(c, inPacket);
                     break;

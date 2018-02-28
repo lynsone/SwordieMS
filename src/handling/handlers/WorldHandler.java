@@ -1710,4 +1710,15 @@ public class WorldHandler {
         int chrid = c.getChr().getId();
         c.write(CField.cancelChair(chrid, -1));
     }
+
+    public static void handleUserDropMoneyRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        int amount = inPacket.decodeInt();
+        if(chr.getMoney() > amount) {
+            chr.deductMoney(amount);
+            Drop drop = new Drop(-1, amount);
+            chr.getField().drop(drop, chr.getPosition());
+        }
+    }
 }

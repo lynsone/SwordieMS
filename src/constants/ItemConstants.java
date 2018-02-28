@@ -291,6 +291,7 @@ public class ItemConstants {
         int id = equip.getItemId();
         List<ItemOption> data = ItemData.getItemOptions();
         for(ItemOption io : data) {
+            // TODO: Debug data, remove once prime line logic is completed (chance for prime/lower tier pot)
             ItemGrade ioGrade = ItemGrade.getGradeByOption(io.getId());
             ItemGrade itemGrade = ItemGrade.getGradeByVal(equip.getBaseGrade());
             boolean jwz = io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade());
@@ -370,7 +371,6 @@ public class ItemConstants {
     public static List<Integer> getWeightedOptionsByEquip(Equip equip, boolean bonus) {
         List<Integer> res = new ArrayList<>();
         List<ItemOption> data = getOptionsByEquip(equip, bonus);
-        System.out.println("Options: " + data);
         for(ItemOption io : data) {
             for (int i = 0; i < io.getWeight(); i++) {
                 res.add(io.getId());

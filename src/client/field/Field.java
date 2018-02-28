@@ -19,6 +19,7 @@ import util.Rect;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static client.character.skills.SkillStat.time;
@@ -549,11 +550,29 @@ public class Field {
         }
     }
 
+    private void broadcastWithPredicate(OutPacket outPacket, Predicate<? super Char> predicate) {
+        getChars().stream().filter(predicate).forEach(chr -> chr.write(outPacket));
+    }
+
+    /**
+     * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
+     * Immediately broadcasts the drop packet.
+     * @param drop The Drop to drop.
+     * @param posFrom The Position that the drop starts off from.
+     * @param posTo The Position where the drop lands.
+     */
     public void drop(Drop drop, Position posFrom, Position posTo) {
         addLife(drop);
         broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
     }
 
+    /**
+     * Drops a {@link Drop} according to a given {@link DropInfo DropInfo}'s specification.
+     * @param dropInfo The
+     * @param posFrom The Position that hte drop starts off from.
+     * @param posTo The Position where the drop lands.
+     * @param ownerID The owner's character ID. Will not be able to be picked up by Chars that are not the owner.
+     */
     public void drop(DropInfo dropInfo, Position posFrom, Position posTo, int ownerID) {
         int itemID = dropInfo.getItemID();
         Item item;
@@ -569,26 +588,44 @@ public class Field {
             drop.setMoney(dropInfo.getMoney());
         }
         addLife(drop);
-        for(Char chr : getChars()) {
-            boolean canDrop = true;
-            if (dropInfo.getQuestReq() != 0) {
-                canDrop = chr.hasQuestInProgress(dropInfo.getQuestReq());
-            }
-            if(canDrop) {
-                chr.write(DropPool.dropEnterField(drop, posFrom, posTo, chr.getId()));
-            }
-        }
+        broadcastWithPredicate(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
+                (Char chr) -> dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq()));
     }
 
+    /**
+     * Drops a Set of {@link DropInfo}s from a base Position.
+     * @param dropInfos The Set of DropInfos.
+     * @param position The Position the initial Drop comes from.
+     * @param ownerID The owner's character ID.
+     */
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
         drop(dropInfos, findFootHoldBelow(position), position, ownerID);
     }
 
+    /**
+     * Drops a {@link Drop} at a given Position. Calculates the Position that the Drop should land at.
+     * @param drop The Drop that should be dropped.
+     * @param position The Position it is dropped from.
+     */
+    public void drop(Drop drop, Position position) {
+        int x = position.getX();
+        Position posTo = new Position(x, findFootHoldBelow(position).getYFromX(x));
+        drop(drop, position, posTo);
+    }
+
+    /**
+     * Drops a Set of {@link DropInfo}s, locked to a specific {@link Foothold}.
+     * Not all drops are guaranteed to be dropped, as this method calculates whether or not a Drop should drop, according
+     * to the DropInfo's prop chance.
+     * @param dropInfos The Set of DropInfos that should be dropped.
+     * @param fh The Foothold this Set of DropInfos is bound to.
+     * @param position The Position the Drops originate from.
+     * @param ownerID The ID of the owner of all drops.
+     */
     public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID) {
         int x = position.getX();
         int minX = fh.getX1();
         int maxX = fh.getX2();
-        System.out.printf("Initial x = %d, min = %d, max = %d%n", x, minX, maxX);
         int diff = 0;
         if(dropInfos.stream().filter(di -> di.getMoney() > 0).findFirst().orElse(null) == null) {
             dropInfos.add(new DropInfo(0, 100, 1000, 0));
@@ -597,7 +634,7 @@ public class Field {
             if(dropInfo.willDrop()) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
                 Position posTo = new Position(x, fh.getYFromX(x));
-                drop(dropInfo, posTo, position, ownerID);
+                drop(dropInfo, position, posTo, ownerID);
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
             }
         }
@@ -615,4 +652,5 @@ public class Field {
         }
         return portals;
     }
+
 }

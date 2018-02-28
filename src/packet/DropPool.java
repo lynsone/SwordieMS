@@ -14,7 +14,6 @@ import util.Position;
 public class DropPool {
 
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID) {
-        // TODO: swap to/from drop pos
         return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 0, false);
@@ -22,7 +21,7 @@ public class DropPool {
 
     public static OutPacket dropEnterField(Drop drop, Position dropPositionFrom, Position dropPositionTo, int charID) {
         return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
-                (byte) 2, dropPositionFrom, charID, dropPositionTo, 0, true, (short) 0, false,
+                (byte) 2, dropPositionTo, charID, dropPositionFrom, 0, true, (short) 0, false,
                 (byte) 0, 0, false);
     }
 
