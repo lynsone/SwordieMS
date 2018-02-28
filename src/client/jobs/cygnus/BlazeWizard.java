@@ -35,7 +35,7 @@ public class BlazeWizard extends Job {
     public static final int ELEMENTAL_SHIFT = 10001254;
     public static final int ELEMENTAL_HARMONY_INT = 10000248;
 
-    public static final int ORBITAL_FLAME = 12001020; 
+    public static final int ORBITAL_FLAME = 12001020;
     public static final int GREATER_ORBITAL_FLAME = 12100020;
     public static final int GRAND_ORBITAL_FLAME = 12110020;
     public static final int FINAL_ORBITAL_FLAME = 12120006;
@@ -116,20 +116,6 @@ public class BlazeWizard extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(FireBarrier, o1); //TODO Correct?
                 break;
-            /*
-            case BURNING_CONDUIT: //TODO Area of Effect Buff
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(y, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                o2.nReason = skillID;
-                o2.nValue = si.getValue(indieBooster, slv);
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
-                break;
-            */
             case CALL_OF_CYGNUS_BW:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(x, slv);

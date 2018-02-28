@@ -15,6 +15,7 @@ import constants.JobConstants;
 import enums.*;
 import loaders.SkillData;
 import packet.CField;
+import packet.MobPool;
 import packet.WvsContext;
 import util.Rect;
 import util.Util;
@@ -480,7 +481,7 @@ public class Warrior extends Job {
                             o2.tOption = si.getValue(time, slv);
                             mts.addStatOptions(MobStat.ACC, o2);
                         }
-                        c.write(CField.mobStatSet(mob, (short) 0));
+                        c.write(MobPool.mobStatSet(mob, (short) 0));
                     }
                 }
                 break;
@@ -635,7 +636,7 @@ public class Warrior extends Job {
                     for (int i = 0; i < mai.damages.length; i++) {
                         dmg += mai.damages[i];
                     }
-                    c.write(CField.mobDamaged(mob.getObjectId(),dmg, mob.getTemplateId(), (byte) 1,(int)  mob.getHp(), (int) mob.getMaxHp()));
+                    c.write(MobPool.mobDamaged(mob.getObjectId(),dmg, mob.getTemplateId(), (byte) 1,(int)  mob.getHp(), (int) mob.getMaxHp()));
                 }
         }
     }

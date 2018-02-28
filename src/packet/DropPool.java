@@ -4,6 +4,7 @@ import client.life.Drop;
 import connection.OutPacket;
 import enums.DropEnterType;
 import enums.DropLeaveType;
+import enums.ItemGrade;
 import handling.OutHeader;
 import util.FileTime;
 import util.Position;
@@ -64,7 +65,7 @@ public class DropPool {
         outPacket.encodeByte(fadeInEffect);
         outPacket.encodeByte(makeType);
         outPacket.encodeInt(collisionPickup); // decode4, but is bCollisionPickUp?
-        outPacket.encodeByte(drop.getItemGrade());
+        outPacket.encodeByte(ItemGrade.getHiddenGradeByVal(drop.getItemGrade()).getVal());
         outPacket.encodeByte(prepareCollisionPickUp);
 
         return outPacket;

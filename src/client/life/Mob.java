@@ -5,15 +5,13 @@ import client.character.ExpIncreaseInfo;
 import client.field.Field;
 import client.field.Foothold;
 import packet.CField;
+import packet.MobPool;
 import packet.WvsContext;
 import server.EventManager;
 import util.Position;
 import util.Tuple;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Mob extends Life {
 
@@ -96,6 +94,7 @@ public class Mob extends Life {
     private int charismaEXP;
     private Map<Char, Long> damageDone = new HashMap<>();
     private Set<DropInfo> drops = new HashSet<>();
+    private List<MobSkill> skills = new ArrayList<>();
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -241,10 +240,19 @@ public class Mob extends Life {
         copy.setMp(getMp());
         copy.setMaxMp(getMaxMp());
         copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
+        for(MobSkill ms : getSkills()) {
+            copy.addSkill(ms);
+        }
+        if(copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
+            copy.getDrops().add(new DropInfo(0, (int) copy.getForcedMobStat().getExp(), 1000, 0));
+        }
         return copy;
     }
 
     public Set<DropInfo> getDrops() {
+        if(drops == null) {
+            drops = new HashSet<>();
+        }
         return drops;
     }
 
@@ -1056,13 +1064,13 @@ public class Mob extends Life {
         if(newHp <= 0) {
             die();
         } else {
-            getField().broadcastPacket(CField.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
+            getField().broadcastPacket(MobPool.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }
     }
 
     private void die() {
         Field field = getField();
-        getField().broadcastPacket(CField.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
+        getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
         if(!isNotRespawnable()) { // double negative
             EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), this);
         }
@@ -1117,6 +1125,14 @@ public class Mob extends Life {
             }
         }
         return max.getLeft();
+    }
+
+    public List<MobSkill> getSkills() {
+        return skills;
+    }
+
+    public void addSkill(MobSkill skill) {
+        getSkills().add(skill);
     }
 
     @Override

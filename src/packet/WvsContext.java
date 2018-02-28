@@ -1,6 +1,7 @@
 package packet;
 
 import client.character.*;
+import client.character.items.Equip;
 import client.character.items.Item;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
@@ -9,6 +10,7 @@ import client.life.movement.*;
 import connection.InPacket;
 import connection.OutPacket;
 import enums.InvType;
+import enums.InventoryOperation;
 import enums.MessageType;
 import enums.Stat;
 import handling.OutHeader;
@@ -127,54 +129,51 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket inventoryOperation(Char chr, boolean exclRequestSent, boolean notRemoveAddInfo, byte type, short oldPos, short newPos,
-                                               InvType invType, short quantity, int bagPos,
-                                               Item item) {
+    public static OutPacket inventoryOperation(boolean exclRequestSent, boolean notRemoveAddInfo, InventoryOperation type, short oldPos, short newPos,
+                                               int bagPos, Item item) {
         OutPacket outPacket = new OutPacket(OutHeader.INVENTORY_OPERATION);
 
         outPacket.encodeByte(exclRequestSent);
         outPacket.encodeByte(1); // size
         outPacket.encodeByte(notRemoveAddInfo);
 
-        outPacket.encodeByte(type); // move
-        outPacket.encodeByte(invType.getVal());
+        outPacket.encodeByte(type.getVal()); // move
+        outPacket.encodeByte(item.getInvType().getVal());
         outPacket.encodeShort(oldPos);
         switch(type) {
-            case 0: // new or update
+            case ADD: // new or update
                 item.encode(outPacket);
                 break;
-            case 1:
-                outPacket.encodeShort(newPos);
+            case UPDATE_QUANTITY: // Quantity change
+                outPacket.encodeShort(item.getQuantity());
                 break;
-            case 2:  // move
+            case MOVE:  // move
                 outPacket.encodeShort(newPos);
-                if (invType == InvType.EQUIP && (oldPos < 0 || newPos < 0)) {
+                if (item.getInvType() == InvType.EQUIP && (oldPos < 0 || newPos < 0)) {
                     outPacket.encodeByte(item.getCashItemSerialNumber() > 0);
                 }
                 break;
-            case 3:
+            case REMOVE: // remove
                 break;
-            case 4:
-                outPacket.encodeLong(item.getCashItemSerialNumber()); // I think?
+            case ITEM_EXP:
+                outPacket.encodeLong(((Equip) item).getExp());
                 break;
-            case 5:
+            case UPDATE_BAG_POS:
                 outPacket.encodeInt(bagPos);
                 break;
-            case 6:
-                outPacket.encodeShort(newPos); // Probably wrong
+            case UPDATE_BAG_QUANTITY:
+                outPacket.encodeShort(newPos);
                 break;
-            case 7:
+            case UNK_1:
                 break;
-            case 8:
-                outPacket.encodeShort(bagPos);
+            case UNK_2:
+                outPacket.encodeShort(bagPos); // ?
                 break;
-            case 9: // update?
+            case UPDATE_ITEM_INFO:
                 item.encode(outPacket);
                 break;
-            case 10:
+            case UNK_3:
                 break;
-
-
         }
         return outPacket;
     }
@@ -569,6 +568,24 @@ public class WvsContext {
         OutPacket outPacket = new OutPacket(OutHeader.ZERO_INFO);
 
         currentInfo.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket gatherItemResult(byte type) {
+        OutPacket outPacket = new OutPacket(OutHeader.GATHER_ITEM_RESULT);
+
+        outPacket.encodeByte(0); // doesn't get used
+        outPacket.encodeByte(type);
+
+        return outPacket;
+    }
+
+    public static OutPacket sortItemResult(byte type) {
+        OutPacket outPacket = new OutPacket(OutHeader.GATHER_ITEM_RESULT);
+
+        outPacket.encodeByte(0); // doesn't get used
+        outPacket.encodeByte(type);
 
         return outPacket;
     }

@@ -75,6 +75,15 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_ACTIVATE_NICK_ITEM:
                     WorldHandler.handleUserActiveNickItem(c, inPacket);
                     break;
+                case USER_GATHER_ITEM_REQUEST:
+                    WorldHandler.handleUserGatherItemRequest(c, inPacket);
+                    break;
+                case USER_SORT_ITEM_REQUEST:
+                    WorldHandler.handleUserSortItemRequest(c, inPacket);
+                    break;
+                case USER_STAT_CHANGE_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserStatChangeItemUseRequest(c, inPacket);
+                    break;
                 case USER_ACTIVATE_DAMAGE_SKIN:
                     WorldHandler.handleUserActivateDanageSkin(c, inPacket);
                     break;

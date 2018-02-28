@@ -12,6 +12,7 @@ import loaders.ItemData;
 import loaders.SkillData;
 import packet.CField;
 import packet.DropPool;
+import packet.MobPool;
 import packet.NpcPool;
 import server.EventManager;
 import util.Position;
@@ -364,12 +365,12 @@ public class Field {
                 mob.setCurFoodhold(fh.deepCopy());
                 if(onlyChar == null) {
                     for (Char chr : getChars()) {
-                        chr.write(CField.mobEnterField(mob, false));
-                        chr.write(CField.mobChangeController(mob, false, controller == chr));
+                        chr.write(MobPool.mobEnterField(mob, false));
+                        chr.write(MobPool.mobChangeController(mob, false, controller == chr));
                     }
                 } else {
-                    onlyChar.getClient().write(CField.mobEnterField(mob, false));
-                    onlyChar.getClient().write(CField.mobChangeController(mob, false, controller == onlyChar));
+                    onlyChar.getClient().write(MobPool.mobEnterField(mob, false));
+                    onlyChar.getClient().write(MobPool.mobChangeController(mob, false, controller == onlyChar));
                 }
             }
             if(life instanceof Summon) {
@@ -458,6 +459,7 @@ public class Field {
     public void respawn(Mob mob) {
         mob.setHp(mob.getMaxHp());
         mob.setMp(mob.getMaxMp());
+        mob.setPosition(mob.getHomePosition().deepCopy());
         spawnLife(mob, null);
     }
 
@@ -655,9 +657,6 @@ public class Field {
         int minX = fh.getX1();
         int maxX = fh.getX2();
         int diff = 0;
-        if(dropInfos.stream().filter(di -> di.getMoney() > 0).findFirst().orElse(null) == null) {
-            dropInfos.add(new DropInfo(0, 100, 1000, 0));
-        }
         for(DropInfo dropInfo : dropInfos) {
             if(dropInfo.willDrop()) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;

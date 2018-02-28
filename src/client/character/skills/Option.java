@@ -35,12 +35,21 @@ public class Option {
         this.rOption = skillID;
     }
 
-    public Option(){}
+    public Option(int itemID, long duration) {
+        // hack to have a constructorfor items
+            this.tTerm = (int) duration;
+            this.nReason = itemID;
+            this.rOption = itemID;
+            this.tOption = (int) duration;
+    }
 
     public Option(int skillID, byte slv) {
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         rOption = skillID;
         tOption = si.getValue(SkillStat.time, slv);
+    }
+
+    public Option() {
     }
 
     public Option deepCopy() {
@@ -72,12 +81,12 @@ public class Option {
     public boolean equals(Object obj) {
         return obj instanceof Option &&
                 ((((Option) obj).rOption == rOption && ((Option) obj).rOption > 0) ||
-                ((((Option) obj).nReason == nReason && ((Option) obj).nReason > 0)));
+                        ((((Option) obj).nReason == nReason && ((Option) obj).nReason > 0)));
     }
 
     @Override
     public String toString() {
-        if(nReason == 0) {
+        if (nReason == 0) {
             return "Indie: false, skill: " + rOption + ", val: " + nOption + ", time: " + tOption;
         } else {
             return "Indie: true, skill: " + nReason + ", val: " + nValue + ", time: " + tTerm;

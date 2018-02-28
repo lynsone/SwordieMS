@@ -25,26 +25,24 @@ import constants.SkillConstants;
 import enums.*;
 import loaders.ItemData;
 import loaders.SkillData;
-import loaders.SkillStringInfo;
 import packet.*;
 import server.Channel;
 import server.Server;
 import server.World;
-import util.Position;
-import util.Rect;
-import util.Tuple;
-import util.Util;
+import util.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static client.character.skills.CharacterTemporaryStat.*;
 import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.ChatMsgColour.YELLOW;
 import static enums.EquipBaseStat.cuc;
 import static enums.EquipBaseStat.ruc;
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
+import static enums.InventoryOperation.*;
 import static enums.Stat.sp;
 
 /**
@@ -145,6 +143,7 @@ public class WorldHandler {
         InvType invTypeTo = invType == EQUIP ? newPos < 0 ? EQUIPPED : EQUIP : invType;
         Item item = chr.getInventoryByType(invTypeFrom).getItemBySlot(oldPos);
         if (item == null) {
+            chr.dispose();
             return;
         }
         String itemBefore = item.toString();
@@ -153,6 +152,8 @@ public class WorldHandler {
             item.drop();
             Drop drop = new Drop(-1, item);
             chr.getField().drop(drop, chr.getPosition(), chr.getPosition());
+            c.write(WvsContext.inventoryOperation(true, false, REMOVE,
+                    oldPos, newPos, 0, item));
         } else {
             Item swapItem = chr.getInventoryByType(invTypeTo).getItemBySlot(newPos);
             if (swapItem != null) {
@@ -171,16 +172,14 @@ public class WorldHandler {
             }
             if (swapItem != null) {
                 swapItem.setBagIndex(oldPos);
-                c.write(WvsContext.inventoryOperation(c.getChr(), true, false, (byte) 2, newPos, oldPos, invTypeTo, quantity,
-                        0, swapItem));
                 chr.chatMessage(YELLOW, "SwapItem after:    " + swapItem);
             }
+            c.write(WvsContext.inventoryOperation(true, false, MOVE, oldPos, newPos,
+                    0, item));
+            chr.chatMessage(YELLOW, "Item before: " + itemBefore);
+            chr.chatMessage(YELLOW, "Item after   : " + item);
+            chr.chatMessage(YELLOW, "--");
         }
-        c.write(WvsContext.inventoryOperation(c.getChr(), true, false, (byte) 2, oldPos, newPos, invType, quantity,
-                0, item));
-        chr.chatMessage(YELLOW, "Item before: " + itemBefore);
-        chr.chatMessage(YELLOW, "Item after   : " + item);
-        chr.chatMessage(YELLOW, "--");
 
 
     }
@@ -891,7 +890,7 @@ public class WorldHandler {
         Field field = chr.getField();
         int mobID = inPacket.decodeInt();
         Mob mob = (Mob) field.getLifeByObjectID(mobID);
-        c.write(CField.mobChangeController(mob, true, true));
+        c.write(MobPool.mobChangeController(mob, true, true));
     }
 
     public static void handleMoveMob(Client c, InPacket inPacket) {
@@ -899,50 +898,64 @@ public class WorldHandler {
         Field field = c.getChr().getField();
         int objectID = inPacket.decodeInt();
         Life life = field.getLifeByObjectID(objectID);
-        if (life == null) {
+        if (life == null || !(life instanceof Mob)) {
             return;
         }
+        Mob mob = (Mob) life;
         byte idk0 = inPacket.decodeByte(); // check if the templateID / 10000 == 250 or 251. No idea for what it's used
         short moveID = inPacket.decodeShort();
         boolean usedSkill = inPacket.decodeByte() != 0;
-        byte skill = inPacket.decodeByte();
+        byte lastSkillUsed = inPacket.decodeByte();
+        int skillID = 0;
+        int slv = 0;
         int idk1 = inPacket.decodeInt();
-        byte idk2 = inPacket.decodeByte();
-        // for: short, short
+        if (usedSkill && lastSkillUsed != -1) {
+            MobSkill mobSkill = null;
+            List<MobSkill> skillList = mob.getSkills();
+            if (skillList.size() > 0) {
+                if (lastSkillUsed != -1) {
+                    mobSkill = skillList.stream()
+                            .filter(ms -> ms.getSkillID() == lastSkillUsed).findFirst().orElse(null);
+                }
+                if (mobSkill == null) {
+                    mobSkill = skillList.get(Randomizer.nextInt(skillList.size()));
+                }
+                skillID = mobSkill.getSkill() != 0 ? mobSkill.getSkill() : mobSkill.getSkill();
+                slv = mobSkill.getLevel();
+                c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID = %d, skill = %d, level = %d", mobSkill.getSkillID(), mobSkill.getSkill(), mobSkill.getLevel()));
+            }
+        }
+        byte multiTargetForBallSize = inPacket.decodeByte();
+        for (int i = 0; i < multiTargetForBallSize; i++) {
+            Position pos = inPacket.decodePosition(); // list of ball positions
+        }
 
-        byte idk3 = inPacket.decodeByte();
-        // for: short
+        byte randTimeForAreaAttackSize = inPacket.decodeByte();
+        for (int i = 0; i < randTimeForAreaAttackSize; i++) {
+            short randTimeForAreaAttack = inPacket.decodeShort(); // could be used for cheat detection, but meh
+        }
 
-        // ?
-        byte idk4 = inPacket.decodeByte();
-
-        // ?
-        int idk5 = inPacket.decodeInt();
-
-        // ?
-        int idk6 = inPacket.decodeInt();
-        int idk7 = inPacket.decodeInt();
-
-        // ?
-        int idk8 = inPacket.decodeInt();
-        byte idk9 = inPacket.decodeByte();
+        byte mask = inPacket.decodeByte();
+        boolean targetUserIDFromSvr = (mask & 1) != 0;
+        boolean isCheatMobMoveRand = ((mask >> 4) & 1) != 0;
+        int hackedCode = inPacket.decodeInt();
+        int moveAction = inPacket.decodeInt(); // not 100% sure
+        int moveActionCS = inPacket.decodeInt();
+        int hitExpire = inPacket.decodeInt();
+        byte idk = inPacket.decodeByte();
         int encodedGatherDuration = inPacket.decodeInt();
         Position pos = inPacket.decodePosition();
         Position vPos = inPacket.decodePosition();
-        Position oldPos = life.getPosition();
+        Position oldPos = mob.getPosition();
         List<Movement> movements = WvsContext.parseMovement(inPacket);
-        int skillID = 0;
-        int slv = 0;
         if (movements.size() > 0) {
-            if (life instanceof Mob) {
-                c.write(CField.mobCtrlAck((Mob) life, true, moveID, skillID, (byte) slv));
-                field.checkMobInAffectedAreas((Mob) life);
-            }
+            c.write(MobPool.mobCtrlAck(mob, true, moveID, skillID, (byte) slv, 0));
+            field.checkMobInAffectedAreas(mob);
             for (Movement m : movements) {
                 Position p = m.getPosition();
-                life.setPosition(p);
-                life.setMoveAction(m.getMoveAction());
-                life.setFh(m.getFh());
+                mob.setPosition(p);
+                mob.setMoveAction(m.getMoveAction());
+                mob.setFh(m.getFh());
             }
         }
     }
@@ -950,13 +963,13 @@ public class WorldHandler {
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
-        short Status = inPacket.decodeShort();
-        if (Status == 0) {
+        short status = inPacket.decodeShort();
+        if (status == 0) {
             int mapleGuideMapId = inPacket.decodeInt();
             Field toField = chr.getClient().getChannelInstance().getField(mapleGuideMapId);
             chr.warp(toField);
         }
-        if (Status == 2) {
+        if (status == 2) {
             //TODO wtf happens here
             //int write 0
             //int something?
@@ -1395,6 +1408,10 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         short pos = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
+        Item item = cashInv.getItemBySlot(pos);
+        if (item == null || item.getItemId() != itemID) {
+            return;
+        }
         switch (itemID) {
             case 5040004: // Hyper Teleport Rock
                 short idk = inPacket.decodeShort();
@@ -1420,8 +1437,9 @@ public class WorldHandler {
                 equip.releaseOptions(false);
                 c.write(CField.redCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
                 c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
-                c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 0, ePos, (short) 0,
-                        invType, (short) 1, 0, equip));
+                c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+                        0, equip));
+                chr.consumeItem(item);
                 break;
             default:
                 chr.chatMessage(YELLOW, "Cash item " + itemID + " is not implemented, notify Sjonnie pls.");
@@ -1478,8 +1496,9 @@ public class WorldHandler {
                 break;
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), true, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 0, ePos, (short) 0,
-                invType, (short) 1, 0, equip));
+        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+                0, equip));
+        chr.consumeItem(scroll);
     }
 
     public static void handleUserUpgradeItemUseRequest(Client c, InPacket inPacket) {
@@ -1498,7 +1517,7 @@ public class WorldHandler {
         }
         int scrollID = scroll.getItemId();
         boolean success = true;
-        Map<ScrollStat, Integer> vals = ItemData.getItemByID(scrollID).getScrollStats();
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(scrollID).getScrollStats();
         if (vals.size() > 0) {
             if (equip.getRuc() <= 0) {
                 WvsContext.dispose(chr);
@@ -1549,8 +1568,9 @@ public class WorldHandler {
             }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 0, ePos, (short) 0,
-                invType, (short) 1, 0, equip));
+        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+                0, equip));
+        chr.consumeItem(scroll);
 
     }
 
@@ -1569,7 +1589,7 @@ public class WorldHandler {
         }
         int scrollID = scroll.getItemId();
         boolean success = true;
-        Map<ScrollStat, Integer> vals = ItemData.getItemByID(scrollID).getScrollStats();
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(scrollID).getScrollStats();
         int chance = vals.getOrDefault(ScrollStat.success, 100);
         int curse = vals.getOrDefault(ScrollStat.cursed, 0);
         success = Util.succeedProp(chance);
@@ -1616,8 +1636,9 @@ public class WorldHandler {
             chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 0, ePos, (short) 0,
-                invType, (short) 1, 0, equip));
+        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+                0, equip));
+        chr.consumeItem(scroll);
     }
 
     public static void handleUserAdditionalOptUpgradeItemUseRequest(Client c, InPacket inPacket) {
@@ -1635,7 +1656,7 @@ public class WorldHandler {
         }
         int scrollID = scroll.getItemId();
         boolean success;
-        Map<ScrollStat, Integer> vals = ItemData.getItemByID(scrollID).getScrollStats();
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(scrollID).getScrollStats();
         int chance = vals.getOrDefault(ScrollStat.success, 100);
         int curse = vals.getOrDefault(ScrollStat.cursed, 0);
         success = Util.succeedProp(chance);
@@ -1672,8 +1693,9 @@ public class WorldHandler {
             chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 0, ePos, (short) 0,
-                invType, (short) 1, 0, equip));
+        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+                0, equip));
+        chr.consumeItem(scroll);
     }
 
     public static void handleUserItemReleaseRequest(Client c, InPacket inPacket) {
@@ -1701,8 +1723,8 @@ public class WorldHandler {
             chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemReleaseEffect(chr.getId(), ePos, bonus));
-        c.write(WvsContext.inventoryOperation(chr, true, false, (byte) 0, ePos, (short) 0,
-                invType, (short) 1, 0, equip));
+        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+                0, equip));
     }
 
     public static void handleUserActiveNickItem(Client c, InPacket inPacket) {
@@ -1821,10 +1843,257 @@ public class WorldHandler {
         Char chr = c.getChr();
         inPacket.decodeInt(); // tick
         int amount = inPacket.decodeInt();
-        if(chr.getMoney() > amount) {
+        if (chr.getMoney() > amount) {
             chr.deductMoney(amount);
             Drop drop = new Drop(-1, amount);
             chr.getField().drop(drop, chr.getPosition());
         }
+    }
+
+    public static void handleUserStatChangeItemUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        inPacket.decodeInt(); // tick
+        short slot = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
+        Item item = chr.getConsumeInventory().getItemBySlot(slot);
+        if (item == null || item.getItemId() != itemID) {
+            return;
+        }
+        Map<SpecStat, Integer> specStats = ItemData.getItemInfoByID(itemID).getSpecStats();
+        long time = specStats.getOrDefault(SpecStat.time, 0) / 1000;
+        for (Map.Entry<SpecStat, Integer> entry : specStats.entrySet()) {
+            SpecStat ss = entry.getKey();
+            int value = entry.getValue();
+            Option o = new Option(itemID, time);
+            o.nOption = value;
+            o.nReason = value;
+            switch (ss) {
+                case hp:
+                    chr.heal(value);
+                    break;
+                case hpR:
+                    chr.heal((int) ((value / 100D) * chr.getStat(Stat.mhp)));
+                    break;
+                case mp:
+                    chr.healMP(value);
+                    break;
+                case mpR:
+                    chr.healMP((int) ((value / 100D) * chr.getStat(Stat.mmp)));
+                    break;
+                case eva:
+                    tsm.putCharacterStatValue(EVA, o);
+                    break;
+                case speed:
+                    tsm.putCharacterStatValue(Speed, o);
+                    break;
+                case pad:
+                    tsm.putCharacterStatValue(PAD, o);
+                    break;
+                case mad:
+                    tsm.putCharacterStatValue(MAD, o);
+                    break;
+                case pdd:
+                    tsm.putCharacterStatValue(PDD, o);
+                    break;
+                case mdd:
+                    tsm.putCharacterStatValue(MDD, o);
+                    break;
+                case acc:
+                    tsm.putCharacterStatValue(ACC, o);
+                    break;
+                case jump:
+                    tsm.putCharacterStatValue(Jump, o);
+                    break;
+                case imhp:
+                    tsm.putCharacterStatValue(MaxHP, o);
+                    break;
+                case immp:
+                    tsm.putCharacterStatValue(MaxMP, o);
+                    break;
+                case indieAllStat:
+                    tsm.putCharacterStatValue(IndieAllStat, o);
+                    break;
+                case indieSpeed:
+                    tsm.putCharacterStatValue(IndieSpeed, o);
+                    break;
+                case indieSTR:
+                    tsm.putCharacterStatValue(IndieSTR, o);
+                    break;
+                case indieDEX:
+                    tsm.putCharacterStatValue(IndieDEX, o);
+                    break;
+                case indieINT:
+                    tsm.putCharacterStatValue(IndieINT, o);
+                    break;
+                case indieLUK:
+                    tsm.putCharacterStatValue(IndieLUK, o);
+                    break;
+                case indiePad:
+                    tsm.putCharacterStatValue(IndiePAD, o);
+                    break;
+                case indiePdd:
+                    tsm.putCharacterStatValue(IndiePDD, o);
+                    break;
+                case indieMad:
+                    tsm.putCharacterStatValue(IndieMAD, o);
+                    break;
+                case indieMdd:
+                    tsm.putCharacterStatValue(IndieMDD, o);
+                    break;
+                case indieBDR:
+                    tsm.putCharacterStatValue(IndieBDR, o);
+                    break;
+                case indieIgnoreMobpdpR:
+                    tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o);
+                    break;
+                case indieStatR:
+                    tsm.putCharacterStatValue(IndieStatR, o);
+                    break;
+                case indieMhp:
+                    tsm.putCharacterStatValue(IndieMHP, o);
+                    break;
+                case indieMmp:
+                    tsm.putCharacterStatValue(IndieMMP, o);
+                    break;
+                case indieBooster:
+                    tsm.putCharacterStatValue(IndieBooster, o);
+                    break;
+                case indieAcc:
+                    tsm.putCharacterStatValue(IndieACC, o);
+                    break;
+                case indieEva:
+                    tsm.putCharacterStatValue(IndieEVA, o);
+                    break;
+                case indieAllSkill:
+                    tsm.putCharacterStatValue(CombatOrders, o);
+                    break;
+                case indieMhpR:
+                    tsm.putCharacterStatValue(IndieMHPR, o);
+                    break;
+                case indieMmpR:
+                    tsm.putCharacterStatValue(IndieMMPR, o);
+                    break;
+                case indieStance:
+                    tsm.putCharacterStatValue(IndieStance, o);
+                    break;
+                case indieForceSpeed:
+                    tsm.putCharacterStatValue(IndieForceSpeed, o);
+                    break;
+                case indieForceJump:
+                    tsm.putCharacterStatValue(IndieForceJump, o);
+                    break;
+                case indieQrPointTerm:
+                    tsm.putCharacterStatValue(IndieQrPointTerm, o);
+                    break;
+                case indieWaterSmashBuff:
+                    tsm.putCharacterStatValue(IndieUNK1, o);
+                    break;
+                case padRate:
+                    tsm.putCharacterStatValue(IndiePADR, o);
+                    break;
+                case madRate:
+                    tsm.putCharacterStatValue(IndieMADR, o);
+                    break;
+                case pddRate:
+                    tsm.putCharacterStatValue(IndiePDDR, o);
+                    break;
+                case mddRate:
+                    tsm.putCharacterStatValue(IndieMDDR, o);
+                    break;
+                case accRate:
+                    tsm.putCharacterStatValue(ACCR, o);
+                    break;
+                case evaRate:
+                    tsm.putCharacterStatValue(EVAR, o);
+                    break;
+                case mhpR:
+                case mhpRRate:
+                    tsm.putCharacterStatValue(IndieMHPR, o);
+                    break;
+                case mmpR:
+                case mmpRRate:
+                    tsm.putCharacterStatValue(IndieMHPR, o);
+                    break;
+                case booster:
+                    tsm.putCharacterStatValue(Booster, o);
+                    break;
+                case expinc:
+                    tsm.putCharacterStatValue(ExpBuffRate, o);
+                    break;
+                case str:
+                    tsm.putCharacterStatValue(STR, o);
+                    break;
+                case dex:
+                    tsm.putCharacterStatValue(DEX, o);
+                    break;
+                case inte:
+                    tsm.putCharacterStatValue(INT, o);
+                    break;
+                case luk:
+                    tsm.putCharacterStatValue(LUK, o);
+                    break;
+                case asrR:
+                    tsm.putCharacterStatValue(AsrRByItem, o);
+                    break;
+                case bdR:
+                    tsm.putCharacterStatValue(BdR, o);
+                    break;
+                case prob:
+                    tsm.putCharacterStatValue(ItemUpByItem, o);
+                    tsm.putCharacterStatValue(MesoUpByItem, o);
+                    break;
+            }
+        }
+        tsm.sendSetStatPacket();
+        chr.consumeItem(item);
+        chr.dispose();
+    }
+
+    public static void handleUserGatherItemRequest(Client c, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
+        Char chr = c.getChr();
+        Inventory inv = chr.getInventoryByType(invType);
+        List<Item> items = inv.getItems();
+        items.sort(Comparator.comparingInt(Item::getBagIndex));
+        for (Item item : items) {
+            int firstSlot = inv.getFirstOpenSlot();
+            if (firstSlot < item.getBagIndex()) {
+                short oldPos = (short) item.getBagIndex();
+                item.setBagIndex(firstSlot);
+                chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.MOVE,
+                        oldPos, (short) item.getBagIndex(), 0, item));
+            }
+
+        }
+        c.write(WvsContext.gatherItemResult(invType.getVal()));
+        chr.dispose();
+    }
+
+    public static void handleUserSortItemRequest(Client c, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
+        Char chr = c.getChr();
+        Inventory inv = chr.getInventoryByType(invType);
+        List<Item> items = inv.getItems();
+        System.out.println();
+        List<Integer> oldIndexes = new ArrayList<>();
+        for (Item item : items) {
+            oldIndexes.add(item.getBagIndex());
+            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
+                    (short) item.getBagIndex(), (short) 0, -1, item));
+        }
+        System.out.println();
+        System.out.println();
+        int i = 0;
+        for (Item item : items) {
+            item.setBagIndex(oldIndexes.get(i));
+            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
+                    (short) item.getBagIndex(), (short) 0, -1, item));
+            i++;
+        }
+        c.write(WvsContext.sortItemResult(invType.getVal()));
+        chr.dispose();
     }
 }

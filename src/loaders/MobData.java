@@ -3,6 +3,7 @@ package loaders;
 import client.character.skills.Option;
 import client.life.ForcedMobStat;
 import client.life.Mob;
+import client.life.MobSkill;
 import client.life.MobTemporaryStat;
 import constants.ServerConstants;
 import org.w3c.dom.Document;
@@ -60,13 +61,13 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getTemplateId());
                 dataOutputStream.writeInt(fms.getLevel());
                 dataOutputStream.writeInt(mob.getFirstAttack());
-                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(BodyAttack).nOption);
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(BodyAttack) != null ? mts.getNewOptionsByMobStat(BodyAttack).nOption : 0);
                 dataOutputStream.writeLong(fms.getMaxHP());
                 dataOutputStream.writeLong(fms.getMaxMP());
                 dataOutputStream.writeInt(fms.getPad());
-                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PDR).nOption);
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PDR) != null ? mts.getNewOptionsByMobStat(PDR).nOption : 0);
                 dataOutputStream.writeInt(fms.getMad());
-                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(MDR).nOption);
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(MDR) != null ? mts.getNewOptionsByMobStat(MDR).nOption : 0);
                 dataOutputStream.writeInt(fms.getAcc());
                 dataOutputStream.writeInt(fms.getEva());
                 dataOutputStream.writeInt(fms.getPushed());
@@ -135,7 +136,35 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getSealedCooltime());
                 dataOutputStream.writeInt(mob.getWillEXP());
                 dataOutputStream.writeUTF(mob.getFixedMoveDir());
-                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PImmune).nOption);
+                dataOutputStream.writeShort(mob.getSkills().size());
+                for(MobSkill ms : mob.getSkills()) {
+                    dataOutputStream.writeInt(ms.getSkillID());
+                    dataOutputStream.writeInt(ms.getSkill());
+                    dataOutputStream.writeByte(ms.getAction());
+                    dataOutputStream.writeInt(ms.getLevel());
+                    dataOutputStream.writeInt(ms.getEffectAfter());
+                    dataOutputStream.writeInt(ms.getSkillAfter());
+                    dataOutputStream.writeByte(ms.getPriority());
+                    dataOutputStream.writeBoolean(ms.isOnlyFsm());
+                    dataOutputStream.writeBoolean(ms.isOnlyOtherSkill());
+                    dataOutputStream.writeBoolean(ms.isDoFirst());
+                    dataOutputStream.writeBoolean(ms.isAfterDead());
+                    dataOutputStream.writeInt(ms.getSkillForbid());
+                    dataOutputStream.writeInt(ms.getAfterAttack());
+                    dataOutputStream.writeInt(ms.getAfterAttackCount());
+                    dataOutputStream.writeInt(ms.getAfterDelay());
+                    dataOutputStream.writeInt(ms.getFixDamR());
+                    dataOutputStream.writeInt(ms.getPreSkillIndex());
+                    dataOutputStream.writeInt(ms.getPreSkillCount());
+                    dataOutputStream.writeInt(ms.getCastTime());
+                    dataOutputStream.writeInt(ms.getCoolTime());
+                    dataOutputStream.writeInt(ms.getDelay());
+                    dataOutputStream.writeInt(ms.getUseLimit());
+                    dataOutputStream.writeUTF(ms.getInfo());
+                    dataOutputStream.writeUTF(ms.getText());
+                    dataOutputStream.writeUTF(ms.getSpeak());
+                }
+                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PImmune) != null ? mts.getNewOptionsByMobStat(PImmune).nOption : 0);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -241,6 +270,36 @@ public class MobData {
             mob.setSealedCooltime(dataInputStream.readInt());
             mob.setWillEXP(dataInputStream.readInt());
             mob.setFixedMoveDir(dataInputStream.readUTF());
+            short skillSize = dataInputStream.readShort();
+            for (int i = 0; i < skillSize; i++) {
+                MobSkill ms = new MobSkill();
+                ms.setSkillID(dataInputStream.readInt());
+                ms.setSkill(dataInputStream.readInt());
+                ms.setAction(dataInputStream.readByte());
+                ms.setLevel(dataInputStream.readInt());
+                ms.setEffectAfter(dataInputStream.readInt());
+                ms.setSkillAfter(dataInputStream.readInt());
+                ms.setPriority(dataInputStream.readByte());
+                ms.setOnlyFsm(dataInputStream.readBoolean());
+                ms.setOnlyOtherSkill(dataInputStream.readBoolean());
+                ms.setDoFirst(dataInputStream.readBoolean());
+                ms.setAfterDead(dataInputStream.readBoolean());
+                ms.setSkillForbid(dataInputStream.readInt());
+                ms.setAfterAttack(dataInputStream.readInt());
+                ms.setAfterAttackCount(dataInputStream.readInt());
+                ms.setAfterDelay(dataInputStream.readInt());
+                ms.setFixDamR(dataInputStream.readInt());
+                ms.setPreSkillIndex(dataInputStream.readInt());
+                ms.setPreSkillCount(dataInputStream.readInt());
+                ms.setCastTime(dataInputStream.readInt());
+                ms.setCoolTime(dataInputStream.readInt());
+                ms.setDelay(dataInputStream.readInt());
+                ms.setUseLimit(dataInputStream.readInt());
+                ms.setInfo(dataInputStream.readUTF());
+                ms.setText(dataInputStream.readUTF());
+                ms.setSpeak(dataInputStream.readUTF());
+                mob.addSkill(ms);
+            }
 
             Option pImmuneOpt = new Option();
             pImmuneOpt.nOption = dataInputStream.readInt();
@@ -253,6 +312,8 @@ public class MobData {
             mob.setMoveAction((byte) 5); // normal monster?
             mob.setHp(fms.getMaxHP());
             mob.setMaxHp(fms.getMaxHP());
+            mob.setMp(fms.getMaxMP());
+            mob.setMaxMp(fms.getMaxMP());
             mob.setDrops(DropData.getDropInfoByID(mob.getTemplateId()));
             addMob(mob);
         } catch (IOException e) {
@@ -556,6 +617,100 @@ public class MobData {
                         mob.setPatrolMob(true);
                         break;
                     case "skill":
+                        for(Node skillIDNode : XMLApi.getAllChildren(n)) {
+                            MobSkill mobSkill = new MobSkill();
+                            mobSkill.setSkillID(Integer.parseInt(XMLApi.getNamedAttribute(skillIDNode, "name")));
+//                            Node firstAttackNode = XMLApi.getFirstChildByNameBF(skillIDNode, "firstAttack");
+//                            if(firstAttackNode != null) {
+//                                mob.setFirstAttack(Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")) != 0);
+//                                if(Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")) > 1) {
+//                                    System.err.printf("Firstattack = %d%n", Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")));
+//                                }
+//                            }
+                            for(Node skillInfoNode : XMLApi.getAllChildren(skillIDNode)) {
+                                String skillNodeName = XMLApi.getNamedAttribute(skillInfoNode, "name");
+                                String skillNodeValue = XMLApi.getNamedAttribute(skillInfoNode, "value");
+                                switch(skillNodeName) {
+                                    case "skill":
+                                        mobSkill.setSkill(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "action":
+                                        mobSkill.setAction(Byte.parseByte(skillNodeValue));
+                                        break;
+                                    case "level":
+                                        mobSkill.setLevel(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "effectAfter":
+                                        if(!skillNodeValue.equals("")) {
+                                            mobSkill.setEffectAfter(Integer.parseInt(skillNodeValue));
+                                        }
+                                        break;
+                                    case "skillAfter":
+                                        mobSkill.setSkillAfter(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "priority":
+                                        mobSkill.setPriority(Byte.parseByte(skillNodeValue));
+                                        break;
+                                    case "onlyFsm":
+                                        mobSkill.setOnlyFsm(Integer.parseInt(skillNodeValue) != 0);
+                                        break;
+                                    case "onlyOtherSkill":
+                                        mobSkill.setOnlyOtherSkill(Integer.parseInt(skillNodeValue) != 0);
+                                        break;
+                                    case "doFirst":
+                                        mobSkill.setDoFirst(Integer.parseInt(skillNodeValue) != 0);
+                                        break;
+                                    case "afterDead":
+                                        mobSkill.setAfterDead(Integer.parseInt(skillNodeValue) != 0);
+                                        break;
+                                    case "skillForbid":
+                                        mobSkill.setSkillForbid(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "afterAttack":
+                                        mobSkill.setAfterAttack(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "afterAttackCount":
+                                        mobSkill.setAfterAttackCount(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "afterDelay":
+                                        mobSkill.setAfterDelay(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "fixDamR":
+                                        mobSkill.setFixDamR(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "preSkillIndex":
+                                        mobSkill.setPreSkillIndex(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "preSkillCount":
+                                        mobSkill.setPreSkillCount(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "castTime":
+                                        mobSkill.setCastTime(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "cooltime":
+                                        mobSkill.setCoolTime(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "delay":
+                                        mobSkill.setDelay(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "useLimit":
+                                        mobSkill.setUseLimit(Integer.parseInt(skillNodeValue));
+                                        break;
+                                    case "info":
+                                        mobSkill.setInfo(skillNodeValue);
+                                        break;
+                                    case "text":
+                                        mobSkill.setText(skillNodeValue);
+                                        break;
+                                    case "speak":
+                                        mobSkill.setSpeak(skillNodeValue);
+                                        break;
+                                    default:
+                                        System.out.printf("Unknown skill node %s with value %s%n", skillNodeName, skillNodeValue);
+                                }
+                            }
+                            mob.addSkill(mobSkill);
+                        }
                     case "speak":
                     case "thumbnail":
                     case "attack":
@@ -680,33 +835,6 @@ public class MobData {
                     case "cantPassByTeleport":
                     case "250000":
                     case "forward_direction":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
-//                    case "prevLinkMob":
                         break;
                     default:
                         System.err.println(String.format("Unkown property %s with value %s.", name, value));

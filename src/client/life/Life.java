@@ -25,6 +25,7 @@ public class Life {
     private boolean notRespawnable;
     private byte moveAction;
     private Field field;
+    private Position homePosition;
 
     public Life(int objectId) {
         this.objectId = objectId;
@@ -259,13 +260,14 @@ public class Life {
 
     public Mob createMobFromLife() {
         Mob mob = null;
-        if(getLifeType().equalsIgnoreCase("m")) {
+        if (getLifeType().equalsIgnoreCase("m")) {
             mob = MobData.getMobDeepCopyById(getTemplateId());
             mob.setObjectId(getObjectId());
             mob.setLifeType(getLifeType());
             mob.setTemplateId(getTemplateId());
             mob.setX(getX());
             mob.setY(getY());
+            mob.setHomePosition(new Position(getX(), getY()));
             mob.setPosition(new Position(getX(), getY()));
             mob.setMobTime(getMobTime());
             mob.setF(getF());
@@ -347,5 +349,13 @@ public class Life {
             npc.setMobAliveReq(getMobAliveReq());
         }
         return npc;
+    }
+
+    public void setHomePosition(Position homePosition) {
+        this.homePosition = homePosition;
+    }
+
+    public Position getHomePosition() {
+        return homePosition;
     }
 }

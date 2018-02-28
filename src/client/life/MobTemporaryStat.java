@@ -8,6 +8,7 @@ import connection.OutPacket;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.CField;
+import packet.MobPool;
 import server.EventManager;
 
 import java.util.*;
@@ -178,11 +179,11 @@ public class MobTemporaryStat {
         if (hasNewMobStat(MCounter)) {
             outPacket.encodeInt(getNewOptionsByMobStat(MCounter).wOption);
         }
-        if (hasNewMobStat(PCounter) || hasNewMobStat(MCounter)) {
+        if (hasNewMobStat(PCounter)) {
             outPacket.encodeInt(getNewOptionsByMobStat(PCounter).mOption); // nCounterProb
             outPacket.encodeInt(getNewOptionsByMobStat(PCounter).bOption); // bCounterDelay
             outPacket.encodeInt(getNewOptionsByMobStat(PCounter).nReason); // nAggroRank
-        } else if(hasNewMobStat(MCounter)) {
+        } else if (hasNewMobStat(MCounter)) {
             outPacket.encodeInt(getNewOptionsByMobStat(MCounter).mOption); // nCounterProb
             outPacket.encodeInt(getNewOptionsByMobStat(MCounter).bOption); // bCounterDelay
             outPacket.encodeInt(getNewOptionsByMobStat(MCounter).nReason); // nAggroRank
@@ -193,6 +194,9 @@ public class MobTemporaryStat {
             outPacket.encodeInt(getNewOptionsByMobStat(Fatality).pOption);
             outPacket.encodeInt(getNewOptionsByMobStat(Fatality).yOption);
             outPacket.encodeInt(getNewOptionsByMobStat(Fatality).mOption);
+        }
+        if (hasNewMobStat(Explosion)) {
+            outPacket.encodeInt(getNewOptionsByMobStat(Explosion).wOption);
         }
         if (hasNewMobStat(ExtraBuffStat)) {
             List<Option> values = getNewOptionsByMobStat(ExtraBuffStat).extraOpts;
@@ -350,8 +354,8 @@ public class MobTemporaryStat {
 
     public BurnedInfo getBurnBySkill(int skillID) {
         BurnedInfo res = null;
-        for(BurnedInfo bi : getBurnedInfos()) {
-            if(bi.getSkillId() == skillID) {
+        for (BurnedInfo bi : getBurnedInfos()) {
+            if (bi.getSkillId() == skillID) {
                 res = bi;
             }
         }
@@ -377,9 +381,9 @@ public class MobTemporaryStat {
     public void removeMobStat(MobStat mobStat, Boolean fromTimer) {
         getRemovedStatVals().put(mobStat, getCurrentStatVals().get(mobStat));
         getCurrentStatVals().remove(mobStat);
-        getMob().getField().broadcastPacket(CField.mobStatReset(getMob(), (byte) 1, false));
+        getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false));
         getTimers().remove(mobStat);
-        if(!fromTimer && getTimers().containsKey(mobStat)) {
+        if (!fromTimer && getTimers().containsKey(mobStat)) {
             getTimers().get(mobStat).cancel();
             getTimers().remove(mobStat);
         } else {
@@ -391,11 +395,11 @@ public class MobTemporaryStat {
         List<BurnedInfo> biList = getBurnedInfos().stream().filter(bi -> bi.getCharacterId() == charId).collect(Collectors.toList());
         getBurnedInfos().removeAll(biList);
         getRemovedStatVals().put(BurnedInfo, getCurrentOptionsByMobStat(BurnedInfo));
-        if(getBurnedInfos().size() == 0) {
+        if (getBurnedInfos().size() == 0) {
             getCurrentStatVals().remove(BurnedInfo);
         }
-        getMob().getField().broadcastPacket(CField.mobStatReset(getMob(), (byte) 1, false, biList));
-        if(!fromTimer) {
+        getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false, biList));
+        if (!fromTimer) {
             getBurnCancelTimers().get(charId).cancel();
             getBurnCancelTimers().remove(charId);
             getBurnTimers().get(charId).cancel();
@@ -408,7 +412,7 @@ public class MobTemporaryStat {
 
     public void addStatOptionsAndBroadcast(MobStat mobStat, Option option) {
         addStatOptions(mobStat, option);
-        mob.getField().broadcastPacket(CField.mobStatSet(getMob(), (short) 0));
+        mob.getField().broadcastPacket(MobPool.mobStatSet(getMob(), (short) 0));
     }
 
     public void addStatOptions(MobStat mobStat, Option option) {
@@ -417,8 +421,8 @@ public class MobTemporaryStat {
         int tAct = option.tOption > 0 ? option.tOption : option.tTerm;
         getNewStatVals().put(mobStat, option);
         getCurrentStatVals().put(mobStat, option);
-        if(tAct > 0 && mobStat != BurnedInfo) {
-            if(getTimers().containsKey(mobStat)) {
+        if (tAct > 0 && mobStat != BurnedInfo) {
+            if (getTimers().containsKey(mobStat)) {
                 getTimers().get(mobStat).cancel();
             }
             Timer t = EventManager.addEvent(this, "removeMobStat", tAct, mobStat, true);
@@ -460,7 +464,7 @@ public class MobTemporaryStat {
     }
 
     public Map<MobStat, Timer> getTimers() {
-        if(timers == null) {
+        if (timers == null) {
             timers = new HashMap<>();
         }
         return timers;
@@ -475,15 +479,15 @@ public class MobTemporaryStat {
     }
 
     public void clear() {
-        for(Timer t : getBurnTimers().values()) {
+        for (Timer t : getBurnTimers().values()) {
             t.cancel();
         }
         getBurnTimers().clear();
-        for(Timer t : getBurnCancelTimers().values()) {
+        for (Timer t : getBurnCancelTimers().values()) {
             t.cancel();
         }
         getBurnCancelTimers().clear();
-        for(Timer t : getTimers().values()) {
+        for (Timer t : getTimers().values()) {
             t.cancel();
         }
         getTimers().clear();
@@ -511,7 +515,7 @@ public class MobTemporaryStat {
         bi.setDotAnimation(bi.getAttackDelay() + bi.getInterval() + time);
         bi.setStartTime((int) System.currentTimeMillis());
         bi.setLastUpdate((int) System.currentTimeMillis());
-        if(bu != null) {
+        if (bu != null) {
             removeBurnedInfo(charId, false);
         }
         getBurnedInfos().add(bi);

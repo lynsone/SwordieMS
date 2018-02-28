@@ -225,7 +225,7 @@ public class CharacterStat {
     }
 
     public long getMoney() {
-        return (short) money;
+        return money;
     }
 
     public ExtendSP getExtendSP() {

@@ -37,6 +37,7 @@ import java.util.*;
 
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
+import static enums.InventoryOperation.*;
 
 /**
  * Created on 11/17/2017.
@@ -301,9 +302,8 @@ public class Char {
             Item existingItem = inventory.getItemByItemID(item.getItemId());
             if (existingItem != null && existingItem.getInvType().isStackable()) {
                 existingItem.addQuantity(item.getQuantity());
-                write(WvsContext.inventoryOperation(this, true, false,
-                        (byte) 0, (short) existingItem.getBagIndex(), (byte) -1, existingItem.getInvType(), (byte) 1,
-                        0, existingItem));
+                write(WvsContext.inventoryOperation(true, false,
+                        UPDATE_BAG_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
             } else {
                 item.setInventoryId(inventory.getId());
                 if (!hasCorrectBagIndex) {
@@ -313,9 +313,8 @@ public class Char {
                 if (item.getId() == 0) {
                     item.updateDB();
                 }
-                write(WvsContext.inventoryOperation(this, true, false,
-                        (byte) 0, (short) item.getBagIndex(), (byte) -1, item.getInvType(), (byte) 1,
-                        0, item));
+                write(WvsContext.inventoryOperation( true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1,0, item));
             }
         }
     }
@@ -1623,6 +1622,9 @@ public class Char {
         CharacterStat cs = getAvatarData().getCharacterStat();
         long curExp = cs.getExp();
         int level = getStat(Stat.level);
+        if(level >= GameConstants.charExp.length - 1) {
+            return;
+        }
         long newExp = curExp + amount;
         Map<Stat, Object> stats = new HashMap<>();
         while (newExp > GameConstants.charExp[level]) {
@@ -1761,6 +1763,10 @@ public class Char {
         return scriptManager;
     }
 
+    /**
+     * Adds a {@link Drop} to this Char.
+     * @param drop The Drop that has been picked up.
+     */
     public void addDrop(Drop drop) {
         if(drop.isMoney()) {
             addMoney(drop.getMoney());
@@ -1772,15 +1778,106 @@ public class Char {
         }
     }
 
+    /**
+     * Returns the Char's name.
+     * @return The Char's name.
+     */
     public String getName() {
         return getAvatarData().getCharacterStat().getName();
     }
 
+    /**
+     * Checks whether or not this Char has a given quest in progress.
+     * @param questReq The quest ID of the requested quest.
+     * @return Whether or not this char is in progress with the quest.
+     */
     public boolean hasQuestInProgress(int questReq) {
         return getQuestManager().hasQuestInProgress(questReq);
     }
 
+    /**
+     * Disposes this Char, allowing it to send packets to the server again.
+     */
     public void dispose() {
         write(WvsContext.exclRequest());
+    }
+
+    /**
+     * Returns the current HP of this Char.
+     * @return the current HP of this Char.
+     */
+    public int getHP() {
+        return getStat(Stat.hp);
+    }
+
+    /**
+     * Returns the current MP of this Char.
+     * @return the current MP of this Char.
+     */
+    public int getMP() {
+        return getStat(Stat.mp);
+    }
+
+    /**
+     * Gets the max hp of this Char. TODO: factor in skills, items, etc...
+     * @return The max hp of this Char
+     */
+    public int getMaxHP() {
+        return getStat(Stat.mhp);
+    }
+
+    /**
+     * Gets the max mp of this Char. TODO: factor in skills, items, etc...
+     * @return The max mp of this Char
+     */
+    public int getMaxMP() {
+        return getStat(Stat.mmp);
+    }
+
+    /**
+     * Heals this Char's HP for a certain amount. Caps off at maximum HP.
+     * @param amount The amount to heal.
+     */
+    public void heal(int amount) {
+        int curHP = getHP();
+        int maxHP = getMaxHP();
+        int newHP = curHP + amount > maxHP ? maxHP : curHP + amount;
+        Map<Stat, Object> stats = new HashMap<>();
+        setStat(Stat.hp, newHP);
+        stats.put(Stat.hp, newHP);
+        write(WvsContext.statChanged(stats));
+    }
+
+    /**
+     * "Heals" this Char's MP for a certain amount. Caps off at maximum MP.
+     * @param amount The amount to heal.
+     */
+    public void healMP(int amount) {
+        int curMP = getMP();
+        int maxMP = getMaxMP();
+        int newMP = curMP + amount > maxMP ? maxMP : curMP + amount;
+        Map<Stat, Object> stats = new HashMap<>();
+        setStat(Stat.mp, newMP);
+        stats.put(Stat.mp, newMP);
+        write(WvsContext.statChanged(stats));
+    }
+
+    /**
+     * Consumes a single {@link Item} from this Char's {@link Inventory}. Will remove the Item if it has a quantity of 1.
+     * @param item The Item to consume.
+     */
+    public void consumeItem(Item item) {
+        Inventory inventory = getInventoryByType(item.getInvType());
+        // data race possible
+        if(item.getQuantity() <= 1) {
+            item.setQuantity(0);
+            inventory.removeItem(item);
+            write(WvsContext.inventoryOperation(true, false,
+                    REMOVE, (short) item.getBagIndex(), (byte) -1, 0, item));
+        } else {
+            item.setQuantity(item.getQuantity() - 1);
+            write(WvsContext.inventoryOperation(true, false,
+                    UPDATE_QUANTITY, (short) item.getBagIndex(), (byte) -1, 0, item));
+        }
     }
 }

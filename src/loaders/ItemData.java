@@ -8,11 +8,8 @@ import constants.ServerConstants;
 import enums.InvType;
 import enums.ScrollStat;
 import enums.SpecStat;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import server.Server;
 import util.*;
 
 import java.io.*;
@@ -1098,10 +1095,10 @@ public class ItemData {
     }
 
     public static Item getItemDeepCopy(int id) {
-        return getDeepCopyByItemInfo(getItemByID(id));
+        return getDeepCopyByItemInfo(getItemInfoByID(id));
     }
 
-    public static ItemInfo getItemByID(int itemID) {
+    public static ItemInfo getItemInfoByID(int itemID) {
         ItemInfo ii =  getItems().stream().filter(i -> i.getItemId() == itemID).
                 findFirst().
                 orElse(null);
