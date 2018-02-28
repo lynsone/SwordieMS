@@ -474,6 +474,12 @@ public class Field {
             EventManager.addEvent(this, "removeLife", duration, aa.getObjectId(), true);
         }
         broadcastPacket(CField.affectedAreaCreated(aa));
+        getChars().forEach(chr -> aa.getField().checkCharInAffectedAreas(chr));
+        getMobs().forEach(mob -> aa.getField().checkMobInAffectedAreas(mob));
+    }
+
+    private List<Mob> getMobs() {
+        return getLifes().stream().filter(life -> life instanceof Mob).map(l -> (Mob) l).collect(Collectors.toList());
     }
 
     public void setObjectIDCounter(int idCounter) {
