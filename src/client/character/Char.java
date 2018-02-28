@@ -9,6 +9,7 @@ import client.field.Portal;
 import client.jobs.Job;
 import client.jobs.JobManager;
 import client.jobs.resistance.WildHunterInfo;
+import client.life.AffectedArea;
 import client.life.Drop;
 import connection.OutPacket;
 import constants.GameConstants;
@@ -1600,6 +1601,10 @@ public class Char {
      * @param portal
      */
     public void warp(Field toField, Portal portal) {
+        TemporaryStatManager tsm = getTemporaryStatManager();
+        for(AffectedArea aa : tsm.getAffectedAreas()) {
+            tsm.removeStatsBySkill(aa.getSkillID());
+        }
         getField().removeChar(this);
         setField(toField);
         field.removeChar(this);

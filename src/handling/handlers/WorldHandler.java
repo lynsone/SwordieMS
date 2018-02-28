@@ -25,6 +25,7 @@ import constants.SkillConstants;
 import enums.*;
 import loaders.ItemData;
 import loaders.SkillData;
+import loaders.SkillStringInfo;
 import packet.*;
 import server.Channel;
 import server.Server;
@@ -182,6 +183,118 @@ public class WorldHandler {
         chr.chatMessage(YELLOW, "--");
 
 
+    }
+
+    public static void handleNonTargetForceAtomAttack(Client c, InPacket inPacket) {
+        // fu dan, I actually create a different one for this one as well
+        AttackInfo attackInfo = new AttackInfo();
+        int skillID2 = inPacket.decodeInt();
+        int skillCrc2 = inPacket.decodeInt();
+        int ntfaaIdk = inPacket.decodeInt();
+        boolean fieldKey = inPacket.decodeByte() == 1;
+        byte mask = inPacket.decodeByte();
+        byte hits = (byte) (mask & 0xF);
+        int mobCount = (mask >>> 4) & 0xF;
+        int skillId = inPacket.decodeInt();
+        byte slv = inPacket.decodeByte();
+        inPacket.decodeByte(); // hardcoded 0
+        inPacket.decodeInt(); // crc
+        boolean zeroBeta = false;
+        if (SkillConstants.isZeroSkill(skillId)) {
+            zeroBeta = inPacket.decodeByte() != 0;
+        }
+        inPacket.decodeByte(); // some zero byte
+        inPacket.decodeByte(); // more zero byte
+        short maskie = inPacket.decodeShort();
+        boolean left = ((maskie >> 15) & 1) != 0;
+        short attackAction = (short) (maskie & 0x7FFF);
+        inPacket.decodeInt(); // another crc (GETCRC32Svr<long>(&a[*n], 0x405u))
+        byte attackActionType = inPacket.decodeByte();
+        byte idk0 = 0;
+        if (SkillConstants.isEvanForceSkill(skillId)) {
+            idk0 = inPacket.decodeByte();
+        }
+        byte mask2 = inPacket.decodeByte();
+        byte attackSpeed = (byte) (mask2 & 0xFFFF);
+        byte reduceCount = (byte) (mask2 >>> 4);
+        int psdTargetPlus = inPacket.decodeInt();
+        int id = inPacket.decodeInt();
+        inPacket.decodeInt(); // another zero
+        attackInfo.fieldKey = fieldKey;
+        attackInfo.hits = hits;
+        attackInfo.mobCount = mobCount;
+        attackInfo.skillId = skillId;
+        attackInfo.slv = slv;
+        attackInfo.left = left;
+        attackInfo.attackAction = attackAction;
+        attackInfo.attackActionType = attackActionType;
+        attackInfo.idk0 = idk0;
+        attackInfo.attackSpeed = attackSpeed;
+        attackInfo.reduceCount = reduceCount;
+        attackInfo.psdTargetPlus = psdTargetPlus;
+        attackInfo.someId = id;
+        for (int i = 0; i < mobCount; i++) {
+            MobAttackInfo mai = new MobAttackInfo();
+            int mobId = inPacket.decodeInt();
+            byte idk1 = inPacket.decodeByte();
+            byte idk2 = inPacket.decodeByte();
+            byte idk3 = inPacket.decodeByte();
+            byte idk4 = inPacket.decodeByte();
+            byte idk5 = inPacket.decodeByte();
+            int templateID = inPacket.decodeInt();
+            byte calcDamageStatIndex = inPacket.decodeByte();
+            short rcDstX = inPacket.decodeShort();
+            short rectRight = inPacket.decodeShort();
+            short oldPosX = inPacket.decodeShort(); // ?
+            short oldPosY = inPacket.decodeShort(); // ?
+            short sIdk6 = inPacket.decodeShort(); // ?
+            short size = attackInfo.hits;
+            int[] damages = new int[size];
+            for (int j = 0; j < size; j++) {
+                damages[j] = inPacket.decodeInt();
+            }
+            int mobUpDownYRange = inPacket.decodeInt();
+            inPacket.decodeInt(); // mob crc
+            // Begin PACKETMAKER::MakeAttackInfoPacket
+            byte type = inPacket.decodeByte();
+            String currentAnimationName = "";
+            int animationDeltaL = 0;
+            String[] hitPartRunTimes = new String[0];
+            if (type == 1) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+                int hitPartRunTimesSize = inPacket.decodeInt();
+                hitPartRunTimes = new String[hitPartRunTimesSize];
+                for (int j = 0; j < hitPartRunTimesSize; j++) {
+                    hitPartRunTimes[j] = inPacket.decodeString();
+                }
+            } else if (type == 2) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+            }
+            // End PACKETMAKER::MakeAttackInfoPacket
+            mai.mobId = mobId;
+            mai.idk1 = idk1;
+            mai.idk2 = idk2;
+            mai.idk3 = idk3;
+            mai.idk4 = idk4;
+            mai.idk5 = idk5;
+            mai.templateID = templateID;
+            mai.calcDamageStatIndex = calcDamageStatIndex;
+            mai.rcDstX = rcDstX;
+            mai.rectRight = rectRight;
+            mai.oldPosX = oldPosX;
+            mai.oldPosY = oldPosY;
+            mai.damages = damages;
+            mai.mobUpDownYRange = mobUpDownYRange;
+            mai.type = type;
+            mai.currentAnimationName = currentAnimationName;
+            mai.animationDeltaL = animationDeltaL;
+            mai.hitPartRunTimes = hitPartRunTimes;
+            attackInfo.mobAttackInfo.add(mai);
+        }
+        Position somePos = inPacket.decodePosition(); // probably start/end position
+        handleAttack(c, attackInfo);
     }
 
     public static void handleMagicAttack(Client c, InPacket inPacket) {
@@ -1188,15 +1301,17 @@ public class WorldHandler {
     }
 
     public static void handleForceAtomCollision(Client c, InPacket inPacket) {
-        int idk1 = inPacket.decodeInt();
+        int size = inPacket.decodeInt();
         int idk2 = inPacket.decodeInt();
-        int idk3 = inPacket.decodeInt();
-        byte idk4 = inPacket.decodeByte();
-        int mobID = inPacket.decodeInt();
-        Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
-        if (mob != null) {
+        for (int i = 0; i < size; i++) {
+            int idk3 = inPacket.decodeInt();
+            byte idk4 = inPacket.decodeByte();
+            int mobID = inPacket.decodeInt();
+            Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
+            if (mob != null) {
 //            mob.damage((long) 133337);
 //            c.write(CField.mobDamaged(mobID, (long) 133337, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
+            }
         }
     }
 
@@ -1238,15 +1353,19 @@ public class WorldHandler {
         switch (skillID) {
             case BlazeWizard.FINAL_ORBITAL_FLAME:
                 fae = ForceAtomEnum.ORBITAL_FLAME_4;
+                skillID = BlazeWizard.FINAL_ORBITAL_FLAME_ATOM;
                 break;
             case BlazeWizard.GRAND_ORBITAL_FLAME:
                 fae = ForceAtomEnum.ORBITAL_FLAME_3;
+                skillID = BlazeWizard.GRAND_ORBITAL_FLAME_ATOM;
                 break;
             case BlazeWizard.GREATER_ORBITAL_FLAME:
                 fae = ForceAtomEnum.ORBITAL_FLAME_2;
+                skillID = BlazeWizard.GREATER_ORBITAL_FLAME_ATOM;
                 break;
             default:
                 fae = ForceAtomEnum.ORBITAL_FLAME_1;
+                skillID = BlazeWizard.ORBITAL_FLAME_ATOM;
                 break;
         }
         int curTime = Util.getCurrentTime();
@@ -1262,10 +1381,12 @@ public class WorldHandler {
                 angle = 90;
                 break;
         }
-        ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), 15, 3,
-                angle, 0, curTime, 0, skillID, new Position(0, 0));
-        c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
-                chr.getId(), skillID, fai, null, dir, range, null, 0, null));
+        ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), 11, 13,
+                angle, 0, curTime, si.getValue(SkillStat.mobCount, slv), skillID, new Position(0, 0));
+        List<ForceAtomInfo> faiList = new ArrayList<>();
+        faiList.add(fai);
+        c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), false,
+                new ArrayList<>(), skillID, faiList, null, dir, range, null, 0, null));
     }
 
     public static void handleUserConsumeCashItemUseRequest(Client c, InPacket inPacket) {

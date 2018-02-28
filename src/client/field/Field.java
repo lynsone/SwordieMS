@@ -519,6 +519,12 @@ public class Field {
         } else if(life instanceof AffectedArea) {
             AffectedArea aa = (AffectedArea) life;
             broadcastPacket(CField.affectedAreaRemoved(aa, false));
+            for(Char chr : getChars()) {
+                TemporaryStatManager tsm = chr.getTemporaryStatManager();
+                if(tsm.hasAffectedArea(aa)) {
+                    tsm.removeStatsBySkill(aa.getSkillID());
+                }
+            }
         }
     }
 

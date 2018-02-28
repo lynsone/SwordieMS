@@ -224,6 +224,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_MAGIC_ATTACK:
                     WorldHandler.handleMagicAttack(c, inPacket);
                     break;
+                case USER_NON_TARGET_FORCE_ATOM_ATTACK:
+                    WorldHandler.handleNonTargetForceAtomAttack(c, inPacket);
+                    break;
                 case USER_BODY_ATTACK:
                     WorldHandler.handleBodyAttack(c, inPacket);
                     break;

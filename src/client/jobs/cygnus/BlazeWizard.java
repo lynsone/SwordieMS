@@ -35,10 +35,15 @@ public class BlazeWizard extends Job {
     public static final int ELEMENTAL_SHIFT = 10001254;
     public static final int ELEMENTAL_HARMONY_INT = 10000248;
 
-    public static final int ORBITAL_FLAME = 12001020; //TODO
+    public static final int ORBITAL_FLAME = 12001020; 
     public static final int GREATER_ORBITAL_FLAME = 12100020;
     public static final int GRAND_ORBITAL_FLAME = 12110020;
     public static final int FINAL_ORBITAL_FLAME = 12120006;
+
+    public static final int ORBITAL_FLAME_ATOM = 12000026;
+    public static final int GREATER_ORBITAL_FLAME_ATOM = 12100028;
+    public static final int GRAND_ORBITAL_FLAME_ATOM = 12110028;
+    public static final int FINAL_ORBITAL_FLAME_ATOM = 12120010;
 
     public static final int IGNITION = 12101024; //Buff TODO (DoT&AoE)
     public static final int FLASHFIRE = 12101025; //Special Skill //TODO
