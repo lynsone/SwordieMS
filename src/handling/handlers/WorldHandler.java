@@ -160,6 +160,8 @@ public class WorldHandler {
                 chr.chatMessage(YELLOW, "SwapItem before: " + swapItem);
             }
             item.setBagIndex(newPos);
+            int beforeSizeOn = chr.getEquippedInventory().getItems().size();
+            int beforeSize = chr.getEquipInventory().getItems().size();
             if (invType == EQUIP && invTypeFrom != invTypeTo) {
                 if (invTypeFrom == EQUIPPED) {
                     chr.unequip(item);
@@ -173,6 +175,11 @@ public class WorldHandler {
             if (swapItem != null) {
                 swapItem.setBagIndex(oldPos);
                 chr.chatMessage(YELLOW, "SwapItem after:    " + swapItem);
+            }
+            int afterSizeOn = chr.getEquippedInventory().getItems().size();
+            int afterSize = chr.getEquipInventory().getItems().size();
+            if(afterSize + afterSizeOn != beforeSize + beforeSizeOn) {
+                throw new RuntimeException("Data duplication!");
             }
             c.write(WvsContext.inventoryOperation(true, false, MOVE, oldPos, newPos,
                     0, item));
@@ -1441,8 +1448,31 @@ public class WorldHandler {
                         0, equip));
                 chr.consumeItem(item);
                 break;
+            case 5062500: // Bonus potential cube
+                ePos = (short) inPacket.decodeInt();
+                invType = ePos < 0 ? EQUIPPED : EQUIP;
+                equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
+                if (equip == null) {
+                    chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                    return;
+                }
+                tierUpChance = ItemConstants.getTierUpChance(itemID);
+                hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
+                tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                if (tierUp) {
+                    hiddenValue++;
+                }
+                equip.setHiddenOptionBonus(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
+                equip.releaseOptions(true);
+                c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
+                c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
+                c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+                        0, equip));
+                chr.consumeItem(item);
+                break;
             default:
                 chr.chatMessage(YELLOW, "Cash item " + itemID + " is not implemented, notify Sjonnie pls.");
+                chr.dispose();
                 break;
         }
     }
@@ -1632,7 +1662,7 @@ public class WorldHandler {
             }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(true, false, UPDATE_ITEM_INFO, ePos, (short) 0,
+        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
                 0, equip));
         chr.consumeItem(scroll);
     }
@@ -2093,7 +2123,7 @@ public class WorldHandler {
         chr.dispose();
     }
 
-    public static void handleScriptItemUseRequest(Client c, InPacket inPacket) {
+    public static void handleUserScriptItemUseRequest(Client c, InPacket inPacket) {
         inPacket.decodeInt(); // tick
         short slot = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
@@ -2106,5 +2136,6 @@ public class WorldHandler {
         }
         chr.getScriptManager().startScript(itemID, itemID + ".py", ScriptType.ITEM);
         chr.dispose();
+
     }
 }

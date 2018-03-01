@@ -82,7 +82,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     WorldHandler.handleUserSortItemRequest(c, inPacket);
                     break;
                 case USER_SCRIPT_ITEM_USE_REQUEST:
-                    WorldHandler.handleUserScriptMessageAnswer(c, inPacket);
+                    WorldHandler.handleUserScriptItemUseRequest(c, inPacket);
                     break;
                 case USER_STAT_CHANGE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserStatChangeItemUseRequest(c, inPacket);

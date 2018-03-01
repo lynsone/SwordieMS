@@ -407,6 +407,7 @@ public class ItemConstants {
         int res = 0;
         switch(id) {
             case 5062009: // Red cube
+            case 5062500: // Bonus potential cube
                 res = 30;
                 break;
         }

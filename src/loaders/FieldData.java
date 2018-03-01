@@ -10,6 +10,7 @@ import constants.ServerConstants;
 import enums.PortalType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import util.Position;
 import util.Util;
 import util.XMLApi;
 
@@ -466,6 +467,7 @@ public class FieldData {
                 l.setTemplateId(dataInputStream.readInt());
                 l.setX(dataInputStream.readInt());
                 l.setY(dataInputStream.readInt());
+                l.setHomePosition(new Position(l.getX(), l.getY()));
                 l.setMobTime(dataInputStream.readInt());
                 l.setF(dataInputStream.readInt());
                 l.setHide(dataInputStream.readBoolean());

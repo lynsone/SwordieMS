@@ -470,6 +470,18 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket inGameCubeResult(int charID, boolean upgrade, int cubeID, int ePos, Equip equip) {
+        OutPacket outPacket = new OutPacket(OutHeader.IN_GAME_CUBE_RESULT);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(upgrade);
+        outPacket.encodeInt(cubeID);
+        outPacket.encodeInt(ePos);
+        equip.encode(outPacket);
+
+        return outPacket;
+    }
+
     public static OutPacket cancelChair(int chrid, int id) {
         OutPacket outPacket = new OutPacket(OutHeader.SIT_RESULT);
 

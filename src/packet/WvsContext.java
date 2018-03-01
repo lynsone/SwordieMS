@@ -2,6 +2,7 @@ package packet;
 
 import client.character.*;
 import client.character.items.Equip;
+import client.character.items.Inventory;
 import client.character.items.Item;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
@@ -131,6 +132,12 @@ public class WvsContext {
 
     public static OutPacket inventoryOperation(boolean exclRequestSent, boolean notRemoveAddInfo, InventoryOperation type, short oldPos, short newPos,
                                                int bagPos, Item item) {
+        // logic like this in packets :(
+        InvType invType = item.getInvType();
+        if(oldPos > 0 && newPos < 0 && invType == InvType.EQUIPPED) {
+            invType = InvType.EQUIP;
+        }
+
         OutPacket outPacket = new OutPacket(OutHeader.INVENTORY_OPERATION);
 
         outPacket.encodeByte(exclRequestSent);
@@ -138,11 +145,6 @@ public class WvsContext {
         outPacket.encodeByte(notRemoveAddInfo);
 
         outPacket.encodeByte(type.getVal());
-        // logic like this in packets :(
-        InvType invType = item.getInvType();
-        if(oldPos > 0 && newPos < 0 && invType == InvType.EQUIPPED) {
-            invType = InvType.EQUIP;
-        }
         outPacket.encodeByte(invType.getVal());
         outPacket.encodeShort(oldPos);
         switch(type) {

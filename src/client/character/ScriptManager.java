@@ -106,7 +106,9 @@ public class ScriptManager implements Observer {
     }
 
     public void stop(ScriptType scriptType) {
-        getScriptInfoByType(scriptType).reset();
+        if(getScriptInfoByType(scriptType) != null) {
+            getScriptInfoByType(scriptType).reset();
+        }
         WvsContext.dispose(chr);
     }
 
@@ -134,7 +136,7 @@ public class ScriptManager implements Observer {
     }
 
     private boolean isActive(ScriptType scriptType) {
-        return getScriptInfoByType(scriptType).isActive();
+        return getScriptInfoByType(scriptType) != null && getScriptInfoByType(scriptType).isActive();
     }
 
     public NpcScriptInfo getNpcScriptInfo() {
