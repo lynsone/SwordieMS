@@ -35,6 +35,7 @@ public class NightWalker extends Job {
     public static final int ELEMENTAL_SLASH = 10001244;
     public static final int NOBLE_MIND = 10000202;
     public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_SHIFT2 = 10000252;
     public static final int ELEMENTAL_HARMONY_LUK = 10000249;
 
     public static final int LUCKY_SEVEN = 14001020;
@@ -88,6 +89,7 @@ public class NightWalker extends Job {
             ELEMENTAL_SLASH,
             NOBLE_MIND,
             ELEMENTAL_SHIFT,
+            ELEMENTAL_SHIFT2,
     };
 
     private int[] buffs = new int[] {

@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
@@ -13,6 +14,7 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
+import enums.TSIndex;
 import loaders.SkillData;
 import packet.UserLocal;
 import packet.WvsContext;
@@ -28,7 +30,7 @@ import static client.character.skills.SkillStat.*;
  */
 public class WildHunter extends Job {
 
-    //Jaguars       Unknown which ID stands for which jaguar (just guesses atm)
+    //Jaguar Summon         Unknown which ID stands for which jaguar (just guesses atm)
     public static final int SUMMON_JAGUAR_GREY = 33001007;           //No Special Jaguar Stats
     public static final int SUMMON_JAGUAR_YELLOW = 33001008;         //No Special Jaguar Stats
     public static final int SUMMON_JAGUAR_RED = 33001009;            //No Special Jaguar Stats
@@ -38,6 +40,18 @@ public class WildHunter extends Job {
     public static final int SUMMON_JAGUAR_SNOW_WHITE = 33001013;     //Buff Duration +10%
     public static final int SUMMON_JAGUAR_ONYX = 33001014;           //Buff Duration +10%
     public static final int SUMMON_JAGUAR_CRIMSON = 33001015;        //Dmg Absorption +10%
+
+    //Jaguar Mount
+    public static final int MOUNT_JAGUAR_GREY = 1932015;
+    public static final int MOUNT_JAGUAR_YELLOW = 1932030;
+    public static final int MOUNT_JAGUAR_RED = 1932031;
+    public static final int MOUNT_JAGUAR_PURPLE = 1932032;
+    public static final int MOUNT_JAGUAR_BLUE = 1932033;
+    public static final int MOUNT_JAGUAR_JAIRA = 1932036;
+    public static final int MOUNT_JAGUAR_SNOW_WHITE = 1932100;
+    public static final int MOUNT_JAGUAR_ONYX = 1932149;
+    public static final int MOUNT_JAGUAR_CRIMSON = 1932215;
+
 
 
     public static final int SECRET_ASSEMBLY = 30001281;
@@ -86,6 +100,7 @@ public class WildHunter extends Job {
             SUMMON_JAGUAR_CRIMSON,
 
             RIDE_JAGUAR,
+
             SOUL_ARROW_CROSSBOW,
             CROSSBOW_BOOSTER,
             CALL_OF_THE_WILD,
@@ -95,6 +110,7 @@ public class WildHunter extends Job {
             MAPLE_WARRIOR_WH,
             FOR_LIBERTY_WH,
             SILENT_RAMPAGE,
+            DRILL_SALVO,
     };
 
     private int lastUsedSkill = 0;
@@ -160,6 +176,13 @@ public class WildHunter extends Job {
 //                o1.nOption =
                 break;
             case SOUL_ARROW_CROSSBOW:
+
+                summon = Summon.getSummonBy(chr, SUMMON_JAGUAR_JAIRA, (byte) 1);
+                summon.setSummonTerm(0);
+                field = c.getChr().getField();
+                field.spawnSummon(summon);
+                c.write(UserLocal.jaguarActive(true));
+
                 o1.nOption = 10; //si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -171,6 +194,13 @@ public class WildHunter extends Job {
                 tsm.putCharacterStatValue(IndiePAD, o2);
                 break;
             case CROSSBOW_BOOSTER:
+
+                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+                tsb.setNOption(MOUNT_JAGUAR_CRIMSON);
+                tsb.setROption(RIDE_JAGUAR);
+                tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+                tsm.sendSetStatPacket();
+
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -209,7 +239,10 @@ public class WildHunter extends Job {
                 tsm.putCharacterStatValue(Speed, o1);
                 break;
             case BACKSTEP:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(DrawBack, o1);
                 break;
             case SHARP_EYES: // x = crit rate%  |  y = max crit dmg%
                 o1.nOption = si.getValue(x, slv);
@@ -245,10 +278,6 @@ public class WildHunter extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
                 //Final attack x %
-                break;
-
-            case HUNTING_ASSISTANT_UNIT:
-                //Tile
                 break;
             case DRILL_SALVO:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -399,6 +428,15 @@ public class WildHunter extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case HUNTING_ASSISTANT_UNIT:
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 4);
+                    chr.getField().spawnAffectedArea(aa);
                     break;
             }
         }

@@ -40,7 +40,8 @@ public class Shade extends Job {
     public static final int GROUND_POUND_SECOND = 25100001; //Special Attack (Slow Debuff)
 
     public static final int SUMMON_OTHER_SPIRIT = 25111209; //Passive Buff (Icon)
-    public static final int SPIRIT_TRAP = 25111206; //Summon
+    public static final int SPIRIT_TRAP = 25111206; //Tile
+    public static final int WEAKEN = 25110210; //Passive Debuff
 
     public static final int SPIRIT_WARD = 25121209; //Special Buff
     public static final int MAPLE_WARRIOR_SH = 25121108; //Buff
@@ -98,10 +99,13 @@ public class Shade extends Job {
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(SpiritGuard, o1);
+                tsm.putCharacterStatValue(NotDamaged, o1);
                 break;
             case SPIRIT_WARD:
-                // TODO (needs a handler, i believe)
+                o1.nOption = 3;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(SpiritGuard, o1);
                 break;
             case MAPLE_WARRIOR_SH:
                 o1.nReason = skillID;
@@ -211,6 +215,35 @@ public class Shade extends Job {
         }
     }
 
+
+    public void handleWeaken(AttackInfo attackInfo, byte slv) {
+        if(chr.hasSkill(WEAKEN)) {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            SkillInfo si = SkillData.getSkillInfoById(WEAKEN);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(si.getValue(prop, slv))) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = WEAKEN;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Weakness, o1);
+                    o2.nOption = si.getValue(y, slv);
+                    o2.rOption = WEAKEN;
+                    o2.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.ACC, o2);
+                    o3.nOption = si.getValue(z, slv);
+                    o3.rOption = WEAKEN;
+                    o3.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.EVA, o3);
+                }
+            }
+        }
+    }
+
+
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
@@ -226,7 +259,7 @@ public class Shade extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            if (skillID == FOX_SPIRITS_ATOM_2) { //TODO
+            if (skillID == FOX_SPIRITS_ATOM_2) { //TODO  Re-creation
                 handleFoxSpiritMobToMob(skillID, slv, attackInfo);
             } else if (skillID == FOX_SPIRITS_ATOM){ //TODO
                 return;
@@ -234,6 +267,7 @@ public class Shade extends Job {
             else {
                 handleFoxSpirits(skillID, slv, attackInfo);
             }
+            handleWeaken(attackInfo, slv);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -244,7 +278,7 @@ public class Shade extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = (-1* si.getValue(y, slv));
+                    o1.nOption = -si.getValue(y, slv);
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
@@ -262,11 +296,27 @@ public class Shade extends Job {
                     }
                 }
                 break;
-            case DEATH_MARK:
-                // TODO
+            case DEATH_MARK:        //TODO  AbsorbHP
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(dotTime, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.DebuffHealing, o1);
+
+                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                }
                 break;
             case SOUL_SPLITTER:
-                // TODO
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(dotTime, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.SeperateSoulC, o1);
+                }
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -307,8 +357,32 @@ public class Shade extends Job {
     }
 
     @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {   //TODO Needs to not Reset the Timer when Hit
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        if (tsm.hasStat(SpiritGuard)) {
+            if (tsm.getOption(SpiritGuard).nOption == 3) {
+                o.nOption = 2;
+                o.rOption = SPIRIT_WARD;
+                o.tOption = 30;
+                tsm.putCharacterStatValue(SpiritGuard, o);
+                tsm.sendSetStatPacket();
+            } else if (tsm.getOption(SpiritGuard).nOption == 2) {
+                o.nOption = 1;
+                o.rOption = SPIRIT_WARD;
+                o.tOption = 30;
+                tsm.putCharacterStatValue(SpiritGuard, o);
+                tsm.sendSetStatPacket();
+            } else if (tsm.getOption(SpiritGuard).nOption == 1) {
+                resetSpiritGuard();
+            }
+        }
+    }
 
+    public void resetSpiritGuard() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.removeStat(SpiritGuard, false);
+        c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
     @Override

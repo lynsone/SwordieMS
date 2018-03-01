@@ -15,7 +15,6 @@ import enums.MobStat;
 import loaders.SkillData;
 import packet.UserLocal;
 import packet.WvsContext;
-import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
@@ -80,7 +79,7 @@ public class Mihile extends Job {
         Option o3 = new Option();
         Option o4 = new Option();
         switch (skillID) {
-            case ROYAL_GUARD:   //Shield Attack has something to do with this skill
+            case ROYAL_GUARD:   //BuffStat 'ShieldAttack'  has something to do with this skill
             case ROYAL_GUARD_2:
             case ROYAL_GUARD_3:
             case ROYAL_GUARD_4:
@@ -259,11 +258,6 @@ public class Mihile extends Job {
             pad = 35;
         }
         return pad;
-    }
-
-    public void supplyInterval() {
-        EventManager.addEvent(this, "supplyInterval", 1500);
-        handleRoyalGuardAttack();
     }
 
     private void handleRoyalGuardAttack() {

@@ -6,18 +6,27 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
+import client.life.Life;
+import client.life.Mob;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import enums.MoveAbility;
+import enums.TSIndex;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import util.Position;
+import util.Rect;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
-import static client.character.skills.CharacterTemporaryStat.IndieMaxDamageOverR;
 import static client.character.skills.SkillStat.*;
 
 /**
@@ -39,16 +48,20 @@ public class Mechanic extends Job {
     public static final int PERFECT_ARMOR = 35101007; //Buff (ON/OFF)
     public static final int OPEN_PORTAL_GX9 = 35101005; //Special Skill (Summon/Portal)
     public static final int ROBO_LAUNCHER_RM7 = 35101012; //Summon
+    public static final int HOMING_BEACON = 35101002;
 
     public static final int ROCK_N_SHOCK = 35111002; //Special Summon
     public static final int ROLL_OF_THE_DICE = 35111013; //Special Buff
     public static final int SUPPORT_UNIT_HEX = 35111008; //Summon
+    public static final int ADV_HOMING_BEACON = 35110017;
 
     public static final int BOTS_N_TOTS = 35121009; //Special Summon
     public static final int MAPLE_WARRIOR_MECH = 35121007; //Buff
+    public static final int ENHANCED_SUPPORT_UNIT = 35120002;
 
     public static final int FOR_LIBERTY_MECH = 35121053;
     public static final int FULL_SPREAD = 35121055;
+    public static final int DISTORTION_BOMB = 35121055;
 
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,
@@ -75,6 +88,8 @@ public class Mechanic extends Job {
     };
 
 
+    private Summon botsNtotsSummons;
+
     public Mechanic(Char chr) {
         super(chr);
         if(isHandlerOfJob(chr.getJob())) {
@@ -92,6 +107,7 @@ public class Mechanic extends Job {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
+        TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -101,10 +117,22 @@ public class Mechanic extends Job {
         Field field;
         switch (skillID) {
             case HUMANOID_MECH:
-                //TODO
+                //o1.nOption = 1;
+                //o1.rOption = skillID;
+                //o1.tOption = 30;
+                //tsm.putCharacterStatValue(Mechanic, o1);
+                //1932016 - Humanoid Mech
+                tsb.setNOption(1932016);
+                tsb.setROption(skillID);
+                tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+                tsm.sendResetStatPacket();
                 break;
+
             case TANK_MECH:
-                //TODO
+                o1.nOption = 2;
+                o1.rOption = skillID;
+                o1.tOption = 30;
+                //tsm.putCharacterStatValue(Mechanic, o1);
                 break;
 
             case MECHANIC_RAGE:
@@ -130,20 +158,49 @@ public class Mechanic extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
 
-            case OPEN_PORTAL_GX9:
-                //TODO
+            case OPEN_PORTAL_GX9:   //TODO WVS_CRAHS_CALLBACK           Special Summon (Creates Portal)
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setAssistType((byte) 0);
+                summon.setAttackActive(false);
+                //field.spawnSummon(summon);
                 break;
             case SUPPORT_UNIT_HEX:
-                //TODO
+            case ENHANCED_SUPPORT_UNIT:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setAssistType((byte) 0);
+                summon.setAttackActive(false);
+                field.spawnSummon(summon);
                 break;
             case ROBO_LAUNCHER_RM7:
-                //TODO
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                field.spawnSummon(summon);
                 break;
-            case ROCK_N_SHOCK:
-                //TODO
+            case ROCK_N_SHOCK:      //TODO TeslaCoil
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setAssistType((byte) 0);
+                summon.setAttackActive(false);
+                //field.spawnAddSummon(summon);
                 break;
-            case BOTS_N_TOTS:
-                //TODO
+            case BOTS_N_TOTS:       //TODO spawn other summons from this summon pos.
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setAssistType((byte) 0);
+                summon.setAttackActive(false);
+                field.spawnSummon(summon);
                 break;
 
             case FOR_LIBERTY_MECH:
@@ -159,14 +216,13 @@ public class Mechanic extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
 
-            case FULL_SPREAD:
+            case FULL_SPREAD:   //TODO  WVS_CRASH_CALLBACK
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
                 field.spawnSummon(summon);
                 break;
-
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -177,7 +233,33 @@ public class Mechanic extends Job {
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
-
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (skillID) {
+            case DISTORTION_BOMB:
+                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                aa.setMobOrigin((byte) 0);
+                aa.setCharID(chr.getId());
+                int x = attackInfo.forcedX;
+                int y = attackInfo.forcedY;
+                aa.setPosition(new Position(x, y));
+                aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                chr.getField().spawnAffectedArea(aa);
+                break;
+        }
     }
 
     @Override
@@ -201,9 +283,36 @@ public class Mechanic extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
+                case HOMING_BEACON:
+                    for(int i=0; i<4; i++) {
+                        handleMechRockets();
+                    }
+                    break;
             }
         }
     }
+
+    private void handleMechRockets() { //TODO Needs to attack multiple enemies if can
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(HOMING_BEACON);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        List<Life> lifes = field.getLifesInRect(rect);
+        for(Life life : lifes) {
+            if(life instanceof Mob) {
+                int ran = new Random().nextInt(41)+39;
+                int mobID = ((Mob) life).getRefImgMobID(); //
+                int inc = ForceAtomEnum.MECH_MEGA_ROCKET_1.getInc();
+                int type = ForceAtomEnum.MECH_MEGA_ROCKET_1.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, ran, 30,
+                        0, 200, (int) System.currentTimeMillis(), 1, 0,
+                        new Position(0, 0));
+                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        true, mobID, HOMING_BEACON, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), 0, life.getPosition()));
+            }
+        }
+    }
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 

@@ -44,6 +44,7 @@ public class Zero extends Job {
     public static final int RHINNES_PROTECTION = 100001268; //Buff
 
     public static final int TIME_HOLDING = 100001274;
+    public static final int TIME_HOLDING_2 = 100001281;
     public static final int TIME_DISTORTION = 100001261;
     public static final int REWIND = 100001272;
     public static final int FOCUSED_TIME = 100001005;
@@ -186,16 +187,17 @@ public class Zero extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NotDamaged, o1); //
 
-                //TODO Lv200+ only
-                o2.nOption = si.getValue(y, slv);
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(x, slv);
-                tsm.putCharacterStatValue(DamR, o2); //
-                o3.nReason = skillID;
-                o3.nValue = si.getValue(z, slv);
-                o3.tStart = (int) System.currentTimeMillis();
-                o3.tTerm = si.getValue(x, slv);
-                tsm.putCharacterStatValue(IndieMaxDamageOverR, o3);
+                if(chr.getStat(Stat.level) >= 200) {
+                    o2.nOption = si.getValue(y, slv);
+                    o2.rOption = TIME_HOLDING_2;
+                    o2.tOption = si.getValue(x, slv);
+                    tsm.putCharacterStatValue(DamR, o2); //
+                    o3.nReason = TIME_HOLDING_2;
+                    o3.nValue = si.getValue(z, slv);
+                    o3.tStart = (int) System.currentTimeMillis();
+                    o3.tTerm = si.getValue(x, slv);
+                    tsm.putCharacterStatValue(IndieMaxDamageOverR, o3);
+                }
                 break;
             case REWIND:
                 o1.nOption = 1;

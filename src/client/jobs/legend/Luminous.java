@@ -427,7 +427,7 @@ public class Luminous extends Job {
     }
 
     @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {   //TODO  Clean up
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         if(tsm.getOption(Larkness).rOption == EQUILIBRIUM) {
@@ -436,16 +436,12 @@ public class Luminous extends Job {
             if (tsm.hasStat(BlessOfDarkness)) {
                 if (tsm.getOption(BlessOfDarkness).nOption == 3) {
                     o.nOption = 2;
-                    o.rOption = BLACK_BLESSING;
-                    o.tOption = 0;
                     tsm.putCharacterStatValue(BlessOfDarkness, o);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                 } else if (tsm.getOption(BlessOfDarkness).nOption == 2) {
                     o.nOption = 1;
-                    o.rOption = BLACK_BLESSING;
-                    o.tOption = 0;
                     tsm.putCharacterStatValue(BlessOfDarkness, o);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                 } else if (tsm.getOption(BlessOfDarkness).nOption == 1) {
                     resetBlackBlessing();
                 }

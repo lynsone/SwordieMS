@@ -7,10 +7,14 @@ import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
 import client.life.AffectedArea;
+import client.life.Mob;
+import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.MobStat;
+import enums.MoveAbility;
 import loaders.SkillData;
 import packet.WvsContext;
 
@@ -30,6 +34,7 @@ public class Kanna extends Job {
     public static final int HAKU = 40020109;
 
     public static final int RADIANT_PEACOCK = 42101003;
+    public static final int NIMBUS_CURSE = 42101005;
 
     public static final int KISHIN_SHOUKAN = 42111003; //summon
     public static final int BLOSSOM_BARRIER = 42111004; //AoE
@@ -39,6 +44,7 @@ public class Kanna extends Job {
     public static final int BELLFLOWER_BARRIER = 42121005; //AoE
     public static final int AKATUSKI_HERO_KANNA = 42121006;
     public static final int NINE_TAILED_FURY = 42121024; //Attacking Skill + Buff
+    public static final int BINDING_TEMPEST = 42121004;
 
     public static final int VERITABLE_PANDEMONIUM = 42121052; //Immobility Debuff
     public static final int PRINCESS_VOW_KANNA = 42121053;
@@ -47,8 +53,9 @@ public class Kanna extends Job {
     private Summon haku;
 
     private int[] buffs = new int[]{
+            HAKU,
             RADIANT_PEACOCK,
-            KISHIN_SHOUKAN, //summon
+            KISHIN_SHOUKAN,
             AKATUSKI_HERO_KANNA,
             NINE_TAILED_FURY,
             PRINCESS_VOW_KANNA,
@@ -61,7 +68,43 @@ public class Kanna extends Job {
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
-
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        int slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case BINDING_TEMPEST:
+            case VERITABLE_PANDEMONIUM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                }
+                break;
+            case NIMBUS_CURSE:
+                AffectedArea aa = AffectedArea.getPassiveAA(skillID, (byte) slv);
+                aa.setMobOrigin((byte) 0);
+                aa.setCharID(chr.getId());
+                aa.setPosition(chr.getPosition());
+                aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                aa.setDelay((short) 5);
+                chr.getField().spawnAffectedArea(aa);
+                break;
+        }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -76,6 +119,8 @@ public class Kanna extends Job {
         Option o4 = new Option();
         Option o5 = new Option();
         switch (skillID) {
+            case HAKU:
+                break;
             case RADIANT_PEACOCK:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
@@ -86,7 +131,7 @@ public class Kanna extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
                 break;
 
@@ -124,6 +169,7 @@ public class Kanna extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -147,6 +193,14 @@ public class Kanna extends Job {
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     aa.setDelay((short) 3);
                     chr.getField().spawnAffectedArea(aa);
+                    break;
+                case NINE_TAILED_FURY:
+                    o1.nReason = skillID;
+                    o1.nValue = si.getValue(indieDamR, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieDamR, o1); //Indie
+                    c.write(WvsContext.temporaryStatSet(tsm));
                     break;
             }
         }
@@ -174,8 +228,8 @@ public class Kanna extends Job {
             Field field;
             haku = Summon.getSummonBy(c.getChr(), skillID, slv);
             field = c.getChr().getField();
-            haku.setFlyMob(true);
-            haku.setMoveAbility((byte) 0);
+            haku.setFlyMob(false);
+            haku.setMoveAbility(MoveAbility.FOLLOW.getVal());
             field.spawnSummon(haku);
         }
     }

@@ -6,18 +6,25 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.ForceAtomEnum;
 import enums.MobStat;
+import enums.MoveAbility;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
+import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -274,7 +281,7 @@ public class Kaiser extends Job {
                 break;
             case TEMPEST_BLADES_THREE:
             case TEMPEST_BLADES_FIVE:
-                // TODO
+                //TODO
                 break;
 
             case FINAL_FORM_THIRD:
@@ -291,18 +298,18 @@ public class Kaiser extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePMdR, o2);
-                /*o3.nOption = si.getValue(jump, slv);
+                o3.nOption = si.getValue(jump, slv);
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Jump, o3);*/  //TODO 38
+                tsm.putCharacterStatValue(Jump, o3);
                 o4.nOption = si.getValue(prop, slv);
                 o4.rOption = skillID;
                 o4.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o4);
-                /*o5.nOption = si.getValue(speed, slv);
+                o5.nOption = si.getValue(speed, slv);
                 o5.rOption = skillID;
                 o5.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Speed, o5);*/ //TODO 38
+                tsm.putCharacterStatValue(Speed, o5);
                 resetGauge(c, tsm);
                 break;
 
@@ -324,7 +331,7 @@ public class Kaiser extends Job {
                 o3.nOption = si.getValue(jump, slv);
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
-                //tsm.putCharacterStatValue(Jump, o3); //TODO 38
+                tsm.putCharacterStatValue(Jump, o3);
                 o4.nOption = si.getValue(prop, slv);
                 o4.rOption = skillID;
                 o4.tOption = si.getValue(time, slv);
@@ -332,7 +339,7 @@ public class Kaiser extends Job {
                 o5.nOption = si.getValue(speed, slv);
                 o5.rOption = skillID;
                 o5.tOption = si.getValue(time, slv);
-                //tsm.putCharacterStatValue(Speed, o5); //TODO 38
+                tsm.putCharacterStatValue(Speed, o5);
                 resetGauge(c, tsm);
                 break;
 
@@ -351,16 +358,13 @@ public class Kaiser extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ViperTimeLeap, o3);   //unsure
-
                 break;
-                // Note:  Higher Morph IDs = Different Colour Trimmings on Kaiser's Final Form
-
             case STONE_DRAGON:
             case STONE_DRAGON_FINAL_FORM:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAction((byte) 0);
+                summon.setMoveAction(MoveAbility.STATIC.getVal());
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
                 break;
@@ -498,6 +502,28 @@ public class Kaiser extends Job {
         }
         return maxGauge;
     }
+
+
+    private void handleFlyingSwords() {
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(TEMPEST_BLADES_FIVE);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        List<Life> lifes = field.getLifesInRect(rect);
+        for(Life life : lifes) {
+            if(life instanceof Mob) {
+                int mobID = ((Mob) life).getRefImgMobID(); //
+                int inc = ForceAtomEnum.KAISER_WEAPON_THROW_1.getInc();
+                int type = ForceAtomEnum.KAISER_WEAPON_THROW_1.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                        0, 300, (int) System.currentTimeMillis(), 1, 0,
+                        new Position(0, 0));
+                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        true, mobID, TEMPEST_BLADES_FIVE, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), TEMPEST_BLADES_FIVE, life.getPosition()));
+            }
+        }
+    }
+
 
     private boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
