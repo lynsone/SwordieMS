@@ -14,11 +14,8 @@ import enums.MobStat;
 import loaders.SkillData;
 import util.Rect;
 
-import static client.character.skills.CharacterTemporaryStat.IndieBooster;
-import static client.character.skills.CharacterTemporaryStat.IndieDamR;
-import static client.character.skills.SkillStat.indieBooster;
-import static client.character.skills.SkillStat.indieDamR;
-import static client.character.skills.SkillStat.time;
+import static client.character.skills.CharacterTemporaryStat.*;
+import static client.character.skills.SkillStat.*;
 
 /**
  * Created on 1/6/2018.
@@ -165,6 +162,7 @@ public class AffectedArea extends Life {
         switch(skillID) {
             case Magician.POISON_MIST:
             case Archer.FLAME_SURGE:
+            case Kanna.NIMBUS_CURSE:
                 if(!mts.hasBurnFromSkill(skillID)) {
                     mts.createAndAddBurnedInfo(getCharID(), skill, 1);
                 }
@@ -173,7 +171,7 @@ public class AffectedArea extends Life {
                 o.nOption = 1;
                 o.rOption = skillID;
                 o.tOption = si.getValue(time, slv);
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
                 break;
             case Thief.FRAILTY_CURSE:
                 o.nOption = si.getValue(SkillStat.y, slv);
@@ -187,6 +185,20 @@ public class AffectedArea extends Life {
                 mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
                 mts.addStatOptionsAndBroadcast(MobStat.MAD, o);
                 mts.addStatOptionsAndBroadcast(MobStat.MDR, o);
+                break;
+            case Zero.TIME_DISTORTION:
+                o.nOption = 1;
+                o.rOption = skillID;
+                o.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
+                o1.nOption = si.getValue(SkillStat.x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
                 break;
         }
     }
@@ -206,7 +218,15 @@ public class AffectedArea extends Life {
         Option o2 = new Option();
         Option o3 = new Option();
         switch(skillID) {
-            case Zero.TIME_DISTORTION:  // TODO Also adds a benefit to party members in AoE
+            case Zero.TIME_DISTORTION:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                //tsm.putCharacterStatValue(DISPEL, o1);  TODO Removes Debuffs
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieBooster, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
                 break;
             case BlazeWizard.BURNING_CONDUIT:
                 o1.nReason = skillID;
@@ -219,10 +239,19 @@ public class AffectedArea extends Life {
                 tsm.putCharacterStatValue(IndieBooster, o2); //Indie
                 break;
             case Kanna.BELLFLOWER_BARRIER:
-                //TODO Party Boost
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(bdR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                tsm.putCharacterStatValue(IndieBDR, o1); //Indie
                 break;
             case Kanna.BLOSSOM_BARRIER:
-                //TODO Party Boost
+                o1.nOption = si.getValue(SkillStat.x, slv);
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(DamageReduce, o1);
+                o2.nOption = si.getValue(SkillStat.y, slv);
+                o2.rOption = skillID;
+                tsm.putCharacterStatValue(AsrR, o2);
+                tsm.putCharacterStatValue(TerR, o2);
                 break;
         }
         tsm.sendSetStatPacket();

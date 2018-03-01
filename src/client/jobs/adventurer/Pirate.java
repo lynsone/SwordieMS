@@ -14,8 +14,10 @@ import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.MoveAbility;
+import enums.TSIndex;
 import loaders.SkillData;
 import packet.WvsContext;
+import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
@@ -42,12 +44,13 @@ public class Pirate extends Job {
     //Buccaneer
     public static final int TORNADO_UPPERCUT = 5101012; //Special Attack TODO (Uses Force)
     public static final int KNUCKLE_BOOSTER = 5101006; //Buff
-    public static final int ENERGY_CHARGE = 5100015; //Energy Gauge TODO fix UI + system
+    public static final int ENERGY_CHARGE = 5100015; //Energy Gauge TODO fix system
 
     public static final int ROLL_OF_THE_DICE_BUCC = 5111007; //Buff
     public static final int ENERGY_BURST = 5111002; //Special Attack  TODO (Uses Force)
     public static final int STATIC_THUMPER = 5111012; //Special Attack TODO (Uses Force)
     public static final int STUN_MASTERY = 5110000;
+    public static final int SUPERCHARGE = 5110014;
 
     public static final int OCTOPUNCH = 5121007; //Special Attack  TODO (Uses Force)
     public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack / Buff TODO Special Buff
@@ -58,6 +61,7 @@ public class Pirate extends Job {
     public static final int TIME_LEAP = 5121010; //Special Move / Buff
     public static final int MAPLE_WARRIOR_BUCC = 5121000; //Buff
     public static final int PIRATE_REVENGE = 5120011;
+    public static final int ULTRA_CHARGE = 5120018;
 
 
     //Corsair
@@ -172,6 +176,9 @@ public class Pirate extends Job {
     };
 
 
+    public int viprEnergy = 1;
+    private final int MAX_ENERGY = getMaxEnergy();
+
     public Pirate(Char chr) {
         super(chr);
         if(isHandlerOfJob(chr.getJob())) {
@@ -182,6 +189,17 @@ public class Pirate extends Job {
                     chr.addSkill(skill);
                 }
             }
+            if(chr.hasSkill(ENERGY_CHARGE)) {
+                TemporaryStatManager tsm = chr.getTemporaryStatManager();
+                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+                tsb.setNOption(viprEnergy);
+                tsb.setROption(0);
+                tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+                tsm.sendSetStatPacket();
+                if(tsm.hasStat(Stimulate)) {
+                    supplyInterval();
+                }
+            }
         }
     }
 
@@ -189,6 +207,7 @@ public class Pirate extends Job {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
+
         Summon summon;
         Field field;
         Option o1 = new Option();
@@ -403,7 +422,15 @@ public class Pirate extends Job {
                 break;
 
             case STIMULATING_CONVERSATION:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Stimulate, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieDamR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o2);
                 break;
 
             case BIONIC_MAXIMIZER:
@@ -476,7 +503,9 @@ public class Pirate extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setAttackActive(false);
+                summon.setAssistType((byte) 0);
                 field.spawnSummon(summon);
                 break;
         }
@@ -517,6 +546,124 @@ public class Pirate extends Job {
                 mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
             }
         }
+    }
+
+    public void handleViprEnergy(int skillid) { //TODO
+        chr.chatMessage(ChatMsgColour.YELLOW, "[Before] Energy: " + viprEnergy);
+        SkillInfo si = SkillData.getSkillInfoById(ENERGY_CHARGE);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+        Option o1 = new Option();
+
+        viprEnergy = tsb.getNOption();
+        int maxenergy = getMaxEnergy();
+        int energycharged = getEnergyincrease();
+        if(viprEnergy < maxenergy) {
+
+            if((viprEnergy + energycharged) > maxenergy) {
+                viprEnergy = maxenergy;
+                tsm.setViperEnergyCharge(1);
+            } else {
+                viprEnergy += 50;// energycharged;
+                tsm.setViperEnergyCharge(0);
+            }
+            o1.nOption = 1;
+            o1.rOption = ULTRA_CHARGE;
+            o1.tOption = 3;
+            tsm.putCharacterStatValue(BMageAura, o1);
+
+        } else {
+            viprEnergy = maxenergy;
+            tsm.setViperEnergyCharge(1);
+            o1.nOption = 1;
+            o1.rOption = getChargeIcon();
+            o1.tOption = 10;
+            tsm.putCharacterStatValue(PoseType, o1);
+        }
+        tsb.setNOption(viprEnergy);
+        tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+        tsm.sendSetStatPacket();
+        chr.chatMessage(ChatMsgColour.YELLOW, "[After] Energy: " + viprEnergy);
+    }
+
+    public void handleEnergyCost(int skillID, byte slv, SkillInfo si) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+        if (si == null) {
+            return;
+        }
+        if (si.getValue(forceCon, slv) > 0) {
+            viprEnergy -= si.getValue(forceCon, slv);
+            viprEnergy = Math.max(0, viprEnergy);
+        }
+        tsb.setNOption(viprEnergy);
+        tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+        tsm.sendSetStatPacket();
+
+    }
+
+    public int getMaxEnergy() {
+        int maxenergy = 0;
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            maxenergy = 5000;
+        }
+        if(chr.hasSkill(SUPERCHARGE)) {
+            maxenergy = 10000;
+        }
+        return maxenergy;
+    }
+
+    public int getEnergyincrease() {
+        int interval = 0;
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            interval = 150;
+        }
+        if(chr.hasSkill(SUPERCHARGE)) {
+            interval = 300;
+        }
+        if(chr.hasSkill(ULTRA_CHARGE)) {
+            interval = 350;
+        }
+        return interval;
+    }
+
+    public int getChargeIcon() {
+        int icon = 0;
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            icon = ENERGY_CHARGE;
+        }
+        if(chr.hasSkill(SUPERCHARGE)) {
+            icon = SUPERCHARGE;
+        }
+        if(chr.hasSkill(ULTRA_CHARGE)) {
+            icon = ULTRA_CHARGE;
+        }
+        return icon;
+    }
+
+    public void incrementSupply() {
+        incrementSupply(800);
+    }
+
+
+    private void incrementSupply(int amount) {
+        viprEnergy += amount;
+        viprEnergy = Math.min(MAX_ENERGY, viprEnergy);
+        updateSupply();
+    }
+
+    public void supplyInterval() {
+        incrementSupply();
+        EventManager.addEvent(this, "supplyInterval", 1000);
+    }
+
+    private void updateSupply() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+
+        tsb.setNOption(viprEnergy);
+        chr.getTemporaryStatManager().putCharacterStatValue(EnergyCharged, tsb.getOption());
+        chr.getTemporaryStatManager().sendSetStatPacket();
     }
 
     public void handlePirateRevenge() {
@@ -560,16 +707,20 @@ public class Pirate extends Job {
             skillID = skill.getSkillId();
         }
 
-        if(chr.getJob() > 519 && chr.getJob() < 523) {      //Corsair
-            if(hasHitMobs) {
-                //Quickdraw
-                handleQuickdraw(attackInfo, tsm, c);
-            }
-        }
+
+        handleViprEnergy(skillID);
 
         if(chr.getJob() > 509 && chr.getJob() < 513) {      //Bucc
             if(hasHitMobs) {
                 handleStunMastery(attackInfo, slv);
+
+            }
+        }
+
+        if(chr.getJob() > 519 && chr.getJob() < 523) {      //Corsair
+            if(hasHitMobs) {
+                //Quickdraw
+                handleQuickdraw(attackInfo, tsm, c);
             }
         }
 
@@ -585,6 +736,7 @@ public class Pirate extends Job {
             }
         }
 
+        handleEnergyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -626,6 +778,8 @@ public class Pirate extends Job {
             si = SkillData.getSkillInfoById(skillID);
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        handleEnergyCost(skillID, slv, si);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {

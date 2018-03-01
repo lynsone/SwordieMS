@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static client.character.skills.SkillStat.*;
 import static client.character.skills.CharacterTemporaryStat.*;
+import static client.character.skills.SkillStat.*;
 
 //TODO MM/BM - Passives
 
@@ -46,7 +46,7 @@ public class Archer extends Job {
     public static final int BOW_BOOSTER = 3101002;
     public static final int XBOW_BOOSTER = 3201002;
     public static final int QUIVER_CARTRIDGE = 3101009;
-    public static final int QUIVER_CARTRIDGE_ATOM = 13100027; //3100010;
+    public static final int QUIVER_CARTRIDGE_ATOM = 3100010; //3100010;
     public static final int FLAME_SURGE = 3111003;
     public static final int PHOENIX = 3111005;
     public static final int FREEZER = 3211005;
@@ -224,7 +224,7 @@ public class Archer extends Job {
         }
     }
 
-    private void handleAggresiveResistance(AttackInfo ai) {
+    private void handleAggresiveResistance(AttackInfo ai) { //TODO  PowerTransfer is the correct TempStat for the Effect
         if(!chr.hasSkill(AGGRESSIVE_RESISTANCE)) {
             return;
         }
@@ -233,6 +233,7 @@ public class Archer extends Job {
         SkillInfo si = SkillData.getSkillInfoById(AGGRESSIVE_RESISTANCE);
         byte slv = (byte) skill.getCurrentLevel();
         Option o = tsm.getOptByCTSAndSkill(DamAbsorbShield, AGGRESSIVE_RESISTANCE);
+        Option o1 = new Option();
         long totalDamage = 0;
         for(MobAttackInfo mai : ai.mobAttackInfo) {
             for(int dmg : mai.damages) {
@@ -271,8 +272,8 @@ public class Archer extends Job {
             c.write(WvsContext.temporaryStatSet(tsm));
         } else if(chr.hasSkill(MORTAL_BLOW_XBOW)) {
             skill = chr.getSkill(MORTAL_BLOW_BOW);
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
+            //si = SkillData.getSkillInfoById(skill.getSkillId());
+            //slv = (byte) skill.getCurrentLevel();
         }
     }
 
@@ -451,6 +452,7 @@ public class Archer extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
+
             }
         }
     }
@@ -475,6 +477,7 @@ public class Archer extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
             }
         }
+
     }
 
     private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -529,6 +532,7 @@ public class Archer extends Job {
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
                 field.spawnSummon(summon);
+
                 break;
             case RECKLESS_HUNT_BOW:
                 o1.nValue = -si.getValue(x, slv);

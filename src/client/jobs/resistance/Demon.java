@@ -97,6 +97,7 @@ public class Demon extends Job {
     public static final int SHIELD_CHARGE_RUSH = 31211002;
     public static final int SHIELD_CHARGE = 31211011; //Special Attack (Stun Debuff)
     public static final int DIABOLIC_RECOVERY = 31211004; //Buff
+    public static final int WARD_EVIL = 1211003; //Buff
 
     public static final int EXCEED_EXECUTION_1 = 31221000; //Special Attack     //TODO (EXCEED System)
     public static final int EXCEED_EXECUTION_2 = 31221009; //Special Attack     //TODO (EXCEED System)
@@ -145,6 +146,7 @@ public class Demon extends Job {
             DEMONIC_FORTITUDE_DS,
             DEMONIC_FORTITUDE_DA,
             FORBIDDEN_CONTRACT,
+            WARD_EVIL,
     };
 
     public static int getOriginalSkillByID(int skillID) {
@@ -274,6 +276,17 @@ public class Demon extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Regen, o1); //TODO HP regen?
+                break;
+            case WARD_EVIL:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamageReduce, o1);
+                o2.nOption = si.getValue(z, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AsrR, o2);
+                tsm.putCharacterStatValue(TerR, o2);
                 break;
             case DIABOLIC_RECOVERY: // x = HP restored at interval
                 o1.nReason = skillID;
@@ -512,7 +525,9 @@ public class Demon extends Job {
     }
 
     private void resetExceed(Client c, TemporaryStatManager tsm) {
+        tsm.getOption(OverloadCount).nOption = 1;
         tsm.removeStat(OverloadCount, false);
+        tsm.removeStat(IndiePMdR, false);
         c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
