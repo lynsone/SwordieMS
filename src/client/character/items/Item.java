@@ -39,7 +39,7 @@ public class Item implements Serializable {
     @Column(name = "cashItemSerialNumber")
     protected long cashItemSerialNumber;
     @JoinColumn(name = "dateExpire")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     protected FileTime dateExpire = FileTime.getFileTimeFromType(FileTime.Type.PERMANENT);
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "invType")

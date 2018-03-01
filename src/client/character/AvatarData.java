@@ -21,13 +21,13 @@ public class AvatarData {
     @Column(name = "id")
     private int id;
     @JoinColumn(name = "characterStat")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private CharacterStat characterStat;
     @JoinColumn(name = "avatarLook")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AvatarLook avatarLook;
     @JoinColumn(name = "zeroAvatarLook")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AvatarLook zeroAvatarLook;
 
     public AvatarLook getAvatarLook() {

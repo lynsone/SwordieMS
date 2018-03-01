@@ -81,6 +81,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_SORT_ITEM_REQUEST:
                     WorldHandler.handleUserSortItemRequest(c, inPacket);
                     break;
+                case USER_SCRIPT_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserScriptMessageAnswer(c, inPacket);
+                    break;
                 case USER_STAT_CHANGE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserStatChangeItemUseRequest(c, inPacket);
                     break;
@@ -180,7 +183,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     WorldHandler.handleUserChat(c, inPacket);
                     break;
                 case USER_CHANGE_SLOT_POSITION_REQUEST:
-                    WorldHandler.handleInventoryOperation(c, inPacket);
+                    WorldHandler.handleUserChangeSlotPositionRequest(c, inPacket);
                     break;
                 case USER_CONSUME_CASH_ITEM_USE_REQUEST:
                     WorldHandler.handleUserConsumeCashItemUseRequest(c, inPacket);

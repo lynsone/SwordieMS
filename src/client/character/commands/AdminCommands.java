@@ -38,36 +38,14 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-//            Mob mob = (Mob) chr.getField().getLifes().get(chr.getField().getLifes().size() - 1);
-//            mob.setMp(200);
-//
-//            Option o = new Option();
-//            o.nOption = 143;
-//            o.rOption = 143;
-//            o.tOption = 0;
-//            o.wOption = 100;
-//            o.mOption = 100;
-//            o.nReason = 1;
-//            o.bOption = 0;
-//
-//            mob.getTemporaryStat().addStatOptionsAndBroadcast(MobStat.PCounter, o);
-//
-//            OutPacket outPacket = new OutPacket(OutHeader.MOB_AFFECTED);
-//
-//            outPacket.encodeInt(mob.getObjectId());
-//            outPacket.encodeInt(143);
-//            outPacket.encodeShort(1);
-//            outPacket.encodeByte(false);
-//            outPacket.encodeInt(30);
-//
-//            chr.write(outPacket);
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            Option o = new Option();
-            o.nOption = 5;
-            o.rOption = 2002004;
-            o.tOption = 50;
-            tsm.putCharacterStatValue(CharacterTemporaryStat.INT, o);
-            tsm.sendSetStatPacket();
+            for(InvType invType : InvType.values()) {
+                chr.chatMessage(YELLOW, invType.toString());
+                for(Item item : chr.getInventoryByType(invType).getItems()) {
+                    item.setInvType(invType);
+                    String name = StringData.getItemStringById(item.getItemId());
+                    chr.chatMessage(YELLOW, String.format("%s, %d, %d", name, item.getItemId(), item.getId()));
+                }
+            }
         }
     }
 
@@ -221,22 +199,68 @@ public class AdminCommands {
 
     public static class GetItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int id = Integer.parseInt(args[1]);
-            Equip equip = ItemData.getEquipDeepCopyFromId(id);
-            if (equip == null) {
-                Item item = ItemData.getItemDeepCopy(id);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                short quant = 1;
-                if (args.length > 2) {
-                    quant = Short.parseShort(args[2]);
+            if (Util.isNumber(args[1])) {
+
+                int id = Integer.parseInt(args[1]);
+                Equip equip = ItemData.getEquipDeepCopyFromId(id);
+                if (equip == null) {
+                    Item item = ItemData.getItemDeepCopy(id);
+                    if (item == null) {
+                        chr.chatMessage(YELLOW, String.format("Could not find an item with id %d", id));
+                        return;
+                    }
+                    chr.addItemToInventory(item.getInvType(), item, false);
+                    short quant = 1;
+                    if (args.length > 2) {
+                        quant = Short.parseShort(args[2]);
+                    }
+                    item.setQuantity(quant);
+                    chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                            ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                } else {
+                    chr.addItemToInventory(InvType.EQUIP, equip, false);
+                    chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                            ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
                 }
-                item.setQuantity(quant);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
             } else {
-                chr.addItemToInventory(InvType.EQUIP, equip, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
+                StringBuilder query = new StringBuilder();
+                int size = args.length;
+                short quant = 0;
+                if (Util.isNumber(args[size - 1])) {
+                    size--;
+                    quant = Short.parseShort(args[size]);
+                }
+                for (int i = 1; i < size; i++) {
+                    query.append(args[i].toLowerCase()).append(" ");
+                }
+                query = new StringBuilder(query.substring(0, query.length() - 1));
+                Map<Integer, String> map = StringData.getItemStringByName(query.toString());
+                if (map.size() == 0) {
+                    chr.chatMessage(YELLOW, "No items found for query " + query);
+                }
+                for (Map.Entry<Integer, String> entry : map.entrySet()) {
+                    int id = entry.getKey();
+                    Item item = ItemData.getEquipDeepCopyFromId(id);
+                    if (item != null) {
+                        Equip equip = (Equip) item;
+                        if(equip.getItemId() < 1000000) {
+                            continue;
+                        }
+                        chr.addItemToInventory(equip);
+                        chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                                ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
+                        return;
+                    }
+                    item = ItemData.getItemDeepCopy(id);
+                    if (item == null) {
+                        continue;
+                    }
+                    item.setQuantity(quant);
+                    chr.addItemToInventory(item);
+                    chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                            ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                    return;
+                }
             }
         }
     }

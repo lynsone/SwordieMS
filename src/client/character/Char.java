@@ -58,38 +58,37 @@ public class Char {
     private int accId;
 
     @JoinColumn(name = "equippedInventory")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory equippedInventory = new Inventory(InvType.EQUIPPED, 50);
 
     @JoinColumn(name = "equipInventory")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory equipInventory = new Inventory(InvType.EQUIP, 50);
 
     @JoinColumn(name = "consumeInventory")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory consumeInventory = new Inventory(InvType.CONSUME, 50);
 
     @JoinColumn(name = "etcInventory")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory etcInventory = new Inventory(InvType.ETC, 50);
 
     @JoinColumn(name = "installInventory")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory installInventory = new Inventory(InvType.INSTALL, 50);
 
     @JoinColumn(name = "cashInventory")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory cashInventory = new Inventory(InvType.CASH, 50);
 
     @JoinColumn(name = "avatarData")
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private AvatarData avatarData;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FuncKeyMap funcKeyMap;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "charId")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Skill> skills;
 
     @Transient
@@ -217,14 +216,14 @@ public class Char {
     public void updateDB() {
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
-        getAvatarData().updateDB(session, tx);
-        getFuncKeyMap().updateDB(session, tx);
-        for (Inventory inventory : getInventories()) {
-            inventory.updateDB(session, tx);
-        }
-        for (Skill s : getSkills()) {
-            s.updateDB(session, tx);
-        }
+//        getAvatarData().updateDB(session, tx);
+//        getFuncKeyMap().updateDB(session, tx);
+//        for (Inventory inventory : getInventories()) {
+//            inventory.updateDB(session, tx);
+//        }
+//        for (Skill s : getSkills()) {
+//            s.updateDB(session, tx);
+//        }
         session.saveOrUpdate(this);
         tx.commit();
         session.close();
@@ -317,10 +316,6 @@ public class Char {
                         ADD, (short) item.getBagIndex(), (byte) -1,0, item));
             }
         }
-    }
-
-    public void addItemToInventoryAndUpdateClient(Item item) {
-        addItemToInventory(item);
     }
 
     public void addItemToInventory(Item item) {
@@ -1773,7 +1768,7 @@ public class Char {
             write(WvsContext.dropPickupMessage(drop.getMoney(), (short) 0, (short) 0));
         } else {
             Item item = drop.getItem();
-            addItemToInventoryAndUpdateClient(item);
+            addItemToInventory(item);
             write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
         }
     }

@@ -115,25 +115,35 @@ public class ItemConstants {
                 break;
             case 112:
                 bodyPartList.add(17);
-                bodyPartList.add(31);
+                bodyPartList.add(65);
+                bodyPartList.add(1512);
+                bodyPartList.add(1513);
                 break;
             case 113:
-                bodyPartList.add(22);
+                bodyPartList.add(50);
                 break;
             case 114:
-                bodyPartList.add(21);
+                bodyPartList.add(49);
                 break;
             case 115:
-                bodyPartList.add(23);
+                bodyPartList.add(51);
                 break;
             case 116:
-                bodyPartList.add(26);
+                bodyPartList.add(52);
+                break;
+            case 117:
+                bodyPartList.add(55);
                 break;
             case 118:
-                bodyPartList.add(29);
+                bodyPartList.add(56);
                 break;
             case 119:
-                bodyPartList.add(30);
+                bodyPartList.add(61);
+                break;
+            case 120:
+                bodyPartList.add(5000);
+                bodyPartList.add(5001);
+                bodyPartList.add(5002);
                 break;
             case 161:
                 bodyPartList.add(1100);
@@ -151,11 +161,11 @@ public class ItemConstants {
                 bodyPartList.add(1104);
                 break;
             case 166:
-                bodyPartList.add(27);
+                bodyPartList.add(53);
                 break;
             case 167:
-                bodyPartList.add(28);
-                bodyPartList.add(30);
+                bodyPartList.add(54);
+                bodyPartList.add(61);
                 break;
             case 168:
                 for (int id = 1400; id < 1425; id++) {
@@ -164,8 +174,8 @@ public class ItemConstants {
                 break;
             case 180:
                 bodyPartList.add(14);
-                bodyPartList.add(24);
-                bodyPartList.add(25);
+                bodyPartList.add(30);
+                bodyPartList.add(38);
                 break;
             case 184:
                 bodyPartList.add(5100);
@@ -209,7 +219,11 @@ public class ItemConstants {
             default:
                 if (ItemConstants.isLongOrBigSword(itemID) || ItemConstants.isWeapon(itemID)) {
                     bodyPartList.add(11);
-                    bodyPartList.add(1507);
+                    if(ItemConstants.isFan(itemID)) {
+                        bodyPartList.add(5200);
+                    } else {
+                        bodyPartList.add(1507);
+                    }
                 } else {
                     System.out.println("Unknown type? id = " + itemID);
                 }
@@ -221,6 +235,11 @@ public class ItemConstants {
     private static boolean isLongOrBigSword(int nItemID) {
         int prefix = nItemID / 10000;
         return prefix % 100 == 56 || prefix % 100 == 57;
+    }
+
+    private static boolean isFan(int nItemID) {
+        int prefix = nItemID / 10000;
+        return prefix % 100 == 55;
     }
 
     public static int getWeaponType(int itemID) {

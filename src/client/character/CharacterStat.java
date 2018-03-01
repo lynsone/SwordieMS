@@ -75,7 +75,7 @@ public class CharacterStat {
     private long money;
     @Column(name = "wp")
     private int wp;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "extendSP")
     private ExtendSP extendSP;
     @Column(name = "posMap")
@@ -102,7 +102,7 @@ public class CharacterStat {
     private int senseExp;
     @Column(name = "charmExp")
     private int charmExp;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "nonCombatStatDayLimit")
     private NonCombatStatDayLimit nonCombatStatDayLimit;
     @Column(name = "pvpExp")
@@ -119,7 +119,7 @@ public class CharacterStat {
     private int eventPoint;
     @Column(name = "albaActivityID")
     private int albaActivityID;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "albaStartTime")
     private FileTime albaStartTime;
     @Column(name = "albaDuration")
@@ -128,13 +128,13 @@ public class CharacterStat {
     private int albaSpecialReward;
     @Column(name = "burning")
     private boolean burning;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "characterCard")
     private CharacterCard characterCard;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accountLastLogout")
     private SystemTime accountLastLogout;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "lastLogout")
     private FileTime lastLogout;
     @Column(name = "gachExp")

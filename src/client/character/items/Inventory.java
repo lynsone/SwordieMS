@@ -57,9 +57,6 @@ public class Inventory {
     }
 
     public void updateDB(Session session, Transaction tx) {
-        for(Item item : getItems()) {
-            item.updateDB(session, tx);
-        }
         session.saveOrUpdate(this);
     }
 

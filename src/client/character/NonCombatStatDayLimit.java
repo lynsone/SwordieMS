@@ -30,7 +30,7 @@ public class NonCombatStatDayLimit {
     private short craft;
     @Column(name = "sense")
     private short sense;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ftLastUpdateCharmByCashPR")
     private FileTime ftLastUpdateCharmByCashPR;
     @Column(name = "charmByCashPR")

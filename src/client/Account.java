@@ -318,9 +318,12 @@ public class Account {
         for(Char c : getCharacters()) {
             c.updateDB();
         }
-        session.update(this);
-        tx.commit();
-        session.close();
+        try {
+            session.update(this);
+            tx.commit();
+        } finally {
+            session.close();
+        }
     }
 
     public void deleteCharacter(Char chr) {

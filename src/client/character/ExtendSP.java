@@ -18,7 +18,7 @@ public class ExtendSP {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "extendSP_id")
     private List<SPSet> spSet;
 

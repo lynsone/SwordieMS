@@ -208,7 +208,7 @@ public class StringData {
     }
 
     public static String getItemStringById(int id) {
-        for(int key : getSkillString().keySet()) {
+        for(int key : itemStrings.keySet()) {
             if(key == id) {
                 return itemStrings.get(key);
             }

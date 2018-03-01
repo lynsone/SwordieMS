@@ -27,8 +27,7 @@ public class Equip extends Item {
     @Column(name = "title")
     private String title;
     @JoinColumn(name = "equippedDate")
-    @Cascade(value = org.hibernate.annotations.CascadeType.MERGE)
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FileTime equippedDate = new FileTime();
     @Column(name = "prevBonusExpRate")
     private int prevBonusExpRate;
@@ -255,7 +254,7 @@ public class Equip extends Item {
         Equip ret = new Equip();
         ret.serialNumber = serialNumber;
         ret.title = title;
-        ret.equippedDate = equippedDate;
+        ret.equippedDate = equippedDate.deepCopy();
         ret.prevBonusExpRate = prevBonusExpRate;
         ret.ruc = ruc;
         ret.cuc = cuc;
@@ -308,7 +307,8 @@ public class Equip extends Item {
         ret.iSlot = iSlot;
         ret.vSlot = vSlot;
         ret.fixedGrade = fixedGrade;
-        ret.options = options;
+        ret.options = new ArrayList<>();
+        ret.options.addAll(options);
         ret.specialGrade = specialGrade;
         ret.fixedPotential = fixedPotential;
         ret.tradeBlock = tradeBlock;

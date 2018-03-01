@@ -16,7 +16,7 @@ public class FuncKeyMap {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "fkMapId")
     private List<Keymapping> keymap = new ArrayList<>();
 

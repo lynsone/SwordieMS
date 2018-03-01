@@ -132,7 +132,7 @@ public class WorldHandler {
         }
     }
 
-    public static void handleInventoryOperation(Client c, InPacket inPacket) {
+    public static void handleUserChangeSlotPositionRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt(); // update tick
         InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
@@ -481,7 +481,7 @@ public class WorldHandler {
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
             if (mob == null) {
-                chr.chatMessage(YELLOW, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
+                chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
             }
             if (mob != null && mob.getHp() > 0) {
                 long totalDamage = Arrays.stream(mai.damages).sum();
@@ -1631,12 +1631,8 @@ public class WorldHandler {
                     break;
             }
         }
-        chr.chatMessage(YELLOW, "Grade = " + equip.getGrade());
-        for (int i = 0; i < 6; i++) {
-            chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
-        }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
+        c.write(WvsContext.inventoryOperation(true, false, UPDATE_ITEM_INFO, ePos, (short) 0,
                 0, equip));
         chr.consumeItem(scroll);
     }
@@ -2094,6 +2090,21 @@ public class WorldHandler {
             i++;
         }
         c.write(WvsContext.sortItemResult(invType.getVal()));
+        chr.dispose();
+    }
+
+    public static void handleScriptItemUseRequest(Client c, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        short slot = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
+        int quant = inPacket.decodeInt();
+        Char chr = c.getChr();
+        Item item = chr.getConsumeInventory().getItemBySlot(slot);
+        if(item == null || item.getItemId() != itemID) {
+            chr.dispose();
+            return;
+        }
+        chr.getScriptManager().startScript(itemID, itemID + ".py", ScriptType.ITEM);
         chr.dispose();
     }
 }
