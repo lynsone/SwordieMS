@@ -517,4 +517,17 @@ public class CField {
 
         return outPacket;
     }
+
+    public static OutPacket createDragon(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.DRAGON_CREATED);
+
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodeInt(chr.getPosition().getX());
+        outPacket.encodeInt(chr.getPosition().getY());
+        outPacket.encodeByte(4); //Dragon Stance
+        outPacket.encodeShort(0);
+        outPacket.encodeShort(chr.getJob());
+
+        return outPacket;
+    }
 }
