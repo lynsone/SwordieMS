@@ -2138,4 +2138,11 @@ public class WorldHandler {
         chr.dispose();
 
     }
+
+    public static void handleRWMultiChargeCancelRequest(Client c, InPacket inPacket) {
+        byte unk = inPacket.decodeByte();
+        int skillid = inPacket.decodeInt();
+
+        c.write(UserLocal.onRWMultiChargeCancelRequest(unk, skillid));
+    }
 }

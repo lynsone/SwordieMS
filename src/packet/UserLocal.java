@@ -50,4 +50,13 @@ public class UserLocal {
 
         return outPacket;
     }
+
+    public static OutPacket onRWMultiChargeCancelRequest(byte unk, int skillID) {
+        OutPacket outPacket = new OutPacket(OutHeader.SKILL_USE_RESULT);
+
+        outPacket.encodeByte(unk);
+        outPacket.encodeInt(skillID);
+
+        return outPacket;
+    }
 }
