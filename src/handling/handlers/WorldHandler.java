@@ -16,6 +16,7 @@ import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
 import client.jobs.legend.Luminous;
+import client.jobs.sengoku.Kanna;
 import client.life.*;
 import client.life.movement.Movement;
 import connection.InPacket;
@@ -2144,5 +2145,23 @@ public class WorldHandler {
         int skillid = inPacket.decodeInt();
 
         c.write(UserLocal.onRWMultiChargeCancelRequest(unk, skillid));
+    }
+
+    public static void handleFoxManActiSetUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        byte bSkillNumber = inPacket.decodeByte(); //bSkill Number
+        //more of the packet, but seems useless
+        switch (bSkillNumber) {
+            case 3:
+                Kanna.hakuFoxFire(chr);
+                break;
+            case 4:
+                Kanna.hakuHakuBlessing(chr);
+                break;
+            case 5:
+                Kanna.hakuBreathUnseen(chr);
+                break;
+        }
     }
 }

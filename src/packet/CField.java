@@ -3,9 +3,14 @@ package packet;
 import client.character.*;
 import client.character.items.BodyPart;
 import client.character.items.Equip;
+import client.character.skills.AttackInfo;
 import client.character.skills.ForceAtomInfo;
+import client.character.skills.MobAttackInfo;
 import client.character.skills.PsychicArea;
-import client.life.*;
+import client.jobs.legend.Evan;
+import client.life.AffectedArea;
+import client.life.Mob;
+import client.life.Summon;
 import connection.OutPacket;
 import constants.ItemConstants;
 import constants.SkillConstants;
@@ -524,9 +529,52 @@ public class CField {
         outPacket.encodeInt(chr.getId());
         outPacket.encodeInt(chr.getPosition().getX());
         outPacket.encodeInt(chr.getPosition().getY());
-        outPacket.encodeByte(4); //Dragon Stance
+        outPacket.encodeByte(4); //Move Action
         outPacket.encodeShort(0);
         outPacket.encodeShort(chr.getJob());
+
+        return outPacket;
+    }
+
+    public static OutPacket removeDragon(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.DRAGON_REMOVE);
+
+        outPacket.encodeInt(chr.getId());
+
+        return outPacket;
+    }
+
+    public static OutPacket addWreckage(Char chr, AttackInfo attackInfo, int debrisCount) {
+        OutPacket outPacket = new OutPacket(OutHeader.ADD_WRECKAGE);
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+
+            outPacket.encodeInt(chr.getId());  //v2
+            outPacket.encodeInt(mob.getX());  //position x
+            outPacket.encodeInt(mob.getY());  //position y
+            outPacket.encodeInt(chr.getClient().getChannelInstance().getField(chr.getFieldID()).getId());  //v4
+            outPacket.encodeInt(1);  //evanWreckage.nIDx
+            outPacket.encodeInt(Evan.ENHANCED_MAGIC_DEBRIS);  //nSkillID
+            outPacket.encodeInt(1);  //nType    must be 1
+            outPacket.encodeInt(debrisCount);  //Number on Skill Icon, # of Wreckages on map
+
+
+        }
+        return outPacket;
+    }
+
+    public static OutPacket enterFieldFoxMan(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.FOX_MAN_ENTER_FIELD);
+
+        Position position = chr.getPosition();
+
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodeShort(0);   // 1 = Haku Old Form,  0 = Haku New Form
+        outPacket.encodePosition(position);
+        outPacket.encodeByte(4); //MoveAction
+        outPacket.encodeShort(0); //Foothold
+        outPacket.encodeInt(0); //nUpgrade
+        outPacket.encodeInt(0); //FanID Equipped by Haku
 
         return outPacket;
     }

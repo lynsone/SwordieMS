@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
+import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -46,7 +47,7 @@ public class Aran extends Job {
 
     public static final int HEROIC_MEMORIES_ARAN = 21121053;
     public static final int ADRENALINE_BURST = 21121058;
-    public static final int MAHAS_DOMAIN = 21121057; //AoE Effect
+    public static final int MAHAS_DOMAIN = 21121068; //AoE Effect
 
 
     //Attacking Skills:
@@ -442,6 +443,15 @@ public class Aran extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case MAHAS_DOMAIN:
+                    SkillInfo mdi = SkillData.getSkillInfoById(MAHAS_DOMAIN);
+                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(mdi.getRects().get(0)));
+                    chr.getField().spawnAffectedArea(aa);
                     break;
             }
         }

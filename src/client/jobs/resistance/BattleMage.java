@@ -355,6 +355,7 @@ public class BattleMage extends Job {
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
+        short charlevel = chr.getAvatarData().getCharacterStat().getLevel();
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
@@ -369,8 +370,9 @@ public class BattleMage extends Job {
                     aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    aa.setDelay((short) 2);
+                    aa.setDelay((short) 16);
                     chr.getField().spawnAffectedArea(aa);
+
                     break;
                 case SECRET_ASSEMBLY:
                     o1.nValue = si.getValue(x, slv);

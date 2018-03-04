@@ -8,6 +8,7 @@ import client.jobs.adventurer.Archer;
 import client.jobs.adventurer.Magician;
 import client.jobs.adventurer.Thief;
 import client.jobs.cygnus.BlazeWizard;
+import client.jobs.legend.Aran;
 import client.jobs.legend.Shade;
 import client.jobs.sengoku.Kanna;
 import enums.MobStat;
@@ -252,6 +253,10 @@ public class AffectedArea extends Life {
                 o2.rOption = skillID;
                 tsm.putCharacterStatValue(AsrR, o2);
                 tsm.putCharacterStatValue(TerR, o2);
+                break;
+            case Aran.MAHAS_DOMAIN:
+                // 20% HP/MP Recovery
+                // Dispel
                 break;
         }
         tsm.sendSetStatPacket();

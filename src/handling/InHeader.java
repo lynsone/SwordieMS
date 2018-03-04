@@ -452,8 +452,8 @@ public enum InHeader {
     E_N_D__S_U_M_M_O_N_E_D(572),
 
     B_E_G_I_N__D_R_A_G_O_N(573),
-    DRAGMOVE(574),
-    DRAGGLIDE(575),
+    DRAGON_MOVE(574),
+    DRAGON_GLIDE(575),
     E_N_D__D_R_A_G_O_N(576),
 
     B_E_G_I_N__A_N_D_R_O_I_D(577),
