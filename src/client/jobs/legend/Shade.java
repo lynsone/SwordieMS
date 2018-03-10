@@ -93,7 +93,7 @@ public class Shade extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
-                tsm.putCharacterStatValue(ChangeFoxMan, o1);
+                tsm.putCharacterStatValue(HiddenPossession, o1);
                 break;
             case SUMMON_OTHER_SPIRIT:
                 o1.nOption = si.getValue(x, slv);
@@ -159,7 +159,7 @@ public class Shade extends Job {
 
     private void handleFoxSpirits(int skillID, byte slv, AttackInfo attackInfo) {   //TODO
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(ChangeFoxMan)) {
+        if (tsm.hasStat(HiddenPossession)) {
             SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
             int anglenum = new Random().nextInt(90) + 10; //randomisation
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -194,7 +194,7 @@ public class Shade extends Job {
 
     private void handleFoxSpiritMobToMob(int skillID, byte slv, AttackInfo attackInfo) {    //TODO ReCreate
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(ChangeFoxMan)) {
+        if (tsm.hasStat(HiddenPossession)) {
             SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
             //int anglenum = new Random().nextInt(90) + 10; //randomisation
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -315,7 +315,7 @@ public class Shade extends Job {
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(dotTime, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.SeperateSoulC, o1);
+                    mts.addStatOptionsAndBroadcast(MobStat.SeperateSoulC, o1); //TODO
                 }
                 break;
         }
@@ -342,7 +342,7 @@ public class Shade extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
-                case SPIRIT_TRAP:   //TODO Doesn't Bind/Stun enemies
+                case SPIRIT_TRAP:
                     SkillInfo fci = SkillData.getSkillInfoById(skillID);
                     AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
                     aa.setMobOrigin((byte) 0);

@@ -2150,9 +2150,9 @@ public class WorldHandler {
     public static void handleFoxManActiSetUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt(); // tick
-        byte bSkillNumber = inPacket.decodeByte(); //bSkill Number
+        byte SkillNumber = inPacket.decodeByte(); //bSkill Number
         //more of the packet, but seems useless
-        switch (bSkillNumber) {
+        switch (SkillNumber) {
             case 3:
                 Kanna.hakuFoxFire(chr);
                 break;

@@ -1,10 +1,14 @@
 package client.character;
 
+import client.character.items.Equip;
+import client.character.items.Item;
 import client.field.Field;
 import client.field.Portal;
 import constants.ServerConstants;
+import enums.InvType;
 import enums.NpcMessageType;
 import enums.ScriptType;
+import loaders.ItemData;
 import packet.ScriptMan;
 import packet.WvsContext;
 import util.Util;
@@ -18,8 +22,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import static enums.ChatMsgColour.GAME_MESSAGE;
-import static enums.ChatMsgColour.YELLOW;
+import static enums.ChatMsgColour.*;
+import static enums.InventoryOperation.ADD;
 import static enums.NpcMessageType.*;
 
 /**
@@ -362,12 +366,99 @@ public class ScriptManager implements Observer {
     }
 
     /**
-     * Sends a message in the main chat box.
+     * Sends a red message in the main chat box.
      * @param text
      */
-    public void chat(String text) {
+    public void chatRed(String text) {
         chr.chatMessage(GAME_MESSAGE, text);
     }
 
+    /**
+     * Sends a blue message in the main chat box.
+     * @param text
+     */
+    public void chatBlue(String text) {chr.chatMessage(GAME_NOTICE, text);}
 
+    /**
+     * Gives the client mesos. Positive amount = add, Negative amount = deduct.
+     * @param mesos
+     */
+    public void giveMesos(int mesos) {chr.addMoney(mesos);}
+
+    public int getMap() {return chr.getFieldID();}
+
+    public long getMesos() {return chr.getMoney();}
+
+    /**
+     * Gives the client a certain quantity of an item.
+     * @param id
+     * @param quantity
+     */
+    public void giveItem(int id, int quantity) {
+        double isEquip = Math.floor((id / 1000000));
+        if(isEquip == 1) {  //Equip
+            Equip equip = ItemData.getEquipDeepCopyFromId(id);
+            chr.addItemToInventory(equip.getInvType(), equip, false);
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
+
+        } else {    //Item
+            Item item = ItemData.getItemDeepCopy(id);
+            item.setQuantity(quantity);
+            chr.addItemToInventory(item);
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+
+        }
+    }
+
+    /**
+     * Checks if the client has a certain quantity of an item.
+     * @param id
+     * @param quantity
+     * @return
+     */
+    public boolean hasItem(int id, int quantity) {
+        double isEquip = Math.floor(id/1000000);
+        int q = 1;
+        if(isEquip == 1) {  //Equip
+            Item equip = chr.getInventoryByType(InvType.EQUIP).getItemByItemID(id);
+            q = equip.getQuantity();
+        } else {
+            Item item2 = ItemData.getItemDeepCopy(id);
+            InvType invType = item2.getInvType();
+            Item item = chr.getInventoryByType(invType).getItemByItemID(id);
+            q = item.getQuantity();
+        }
+
+        if(q >= quantity) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the client has enough space in their inventory to hold an item.
+     * @param id
+     * @return
+     */
+     public boolean canHold(int id) { //1452002
+        double isEquip = Math.floor(id / 1000000);
+        int slot = 0;
+        if(isEquip == 1) {  //Equip
+            Equip equip = ItemData.getEquipDeepCopyFromId(id);
+            slot = (int) chr.getInventoryByType(InvType.EQUIP).getSlots();
+        } else {    //Item
+            Item item = ItemData.getItemDeepCopy(id);
+            InvType invType = item.getInvType();
+            slot = (int) chr.getInventoryByType(invType).getSlots();
+        }
+
+        if (slot > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

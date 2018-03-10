@@ -94,8 +94,12 @@ public class Evan extends Job {
                     chr.addSkill(skill);
                 }
             }
-
+            //spawnMir();
         }
+    }
+
+    public void spawnMir() {
+        c.write(CField.createDragon(chr));
     }
 
     public int getEvanSkill(int skillID) {

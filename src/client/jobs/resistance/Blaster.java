@@ -165,7 +165,7 @@ public class Blaster extends Job {
                     break;
                 case REVOLVING_CANNON_3:
                 case REVOLVING_CANNON_2:
-                case REVOLVING_CANNON:
+                //case REVOLVING_CANNON:
                     handleAmmoCost();
                     handleGaugeIncrease();
                     c.write(UserLocal.onRWMultiChargeCancelRequest((byte)1, skillID));

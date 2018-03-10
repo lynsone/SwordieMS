@@ -16,6 +16,7 @@ import enums.ForceAtomEnum;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.CField;
+import packet.UserLocal;
 import packet.WvsContext;
 import util.Position;
 import util.Rect;
@@ -118,7 +119,10 @@ public class AngelicBuster extends Job {
                 tsm.putCharacterStatValue(EMHP, o2);
                 break;
             case POWER_TRANSFER:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(PowerTransferGauge, o1);
                 break;
             case IRON_BLOSSOM:
                 o1.nOption = si.getValue(prop, slv);
@@ -253,6 +257,10 @@ public class AngelicBuster extends Job {
             if (skillID != SOUL_SEEKER_ATOM) {
                 handleSoulSeekerExpert(skillID, slv, attackInfo);
             }
+            if (Util.succeedProp(getRechargeProp(skillID, slv))) {
+                c.write(UserLocal.showABRechargeEffect());
+                c.write(UserLocal.unLockSkill());
+            }
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -261,23 +269,10 @@ public class AngelicBuster extends Job {
             case AB_NORMAL_ATTACK:
                 handleSoulSeekerExpert(60011216, slv, attackInfo);
                 break;
-            case STAR_BUBBLE:
-            case PINK_PUMMEL:
-            case SHINING_STAR_BURST:
-            case HEAVENLY_CRASH:
-            case TRINITY:           //Only Recharge
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(OnActive, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat(); //TODO Replace with Character Temp Stat
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        //mts.addStatOptionsAndBroadcast(AB Recharge, o1); //TODO AB Recharge Temp Stat/Method
-                    }
-                }
+            case TRINITY:
+
                 break;
-            case LOVELY_STING:      //Unknown Debuff + Recharge
+            case LOVELY_STING:      //Unknown Debuff
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -286,17 +281,10 @@ public class AngelicBuster extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         //mts.addStatOptionsAndBroadcast(MobStat.SoulExplosion, o1); //TODO Look for exact Debuff
-                    } else if(Util.succeedProp(si.getValue(OnActive, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat(); //TODO Replace with Character Temp Stat
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        //mts.addStatOptionsAndBroadcast(AB Recharge, o1); //TODO AB Recharge Temp Stat/Method
                     }
                 }
                 break;
-            case FINALE_RIBBON:     //DmgUp Debuff + Recharge
+            case FINALE_RIBBON:     //DmgUp Debuff
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -305,17 +293,10 @@ public class AngelicBuster extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1); //TODO Check if this is the Correct MobStat
-                    } else if(Util.succeedProp(si.getValue(OnActive, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat(); //TODO Replace with Character Temp Stat
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        //mts.addStatOptionsAndBroadcast(AB Recharge, o1); //TODO AB Recharge Temp Stat/Method
                     }
                 }
                 break;
-            case CELESTIAL_ROAR:    //Stun Debuff + Recharge
+            case CELESTIAL_ROAR:    //Stun Debuff
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -324,13 +305,6 @@ public class AngelicBuster extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    } else if(Util.succeedProp(si.getValue(OnActive, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat(); //TODO Replace with Character Temp Stat
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        //mts.addStatOptionsAndBroadcast(AB Recharge, o1); //TODO AB Recharge Temp Stat/Method
                     }
                 }
                 break;
@@ -384,5 +358,26 @@ public class AngelicBuster extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    public int getRechargeProp(int skillID, byte slv) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        int primerecharge = si.getValue(OnActive, slv);
+        int recharge = primerecharge;
+
+        if (chr.hasSkill(65000003)) {
+            SkillInfo ah1 = SkillData.getSkillInfoById(65000003);
+            recharge += ah1.getValue(x, slv);
+        }
+        if (skillID == CELESTIAL_ROAR && tsm.hasStat(AngelicBursterSoulSeeker)) {
+            SkillInfo sse = SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT);
+            recharge += sse.getValue(z, slv);
+        }
+        if (primerecharge > 0) {
+            return recharge;
+        } else {
+            return 0;
+        }
     }
 }
