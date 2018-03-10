@@ -47,7 +47,7 @@ public class Kanna extends Job {
 
     public static final int VERITABLE_PANDEMONIUM = 42121052; //Immobility Debuff
     public static final int PRINCESS_VOW_KANNA = 42121053;
-    public static final int BLACKHEARTED_CURSE = 32121054;
+    public static final int BLACKHEARTED_CURSE = 42121054;
 
     //Haku Buffs
     public static final int HAKUS_GIFT = 42121020;
@@ -67,6 +67,7 @@ public class Kanna extends Job {
 
     public Kanna(Char chr) {
         super(chr);
+        //getHakuFollow();
     }
 
     @Override
@@ -156,7 +157,10 @@ public class Kanna extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOver, o2);
                 break;
             case BLACKHEARTED_CURSE:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(BlackHeartedCurse, o1);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

@@ -2171,6 +2171,11 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(TeamRoar).rOption);
             outPacket.encodeInt(getOption(TeamRoar).tOption);
         }
+        if (hasNewStat(BlackHeartedCurse)) {
+            outPacket.encodeShort(getOption(BlackHeartedCurse).nOption);
+            outPacket.encodeInt(getOption(BlackHeartedCurse).rOption);
+            outPacket.encodeInt(getOption(BlackHeartedCurse).tOption);
+        }
 
         if (hasNewStat(SoulMP)) {
             outPacket.encodeInt(getOption(SoulMP).xOption);

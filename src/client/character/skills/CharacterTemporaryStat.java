@@ -542,7 +542,7 @@ public enum CharacterTemporaryStat {
     Unk500(0x8, 14),
     Unk600(0x4, 14),
     Unk700(0x2, 14),
-    Unk800(0x1, 14), // Orange shield
+    BlackHeartedCurse(0x1, 14), // Kanna Hyper Shield
 
     BeastMode(0x80000000, 15), // BeastModes
     TeamRoar(0x40000000, 15), // BT Hyper
