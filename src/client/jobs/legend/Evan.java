@@ -9,10 +9,7 @@ import client.jobs.Job;
 import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
-import enums.ChatMsgColour;
-import enums.MobStat;
-import enums.MoveAbility;
-import enums.TSIndex;
+import enums.*;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -20,6 +17,7 @@ import util.Position;
 import util.Rect;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -36,15 +34,17 @@ public class Evan extends Job {
 
     public static final int MAGIC_BOOSTER = 22111020; //Buff
     public static final int ELEMENTAL_DECREASE = 22141016; //Buff
-
+    public static final int PARTNERS = 22110016;
 
     public static final int BLESSING_OF_THE_ONYX = 22181000; //Buff
     public static final int MAPLE_WARRIOR_EVAN = 22171000; //Buff
+    public static final int MAGIC_DEBRIS = 22141017;
 
     public static final int DRAGON_MASTER = 22171080; //Mount
     public static final int DRAGON_MASTER_2 = 22171083; //Add-on
     public static final int SUMMON_ONYX_DRAGON = 22171081; //Summon
     public static final int HEROIC_MEMORIES_EVAN = 22171082;
+    public static final int ENHANCED_MAGIC_DEBRIS = 22170070;
 
     //Returns
     public static final int RETURN_FLASH = 22110013; //Return after Wind Skills (Mob Debuff)
@@ -52,6 +52,19 @@ public class Evan extends Job {
     public static final int RETURN_FLAME = 22170064; //Return Flame (Flame  AoE)
     public static final int RETURN_FLAME_TILE = 22170093; //Return Flames Tile
 
+
+    //Evan Attacks
+    public static final int MANA_BURST_I = 22001010;
+    public static final int MANA_BURST_II = 22110010;
+    public static final int MANA_BURST_III = 22140010;
+    public static final int MANA_BURST_IV_1 = 22170060;
+    public static final int MANA_BURST_IV_2 = 22170061;
+    public static final int WIND_CIRCLE = 22111011;
+    public static final int THUNDER_CIRCLE = 22141011;
+    public static final int EARTH_CIRCLE = 22171062;
+    public static final int DARK_FOG = 22171095;
+
+    private int prevSkill = 0;
 
     private int[] addedSkills = new int[] {
             INHERITED_WILL,
@@ -81,8 +94,29 @@ public class Evan extends Job {
                     chr.addSkill(skill);
                 }
             }
+            //spawnMir();
+        }
+    }
+
+    public void spawnMir() {
+        c.write(CField.createDragon(chr));
+    }
+
+    public int getEvanSkill(int skillID) {
+        switch (skillID) {
+            case MANA_BURST_I:
+            case MANA_BURST_II:
+            case MANA_BURST_III:
+            case MANA_BURST_IV_1:
+            case MANA_BURST_IV_2:
+            case WIND_CIRCLE:
+            case THUNDER_CIRCLE:
+            case EARTH_CIRCLE:
+            case DARK_FOG:
+                return 1;
 
         }
+        return skillID;
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -111,6 +145,9 @@ public class Evan extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
+
+
+
                 break;
             case RETURN_DIVE:
                 o1.nReason = skillID;
@@ -162,7 +199,7 @@ public class Evan extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
                 break;
             case DRAGON_MASTER:
@@ -203,11 +240,40 @@ public class Evan extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        if(hasHitMobs) {
+            if (getEvanSkill(skillID) != 1) {
+                handlePartners(skillID);
+            }
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
+            case THUNDER_CIRCLE:
+                if(hasHitMobs) {
+                    c.write(CField.addWreckage(chr, attackInfo, 1));
+                }
+                break;
+        }
+    }
 
+    public void handlePartners(int skillID) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(PARTNERS);
+        Option o = new Option();
+        Option o1 = new Option();
+        if(tsm.getOptByCTSAndSkill(Stance, PARTNERS) == null) {
+            prevSkill = skillID;
+            o.nReason = PARTNERS;
+            o.nValue = si.getValue(indieDamR, 1);
+            o.tStart = (int) System.currentTimeMillis();
+            o.tTerm = 3;
+            tsm.putCharacterStatValue(IndieDamR, o);
+            o1.nOption = si.getValue(stanceProp, 1);
+            o1.rOption = PARTNERS;
+            o1.tOption = 3;
+            tsm.putCharacterStatValue(Stance, o1);
+            c.write(WvsContext.temporaryStatSet(tsm));
         }
     }
 
@@ -264,6 +330,10 @@ public class Evan extends Job {
                         }
                     }
                     break;
+                case MAGIC_DEBRIS:
+                case ENHANCED_MAGIC_DEBRIS:
+                    handleMagicDebris();
+                    break;
             }
         }
     }
@@ -291,5 +361,25 @@ public class Evan extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    private void handleMagicDebris() {
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(MAGIC_DEBRIS);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        List<Life> lifes = field.getLifesInRect(rect);
+        for(Life life : lifes) {
+            if(life instanceof Mob) {
+                int mobID = ((Mob) life).getRefImgMobID(); //
+                int inc = ForceAtomEnum.FAST_STAR_ORB.getInc();
+                int type = ForceAtomEnum.FAST_STAR_ORB.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 20,
+                        0, 200, (int) System.currentTimeMillis(), 1, 0,
+                        new Position(life.deepCopy().getX(), life.deepCopy().getY()));
+                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        true, mobID, MAGIC_DEBRIS, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), MAGIC_DEBRIS, life.getPosition()));
+            }
+        }
     }
 }

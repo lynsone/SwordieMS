@@ -317,6 +317,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_PORTABLE_CHAIR_SIT_REQUEST:
                     WorldHandler.handleShowChair(c, inPacket);
                     break;
+                case R_W_MULTI_CHARGE_CANCEL_REQUEST:
+                    WorldHandler.handleRWMultiChargeCancelRequest(c, inPacket);
+                    break;
+                case FOX_MAN_ACTISET_USE_REQUEST:
+                    WorldHandler.handleFoxManActiSetUseRequest(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

@@ -699,4 +699,98 @@ public class AdminCommands {
         }
     }
 
+    public static class GoTo extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+
+            HashMap<String,Integer> gotomaps = new HashMap<>();
+                gotomaps.put("ardent", 910001000);
+                gotomaps.put("ariant", 260000100);
+                gotomaps.put("amherst", 1010000);
+                gotomaps.put("amoria", 680000000);
+                gotomaps.put("aqua", 860000000);
+                gotomaps.put("aquaroad", 230000000);
+                gotomaps.put("boatquay", 541000000);
+                gotomaps.put("cwk", 610030000);
+                gotomaps.put("edelstein", 310000000);
+                gotomaps.put("ellin", 300000000);
+                gotomaps.put("ellinia", 101000000);
+                gotomaps.put("ellinel", 101071300);
+                gotomaps.put("elluel", 101050000);
+                gotomaps.put("elnath", 211000000);
+                gotomaps.put("ereve", 130000000);
+                gotomaps.put("florina", 120000300);
+                gotomaps.put("fm", 910000000);
+                gotomaps.put("future", 271000000);
+                gotomaps.put("gmmap", 180000000);
+                gotomaps.put("happy", 209000000);
+                gotomaps.put("harbor", 104000000);
+                gotomaps.put("henesys", 100000000);
+                gotomaps.put("herbtown", 251000000);
+                gotomaps.put("kampung", 551000000);
+                gotomaps.put("kerning", 103000000);
+                gotomaps.put("korean", 222000000);
+                gotomaps.put("leafre", 240000000);
+                gotomaps.put("ludi", 220000000);
+                gotomaps.put("malaysia", 550000000);
+                gotomaps.put("mulung", 250000000);
+                gotomaps.put("nautilus", 120000000);
+                gotomaps.put("nlc", 600000000);
+                gotomaps.put("omega", 221000000);
+                gotomaps.put("orbis", 200000000);
+                gotomaps.put("pantheon", 400000000);
+                gotomaps.put("pinkbean", 270050100);
+                gotomaps.put("phantom", 610010000);
+                gotomaps.put("perion", 102000000);
+                gotomaps.put("rien", 140000000);
+                gotomaps.put("showatown", 801000000);
+                gotomaps.put("singapore", 540000000);
+                gotomaps.put("sixpath", 104020000);
+                gotomaps.put("sleepywood", 105000000);
+                gotomaps.put("southperry", 2000000);
+                gotomaps.put("tot", 270000000);
+                gotomaps.put("twilight", 273000000);
+                gotomaps.put("tynerum", 301000000);
+                gotomaps.put("zipangu", 800000000);
+                gotomaps.put("pianus", 230040420);
+                gotomaps.put("horntail", 240060200);
+                gotomaps.put("chorntail", 240060201);
+                gotomaps.put("griffey", 240020101);
+                gotomaps.put("manon", 240020401);
+                gotomaps.put("zakum", 280030000);
+                gotomaps.put("czakum", 280030001);
+                gotomaps.put("pap", 220080001);
+                gotomaps.put("oxquiz", 109020001);
+                gotomaps.put("ola", 109030101);
+                gotomaps.put("fitness", 109040000);
+                gotomaps.put("snowball", 109060000);
+                gotomaps.put("boss", 682020000);
+                gotomaps.put("dojo", 925020001);
+                gotomaps.put("pq", 910002000);
+                gotomaps.put("h", 100000000);
+                gotomaps.put("gollux", 863010000);
+                gotomaps.put("lotus", 350060300);
+                gotomaps.put("damien", 105300303);
+                gotomaps.put("ursus", 970072200);
+                gotomaps.put("pno", 811000008);
+                gotomaps.put("cygnus", 271040000);
+                gotomaps.put("ra", 105200000);
+
+            if(gotomaps.containsKey(args[1])) {
+                Field toField = chr.getClient().getChannelInstance().getField(gotomaps.get(args[1]));
+                Portal portal = chr.getField().getPortalByID(0);
+                chr.warp(toField, portal);
+            } else if(args[1].equals("locations")) {
+                chr.chatMessage(GAME_NOTICE, "Use !goto <location>");
+                StringBuilder sb = new StringBuilder();
+                for (String s : gotomaps.keySet()) {
+                    sb.append(s).append(",  ");
+                }
+                chr.chatMessage(GAME_NOTICE, sb.substring(0, sb.length()));
+            }
+            else {
+                chr.chatMessage(GAME_NOTICE, "Map does not exist.");
+            }
+        }
+    }
+
 }

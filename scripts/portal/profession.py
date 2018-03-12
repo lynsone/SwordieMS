@@ -3,3 +3,4 @@ def init():
 	portal = 6
 	
 	sm.warp(map, portal)
+	sm.dispose()

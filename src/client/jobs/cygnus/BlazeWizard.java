@@ -110,11 +110,11 @@ public class BlazeWizard extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
-            case FLAME_BARRIER:  //TODO  Explodes afterwards   y = mobCount on Explosion
+            case FLAME_BARRIER:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(FireBarrier, o1); //TODO Correct?
+                tsm.putCharacterStatValue(DamageReduce, o1);
                 break;
             case CALL_OF_CYGNUS_BW:
                 o1.nReason = skillID;

@@ -19,6 +19,7 @@ import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
 import client.jobs.legend.Luminous;
+import client.jobs.sengoku.Kanna;
 import client.life.*;
 import client.life.movement.Movement;
 import connection.InPacket;
@@ -2211,6 +2212,31 @@ public class WorldHandler {
                     scriptName = String.format("%d%s.py", questID, ScriptManager.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                break;
+        }
+    }
+
+    public static void handleRWMultiChargeCancelRequest(Client c, InPacket inPacket) {
+        byte unk = inPacket.decodeByte();
+        int skillid = inPacket.decodeInt();
+
+        c.write(UserLocal.onRWMultiChargeCancelRequest(unk, skillid));
+    }
+
+    public static void handleFoxManActiSetUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        byte SkillNumber = inPacket.decodeByte(); //bSkill Number
+        //more of the packet, but seems useless
+        switch (SkillNumber) {
+            case 3:
+                Kanna.hakuFoxFire(chr);
+                break;
+            case 4:
+                Kanna.hakuHakuBlessing(chr);
+                break;
+            case 5:
+                Kanna.hakuBreathUnseen(chr);
                 break;
         }
     }

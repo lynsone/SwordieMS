@@ -30,7 +30,7 @@ import static client.character.skills.SkillStat.*;
  */
 public class WildHunter extends Job {
 
-    //Jaguar Summon         Unknown which ID stands for which jaguar (just guesses atm)
+    //Jaguar Summon
     public static final int SUMMON_JAGUAR_GREY = 33001007;           //No Special Jaguar Stats
     public static final int SUMMON_JAGUAR_YELLOW = 33001008;         //No Special Jaguar Stats
     public static final int SUMMON_JAGUAR_RED = 33001009;            //No Special Jaguar Stats
@@ -176,7 +176,6 @@ public class WildHunter extends Job {
 //                o1.nOption =
                 break;
             case SOUL_ARROW_CROSSBOW:
-
                 summon = Summon.getSummonBy(chr, SUMMON_JAGUAR_JAIRA, (byte) 1);
                 summon.setSummonTerm(0);
                 field = c.getChr().getField();
@@ -206,12 +205,13 @@ public class WildHunter extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
-            case CALL_OF_THE_WILD: // z = attack power&m.att%  |  DmgAbsorb & EVAR & MaxMPR = x
-                o1.nOption = si.getValue(z, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamR, o1);
-                tsm.putCharacterStatValue(MAD, o1); //Matt%?
+            case CALL_OF_THE_WILD:
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(z, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePADR, o1);
+                tsm.putCharacterStatValue(IndieMADR, o1);
                 o2.nOption = si.getValue(x, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);

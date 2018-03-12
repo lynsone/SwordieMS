@@ -48,14 +48,19 @@ public class Zero extends Job {
     public static final int TIME_DISTORTION = 100001261;
     public static final int REWIND = 100001272;
     public static final int FOCUSED_TIME = 100001005;
+    public static final int DOUBLE_TIME = 100000267;
+    public static final int DOUBLE_TIME_ALPHA = 100000276;
+    public static final int DOUBLE_TIME_BETA = 100000277;
 
     public static final int AIR_RIOT = 101000101; //Special Attack (Stun Debuff)
     public static final int THROWING_WEAPON = 101100100; //Special Attack (Throw Sword)
     public static final int ADVANCED_THROWING_WEAPON = 101100101; //Special Attack (Throw Sword)
-    public static final int ADV_EARTH_BREAK = 101120105; //Special Attack (Shock Field)
-    public static final int ADV_STORM_BREAK = 101120204; //Special Attack (Shock Field)
-    public static final int ADV_EARTH_BREAK_SHOCKWAVE = 101120106;
-    public static final int ADV_STORM_BREAK_SHOCKWAVE = 101120206;
+    public static final int ADV_EARTH_BREAK = 101120104;
+    public static final int ADV_STORM_BREAK = 101120204;
+    public static final int ADV_EARTH_BREAK_SHOCK_INIT = 101120105; //Attack to initialise the Shockwave
+    public static final int ADV_STORM_BREAK_SHOCK_INIT = 101120205; //Attack to initialise the Shockwave
+    public static final int ADV_EARTH_BREAK_SHOCKWAVE = 101120106; //Tile Skill
+    public static final int ADV_STORM_BREAK_SHOCKWAVE = 101120206; //Tile Skill
     public static final int DIVINE_LEER = 101120207;
     public static final int CRITICAL_BIND = 101120110;
     public static final int IMMUNE_BARRIER = 101120109;
@@ -78,6 +83,119 @@ public class Zero extends Job {
             REWIND,
             FOCUSED_TIME,
     };
+
+    private int doubleTimePrevSkill = 0;
+
+    private final int[] getBetaSkill = new int[] {
+            101001100, //Rising Slash
+            101000100, //Air Raid
+            101000101, //Air Riot
+            101000102, //Air Riot
+
+            101101100, //Flash Cut
+            101100100, //Throwing Weapon
+            101100101, //Adv. Throwing Weapon
+
+            101111100, //Spin Driver
+            101110101, //Wheel Wind
+            101110102, //Adv Wheel Wind
+            101110104, //Adv Blade Tempest
+
+            101121100, //Giga Crash
+            101120100, //Falling Star
+            101120101, //Falling Star
+            101120102, //Earth Break
+            101120103, //Groundbreaker
+            101120104, //Adv Earth Break
+            101120105, //Mega Groundbreaker (Tile)
+
+    };
+
+    private final int[] getAlphaSkill = new int[] {
+            101001200, //Moon Strike
+            101000200, //Piercing Thrust
+            101000201, //Shadow Strike
+            101000202, //Shadow Strike
+
+            101101200, //Flash Assault
+            101100200, //Spin Cutter
+            101100201, //Adv Spin Cutter
+            101100202, //Adv Blade Ring
+
+            101110200, //Grand Rolling Cross
+            101110201, //Grand Rolling Cross
+            101111200, //Rolling Cross
+            101110202, //Rolling Assault
+            101110203, //Advanced Rolling Assault
+            101110204, //Advanced Rolling Assault
+
+            101120200, //Wind Cutter
+            101120201, //Wind Striker
+            101120202, //Storm Break
+            101120203, //Storm Break
+            101120204, //Advanced Storm Break
+            101120205, //Severe Storm Break
+            101120206, //Severe Storm Break
+            101121101, //Hurricane Wind
+            101121200, //Wind Cutter
+    };
+
+    public static int getAlphaOrBetaSkill(int skillID) {
+        switch(skillID) {
+            case 101001200: //Moon Strike
+            case 101000200: //Piercing Thrust
+            case 101000201: //Shadow Strike
+            case 101000202: //Shadow Strike
+
+            case 101101200: //Flash Assault
+            case 101100200: //Spin Cutter
+            case 101100201: //Adv Spin Cutter
+            case 101100202: //Adv Blade Ring
+
+            case 101110200: //Grand Rolling Cross
+            case 101110201: //Grand Rolling Cross
+            case 101111200: //Rolling Cross
+            case 101110202: //Rolling Assault
+            case 101110203: //Advanced Rolling Assault
+            case 101110204: //Advanced Rolling Assault
+
+            case 101120200: //Wind Cutter
+            case 101120201: //Wind Striker
+            case 101120202: //Storm Break
+            case 101120203: //Storm Break
+            case 101120204: //Advanced Storm Break
+            case 101120205: //Severe Storm Break (Tile)
+            case 101120206: //Severe Storm Break
+            case 101121101: //Hurricane Wind
+            case 101121200: //Wind Cutter:
+                return 1; //Alpha skills
+
+            case 101001100: //Rising Slash
+            case 101000100: //Air Raid
+            case 101000101: //Air Riot
+            case 101000102: //Air Riot
+
+            case 101101100: //Flash Cut
+            case 101100100: //Throwing Weapon
+            case 101100101: //Adv. Throwing Weapon
+
+            case 101111100: //Spin Driver
+            case 101110101: //Wheel Wind
+            case 101110102: //Adv Wheel Wind
+            case 101110104: //Adv Blade Tempest
+
+            case 101121100: //Giga Crash
+            case 101120100: //Falling Star
+            case 101120101: //Falling Star
+            case 101120102: //Earth Break
+            case 101120103: //Groundbreaker
+            case 101120104: //Adv Earth Break
+            case 101120105: //Mega Groundbreaker (Tile)
+                return 2; //Beta skills
+
+        }
+        return skillID; // no original skill linked with this one
+    }
 
     public Zero(Char chr) {
         super(chr);
@@ -243,10 +361,21 @@ public class Zero extends Job {
         System.out.println(SkillConstants.isZeroAlphaSkill(skillID));
         System.out.println(!chr.getZeroInfo().isZeroBetaState());
         boolean isAlpha = SkillConstants.isZeroAlphaSkill(skillID) || !chr.getZeroInfo().isZeroBetaState();
-        if(isAlpha) {
-            handleDivineLeer(attackInfo);
-        } else {
-            handleCriticalBind(attackInfo); //TODO
+
+        if(getAlphaOrBetaSkill(skillID) == 1) {
+            if(hasHitMobs) {
+                handleDoubleTimeAlpha(skillID);
+            }
+
+            handleDivineLeer(attackInfo, skillID);
+        }
+
+        if(getAlphaOrBetaSkill(skillID) == 2) {
+            if(hasHitMobs) {
+                handleDoubleTimeBeta(skillID);
+            }
+
+            handleCriticalBind(attackInfo, skillID);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -263,38 +392,6 @@ public class Zero extends Job {
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
-                break;
-            case ADV_EARTH_BREAK:
-                SkillInfo aebi = SkillData.getSkillInfoById(ADV_EARTH_BREAK_SHOCKWAVE); //TODO stay forever & should be larger
-                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
-                aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
-                aa.setSkillID(ADV_EARTH_BREAK_SHOCKWAVE);
-                aa.setPosition(chr.getPosition());
-                aa.setRect(aa.getPosition().getRectAround(aebi.getRects().get(0)));
-                if (chr.isLeft()) {
-                    aa.setFlip(false);
-                } else {
-                    aa.setFlip(true);
-                }
-                aa.setDelay((short) 7); //spawn delay
-                chr.getField().spawnAffectedArea(aa);
-                break;
-            case ADV_STORM_BREAK:
-                SkillInfo asbi = SkillData.getSkillInfoById(ADV_STORM_BREAK_SHOCKWAVE); //TODO stay forever & should be larger
-                AffectedArea aa2 = AffectedArea.getAffectedArea(attackInfo);
-                aa2.setMobOrigin((byte) 0);
-                aa2.setCharID(chr.getId());
-                aa2.setSkillID(ADV_STORM_BREAK_SHOCKWAVE);
-                aa2.setPosition(chr.getPosition());
-                aa2.setRect(aa2.getPosition().getRectAround(asbi.getRects().get(0)));
-                if (chr.isLeft()) {
-                    aa2.setFlip(false);
-                } else {
-                    aa2.setFlip(true);
-                }
-                aa2.setDelay((short) 7); //spawn delay
-                chr.getField().spawnAffectedArea(aa2);
                 break;
         }
     }
@@ -335,6 +432,16 @@ public class Zero extends Job {
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     aa.setDelay((short) 5);
                     chr.getField().spawnAffectedArea(aa);
+                    break;
+                case ADV_EARTH_BREAK_SHOCK_INIT:
+                    SkillInfo rft = SkillData.getSkillInfoById(ADV_EARTH_BREAK_SHOCKWAVE);
+                    AffectedArea aa2 = AffectedArea.getPassiveAA(ADV_EARTH_BREAK_SHOCKWAVE, slv);
+                    aa2.setMobOrigin((byte) 0);
+                    aa2.setCharID(chr.getId());
+                    aa2.setPosition(chr.getPosition());
+                    aa2.setRect(aa2.getPosition().getRectAround(rft.getRects().get(0)));
+                    aa2.setSlv((byte)30);
+                    chr.getField().spawnAffectedArea(aa2);
                     break;
             }
         }
@@ -381,38 +488,94 @@ public class Zero extends Job {
         return chr.getZeroInfo().isZeroBetaState();
     }
 
-    private void handleDivineLeer(AttackInfo ai) {
+    private void handleDivineLeer(AttackInfo ai, int skillID) {     //TODO  Arrays.asList  doesn't function correctly
         Skill skill = chr.getSkill(DIVINE_LEER);
-        if(skill == null) {
+        if (skill == null) {
             return;
         }
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(DIVINE_LEER);
-        for(MobAttackInfo mai : ai.mobAttackInfo) {
-            if(Util.succeedProp(si.getValue(prop, slv))) {
+        for (MobAttackInfo mai : ai.mobAttackInfo) {
+            if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 mob.getTemporaryStat().createAndAddBurnedInfo(chr.getId(), skill, 1);
             }
         }
     }
 
-    private void handleCriticalBind(AttackInfo ai) {
+    private void handleCriticalBind(AttackInfo ai, int skillID) {   //TODO  Arrays.asList  doesn't function correctly
         Skill skill = chr.getSkill(CRITICAL_BIND);
-        if(skill == null) {
+        if (skill == null) {
             return;
         }
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(CRITICAL_BIND);
-        for(MobAttackInfo mai : ai.mobAttackInfo) {
-            if(Util.succeedProp(si.getValue(prop, slv))) {
+        for (MobAttackInfo mai : ai.mobAttackInfo) {
+            if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 MobTemporaryStat mts = mob.getTemporaryStat();
                 Option o = new Option();
+                Option o1 = new Option();
                 o.nOption = 1;
                 o.rOption = CRITICAL_BIND;
                 o.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
                 mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                o1.nOption = si.getValue(SkillStat.x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
             }
+        }
+    }
+
+    private void handleDoubleTimeAlpha(int skillID) {
+        if (chr.hasSkill(DOUBLE_TIME)) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o = new Option();
+            Option o1 = new Option();
+            SkillInfo si = SkillData.getSkillInfoById(DOUBLE_TIME_ALPHA);
+            int amount = 1;
+            if (tsm.hasStat(TimeFastABuff)) {
+                if (doubleTimePrevSkill == skillID) {
+                    return;
+                }
+                amount = tsm.getOption(TimeFastABuff).nOption;
+                if (amount < 10) {
+                    amount++;
+                }
+            }
+            doubleTimePrevSkill = skillID;
+            o.nOption = amount;
+            o.rOption = DOUBLE_TIME_ALPHA;
+            o.tOption = 20;
+            tsm.putCharacterStatValue(TimeFastABuff, o);
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+    private void handleDoubleTimeBeta(int skillID) {
+        if (chr.hasSkill(DOUBLE_TIME)) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o = new Option();
+            Option o1 = new Option();
+            SkillInfo si = SkillData.getSkillInfoById(DOUBLE_TIME_BETA);
+            int amount = 1;
+            if (tsm.hasStat(TimeFastBBuff)) {
+                if (doubleTimePrevSkill == skillID) {
+                    return;
+                }
+                amount = tsm.getOption(TimeFastBBuff).nOption;
+                if (amount < 10) {
+                    amount++;
+                }
+            }
+            doubleTimePrevSkill = skillID;
+            o.nOption = amount;
+            o.rOption = DOUBLE_TIME_BETA;
+            o.tOption = 20;
+            tsm.putCharacterStatValue(TimeFastBBuff, o);
+            c.write(WvsContext.temporaryStatSet(tsm));
         }
     }
 }

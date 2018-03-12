@@ -2161,7 +2161,21 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(Stigma).rOption);
             outPacket.encodeInt(getOption(Stigma).tOption);
         }
-
+        if (hasNewStat(BeastMode)) {
+            outPacket.encodeShort(getOption(BeastMode).nOption);
+            outPacket.encodeInt(getOption(BeastMode).rOption);
+            outPacket.encodeInt(getOption(BeastMode).tOption);
+        }
+        if (hasNewStat(TeamRoar)) {
+            outPacket.encodeShort(getOption(TeamRoar).nOption);
+            outPacket.encodeInt(getOption(TeamRoar).rOption);
+            outPacket.encodeInt(getOption(TeamRoar).tOption);
+        }
+        if (hasNewStat(BlackHeartedCurse)) {
+            outPacket.encodeShort(getOption(BlackHeartedCurse).nOption);
+            outPacket.encodeInt(getOption(BlackHeartedCurse).rOption);
+            outPacket.encodeInt(getOption(BlackHeartedCurse).tOption);
+        }
 
         if (hasNewStat(SoulMP)) {
             outPacket.encodeInt(getOption(SoulMP).xOption);

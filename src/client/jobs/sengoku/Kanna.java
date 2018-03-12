@@ -16,6 +16,7 @@ import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.MoveAbility;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
 
 import java.util.Arrays;
@@ -26,8 +27,6 @@ import static client.character.skills.SkillStat.*;
 /**
  * Created on 12/14/2017.
  */
-
-//TODO 38s on SET_FIELD
 
 public class Kanna extends Job {
 
@@ -48,9 +47,13 @@ public class Kanna extends Job {
 
     public static final int VERITABLE_PANDEMONIUM = 42121052; //Immobility Debuff
     public static final int PRINCESS_VOW_KANNA = 42121053;
-    public static final int BLACKHEARTED_CURSE = 32121054;
+    public static final int BLACKHEARTED_CURSE = 42121054;
 
-    private Summon haku;
+    //Haku Buffs
+    public static final int HAKUS_GIFT = 42121020;
+    public static final int FOXFIRE = 42121021;
+    public static final int HAKUS_BLESSING = 42121022;
+    public static final int BREATH_UNSEEN = 42121023;
 
     private int[] buffs = new int[]{
             HAKU,
@@ -64,6 +67,7 @@ public class Kanna extends Job {
 
     public Kanna(Char chr) {
         super(chr);
+        //getHakuFollow();
     }
 
     @Override
@@ -119,13 +123,12 @@ public class Kanna extends Job {
         Option o4 = new Option();
         Option o5 = new Option();
         switch (skillID) {
-            case HAKU:
-                break;
             case RADIANT_PEACOCK:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
+                getHakuFollow();
                 break;
             case KISHIN_SHOUKAN:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -134,7 +137,6 @@ public class Kanna extends Job {
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
                 break;
-
             case AKATUSKI_HERO_KANNA:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(x, slv);
@@ -142,7 +144,6 @@ public class Kanna extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
-
             case PRINCESS_VOW_KANNA:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
@@ -155,9 +156,11 @@ public class Kanna extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOver, o2);
                 break;
-
             case BLACKHEARTED_CURSE:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(BlackHeartedCurse, o1);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -206,9 +209,42 @@ public class Kanna extends Job {
         }
     }
 
+    public void getHakuFollow() {
+        if(chr.hasSkill(HAKU)) {
+            c.write(CField.enterFieldFoxMan(chr));
+        }
+    }
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        int foxfires = 6;
+        if (tsm.hasStat(FireBarrier)) {
+            if(foxfires > 1) {
+                foxfires = foxfires - 1;
+                }
+            if(foxfires == 4 || foxfires == 3) {
+                o.nOption = 2;
+                tsm.putCharacterStatValue(FireBarrier, o);
+                tsm.sendSetStatPacket();
+            } else if(foxfires == 2) {
+                o.nOption = 1;
+                tsm.putCharacterStatValue(FireBarrier, o);
+                tsm.sendSetStatPacket();
+            } else if (foxfires == 1) {
+                resetFireBarrier();
+                o.nOption = 0;
+                tsm.putCharacterStatValue(FireBarrier, o);
+                tsm.sendSetStatPacket();
+            }
+        }
+    }
 
+    public void resetFireBarrier() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.removeStat(FireBarrier, false);
+        c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
     @Override
@@ -222,16 +258,48 @@ public class Kanna extends Job {
         return 0;
     }
 
+    public static void hakuFoxFire(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(FOXFIRE);
+        int slv = si.getCurrentLevel();
+        Option o1 = new Option();
 
-    private void getHakuSummon(int skillID, byte slv, Char chr) {
-        if (chr.hasSkill(HAKU)) {
-            Field field;
-            haku = Summon.getSummonBy(c.getChr(), skillID, slv);
-            field = c.getChr().getField();
-            haku.setFlyMob(false);
-            haku.setMoveAbility(MoveAbility.FOLLOW.getVal());
-            field.spawnSummon(haku);
-        }
+        o1.nOption = 6;
+        o1.rOption = FOXFIRE;
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(FireBarrier, o1);
+        chr.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    public static void hakuHakuBlessing(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(HAKUS_BLESSING);
+        int slv = si.getCurrentLevel();
+        Option o1 = new Option();
+
+        o1.nReason = HAKUS_BLESSING;
+        o1.nValue = si.getValue(indiePdd, slv);
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IndiePDD, o1);
+        chr.write(WvsContext.temporaryStatSet(tsm));
+    }
+
+    public static void hakuBreathUnseen(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(BREATH_UNSEEN);
+        int slv = si.getCurrentLevel();
+        Option o1 = new Option();
+        Option o2 = new Option();
+
+        o1.nOption = si.getValue(prop, slv);
+        o1.rOption = BREATH_UNSEEN;
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(Stance, o1);
+        o2.nOption = si.getValue(x, slv);
+        o2.rOption = BREATH_UNSEEN;
+        o2.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
+        chr.write(WvsContext.temporaryStatSet(tsm));
+    }
 }

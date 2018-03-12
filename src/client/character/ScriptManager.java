@@ -2,13 +2,18 @@ package client.character;
 
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
+import client.character.items.Equip;
+import client.character.items.Item;
 import client.field.Field;
 import client.field.Portal;
+import constants.ItemConstants;
 import constants.ServerConstants;
+import enums.InvType;
 import enums.NpcMessageType;
 import enums.QuestStatus;
 import enums.ScriptType;
 import loaders.QuestData;
+import loaders.ItemData;
 import packet.ScriptMan;
 import packet.WvsContext;
 import util.FileTime;
@@ -23,8 +28,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import static enums.ChatMsgColour.GAME_MESSAGE;
-import static enums.ChatMsgColour.YELLOW;
+import static enums.ChatMsgColour.*;
+import static enums.InventoryOperation.ADD;
 import static enums.NpcMessageType.*;
 
 /**
@@ -70,6 +75,7 @@ public class ScriptManager implements Observer {
     public int getParentIDByScriptType(ScriptType scriptType) {
         return getScriptInfoByType(scriptType) != null ? getScriptInfoByType(scriptType).getParentID() : 2007;
     }
+
     public void startScript(int parentID, ScriptType scriptType) {
         startScript(parentID, parentID + ".py", scriptType);
     }
@@ -86,11 +92,11 @@ public class ScriptManager implements Observer {
         ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
         scriptEngine.put("sm", this);
         scriptEngine.put("parentID", parentID);
-        if(scriptType == ScriptType.QUEST) {
+        if (scriptType == ScriptType.QUEST) {
             chat(scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) + "");
             scriptEngine.put("startQuest",
                     scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) ==
-                    QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
+                            QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
         }
         ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);
         getScripts().put(scriptType, scriptInfo);
@@ -107,7 +113,7 @@ public class ScriptManager implements Observer {
         String dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
                 scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
         boolean exists = new File(dir).exists();
-        if(!exists) {
+        if (!exists) {
             System.err.printf("[Error] Could not find script %s/%s.%n", scriptType.toString().toLowerCase(), name);
             chr.chatMessage(YELLOW, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
             dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
@@ -132,7 +138,7 @@ public class ScriptManager implements Observer {
     }
 
     public void stop(ScriptType scriptType) {
-        if(getScriptInfoByType(scriptType) != null) {
+        if (getScriptInfoByType(scriptType) != null) {
             getScriptInfoByType(scriptType).reset();
         }
         WvsContext.dispose(chr);
@@ -144,14 +150,14 @@ public class ScriptManager implements Observer {
     }
 
     public void handleAction(ScriptType scriptType, byte lastType, byte response, int answer) {
-        switch(response) {
+        switch (response) {
             case -1:
                 stop(scriptType);
                 break;
             case 0:
             case 1:
                 try {
-                    if(isActive(scriptType)) {
+                    if (isActive(scriptType)) {
                         getInvocableByType(scriptType).invokeFunction("action", response, answer);
                     }
                 } catch (ScriptException | NoSuchMethodException e) {
@@ -175,8 +181,8 @@ public class ScriptManager implements Observer {
 
     public int getParentID() {
         int res = 0;
-        for(ScriptType type : ScriptType.values()) {
-            if(getScriptInfoByType(type) != null) {
+        for (ScriptType type : ScriptType.values()) {
+            if (getScriptInfoByType(type) != null) {
                 res = getScriptInfoByType(type).getParentID();
             }
         }
@@ -188,6 +194,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a normal chat window with prev/next buttons enabled.
+     *
      * @param text The text to say.
      */
     public void sendSay(String text) {
@@ -196,12 +203,13 @@ public class ScriptManager implements Observer {
 
     /**
      * Helper function that ensures that selections have the appropriate type (AskMenu).
+     *
      * @param text
      * @param nmt
      */
     private void sendGeneralSay(String text, NpcMessageType nmt) {
         getNpcScriptInfo().setText(text);
-        if(text.contains("#L")) {
+        if (text.contains("#L")) {
             nmt = AskMenu;
         }
         getNpcScriptInfo().setMessageType(nmt);
@@ -210,6 +218,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a normal chat window with just the next button enabled.
+     *
      * @param text The text to say.
      */
     public void sendNext(String text) {
@@ -218,6 +227,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a normal chat window with just the prev button enabled.
+     *
      * @param text The text to say.
      */
     public void sendPrev(String text) {
@@ -226,6 +236,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a normal chat window with just an Ok button.
+     *
      * @param text The text to say.
      */
     public void sendSayOkay(String text) {
@@ -234,6 +245,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window with a single image from wz.
+     *
      * @param image The image location in wz.
      */
     public void sendSayImage(String image) {
@@ -242,6 +254,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window with a list of images from wz.
+     *
      * @param images The window location in wz.
      */
     public void sendSayImage(String[] images) {
@@ -252,6 +265,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window with a yes/no option.
+     *
      * @param text The text to display.
      */
     public void sendAskYesNo(String text) {
@@ -260,10 +274,11 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window with a text box the client can enter text in.
-     * @param text The text to display.
+     *
+     * @param text        The text to display.
      * @param defaultText The default text of the text box for client input.
-     * @param minLength The minimum length of the input.
-     * @param maxLength The maxmium length of the input.
+     * @param minLength   The minimum length of the input.
+     * @param maxLength   The maxmium length of the input.
      */
     public void sendAskText(String text, String defaultText, short minLength, short maxLength) {
         getNpcScriptInfo().setMin(minLength);
@@ -274,10 +289,11 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window with a text box the client can enter numbers in.
-     * @param text The text to display.
+     *
+     * @param text       The text to display.
      * @param defaultNum The default number displayed in the text box.
-     * @param min The minimum number required to enter.
-     * @param max The maximum number required to enter.
+     * @param min        The minimum number required to enter.
+     * @param max        The maximum number required to enter.
      */
     public void sendAskNumber(String text, int defaultNum, int min, int max) {
         getNpcScriptInfo().setDefaultNumber(defaultNum);
@@ -288,18 +304,19 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window for a quiz.
-     * @param type The type (0 for question, 1 for nothing)
-     * @param title The title of the quiz.
+     *
+     * @param type    The type (0 for question, 1 for nothing)
+     * @param title   The title of the quiz.
      * @param problem The question of the quiz.
-     * @param hint The hint of the quiz.
-     * @param min The minimum length of the answer.
-     * @param max The maximum length of the answer.
-     * @param time The time allowed to answer the question, in seconds.
+     * @param hint    The hint of the quiz.
+     * @param min     The minimum length of the answer.
+     * @param max     The maximum length of the answer.
+     * @param time    The time allowed to answer the question, in seconds.
      */
     public void sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time) {
         NpcScriptInfo nsi = getNpcScriptInfo();
         nsi.setType(type);
-        if(type != 1) {
+        if (type != 1) {
             nsi.setTitle(title);
             nsi.setProblemText(problem);
             nsi.setHintText(hint);
@@ -312,17 +329,18 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window for an initial speed quiz.
-     * @param type The type (0 for question, 1 for nothing).
-     * @param quizType The type of quiz (expirement with this).
-     * @param answer The correct answer.
+     *
+     * @param type           The type (0 for question, 1 for nothing).
+     * @param quizType       The type of quiz (expirement with this).
+     * @param answer         The correct answer.
      * @param correctAnswers Current amount of correct answers.
-     * @param remaining The remaining amount of questions.
-     * @param time The remaining amount of time, in seconds.
+     * @param remaining      The remaining amount of questions.
+     * @param time           The remaining amount of time, in seconds.
      */
     public void sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time) {
         NpcScriptInfo nsi = getNpcScriptInfo();
         nsi.setType(type);
-        if(type != 1) {
+        if (type != 1) {
             nsi.setQuizType(quizType);
             nsi.setAnswer(answer);
             nsi.setCorrectAnswers(correctAnswers);
@@ -334,10 +352,11 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends an IC quiz.
-     * @param type The type (0 for question, 1 for nothing).
-     * @param text The question for the quiz.
+     *
+     * @param type     The type (0 for question, 1 for nothing).
+     * @param text     The question for the quiz.
      * @param hintText The hint of the quiz.
-     * @param time The remaining amount of time, in seconds.
+     * @param time     The remaining amount of time, in seconds.
      */
     public void sendICQuiz(byte type, String text, String hintText, int time) {
         getNpcScriptInfo().setType(type);
@@ -348,9 +367,10 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a chat window with the user's avatar as speaker.
-     * @param text The text to display.
+     *
+     * @param text          The text to display.
      * @param angelicBuster Whether or not the avatar should be in its dress up form.
-     * @param zeroBeta Whether or not the avatar should be in its beta form.
+     * @param zeroBeta      Whether or not the avatar should be in its beta form.
      */
     public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta) {
         getNpcScriptInfo().setAngelicBuster(angelicBuster);
@@ -369,6 +389,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Warps the client to a given {@link Field} ID.
+     *
      * @param mid The id of the Field.
      * @param pid The portal
      */
@@ -380,6 +401,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Warps the client to a given {@link Field} ID.
+     *
      * @param id The id of the Field.
      */
     public void warp(int id) {
@@ -388,17 +410,45 @@ public class ScriptManager implements Observer {
     }
 
     /**
-     * Sends a message in the main chat box.
-     * @param text The text to display.
+     * Sends a red message in the main chat box.
+     *
+     * @param text
      */
     public void chat(String text) {
+        chatRed(text);
+    }
+
+    /**
+     * Sends a red message in the main chat box.
+     *
+     * @param text
+     */
+    public void chatRed(String text) {
         chr.chatMessage(GAME_MESSAGE, text);
+    }
+
+    /**
+     * Sends a blue message in the main chat box.
+     *
+     * @param text
+     */
+    public void chatBlue(String text) {
+        chr.chatMessage(GAME_NOTICE, text);
+    }
+
+    /**
+     * Gives the client mesos. Positive amount = add, Negative amount = deduct.
+     *
+     * @param mesos
+     */
+    public void giveMesos(int mesos) {
+        chr.addMoney(mesos);
     }
 
     public void completeQuestNoRewards(int id) {
         QuestManager qm = chr.getQuestManager();
         Quest quest = qm.getQuests().get(id);
-        if(quest == null) {
+        if (quest == null) {
             quest = QuestData.createQuestFromId(id);
         }
         quest.setCompletedTime(FileTime.getTime());
@@ -416,5 +466,72 @@ public class ScriptManager implements Observer {
         return chr.getField().getId();
     }
 
+    public long getMesos() {
+        return chr.getMoney();
+    }
 
+    /**
+     * Gives the client a certain quantity of an item.
+     *
+     * @param id
+     * @param quantity
+     */
+    public void giveItem(int id, int quantity) {
+        double isEquip = Math.floor((id / 1000000));
+        if (isEquip == 1) {  //Equip
+            Equip equip = ItemData.getEquipDeepCopyFromId(id);
+            chr.addItemToInventory(equip.getInvType(), equip, false);
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
+
+        } else {    //Item
+            Item item = ItemData.getItemDeepCopy(id);
+            item.setQuantity(quantity);
+            chr.addItemToInventory(item);
+            chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                    ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+
+        }
+    }
+
+    /**
+     * Checks if the client has a certain quantity of an item.
+     *
+     * @param id
+     * @param quantity
+     * @return
+     */
+    public boolean hasItem(int id, int quantity) {
+        int q = 1;
+        if (ItemConstants.isEquip(id)) {  //Equip
+            Item equip = chr.getInventoryByType(InvType.EQUIP).getItemByItemID(id);
+            q = equip.getQuantity();
+        } else {
+            Item item2 = ItemData.getItemDeepCopy(id);
+            InvType invType = item2.getInvType();
+            Item item = chr.getInventoryByType(invType).getItemByItemID(id);
+            q = item.getQuantity();
+        }
+
+        return q >= quantity;
+    }
+
+    /**
+     * Checks if the client has enough space in their inventory to hold an item.
+     * @param id
+     * @return
+     */
+    public boolean canHold(int id) { //1452002
+        double isEquip = Math.floor(id / 1000000);
+        int slot = 0;
+        if (isEquip == 1) {  //Equip
+            Equip equip = ItemData.getEquipDeepCopyFromId(id);
+            slot = (int) chr.getInventoryByType(InvType.EQUIP).getSlots();
+        } else {    //Item
+            Item item = ItemData.getItemDeepCopy(id);
+            InvType invType = item.getInvType();
+            slot = (int) chr.getInventoryByType(invType).getSlots();
+        }
+        return slot > 0;
+    }
 }
