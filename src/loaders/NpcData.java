@@ -97,6 +97,7 @@ public class NpcData {
                 String val = dis.readUTF();
                 npc.getScripts().put(id, val);
             }
+            getBaseNpcs().add(npc);
             return npc;
         } catch (IOException e) {
             e.printStackTrace();

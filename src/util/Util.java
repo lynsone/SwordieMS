@@ -1,6 +1,7 @@
 package util;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.internal.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +29,10 @@ public class Util {
 
     public static int getCurrentTime() {
         return (int) System.currentTimeMillis();
+    }
+
+    public static long getCurrentTimeLong() {
+        return System.currentTimeMillis();
     }
 
     public static int getRandom(int inclBound) {
@@ -69,6 +74,7 @@ public class Util {
     }
 
     public static byte[] getByteArrayByString(String s) {
+        s = s.replace("|", " ");
         s = s.replace(" ", "");
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -109,5 +115,34 @@ public class Util {
         if(!file.exists()) {
             file.mkdir();
         }
+    }
+
+    public static String rightPaddedString(int totalLength, char c, String value) {
+        totalLength = Math.max(totalLength, value.length());
+        char[] chars = new char[totalLength];
+        char[] valueChars = value.toCharArray();
+        for (int i = 0; i < value.length() ; i++) {
+            chars[i] = valueChars[i];
+        }
+        for(int i = value.length(); i < chars.length; i++) {
+            chars[i] = c;
+        }
+        return new String(chars);
+    }
+
+    public static String leftPaddedString(int totalLength, char c, String value) {
+        totalLength = Math.max(totalLength, value.length());
+        char[] chars = new char[totalLength];
+        char[] valueChars = value.toCharArray();
+        int pad = totalLength - value.length();
+        int i;
+        for (i = 0; i < pad ; i++) {
+            chars[i] = c;
+        }
+        int j = 0;
+        for(i = pad; i < chars.length; i++) {
+            chars[i] = valueChars[j++];
+        }
+        return new String(chars);
     }
 }

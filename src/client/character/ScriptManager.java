@@ -1,12 +1,17 @@
 package client.character;
 
+import client.character.quest.Quest;
+import client.character.quest.QuestManager;
 import client.field.Field;
 import client.field.Portal;
 import constants.ServerConstants;
 import enums.NpcMessageType;
+import enums.QuestStatus;
 import enums.ScriptType;
+import loaders.QuestData;
 import packet.ScriptMan;
 import packet.WvsContext;
+import util.FileTime;
 import util.Util;
 
 import javax.script.*;
@@ -28,7 +33,9 @@ import static enums.NpcMessageType.*;
 public class ScriptManager implements Observer {
     public static final String SCRIPT_ENGINE_NAME = "python";
     public static final String SCRIPT_ENGINE_EXTENSION = ".py";
-    private static final String DEFAULT_SCRIPT = "D:\\SwordieMS\\Swordie\\scripts\\npc\\undefined.py";
+    private static final String DEFAULT_SCRIPT = "undefined";
+    public static final String QUEST_START_SCRIPT_END_TAG = "s";
+    public static final String QUEST_COMPLETE_SCRIPT_END_TAG = "e";
 
     private Char chr;
     private NpcScriptInfo npcScriptInfo;
@@ -63,29 +70,48 @@ public class ScriptManager implements Observer {
     public int getParentIDByScriptType(ScriptType scriptType) {
         return getScriptInfoByType(scriptType) != null ? getScriptInfoByType(scriptType).getParentID() : 2007;
     }
+    public void startScript(int parentID, ScriptType scriptType) {
+        startScript(parentID, parentID + ".py", scriptType);
+    }
+
+    private void startScript(int parentID, ScriptType scriptType, String initFuncName) {
+        startScript(parentID, parentID + ".py", scriptType, initFuncName);
+    }
 
     public void startScript(int parentID, String scriptName, ScriptType scriptType) {
+        startScript(parentID, scriptName, scriptType, "init");
+    }
+
+    private void startScript(int parentID, String scriptName, ScriptType scriptType, String initFuncName) {
         ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
         scriptEngine.put("sm", this);
+        scriptEngine.put("parentID", parentID);
+        if(scriptType == ScriptType.QUEST) {
+            chat(scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) + "");
+            scriptEngine.put("startQuest",
+                    scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) ==
+                    QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
+        }
         ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);
         getScripts().put(scriptType, scriptInfo);
         Invocable inv = getInvocableFromScriptNameAndType(scriptName, scriptType);
         getScripts().get(scriptType).setInvocable(inv);
         try {
-            getInvocableByType(scriptType).invokeFunction("init");
+            getInvocableByType(scriptType).invokeFunction(initFuncName);
         } catch (ScriptException | NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
 
     private Invocable getInvocableFromScriptNameAndType(String name, ScriptType scriptType) {
-        String dir = String.format("%s\\%s\\%s%s", ServerConstants.SCRIPT_DIR,
+        String dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
                 scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
         boolean exists = new File(dir).exists();
         if(!exists) {
-            System.err.printf("[Error] Could not find script %s\\%s.%n", scriptType.toString().toLowerCase(), name);
+            System.err.printf("[Error] Could not find script %s/%s.%n", scriptType.toString().toLowerCase(), name);
             chr.chatMessage(YELLOW, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
-            dir = DEFAULT_SCRIPT;
+            dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
+                    scriptType.toString().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
         }
         CompiledScript cs;
         ScriptEngine se = getScriptEngineByType(scriptType);
@@ -363,10 +389,31 @@ public class ScriptManager implements Observer {
 
     /**
      * Sends a message in the main chat box.
-     * @param text
+     * @param text The text to display.
      */
     public void chat(String text) {
         chr.chatMessage(GAME_MESSAGE, text);
+    }
+
+    public void completeQuestNoRewards(int id) {
+        QuestManager qm = chr.getQuestManager();
+        Quest quest = qm.getQuests().get(id);
+        if(quest == null) {
+            quest = QuestData.createQuestFromId(id);
+        }
+        quest.setCompletedTime(FileTime.getTime());
+        quest.setStatus(QuestStatus.COMPLETE);
+        qm.addQuest(quest);
+        chr.write(WvsContext.questRecordMessage(quest));
+    }
+
+    public void startQuestNoCheck(int id) {
+        QuestManager qm = chr.getQuestManager();
+        qm.addQuest(QuestData.createQuestFromId(id));
+    }
+
+    public int getFieldID() {
+        return chr.getField().getId();
     }
 
 

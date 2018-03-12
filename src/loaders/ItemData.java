@@ -32,10 +32,10 @@ public class ItemData {
 
     //    @Loader(varName = "itemIds")
     public static void loadItemIDs() {
-        String wzDir = ServerConstants.WZ_DIR + "\\Item.wz";
+        String wzDir = ServerConstants.WZ_DIR + "/Item.wz";
         String[] subMaps = new String[]{"Cash", "Consume", "Etc", "Install", "Pet", "Special"};
         for (String subMap : subMaps) {
-            File subDir = new File(wzDir + "\\" + subMap);
+            File subDir = new File(String.format("%s/%s", wzDir, subMap));
             File[] files = subDir.listFiles();
             for (File file : files) {
                 if (file.getName().contains("MaplePoint")) {
@@ -85,7 +85,7 @@ public class ItemData {
     }
 
     private static Equip getEquipFromFile(int itemId) {
-        String fieldDir = ServerConstants.DAT_DIR + "\\equips\\" + itemId + ".dat";
+        String fieldDir = String.format("%s/equips/%d.dat", ServerConstants.DAT_DIR, itemId);
         File file = new File(fieldDir);
         if (!file.exists()) {
             return null;
@@ -170,7 +170,7 @@ public class ItemData {
         DataOutputStream dataOutputStream;
         try {
             for (Equip equip : getEquips()) {
-                dataOutputStream = new DataOutputStream(new FileOutputStream(dir + "\\" + equip.getItemId() + ".dat"));
+                dataOutputStream = new DataOutputStream(new FileOutputStream(dir + "/" + equip.getItemId() + ".dat"));
                 dataOutputStream.writeInt(equip.getItemId());
                 dataOutputStream.writeUTF(equip.getiSlot());
                 dataOutputStream.writeUTF(equip.getvSlot());
@@ -227,7 +227,7 @@ public class ItemData {
     public static void loadEquips(File file, boolean exists) {
         if (!exists) {
             loadEquipsFromWz();
-            saveEquips(ServerConstants.DAT_DIR + "\\equips");
+            saveEquips(ServerConstants.DAT_DIR + "/equips");
         } else {
             try {
                 DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
@@ -301,11 +301,11 @@ public class ItemData {
     }
 
     public static void loadEquipsFromWz() {
-        String wzDir = ServerConstants.WZ_DIR + "\\Character.wz";
+        String wzDir = ServerConstants.WZ_DIR + "/Character.wz";
         String[] subMaps = new String[]{"Accessory", "Android", "Cap", "Cape", "Coat", "Dragon", "Face", "Glove",
                 "Longcoat", "Mechanic", "Pants", "PetEquip", "Ring", "Shield", "Shoes", "Totem", "Weapon"};
         for (String subMap : subMaps) {
-            File subDir = new File(wzDir + "\\" + subMap);
+            File subDir = new File(String.format("%s/%s", wzDir, subMap));
             File[] files = subDir.listFiles();
             for (File file : files) {
                 Document doc = XMLApi.getRoot(file);
@@ -599,7 +599,7 @@ public class ItemData {
         DataOutputStream dataOutputStream;
         try {
             for (ItemInfo ii : getItems()) {
-                dataOutputStream = new DataOutputStream(new FileOutputStream(new File(dir + "\\" + ii.getItemId() + ".dat")));
+                dataOutputStream = new DataOutputStream(new FileOutputStream(new File(dir + "/" + ii.getItemId() + ".dat")));
                 dataOutputStream.writeInt(ii.getItemId());
                 dataOutputStream.writeUTF(ii.getInvType().toString());
                 dataOutputStream.writeBoolean(ii.isCash());
@@ -637,10 +637,10 @@ public class ItemData {
     }
 
     public static void loadItemsFromWZ() {
-        String wzDir = ServerConstants.WZ_DIR + "\\Item.wz";
+        String wzDir = ServerConstants.WZ_DIR + "/Item.wz";
         String[] subMaps = new String[]{"Cash", "Consume", "Etc", "Install", "Special"}; // not pet
         for (String subMap : subMaps) {
-            File subDir = new File(wzDir + "\\" + subMap);
+            File subDir = new File(String.format("%s/%s", wzDir, subMap));
             File[] files = subDir.listFiles();
             for (File file : files) {
                 Document doc = XMLApi.getRoot(file);
@@ -649,7 +649,7 @@ public class ItemData {
                 for (Node mainNode : XMLApi.getAllChildren(nodes.get(0))) {
                     String nodeName = XMLApi.getNamedAttribute(mainNode, "name");
                     if (!Util.isNumber(nodeName)) {
-                        System.err.println(nodeName + " is not a number.");
+                        System.err.printf("%s is not a number.%n", nodeName);
                         continue;
                     }
                     int id = Integer.parseInt(nodeName);
@@ -1103,7 +1103,7 @@ public class ItemData {
                 findFirst().
                 orElse(null);
         if(ii == null) {
-            File file = new File(ServerConstants.DAT_DIR + "\\items\\" + itemID + ".dat");
+            File file = new File(String.format("%s/items/%d.dat", ServerConstants.DAT_DIR, itemID));
             if(!file.exists()) {
                 return null;
             } else {
@@ -1118,8 +1118,8 @@ public class ItemData {
     }
 
     public static void loadItemOptionsFromWZ() {
-        String wzDir = ServerConstants.WZ_DIR + "\\Item.wz";
-        String itemOptionDir = wzDir + "\\ItemOption.img.xml";
+        String wzDir = ServerConstants.WZ_DIR + "/Item.wz";
+        String itemOptionDir = String.format("%s/ItemOption.img.xml", wzDir);
         File file = new File(itemOptionDir);
         Document doc = XMLApi.getRoot(file);
         Node node = doc;
@@ -1158,7 +1158,7 @@ public class ItemData {
     }
 
     public static void saveItemOptions(String dir) {
-        File file = new File(dir + "\\itemOptions.dat");
+        File file = new File(String.format("%s/itemOptions.dat", dir));
         try {
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(file));
             dos.writeInt(getItemOptions().size());
@@ -1199,9 +1199,9 @@ public class ItemData {
     @SuppressWarnings("unused") // Reflection
     public static void generateDatFiles() {
         loadEquipsFromWz();
-        saveEquips(ServerConstants.DAT_DIR + "\\equips");
+        saveEquips(ServerConstants.DAT_DIR + "/equips");
         loadItemsFromWZ();
-        saveItems(ServerConstants.DAT_DIR + "\\items");
+        saveItems(ServerConstants.DAT_DIR + "/items");
         loadItemOptionsFromWZ();
         saveItemOptions(ServerConstants.DAT_DIR);
     }
@@ -1209,7 +1209,7 @@ public class ItemData {
     public static void main(String[] args) {
         loadItemOptionsFromWZ();
         saveItemOptions(ServerConstants.DAT_DIR);
-        loadItemOptions(new File(ServerConstants.DAT_DIR + "\\itemOptions.dat"), true);
+        loadItemOptions(new File(ServerConstants.DAT_DIR + "/itemOptions.dat"), true);
         System.out.println(getItemOptions());
     }
 

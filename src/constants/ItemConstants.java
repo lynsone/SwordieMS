@@ -2,6 +2,7 @@ package constants;
 
 import client.character.items.Equip;
 import client.character.items.ItemOption;
+import enums.InvType;
 import enums.ItemGrade;
 import loaders.ItemData;
 import util.Util;
@@ -412,5 +413,9 @@ public class ItemConstants {
                 break;
         }
         return res;
+    }
+
+    public static boolean isEquip(int id) {
+        return id / 1000000 == 1;
     }
 }

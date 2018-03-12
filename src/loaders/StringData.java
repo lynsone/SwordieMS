@@ -27,7 +27,7 @@ public class StringData {
 
     public static void loadItemStringsFromWz() {
         long start = System.currentTimeMillis();
-        String wzDir = ServerConstants.WZ_DIR + "\\String.wz\\";
+        String wzDir = ServerConstants.WZ_DIR + "/String.wz/";
         String[] files = new String[]{"Cash", "Consume", "Eqp", "Ins", "Pet", "Etc"};
         for(String fileDir : files) {
             File file = new File(wzDir + fileDir + ".img.xml");
@@ -70,7 +70,7 @@ public class StringData {
 
     public static void loadStringsFromWz() {
         long start = System.currentTimeMillis();
-        String wzDir = ServerConstants.WZ_DIR + "\\String.wz\\Skill.img.xml";
+        String wzDir = ServerConstants.WZ_DIR + "/String.wz/Skill.img.xml";
         File file = new File(wzDir);
         Document doc = XMLApi.getRoot(file);
         Node node = doc;
@@ -112,16 +112,16 @@ public class StringData {
     public static void generateDatFiles() {
         loadStringsFromWz();
         loadItemStringsFromWz();
-        saveSkillStrings(ServerConstants.DAT_DIR + "\\strings");
-        saveItemStrings(ServerConstants.DAT_DIR + "\\strings");
+        saveSkillStrings(ServerConstants.DAT_DIR + "/strings");
+        saveItemStrings(ServerConstants.DAT_DIR + "/strings");
     }
 
     private static void saveSkillStrings(String dir) {
         Util.makeDirIfAbsent(dir);
-//        String fileDir = dir + "\\skills";
+//        String fileDir = dir + "/skills";
 //        Util.makeDirIfAbsent(fileDir);
         try {
-            File file = new File(dir + "\\skills.dat");
+            File file = new File(dir + "/skills.dat");
             DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
             dataOutputStream.writeInt(getSkillString().size());
             for(Map.Entry<Integer, SkillStringInfo> entry : getSkillString().entrySet()) {
@@ -139,7 +139,7 @@ public class StringData {
 
     public static void loadSkillStrings() {
         long start = System.currentTimeMillis();
-        File file = new File(ServerConstants.DAT_DIR + "\\strings\\skills.dat");
+        File file = new File(ServerConstants.DAT_DIR + "/strings/skills.dat");
         try {
             DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
             int size = dataInputStream.readInt();
@@ -160,7 +160,7 @@ public class StringData {
     private static void saveItemStrings(String dir) {
         Util.makeDirIfAbsent(dir);
         try {
-            File file = new File(dir + "\\items.dat");
+            File file = new File(dir + "/items.dat");
             DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
             dataOutputStream.writeInt(itemStrings.size());
             for(Map.Entry<Integer, String> entry : itemStrings.entrySet()) {
@@ -176,7 +176,7 @@ public class StringData {
 
     public static void loadItemStrings() {
         long start = System.currentTimeMillis();
-        File file = new File(ServerConstants.DAT_DIR + "\\strings\\items.dat");
+        File file = new File(ServerConstants.DAT_DIR + "/strings/items.dat");
         try {
             DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
             int size = dataInputStream.readInt();

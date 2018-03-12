@@ -6,7 +6,6 @@ import client.field.FieldCustom;
 import connection.OutPacket;
 import enums.DBChar;
 import handling.OutHeader;
-import util.FileTime;
 import util.Util;
 
 import java.security.SecureRandom;
@@ -22,7 +21,6 @@ public class Stage {
                                      boolean setWhiteFadeInOut, int mobStatAdjustRate, FieldCustom fieldCustom,
                                      boolean canNotifyAnnouncedQuest, int stackEventGauge) {
         OutPacket outPacket = new OutPacket(OutHeader.SET_FIELD);
-        //outPacket.encodeBytes(Util.getByteArrayByString("00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 20 03 00 00 58 02 00 00 01 00 00 01 EE 1F 90 01 EE 1F 90 01 EE 1F 90 FF FF FF FF FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 01 00 00 00 00 00 00 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 01 B1 4F 00 00 31 75 00 00 FF 00 00 01 08 09 0C 00 05 00 04 00 04 00 32 00 00 00 32 00 00 00 32 00 00 00 32 00 00 00 00 00 01 04 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 C0 EE 7D 37 00 00 00 00 00 00 00 00 79 67 48 78 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 0A 00 00 00 00 05 06 00 00 00 00 00 FF FF FF FF FE FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 8C 89 D3 01 30 4A BF B7 00 14 01 04 00 61 64 61 64 01 04 00 61 64 61 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 20 20 20 20 3C 00 40 E0 FD 3B 37 4F 01 00 05 00 01 45 06 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 54 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 07 00 01 A6 5B 10 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 55 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 01 F0 DD 13 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 00 00 00 00 1C 00 00 00 FF 55 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 37 00 01 20 E2 11 00 00 00 80 05 BB 46 E6 17 02 FF FF FF FF 3C 00 00 00 01 00 01 00 01 00 01 00 1C 00 00 00 FF 56 1C 94 DD 60 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 40 E0 FD 3B 37 4F 01 FF FF FF FF 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 01 00 00 00 00 01 09 00 5F 38 00 00 B2 7A D3 01 2C 3B 00 00 B2 7A D3 01 FA 49 00 00 B2 7A D3 01 A5 81 00 00 B2 7A D3 01 A6 81 00 00 B2 7A D3 01 DB 81 00 00 B2 7A D3 01 F1 81 00 00 B2 7A D3 01 F3 81 00 00 B2 7A D3 01 B2 99 00 00 B2 7A D3 01 00 00 00 00 00 00 00 00 FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B FF C9 9A 3B 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 70 E6 BF B7 8C 89 D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
 
         short shortSize = 0;
         outPacket.encodeShort(shortSize);
@@ -46,6 +44,7 @@ public class Stage {
                 outPacket.encodeString(""); // sMsg2
             }
         }
+
         if(characterData) {
             Random random = new SecureRandom();
             int s1 = random.nextInt();
@@ -55,64 +54,10 @@ public class Stage {
             outPacket.encodeInt(s2);
             outPacket.encodeInt(s3);
 
-            chr.encode(outPacket, DBChar.All);
+            chr.encode(outPacket, DBChar.All); // <<<<------------------------------------
             // unk sub (not in kmst)
             // logout event (mushy)
-            int idOrSomething = 0;
-            outPacket.encodeInt(idOrSomething);
-            if(idOrSomething > 0) {
-                for (int i = 0; i < 3; i++) {
-                    // sub_9896B0
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeString("");
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeLong(0);
-                    outPacket.encodeLong(0);
-                    outPacket.encodeLong(0);
-                    outPacket.encodeLong(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeShort(0);
-                    outPacket.encodeShort(0);
-                    outPacket.encodeShort(0);
-                    outPacket.encodeShort(0);
-                    outPacket.encodeShort(0);
-                    outPacket.encodeShort(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeString("");
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeInt(0);
-                    outPacket.encodeByte(0);
-                    // if(a3 & 1 != 0) -> encode int + str + buf of size 0x18 (24). a3 is 0 when called from setField
-                    int size = 0;
-                    outPacket.encodeInt(size);
-                    for (int j = 0; j < size; j++) {
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                        outPacket.encodeInt(0);
-                    }
-                }
-            }
+            encodeLogoutEvent(outPacket);
         } else {
             outPacket.encodeByte(usingBuffProtector);
             outPacket.encodeInt(field.getId());
@@ -125,11 +70,12 @@ public class Stage {
                 outPacket.encodeInt(0);
             }
         }
+        System.out.println(outPacket);
 
         // 41 bytes below
         outPacket.encodeByte(setWhiteFadeInOut);
         outPacket.encodeByte(0); // unsure
-        outPacket.encodeFT(new FileTime()); // ftServer
+        outPacket.encodeBytes(Util.getByteArrayByString("40 64 2B 70 84 7A D3 01")); // TODO: proper ftServer encoding
         outPacket.encodeInt(mobStatAdjustRate);
         boolean hasFieldCustom = fieldCustom != null;
         outPacket.encodeByte(hasFieldCustom);
@@ -166,5 +112,63 @@ public class Stage {
             outPacket.encodeInt(0); // ?
         }
         return outPacket;
+    }
+
+    private static void encodeLogoutEvent(OutPacket outPacket) {
+        int idOrSomething = 0;
+        outPacket.encodeInt(idOrSomething);
+        if(idOrSomething > 0) {
+            for (int i = 0; i < 3; i++) {
+                // sub_9896B0
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeString("");
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeLong(0);
+                outPacket.encodeLong(0);
+                outPacket.encodeLong(0);
+                outPacket.encodeLong(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeShort(0);
+                outPacket.encodeShort(0);
+                outPacket.encodeShort(0);
+                outPacket.encodeShort(0);
+                outPacket.encodeShort(0);
+                outPacket.encodeShort(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeString("");
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeInt(0);
+                outPacket.encodeByte(0);
+                // if(a3 & 1 != 0) -> encode int + str + buf of size 0x18 (24). a3 is 0 when called from setField
+                int size = 0;
+                outPacket.encodeInt(size);
+                for (int j = 0; j < size; j++) {
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                }
+            }
+        }
     }
 }

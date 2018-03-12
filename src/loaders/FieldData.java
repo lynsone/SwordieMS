@@ -35,7 +35,7 @@ public class FieldData {
         try {
             DataOutputStream dataOutputStream;
             for(Field field : getFields()) {
-                File file = new File(dir + "\\" + field.getId()+".dat");
+                File file = new File(dir + "/" + field.getId()+".dat");
                 dataOutputStream = new DataOutputStream(new FileOutputStream(file));
                 dataOutputStream.writeInt(field.getId());
                 dataOutputStream.writeBoolean(field.isTown());
@@ -118,7 +118,7 @@ public class FieldData {
     }
 
     private static void loadFieldInfoFromWz() {
-        String wzDir = ServerConstants.WZ_DIR + "\\Map.wz\\Map";
+        String wzDir = ServerConstants.WZ_DIR + "/Map.wz/Map";
         File dir = new File(wzDir);
         File[] files = dir.listFiles();
         for (File file : files) {
@@ -394,7 +394,7 @@ public class FieldData {
     }
 
     private static Field getFieldFromFile(int id) {
-        String fieldDir = ServerConstants.DAT_DIR + "\\fields\\" + id + ".dat";
+        String fieldDir = ServerConstants.DAT_DIR + "/fields/" + id + ".dat";
         File file = new File(fieldDir);
         if(!file.exists()) {
             System.err.println("Could not find field " + id);
@@ -504,7 +504,7 @@ public class FieldData {
 
     public static void generateDatFiles() {
         loadFieldInfoFromWz();
-        saveFields(ServerConstants.DAT_DIR + "\\fields");
+        saveFields(ServerConstants.DAT_DIR + "/fields");
     }
 
     public static Field getFieldCopyById(int id) {

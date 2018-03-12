@@ -4,19 +4,19 @@ import client.character.*;
 import client.character.items.Equip;
 import client.character.items.Inventory;
 import client.character.items.Item;
+import client.character.quest.Quest;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.jobs.resistance.WildHunterInfo;
 import client.life.movement.*;
+import com.kenai.jaffl.annotations.Out;
 import connection.InPacket;
 import connection.OutPacket;
-import enums.InvType;
-import enums.InventoryOperation;
-import enums.MessageType;
-import enums.Stat;
+import enums.*;
 import handling.OutHeader;
 import util.FileTime;
 import util.Position;
+import util.Triple;
 
 import java.util.*;
 
@@ -47,17 +47,17 @@ public class WvsContext {
         outPacket.encodeByte(exclRequestSent);
         // GW_CharacterStat::DecodeChangeStat
         int mask = 0;
-        for(Stat stat : stats.keySet()) {
+        for (Stat stat : stats.keySet()) {
             mask |= stat.getVal();
         }
         outPacket.encodeLong(mask);
         Comparator statComper = Comparator.comparingInt(o -> ((Stat) o).getVal());
         TreeMap<Stat, Object> sortedStats = new TreeMap<>(statComper);
         sortedStats.putAll(stats);
-        for(Map.Entry<Stat, Object> entry : sortedStats.entrySet()) {
+        for (Map.Entry<Stat, Object> entry : sortedStats.entrySet()) {
             Stat stat = entry.getKey();
             Object value = entry.getValue();
-            switch(stat) {
+            switch (stat) {
                 case skin:
                 case level:
                 case fatigue:
@@ -87,7 +87,7 @@ public class WvsContext {
                     outPacket.encodeShort((Short) value);
                     break;
                 case sp:
-                    if(value instanceof ExtendSP) {
+                    if (value instanceof ExtendSP) {
                         ((ExtendSP) value).encode(outPacket);
                     } else {
                         outPacket.encodeShort((Short) value);
@@ -119,11 +119,11 @@ public class WvsContext {
         outPacket.encodeByte(mixAddHairColor);
         outPacket.encodeByte(mixHairBaseProb);
         outPacket.encodeByte(charmOld > 0);
-        if(charmOld > 0) {
+        if (charmOld > 0) {
             outPacket.encodeByte(charmOld);
         }
         outPacket.encodeByte(updateCovery);
-        if(updateCovery) {
+        if (updateCovery) {
             outPacket.encodeInt(hpRecovery);
             outPacket.encodeInt(mpRecovery);
         }
@@ -134,7 +134,7 @@ public class WvsContext {
                                                int bagPos, Item item) {
         // logic like this in packets :(
         InvType invType = item.getInvType();
-        if(oldPos > 0 && newPos < 0 && invType == InvType.EQUIPPED) {
+        if (oldPos > 0 && newPos < 0 && invType == InvType.EQUIPPED) {
             invType = InvType.EQUIP;
         }
 
@@ -147,7 +147,7 @@ public class WvsContext {
         outPacket.encodeByte(type.getVal());
         outPacket.encodeByte(invType.getVal());
         outPacket.encodeShort(oldPos);
-        switch(type) {
+        switch (type) {
             case ADD:
                 item.encode(outPacket);
                 break;
@@ -190,7 +190,7 @@ public class WvsContext {
 
         for (int i = 0; i < 5; i++) {
             outPacket.encodeString("");
-            if(i >= tags.length) {
+            if (i >= tags.length) {
                 outPacket.encodeByte(-1);
             } else {
                 outPacket.encodeByte(tags[i]);
@@ -208,7 +208,7 @@ public class WvsContext {
         outPacket.encodeByte(showResult);
         outPacket.encodeByte(removeLinkSkill);
         outPacket.encodeShort(skills.size());
-        for(Skill skill : skills) {
+        for (Skill skill : skills) {
             outPacket.encodeInt(skill.getSkillId());
             outPacket.encodeInt(skill.getCurrentLevel());
             outPacket.encodeInt(skill.getMasterLevel());
@@ -339,7 +339,7 @@ public class WvsContext {
         outPacket.encodeByte(0);
         outPacket.encodeByte(0);
         outPacket.encodeByte(0);
-        if(hasMovingAffectingStat) {
+        if (hasMovingAffectingStat) {
             outPacket.encodeByte(0);
         }
 
@@ -349,12 +349,12 @@ public class WvsContext {
     public static OutPacket temporaryStatReset(TemporaryStatManager temporaryStatManager, boolean demount) {
         OutPacket outPacket = new OutPacket(OutHeader.TEMPORARY_STAT_RESET);
 
-        for(int i : temporaryStatManager.getRemovedMask()) {
+        for (int i : temporaryStatManager.getRemovedMask()) {
             outPacket.encodeInt(i);
         }
 //        temporaryStatManager.getRemovedStats().forEach((cts, option) -> outPacket.encodeInt(0));
         temporaryStatManager.encodeRemovedIndieTempStat(outPacket);
-        if(temporaryStatManager.hasRemovedMovingEffectingStat()) {
+        if (temporaryStatManager.hasRemovedMovingEffectingStat()) {
             outPacket.encodeByte(0);
         }
         outPacket.encodeByte(0); // ?
@@ -417,18 +417,36 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket questRecordMessage(int qrKey, byte state, boolean validCheck) {
+    public static OutPacket questRecordMessageAddValidCheck(int qrKey, byte state) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
-        if(validCheck) {
-            outPacket.encodeByte(QUEST_RECORD_MESSAGE_ADD_VALID_CHECK.getVal());
-            outPacket.encodeInt(qrKey);
-            outPacket.encodeByte(validCheck);
-            outPacket.encodeByte(state);
-        } else {
-            outPacket.encodeByte(QUEST_RECORD_MESSAGE.getVal());
-            outPacket.encodeInt(qrKey);
-            outPacket.encodeByte(state);
+        outPacket.encodeByte(QUEST_RECORD_MESSAGE_ADD_VALID_CHECK.getVal());
+        outPacket.encodeInt(qrKey);
+        outPacket.encodeByte(true);
+        outPacket.encodeByte(state);
+        // TODO probably missing something here
+
+        return outPacket;
+    }
+
+    public static OutPacket questRecordMessage(Quest quest) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(QUEST_RECORD_MESSAGE.getVal());
+        outPacket.encodeInt(quest.getQRKey());
+        QuestStatus state = quest.getStatus();
+        outPacket.encodeByte(state.getVal());
+
+        switch(state) {
+            case NOT_STARTED:
+                outPacket.encodeByte(0); // If quest is completed, but should never be true?
+                break;
+            case STARTED:
+                outPacket.encodeString(quest.getQRValue());
+                break;
+            case COMPLETE:
+                outPacket.encodeFT(quest.getCompletedTime());
+                break;
         }
 
         return outPacket;
@@ -470,7 +488,8 @@ public class WvsContext {
      * ITEM_PROTECT_EXPIRE_MESSAGE<br>
      * ITEM_ABILITY_TIME_LIMITED_EXPIRE_MESSAGE<br>
      * SKILL_EXPIRE_MESSAGE
-     * @param mt The message type.
+     *
+     * @param mt    The message type.
      * @param items The list of ints that should be encoded.
      * @return The message OutPacket.
      */
@@ -478,7 +497,7 @@ public class WvsContext {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(mt.getVal());
-        switch(mt) {
+        switch (mt) {
             case GENERAL_ITEM_EXPIRE_MESSAGE:
             case ITEM_PROTECT_EXPIRE_MESSAGE:
             case ITEM_ABILITY_TIME_LIMITED_EXPIRE_MESSAGE:
@@ -502,29 +521,30 @@ public class WvsContext {
 
     /**
      * Returns a packet for messages with the following {@link MessageType}:<br>
-     *     int: <br>
-     *     CASH_ITEM_EXPIRE_MESSAGE<br>
-     *     INC_POP_MESSAGE<br>
-     *     INC_GP_MESSAGE<br>
-     *     GIVE_BUFF_MESSAGE<br><br>
-     *     int + byte: <br>
-     *     INC_COMMITMENT_MESSAGE<br><br>
-     *     String: <br>
-     *     SYSTEM_MESSAGE<br><br>
-     *     int + String: <br>
-     *     QUEST_RECORD_EX_MESSAGE<br>
-     *     WORLD_SHARE_RECORD_MESSAGE<br>
-     * @param mt The message type.
-     * @param i The integer to encode.
+     * int: <br>
+     * CASH_ITEM_EXPIRE_MESSAGE<br>
+     * INC_POP_MESSAGE<br>
+     * INC_GP_MESSAGE<br>
+     * GIVE_BUFF_MESSAGE<br><br>
+     * int + byte: <br>
+     * INC_COMMITMENT_MESSAGE<br><br>
+     * String: <br>
+     * SYSTEM_MESSAGE<br><br>
+     * int + String: <br>
+     * QUEST_RECORD_EX_MESSAGE<br>
+     * WORLD_SHARE_RECORD_MESSAGE<br>
+     *
+     * @param mt     The message type.
+     * @param i      The integer to encode.
      * @param string The String to encode.
-     * @param type The type (byte) to encode.
+     * @param type   The type (byte) to encode.
      * @return The message OutPacket.
      */
     public static OutPacket message(MessageType mt, int i, String string, byte type) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(mt.getVal());
-        switch(mt) {
+        switch (mt) {
             case CASH_ITEM_EXPIRE_MESSAGE:
             case INC_POP_MESSAGE:
             case INC_GP_MESSAGE:
@@ -595,5 +615,9 @@ public class WvsContext {
         outPacket.encodeByte(type);
 
         return outPacket;
+    }
+
+    public static OutPacket clearAnnouncedQuest() {
+        return new OutPacket(OutHeader.CLEAR_ANNOUNCED_QUEST);
     }
 }

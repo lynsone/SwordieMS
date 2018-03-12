@@ -103,7 +103,7 @@ public class SkillData {
     }
 
     private static void loadSkillsFromWz(){
-        String wzDir = ServerConstants.WZ_DIR + "\\Skill.wz";
+        String wzDir = ServerConstants.WZ_DIR + "/Skill.wz";
         File dir = new File(wzDir);
         File[] files = dir.listFiles();
         for (File file : files) {

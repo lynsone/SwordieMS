@@ -11,18 +11,17 @@ import client.jobs.JobManager;
 import client.jobs.resistance.WildHunterInfo;
 import client.life.AffectedArea;
 import client.life.Drop;
+import client.character.quest.Quest;
+import client.character.quest.QuestManager;
 import connection.OutPacket;
 import constants.GameConstants;
+import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
-import enums.ChatMsgColour;
-import enums.DBChar;
-import enums.InvType;
-import enums.Stat;
+import enums.*;
 import loaders.SkillData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.annotations.Cascade;
 import packet.Stage;
 import packet.UserLocal;
 import packet.WvsContext;
@@ -31,6 +30,7 @@ import util.FileTime;
 import loaders.ItemData;
 import util.Position;
 import util.Rect;
+import util.Util;
 
 import javax.persistence.*;
 import java.util.*;
@@ -201,7 +201,7 @@ public class Char {
         }
         stolenSkills = new ArrayList<>();
         chosenSkills = new ArrayList<>();
-        questManager = new QuestManager();
+        questManager = new QuestManager(this);
         itemPots = new ArrayList<>();
         friends = new ArrayList<>();
         expConsumeItems = new ArrayList<>();
@@ -436,7 +436,7 @@ public class Char {
             if (getMonsterBattleMobInfos() != null) {
                 for (MonsterBattleMobInfo mbmi : getMonsterBattleMobInfos()) {
                     mbmi.encode(outPacket);
-                    // int int int int int int byte int int
+                    // TODO int int int int int int byte int int
                 }
             }
             outPacket.encodeInt(getId());
@@ -452,17 +452,17 @@ public class Char {
             boolean hasMonsterBattleLadder = getMonsterBattleLadder() != null;
             outPacket.encodeByte(hasMonsterBattleLadder);
             if (hasMonsterBattleLadder) {
-                getMonsterBattleLadder().encode(outPacket); // GW_MonsterBattleLadder_UserInfo::Decode
+                getMonsterBattleLadder().encode(outPacket); // TODO GW_MonsterBattleLadder_UserInfo::Decode
             }
             boolean hasMonsterBattleRankInfo = getMonsterBattleRankInfo() != null;
             outPacket.encodeByte(hasMonsterBattleRankInfo);
             if (hasMonsterBattleRankInfo) {
-                getMonsterBattleRankInfo().encode(outPacket); // GW_MonsterBattleRankInfo::Decode(&dummyBLD, nSlotHyper);
+                getMonsterBattleRankInfo().encode(outPacket); // TODO GW_MonsterBattleRankInfo::Decode(&dummyBLD, nSlotHyper);
             }
             outPacket.encodeByte(hasMonsterBattleRankInfo);
             // again?
             if (hasMonsterBattleRankInfo) {
-                getMonsterBattleRankInfo().encode(outPacket); // GW_MonsterBattleRankInfo::Decode(&dummyBLD, nSlotHyper);
+                getMonsterBattleRankInfo().encode(outPacket); // TODO GW_MonsterBattleRankInfo::Decode(&dummyBLD, nSlotHyper);
             }
         }
         if (mask.isInMask(DBChar.InventorySize)) {
@@ -686,36 +686,42 @@ public class Char {
                 outPacket.encodeInt(0); // nSkillCooltime
             }
         }
-
         if (mask.isInMask(DBChar.QuestRecord)) {
             // modified/deleted, not completed anyway
-            boolean init = true;
-            outPacket.encodeByte(init);
-            short size = (short) getQuestManager().getQuests().size();
+            boolean removeAllOldEntries = true;
+            outPacket.encodeByte(removeAllOldEntries);
+            short size = (short) getQuestManager().getQuestsInProgress().size();
             outPacket.encodeShort(size);
-            for (Quest quest : getQuestManager().getQuests()) {
+            for (Quest quest : getQuestManager().getQuestsInProgress()) {
                 outPacket.encodeInt(quest.getQRKey());
                 outPacket.encodeString(quest.getQRValue());
             }
-            if (!init) {
+            if (!removeAllOldEntries) {
+                // blacklisted quests
                 short size2 = 0;
                 outPacket.encodeShort(size2);
                 for (int i = 0; i < size2; i++) {
                     outPacket.encodeInt(0); // nQRKey
                 }
             }
-            outPacket.encodeShort(0); // ? mushy
+            size = 0;
+            outPacket.encodeShort(size);
+            // Not sure what this is for
+            for (int i = 0; i < size; i++) {
+                outPacket.encodeString("");
+                outPacket.encodeString("");
+            }
         }
         if (mask.isInMask(DBChar.QuestComplete)) {
-            boolean init = true;
-            outPacket.encodeByte(init);
-            List<Quest> completedQuests = getQuestManager().getCompletedQuests();
+            boolean removeAllOldEntries = true;
+            outPacket.encodeByte(removeAllOldEntries);
+            Set<Quest> completedQuests = getQuestManager().getCompletedQuests();
             outPacket.encodeShort(completedQuests.size());
             for (Quest quest : completedQuests) {
                 outPacket.encodeInt(quest.getQRKey());
                 outPacket.encodeInt(0); // Timestamp of completion
             }
-            if (!init) {
+            if (!removeAllOldEntries) {
                 short size = 0;
                 outPacket.encodeShort(size);
                 for (int i = 0; i < size; i++) {
@@ -769,11 +775,11 @@ public class Char {
             boolean isCompleted = false;
             outPacket.encodeByte(isCompleted);
             if (!isCompleted) {
-                short size = 0;
+                short size = 1;
                 outPacket.encodeShort(size);
                 for (int i = 0; i < size; i++) {
-                    outPacket.encodeShort(0);
-                    outPacket.encodeByte(0);
+                    outPacket.encodeShort(1);
+                    outPacket.encodeByte(1);
                 }
             } else {
                 outPacket.encodeShort(0); // card list size
@@ -1604,16 +1610,23 @@ public class Char {
         field.removeChar(this);
         toField.addChar(this);
         getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, false, hasBuffProtector(),
-                (byte) portal.getId(), false, 100, null, false, -1));
-        toField.spawnLifesForChar(this);
-    }
+                (byte) portal.getId(), false, 100, null, true, -1));
+     toField.spawnLifesForChar(this);
+     }
 
-    /**
+     /**
      * Adds a given amount of exp to this Char. Immediately checks for level-up possibility, and sends the updated
      * stats to the client. Allows multi-leveling.
      * @param amount The amount of exp to add.
      */
     public void addExp(long amount) {
+        ExpIncreaseInfo eii = new ExpIncreaseInfo();
+        eii.setLastHit(true);
+        eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, amount));
+        addExp(amount, eii);
+    }
+
+    public void addExp(long amount, ExpIncreaseInfo eii) {
         CharacterStat cs = getAvatarData().getCharacterStat();
         long curExp = cs.getExp();
         int level = getStat(Stat.level);
@@ -1631,7 +1644,7 @@ public class Char {
         }
         cs.setExp(newExp);
         stats.put(Stat.exp, newExp);
-
+        write(WvsContext.incExpMessage(eii));
         getClient().write(WvsContext.statChanged(stats));
     }
 
@@ -1874,5 +1887,25 @@ public class Char {
             write(WvsContext.inventoryOperation(true, false,
                     UPDATE_QUANTITY, (short) item.getBagIndex(), (byte) -1, 0, item));
         }
+    }
+
+    public boolean hasItem(int itemID) {
+        return getInventories().stream().anyMatch(inv -> inv.containsItem(itemID));
+    }
+
+    public boolean hasItemCount(int itemID, int count) {
+        return getInventories().stream().anyMatch(inv -> {
+            Item item = inv.getItemByItemID(itemID);
+            return item != null && item.getQuantity() >= count;
+        });
+    }
+
+    public short getLevel() {
+        return getAvatarData().getCharacterStat().getLevel();
+    }
+
+    public boolean isMarried() {
+        // TODO
+        return false;
     }
 }

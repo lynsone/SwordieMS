@@ -3,12 +3,15 @@ package handling.handlers;
 import client.Client;
 import client.character.Char;
 import client.character.ExtendSP;
+import client.character.ScriptManager;
 import client.character.commands.AdminCommand;
 import client.character.commands.AdminCommands;
 import client.character.items.Equip;
 import client.character.items.EquipAttribute;
 import client.character.items.Inventory;
 import client.character.items.Item;
+import client.character.quest.Quest;
+import client.character.quest.QuestManager;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
@@ -24,6 +27,8 @@ import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
 import loaders.ItemData;
+import loaders.QuestData;
+import loaders.QuestInfo;
 import loaders.SkillData;
 import packet.*;
 import server.Channel;
@@ -69,11 +74,10 @@ public class WorldHandler {
         field.addChar(chr);
         chr.setField(field);
         c.write(WvsContext.updateEventNameTag(new int[]{}));
-        c.write(Stage.setField(chr, field, c.getChannel(), true, 0, true, false,
+        c.write(Stage.setField(chr, field, c.getChannel(), false, 0, true, false,
                 (byte) 0, false, 100, null, true, -1));
         if (JobConstants.isBeastTamer(chr.getJob())) {
             c.write(CField.beastTamerFuncKeyMappedManInit());
-
         } else {
             c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
         }
@@ -1887,192 +1891,200 @@ public class WorldHandler {
             return;
         }
         Map<SpecStat, Integer> specStats = ItemData.getItemInfoByID(itemID).getSpecStats();
-        long time = specStats.getOrDefault(SpecStat.time, 0) / 1000;
-        for (Map.Entry<SpecStat, Integer> entry : specStats.entrySet()) {
-            SpecStat ss = entry.getKey();
-            int value = entry.getValue();
-            Option o = new Option(itemID, time);
-            o.nOption = value;
-            o.nReason = value;
-            switch (ss) {
-                case hp:
-                    chr.heal(value);
-                    break;
-                case hpR:
-                    chr.heal((int) ((value / 100D) * chr.getStat(Stat.mhp)));
-                    break;
-                case mp:
-                    chr.healMP(value);
-                    break;
-                case mpR:
-                    chr.healMP((int) ((value / 100D) * chr.getStat(Stat.mmp)));
-                    break;
-                case eva:
-                    tsm.putCharacterStatValue(EVA, o);
-                    break;
-                case speed:
-                    tsm.putCharacterStatValue(Speed, o);
-                    break;
-                case pad:
-                    tsm.putCharacterStatValue(PAD, o);
-                    break;
-                case mad:
-                    tsm.putCharacterStatValue(MAD, o);
-                    break;
-                case pdd:
-                    tsm.putCharacterStatValue(PDD, o);
-                    break;
-                case mdd:
-                    tsm.putCharacterStatValue(MDD, o);
-                    break;
-                case acc:
-                    tsm.putCharacterStatValue(ACC, o);
-                    break;
-                case jump:
-                    tsm.putCharacterStatValue(Jump, o);
-                    break;
-                case imhp:
-                    tsm.putCharacterStatValue(MaxHP, o);
-                    break;
-                case immp:
-                    tsm.putCharacterStatValue(MaxMP, o);
-                    break;
-                case indieAllStat:
-                    tsm.putCharacterStatValue(IndieAllStat, o);
-                    break;
-                case indieSpeed:
-                    tsm.putCharacterStatValue(IndieSpeed, o);
-                    break;
-                case indieSTR:
-                    tsm.putCharacterStatValue(IndieSTR, o);
-                    break;
-                case indieDEX:
-                    tsm.putCharacterStatValue(IndieDEX, o);
-                    break;
-                case indieINT:
-                    tsm.putCharacterStatValue(IndieINT, o);
-                    break;
-                case indieLUK:
-                    tsm.putCharacterStatValue(IndieLUK, o);
-                    break;
-                case indiePad:
-                    tsm.putCharacterStatValue(IndiePAD, o);
-                    break;
-                case indiePdd:
-                    tsm.putCharacterStatValue(IndiePDD, o);
-                    break;
-                case indieMad:
-                    tsm.putCharacterStatValue(IndieMAD, o);
-                    break;
-                case indieMdd:
-                    tsm.putCharacterStatValue(IndieMDD, o);
-                    break;
-                case indieBDR:
-                    tsm.putCharacterStatValue(IndieBDR, o);
-                    break;
-                case indieIgnoreMobpdpR:
-                    tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o);
-                    break;
-                case indieStatR:
-                    tsm.putCharacterStatValue(IndieStatR, o);
-                    break;
-                case indieMhp:
-                    tsm.putCharacterStatValue(IndieMHP, o);
-                    break;
-                case indieMmp:
-                    tsm.putCharacterStatValue(IndieMMP, o);
-                    break;
-                case indieBooster:
-                    tsm.putCharacterStatValue(IndieBooster, o);
-                    break;
-                case indieAcc:
-                    tsm.putCharacterStatValue(IndieACC, o);
-                    break;
-                case indieEva:
-                    tsm.putCharacterStatValue(IndieEVA, o);
-                    break;
-                case indieAllSkill:
-                    tsm.putCharacterStatValue(CombatOrders, o);
-                    break;
-                case indieMhpR:
-                    tsm.putCharacterStatValue(IndieMHPR, o);
-                    break;
-                case indieMmpR:
-                    tsm.putCharacterStatValue(IndieMMPR, o);
-                    break;
-                case indieStance:
-                    tsm.putCharacterStatValue(IndieStance, o);
-                    break;
-                case indieForceSpeed:
-                    tsm.putCharacterStatValue(IndieForceSpeed, o);
-                    break;
-                case indieForceJump:
-                    tsm.putCharacterStatValue(IndieForceJump, o);
-                    break;
-                case indieQrPointTerm:
-                    tsm.putCharacterStatValue(IndieQrPointTerm, o);
-                    break;
-                case indieWaterSmashBuff:
-                    tsm.putCharacterStatValue(IndieUNK1, o);
-                    break;
-                case padRate:
-                    tsm.putCharacterStatValue(IndiePADR, o);
-                    break;
-                case madRate:
-                    tsm.putCharacterStatValue(IndieMADR, o);
-                    break;
-                case pddRate:
-                    tsm.putCharacterStatValue(IndiePDDR, o);
-                    break;
-                case mddRate:
-                    tsm.putCharacterStatValue(IndieMDDR, o);
-                    break;
-                case accRate:
-                    tsm.putCharacterStatValue(ACCR, o);
-                    break;
-                case evaRate:
-                    tsm.putCharacterStatValue(EVAR, o);
-                    break;
-                case mhpR:
-                case mhpRRate:
-                    tsm.putCharacterStatValue(IndieMHPR, o);
-                    break;
-                case mmpR:
-                case mmpRRate:
-                    tsm.putCharacterStatValue(IndieMHPR, o);
-                    break;
-                case booster:
-                    tsm.putCharacterStatValue(Booster, o);
-                    break;
-                case expinc:
-                    tsm.putCharacterStatValue(ExpBuffRate, o);
-                    break;
-                case str:
-                    tsm.putCharacterStatValue(STR, o);
-                    break;
-                case dex:
-                    tsm.putCharacterStatValue(DEX, o);
-                    break;
-                case inte:
-                    tsm.putCharacterStatValue(INT, o);
-                    break;
-                case luk:
-                    tsm.putCharacterStatValue(LUK, o);
-                    break;
-                case asrR:
-                    tsm.putCharacterStatValue(AsrRByItem, o);
-                    break;
-                case bdR:
-                    tsm.putCharacterStatValue(BdR, o);
-                    break;
-                case prob:
-                    tsm.putCharacterStatValue(ItemUpByItem, o);
-                    tsm.putCharacterStatValue(MesoUpByItem, o);
-                    break;
+        if(specStats.size() > 0) {
+            long time = specStats.getOrDefault(SpecStat.time, 0) / 1000;
+            for (Map.Entry<SpecStat, Integer> entry : specStats.entrySet()) {
+                SpecStat ss = entry.getKey();
+                int value = entry.getValue();
+                Option o = new Option(itemID, time);
+                o.nOption = value;
+                o.nReason = value;
+                switch (ss) {
+                    case hp:
+                        chr.heal(value);
+                        break;
+                    case hpR:
+                        chr.heal((int) ((value / 100D) * chr.getStat(Stat.mhp)));
+                        break;
+                    case mp:
+                        chr.healMP(value);
+                        break;
+                    case mpR:
+                        chr.healMP((int) ((value / 100D) * chr.getStat(Stat.mmp)));
+                        break;
+                    case eva:
+                        tsm.putCharacterStatValue(EVA, o);
+                        break;
+                    case speed:
+                        tsm.putCharacterStatValue(Speed, o);
+                        break;
+                    case pad:
+                        tsm.putCharacterStatValue(PAD, o);
+                        break;
+                    case mad:
+                        tsm.putCharacterStatValue(MAD, o);
+                        break;
+                    case pdd:
+                        tsm.putCharacterStatValue(PDD, o);
+                        break;
+                    case mdd:
+                        tsm.putCharacterStatValue(MDD, o);
+                        break;
+                    case acc:
+                        tsm.putCharacterStatValue(ACC, o);
+                        break;
+                    case jump:
+                        tsm.putCharacterStatValue(Jump, o);
+                        break;
+                    case imhp:
+                        tsm.putCharacterStatValue(MaxHP, o);
+                        break;
+                    case immp:
+                        tsm.putCharacterStatValue(MaxMP, o);
+                        break;
+                    case indieAllStat:
+                        tsm.putCharacterStatValue(IndieAllStat, o);
+                        break;
+                    case indieSpeed:
+                        tsm.putCharacterStatValue(IndieSpeed, o);
+                        break;
+                    case indieSTR:
+                        tsm.putCharacterStatValue(IndieSTR, o);
+                        break;
+                    case indieDEX:
+                        tsm.putCharacterStatValue(IndieDEX, o);
+                        break;
+                    case indieINT:
+                        tsm.putCharacterStatValue(IndieINT, o);
+                        break;
+                    case indieLUK:
+                        tsm.putCharacterStatValue(IndieLUK, o);
+                        break;
+                    case indiePad:
+                        tsm.putCharacterStatValue(IndiePAD, o);
+                        break;
+                    case indiePdd:
+                        tsm.putCharacterStatValue(IndiePDD, o);
+                        break;
+                    case indieMad:
+                        tsm.putCharacterStatValue(IndieMAD, o);
+                        break;
+                    case indieMdd:
+                        tsm.putCharacterStatValue(IndieMDD, o);
+                        break;
+                    case indieBDR:
+                        tsm.putCharacterStatValue(IndieBDR, o);
+                        break;
+                    case indieIgnoreMobpdpR:
+                        tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o);
+                        break;
+                    case indieStatR:
+                        tsm.putCharacterStatValue(IndieStatR, o);
+                        break;
+                    case indieMhp:
+                        tsm.putCharacterStatValue(IndieMHP, o);
+                        break;
+                    case indieMmp:
+                        tsm.putCharacterStatValue(IndieMMP, o);
+                        break;
+                    case indieBooster:
+                        tsm.putCharacterStatValue(IndieBooster, o);
+                        break;
+                    case indieAcc:
+                        tsm.putCharacterStatValue(IndieACC, o);
+                        break;
+                    case indieEva:
+                        tsm.putCharacterStatValue(IndieEVA, o);
+                        break;
+                    case indieAllSkill:
+                        tsm.putCharacterStatValue(CombatOrders, o);
+                        break;
+                    case indieMhpR:
+                        tsm.putCharacterStatValue(IndieMHPR, o);
+                        break;
+                    case indieMmpR:
+                        tsm.putCharacterStatValue(IndieMMPR, o);
+                        break;
+                    case indieStance:
+                        tsm.putCharacterStatValue(IndieStance, o);
+                        break;
+                    case indieForceSpeed:
+                        tsm.putCharacterStatValue(IndieForceSpeed, o);
+                        break;
+                    case indieForceJump:
+                        tsm.putCharacterStatValue(IndieForceJump, o);
+                        break;
+                    case indieQrPointTerm:
+                        tsm.putCharacterStatValue(IndieQrPointTerm, o);
+                        break;
+                    case indieWaterSmashBuff:
+                        tsm.putCharacterStatValue(IndieUNK1, o);
+                        break;
+                    case padRate:
+                        tsm.putCharacterStatValue(IndiePADR, o);
+                        break;
+                    case madRate:
+                        tsm.putCharacterStatValue(IndieMADR, o);
+                        break;
+                    case pddRate:
+                        tsm.putCharacterStatValue(IndiePDDR, o);
+                        break;
+                    case mddRate:
+                        tsm.putCharacterStatValue(IndieMDDR, o);
+                        break;
+                    case accRate:
+                        tsm.putCharacterStatValue(ACCR, o);
+                        break;
+                    case evaRate:
+                        tsm.putCharacterStatValue(EVAR, o);
+                        break;
+                    case mhpR:
+                    case mhpRRate:
+                        tsm.putCharacterStatValue(IndieMHPR, o);
+                        break;
+                    case mmpR:
+                    case mmpRRate:
+                        tsm.putCharacterStatValue(IndieMHPR, o);
+                        break;
+                    case booster:
+                        tsm.putCharacterStatValue(Booster, o);
+                        break;
+                    case expinc:
+                        tsm.putCharacterStatValue(ExpBuffRate, o);
+                        break;
+                    case str:
+                        tsm.putCharacterStatValue(STR, o);
+                        break;
+                    case dex:
+                        tsm.putCharacterStatValue(DEX, o);
+                        break;
+                    case inte:
+                        tsm.putCharacterStatValue(INT, o);
+                        break;
+                    case luk:
+                        tsm.putCharacterStatValue(LUK, o);
+                        break;
+                    case asrR:
+                        tsm.putCharacterStatValue(AsrRByItem, o);
+                        break;
+                    case bdR:
+                        tsm.putCharacterStatValue(BdR, o);
+                        break;
+                    case prob:
+                        tsm.putCharacterStatValue(ItemUpByItem, o);
+                        tsm.putCharacterStatValue(MesoUpByItem, o);
+                        break;
+                }
             }
+            tsm.sendSetStatPacket();
+            chr.consumeItem(item);
+        } else {
+            switch(itemID) {
+                default:
+                    chr.chatMessage(YELLOW, String.format("Unhandled stat change item %d", itemID));
+            }
+            chr.consumeItem(item);
         }
-        tsm.sendSetStatPacket();
-        chr.consumeItem(item);
         chr.dispose();
     }
 
@@ -2136,6 +2148,70 @@ public class WorldHandler {
         }
         chr.getScriptManager().startScript(itemID, itemID + ".py", ScriptType.ITEM);
         chr.dispose();
+    }
 
+    public static void handleUserQuestRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        QuestManager qm = chr.getQuestManager();
+        byte type = inPacket.decodeByte();
+        int questID = 0;
+        int npcTemplateID = 0;
+        Position position = null;
+        switch(type) {
+            case 1: // Quest start
+            case 2: // Quest end
+                questID = inPacket.decodeInt();
+                npcTemplateID = inPacket.decodeInt();
+                if(inPacket.getUnreadBytes() > 4) {
+                    position = inPacket.decodePosition();
+                }
+                break;
+            case 3: // Scripted quest start
+            case 4: // Scripted quest end
+                questID = inPacket.decodeInt();
+                npcTemplateID = inPacket.decodeInt();
+                if(inPacket.getUnreadBytes() > 4) {
+                    position = inPacket.decodePosition();
+                }
+                break;
+            default:
+                System.err.printf("[Info] Unkown quest request %d!%n", type);
+                break;
+        }
+        if(questID == 0) {
+            chr.chatMessage(GAME_MESSAGE, "Could not start quest.");
+            return;
+        }
+        switch(type) {
+            case 1:
+                if(qm.canStartQuest(questID)) {
+                    qm.addQuest(QuestData.createQuestFromId(questID));
+                }
+                break;
+            case 2:
+                if(qm.hasQuestInProgress(questID)) {
+                    Quest quest = qm.getQuests().get(questID);
+                    if(quest.isComplete()) {
+                        qm.completeQuest(questID);
+                    }
+                }
+                break;
+            case 3:
+                QuestInfo qi = QuestData.getQuestInfoById(questID);
+                String scriptName = qi.getStartScript();
+                if(scriptName == null || scriptName.equalsIgnoreCase("")) {
+                    scriptName = String.format("%d%s.py", questID, ScriptManager.QUEST_START_SCRIPT_END_TAG);
+                }
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                break;
+            case 4:
+                qi = QuestData.getQuestInfoById(questID);
+                scriptName = qi.getEndScript();
+                if(scriptName == null || scriptName.equalsIgnoreCase("")) {
+                    scriptName = String.format("%d%s.py", questID, ScriptManager.QUEST_COMPLETE_SCRIPT_END_TAG);
+                }
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                break;
+        }
     }
 }

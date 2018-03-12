@@ -9,5 +9,6 @@ public enum ScriptType {
     FIELD,
     PORTAL,
     REACTOR,
-    ITEM;
+    ITEM,
+    QUEST
 }

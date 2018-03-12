@@ -136,4 +136,8 @@ public class Inventory {
     public Item getItemByItemID(int itemId) {
         return getItems().stream().filter(item -> item.getItemId() == itemId).findFirst().orElse(null);
     }
+
+    public boolean containsItem(int itemID) {
+        return getItems().stream().anyMatch(item -> item.getItemId() == itemID);
+    }
 }

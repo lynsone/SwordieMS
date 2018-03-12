@@ -97,9 +97,10 @@ public class Server extends Properties {
     }
 
     private void checkAndCreateDat() {
-        File file = new File(ServerConstants.DAT_DIR + "\\equips");
+        File file = new File(ServerConstants.DAT_DIR + "/equips");
         boolean exists = file.exists();
         if(!exists) {
+            System.out.println("Dat files cannot be found (at least not the equip dats). All dats will now be generated. This may take a long while.");
             for(Class c : DataClasses.datCreators) {
                 try {
                     Method m = c.getMethod("generateDatFiles");

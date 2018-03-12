@@ -12,8 +12,10 @@ import constants.SkillConstants;
 import enums.*;
 import handling.OutHeader;
 import handling.handlers.PsychicLock;
+import util.FileTime;
 import util.Position;
 import util.Rect;
+import util.Triple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -527,6 +529,29 @@ public class CField {
         outPacket.encodeByte(4); //Dragon Stance
         outPacket.encodeShort(0);
         outPacket.encodeShort(chr.getJob());
+
+        return outPacket;
+    }
+
+
+
+    public static OutPacket questClear(int qrKey) {
+        OutPacket outPacket = new OutPacket(OutHeader.QUEST_CLEAR);
+
+        outPacket.encodeInt(qrKey);
+
+        return outPacket;
+    }
+
+    public static OutPacket setQuestTime(List<Triple<Integer, FileTime, FileTime>> questTimes) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_QUEST_TIME);
+
+        outPacket.encodeByte(questTimes.size());
+        for(Triple<Integer, FileTime, FileTime> times : questTimes) {
+            outPacket.encodeInt(times.getLeft());
+            outPacket.encodeFT(times.getMiddle());
+            outPacket.encodeFT(times.getRight());
+        }
 
         return outPacket;
     }

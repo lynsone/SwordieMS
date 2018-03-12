@@ -18,7 +18,7 @@ public class DropData {
     private static Map<Integer, Set<DropInfo>> drops = new HashMap<>();
 
     public static void loadDropsFromWz() {
-        String wzDir = ServerConstants.WZ_DIR + "\\String.wz\\MonsterBook.img.xml";
+        String wzDir = ServerConstants.WZ_DIR + "/String.wz/MonsterBook.img.xml";
         File file = new File(wzDir);
         Document doc = XMLApi.getRoot(file);
         Node mainNode = XMLApi.getAllChildren(doc).get(0);
@@ -95,7 +95,7 @@ public class DropData {
         for (Map.Entry<Integer, Set<DropInfo>> entry : getDrops().entrySet()) {
             int mobID = entry.getKey();
             Set<DropInfo> drops = entry.getValue();
-            File file = new File(String.format("%s\\%d.dat", dir, mobID));
+            File file = new File(String.format("%s/%d.dat", dir, mobID));
             try {
                 DataOutputStream das = new DataOutputStream(new FileOutputStream(file));
                 das.writeInt(mobID);
@@ -114,7 +114,7 @@ public class DropData {
     public static Set<DropInfo> getDropInfoByID(int mobID) {
         Set<DropInfo> drops = getCachedDropInfoById(mobID);
         if(drops == null) {
-            File file = new File(String.format("%s\\mobDrops\\%d.dat", ServerConstants.DAT_DIR, mobID));
+            File file = new File(String.format("%s/mobDrops/%d.dat", ServerConstants.DAT_DIR, mobID));
             if (file.exists()) {
                 loadDropsFromFile(file);
                 drops = getCachedDropInfoById(mobID);
@@ -158,15 +158,24 @@ public class DropData {
 
     public static void generateTxtFromMonsterBook() {
         loadDropsFromWz();
-        saveDropsToTxt(new File(ServerConstants.RESOURCES_DIR + "\\mobDrops.txt"));
+        saveDropsToTxt(new File(ServerConstants.RESOURCES_DIR + "/mobDrops.txt"));
     }
 
     public static void generateDatFiles() {
-        loadCompleteDropsFromTxt(new File(ServerConstants.RESOURCES_DIR + "\\mobDrops.txt"));
-        saveDropsToDat(ServerConstants.DAT_DIR + "\\mobDrops");
+        loadCompleteDropsFromTxt(new File(ServerConstants.RESOURCES_DIR + "/mobDrops.txt"));
+        saveDropsToDat(ServerConstants.DAT_DIR + "/mobDrops");
     }
 
     public static void main(String[] args) {
         generateDatFiles();
+    }
+
+    public static String getLeftPaddedStr(final String in, final char padchar, final int length) {
+        StringBuilder builder = new StringBuilder(length);
+        for (int x = in.length(); x < length; x++) {
+            builder.append(padchar);
+        }
+        builder.append(in);
+        return builder.toString();
     }
 }

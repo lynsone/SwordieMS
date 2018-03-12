@@ -150,4 +150,12 @@ public class InPacket extends Packet {
     public Position decodePositionInt() {
         return new Position(decodeInt(), decodeInt());
     }
+
+    /**
+     * Returns the amount of bytes that are unread.
+     * @return The amount of bytes that are unread.
+     */
+    public int getUnreadBytes() {
+        return byteBuf.readableBytes();
+    }
 }

@@ -55,7 +55,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
             if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(op))) {
-                System.out.println("[In]\t| " + InHeader.getInHeaderByOp(op) + ", " + +op + "/" + Integer.toHexString(op) + "\t| " + inPacket);
+                System.out.printf("[In]\t| %s, %d/0x%s\t| %s%n", InHeader.getInHeaderByOp(op), +op, Integer.toHexString(op).toUpperCase(), inPacket);
             }
             switch(opHeader) {
                 case CONNECT:
@@ -196,6 +196,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_ITEM_RELEASE_REQUEST:
                     WorldHandler.handleUserItemReleaseRequest(c, inPacket);
+                    break;
+                case USER_QUEST_REQUEST:
+                    WorldHandler.handleUserQuestRequest(c, inPacket);
                     break;
                 case ZERO_TAG:
                     WorldHandler.handleZeroTag(c, inPacket);

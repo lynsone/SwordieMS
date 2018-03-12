@@ -727,12 +727,12 @@ public enum CharacterTemporaryStat {
     }
 
     public static void mainNoMainPls(String[] args) {
-        int a = 0x1EB;
-        int v1 = 1 << (31 - (a & 0x1f));
-        int v5 = a >> 5;
-        System.out.printf("value 0x%04x, pos %d%n", v1, v5);
+        int a = 0x1eb;
+        int val = 1 << (31 - (a & 0x1f));
+        int pos = a >> 5;
+        System.out.printf("value 0x%04x, pos %d%n", val, pos);
         for(CharacterTemporaryStat cts : values()) {
-            if(cts.getVal() == v1 && cts.getPos() == v5) {
+            if(cts.getVal() == val && cts.getPos() == pos) {
                 System.out.println("Corresponds to " + cts);
             }
         }

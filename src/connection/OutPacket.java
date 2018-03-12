@@ -239,7 +239,8 @@ public class OutPacket extends Packet {
 
     @Override
     public String toString() {
-        return OutHeader.getOutHeaderByOp(op) + ", " + op + "/0x" + Integer.toHexString(op) + "\t| " + Util.readableByteArray(Arrays.copyOfRange(getData(), 2, getData().length));
+        return String.format("%s, %s/0x%s\t| %s", OutHeader.getOutHeaderByOp(op), op, Integer.toHexString(op).toUpperCase()
+                , Util.readableByteArray(Arrays.copyOfRange(getData(), 2, getData().length)));
     }
 
     public void encodeShort(int value) {

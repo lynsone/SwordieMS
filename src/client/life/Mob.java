@@ -2,6 +2,7 @@ package client.life;
 
 import client.character.Char;
 import client.character.ExpIncreaseInfo;
+import client.character.quest.Quest;
 import client.field.Field;
 import client.field.Foothold;
 import packet.CField;
@@ -95,6 +96,7 @@ public class Mob extends Life {
     private Map<Char, Long> damageDone = new HashMap<>();
     private Set<DropInfo> drops = new HashSet<>();
     private List<MobSkill> skills = new ArrayList<>();
+    private Set<Integer> quests = new HashSet<>();
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -242,6 +244,9 @@ public class Mob extends Life {
         copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
         for(MobSkill ms : getSkills()) {
             copy.addSkill(ms);
+        }
+        for(int i : getQuests()) {
+            copy.addQuest(i);
         }
         if(copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
             copy.getDrops().add(new DropInfo(0, (int) copy.getForcedMobStat().getExp(), 1000, 0));
@@ -1077,6 +1082,9 @@ public class Mob extends Life {
         field.putLifeController(this, null);
         distributeExp();
         dropDrops(); // xd
+        for(Char chr : getDamageDone().keySet()) {
+            chr.getQuestManager().handleMobKill(this);
+        }
     }
 
     private void dropDrops() {
@@ -1109,8 +1117,7 @@ public class Mob extends Life {
             ExpIncreaseInfo eii = chr.getExpIncreaseInfo();
             eii.setLastHit(true);
             eii.setIncEXP(appliedExp > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) appliedExp);
-            chr.write(WvsContext.incExpMessage(eii));
-            chr.addExp(appliedExp);
+            chr.addExp(appliedExp, eii);
         }
     }
 
@@ -1142,5 +1149,17 @@ public class Mob extends Life {
             return mob.getTemplateId() == getTemplateId() && mob.getObjectId() == getObjectId() && mob.getField().equals(getField());
         }
         return false;
+    }
+
+    public Set<Integer> getQuests() {
+        return quests;
+    }
+
+    public void setQuests(Set<Integer> quests) {
+        this.quests = quests;
+    }
+
+    public void addQuest(int questID) {
+        getQuests().add(questID);
     }
 }

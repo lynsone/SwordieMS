@@ -4,6 +4,7 @@ import client.Client;
 import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Item;
+import client.character.quest.Quest;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
@@ -38,12 +39,25 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            for(InvType invType : InvType.values()) {
+            for(Quest q : chr.getQuestManager().getCompletedQuests()) {
+                chr.chatMessage(YELLOW, "" + q.getQRKey());
+            }
+
+        }
+    }
+
+    public static class ShowInvInfo extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+
+            chr.chatMessage(YELLOW, "------------------------------------------------------------");
+            for (InvType invType : InvType.values()) {
                 chr.chatMessage(YELLOW, invType.toString());
-                for(Item item : chr.getInventoryByType(invType).getItems()) {
+                for (Item item : chr.getInventoryByType(invType).getItems()) {
                     item.setInvType(invType);
                     String name = StringData.getItemStringById(item.getItemId());
-                    chr.chatMessage(YELLOW, String.format("%s, %d, %d", name, item.getItemId(), item.getId()));
+                    chr.chatMessage(YELLOW, String.format("%s, %d, %d, %d, %s", name, item.getItemId(), item.getId(),
+                            item.getBagIndex(), item.getInvType().toString()));
                 }
             }
         }
@@ -225,7 +239,7 @@ public class AdminCommands {
             } else {
                 StringBuilder query = new StringBuilder();
                 int size = args.length;
-                short quant = 0;
+                short quant = 1;
                 if (Util.isNumber(args[size - 1])) {
                     size--;
                     quant = Short.parseShort(args[size]);
@@ -243,7 +257,7 @@ public class AdminCommands {
                     Item item = ItemData.getEquipDeepCopyFromId(id);
                     if (item != null) {
                         Equip equip = (Equip) item;
-                        if(equip.getItemId() < 1000000) {
+                        if (equip.getItemId() < 1000000) {
                             continue;
                         }
                         chr.addItemToInventory(equip);
@@ -448,7 +462,7 @@ public class AdminCommands {
         }
     }
 
-    public static class Int extends AdminCommand {
+    public static class SetInt extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {

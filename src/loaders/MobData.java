@@ -33,11 +33,18 @@ public class MobData {
 
     public static void generateDatFiles() {
         loadMobsFromWz();
-        saveToFile(ServerConstants.DAT_DIR + "\\mobs");
+        QuestData.linkMobData();
+        saveToFile(ServerConstants.DAT_DIR + "/mobs");
     }
 
     public static Mob getMobById(int id) {
-        return getMobs().stream().filter(mob -> mob.getTemplateId() == id).findFirst().orElse(loadMobFromFile(id));
+        for(Mob mob : getMobs()) {
+            if(mob.getTemplateId() == id) {
+                return mob;
+            }
+        }
+        return loadMobFromFile(id);
+//        return getMobs().stream().filter(mob -> mob.getTemplateId() == id).findFirst().orElse(loadMobFromFile(id));
     }
 
     public static Mob getMobDeepCopyById(int id) {
@@ -54,7 +61,7 @@ public class MobData {
         DataOutputStream dataOutputStream;
         try {
             for (Mob mob : getMobs()) {
-                File file = new File(dir + "\\" + mob.getTemplateId() + ".dat");
+                File file = new File(dir + "/" + mob.getTemplateId() + ".dat");
                 dataOutputStream = new DataOutputStream(new FileOutputStream(file));
                 ForcedMobStat fms = mob.getForcedMobStat();
                 MobTemporaryStat mts = mob.getTemporaryStat();
@@ -136,6 +143,10 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getSealedCooltime());
                 dataOutputStream.writeInt(mob.getWillEXP());
                 dataOutputStream.writeUTF(mob.getFixedMoveDir());
+                dataOutputStream.writeShort(mob.getQuests().size());
+                for(int i : mob.getQuests()) {
+                    dataOutputStream.writeInt(i);
+                }
                 dataOutputStream.writeShort(mob.getSkills().size());
                 for(MobSkill ms : mob.getSkills()) {
                     dataOutputStream.writeInt(ms.getSkillID());
@@ -172,7 +183,7 @@ public class MobData {
     }
 
     private static Mob loadMobFromFile(int id) {
-        File file = new File(ServerConstants.DAT_DIR + "\\mobs\\" + id + ".dat");
+        File file = new File(ServerConstants.DAT_DIR + "/mobs/" + id + ".dat");
         if(!file.exists()) {
             return null;
         }
@@ -270,6 +281,10 @@ public class MobData {
             mob.setSealedCooltime(dataInputStream.readInt());
             mob.setWillEXP(dataInputStream.readInt());
             mob.setFixedMoveDir(dataInputStream.readUTF());
+            short size = dataInputStream.readShort();
+            for (int i = 0; i < size; i++) {
+                mob.addQuest(dataInputStream.readInt());
+            }
             short skillSize = dataInputStream.readShort();
             for (int i = 0; i < skillSize; i++) {
                 MobSkill ms = new MobSkill();
@@ -324,8 +339,8 @@ public class MobData {
 
 
     public static void loadMobsFromWz() {
-        String wzDir1 = ServerConstants.WZ_DIR + "\\Mob.wz";
-        String wzDir2 = ServerConstants.WZ_DIR + "\\Mob2.wz";
+        String wzDir1 = ServerConstants.WZ_DIR + "/Mob.wz";
+        String wzDir2 = ServerConstants.WZ_DIR + "/Mob2.wz";
         File dir1 = new File(wzDir1);
         File[] files1 = dir1.listFiles();
         File dir2 = new File(wzDir2);
@@ -842,5 +857,9 @@ public class MobData {
                 getMobs().add(mob);
             }
         }
+    }
+
+    public static void main(String[] args) {
+        generateDatFiles();
     }
 }
