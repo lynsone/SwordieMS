@@ -328,6 +328,9 @@ public class Equip extends Item {
         ret.invType = invType;
         ret.type = type;
         ret.isCash = isCash;
+        for(int i : getQuestIDs()) {
+            ret.addQuest(i);
+        }
         return ret;
     }
 

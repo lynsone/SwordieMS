@@ -80,4 +80,8 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
     public String getValue() {
         return String.valueOf(getCurrentCount());
     }
+
+    public void addItem(int quantity) {
+        setCurrentCount(getCurrentCount() + quantity);
+    }
 }

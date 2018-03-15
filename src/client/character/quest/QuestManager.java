@@ -1,6 +1,7 @@
 package client.character.quest;
 
 import client.character.Char;
+import client.character.items.Item;
 import client.character.quest.questRequirements.QuestStartCompletionRequirement;
 import client.character.quest.questRequirements.QuestStartRequirement;
 import client.character.quest.questReward.QuestReward;
@@ -158,6 +159,25 @@ public class QuestManager {
             Quest q = getQuests().get(questID);
             if (q != null && !q.isComplete()) {
                 q.handleMobKill(mob.getTemplateId());
+                chr.write(WvsContext.questRecordMessage(q));
+            }
+        }
+    }
+
+    public void handleMoneyGain(int money) {
+        for(Quest q : getQuestsInProgress()) {
+            if(q.hasMoneyReq()) {
+                q.addMoney(money);
+                chr.write(WvsContext.questRecordMessage(q));
+            }
+        }
+    }
+
+    public void handleItemGain(Item item) {
+        for(int questID : item.getQuestIDs()) {
+            Quest q = getQuests().get(questID);
+            if (q != null && !q.isComplete()) {
+                q.handleItemGain(item);
                 chr.write(WvsContext.questRecordMessage(q));
             }
         }

@@ -1,9 +1,7 @@
 package client.character.quest;
 
-import client.character.quest.QuestProgressRequirement.QuestProgressItemRequirement;
-import client.character.quest.QuestProgressRequirement.QuestProgressMobRequirement;
-import client.character.quest.QuestProgressRequirement.QuestProgressRequirement;
-import client.character.quest.QuestProgressRequirement.QuestValueRequirement;
+import client.character.items.Item;
+import client.character.quest.QuestProgressRequirement.*;
 import enums.QuestStatus;
 import org.hibernate.annotations.Cascade;
 import org.python.antlr.op.In;
@@ -13,6 +11,7 @@ import util.Util;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -152,5 +151,30 @@ public class Quest {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public boolean hasMoneyReq() {
+        return getProgressRequirements().stream().filter(q -> q instanceof QuestProgressMoneyRequirement).count() > 0;
+    }
+
+    public void addMoney(int money) {
+        QuestProgressMoneyRequirement qpmr = getProgressRequirements().stream()
+                .filter(q -> q instanceof QuestProgressMoneyRequirement)
+                .map(q -> (QuestProgressMoneyRequirement) q)
+                .findAny().orElse(null);
+        if(qpmr != null) {
+            qpmr.addMoney(money);
+        }
+    }
+
+    public void handleItemGain(Item item) {
+        Set<QuestProgressItemRequirement> qpirs = getProgressRequirements().stream()
+                .filter(q -> q instanceof QuestProgressItemRequirement &&
+                        ((QuestProgressItemRequirement) q).getItemID() == item.getItemId())
+                .map(q -> (QuestProgressItemRequirement) q)
+                .collect(Collectors.toSet());
+        for(QuestProgressItemRequirement qpir : qpirs) {
+            qpir.addItem(item.getQuantity());
+        }
     }
 }

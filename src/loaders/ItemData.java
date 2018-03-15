@@ -4,6 +4,7 @@ import client.character.items.Equip;
 import client.character.items.Item;
 import client.character.items.ItemOption;
 import client.character.items.ItemState;
+import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.InvType;
 import enums.ScrollStat;
@@ -13,9 +14,7 @@ import org.w3c.dom.Node;
 import util.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static client.character.items.Item.Type.ITEM;
 import static enums.ScrollStat.*;
@@ -148,6 +147,11 @@ public class ItemData {
             }
             int fixedGrade = dataInputStream.readInt();
             int specialGrade = dataInputStream.readInt();
+            short size = dataInputStream.readShort();
+            int[] questIDs = new int[size];
+            for (int i = 0; i < size; i++) {
+                questIDs[i] = dataInputStream.readInt();
+            }
             equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
                     null, new FileTime(-1), 0, ruc, (short) 0, iStr, iDex, iInt,
                     iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
@@ -157,6 +161,9 @@ public class ItemData {
                     rLuk, rLevel, rJob, rPop, cash,
                     islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
                     notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
+            for(int i : questIDs) {
+                equip.addQuest(i);
+            }
             equips.add(equip);
         } catch (IOException e) {
             e.printStackTrace();
@@ -217,88 +224,16 @@ public class ItemData {
                 }
                 dataOutputStream.writeInt(equip.getFixedGrade());
                 dataOutputStream.writeInt(equip.getSpecialGrade());
+                dataOutputStream.writeShort(equip.getQuestIDs().size());
+                for (int i : equip.getQuestIDs()) {
+                    dataOutputStream.writeInt(i);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    //    @Loader(varName = "equips")
-    public static void loadEquips(File file, boolean exists) {
-        if (!exists) {
-            loadEquipsFromWz();
-            saveEquips(ServerConstants.DAT_DIR + "/equips");
-        } else {
-            try {
-                DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
-                short size = dataInputStream.readShort();
-                for (short kappa = 0; kappa < size; kappa++) {
-                    int itemId = dataInputStream.readInt();
-                    String islot = dataInputStream.readUTF();
-                    String vslot = dataInputStream.readUTF();
-                    short rJob = dataInputStream.readShort();
-                    short rLevel = dataInputStream.readShort();
-                    short rStr = dataInputStream.readShort();
-                    short rDex = dataInputStream.readShort();
-                    short rInt = dataInputStream.readShort();
-                    short rLuk = dataInputStream.readShort();
-                    short rPop = dataInputStream.readShort();
-                    short iStr = dataInputStream.readShort();
-                    short iDex = dataInputStream.readShort();
-                    short iInt = dataInputStream.readShort();
-                    short iLuk = dataInputStream.readShort();
-                    short iPDD = dataInputStream.readShort();
-                    short iMDD = dataInputStream.readShort();
-                    short iMaxHp = dataInputStream.readShort();
-                    short iMaxMp = dataInputStream.readShort();
-                    short iPad = dataInputStream.readShort();
-                    short iMad = dataInputStream.readShort();
-                    short iEva = dataInputStream.readShort();
-                    short iAcc = dataInputStream.readShort();
-                    short iCraft = dataInputStream.readShort();
-                    short iSpeed = dataInputStream.readShort();
-                    short iJump = dataInputStream.readShort();
-                    short damR = dataInputStream.readShort();
-                    short statR = dataInputStream.readShort();
-                    short ruc = dataInputStream.readShort();
-                    int charmEXP = dataInputStream.readInt();
-                    int setItemID = dataInputStream.readInt();
-                    int price = dataInputStream.readInt();
-                    int attackSpeed = dataInputStream.readInt();
-                    boolean cash = dataInputStream.readBoolean();
-                    boolean expireOnLogout = dataInputStream.readBoolean();
-                    boolean exItem = dataInputStream.readBoolean();
-                    boolean notSale = dataInputStream.readBoolean();
-                    boolean only = dataInputStream.readBoolean();
-                    boolean tradeBlock = dataInputStream.readBoolean();
-                    boolean equipTradeBlock = dataInputStream.readBoolean();
-                    boolean fixedPotential = dataInputStream.readBoolean();
-                    short optionLength = dataInputStream.readShort();
-                    List<Integer> options = new ArrayList<>(optionLength);
-                    for (int i = 0; i < optionLength; i++) {
-                        options.add(dataInputStream.readInt());
-                    }
-                    for (int i = 0; i < 7 - optionLength; i++) {
-                        options.add(0);
-                    }
-                    int fixedGrade = dataInputStream.readInt();
-                    int specialGrade = dataInputStream.readInt();
-                    Equip equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                            null, new FileTime(-1), 0, ruc, (short) 0, iStr, iDex, iInt,
-                            iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
-                            iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
-                            (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
-                            (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
-                            rLuk, rLevel, rJob, rPop, cash,
-                            islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
-                            notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
-                    equips.add(equip);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     public static void loadEquipsFromWz() {
         String wzDir = ServerConstants.WZ_DIR + "/Character.wz";
@@ -567,7 +502,6 @@ public class ItemData {
             itemInfo.setSenseEXP(dataInputStream.readInt());
             itemInfo.setQuest(dataInputStream.readBoolean());
             itemInfo.setReqQuestOnProgress(dataInputStream.readInt());
-            itemInfo.setQuestID(dataInputStream.readInt());
             itemInfo.setNotConsume(dataInputStream.readBoolean());
             itemInfo.setMonsterBook(dataInputStream.readBoolean());
             itemInfo.setMobID(dataInputStream.readInt());
@@ -584,6 +518,10 @@ public class ItemData {
                 SpecStat ss = SpecStat.getSpecStatByName(dataInputStream.readUTF());
                 int val = dataInputStream.readInt();
                 itemInfo.putSpecStat(ss, val);
+            }
+            size = dataInputStream.readShort();
+            for (int i = 0; i < size; i++) {
+                itemInfo.addQuest(dataInputStream.readInt());
             }
             getItems().add(itemInfo);
 
@@ -614,7 +552,6 @@ public class ItemData {
                 dataOutputStream.writeInt(ii.getSenseEXP());
                 dataOutputStream.writeBoolean(ii.isQuest());
                 dataOutputStream.writeInt(ii.getReqQuestOnProgress());
-                dataOutputStream.writeInt(ii.getQuestID());
                 dataOutputStream.writeBoolean(ii.isNotConsume());
                 dataOutputStream.writeBoolean(ii.isMonsterBook());
                 dataOutputStream.writeInt(ii.getMobID());
@@ -629,6 +566,10 @@ public class ItemData {
                 for (Map.Entry<SpecStat, Integer> entry : ii.getSpecStats().entrySet()) {
                     dataOutputStream.writeUTF(entry.getKey().toString());
                     dataOutputStream.writeInt(entry.getValue());
+                }
+                dataOutputStream.writeShort(ii.getQuestIDs().size());
+                for(int i : ii.getQuestIDs()) {
+                    dataOutputStream.writeInt(i);
                 }
             }
         } catch (IOException e) {
@@ -1032,9 +973,9 @@ public class ItemData {
                                 case "qid":
                                 case "questId":
                                     if (value.contains(".") && value.split("[.]").length > 0) {
-                                        item.setQuestID(Integer.parseInt(value.split("[.]")[0]));
+                                        item.addQuest(Integer.parseInt(value.split("[.]")[0]));
                                     } else {
-                                        item.setQuestID(Integer.parseInt(value));
+                                        item.addQuest(Integer.parseInt(value));
                                     }
                                     break;
                                 case "notConsume":
@@ -1091,6 +1032,9 @@ public class ItemData {
         res.setQuantity(1);
         res.setType(ITEM);
         res.setInvType(itemInfo.getInvType());
+        for(int i : itemInfo.getQuestIDs()) {
+            res.addQuest(i);
+        }
         return res;
     }
 
@@ -1203,14 +1147,12 @@ public class ItemData {
         loadItemsFromWZ();
         saveItems(ServerConstants.DAT_DIR + "/items");
         loadItemOptionsFromWZ();
+        QuestData.linkItemData();
         saveItemOptions(ServerConstants.DAT_DIR);
     }
 
     public static void main(String[] args) {
-        loadItemOptionsFromWZ();
-        saveItemOptions(ServerConstants.DAT_DIR);
-        loadItemOptions(new File(ServerConstants.DAT_DIR + "/itemOptions.dat"), true);
-        System.out.println(getItemOptions());
+        generateDatFiles();
     }
 
     public static List<ItemInfo> getItems() {

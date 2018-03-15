@@ -5,7 +5,9 @@ import enums.ScrollStat;
 import enums.SpecStat;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created on 1/9/2018.
@@ -27,7 +29,7 @@ public class ItemInfo {
     private boolean quest;
     private int reqQuestOnProgress;
     private int senseEXP;
-    private int questID;
+    private Set<Integer> questIDs = new HashSet<>();
     private int mobID;
     private int npcID;
     private int linkedID;
@@ -159,12 +161,12 @@ public class ItemInfo {
         return senseEXP;
     }
 
-    public void setQuestID(int questID) {
-        this.questID = questID;
+    public void addQuest(int questID) {
+        getQuestIDs().add(questID);
     }
 
-    public int getQuestID() {
-        return questID;
+    public Set<Integer> getQuestIDs() {
+        return questIDs;
     }
 
     public void setMobID(int mobID) {

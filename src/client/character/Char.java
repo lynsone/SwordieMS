@@ -1783,10 +1783,12 @@ public class Char {
     public void addDrop(Drop drop) {
         if(drop.isMoney()) {
             addMoney(drop.getMoney());
+            getQuestManager().handleMoneyGain(drop.getMoney());
             write(WvsContext.dropPickupMessage(drop.getMoney(), (short) 0, (short) 0));
         } else {
             Item item = drop.getItem();
             addItemToInventory(item);
+            getQuestManager().handleItemGain(item);
             write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
         }
     }
