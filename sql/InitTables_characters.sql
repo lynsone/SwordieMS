@@ -20,6 +20,14 @@ DROP TABLE IF EXISTS options;
 DROP TABLE IF EXISTS equips;
 DROP TABLE IF EXISTS items;
 DROP TABLE IF EXISTS inventories;
+DROP TABLE IF EXISTS questProgressRequirements;
+DROP TABLE IF EXISTS questProgressItemRequirements;
+DROP TABLE IF EXISTS questProgressLevelRequirements;
+DROP TABLE IF EXISTS questProgressMoneyRequirements;
+DROP TABLE IF EXISTS questProgressMobRequirements;
+DROP TABLE IF EXISTS questlists;
+DROP TABLE IF EXISTS questManagers;
+DROP TABLE IF EXISTS quests;
 DROP TABLE IF EXISTS filetimes;
 
 CREATE TABLE filetimes (
@@ -27,6 +35,75 @@ CREATE TABLE filetimes (
     lowDateTime int,
     highDateTime int,
     PRIMARY KEY (id)
+);
+
+CREATE TABLE quests (
+	id bigint NOT NULL AUTO_INCREMENT,
+    qrKey int,
+    status int,
+    completedTime int,
+	PRIMARY KEY (id),
+    FOREIGN KEY (completedTime) REFERENCES filetimes(id)
+);
+
+CREATE TABLE questManagers (
+	id bigint NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE questlists (
+	questList_id bigint NOT NULL AUTO_INCREMENT,
+	QuestManager_id bigint,
+    questID int,
+    fk_questID bigint,
+    PRIMARY KEY (questList_id),
+    FOREIGN KEY (QuestManager_id) REFERENCES questManagers(id) ON DELETE CASCADE,
+    FOREIGN KEY (fk_questID) REFERENCES quests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE questProgressRequirements (
+	id bigint NOT NULL AUTO_INCREMENT,
+	questID bigint,
+    PRIMARY KEY (id),
+    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE questProgressItemRequirements (
+	id bigint NOT NULL AUTO_INCREMENT,
+    itemID int,
+	questID bigint,
+    requiredCount int,
+    currentCount int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE questProgressLevelRequirements (
+	id bigint NOT NULL AUTO_INCREMENT,
+    level int,
+	questID bigint,
+    curLevel int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE questProgressMoneyRequirements (
+	id bigint NOT NULL AUTO_INCREMENT,
+    money int,
+	questID bigint,
+    curMoney int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE questProgressMobRequirements (
+	id bigint NOT NULL AUTO_INCREMENT,
+    mobID int,
+	questID bigint,
+    requiredCount int,
+    currentCount int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
 );
 
 
@@ -340,6 +417,7 @@ CREATE TABLE characters (
     cashInventory int,
     funcKeyMap_id int,
     fieldID int,
+    questManager bigint,
 	PRIMARY KEY (id),
     FOREIGN KEY (avatarData) REFERENCES avatarData(id) ON DELETE CASCADE,
     FOREIGN KEY (equippedInventory) REFERENCES inventories(id) ON DELETE CASCADE,
@@ -348,7 +426,8 @@ CREATE TABLE characters (
     FOREIGN KEY (etcInventory) REFERENCES inventories(id) ON DELETE CASCADE,
     FOREIGN KEY (installInventory) REFERENCES inventories(id) ON DELETE CASCADE,
     FOREIGN KEY (cashInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (funcKeyMap_id) REFERENCES funckeymap(id) ON DELETE CASCADE
+    FOREIGN KEY (funcKeyMap_id) REFERENCES funckeymap(id) ON DELETE CASCADE,
+    FOREIGN KEY (questManager) REFERENCES questmanagers(id) ON DELETE CASCADE
 );
 
 CREATE TABLE skills (
@@ -386,6 +465,7 @@ CREATE TABLE accounts (
 	creationDate long,
 	PRIMARY KEY (id)
 );
+
 
 #CREATE TABLE test (
 #	id int NOT NULL AUTO_INCREMENT,

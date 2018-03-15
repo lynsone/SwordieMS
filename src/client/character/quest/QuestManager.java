@@ -8,10 +8,12 @@ import client.life.Mob;
 import enums.QuestStatus;
 import loaders.QuestData;
 import loaders.QuestInfo;
+import org.hibernate.annotations.Cascade;
 import packet.CField;
 import packet.WvsContext;
 import util.FileTime;
 
+import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,9 +23,30 @@ import static enums.QuestStatus.*;
 /**
  * Created on 12/20/2017.
  */
+@Entity
+@Table(name = "questManagers")
 public class QuestManager {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    /*
+    @ElementCollection
+@CollectionTable(name="<name_of_join_table>")
+@MapKeyColumn(name="<name_of_map_key_in_table>")
+     */
+    @ElementCollection
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @CollectionTable(name = "questlists")
+    @MapKeyColumn(name = "questID")
     private Map<Integer, Quest> questList;
+    @Transient
     private Char chr;
+
+    public QuestManager() {
+
+    }
 
     public QuestManager(Char chr) {
         questList = new HashMap<>();
@@ -138,5 +161,17 @@ public class QuestManager {
                 chr.write(WvsContext.questRecordMessage(q));
             }
         }
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setChr(Char chr) {
+        this.chr = chr;
     }
 }

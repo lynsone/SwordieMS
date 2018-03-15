@@ -2,6 +2,9 @@ package client.character.quest.QuestProgressRequirement;
 
 import loaders.DatSerializable;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,18 +12,26 @@ import java.io.IOException;
 /**
  * Created on 3/2/2018.
  */
-public class QuestProgressMobRequirement implements QuestProgressRequirement, QuestValueRequirement {
+@Entity
+@Table(name = "questProgressMobRequirements")
+public class QuestProgressMobRequirement extends QuestProgressRequirement implements QuestValueRequirement {
 
-    private int id;
+    @Column(name = "mobID")
+    private int mobID;
+    @Column(name = "requiredCount")
     private int requiredCount;
+    @Column(name = "currentCount")
     private int currentCount;
 
-    public int getId() {
-        return id;
+    public QuestProgressMobRequirement() {
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public int getMobID() {
+        return mobID;
+    }
+
+    public void setId(int mobID) {
+        this.mobID = mobID;
     }
 
     public int getRequiredCount() {
@@ -53,7 +64,7 @@ public class QuestProgressMobRequirement implements QuestProgressRequirement, Qu
 
     @Override
     public void write(DataOutputStream dos) throws IOException {
-        dos.writeInt(getId());
+        dos.writeInt(getMobID());
         dos.writeInt(getRequiredCount());
     }
 

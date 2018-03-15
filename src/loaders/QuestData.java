@@ -444,7 +444,7 @@ public class QuestData {
                             .filter(q -> q instanceof QuestProgressMobRequirement)
                             .map(q -> (QuestProgressMobRequirement) q)
                             .collect(Collectors.toSet())) { // readability is overrated
-                Mob m = MobData.getMobById(qpmr.getId());
+                Mob m = MobData.getMobById(qpmr.getMobID());
                 if(m != null) {
                     m.addQuest(qi.getQuestID());
                 }

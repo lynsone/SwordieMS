@@ -2,6 +2,9 @@ package client.character.quest.QuestProgressRequirement;
 
 import loaders.DatSerializable;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,10 +12,17 @@ import java.io.IOException;
 /**
  * Created on 3/2/2018.
  */
-public class QuestProgressMoneyRequirement implements QuestProgressRequirement {
+@Entity
+@Table(name = "questProgressMoneyRequirements")
+public class QuestProgressMoneyRequirement extends QuestProgressRequirement {
 
+    @Column(name = "money")
     private int money;
+    @Column(name = "curMoney")
     private int curMoney;
+
+    public QuestProgressMoneyRequirement() {
+    }
 
     public QuestProgressMoneyRequirement(int money){
         this.money = money;

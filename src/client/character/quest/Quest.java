@@ -5,10 +5,12 @@ import client.character.quest.QuestProgressRequirement.QuestProgressMobRequireme
 import client.character.quest.QuestProgressRequirement.QuestProgressRequirement;
 import client.character.quest.QuestProgressRequirement.QuestValueRequirement;
 import enums.QuestStatus;
+import org.hibernate.annotations.Cascade;
 import org.python.antlr.op.In;
 import util.FileTime;
 import util.Util;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,10 +19,27 @@ import java.util.stream.Collectors;
 /**
  * Created on 12/20/2017.
  */
+@Entity
+@Table(name = "quests")
 public class Quest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(name = "qrKey")
     private int QRKey;
+
+    @Column(name = "status")
     private QuestStatus status;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "questID")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<QuestProgressRequirement> progressRequirements;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "completedTime")
     private FileTime completedTime;
 
     public Quest() {
@@ -88,7 +107,7 @@ public class Quest {
     }
 
     public QuestProgressMobRequirement getMobReqByMobID(int mobID) {
-        return getMobReqs().stream().filter(qpmr -> qpmr.getId() == mobID).findFirst().orElse(null);
+        return getMobReqs().stream().filter(qpmr -> qpmr.getMobID() == mobID).findFirst().orElse(null);
     }
 
     public boolean hasMobReq(int mobID) {
@@ -116,7 +135,7 @@ public class Quest {
         QuestProgressMobRequirement qpmr = (QuestProgressMobRequirement) getProgressRequirements()
                 .stream()
                 .filter(q -> q instanceof QuestProgressMobRequirement &&
-                        ((QuestProgressMobRequirement) q).getId() == mobID)
+                        ((QuestProgressMobRequirement) q).getMobID() == mobID)
                 .findFirst().get();
         // should never return null, as this method should only be called when this quest indeed has this mob
         qpmr.incCurrentCount(1);
@@ -125,5 +144,13 @@ public class Quest {
     @Override
     public String toString() {
         return String.format("%d, %s", getQRKey(), getQRValue());
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

@@ -6,6 +6,9 @@ import client.character.*;
 import client.character.items.Equip;
 import client.character.items.Inventory;
 import client.character.items.Item;
+import client.character.quest.Quest;
+import client.character.quest.QuestManager;
+import client.character.quest.QuestProgressRequirement.*;
 import client.character.skills.Skill;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -28,24 +31,31 @@ public class DatabaseManager {
     public static void init() {
         Configuration configuration = new Configuration().configure();
         Class[] dbClasses = new Class[] {
-                Account.class,
-                Char.class,
-                AvatarData.class,
-                AvatarLook.class,
-                CharacterStat.class,
-                ExtendSP.class,
-                SPSet.class,
-                NonCombatStatDayLimit.class,
                 FileTime.class,
                 SystemTime.class,
+                NonCombatStatDayLimit.class,
                 CharacterCard.class,
-                Inventory.class,
                 Item.class,
                 Equip.class,
+                Inventory.class,
                 Test.class,
                 Skill.class,
                 FuncKeyMap.class,
                 Keymapping.class,
+                SPSet.class,
+                ExtendSP.class,
+                CharacterStat.class,
+                AvatarLook.class,
+                AvatarData.class,
+                Char.class,
+                Account.class,
+                QuestManager.class,
+                Quest.class,
+                QuestProgressRequirement.class,
+                QuestProgressItemRequirement.class,
+                QuestProgressLevelRequirement.class,
+                QuestProgressMobRequirement.class,
+                QuestProgressMoneyRequirement.class
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

@@ -57,6 +57,10 @@ public class Char {
     @Column(name = "accId")
     private int accId;
 
+    @JoinColumn(name = "questManager")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private QuestManager questManager;
+
     @JoinColumn(name = "equippedInventory")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Inventory equippedInventory = new Inventory(InvType.EQUIPPED, 50);
@@ -99,8 +103,6 @@ public class Char {
     private List<Skill> stolenSkills;
     @Transient
     private List<Skill> chosenSkills;
-    @Transient
-    private QuestManager questManager;
     @Transient
     private List<ItemPot> itemPots;
     @Transient
@@ -1140,6 +1142,9 @@ public class Char {
     }
 
     public QuestManager getQuestManager() {
+        if(questManager.getChr() == null) {
+            questManager.setChr(this);
+        }
         return questManager;
     }
 

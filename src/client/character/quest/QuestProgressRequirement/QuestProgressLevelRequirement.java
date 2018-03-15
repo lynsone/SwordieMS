@@ -2,6 +2,9 @@ package client.character.quest.QuestProgressRequirement;
 
 import loaders.DatSerializable;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,10 +12,17 @@ import java.io.IOException;
 /**
  * Created on 3/2/2018.
  */
-public class QuestProgressLevelRequirement implements QuestProgressRequirement {
+@Entity
+@Table(name = "questProgressLevelRequirements")
+public class QuestProgressLevelRequirement extends QuestProgressRequirement {
 
+    @Column(name = "level")
     private int level;
+    @Column(name = "curLevel")
     private int curLevel;
+
+    public QuestProgressLevelRequirement() {
+    }
 
     public QuestProgressLevelRequirement(int level){
         this.level = level;
