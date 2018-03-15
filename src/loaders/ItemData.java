@@ -1158,13 +1158,4 @@ public class ItemData {
     public static List<ItemInfo> getItems() {
         return items;
     }
-
-    public static Set<Integer> getQuestsByItemID(int itemID) {
-        Set<Integer> res = new HashSet<>();
-        if(ItemConstants.isEquip(itemID)) {
-            Item item = getEquipById(itemID);
-
-        }
-        return res;
-    }
 }
