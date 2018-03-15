@@ -48,4 +48,8 @@ public class QuestProgressMoneyRequirement implements QuestProgressRequirement {
     public DatSerializable load(DataInputStream dis) throws IOException {
         return new QuestProgressMoneyRequirement(dis.readInt());
     }
+
+    public void addMoney(int money) {
+        setMoney(getMoney() + money);
+    }
 }

@@ -69,4 +69,8 @@ public class QuestProgressItemRequirement implements QuestProgressRequirement, Q
     public String getValue() {
         return String.valueOf(getCurrentCount());
     }
+
+    public void addItem(int quantity) {
+        setCurrentCount(getCurrentCount() + quantity);
+    }
 }

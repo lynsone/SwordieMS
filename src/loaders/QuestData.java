@@ -1,10 +1,12 @@
 package loaders;
 
+import client.character.items.Item;
 import client.character.quest.Quest;
 import client.character.quest.QuestProgressRequirement.*;
 import client.character.quest.questRequirements.*;
 import client.character.quest.questReward.*;
 import client.life.Mob;
+import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.QuestStatus;
 import enums.Stat;
@@ -447,6 +449,33 @@ public class QuestData {
                 Mob m = MobData.getMobById(qpmr.getId());
                 if(m != null) {
                     m.addQuest(qi.getQuestID());
+                }
+            }
+        }
+    }
+
+    public static void linkItemData() {
+        if (getBaseQuests().size() == 0) {
+            loadQuestsFromWZ();
+        }
+        for(QuestInfo qi : getBaseQuests()) {
+            for(QuestProgressItemRequirement qpmr :
+                    qi.getQuestProgressRequirements()
+                            .stream()
+                            .filter(q -> q instanceof QuestProgressItemRequirement)
+                            .map(q -> (QuestProgressItemRequirement) q)
+                            .collect(Collectors.toSet())) { // readability is overrated
+                int itemID = qpmr.getId();
+                if(ItemConstants.isEquip(itemID)) {
+                    Item item = ItemData.getEquips().stream().filter(e -> e.getItemId() == itemID).findAny().orElse(null);
+                    if(item != null) {
+                        item.addQuest(qi.getQuestID());
+                    }
+                } else {
+                    ItemInfo item = ItemData.getItemInfoByID(qpmr.getId());
+                    if (item != null) {
+                        item.setQuestID(qi.getQuestID());
+                    }
                 }
             }
         }

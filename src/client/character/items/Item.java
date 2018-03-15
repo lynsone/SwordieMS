@@ -13,9 +13,7 @@ import util.FileTime;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * GW_ItemSlotBase
@@ -53,6 +51,8 @@ public class Item implements Serializable {
     protected int quantity;
     @Column(name = "owner")
     private String owner = "";
+    @Transient
+    private Set<Integer> questIDs = new HashSet<>();
 
     public long getId() {
         return id;
@@ -115,6 +115,18 @@ public class Item implements Serializable {
         if (amount > 0) {
             setQuantity(Math.max(0, getQuantity() - amount));
         }
+    }
+
+    public Set<Integer> getQuestIDs() {
+        return questIDs;
+    }
+
+    public void addQuest(int questID) {
+        getQuestIDs().add(questID);
+    }
+
+    public Set<Integer> getQuestID() {
+        return getQuestIDs();
     }
 
     public enum Type {
