@@ -23,6 +23,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import net.Packet;
+import org.apache.log4j.LogManager;
 
 /**
  * Implementation of a Netty encoder pattern so that encryption of MapleStory
@@ -32,6 +33,7 @@ import net.Packet;
  * @author Zygon
  */
 public final class PacketEncoder extends MessageToByteEncoder<Packet> {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
     protected void encode(ChannelHandlerContext chc, Packet in, ByteBuf bb) throws Exception {
@@ -41,7 +43,7 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
 
         if (c != null) {
             if(!OutHeader.isSpamHeader(OutHeader.getOutHeaderByOp(in.getHeader()))) {
-                System.out.println("[Out]\t| " + in);
+                log.debug("[Out]\t| " + in);
             }
             byte[] iv = c.getSendIV();
             byte[] head = MapleCrypto.getHeader(data.length, iv);
@@ -60,7 +62,7 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
             bb.writeBytes(data);
             
         } else {
-            System.out.println("[PacketEncoder] | Plain sending " + in);
+            log.debug("[PacketEncoder] | Plain sending " + in);
             bb.writeBytes(data);
         }
     }

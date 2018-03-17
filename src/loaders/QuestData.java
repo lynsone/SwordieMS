@@ -10,6 +10,7 @@ import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.QuestStatus;
 import enums.Stat;
+import org.apache.log4j.LogManager;
 import org.w3c.dom.Node;
 import util.Util;
 import util.XMLApi;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  */
 public class QuestData {
     private static Set<QuestInfo> baseQuests = new HashSet<>();
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static void loadQuestsFromWZ() {
         String wzDir = ServerConstants.WZ_DIR + "\\Quest.wz\\";
@@ -217,7 +219,7 @@ public class QuestData {
                                         case "state":
                                             break; // state var is always 2 (completion)
                                         default:
-                                            System.err.printf("(%d) Unk quest name %s with value %s%n", questID, questName, questValue);
+                                            log.warn(String.format("(%d) Unk quest name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
                                 }
@@ -237,7 +239,7 @@ public class QuestData {
                                         case "order":
                                             break;
                                         default:
-                                            System.err.printf("(%d) Unk pet name %s with value %s%n", questID, questName, questValue);
+                                            log.warn(String.format("(%d) Unk pet name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
                                 }
@@ -277,7 +279,7 @@ public class QuestData {
                                         case "order":
                                             break;
                                         default:
-                                            System.err.printf("(%d) Unk mob name %s with value %s%n", questID, questName, questValue);
+                                            log.warn(String.format("(%d) Unk mob name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
                                 }
@@ -299,7 +301,7 @@ public class QuestData {
                                         case "levelCondition":
                                             break;
                                         default:
-                                            System.err.printf("(%d) Unk skill name %s with value %s%n", questID, questName, questValue);
+                                            log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
                                 }
@@ -331,7 +333,7 @@ public class QuestData {
                                         case "secret":
                                             break;
                                         default:
-                                            System.err.printf("(%d) Unk item name %s with value %s%n", questID, questName, questValue);
+                                            log.warn(String.format("(%d) Unk item name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
                                 }
@@ -343,7 +345,7 @@ public class QuestData {
                             }
                             break;
                         default:
-                            System.err.printf("(%d) Unk name %s with value %s%n", questID, name, value);
+                            log.warn(String.format("(%d) Unk name %s with value %s", questID, name, value));
                             break;
                     }
                 }
@@ -403,7 +405,7 @@ public class QuestData {
                                             qir.setGender(Integer.parseInt(itemValue));
                                             break;
                                         default:
-                                            System.err.printf("(%d) Unk item name %s with value %s status %d%n", id, itemName, itemValue, status);
+                                            log.warn(String.format("(%d) Unk item name %s with value %s status %d", id, itemName, itemValue, status));
                                             break;
                                     }
                                 }
@@ -411,7 +413,7 @@ public class QuestData {
                             }
                             break;
                         default:
-                            System.err.printf("(%d) Unk name %s with value %s status %d%n", id, name, value, status);
+                            log.warn(String.format("(%d) Unk name %s with value %s status %d", id, name, value, status));
                             break;
                     }
                 }
@@ -425,7 +427,7 @@ public class QuestData {
             int id = Integer.parseInt(XMLApi.getNamedAttribute(questIDNode, "name"));
             QuestInfo quest = getQuestInfo(id);
             Node autoCompleteNode = XMLApi.getFirstChildByNameBF(questIDNode, "autoComplete");
-            if(autoCompleteNode != null) {
+            if (autoCompleteNode != null) {
                 quest.setAutoComplete(Integer.parseInt(XMLApi.getNamedAttribute(autoCompleteNode, "value")) == 1);
             }
         }
@@ -439,15 +441,15 @@ public class QuestData {
         if (getBaseQuests().size() == 0) {
             loadQuestsFromWZ();
         }
-        for(QuestInfo qi : getBaseQuests()) {
-            for(QuestProgressMobRequirement qpmr :
+        for (QuestInfo qi : getBaseQuests()) {
+            for (QuestProgressMobRequirement qpmr :
                     qi.getQuestProgressRequirements()
                             .stream()
                             .filter(q -> q instanceof QuestProgressMobRequirement)
                             .map(q -> (QuestProgressMobRequirement) q)
                             .collect(Collectors.toSet())) { // readability is overrated
                 Mob m = MobData.getMobById(qpmr.getMobID());
-                if(m != null) {
+                if (m != null) {
                     m.addQuest(qi.getQuestID());
                 }
             }
@@ -458,17 +460,17 @@ public class QuestData {
         if (getBaseQuests().size() == 0) {
             loadQuestsFromWZ();
         }
-        for(QuestInfo qi : getBaseQuests()) {
-            for(QuestProgressItemRequirement qpmr :
+        for (QuestInfo qi : getBaseQuests()) {
+            for (QuestProgressItemRequirement qpmr :
                     qi.getQuestProgressRequirements()
                             .stream()
                             .filter(q -> q instanceof QuestProgressItemRequirement)
                             .map(q -> (QuestProgressItemRequirement) q)
                             .collect(Collectors.toSet())) { // readability is overrated
                 int itemID = qpmr.getItemID();
-                if(ItemConstants.isEquip(itemID)) {
+                if (ItemConstants.isEquip(itemID)) {
                     Item item = ItemData.getEquips().stream().filter(e -> e.getItemId() == itemID).findAny().orElse(null);
-                    if(item != null) {
+                    if (item != null) {
                         item.addQuest(qi.getQuestID());
                     }
                 } else {
@@ -614,7 +616,7 @@ public class QuestData {
             qi.setAutoComplete(dis.readBoolean());
             getBaseQuests().add(qi);
         } catch (IOException e) {
-            System.err.println(qi.getQuestID());
+            log.error(String.format("IOException when loading %d", qi.getQuestID()));
             e.printStackTrace();
         }
         return qi;
@@ -624,12 +626,12 @@ public class QuestData {
         QuestInfo qi = getQuestInfoById(questID);
         Quest quest = new Quest();
         quest.setQRKey(questID);
-        if(qi.isAutoComplete()) {
+        if (qi.isAutoComplete()) {
             quest.completeQuest();
         } else {
             quest.setStatus(QuestStatus.STARTED);
         }
-        for(QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
+        for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
             quest.addQuestProgressRequirement(qpr);
         }
         return quest;

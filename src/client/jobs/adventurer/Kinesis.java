@@ -28,32 +28,32 @@ import static client.character.skills.SkillStat.*;
 public class Kinesis extends Job {
     public static final int RETURN_KINESIS = 140001290;
 
-    public final static int PSYCHIC_FORCE = 142001000;
-    public final static int MENTAL_SHIELD = 142001007;
-    public final static int ESP_BOOSTER = 142001003;
-    public final static int ULTIMATE_METAL_PRESS = 142001002;
-    public final static int PSYCHIC_BLAST_FWD = 142100000;
-    public final static int PSYCHIC_BLAST_DOWN = 142100001;
-    public final static int PSYCHIC_ASSAULT_FWD = 142110000;
-    public final static int PSYCHIC_ASSAULT_DOWN = 142110001;
-    public final static int PSYCHIC_DRAIN = 142101009; // TODO, AffectedArea?
-    public final static int PSYCHIC_ARMOR = 142101004;
-    public final static int ULTIMATE_DEEP_IMPACT = 142101003;
-    public final static int PSYCHIC_BULWARK = 142110009;
-    public final static int PURE_POWER = 142101005;
-    public final static int PSYCHIC_REINFORCEMENT = 142111008;
-    public final static int KINETIC_JAUNT = 142111010;
-    public final static int ULTIMATE_TRAINWRECK = 142111007;
-    public final static int KINETIC_COMBO = 142110011;
-    public final static int MIND_BREAK = 142121004;
-    public final static int ULTIMATE_PSYCHIC_SHOT = 142120002;
-    public final static int ULTIMATE_BPM = 142120002;
-    public final static int PRESIDENTS_ORDERS = 142121016;
-    public final static int PSYCHIC_CHARGER = 142121008;
-    public final static int TELEPATH_TACTICS = 142121006;
-    public final static int MENTAL_TEMPEST = 142121030;
+    public static final int PSYCHIC_FORCE = 142001000;
+    public static final int MENTAL_SHIELD = 142001007;
+    public static final int ESP_BOOSTER = 142001003;
+    public static final int ULTIMATE_METAL_PRESS = 142001002;
+    public static final int PSYCHIC_BLAST_FWD = 142100000;
+    public static final int PSYCHIC_BLAST_DOWN = 142100001;
+    public static final int PSYCHIC_ASSAULT_FWD = 142110000;
+    public static final int PSYCHIC_ASSAULT_DOWN = 142110001;
+    public static final int PSYCHIC_DRAIN = 142101009; // TODO, AffectedArea?
+    public static final int PSYCHIC_ARMOR = 142101004;
+    public static final int ULTIMATE_DEEP_IMPACT = 142101003;
+    public static final int PSYCHIC_BULWARK = 142110009;
+    public static final int PURE_POWER = 142101005;
+    public static final int PSYCHIC_REINFORCEMENT = 142111008;
+    public static final int KINETIC_JAUNT = 142111010;
+    public static final int ULTIMATE_TRAINWRECK = 142111007;
+    public static final int KINETIC_COMBO = 142110011;
+    public static final int MIND_BREAK = 142121004;
+    public static final int ULTIMATE_PSYCHIC_SHOT = 142120002;
+    public static final int ULTIMATE_BPM = 142120002;
+    public static final int PRESIDENTS_ORDERS = 142121016;
+    public static final int PSYCHIC_CHARGER = 142121008;
+    public static final int TELEPATH_TACTICS = 142121006;
+    public static final int MENTAL_TEMPEST = 142121030;
 
-    private final static int MAX_PP = 30;
+    private static final int MAX_PP = 30;
 
     private final int[] buffs = new int[]{
             ESP_BOOSTER,
@@ -205,7 +205,6 @@ public class Kinesis extends Job {
             case PSYCHIC_ARMOR:
             case PSYCHIC_BULWARK:
                 int t = SkillData.getSkillInfoById(PSYCHIC_ARMOR).getValue(time, slv);
-                System.out.println(t);
                 o1.nValue = si.getValue(indiePdd, slv);
                 o1.nReason = skillID;
                 o1.tStart = curTime;

@@ -5,6 +5,7 @@ import client.character.items.ItemOption;
 import enums.InvType;
 import enums.ItemGrade;
 import loaders.ItemData;
+import org.apache.log4j.LogManager;
 import util.Util;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
  * Created on 12/12/2017.
  */
 public class ItemConstants {
-
+    static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     public static final int THIRD_LINE_CHANCE = 50;
 
     public static int getGenderFromId(int nItemID) {
@@ -226,7 +227,7 @@ public class ItemConstants {
                         bodyPartList.add(1507);
                     }
                 } else {
-                    System.out.println("Unknown type? id = " + itemID);
+                    log.debug("Unknown type? id = " + itemID);
                 }
                 break;
         }

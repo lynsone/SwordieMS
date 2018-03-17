@@ -31,7 +31,8 @@ public class FileTime implements Serializable {
         MAX_TIME(150842304000000000L),
         ZERO_TIME(94354848000000000L),
         PERMANENT(150841440000000000L),
-        FT_UT_OFFSET(116444592000000000L)
+        FT_UT_OFFSET(116444592000000000L),
+        QUEST_TIME(27111908);
         ;
         private long val;
 
@@ -77,6 +78,10 @@ public class FileTime implements Serializable {
 
     public static FileTime getTime() {
         return getFTFromLong(System.currentTimeMillis() * 10000L + Type.FT_UT_OFFSET.getVal()); // Mushy
+    }
+
+    public static FileTime getCurrentTimeForQuest() {
+        return getFTFromLong((long) ((System.currentTimeMillis() / 1000 / 60) * 0.1396987) + Type.QUEST_TIME.getVal());
     }
 
     public static FileTime getTimeFromLong(long time) {

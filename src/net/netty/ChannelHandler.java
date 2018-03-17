@@ -9,6 +9,7 @@ import handling.handlers.WorldHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import org.apache.log4j.LogManager;
 import packet.WvsContext;
 
 import java.io.IOException;
@@ -21,6 +22,8 @@ import static net.netty.NettyClient.CLIENT_KEY;
  */
 public class ChannelHandler extends ChannelInboundHandlerAdapter {
 
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         NettyClient o = ctx.channel().attr(CLIENT_KEY).get();
@@ -32,7 +35,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("[ChannelHandler] | Channel inactive.");
+        log.debug("[ChannelHandler] | Channel inactive.");
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
         if(c != null && c.getChr() != null) {
             c.getChr().updateDB();
@@ -55,7 +58,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
             if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(op))) {
-                System.out.printf("[In]\t| %s, %d/0x%s\t| %s%n", InHeader.getInHeaderByOp(op), +op, Integer.toHexString(op).toUpperCase(), inPacket);
+                log.debug(String.format("[In]\t| %s, %d/0x%s\t| %s", InHeader.getInHeaderByOp(op), +op, Integer.toHexString(op).toUpperCase(), inPacket));
             }
             switch(opHeader) {
                 case CONNECT:
@@ -105,7 +108,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     inPacket.decodeInt(); // crc
                     int skillID = inPacket.decodeInt();
                     byte slv = inPacket.decodeByte();
-                    System.out.println("SkillID: " + skillID);
+                    log.debug("SkillID: " + skillID);
                     c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
                     c.getChr().getJobHandler().handleSkill(c, skillID, slv, inPacket);
                     WvsContext.dispose(c.getChr());
@@ -334,14 +337,14 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
 
     private void handleUnknown(InPacket inPacket, short opCode) {
         if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(opCode))) {
-            System.out.println("Unhandled opcode " + opCode + "/0x" + Integer.toHexString(opCode) + ", packet " + inPacket);
+            log.warn(String.format("Unhandled opcode %s/0x%s, packet %s", opCode, Integer.toHexString(opCode), inPacket));
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (cause instanceof IOException) {
-            System.err.println("Client forcibly closed the game.");
+            log.info("Client forcibly closed the game.");
         } else {
             cause.printStackTrace();
         }

@@ -2,21 +2,18 @@ package server;
 
 import client.Account;
 import client.Client;
-import client.character.Char;
-import client.character.items.Equip;
+import com.sun.media.jfxmedia.logging.Logger;
 import constants.ServerConfig;
 import constants.ServerConstants;
-import loaders.ItemData;
-import loaders.SkillStringInfo;
 import loaders.StringData;
 import net.crypto.MapleCrypto;
 import net.db.DatabaseConnection;
 import net.db.DatabaseManager;
 import net.netty.ChannelAcceptor;
 import net.netty.LoginAcceptor;
+import org.apache.log4j.LogManager;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+import util.FileTime;
 import util.Loader;
 import loaders.DataClasses;
 import util.Tuple;
@@ -31,6 +28,8 @@ import java.util.*;
  * Created on 2/18/2017.
  */
 public class Server extends Properties {
+
+    final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     private static final Server server = new Server();
 
@@ -50,7 +49,7 @@ public class Server extends Properties {
     }
 
     private void init() {
-        System.out.println("[Info] Starting server.");
+        log.info("Starting server.");
         long start = System.currentTimeMillis();
         Properties properties = new Properties();
         try {
@@ -70,7 +69,7 @@ public class Server extends Properties {
 
         long startNow = System.currentTimeMillis();
         DatabaseManager.init();
-        System.out.println("[Info] Finished loading Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
+        log.info("Finished loading Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
 
         try {
             checkAndCreateDat();
@@ -93,14 +92,14 @@ public class Server extends Properties {
             }
         }
         long end = System.currentTimeMillis();
-        System.out.println("[Info] Finished loading server in " + (end - start) + "ms");
+        log.info(String.format("Finished loading server in %dms", end - start));
     }
 
     private void checkAndCreateDat() {
         File file = new File(ServerConstants.DAT_DIR + "/equips");
         boolean exists = file.exists();
         if(!exists) {
-            System.out.println("Dat files cannot be found (at least not the equip dats). All dats will now be generated. This may take a long while.");
+            log.info("Dat files cannot be found (at least not the equip dats). All dats will now be generated. This may take a long while.");
             for(Class c : DataClasses.datCreators) {
                 try {
                     Method m = c.getMethod("generateDatFiles");
@@ -126,9 +125,9 @@ public class Server extends Properties {
                     method.invoke(c, file, exists);
                     long total = System.currentTimeMillis() - start;
                     if (exists) {
-                        System.out.println("[Info] Took " + total + "ms to load from " + file.getName());
+                        log.info(String.format("Took %dms to load from %s", total, file.getName()));
                     } else {
-                        System.out.println("[Info] Took " + total + "ms to load using " + method.getName());
+                        log.info(String.format("Took %dms to load using %s", total, method.getName()));
                     }
                 }
             }

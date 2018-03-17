@@ -6,6 +6,7 @@ import client.life.Mob;
 import client.life.MobSkill;
 import client.life.MobTemporaryStat;
 import constants.ServerConstants;
+import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.Util;
@@ -20,6 +21,7 @@ import static enums.MobStat.*;
  * Created on 12/30/2017.
  */
 public class MobData {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     private static Set<Mob> mobs = new HashSet<>();
 
@@ -639,7 +641,7 @@ public class MobData {
 //                            if(firstAttackNode != null) {
 //                                mob.setFirstAttack(Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")) != 0);
 //                                if(Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")) > 1) {
-//                                    System.err.printf("Firstattack = %d%n", Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")));
+//                                    System.err.printf("Firstattack = %d", Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")));
 //                                }
 //                            }
                             for(Node skillInfoNode : XMLApi.getAllChildren(skillIDNode)) {
@@ -721,7 +723,7 @@ public class MobData {
                                         mobSkill.setSpeak(skillNodeValue);
                                         break;
                                     default:
-                                        System.out.printf("Unknown skill node %s with value %s%n", skillNodeName, skillNodeValue);
+                                        log.warn(String.format("Unknown skill node %s with value %s", skillNodeName, skillNodeValue));
                                 }
                             }
                             mob.addSkill(mobSkill);
@@ -852,7 +854,7 @@ public class MobData {
                     case "forward_direction":
                         break;
                     default:
-                        System.err.println(String.format("Unkown property %s with value %s.", name, value));
+                        log.warn(String.format("Unkown property %s with value %s.", name, value));
                 }
                 getMobs().add(mob);
             }

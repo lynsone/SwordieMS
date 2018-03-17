@@ -1,219 +1,72 @@
-case 432:
-        CField::OnTransferFieldReqIgnored(this - 2, iPacket);
-        break;
-      case 433:
-        CField::OnTransferChannelReqIgnored(iPacket);
-        break;
-      case 434:
-        CField::OnTransferPvpReqIgnored(iPacket);
-        break;
-      case 435:
-        CField::OnFieldSpecificData(iPacket);
-        break;
-      case 436:
-        CField::OnGroupMessage(iPacket);
-        break;
-      case 437:
-        CField::OnFieldUniverseMessage(iPacket);
-        break;
-      case 438:
-        CField::OnWhisper(this - 2, iPacket);
-        break;
-      case 439:
-        CField::OnSummonItemInavailable(iPacket);
-        break;
-      case 440:
-        (loc_83FE00)(this - 8, iPacket);
-        break;
-      case 441:
-        sub_832DE0(iPacket);
-        break;
-      case 442:
-        sub_81D9F0(this - 8, iPacket);
-        break;
-      case 443:
-        sub_81DA70(this - 8, iPacket);
-        break;
-      case 444:
-        sub_8042D0(this - 2, iPacket);
-        break;
-      case 445:
-        sub_81D960(iPacket);
-        break;
-      case 446:
-        sub_8816E0(this - 2, iPacket);
-        break;
-      case 447:
-        sub_882060(this - 2, iPacket);
-        break;
-      case 448:
-        CField::OnBlowWeather(iPacket);
-        break;
-      case 449:
-        CField::OnPlayJukeBox(this - 2, iPacket);
-        break;
-      case 450:
-        CField::OnAdminResult(iPacket);
-        break;
-      case 451:
-        CField::OnQuiz(iPacket);
-        break;
-      case 452:
-        CField::OnDesc(this - 2, iPacket);
-        break;
-      case 453:
-        (*(*(this - 2) + 168))(this - 8, iPacket);
-        break;
-      case 456:
-        CField::OnSetQuestClear(iPacket);
-        break;
-      case 457:
-        CField::OnSetQuestTime(iPacket);
-        break;
-      case 458:
-        CField::OnSetObjectState(iPacket);
-        break;
-      case 459:
-        CWnd::Destroy(iPacket);
-        break;
-      case 461:
-        CField::OnStalkResult(iPacket);
-        break;
-      case 464:
-        CQuickslotKeyMappedMan::OnInit(iPacket);
-        break;
-      case 465:
-        CField::OnFootHoldMove(this - 2, iPacket);
-        break;
-      case 466:
-        CField::OnCorrectFootHoldMove(this - 8, iPacket);
-        break;
-      case 471:
-        CField::OnSmartMobNotice(this - 2, iPacket);
-        break;
-      case 472:
-        CField::OnChangePhase(iPacket);
-        break;
-      case 473:
-        CField::OnChangeMobZone(iPacket);
-        break;
-      case 475:
-        CField::OnPvPMigrateInfoResult(iPacket);
-        break;
-      case 476:
-        CInGameDirectionNodeInfo::OnCurNodeEventEnd(iPacket);
-        break;
-      case 477:
-        CField::OnCreateForceAtom(iPacket);
-        break;
-      case 478:
-        CField::OnSetAchieveRate(iPacket);
-        break;
-      case 479:
-        CField::OnSetQuickMoveInfo(iPacket);
-        break;
-      case 480:
-        CField::OnChangeAswanSiegeWeaponGauge(iPacket);
-        break;
-      case 481:
-        CField::OnCreateObtacle(this - 2, iPacket);
-        break;
-      case 482:
-        CField::OnClearObtacle(this - 8, iPacket);
-        break;
-      case 483:
-        sub_89AE20(this - 2, iPacket);
-        break;
-      case 484:
-        CField::OnB2FootHoldCreate(this - 8, iPacket);
-        break;
-      case 485:
-        CField::OnDebuffObjON(this - 2, iPacket);
-        break;
-      case 486:
-        CField::OnCreateFallingCatcher(this - 8, iPacket);
-        break;
-      case 487:
-        CField::OnChaseEffectSet(iPacket);
-        break;
-      case 488:
-        CWvsContext::OnMesoExchangeResult(iPacket);
-        break;
-      case 489:
-        CField::OnSetMirrorDungeonInfo(iPacket);
-        break;
-      case 490:
-        CField::OnSetIntrusion(this - 2, iPacket);
-        break;
-      case 491:
-        CField::OnCannotDrop(iPacket);
-        break;
-      case 492:
-        CField::OnFootHoldOnOff(iPacket);
-        break;
-      case 493:
-        CField::OnLadderRopeOnOff(iPacket);
-        break;
-      case 494:
-        CField::OnMomentAreaOnOff(iPacket);
-        break;
-      case 495:
-        CField::OnMomentAreaOnOffAll(iPacket);
-        break;
-      case 496:
-        CField::OnChatLetClientConnect(iPacket);
-        break;
-      case 497:
-        CField::OnChatInduceClientConnect(iPacket);
-        break;
-      case 498:
-        CUICoordinationContest::OnPacket(iPacket);
-        break;
-      case 499:
-        CField::OnEliteState(iPacket);
-        break;
-      case 500:
-        CField::OnPlaySound(iPacket);
-        break;
-      case 501:
-        CField::OnStackEventGauge(iPacket);
-        break;
-      case 502:
-        CField::OnSetUnionField(this - 2, iPacket);
-        break;
-      case 504:
-        CField::OnStarPlanetBurningTimeInfo(iPacket);
-        break;
-      case 505:
-        CField::OnPublicShareState(iPacket);
-        break;
-      case 506:
-        CField::OnFunctionTempBlock(iPacket);
-        break;
-      case 507:
-        CUIStatusBar::OnPacket(iPacket);
-        break;
-      case 508:
-        FieldDelaySkill::OnFieldSkillDelay(iPacket);
-        break;
-      case 509:
-        CField::OnWeatherPacket_Add(iPacket);
-        break;
-      case 510:
-        CField::OnWeatherPacket_Remove(iPacket);
-        break;
-      case 511:
-        CField::OnWeatherPacket_Msg(iPacket);
-        break;
-      case 512:
-        CField::OnAddWreckage(iPacket);
-        break;
-      case 513:
-        CField::OnDelWreckage(this - 2, iPacket);
-        break;
-      case 514:
-        CField::OnCreateMirrorImage(iPacket);
-        break;
-      case 515:
-        CField::OnFuntionFootholdMan(this - 2, iPacket);
-        break;
+switch ( nType )
+      {
+        case 1113:
+          CField::OnRankCreate(this - 2, iPacket);
+          break;
+        case 1114:
+          CFieldRankSystem::OnSetUserName(this - 2, iPacket);
+          break;
+        case 1115:
+          CFieldRankSystem::OnNotifyData(this - 2, iPacket);
+          break;
+        case 1155:
+          CField::OnFieldFadeObjectInfo(this - 2, iPacket);
+          break;
+        case 1156:
+          CRuneStoneMgrForClient::OnRuneStoneClearAndAllRegister(0, iPacket);
+          break;
+        case 1157:
+          CRuneStoneMgrForClient::OnRuneStoneDisappear(0, iPacket);
+          break;
+        case 1158:
+          CRuneStoneMgrForClient::OnRuneStoneAppear(0, iPacket);
+          break;
+        case 1160:
+          CField::OnStarPlanetScreenWorldEvent(this - 2, a2, iPacket);
+          break;
+        case 1161:
+          CField::OnFieldStateCreate(this - 2, iPacket);
+          break;
+        case 1162:
+          CField::OnFieldStateRemove(this - 2, iPacket);
+          break;
+        case 1163:
+          CField::OnChaserMove(this - 2, iPacket);
+          break;
+        case 1207:
+          CField::OnHorntailTimer(iPacket);
+          break;
+        case 1211:
+          CField::OnZakumTimer(iPacket);
+          break;
+        case 1280:
+          CField::OnZakumTimer1(iPacket);
+          break;
+        case 1308:
+          CTrunkDlg::OnPacket(iPacket);
+          break;
+        case 1311:
+          CRPSGameDlg::OnPacket(iPacket);
+          break;
+        case 1312:
+          CGoStopRPSGameDlg::OnPacket(iPacket);
+          break;
+        case 1313:
+          CStarPlanetGoStopRPSGameDlg::OnPacket(iPacket);
+          break;
+        case 1314:
+          CUIMessenger::OnPacket(iPacket);
+          break;
+        case 1315:
+          CMiniRoomBaseDlg::OnPacketBase(iPacket);
+          break;
+        case 1316:
+          CField::OnSetCashShopInitialItem(iPacket);
+          break;
+        case 1317:
+          CField::OnTryMigrateCashShop(iPacket);
+          break;
+        case 1339:
+          CParcelDlg::OnPacket(iPacket);
+          break;
+        default:

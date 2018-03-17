@@ -35,6 +35,7 @@ import util.Util;
 import javax.persistence.*;
 import java.util.*;
 
+import static enums.ChatMsgColour.YELLOW;
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
 import static enums.InventoryOperation.*;
@@ -1475,6 +1476,14 @@ public class Char {
     }
 
     /**
+     * Sends a message to this Char with a default colour {@link ChatMsgColour#YELLOW}.
+     * @param msg The message to display.
+     */
+    public void chatMessage(String msg) {
+        chatMessage(YELLOW, msg);
+    }
+
+    /**
      * Sends a message to this Char with a given {@link ChatMsgColour colour}.
      * @param clr The Colour this message should be in.
      * @param msg The message to display.
@@ -1738,8 +1747,6 @@ public class Char {
         updatedStats.put(Stat.mhp, cs.getHp());
         updatedStats.put(Stat.mp, cs.getHp());
         updatedStats.put(Stat.mmp, cs.getHp());
-        System.out.println("Old = " + oldInfo.isZeroBetaState());
-        System.out.println("New = " + currentInfo.isZeroBetaState());
         write(WvsContext.statChanged(updatedStats));
 //        write(WvsContext.zeroInfo(currentInfo));
     }

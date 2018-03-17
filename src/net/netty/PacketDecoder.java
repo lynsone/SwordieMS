@@ -23,6 +23,7 @@ import net.crypto.MapleCrypto;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import org.apache.log4j.LogManager;
 import util.Util;
 
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.List;
  * @author Zygon
  */
 public class PacketDecoder extends ByteToMessageDecoder {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
     protected void decode(ChannelHandlerContext chc, ByteBuf in, List<Object> out) throws Exception {
@@ -46,7 +48,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
                 if (in.readableBytes() >= 4) {
                     int h = in.readInt();
                     if (!MapleCrypto.checkPacket(h, iv)) {
-                        System.err.println("[PacketDecoder] | Incorrect packet seq! Dropping client " + c.getIP() + ".");
+                        log.error(String.format("[PacketDecoder] | Incorrect packet seq! Dropping client %s.", c.getIP()));
                         c.close();
                         return;
                     }

@@ -3,6 +3,7 @@ package loaders;
 import client.character.skills.Skill;
 import client.character.skills.SkillStat;
 import constants.ServerConstants;
+import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.Triple;
@@ -24,6 +25,7 @@ import static enums.ChatMsgColour.YELLOW;
 public class StringData {
     public static Map<Integer, SkillStringInfo> skillString = new HashMap<>();
     public static Map<Integer, String> itemStrings = new HashMap<>();
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static void loadItemStringsFromWz() {
         long start = System.currentTimeMillis();
@@ -65,7 +67,7 @@ public class StringData {
                 }
             }
         }
-        System.out.println("[Info] Loaded item strings from wz in " + (System.currentTimeMillis() - start) + "ms.");
+        log.info(String.format("Loaded item strings from wz in %dms.", System.currentTimeMillis() - start));
     }
 
     public static void loadStringsFromWz() {
@@ -102,7 +104,7 @@ public class StringData {
                 skillString.put(Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name")), ssi);
             }
         }
-        System.out.println("[Info] Loaded skill strings in " + (System.currentTimeMillis() - start) + "ms.");
+        log.info(String.format("Loaded skill strings in %dms.", System.currentTimeMillis() - start));
     }
 
     public static Map<Integer, SkillStringInfo> getSkillString() {
@@ -154,7 +156,7 @@ public class StringData {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("[Info] Loaded skill strings from data file in " + (System.currentTimeMillis() - start) + "ms.");
+        log.info(String.format("Loaded skill strings from data file in %dms.", System.currentTimeMillis() - start));
     }
 
     private static void saveItemStrings(String dir) {
@@ -188,7 +190,7 @@ public class StringData {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("[Info] Loaded item strings from data file in " + (System.currentTimeMillis() - start) + "ms.");
+        log.info(String.format("Loaded item strings from data file in %dms.", System.currentTimeMillis() - start));
     }
 
     public static void main(String[] args) {

@@ -4,6 +4,7 @@ import client.character.skills.Skill;
 import client.character.skills.SkillInfo;
 import client.character.skills.SkillStat;
 import constants.ServerConstants;
+import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.*;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class SkillData {
 
     private static Map<Integer, SkillInfo> skills = new HashMap<>();
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Saver(varName = "skills")
     public static void saveSkills(File file) {
@@ -120,7 +122,7 @@ public class SkillData {
                 if(Util.isNumber(name)) {
                     rootId = Integer.parseInt(name);
                 } else {
-                    System.err.println(name + " is not a number.");
+                    log.error(name + " is not a number.");
                     continue;
                 }
                 Node skillChild = XMLApi.getFirstChildByNameBF(mainNode, "skill");
@@ -135,7 +137,7 @@ public class SkillData {
                             skillId = Integer.parseInt(skillIdName);
                             skill.setSkillId(skillId);
                         } else {
-                            System.err.println(name + " is not a number.");
+                            log.error(name + " is not a number.");
                             continue;
                         }
                         // start main level info
@@ -185,7 +187,7 @@ public class SkillData {
                             } else {
                                 SkillStat skillStat = SkillStat.getSkillStatByString(statName);
                                 if(skillStat == null) {
-                                    System.err.println("Unknown SkillStat " + statName);
+                                    log.warn("Unknown SkillStat " + statName);
                                 } else {
                                     skill.addSkillStatInfo(skillStat, statValue);
                                 }

@@ -8,6 +8,7 @@ import client.life.Mob;
 import client.life.Npc;
 import constants.ServerConstants;
 import enums.PortalType;
+import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.Position;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class FieldData {
 
     private static List<Field> fields = new ArrayList<>();
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static void main(String[] args) {
         generateDatFiles();
@@ -368,7 +370,7 @@ public class FieldData {
                                     life.setMobAliveReq(Integer.parseInt(value));
                                     break;
                                 default:
-                                    System.err.println("unknown life property " + name + " with value " + value);
+                                    log.warn("unknown life property " + name + " with value " + value);
                                     break;
                             }
                         }
@@ -397,7 +399,7 @@ public class FieldData {
         String fieldDir = ServerConstants.DAT_DIR + "/fields/" + id + ".dat";
         File file = new File(fieldDir);
         if(!file.exists()) {
-            System.err.println("Could not find field " + id);
+            log.warn("Could not find field " + id);
             return null;
         } else {
             return readFieldFromFile(file);

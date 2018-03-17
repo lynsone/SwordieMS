@@ -3,6 +3,7 @@ package client.character.quest.questRequirements;
 import client.character.Char;
 import client.character.quest.QuestManager;
 import loaders.DatSerializable;
+import org.apache.log4j.LogManager;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -12,6 +13,7 @@ import java.io.IOException;
  * Created on 3/2/2018.
  */
 public class QuestStartCompletionRequirement implements QuestStartRequirement {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     private int questID;
     private byte questStatus;
 
@@ -49,7 +51,7 @@ public class QuestStartCompletionRequirement implements QuestStartRequirement {
             case 0: // Completed
                 return qm.hasQuestCompleted(getQuestID());
             default:
-                System.err.printf("[Error] Unknown status %d%n.", getQuestStatus());
+                log.error(String.format("Unknown status %d.", getQuestStatus()));
                 return true;
         }
     }

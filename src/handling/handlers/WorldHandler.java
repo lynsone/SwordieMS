@@ -31,6 +31,7 @@ import loaders.ItemData;
 import loaders.QuestData;
 import loaders.QuestInfo;
 import loaders.SkillData;
+import org.apache.log4j.LogManager;
 import packet.*;
 import server.Channel;
 import server.Server;
@@ -55,6 +56,8 @@ import static enums.Stat.sp;
  * Created on 12/14/2017.
  */
 public class WorldHandler {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+
     public static void handleCharLogin(Client c, InPacket inPacket) {
         int worldId = inPacket.decodeInt();
         int charId = inPacket.decodeInt();
@@ -506,7 +509,7 @@ public class WorldHandler {
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
-        System.out.println("SkillID: " + attackInfo.skillId);
+        log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
@@ -592,7 +595,7 @@ public class WorldHandler {
                 break;
             default:
                 toField = c.getChannelInstance().getField(field.getReturnMap());
-                System.out.printf("Unhandled Return Scroll: %d in WorldHandler.java%n", itemID);
+                log.warn(String.format("Unhandled Return Scroll: %d in WorldHandler.java", itemID));
                 break;
         }
         chr.warp(toField);
@@ -2134,15 +2137,12 @@ public class WorldHandler {
         Char chr = c.getChr();
         Inventory inv = chr.getInventoryByType(invType);
         List<Item> items = inv.getItems();
-        System.out.println();
         List<Integer> oldIndexes = new ArrayList<>();
         for (Item item : items) {
             oldIndexes.add(item.getBagIndex());
             chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
                     (short) item.getBagIndex(), (short) 0, -1, item));
         }
-        System.out.println();
-        System.out.println();
         int i = 0;
         for (Item item : items) {
             item.setBagIndex(oldIndexes.get(i));
@@ -2194,7 +2194,7 @@ public class WorldHandler {
                 }
                 break;
             default:
-                System.err.printf("[Info] Unkown quest request %d!%n", type);
+                log.error(String.format("Unkown quest request %d!", type));
                 break;
         }
         if(questID == 0) {

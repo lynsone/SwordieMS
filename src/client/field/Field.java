@@ -474,7 +474,6 @@ public class Field {
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
         if(si != null) {
             int duration = si.getValue(time, aa.getSlv()) * 1000;
-            System.out.println(duration);
             EventManager.addEvent(this, "removeLife", duration, aa.getObjectId(), true);
         }
         broadcastPacket(CField.affectedAreaCreated(aa));

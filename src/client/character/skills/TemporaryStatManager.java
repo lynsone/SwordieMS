@@ -5,6 +5,7 @@ import client.life.AffectedArea;
 import com.sun.istack.internal.NotNull;
 import connection.OutPacket;
 import enums.TSIndex;
+import org.apache.log4j.LogManager;
 import packet.WvsContext;
 import server.EventManager;
 import util.Tuple;
@@ -18,6 +19,7 @@ import static client.character.skills.CharacterTemporaryStat.*;
  * Created on 1/3/2018.
  */
 public class TemporaryStatManager {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     private Map<CharacterTemporaryStat, List<Option>> currentStats = new HashMap<>();
     private Map<CharacterTemporaryStat, List<Option>> newStats = new HashMap<>();
     private Map<CharacterTemporaryStat, List<Option>> removedStats = new HashMap<>();
@@ -2606,7 +2608,7 @@ public class TemporaryStatManager {
             if (cts.isIndie() && getOptions(cts).contains(checkOpt)) {
                 Option o = getOptions(cts).stream().filter(opt -> opt.equals(checkOpt)).findFirst().orElse(null);
                 if (o == null) {
-                    System.err.println("Found option null, yet the options contained it?");
+                    log.error("Found option null, yet the options contained it?");
                 } else {
                     removedMap.put(cts, o);
                 }

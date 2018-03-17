@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Randomizer {
 
-    private final static Random rand = new Random();
+    private static final Random rand = new Random();
 
     public static final int nextInt() {
         return rand.nextInt();

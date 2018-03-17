@@ -14,6 +14,7 @@ import enums.QuestStatus;
 import enums.ScriptType;
 import loaders.QuestData;
 import loaders.ItemData;
+import org.apache.log4j.LogManager;
 import packet.ScriptMan;
 import packet.WvsContext;
 import util.FileTime;
@@ -41,6 +42,7 @@ public class ScriptManager implements Observer {
     private static final String DEFAULT_SCRIPT = "undefined";
     public static final String QUEST_START_SCRIPT_END_TAG = "s";
     public static final String QUEST_COMPLETE_SCRIPT_END_TAG = "e";
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     private Char chr;
     private NpcScriptInfo npcScriptInfo;
@@ -114,7 +116,7 @@ public class ScriptManager implements Observer {
                 scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
         boolean exists = new File(dir).exists();
         if (!exists) {
-            System.err.printf("[Error] Could not find script %s/%s.%n", scriptType.toString().toLowerCase(), name);
+            log.error(String.format("[Error] Could not find script %s/%s.", scriptType.toString().toLowerCase(), name));
             chr.chatMessage(YELLOW, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
             dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
                     scriptType.toString().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
@@ -131,7 +133,7 @@ public class ScriptManager implements Observer {
             cs = ((Compilable) se).compile(dir);
             cs.eval();
         } catch (ScriptException e) {
-            System.err.printf("[Error] Unable to compile script %s!%n", name);
+            log.error(String.format("Unable to compile script %s!", name));
             e.printStackTrace();
         }
         return (Invocable) se;

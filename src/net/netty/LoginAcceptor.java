@@ -8,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.crypto.MapleCrypto;
+import org.apache.log4j.LogManager;
 import packet.Login;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import static net.netty.NettyClient.CLIENT_KEY;
 public class LoginAcceptor implements Runnable{
 
     public static Map<String, Channel> channelPool = new HashMap<>();
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     @Override
     public void run() {
         // Taken from http://netty.io/wiki/user-guide-for-4.x.html
@@ -43,7 +45,7 @@ public class LoginAcceptor implements Runnable{
 
                     Client c = new Client(ch, siv, riv);
                     // remove after debug stage
-                    System.out.printf("[Debug] Opened session with %s in LoginAcceptor%n", c.getIP());
+                    log.debug(String.format("Opened session with %s in LoginAcceptor", c.getIP()));
                     c.write(Login.sendConnect(riv, siv));
 //                  c.write("hi".getBytes());
 

@@ -5,6 +5,7 @@ import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Item;
 import client.character.quest.Quest;
+import client.character.quest.QuestManager;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
@@ -16,6 +17,7 @@ import constants.JobConstants.JobEnum;
 import enums.*;
 import handling.OutHeader;
 import loaders.*;
+import org.apache.log4j.LogManager;
 import packet.CField;
 import packet.MobPool;
 import packet.Stage;
@@ -35,13 +37,19 @@ import static enums.InventoryOperation.ADD;
  * Created on 12/22/2017.
  */
 public class AdminCommands {
+    static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            for(Quest q : chr.getQuestManager().getCompletedQuests()) {
-                chr.chatMessage(YELLOW, "" + q.getQRKey());
-            }
+            // 2701 mob, 2052 item
+            QuestManager qm = chr.getQuestManager();
+            Quest q1 = QuestData.createQuestFromId(2052);
+            Quest q2 = QuestData.createQuestFromId(2701);
+            qm.removeQuest(q1.getQRKey());
+            qm.removeQuest(q2.getQRKey());
+            qm.addQuest(q1);
+            qm.addQuest(q2);
 
         }
     }
@@ -84,7 +92,7 @@ public class AdminCommands {
             for (int i = 0; i < mask.length; i++) {
                 outPacket.encodeInt(mask[i]);
             }
-            System.out.println("[Out]\t| " + outPacket);
+            log.debug("[Out]\t| " + outPacket);
 
             outPacket.encodeShort(1); // n                            //Short / Int
             outPacket.encodeInt(Kaiser.FINAL_TRANCE); // r
@@ -177,7 +185,7 @@ public class AdminCommands {
                 }
                 field.spawnLife(mob, null);
 
-                System.out.println("Mob has id " + mob.getObjectId());
+                log.debug("Mob has id " + mob.getObjectId());
             }
         }
     }
@@ -627,7 +635,7 @@ public class AdminCommands {
                 query += args[i].toLowerCase() + " ";
             }
             query = query.substring(0, query.length() - 1);
-            System.out.println("Query: " + query);
+            chr.chatMessage("Query: " + query);
             boolean isNumber = Util.isNumber(query);
             if ("skill".equalsIgnoreCase(args[1])) {
                 SkillStringInfo ssi;

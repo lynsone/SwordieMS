@@ -1,5 +1,7 @@
 package client.character.skills;
 
+import org.apache.log4j.LogManager;
+
 /**
  * Created on 1/2/2018.
  */
@@ -640,6 +642,7 @@ public enum CharacterTemporaryStat {
     private int val;
     private int pos;
     public static final int length = 17;
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     CharacterTemporaryStat(int val, int pos) {
         this.val = val;
@@ -730,10 +733,10 @@ public enum CharacterTemporaryStat {
         int a = 0x1eb;
         int val = 1 << (31 - (a & 0x1f));
         int pos = a >> 5;
-        System.out.printf("value 0x%04x, pos %d%n", val, pos);
+        log.debug(String.format("value 0x%04x, pos %d", val, pos));
         for(CharacterTemporaryStat cts : values()) {
             if(cts.getVal() == val && cts.getPos() == pos) {
-                System.out.println("Corresponds to " + cts);
+                log.debug("Corresponds to " + cts);
             }
         }
     }

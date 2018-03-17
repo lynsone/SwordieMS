@@ -14,6 +14,7 @@ import connection.InPacket;
 import connection.OutPacket;
 import enums.*;
 import handling.OutHeader;
+import org.apache.log4j.LogManager;
 import util.FileTime;
 import util.Position;
 import util.Triple;
@@ -26,6 +27,7 @@ import static enums.MessageType.*;
  * Created on 12/22/2017.
  */
 public class WvsContext {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static void dispose(Char chr) {
         chr.dispose();
@@ -321,7 +323,7 @@ public class WvsContext {
                     res.add(new Movement8(inPacket, type));
                     break;
                 default:
-                    System.out.printf("The type (%s) is unhandled. %n", type);
+                    log.warn(String.format("[WvsContext.parseMovement] The type (%s) is unhandled.", type));
                     break;
             }
         }

@@ -16,6 +16,7 @@ import enums.CharNameResult;
 import enums.LoginType;
 import handling.OutHeader;
 import loaders.ItemData;
+import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import packet.Login;
@@ -34,7 +35,7 @@ import static enums.InvType.EQUIPPED;
  */
 public class LoginHandler {
 
-
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     private static int id;
 
     public static void handleConnect(Client client, InPacket inPacket) {
@@ -42,7 +43,7 @@ public class LoginHandler {
         short version = inPacket.decodeShort();
         String minorVersion = inPacket.decodeString(1);
         if (locale != ServerConstants.LOCALE || version != ServerConstants.VERSION) {
-            System.err.println("Client " + client.getIP() + " has an incorrect version.");
+            log.info(String.format("Client %s has an incorrect version.", client.getIP()));
             client.close();
         }
     }
@@ -56,7 +57,7 @@ public class LoginHandler {
     }
 
     public static void handlePong(Client c, InPacket inPacket) {
-        return;
+
     }
 
     public static void handleLoginPassword(Client c, InPacket inPacket) {
@@ -160,9 +161,7 @@ public class LoginHandler {
         int[] items = new int[itemLength]; //face, hair, markings, skin, overall, top, bottom, cape, boots, weapon
         for (int i = 0; i < itemLength; i++) {
             items[i] = inPacket.decodeInt();
-            System.out.println(items[i]);
         }
-        System.out.println(curSelectedRace);
 
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
@@ -231,7 +230,7 @@ public class LoginHandler {
     public static void handleClientError(Client c, InPacket inPacket) {
         c.close();
         if (inPacket.getData().length < 8) {
-            System.err.println("Error: " + inPacket);
+            log.error(String.format("Error: %s", inPacket));
             return;
         }
         short type = inPacket.decodeShort();
@@ -251,13 +250,13 @@ public class LoginHandler {
         short op = inPacket.decodeShort();
 
         OutHeader opcode = OutHeader.getOutHeaderByOp(op);
-        System.err.printf("[Error %s] (%s / %d) Data: %s%n", errortype, opcode, op, inPacket);
+        log.error(String.format("[Error %s] (%s / %d) Data: %s", errortype, opcode, op, inPacket));
         if(opcode == OutHeader.TEMPORARY_STAT_SET) {
             for (int i = 0; i < CharacterTemporaryStat.length; i++) {
                 int mask = inPacket.decodeInt();
                 for(CharacterTemporaryStat cts : CharacterTemporaryStat.values()) {
                     if(cts.getPos() == i && (cts.getVal() & mask) != 0) {
-                        System.err.printf("[Error %s] Contained stat %s%n", errortype, cts.toString());
+                        log.error(String.format("[Error %s] Contained stat %s", errortype, cts.toString()));
                     }
                 }
             }

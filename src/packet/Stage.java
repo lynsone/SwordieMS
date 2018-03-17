@@ -70,7 +70,6 @@ public class Stage {
                 outPacket.encodeInt(0);
             }
         }
-        System.out.println(outPacket);
 
         // 41 bytes below
         outPacket.encodeByte(setWhiteFadeInOut);

@@ -358,9 +358,6 @@ public class Zero extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        System.out.println(SkillConstants.isZeroAlphaSkill(skillID));
-        System.out.println(!chr.getZeroInfo().isZeroBetaState());
-        boolean isAlpha = SkillConstants.isZeroAlphaSkill(skillID) || !chr.getZeroInfo().isZeroBetaState();
 
         if(getAlphaOrBetaSkill(skillID) == 1) {
             if(hasHitMobs) {

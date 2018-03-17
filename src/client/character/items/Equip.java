@@ -1065,10 +1065,8 @@ public class Equip extends Item {
         for (EquipBaseStat ebs : EquipBaseStat.values()) {
             if (getBaseStat(ebs) != 0 && ebs.getPos() == pos) {
                 mask |= ebs.getVal();
-//                System.out.println(ebs);
             }
         }
-//        System.out.println("Mask for item " + itemId + " at pos " + pos + ": " + mask);
         return mask;
     }
 

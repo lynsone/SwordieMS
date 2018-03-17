@@ -2,6 +2,7 @@ package connection;
 
 import handling.OutHeader;
 import net.Packet;
+import org.apache.log4j.LogManager;
 import util.FileTime;
 import util.Position;
 import util.Rect;
@@ -15,6 +16,7 @@ public class OutPacket extends Packet {
     private boolean loopback = false;
     private boolean encryptedByShanda = false;
     private short op;
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     /**
      * Creates a new OutPacket with a given op. Immediately encodes the op.
@@ -176,7 +178,7 @@ public class OutPacket extends Packet {
             s = "";
         }
         if(s.length() > Short.MAX_VALUE) {
-            System.err.println("Tried to encode a string that is too big.");
+            log.error("Tried to encode a string that is too big.");
             return;
         }
         encodeShort((short) s.length());

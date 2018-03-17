@@ -9,6 +9,7 @@ import constants.ServerConstants;
 import enums.InvType;
 import enums.ScrollStat;
 import enums.SpecStat;
+import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.*;
@@ -28,6 +29,7 @@ public class ItemData {
     public static List<Integer> equipItemIds = new ArrayList<>();
     public static List<ItemInfo> items = new ArrayList<>();
     public static List<ItemOption> itemOptions = new ArrayList<>();
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     //    @Loader(varName = "itemIds")
     public static void loadItemIDs() {
@@ -590,7 +592,7 @@ public class ItemData {
                 for (Node mainNode : XMLApi.getAllChildren(nodes.get(0))) {
                     String nodeName = XMLApi.getNamedAttribute(mainNode, "name");
                     if (!Util.isNumber(nodeName)) {
-                        System.err.printf("%s is not a number.%n", nodeName);
+                        log.error(String.format("%s is not a number.", nodeName));
                         continue;
                     }
                     int id = Integer.parseInt(nodeName);
@@ -996,8 +998,7 @@ public class ItemData {
                                 case "spec":
                                     break;
                                 default:
-                                    System.out.println(item.getItemId());
-                                    System.out.println("Unkown node: " + name + ", value = " + value);
+                                    log.warn(String.format("Unkown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
                             }
                         }
                     }

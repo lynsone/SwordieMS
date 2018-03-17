@@ -27,7 +27,6 @@ public class NpcData {
             Node mainNode = XMLApi.getAllChildren(node).get(0);
             int id = Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name")
                     .replace(".xml", "").replace(".img", ""));
-            System.out.println(id);
             npc.setTemplateId(id);
             Node scriptNode = XMLApi.getFirstChildByNameBF(mainNode, "script");
             if(scriptNode != null) {

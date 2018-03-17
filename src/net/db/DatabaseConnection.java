@@ -21,6 +21,7 @@
 package net.db;
 
 import constants.ServerConfig;
+import org.apache.log4j.LogManager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,6 +39,7 @@ import java.util.LinkedList;
  * @author Novak (Implementing BlackRabbit's fix in this source's connection)
  */
 public class DatabaseConnection {
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     private static final ThreadLocal<Connection> con = new DatabaseConnection.ThreadLocalConnection();
     public static final int CLOSE_CURRENT_RESULT = 1;
@@ -85,12 +87,11 @@ public class DatabaseConnection {
      */
     public static final int NO_GENERATED_KEYS = 2;
 
-
     static {
         try {
             Class.forName("com.mysql.jdbc.Driver"); // touch the mysql driver
         } catch (ClassNotFoundException e) {
-            System.err.println("[SEVERE] SQL Driver Not Found. Consider death by clams.");
+            log.fatal("SQL Driver Not Found. Consider death by clams.");
             e.printStackTrace();
         }
     }
@@ -123,7 +124,7 @@ public class DatabaseConnection {
             try {
                 return DriverManager.getConnection("jdbc:mysql://127.0.0.1:" + ServerConfig.SQL_PORT + "/" + ServerConfig.SQL_SCHEMA + "?autoReconnect=true&useSSL=false", ServerConfig.SQL_USERNAME, ServerConfig.SQL_PASSWORD);
             } catch (SQLException e) {
-                System.out.println("[SEVERE] Unable to make net.db connection.");
+                log.fatal("[SEVERE] Unable to make net.db connection.");
                 e.printStackTrace();
                 return null;
             }

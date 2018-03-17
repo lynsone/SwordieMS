@@ -8,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.crypto.MapleCrypto;
+import org.apache.log4j.LogManager;
 import packet.Login;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class ChannelAcceptor implements Runnable{
 
     public Map<String, Channel> channelPool = new HashMap<>();
     public server.Channel channel;
+    private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
     public void run() {
@@ -42,7 +44,7 @@ public class ChannelAcceptor implements Runnable{
 
                     Client c = new Client(ch, siv, riv);
                     // remove after debug stage
-                    System.out.printf("[Debug] Opened session with %s on channel %d%n", c.getIP(), channel.getChannelId());
+                    log.debug(String.format("Opened session with %s on channel %d", c.getIP(), channel.getChannelId()));
                     c.write(Login.sendConnect(riv, siv));
 
                     channelPool.put(c.getIP(), ch);
@@ -59,7 +61,7 @@ public class ChannelAcceptor implements Runnable{
 
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(channel.getPort()).sync();
-            System.out.printf("[Info] Channel %d listening on port %d%n", channel.getChannelId(), channel.getPort());
+            log.info(String.format("Channel %d listening on port %d", channel.getChannelId(), channel.getPort()));
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
             // shut down your server.
