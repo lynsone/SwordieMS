@@ -2,9 +2,7 @@ package client.character.quest.QuestProgressRequirement;
 
 import loaders.DatSerializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,10 +11,11 @@ import java.io.IOException;
  * Created on 3/2/2018.
  */
 @Entity
-@Table(name = "questProgressItemRequirements")
-public class QuestProgressItemRequirement extends QuestProgressRequirement implements QuestValueRequirement{
+@DiscriminatorValue("item")
+public class QuestProgressItemRequirement extends QuestProgressRequirement implements QuestValueRequirement {
 
-    @Column(name = "itemID")
+
+    @Column(name = "unitID")
     private int itemID;
     @Column(name = "requiredCount")
     private int requiredCount;
@@ -71,7 +70,7 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
     @Override
     public DatSerializable load(DataInputStream dis) throws IOException {
         QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
-        qpir.setId(dis.readInt());
+        qpir.setItemID(dis.readInt());
         qpir.setRequiredCount(dis.readInt());
         return qpir;
     }
@@ -82,6 +81,6 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
     }
 
     public void addItem(int quantity) {
-        setCurrentCount(getCurrentCount() + quantity);
+        incCurrentCount(quantity);
     }
 }

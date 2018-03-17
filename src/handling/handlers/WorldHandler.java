@@ -153,12 +153,30 @@ public class WorldHandler {
         }
         String itemBefore = item.toString();
         if (newPos == 0) { // Drop
-            chr.getInventoryByType(invTypeFrom).removeItem(item);
-            item.drop();
-            Drop drop = new Drop(-1, item);
+            boolean fullDrop;
+            Drop drop;
+            if(!item.getInvType().isStackable() || quantity >= item.getQuantity()) {
+                // Whole item is dropped (equip/stackable items with all their quantity)
+                fullDrop = true;
+                chr.getInventoryByType(invTypeFrom).removeItem(item);
+                item.drop();
+                drop = new Drop(-1, item);
+            } else {
+                // Part of the stack is dropped
+                fullDrop = false;
+                Item dropItem = ItemData.getItemDeepCopy(item.getItemId());
+                dropItem.setQuantity(quantity);
+                item.removeQuantity(quantity);
+                drop = new Drop(-1, dropItem);
+            }
             chr.getField().drop(drop, chr.getPosition(), chr.getPosition());
-            c.write(WvsContext.inventoryOperation(true, false, REMOVE,
-                    oldPos, newPos, 0, item));
+            if(fullDrop) {
+                c.write(WvsContext.inventoryOperation(true, false, REMOVE,
+                        oldPos, newPos, 0, item));
+            } else {
+                c.write(WvsContext.inventoryOperation(true, false, UPDATE_QUANTITY,
+                        oldPos, newPos, 0, item));
+            }
         } else {
             Item swapItem = chr.getInventoryByType(invTypeTo).getItemBySlot(newPos);
             if (swapItem != null) {

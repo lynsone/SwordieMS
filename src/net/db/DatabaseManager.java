@@ -52,10 +52,10 @@ public class DatabaseManager {
                 QuestManager.class,
                 Quest.class,
                 QuestProgressRequirement.class,
-                QuestProgressItemRequirement.class,
                 QuestProgressLevelRequirement.class,
+                QuestProgressItemRequirement.class,
                 QuestProgressMobRequirement.class,
-                QuestProgressMoneyRequirement.class
+                QuestProgressMoneyRequirement.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

@@ -79,7 +79,7 @@ public class LoginHandler {
             if (rs.next()) {
                 success = password.equals(rs.getString("password"));
                 int id = rs.getInt("id");
-                result = success ? LoginType.SUCCESS.getValue() : LoginType.TROUBLE_LOGGING_IN.getValue();
+                result = success ? LoginType.SUCCESS.getValue() : LoginType.INVALID_PASSWORD.getValue();
                 if (success) {
                     account = Account.getFromDBById(id);
                     Server.getInstance().getAccounts().add(account);

@@ -270,7 +270,7 @@ public class QuestData {
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
                                     switch (questName) {
                                         case "id":
-                                            qpmr.setId(Integer.parseInt(questValue));
+                                            qpmr.setMobID(Integer.parseInt(questValue));
                                             break;
                                         case "count":
                                             qpmr.setRequiredCount(Integer.parseInt(questValue));
@@ -317,14 +317,14 @@ public class QuestData {
                                             if (status == 0) {
                                                 qir.setId(Integer.parseInt(questValue));
                                             } else {
-                                                qpir.setId(Integer.parseInt(questValue));
+                                                qpir.setItemID(Integer.parseInt(questValue));
                                             }
                                             break;
                                         case "count":
                                             if (status == 0) {
                                                 qir.setQuantity(Integer.parseInt(questValue));
                                             } else {
-                                                qpir.setCurrentCount(Integer.parseInt(questValue));
+                                                qpir.setRequiredCount(Integer.parseInt(questValue));
                                             }
                                             break;
                                         case "order":

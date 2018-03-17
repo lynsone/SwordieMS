@@ -2,6 +2,7 @@ package client.character.quest;
 
 import client.character.Char;
 import client.character.items.Item;
+import client.character.quest.QuestProgressRequirement.QuestProgressItemRequirement;
 import client.character.quest.questRequirements.QuestStartCompletionRequirement;
 import client.character.quest.questRequirements.QuestStartRequirement;
 import client.character.quest.questReward.QuestReward;
@@ -149,6 +150,9 @@ public class QuestManager {
         quest.setCompletedTime(FileTime.getTime());
         chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
         chr.write(WvsContext.questRecordMessage(quest));
+        for(QuestProgressItemRequirement qpir : quest.getItemReqs()) {
+            chr.consumeItem(qpir.getItemID(), qpir.getRequiredCount());
+        }
         for(QuestReward qr : questInfo.getQuestRewards()) {
             qr.giveReward(chr);
         }
@@ -193,5 +197,14 @@ public class QuestManager {
 
     public void setChr(Char chr) {
         this.chr = chr;
+    }
+
+    public void removeQuest(int questID) {
+        Quest q = getQuests().get(questID);
+        if(q != null) {
+            q.setStatus(NOT_STARTED);
+            getQuests().remove(questID);
+            chr.write(WvsContext.questRecordMessage(q));
+        }
     }
 }

@@ -218,14 +218,6 @@ public class Char {
     public void updateDB() {
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
-//        getAvatarData().updateDB(session, tx);
-//        getFuncKeyMap().updateDB(session, tx);
-//        for (Inventory inventory : getInventories()) {
-//            inventory.updateDB(session, tx);
-//        }
-//        for (Skill s : getSkills()) {
-//            s.updateDB(session, tx);
-//        }
         session.saveOrUpdate(this);
         tx.commit();
         session.close();
@@ -234,10 +226,6 @@ public class Char {
     public void createInDB() {
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
-        getAvatarData().createInDB(session, tx);
-        for (Inventory inventory : getInventories()) {
-            inventory.createInDB(session, tx);
-        }
         session.save(this);
         tx.commit();
         session.close();
@@ -246,10 +234,6 @@ public class Char {
     public void deleteFromDB() {
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
-        getAvatarData().deleteFromDB(session, tx);
-        for (Inventory inventory : getInventories()) {
-            inventory.deleteInDB(session, tx);
-        }
         session.delete(this);
         tx.commit();
         session.close();
@@ -322,6 +306,7 @@ public class Char {
 
     public void addItemToInventory(Item item) {
         addItemToInventory(item.getInvType(), item, false);
+        getQuestManager().handleItemGain(item);
     }
 
     public void setEquippedInventory(Inventory equippedInventory) {
@@ -1788,7 +1773,6 @@ public class Char {
         } else {
             Item item = drop.getItem();
             addItemToInventory(item);
-            getQuestManager().handleItemGain(item);
             write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
         }
     }
@@ -1879,7 +1863,7 @@ public class Char {
 
     /**
      * Consumes a single {@link Item} from this Char's {@link Inventory}. Will remove the Item if it has a quantity of 1.
-     * @param item The Item to consume.
+     * @param item The Item to consume, which is currently in the Char's inventory.
      */
     public void consumeItem(Item item) {
         Inventory inventory = getInventoryByType(item.getInvType());
@@ -1893,6 +1877,24 @@ public class Char {
             item.setQuantity(item.getQuantity() - 1);
             write(WvsContext.inventoryOperation(true, false,
                     UPDATE_QUANTITY, (short) item.getBagIndex(), (byte) -1, 0, item));
+        }
+    }
+
+    /**
+     * Consumes an item of this Char with the given id. Will do nothing if the Char doesn't have the Item.
+     * Only works for non-Equip (i.e., type is not EQUIPPED or EQUIP, CASH is fine) items.
+     * Calls {@link #consumeItem(Item)} if an Item is found.
+     * @param id The Item's id.
+     * @param quantity The amount to consume.
+     */
+    public void consumeItem(int id, int quantity) {
+        if(ItemConstants.isEquip(id)) {
+            return;
+        }
+        Item checkItem = ItemData.getItemDeepCopy(id);
+        Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
+        if(item != null) {
+            consumeItem(item);
         }
     }
 

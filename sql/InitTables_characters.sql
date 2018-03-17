@@ -40,6 +40,7 @@ CREATE TABLE filetimes (
 CREATE TABLE quests (
 	id bigint NOT NULL AUTO_INCREMENT,
     qrKey int,
+    qrValue VARCHAR(255),
     status int,
     completedTime int,
 	PRIMARY KEY (id),
@@ -63,49 +64,14 @@ CREATE TABLE questlists (
 
 CREATE TABLE questProgressRequirements (
 	id bigint NOT NULL AUTO_INCREMENT,
+    progressType VARCHAR(255),
 	questID bigint,
-    PRIMARY KEY (id),
-    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
-);
-
-CREATE TABLE questProgressItemRequirements (
-	id bigint NOT NULL AUTO_INCREMENT,
-    itemID int,
-	questID bigint,
+    unitID int,
     requiredCount int,
     currentCount int,
     PRIMARY KEY (id),
     FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
 );
-
-CREATE TABLE questProgressLevelRequirements (
-	id bigint NOT NULL AUTO_INCREMENT,
-    level int,
-	questID bigint,
-    curLevel int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
-);
-
-CREATE TABLE questProgressMoneyRequirements (
-	id bigint NOT NULL AUTO_INCREMENT,
-    money int,
-	questID bigint,
-    curMoney int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
-);
-
-CREATE TABLE questProgressMobRequirements (
-	id bigint NOT NULL AUTO_INCREMENT,
-    mobID int,
-	questID bigint,
-    requiredCount int,
-    currentCount int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
-);
-
 
 CREATE TABLE inventories (
 	id int NOT NULL AUTO_INCREMENT,

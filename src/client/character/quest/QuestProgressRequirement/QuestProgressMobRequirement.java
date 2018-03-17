@@ -2,9 +2,7 @@ package client.character.quest.QuestProgressRequirement;
 
 import loaders.DatSerializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,10 +11,10 @@ import java.io.IOException;
  * Created on 3/2/2018.
  */
 @Entity
-@Table(name = "questProgressMobRequirements")
+@DiscriminatorValue("mob")
 public class QuestProgressMobRequirement extends QuestProgressRequirement implements QuestValueRequirement {
 
-    @Column(name = "mobID")
+    @Column(name = "unitID")
     private int mobID;
     @Column(name = "requiredCount")
     private int requiredCount;
@@ -26,12 +24,12 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
     public QuestProgressMobRequirement() {
     }
 
-    public int getMobID() {
-        return mobID;
+    public void setMobID(int mobID) {
+        this.mobID = mobID;
     }
 
-    public void setId(int mobID) {
-        this.mobID = mobID;
+    public int getMobID() {
+        return mobID;
     }
 
     public int getRequiredCount() {
@@ -71,7 +69,7 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
     @Override
     public DatSerializable load(DataInputStream dis) throws IOException {
         QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
-        qpmr.setId(dis.readInt());
+        qpmr.setMobID(dis.readInt());
         qpmr.setRequiredCount(dis.readInt());
         return qpmr;
     }

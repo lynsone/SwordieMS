@@ -29,6 +29,9 @@ public class Quest {
     @Column(name = "qrKey")
     private int QRKey;
 
+    @Column(name = "qrValue")
+    private String qrValue;
+
     @Column(name = "status")
     private QuestStatus status;
 
@@ -154,17 +157,14 @@ public class Quest {
     }
 
     public boolean hasMoneyReq() {
-        return getProgressRequirements().stream().filter(q -> q instanceof QuestProgressMoneyRequirement).count() > 0;
+        return getProgressRequirements().stream().anyMatch(q -> q instanceof QuestProgressMoneyRequirement);
     }
 
     public void addMoney(int money) {
-        QuestProgressMoneyRequirement qpmr = getProgressRequirements().stream()
+        getProgressRequirements().stream()
                 .filter(q -> q instanceof QuestProgressMoneyRequirement)
                 .map(q -> (QuestProgressMoneyRequirement) q)
-                .findAny().orElse(null);
-        if(qpmr != null) {
-            qpmr.addMoney(money);
-        }
+                .findAny().ifPresent(qpmr -> qpmr.addMoney(money));
     }
 
     public void handleItemGain(Item item) {
@@ -176,5 +176,23 @@ public class Quest {
         for(QuestProgressItemRequirement qpir : qpirs) {
             qpir.addItem(item.getQuantity());
         }
+    }
+
+    public String getQrValue() {
+        if(qrValue != null && !qrValue.equalsIgnoreCase("")) {
+            return qrValue;
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for(QuestProgressRequirement qpr : getProgressRequirements()) {
+                if(qpr instanceof QuestValueRequirement) {
+                    sb.append(Util.leftPaddedString(3, '0', ((QuestValueRequirement) qpr).getValue()));
+                }
+            }
+            return sb.toString();
+        }
+    }
+
+    public void setQrValue(String qrValue) {
+        this.qrValue = qrValue;
     }
 }
