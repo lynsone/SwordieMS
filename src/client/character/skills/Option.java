@@ -28,6 +28,7 @@ public class Option {
     public int tStart;
     public int tTerm;
     public int pOption;
+    public int slv;
     public List<Option> extraOpts = new ArrayList<>();
 
     public Option(int skillID) {
@@ -73,6 +74,7 @@ public class Option {
         copy.nKey = nKey;
         copy.tStart = tStart;
         copy.tTerm = tTerm;
+        copy.slv = slv;
         extraOpts.forEach(o -> extraOpts.add(o.deepCopy()));
         return copy;
     }

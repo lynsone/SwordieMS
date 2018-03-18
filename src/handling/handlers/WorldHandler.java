@@ -953,9 +953,10 @@ public class WorldHandler {
                 if (mobSkill == null) {
                     mobSkill = skillList.get(Randomizer.nextInt(skillList.size()));
                 }
-                skillID = mobSkill.getSkill() != 0 ? mobSkill.getSkill() : mobSkill.getSkill();
+                skillID = mobSkill.getSkill();
                 slv = mobSkill.getLevel();
                 c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID = %d, skill = %d, level = %d", mobSkill.getSkillID(), mobSkill.getSkill(), mobSkill.getLevel()));
+                mobSkill.handleEffect(mob);
             }
         }
         byte multiTargetForBallSize = inPacket.decodeByte();

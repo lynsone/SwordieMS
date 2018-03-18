@@ -410,9 +410,26 @@ public class MobTemporaryStat {
         }
     }
 
+    /**
+     * Adds a new MobStat to this MobTemporaryStat. Will immediately broadcast the reaction to all clients.
+     * Only works for user skills, not mob skills. For the latter, use {@link #addMobSkillOptionsAndBroadCast(MobStat, Option)}.
+     * @param mobStat The MobStat to add.
+     * @param option The Option that contains the values of the stat.
+     */
     public void addStatOptionsAndBroadcast(MobStat mobStat, Option option) {
         addStatOptions(mobStat, option);
         mob.getField().broadcastPacket(MobPool.mobStatSet(getMob(), (short) 0));
+    }
+
+    /**
+     * Adds a new MobStat to this MobTemporary stat. Will immediately broadcast the reaction to all clients.
+     * Only works for mob skills, not user skills. For the latter, use {@link #addStatOptionsAndBroadcast(MobStat, Option)}.
+     * @param mobStat The MobStat to add.
+     * @param o The option that contains the values of the stat.
+     */
+    public void addMobSkillOptionsAndBroadCast(MobStat mobStat, Option o) {
+        o.rOption |= o.slv << 16; // mob skills are encoded differently: not an int, but short (skill ID), then short (slv).
+        addStatOptionsAndBroadcast(mobStat, o);
     }
 
     public void addStatOptions(MobStat mobStat, Option option) {

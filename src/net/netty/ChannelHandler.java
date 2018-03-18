@@ -42,6 +42,8 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
             Field returnMap = c.getChannelInstance().getField(c.getChr().getField().getReturnMap());
             c.getChr().setField(returnMap);
             c.getChr().updateDB();
+        } else {
+            log.warn("[ChannelHandler] | Was not able to save character, data inconsistency may have occurred.");
         }
         NettyClient o = ctx.channel().attr(CLIENT_KEY).get();
         if (o != null) {

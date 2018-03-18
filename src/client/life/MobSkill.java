@@ -1,9 +1,15 @@
 package client.life;
 
+import client.character.skills.Option;
+import enums.MobStat;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 /**
  * Created on 2/28/2018.
  */
 public class MobSkill {
+    private static final Logger log = LogManager.getRootLogger();
     private int skillID;
     private byte action;
     private int level;
@@ -237,5 +243,25 @@ public class MobSkill {
 
     public void setSkill(int skill) {
         this.skill = skill;
+    }
+
+    public void handleEffect(Mob mob) {
+        MobTemporaryStat mts = mob.getTemporaryStat();
+        Option o = new Option(getSkill());
+        o.slv = getLevel();
+        switch(getSkill()) {
+            case 100:
+            case 110:
+                o.nOption = 1;
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PowerUp, o);
+                break;
+            case 102:
+                o.nOption = 1;
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PGuardUp, o);
+                break;
+            default:
+                log.warn(String.format("Unhandled mob skill %d, slv = %d", getSkill(), getLevel()));
+                break;
+        }
     }
 }
