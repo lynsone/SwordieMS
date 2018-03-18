@@ -231,7 +231,7 @@ public class AdminCommands {
                         chr.chatMessage(YELLOW, String.format("Could not find an item with id %d", id));
                         return;
                     }
-                    chr.addItemToInventory(item.getInvType(), item, false);
+                    chr.addItemToInventory(item);
                     short quant = 1;
                     if (args.length > 2) {
                         quant = Short.parseShort(args[2]);

@@ -1,4 +1,4 @@
-maps = [104000000, 100000000, 103000000, 180000000, 102000000]
+maps = [104000000, 100000000, 103000000, 101000000, 102000000]
 
 def init():
     sm.sendSay("Where would you like to go? \r\n#L0#Lith Harbor#l\r\n#L1#Henesys#l\r\n#L2#Kerning City#l"

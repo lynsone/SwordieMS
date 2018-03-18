@@ -8,6 +8,7 @@ import client.character.quest.questRequirements.QuestStartRequirement;
 import client.character.quest.questReward.QuestReward;
 import client.life.Mob;
 import enums.QuestStatus;
+import loaders.ItemData;
 import loaders.QuestData;
 import loaders.QuestInfo;
 import org.hibernate.annotations.Cascade;
@@ -178,7 +179,7 @@ public class QuestManager {
     }
 
     public void handleItemGain(Item item) {
-        for(int questID : item.getQuestIDs()) {
+        for(int questID : ItemData.getItemInfoByID(item.getItemId()).getQuestIDs()) {
             Quest q = getQuests().get(questID);
             if (q != null && !q.isComplete()) {
                 q.handleItemGain(item);

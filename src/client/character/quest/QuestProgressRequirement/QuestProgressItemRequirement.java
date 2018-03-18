@@ -42,9 +42,9 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
     }
 
     public void incCurrentCount(int amount) {
-        requiredCount += amount;
-        if(requiredCount < 0) {
-            requiredCount = 0;
+        currentCount += amount;
+        if(currentCount < 0) {
+            currentCount = 0;
         }
     }
 

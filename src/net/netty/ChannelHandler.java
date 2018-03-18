@@ -1,6 +1,7 @@
 package net.netty;
 
 import client.Client;
+import client.field.Field;
 import connection.InPacket;
 import enums.ChatMsgColour;
 import handling.InHeader;
@@ -38,6 +39,8 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
         log.debug("[ChannelHandler] | Channel inactive.");
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
         if(c != null && c.getChr() != null) {
+            Field returnMap = c.getChannelInstance().getField(c.getChr().getField().getReturnMap());
+            c.getChr().setField(returnMap);
             c.getChr().updateDB();
         }
         NettyClient o = ctx.channel().attr(CLIENT_KEY).get();

@@ -24,44 +24,11 @@ import static enums.ScrollStat.*;
  * Created on 11/17/2017.
  */
 public class ItemData {
-    public static List<Integer> itemIds = new ArrayList<>();
-    public static List<Equip> equips = new ArrayList<>();
-    public static List<Integer> equipItemIds = new ArrayList<>();
-    public static List<ItemInfo> items = new ArrayList<>();
+    public static Map<Integer, Equip> equips = new HashMap<>();
+    public static Map<Integer, ItemInfo> items = new HashMap<>();
     public static List<ItemOption> itemOptions = new ArrayList<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
-    //    @Loader(varName = "itemIds")
-    public static void loadItemIDs() {
-        String wzDir = ServerConstants.WZ_DIR + "/Item.wz";
-        String[] subMaps = new String[]{"Cash", "Consume", "Etc", "Install", "Pet", "Special"};
-        for (String subMap : subMaps) {
-            File subDir = new File(String.format("%s/%s", wzDir, subMap));
-            File[] files = subDir.listFiles();
-            for (File file : files) {
-                if (file.getName().contains("MaplePoint")) {
-                    continue;
-                }
-                Document doc = XMLApi.getRoot(file);
-                Node node = doc.getFirstChild();
-                if (!subMap.equals("Pet")) {
-                    List<Node> nodes = XMLApi.getAllChildren(node);
-                    for (Node n : nodes) {
-                        Map<String, String> attributes = XMLApi.getAttributes(n);
-                        String name = attributes.get("name");
-                        if (name != null) {
-                            itemIds.add(Integer.parseInt(name));
-                        }
-
-                    }
-                } else {
-                    itemIds.add(Integer.valueOf(
-                            node.getAttributes().getNamedItem("name").getNodeValue().replace(".img", "")));
-                }
-            }
-
-        }
-    }
 
     /**
      * Creates a new Equip given an itemId.
@@ -82,7 +49,7 @@ public class ItemData {
     }
 
     private static Equip getEquipById(int itemId) {
-        return getEquips().stream().filter(eq -> eq.getItemId() == itemId).findFirst().orElse(getEquipFromFile(itemId));
+        return getEquips().getOrDefault(itemId, getEquipFromFile(itemId));
     }
 
     private static Equip getEquipFromFile(int itemId) {
@@ -149,11 +116,6 @@ public class ItemData {
             }
             int fixedGrade = dataInputStream.readInt();
             int specialGrade = dataInputStream.readInt();
-            short size = dataInputStream.readShort();
-            int[] questIDs = new int[size];
-            for (int i = 0; i < size; i++) {
-                questIDs[i] = dataInputStream.readInt();
-            }
             equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
                     null, new FileTime(-1), 0, ruc, (short) 0, iStr, iDex, iInt,
                     iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
@@ -163,10 +125,7 @@ public class ItemData {
                     rLuk, rLevel, rJob, rPop, cash,
                     islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
                     notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
-            for(int i : questIDs) {
-                equip.addQuest(i);
-            }
-            equips.add(equip);
+            equips.put(equip.getItemId(), equip);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -178,7 +137,7 @@ public class ItemData {
         Util.makeDirIfAbsent(dir);
         DataOutputStream dataOutputStream;
         try {
-            for (Equip equip : getEquips()) {
+            for (Equip equip : getEquips().values()) {
                 dataOutputStream = new DataOutputStream(new FileOutputStream(dir + "/" + equip.getItemId() + ".dat"));
                 dataOutputStream.writeInt(equip.getItemId());
                 dataOutputStream.writeUTF(equip.getiSlot());
@@ -226,10 +185,6 @@ public class ItemData {
                 }
                 dataOutputStream.writeInt(equip.getFixedGrade());
                 dataOutputStream.writeInt(equip.getSpecialGrade());
-                dataOutputStream.writeShort(equip.getQuestIDs().size());
-                for (int i : equip.getQuestIDs()) {
-                    dataOutputStream.writeInt(i);
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -478,7 +433,7 @@ public class ItemData {
                                 (short) reqLuk, (short) reqLevel, (short) reqJob, (short) reqPop, cash,
                                 islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
                                 notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
-                        equips.add(equip);
+                        equips.put(equip.getItemId(), equip);
                     }
                 }
             }
@@ -525,7 +480,7 @@ public class ItemData {
             for (int i = 0; i < size; i++) {
                 itemInfo.addQuest(dataInputStream.readInt());
             }
-            getItems().add(itemInfo);
+            getItems().put(itemInfo.getItemId(), itemInfo);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -538,7 +493,7 @@ public class ItemData {
         Util.makeDirIfAbsent(dir);
         DataOutputStream dataOutputStream;
         try {
-            for (ItemInfo ii : getItems()) {
+            for (ItemInfo ii : getItems().values()) {
                 dataOutputStream = new DataOutputStream(new FileOutputStream(new File(dir + "/" + ii.getItemId() + ".dat")));
                 dataOutputStream.writeInt(ii.getItemId());
                 dataOutputStream.writeUTF(ii.getInvType().toString());
@@ -1018,7 +973,7 @@ public class ItemData {
                             }
                         }
                     }
-                    getItems().add(item);
+                    getItems().put(item.getItemId(), item);
                 }
             }
         }
@@ -1033,9 +988,6 @@ public class ItemData {
         res.setQuantity(1);
         res.setType(ITEM);
         res.setInvType(itemInfo.getInvType());
-        for(int i : itemInfo.getQuestIDs()) {
-            res.addQuest(i);
-        }
         return res;
     }
 
@@ -1044,9 +996,7 @@ public class ItemData {
     }
 
     public static ItemInfo getItemInfoByID(int itemID) {
-        ItemInfo ii =  getItems().stream().filter(i -> i.getItemId() == itemID).
-                findFirst().
-                orElse(null);
+        ItemInfo ii = getItems().getOrDefault(itemID, null);
         if(ii == null) {
             File file = new File(String.format("%s/items/%d.dat", ServerConstants.DAT_DIR, itemID));
             if(!file.exists()) {
@@ -1058,7 +1008,7 @@ public class ItemData {
         return ii;
     }
 
-    public static List<Equip> getEquips() {
+    public static Map<Integer, Equip> getEquips() {
         return equips;
     }
 
@@ -1144,11 +1094,11 @@ public class ItemData {
     @SuppressWarnings("unused") // Reflection
     public static void generateDatFiles() {
         loadEquipsFromWz();
-        saveEquips(ServerConstants.DAT_DIR + "/equips");
         loadItemsFromWZ();
+        QuestData.linkItemData();
+        saveEquips(ServerConstants.DAT_DIR + "/equips");
         saveItems(ServerConstants.DAT_DIR + "/items");
         loadItemOptionsFromWZ();
-        QuestData.linkItemData();
         saveItemOptions(ServerConstants.DAT_DIR);
     }
 
@@ -1156,7 +1106,11 @@ public class ItemData {
         generateDatFiles();
     }
 
-    public static List<ItemInfo> getItems() {
+    public static Map<Integer, ItemInfo> getItems() {
         return items;
+    }
+
+    public static void addItemInfo(ItemInfo ii) {
+        getItems().put(ii.getItemId(), ii);
     }
 }

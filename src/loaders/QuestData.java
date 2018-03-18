@@ -8,6 +8,7 @@ import client.character.quest.questReward.*;
 import client.life.Mob;
 import constants.ItemConstants;
 import constants.ServerConstants;
+import enums.InvType;
 import enums.QuestStatus;
 import enums.Stat;
 import org.apache.log4j.LogManager;
@@ -469,10 +470,13 @@ public class QuestData {
                             .collect(Collectors.toSet())) { // readability is overrated
                 int itemID = qpmr.getItemID();
                 if (ItemConstants.isEquip(itemID)) {
-                    Item item = ItemData.getEquips().stream().filter(e -> e.getItemId() == itemID).findAny().orElse(null);
-                    if (item != null) {
-                        item.addQuest(qi.getQuestID());
-                    }
+                    // create new ItemInfos just for equips that are required for quests
+                    // normally ItemInfo is just for non-equips.
+                    ItemInfo ii = new ItemInfo();
+                    ii.setItemId(itemID);
+                    ii.setInvType(InvType.EQUIP);
+                    ii.addQuest(qi.getQuestID());
+                    ItemData.addItemInfo(ii);
                 } else {
                     ItemInfo item = ItemData.getItemInfoByID(qpmr.getItemID());
                     if (item != null) {

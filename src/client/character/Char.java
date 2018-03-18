@@ -30,7 +30,6 @@ import util.FileTime;
 import loaders.ItemData;
 import util.Position;
 import util.Rect;
-import util.Util;
 
 import javax.persistence.*;
 import java.util.*;
@@ -283,6 +282,7 @@ public class Char {
     }
 
     public void addItemToInventory(InvType type, Item item, boolean hasCorrectBagIndex) {
+        getQuestManager().handleItemGain(item);
         Inventory inventory = getInventoryByType(type);
         if (inventory != null) {
             Item existingItem = inventory.getItemByItemID(item.getItemId());
@@ -307,7 +307,6 @@ public class Char {
 
     public void addItemToInventory(Item item) {
         addItemToInventory(item.getInvType(), item, false);
-        getQuestManager().handleItemGain(item);
     }
 
     public void setEquippedInventory(Inventory equippedInventory) {
@@ -1895,11 +1894,10 @@ public class Char {
      * @param quantity The amount to consume.
      */
     public void consumeItem(int id, int quantity) {
-        if(ItemConstants.isEquip(id)) {
-            return;
-        }
+        quantity = 1;
         Item checkItem = ItemData.getItemDeepCopy(id);
         Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
+        item.setQuantity(quantity);
         if(item != null) {
             consumeItem(item);
         }
