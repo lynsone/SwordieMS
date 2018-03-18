@@ -60,7 +60,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket lockSkill(int skillID) {
+    public static OutPacket onSetOffStateForOffSkill(int skillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SET_OFF_STATE_FOR_OFF_SKILL);
 
         outPacket.encodeInt(skillID);
@@ -68,7 +68,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket unLockSkill() {
+    public static OutPacket onResetStateForOffSkill() {
         OutPacket outPacket = new OutPacket(OutHeader.RESET_STATE_FOR_OFF_SKILL);
 
         outPacket.encodeInt(0);
@@ -77,11 +77,19 @@ public class UserLocal {
 
     }
 
-    public static OutPacket showABRechargeEffect() {
+    public static OutPacket onEffectRechargeAB() {
         OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
 
         outPacket.encodeByte(0x31);
         outPacket.encodeByte(1);
+
+        return outPacket;
+    }
+
+    public static OutPacket ModHayatoCombo(int amount) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOD_HAYATO_COMBO);
+
+        outPacket.encodeInt(amount);
 
         return outPacket;
     }

@@ -258,8 +258,8 @@ public class AngelicBuster extends Job {
                 handleSoulSeekerExpert(skillID, slv, attackInfo);
             }
             if (Util.succeedProp(getRechargeProp(skillID, slv))) {
-                c.write(UserLocal.showABRechargeEffect());
-                c.write(UserLocal.unLockSkill());
+                c.write(UserLocal.onEffectRechargeAB());
+                c.write(UserLocal.onResetStateForOffSkill());
             }
         }
         Option o1 = new Option();

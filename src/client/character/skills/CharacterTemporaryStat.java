@@ -524,11 +524,11 @@ public enum CharacterTemporaryStat {
     Unk3(0x200000, 14),
     Unk4(0x100000, 14),
     Unk5(0x80000, 14), // 38
-    Unk6(0x40000, 14), // Crash but no 38
-    Unk7(0x20000, 14),
-    Unk8(0x10000, 14),
+    HayatoStance(0x40000, 14),
+    HayatoStanceBonus(0x20000, 14),
+    EyeForEye(0x10000, 14),
 
-    Unk10(0x8000, 14),
+    WillowDodge(0x8000, 14),
     Unk20(0x4000, 14),
     Unk30(0x2000, 14),
     Unk40(0x1000, 14),
@@ -540,8 +540,8 @@ public enum CharacterTemporaryStat {
     Unk100(0x80, 14),
     Unk200(0x40, 14),
     Unk300(0x20, 14), // Adds range
-    Unk400(0x10, 14), // n% boss att
-    Unk500(0x8, 14),
+    BellFlowerBarrierBossDmg(0x10, 14), // n% boss att
+    Battoujutsu(0x8, 14),
     Unk600(0x4, 14),
     Unk700(0x2, 14),
     BlackHeartedCurse(0x1, 14), // Kanna Hyper Shield

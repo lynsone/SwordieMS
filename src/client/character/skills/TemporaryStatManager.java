@@ -2178,6 +2178,21 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(BlackHeartedCurse).rOption);
             outPacket.encodeInt(getOption(BlackHeartedCurse).tOption);
         }
+        if (hasNewStat(HayatoStance)) {
+            outPacket.encodeShort(getOption(HayatoStance).nOption);
+            outPacket.encodeInt(getOption(HayatoStance).rOption);
+            outPacket.encodeInt(getOption(HayatoStance).tOption);
+        }
+        if (hasNewStat(HayatoStanceBonus)) {
+            outPacket.encodeShort(getOption(HayatoStanceBonus).nOption);
+            outPacket.encodeInt(getOption(HayatoStanceBonus).rOption);
+            outPacket.encodeInt(getOption(HayatoStanceBonus).tOption);
+        }
+        if (hasNewStat(EyeForEye)) {
+            outPacket.encodeShort(getOption(EyeForEye).nOption);
+            outPacket.encodeInt(getOption(EyeForEye).rOption);
+            outPacket.encodeInt(getOption(EyeForEye).tOption);
+        }
 
         if (hasNewStat(SoulMP)) {
             outPacket.encodeInt(getOption(SoulMP).xOption);
@@ -2192,8 +2207,8 @@ public class TemporaryStatManager {
             outPacket.encodeInt(0); // nKey
             outPacket.encodeByte(0); // bEnable
         }
-        if (hasNewStat(Unk6)) {
-            outPacket.encodeInt(getOption(Unk6).xOption);
+        if (hasNewStat(HayatoStance)) {
+            outPacket.encodeInt(getOption(HayatoStance).xOption);
         }
         if (hasNewStat(Unk5)) {
             outPacket.encodeInt(getOption(Unk5).xOption);
