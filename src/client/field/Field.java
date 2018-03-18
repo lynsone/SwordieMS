@@ -50,7 +50,7 @@ public class Field {
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
         this.uniqueId = uniqueId;
-        this.rect = new Rectangle(800,600);
+        this.rect = new Rectangle(800, 600);
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
         this.lifes = new ArrayList<>();
@@ -258,6 +258,7 @@ public class Field {
     public Portal getPortalByName(String name) {
         return getPortals().stream().filter(portal -> portal.getName().equals(name)).findAny().orElse(null);
     }
+
     public Portal getPortalByID(int id) {
         return getPortals().stream().filter(portal -> portal.getId() == id).findAny().orElse(null);
     }
@@ -266,13 +267,13 @@ public class Field {
         Set<Foothold> footholds = getFootholds().stream().filter(fh -> fh.getX1() <= pos.getX() && fh.getX2() >= pos.getX()).collect(Collectors.toSet());
         Foothold res = null;
         int lastY = Integer.MAX_VALUE;
-        for(Foothold fh : footholds) {
-            if(res == null) {
+        for (Foothold fh : footholds) {
+            if (res == null) {
                 res = fh;
                 lastY = fh.getYFromX(pos.getX());
             } else {
                 int y = fh.getYFromX(pos.getX());
-                if(y < lastY && y >= pos.getY()) {
+                if (y < lastY && y >= pos.getY()) {
                     res = fh;
                     lastY = y;
                 }
@@ -306,10 +307,10 @@ public class Field {
     }
 
     public void addLife(Life life) {
-        if(life.getObjectId() < 0) {
+        if (life.getObjectId() < 0) {
             life.setObjectId(getNewObjectID());
         }
-        if(!getLifes().contains(life)) {
+        if (!getLifes().contains(life)) {
             getLifes().add(life);
             life.setField(this);
         }
@@ -317,7 +318,7 @@ public class Field {
 
     public void removeLife(int id) {
         Life life = getLifeByObjectID(id);
-        if(life == null) {
+        if (life == null) {
             return;
         }
         getLifes().remove(life);
@@ -329,7 +330,7 @@ public class Field {
                         ((Summon) s).getCharID() == summon.getCharID() &&
                         ((Summon) s).getSkillID() == summon.getSkillID())
                 .findFirst().orElse(null);
-        if(oldSummon != null) {
+        if (oldSummon != null) {
             removeLife(oldSummon.getObjectId(), false);
         }
         spawnLife(summon, null);
@@ -343,27 +344,27 @@ public class Field {
         addLife(life);
         if (getChars().size() > 0) {
             Char controller = null;
-            if(getLifeToControllers().containsKey(life)) {
+            if (getLifeToControllers().containsKey(life)) {
                 controller = getLifeToControllers().get(life);
             }
-            if(controller == null) {
+            if (controller == null) {
                 controller = getChars().get(0);
                 putLifeController(life, controller);
             }
             Mob mob = null;
-            if(life instanceof Mob) {
+            if (life instanceof Mob) {
                 mob = (Mob) life;
                 mob.setTemporaryStat(new MobTemporaryStat(mob));
             }
             if (mob != null) {
                 Position pos = mob.getPosition();
                 Foothold fh = getFootholdById(mob.getFh());
-                if(fh == null) {
+                if (fh == null) {
                     fh = findFootHoldBelow(pos);
                 }
                 mob.setHomeFoothold(fh.deepCopy());
                 mob.setCurFoodhold(fh.deepCopy());
-                if(onlyChar == null) {
+                if (onlyChar == null) {
                     for (Char chr : getChars()) {
                         chr.write(MobPool.mobEnterField(mob, false));
                         chr.write(MobPool.mobChangeController(mob, false, controller == chr));
@@ -373,25 +374,26 @@ public class Field {
                     onlyChar.getClient().write(MobPool.mobChangeController(mob, false, controller == onlyChar));
                 }
             }
-            if(life instanceof Summon) {
+            if (life instanceof Summon) {
                 Summon summon = (Summon) life;
-                if(summon.getSummonTerm() > 0) {
+                if (summon.getSummonTerm() > 0) {
                     Timer t = EventManager.addEvent(this, "removeLife", summon.getSummonTerm(), summon.getObjectId(), true);
                     addLifeTimer(summon, t);
                 }
                 broadcastPacket(CField.summonedCreated(summon.getCharID(), summon));
             }
-            if(life instanceof Npc) {
+            if (life instanceof Npc) {
                 Npc npc = (Npc) life;
-                for(Char chr : getChars()) {
+                for (Char chr : getChars()) {
                     chr.write(NpcPool.npcEnterField(npc));
                     chr.write(NpcPool.npcChangeController(npc, false));
                 }
             }
         }
     }
+
     private void removeLife(Life life) {
-        if(getLifes().contains(life)) {
+        if (getLifes().contains(life)) {
             getLifes().remove(life);
         }
     }
@@ -409,17 +411,17 @@ public class Field {
     }
 
     public void addChar(Char chr) {
-        if(!getChars().contains(chr)) {
+        if (!getChars().contains(chr)) {
             getChars().add(chr);
         }
     }
 
     public void removeChar(Char chr) {
-        if(getChars().contains(chr)) {
+        if (getChars().contains(chr)) {
             getChars().remove(chr);
         }
-        for(Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
-            if(entry.getValue() == chr) { // yes, ==
+        for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
+            if (entry.getValue() == chr) { // yes, ==
                 putLifeController(entry.getKey(), null);
             }
         }
@@ -446,7 +448,7 @@ public class Field {
     }
 
     public void spawnLifesForChar(Char chr) {
-        for(Life life : getLifes()) {
+        for (Life life : getLifes()) {
             spawnLife(life, chr);
         }
     }
@@ -464,7 +466,7 @@ public class Field {
     }
 
     public void broadcastPacket(OutPacket outPacket) {
-        for(Char c : getChars()) {
+        for (Char c : getChars()) {
             c.getClient().write(outPacket);
         }
     }
@@ -472,7 +474,7 @@ public class Field {
     public void spawnAffectedArea(AffectedArea aa) {
         addLife(aa);
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
-        if(si != null) {
+        if (si != null) {
             int duration = si.getValue(time, aa.getSlv()) * 1000;
             EventManager.addEvent(this, "removeLife", duration, aa.getObjectId(), true);
         }
@@ -495,11 +497,11 @@ public class Field {
 
     public List<Life> getLifesInRect(Rect rect) {
         List<Life> lifes = new ArrayList<>();
-        for(Life life : getLifes()) {
+        for (Life life : getLifes()) {
             Position position = life.getPosition();
             int x = position.getX();
             int y = position.getY();
-            if(x >= rect.getLeft() && y >= rect.getTop()
+            if (x >= rect.getLeft() && y >= rect.getTop()
                     && x <= rect.getRight() && y <= rect.getBottom()) {
                 lifes.add(life);
             }
@@ -509,20 +511,20 @@ public class Field {
 
     public synchronized void removeLife(Integer id, Boolean fromTimer) {
         Life life = getLifeByObjectID(id);
-        if(life == null) {
+        if (life == null) {
             return;
         }
         removeLife(id);
         removeTimer(life, fromTimer);
-        if(life instanceof Summon) {
+        if (life instanceof Summon) {
             Summon summon = (Summon) life;
             broadcastPacket(CField.summonedRemoved(summon, LeaveType.ANIMATION));
-        } else if(life instanceof AffectedArea) {
+        } else if (life instanceof AffectedArea) {
             AffectedArea aa = (AffectedArea) life;
             broadcastPacket(CField.affectedAreaRemoved(aa, false));
-            for(Char chr : getChars()) {
+            for (Char chr : getChars()) {
                 TemporaryStatManager tsm = chr.getTemporaryStatManager();
-                if(tsm.hasAffectedArea(aa)) {
+                if (tsm.hasAffectedArea(aa)) {
                     tsm.removeStatsBySkill(aa.getSkillID());
                 }
             }
@@ -531,7 +533,7 @@ public class Field {
 
     public synchronized void removeDrop(Integer dropID, Integer pickupUserID, Boolean fromTimer) {
         Life life = getLifeByObjectID(dropID);
-        if(life instanceof Drop) {
+        if (life instanceof Drop) {
             broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
             removeLife(dropID, fromTimer);
         }
@@ -546,10 +548,10 @@ public class Field {
     }
 
     public void removeTimer(Life life, boolean fromTimer) {
-        if(!getLifeTimers().containsKey(life)) {
+        if (!getLifeTimers().containsKey(life)) {
             return;
         }
-        if(!fromTimer) {
+        if (!fromTimer) {
             getLifeTimers().get(life).cancel();
         }
         getLifeTimers().remove(life);
@@ -560,8 +562,8 @@ public class Field {
     }
 
     public void checkMobInAffectedAreas(Mob mob) {
-        for(AffectedArea aa : getAffectedAreas()) {
-            if(aa.getRect().hasPositionInside(mob.getPosition())) {
+        for (AffectedArea aa : getAffectedAreas()) {
+            if (aa.getRect().hasPositionInside(mob.getPosition())) {
                 aa.handleMobInside(mob);
             }
         }
@@ -569,11 +571,11 @@ public class Field {
 
     public void checkCharInAffectedAreas(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        for(AffectedArea aa : getAffectedAreas()) {
+        for (AffectedArea aa : getAffectedAreas()) {
             boolean isInsideAA = aa.getRect().hasPositionInside(chr.getPosition());
-            if(isInsideAA) {
+            if (isInsideAA) {
                 aa.handleCharInside(chr);
-            } else if(tsm.hasAffectedArea(aa) && !isInsideAA) {
+            } else if (tsm.hasAffectedArea(aa) && !isInsideAA) {
                 tsm.removeAffectedArea(aa);
             }
         }
@@ -586,9 +588,10 @@ public class Field {
     /**
      * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
      * Immediately broadcasts the drop packet.
-     * @param drop The Drop to drop.
+     *
+     * @param drop    The Drop to drop.
      * @param posFrom The Position that the drop starts off from.
-     * @param posTo The Position where the drop lands.
+     * @param posTo   The Position where the drop lands.
      */
     public void drop(Drop drop, Position posFrom, Position posTo) {
         addLife(drop);
@@ -597,17 +600,18 @@ public class Field {
 
     /**
      * Drops a {@link Drop} according to a given {@link DropInfo DropInfo}'s specification.
+     *
      * @param dropInfo The
-     * @param posFrom The Position that hte drop starts off from.
-     * @param posTo The Position where the drop lands.
-     * @param ownerID The owner's character ID. Will not be able to be picked up by Chars that are not the owner.
+     * @param posFrom  The Position that hte drop starts off from.
+     * @param posTo    The Position where the drop lands.
+     * @param ownerID  The owner's character ID. Will not be able to be picked up by Chars that are not the owner.
      */
     public void drop(DropInfo dropInfo, Position posFrom, Position posTo, int ownerID) {
         int itemID = dropInfo.getItemID();
         Item item;
         Drop drop = new Drop(-1);
         drop.setOwnerID(ownerID);
-        if(itemID != 0) {
+        if (itemID != 0) {
             item = ItemData.getEquipDeepCopyFromId(itemID);
             if (item == null) {
                 item = ItemData.getItemDeepCopy(itemID);
@@ -623,9 +627,10 @@ public class Field {
 
     /**
      * Drops a Set of {@link DropInfo}s from a base Position.
+     *
      * @param dropInfos The Set of DropInfos.
-     * @param position The Position the initial Drop comes from.
-     * @param ownerID The owner's character ID.
+     * @param position  The Position the initial Drop comes from.
+     * @param ownerID   The owner's character ID.
      */
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
         drop(dropInfos, findFootHoldBelow(position), position, ownerID);
@@ -633,7 +638,8 @@ public class Field {
 
     /**
      * Drops a {@link Drop} at a given Position. Calculates the Position that the Drop should land at.
-     * @param drop The Drop that should be dropped.
+     *
+     * @param drop     The Drop that should be dropped.
      * @param position The Position it is dropped from.
      */
     public void drop(Drop drop, Position position) {
@@ -646,18 +652,19 @@ public class Field {
      * Drops a Set of {@link DropInfo}s, locked to a specific {@link Foothold}.
      * Not all drops are guaranteed to be dropped, as this method calculates whether or not a Drop should drop, according
      * to the DropInfo's prop chance.
+     *
      * @param dropInfos The Set of DropInfos that should be dropped.
-     * @param fh The Foothold this Set of DropInfos is bound to.
-     * @param position The Position the Drops originate from.
-     * @param ownerID The ID of the owner of all drops.
+     * @param fh        The Foothold this Set of DropInfos is bound to.
+     * @param position  The Position the Drops originate from.
+     * @param ownerID   The ID of the owner of all drops.
      */
     public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID) {
         int x = position.getX();
         int minX = fh.getX1();
         int maxX = fh.getX2();
         int diff = 0;
-        for(DropInfo dropInfo : dropInfos) {
-            if(dropInfo.willDrop()) {
+        for (DropInfo dropInfo : dropInfos) {
+            if (dropInfo.willDrop()) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
                 Position posTo = new Position(x, fh.getYFromX(x));
                 drop(dropInfo, position, posTo, ownerID);
@@ -666,12 +673,12 @@ public class Field {
         }
     }
 
-    public List<Portal> getclosestPortal (Rect rect) {
+    public List<Portal> getclosestPortal(Rect rect) {
         List<Portal> portals = new ArrayList<>();
-        for(Portal portals2 : getPortals()) {
+        for (Portal portals2 : getPortals()) {
             int x = portals2.getX();
             int y = portals2.getY();
-            if(x >= rect.getLeft() && y >= rect.getTop()
+            if (x >= rect.getLeft() && y >= rect.getTop()
                     && x <= rect.getRight() && y <= rect.getBottom()) {
                 portals.add(portals2);
             }

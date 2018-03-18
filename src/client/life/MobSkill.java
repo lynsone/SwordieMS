@@ -1,9 +1,17 @@
 package client.life;
 
 import client.character.skills.Option;
+import client.character.skills.SkillInfo;
+import enums.MobSkillID;
+import enums.MobSkillStat;
 import enums.MobStat;
+import loaders.MobData;
+import loaders.MobSkillInfo;
+import loaders.SkillData;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+
+import static enums.MobSkillStat.*;
 
 /**
  * Created on 2/28/2018.
@@ -247,15 +255,25 @@ public class MobSkill {
 
     public void handleEffect(Mob mob) {
         MobTemporaryStat mts = mob.getTemporaryStat();
-        Option o = new Option(getSkill());
-        o.slv = getLevel();
-        switch(getSkill()) {
-            case 100:
-            case 110:
-                o.nOption = 1;
+        short skill = (short) getSkill();
+        short level = (short) getLevel();
+        MobSkillInfo msi = SkillData.getMobSkillInfoByIdAndLevel(skill, level);
+        MobSkillID msID = MobSkillID.getMobSkillIDByVal(skill);
+        Option o = new Option(skill);
+        o.slv = level;
+        o.tOption = msi.getSkillStatIntValue(time);
+        switch(msID) {
+            case PowerUp:
+            case PowerUp2:
+            case PowerUp3:
+                o.nOption = msi.getSkillStatIntValue(x);
                 mts.addMobSkillOptionsAndBroadCast(MobStat.PowerUp, o);
                 break;
-            case 102:
+            case PGuardUp:
+                o.nOption = 1;
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PGuardUp, o);
+                break;
+            case MGuardUp:
                 o.nOption = 1;
                 mts.addMobSkillOptionsAndBroadCast(MobStat.PGuardUp, o);
                 break;
