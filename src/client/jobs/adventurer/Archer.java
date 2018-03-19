@@ -56,6 +56,7 @@ public class Archer extends Job {
     public static final int ARROW_PLATTER = 3111013;
     public static final int EVASION_BOOST = 3110007;
     public static final int SHARP_EYES_BOW = 3121002;
+    public static final int SHARP_EYES_BOW_IED_H = 3120044;
     public static final int ILLUSION_STEP_BOW = 3121007;
     public static final int ENCHANTED_QUIVER = 3121016;
     public static final int BINDING_SHOT = 3121014;
@@ -69,6 +70,7 @@ public class Archer extends Job {
     public static final int MAPLE_WARRIOR_XBOW = 3221000;
     public static final int ARROW_ILLUSION = 3221014;
     public static final int SHARP_EYES_XBOW = 3221002;
+    public static final int SHARP_EYES_XBOW_IED_H = 3220044;
     public static final int ILLUSION_STEP_XBOW = 3221006;
 
     public static final int EPIC_ADVENTURE_XBOW = 3221053;
@@ -146,7 +148,6 @@ public class Archer extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case ARROW_BOMB:
-            case PHOENIX:
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -154,6 +155,18 @@ public class Archer extends Job {
                         o1.nOption = 1;
                         o1.rOption = skillID;
                         o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+            case PHOENIX:
+                if (Util.succeedProp(si.getValue(prop, slv))) {
+                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = 3;
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
@@ -221,10 +234,20 @@ public class Archer extends Job {
                     }
                 }
                 break;
+            case FREEZER:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(x, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
+                }
+                break;
         }
     }
 
-    private void handleAggresiveResistance(AttackInfo ai) { //TODO  PowerTransfer is the correct TempStat for the Effect
+    private void handleAggresiveResistance(AttackInfo ai) {
         if(!chr.hasSkill(AGGRESSIVE_RESISTANCE)) {
             return;
         }
@@ -248,8 +271,22 @@ public class Archer extends Job {
         o.nOption = (int) Math.min((int) totalDamage * (si.getValue(y, slv) / 100D) + o.nOption,
                 chr.getStat(Stat.mhp) / (si.getValue(z, slv) / 100D));
         o.tOption = si.getValue(time, slv);
-        tsm.putCharacterStatValue(DamR, o);
+        tsm.putCharacterStatValue(DamAbsorbShield, o);
         tsm.sendSetStatPacket();
+        handleAggressiveResistanceEffect();
+    }
+
+    private void handleAggressiveResistanceEffect() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(AGGRESSIVE_RESISTANCE);
+        SkillInfo si = SkillData.getSkillInfoById(AGGRESSIVE_RESISTANCE);
+        byte slv = (byte) skill.getCurrentLevel();
+        o.nOption = 1;
+        o.rOption = AGGRESSIVE_RESISTANCE;
+        o.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(PowerTransferGauge, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     private void handleMortalBlow() {
@@ -575,7 +612,12 @@ public class Archer extends Job {
                 o2.nOption = si.getValue(y, slv);
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-//                o2.mOption = si.getValue(x, slv); mOption is for the hyper passive
+
+                //mOption is for the hyper passive
+                if(chr.hasSkill(SHARP_EYES_BOW_IED_H) || chr.hasSkill(SHARP_EYES_XBOW_IED_H)) {
+                    o2.mOption = si.getValue(ignoreMobpdpR, slv);
+
+                }
                 tsm.putCharacterStatValue(SharpEyes, o2);
                 break;
             case ILLUSION_STEP_BOW:
@@ -639,10 +681,10 @@ public class Archer extends Job {
                 tsm.putCharacterStatValue(Preparation, o3); //preparation = BD%
                 break;
             case BULLSEYE_SHOT:
-                o1.nOption = 5; //Buff doesn't contain Min Crit but the BullsEye EffectTempStat gives it.
+                o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(BullsEye, o1);    //BullsEye = Min Crit Dmg%
+                tsm.putCharacterStatValue(BullsEye, o1);
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieDamR, slv);
                 o2.tStart = (int) System.currentTimeMillis();
@@ -657,10 +699,11 @@ public class Archer extends Job {
                 o4.rOption = skillID;
                 o4.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(SharpEyes, o4);   //Max Crit Dmg%
-                o5.nOption = si.getValue(x, slv);
-                o5.rOption = skillID;
-                o5.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(CriticalBuff, o5);
+                o5.nReason = skillID;
+                o5.nValue = si.getValue(x, slv);
+                o5.tStart = (int) System.currentTimeMillis();
+                o5.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieCr, o5);
                 break;
         }
         tsm.sendSetStatPacket();

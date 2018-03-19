@@ -109,7 +109,9 @@ public class Warrior extends Job {
             RAGE, // Rage
             MAPLE_WARRIOR_HERO, // Maple Warrior
             MAPLE_WARRIOR_PALADIN,
+            MAPLE_WARRIOR_DARK_KNIGHT,
             WEAPON_BOOSTER_PAGE, // Weapon Booster - Page
+            WEAPON_BOOSTER_SPEARMAN,
             COMBAT_ORDERS,
             PARASHOCK_GUARD,
             ELEMENTAL_FORCE,
@@ -724,13 +726,13 @@ public class Warrior extends Job {
         if(chr.hasSkill(DIVINE_SHIELD)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             SkillInfo si = SkillData.getSkillInfoById(DIVINE_SHIELD);
-            byte slv = (byte) si.getCurrentLevel();
+            int slv = si.getCurrentLevel();
             int shieldprop = 50;//      si.getValue(SkillStat.prop, slv);       //TODO should be prop in WzFiles, but it's actually 0
             Option o1 = new Option();
             Option o2 = new Option();
 
-            if(tsm.hasStat(BlessingArmor)) {
-                if(divShieldAmount<10) {
+            if (tsm.hasStat(BlessingArmor)) {
+                if (divShieldAmount < 10) {
                     divShieldAmount++;
                 } else {
                     resetDivineShield();
@@ -750,8 +752,14 @@ public class Warrior extends Job {
                     divShieldAmount = 0;
                 }
             }
-
-
+        }
+        if(chr.hasSkill(1110013)) {
+            SkillInfo csi = SkillData.getSkillInfoById(1110013);
+            int slv = csi.getCurrentLevel();
+            int comboprop = 30; //csi.getValue(subProp, slv);
+            if(Util.succeedProp(comboprop)) {
+                addCombo(chr);
+            }
         }
     }
 

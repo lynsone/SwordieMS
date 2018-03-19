@@ -176,7 +176,7 @@ public class Pirate extends Job {
     };
 
 
-    public int viprEnergy = 1;
+    public int viprEnergy = 0;
     private final int MAX_ENERGY = getMaxEnergy();
 
     public Pirate(Char chr) {
@@ -533,9 +533,10 @@ public class Pirate extends Job {
         }
     }
 
-    public void handleStunMastery(AttackInfo attackInfo, byte slv) {
+    public void handleStunMastery(AttackInfo attackInfo) {
         Option o1 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(STUN_MASTERY);
+        int slv = si.getCurrentLevel();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(subProp, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -712,7 +713,7 @@ public class Pirate extends Job {
 
         if(chr.getJob() > 509 && chr.getJob() < 513) {      //Bucc
             if(hasHitMobs) {
-                handleStunMastery(attackInfo, slv);
+                handleStunMastery(attackInfo);
 
             }
         }

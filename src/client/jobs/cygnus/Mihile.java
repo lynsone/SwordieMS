@@ -121,11 +121,11 @@ public class Mihile extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
-                //tsm.putCharacterStatValue(MichaelSoulLink, o1);
+                tsm.putCharacterStatValue(MichaelSoulLink, o1);
                 o2.nOption = 1;
                 o2.rOption = skillID;
                 o2.tOption = 0;
-                //tsm.putCharacterStatValue(BMageAura, o2);
+                tsm.putCharacterStatValue(BMageAura, o2);
                 // dot = healing duration
                 // indieDamR = dmg% per member
                 // q = receive 20%s of party's dmg which can be nullified with Royal Guard
@@ -133,7 +133,7 @@ public class Mihile extends Job {
                 // w = DEF% from enduring Spirit
                 // x = Att/M.att%
                 // y = AsrR
-                // z = 4000  //TODO  idk
+                // z = 4000
 
                 // TODO
                 break;
@@ -149,7 +149,7 @@ public class Mihile extends Job {
                 o3.nOption = si.getValue(y, slv);
                 o3.rOption = skillID;
                 o3.tOption = 0;
-                tsm.putCharacterStatValue(BullsEye, o3);
+                tsm.putCharacterStatValue(IncCriticalDamMin, o3);
                 break;
             case CALL_OF_CYGNUS_MIHILE:
                 o1.nValue = si.getValue(x, slv);

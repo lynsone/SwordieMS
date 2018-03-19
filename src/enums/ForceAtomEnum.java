@@ -15,25 +15,30 @@ public enum ForceAtomEnum {
     NETHER_SHIELD(3, 3), //Nether Shield
     RABBIT_ORB(3, 4), // Shade
     FLAMING_RABBIT_ORB(3, 5), // same for 4, but insta disappear (byMob?)
+    AB_ORB_RECREATION(4, 1), //AB - Soul Seeker - Recreation
+    DA_ORB_RECREATION(4, 2),
+    NETHER_SHIELD_RECREATION(4, 3),
+    RABBIT_ORB_RECREATION(4, 4),
+    FLAMING_RABBIT_ORB_RECREATION(4, 5),
     XENON_ROCKET_1(5, 1), //Xenon Aegis System Rockets
     XENON_ROCKET_2(5, 2), //Xenon Aegis System Rockets
     XENON_ROCKET_3(6, 1), //Xenon Pinpoint Salvo
     WA_ARROW_1(7, 1), //WA Green Arrow
     WA_ARROW_2(7, 2), //WA Purple Arrow
     WA_ARROW_HYPER(8, 1), //WA Hyper Arrow
-    KANNA_ORB_1(9, 1), // to char
-    KANNA_ORB_2(9, 2), // to char
+    KANNA_ORB_1(9, 1), // to char       isMobStartForceAtom
+    KANNA_ORB_2(9, 2), // to char       isMobStartForceAtom
     BM_ARROW(10, 1), //Magic Arrow from Quiver Cartridge
-    ASSASSIN_MARK(11, 1), //Assassin's Mark
-    NIGHTLORD_MARK(11, 2), //Night Lord's Mark
+    ASSASSIN_MARK(11, 1), //Assassin's Mark         isMobStartForceAtom
+    NIGHTLORD_MARK(11, 2), //Night Lord's Mark      isMobStartForceAtom
     FLYING_MESO(12, 1), //Flying Meso - Shadower's Meso Explosion
     BLUE_RABBIT_ORB(13, 1), //Shade 2nd Job
     RED_RABBIT_ORB(13, 2), //Shade 4th Job upgrade
-    YELLOW_ORB_TO_SELF(14, 1), //Looks similar to Demon Slayer's Fury Orbs but it's yellow instead of blue
+    YELLOW_ORB_TO_SELF(14, 1), //Looks similar to Demon Slayer's Fury Orbs but it's yellow instead of blue      isMobStartForceAtom
     NIGHT_WALKER_BAT(15, 1), //Night Walker Bat  from Mob?
     NIGHT_WALKER_BAT_4(15, 2), //Night Walker Bats(4th)  from Mob?
-    NIGHT_WALKER_FROM_MOB(16, 1), //Night Walker Bat
-    NIGHT_WALKER_FROM_MOB_4(16, 2), //Night Walker Bats (4th Job)
+    NIGHT_WALKER_FROM_MOB(16, 1), //Night Walker Bat                isMobStartForceAtom
+    NIGHT_WALKER_FROM_MOB_4(16, 2), //Night Walker Bats (4th Job)   isMobStartForceAtom
     ORBITAL_FLAME_1(17, 1), //Blaze Wizard(1)
     ORBITAL_FLAME_3(17, 2), //Blaze Wizard(3)
     ORBITAL_FLAME_2(17, 3), //Blaze Wizard(2)
@@ -50,6 +55,7 @@ public enum ForceAtomEnum {
     KINESIS_ORB_REAL(22, 1),
     FAST_STAR_ORB(24, 1), //Evan's Magic Debris
     TRANSPARENT_AB_ORB(25, 1), // same for 26, but that disappears
+    TRANSPARENT_AB_ORB_RECREATION(26,1),
 
     ;
 

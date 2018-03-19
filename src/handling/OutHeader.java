@@ -709,6 +709,9 @@ public enum OutHeader {
     OPEN_MESO_SACK_SUCCESS(847),
     OPEN_MESO_SACK_FAIL(848),
 
+
+    MOD_HAYATO_COMBO(886),
+
     // CSummonedPool::OnPacket
     SUMMONED_CREATED(892),
     SUMMONED_REMOVED(893),

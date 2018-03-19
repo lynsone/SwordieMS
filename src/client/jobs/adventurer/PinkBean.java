@@ -6,10 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
-import client.life.Life;
-import client.life.Mob;
-import client.life.MobTemporaryStat;
-import client.life.Summon;
+import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
@@ -41,14 +38,13 @@ public class PinkBean extends Job {
     public static final int INSTANT_GARDEN_BREEZY = 131001207; //Area of Effect
     public static final int INSTANT_GARDEN_PRETTY = 131001307; //Summon
 
-    public static final int GO_MINI_BEANS = 131001015; //   ON/OFF buff for  Summon
+    public static final int GO_MINI_BEANS = 131001015; //   ON/OFF buff
+    public static final int MINI_BEANS = 131002015; //Summon Info
     public static final int EVERYBODY_HAPPY = 131001009; //Buff
     public static final int LETS_ROLL = 131001004;
     public static final int BLAZING_YOYO = 131001010;
     public static final int BLAZING_YOYO_2 = 131001011;
 
-
-    private Summon miniBean;
     private int yoyo;
     private final int MAX_YOYO_STACK = 8;
 
@@ -58,8 +54,6 @@ public class PinkBean extends Job {
             CHILL_OUT_MYSTERIOUS_COCKTAIL,
             CHILL_OUT_NOM_NOM_MEAT,
 
-            INSTANT_GARDEN_POSIE,
-            INSTANT_GARDEN_BREEZY,
             INSTANT_GARDEN_PRETTY,
 
             GO_MINI_BEANS,
@@ -158,10 +152,6 @@ public class PinkBean extends Job {
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(PinkbeanMinibeenMove, o1);
-                o2.nOption = 8;
-                o2.rOption = skillID;
-                o2.tOption = 0;
-                //tsm.putCharacterStatValue(PinkbeanYoYoStack, o2);
                 break;
             case EVERYBODY_HAPPY:
                 o1.nOption = 1;
@@ -211,11 +201,15 @@ public class PinkBean extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        if(hasHitMobs) {
+            if(skillID != MINI_BEANS) {
+                handleGoMiniBeans(attackInfo);
+            }
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
-
         }
     }
 
@@ -259,6 +253,37 @@ public class PinkBean extends Job {
                 case BLAZING_YOYO:
                 case BLAZING_YOYO_2:
                     costYoYo();
+                    break;
+
+                case INSTANT_GARDEN_BREEZY:
+                    SkillInfo isb = SkillData.getSkillInfoById(INSTANT_GARDEN_BREEZY);
+                    AffectedArea aa = AffectedArea.getPassiveAA(INSTANT_GARDEN_BREEZY, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setCharID(chr.getId());
+                    aa.setPosition(chr.getPosition());
+                    if (chr.isLeft()) {
+                        aa.setFlip(false);
+                    } else {
+                        aa.setFlip(true);
+                    }
+                    aa.setRect(aa.getPosition().getRectAround(isb.getRects().get(0)));
+                    aa.setDelay((short) 10);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
+                case INSTANT_GARDEN_POSIE:
+                    SkillInfo isp = SkillData.getSkillInfoById(INSTANT_GARDEN_POSIE);
+                    AffectedArea aa2 = AffectedArea.getPassiveAA(INSTANT_GARDEN_POSIE, slv);
+                    aa2.setMobOrigin((byte) 0);
+                    aa2.setCharID(chr.getId());
+                    aa2.setPosition(chr.getPosition());
+                    if (chr.isLeft()) {
+                        aa2.setFlip(false);
+                    } else {
+                        aa2.setFlip(true);
+                    }
+                    aa2.setRect(aa2.getPosition().getRectAround(isp.getRects().get(0)));
+                    aa2.setDelay((short) 12);
+                    chr.getField().spawnAffectedArea(aa2);
                     break;
             }
         }
@@ -307,35 +332,37 @@ public class PinkBean extends Job {
         yoyoIncrement();
         EventManager.addEvent(this, "yoyoInterval", 1000);
     }
-
-    /*private void updateYoYo() {
+/*
+    private void updateYoYo() {
         Option o = new Option();
         o.nOption = yoyo;
         chr.getTemporaryStatManager().putCharacterStatValue(PinkbeanYoYoStack, o);
         chr.getTemporaryStatManager().sendSetStatPacket();
-    }*/
+    }
+*/
 
 
 
-
-    private void handleGoMiniBeans(int skillID, byte slv) {
+    private void handleGoMiniBeans(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Field field;
+        Summon summon;
         if(tsm.hasStat(PinkbeanMinibeenMove)) {
             SkillInfo miniBeanInfo = SkillData.getSkillInfoById(GO_MINI_BEANS);
-            int minibeanproc = miniBeanInfo.getValue(z, miniBeanInfo.getCurrentLevel());
-            if(Util.succeedProp(minibeanproc)) {
-                //summonMiniBean(skillID, slv);         //WVS_CRASH_CALLBACK
+            byte slv = (byte)miniBeanInfo.getCurrentLevel();
+            int minibeanproc = 100;//   miniBeanInfo.getValue(z, miniBeanInfo.getCurrentLevel());
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(Util.succeedProp(minibeanproc)) {
+                    summon = Summon.getSummonBy(c.getChr(), MINI_BEANS, slv);
+                    field = c.getChr().getField();
+                    summon.setFlyMob(true);
+                    summon.setPosition(mob.getPosition());
+                    summon.setMoveAbility(MoveAbility.FLY_AWAY.getVal());
+                    field.spawnAddSummon(summon);
+                }
             }
         }
-    }
-
-    private void summonMiniBean(int skillID, byte slv) { //WVS_CRASH_CALLBACK
-        Field field;
-        miniBean = Summon.getSummonBy(c.getChr(), skillID, slv);
-        field = c.getChr().getField();
-        miniBean.setFlyMob(true);
-        miniBean.setMoveAbility(MoveAbility.FLY_AWAY.getVal());
-        field.spawnSummon(miniBean);
     }
 
 }
