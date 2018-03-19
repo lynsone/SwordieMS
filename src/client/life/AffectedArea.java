@@ -211,8 +211,7 @@ public class AffectedArea extends Life {
         }
         tsm.addAffectedArea(this);
         int skillID = getSkillID();
-        Skill skill = chr.getSkill(getSkillID());
-        byte slv = (byte) skill.getCurrentLevel();
+        byte slv = getSlv();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         Option o = new Option();
         Option o1 = new Option();

@@ -206,7 +206,7 @@ public class AngelicBuster extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                                 anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
                                 new Position(5, 0)); //Slightly behind the player
-                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
                 }
@@ -228,7 +228,7 @@ public class AngelicBuster extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                         anglenum, 250, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, -100));
-                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                         true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
                         life.getPosition(), SOUL_SEEKER_ATOM, life.getPosition()));
             }

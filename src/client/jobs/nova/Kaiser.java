@@ -517,7 +517,7 @@ public class Kaiser extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                         0, 300, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, 0));
-                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                         true, mobID, TEMPEST_BLADES_FIVE, forceAtomInfo, new Rect(), 0, 300,
                         life.getPosition(), TEMPEST_BLADES_FIVE, life.getPosition()));
             }

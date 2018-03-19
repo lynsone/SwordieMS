@@ -29,9 +29,22 @@ public class UserRemote {
         outPacket.encodePosition(oldPos);
         outPacket.encodePosition(oldVPos);
         outPacket.encodeInt(encodedGatherDuration);
+        outPacket.encodeByte(movements.size());
         for(Movement m : movements) {
             m.encode(outPacket);
         }
+        outPacket.encodeByte(0);
+
+        return outPacket;
+    }
+
+    public static OutPacket emotion(int id, int emotion, int duration, boolean byItemOption) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_EMOTION);
+
+        outPacket.encodeInt(id);
+        outPacket.encodeInt(emotion);
+        outPacket.encodeInt(duration);
+        outPacket.encodeByte(byItemOption);
 
         return outPacket;
     }

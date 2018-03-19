@@ -384,7 +384,7 @@ public class Xenon extends Job {
                     faiList.add(fai);
                     mobList.add(mobID);
                 }
-                c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
                         mobList, AEGIS_SYSTEM_ATOM, faiList, null, 0, 0,
                         null, 0, null));
             }

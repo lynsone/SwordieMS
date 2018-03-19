@@ -376,7 +376,7 @@ public class Evan extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 20,
                         0, 200, (int) System.currentTimeMillis(), 1, 0,
                         new Position(life.deepCopy().getX(), life.deepCopy().getY()));
-                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                         true, mobID, MAGIC_DEBRIS, forceAtomInfo, new Rect(), 0, 300,
                         life.getPosition(), MAGIC_DEBRIS, life.getPosition()));
             }

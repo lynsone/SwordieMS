@@ -378,7 +378,7 @@ public class Archer extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 15,
                                 num, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
-                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobId, QUIVER_CARTRIDGE_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), 0, mob.getPosition()));
                     }

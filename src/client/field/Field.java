@@ -426,7 +426,7 @@ public class Field {
             broadcastPacket(UserPool.userLeaveField(chr), chr);
         }
         for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
-            if (entry.getValue().equals(chr)) {
+            if (entry.getValue() != null && entry.getValue().equals(chr)) {
                 putLifeController(entry.getKey(), null);
             }
         }

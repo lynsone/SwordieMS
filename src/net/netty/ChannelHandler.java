@@ -39,8 +39,10 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
         log.debug("[ChannelHandler] | Channel inactive.");
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
         if(c != null && c.getChr() != null) {
-            Field returnMap = c.getChannelInstance().getField(c.getChr().getField().getReturnMap());
-            c.getChr().setField(returnMap);
+            Field field = c.getChr().getField();
+            field.removeChar(c.getChr());
+//            Field returnMap = c.getChannelInstance().getField(c.getChr().getField().getReturnMap());
+//            c.getChr().setField(returnMap);
             c.getChr().updateDB();
         } else {
             log.warn("[ChannelHandler] | Was not able to save character, data inconsistency may have occurred.");
@@ -77,6 +79,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case WVS_CRASH_CALLBACK:
                     if(c != null && c.getAccount() != null) {
+                        c.getChr().getField().removeChar(c.getChr());
                         c.getAccount().updateDB();
                     }
                     break;

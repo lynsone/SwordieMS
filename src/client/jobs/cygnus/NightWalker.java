@@ -284,7 +284,7 @@ public class NightWalker extends Job {
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 3,
                                     90, 0, (int) System.currentTimeMillis(), 1, 0,
                                     new Position(-20, position));
-                            chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                     true, mobID, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                     mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));    //TODO mob.getPosition()  QUINT_THROW giving NPE
                         }

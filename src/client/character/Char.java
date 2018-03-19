@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import packet.Stage;
 import packet.UserLocal;
+import packet.UserPool;
 import packet.WvsContext;
 import server.Server;
 import util.FileTime;
@@ -367,8 +368,8 @@ public class Char {
                 if (item.getId() == 0) {
                     item.updateDB();
                 }
-                write(WvsContext.inventoryOperation( true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1,0, item));
+                write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
             }
         }
     }
@@ -423,8 +424,9 @@ public class Char {
 
     /**
      * Encodes this Char's info inside a given {@link OutPacket}, with given info.
+     *
      * @param outPacket The OutPacket this method should encode to.
-     * @param mask Which info should be encoded.
+     * @param mask      Which info should be encoded.
      */
     public void encode(OutPacket outPacket, DBChar mask) {
 
@@ -906,7 +908,7 @@ public class Char {
         }
         if (mask.isInMask(DBChar.ZeroInfo)) {
             if (JobConstants.isZero(getAvatarData().getCharacterStat().getJob())) {
-                if(getZeroInfo() == null) {
+                if (getZeroInfo() == null) {
                     initZeroInfo();
                 }
                 getZeroInfo().encode(outPacket); //ZeroInfo::Decode
@@ -1200,7 +1202,7 @@ public class Char {
     }
 
     public QuestManager getQuestManager() {
-        if(questManager.getChr() == null) {
+        if (questManager.getChr() == null) {
             questManager.setChr(this);
         }
         return questManager;
@@ -1339,6 +1341,7 @@ public class Char {
     /**
      * Sets the job of this Char with a given id. Does nothing if the id is invalid.
      * If it is valid, will set this Char's job, add all Skills that the job should have by default, and sends the info to the client.
+     *
      * @param id
      */
     public void setJob(int id) {
@@ -1359,6 +1362,7 @@ public class Char {
 
     /**
      * Sets the SP to the current job level.
+     *
      * @param num The new SP amount.
      */
     public void setSpToCurrentJob(int num) {
@@ -1380,6 +1384,7 @@ public class Char {
 
     /**
      * Adds a {@link Skill} to this Char. Overrides the old Skill if the Char already had a Skill with the same id.
+     *
      * @param skill The Skill this Char should get.
      */
     public void addSkill(Skill skill) {
@@ -1395,6 +1400,7 @@ public class Char {
 
     /**
      * Returns whether or not this Char has a {@link Skill} with a given id.
+     *
      * @param id The id of the Skill.
      * @return Whether or not this Char has a Skill with the given id.
      */
@@ -1404,6 +1410,7 @@ public class Char {
 
     /**
      * Gets a {@link Skill} of this Char with a given id.
+     *
      * @param id The id of the requested Skill.
      * @return The Skill corresponding to the given id of this Char, or null if there is none.
      */
@@ -1414,7 +1421,8 @@ public class Char {
     /**
      * Gets a {@link Skill} with a given ID. If <code>createIfNull</code> is true, creates the Skill if it doesn't exist yet.
      * If it is false, will return null if this Char does not have the given Skill.
-     * @param id The id of the requested Skill.
+     *
+     * @param id           The id of the requested Skill.
      * @param createIfNull Whether or not this method should create the Skill if it doesn't exist.
      * @return The Skill that the Char has, or <code>null</code> if there is no such skill and <code>createIfNull</code> is false.
      */
@@ -1429,6 +1437,7 @@ public class Char {
 
     /**
      * Creates a new {@link Skill} for this Char.
+     *
      * @param id The skillID of the Skill to be created.
      * @return The new Skill.
      */
@@ -1549,6 +1558,7 @@ public class Char {
 
     /**
      * Sends a message to this Char with a default colour {@link ChatMsgColour#YELLOW}.
+     *
      * @param msg The message to display.
      */
     public void chatMessage(String msg) {
@@ -1557,6 +1567,7 @@ public class Char {
 
     /**
      * Sends a message to this Char with a given {@link ChatMsgColour colour}.
+     *
      * @param clr The Colour this message should be in.
      * @param msg The message to display.
      */
@@ -1566,6 +1577,7 @@ public class Char {
 
     /**
      * Unequips an {@link Item}. Ensures that the hairEquips and both inventories get updated.
+     *
      * @param item The Item to equip.
      */
     public void unequip(Item item) {
@@ -1579,6 +1591,7 @@ public class Char {
 
     /**
      * Equips an {@link Item}. Ensures that the hairEquips and both inventories get updated.
+     *
      * @param item The Item to equip.
      */
     public void equip(Item item) {
@@ -1620,6 +1633,7 @@ public class Char {
 
     /**
      * Creates a {@link Rect} with regard to this character. Adds all values to this Char's position.
+     *
      * @param rect The rectangle to use.
      * @return The new rectangle.
      */
@@ -1631,6 +1645,7 @@ public class Char {
 
     /**
      * Returns the Equip equipped at a certain {@link BodyPart}.
+     *
      * @param bodyPart The requested bodyPart.
      * @return The Equip corresponding to <code>bodyPart</code>. Null if there is none.
      */
@@ -1658,6 +1673,7 @@ public class Char {
     /**
      * Warps this character to a given field, at the starting position.
      * See {@link #warp(Field, Portal) warp}.
+     *
      * @param toField The field to warp to.
      */
     public void warp(Field toField) {
@@ -1668,12 +1684,13 @@ public class Char {
      * Warps this character to a given field, at a given portal.
      * Ensures that the previous map does not contain this Char anymore, and that the new field does.
      * Ensures that all Lifes are immediately spawned for the new player.
+     *
      * @param toField
      * @param portal
      */
     public void warp(Field toField, Portal portal) {
         TemporaryStatManager tsm = getTemporaryStatManager();
-        for(AffectedArea aa : tsm.getAffectedAreas()) {
+        for (AffectedArea aa : tsm.getAffectedAreas()) {
             tsm.removeStatsBySkill(aa.getSkillID());
         }
         getField().removeChar(this);
@@ -1682,12 +1699,18 @@ public class Char {
         toField.addChar(this);
         getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, false, hasBuffProtector(),
                 (byte) portal.getId(), false, 100, null, true, -1));
-     toField.spawnLifesForChar(this);
-     }
+        toField.spawnLifesForChar(this);
+        for(Char c : toField.getChars()) {
+            if(!c.equals(this)) {
+                write(UserPool.userEnterField(c));
+            }
+        }
+    }
 
-     /**
+    /**
      * Adds a given amount of exp to this Char. Immediately checks for level-up possibility, and sends the updated
      * stats to the client. Allows multi-leveling.
+     *
      * @param amount The amount of exp to add.
      */
     public void addExp(long amount) {
@@ -1701,7 +1724,7 @@ public class Char {
         CharacterStat cs = getAvatarData().getCharacterStat();
         long curExp = cs.getExp();
         int level = getStat(Stat.level);
-        if(level >= GameConstants.charExp.length - 1) {
+        if (level >= GameConstants.charExp.length - 1) {
             return;
         }
         long newExp = curExp + amount;
@@ -1721,10 +1744,11 @@ public class Char {
 
     /**
      * Writes a packet to this Char's client.
+     *
      * @param outPacket The OutPacket to write.
      */
     public void write(OutPacket outPacket) {
-        if(getClient() != null) {
+        if (getClient() != null) {
             getClient().write(outPacket);
         }
     }
@@ -1780,6 +1804,7 @@ public class Char {
 
     /**
      * Returns if this Char can be invited to a party.
+     *
      * @return Whether or not this Char can be invited to a party.
      */
     public boolean isPartyInvitable() {
@@ -1788,6 +1813,7 @@ public class Char {
 
     /**
      * Returns if this character is currently in its beta state.
+     *
      * @return true if this Char is in a beta state.
      */
     public boolean isZeroBeta() {
@@ -1799,7 +1825,7 @@ public class Char {
      * Goes into Beta form if Alpha, and into Alpha if Beta.
      */
     public void swapZeroState() {
-        if(!(JobConstants.isZero(getJob())) || getZeroInfo() == null) {
+        if (!(JobConstants.isZero(getJob())) || getZeroInfo() == null) {
             return;
         }
         ZeroInfo oldInfo = getZeroInfo().deepCopy();
@@ -1842,10 +1868,11 @@ public class Char {
 
     /**
      * Adds a {@link Drop} to this Char.
+     *
      * @param drop The Drop that has been picked up.
      */
     public void addDrop(Drop drop) {
-        if(drop.isMoney()) {
+        if (drop.isMoney()) {
             addMoney(drop.getMoney());
             getQuestManager().handleMoneyGain(drop.getMoney());
             write(WvsContext.dropPickupMessage(drop.getMoney(), (short) 0, (short) 0));
@@ -1858,6 +1885,7 @@ public class Char {
 
     /**
      * Returns the Char's name.
+     *
      * @return The Char's name.
      */
     public String getName() {
@@ -1866,6 +1894,7 @@ public class Char {
 
     /**
      * Checks whether or not this Char has a given quest in progress.
+     *
      * @param questReq The quest ID of the requested quest.
      * @return Whether or not this char is in progress with the quest.
      */
@@ -1882,6 +1911,7 @@ public class Char {
 
     /**
      * Returns the current HP of this Char.
+     *
      * @return the current HP of this Char.
      */
     public int getHP() {
@@ -1890,6 +1920,7 @@ public class Char {
 
     /**
      * Returns the current MP of this Char.
+     *
      * @return the current MP of this Char.
      */
     public int getMP() {
@@ -1898,6 +1929,7 @@ public class Char {
 
     /**
      * Gets the max hp of this Char. TODO: factor in skills, items, etc...
+     *
      * @return The max hp of this Char
      */
     public int getMaxHP() {
@@ -1906,6 +1938,7 @@ public class Char {
 
     /**
      * Gets the max mp of this Char. TODO: factor in skills, items, etc...
+     *
      * @return The max mp of this Char
      */
     public int getMaxMP() {
@@ -1914,6 +1947,7 @@ public class Char {
 
     /**
      * Heals this Char's HP for a certain amount. Caps off at maximum HP.
+     *
      * @param amount The amount to heal.
      */
     public void heal(int amount) {
@@ -1928,6 +1962,7 @@ public class Char {
 
     /**
      * "Heals" this Char's MP for a certain amount. Caps off at maximum MP.
+     *
      * @param amount The amount to heal.
      */
     public void healMP(int amount) {
@@ -1942,12 +1977,13 @@ public class Char {
 
     /**
      * Consumes a single {@link Item} from this Char's {@link Inventory}. Will remove the Item if it has a quantity of 1.
+     *
      * @param item The Item to consume, which is currently in the Char's inventory.
      */
     public void consumeItem(Item item) {
         Inventory inventory = getInventoryByType(item.getInvType());
         // data race possible
-        if(item.getQuantity() <= 1) {
+        if (item.getQuantity() <= 1) {
             item.setQuantity(0);
             inventory.removeItem(item);
             write(WvsContext.inventoryOperation(true, false,
@@ -1963,7 +1999,8 @@ public class Char {
      * Consumes an item of this Char with the given id. Will do nothing if the Char doesn't have the Item.
      * Only works for non-Equip (i.e., type is not EQUIPPED or EQUIP, CASH is fine) items.
      * Calls {@link #consumeItem(Item)} if an Item is found.
-     * @param id The Item's id.
+     *
+     * @param id       The Item's id.
      * @param quantity The amount to consume.
      */
     public void consumeItem(int id, int quantity) {
@@ -1971,7 +2008,7 @@ public class Char {
         Item checkItem = ItemData.getItemDeepCopy(id);
         Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
         item.setQuantity(quantity);
-        if(item != null) {
+        if (item != null) {
             consumeItem(item);
         }
     }
@@ -1997,7 +2034,7 @@ public class Char {
     }
 
     public Guild getGuild() {
-        if(guild == null) {
+        if (guild == null) {
             return new Guild();
         }
         return guild;
@@ -2200,7 +2237,7 @@ public class Char {
     }
 
     public FarmUserInfo getFarmUserInfo() {
-        if(farmUserInfo == null) {
+        if (farmUserInfo == null) {
             return new FarmUserInfo();
         }
         return farmUserInfo;
@@ -2235,7 +2272,7 @@ public class Char {
     }
 
     public FreezeHotEventInfo getFreezeHotEventInfo() {
-        if(freezeHotEventInfo == null) {
+        if (freezeHotEventInfo == null) {
             return new FreezeHotEventInfo();
         }
         return freezeHotEventInfo;

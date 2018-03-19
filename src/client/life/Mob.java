@@ -3,6 +3,8 @@ package client.life;
 import client.character.Char;
 import client.character.ExpIncreaseInfo;
 import client.character.quest.Quest;
+import client.character.skills.AttackInfo;
+import client.character.skills.MobAttackInfo;
 import client.field.Field;
 import client.field.Foothold;
 import packet.CField;
@@ -1061,11 +1063,17 @@ public class Mob extends Life {
         return charismaEXP;
     }
 
-    public void damage(Long totalDamage) {
+    public void damage(Long totalDamage, MobAttackInfo mai, Char source) {
+        long maxHP = getMaxHp();
         long oldHp = getHp();
         long newHp = oldHp - totalDamage;
         setHp(newHp);
-        double percDamage = ((double) newHp / getMaxHp());
+        double percDamage = ((double) newHp / maxHP);
+        newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
+        maxHP = maxHP > Integer.MAX_VALUE ? Integer.MAX_VALUE : maxHP;
+        for(int dmg : mai.damages) {
+            getField().broadcastPacket(MobPool.mobDamaged(getObjectId(), dmg, getTemplateId(), (byte) 1, (int) newHp, (int) maxHP), source);
+        }
         if(newHp <= 0) {
             die();
         } else {

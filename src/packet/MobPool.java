@@ -1,10 +1,13 @@
 package packet;
 
 import client.character.Char;
+import client.character.skills.MobAttackInfo;
 import client.life.*;
+import client.life.movement.Movement;
 import connection.OutPacket;
 import enums.MobStat;
 import handling.OutHeader;
+import util.Position;
 
 import java.util.List;
 
@@ -189,10 +192,10 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobDamaged(int id, long damage, int templateID, byte type, int hp, int maxHp) {
+    public static OutPacket mobDamaged(int mobID, long damage, int templateID, byte type, int hp, int maxHp) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_DAMAGED);
 
-        outPacket.encodeInt(id);
+        outPacket.encodeInt(mobID);
         outPacket.encodeByte(type);
         damage = damage > Integer.MAX_VALUE ? Integer.MAX_VALUE : damage;
         outPacket.encodeInt((int) damage);
@@ -309,6 +312,46 @@ public class MobPool {
         outPacket.encodeShort(delay);
         outPacket.encodeByte(userSkill);
         outPacket.encodeInt(slv);
+
+        return outPacket;
+    }
+
+    public static OutPacket mobMove(Mob mob, MobSkillAttackInfo msai, List<Movement> movements) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_MOVE);
+
+        outPacket.encodeInt(mob.getObjectId());
+        outPacket.encodeByte(msai.actionAndDirMask);
+        outPacket.encodeByte(msai.actionAndDir);
+        outPacket.encodeInt(msai.targetInfo);
+        outPacket.encodeByte(msai.multiTargetForBalls.size());
+        for(Position pos : msai.multiTargetForBalls) {
+            outPacket.encodePosition(pos);
+        }
+        outPacket.encodeByte(msai.randTimeForAreaAttacks.size());
+        for(short s : msai.randTimeForAreaAttacks) {
+            outPacket.encodeShort(s);
+        }
+        outPacket.encodeInt(msai.encodedGatherDuration);
+        outPacket.encodePosition(msai.oldPos);
+        outPacket.encodePosition(msai.oldVPos);
+        outPacket.encodeByte(movements.size());
+        for(Movement m : movements) {
+            m.encode(outPacket);
+        }
+        outPacket.encodeByte(0);
+
+
+        /*
+        outPacket.encodePosition(oldPos);
+        outPacket.encodePosition(oldVPos);
+        outPacket.encodeInt(encodedGatherDuration);
+        outPacket.encodeByte(movements.size());
+        for(Movement m : movements) {
+            m.encode(outPacket);
+        }
+        outPacket.encodeByte(0);
+        */
+
 
         return outPacket;
     }

@@ -86,6 +86,11 @@ public class WorldHandler {
             c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
         }
         field.spawnLifesForChar(chr);
+        for(Char charr : field.getChars()) {
+            if(!charr.equals(chr)) {
+                chr.write(UserPool.userEnterField(charr));
+            }
+        }
     }
 
     public static void handleMove(Client c, InPacket inPacket) {
@@ -521,7 +526,7 @@ public class WorldHandler {
             if (mob != null && mob.getHp() > 0) {
                 long totalDamage = Arrays.stream(mai.damages).sum();
                 mob.addDamage(chr, totalDamage);
-                mob.damage(totalDamage);
+                mob.damage(totalDamage, mai, chr);
             }
         }
         c.getChr().getJobHandler().handleAttack(c, attackInfo);
@@ -936,14 +941,20 @@ public class WorldHandler {
         if (life == null || !(life instanceof Mob)) {
             return;
         }
+        MobSkillAttackInfo msai = new MobSkillAttackInfo();
         Mob mob = (Mob) life;
+        Char controller = field.getLifeToControllers().get(mob);
         byte idk0 = inPacket.decodeByte(); // check if the templateID / 10000 == 250 or 251. No idea for what it's used
         short moveID = inPacket.decodeShort();
-        boolean usedSkill = inPacket.decodeByte() != 0;
+        byte actionAndDir = inPacket.decodeByte();
+        msai.actionAndDirMask = actionAndDir;
+        boolean usedSkill = actionAndDir != 0;
         byte lastSkillUsed = inPacket.decodeByte();
+        msai.actionAndDir = lastSkillUsed;
         int skillID = 0;
         int slv = 0;
-        int idk1 = inPacket.decodeInt();
+        int targetInfo = inPacket.decodeInt();
+        msai.targetInfo = targetInfo;
         if (usedSkill && lastSkillUsed != -1) {
             MobSkill mobSkill = null;
             List<MobSkill> skillList = mob.getSkills();
@@ -964,11 +975,13 @@ public class WorldHandler {
         byte multiTargetForBallSize = inPacket.decodeByte();
         for (int i = 0; i < multiTargetForBallSize; i++) {
             Position pos = inPacket.decodePosition(); // list of ball positions
+            msai.multiTargetForBalls.add(pos);
         }
 
         byte randTimeForAreaAttackSize = inPacket.decodeByte();
         for (int i = 0; i < randTimeForAreaAttackSize; i++) {
             short randTimeForAreaAttack = inPacket.decodeShort(); // could be used for cheat detection, but meh
+            msai.randTimeForAreaAttacks.add(randTimeForAreaAttack);
         }
 
         byte mask = inPacket.decodeByte();
@@ -994,6 +1007,10 @@ public class WorldHandler {
                 mob.setFh(m.getFh());
             }
         }
+        msai.oldPos = pos;
+        msai.oldVPos = vPos;
+        msai.encodedGatherDuration = encodedGatherDuration;
+        field.broadcastPacket(MobPool.mobMove(mob, msai, movements), controller);
     }
 
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
@@ -1225,6 +1242,7 @@ public class WorldHandler {
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         if (c.getAccount() != null) {
+            c.getChr().getField().removeChar(c.getChr());
             c.getAccount().updateDB();
         }
         chr.updateDB();
@@ -1434,7 +1452,7 @@ public class WorldHandler {
                 angle, 0, curTime, si.getValue(SkillStat.mobCount, slv), skillID, new Position(0, 0));
         List<ForceAtomInfo> faiList = new ArrayList<>();
         faiList.add(fai);
-        c.write(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), false,
+        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), false,
                 new ArrayList<>(), skillID, faiList, null, dir, range, null, 0, null));
     }
 
@@ -2267,6 +2285,6 @@ public class WorldHandler {
         int emotion = inPacket.decodeInt();
         int duration = inPacket.decodeInt();
         boolean byItemOption = inPacket.decodeByte() != 0;
-        chr.getField().broadcastPacket(User.emotion(chr.getId(), emotion, duration, byItemOption), chr);
+        chr.getField().broadcastPacket(UserRemote.emotion(chr.getId(), emotion, duration, byItemOption), chr);
     }
 }

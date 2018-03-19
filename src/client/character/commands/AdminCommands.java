@@ -570,7 +570,7 @@ public class AdminCommands {
             List<Integer> mobs = new ArrayList<>();
             int mobID = mob.getObjectId();
             mobs.add(mobID);
-            chr.getClient().write(CField.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
+            chr.getField().broadcastPacket(CField.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
                     true, mobs, 142110011, fais, null, 0, 0, null, 142110011, mob.getPosition()));
 
         }

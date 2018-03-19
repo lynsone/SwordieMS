@@ -42,7 +42,7 @@ public class User {
     }
 
     public static OutPacket emotion(int charID, int emotion, int duration, boolean byItemOption) {
-        OutPacket outPacket = new OutPacket();
+        OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
 
         outPacket.encodeInt(charID);
         outPacket.encodeInt(emotion);

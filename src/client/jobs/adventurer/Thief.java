@@ -543,7 +543,7 @@ public class Thief extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                         0, 0, (int) System.currentTimeMillis(), 1, 0,
                         new Position());
-                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                         true, mobID, MESO_EXPLOSION, forceAtomInfo, new Rect(), 0, 300,
                         life.getPosition(), MESO_EXPLOSION, life.getPosition()));
             }
@@ -683,7 +683,7 @@ public class Thief extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                             0, 100, (int) System.currentTimeMillis(), 1, 0,
                             new Position());
-                    chr.getClient().write(CField.createForceAtom(false, mobID, chr.getId(), type,
+                    chr.getField().broadcastPacket(CField.createForceAtom(false, mobID, chr.getId(), type,
                             true, mobID, ASSASSINS_MARK_ATOM, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), 2070000, mob.getPosition()));
                 }

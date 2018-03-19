@@ -1032,7 +1032,8 @@ public enum OutHeader {
                 CHAT_MSG,
                 MOB_HP_INDICATOR,
                 STAT_CHANGED,
-                MOB_CHANGE_CONTROLLER
+                MOB_CHANGE_CONTROLLER,
+                MOB_MOVE
 
                 );
         return spam.contains(outHeader);

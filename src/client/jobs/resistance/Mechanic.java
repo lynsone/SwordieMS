@@ -306,7 +306,7 @@ public class Mechanic extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, ran, 30,
                         0, 200, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, 0));
-                chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                         true, mobID, HOMING_BEACON, forceAtomInfo, new Rect(), 0, 300,
                         life.getPosition(), 0, life.getPosition()));
             }

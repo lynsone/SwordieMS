@@ -173,7 +173,7 @@ public class Shade extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
-                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, FOX_SPIRITS_ATOM_2, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), FOX_SPIRITS_ATOM_2, mob.getPosition()));
                     } else {
@@ -183,7 +183,7 @@ public class Shade extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
-                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), FOX_SPIRITS_ATOM, mob.getPosition()));
                     }
@@ -207,7 +207,7 @@ public class Shade extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                             0, 0, (int) System.currentTimeMillis(), 1, 0,
                             new Position());
-                    chr.getClient().write(CField.createForceAtom(true, mobID, mobID, type, //TODO  atm Player -> Mob     |      Change to Mob -> Mob
+                    chr.getField().broadcastPacket(CField.createForceAtom(true, mobID, mobID, type, //TODO  atm Player -> Mob     |      Change to Mob -> Mob
                             true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), FOX_SPIRITS_ATOM, mob.getPosition()));
                 }

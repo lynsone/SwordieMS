@@ -301,7 +301,7 @@ public class WindArcher extends Job {
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 65, 15,
                                     anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
                                     new Position(35, 0)); //Slightly behind the player
-                            chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                     true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                     mob.getPosition(), 0, mob.getPosition()));
                         } else {
@@ -311,7 +311,7 @@ public class WindArcher extends Job {
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 65, 15,
                                     anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
                                     new Position(35, 0)); //Slightly behind the player
-                            chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                     true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                     mob.getPosition(), 0, mob.getPosition()));
                         }
@@ -335,7 +335,7 @@ public class WindArcher extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 5, 5,
                                 270, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position(35, ranY)); //Slightly behind the player
-                        chr.getClient().write(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, STORM_BRINGER, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), STORM_BRINGER, mob.getPosition()));
                 }
