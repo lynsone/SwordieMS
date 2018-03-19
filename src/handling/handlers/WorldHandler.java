@@ -138,7 +138,7 @@ public class WorldHandler {
                 }
             }
         } else {
-            chr.getField().broadcastPacket(CField.chat(chr.getId(), ChatType.USER, msg, false, 0, c.getWorldId()));
+            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatType.USER, msg, false, 0, c.getWorldId()));
         }
     }
 
@@ -2244,12 +2244,12 @@ public class WorldHandler {
         c.write(UserLocal.onRWMultiChargeCancelRequest(unk, skillid));
     }
 
-    public static void handleFoxManActiSetUseRequest(Client c, InPacket inPacket) {
+    public static void handleFoxManActionSetUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt(); // tick
-        byte SkillNumber = inPacket.decodeByte(); //bSkill Number
+        byte skillNumber = inPacket.decodeByte(); //bSkill Number
         //more of the packet, but seems useless
-        switch (SkillNumber) {
+        switch (skillNumber) {
             case 3:
                 Kanna.hakuFoxFire(chr);
                 break;
@@ -2260,5 +2260,13 @@ public class WorldHandler {
                 Kanna.hakuBreathUnseen(chr);
                 break;
         }
+    }
+
+    public static void handleUserEmotion(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int emotion = inPacket.decodeInt();
+        int duration = inPacket.decodeInt();
+        boolean byItemOption = inPacket.decodeByte() != 0;
+        chr.getField().broadcastPacket(User.emotion(chr.getId(), emotion, duration, byItemOption), chr);
     }
 }

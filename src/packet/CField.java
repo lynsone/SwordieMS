@@ -324,19 +324,6 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket chat(int charID, ChatType type, String msg, boolean onlyBalloon, int idk, int worldID) {
-        OutPacket outPacket = new OutPacket(OutHeader.CHAT);
-
-        outPacket.encodeInt(charID);
-        outPacket.encodeByte(type.getVal());
-        outPacket.encodeString(msg);
-        outPacket.encodeByte(onlyBalloon);
-        outPacket.encodeByte(idk);
-        outPacket.encodeByte(worldID);
-
-        return outPacket;
-    }
-
     public static OutPacket characterInfo(Char chr) {
         OutPacket outPacket = new OutPacket(OutHeader.CHARACTER_INFO);
 

@@ -198,4 +198,12 @@ public class UserPool {
         // end sub_16D99C0
         return outPacket;
     }
+
+    public static OutPacket userLeaveField(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.USER_LEAVE_FIELD);
+
+        outPacket.encodeInt(chr.getId());
+
+        return outPacket;
+    }
 }

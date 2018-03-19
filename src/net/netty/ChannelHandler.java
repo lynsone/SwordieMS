@@ -168,7 +168,6 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case UPDATE_CLIENT_ENVIRONMENT:
                 case WVS_SET_UP_STEP:
                 case LOCALE:
-                case USER_EMOTION:
                 case USER_CALC_DAMAGE_STAT_SET_REQUEST:
                     break;
                 // sorted from here ------------------
@@ -177,6 +176,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_HIT:
                     c.getChr().getJobHandler().handleHit(c, inPacket);
+                    break;
+                case USER_EMOTION:
+                    WorldHandler.handleUserEmotion(c, inPacket);
                     break;
                 case USER_SELECT_NPC:
                     WorldHandler.handleUserSelectNpc(c, inPacket);
@@ -328,8 +330,8 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case R_W_MULTI_CHARGE_CANCEL_REQUEST:
                     WorldHandler.handleRWMultiChargeCancelRequest(c, inPacket);
                     break;
-                case FOX_MAN_ACTISET_USE_REQUEST:
-                    WorldHandler.handleFoxManActiSetUseRequest(c, inPacket);
+                case FOX_MAN_ACTION_SET_USE_REQUEST:
+                    WorldHandler.handleFoxManActionSetUseRequest(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);
