@@ -430,4 +430,125 @@ public class SkillConstants {
     public static boolean isEquilibriumSkill(int skillID) {
         return skillID >= 20040219 && skillID <= 20040220;
     }
+
+    public static int getAdvancedCountHyperSkill(int skillId) {
+        switch(skillId) {
+            case 4121013:
+                return 4120051;
+            case 5321012:
+                return 5320051;
+            default:
+                return 0;
+        }
+    }
+
+    public static int getAdvancedAttackCountHyperSkill(int skillId) {
+        switch(skillId) {
+            case 25121005:
+                return 25120148;
+            case 31121001:
+                return 31120050;
+            case 31111005:
+                return 31120044;
+            case 22140023:
+                return 22170086;
+            case 21120022:
+            case 21121015:
+            case 21121016:
+            case 21121017:
+                return 21120066;
+            case 21120006:
+                return 21120049;
+            case 21110020:
+            case 21111021:
+                return 21120047;
+            case 15121002:
+                return 15120048;
+            case 14121002:
+                return 14120045;
+            case 15111022:
+            case 15120003:
+                return 15120045;
+            case 51121008:
+                return 51120048;
+            case 32111003:
+                return 32120047;
+            case 35121016:
+                return 35120051;
+            case 37110002:
+                return 37120045;
+            case 51120057:
+                return 51120058;
+            case 51121007:
+                return 51120051;
+            case 65121007:
+            case 65121008:
+            case 65121101:
+                return 65120051;
+            case 61121201:
+            case 61121100:
+                return 61120045;
+            case 51121009:
+                return 51120058;
+            case 13121002:
+                return 13120048;
+            case 5121016:
+            case 5121017:
+                return 5120051;
+            case 3121015:
+                return 3120048;
+            case 2121006:
+                return 2120048;
+            case 2221006:
+                return 2220048;
+            case 1221011:
+                return 1220050;
+            case 1120017:
+            case 1121008:
+                return 1120051;
+            case 1221009:
+                return 1220048;
+            case 4331000:
+                return 4340045;
+            case 3121020:
+                return 3120051;
+            case 3221017:
+                return 3220048;
+            case 4221007:
+                return 4220048;
+            case 4341009:
+                return 4340048;
+            case 5121007:
+                return 5120048;
+            case 5321004:
+                return 5320043;
+            // if ( nSkillID != &loc_A9B1CF ) nothing done with line 172?
+            case 12110028:
+            case 12000026:
+            case 12100028:
+                return 12120045;
+            case 12120010:
+                return 12120045;
+            case 12120011:
+                return 12120046;
+            default:
+                return 0;
+        }
+    }
+
+    public static boolean isKinesisPsychicLockSkill(int skillId) {
+        switch(skillId) {
+            case 142120000:
+            case 142120001:
+            case 142120002:
+            case 142120014:
+            case 142111002:
+            case 142100010:
+            case 142110003:
+            case 142110015:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

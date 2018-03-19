@@ -1071,9 +1071,9 @@ public class Mob extends Life {
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         maxHP = maxHP > Integer.MAX_VALUE ? Integer.MAX_VALUE : maxHP;
-        for(int dmg : mai.damages) {
-            getField().broadcastPacket(MobPool.mobDamaged(getObjectId(), dmg, getTemplateId(), (byte) 1, (int) newHp, (int) maxHP), source);
-        }
+//        for(int dmg : mai.damages) {
+//            getField().broadcastPacket(MobPool.mobDamaged(getObjectId(), dmg, getTemplateId(), (byte) 1, (int) newHp, (int) maxHP), source);
+//        }
         if(newHp <= 0) {
             die();
         } else {
@@ -1090,9 +1090,11 @@ public class Mob extends Life {
         field.putLifeController(this, null);
         distributeExp();
         dropDrops(); // xd
+        setPosition(getHomePosition());
         for(Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
         }
+        getDamageDone().clear();
     }
 
     private void dropDrops() {

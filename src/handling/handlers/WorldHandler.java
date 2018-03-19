@@ -27,6 +27,7 @@ import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
+import handling.OutHeader;
 import loaders.ItemData;
 import loaders.QuestData;
 import loaders.QuestInfo;
@@ -227,6 +228,7 @@ public class WorldHandler {
     public static void handleNonTargetForceAtomAttack(Client c, InPacket inPacket) {
         // fu dan, I actually create a different one for this one as well
         AttackInfo attackInfo = new AttackInfo();
+        attackInfo.attackHeader = OutHeader.REMOTE_MAGIC_ATTACK;
         int skillID2 = inPacket.decodeInt();
         int skillCrc2 = inPacket.decodeInt();
         int ntfaaIdk = inPacket.decodeInt();
@@ -337,7 +339,8 @@ public class WorldHandler {
     }
 
     public static void handleMagicAttack(Client c, InPacket inPacket) {
-        AttackInfo attackInfo = new AttackInfo();
+        AttackInfo ai = new AttackInfo();
+        ai.attackHeader = OutHeader.REMOTE_MAGIC_ATTACK;
         boolean fieldKey = inPacket.decodeByte() == 1;
         byte mask = inPacket.decodeByte();
         byte hits = (byte) (mask & 0xF);
@@ -350,7 +353,7 @@ public class WorldHandler {
             keyDown = inPacket.decodeInt();
         }
         inPacket.decodeByte(); // some zero byte
-        byte idk = inPacket.decodeByte();
+        ai.someMask = inPacket.decodeByte();
         short maskie = inPacket.decodeShort();
         boolean left = ((maskie >> 15) & 1) != 0;
         short attackAction = (short) (maskie & 0x7FFF);
@@ -365,21 +368,20 @@ public class WorldHandler {
         byte reduceCount = (byte) (mask2 >>> 4);
         int psdTargetPlus = inPacket.decodeInt();
         int id = inPacket.decodeInt();
-        attackInfo.fieldKey = fieldKey;
-        attackInfo.hits = hits;
-        attackInfo.mobCount = mobCount;
-        attackInfo.skillId = skillId;
-        attackInfo.slv = slv;
-        attackInfo.keyDown = keyDown;
-        attackInfo.idk = idk;
-        attackInfo.left = left;
-        attackInfo.attackAction = attackAction;
-        attackInfo.attackActionType = attackActionType;
-        attackInfo.idk0 = idk0;
-        attackInfo.attackSpeed = attackSpeed;
-        attackInfo.reduceCount = reduceCount;
-        attackInfo.psdTargetPlus = psdTargetPlus;
-        attackInfo.someId = id;
+        ai.fieldKey = fieldKey;
+        ai.hits = hits;
+        ai.mobCount = mobCount;
+        ai.skillId = skillId;
+        ai.slv = slv;
+        ai.keyDown = keyDown;
+        ai.left = left;
+        ai.attackAction = attackAction;
+        ai.attackActionType = attackActionType;
+        ai.idk0 = idk0;
+        ai.attackSpeed = attackSpeed;
+        ai.reduceCount = reduceCount;
+        ai.psdTargetPlus = psdTargetPlus;
+        ai.someId = id;
         for (int i = 0; i < mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             int mobId = inPacket.decodeInt();
@@ -402,7 +404,7 @@ public class WorldHandler {
             } else {
                 sIdk6 = inPacket.decodeShort();
             }
-            short size = attackInfo.hits;
+            short size = ai.hits;
             int[] damages = new int[size];
             for (int j = 0; j < size; j++) {
                 damages[j] = inPacket.decodeInt();
@@ -446,21 +448,21 @@ public class WorldHandler {
             mai.currentAnimationName = currentAnimationName;
             mai.animationDeltaL = animationDeltaL;
             mai.hitPartRunTimes = hitPartRunTimes;
-            attackInfo.mobAttackInfo.add(mai);
+            ai.mobAttackInfo.add(mai);
         }
         if (skillId > 27111303) {
             if (skillId == 27121052 || skillId == 80001837) {
                 int x = inPacket.decodeShort();
                 int y = inPacket.decodeShort();
-                attackInfo.x = x;
-                attackInfo.y = y;
+                ai.x = x;
+                ai.y = y;
             }
         } else if (skillId != 32111016) {
             short forcedX = inPacket.decodeShort();
             short forcedY = inPacket.decodeShort();
             boolean dragon = inPacket.decodeByte() != 0;
-            attackInfo.forcedX = forcedX;
-            attackInfo.forcedY = forcedY;
+            ai.forcedX = forcedX;
+            ai.forcedY = forcedY;
             if (dragon) {
                 short rcDstRight = inPacket.decodeShort();
                 short rectRight = inPacket.decodeShort();
@@ -469,14 +471,14 @@ public class WorldHandler {
                 inPacket.decodeByte(); // always 0
                 inPacket.decodeByte(); // -1
                 inPacket.decodeByte(); // 0
-                attackInfo.rcDstRight = rcDstRight;
-                attackInfo.rectRight = rectRight;
-                attackInfo.x = x;
-                attackInfo.y = y;
+                ai.rcDstRight = rcDstRight;
+                ai.rectRight = rectRight;
+                ai.x = x;
+                ai.y = y;
             }
             if (skillId == 12100029) {
                 int option = inPacket.decodeInt();
-                attackInfo.option = option;
+                ai.option = option;
             } else {
                 switch (skillId) {
                     case 2121003: // Mist Eruption
@@ -485,15 +487,15 @@ public class WorldHandler {
                         for (int i = 0; i < size; i++) {
                             mists[i] = inPacket.decodeInt();
                         }
-                        attackInfo.mists = mists;
+                        ai.mists = mists;
                         break;
                     case 2111003: // Poison Mist
                         byte force = inPacket.decodeByte();
                         short forcedXSh = inPacket.decodeShort();
                         short forcedYSh = inPacket.decodeShort();
-                        attackInfo.force = force;
-                        attackInfo.forcedXSh = forcedXSh;
-                        attackInfo.forcedYSh = forcedYSh;
+                        ai.force = force;
+                        ai.forcedXSh = forcedXSh;
+                        ai.forcedYSh = forcedYSh;
                         break;
                     case 80001835: // Soul Shear, but unreachable?
                         byte sizeB = inPacket.decodeByte();
@@ -504,13 +506,13 @@ public class WorldHandler {
                             shortArr2[i] = inPacket.decodeShort();
                         }
                         short delay = inPacket.decodeShort();
-                        attackInfo.mists = idkArr2;
-                        attackInfo.shortArr = shortArr2;
-                        attackInfo.delay = delay;
+                        ai.mists = idkArr2;
+                        ai.shortArr = shortArr2;
+                        ai.delay = delay;
                 }
             }
         }
-        handleAttack(c, attackInfo);
+        handleAttack(c, ai);
     }
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
@@ -518,6 +520,7 @@ public class WorldHandler {
         chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
         log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
+        chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
             if (mob == null) {
@@ -651,6 +654,7 @@ public class WorldHandler {
 
     public static void handleMeleeAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
+        ai.attackHeader = OutHeader.REMOTE_MELEE_ATTACK;
         ai.fieldKey = inPacket.decodeByte() != 0;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
@@ -672,14 +676,14 @@ public class WorldHandler {
         if (SkillConstants.isUsercloneSummonedAbleSkill(skillID)) {
             ai.bySummonedID = inPacket.decodeInt();
         }
-        byte idk = inPacket.decodeByte();
-        ai.idk = inPacket.decodeByte();
+        ai.buckShot = inPacket.decodeByte();
+        ai.someMask = inPacket.decodeByte();
         short maskie = inPacket.decodeShort();
         ai.left = ((maskie >> 15) & 1) != 0;
         ai.attackAction = (short) (maskie & 0x7FFF);
         inPacket.decodeInt(); // crc
         ai.attackActionType = inPacket.decodeByte();
-        ai.idk0 = inPacket.decodeByte();
+        ai.attackSpeed = inPacket.decodeByte();
         ai.tick = inPacket.decodeInt();
         ai.ptTarget.setY(inPacket.decodeInt());
         ai.finalAttackLastSkillID = inPacket.decodeInt();
@@ -809,6 +813,7 @@ public class WorldHandler {
 
     public static void handleBodyAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
+        ai.attackHeader = OutHeader.REMOTE_BODY;
         ai.fieldKey = inPacket.decodeByte() != 0;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
@@ -1122,12 +1127,14 @@ public class WorldHandler {
 
     public static void handleShootAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
+        ai.attackHeader = OutHeader.REMOTE_SHOOT_ATTACK;
         byte nul = inPacket.decodeByte();
         ai.fieldKey = inPacket.decodeByte() != 0;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (byte) (mask >>> 4);
         ai.skillId = inPacket.decodeInt();
+        ai.bulletID = ai.skillId;
         ai.slv = inPacket.decodeByte();
         ai.addAttackProc = inPacket.decodeByte();
         c.getChr().chatMessage(YELLOW, "addAttackProc: " + ai.addAttackProc);
@@ -1142,8 +1149,8 @@ public class WorldHandler {
         if (SkillConstants.isUsercloneSummonedAbleSkill(skillID)) {
             ai.bySummonedID = inPacket.decodeInt();
         }
-        byte idk = inPacket.decodeByte();
-        byte idk2 = inPacket.decodeByte();
+        ai.buckShot = inPacket.decodeByte();
+        ai.someMask = inPacket.decodeByte();
         int idk3 = inPacket.decodeInt();
         ai.isJablin = inPacket.decodeByte() != 0;
         short maskie = inPacket.decodeShort();
@@ -1154,19 +1161,19 @@ public class WorldHandler {
             int idk10 = inPacket.decodeInt();
             short idk11 = inPacket.decodeShort();
         }
-        int idk4 = inPacket.decodeInt();
+        inPacket.decodeInt(); // crc
         ai.attackActionType = inPacket.decodeByte();
         if (skillID == 23111001 || skillID == 80001915 || skillID == 36111010) {
             int idk5 = inPacket.decodeInt();
-            int x = inPacket.decodeInt();
+            int x = inPacket.decodeInt(); // E0 6E 1F 00
             int y = inPacket.decodeInt();
         }
         ai.attackSpeed = inPacket.decodeByte();
         int idk6 = inPacket.decodeInt();
         int idk7 = inPacket.decodeInt();
         short idk8 = inPacket.decodeShort();
-        ai.attackAction = inPacket.decodeShort();
-        ai.attackActionType = inPacket.decodeByte();
+        short idk9 = inPacket.decodeShort();
+        ai.byteIdk1 = inPacket.decodeByte();
         if (!SkillConstants.isShootSkillNotConsumingBullets(skillID)) {
             ai.bulletCount = inPacket.decodeInt();
         }
@@ -1174,11 +1181,11 @@ public class WorldHandler {
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             mai.mobId = inPacket.decodeInt();
-            byte byteIdk1 = inPacket.decodeByte();
-            byte byteIdk2 = inPacket.decodeByte();
-            byte byteIdk3 = inPacket.decodeByte();
-            byte byteIdk4 = inPacket.decodeByte();
-            byte byteIdk5 = inPacket.decodeByte();
+            mai.byteIdk1 = inPacket.decodeByte();
+            mai.byteIdk2 = inPacket.decodeByte();
+            mai.byteIdk3 = inPacket.decodeByte();
+            mai.byteIdk4 = inPacket.decodeByte();
+            mai.byteIdk5 = inPacket.decodeByte();
             mai.templateID = inPacket.decodeInt();
             mai.calcDamageStatIndex = (byte) (inPacket.decodeByte() & 0x7F);
             mai.rect = inPacket.decodeShortRect();

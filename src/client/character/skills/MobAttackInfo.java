@@ -29,4 +29,11 @@ public class MobAttackInfo {
     public Position pos2;
     public Rect rect;
     public int idkInt;
+    public byte byteIdk1;
+    public byte byteIdk2;
+    public byte byteIdk3;
+    public byte byteIdk4;
+    public byte byteIdk5;
+    public int psychicLockInfo;
+    public byte rocketRushInfo;
 }

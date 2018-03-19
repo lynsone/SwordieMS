@@ -1,6 +1,7 @@
 package client.character.skills;
 
 import client.life.Summon;
+import handling.OutHeader;
 import util.Position;
 import util.Rect;
 
@@ -69,4 +70,22 @@ public class AttackInfo {
     public Position bodyRelMove;
     public Position keyDownRectMoveXY;
     public int tick;
+    public int passiveSLV;
+    public int passiveSkillID;
+    public byte someMask;
+    public byte buckShot;
+    public int option3;
+    public int buckShotSkillID;
+    public int buckShotSlv;
+    public byte passiveAddAttackCount;
+    public byte showFixedDamage;
+    public boolean isDragonAttack;
+    public byte mastery;
+    public byte actionSpeed;
+    public byte byteIdk1;
+    public byte byteIdk2;
+    public byte byteIdk3;
+    public byte byteIdk4;
+    public byte byteIdk5;
+    public OutHeader attackHeader;
 }

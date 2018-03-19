@@ -153,7 +153,7 @@ public class AffectedArea extends Life {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int skillID = getSkillID();
         Skill skill = chr.getSkill(getSkillID());
-        byte slv = (byte) skill.getCurrentLevel();
+        byte slv = getSlv();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         MobTemporaryStat mts = mob.getTemporaryStat();
         Option o = new Option();
