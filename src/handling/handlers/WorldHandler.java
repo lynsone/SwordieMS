@@ -109,7 +109,7 @@ public class WorldHandler {
             chr.setFoothold(m.getFh());
         }
         chr.getField().checkCharInAffectedAreas(chr);
-        chr.getField().broadcastPacket(UserRemote.move(chr, movements), chr);
+        chr.getField().broadcastPacket(UserRemote.move(chr, encodedGatherDuration, oldPos, oldVPos, (byte) 0, movements), chr);
     }
 
     public static void handleUserChat(Client c, InPacket inPacket) {

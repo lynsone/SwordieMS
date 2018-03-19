@@ -4,6 +4,7 @@ import client.character.Char;
 import client.life.movement.Movement;
 import connection.OutPacket;
 import handling.OutHeader;
+import util.Position;
 
 import java.util.List;
 
@@ -20,10 +21,14 @@ public class UserRemote {
         return outPacket;
     }
 
-    public static OutPacket move(Char chr, List<Movement> movements) {
+    public static OutPacket move(Char chr, int encodedGatherDuration, Position oldPos, Position oldVPos,
+                                 byte exceptionObject, List<Movement> movements) {
         OutPacket outPacket = new OutPacket(OutHeader.REMOTE_MOVE);
 
         outPacket.encodeInt(chr.getId());
+        outPacket.encodePosition(oldPos);
+        outPacket.encodePosition(oldVPos);
+        outPacket.encodeInt(encodedGatherDuration);
         for(Movement m : movements) {
             m.encode(outPacket);
         }
