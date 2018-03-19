@@ -147,6 +147,74 @@ public class Char {
     private boolean partyInvitable;
     @Transient
     private ScriptManager scriptManager = new ScriptManager(this);
+    @Transient
+    private Guild guild;
+    @Transient
+    private int driverID;
+    @Transient
+    private int passengerID;
+    @Transient
+    private int chocoCount;
+    @Transient
+    private int activeEffectItemID;
+    @Transient
+    private int monkeyEffectItemID;
+    @Transient
+    private int completedSetItemID;
+    @Transient
+    private short fieldSeatID;
+    @Transient
+    private int portableChairID;
+    @Transient
+    private String portableChairMsg;
+    @Transient
+    private short foothold;
+    @Transient
+    private int tamingMobLevel;
+    @Transient
+    private int tamingMobExp;
+    @Transient
+    private int tamingMobFatigue;
+    @Transient
+    private MiniRoom miniRoom;
+    @Transient
+    private String ADBoardRemoteMsg;
+    @Transient
+    private boolean inCouple;
+    @Transient
+    private CoupleRecord couple;
+    @Transient
+    private FriendshipRingRecord friendshipRingRecord;
+    @Transient
+    private int evanDragonGlide;
+    @Transient
+    private int kaiserMorphRotateHueExtern;
+    @Transient
+    private int kaiserMorphPrimiumBlack;
+    @Transient
+    private int kaiserMorphRotateHueInnner;
+    @Transient
+    private int makingMeisterSkillEff;
+    @Transient
+    private FarmUserInfo farmUserInfo;
+    @Transient
+    private int customizeEffect;
+    @Transient
+    private String customizeEffectMsg;
+    @Transient
+    private byte soulEffect;
+    @Transient
+    private FreezeHotEventInfo freezeHotEventInfo;
+    @Transient
+    private int eventBestFriendAID;
+    @Transient
+    private int mesoChairCount;
+    @Transient
+    private boolean beastFormWingOn;
+    @Transient
+    private int activeNickItemID;
+    @Transient
+    private int mechanicHue;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -199,7 +267,7 @@ public class Char {
         ranking = new Ranking();
         pets = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            pets.add(new Pet());
+            pets.add(new Pet(-1));
         }
         stolenSkills = new ArrayList<>();
         chosenSkills = new ArrayList<>();
@@ -1098,6 +1166,11 @@ public class Char {
 
     }
 
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof Char && ((Char) other).getId() == getId();
+    }
+
     private String getBlessingOfEmpress() {
         return null;
     }
@@ -1921,5 +1994,294 @@ public class Char {
     public boolean isMarried() {
         // TODO
         return false;
+    }
+
+    public Guild getGuild() {
+        if(guild == null) {
+            return new Guild();
+        }
+        return guild;
+    }
+
+    public void setGuild(Guild guild) {
+        this.guild = guild;
+    }
+
+    public int getTotalChuc() {
+        return getInventoryByType(InvType.EQUIPPED).getItems().stream().mapToInt(i -> ((Equip) i).getChuc()).sum();
+    }
+
+    public int getDriverID() {
+        return driverID;
+    }
+
+    public void setDriverID(int driverID) {
+        this.driverID = driverID;
+    }
+
+    public int getPassengerID() {
+        return passengerID;
+    }
+
+    public void setPassengerID(int passengerID) {
+        this.passengerID = passengerID;
+    }
+
+    public int getChocoCount() {
+        return chocoCount;
+    }
+
+    public void setChocoCount(int chocoCount) {
+        this.chocoCount = chocoCount;
+    }
+
+    public int getActiveEffectItemID() {
+        return activeEffectItemID;
+    }
+
+    public void setActiveEffectItemID(int activeEffectItemID) {
+        this.activeEffectItemID = activeEffectItemID;
+    }
+
+    public int getMonkeyEffectItemID() {
+        return monkeyEffectItemID;
+    }
+
+    public void setMonkeyEffectItemID(int monkeyEffectItemID) {
+        this.monkeyEffectItemID = monkeyEffectItemID;
+    }
+
+    public int getCompletedSetItemID() {
+        return completedSetItemID;
+    }
+
+    public void setCompletedSetItemID(int completedSetItemID) {
+        this.completedSetItemID = completedSetItemID;
+    }
+
+    public short getFieldSeatID() {
+        return -1;
+    }
+
+    public void setFieldSeatID(short fieldSeatID) {
+        this.fieldSeatID = fieldSeatID;
+    }
+
+    public int getPortableChairID() {
+        return portableChairID;
+    }
+
+    public void setPortableChairID(int portableChairID) {
+        this.portableChairID = portableChairID;
+    }
+
+    public String getPortableChairMsg() {
+        return portableChairMsg;
+    }
+
+    public void setPortableChairMsg(String portableChairMsg) {
+        this.portableChairMsg = portableChairMsg;
+    }
+
+    public short getFoothold() {
+        return foothold;
+    }
+
+    public void setFoothold(short foothold) {
+        this.foothold = foothold;
+    }
+
+    public int getTamingMobLevel() {
+        return tamingMobLevel;
+    }
+
+    public void setTamingMobLevel(int tamingMobLevel) {
+        this.tamingMobLevel = tamingMobLevel;
+    }
+
+    public int getTamingMobExp() {
+        return tamingMobExp;
+    }
+
+    public void setTamingMobExp(int tamingMobExp) {
+        this.tamingMobExp = tamingMobExp;
+    }
+
+    public int getTamingMobFatigue() {
+        return tamingMobFatigue;
+    }
+
+    public void setTamingMobFatigue(int tamingMobFatigue) {
+        this.tamingMobFatigue = tamingMobFatigue;
+    }
+
+    public MiniRoom getMiniRoom() {
+        return miniRoom;
+    }
+
+    public void setMiniRoom(MiniRoom miniRoom) {
+        this.miniRoom = miniRoom;
+    }
+
+    public String getADBoardRemoteMsg() {
+        return ADBoardRemoteMsg;
+    }
+
+    public void setADBoardRemoteMsg(String ADBoardRemoteMsg) {
+        this.ADBoardRemoteMsg = ADBoardRemoteMsg;
+    }
+
+    public boolean isInCouple() {
+        return inCouple;
+    }
+
+    public void setInCouple(boolean inCouple) {
+        this.inCouple = inCouple;
+    }
+
+    public CoupleRecord getCouple() {
+        return couple;
+    }
+
+    public void setCouple(CoupleRecord couple) {
+        this.couple = couple;
+    }
+
+    public boolean hasFriendshipItem() {
+        return false;
+    }
+
+    public FriendshipRingRecord getFriendshipRingRecord() {
+        return friendshipRingRecord;
+    }
+
+    public void setFriendshipRingRecord(FriendshipRingRecord friendshipRingRecord) {
+        this.friendshipRingRecord = friendshipRingRecord;
+    }
+
+    public int getEvanDragonGlide() {
+        return evanDragonGlide;
+    }
+
+    public void setEvanDragonGlide(int evanDragonGlide) {
+        this.evanDragonGlide = evanDragonGlide;
+    }
+
+    public int getKaiserMorphRotateHueExtern() {
+        return kaiserMorphRotateHueExtern;
+    }
+
+    public void setKaiserMorphRotateHueExtern(int kaiserMorphRotateHueExtern) {
+        this.kaiserMorphRotateHueExtern = kaiserMorphRotateHueExtern;
+    }
+
+    public int getKaiserMorphPrimiumBlack() {
+        return kaiserMorphPrimiumBlack;
+    }
+
+    public void setKaiserMorphPrimiumBlack(int kaiserMorphPrimiumBlack) {
+        this.kaiserMorphPrimiumBlack = kaiserMorphPrimiumBlack;
+    }
+
+    public int getKaiserMorphRotateHueInnner() {
+        return kaiserMorphRotateHueInnner;
+    }
+
+    public void setKaiserMorphRotateHueInnner(int kaiserMorphRotateHueInnner) {
+        this.kaiserMorphRotateHueInnner = kaiserMorphRotateHueInnner;
+    }
+
+    public int getMakingMeisterSkillEff() {
+        return makingMeisterSkillEff;
+    }
+
+    public void setMakingMeisterSkillEff(int makingMeisterSkillEff) {
+        this.makingMeisterSkillEff = makingMeisterSkillEff;
+    }
+
+    public FarmUserInfo getFarmUserInfo() {
+        if(farmUserInfo == null) {
+            return new FarmUserInfo();
+        }
+        return farmUserInfo;
+    }
+
+    public void setFarmUserInfo(FarmUserInfo farmUserInfo) {
+        this.farmUserInfo = farmUserInfo;
+    }
+
+    public int getCustomizeEffect() {
+        return customizeEffect;
+    }
+
+    public void setCustomizeEffect(int customizeEffect) {
+        this.customizeEffect = customizeEffect;
+    }
+
+    public String getCustomizeEffectMsg() {
+        return customizeEffectMsg;
+    }
+
+    public void setCustomizeEffectMsg(String customizeEffectMsg) {
+        this.customizeEffectMsg = customizeEffectMsg;
+    }
+
+    public byte getSoulEffect() {
+        return soulEffect;
+    }
+
+    public void setSoulEffect(byte soulEffect) {
+        this.soulEffect = soulEffect;
+    }
+
+    public FreezeHotEventInfo getFreezeHotEventInfo() {
+        if(freezeHotEventInfo == null) {
+            return new FreezeHotEventInfo();
+        }
+        return freezeHotEventInfo;
+    }
+
+    public void setFreezeHotEventInfo(FreezeHotEventInfo freezeHotEventInfo) {
+        this.freezeHotEventInfo = freezeHotEventInfo;
+    }
+
+    public int getEventBestFriendAID() {
+        return eventBestFriendAID;
+    }
+
+    public void setEventBestFriendAID(int eventBestFriendAID) {
+        this.eventBestFriendAID = eventBestFriendAID;
+    }
+
+    public int getMesoChairCount() {
+        return mesoChairCount;
+    }
+
+    public void setMesoChairCount(int mesoChairCount) {
+        this.mesoChairCount = mesoChairCount;
+    }
+
+    public boolean isBeastFormWingOn() {
+        return beastFormWingOn;
+    }
+
+    public void setBeastFormWingOn(boolean beastFormWingOn) {
+        this.beastFormWingOn = beastFormWingOn;
+    }
+
+    public int getActiveNickItemID() {
+        return activeNickItemID;
+    }
+
+    public void setActiveNickItemID(int activeNickItemID) {
+        this.activeNickItemID = activeNickItemID;
+    }
+
+    public int getMechanicHue() {
+        return mechanicHue;
+    }
+
+    public void setMechanicHue(int mechanicHue) {
+        this.mechanicHue = mechanicHue;
     }
 }

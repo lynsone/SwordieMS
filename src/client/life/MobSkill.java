@@ -270,12 +270,12 @@ public class MobSkill {
                 mts.addMobSkillOptionsAndBroadCast(MobStat.PowerUp, o);
                 break;
             case PGuardUp:
-                o.nOption = 1;
+                o.nOption = msi.getSkillStatIntValue(x);
                 mts.addMobSkillOptionsAndBroadCast(MobStat.PGuardUp, o);
                 break;
             case MGuardUp:
-                o.nOption = 1;
-                mts.addMobSkillOptionsAndBroadCast(MobStat.PGuardUp, o);
+                o.nOption = msi.getSkillStatIntValue(x);
+                mts.addMobSkillOptionsAndBroadCast(MobStat.MGuardUp, o);
                 break;
             default:
                 log.warn(String.format("Unhandled mob skill %d, slv = %d", getSkill(), getLevel()));

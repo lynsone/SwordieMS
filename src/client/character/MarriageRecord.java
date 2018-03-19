@@ -89,4 +89,11 @@ public class MarriageRecord {
     public void setBridgeName(String bridgeName) {
         this.bridgeName = bridgeName;
     }
+
+    public void encodeForRemote(OutPacket outPacket) {
+        // TODO make it so this works for a single player (groom/bride should be turned around 50% of the time)
+        outPacket.encodeInt(getGroomId());
+        outPacket.encodeInt(getBrideId());
+        outPacket.encodeInt(getGroomItemId());
+    }
 }

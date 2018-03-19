@@ -106,8 +106,10 @@ public class WorldHandler {
             chr.setPosition(pos);
             chr.setMoveAction(m.getMoveAction());
             chr.setLeft(m.getMoveAction() % 2 == 1);
+            chr.setFoothold(m.getFh());
         }
         chr.getField().checkCharInAffectedAreas(chr);
+        chr.getField().broadcastPacket(UserRemote.move(chr, movements), chr);
     }
 
     public static void handleUserChat(Client c, InPacket inPacket) {

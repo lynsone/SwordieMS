@@ -18,10 +18,7 @@ import enums.*;
 import handling.OutHeader;
 import loaders.*;
 import org.apache.log4j.LogManager;
-import packet.CField;
-import packet.MobPool;
-import packet.Stage;
-import packet.WvsContext;
+import packet.*;
 import util.Position;
 import util.Rect;
 import util.Util;
@@ -42,15 +39,10 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            // 2701 mob, 2052 item
-            QuestManager qm = chr.getQuestManager();
-            Quest q1 = QuestData.createQuestFromId(2052);
-            Quest q2 = QuestData.createQuestFromId(2701);
-            qm.removeQuest(q1.getQRKey());
-            qm.removeQuest(q2.getQRKey());
-            qm.addQuest(q1);
-            qm.addQuest(q2);
-
+            Char other = Char.getFromDBById(2);
+            other.setPosition(chr.getPosition());
+            other.setFoothold((short) chr.getField().findFootHoldBelow(other.getPosition()).getId());
+            chr.write(UserPool.userEnterField(other));
         }
     }
 

@@ -2624,4 +2624,15 @@ public class TemporaryStatManager {
             }
         });
     }
+
+    public void encodeForRemote(OutPacket outPacket) {
+        for (int i = 0; i < 17; i++) {
+            outPacket.encodeInt(0);
+        }
+        outPacket.encodeByte(0);
+        outPacket.encodeByte(0);
+        outPacket.encodeByte(0);
+        new StopForceAtom().encode(outPacket);
+        outPacket.encodeInt(0); // viperEnergy
+    }
 }

@@ -179,6 +179,9 @@ public class QuestManager {
     }
 
     public void handleItemGain(Item item) {
+        if(ItemData.getItemInfoByID(item.getItemId()) == null) {
+            return;
+        }
         for(int questID : ItemData.getItemInfoByID(item.getItemId()).getQuestIDs()) {
             Quest q = getQuests().get(questID);
             if (q != null && !q.isComplete()) {

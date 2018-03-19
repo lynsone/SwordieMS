@@ -2,14 +2,19 @@ package client.character;
 
 import connection.OutPacket;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created on 12/19/2017.
  */
 public class CoupleRecord {
+    private Map<Long, Integer> snToItemMap = new HashMap<>();
     private int pairCharacterId;
     private String pairCharacterName;
     private long sn;
     private long pairSn;
+    private int itemID;
 
     public int getPairCharacterId() {
         return pairCharacterId;
@@ -48,5 +53,20 @@ public class CoupleRecord {
         outPacket.encodeString(getPairCharacterName(), 13);
         outPacket.encodeLong(getSn());
         outPacket.encodeLong(getPairSn());
+    }
+
+    public void encodeForRemote(OutPacket outPacket) {
+        outPacket.encodeInt(1); // there can be more of the following 3 things (combined)
+        outPacket.encodeLong(getSn());
+        outPacket.encodeLong(getPairSn());
+        outPacket.encodeInt(getItemID());
+    }
+
+    public int getItemID() {
+        return itemID;
+    }
+
+    public void setItemID(int itemID) {
+        this.itemID = itemID;
     }
 }

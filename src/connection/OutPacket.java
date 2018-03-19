@@ -258,8 +258,13 @@ public class OutPacket extends Packet {
     }
 
     public void encodePosition(Position position) {
-        encodeShort(position.getX());
-        encodeShort(position.getY());
+        if(position != null) {
+            encodeShort(position.getX());
+            encodeShort(position.getY());
+        } else {
+            encodeShort(0);
+            encodeShort(0);
+        }
     }
 
     public void encodeRectInt(Rect rect) {

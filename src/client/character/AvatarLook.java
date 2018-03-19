@@ -72,6 +72,12 @@ public class AvatarLook {
     private int ears;
     @Column(name = "tail")
     private int tail;
+    @Transient
+    private int demonWingID;
+    @Transient
+    private int kaiserWingID;
+    @Transient
+    private int kaiserTailID;
 
     public AvatarLook() {
         hairEquips = new ArrayList<>();
@@ -358,4 +364,27 @@ public class AvatarLook {
         session.delete(this);
     }
 
+    public int getDemonWingID() {
+        return demonWingID;
+    }
+
+    public void setDemonWingID(int demonWingID) {
+        this.demonWingID = demonWingID;
+    }
+
+    public int getKaiserWingID() {
+        return kaiserWingID;
+    }
+
+    public void setKaiserWingID(int kaiserWingID) {
+        this.kaiserWingID = kaiserWingID;
+    }
+
+    public int getKaiserTailID() {
+        return kaiserTailID;
+    }
+
+    public void setKaiserTailID(int kaiserTailID) {
+        this.kaiserTailID = kaiserTailID;
+    }
 }

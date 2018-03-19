@@ -10,10 +10,7 @@ import constants.GameConstants;
 import enums.LeaveType;
 import loaders.ItemData;
 import loaders.SkillData;
-import packet.CField;
-import packet.DropPool;
-import packet.MobPool;
-import packet.NpcPool;
+import packet.*;
 import server.EventManager;
 import util.Position;
 import util.Rect;
@@ -414,6 +411,13 @@ public class Field {
         if (!getChars().contains(chr)) {
             getChars().add(chr);
         }
+        broadcastPacket(UserPool.userEnterField(chr), chr);
+    }
+
+    public void broadcastPacket(OutPacket outPacket, Char exceptChr) {
+        getChars().stream().filter(chr -> !chr.equals(exceptChr)).forEach(
+                chr -> chr.write(outPacket)
+        );
     }
 
     public void removeChar(Char chr) {
