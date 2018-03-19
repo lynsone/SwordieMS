@@ -6,6 +6,8 @@ import io.netty.channel.Channel;
 import net.netty.NettyClient;
 import packet.Login;
 import server.EventManager;
+import server.Server;
+import server.World;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -86,5 +88,9 @@ public class Client extends NettyClient {
 
     public server.Channel getChannelInstance() {
         return channelInstance;
+    }
+
+    public World getWorld() {
+        return Server.getInstance().getWorldById(getWorldId());
     }
 }

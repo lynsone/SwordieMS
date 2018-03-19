@@ -39,10 +39,16 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            Char other = Char.getFromDBById(2);
-            other.setPosition(chr.getPosition());
-            other.setFoothold((short) chr.getField().findFootHoldBelow(other.getPosition()).getId());
-            chr.write(UserPool.userEnterField(other));
+            OutPacket outPacket = new OutPacket(OutHeader.WHISPER);
+
+            outPacket.encodeByte(18);
+            outPacket.encodeString("Sjonnie");
+            outPacket.encodeByte(0);
+            outPacket.encodeByte(0);
+            outPacket.encodeString("hoi");
+
+
+            chr.write(outPacket);
         }
     }
 
@@ -103,12 +109,12 @@ public class AdminCommands {
             outPacket.encodeByte(0); // pvpDamage
             outPacket.encodeInt(0); // viperCharge
             // Start TSTS encode
-//            outPacket.encodeBytes(new byte[Integer.parseInt(args[2])]);
+//            outPacket.encodeArrByte(new byte[Integer.parseInt(args[2])]);
 //            outPacket.encodeInt(1);
 //            outPacket.encodeInt(80001001);
 //            outPacket.encodeByte(1);
 //            outPacket.encodeByte(0);
-//            outPacket.encodeBytes(new byte[Integer.parseInt(args[1])]);
+//            outPacket.encodeArrByte(new byte[Integer.parseInt(args[1])]);
 //            outPacket.encodeShort(1);
             // End TSTS encode
             // End  encodeForLocal
@@ -118,7 +124,7 @@ public class AdminCommands {
             outPacket.encodeByte(0);
             outPacket.encodeByte(0);
             outPacket.encodeByte(0); // movement enhancing
-//            outPacket.encodeBytes(new byte[Integer.parseInt(args[1])]);
+//            outPacket.encodeArrByte(new byte[Integer.parseInt(args[1])]);
             chr.write(outPacket);
 
 

@@ -3,14 +3,10 @@ package packet;
 import client.character.Char;
 import client.character.skills.AttackInfo;
 import client.character.skills.MobAttackInfo;
-import client.character.skills.Skill;
-import client.character.skills.SkillInfo;
 import client.life.movement.Movement;
 import connection.OutPacket;
-import constants.GameConstants;
 import constants.SkillConstants;
 import handling.OutHeader;
-import loaders.SkillData;
 import util.Position;
 
 import java.util.List;
@@ -159,7 +155,7 @@ public class UserRemote {
                 outPacket.encodePositionInt(ai.teleportPt);
             }
 //            if(ai.attackHeader == )
-            outPacket.encodeBytes(new byte[50]);
+            outPacket.encodeArrByte(new byte[50]);
         }
 
         return outPacket;

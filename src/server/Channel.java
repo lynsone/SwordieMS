@@ -2,15 +2,13 @@ package server;
 
 import client.Account;
 import client.Client;
+import client.character.Char;
 import client.field.Field;
 import constants.ServerConstants;
 import loaders.FieldData;
 import util.Tuple;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created on 11/2/2017.
@@ -23,6 +21,7 @@ public class Channel {
     private boolean adultChannel;
     private List<Field> fields;
     private Map<Integer, Tuple<Byte, Client>> transfers;
+    private Map<Integer, Char> chars = new HashMap<>();
 
     private Channel(String name, int gaugePx, World world, int channelId, boolean adultChannel) {
         this.name = name;
@@ -118,5 +117,25 @@ public class Channel {
 
     public void removeClientFromTransfer(int characterId) {
         getTransfers().remove(characterId);
+    }
+
+    public Map<Integer, Char> getChars() {
+        return chars;
+    }
+
+    public void addChar(Char chr) {
+        getChars().put(chr.getId(), chr);
+    }
+
+    public void removeChar(Char chr) {
+        getChars().remove(chr.getId());
+    }
+
+    public Char getCharById(int id) {
+        return getChars().get(id);
+    }
+
+    public Char getCharByName(String name) {
+        return getChars().values().stream().filter(chr -> chr.getName().equalsIgnoreCase(name)).findAny().orElse(null);
     }
 }

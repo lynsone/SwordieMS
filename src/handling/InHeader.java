@@ -253,7 +253,7 @@ public enum InHeader {
     USER_LUCKY_ITEM_USE_REQUEST(377),
     USER_MOB_MOVE_ABILITY_CHANGE(378),
     USER_DRAGACTION(379),
-    USER_DRAGBREATH_EARTH_EFFECT(380),
+    USER_DRAGON_BREATH_EARTH_EFFECT(380),
     USER_RENAME_REQUEST(381),
     BROADCAST_MSG(382),
     GROUP_MESSAGE(383),
@@ -1000,7 +1000,8 @@ public enum InHeader {
                 USER_TEMPORARY_STAT_UPDATE_REQUEST,
                 USER_CALC_DAMAGE_STAT_SET_REQUEST,
                 MOB_APPLY_CTRL,
-                USER_REQUEST_INSTANCE_TABLE
+                USER_REQUEST_INSTANCE_TABLE,
+                USER_QUEST_REQUEST
         );
         return spam.contains(inHeaderByOp);
     }

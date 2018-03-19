@@ -691,4 +691,7 @@ public class Field {
         return portals;
     }
 
+    public Char getCharByName(String name) {
+        return getChars().stream().filter(chr -> chr.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
 }

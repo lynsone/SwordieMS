@@ -13,9 +13,9 @@ import client.life.AffectedArea;
 import client.life.Drop;
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
+import client.party.Party;
 import connection.OutPacket;
 import constants.GameConstants;
-import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
@@ -216,6 +216,10 @@ public class Char {
     private int activeNickItemID;
     @Transient
     private int mechanicHue;
+    @Transient
+    private boolean online;
+    @Transient
+    private Party party;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -842,10 +846,10 @@ public class Char {
                 outPacket.encodeShort(0); // card list size
                 short encSize = 0;
                 outPacket.encodeShort(encSize);
-                outPacket.encodeBytes(new byte[encSize]);
+                outPacket.encodeArrByte(new byte[encSize]);
                 encSize = 0;
                 outPacket.encodeShort(encSize);
-                outPacket.encodeBytes(new byte[encSize]);
+                outPacket.encodeArrByte(new byte[encSize]);
             }
             outPacket.encodeInt(-1); // monsterbook set
         }
@@ -996,7 +1000,7 @@ public class Char {
 //        for(int i = 0; i < sizeInt; i++) {
 //            getMonsterLifeInviteInfo().encode(outPacket);
 //        }
-//        outPacket.encodeBytes(Util.getByteArrayByString("01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
+//        outPacket.encodeArrByte(Util.getByteArrayByString("01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
         if (mask.isInMask(DBChar.Character)) {
             outPacket.encodeInt(0); // honor level
             outPacket.encodeInt(0); // honor exp
@@ -1164,7 +1168,7 @@ public class Char {
             outPacket.encodeInt(0);
             outPacket.encodeInt(0);
         }
-        outPacket.encodeBytes(new byte[32]); // real
+        outPacket.encodeArrByte(new byte[32]); // real
 
     }
 
@@ -1354,6 +1358,9 @@ public class Char {
         List<Skill> skills = SkillData.getSkillsByJob((short) id);
         skills.forEach(this::addSkill);
         getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        if(getParty() != null) {
+            getParty().updateFull();
+        }
     }
 
     public short getJob() {
@@ -1478,6 +1485,9 @@ public class Char {
                 break;
             case level:
                 getAvatarData().getCharacterStat().setLevel(amount);
+                if(getParty() != null) {
+                    getParty().updateFull();
+                }
                 break;
         }
     }
@@ -1704,6 +1714,9 @@ public class Char {
             if(!c.equals(this)) {
                 write(UserPool.userEnterField(c));
             }
+        }
+        if(getParty() != null) {
+            getParty().updateFull();
         }
     }
 
@@ -2320,5 +2333,28 @@ public class Char {
 
     public void setMechanicHue(int mechanicHue) {
         this.mechanicHue = mechanicHue;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public void setParty(Party party) {
+        this.party = party;
+    }
+
+    public Party getParty() {
+        return party;
+    }
+
+    public void logout() {
+        setOnline(false);
+        getField().removeChar(this);
+        updateDB();
+        getClient().getChannelInstance().removeChar(this);
     }
 }

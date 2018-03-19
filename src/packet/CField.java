@@ -28,8 +28,6 @@ import java.util.TreeMap;
 
 public class CField {
 
-
-
     public static OutPacket funcKeyMappedManInit(FuncKeyMap funcKeyMap) {
         OutPacket outPacket = new OutPacket(OutHeader.FUNC_KEY_MAPPED_MAN_INIT);
 
@@ -587,6 +585,25 @@ public class CField {
         outPacket.encodeShort(0); //Foothold
         outPacket.encodeInt(0); //nUpgrade
         outPacket.encodeInt(0); //FanID Equipped by Haku
+
+        return outPacket;
+    }
+
+    public static OutPacket whisper(String sourceName, byte channelIdx, boolean gm, String msg, boolean notFound) {
+        OutPacket outPacket = new OutPacket(OutHeader.WHISPER);
+
+        if(notFound) {
+            outPacket.encodeByte(9);
+            outPacket.encodeString(sourceName);
+            outPacket.encodeByte(4);
+            outPacket.encodeInt(channelIdx);
+        } else {
+            outPacket.encodeByte(18);
+            outPacket.encodeString(sourceName);
+            outPacket.encodeByte(channelIdx);
+            outPacket.encodeByte(gm);
+            outPacket.encodeString(msg);
+        }
 
         return outPacket;
     }

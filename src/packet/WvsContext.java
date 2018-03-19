@@ -9,6 +9,7 @@ import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.jobs.resistance.WildHunterInfo;
 import client.life.movement.*;
+import client.party.PartyResultInfo;
 import com.kenai.jaffl.annotations.Out;
 import connection.InPacket;
 import connection.OutPacket;
@@ -621,5 +622,14 @@ public class WvsContext {
 
     public static OutPacket clearAnnouncedQuest() {
         return new OutPacket(OutHeader.CLEAR_ANNOUNCED_QUEST);
+    }
+
+    public static OutPacket partyResult(PartyResultInfo pri) {
+        OutPacket outPacket = new OutPacket(OutHeader.PARTY_RESULT);
+
+        outPacket.encodeByte(pri.getType().getVal());
+        pri.encode(outPacket);
+
+        return outPacket;
     }
 }

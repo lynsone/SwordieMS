@@ -1033,7 +1033,10 @@ public enum OutHeader {
                 MOB_HP_INDICATOR,
                 STAT_CHANGED,
                 MOB_CHANGE_CONTROLLER,
-                MOB_MOVE
+                MOB_MOVE,
+                REMOTE_MOVE,
+                REMOTE_EMOTION,
+                EXCL_REQUEST
 
                 );
         return spam.contains(outHeader);

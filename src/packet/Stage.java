@@ -74,7 +74,7 @@ public class Stage {
         // 41 bytes below
         outPacket.encodeByte(setWhiteFadeInOut);
         outPacket.encodeByte(0); // unsure
-        outPacket.encodeBytes(Util.getByteArrayByString("40 64 2B 70 84 7A D3 01")); // TODO: proper ftServer encoding
+        outPacket.encodeArrByte(Util.getByteArrayByString("40 64 2B 70 84 7A D3 01")); // TODO: proper ftServer encoding
         outPacket.encodeInt(mobStatAdjustRate);
         boolean hasFieldCustom = fieldCustom != null;
         outPacket.encodeByte(hasFieldCustom);

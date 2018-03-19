@@ -52,7 +52,7 @@ public class OutPacket extends Packet {
     public OutPacket(byte[] data) {
         super(data);
         baos = new ByteArrayOutputStream();
-        encodeBytes(data);
+        encodeArrByte(data);
     }
 
     /**
@@ -92,7 +92,7 @@ public class OutPacket extends Packet {
      * Encodes a byte array to this OutPacket.
      * @param bArr The byte array to encode.
      */
-    public void encodeBytes(byte[] bArr) {
+    public void encodeArrByte(byte[] bArr) {
         for (byte b : bArr) {
             baos.write(b);
         }
@@ -209,7 +209,7 @@ public class OutPacket extends Packet {
     public void setData(byte[] nD) {
         super.setData(nD);
         baos.reset();
-        encodeBytes(nD);
+        encodeArrByte(nD);
     }
 
     @Override

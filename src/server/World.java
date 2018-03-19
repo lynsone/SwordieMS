@@ -1,5 +1,6 @@
 package server;
 
+import client.character.Char;
 import enums.ServerStatus;
 
 import java.util.ArrayList;
@@ -84,5 +85,15 @@ public class World {
 
     public ServerStatus getStatus() {
         return ServerStatus.NORMAL;
+    }
+
+    public Char getCharByName(String name) {
+        for(Channel c : getChannels()) {
+            Char chr = c.getCharByName(name);
+            if(chr != null) {
+                return chr;
+            }
+        }
+        return null;
     }
 }

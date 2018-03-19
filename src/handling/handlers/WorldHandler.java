@@ -22,6 +22,7 @@ import client.jobs.legend.Luminous;
 import client.jobs.sengoku.Kanna;
 import client.life.*;
 import client.life.movement.Movement;
+import client.party.*;
 import connection.InPacket;
 import constants.ItemConstants;
 import constants.JobConstants;
@@ -42,15 +43,18 @@ import util.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static enums.ChatMsgColour.GAME_MESSAGE;
+import static enums.ChatMsgColour.WHISPER_GREEN;
 import static enums.ChatMsgColour.YELLOW;
 import static enums.EquipBaseStat.cuc;
 import static enums.EquipBaseStat.ruc;
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
 import static enums.InventoryOperation.*;
+import static enums.Stat.ap;
 import static enums.Stat.sp;
 
 /**
@@ -66,15 +70,18 @@ public class WorldHandler {
         byte channel = info.getLeft();
         Server.getInstance().getWorldById(worldId).getChannelById(channel).removeClientFromTransfer(charId);
         c.setChannel(channel);
+        c.setWorldId((byte) worldId);
         c.setChannelInstance(Server.getInstance().getWorldById(worldId).getChannelById(channel));
 //        Char chr = Char.getFromDBById(charId);
-        Char chr = c.getChr();
+        Char chr = info.getRight().getChr();
         if (chr == null || chr.getId() != charId) {
             chr = Char.getFromDBById(charId);
         }
         chr.setClient(c);
         c.setChr(chr);
+        c.getChannelInstance().addChar(chr);
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
+        chr.setOnline(true);
         Field field = c.getChannelInstance().getField(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
         field.addChar(chr);
         chr.setField(field);
@@ -91,6 +98,9 @@ public class WorldHandler {
             if(!charr.equals(chr)) {
                 chr.write(UserPool.userEnterField(charr));
             }
+        }
+        if(chr.getParty() != null) {
+            chr.getParty().updateFull();
         }
     }
 
@@ -1249,10 +1259,11 @@ public class WorldHandler {
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         if (c.getAccount() != null) {
-            c.getChr().getField().removeChar(c.getChr());
+            c.getChr().logout();
             c.getAccount().updateDB();
         }
         chr.updateDB();
+        c.getChr().setOnline(false);
         int worldID = chr.getClient().getChannelInstance().getWorldId();
         World world = Server.getInstance().getWorldById(worldID);
         Field field = chr.getField();
@@ -1880,7 +1891,7 @@ public class WorldHandler {
         byte lastType = inPacket.decodeByte();
         byte action = inPacket.decodeByte();
         int answer = 0;
-        if (nmt == NpcMessageType.AskMenu && action != -1) {
+        if (nmt == NpcMessageType.AskMenu && action != -1 && lastType != 5) {
             answer = inPacket.decodeInt();
         }
         chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
@@ -2293,5 +2304,137 @@ public class WorldHandler {
         int duration = inPacket.decodeInt();
         boolean byItemOption = inPacket.decodeByte() != 0;
         chr.getField().broadcastPacket(UserRemote.emotion(chr.getId(), emotion, duration, byItemOption), chr);
+    }
+
+    public static void handlePartyRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        byte type = inPacket.decodeByte();
+        PartyRequestType prt = PartyRequestType.getByVal(type);
+        Party party = chr.getParty();
+        if(prt == null) {
+            log.error(String.format("Unknown party request type %d", type));
+            return;
+        }
+        switch(prt) {
+            case Create:
+                boolean appliable = inPacket.decodeByte() != 0;
+                String name = inPacket.decodeString();
+                party = Party.createNewParty(appliable, name);
+                party.addPartyMember(chr);
+                CreatePartyResult cpr = new CreatePartyResult();
+                cpr.party = party;
+                chr.write(WvsContext.partyResult(cpr));
+                break;
+            case Leave:
+                if(party.hasCharAsLeader(chr)) {
+                    party.disband();
+                } else {
+                    LeavePartyResult lpr = new LeavePartyResult();
+                    lpr.partyExists = true;
+                    lpr.wasExpelled = false;
+                    lpr.party = party;
+                    lpr.leaver = party.getPartyMemberByID(chr.getId());
+                    party.broadcast(WvsContext.partyResult(lpr));
+                    party.removePartyMember(lpr.leaver);
+                    party.updateFull();
+                }
+                break;
+            case Invite:
+                String invitedName = inPacket.decodeString();
+                PartyJoinRequestBlue pjrb = new PartyJoinRequestBlue();
+                if(party == null) {
+                    party = Party.createNewParty(true, "Party with me!");
+                    party.addPartyMember(chr);
+                    cpr = new CreatePartyResult();
+                    cpr.party = party;
+                    chr.write(WvsContext.partyResult(cpr));
+                }
+                pjrb.inviter = party.getPartyLeader();
+                pjrb.partyID = party.getId();
+                Char invited = chr.getField().getCharByName(invitedName);
+                if(invited.getParty() == null) {
+                    invited.write(WvsContext.partyResult(pjrb));
+                    chr.chatMessage(GAME_MESSAGE, String.format("You invited %s to your party.", invitedName));
+                } else {
+                    chr.chatMessage(GAME_MESSAGE, String.format("%s is already in a party.", invitedName));
+                }
+                break;
+            case Expel:
+                int expelID = inPacket.decodeInt();
+                party.expel(expelID);
+                break;
+            case ChangeLeadership:
+                int newLeaderID = inPacket.decodeInt();
+                party.setPartyLeaderID(newLeaderID);
+                LeaderShipTransferResult lstr = new LeaderShipTransferResult();
+                lstr.newLeaderID = newLeaderID;
+                lstr.reasonIsDisconnect = false;
+                party.broadcast(WvsContext.partyResult(lstr));
+                break;
+            default:
+                log.error(String.format("Unknown party request type %d", type));
+                break;
+        }
+    }
+
+    public static void handlePartyResult(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        byte type = inPacket.decodeByte();
+        int partyID = inPacket.decodeInt();
+        PartyRequestResultType prrt = PartyRequestResultType.getByVal(type);
+        if(prrt == null) {
+            log.error(String.format("Unknown party request result type %d", type));
+            return;
+        }
+        switch(prrt) {
+            case AcceptPartyInvite:
+                // TODO make parties get saved in world
+                Char leader = chr.getField().getChars().stream()
+                        .filter(l -> l.getParty() != null
+                        && l.getParty().getId() == partyID).findFirst().orElse(null);
+                Party party = leader.getParty();
+                if(!party.isFull()) {
+                    party.addPartyMember(chr);
+                    PartyJoinResult pjr = new PartyJoinResult();
+                    pjr.party = party;
+                    pjr.joinerName = chr.getName();
+                    for(Char onChar : party.getOnlineMembers().stream().map(pm -> pm.getChr()).collect(Collectors.toList())) {
+                        onChar.write(WvsContext.partyResult(pjr));
+                    }
+                } else {
+                    chr.write(WvsContext.partyResult(new PartyMessageResult(PartyResultType.FullPartyMsg)));
+                }
+                break;
+            case DeclinePartyInvite:
+                leader = chr.getField().getChars().stream()
+                        .filter(l -> l.getParty() != null &&
+                        l.getParty().getId() == partyID).findFirst().orElse(null);
+                leader.chatMessage(GAME_MESSAGE, String.format("%s has declined your invite.", chr.getName()));
+                break;
+            default:
+                log.error(String.format("Unknown party request result type %d", type));
+                break;
+        }
+    }
+
+    public static void handleWhisper(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        byte type = inPacket.decodeByte();
+        inPacket.decodeInt(); // tick
+        String destName = inPacket.decodeString();
+        Char dest = c.getWorld().getCharByName(destName);
+        if(dest == null) {
+            c.write(CField.whisper(destName, (byte) 0, false, "", true));
+        }
+        switch(type) {
+            case 5: // /find command
+                break;
+            case 6: // whisper
+                String msg = inPacket.decodeString();
+                dest.write(CField.whisper(chr.getName(), (byte) (c.getChannel() - 1), false, msg, false));
+                chr.chatMessage(WHISPER_GREEN, String.format("%s<< %s", dest.getName(), msg));
+                break;
+        }
+
     }
 }
