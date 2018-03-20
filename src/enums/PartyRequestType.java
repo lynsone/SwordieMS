@@ -11,6 +11,7 @@ public enum PartyRequestType {
     Invite(4),
     Expel(6),
     ChangeLeadership(7),
+    InviteRequest(8),
     ;
 
     private byte val;

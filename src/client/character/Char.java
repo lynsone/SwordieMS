@@ -16,16 +16,14 @@ import client.character.quest.QuestManager;
 import client.party.Party;
 import connection.OutPacket;
 import constants.GameConstants;
+import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
 import loaders.SkillData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import packet.Stage;
-import packet.UserLocal;
-import packet.UserPool;
-import packet.WvsContext;
+import packet.*;
 import server.Server;
 import util.FileTime;
 import loaders.ItemData;
@@ -1591,12 +1589,19 @@ public class Char {
      * @param item The Item to equip.
      */
     public void unequip(Item item) {
+        AvatarLook al = getAvatarData().getAvatarLook();
+        int itemID = item.getItemId();
         getInventoryByType(EQUIPPED).removeItem(item);
         getInventoryByType(EQUIP).addItem(item);
         List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-        if (hairEquips.contains(item.getItemId())) {
-            hairEquips.remove((Integer) item.getItemId());
+        if(ItemConstants.isWeapon(itemID)) {
+            al.setWeaponId(0);
         }
+        if (hairEquips.contains(itemID)) {
+            hairEquips.remove((Integer) itemID);
+        }
+        byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
+        getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
     }
 
     /**
@@ -1605,12 +1610,19 @@ public class Char {
      * @param item The Item to equip.
      */
     public void equip(Item item) {
+        AvatarLook al = getAvatarData().getAvatarLook();
+        int itemID = item.getItemId();
         getInventoryByType(EQUIP).removeItem(item);
         getInventoryByType(EQUIPPED).addItem(item);
         List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-        if (!hairEquips.contains(item.getItemId())) {
-            hairEquips.add(item.getItemId());
+        if(ItemConstants.isWeapon(itemID)) {
+            al.setWeaponId(itemID);
         }
+        if (!hairEquips.contains(itemID)) {
+            hairEquips.add(itemID);
+        }
+        byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
+        getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
     }
 
     public TemporaryStatManager getTemporaryStatManager() {

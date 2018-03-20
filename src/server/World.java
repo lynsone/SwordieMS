@@ -1,10 +1,13 @@
 package server;
 
 import client.character.Char;
+import client.party.Party;
 import enums.ServerStatus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created on 11/2/2017.
@@ -16,6 +19,7 @@ public class World {
     private boolean starplanet;
     private String name, worldEventDescription;
     private List<Channel> channels;
+    private Map<Integer, Party> parties = new HashMap<>();
 
     public World(int worldId, String name, int worldState, String worldEventDescription, int worldEventEXP_WSE,
                  int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet) {
@@ -95,5 +99,22 @@ public class World {
             }
         }
         return null;
+    }
+
+    public Map<Integer, Party> getParties() {
+        return parties;
+    }
+
+    public void addParty(Party p) {
+        getParties().put(p.getId(), p);
+        p.setWorld(this);
+    }
+
+    public void removeParty(Party p) {
+        getParties().remove(p.getId());
+    }
+
+    public Party getPartybyId(int partyID) {
+        return getParties().get(partyID);
     }
 }

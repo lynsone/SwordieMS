@@ -2320,6 +2320,7 @@ public class WorldHandler {
                 boolean appliable = inPacket.decodeByte() != 0;
                 String name = inPacket.decodeString();
                 party = Party.createNewParty(appliable, name);
+                party.setId(chr.getId());
                 party.addPartyMember(chr);
                 CreatePartyResult cpr = new CreatePartyResult();
                 cpr.party = party;
@@ -2344,6 +2345,7 @@ public class WorldHandler {
                 PartyJoinRequestBlue pjrb = new PartyJoinRequestBlue();
                 if(party == null) {
                     party = Party.createNewParty(true, "Party with me!");
+                    party.setId(chr.getId());
                     party.addPartyMember(chr);
                     cpr = new CreatePartyResult();
                     cpr.party = party;
@@ -2352,7 +2354,9 @@ public class WorldHandler {
                 pjrb.inviter = party.getPartyLeader();
                 pjrb.partyID = party.getId();
                 Char invited = chr.getField().getCharByName(invitedName);
-                if(invited.getParty() == null) {
+                if(!invited.isPartyInvitable()) {
+                    chr.chatMessage(GAME_MESSAGE, String.format("%s is currently not accepting party invites.", invitedName));
+                } else if(invited.getParty() == null) {
                     invited.write(WvsContext.partyResult(pjrb));
                     chr.chatMessage(GAME_MESSAGE, String.format("You invited %s to your party.", invitedName));
                 } else {
@@ -2371,6 +2375,23 @@ public class WorldHandler {
                 lstr.reasonIsDisconnect = false;
                 party.broadcast(WvsContext.partyResult(lstr));
                 break;
+            case InviteRequest:
+                int partyID = inPacket.decodeInt();
+                party = chr.getField().getChars().stream()
+                        .filter(ch -> ch.getParty() != null && ch.getParty().getId() == partyID)
+                        .map(Char::getParty)
+                        .findFirst()
+                        .orElse(null);
+                if(party.getApplyingChar() == null) {
+                    PartyApplyRequest par = new PartyApplyRequest();
+                    par.partyID = partyID;
+                    par.applier = chr;
+                    party.setApplyingChar(chr);
+                    party.getPartyLeader().getChr().write(WvsContext.partyResult(par));
+                } else {
+                    chr.chatMessage(GAME_MESSAGE, "That party already has an applier. Please wait until the applier is accepted or denied.");
+                }
+                break;
             default:
                 log.error(String.format("Unknown party request type %d", type));
                 break;
@@ -2388,7 +2409,6 @@ public class WorldHandler {
         }
         switch(prrt) {
             case AcceptPartyInvite:
-                // TODO make parties get saved in world
                 Char leader = chr.getField().getChars().stream()
                         .filter(l -> l.getParty() != null
                         && l.getParty().getId() == partyID).findFirst().orElse(null);
@@ -2398,7 +2418,7 @@ public class WorldHandler {
                     PartyJoinResult pjr = new PartyJoinResult();
                     pjr.party = party;
                     pjr.joinerName = chr.getName();
-                    for(Char onChar : party.getOnlineMembers().stream().map(pm -> pm.getChr()).collect(Collectors.toList())) {
+                    for(Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
                         onChar.write(WvsContext.partyResult(pjr));
                     }
                 } else {
@@ -2410,6 +2430,32 @@ public class WorldHandler {
                         .filter(l -> l.getParty() != null &&
                         l.getParty().getId() == partyID).findFirst().orElse(null);
                 leader.chatMessage(GAME_MESSAGE, String.format("%s has declined your invite.", chr.getName()));
+                break;
+            case AcceptPartyApply:
+                party = chr.getClient().getWorld().getPartybyId(partyID);
+                Char applier = party.getApplyingChar();
+                if(applier.getParty() != null) {
+                    party.getPartyLeader().getChr().chatMessage(GAME_MESSAGE, String.format("%s is already in a party.", applier.getName()));
+                } else if(!party.isFull()) {
+                    party.addPartyMember(applier);
+                    PartyJoinResult pjr = new PartyJoinResult();
+                    pjr.party = party;
+                    pjr.joinerName = applier.getName();
+                    for(Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
+                        onChar.write(WvsContext.partyResult(pjr));
+                    }
+                } else {
+                    applier.write(WvsContext.partyResult(new PartyMessageResult(PartyResultType.FullPartyMsg)));
+                }
+                party.setApplyingChar(null);
+                break;
+            case DeclinePartyApply:
+                party = chr.getClient().getWorld().getPartybyId(partyID);
+                applier = party.getApplyingChar();
+                if(applier != null) {
+                    applier.chatMessage(GAME_MESSAGE, "Your party apply request has been denied.");
+                    party.setApplyingChar(null);
+                }
                 break;
             default:
                 log.error(String.format("Unknown party request result type %d", type));
@@ -2436,5 +2482,29 @@ public class WorldHandler {
                 break;
         }
 
+    }
+
+    public static void handlePartyMemberCandidateRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+        chr.write(WvsContext.partyMemberCandidateResult(field.getChars().stream()
+                .filter(ch -> ch.isPartyInvitable() && !ch.equals(chr) && ch.getParty() == null)
+                .collect(Collectors.toSet())));
+    }
+
+    public static void handlePartyCandidateRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        if(chr.getParty() != null) {
+            chr.write(WvsContext.partyCandidateResult(new HashSet<>()));
+            return;
+        }
+        Field field = chr.getField();
+        Set<Party> parties = new HashSet<>();
+        for(Char ch : field.getChars()) {
+            if(ch.getParty() != null && ch.getParty().hasCharAsLeader(ch)) {
+                parties.add(ch.getParty());
+            }
+        }
+        chr.write(WvsContext.partyCandidateResult(parties));
     }
 }

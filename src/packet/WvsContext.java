@@ -9,6 +9,8 @@ import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.jobs.resistance.WildHunterInfo;
 import client.life.movement.*;
+import client.party.Party;
+import client.party.PartyMember;
 import client.party.PartyResultInfo;
 import com.kenai.jaffl.annotations.Out;
 import connection.InPacket;
@@ -629,6 +631,47 @@ public class WvsContext {
 
         outPacket.encodeByte(pri.getType().getVal());
         pri.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket partyMemberCandidateResult(Set<Char> chars) {
+        OutPacket outPacket = new OutPacket(OutHeader.PARTY_MEMBER_CANDIDATE_RESULT);
+
+        outPacket.encodeByte(chars.size());
+        for(Char chr : chars) {
+            outPacket.encodeInt(chr.getId());
+            outPacket.encodeString(chr.getName());
+            outPacket.encodeShort(chr.getJob());
+            outPacket.encodeShort(chr.getAvatarData().getCharacterStat().getSubJob());
+            outPacket.encodeByte(chr.getLevel());
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket partyCandidateResult(Set<Party> parties) {
+        OutPacket outPacket = new OutPacket(OutHeader.PARTY_CANDIDATE_RESULT);
+
+        outPacket.encodeByte(parties.size());
+        for(Party party : parties) {
+            Char leader = party.getPartyLeader().getChr();
+            outPacket.encodeInt(party.getId());
+            outPacket.encodeString(leader.getName());
+            outPacket.encodeByte(party.getAvgLevel());
+            outPacket.encodeByte(party.getMembers().size());
+            outPacket.encodeString(party.getName());
+            outPacket.encodeByte(party.getMembers().size());
+            for(PartyMember pm : party.getMembers()) {
+                outPacket.encodeInt(pm.getCharID());
+                outPacket.encodeString(pm.getCharName());
+                outPacket.encodeShort(pm.getJob());
+                outPacket.encodeShort(pm.getSubSob());
+                outPacket.encodeByte(pm.getLevel());
+                outPacket.encodeByte(pm.equals(party.getPartyLeader()));
+            }
+        }
+        outPacket.encodeArrByte(new byte[40]);
 
         return outPacket;
     }

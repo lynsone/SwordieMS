@@ -325,6 +325,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case DROP_PICK_UP_REQUEST:
                     WorldHandler.handleDropPickUpRequest(c, inPacket);
                     break;
+                case PARTY_MEMBER_CANDIDATE_REQUEST:
+                    WorldHandler.handlePartyMemberCandidateRequest(c, inPacket);
+                    break;
+                case PARTY_CANDIDATE_REQUEST:
+                    WorldHandler.handlePartyCandidateRequest(c, inPacket);
+                    break;
                 case BATTLE_RECORD_ON_OFF_REQUEST:
                     WorldHandler.handleBattleRecordOnOffRequest(c, inPacket);
                     break;

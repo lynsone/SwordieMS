@@ -1,11 +1,16 @@
 package packet;
 
+import client.character.AvatarLook;
 import client.character.Char;
+import client.character.CharacterStat;
 import client.character.skills.AttackInfo;
+import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.MobAttackInfo;
+import client.character.skills.TemporaryStatManager;
 import client.life.movement.Movement;
 import connection.OutPacket;
 import constants.SkillConstants;
+import enums.AvatarModifiedMask;
 import handling.OutHeader;
 import util.Position;
 
@@ -157,6 +162,48 @@ public class UserRemote {
 //            if(ai.attackHeader == )
             outPacket.encodeArrByte(new byte[50]);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket avatarModified(Char chr, byte mask, byte carryItemEffect) {
+        AvatarLook al = chr.getAvatarData().getAvatarLook();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_AVATAR_MODIFIED);
+
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodeByte(mask);
+        if((mask & AvatarModifiedMask.AvatarLook.getVal()) != 0) {
+            chr.chatMessage(al.getHairEquips().toString());
+            al.encode(outPacket);
+        }
+        if((mask & AvatarModifiedMask.SubAvatarLook.getVal()) != 0) {
+            al.encode(outPacket); // subAvatarLook
+        }
+        if((mask & AvatarModifiedMask.Speed.getVal()) != 0) {
+            outPacket.encodeByte(tsm.getOption(CharacterTemporaryStat.Speed).nOption);
+        }
+        if((mask & AvatarModifiedMask.CarryItemEffect.getVal()) != 0) {
+            outPacket.encodeByte(carryItemEffect);
+        }
+        boolean hasCouple = chr.getCouple() != null;
+        outPacket.encodeByte(hasCouple);
+        if(hasCouple) {
+            chr.getCouple().encodeForRemote(outPacket);
+        }
+        boolean hasFriendShip = chr.getFriendshipRingRecord() != null;
+        outPacket.encodeByte(hasFriendShip);
+        if(hasFriendShip) {
+            chr.getFriendshipRingRecord().encode(outPacket);
+        }
+        boolean hasWedding = chr.getMarriageRecord() != null;
+        outPacket.encodeByte(hasWedding);
+        if(hasWedding) {
+            chr.getMarriageRecord().encode(outPacket);
+        }
+        outPacket.encodeInt(chr.getCompletedSetItemID());
+        outPacket.encodeInt(chr.getTotalChuc());
 
         return outPacket;
     }

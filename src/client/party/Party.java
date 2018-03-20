@@ -3,8 +3,10 @@ package client.party;
 import client.character.Char;
 import connection.OutPacket;
 import packet.WvsContext;
+import server.World;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -18,6 +20,8 @@ public class Party {
     private boolean appliable;
     private String name;
     private int partyLeaderID;
+    private World world;
+    private Char applyingChar;
 
     public boolean isAppliable() {
         return appliable;
@@ -107,6 +111,7 @@ public class Party {
         PartyMember pm = new PartyMember(chr);
         if(isEmpty()) {
             setPartyLeaderID(chr.getId());
+            chr.getClient().getWorld().addParty(this);
         }
         PartyMember[] partyMembers = getPartyMembers();
         PartyJoinResult pjr = new PartyJoinResult();
@@ -161,10 +166,16 @@ public class Party {
         for (int i = 0; i < getPartyMembers().length; i++) {
             getPartyMembers()[i] = null;
         }
+        getWorld().removeParty(this);
+        setWorld(null);
     }
 
     public List<PartyMember> getOnlineMembers() {
         return Arrays.stream(getPartyMembers()).filter(pm -> pm != null && pm.isOnline()).collect(Collectors.toList());
+    }
+
+    public List<PartyMember> getMembers() {
+        return Arrays.stream(getPartyMembers()).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     public void updateFull() {
@@ -221,5 +232,28 @@ public class Party {
         party.setAppliable(appliable);
         party.setName(name);
         return party;
+    }
+
+    public int getAvgLevel() {
+        Collection<PartyMember> partyMembers = getMembers();
+        return partyMembers.stream()
+                .mapToInt(pm -> pm.getChr().getLevel())
+                .sum() / partyMembers.size();
+    }
+
+    public void setWorld(World world) {
+        this.world = world;
+    }
+
+    public World getWorld() {
+        return world;
+    }
+
+    public Char getApplyingChar() {
+        return applyingChar;
+    }
+
+    public void setApplyingChar(Char applyingChar) {
+        this.applyingChar = applyingChar;
     }
 }
