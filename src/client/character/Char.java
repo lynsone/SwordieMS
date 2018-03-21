@@ -6,6 +6,7 @@ import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.field.Field;
 import client.field.Portal;
+import client.guild.Guild;
 import client.jobs.Job;
 import client.jobs.JobManager;
 import client.jobs.resistance.WildHunterInfo;
