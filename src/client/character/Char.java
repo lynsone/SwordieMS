@@ -1707,8 +1707,8 @@ public class Char {
      * Ensures that the previous map does not contain this Char anymore, and that the new field does.
      * Ensures that all Lifes are immediately spawned for the new player.
      *
-     * @param toField
-     * @param portal
+     * @param toField The {@link Field} to warp to.
+     * @param portal The {@link Portal} where to spawn at.
      */
     public void warp(Field toField, Portal portal) {
         TemporaryStatManager tsm = getTemporaryStatManager();
@@ -1729,6 +1729,11 @@ public class Char {
         }
         if(getParty() != null) {
             getParty().updateFull();
+        }
+        for(Char charr : getField().getChars()) {
+            if(!charr.equals(this)) {
+                write(UserPool.userEnterField(charr));
+            }
         }
     }
 
