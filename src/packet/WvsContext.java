@@ -2,17 +2,16 @@ package packet;
 
 import client.character.*;
 import client.character.items.Equip;
-import client.character.items.Inventory;
 import client.character.items.Item;
 import client.character.quest.Quest;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
+import client.guild.GuildResultInfo;
 import client.jobs.resistance.WildHunterInfo;
 import client.life.movement.*;
 import client.party.Party;
 import client.party.PartyMember;
 import client.party.PartyResultInfo;
-import com.kenai.jaffl.annotations.Out;
 import connection.InPacket;
 import connection.OutPacket;
 import enums.*;
@@ -20,7 +19,6 @@ import handling.OutHeader;
 import org.apache.log4j.LogManager;
 import util.FileTime;
 import util.Position;
-import util.Triple;
 
 import java.util.*;
 
@@ -671,7 +669,16 @@ public class WvsContext {
                 outPacket.encodeByte(pm.equals(party.getPartyLeader()));
             }
         }
-        outPacket.encodeArrByte(new byte[40]);
+        outPacket.encodeArr(new byte[40]);
+
+        return outPacket;
+    }
+
+    public static OutPacket guildResult(GuildResultInfo gri) {
+        OutPacket outPacket = new OutPacket(OutHeader.GUILD_RESULT);
+
+        outPacket.encodeByte(gri.getType().getVal());
+        gri.encode(outPacket);
 
         return outPacket;
     }

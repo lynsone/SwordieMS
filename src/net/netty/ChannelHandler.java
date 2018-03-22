@@ -220,6 +220,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case PARTY_RESULT:
                     WorldHandler.handlePartyResult(c, inPacket);
                     break;
+                case GUILD_REQUEST:
+                    WorldHandler.handleGuildRequest(c, inPacket);
+                    break;
                 case REQUEST_SET_BLESS_OF_DARKNESS:
                     WorldHandler.handleRequestSetBlessOfDarkness(c, inPacket);
                     break;

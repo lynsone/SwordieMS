@@ -1,17 +1,17 @@
 package client.character;
 
+import client.character.items.Inventory;
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.character.items.Equip;
 import client.character.items.Item;
 import client.field.Field;
 import client.field.Portal;
+import client.guild.GuildCreate;
+import client.guild.GuildMsg;
 import constants.ItemConstants;
 import constants.ServerConstants;
-import enums.InvType;
-import enums.NpcMessageType;
-import enums.QuestStatus;
-import enums.ScriptType;
+import enums.*;
 import loaders.QuestData;
 import loaders.ItemData;
 import org.apache.log4j.LogManager;
@@ -523,17 +523,23 @@ public class ScriptManager implements Observer {
      * @param id
      * @return
      */
-    public boolean canHold(int id) { //1452002
-        double isEquip = Math.floor(id / 1000000);
-        int slot = 0;
-        if (isEquip == 1) {  //Equip
-            Equip equip = ItemData.getEquipDeepCopyFromId(id);
-            slot = (int) chr.getInventoryByType(InvType.EQUIP).getSlots();
+    public boolean canHold(int id) {
+        boolean canHold = true;
+        if (ItemConstants.isEquip(id)) {  //Equip
+            canHold = chr.getEquipInventory().getSlots() > chr.getEquipInventory().getItems().size();
         } else {    //Item
             Item item = ItemData.getItemDeepCopy(id);
-            InvType invType = item.getInvType();
-            slot = (int) chr.getInventoryByType(invType).getSlots();
+            Inventory inv = chr.getInventoryByType(item.getInvType());
+            Item curItem = inv.getItemByItemID(id);
+            canHold = (curItem != null && curItem.getQuantity() + 1 > 0) || inv.getSlots() > inv.getItems().size();
         }
-        return slot > 0;
+        return canHold;
+    }
+
+    /**
+     * Shows a window to the Client that is used to create a guild.
+     */
+    public void showGuildCreateWindow() {
+        chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.InputGuildName)));
     }
 }

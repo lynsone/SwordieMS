@@ -28,6 +28,13 @@ DROP TABLE IF EXISTS questProgressMobRequirements;
 DROP TABLE IF EXISTS questlists;
 DROP TABLE IF EXISTS questManagers;
 DROP TABLE IF EXISTS quests;
+DROP TABLE IF EXISTS guildrequestors;
+DROP TABLE IF EXISTS gradeNames;
+DROP TABLE IF EXISTS guildmembers;
+DROP TABLE IF EXISTS guildrequestors;
+DROP TABLE IF EXISTS guildskills;
+DROP TABLE IF EXISTS guildskill;
+DROP TABLE IF EXISTS guilds;
 DROP TABLE IF EXISTS filetimes;
 
 CREATE TABLE filetimes (
@@ -171,7 +178,6 @@ CREATE TABLE equips (
     FOREIGN KEY (itemId) REFERENCES items(id),
     FOREIGN KEY (equippedDate) REFERENCES filetimes(id)
 );
-
 CREATE TABLE options (
 	id int NOT NULL AUTO_INCREMENT,
     equipId bigint,
@@ -371,6 +377,29 @@ CREATE TABLE keymaps (
 );
 
 
+CREATE TABLE guilds (
+	id int NOT NULL AUTO_INCREMENT,
+    name varchar(255),
+    leaderID int,
+    worldID int,
+    markBg int,
+    markBgColor tinyint,
+    mark tinyint,
+    markColor int,
+    maxMembers int,
+    notice varchar(255),
+    points int,
+    seasonPoints int,
+    allianceID int,
+    level int,
+    rank int,
+    ggp int,
+    appliable boolean,
+    joinSetting int,
+    reqLevel int,
+    PRIMARY KEY (id)    
+);
+
 CREATE TABLE characters (
 	id int NOT NULL AUTO_INCREMENT,
     accId int,
@@ -384,6 +413,7 @@ CREATE TABLE characters (
     funcKeyMap_id int,
     fieldID int,
     questManager bigint,
+    guild int,
 	PRIMARY KEY (id),
     FOREIGN KEY (avatarData) REFERENCES avatarData(id) ON DELETE CASCADE,
     FOREIGN KEY (equippedInventory) REFERENCES inventories(id) ON DELETE CASCADE,
@@ -393,8 +423,70 @@ CREATE TABLE characters (
     FOREIGN KEY (installInventory) REFERENCES inventories(id) ON DELETE CASCADE,
     FOREIGN KEY (cashInventory) REFERENCES inventories(id) ON DELETE CASCADE,
     FOREIGN KEY (funcKeyMap_id) REFERENCES funckeymap(id) ON DELETE CASCADE,
-    FOREIGN KEY (questManager) REFERENCES questmanagers(id) ON DELETE CASCADE
+    FOREIGN KEY (questManager) REFERENCES questmanagers(id) ON DELETE CASCADE,
+    FOREIGN KEY (guild) REFERENCES guilds(id)
 );
+
+CREATE TABLE GuildSkill (
+	id int not null auto_increment,
+    skillID int,
+    level int,
+    expireDate int,
+    buyCharacterName varchar(255),
+    extendCharacterName varchar(255),
+    primary key (id),
+    foreign key (expireDate) references filetimes(id) on delete cascade
+);
+
+CREATE TABLE guildskills (
+	guildSkill_id int not null auto_increment,
+    Guild_id int,
+    skillID int,
+    fk_GuildSkillID int,
+    primary key (guildSkill_id),
+	foreign key (Guild_id) references guilds(id),
+    FOREIGN KEY (fk_GuildSkillID) REFERENCES GuildSkill(id) on delete cascade
+);
+
+CREATE TABLE guildmembers (
+	id int NOT NULL AUTO_INCREMENT,
+    charID int,
+    guildID int,
+    grade int,
+    allianceGrade int,
+    commitment int,
+    dayCommitment int,
+    igp int,
+    commitmentIncTime int,
+    name varchar(255),
+    job int,
+    level int,
+    loggedIn boolean,
+	PRIMARY KEY (id),
+    FOREIGN KEY (guildID) REFERENCES guilds(id),
+    FOREIGN KEY (commitmentIncTime) REFERENCES filetimes(id) on delete cascade
+);
+
+CREATE TABLE guildrequestors (
+	id int NOT NULL AUTO_INCREMENT,
+    charID int,
+    guildID int,
+    name varchar(255),
+    job int,
+    level int,
+    loggedIn boolean,
+	PRIMARY KEY (id),
+    FOREIGN KEY (guildID) REFERENCES guilds(id)
+);
+
+CREATE TABLE gradeNames (
+	id int NOT NULL AUTO_INCREMENT,
+	gradeName varchar(255),
+    guildID int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (guildID) references guilds(id)
+);
+
 
 CREATE TABLE skills (
 	id int NOT NULL AUTO_INCREMENT,
@@ -433,20 +525,5 @@ CREATE TABLE accounts (
 );
 
 
-#CREATE TABLE test (
-#	id int NOT NULL AUTO_INCREMENT,
-#    userId int,
-#    val int,
-#    PRIMARY KEY (id),
-#    FOREIGN KEY (userId) REFERENCES users(id)
-#);
-
-#CREATE TABLE test (
-#	id int NOT NULL AUTO_INCREMENT,
-#    val1 int,
-#    val2 int,
-#    PRIMARY KEY (id)
-#);
-
-
 INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('admin', 'admin', '7', '0', '0', '111111', '40');
+INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('asura', 'admin', '7', '0', '0', '111111', '40');

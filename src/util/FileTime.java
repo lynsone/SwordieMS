@@ -45,6 +45,24 @@ public class FileTime implements Serializable {
         }
     }
 
+    public enum FileTimeType {
+        DATE_19000101_444(-35635200, 21968699),
+        DATE_20790101_424(-1157267456, 35120710),
+        ;
+
+        private int low;
+        private int high;
+
+        FileTimeType(int low, int high) {
+            this.low = low;
+            this.high = high;
+        }
+
+        public FileTime getVal() {
+            return new FileTime(low, high);
+        }
+    }
+
     public FileTime(int lowDateTime, int highDateTime) {
         this.lowDateTime = lowDateTime;
         this.highDateTime = highDateTime;

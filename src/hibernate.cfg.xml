@@ -27,7 +27,10 @@
             true
         </property>
 
-        <!-- List of XML mapping files -->
+        <property name="hibernate.show_sql">
+            false
+        </property>
 
+        <!-- List of XML mapping files -->
     </session-factory>
 </hibernate-configuration>

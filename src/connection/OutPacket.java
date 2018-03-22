@@ -52,7 +52,7 @@ public class OutPacket extends Packet {
     public OutPacket(byte[] data) {
         super(data);
         baos = new ByteArrayOutputStream();
-        encodeArrByte(data);
+        encodeArr(data);
     }
 
     /**
@@ -90,9 +90,10 @@ public class OutPacket extends Packet {
 
     /**
      * Encodes a byte array to this OutPacket.
+     * Named like this to prevent autocompletion of "by" to "byteArray" or similar names.
      * @param bArr The byte array to encode.
      */
-    public void encodeArrByte(byte[] bArr) {
+    public void encodeArr(byte[] bArr) {
         for (byte b : bArr) {
             baos.write(b);
         }
@@ -209,7 +210,7 @@ public class OutPacket extends Packet {
     public void setData(byte[] nD) {
         super.setData(nD);
         baos.reset();
-        encodeArrByte(nD);
+        encodeArr(nD);
     }
 
     @Override
@@ -254,7 +255,11 @@ public class OutPacket extends Packet {
     }
 
     public void encodeFT(FileTime fileTime) {
-        fileTime.encode(this);
+        if(fileTime == null) {
+            encodeLong(0);
+        } else {
+            fileTime.encode(this);
+        }
     }
 
     public void encodePosition(Position position) {

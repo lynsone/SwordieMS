@@ -29,8 +29,8 @@ public class Login {
         oPacket.encodeShort((short) 15);
         oPacket.encodeShort(ServerConstants.VERSION);
         oPacket.encodeString(ServerConstants.MINOR_VERSION);
-        oPacket.encodeArrByte(siv);
-        oPacket.encodeArrByte(riv);
+        oPacket.encodeArr(siv);
+        oPacket.encodeArr(riv);
         oPacket.encodeByte(ServerConstants.LOCALE);
         oPacket.encodeByte(false);
         return oPacket;
@@ -257,7 +257,7 @@ public class Login {
 
         if(loginType == LoginType.SUCCESS) {
             byte[] server = new byte[]{8, 31, 99, ((byte) 141)};
-            outPacket.encodeArrByte(server);
+            outPacket.encodeArr(server);
             outPacket.encodeShort(port);
 
             // chat stuff

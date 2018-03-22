@@ -2,6 +2,7 @@ package server;
 
 import client.Account;
 import client.Client;
+import client.guild.Guild;
 import com.sun.media.jfxmedia.logging.Logger;
 import constants.ServerConfig;
 import constants.ServerConstants;
@@ -13,6 +14,7 @@ import net.netty.ChannelAcceptor;
 import net.netty.LoginAcceptor;
 import org.apache.log4j.LogManager;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import util.FileTime;
 import util.Loader;
 import loaders.DataClasses;
@@ -157,5 +159,13 @@ public class Server extends Properties {
             }
         }
         return null;
+    }
+
+    public void saveToDB(Object obj) {
+        Session session = getNewDatabaseSession();
+        Transaction t = session.beginTransaction();
+        session.saveOrUpdate(obj);
+        t.commit();
+        session.close();
     }
 }

@@ -2,7 +2,6 @@ package packet;
 
 import client.character.AvatarLook;
 import client.character.Char;
-import client.character.CharacterStat;
 import client.character.skills.AttackInfo;
 import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.MobAttackInfo;
@@ -160,7 +159,7 @@ public class UserRemote {
                 outPacket.encodePositionInt(ai.teleportPt);
             }
 //            if(ai.attackHeader == )
-            outPacket.encodeArrByte(new byte[50]);
+            outPacket.encodeArr(new byte[50]);
         }
 
         return outPacket;

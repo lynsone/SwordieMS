@@ -2417,7 +2417,7 @@ public class TemporaryStatManager {
             outPacket.encodeByte(getOption(Unk7000).xOption);
             outPacket.encodeByte(getOption(Unk7000).yOption);
         }
-        outPacket.encodeArrByte(new byte[200]);
+        outPacket.encodeArr(new byte[200]);
         getNewStats().clear();
     }
 

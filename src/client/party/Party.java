@@ -89,7 +89,7 @@ public class Party {
         }
         outPacket.encodeByte(isAppliable() && !isFull());
         outPacket.encodeString(getName());
-        outPacket.encodeArrByte(new byte[50]);
+        outPacket.encodeArr(new byte[50]);
     }
 
     public int getPartyLeaderID() {

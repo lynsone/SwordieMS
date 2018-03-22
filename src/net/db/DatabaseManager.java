@@ -1,7 +1,6 @@
 package net.db;
 
 import client.Account;
-import client.Test;
 import client.character.*;
 import client.character.items.Equip;
 import client.character.items.Inventory;
@@ -10,6 +9,10 @@ import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.character.quest.QuestProgressRequirement.*;
 import client.character.skills.Skill;
+import client.guild.Guild;
+import client.guild.GuildMember;
+import client.guild.GuildRequestor;
+import client.guild.GuildSkill;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -38,7 +41,6 @@ public class DatabaseManager {
                 Item.class,
                 Equip.class,
                 Inventory.class,
-                Test.class,
                 Skill.class,
                 FuncKeyMap.class,
                 Keymapping.class,
@@ -56,6 +58,10 @@ public class DatabaseManager {
                 QuestProgressItemRequirement.class,
                 QuestProgressMobRequirement.class,
                 QuestProgressMoneyRequirement.class,
+                Guild.class,
+                GuildMember.class,
+                GuildRequestor.class,
+                GuildSkill.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

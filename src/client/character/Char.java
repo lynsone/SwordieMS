@@ -95,6 +95,9 @@ public class Char {
     @JoinColumn(name = "charId")
     private List<Skill> skills;
 
+    @JoinColumn(name = "guild")
+    @OneToOne(cascade = CascadeType.ALL)
+    private Guild guild;
     @Transient
     private Ranking ranking;
     @Transient
@@ -147,8 +150,6 @@ public class Char {
     private boolean partyInvitable;
     @Transient
     private ScriptManager scriptManager = new ScriptManager(this);
-    @Transient
-    private Guild guild;
     @Transient
     private int driverID;
     @Transient
@@ -845,10 +846,10 @@ public class Char {
                 outPacket.encodeShort(0); // card list size
                 short encSize = 0;
                 outPacket.encodeShort(encSize);
-                outPacket.encodeArrByte(new byte[encSize]);
+                outPacket.encodeArr(new byte[encSize]);
                 encSize = 0;
                 outPacket.encodeShort(encSize);
-                outPacket.encodeArrByte(new byte[encSize]);
+                outPacket.encodeArr(new byte[encSize]);
             }
             outPacket.encodeInt(-1); // monsterbook set
         }
@@ -999,7 +1000,7 @@ public class Char {
 //        for(int i = 0; i < sizeInt; i++) {
 //            getMonsterLifeInviteInfo().encode(outPacket);
 //        }
-//        outPacket.encodeArrByte(Util.getByteArrayByString("01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
+//        outPacket.encodeArr(Util.getByteArrayByString("01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
         if (mask.isInMask(DBChar.Character)) {
             outPacket.encodeInt(0); // honor level
             outPacket.encodeInt(0); // honor exp
@@ -1167,7 +1168,7 @@ public class Char {
             outPacket.encodeInt(0);
             outPacket.encodeInt(0);
         }
-        outPacket.encodeArrByte(new byte[32]); // real
+        outPacket.encodeArr(new byte[32]); // real
 
     }
 
@@ -1357,9 +1358,7 @@ public class Char {
         List<Skill> skills = SkillData.getSkillsByJob((short) id);
         skills.forEach(this::addSkill);
         getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
-        if(getParty() != null) {
-            getParty().updateFull();
-        }
+        notifyChanges();
     }
 
     public short getJob() {
@@ -1484,10 +1483,17 @@ public class Char {
                 break;
             case level:
                 getAvatarData().getCharacterStat().setLevel(amount);
-                if(getParty() != null) {
-                    getParty().updateFull();
-                }
+                notifyChanges();
                 break;
+        }
+    }
+
+    private void notifyChanges() {
+        if(getParty() != null) {
+            getParty().updateFull();
+        }
+        if(getGuild() != null) {
+            // TODO
         }
     }
 
@@ -1728,9 +1734,7 @@ public class Char {
                 write(UserPool.userEnterField(c));
             }
         }
-        if(getParty() != null) {
-            getParty().updateFull();
-        }
+        notifyChanges();
         for(Char charr : getField().getChars()) {
             if(!charr.equals(this)) {
                 write(UserPool.userEnterField(charr));
@@ -2374,5 +2378,9 @@ public class Char {
         getField().removeChar(this);
         updateDB();
         getClient().getChannelInstance().removeChar(this);
+    }
+
+    public int getSubJob() {
+        return getAvatarData().getCharacterStat().getSubJob();
     }
 }

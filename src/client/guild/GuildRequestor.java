@@ -6,39 +6,27 @@ import util.FileTime;
 
 import javax.persistence.*;
 
+/**
+ * Created on 3/21/2018.
+ */
 @Entity
-@Table(name = "guildmembers")
-public class GuildMember {
+public class GuildRequestor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "charID")
     private int charID;
     @Transient
     private Char chr;
-    @Column(name = "grade")
-    private int grade;
-    @Column(name = "allianceGrade")
-    private int allianceGrade;
-    @Column(name = "commitment")
-    private int commitment;
-    @Column(name = "dayCommitment")
-    private int dayCommitment;
-    @Column(name = "igp")
-    private int igp;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "commitmentIncTime")
-    private FileTime commitmentIncTime;
     private String name;
     private int job;
     private int level;
     @Column(name = "loggedIn")
     private boolean online;
 
-    public GuildMember() {
+    public GuildRequestor() {
     }
 
-    public GuildMember(Char chr) {
+    public GuildRequestor(Char chr) {
         this.chr = chr;
         updateInfoFromChar(chr);
     }
@@ -59,65 +47,18 @@ public class GuildMember {
         this.chr = chr;
     }
 
-    public int getGrade() {
-        return grade;
-    }
-
-    public void setGrade(int grade) {
-        this.grade = grade;
-    }
-
-    public int getAllianceGrade() {
-        return allianceGrade;
-    }
-
-    public void setAllianceGrade(int allianceGrade) {
-        this.allianceGrade = allianceGrade;
-    }
-
-    public int getCommitment() {
-        return commitment;
-    }
-
-    public void setCommitment(int commitment) {
-        this.commitment = commitment;
-    }
-
-    public int getDayCommitment() {
-        return dayCommitment;
-    }
-
-    public void setDayCommitment(int dayCommitment) {
-        this.dayCommitment = dayCommitment;
-    }
-
-    public int getIgp() {
-        return igp;
-    }
-
-    public void setIgp(int igp) {
-        this.igp = igp;
-    }
-
-    public FileTime getCommitmentIncTime() {
-        return commitmentIncTime;
-    }
-
-    public void setCommitmentIncTime(FileTime commitmentIncTime) {
-        this.commitmentIncTime = commitmentIncTime;
-    }
-
     public void encode(OutPacket outPacket) {
         outPacket.encodeString(getName(), 13);
         outPacket.encodeInt(getJob());
         outPacket.encodeInt(getLevel());
-        outPacket.encodeInt(getGrade());
+        outPacket.encodeInt(0);
         outPacket.encodeInt(isOnline() ? 1 : 0);
-        outPacket.encodeInt(getAllianceGrade());
-        outPacket.encodeInt(getCommitment());
-        outPacket.encodeInt(getDayCommitment());
-        outPacket.encodeInt(getIgp());
-        outPacket.encodeFT(getCommitmentIncTime());
+        // Following is guild specific info, requestors don't have these
+        outPacket.encodeInt(0);
+        outPacket.encodeInt(0);
+        outPacket.encodeInt(0);
+        outPacket.encodeInt(0);
+        outPacket.encodeLong(0);
     }
 
     @Override
@@ -165,11 +106,11 @@ public class GuildMember {
         this.level = level;
     }
 
-    public boolean isOnline() {
-        return online;
-    }
-
     public void setOnline(boolean online) {
         this.online = online;
+    }
+
+    public boolean isOnline() {
+        return online;
     }
 }

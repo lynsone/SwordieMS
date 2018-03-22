@@ -57,16 +57,6 @@ public class Account {
     @Column(name = "creationDate")
     private long creationDate;
 
-//    @ElementCollection
-//    @CollectionTable(name = "test", joinColumns = @JoinColumn(name = "userId"))
-//    @Column(name = "val")
-//    private List<Integer> test = new ArrayList<>();
-
-//    @OneToOne
-//    @JoinColumn(name = "test_id")
-//    private Test test;
-
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accId")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)

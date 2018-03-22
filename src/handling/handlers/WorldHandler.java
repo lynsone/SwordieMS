@@ -15,6 +15,8 @@ import client.character.quest.QuestManager;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
+import client.guild.Guild;
+import client.guild.GuildCreate;
 import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
@@ -1302,7 +1304,6 @@ public class WorldHandler {
             chr.setStat(Stat.mp, newMP);
             newStats.put(Stat.mp, newMP);
         }
-
         c.write(WvsContext.statChanged(newStats));
     }
 
@@ -2506,5 +2507,28 @@ public class WorldHandler {
             }
         }
         chr.write(WvsContext.partyCandidateResult(parties));
+    }
+
+    public static void handleGuildRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        byte type = inPacket.decodeByte();
+        GuildRequestType grt = GuildRequestType.getTypeByVal(type);
+        if(grt == null) {
+            log.error(String.format("Unkown guild request %d", type));
+            return;
+        }
+        switch(grt) {
+            case Create:
+                String name = inPacket.decodeString();
+                Guild guild = new Guild();
+                guild.setName(name);
+                guild.addMember(chr);
+                Server.getInstance().saveToDB(guild);
+                chr.write(WvsContext.guildResult(new GuildCreate(guild)));
+                break;
+            default:
+                log.error(String.format("Unkown guild request %s", grt.toString()));
+                break;
+        }
     }
 }
