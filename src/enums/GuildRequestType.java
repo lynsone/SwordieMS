@@ -7,6 +7,10 @@ import java.util.Arrays;
  */
 public enum GuildRequestType {
     Create(4),
+    SetGuildRankTitles(18),
+    SetEmblem(20),
+    NoblesseSkillButton(44),
+    GuildSearch(45),
     ;
 
     private byte val;
