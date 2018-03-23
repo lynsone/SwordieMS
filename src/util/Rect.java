@@ -89,6 +89,26 @@ public class Rect {
         this.bottom = bottom;
     }
 
+    /**
+     * Returns the width of this Rect.
+     * @return the width of this Rect.
+     */
+    public int getWidth() {
+        return Math.abs(getLeft() - getRight());
+    }
+
+    /**
+     * Returns the height of this Rect.
+     * @return The height of this Rect.
+     */
+    public int getHeight() {
+        return Math.abs(getTop() - getBottom());
+    }
+
+    /**
+     * Encodes this Rect to a given {@link OutPacket}.
+     * @param outPacket The OutPacket this Rect should be encoded to.
+     */
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getLeft());
         outPacket.encodeInt(getTop());
@@ -96,9 +116,34 @@ public class Rect {
         outPacket.encodeInt(getBottom());
     }
 
+    /**
+     * Returns whether or not a {@link Position} is inside this Rect.
+     * @param position The Position to check.
+     * @return if the position is not null and inside this Rect (rect.left < pos.x < rect.right &&
+     * rect.top < pos.y < rect.bottom.
+     */
     public boolean hasPositionInside(Position position) {
+        if(position == null) {
+            return false;
+        }
         int x = position.getX();
         int y = position.getY();
         return x >= left && y >= top && x <= right && y <= bottom;
+    }
+
+    /**
+     * Move this Rect left by the width, effectively flipping around the left edge.
+     * @return The resulting Rect from the move.
+     */
+    public Rect moveLeft() {
+        return new Rect(getLeft() - getWidth(), getTop(), getLeft(), getBottom());
+    }
+
+    /**
+     * Move this Rect right by the width, effectively flipping around the right edge.
+     * @return The resulting Rect from the move.
+     */
+    public Rect moveRight() {
+        return new Rect(getRight(), getTop(), getRight() + getWidth(), getBottom());
     }
 }
