@@ -29,7 +29,14 @@ public enum ChatMsgColour {
     SWEDEN(22),
     DARK_RED(30),
     GACHA_REWARD(31),
-    // There's more, but meh
+    GACHA_RED(32),
+    GACHA_RED_2(33), // same as GACHA_RED(32)
+    DARK_BLUE_2(34), // same as DARK_BLUE(16)
+    ITEM_NO_ITEM_SMEGA_DARK_TEXT(35),
+    WHITE_ON_GREEN(36),
+    CAKE_MEGAPHONE(37),
+    PIE_MEGAPHONE(38),
+    BLACK_ON_WHITE(39),
     ;
     private short val;
 

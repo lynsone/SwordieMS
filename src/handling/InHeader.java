@@ -35,6 +35,7 @@ public enum InHeader {
     CREATE_CHAR(125),
     DELETE_CHAR(128),
     HEARTBEAT_REQUEST(134),
+    UPDATE_CHARACTER_CARD_REQUEST(143),
     CLIENT_ERROR(149),
     CLIENT_START(152),
     SERVERSTATUS_REQUEST(-1), // disconnects upon sending message (no error given)

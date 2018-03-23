@@ -2193,6 +2193,36 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(EyeForEye).rOption);
             outPacket.encodeInt(getOption(EyeForEye).tOption);
         }
+        if (hasNewStat(WillowDodge)) {
+            outPacket.encodeShort(getOption(WillowDodge).nOption);
+            outPacket.encodeInt(getOption(WillowDodge).rOption);
+            outPacket.encodeInt(getOption(WillowDodge).tOption);
+        }
+        if (hasNewStat(Jinsoku)) {
+            outPacket.encodeShort(getOption(Jinsoku).nOption);
+            outPacket.encodeInt(getOption(Jinsoku).rOption);
+            outPacket.encodeInt(getOption(Jinsoku).tOption);
+        }
+        if (hasNewStat(HayatoPAD)) {
+            outPacket.encodeShort(getOption(HayatoPAD).nOption);
+            outPacket.encodeInt(getOption(HayatoPAD).rOption);
+            outPacket.encodeInt(getOption(HayatoPAD).tOption);
+        }
+        if (hasNewStat(HayatoCr)) {
+            outPacket.encodeShort(getOption(HayatoCr).nOption);
+            outPacket.encodeInt(getOption(HayatoCr).rOption);
+            outPacket.encodeInt(getOption(HayatoCr).tOption);
+        }
+        if (hasNewStat(HayatoMPR)) {
+            outPacket.encodeShort(getOption(HayatoMPR).nOption);
+            outPacket.encodeInt(getOption(HayatoMPR).rOption);
+            outPacket.encodeInt(getOption(HayatoMPR).tOption);
+        }
+        if (hasNewStat(HayatoHPR)) {
+            outPacket.encodeShort(getOption(HayatoHPR).nOption);
+            outPacket.encodeInt(getOption(HayatoHPR).rOption);
+            outPacket.encodeInt(getOption(HayatoHPR).tOption);
+        }
 
         if (hasNewStat(SoulMP)) {
             outPacket.encodeInt(getOption(SoulMP).xOption);
