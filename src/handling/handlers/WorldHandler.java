@@ -50,15 +50,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static client.character.skills.CharacterTemporaryStat.*;
-import static enums.ChatMsgColour.GAME_MESSAGE;
-import static enums.ChatMsgColour.WHISPER_GREEN;
-import static enums.ChatMsgColour.YELLOW;
+import static enums.ChatMsgColour.*;
 import static enums.EquipBaseStat.cuc;
 import static enums.EquipBaseStat.ruc;
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
 import static enums.InventoryOperation.*;
-import static enums.Stat.exp;
 import static enums.Stat.sp;
 
 /**
@@ -2602,5 +2599,25 @@ public class WorldHandler {
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
         }
+    }
+
+    public static void handleUserCreateAuraByGrenade(Client c, InPacket inPacket) {
+        int objID = inPacket.decodeInt();
+        int skillID = inPacket.decodeInt();
+        Position position = inPacket.decodePosition();
+        byte isLeft = inPacket.decodeByte();
+
+        Char chr = c.getChr();
+        SkillInfo fci = SkillData.getSkillInfoById(skillID);
+        byte slv = (byte) chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID)).getCurrentLevel();
+        AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+        aa.setObjectId(objID);
+        aa.setMobOrigin((byte) 0);
+        aa.setCharID(chr.getId());
+        aa.setPosition(position);
+        aa.setSkillID(skillID);
+        aa.setSlv(slv);
+        aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
+        c.write(CField.affectedAreaCreated(aa));
     }
 }

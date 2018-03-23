@@ -530,18 +530,18 @@ public enum CharacterTemporaryStat {
 
     WillowDodge(0x8000, 14),
     Unk20(0x4000, 14),
-    Unk30(0x2000, 14),
-    Unk40(0x1000, 14),
-    Unk50(0x800, 14),
+    HayatoPAD(0x2000, 14),
+    HayatoHPR(0x1000, 14),
+    HayatoMPR(0x800, 14),
     Unk60(0x400, 14),
     Unk70(0x200, 14), // Not a temp stat? Doesn't give buff
     Unk80(0x100, 14), // No buff
     
-    Unk100(0x80, 14),
-    Unk200(0x40, 14),
-    Unk300(0x20, 14), // Adds range
-    BellFlowerBarrierBossDmg(0x10, 14), // n% boss att
-    Battoujutsu(0x8, 14),
+    Jinsoku(0x80, 14),
+    HayatoCr(0x40, 14),
+    HakuBlessing(0x20, 14), // Adds range
+    HayatoBoss(0x10, 14), // n% boss att
+    BattoujutsuAdvance(0x8, 14),
     Unk600(0x4, 14),
     Unk700(0x2, 14),
     BlackHeartedCurse(0x1, 14), // Kanna Hyper Shield

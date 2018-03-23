@@ -551,4 +551,13 @@ public class SkillConstants {
                 return false;
         }
     }
+
+    public static int getActualSkillIDfromSkillID(int skillID) {
+        switch (skillID) {
+            case 101120206: //Zero - Severe Storm Break (Tile)
+                return 101120204; //Zero - Adv Storm Break
+            default:
+                return skillID;
+        }
+    }
 }

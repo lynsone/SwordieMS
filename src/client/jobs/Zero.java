@@ -11,12 +11,12 @@ import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
-import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.MoveAbility;
 import enums.Stat;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
 import util.Util;
 
@@ -64,6 +64,7 @@ public class Zero extends Job {
     public static final int DIVINE_LEER = 101120207;
     public static final int CRITICAL_BIND = 101120110;
     public static final int IMMUNE_BARRIER = 101120109;
+    public static final int ARMOR_SPLIT = 101110103;
 
     private int[] addedSkills = new int[] {
             DUAL_COMBAT,
@@ -85,60 +86,6 @@ public class Zero extends Job {
     };
 
     private int doubleTimePrevSkill = 0;
-
-    private final int[] getBetaSkill = new int[] {
-            101001100, //Rising Slash
-            101000100, //Air Raid
-            101000101, //Air Riot
-            101000102, //Air Riot
-
-            101101100, //Flash Cut
-            101100100, //Throwing Weapon
-            101100101, //Adv. Throwing Weapon
-
-            101111100, //Spin Driver
-            101110101, //Wheel Wind
-            101110102, //Adv Wheel Wind
-            101110104, //Adv Blade Tempest
-
-            101121100, //Giga Crash
-            101120100, //Falling Star
-            101120101, //Falling Star
-            101120102, //Earth Break
-            101120103, //Groundbreaker
-            101120104, //Adv Earth Break
-            101120105, //Mega Groundbreaker (Tile)
-
-    };
-
-    private final int[] getAlphaSkill = new int[] {
-            101001200, //Moon Strike
-            101000200, //Piercing Thrust
-            101000201, //Shadow Strike
-            101000202, //Shadow Strike
-
-            101101200, //Flash Assault
-            101100200, //Spin Cutter
-            101100201, //Adv Spin Cutter
-            101100202, //Adv Blade Ring
-
-            101110200, //Grand Rolling Cross
-            101110201, //Grand Rolling Cross
-            101111200, //Rolling Cross
-            101110202, //Rolling Assault
-            101110203, //Advanced Rolling Assault
-            101110204, //Advanced Rolling Assault
-
-            101120200, //Wind Cutter
-            101120201, //Wind Striker
-            101120202, //Storm Break
-            101120203, //Storm Break
-            101120204, //Advanced Storm Break
-            101120205, //Severe Storm Break
-            101120206, //Severe Storm Break
-            101121101, //Hurricane Wind
-            101121200, //Wind Cutter
-    };
 
     public static int getAlphaOrBetaSkill(int skillID) {
         switch(skillID) {
@@ -373,6 +320,7 @@ public class Zero extends Job {
             }
 
             handleCriticalBind(attackInfo, skillID);
+            handleArmorSplit(attackInfo, skillID);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -389,7 +337,18 @@ public class Zero extends Job {
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
+                //break;
+            case ADV_EARTH_BREAK_SHOCK_INIT:
+                SkillInfo fci = SkillData.getSkillInfoById(ADV_EARTH_BREAK);
+                AffectedArea aa = AffectedArea.getPassiveAA(ADV_EARTH_BREAK, slv);
+                aa.setMobOrigin((byte) 0);
+                aa.setCharID(chr.getId());
+                aa.setPosition(chr.getPosition());
+                aa.setSkillID(ADV_EARTH_BREAK);
+                aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
+                c.write(CField.affectedAreaCreated(aa));
                 break;
+
         }
     }
 
@@ -430,16 +389,6 @@ public class Zero extends Job {
                     aa.setDelay((short) 5);
                     chr.getField().spawnAffectedArea(aa);
                     break;
-                case ADV_EARTH_BREAK_SHOCK_INIT:
-                    SkillInfo rft = SkillData.getSkillInfoById(ADV_EARTH_BREAK_SHOCKWAVE);
-                    AffectedArea aa2 = AffectedArea.getPassiveAA(ADV_EARTH_BREAK_SHOCKWAVE, slv);
-                    aa2.setMobOrigin((byte) 0);
-                    aa2.setCharID(chr.getId());
-                    aa2.setPosition(chr.getPosition());
-                    aa2.setRect(aa2.getPosition().getRectAround(rft.getRects().get(0)));
-                    aa2.setSlv((byte)30);
-                    chr.getField().spawnAffectedArea(aa2);
-                    break;
             }
         }
     }
@@ -466,6 +415,7 @@ public class Zero extends Job {
             int newDamage = hitInfo.HPDamage - maxSoakDamage < 0 ? 0 : hitInfo.HPDamage - maxSoakDamage;
             o.nOption = maxSoakDamage - (hitInfo.HPDamage - newDamage); // update soak value
             hitInfo.HPDamage = newDamage;
+            o.tOption = si.getValue(time, slv); //added duration
             tsm.putCharacterStatValue(ImmuneBarrier, o);
             tsm.sendSetStatPacket();
         }
@@ -485,7 +435,7 @@ public class Zero extends Job {
         return chr.getZeroInfo().isZeroBetaState();
     }
 
-    private void handleDivineLeer(AttackInfo ai, int skillID) {     //TODO  Arrays.asList  doesn't function correctly
+    private void handleDivineLeer(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(DIVINE_LEER);
         if (skill == null) {
             return;
@@ -500,7 +450,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleCriticalBind(AttackInfo ai, int skillID) {   //TODO  Arrays.asList  doesn't function correctly
+    private void handleCriticalBind(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(CRITICAL_BIND);
         if (skill == null) {
             return;
@@ -515,13 +465,41 @@ public class Zero extends Job {
                 Option o1 = new Option();
                 o.nOption = 1;
                 o.rOption = CRITICAL_BIND;
-                o.tOption = si.getValue(time, slv);
+                o.tOption = 4;//    si.getValue(time, slv);
                 mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
                 mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
                 o1.nOption = si.getValue(SkillStat.x, slv);
                 o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
+                o1.tOption = 4;//   si.getValue(time, slv);
                 mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+            }
+        }
+    }
+
+    private void handleArmorSplit(AttackInfo ai, int skillID) {
+        Skill skill = chr.getSkill(ARMOR_SPLIT);
+        if (skill == null) {
+            return;
+        }
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(ARMOR_SPLIT);
+        int amount = 1;
+        for (MobAttackInfo mai : ai.mobAttackInfo) {
+            if (Util.succeedProp(si.getValue(prop, slv))) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                Option o = new Option();
+                if (mts.hasCurrentMobStat(MobStat.MultiPMDR)) {
+                    amount = mts.getCurrentOptionsByMobStat(MobStat.MultiPMDR).cOption;
+                    if (amount < si.getValue(x, slv)) {
+                        amount++;
+                    }
+                }
+                o.nOption = si.getValue(y, slv) * amount;
+                o.rOption = ARMOR_SPLIT;
+                o.tOption = si.getValue(time, slv);
+                o.cOption = amount;
+                mts.addStatOptionsAndBroadcast(MobStat.MultiPMDR, o);
             }
         }
     }

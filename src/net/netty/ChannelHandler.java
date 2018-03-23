@@ -1,7 +1,6 @@
 package net.netty;
 
 import client.Client;
-import client.field.Field;
 import connection.InPacket;
 import enums.ChatMsgColour;
 import handling.InHeader;
@@ -348,6 +347,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case FOX_MAN_ACTION_SET_USE_REQUEST:
                     WorldHandler.handleFoxManActionSetUseRequest(c, inPacket);
+                    break;
+                case USER_CREATE_AURA_BY_GRENADE:
+                    WorldHandler.handleUserCreateAuraByGrenade(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);
