@@ -168,4 +168,8 @@ public class Server extends Properties {
         t.commit();
         session.close();
     }
+
+    public void cleanSessions() {
+        DatabaseManager.cleanUpSessions();
+    }
 }

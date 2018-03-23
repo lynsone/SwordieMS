@@ -33,11 +33,11 @@ public class Guild {
     @JoinColumn(name = "guildID")
     private List<GuildMember> members = new ArrayList<>();
     @Column(name = "markBg")
-    private short markBg;
+    private int markBg;
     @Column(name = "markBgColor")
     private int markBgColor;
     @Column(name = "mark")
-    private short mark;
+    private int mark;
     @Column(name = "markColor")
     private int markColor;
     @Column(name = "maxMembers")
@@ -158,6 +158,9 @@ public class Guild {
     }
 
     public void removeMember(GuildMember guildMember) {
+        if(guildMember.getChr() != null) {
+            guildMember.getChr().setGuild(null);
+        }
         getMembers().remove(guildMember);
     }
 
@@ -194,11 +197,11 @@ public class Guild {
         return getMembers().stream().filter(gm -> gm.getCharID() == id).findAny().orElse(null);
     }
 
-    public short getMarkBg() {
+    public int getMarkBg() {
         return markBg;
     }
 
-    public void setMarkBg(short markBg) {
+    public void setMarkBg(int markBg) {
         this.markBg = markBg;
     }
 
@@ -210,11 +213,11 @@ public class Guild {
         this.markBgColor = markBgColor;
     }
 
-    public short getMark() {
+    public int getMark() {
         return mark;
     }
 
-    public void setMark(short mark) {
+    public void setMark(int mark) {
         this.mark = mark;
     }
 
@@ -239,7 +242,10 @@ public class Guild {
     }
 
     public void broadcast(OutPacket outPacket) {
-        getOnlineMembers().forEach(gm -> gm.getChr().write(outPacket));
+        getOnlineMembers().forEach(gm -> {
+            System.out.println(gm.getChr() == null ? "Null!" : gm.getChr().getName() + ", " + gm.isOnline() + ", " + gm.getChr());
+        });
+        getOnlineMembers().stream().filter(gm -> gm.getChr() != null).forEach(gm -> gm.getChr().write(outPacket));
     }
 
     public void broadcast(OutPacket outPacket, Char exceptChr) {
@@ -378,5 +384,13 @@ public class Guild {
 
     public void setWorldID(int worldID) {
         this.worldID = worldID;
+    }
+
+    public static void defaultEncodeForRemote(OutPacket outPacket) {
+        outPacket.encodeString("");
+        outPacket.encodeShort(0);
+        outPacket.encodeByte(0);
+        outPacket.encodeShort(0);
+        outPacket.encodeByte(0);
     }
 }

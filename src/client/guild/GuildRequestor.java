@@ -2,7 +2,6 @@ package client.guild;
 
 import client.character.Char;
 import connection.OutPacket;
-import util.FileTime;
 
 import javax.persistence.*;
 
@@ -10,6 +9,7 @@ import javax.persistence.*;
  * Created on 3/21/2018.
  */
 @Entity
+@Table(name = "guildrequestors")
 public class GuildRequestor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

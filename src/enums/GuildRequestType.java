@@ -6,11 +6,15 @@ import java.util.Arrays;
  * Created on 3/21/2018.
  */
 public enum GuildRequestType {
+    AcceptJoinRequest(1),
     Create(4),
-    SetGuildRankTitles(18),
-    SetEmblem(20),
+    JoinRequest(7),
+    Expel(12),
+    SetGuildGrades(18),
+    SetMemberGrade(19),
+    SetMark(20),
     NoblesseSkillButton(44),
-    GuildSearch(45),
+    GuildFind(45),
     ;
 
     private byte val;

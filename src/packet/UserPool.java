@@ -6,6 +6,7 @@ import client.character.CharacterStat;
 import client.character.Pet;
 import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.TemporaryStatManager;
+import client.guild.Guild;
 import connection.OutPacket;
 import constants.JobConstants;
 import enums.TSIndex;
@@ -25,7 +26,11 @@ public class UserPool {
         outPacket.encodeByte(chr.getLevel());
         outPacket.encodeString(chr.getName());
         outPacket.encodeString(""); // parent name, deprecated
-        chr.getGuild().encodeForRemote(outPacket);
+        if(chr.getGuild() != null) {
+            chr.getGuild().encodeForRemote(outPacket);
+        } else {
+            Guild.defaultEncodeForRemote(outPacket);
+        }
         outPacket.encodeByte(cs.getGender());
         outPacket.encodeInt(cs.getPop());
         outPacket.encodeInt(10); // nFarmLevel

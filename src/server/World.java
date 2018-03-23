@@ -1,8 +1,11 @@
 package server;
 
 import client.character.Char;
+import client.guild.Guild;
 import client.party.Party;
 import enums.ServerStatus;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +23,7 @@ public class World {
     private String name, worldEventDescription;
     private List<Channel> channels;
     private Map<Integer, Party> parties = new HashMap<>();
+    private Map<Integer, Guild> guilds = new HashMap<>();
 
     public World(int worldId, String name, int worldState, String worldEventDescription, int worldEventEXP_WSE,
                  int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet) {
@@ -116,5 +120,27 @@ public class World {
 
     public Party getPartybyId(int partyID) {
         return getParties().get(partyID);
+    }
+
+    public Map<Integer, Guild> getGuilds() {
+        return guilds;
+    }
+
+    public Guild getGuildByID(int id) {
+        Guild g = getGuilds().get(id);
+        return g == null ? loadGuildFromDB(id) : g;
+    }
+
+    public Guild loadGuildFromDB(int id) {
+        Guild res;
+        Session s = Server.getInstance().getNewDatabaseSession();
+        Transaction t = s.beginTransaction();
+        res = s.get(Guild.class, id);
+        t.commit();
+        s.close();
+        if(res != null) {
+            getGuilds().put(id, res);
+        }
+        return res;
     }
 }

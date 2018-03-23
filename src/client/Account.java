@@ -303,6 +303,7 @@ public class Account {
     }
 
     public void updateDB() {
+        Server.getInstance().cleanSessions();
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
         for(Char c : getCharacters()) {

@@ -7,9 +7,13 @@ import enums.GuildResultType;
 /**
  * Created on 3/21/2018.
  */
-public class JoinRequest implements GuildResultInfo {
+public class GuildJoinRequest implements GuildResultInfo {
 
     public Char chr;
+
+    public GuildJoinRequest(Char chr) {
+        this.chr = chr;
+    }
 
     @Override
     public GuildResultType getType() {

@@ -15,8 +15,7 @@ import client.character.quest.QuestManager;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
-import client.guild.Guild;
-import client.guild.GuildCreate;
+import client.guild.*;
 import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
@@ -36,6 +35,9 @@ import loaders.QuestData;
 import loaders.QuestInfo;
 import loaders.SkillData;
 import org.apache.log4j.LogManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import packet.*;
 import server.Channel;
 import server.Server;
@@ -56,7 +58,7 @@ import static enums.EquipBaseStat.ruc;
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
 import static enums.InventoryOperation.*;
-import static enums.Stat.ap;
+import static enums.Stat.exp;
 import static enums.Stat.sp;
 
 /**
@@ -87,22 +89,15 @@ public class WorldHandler {
         Field field = c.getChannelInstance().getField(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
         field.addChar(chr);
         chr.setField(field);
+        chr.warp(field, true);
         c.write(WvsContext.updateEventNameTag(new int[]{}));
-        c.write(Stage.setField(chr, field, c.getChannel(), false, 0, true, false,
-                (byte) 0, false, 100, null, true, -1));
+        if(chr.getGuild() != null) {
+            chr.setGuild(chr.getClient().getWorld().getGuildByID(chr.getGuild().getId()));
+        }
         if (JobConstants.isBeastTamer(chr.getJob())) {
             c.write(CField.beastTamerFuncKeyMappedManInit());
         } else {
             c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
-        }
-        field.spawnLifesForChar(chr);
-        for(Char charr : field.getChars()) {
-            if(!charr.equals(chr)) {
-                chr.write(UserPool.userEnterField(charr));
-            }
-        }
-        if(chr.getParty() != null) {
-            chr.getParty().updateFull();
         }
     }
 
@@ -561,7 +556,8 @@ public class WorldHandler {
             chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
         } else {
             Field toField = c.getChannelInstance().getField(portal.getTargetMapId());
-            chr.warp(toField, portal);
+            Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
+            chr.warp(toField, toPortal);
         }
     }
 
@@ -1265,7 +1261,6 @@ public class WorldHandler {
             c.getAccount().updateDB();
         }
         chr.updateDB();
-        c.getChr().setOnline(false);
         int worldID = chr.getClient().getChannelInstance().getWorldId();
         World world = Server.getInstance().getWorldById(worldID);
         Field field = chr.getField();
@@ -2514,20 +2509,97 @@ public class WorldHandler {
         byte type = inPacket.decodeByte();
         GuildRequestType grt = GuildRequestType.getTypeByVal(type);
         if(grt == null) {
-            log.error(String.format("Unkown guild request %d", type));
+            log.error(String.format("Unknown guild request %d", type));
             return;
         }
+        Guild guild = chr.getGuild();
         switch(grt) {
+            case AcceptJoinRequest:
+                int guildID = inPacket.decodeInt();
+                Session s = Server.getInstance().getNewDatabaseSession();
+                Transaction t = s.beginTransaction();
+                guild = s.get(Guild.class, guildID);
+                t.commit();
+                s.close();
+                if(guild != null && chr.getGuild() == null) {
+                    guild.addMember(chr);
+                    guild.broadcast(WvsContext.guildResult(
+                            new GuildJoinMsg(guild.getId(), guild.getMemberByID(chr.getId()))));
+                } else {
+                    chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.AlreadyJoinedGuildMsg)));
+                }
+                break;
             case Create:
                 String name = inPacket.decodeString();
-                Guild guild = new Guild();
-                guild.setName(name);
-                guild.addMember(chr);
-                Server.getInstance().saveToDB(guild);
-                chr.write(WvsContext.guildResult(new GuildCreate(guild)));
+                s = Server.getInstance().getNewDatabaseSession();
+                t = s.beginTransaction();
+                Query q = s.createQuery("FROM Guild WHERE name = ?");
+                q.setParameter(0, name);
+                List<Guild> guilds = q.list();
+                t.commit();
+                s.close();
+                if(guilds == null || guilds.size() == 0) {
+                    guild = new Guild();
+                    guild.setLevel(1);
+                    guild.setName(name);
+                    guild.addMember(chr);
+                    guild.setWorldID(chr.getClient().getWorldId());
+                    Server.getInstance().saveToDB(guild);
+                    chr.write(WvsContext.guildResult(new GuildCreate(guild)));
+                } else {
+                    chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.GuildNameInUseMsg)));
+                }
+                break;
+            case JoinRequest:
+                Char invited = chr.getClient().getChannelInstance().getCharByName(inPacket.decodeString());
+                if(invited == null) {
+                    chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.CharacterCannotBeFoundInChannelMsg)));
+                } else {
+                    invited.write(WvsContext.guildResult(new GuildJoinRequest(chr)));
+                }
+                break;
+            case Expel:
+                int expelledID = inPacket.decodeInt();
+                String expelledName = inPacket.decodeString();
+                GuildMember gm = guild.getMemberByID(expelledID);
+                Char expelled = gm.getChr();
+                guild.broadcast(WvsContext.guildResult(new GuildLeaveResult(guild.getId(), expelledID, expelledName, true)));
+                if(expelled == null) {
+                    expelled = Char.getFromDBById(expelledID);
+                    guild.removeMember(gm);
+                    Server.getInstance().saveToDB(expelled);
+                } else {
+                    guild.removeMember(gm);
+
+                }
+                break;
+            case SetMark:
+                guild.setMarkBg(inPacket.decodeShort());
+                guild.setMarkBgColor(inPacket.decodeByte());
+                guild.setMark(inPacket.decodeShort());
+                guild.setMarkColor(inPacket.decodeByte());
+                guild.broadcast(WvsContext.guildResult(new GuildUpdateMark(guild)));
+                break;
+            case SetGuildGrades:
+                String[] newNames = new String[guild.getGradeNames().size()];
+                for (int i = 0; i < newNames.length; i++) {
+                    newNames[i] = inPacket.decodeString();
+                }
+                guild.setGradeNames(newNames);
+                guild.broadcast(WvsContext.guildResult(new GuildUpdateGradeNames(guild.getId(), newNames)));
+                break;
+            case SetMemberGrade:
+                int id = inPacket.decodeInt();
+                byte grade = inPacket.decodeByte();
+                gm = guild.getMemberByID(id);
+                gm.setGrade(grade);
+                GuildUpdateMemberGrade gumg = new GuildUpdateMemberGrade();
+                gumg.gm = gm;
+                gumg.guildID = guild.getId();
+                guild.broadcast(WvsContext.guildResult(gumg));
                 break;
             default:
-                log.error(String.format("Unkown guild request %s", grt.toString()));
+                log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
         }
     }

@@ -383,8 +383,8 @@ CREATE TABLE guilds (
     leaderID int,
     worldID int,
     markBg int,
-    markBgColor tinyint,
-    mark tinyint,
+    markBgColor int,
+    mark int,
     markColor int,
     maxMembers int,
     notice varchar(255),
@@ -440,6 +440,7 @@ CREATE TABLE GuildSkill (
 
 CREATE TABLE guildskills (
 	guildSkill_id int not null auto_increment,
+    skills_id int,
     Guild_id int,
     skillID int,
     fk_GuildSkillID int,
@@ -469,6 +470,7 @@ CREATE TABLE guildmembers (
 
 CREATE TABLE guildrequestors (
 	id int NOT NULL AUTO_INCREMENT,
+    requestors_id int,
     charID int,
     guildID int,
     name varchar(255),

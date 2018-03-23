@@ -7,6 +7,9 @@ import client.character.skills.TemporaryStatManager;
 import client.field.Field;
 import client.field.Portal;
 import client.guild.Guild;
+import client.guild.GuildMember;
+import client.guild.GuildUpdate;
+import client.guild.GuildUpdateMemberLogin;
 import client.jobs.Job;
 import client.jobs.JobManager;
 import client.jobs.resistance.WildHunterInfo;
@@ -1489,10 +1492,10 @@ public class Char {
     }
 
     private void notifyChanges() {
-        if(getParty() != null) {
+        if (getParty() != null) {
             getParty().updateFull();
         }
-        if(getGuild() != null) {
+        if (getGuild() != null) {
             // TODO
         }
     }
@@ -1601,7 +1604,7 @@ public class Char {
         getInventoryByType(EQUIPPED).removeItem(item);
         getInventoryByType(EQUIP).addItem(item);
         List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-        if(ItemConstants.isWeapon(itemID)) {
+        if (ItemConstants.isWeapon(itemID)) {
             al.setWeaponId(0);
         }
         if (hairEquips.contains(itemID)) {
@@ -1622,7 +1625,7 @@ public class Char {
         getInventoryByType(EQUIP).removeItem(item);
         getInventoryByType(EQUIPPED).addItem(item);
         List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-        if(ItemConstants.isWeapon(itemID)) {
+        if (ItemConstants.isWeapon(itemID)) {
             al.setWeaponId(itemID);
         }
         if (!hairEquips.contains(itemID)) {
@@ -1706,7 +1709,27 @@ public class Char {
      * @param toField The field to warp to.
      */
     public void warp(Field toField) {
-        warp(toField, toField.getPortalByName("sp"));
+        warp(toField, toField.getPortalByName("sp"), false);
+    }
+
+    /**
+     * Warps this Char to a given {@link Field}, with the Field's "sp" portal as spawn position.
+     *
+     * @param toField       The Field to warp to.
+     * @param characterData Whether or not the character data should be encoded.
+     */
+    public void warp(Field toField, boolean characterData) {
+        warp(toField, toField.getPortalByName("sp"), characterData);
+    }
+
+    /**
+     * Warps this Char to a given {@link Field} and {@link Portal}. Will not include character data.
+     *
+     * @param toField  The Field to warp to.
+     * @param toPortal The Portal to spawn at.
+     */
+    public void warp(Field toField, Portal toPortal) {
+        warp(toField, toPortal, false);
     }
 
     /**
@@ -1715,31 +1738,33 @@ public class Char {
      * Ensures that all Lifes are immediately spawned for the new player.
      *
      * @param toField The {@link Field} to warp to.
-     * @param portal The {@link Portal} where to spawn at.
+     * @param portal  The {@link Portal} where to spawn at.
      */
-    public void warp(Field toField, Portal portal) {
+    public void warp(Field toField, Portal portal, boolean characterData) {
         TemporaryStatManager tsm = getTemporaryStatManager();
         for (AffectedArea aa : tsm.getAffectedAreas()) {
             tsm.removeStatsBySkill(aa.getSkillID());
         }
-        getField().removeChar(this);
+        if (getField() != null) {
+            getField().removeChar(this);
+        }
         setField(toField);
-        field.removeChar(this);
         toField.addChar(this);
-        getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, false, hasBuffProtector(),
+        getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
                 (byte) portal.getId(), false, 100, null, true, -1));
+        if(characterData) {
+            if(getGuild() != null) {
+
+                write(WvsContext.guildResult(new GuildUpdate(getGuild())));
+            }
+        }
         toField.spawnLifesForChar(this);
-        for(Char c : toField.getChars()) {
-            if(!c.equals(this)) {
+        for (Char c : toField.getChars()) {
+            if (!c.equals(this)) {
                 write(UserPool.userEnterField(c));
             }
         }
         notifyChanges();
-        for(Char charr : getField().getChars()) {
-            if(!charr.equals(this)) {
-                write(UserPool.userEnterField(charr));
-            }
-        }
     }
 
     /**
@@ -2069,14 +2094,15 @@ public class Char {
     }
 
     public Guild getGuild() {
-        if (guild == null) {
-            return new Guild();
-        }
         return guild;
     }
 
     public void setGuild(Guild guild) {
-        this.guild = guild;
+        if(guild != null) {
+            this.guild = getClient().getWorld().getGuildByID(guild.getId());
+        } else {
+            this.guild = null;
+        }
     }
 
     public int getTotalChuc() {
@@ -2362,6 +2388,14 @@ public class Char {
     }
 
     public void setOnline(boolean online) {
+        if(getGuild() != null) {
+            Guild g = getGuild();
+            GuildMember gm = g.getMemberByID(getId());
+            gm.setOnline(online);
+            gm.setChr(online ? this : null);
+            getGuild().broadcast(WvsContext.guildResult(
+                    new GuildUpdateMemberLogin(g.getId(), getId(), online, !this.online && online)), this);
+        }
         this.online = online;
     }
 
