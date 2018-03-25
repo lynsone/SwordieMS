@@ -97,7 +97,7 @@ public class Demon extends Job {
     public static final int SHIELD_CHARGE_RUSH = 31211002;
     public static final int SHIELD_CHARGE = 31211011; //Special Attack (Stun Debuff)
     public static final int DIABOLIC_RECOVERY = 31211004; //Buff
-    public static final int WARD_EVIL = 1211003; //Buff
+    public static final int WARD_EVIL = 31211003; //Buff
 
     public static final int EXCEED_EXECUTION_1 = 31221000; //Special Attack     //TODO (EXCEED System)
     public static final int EXCEED_EXECUTION_2 = 31221009; //Special Attack     //TODO (EXCEED System)
@@ -112,6 +112,7 @@ public class Demon extends Job {
 
     public static final int DEMONIC_FORTITUDE_DA = 31221053;
     public static final int FORBIDDEN_CONTRACT = 31221054;
+    public static final int THOUSAND_SWORDS = 31221052;
 
 
     private int[] addedSkillsDS = new int[] {
@@ -147,6 +148,32 @@ public class Demon extends Job {
             DEMONIC_FORTITUDE_DA,
             FORBIDDEN_CONTRACT,
             WARD_EVIL,
+    };
+
+    private int[] exceed = new int[] {
+            EXCEED_DOUBLE_SLASH_1,
+            EXCEED_DOUBLE_SLASH_2,
+            EXCEED_DOUBLE_SLASH_3,
+            EXCEED_DOUBLE_SLASH_4,
+            EXCEED_DOUBLE_SLASH_PURPLE,
+
+            EXCEED_DEMON_STRIKE_1,
+            EXCEED_DEMON_STRIKE_2,
+            EXCEED_DEMON_STRIKE_3,
+            EXCEED_DEMON_STRIKE_4,
+            EXCEED_DEMON_STRIKE_PURPLE,
+
+            EXCEED_LUNAR_SLASH_1,
+            EXCEED_LUNAR_SLASH_2,
+            EXCEED_LUNAR_SLASH_3,
+            EXCEED_LUNAR_SLASH_4,
+            EXCEED_LUNAR_SLASH_PURPLE,
+
+            EXCEED_EXECUTION_1,
+            EXCEED_EXECUTION_2,
+            EXCEED_EXECUTION_3,
+            EXCEED_EXECUTION_4,
+            EXCEED_EXECUTION_PURPLE,
     };
 
     public static int getOriginalSkillByID(int skillID) {
@@ -215,12 +242,7 @@ public class Demon extends Job {
         switch (skillID) {
             case OVERLOAD_RELEASE:
                 int overloadcount = tsm.getOption(OverloadCount).nOption;
-                if(overloadcount > 19) { //20 overload count  for the buff
-/*                o1.nReason = skillID;
-                o1.nValue = si.getValue(x, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieMHPR, o1);  */
+                if(overloadcount >= getMaxExceed(chr)) { //20 (or 18 w/Hyper)  overload count  for the buff
                     o2.nOption = si.getValue(indiePMdR, slv);
                     o2.rOption = skillID;
                     o2.tOption = si.getValue(time, slv);
@@ -330,10 +352,10 @@ public class Demon extends Job {
                 //HP consumption from Skills = 0;
                 break;
             case BLUE_BLOOD:
-                o1.nOption = 1;
+                o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(BuckShot, o1);
+                tsm.putCharacterStatValue(ShadowPartner, o1);
         }
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -356,7 +378,6 @@ public class Demon extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        int originalSkill = getOriginalSkillByID(skillID);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -452,14 +473,18 @@ public class Demon extends Job {
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = skill.getSkillId();
-                    o1.tOption = 10;
+                    o1.tOption = 30;
                     mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
                     mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
                 }
                 break;
 
+            case THOUSAND_SWORDS:
+                for(int i = 0; i<5; i++) {
+                    handleOverloadCount(attackInfo, skillID, tsm, c);
+                }
+                break;
 
-                //Ugly, I know  but it's the only way I got it to work properly
             case EXCEED_DOUBLE_SLASH_1:
             case EXCEED_DOUBLE_SLASH_2:
             case EXCEED_DOUBLE_SLASH_3:

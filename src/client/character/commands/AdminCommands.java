@@ -4,8 +4,6 @@ import client.Client;
 import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Item;
-import client.character.quest.Quest;
-import client.character.quest.QuestManager;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
@@ -15,15 +13,22 @@ import client.life.Life;
 import client.life.Mob;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
-import enums.*;
+import enums.EquipBaseStat;
+import enums.ForceAtomEnum;
+import enums.InvType;
+import enums.Stat;
 import handling.OutHeader;
 import loaders.*;
 import org.apache.log4j.LogManager;
-import packet.*;
+import packet.CField;
+import packet.MobPool;
+import packet.Stage;
+import packet.WvsContext;
 import util.Position;
 import util.Rect;
 import util.Util;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -163,6 +168,24 @@ public class AdminCommands {
         }
     }
 
+    public static class Stats extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int strength = chr.getStat(Stat.str);
+            int dexterity = chr.getStat(Stat.dex);
+            int intellect = chr.getStat(Stat.inte);
+            int luck = chr.getStat(Stat.luk);
+            int hp = chr.getStat(Stat.hp);
+            int mhp = chr.getStat(Stat.mhp);
+            int mp = chr.getStat(Stat.mp);
+            int mmp = chr.getStat(Stat.mmp);
+            double hpratio = (((double) hp) / mhp) * 100;
+            double mpratio = (((double) mp) / mmp) * 100;
+            DecimalFormat formatNumbers = new DecimalFormat("##.00");
+            NumberFormat addDeci = NumberFormat.getNumberInstance(Locale.US);
+            chr.chatMessage(GAME_NOTICE, "STR: " +addDeci.format(strength)+ "  DEX: " +addDeci.format(dexterity)+ "  INT: " +addDeci.format(intellect)+ "  LUK: " +addDeci.format(luck));
+            chr.chatMessage(GAME_NOTICE, "HP: " +addDeci.format(hp)+ " / " +addDeci.format(mhp)+ " ("+formatNumbers.format(hpratio)+"%)   MP: " +addDeci.format(mp)+ " / " +addDeci.format(mmp)+ " ("+formatNumbers.format(mpratio)+"%)");
+        }
+    }
 
     public static class Spawn extends AdminCommand {
         public static void execute(Char chr, String[] args) {

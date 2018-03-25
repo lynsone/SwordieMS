@@ -6,6 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.jobs.Job;
 import client.life.AffectedArea;
+import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -15,6 +16,7 @@ import enums.MobStat;
 import loaders.SkillData;
 import packet.UserLocal;
 import packet.WvsContext;
+import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
@@ -47,6 +49,12 @@ public class Mihile extends Job {
     public static final int RADIANT_CROSS_AA = 51120057; //Area of Effect,  After Radiant Cross
     public static final int CALL_OF_CYGNUS_MIHILE = 51121005; //Buff
 
+    //Final Attack
+    public static final int FINAL_ATTACK_MIHILE = 51100002;
+    public static final int ADVANCED_FINAL_ATTACK_MIHILE = 51120002;
+
+
+    public static final int CHARGING_LIGHT = 51121052;
     public static final int QUEEN_OF_TOMORROW = 51121053;
     public static final int SACRED_CUBE = 51121054;
 
@@ -346,11 +354,20 @@ public class Mihile extends Job {
                     }
                 }
                 break;
+            case CHARGING_LIGHT:
+                o1.nReason = skillID;
+                o1.nValue = 10;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                c.write(WvsContext.temporaryStatSet(tsm));
+                break;
         }
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -366,9 +383,20 @@ public class Mihile extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case MAGIC_CRASH:
-                    // TODO
-                    break;
-                case RADIANT_CROSS:
+                    Rect rect2 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
+                            , inPacket.decodeShort(), inPacket.decodeShort());
+                    for(Life life : chr.getField().getLifesInRect(rect2)) {
+                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                            Mob mob = (Mob) life;
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            if(Util.succeedProp(si.getValue(prop, slv))) {
+                                o1.nOption = 1;
+                                o1.rOption = skillID;
+                                o1.tOption = si.getValue(time, slv);
+                                mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
+                            }
+                        }
+                    }
                     break;
             }
         }
@@ -400,6 +428,37 @@ public class Mihile extends Job {
 
     @Override
     public int getFinalAttackSkill() {
-        return 0;
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(FINAL_ATTACK_MIHILE)) {
+                fas = FINAL_ATTACK_MIHILE;
+            }
+            if (chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
+                fas = ADVANCED_FINAL_ATTACK_MIHILE;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
+    }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_MIHILE)) {
+            skill = chr.getSkill(FINAL_ATTACK_MIHILE);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_MIHILE);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        Skill skill = getFinalAtkSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
     }
 }

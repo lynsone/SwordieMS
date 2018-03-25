@@ -18,6 +18,7 @@ import enums.MoveAbility;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
+import util.Position;
 
 import java.util.Arrays;
 
@@ -34,6 +35,7 @@ public class Kanna extends Job {
 
     public static final int RADIANT_PEACOCK = 42101003;
     public static final int NIMBUS_CURSE = 42101005;
+    public static final int HAKU_REBORN = 42101002;
 
     public static final int KISHIN_SHOUKAN = 42111003; //summon
     public static final int BLOSSOM_BARRIER = 42111004; //AoE
@@ -56,7 +58,7 @@ public class Kanna extends Job {
     public static final int BREATH_UNSEEN = 42121023;
 
     private int[] buffs = new int[]{
-            HAKU,
+            HAKU_REBORN,
             RADIANT_PEACOCK,
             KISHIN_SHOUKAN,
             AKATUSKI_HERO_KANNA,
@@ -98,6 +100,7 @@ public class Kanna extends Job {
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
+
                 break;
             case NIMBUS_CURSE:
                 AffectedArea aa = AffectedArea.getPassiveAA(skillID, (byte) slv);
@@ -123,6 +126,12 @@ public class Kanna extends Job {
         Option o4 = new Option();
         Option o5 = new Option();
         switch (skillID) {
+            case HAKU_REBORN:
+                o1.nOption = 0;
+                o1.rOption = skillID;
+                o1.tOption = 30;
+                tsm.putCharacterStatValue(ChangeFoxMan, o1);
+                break;
             case RADIANT_PEACOCK:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
@@ -134,8 +143,13 @@ public class Kanna extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
+
+                int x1 = chr.getPosition().deepCopy().getX() - 500;
+                int x2 = chr.getPosition().deepCopy().getX() + 500;
+                summon.setKishinPositions(new Position[]{ new Position(x1, chr.getPosition().getY()),  new Position(x2, chr.getPosition().getY()) });
+
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
-                field.spawnSummon(summon);
+                field.spawnAddSummon(summon);
                 break;
             case AKATUSKI_HERO_KANNA:
                 o1.nReason = skillID;
@@ -210,9 +224,9 @@ public class Kanna extends Job {
     }
 
     public void getHakuFollow() {
-        if(chr.hasSkill(HAKU)) {
+        //if(chr.hasSkill(HAKU)) {
             c.write(CField.enterFieldFoxMan(chr));
-        }
+        //}
     }
 
     @Override

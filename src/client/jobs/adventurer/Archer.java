@@ -13,10 +13,7 @@ import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
-import enums.ForceAtomEnum;
-import enums.MobStat;
-import enums.MoveAbility;
-import enums.Stat;
+import enums.*;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -77,6 +74,12 @@ public class Archer extends Job {
     public static final int EPIC_ADVENTURE_BOW = 3121053;
     public static final int CONCENTRATION = 3121054;
     public static final int BULLSEYE_SHOT = 3221054;
+
+    //Final Attack
+    public static final int FINAL_ATTACK_BOW = 3100001;
+    public static final int ADVANCED_FINAL_ATTACK_BOW = 3120008;
+    public static final int FINAL_ATTACK_XBOW = 3200001;
+
 
     private QuiverCartridge quiverCartridge;
 
@@ -142,6 +145,8 @@ public class Archer extends Job {
             handleFocusedFury();
             handleMortalBlow();
             handleAggresiveResistance(attackInfo);
+
+
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -732,7 +737,44 @@ public class Archer extends Job {
 
     @Override
     public int getFinalAttackSkill() {
-        return 0;
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(FINAL_ATTACK_BOW)) {
+                fas = FINAL_ATTACK_BOW;
+            }
+            if (chr.hasSkill(FINAL_ATTACK_XBOW)) {
+                fas = FINAL_ATTACK_XBOW;
+            }
+            if (chr.hasSkill(ADVANCED_FINAL_ATTACK_BOW)) {
+                fas = ADVANCED_FINAL_ATTACK_BOW;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
+    }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_BOW)) {
+            skill = chr.getSkill(FINAL_ATTACK_BOW);
+        }
+        if(chr.hasSkill(FINAL_ATTACK_XBOW)) {
+            skill = chr.getSkill(FINAL_ATTACK_XBOW);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_BOW)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_BOW);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        Skill skill = getFinalAtkSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
     }
 
     public int getMaxNumberOfArrows(Char chr, int type) {

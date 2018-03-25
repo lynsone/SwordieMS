@@ -711,27 +711,28 @@ public class Pirate extends Job {
 
         handleViprEnergy(skillID);
 
-        if(chr.getJob() > 509 && chr.getJob() < 513) {      //Bucc
+        if (chr.getJob() >= JobConstants.JobEnum.BRAWLER.getJobId() && chr.getJob() <= JobConstants.JobEnum.BUCCANEER.getJobId()) {
             if(hasHitMobs) {
+                //Stun Mastery
                 handleStunMastery(attackInfo);
 
             }
         }
 
-        if(chr.getJob() > 519 && chr.getJob() < 523) {      //Corsair
+        if (chr.getJob() >= JobConstants.JobEnum.GUNSLINGER.getJobId() && chr.getJob() <= JobConstants.JobEnum.CORSAIR.getJobId()) {
             if(hasHitMobs) {
                 //Quickdraw
                 handleQuickdraw(attackInfo, tsm, c);
             }
         }
 
-        if(chr.getJob() > 529 && chr.getJob() < 533) {      //Cannoneer
+        if ((chr.getJob() >= JobConstants.JobEnum.CANNONEER.getJobId() && chr.getJob() <= JobConstants.JobEnum.CANNON_MASTER.getJobId()) || chr.getJob() == JobConstants.JobEnum.PIRATE_CANNONNEER.getJobId()) {
             if(hasHitMobs) {
 
             }
         }
 
-        if(chr.getJob() > 569 && chr.getJob() < 573) {      //Jett
+        if ((chr.getJob() >= JobConstants.JobEnum.JETT2.getJobId() && chr.getJob() <= JobConstants.JobEnum.JETT4.getJobId()) || chr.getJob() == JobConstants.JobEnum.JETT1.getJobId()) {
             if(hasHitMobs) {
 
             }

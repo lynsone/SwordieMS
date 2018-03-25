@@ -13,9 +13,11 @@ import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
+import enums.MobStat;
 import enums.MoveAbility;
 import loaders.SkillData;
 import packet.WvsContext;
+import util.Position;
 import util.Util;
 
 import java.util.Arrays;
@@ -45,21 +47,29 @@ public class BlazeWizard extends Job {
     public static final int GRAND_ORBITAL_FLAME_ATOM = 12110028;
     public static final int FINAL_ORBITAL_FLAME_ATOM = 12120010;
 
+
+
     public static final int IGNITION = 12101024; //Buff TODO (DoT&AoE)
     public static final int FLASHFIRE = 12101025; //Special Skill //TODO
     public static final int WORD_OF_FIRE = 12101023; //Buff
-    public static final int CONTROLLED_BURN = 121010232; //Special Skill //TODO
+    public static final int CONTROLLED_BURN = 12101022; //Special Skill //TODO
 
     public static final int CINDER_MAELSTROM = 12111022; //Special Skill //TODO
     public static final int PHOENIX_RUN = 12111023; //Special Buff //TODO
 
-    public static final int BURNING_CONDUIT = 12121005;  //TODO Area of Effect Skill
+    public static final int BURNING_CONDUIT = 12121005;
     public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff //TODO give a buff
     public static final int FIRES_OF_CREATION_LION = 12120013; //Buff //TODO give a buff
     public static final int FLAME_BARRIER = 12121003; //Buff //TODO gives Kanna's Flame Barrier
     public static final int CALL_OF_CYGNUS_BW = 12121000; //Buff
 
     public static final int GLORY_OF_THE_GUARDIANS_BW = 12121053;
+
+    //Flame Elements
+    public static final int FLAME_ELEMENT = 12000022;
+    public static final int GREATER_FLAME_ELEMENT = 12100026;
+    public static final int GRAND_FLAME_ELEMENT = 12110024;
+    public static final int FINAL_FLAME_ELEMENT = 12120007;
 
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_INT,
@@ -80,6 +90,10 @@ public class BlazeWizard extends Job {
             CALL_OF_CYGNUS_BW,
             GLORY_OF_THE_GUARDIANS_BW,
     };
+
+    boolean used;
+    Position chrPos;
+    int prevmap;
 
     public BlazeWizard(Char chr) {
         super(chr);
@@ -129,10 +143,16 @@ public class BlazeWizard extends Job {
                 tsm.putCharacterStatValue(WizardIgnite, o1);
                 break;
             case FIRES_OF_CREATION_FOX:
-            case FIRES_OF_CREATION_LION:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
+                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                field.spawnSummon(summon);
+                break;
+            case FIRES_OF_CREATION_LION:
+                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                field = c.getChr().getField();
+                summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
                 field.spawnSummon(summon);
                 break;
@@ -186,12 +206,18 @@ public class BlazeWizard extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
-
+            case ORBITAL_FLAME_ATOM:
+            case GREATER_ORBITAL_FLAME_ATOM:
+            case GRAND_ORBITAL_FLAME_ATOM:
+            case FINAL_ORBITAL_FLAME_ATOM:
+                summonFlameElement();
+                break;
         }
     }
 
     private void handleIgnite(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
         if(tsm.hasStat(WizardIgnite)) {
             Skill skill = chr.getSkill(IGNITION);
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
@@ -201,6 +227,12 @@ public class BlazeWizard extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+
+                    o.nOption = 5;
+                    o.rOption = 12101024;
+                    o.tOption = 20;
+                    o.wOption = 1;
+                    mts.addStatOptionsAndBroadcast(MobStat.Ember, o);
                 }
             }
         }
@@ -226,10 +258,31 @@ public class BlazeWizard extends Job {
                     //TODO
                     break;
                 case FLASHFIRE:
-                    //TODO
+                    Position flamepos = chr.getPosition();
+                    if(used == true) {
+                        if(chr.getFieldID() != prevmap) {
+                            //Set Blink
+                            prevmap = chr.getFieldID();
+                            c.write(WvsContext.flameWizardFlareBlink(chr, flamepos, false));
+                            chrPos = chr.getPosition();
+                            used = true;
+                        } else {
+                            //Clear Blink + Teleport
+                            c.write(WvsContext.flameWizardFlareBlink(chr, chrPos, true));
+                            used = false;
+                        }
+                    } else {
+                        //Set Blink
+                        prevmap = chr.getFieldID();
+                        c.write(WvsContext.flameWizardFlareBlink(chr, flamepos, false));
+                        chrPos = chr.getPosition();
+                        used = true;
+                    }
                     break;
                 case CONTROLLED_BURN:
-                    //TODO
+                    int healmp = si.getValue(x, slv);
+                    int healpercent = (chr.getMaxMP() * healmp) / 100;
+                    chr.healMP(healpercent);
                     break;
                 case IMPERIAL_RECALL:
                     o1.nValue = si.getValue(x, slv);
@@ -271,5 +324,46 @@ public class BlazeWizard extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    private void summonFlameElement() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.getOptByCTSAndSkill(MAD, getFlameElement()) == null) {
+            Option o1 = new Option();
+            Skill skill = chr.getSkill(FLAME_ELEMENT);
+            SkillInfo si = SkillData.getSkillInfoById(getFlameElement());
+            byte slv = (byte) chr.getSkill(getFlameElement()).getCurrentLevel();
+            Summon summon;
+            Field field;
+            field = c.getChr().getField();
+            summon = Summon.getSummonBy(chr, getFlameElement(), slv);
+            summon.setFlyMob(true);
+            summon.setAttackActive(false);
+            summon.setAssistType((byte) 0);
+            field.spawnSummon(summon);
+
+            o1.nOption = si.getValue(x, slv);
+            o1.rOption = getFlameElement();
+            o1.tOption = si.getValue(time, slv);
+            tsm.putCharacterStatValue(MAD, o1);
+            c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+    private int getFlameElement() {
+        int skill = 0;
+        if(chr.hasSkill(FLAME_ELEMENT)) {
+            skill = FLAME_ELEMENT;
+        }
+        if(chr.hasSkill(GREATER_FLAME_ELEMENT)) {
+            skill = GREATER_FLAME_ELEMENT;
+        }
+        if(chr.hasSkill(GRAND_FLAME_ELEMENT)) {
+            skill = GRAND_FLAME_ELEMENT;
+        }
+        if(chr.hasSkill(FINAL_FLAME_ELEMENT)) {
+            skill = FINAL_FLAME_ELEMENT;
+        }
+        return skill;
     }
 }

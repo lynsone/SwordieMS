@@ -105,7 +105,6 @@ public class NightWalker extends Job {
             DARK_OMEN,
             GLORY_OF_THE_GUARDIANS_NW,
             SHADOW_ILLUSION,
-            DOMINION,
     };
 
     private Summon bats;
@@ -383,6 +382,21 @@ public class NightWalker extends Job {
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
                 break;
+            case DOMINION:  //TODO Max Darkness Stack whilst active,
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time ,slv);
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                o2.nOption = 100;
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time ,slv);
+                tsm.putCharacterStatValue(CriticalBuff, o2);
+                o3.nOption = 100;
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time ,slv);
+                tsm.putCharacterStatValue(Stance, o3);
+                c.write(WvsContext.temporaryStatSet(tsm));
+                break;
         }
     }
 
@@ -487,21 +501,6 @@ public class NightWalker extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
-                    break;
-                case DOMINION:  //TODO Max Darkness Stack whilst active,
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time ,slv);
-                    tsm.putCharacterStatValue(NotDamaged, o1);
-                    o2.nOption = 100;
-                    o2.rOption = skillID;
-                    o2.tOption = si.getValue(time ,slv);
-                    tsm.putCharacterStatValue(CriticalBuff, o2);
-                    o3.nOption = 100;
-                    o3.rOption = skillID;
-                    o3.tOption = si.getValue(time ,slv);
-                    tsm.putCharacterStatValue(Stance, o3);
-                    c.write(WvsContext.temporaryStatSet(tsm));
                     break;
             }
         }

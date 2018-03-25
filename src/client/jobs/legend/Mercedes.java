@@ -12,16 +12,12 @@ import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
-import enums.LeaveType;
 import enums.MobStat;
-import enums.MoveAbility;
 import loaders.SkillData;
-import packet.CField;
 import packet.WvsContext;
 import util.Util;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -53,6 +49,10 @@ public class Mercedes extends Job {
 
     public static final int HEROIC_MEMORIES_MERC = 23121053;
     public static final int ELVISH_BLESSING = 23121054;
+
+    //Final Attack
+    public static final int FINAL_ATTACK_DBG = 23100006;
+    public static final int ADVANCED_FINAL_ATTACK = 23120012;
 
     public static int getOriginalSkillByID(int skillID) {
         switch(skillID) {
@@ -186,55 +186,10 @@ public class Mercedes extends Job {
                 tsm.putCharacterStatValue(Stance, o2);
                 break;
             case ELEMENTAL_KNIGHTS_BLUE:
-                summonEleKnight(slv);
+                //handleEleKnightSummons(slv);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
-    }
-
-    private void summonEleKnight(byte slv) {    //TODO Need to remove current summon, and spawn a new summon
-
-        Summon summonBlue = Summon.getSummonBy(c.getChr(), ELEMENTAL_KNIGHTS_BLUE, slv);
-        Summon summonRed = Summon.getSummonBy(c.getChr(), ELEMENTAL_KNIGHTS_RED, slv);
-        Summon summonPurple = Summon.getSummonBy(c.getChr(), ELEMENTAL_KNIGHTS_PURPLE, slv);
-        Field field;
-        field = c.getChr().getField();
-        summonBlue.setFlyMob(true);
-        summonBlue.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-        summonRed.setFlyMob(true);
-        summonRed.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-        summonPurple.setFlyMob(true);
-        summonPurple.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-
-
-        int chance = new Random().nextInt(100) + 1;
-        if (chance < 32) {                                      // Ice Knight
-            //if(summonBoolean == 1) {
-                c.write(CField.summonedRemoved(summonRed, LeaveType.ANIMATION));
-                c.write(CField.summonedRemoved(summonPurple, LeaveType.ANIMATION));
-            //}
-            field.spawnSummon(summonBlue);
-            summonBoolean = 1;
-
-
-        } else if (chance > 32 && chance < 67) {                // Fire Knight
-            //if(summonBoolean == 1) {
-                c.write(CField.summonedRemoved(summonBlue, LeaveType.ANIMATION));
-                c.write(CField.summonedRemoved(summonPurple, LeaveType.ANIMATION));
-            //}
-            field.spawnSummon(summonRed);
-            summonBoolean = 1;
-
-
-        } else if (chance > 67 && chance < 100) {               // Dark Knight
-            //if(summonBoolean == 1) {
-                c.write(CField.summonedRemoved(summonBlue, LeaveType.ANIMATION));
-                c.write(CField.summonedRemoved(summonRed, LeaveType.ANIMATION));
-            //}
-            field.spawnSummon(summonPurple);
-            summonBoolean = 1;
-        }
-
     }
 
     // y = stack | lasts subTime,  Final Dmg increase per stack = x
@@ -400,6 +355,37 @@ public class Mercedes extends Job {
 
     @Override
     public int getFinalAttackSkill() {
-        return 0;
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(FINAL_ATTACK_DBG)) {
+                fas = FINAL_ATTACK_DBG;
+            }
+            if (chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+                fas = ADVANCED_FINAL_ATTACK;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
+    }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_DBG)) {
+            skill = chr.getSkill(FINAL_ATTACK_DBG);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        Skill skill = getFinalAtkSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
     }
 }

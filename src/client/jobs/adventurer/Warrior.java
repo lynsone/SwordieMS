@@ -387,16 +387,7 @@ public class Warrior extends Job {
             skillID = skill.getSkillId();
         }
         int comboProp = getComboProp(chr);
-/*        if (hasHitMobs && Util.succeedProp(comboProp)) {
-            addCombo(chr);
-            Skill advCombo = chr.getSkill(COMBO_ATTACK);
-            int secondProp = SkillData.getSkillInfoById(advCombo.getSkillId()).getValue(prop, slv);
-            if (advCombo != null && Util.succeedProp(secondProp)) {
-                addCombo(chr);
-            }
-        }
-*/
-        if(chr.getJob() > 109 && chr.getJob() < 113) {      //Hero
+        if (chr.getJob() >= JobConstants.JobEnum.FIGHTER.getJobId() && chr.getJob() <= JobConstants.JobEnum.HERO.getJobId()) {
             if(hasHitMobs) {
                 //Combo
                 if(Util.succeedProp(comboProp)) {
@@ -411,13 +402,13 @@ public class Warrior extends Job {
             }
         }
 
-        if(chr.getJob() > 119 && chr.getJob() < 123) {      //Paladin
+        if (chr.getJob() >= JobConstants.JobEnum.PAGE.getJobId() && chr.getJob() <= JobConstants.JobEnum.PALADIN.getJobId()) {
             if(hasHitMobs) {
 
             }
         }
 
-        if(chr.getJob() > 129 && chr.getJob() < 133) {      //Dark Knight
+        if (chr.getJob() >= JobConstants.JobEnum.SPEARMAN.getJobId() && chr.getJob() <= JobConstants.JobEnum.DARKKNIGHT.getJobId()) {
             if(hasHitMobs) {
 
             }
@@ -852,16 +843,51 @@ public class Warrior extends Job {
 
     @Override
     public int getFinalAttackSkill() {
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
+                fas = FINAL_ATTACK_FIGHTER;
+            }
+            if (chr.hasSkill(FINAL_ATTACK_PAGE)) {
+                fas = FINAL_ATTACK_PAGE;
+            }
+            if (chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
+                fas = FINAL_ATTACK_SPEARMAN;
+            }
+            if (chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+                fas = ADVANCED_FINAL_ATTACK;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
+    }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
         if(chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
-            return FINAL_ATTACK_FIGHTER;
+            skill = chr.getSkill(FINAL_ATTACK_FIGHTER);
         }
         if(chr.hasSkill(FINAL_ATTACK_PAGE)) {
-            return FINAL_ATTACK_PAGE;
+            skill = chr.getSkill(FINAL_ATTACK_PAGE);
         }
         if(chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
-            return FINAL_ATTACK_SPEARMAN;
+            skill = chr.getSkill(FINAL_ATTACK_SPEARMAN);
         }
-        return 0;
+
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        Skill skill = getFinalAtkSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
     }
 
     private void handleCharges(int skillId, TemporaryStatManager tsm, Client c) {
