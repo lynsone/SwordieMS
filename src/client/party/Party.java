@@ -1,14 +1,14 @@
 package client.party;
 
 import client.character.Char;
+import client.field.Field;
 import connection.OutPacket;
+import enums.FieldInstanceType;
+import loaders.FieldData;
 import packet.WvsContext;
 import server.World;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +22,7 @@ public class Party {
     private int partyLeaderID;
     private World world;
     private Char applyingChar;
+    private Map<Integer, Field> fields = new HashMap<>();
 
     public boolean isAppliable() {
         return appliable;
@@ -111,7 +112,6 @@ public class Party {
         PartyMember pm = new PartyMember(chr);
         if(isEmpty()) {
             setPartyLeaderID(chr.getId());
-            chr.getClient().getWorld().addParty(this);
         }
         PartyMember[] partyMembers = getPartyMembers();
         PartyJoinResult pjr = new PartyJoinResult();
@@ -226,11 +226,12 @@ public class Party {
         updateFull();
     }
 
-    public static Party createNewParty(boolean appliable, String name) {
+    public static Party createNewParty(boolean appliable, String name, World world) {
         Party party = new Party();
-        party.setId(10);
         party.setAppliable(appliable);
         party.setName(name);
+        party.setWorld(world);
+        world.addParty(party);
         return party;
     }
 
@@ -255,5 +256,47 @@ public class Party {
 
     public void setApplyingChar(Char applyingChar) {
         this.applyingChar = applyingChar;
+    }
+
+    public Map<Integer, Field> getFields() {
+        return fields;
+    }
+
+    public void addField(Field field) {
+        getFields().put(field.getId(), field);
+    }
+
+    /**
+     * Clears the current Fields. Will return any character that is currently on any of the Fields to the Field's return field.
+     */
+    public void clearFieldInstances() {
+        Set<Char> chrs = new HashSet<>();
+        for(Field f : getFields().values()) {
+            chrs.addAll(f.getChars());
+        }
+        for(Char chr : chrs) {
+            chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
+            int returnMap = chr.getField().getReturnMap();
+            if(returnMap != 999999999 && returnMap != chr.getField().getReturnMap()) {
+                Field field = chr.getClient().getChannelInstance().getField(returnMap);
+                chr.warp(field);
+            }
+        }
+        getFields().clear();
+    }
+
+    /**
+     * Returns the Field corresponding to the provided fieldID. If there is none, creates one.
+     * @param fieldID The Field's id.
+     * @return The Field corresponding to the given id.
+     */
+    public Field getOrCreateFieldById(int fieldID) {
+        if (getFields().containsKey(fieldID)) {
+            return getFields().get(fieldID);
+        } else {
+            Field field = FieldData.getFieldCopyById(fieldID);
+            addField(field);
+            return field;
+        }
     }
 }

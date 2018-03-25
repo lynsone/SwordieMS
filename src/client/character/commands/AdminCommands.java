@@ -153,10 +153,12 @@ public class AdminCommands {
             );
             chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");
             chr.chatMessage(GM_BLUE_CHAT, "Current Map: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getFieldID()));
+            chr.chatMessage(GM_BLUE_CHAT, "Current ReturnMap: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getField().getReturnMap()));
             chr.chatMessage(GM_BLUE_CHAT, ".");
             for (Portal portal : chr.getField().getclosestPortal(rect)) {
                 chr.chatMessage(GM_BLUE_CHAT, "Portal Name: " + portal.getName());
                 chr.chatMessage(GM_BLUE_CHAT, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
+                chr.chatMessage(GM_BLUE_CHAT, "Portal target map: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getTargetMapId()));
                 chr.chatMessage(GM_BLUE_CHAT, ".");
             }
             chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");

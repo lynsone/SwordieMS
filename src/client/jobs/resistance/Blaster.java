@@ -198,7 +198,7 @@ public class Blaster extends Job {
         c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

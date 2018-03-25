@@ -60,7 +60,7 @@ public abstract class Job {
         Char chr = c.getChr();
         int curHP = chr.getStat(Stat.hp);
         int newHP = curHP - hitInfo.HPDamage;
-        if(newHP < 0) {
+        if(newHP <= 0) {
             // TODO Dying
             curHP = chr.getStat(Stat.mhp);
         } else {
@@ -109,4 +109,6 @@ public abstract class Job {
         chr.addStat(Stat.mmp, 500);
         chr.addStat(Stat.ap, 5);
     }
+
+    public abstract boolean isBuff(int skillID);
 }

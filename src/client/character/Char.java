@@ -24,6 +24,7 @@ import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
+import loaders.FieldData;
 import loaders.SkillData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -38,6 +39,7 @@ import javax.persistence.*;
 import java.util.*;
 
 import static enums.ChatMsgColour.YELLOW;
+import static enums.FieldInstanceType.*;
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
 import static enums.InventoryOperation.*;
@@ -223,6 +225,10 @@ public class Char {
     private boolean online;
     @Transient
     private Party party;
+    @Transient
+    private FieldInstanceType fieldInstanceType;
+    @Transient
+    private Map<Integer, Field> fields = new HashMap<>();
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -272,6 +278,7 @@ public class Char {
         characterStat.setHair(items.length > 1 ? items[1] : 0);
         characterStat.setPosMap(100000000);
         getAvatarData().setCharacterStat(characterStat);
+        setFieldInstanceType(CHANNEL);
         ranking = new Ranking();
         pets = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -1703,6 +1710,35 @@ public class Char {
     }
 
     /**
+     * Returns a {@link Field} based on the current {@link FieldInstanceType} of this Char (channel, expedition,
+     * party or solo).
+     *
+     * @return The Field corresponding to the current FieldInstanceType.
+     */
+    public Field getOrCreateFieldByCurrentInstanceType(int fieldID) {
+        Field res = null;
+        switch (getFieldInstanceType()) {
+            case SOLO:
+                if (getFields().containsKey(fieldID)) {
+                    res = getPersonalById(fieldID);
+                } else {
+                    Field field = FieldData.getFieldCopyById(fieldID);
+                    addField(field);
+                    res = field;
+                }
+                break;
+            case PARTY:
+                res = getParty() != null ? getParty().getOrCreateFieldById(fieldID) : null;
+                break;
+            // TODO expedition
+            default:
+                res = getClient().getChannelInstance().getField(fieldID);
+                break;
+        }
+        return res;
+    }
+
+    /**
      * Warps this character to a given field, at the starting position.
      * See {@link #warp(Field, Portal) warp}.
      *
@@ -1765,6 +1801,7 @@ public class Char {
             }
         }
         notifyChanges();
+        toField.execUserEnterScript(this);
     }
 
     /**
@@ -2416,5 +2453,29 @@ public class Char {
 
     public int getSubJob() {
         return getAvatarData().getCharacterStat().getSubJob();
+    }
+
+    public FieldInstanceType getFieldInstanceType() {
+        return fieldInstanceType;
+    }
+
+    public void setFieldInstanceType(FieldInstanceType fieldInstanceType) {
+        this.fieldInstanceType = fieldInstanceType;
+    }
+
+    /**
+     * Returns the current Set of Fields that this Char holds as personal instances.
+     * @return the list of personal Field instances.
+     */
+    public Map<Integer, Field> getFields() {
+        return fields;
+    }
+
+    public void addField(Field field) {
+        getFields().put(field.getId(), field);
+    }
+
+    public Field getPersonalById(int id) {
+        return getFields().get(id);
     }
 }

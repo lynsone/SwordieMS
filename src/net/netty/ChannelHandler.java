@@ -1,6 +1,7 @@
 package net.netty;
 
 import client.Client;
+import client.jobs.Job;
 import connection.InPacket;
 import enums.ChatMsgColour;
 import handling.InHeader;
@@ -107,13 +108,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     WorldHandler.handlePartyInvitableSet(c, inPacket);
                     break;
                 case USER_SKILL_USE_REQUEST:
-                    inPacket.decodeInt(); // crc
-                    int skillID = inPacket.decodeInt();
-                    byte slv = inPacket.decodeByte();
-                    log.debug("SkillID: " + skillID);
-                    c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-                    c.getChr().getJobHandler().handleSkill(c, skillID, slv, inPacket);
-                    WvsContext.dispose(c.getChr());
+                    WorldHandler.handleUserSkillUseRequest(c, inPacket);
                     break;
                 case USER_SKILL_CANCEL_REQUEST:
                     WorldHandler.handleTemporaryStatResetRequest(c, inPacket);

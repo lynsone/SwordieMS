@@ -260,7 +260,7 @@ public class Aran extends Job {
         tsm.getOption(ComboAbilityBuff).nOption = 500;
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

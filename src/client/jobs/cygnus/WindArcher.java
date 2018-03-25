@@ -383,7 +383,7 @@ public class WindArcher extends Job {
         return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

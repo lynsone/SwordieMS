@@ -689,7 +689,7 @@ public class Pirate extends Job {
         }
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

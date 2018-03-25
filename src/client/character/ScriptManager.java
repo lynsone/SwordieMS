@@ -7,17 +7,21 @@ import client.character.items.Equip;
 import client.character.items.Item;
 import client.field.Field;
 import client.field.Portal;
-import client.guild.GuildCreate;
 import client.guild.GuildMsg;
+import client.life.Mob;
+import client.party.Party;
+import client.party.PartyMember;
 import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.*;
+import loaders.MobData;
 import loaders.QuestData;
 import loaders.ItemData;
 import org.apache.log4j.LogManager;
 import packet.ScriptMan;
 import packet.WvsContext;
 import util.FileTime;
+import util.Position;
 import util.Util;
 
 import javax.script.*;
@@ -158,9 +162,12 @@ public class ScriptManager implements Observer {
                 break;
             case 0:
             case 1:
+            case 2:
                 try {
                     if (isActive(scriptType)) {
                         getInvocableByType(scriptType).invokeFunction("action", response, answer);
+                    } else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
+                        getInvocableByType(ScriptType.PORTAL).invokeFunction("action", response, answer);
                     }
                 } catch (ScriptException | NoSuchMethodException e) {
                     e.printStackTrace();
@@ -387,6 +394,9 @@ public class ScriptManager implements Observer {
      */
     public void dispose() {
         stop(ScriptType.NPC);
+        stop(ScriptType.PORTAL);
+        stop(ScriptType.ITEM);
+        stop(ScriptType.QUEST);
     }
 
     /**
@@ -520,6 +530,7 @@ public class ScriptManager implements Observer {
 
     /**
      * Checks if the client has enough space in their inventory to hold an item.
+     *
      * @param id
      * @return
      */
@@ -541,5 +552,105 @@ public class ScriptManager implements Observer {
      */
     public void showGuildCreateWindow() {
         chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.InputGuildName)));
+    }
+
+    public Party getParty() {
+        return chr.getParty();
+    }
+
+    public void setPartyField() {
+        chr.setFieldInstanceType(FieldInstanceType.PARTY);
+    }
+
+    public boolean isPartyLeader() {
+        return chr.getParty() != null & chr.getParty().getPartyLeaderID() == chr.getId();
+    }
+
+    public boolean checkParty() {
+        if (chr.getParty() == null) {
+            chat("You are not in a party.");
+            return false;
+        } else if (!isPartyLeader()) {
+            chat("You are not the party leader.");
+            return false;
+        }
+        boolean res = true;
+        Char leader = chr.getParty().getPartyLeader().getChr();
+        if (leader == null) {
+            chat("Your leader is currently offline.");
+        } else {
+            int fieldID = leader.getFieldID();
+            for (PartyMember pm : chr.getParty().getPartyMembers()) {
+                if (pm != null) {
+                    res &= pm.getChr() != null && pm.isOnline() && pm.getFieldID() == fieldID;
+                }
+            }
+        }
+        if (!res) {
+            chat("Make sure that your whole party is online and in the same map as the party leader.");
+        }
+        return res;
+    }
+
+    public void warpParty(int id) {
+        warpParty(id, true);
+    }
+
+    public void warpPartyOut(int id) {
+        warpParty(id, false);
+    }
+
+    public void warpParty(int id, boolean in) {
+        if (chr.getParty() == null) {
+            chr.setFieldInstanceType(in ? FieldInstanceType.PARTY : FieldInstanceType.CHANNEL);
+            Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
+            chr.warp(field);
+        } else {
+
+            for (PartyMember pm : chr.getParty().getPartyMembers()) {
+                if (pm != null && pm.getChr() != null) {
+                    Char partyChr = pm.getChr();
+                    partyChr.setFieldInstanceType(in ? FieldInstanceType.PARTY : FieldInstanceType.CHANNEL);
+                    Field field = partyChr.getOrCreateFieldByCurrentInstanceType(id);
+                    partyChr.warp(field);
+                }
+            }
+        }
+    }
+
+    public void clearPartyInfo() {
+        if (chr.getParty() != null) {
+            chr.getParty().clearFieldInstances();
+        }
+    }
+
+    public void spawnMob(int id) {
+        spawnMob(id, 0, 0, false);
+    }
+
+    public void spawnMob(int id, boolean respawnable) {
+        spawnMob(id, 0, 0, respawnable);
+    }
+
+    public void spawnMobOnChar(int id) {
+        spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), false);
+    }
+
+    public void spawnMobOnChar(int id, boolean respawnable) {
+        spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), respawnable);
+    }
+
+    public void spawnMob(int id, int x, int y, boolean respawnable) {
+        Mob mob = MobData.getMobDeepCopyById(id);
+        Position pos = new Position(x, y);
+        mob.setPosition(pos.deepCopy());
+        mob.setPrevPos(pos.deepCopy());
+        mob.setPosition(pos.deepCopy());
+        mob.setNotRespawnable(!respawnable);
+        Field field = chr.getField();
+        if (mob.getField() == null) {
+            mob.setField(field);
+        }
+        field.spawnLife(mob, null);
     }
 }

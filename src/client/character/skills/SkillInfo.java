@@ -24,6 +24,7 @@ public class SkillInfo {
     private int masterLevel;
     private int fixLevel;
     private List<Rect> rects = new ArrayList<>();
+    private boolean massSpell;
 
     public int getSkillId() {
         return skillId;
@@ -128,6 +129,18 @@ public class SkillInfo {
     }
 
     public Rect getLastRect() {
-        return rects.size() > 0 ? rects.get(rects.size() - 1) : null;
+        return rects != null && rects.size() > 0 ? rects.get(rects.size() - 1) : null;
+    }
+
+    public Rect getFirstRect() {
+        return rects != null && rects.size() > 0 ? rects.get(0) : null;
+    }
+
+    public boolean isMassSpell() {
+        return massSpell;
+    }
+
+    public void setMassSpell(boolean massSpell) {
+        this.massSpell = massSpell;
     }
 }

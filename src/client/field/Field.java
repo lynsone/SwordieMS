@@ -8,6 +8,7 @@ import client.life.*;
 import connection.OutPacket;
 import constants.GameConstants;
 import enums.LeaveType;
+import enums.ScriptType;
 import loaders.ItemData;
 import loaders.SkillData;
 import packet.*;
@@ -693,5 +694,13 @@ public class Field {
 
     public Char getCharByName(String name) {
         return getChars().stream().filter(chr -> chr.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+    public void execUserEnterScript(Char chr) {
+        if(getOnUserEnter() == null || getOnUserEnter().equalsIgnoreCase("")) {
+            return;
+        }
+        String script = getOnUserEnter();
+        chr.getScriptManager().startScript(getId(), script, ScriptType.FIELD);
     }
 }

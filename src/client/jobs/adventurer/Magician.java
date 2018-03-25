@@ -100,8 +100,7 @@ public class Magician extends Job {
     public static final int MEGIDDO_FLAME_ATOM = 2121055;
 
 
-
-    private int[] addedSkills = new int[] {
+    private int[] addedSkills = new int[]{
             MAPLE_RETURN,
     };
 
@@ -149,7 +148,7 @@ public class Magician extends Job {
 
     public Magician(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if (isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -175,13 +174,13 @@ public class Magician extends Job {
             skillID = skill.getSkillId();
         }
 
-
         if (hasHitMobs) {                                   //Common
             handleArcaneAim();
         }
 
-        if(chr.getJob() > 209 && chr.getJob() < 213) {      //Mage - Fire Poison
-            if(hasHitMobs) {
+        if (chr.getJob() >= JobConstants.JobEnum.FP_WIZARD.getJobId()
+                && chr.getJob() <= JobConstants.JobEnum.FP_ARCHMAGE.getJobId() ) {      //Mage - Fire Poison
+            if (hasHitMobs) {
                 //Ignite
                 handleIgnite(attackInfo, chr, tsm);
 
@@ -190,16 +189,18 @@ public class Magician extends Job {
             }
         }
 
-        if(chr.getJob() > 219 && chr.getJob() < 223) {      //Mage - Ice Lightning
-            if(hasHitMobs) {
+        if (chr.getJob() >= JobConstants.JobEnum.IL_WIZARD.getJobId()
+                && chr.getJob() <= JobConstants.JobEnum.IL_ARCHMAGE.getJobId() ) {      //Mage - Ice Lightning
+            if (hasHitMobs) {
                 //Freezing Crush / Frozen Clutch
                 handleFreezingCrush(attackInfo, slv);
 
             }
         }
 
-        if(chr.getJob() > 229 && chr.getJob() < 233) {      //Bishop
-            if(hasHitMobs) {
+        if (chr.getJob() >= JobConstants.JobEnum.CLERIC.getJobId()
+                && chr.getJob() <= JobConstants.JobEnum.BISHOP.getJobId() ) {      //Mage - Bishop
+            if (hasHitMobs) {
 
             }
         }
@@ -209,8 +210,8 @@ public class Magician extends Job {
         Option o3 = new Option();
         switch (skillID) {
             case POISON_BREATH:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
@@ -229,8 +230,8 @@ public class Magician extends Job {
                 chr.getField().spawnAffectedArea(aa);
                 break;
             case TELEPORT_MASTERY_FP:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -242,9 +243,9 @@ public class Magician extends Job {
                 }
                 break;
             case FLAME_HAZE:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
@@ -267,14 +268,14 @@ public class Magician extends Job {
                 }
                 break;
             case IFRIT:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                 }
                 break;
             case PARALYZE:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
@@ -287,7 +288,7 @@ public class Magician extends Job {
             case COLD_BEAM:
             case ICE_STRIKE:
             case GLACIER_CHAIN:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 5;
@@ -298,7 +299,7 @@ public class Magician extends Job {
                 break;
             case TELEPORT_MASTERY_IL:
             case CHAIN_LIGHTNING:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
@@ -310,13 +311,13 @@ public class Magician extends Job {
                 }
                 break;
             case MIST_ERUPTION:
-                for(int id : attackInfo.mists) {
+                for (int id : attackInfo.mists) {
                     Field field = chr.getField();
                     field.removeLife(id);
                 }
                 break;
             case BAHAMUT:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 25;
@@ -334,8 +335,8 @@ public class Magician extends Job {
         SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
         List<Life> lifes = field.getLifesInRect(rect);
-        for(Life life : lifes) {
-            if(life instanceof Mob) {
+        for (Life life : lifes) {
+            if (life instanceof Mob) {
                 int mobID = ((Mob) life).getRefImgMobID(); //
                 int x = ((Mob) life).getPosition().getX();
                 int y = ((Mob) life).getPosition().getY();
@@ -353,13 +354,13 @@ public class Magician extends Job {
 
     private void handleArcaneAim() {
         Skill skill = chr.getSkill(getArcaneAimSkill());
-        if(skill == null) {
+        if (skill == null) {
             return;
         }
         SkillInfo arcaneAimInfo = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) skill.getCurrentLevel();
         int arcaneAimProp = arcaneAimInfo.getValue(prop, slv);
-        if(!Util.succeedProp(arcaneAimProp)) {
+        if (!Util.succeedProp(arcaneAimProp)) {
             return;
         }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -381,7 +382,7 @@ public class Magician extends Job {
         o1.rOption = 2320011;
         o1.tOption = 5; // No Time Variable
         tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
-        o2.nOption = ( amount * arcaneAimInfo.getValue(x, slv));
+        o2.nOption = (amount * arcaneAimInfo.getValue(x, slv));
         o2.rOption = 2320011;
         o2.tOption = 5; // No Time Variable
         tsm.putCharacterStatValue(DamR, o2);
@@ -389,12 +390,12 @@ public class Magician extends Job {
     }
 
     private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm) {
-        if(tsm.hasStat(WizardIgnite)) {
+        if (tsm.hasStat(WizardIgnite)) {
             SkillInfo igniteInfo = SkillData.getSkillInfoById(IGNITE);
-            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 if (Util.succeedProp(igniteInfo.getValue(prop, 10))) {
-                    AffectedArea aa = AffectedArea.getPassiveAA(IGNITE, (byte)10);
+                    AffectedArea aa = AffectedArea.getPassiveAA(IGNITE, (byte) 10);
                     aa.setMobOrigin((byte) 1);
                     aa.setCharID(chr.getId());
                     aa.setPosition(mob.getPosition());
@@ -409,7 +410,7 @@ public class Magician extends Job {
 
     private void handleChillingStep(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(tsm.hasStat(ChillingStep)) {
+        if (tsm.hasStat(ChillingStep)) {
             for (int i = 0; i < 168; i += 56) {
                 SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
                 Skill skill = chr.getSkill(CHILLING_STEP);
@@ -459,7 +460,7 @@ public class Magician extends Job {
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
-        if(skill != null) {
+        if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
@@ -467,7 +468,7 @@ public class Magician extends Job {
             handleBuff(c, inPacket, skillID, slv);
         } else {
             Option o1 = new Option();
-            switch(skillID) {
+            switch (skillID) {
                 case MAPLE_RETURN:
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
@@ -504,7 +505,7 @@ public class Magician extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(tsm.hasStat(MagicGuard)) {
+        if (tsm.hasStat(MagicGuard)) {
             Skill skill = chr.getSkill(MAGIC_GUARD);
             SkillInfo si = SkillData.getSkillInfoById(MAGIC_GUARD);
             int dmgPerc = si.getValue(x, skill.getCurrentLevel());
@@ -516,7 +517,7 @@ public class Magician extends Job {
         }
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
@@ -718,7 +719,7 @@ public class Magician extends Job {
     @Override
     public boolean isHandlerOfJob(short id) {
         JobConstants.JobEnum jobEnum = JobConstants.JobEnum.getJobById(id);
-        switch(jobEnum) {
+        switch (jobEnum) {
             case MAGICIAN:
             case FP_WIZARD:
             case FP_MAGE:
@@ -745,9 +746,9 @@ public class Magician extends Job {
         if (chr.hasSkill(ARCANE_AIM_FP)) {
             res = ARCANE_AIM_FP;
         } else if (chr.hasSkill(ARCANE_AIM_IL)) {
-            res =  ARCANE_AIM_IL;
+            res = ARCANE_AIM_IL;
         } else if (chr.hasSkill(ARCANE_AIM_BISH)) {
-            res =  ARCANE_AIM_BISH;
+            res = ARCANE_AIM_BISH;
         }
         return res;
     }
@@ -755,7 +756,7 @@ public class Magician extends Job {
     private int getElementalDrainSkill() {
         int res = 0;
         if (chr.hasSkill(FERVENT_DRAIN)) {
-            res =  FERVENT_DRAIN;
+            res = FERVENT_DRAIN;
         } else if (chr.hasSkill(ELEMENTAL_DRAIN)) {
             res = ELEMENTAL_DRAIN;
         }
@@ -768,13 +769,13 @@ public class Magician extends Job {
         SkillInfo si = SkillData.getSkillInfoById(FROST_CLUTCH);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             //if (Util.succeedProp(si.getValue(prop, slv))) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                MobTemporaryStat mts = mob.getTemporaryStat();
-                o1.nOption = 1;
-                o1.rOption = FROST_CLUTCH;
-                o1.tOption = 15; //si.getValue(subTime, slv);
-                o1.mOption = 2; //Should be Amount
-                mts.addStatOptionsAndBroadcast(MobStat.Speed, o1); // IDA says it's Speed, but it doesn't broadcast the Debuff over the mob
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            o1.nOption = 1;
+            o1.rOption = FROST_CLUTCH;
+            o1.tOption = 15; //si.getValue(subTime, slv);
+            o1.mOption = 2; //Should be Amount
+            mts.addStatOptionsAndBroadcast(MobStat.Speed, o1); // IDA says it's Speed, but it doesn't broadcast the Debuff over the mob
             //}
         }
     }

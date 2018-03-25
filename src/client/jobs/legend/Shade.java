@@ -322,7 +322,7 @@ public class Shade extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

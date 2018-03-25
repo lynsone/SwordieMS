@@ -41,4 +41,9 @@ public class Citizen extends Job {
     public int getFinalAttackSkill() {
         return 0;
     }
+
+    @Override
+    public boolean isBuff(int skillID) {
+        return false;
+    }
 }

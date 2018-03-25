@@ -159,7 +159,8 @@ public class Thief extends Job {
                     chr.addSkill(skill);
                 }
             }
-            if(chr.getJob() > 419 || chr.getJob() < 425 ) {
+            if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId()
+                    && chr.getJob() <= JobConstants.JobEnum.CHIEFBANDIT.getJobId()) {
                 critInterval();
             }
         }
@@ -181,7 +182,8 @@ public class Thief extends Job {
             skillID = skill.getSkillId();
         }
 
-        if (chr.getJob() > 409 && chr.getJob() < 413) { //Night Lord
+        if (chr.getJob() >= JobConstants.JobEnum.ASSASSIN.getJobId()
+                && chr.getJob() <= JobConstants.JobEnum.NIGHTLORD.getJobId()) { // Night Lord
 
             if(hasHitMobs) {
                 handleNightLordMark(skillID, slv, attackInfo);
@@ -189,7 +191,8 @@ public class Thief extends Job {
         }
 
 
-        if (chr.getJob() > 419 && chr.getJob() < 423) { //Shadower
+        if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId()
+                && chr.getJob() <= JobConstants.JobEnum.CHIEFBANDIT.getJobId()) { // Shadower
             if(hasHitMobs) {
                 //Critical Growth & Prime Critical
                 incrementCritGrowing();
@@ -691,7 +694,7 @@ public class Thief extends Job {
         }
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

@@ -709,7 +709,7 @@ public class Archer extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

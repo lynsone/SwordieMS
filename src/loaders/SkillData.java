@@ -37,6 +37,7 @@ public class SkillData {
                 dataOutputStream.writeInt(si.getMasterLevel());
                 dataOutputStream.writeInt(si.getFixLevel());
                 dataOutputStream.writeBoolean(si.isInvisible());
+                dataOutputStream.writeBoolean(si.isMassSpell());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -83,6 +84,7 @@ public class SkillData {
                     skillInfo.setMasterLevel(dataInputStream.readInt());
                     skillInfo.setFixLevel(dataInputStream.readInt());
                     skillInfo.setInvisible(dataInputStream.readBoolean());
+                    skillInfo.setMassSpell(dataInputStream.readBoolean());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -159,6 +161,12 @@ public class SkillData {
                             invisible = Integer.parseInt(XMLApi.getAttributes(invis).get("value")) == 1;
                         }
                         skill.setInvisible(invisible);
+                        Node massSpellNode = XMLApi.getFirstChildByNameBF(skillNode, "massSpell");
+                        boolean massSpell = false;
+                        if(massSpellNode != null) {
+                            massSpell = Integer.parseInt(XMLApi.getAttributes(massSpellNode).get("value")) == 1;
+                        }
+                        skill.setMassSpell(massSpell);
                         // end main level info
                         // start "common" level info
                         Node common = XMLApi.getFirstChildByNameBF(skillNode, "common");

@@ -24,6 +24,7 @@ public class World {
     private List<Channel> channels;
     private Map<Integer, Party> parties = new HashMap<>();
     private Map<Integer, Guild> guilds = new HashMap<>();
+    private int partyIDCounter = 1;
 
     public World(int worldId, String name, int worldState, String worldEventDescription, int worldEventEXP_WSE,
                  int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet) {
@@ -110,8 +111,12 @@ public class World {
     }
 
     public void addParty(Party p) {
-        getParties().put(p.getId(), p);
-        p.setWorld(this);
+        int id = getPartyIdAndIncrement(); // sequential IDs should be fine here
+        getParties().put(id, p);
+        p.setId(id);
+        if(p.getWorld() == null) {
+            p.setWorld(this);
+        }
     }
 
     public void removeParty(Party p) {
@@ -142,5 +147,17 @@ public class World {
             getGuilds().put(id, res);
         }
         return res;
+    }
+
+    public int getPartyIdAndIncrement() {
+        return partyIDCounter++;
+    }
+
+    public int getPartyIDCounter() {
+        return partyIDCounter;
+    }
+
+    public void setPartyIDCounter(int partyIDCounter) {
+        this.partyIDCounter = partyIDCounter;
     }
 }

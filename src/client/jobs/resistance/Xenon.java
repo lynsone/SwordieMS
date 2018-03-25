@@ -248,7 +248,7 @@ public class Xenon extends Job {
         chr.getTemporaryStatManager().sendSetStatPacket();
     }
 
-    private boolean isBuff(int skillID) {
+    public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 

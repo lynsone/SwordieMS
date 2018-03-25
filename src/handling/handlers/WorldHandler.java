@@ -16,6 +16,7 @@ import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
 import client.guild.*;
+import client.jobs.Job;
 import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.cygnus.BlazeWizard;
@@ -552,7 +553,7 @@ public class WorldHandler {
         if (portal.getScript() != null && !portal.getScript().equals("")) {
             chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
         } else {
-            Field toField = c.getChannelInstance().getField(portal.getTargetMapId());
+            Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
             Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
             chr.warp(toField, toPortal);
         }
@@ -563,7 +564,10 @@ public class WorldHandler {
         byte portalID = inPacket.decodeByte();
         String script = inPacket.decodeString();
         Portal portal = chr.getField().getPortalByID(portalID);
-        chr.getScriptManager().startScript(portal.getId(), script, ScriptType.PORTAL);
+        if(portal != null) {
+            portalID = (byte) portal.getId();
+        }
+        chr.getScriptManager().startScript(portalID, script, ScriptType.PORTAL);
 
     }
 
@@ -1884,7 +1888,7 @@ public class WorldHandler {
         byte lastType = inPacket.decodeByte();
         byte action = inPacket.decodeByte();
         int answer = 0;
-        if (nmt == NpcMessageType.AskMenu && action != -1 && lastType != 5) {
+        if (inPacket.getUnreadBytes() >= 4) {
             answer = inPacket.decodeInt();
         }
         chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
@@ -2312,8 +2316,7 @@ public class WorldHandler {
             case Create:
                 boolean appliable = inPacket.decodeByte() != 0;
                 String name = inPacket.decodeString();
-                party = Party.createNewParty(appliable, name);
-                party.setId(chr.getId());
+                party = Party.createNewParty(appliable, name, chr.getClient().getWorld());
                 party.addPartyMember(chr);
                 CreatePartyResult cpr = new CreatePartyResult();
                 cpr.party = party;
@@ -2337,8 +2340,7 @@ public class WorldHandler {
                 String invitedName = inPacket.decodeString();
                 PartyJoinRequestBlue pjrb = new PartyJoinRequestBlue();
                 if(party == null) {
-                    party = Party.createNewParty(true, "Party with me!");
-                    party.setId(chr.getId());
+                    party = Party.createNewParty(true, "Party with me!", chr.getClient().getWorld());
                     party.addPartyMember(chr);
                     cpr = new CreatePartyResult();
                     cpr.party = party;
@@ -2464,6 +2466,7 @@ public class WorldHandler {
         Char dest = c.getWorld().getCharByName(destName);
         if(dest == null) {
             c.write(CField.whisper(destName, (byte) 0, false, "", true));
+            return;
         }
         switch(type) {
             case 5: // /find command
@@ -2619,5 +2622,32 @@ public class WorldHandler {
         aa.setSlv(slv);
         aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
         c.write(CField.affectedAreaCreated(aa));
+    }
+
+    public static void handleUserSkillUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // crc
+        int skillID = inPacket.decodeInt();
+        byte slv = inPacket.decodeByte();
+        log.debug("SkillID: " + skillID);
+        c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        Job sourceJobHandler = c.getChr().getJobHandler();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        if(si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
+            Rect r = si.getFirstRect();
+            if(r != null) {
+                Rect rectAround = chr.getRectAround(r);
+                for(PartyMember pm : chr.getParty().getOnlineMembers()) {
+                    if(pm.getChr() != null
+                            && pm.getFieldID() == chr.getFieldID()
+                            && rectAround.hasPositionInside(pm.getChr().getPosition())) {
+                        sourceJobHandler.handleSkill(pm.getChr().getClient(), skillID, slv, inPacket);
+                    }
+                }
+            }
+        } else {
+            sourceJobHandler.handleSkill(c, skillID, slv, inPacket);
+        }
+        WvsContext.dispose(c.getChr());
     }
 }
