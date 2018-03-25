@@ -49,6 +49,9 @@ public class Aran extends Job {
     public static final int ADRENALINE_BURST = 21121058;
     public static final int MAHAS_DOMAIN = 21121068; //AoE Effect
 
+    //Final Attack
+    public static final int FINAL_ATTACK = 21100010;
+    public static final int ADVANCED_FINAL_ATTACK = 21120012;
 
     //Attacking Skills:
     public static final int SMASH_WAVE = 21001009;
@@ -479,7 +482,38 @@ public class Aran extends Job {
 
     @Override
     public int getFinalAttackSkill() {
-        return 0;
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(FINAL_ATTACK)) {
+                fas = FINAL_ATTACK;
+            }
+            if (chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+                fas = ADVANCED_FINAL_ATTACK;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
+    }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK)) {
+            skill = chr.getSkill(FINAL_ATTACK);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        Skill skill = getFinalAtkSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
     }
 
     private int getCombo() {

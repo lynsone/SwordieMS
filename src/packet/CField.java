@@ -77,12 +77,11 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket summonedAssistAttackRequest(int charID, Summon summon) {
+    public static OutPacket summonedAssistAttackRequest(int charID, int summonID) {
         OutPacket outpacket = new OutPacket(OutHeader.SUMMONED_ASSIST_ATTACK_REQUEST);
 
         outpacket.encodeInt(charID);
-        outpacket.encodeInt(summon.getObjectId());
-        outpacket.encodeInt(summon.getAssistType());
+        outpacket.encodeInt(summonID);
 
         return outpacket;
     }
@@ -93,6 +92,14 @@ public class CField {
         outPacket.encodeInt(charID);
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(summon.isAttackActive());
+
+        return outPacket;
+    }
+
+    public static OutPacket summonedAttackDone() {
+        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_ATTACK_DONE);
+
+        outPacket.encodeByte(true);
 
         return outPacket;
     }
@@ -604,6 +611,17 @@ public class CField {
             outPacket.encodeByte(gm);
             outPacket.encodeString(msg);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket teleport(Position position, Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.TELEPORT);
+        outPacket.encodeByte(false);
+        outPacket.encodeByte(6);
+
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodePosition(position);
 
         return outPacket;
     }

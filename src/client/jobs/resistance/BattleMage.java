@@ -122,6 +122,7 @@ public class BattleMage extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
+                c.write(CField.summonedAssistAttackRequest(chr.getId(), death.getObjectId()));
                 break;
 
             case HASTY_AURA:
@@ -232,7 +233,7 @@ public class BattleMage extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
-                tsm.putCharacterStatValue(TeleportMasteryOn, o1); //TODO Correct?
+                tsm.putCharacterStatValue(DarkLighting, o1);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -251,6 +252,10 @@ public class BattleMage extends Job {
         field.spawnSummon(death);
     }
 
+    public static void deathAttack() {
+
+    }
+
     private void handleCondemnation(int skillID, TemporaryStatManager tsm) {
         Option o = new Option();
         SkillInfo condemnationInfo = SkillData.getSkillInfoById(CONDEMNATION);
@@ -262,12 +267,12 @@ public class BattleMage extends Job {
             } else if (amount >= 7 /*condemnationInfo.getValue(x, condemnationInfo.getCurrentLevel())*/) {
 
 
-                death.setAttackActive(true);
-                c.write(CField.summonedSummonAttackActive(chr.getId(), death));
+
+                //c.write(CField.summonedSummonAttackActive(chr.getId(), death, true));
 
 
                 death.setAssistType((byte) 1);
-                c.write(CField.summonedAssistAttackRequest(chr.getId(), death));
+                //c.write(CField.summonedAssistAttackRequest(chr.getId(), death));
 
 
                 //amount = 1;
@@ -317,7 +322,7 @@ public class BattleMage extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleCondemnation(skill.getSkillId(), tsm);
+        //handleCondemnation(skill.getSkillId(), tsm);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();

@@ -143,7 +143,6 @@ public class Magician extends Job {
             ABSOLUTE_ZERO_AURA,
             INFERNO_AURA,
             RIGHTEOUSLY_INDIGNANT,
-            HEAVENS_DOOR,
     };
 
     public Magician(Char chr) {
@@ -178,9 +177,8 @@ public class Magician extends Job {
             handleArcaneAim();
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.FP_WIZARD.getJobId()
-                && chr.getJob() <= JobConstants.JobEnum.FP_ARCHMAGE.getJobId() ) {      //Mage - Fire Poison
-            if (hasHitMobs) {
+        if (chr.getJob() >= JobConstants.JobEnum.FP_WIZARD.getJobId() && chr.getJob() <= JobConstants.JobEnum.FP_ARCHMAGE.getJobId()) {
+            if(hasHitMobs) {
                 //Ignite
                 handleIgnite(attackInfo, chr, tsm);
 
@@ -189,18 +187,16 @@ public class Magician extends Job {
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.IL_WIZARD.getJobId()
-                && chr.getJob() <= JobConstants.JobEnum.IL_ARCHMAGE.getJobId() ) {      //Mage - Ice Lightning
-            if (hasHitMobs) {
+        if (chr.getJob() >= JobConstants.JobEnum.IL_WIZARD.getJobId() && chr.getJob() <= JobConstants.JobEnum.IL_ARCHMAGE.getJobId()) {
+            if(hasHitMobs) {
                 //Freezing Crush / Frozen Clutch
                 handleFreezingCrush(attackInfo, slv);
 
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.CLERIC.getJobId()
-                && chr.getJob() <= JobConstants.JobEnum.BISHOP.getJobId() ) {      //Mage - Bishop
-            if (hasHitMobs) {
+        if (chr.getJob() >= JobConstants.JobEnum.CLERIC.getJobId() && chr.getJob() <= JobConstants.JobEnum.BISHOP.getJobId()) {
+            if(hasHitMobs) {
 
             }
         }
@@ -325,6 +321,13 @@ public class Magician extends Job {
                     o1.tOption = si.getValue(subTime, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
                 }
+                break;
+            case HEAVENS_DOOR:
+                o1.nOption = 1;
+                o1.rOption = HEAVENS_DOOR;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(HeavensDoor, o1);
+                c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
 
@@ -478,13 +481,6 @@ public class Magician extends Job {
                     break;
                 case MEGIDDO_FLAME:
                     handleMegiddoFlame();
-                    break;
-                case HEAVENS_DOOR:
-                    o1.nOption = 1;
-                    o1.rOption = HEAVENS_DOOR;
-                    o1.tOption = 0;
-                    tsm.putCharacterStatValue(HeavensDoor, o1);
-                    c.write(WvsContext.temporaryStatSet(tsm));
                     break;
                 case HOLY_FOUNTAIN: //User_Create_Holidom_Request  needs to be created
                     AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);

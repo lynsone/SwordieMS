@@ -14,6 +14,7 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
+import enums.MoveAbility;
 import enums.TSIndex;
 import loaders.SkillData;
 import packet.UserLocal;
@@ -73,11 +74,16 @@ public class WildHunter extends Job {
     public static final int BACKSTEP = 33111011; //Special Buff (ON/OFF)
     public static final int HUNTING_ASSISTANT_UNIT = 33111013; //Area of Effect
     public static final int SONIC_ROAR = 33111015; //Special Attack (Bite Debuff)
+    public static final int FLURRY = 33110008; //Dodge
 
     public static final int JAGUAR_SOUL = 33121017; //Special Attack (Stun Debuff) + (Bite Debuff) + (Magic Crash Debuff)
     public static final int DRILL_SALVO = 33121016; //Summon
     public static final int SHARP_EYES = 33121004; //Buff
     public static final int MAPLE_WARRIOR_WH = 33121007; //Buff
+
+    //Final Attack
+    public static final int FINAL_ATTACK_WH = 33100009;
+    public static final int ADVANCED_FINAL_ATTACK_WH = 33120011;
 
     public static final int FOR_LIBERTY_WH = 33121053;
     public static final int SILENT_RAMPAGE = 33121054;
@@ -277,14 +283,12 @@ public class WildHunter extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
-                //Final attack x %
                 break;
             case DRILL_SALVO:
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                summon = Summon.getSummonBy(c.getChr(), DRILL_SALVO, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setSummonTerm(0);
-                summon.setMoveAction((byte) 0);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
                 break;
         }
@@ -435,6 +439,11 @@ public class WildHunter extends Job {
                     aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    if(chr.isLeft()) {
+                        aa.setFlip(false);
+                    } else {
+                        aa.setFlip(true);
+                    }
                     aa.setDelay((short) 4);
                     chr.getField().spawnAffectedArea(aa);
                     break;
@@ -444,7 +453,21 @@ public class WildHunter extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
+        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+            // Dodged
+            if(chr.hasSkill(FLURRY)) {
+                Skill skill = chr.getSkill(FLURRY);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                TemporaryStatManager tsm = chr.getTemporaryStatManager();
+                Option o = new Option();
+                o.nOption = 100;
+                o.rOption = skill.getSkillId();
+                o.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CriticalBuff, o);
+                c.write(WvsContext.temporaryStatSet(tsm));
+            }
+        }
     }
 
     @Override
@@ -454,6 +477,41 @@ public class WildHunter extends Job {
 
     @Override
     public int getFinalAttackSkill() {
-        return 0;
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(FINAL_ATTACK_WH)) {
+                fas = FINAL_ATTACK_WH;
+            }
+            if (chr.hasSkill(ADVANCED_FINAL_ATTACK_WH)) {
+                fas = ADVANCED_FINAL_ATTACK_WH;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
+    }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_WH)) {
+            skill = chr.getSkill(FINAL_ATTACK_WH);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_WH)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_WH);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.getOptByCTSAndSkill(IndieDamR, SILENT_RAMPAGE) != null) {
+            return 100;
+        }
+        Skill skill = getFinalAtkSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
     }
 }

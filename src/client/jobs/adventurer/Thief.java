@@ -159,8 +159,7 @@ public class Thief extends Job {
                     chr.addSkill(skill);
                 }
             }
-            if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId()
-                    && chr.getJob() <= JobConstants.JobEnum.CHIEFBANDIT.getJobId()) {
+            if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.SHADOWER.getJobId()) {
                 critInterval();
             }
         }
@@ -182,20 +181,19 @@ public class Thief extends Job {
             skillID = skill.getSkillId();
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.ASSASSIN.getJobId()
-                && chr.getJob() <= JobConstants.JobEnum.NIGHTLORD.getJobId()) { // Night Lord
-
+        if (chr.getJob() >= JobConstants.JobEnum.ASSASSIN.getJobId() && chr.getJob() <= JobConstants.JobEnum.NIGHTLORD.getJobId()) {
             if(hasHitMobs) {
                 handleNightLordMark(skillID, slv, attackInfo);
             }
         }
 
 
-        if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId()
-                && chr.getJob() <= JobConstants.JobEnum.CHIEFBANDIT.getJobId()) { // Shadower
+        if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.SHADOWER.getJobId()) {
             if(hasHitMobs) {
                 //Critical Growth & Prime Critical
-                incrementCritGrowing();
+                if(chr.hasSkill(CRITICAL_GROWTH)) {
+                    incrementCritGrowing();
+                }
 
                 //Flip of the Coin
                 if(chr.hasSkill(FLIP_THE_COIN)) {
@@ -214,7 +212,7 @@ public class Thief extends Job {
             }
         }
 
-        if (chr.getJob() > 429 || chr.getJob() < 435) { //Dual Blade
+        if (chr.getJob() >= JobConstants.JobEnum.BLADE_RECRUIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.BLADE_MASTER.getJobId()) {
             if(hasHitMobs) {
 
             }

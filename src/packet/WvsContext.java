@@ -682,4 +682,29 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket flameWizardFlareBlink(Char chr, Position newPosition, boolean used) {
+        OutPacket outPacket = new OutPacket(OutHeader.FLAME_WIZARD_FLARE_BLINK);
+
+        Position zero = new Position(0,0);
+        outPacket.encodeInt(chr.getId()); //chr?
+        outPacket.encodeByte(used); //used?
+
+        if (used) {
+
+        //Blink - Clear + Teleport
+            chr.write(CField.teleport(newPosition, chr));
+
+        } else {
+
+        //Blink - Set Position
+            outPacket.encodeByte(used);
+            outPacket.encodeShort(1);
+            outPacket.encodePosition(newPosition); //2x encode Short (x/y)
+            outPacket.encodePosition(zero); //2x encode Short (x/y)
+        }
+        return outPacket;
+    }
+
+
 }

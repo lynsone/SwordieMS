@@ -15,6 +15,7 @@ import packet.CField;
 import packet.WvsContext;
 import util.Position;
 import util.Rect;
+import util.Util;
 
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +64,10 @@ public class Evan extends Job {
     public static final int THUNDER_CIRCLE = 22141011;
     public static final int EARTH_CIRCLE = 22171062;
     public static final int DARK_FOG = 22171095;
+
+    //Final Attack
+    public static final int DRAGON_SPARK = 22000015;
+    public static final int ADV_DRAGON_SPARK = 22110021;
 
     private int prevSkill = 0;
 
@@ -208,7 +213,7 @@ public class Evan extends Job {
                 tsb.setNOption(1939007);
                 tsb.setROption(skillID);
                 tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
-                tsm.sendResetStatPacket();
+                tsm.sendSetStatPacket();
 
                 o1.nOption = 1;
                 o1.rOption = DRAGON_MASTER;
@@ -360,8 +365,41 @@ public class Evan extends Job {
 
     @Override
     public int getFinalAttackSkill() {
-        return 0;
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(DRAGON_SPARK)) {
+                fas = DRAGON_SPARK;
+            }
+            if (chr.hasSkill(ADV_DRAGON_SPARK)) {
+                fas = ADV_DRAGON_SPARK;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
     }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(DRAGON_SPARK)) {
+            skill = chr.getSkill(DRAGON_SPARK);
+        }
+        if(chr.hasSkill(ADV_DRAGON_SPARK)) {
+            skill = chr.getSkill(ADV_DRAGON_SPARK);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        Skill skill = getFinalAtkSkill(chr);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
+    }
+
+
 
     private void handleMagicDebris() {
         Field field = chr.getField();

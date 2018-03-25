@@ -42,6 +42,8 @@ public class Hayato extends Job {
     public static final int KATANA_BOOSTER = 41101005; //Buff
     public static final int MILITARY_MIGHT = 41101003; //Buff
 
+    public static final int WILLOW_DODGE = 41110006;
+
     public static final int IRON_SKIN = 41121003; //Buff
     public static final int AKATSUKI_HERO_HAYATO = 41121005; //Buff
     public static final int TORNADO_BLADE = 41121017; //Attack (Stun Debuff)
@@ -264,7 +266,7 @@ public class Hayato extends Job {
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieCr, o1);
+                tsm.putCharacterStatValue(HayatoCr, o1);
                 c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
@@ -294,7 +296,7 @@ public class Hayato extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
+        handleWillowDodge();
     }
 
     @Override
@@ -539,5 +541,35 @@ public class Hayato extends Job {
                 mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
             }
         }
+    }
+
+    public void handleWillowDodge() {   //TODO
+        Skill skill = chr.getSkill(WILLOW_DODGE);
+        if (skill == null) {
+            return;
+        }
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(WILLOW_DODGE);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Option o1 = new Option();
+        int amount = 1;
+        if (tsm.hasStat(WillowDodge)) {
+            amount = tsm.getOption(WillowDodge).nOption;
+            if (amount < 5) {
+                amount++;
+            }
+        }
+        o.nOption = 100000;
+        o.rOption = WILLOW_DODGE;
+        o.tOption = 20;
+        tsm.putCharacterStatValue(HayatoPAD, o);
+
+        o1.nOption = si.getValue(damR, slv);
+        o1.rOption = WILLOW_DODGE;
+        o1.tOption = 20;
+        tsm.putCharacterStatValue(DamR, o1);
+
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 }

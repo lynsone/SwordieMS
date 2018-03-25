@@ -11,6 +11,7 @@ import client.life.MobTemporaryStat;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ForceAtomEnum;
+import enums.MobStat;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -52,6 +53,9 @@ public class Kinesis extends Job {
     public static final int PSYCHIC_CHARGER = 142121008;
     public static final int TELEPATH_TACTICS = 142121006;
     public static final int MENTAL_TEMPEST = 142121030;
+    public static final int MENTAL_SHOCK = 142121031;
+    public static final int MENTAL_OVERDRIVE = 142121032;
+
 
     private static final int MAX_PP = 30;
 
@@ -146,6 +150,16 @@ public class Kinesis extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePMdR, o1);
                 c.write(WvsContext.temporaryStatSet(tsm));
+                break;
+            case MENTAL_SHOCK:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                }
                 break;
         }
     }

@@ -6,10 +6,7 @@ import client.character.HitInfo;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
-import client.life.AffectedArea;
-import client.life.Mob;
-import client.life.MobTemporaryStat;
-import client.life.Summon;
+import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
@@ -20,6 +17,7 @@ import packet.CField;
 import packet.WvsContext;
 import server.EventManager;
 import util.Position;
+import util.Rect;
 import util.Util;
 
 import java.util.ArrayList;
@@ -55,11 +53,12 @@ public class Xenon extends Job {
     public static final int MANIFEST_PROJECTOR = 36111006; //Special Buff (Special Duration)
     public static final int EMERGENCY_RESUPPLY = 36111008; //Special Skill
     public static final int PINPOINT_SALVO_REDESIGN_B = 36110012; //Special Attack Upgrade  (Passive Upgrade)
+    public static final int TRIANGULATION = 36110005;
 
     public static final int HYPOGRAM_FIELD_FORCE_FIELD = 36121002;                  //TODO Summon/Area of Effect?
     public static final int HYPOGRAM_FIELD_PENETRATE = 36121013;                    //TODO Summon/Area of Effect?
     public static final int HYPOGRAM_FIELD_SUPPORT = 36121014;                      //TODO Summon/Area of Effect?
-    public static final int TEMPORAL_POD = 36121007;                                //TODO Area of Effect
+    public static final int TEMPORAL_POD = 36121007;                                //TODO
     public static final int OOPARTS_CODE = 36121003; //Buff
     public static final int MAPLE_WARRIOR_XENON = 36121008; //Buff
     public static final int PINPOINT_SALVO_PERFECT_DESIGN = 36120015; //Sp. Attack Upgrade  (Passive Upgrade)
@@ -96,7 +95,6 @@ public class Xenon extends Job {
             TEMPORAL_POD,
             OOPARTS_CODE,
             MAPLE_WARRIOR_XENON,
-            ORBITAL_CATACLYSM,
             AMARANTH_GENERATOR,
     };
 
@@ -271,6 +269,7 @@ public class Xenon extends Job {
                 incrementSupply();
             }
         }
+        handleTriangulation(attackInfo);
         handleSupplyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
         Option o2 = new Option();
@@ -286,6 +285,29 @@ public class Xenon extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
                 }
+                break;
+            case ORBITAL_CATACLYSM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = - si.getValue(x, slv);
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                    }
+                }
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(indieDamR, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(y, slv);
+                tsm.putCharacterStatValue(IndieDamR, o1);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieMaxDamageOverR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(y, slv);
+                tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
     }
@@ -325,18 +347,8 @@ public class Xenon extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
-                case ORBITAL_CATACLYSM:
-                    o1.nReason = skillID;
-                    o1.nValue = si.getValue(indieDamR, slv);
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieDamR, o1);
-                    o2.nReason = skillID;
-                    o2.nValue = si.getValue(indieMaxDamageOverR, slv);
-                    o2.tStart = (int) System.currentTimeMillis();
-                    o2.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                case PINPOINT_SALVO:
+                    handlePinPointSalvo();
                     break;
             }
         }
@@ -400,5 +412,57 @@ public class Xenon extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    public void handleTriangulation(AttackInfo attackInfo) {        //TODO
+        Skill skill = chr.getSkill(TRIANGULATION);
+        int slv = skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(TRIANGULATION);
+        Option o1 = new Option();
+        Option o = new Option();
+        int amount = 4;
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            MobTemporaryStat mts = mob.getTemporaryStat();
+
+            if (mts.hasCurrentMobStat(MobStat.Explosion)) {
+                amount = mts.getCurrentOptionsByMobStat(MobStat.Explosion).nOption;
+                if (amount < 3) {
+                    amount++;
+                }
+            }
+            o1.nOption = amount;
+            o1.rOption = TRIANGULATION;
+            o1.tOption = 0;
+            mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
+
+            o.nOption = (si.getValue(x, slv) * amount);
+            o.rOption = TRIANGULATION;
+            o.tOption = 0;
+            mts.addStatOptionsAndBroadcast(MobStat.ACC, o);
+            mts.addStatOptionsAndBroadcast(MobStat.EVA, o);
+
+        }
+    }
+
+    private void handlePinPointSalvo() {
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(PINPOINT_SALVO);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        List<Life> lifes = field.getLifesInRect(rect);
+        for(Life life : lifes) {
+            if(life instanceof Mob) {
+                int anglenum = new Random().nextInt(160)+20;
+                int mobID = ((Mob) life).getRefImgMobID(); //
+                int inc = ForceAtomEnum.XENON_ROCKET_3.getInc();
+                int type = ForceAtomEnum.XENON_ROCKET_3.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                        anglenum, 250, (int) System.currentTimeMillis(), 1, 0,
+                        new Position());
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        true, mobID, PINPOINT_SALVO, forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), PINPOINT_SALVO, life.getPosition()));
+            }
+        }
     }
 }
