@@ -19,6 +19,7 @@ import util.Util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -175,6 +176,7 @@ public class Magician extends Job {
 
         if (hasHitMobs) {                                   //Common
             handleArcaneAim();
+            handleMegiddoFlameReCreation(skillID, slv, attackInfo);
         }
 
         if (chr.getJob() >= JobConstants.JobEnum.FP_WIZARD.getJobId() && chr.getJob() <= JobConstants.JobEnum.FP_ARCHMAGE.getJobId()) {
@@ -341,16 +343,41 @@ public class Magician extends Job {
         for (Life life : lifes) {
             if (life instanceof Mob) {
                 int mobID = ((Mob) life).getRefImgMobID(); //
+                int mobID2 = ((Mob) life).getObjectId();
+                int mobID3 = life.getTemplateId();
                 int x = ((Mob) life).getPosition().getX();
                 int y = ((Mob) life).getPosition().getY();
                 int inc = ForceAtomEnum.DA_ORB.getInc();
                 int type = ForceAtomEnum.DA_ORB.getForceAtomType();
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                         0, 500, (int) System.currentTimeMillis(), 1, 0,
-                        new Position(0, -100));
+                        new Position(0, 0));
                 chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                         true, mobID, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
                         life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
+            }
+        }
+    }
+
+    private void handleMegiddoFlameReCreation(int skillID, byte slv, AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
+        int anglenum = new Random().nextInt(360);
+        int delaynum = new Random().nextInt(100); //Random delay between 0~150ms
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            int TW1prop = 85;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change
+            if (Util.succeedProp(TW1prop)) {
+                int mobID = mai.mobId;
+
+                int inc = ForceAtomEnum.DA_ORB_RECREATION.getInc();
+                int type = ForceAtomEnum.DA_ORB_RECREATION.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 5,
+                        anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
+                        new Position(0, 0)); //Slightly behind the player
+                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                        true, mobID, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                        mob.getPosition(), MEGIDDO_FLAME_ATOM, mob.getPosition()));
             }
         }
     }

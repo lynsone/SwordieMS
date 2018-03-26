@@ -4,8 +4,10 @@ import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
 import client.character.skills.*;
+import client.field.Field;
 import client.jobs.Job;
 import client.life.AffectedArea;
+import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -21,6 +23,7 @@ import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -34,6 +37,7 @@ public class Shade extends Job {
     public static final int FOX_TROT = 20051284;
 
     public static final int FOX_SPIRITS = 25101009; //Buff (ON/OFF)                 //HiddenPossesion TempStat
+    public static final int FOX_SPIRITS_INIT = 25100009;
     public static final int FOX_SPIRITS_ATOM = 25100010;
     public static final int FOX_SPIRITS_ATOM_2 = 25120115; //Upgrade
     public static final int GROUND_POUND_FIRST = 25101000; //Special Attack (Slow Debuff)
@@ -48,6 +52,7 @@ public class Shade extends Job {
     public static final int BOMB_PUNCH_FINAL = 25121003; //Special Attack (Stun Debuff)
     public static final int DEATH_MARK = 25121006; //Special Attack (Mark Debuff)
     public static final int SOUL_SPLITTER = 25121007; //Special Attack (Split)
+    public static final int FIRE_FOX_SPIRIT_MASTERY = 25120110;
 
     public static final int HEROIC_MEMORIES_SH = 25121132;
     public static final int SPIRIT_BOND_MAX = 25121131;
@@ -157,64 +162,83 @@ public class Shade extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleFoxSpirits(int skillID, byte slv, AttackInfo attackInfo) {   //TODO
+    private void handleFoxSpirits(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(HiddenPossession)) {
             SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
-            int anglenum = new Random().nextInt(90) + 10; //randomisation
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                int TW1prop = 100;//  SkillData.getSkillInfoById(FOX_SPIRITS_ATOM).getValue(prop, slv); //TODO Change
-                if (Util.succeedProp(TW1prop)) {
-                    if(chr.hasSkill(25120110)) {
-                        int mobID = mai.mobId;
-                        int inc = ForceAtomEnum.RED_RABBIT_ORB.getInc(); //4th Job
-                        int type = ForceAtomEnum.RED_RABBIT_ORB.getForceAtomType(); //4th Job
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                                new Position());
+            Field field = chr.getField();
+            //Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+
+            Rect rect = new Rect(
+                    new Position(
+                            chr.getPosition().getX() - 750,
+                            chr.getPosition().getY() - 750),
+                    new Position(
+                            chr.getPosition().getX() + 750,
+                            chr.getPosition().getY() + 750)
+            );
+
+            List<Life> lifes = field.getLifesInRect(rect);
+            for(Life life : lifes) {
+                if(life instanceof Mob) {
+                    int anglenum = 305;// new Random().nextInt(270);
+                    int mobID = ((Mob) life).getRefImgMobID();
+                    if(skillID == FIRE_FOX_SPIRIT_MASTERY) {
+                        int inc = ForceAtomEnum.FLAMING_RABBIT_ORB.getInc();
+                        int type = ForceAtomEnum.FLAMING_RABBIT_ORB.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 7,
+                                anglenum, 400, (int) System.currentTimeMillis(), 1, 0,
+                                new Position(chr.isLeft() ? 0 : -50,-50));
                         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, FOX_SPIRITS_ATOM_2, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), FOX_SPIRITS_ATOM_2, mob.getPosition()));
-                    } else {
-                        int mobID = mai.mobId;
-                        int inc = ForceAtomEnum.BLUE_RABBIT_ORB.getInc(); //2nd Job
-                        int type = ForceAtomEnum.BLUE_RABBIT_ORB.getForceAtomType(); //2nd Job
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                                new Position());
+                                life.getPosition(), FOX_SPIRITS_ATOM_2, life.getPosition()));
+                    }
+                    if(skillID == FOX_SPIRITS_INIT) {
+                        int inc = ForceAtomEnum.RABBIT_ORB.getInc();
+                        int type = ForceAtomEnum.RABBIT_ORB.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 7,
+                                anglenum, 400, (int) System.currentTimeMillis(), 1, 0,
+                                new Position(chr.isLeft() ? 0 : -50, -50));
                         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), FOX_SPIRITS_ATOM, mob.getPosition()));
+                                life.getPosition(), FOX_SPIRITS_ATOM, life.getPosition()));
                     }
                 }
             }
         }
     }
 
-    private void handleFoxSpiritMobToMob(int skillID, byte slv, AttackInfo attackInfo) {    //TODO ReCreate
+    private void handleFoxSpiritsReCreation(int skillID, byte slv, AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(HiddenPossession)) {
-            SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
-            //int anglenum = new Random().nextInt(90) + 10; //randomisation
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                int TW1prop = 60;//  SkillData.getSkillInfoById(FOX_SPIRITS_ATOM).getValue(prop, slv); //TODO Change
-                if (Util.succeedProp(TW1prop)) {
-                    int mobID = mai.mobId;
-                    int inc = ForceAtomEnum.RABBIT_ORB.getInc(); //2nd Job
-                    int type = ForceAtomEnum.RABBIT_ORB.getForceAtomType(); //2nd Job
-                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                            0, 0, (int) System.currentTimeMillis(), 1, 0,
+        SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
+        int anglenum = new Random().nextInt(360);
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            int TW1prop = 70;  // Recreation %
+            if (Util.succeedProp(TW1prop)) {
+                int mobID = mai.mobId;
+                if(chr.hasSkill(FIRE_FOX_SPIRIT_MASTERY)) {
+                    int inc = ForceAtomEnum.FLAMING_RABBIT_ORB_RECREATION.getInc(); //4th Job
+                    int type = ForceAtomEnum.FLAMING_RABBIT_ORB_RECREATION.getForceAtomType(); //4th Job
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 4,
+                            anglenum, 100, (int) System.currentTimeMillis(), 1, 0,
                             new Position());
-                    chr.getField().broadcastPacket(CField.createForceAtom(true, mobID, mobID, type, //TODO  atm Player -> Mob     |      Change to Mob -> Mob
+                    chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                            true, mobID, FOX_SPIRITS_ATOM_2, forceAtomInfo, new Rect(), 0, 300,
+                            mob.getPosition(), FOX_SPIRITS_ATOM_2, mob.getPosition()));
+                } else {
+                    int inc = ForceAtomEnum.RABBIT_ORB_RECREATION.getInc();
+                    int type = ForceAtomEnum.RABBIT_ORB_RECREATION.getForceAtomType();
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 4,
+                            anglenum, 100, (int) System.currentTimeMillis(), 1, 0,
+                            new Position());
+                    chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
                             true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), FOX_SPIRITS_ATOM, mob.getPosition()));
                 }
             }
         }
     }
-
 
     public void handleWeaken(AttackInfo attackInfo, byte slv) {
         if(chr.hasSkill(WEAKEN)) {
@@ -259,14 +283,10 @@ public class Shade extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            if (skillID == FOX_SPIRITS_ATOM_2) { //TODO  Re-creation
-                handleFoxSpiritMobToMob(skillID, slv, attackInfo);
-            } else if (skillID == FOX_SPIRITS_ATOM){ //TODO
-                return;
+            if(attackInfo.skillId == FOX_SPIRITS_ATOM || attackInfo.skillId == FOX_SPIRITS_ATOM_2) {
+                handleFoxSpiritsReCreation(skillID, slv, attackInfo);
             }
-            else {
-                handleFoxSpirits(skillID, slv, attackInfo);
-            }
+
             handleWeaken(attackInfo, slv);
         }
         Option o1 = new Option();
@@ -352,6 +372,9 @@ public class Shade extends Job {
                     aa.setDelay((short) 4);
                     chr.getField().spawnAffectedArea(aa);
                     break;
+                case FIRE_FOX_SPIRIT_MASTERY:
+                case FOX_SPIRITS_INIT:
+                    handleFoxSpirits(skillID);
             }
         }
     }

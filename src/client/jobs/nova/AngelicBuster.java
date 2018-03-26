@@ -214,7 +214,7 @@ public class AngelicBuster extends Job {
         }
     }
 
-    private void handleSoulSeeker() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb        Re-Creation!
+    private void handleSoulSeeker() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -235,6 +235,31 @@ public class AngelicBuster extends Job {
         }
     }
 
+
+    private void handleSoulSeekerReCreation(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
+        int anglenum = new Random().nextInt(360);
+        int delaynum = new Random().nextInt(150);
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            int TW1prop = 100;// TODO
+            if (Util.succeedProp(TW1prop)) {
+                int mobID = mai.mobId;
+
+                int inc = ForceAtomEnum.AB_ORB_RECREATION.getInc();
+                int type = ForceAtomEnum.AB_ORB_RECREATION.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 2,
+                        anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
+                        new Position());
+                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                        true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                        mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
+            }
+        }
+    }
+
+
     public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -254,13 +279,20 @@ public class AngelicBuster extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            if (skillID != SOUL_SEEKER_ATOM) {
+
+            if (attackInfo.skillId == SOUL_SEEKER_ATOM) {
+                handleSoulSeekerReCreation(attackInfo);
+            }
+
+            if (attackInfo.skillId != SOUL_SEEKER_ATOM) {
                 handleSoulSeekerExpert(skillID, slv, attackInfo);
             }
+
             if (Util.succeedProp(getRechargeProp(skillID, slv))) {
                 c.write(UserLocal.onEffectRechargeAB());
                 c.write(UserLocal.onResetStateForOffSkill());
             }
+
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -363,7 +395,7 @@ public class AngelicBuster extends Job {
     public int getRechargeProp(int skillID, byte slv) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
-        int primerecharge = si.getValue(OnActive, slv);
+        int primerecharge = 90;//  si.getValue(OnActive, slv);
         int recharge = primerecharge;
 
         if (chr.hasSkill(65000003)) {

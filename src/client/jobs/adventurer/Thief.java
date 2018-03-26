@@ -56,6 +56,7 @@ public class Thief extends Job {
     public static final int SHOWDOWN = 4121017; //Special Attack
     public static final int SUDDEN_RAID_NL = 4121016; //Special Attack
     public static final int FRAILTY_CURSE = 4121015; //AoE
+    public static final int NIGHT_LORD_MARK = 4120018;
 
 
     // Shadower
@@ -183,7 +184,11 @@ public class Thief extends Job {
 
         if (chr.getJob() >= JobConstants.JobEnum.ASSASSIN.getJobId() && chr.getJob() <= JobConstants.JobEnum.NIGHTLORD.getJobId()) {
             if(hasHitMobs) {
-                handleNightLordMark(skillID, slv, attackInfo);
+                //NightLord's Mark & ForceAtom
+                if(chr.hasSkill(ASSASSINS_MARK)) {
+                    setMarkonMob(attackInfo);
+                    handleMark(attackInfo);
+                }
             }
         }
 
@@ -268,7 +273,7 @@ public class Thief extends Job {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
-                }       // TODO DoT  or  Affect on Hit Effect?
+                }
                 break;
             case FLASHBANG:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -669,29 +674,6 @@ public class Thief extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-
-    private void handleNightLordMark(int skillID, byte slv, AttackInfo attackInfo) {    //From Mob, not Player
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(NightLordMark)) {
-            SkillInfo si = SkillData.getSkillInfoById(ASSASSINS_MARK);
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                int TW1prop = 100;//
-                if (Util.succeedProp(TW1prop)) {
-                    int mobID = mai.mobId;
-                    int inc = ForceAtomEnum.ASSASSIN_MARK.getInc();
-                    int type = ForceAtomEnum.ASSASSIN_MARK.getForceAtomType();
-                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                            0, 100, (int) System.currentTimeMillis(), 1, 0,
-                            new Position());
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, mobID, chr.getId(), type,
-                            true, mobID, ASSASSINS_MARK_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                            mob.getPosition(), 2070000, mob.getPosition()));
-                }
-            }
-        }
-    }
-
     public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -722,6 +704,82 @@ public class Thief extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+
+    private void handleMark(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(ASSASSINS_MARK);
+        SkillInfo si = SkillData.getSkillInfoById(ASSASSINS_MARK);
+        byte slv = (byte) skill.getCurrentLevel();
+        int skillId = skill.getSkillId();
+        if(tsm.hasStat(NightLordMark)) {
+
+            if (attackInfo.skillId != ASSASSINS_MARK_ATOM) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    int mobID = mai.mobId;
+                    Rect rect = new Rect(
+                            new Position(
+                                    mob.getPosition().getX() - 5000,
+                                    mob.getPosition().getY() - 5000),
+                            new Position(
+                                    mob.getPosition().getX() + 5000,
+                                    mob.getPosition().getY() + 5000)
+                    );
+
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(mts.hasBurnFromSkill(getCurMarkLv())) {
+                        for (int i = 0; i < 6; i++) {
+                            int anglez = (360 / 6) * i;
+
+                            int inc = ForceAtomEnum.ASSASSIN_MARK.getInc();
+                            int type = ForceAtomEnum.ASSASSIN_MARK.getForceAtomType();
+
+                            if(chr.hasSkill(NIGHT_LORD_MARK)) {
+                                inc = ForceAtomEnum.NIGHTLORD_MARK.getInc();
+                                type = ForceAtomEnum.NIGHTLORD_MARK.getForceAtomType();
+                            }
+
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 4,
+                                    anglez, 200, (int) System.currentTimeMillis(), 1, 0,
+                                    new Position());
+                            chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                                    true, mobID, ASSASSINS_MARK_ATOM, forceAtomInfo, rect, 0, 300,
+                                    mob.getPosition(), chr.getBulletIDForAttack(), mob.getPosition()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void setMarkonMob(AttackInfo attackInfo) {
+        Skill skill = chr.getSkill(getCurMarkLv());
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(getCurMarkLv());
+        byte slv = (byte) skill.getCurrentLevel();
+        int markprop = si.getValue(prop, slv);
+        if(tsm.hasStat(NightLordMark)) {
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(markprop)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                }
+            }
+        }
+    }
+
+    private int getCurMarkLv() {
+        int supgrade = 0;
+        if(chr.hasSkill(ASSASSINS_MARK)) {
+            supgrade = ASSASSINS_MARK;
+        }
+        if(chr.hasSkill(NIGHT_LORD_MARK)) {
+            supgrade = NIGHT_LORD_MARK;
+        }
+        return supgrade;
     }
 
 }

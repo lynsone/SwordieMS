@@ -23,6 +23,7 @@ import util.Util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -378,6 +379,11 @@ public class Demon extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        if(hasHitMobs) {
+            if(attackInfo.skillId == NETHER_SHIELD_ATOM) {
+                handleNetherShieldReCreation(attackInfo);
+            }
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -513,7 +519,7 @@ public class Demon extends Job {
         }
     }
 
-    private void handleNetherShield() { //TODO  Can't spawn orb if too close to the Mob || doesn't always spawn an orb
+    private void handleNetherShield() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(NETHER_SHIELD);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -523,12 +529,36 @@ public class Demon extends Job {
                 int mobID = ((Mob) life).getRefImgMobID(); //
                 int inc = ForceAtomEnum.NETHER_SHIELD.getInc();
                 int type = ForceAtomEnum.NETHER_SHIELD.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 500, (int) System.currentTimeMillis(), 1, 0,
-                        new Position(0, -100));
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                for(int i = 0; i<2; i++) {
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                            350 + (10*i), 500, (int) System.currentTimeMillis(), 1, 0,
+                            new Position(0, -100));
+                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                            true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                            life.getPosition(), NETHER_SHIELD_ATOM, life.getPosition()));
+                }
+            }
+        }
+    }
+
+    private void handleNetherShieldReCreation(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(NETHER_SHIELD);
+        int anglenum = new Random().nextInt(360);
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            int TW1prop = 100;// TODO
+            if (Util.succeedProp(TW1prop)) {
+                int mobID = mai.mobId;
+
+                int inc = ForceAtomEnum.NETHER_SHIELD_RECREATION.getInc();
+                int type = ForceAtomEnum.NETHER_SHIELD_RECREATION.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 35, 4,
+                        anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                        new Position());
+                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
                         true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), NETHER_SHIELD_ATOM, life.getPosition()));
+                        mob.getPosition(), NETHER_SHIELD_ATOM, mob.getPosition()));
             }
         }
     }
