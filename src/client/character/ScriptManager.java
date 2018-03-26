@@ -7,6 +7,7 @@ import client.character.items.Equip;
 import client.character.items.Item;
 import client.field.Field;
 import client.field.Portal;
+import client.field.fieldeffect.MobHPTagFieldEffect;
 import client.guild.GuildMsg;
 import client.life.Mob;
 import client.party.Party;
@@ -18,6 +19,7 @@ import loaders.MobData;
 import loaders.QuestData;
 import loaders.ItemData;
 import org.apache.log4j.LogManager;
+import packet.CField;
 import packet.ScriptMan;
 import packet.WvsContext;
 import util.FileTime;
@@ -28,10 +30,8 @@ import javax.script.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static enums.ChatMsgColour.*;
 import static enums.InventoryOperation.ADD;
@@ -399,6 +399,10 @@ public class ScriptManager implements Observer {
         stop(ScriptType.QUEST);
     }
 
+    public void dispose(ScriptType scriptType) {
+        stop(scriptType);
+    }
+
     /**
      * Warps the client to a given {@link Field} ID.
      *
@@ -652,5 +656,19 @@ public class ScriptManager implements Observer {
             mob.setField(field);
         }
         field.spawnLife(mob, null);
+    }
+
+    public void showHP(int templateID) {
+        chr.getField().getMobs().stream()
+                .filter(m -> m.getTemplateId() == templateID)
+                .findFirst()
+                .ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(mob))));
+    }
+
+    public void showHP() {
+        chr.getField().getMobs().stream()
+                .filter(m -> m.getHp() > 0)
+                .findFirst()
+                .ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(mob))));
     }
 }

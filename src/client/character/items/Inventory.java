@@ -77,7 +77,7 @@ public class Inventory {
     }
 
     public void addItem(Item item) {
-        if(getItems().size() < getSlots()) {
+        if(getItems().size() <= getSlots()) {
             getItems().add(item);
             item.setInvType(getType());
             sortItemsByIndex();
@@ -151,5 +151,13 @@ public class Inventory {
 
     public boolean containsItem(int itemID) {
         return getItems().stream().anyMatch(item -> item.getItemId() == itemID);
+    }
+
+    public boolean canPickUp(Item item) {
+        return !isFull() || (item.getInvType().isStackable() && getItemByItemID(item.getItemId()) != null);
+    }
+
+    private boolean isFull() {
+        return getSlots() > getItems().size();
     }
 }

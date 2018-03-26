@@ -65,8 +65,8 @@ CREATE TABLE questlists (
     questID int,
     fk_questID bigint,
     PRIMARY KEY (questList_id),
-    FOREIGN KEY (QuestManager_id) REFERENCES questManagers(id) ON DELETE CASCADE,
-    FOREIGN KEY (fk_questID) REFERENCES quests(id) ON DELETE CASCADE
+    FOREIGN KEY (QuestManager_id) REFERENCES questManagers(id)  on delete cascade,
+    FOREIGN KEY (fk_questID) REFERENCES quests(id) 
 );
 
 CREATE TABLE questProgressRequirements (
@@ -77,7 +77,7 @@ CREATE TABLE questProgressRequirements (
     requiredCount int,
     currentCount int,
     PRIMARY KEY (id),
-    FOREIGN KEY (questID) REFERENCES quests(id) ON DELETE CASCADE
+    FOREIGN KEY (questID) REFERENCES quests(id)  on delete cascade
 );
 
 CREATE TABLE inventories (
@@ -100,7 +100,7 @@ CREATE TABLE items (
     quantity int,
     owner varchar(255),
     PRIMARY KEY (id),
-    FOREIGN KEY (inventoryId) REFERENCES inventories(id) ON DELETE CASCADE
+    FOREIGN KEY (inventoryId) REFERENCES inventories(id)  on delete cascade
 );
 
 CREATE TABLE equips (
@@ -175,7 +175,7 @@ CREATE TABLE equips (
     vSlot varchar(255),
     fixedGrade int,
     PRIMARY KEY (itemId),
-    FOREIGN KEY (itemId) REFERENCES items(id),
+    FOREIGN KEY (itemId) REFERENCES items(id) on delete cascade,
     FOREIGN KEY (equippedDate) REFERENCES filetimes(id)
 );
 CREATE TABLE options (
@@ -183,7 +183,7 @@ CREATE TABLE options (
     equipId bigint,
     optionId int,
     PRIMARY KEY (id),
-    FOREIGN KEY (equipId) REFERENCES equips(itemId)
+    FOREIGN KEY (equipId) REFERENCES equips(itemId) on delete cascade
 );
 
 CREATE TABLE avatarLook (
@@ -213,7 +213,7 @@ CREATE TABLE hairEquips (
     alId int,
     equipId int,
     PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id)
+    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
 );
 
 CREATE TABLE unseenEquips (
@@ -221,7 +221,7 @@ CREATE TABLE unseenEquips (
     alId int,
     equipId int,
     PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id)
+    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
 );
 
 CREATE TABLE petIDs (
@@ -229,7 +229,7 @@ CREATE TABLE petIDs (
     alId int,
     petId int,
     PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id)
+    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
 );
 
 CREATE TABLE totems (
@@ -237,7 +237,7 @@ CREATE TABLE totems (
     alId int,
     totemId int,
     PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id)
+    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
 );
 
 CREATE TABLE extendSP (
@@ -251,7 +251,7 @@ CREATE TABLE spSet (
     jobLevel tinyint,
     sp int,
     PRIMARY KEY (id),
-    FOREIGN KEY (extendSP_id) REFERENCES extendSP(id)
+    FOREIGN KEY (extendSP_id) REFERENCES extendSP(id) on delete cascade
 );
 
 CREATE TABLE systemtimes (
@@ -445,7 +445,7 @@ CREATE TABLE guildskills (
     skillID int,
     fk_GuildSkillID int,
     primary key (guildSkill_id),
-	foreign key (Guild_id) references guilds(id),
+	foreign key (Guild_id) references guilds(id), on delete cascade
     FOREIGN KEY (fk_GuildSkillID) REFERENCES GuildSkill(id) on delete cascade
 );
 
@@ -478,7 +478,7 @@ CREATE TABLE guildrequestors (
     level int,
     loggedIn boolean,
 	PRIMARY KEY (id),
-    FOREIGN KEY (guildID) REFERENCES guilds(id)
+    FOREIGN KEY (guildID) REFERENCES guilds(id) on delete cascade
 );
 
 CREATE TABLE gradeNames (
@@ -486,7 +486,7 @@ CREATE TABLE gradeNames (
 	gradeName varchar(255),
     guildID int,
     PRIMARY KEY (id),
-    FOREIGN KEY (guildID) references guilds(id)
+    FOREIGN KEY (guildID) references guilds(id) on delete cascade
 );
 
 
@@ -499,7 +499,7 @@ CREATE TABLE skills (
     currentLevel int,
     masterLevel int,
     PRIMARY KEY (id),
-    FOREIGN KEY (charId) REFERENCES characters(id) ON DELETE CASCADE
+    FOREIGN KEY (charId) REFERENCES characters(id)  on delete cascade
 );
 
 CREATE TABLE accounts (
