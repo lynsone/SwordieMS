@@ -37,6 +37,7 @@ import util.Rect;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static enums.ChatMsgColour.YELLOW;
 import static enums.FieldInstanceType.*;
@@ -229,6 +230,8 @@ public class Char {
     private FieldInstanceType fieldInstanceType;
     @Transient
     private Map<Integer, Field> fields = new HashMap<>();
+    @Transient
+    private int bulletIDForAttack;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -385,6 +388,7 @@ public class Char {
                 write(WvsContext.inventoryOperation(true, false,
                         ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
             }
+            setBulletIDForAttack(calculateBulletIDForAttack());
         }
     }
 
@@ -2080,7 +2084,7 @@ public class Char {
     public void consumeItem(Item item) {
         Inventory inventory = getInventoryByType(item.getInvType());
         // data race possible
-        if (item.getQuantity() <= 1) {
+        if (item.getQuantity() <= 1 && !ItemConstants.isThrowingItem(item.getItemId())) {
             item.setQuantity(0);
             inventory.removeItem(item);
             write(WvsContext.inventoryOperation(true, false,
@@ -2090,6 +2094,7 @@ public class Char {
             write(WvsContext.inventoryOperation(true, false,
                     UPDATE_QUANTITY, (short) item.getBagIndex(), (byte) -1, 0, item));
         }
+        setBulletIDForAttack(calculateBulletIDForAttack());
     }
 
     /**
@@ -2477,5 +2482,36 @@ public class Char {
 
     public Field getPersonalById(int id) {
         return getFields().get(id);
+    }
+
+    public int calculateBulletIDForAttack() {
+        Item weapon = getEquippedInventory().getFirstItemByBodyPart(BodyPart.WEAPON);
+        if(weapon == null) {
+            return 0;
+        }
+        Predicate<Item> p;
+        int id = weapon.getItemId();
+
+        if(ItemConstants.isClaw(id)) {
+            p = i -> ItemConstants.isThrowingStar(i.getItemId());
+        } else if(ItemConstants.isBow(id)) {
+            p = i -> ItemConstants.isBowArrow(i.getItemId());
+        } else if(ItemConstants.isXBow(id)) {
+            p = i -> ItemConstants.isXBowArrow(i.getItemId());
+        } else if(ItemConstants.isGun(id)) {
+            p = i -> ItemConstants.isBullet(i.getItemId());
+        } else {
+            return 0;
+        }
+        Item i = getConsumeInventory().getItems().stream().filter(p).findFirst().orElse(null);
+        return i != null ? i.getItemId() : 0;
+    }
+
+    public int getBulletIDForAttack() {
+        return bulletIDForAttack;
+    }
+
+    public void setBulletIDForAttack(int bulletIDForAttack) {
+        this.bulletIDForAttack = bulletIDForAttack;
     }
 }

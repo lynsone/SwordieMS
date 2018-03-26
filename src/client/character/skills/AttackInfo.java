@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AttackInfo {
-    public boolean fieldKey;
+    public byte fieldKey;
     public byte hits;
     public int mobCount;
     public int skillId;

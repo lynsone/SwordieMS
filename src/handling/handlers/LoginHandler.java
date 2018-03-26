@@ -175,9 +175,9 @@ public class LoginHandler {
             chr.getAvatarData().getZeroAvatarLook().getHairEquips().remove(new Integer(1572000));
             chr.getAvatarData().getZeroAvatarLook().setWeaponId(1562000);
             chr.getAvatarData().getZeroAvatarLook().setGender(1);
-            chr.getAvatarData().getZeroAvatarLook().setSkin(chr.getAvatarData().getAvatarLook().getSkin());
-            chr.getAvatarData().getZeroAvatarLook().setFace(21290);
-            chr.getAvatarData().getZeroAvatarLook().setHair(37623);
+            chr.getAvatarData().getZeroAvatarLook().setSkin(skin);
+            chr.getAvatarData().getZeroAvatarLook().setFace(items[0]);
+            chr.getAvatarData().getZeroAvatarLook().setHair(items[1]);
             chr.getAvatarData().getZeroAvatarLook().setZeroBetaLook(true);
             chr.getAvatarData().getCharacterStat().setLevel(100);
             chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats

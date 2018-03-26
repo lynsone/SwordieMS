@@ -81,7 +81,7 @@ public class UserRemote {
         if(attackType == OutHeader.REMOTE_SHOOT_ATTACK &&
                 (SkillConstants.getAdvancedCountHyperSkill(ai.skillId) != 0  ||
                 SkillConstants.getAdvancedAttackCountHyperSkill(ai.skillId) != 0 ||
-                ai.skillId == 80001850)){
+                SkillConstants.isShikigamiHauntingSkill(ai.skillId))){
             outPacket.encodeByte(ai.passiveSLV);
             if(ai.passiveSLV > 0) {
                 outPacket.encodeInt(ai.passiveSkillID);
@@ -117,6 +117,7 @@ public class UserRemote {
                     outPacket.encodeByte(mai.byteIdk3);
                     outPacket.encodeShort(mai.byteIdk4);
                     if(ai.skillId == 80001835 || ai.skillId == 42111002 || ai.skillId == 80011050) {
+                        // Soul Shear
                         outPacket.encodeByte(ai.hits);
                         outPacket.encodeInt(0); // not exactly sure
                     }

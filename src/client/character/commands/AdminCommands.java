@@ -198,6 +198,10 @@ public class AdminCommands {
             }
             for (int i = 0; i < count; i++) {
                 Mob mob = MobData.getMobDeepCopyById(id);
+                if(mob == null) {
+                    chr.chatMessage("Could not find a mob with that ID.");
+                    return;
+                }
                 Field field = chr.getField();
                 Position pos = chr.getPosition();
                 mob.setPosition(pos.deepCopy());
@@ -578,15 +582,8 @@ public class AdminCommands {
     public static class SetMap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
 
-            Field field = chr.getField();
             Field toField = chr.getClient().getChannelInstance().getField(Integer.parseInt(args[1]));
-            chr.setField(toField);
-            Portal toPortal = toField.getPortalByID(0);
-            field.removeChar(chr);
-            toField.addChar(chr);
-            chr.getClient().write(Stage.setField(chr, toField, chr.getClient().getChannel(), false, 0, false, chr.hasBuffProtector(),
-                    (byte) toPortal.getId(), false, 100, null, false, -1));
-            toField.spawnLifesForChar(chr);
+            chr.warp(toField);
         }
     }
 

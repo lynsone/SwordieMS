@@ -7,6 +7,7 @@ import client.character.skills.AttackInfo;
 import client.character.skills.MobAttackInfo;
 import client.field.Field;
 import client.field.Foothold;
+import client.field.fieldeffect.MobHPTagFieldEffect;
 import packet.CField;
 import packet.MobPool;
 import packet.WvsContext;
@@ -162,19 +163,19 @@ public class Mob extends Life {
         if (getPrevPos() != null) {
             copy.setPrevPos(getPrevPos().deepCopy());
         }
-        if(getCurFoodhold() != null) {
+        if (getCurFoodhold() != null) {
             copy.setCurFoodhold(getCurFoodhold().deepCopy());
         }
-        if(getHomeFoothold() != null) {
+        if (getHomeFoothold() != null) {
             copy.setHomeFoothold(getHomeFoothold().deepCopy());
         }
         copy.setLifeReleaseOwnerName(getLifeReleaseOwnerName());
         copy.setLifeReleaseMobName(getLifeReleaseMobName());
         copy.setShootingMoveStat(null);
-        if(getForcedMobStat() != null) {
+        if (getForcedMobStat() != null) {
             copy.setForcedMobStat(getForcedMobStat().deepCopy());
         }
-        if(getTemporaryStat() != null) {
+        if (getTemporaryStat() != null) {
             copy.setTemporaryStat(getTemporaryStat().deepCopy());
         }
         copy.setFirstAttack(getFirstAttack());
@@ -244,20 +245,20 @@ public class Mob extends Life {
         copy.setMp(getMp());
         copy.setMaxMp(getMaxMp());
         copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
-        for(MobSkill ms : getSkills()) {
+        for (MobSkill ms : getSkills()) {
             copy.addSkill(ms);
         }
-        for(int i : getQuests()) {
+        for (int i : getQuests()) {
             copy.addQuest(i);
         }
-        if(copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
+        if (copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
             copy.getDrops().add(new DropInfo(0, (int) copy.getForcedMobStat().getExp(), 1000, 0));
         }
         return copy;
     }
 
     public Set<DropInfo> getDrops() {
-        if(drops == null) {
+        if (drops == null) {
             drops = new HashSet<>();
         }
         return drops;
@@ -429,6 +430,14 @@ public class Mob extends Life {
 
     public long getHp() {
         return hp;
+    }
+
+    public int getHpComparedToMaxHP() {
+        if (getMaxHp() <= Integer.MAX_VALUE) {
+            return (int) getHp();
+        } else {
+            return (int) (getHp() * (((double) Integer.MAX_VALUE) / getMaxHp()));
+        }
     }
 
     public void setHp(long hp) {
@@ -1070,12 +1079,11 @@ public class Mob extends Life {
         setHp(newHp);
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
-        maxHP = maxHP > Integer.MAX_VALUE ? Integer.MAX_VALUE : maxHP;
-//        for(int dmg : mai.damages) {
-//            getField().broadcastPacket(MobPool.mobDamaged(getObjectId(), dmg, getTemplateId(), (byte) 1, (int) newHp, (int) maxHP), source);
-//        }
-        if(newHp <= 0) {
+        if (newHp <= 0) {
             die();
+            getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(this, getHpTagColor(), getHpTagBgcolor())));
+        } else if (isBoss()) {
+            getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(this, getHpTagColor(), getHpTagBgcolor())));
         } else {
             getField().broadcastPacket(MobPool.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }
@@ -1084,14 +1092,16 @@ public class Mob extends Life {
     private void die() {
         Field field = getField();
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
-        if(!isNotRespawnable()) { // double negative
+        if (!isNotRespawnable()) { // double negative
             EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), this);
+        } else {
+            getField().removeLife(getObjectId());
         }
         field.putLifeController(this, null);
         distributeExp();
         dropDrops(); // xd
         setPosition(getHomePosition());
-        for(Char chr : getDamageDone().keySet()) {
+        for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
         }
         getDamageDone().clear();
@@ -1107,10 +1117,10 @@ public class Mob extends Life {
 
     public void addDamage(Char chr, long damage) {
         long cur = 0;
-        if(getDamageDone().containsKey(chr)) {
+        if (getDamageDone().containsKey(chr)) {
             cur = getDamageDone().get(chr);
         }
-        if(damage <= getHp()) {
+        if (damage <= getHp()) {
             cur += damage;
         } else {
             cur += getHp();
@@ -1121,7 +1131,7 @@ public class Mob extends Life {
     public void distributeExp() {
         long exp = getForcedMobStat().getExp();
         long totalDamage = getDamageDone().values().stream().mapToLong(l -> l).sum();
-        for(Char chr : getDamageDone().keySet()) {
+        for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
             long appliedExp = (long) (exp * damagePerc);
             ExpIncreaseInfo eii = chr.getExpIncreaseInfo();
@@ -1133,10 +1143,10 @@ public class Mob extends Life {
 
     public Char getMostDamageChar() {
         Tuple<Char, Long> max = new Tuple<>(null, (long) -1);
-        for(Map.Entry<Char, Long> entry : getDamageDone().entrySet()) {
+        for (Map.Entry<Char, Long> entry : getDamageDone().entrySet()) {
             Char chr = entry.getKey();
             long damage = entry.getValue();
-            if(max == null || damage > max.getRight()) {
+            if (max == null || damage > max.getRight()) {
                 max.setLeft(chr);
                 max.setRight(damage);
             }

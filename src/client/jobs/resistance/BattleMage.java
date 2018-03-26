@@ -122,7 +122,9 @@ public class BattleMage extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                c.write(CField.summonedAssistAttackRequest(chr.getId(), death.getObjectId()));
+                if(death != null) {
+                    c.write(CField.summonedAssistAttackRequest(chr.getId(), death.getObjectId()));
+                }
                 break;
 
             case HASTY_AURA:

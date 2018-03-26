@@ -97,6 +97,7 @@ public class WorldHandler {
         } else {
             c.write(CField.funcKeyMappedManInit(chr.getFuncKeyMap()));
         }
+        chr.setBulletIDForAttack(chr.calculateBulletIDForAttack());
     }
 
     public static void handleMove(Client c, InPacket inPacket) {
@@ -237,7 +238,7 @@ public class WorldHandler {
         int skillID2 = inPacket.decodeInt();
         int skillCrc2 = inPacket.decodeInt();
         int ntfaaIdk = inPacket.decodeInt();
-        boolean fieldKey = inPacket.decodeByte() == 1;
+        byte fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         byte hits = (byte) (mask & 0xF);
         int mobCount = (mask >>> 4) & 0xF;
@@ -346,7 +347,7 @@ public class WorldHandler {
     public static void handleMagicAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
         ai.attackHeader = OutHeader.REMOTE_MAGIC_ATTACK;
-        boolean fieldKey = inPacket.decodeByte() == 1;
+        byte fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         byte hits = (byte) (mask & 0xF);
         int mobCount = (mask >>> 4) & 0xF;
@@ -525,6 +526,7 @@ public class WorldHandler {
         chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
         log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
+        c.getChr().getJobHandler().handleAttack(c, attackInfo);
         chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
@@ -537,7 +539,6 @@ public class WorldHandler {
                 mob.damage(totalDamage, mai, chr);
             }
         }
-        c.getChr().getJobHandler().handleAttack(c, attackInfo);
     }
 
 
@@ -664,7 +665,7 @@ public class WorldHandler {
     public static void handleMeleeAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
         ai.attackHeader = OutHeader.REMOTE_MELEE_ATTACK;
-        ai.fieldKey = inPacket.decodeByte() != 0;
+        ai.fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (byte) (mask >>> 4);
@@ -823,7 +824,7 @@ public class WorldHandler {
     public static void handleBodyAttack(Client c, InPacket inPacket) {
         AttackInfo ai = new AttackInfo();
         ai.attackHeader = OutHeader.REMOTE_BODY;
-        ai.fieldKey = inPacket.decodeByte() != 0;
+        ai.fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (byte) (mask >>> 4);
@@ -1138,12 +1139,12 @@ public class WorldHandler {
         AttackInfo ai = new AttackInfo();
         ai.attackHeader = OutHeader.REMOTE_SHOOT_ATTACK;
         byte nul = inPacket.decodeByte();
-        ai.fieldKey = inPacket.decodeByte() != 0;
+        ai.fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (byte) (mask >>> 4);
         ai.skillId = inPacket.decodeInt();
-        ai.bulletID = ai.skillId;
+        ai.bulletID = c.getChr().getBulletIDForAttack();
         ai.slv = inPacket.decodeByte();
         ai.addAttackProc = inPacket.decodeByte();
         c.getChr().chatMessage(YELLOW, "addAttackProc: " + ai.addAttackProc);

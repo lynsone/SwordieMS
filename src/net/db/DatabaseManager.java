@@ -77,11 +77,6 @@ public class DatabaseManager {
     }
 
     public static void cleanUpSessions() {
-        for(Session session : sessions) {
-            if(session.isOpen() && !session.isJoinedToTransaction()) {
-                session.close();
-            }
-        }
         sessions.removeAll(sessions.stream().filter(s -> !s.isOpen()).collect(Collectors.toList()));
     }
 }

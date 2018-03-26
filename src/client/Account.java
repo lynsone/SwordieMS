@@ -306,9 +306,6 @@ public class Account {
         Server.getInstance().cleanSessions();
         Session session = Server.getInstance().getNewDatabaseSession();
         Transaction tx = session.beginTransaction();
-        for(Char c : getCharacters()) {
-            c.updateDB();
-        }
         try {
             session.update(this);
             tx.commit();

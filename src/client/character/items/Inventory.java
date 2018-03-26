@@ -8,6 +8,8 @@ import server.Server;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,6 +80,7 @@ public class Inventory {
         if(getItems().size() < getSlots()) {
             getItems().add(item);
             item.setInvType(getType());
+            sortItemsByIndex();
         }
     }
 
@@ -92,6 +95,7 @@ public class Inventory {
     public void removeItem(Item item) {
         if(getItems().contains(item)) {
             getItems().remove(item);
+            sortItemsByIndex();
         }
     }
 
@@ -104,6 +108,10 @@ public class Inventory {
         return 0;
     }
 
+    public Item getFirstItemByBodyPart(BodyPart bodyPart) {
+        List<Item> items = getItemsByBodyPart(bodyPart);
+        return items != null && items.size() > 0 ? items.get(0) : null;
+    }
 
     public List<Item> getItemsByBodyPart(BodyPart bodyPart) {
         return getItems().stream().filter(item -> item.getBagIndex() == bodyPart.getVal()).collect(Collectors.toList());
@@ -111,6 +119,10 @@ public class Inventory {
 
     public List<Item> getItems() {
         return items;
+    }
+
+    public void sortItemsByIndex() {
+        getItems().sort(Comparator.comparingInt(Item::getBagIndex));
     }
 
     public void setItems(List<Item> items) {

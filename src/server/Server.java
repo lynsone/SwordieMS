@@ -145,6 +145,7 @@ public class Server extends Properties {
     }
 
     public Session getNewDatabaseSession() {
+        cleanSessions();
         return DatabaseManager.getSession();
     }
 

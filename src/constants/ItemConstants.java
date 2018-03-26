@@ -2,7 +2,6 @@ package constants;
 
 import client.character.items.Equip;
 import client.character.items.ItemOption;
-import enums.InvType;
 import enums.ItemGrade;
 import loaders.ItemData;
 import org.apache.log4j.LogManager;
@@ -251,16 +250,24 @@ public class ItemConstants {
         return itemID / 10000 % 100;
     }
 
-    public static boolean isThrowingStar(int itemId) {
-        return itemId / 10000 == 207;
+    public static boolean isThrowingItem(int itemID) {
+        return isThrowingStar(itemID) || isBullet(itemID) || isBowArrow(itemID);
     }
 
-    public static boolean isBullet(int itemId) {
-        return itemId / 10000 == 233;
+    public static boolean isThrowingStar(int itemID) {
+        return itemID / 10000 == 207;
     }
 
-    public static boolean isFamiliar(int itemId) {
-        return itemId / 10000 == 287;
+    public static boolean isBullet(int itemID) {
+        return itemID / 10000 == 233;
+    }
+
+    public static boolean isBowArrow(int itemID) {
+        return itemID / 1000 == 2060;
+    }
+
+    public static boolean isFamiliar(int itemID) {
+        return itemID / 10000 == 287;
     }
 
     public static boolean isEnhancementScroll(int scrollID) {
@@ -418,5 +425,25 @@ public class ItemConstants {
 
     public static boolean isEquip(int id) {
         return id / 1000000 == 1;
+    }
+
+    public static boolean isClaw(int id) {
+        return id / 10000 == 147;
+    }
+
+    public static boolean isBow(int id) {
+        return id / 10000 == 145;
+    }
+
+    public static boolean isXBow(int id) {
+        return id / 10000 == 146;
+    }
+
+    public static boolean isGun(int id) {
+        return id / 10000 == 149;
+    }
+
+    public static boolean isXBowArrow(int id) {
+        return id / 1000 == 2061;
     }
 }

@@ -560,4 +560,18 @@ public class SkillConstants {
                 return skillID;
         }
     }
+
+    public static boolean isShikigamiHauntingSkill(int skillID) {
+        switch(skillID) {
+            case 80001850:
+            case 42001000:
+            case 42001005:
+            case 42001006:
+            case 40021185:
+            case 80011067:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

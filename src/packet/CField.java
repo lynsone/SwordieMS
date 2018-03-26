@@ -7,6 +7,7 @@ import client.character.skills.AttackInfo;
 import client.character.skills.ForceAtomInfo;
 import client.character.skills.MobAttackInfo;
 import client.character.skills.PsychicArea;
+import client.field.fieldeffect.FieldEffect;
 import client.jobs.legend.Evan;
 import client.life.AffectedArea;
 import client.life.Mob;
@@ -622,6 +623,15 @@ public class CField {
 
         outPacket.encodeInt(chr.getId());
         outPacket.encodePosition(position);
+
+        return outPacket;
+    }
+
+    public static OutPacket fieldEffect(FieldEffect fe) {
+        OutPacket outPacket = new OutPacket(OutHeader.FIELD_EFFECT);
+
+        outPacket.encodeByte(fe.getType().getVal());
+        fe.encode(outPacket);
 
         return outPacket;
     }
