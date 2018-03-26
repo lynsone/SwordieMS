@@ -574,4 +574,19 @@ public class SkillConstants {
                 return false;
         }
     }
+
+    public static boolean needsOneMoreByte(int skillId) {
+        switch(skillId) {
+            case 23120012:
+            case 23121000:
+            case 23101000:
+            case 23001000:
+            case 23111001:
+            case 23121052:
+            case 23121002:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

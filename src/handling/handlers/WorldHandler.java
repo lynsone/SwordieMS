@@ -1188,6 +1188,9 @@ public class WorldHandler {
             ai.bulletCount = inPacket.decodeInt();
         }
         ai.rect = inPacket.decodeShortRect();
+        if(SkillConstants.needsOneMoreByte(ai.skillId)) {
+            inPacket.decodeInt();
+        }
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             mai.mobId = inPacket.decodeInt();
@@ -1889,7 +1892,7 @@ public class WorldHandler {
         byte lastType = inPacket.decodeByte();
         byte action = inPacket.decodeByte();
         int answer = 0;
-        if (inPacket.getUnreadBytes() >= 4) {
+        if (inPacket.getUnreadAmount() >= 4) {
             answer = inPacket.decodeInt();
         }
         chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
@@ -1907,8 +1910,10 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(dropID);
         if (life != null && life instanceof Drop) {
             Drop drop = (Drop) life;
-            chr.addDrop(drop);
-            field.removeDrop(dropID, chr.getId(), false);
+            boolean success = chr.addDrop(drop);
+            if(success) {
+                field.removeDrop(dropID, chr.getId(), false);
+            }
         }
 
     }
@@ -2218,7 +2223,7 @@ public class WorldHandler {
             case 2: // Quest end
                 questID = inPacket.decodeInt();
                 npcTemplateID = inPacket.decodeInt();
-                if(inPacket.getUnreadBytes() > 4) {
+                if(inPacket.getUnreadAmount() > 4) {
                     position = inPacket.decodePosition();
                 }
                 break;
@@ -2226,7 +2231,7 @@ public class WorldHandler {
             case 4: // Scripted quest end
                 questID = inPacket.decodeInt();
                 npcTemplateID = inPacket.decodeInt();
-                if(inPacket.getUnreadBytes() > 4) {
+                if(inPacket.getUnreadAmount() > 4) {
                     position = inPacket.decodePosition();
                 }
                 break;

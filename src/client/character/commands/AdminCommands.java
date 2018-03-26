@@ -45,19 +45,8 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            Guild guild = new Guild();
-            guild.setId(10);
-            guild.addMember(chr);
-
-            OutPacket outPacket = new OutPacket(OutHeader.GUILD_RESULT);
-
-            outPacket.encodeByte(98);
-            outPacket.encodeInt(guild.getId());
-            outPacket.encodeInt(5);
-            outPacket.encodeByte(1);
-            guild.encode(outPacket);
-
-            chr.write(outPacket);
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            tsm.sendSetStatPacket();
         }
     }
 

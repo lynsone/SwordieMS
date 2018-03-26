@@ -44,6 +44,7 @@ public class Field {
     private String onFirstUserEnter = "", onUserEnter = "";
     private int fixedMobCapacity;
     private int objectIDCounter = 1000000;
+    private boolean userFirstEnter = false;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -411,8 +412,15 @@ public class Field {
     public void addChar(Char chr) {
         if (!getChars().contains(chr)) {
             getChars().add(chr);
+            if(!isUserFirstEnter() && hasUserFirstEnterScript()) {
+                chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FIELD);
+            }
         }
         broadcastPacket(UserPool.userEnterField(chr), chr);
+    }
+
+    private boolean hasUserFirstEnterScript() {
+        return getOnFirstUserEnter() != null && !getOnFirstUserEnter().equalsIgnoreCase("");
     }
 
     public void broadcastPacket(OutPacket outPacket, Char exceptChr) {
@@ -489,7 +497,7 @@ public class Field {
         getMobs().forEach(mob -> aa.getField().checkMobInAffectedAreas(mob));
     }
 
-    private List<Mob> getMobs() {
+    public List<Mob> getMobs() {
         return getLifes().stream().filter(life -> life instanceof Mob).map(l -> (Mob) l).collect(Collectors.toList());
     }
 
@@ -702,5 +710,13 @@ public class Field {
         }
         String script = getOnUserEnter();
         chr.getScriptManager().startScript(getId(), script, ScriptType.FIELD);
+    }
+
+    public boolean isUserFirstEnter() {
+        return userFirstEnter;
+    }
+
+    public void setUserFirstEnter(boolean userFirstEnter) {
+        this.userFirstEnter = userFirstEnter;
     }
 }

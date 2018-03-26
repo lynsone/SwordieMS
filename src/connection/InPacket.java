@@ -155,7 +155,7 @@ public class InPacket extends Packet {
      * Returns the amount of bytes that are unread.
      * @return The amount of bytes that are unread.
      */
-    public int getUnreadBytes() {
+    public int getUnreadAmount() {
         return byteBuf.readableBytes();
     }
 }

@@ -1972,15 +1972,22 @@ public class Char {
      *
      * @param drop The Drop that has been picked up.
      */
-    public void addDrop(Drop drop) {
+    public boolean addDrop(Drop drop) {
         if (drop.isMoney()) {
             addMoney(drop.getMoney());
             getQuestManager().handleMoneyGain(drop.getMoney());
             write(WvsContext.dropPickupMessage(drop.getMoney(), (short) 0, (short) 0));
+            return true;
         } else {
             Item item = drop.getItem();
-            addItemToInventory(item);
-            write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
+            if(getInventoryByType(item.getInvType()).canPickUp(item)) {
+                addItemToInventory(item);
+                write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
+                return true;
+            } else {
+                write(WvsContext.dropPickupMessage(0, (byte) -1, (short) 0, (short) 0, (short) 0));
+                return false;
+            }
         }
     }
 

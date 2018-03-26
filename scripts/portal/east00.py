@@ -12,9 +12,9 @@ def init():
 		map = 106030600
 		portal = 3
 		
-	else:	
-		map = 100040000
-		portal = 3
+	else:
+		map = sm.getChr().getField().getReturnMap()
+		portal = 0
 	
 	sm.warp(map, portal)
 	sm.dispose()

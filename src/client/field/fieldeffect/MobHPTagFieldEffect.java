@@ -10,13 +10,9 @@ import enums.FieldEffectType;
 public class MobHPTagFieldEffect implements FieldEffect {
 
     private Mob mob;
-    private int color;
-    private int bgColor;
 
-    public MobHPTagFieldEffect(Mob mob, int color, int bgColor) {
+    public MobHPTagFieldEffect(Mob mob) {
         this.mob = mob;
-        this.color = color;
-        this.bgColor = bgColor;
     }
 
     @Override
@@ -27,9 +23,11 @@ public class MobHPTagFieldEffect implements FieldEffect {
     @Override
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(mob.getTemplateId());
-        outPacket.encodeInt((int) mob.getHp());
-        outPacket.encodeInt((int) Math.min(Integer.MAX_VALUE, mob.getMaxHp()));
-        outPacket.encodeByte(color);
-        outPacket.encodeByte(bgColor);
+        int maxHP = (int) Math.min(Integer.MAX_VALUE, mob.getMaxHp());
+        double ratio = mob.getMaxHp() / (double) Integer.MAX_VALUE;
+        outPacket.encodeInt(ratio > 1 ? (int) (mob.getHp() / ratio) : (int) mob.getHp());
+        outPacket.encodeInt(maxHP);
+        outPacket.encodeByte(mob.getHpTagColor());
+        outPacket.encodeByte(mob.getHpTagBgcolor());
     }
 }
