@@ -58,24 +58,6 @@ public class Inventory {
         this.slots = slots;
     }
 
-    public void updateDB(Session session, Transaction tx) {
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        for(Item item : getItems()) {
-            item.createInDB(session, tx);
-        }
-        session.save(this);
-    }
-
-    public void deleteInDB(Session session, Transaction tx) {
-        for(Item item : getItems()) {
-            item.deleteInDB(session, tx);
-        }
-        session.delete(this);
-    }
-
     public void addItem(Item item) {
         if(getItems().size() <= getSlots()) {
             getItems().add(item);
@@ -83,15 +65,6 @@ public class Inventory {
             sortItemsByIndex();
         }
     }
-
-    public void updateDB() {
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction tx = session.beginTransaction();
-        updateDB(session, tx);
-        tx.commit();
-        session.close();
-    }
-
     public void removeItem(Item item) {
         if(getItems().contains(item)) {
             getItems().remove(item);
@@ -158,6 +131,6 @@ public class Inventory {
     }
 
     private boolean isFull() {
-        return getSlots() > getItems().size();
+        return getItems().size() >= getSlots();
     }
 }

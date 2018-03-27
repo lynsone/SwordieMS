@@ -16,6 +16,7 @@ import enums.CharNameResult;
 import enums.LoginType;
 import handling.OutHeader;
 import loaders.ItemData;
+import net.db.DatabaseManager;
 import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -191,13 +192,13 @@ public class LoginHandler {
         c.getAccount().addCharacter(chr);
 //        chr.setAccId(c.getAccount().getId());
 //        chr.updateDB();
-        c.getAccount().updateDB();
+        DatabaseManager.saveToDB(c.getAccount());
 
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
         cs.setPosMap(100000000);
-        chr.updateDB();
+        DatabaseManager.saveToDB(chr);
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromId(i);
             if (equip != null && equip.getItemId() >= 1000000) {
@@ -212,7 +213,7 @@ public class LoginHandler {
                     equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
             chr.addItemToInventory(EQUIPPED, equip, true);
         }
-        chr.getInventoryByType(EQUIPPED).updateDB();
+        DatabaseManager.saveToDB(chr.getInventoryByType(EQUIPPED));
         c.write(Login.createNewCharacterResult(LoginType.SUCCESS, chr));
     }
 
@@ -220,9 +221,10 @@ public class LoginHandler {
         if (handleAuthSecondPassword(c, inPacket)) {
             int charId = inPacket.decodeInt();
             Char chr = Char.getFromDBById(charId);
-            chr.deleteFromDB();
+            DatabaseManager.deleteFromDB(chr);
             Account a = Account.getFromDBById(c.getAccount().getId());
-            a.deleteCharacter(chr);
+            a.getCharacters().remove(chr);
+            DatabaseManager.saveToDB(a);
             c.write(Login.sendDeleteCharacterResult(charId, LoginType.SUCCESS));
         }
     }

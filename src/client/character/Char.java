@@ -26,6 +26,7 @@ import constants.SkillConstants;
 import enums.*;
 import loaders.FieldData;
 import loaders.SkillData;
+import net.db.DatabaseManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import packet.*;
@@ -300,31 +301,6 @@ public class Char {
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
 
     }
-
-    public void updateDB() {
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction tx = session.beginTransaction();
-        session.saveOrUpdate(this);
-        tx.commit();
-        session.close();
-    }
-
-    public void createInDB() {
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction tx = session.beginTransaction();
-        session.save(this);
-        tx.commit();
-        session.close();
-    }
-
-    public void deleteFromDB() {
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction tx = session.beginTransaction();
-        session.delete(this);
-        tx.commit();
-        session.close();
-    }
-
     public static Char getFromDBById(int userId) {
         Char chr;
         Session session = Server.getInstance().getNewDatabaseSession();
@@ -383,7 +359,7 @@ public class Char {
                 }
                 inventory.addItem(item);
                 if (item.getId() == 0) {
-                    item.updateDB();
+                    DatabaseManager.saveToDB(item);
                 }
                 write(WvsContext.inventoryOperation(true, false,
                         ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
@@ -2459,7 +2435,7 @@ public class Char {
     public void logout() {
         setOnline(false);
         getField().removeChar(this);
-        updateDB();
+        DatabaseManager.saveToDB(this);
         getClient().getChannelInstance().removeChar(this);
     }
 

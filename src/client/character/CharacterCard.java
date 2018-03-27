@@ -70,16 +70,4 @@ public class CharacterCard {
     public void setId(int id) {
         this.id = id;
     }
-
-    public void updateDB(Session session, Transaction tx) {
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        session.save(this);
-    }
-
-    public void deleteFromDB(Session session, Transaction tx) {
-        session.delete(this);
-    }
 }

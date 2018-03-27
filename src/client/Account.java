@@ -301,21 +301,4 @@ public class Account {
     public void setId(int id) {
         this.id = id;
     }
-
-    public void updateDB() {
-        Server.getInstance().cleanSessions();
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction tx = session.beginTransaction();
-        try {
-            session.update(this);
-            tx.commit();
-        } finally {
-            session.close();
-        }
-    }
-
-    public void deleteCharacter(Char chr) {
-        getCharacters().remove(chr);
-        updateDB();
-    }
 }

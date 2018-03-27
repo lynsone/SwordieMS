@@ -352,18 +352,6 @@ public class AvatarLook {
         this.id = id;
     }
 
-    public void updateDB(Session session, Transaction tx) {
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        session.save(this);
-    }
-
-    public void deleteFromDB(Session session, Transaction tx) {
-        session.delete(this);
-    }
-
     public int getDemonWingID() {
         return demonWingID;
     }

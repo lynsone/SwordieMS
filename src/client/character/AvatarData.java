@@ -1,12 +1,7 @@
 package client.character;
 
-import client.character.items.Inventory;
 import connection.OutPacket;
 import constants.JobConstants;
-import net.db.DBObject;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import server.Server;
 
 import javax.persistence.*;
 
@@ -68,33 +63,6 @@ public class AvatarData {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public void updateDB(Session session, Transaction tx) {
-        getAvatarLook().updateDB(session, tx);
-        if(getZeroAvatarLook() != null) {
-            getZeroAvatarLook().updateDB(session, tx);
-        }
-        getCharacterStat().updateDB(session, tx);
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        getAvatarLook().createInDB(session, tx);
-        if(getZeroAvatarLook() != null) {
-            getZeroAvatarLook().createInDB(session, tx);
-        }
-        getCharacterStat().createInDB(session, tx);
-        session.save(this);
-    }
-
-    public void deleteFromDB(Session session, Transaction tx) {
-        getAvatarLook().deleteFromDB(session, tx);
-        if(getZeroAvatarLook() != null) {
-            getZeroAvatarLook().deleteFromDB(session, tx);
-        }
-        getCharacterStat().deleteFromDB(session, tx);
-        session.delete(this);
     }
 
     public AvatarLook getAvatarLook(boolean zeroBetaState) {

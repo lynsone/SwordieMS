@@ -61,27 +61,6 @@ public class ExtendSP {
         this.id = id;
     }
 
-    public void updateDB(Session session, Transaction tx) {
-        for(SPSet spSet : getSpSet()) {
-            spSet.updateDB(session, tx);
-        }
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        for(SPSet spSet : getSpSet()) {
-            spSet.createInDB(session, tx);
-        }
-        session.save(this);
-    }
-
-    public void deleteFromDB(Session session, Transaction tx) {
-        for(SPSet spSet : getSpSet()) {
-            spSet.deleteFromDB(session, tx);
-        }
-        session.delete(this);
-    }
-
     public void setSpToJobLevel(int jobLevel, int sp) {
         SPSet spSet = getSpSet().stream().filter(sps -> sps.getJobLevel() == jobLevel).findFirst().orElse(null);
         if(spSet != null) {

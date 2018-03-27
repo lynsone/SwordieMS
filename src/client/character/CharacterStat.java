@@ -678,35 +678,5 @@ public class CharacterStat {
     public void setAccountLastLogout(SystemTime accountLastLogout) {
         this.accountLastLogout = accountLastLogout;
     }
-
-    public void updateDB(Session session, Transaction tx) {
-        getExtendSP().updateDB(session, tx);
-        getCharacterCard().updateDB(session, tx);
-        getAlbaStartTime().updateDB(session, tx);
-        getLastLogout().updateDB(session, tx);
-        getNonCombatStatDayLimit().updateDB(session, tx);
-        getAccountLastLogout().updateDB(session, tx);
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        getExtendSP().createInDB(session, tx);
-        getCharacterCard().createInDB(session, tx);
-        getAlbaStartTime().createInDB(session, tx);
-        getLastLogout().createInDB(session, tx);
-        getNonCombatStatDayLimit().createInDB(session, tx); // see what hibernate does with it
-        getAccountLastLogout().createInDB(session, tx);
-        session.save(this);
-    }
-
-    public void deleteFromDB(Session session, Transaction tx) {
-        getExtendSP().deleteFromDB(session, tx);
-        getCharacterCard().deleteFromDB(session, tx);
-        getAlbaStartTime().deleteFromDB(session, tx);
-        getLastLogout().deleteFromDB(session, tx);
-        getNonCombatStatDayLimit().deleteFromDB(session, tx);
-        getAccountLastLogout().deleteFromDB(session, tx);
-        session.delete(this);
-    }
 }
 

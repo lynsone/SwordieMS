@@ -1263,12 +1263,6 @@ public class Equip extends Item {
         }
     }
 
-    @Override
-    public void updateDB(Session session, Transaction tx) {
-        super.updateDB(session, tx);
-        getEquippedDate().updateDB(session, tx);
-    }
-
     public void addStat(EquipBaseStat stat, int amount) {
         int cur = (int) getBaseStat(stat);
         int newStat = cur + amount >= 0 ? cur + amount : 0; // stat cannot be negative

@@ -15,6 +15,7 @@ import client.guild.GuildRequestor;
 import client.guild.GuildSkill;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import util.FileTime;
 import util.SystemTime;
@@ -78,5 +79,27 @@ public class DatabaseManager {
 
     public static void cleanUpSessions() {
         sessions.removeAll(sessions.stream().filter(s -> !s.isOpen()).collect(Collectors.toList()));
+    }
+
+    public static void saveToDB(Object obj) {
+        synchronized (obj) {
+            try (Session session = getSession()) {
+                Transaction t = session.beginTransaction();
+                session.saveOrUpdate(obj);
+                t.commit();
+            }
+        }
+        cleanUpSessions();
+    }
+
+    public static void deleteFromDB(Object obj) {
+        synchronized (obj) {
+            try (Session session = getSession()) {
+                Transaction t = session.beginTransaction();
+                session.delete(obj);
+                t.commit();
+            }
+        }
+        cleanUpSessions();
     }
 }

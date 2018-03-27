@@ -35,6 +35,7 @@ import loaders.ItemData;
 import loaders.QuestData;
 import loaders.QuestInfo;
 import loaders.SkillData;
+import net.db.DatabaseManager;
 import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -133,7 +134,7 @@ public class WorldHandler {
                 WvsContext.dispose(c.getChr());
                 chr.chatMessage(YELLOW, String.format("X=%d, Y=%d", chr.getPosition().getX(), chr.getPosition().getY()));
             } else if (msg.equalsIgnoreCase("@save")) {
-                chr.updateDB();
+                DatabaseManager.saveToDB(chr);
             }
         } else if (msg.charAt(0) == AdminCommand.getPrefix()) {
             for (Class clazz : AdminCommands.class.getClasses()) {
@@ -1263,9 +1264,9 @@ public class WorldHandler {
         Char chr = c.getChr();
         if (c.getAccount() != null) {
             c.getChr().logout();
-            c.getAccount().updateDB();
+            DatabaseManager.saveToDB(c.getAccount());
         }
-        chr.updateDB();
+        DatabaseManager.saveToDB(chr);
         int worldID = chr.getClient().getChannelInstance().getWorldId();
         World world = Server.getInstance().getWorldById(worldID);
         Field field = chr.getField();
@@ -2550,7 +2551,7 @@ public class WorldHandler {
                     guild.setName(name);
                     guild.addMember(chr);
                     guild.setWorldID(chr.getClient().getWorldId());
-                    Server.getInstance().saveToDB(guild);
+                    DatabaseManager.saveToDB(guild);
                     chr.write(WvsContext.guildResult(new GuildCreate(guild)));
                 } else {
                     chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.GuildNameInUseMsg)));
@@ -2573,10 +2574,9 @@ public class WorldHandler {
                 if(expelled == null) {
                     expelled = Char.getFromDBById(expelledID);
                     guild.removeMember(gm);
-                    Server.getInstance().saveToDB(expelled);
+                    DatabaseManager.saveToDB(expelled);
                 } else {
                     guild.removeMember(gm);
-
                 }
                 break;
             case SetMark:

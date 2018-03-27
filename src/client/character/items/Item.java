@@ -68,29 +68,6 @@ public class Item implements Serializable {
         this.inventoryId = inventoryId;
     }
 
-    public void updateDB() {
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction tx = session.beginTransaction();
-        updateDB(session, tx);
-        tx.commit();
-        session.close();
-    }
-
-    public void updateDB(Session session, Transaction tx) {
-        getDateExpire().updateDB(session, tx);
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        getDateExpire().createInDB(session, tx);
-        session.save(this);
-    }
-
-    public void deleteInDB(Session session, Transaction tx) {
-        getDateExpire().deleteFromDB(session, tx);
-        session.delete(this);
-    }
-
     public String getOwner() {
         return owner;
     }

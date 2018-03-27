@@ -77,10 +77,6 @@ public class Skill {
         this.charId = charId;
     }
 
-    public void updateDB(Session session, Transaction tx) {
-        session.saveOrUpdate(this);
-    }
-
     public void setMasterLevel(int masterLevel) {
         this.masterLevel = masterLevel;
     }

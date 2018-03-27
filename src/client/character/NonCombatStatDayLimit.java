@@ -134,19 +134,4 @@ public class NonCombatStatDayLimit {
     public void setId(int id) {
         this.id = id;
     }
-
-    public void updateDB(Session session, Transaction tx) {
-        getFtLastUpdateCharmByCashPR().updateDB(session, tx);
-        session.saveOrUpdate(this);
-    }
-
-    public void createInDB(Session session, Transaction tx) {
-        getFtLastUpdateCharmByCashPR().createInDB(session, tx);
-        session.save(this);
-    }
-
-    public void deleteFromDB(Session session, Transaction tx) {
-        getFtLastUpdateCharmByCashPR().deleteFromDB(session, tx);
-        session.delete(this);
-    }
 }

@@ -162,14 +162,6 @@ public class Server extends Properties {
         return null;
     }
 
-    public void saveToDB(Object obj) {
-        Session session = getNewDatabaseSession();
-        Transaction t = session.beginTransaction();
-        session.saveOrUpdate(obj);
-        t.commit();
-        session.close();
-    }
-
     public void cleanSessions() {
         DatabaseManager.cleanUpSessions();
     }

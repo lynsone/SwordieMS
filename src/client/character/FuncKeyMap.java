@@ -97,8 +97,4 @@ public class FuncKeyMap {
         }
         return fkm;
     }
-
-    public void updateDB(Session session, Transaction tx) {
-        session.saveOrUpdate(this);
-    }
 }
