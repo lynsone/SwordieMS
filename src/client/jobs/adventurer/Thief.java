@@ -161,7 +161,7 @@ public class Thief extends Job {
                 }
             }
             if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.SHADOWER.getJobId()) {
-                critInterval();
+                EventManager.addFixedRateEvent(this::incrementCritGrowing, 0, 2000);
             }
         }
 
@@ -627,11 +627,6 @@ public class Thief extends Job {
 
     public void incrementCritGrowing() {
         incrementCritGrowth(1);   //Crit Growing
-    }
-
-    public void critInterval() {   //Timer
-        incrementCritGrowing();
-        EventManager.addEvent(this, "critInterval", 2000); //2sec subTime
     }
 
     private int getCritGrowIcon() {

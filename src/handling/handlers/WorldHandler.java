@@ -536,7 +536,7 @@ public class WorldHandler {
             if (mob != null && mob.getHp() > 0) {
                 long totalDamage = Arrays.stream(mai.damages).sum();
                 mob.addDamage(chr, totalDamage);
-                mob.damage(totalDamage, mai, chr);
+                mob.damage(totalDamage);
             }
         }
     }

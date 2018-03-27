@@ -337,7 +337,7 @@ public class WvsContext {
         boolean hasMovingAffectingStat = tsm.hasNewMovingEffectingStat(); // encoding flushes new stats
         tsm.encodeForLocal(outPacket);
 
-        outPacket.encodeInt(0); // ?
+        outPacket.encodeInt(0);
         outPacket.encodeShort(1);
         outPacket.encodeByte(0);
         outPacket.encodeByte(0);

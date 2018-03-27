@@ -235,8 +235,9 @@ public class Xenon extends Job {
     }
 
     public void supplyInterval() {
+        // done this way so we don't have to manually stop the schedule once the xenon has logged out
         incrementSupply();
-        EventManager.addEvent(this, "supplyInterval", 4000);
+        EventManager.addEvent(this::supplyInterval, 4000);
     }
 
     private void updateSupply() {

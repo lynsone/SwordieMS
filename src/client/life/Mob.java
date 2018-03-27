@@ -1072,7 +1072,7 @@ public class Mob extends Life {
         return charismaEXP;
     }
 
-    public void damage(Long totalDamage, MobAttackInfo mai, Char source) {
+    public void damage(Long totalDamage) {
         long maxHP = getMaxHp();
         long oldHp = getHp();
         long newHp = oldHp - totalDamage;
@@ -1093,7 +1093,7 @@ public class Mob extends Life {
         Field field = getField();
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
         if (!isNotRespawnable()) { // double negative
-            EventManager.addEvent(field, "respawn", (long) (5000 * (1 / field.getMobRate())), this);
+            EventManager.addEvent(() -> field.respawn(this), (long) (5000 * (1 / field.getMobRate())));
         } else {
             getField().removeLife(getObjectId());
         }

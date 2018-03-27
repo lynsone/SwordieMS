@@ -11,6 +11,7 @@ import server.EventManager;
 import util.Tuple;
 
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -23,8 +24,8 @@ public class TemporaryStatManager {
     private Map<CharacterTemporaryStat, List<Option>> currentStats = new HashMap<>();
     private Map<CharacterTemporaryStat, List<Option>> newStats = new HashMap<>();
     private Map<CharacterTemporaryStat, List<Option>> removedStats = new HashMap<>();
-    private Map<CharacterTemporaryStat, Timer> timers = new HashMap<>();
-    private HashMap<Tuple<CharacterTemporaryStat, Option>, Timer> indieTimers = new HashMap<>();
+    private Map<CharacterTemporaryStat, ScheduledFuture> schedules = new HashMap<>();
+    private HashMap<Tuple<CharacterTemporaryStat, Option>, ScheduledFuture> indieSchedules = new HashMap<>();
     private int pvpDamage;
     private byte defenseState;
     private byte defenseAtt;
@@ -81,11 +82,11 @@ public class TemporaryStatManager {
             getNewStats().put(cts, optList);
             getCurrentStats().put(cts, optList);
             if (option.tOption > 0) {
-                if (getTimers().containsKey(cts)) {
-                    getTimers().get(cts).cancel();
+                if (getSchedules().containsKey(cts)) {
+                    getSchedules().get(cts).cancel(false);
                 }
-                Timer t = EventManager.addEvent(this, "removeStat", option.tOption, cts, true);
-                getTimers().put(cts, t);
+                ScheduledFuture sf = EventManager.addEvent(() -> removeStat(cts, true), option.tOption);
+                getSchedules().put(cts, sf);
             }
         } else {
             List<Option> optList;
@@ -102,11 +103,11 @@ public class TemporaryStatManager {
             getCurrentStats().put(cts, optList);
             if (option.tTerm > 0) {
                 Tuple tuple = new Tuple(cts, option);
-                if (getIndieTimers().containsKey(tuple)) {
-                    getIndieTimers().get(tuple).cancel();
+                if (getIndieSchedules().containsKey(tuple)) {
+                    getIndieSchedules().get(tuple).cancel(false);
                 }
-                Timer t = EventManager.addEvent(this, "removeIndieStat", option.tTerm, cts, option, true);
-                getIndieTimers().put(tuple, t);
+                ScheduledFuture sf = EventManager.addEvent(() -> removeIndieStat(cts, option, true), option.tTerm);
+                getIndieSchedules().put(tuple, sf);
             }
         }
     }
@@ -124,7 +125,7 @@ public class TemporaryStatManager {
         return res;
     }
 
-    public synchronized void removeStat(CharacterTemporaryStat cts, Boolean fromTimer) {
+    public synchronized void removeStat(CharacterTemporaryStat cts, Boolean fromSchedule) {
         if(cts == CombatOrders) {
             chr.setCombatOrders(0);
         }
@@ -134,14 +135,14 @@ public class TemporaryStatManager {
         if (TSIndex.isTwoStat(cts)) {
             getTSBByTSIndex(TSIndex.getTSEFromCTS(cts)).reset();
         }
-        if(!fromTimer && getTimers().containsKey(cts)) {
-            getTimers().get(cts).cancel();
+        if(!fromSchedule && getSchedules().containsKey(cts)) {
+            getSchedules().get(cts).cancel(false);
         } else {
-            getTimers().remove(cts);
+            getSchedules().remove(cts);
         }
     }
 
-    public synchronized void removeIndieStat(CharacterTemporaryStat cts, Option option, Boolean fromTimer) {
+    public synchronized void removeIndieStat(CharacterTemporaryStat cts, Option option, Boolean fromSchedule) {
         List<Option> optList = new ArrayList<>();
         optList.add(option);
         getRemovedStats().put(cts, optList);
@@ -153,10 +154,10 @@ public class TemporaryStatManager {
         }
         getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
         Tuple tuple = new Tuple(cts, option);
-        if(!fromTimer && getIndieTimers().containsKey(tuple)) {
-            getIndieTimers().get(tuple).cancel();
+        if(!fromSchedule && getIndieSchedules().containsKey(tuple)) {
+            getIndieSchedules().get(tuple).cancel(false);
         } else {
-            getIndieTimers().remove(tuple);
+            getIndieSchedules().remove(tuple);
         }
     }
 
@@ -2447,7 +2448,6 @@ public class TemporaryStatManager {
             outPacket.encodeByte(getOption(Unk7000).xOption);
             outPacket.encodeByte(getOption(Unk7000).yOption);
         }
-        outPacket.encodeArr(new byte[200]);
         getNewStats().clear();
     }
 
@@ -2471,8 +2471,12 @@ public class TemporaryStatManager {
                 outPacket.encodeInt(curTime - option.tStart);
                 outPacket.encodeInt(option.tTerm); // tTerm
                 outPacket.encodeInt(0); // size
-                // pw.writeInt(0); // nMValueKey
-                // pw.writeInt(0); // nMValue
+            }
+            int idk = 0;
+            outPacket.encodeInt(idk);
+            for (int i = 0; i < idk; i++) {
+                outPacket.encodeInt(0); // nMValueKey
+                outPacket.encodeInt(0); // nMValue
             }
         }
     }
@@ -2609,12 +2613,12 @@ public class TemporaryStatManager {
         return chr;
     }
 
-    public Map<CharacterTemporaryStat, Timer> getTimers() {
-        return timers;
+    public Map<CharacterTemporaryStat, ScheduledFuture> getSchedules() {
+        return schedules;
     }
 
-    public Map<Tuple<CharacterTemporaryStat, Option>, Timer> getIndieTimers() {
-        return indieTimers;
+    public Map<Tuple<CharacterTemporaryStat, Option>, ScheduledFuture> getIndieSchedules() {
+        return indieSchedules;
     }
 
     public void sendSetStatPacket() {

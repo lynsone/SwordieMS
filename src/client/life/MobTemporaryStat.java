@@ -1,17 +1,16 @@
 package client.life;
 
-import client.Client;
 import client.character.skills.Option;
 import client.character.skills.Skill;
 import client.character.skills.SkillInfo;
 import connection.OutPacket;
 import enums.MobStat;
 import loaders.SkillData;
-import packet.CField;
 import packet.MobPool;
 import server.EventManager;
 
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 import static client.character.skills.SkillStat.*;
@@ -20,8 +19,8 @@ import static enums.MobStat.*;
 
 public class MobTemporaryStat {
     private List<BurnedInfo> burnedInfos = new ArrayList<>();
-    private Map<Integer, Timer> burnCancelTimers = new HashMap<>();
-    private Map<Integer, Timer> burnTimers = new HashMap<>();
+    private Map<Integer, ScheduledFuture> burnCancelSchedules = new HashMap<>();
+    private Map<Integer, ScheduledFuture> burnSchedules = new HashMap<>();
     private String linkTeam;
     private Comparator mobStatComper = (o1, o2) -> {
         MobStat k1 = (MobStat) o1;
@@ -43,7 +42,7 @@ public class MobTemporaryStat {
     private TreeMap<MobStat, Option> currentStatVals = new TreeMap<>(mobStatComper);
     private TreeMap<MobStat, Option> newStatVals = new TreeMap<>(mobStatComper);
     private TreeMap<MobStat, Option> removedStatVals = new TreeMap<>(mobStatComper);
-    private Map<MobStat, Timer> timers = new HashMap<>();
+    private Map<MobStat, ScheduledFuture> schedules = new HashMap<>();
     private Mob mob;
 
     public MobTemporaryStat(Mob mob) {
@@ -378,20 +377,20 @@ public class MobTemporaryStat {
         return removedStatVals;
     }
 
-    public void removeMobStat(MobStat mobStat, Boolean fromTimer) {
+    public void removeMobStat(MobStat mobStat, Boolean fromSchedule) {
         getRemovedStatVals().put(mobStat, getCurrentStatVals().get(mobStat));
         getCurrentStatVals().remove(mobStat);
         getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false));
-        getTimers().remove(mobStat);
-        if (!fromTimer && getTimers().containsKey(mobStat)) {
-            getTimers().get(mobStat).cancel();
-            getTimers().remove(mobStat);
+        getSchedules().remove(mobStat);
+        if (!fromSchedule && getSchedules().containsKey(mobStat)) {
+            getSchedules().get(mobStat).cancel(true);
+            getSchedules().remove(mobStat);
         } else {
-            getTimers().remove(mobStat);
+            getSchedules().remove(mobStat);
         }
     }
 
-    public void removeBurnedInfo(Integer charId, Boolean fromTimer) {
+    public void removeBurnedInfo(Integer charId, Boolean fromSchedule) {
         List<BurnedInfo> biList = getBurnedInfos().stream().filter(bi -> bi.getCharacterId() == charId).collect(Collectors.toList());
         getBurnedInfos().removeAll(biList);
         getRemovedStatVals().put(BurnedInfo, getCurrentOptionsByMobStat(BurnedInfo));
@@ -399,14 +398,14 @@ public class MobTemporaryStat {
             getCurrentStatVals().remove(BurnedInfo);
         }
         getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false, biList));
-        if (!fromTimer) {
-            getBurnCancelTimers().get(charId).cancel();
-            getBurnCancelTimers().remove(charId);
-            getBurnTimers().get(charId).cancel();
-            getBurnTimers().remove(charId);
+        if (!fromSchedule) {
+            getBurnCancelSchedules().get(charId).cancel(true);
+            getBurnCancelSchedules().remove(charId);
+            getBurnSchedules().get(charId).cancel(true);
+            getBurnSchedules().remove(charId);
         } else {
-            getBurnCancelTimers().remove(charId);
-            getBurnTimers().remove(charId);
+            getBurnCancelSchedules().remove(charId);
+            getBurnSchedules().remove(charId);
         }
     }
 
@@ -439,11 +438,11 @@ public class MobTemporaryStat {
         getNewStatVals().put(mobStat, option);
         getCurrentStatVals().put(mobStat, option);
         if (tAct > 0 && mobStat != BurnedInfo) {
-            if (getTimers().containsKey(mobStat)) {
-                getTimers().get(mobStat).cancel();
+            if (getSchedules().containsKey(mobStat)) {
+                getSchedules().get(mobStat).cancel(true);
             }
-            Timer t = EventManager.addEvent(this, "removeMobStat", tAct, mobStat, true);
-            getTimers().put(mobStat, t);
+            ScheduledFuture sf = EventManager.addEvent(() -> removeMobStat(mobStat, true), tAct);
+            getSchedules().put(mobStat, sf);
         }
     }
 
@@ -480,11 +479,11 @@ public class MobTemporaryStat {
         return getRemovedStatVals().keySet().stream().anyMatch(MobStat::isMovementAffectingStat);
     }
 
-    public Map<MobStat, Timer> getTimers() {
-        if (timers == null) {
-            timers = new HashMap<>();
+    public Map<MobStat, ScheduledFuture> getSchedules() {
+        if (schedules == null) {
+            schedules = new HashMap<>();
         }
-        return timers;
+        return schedules;
     }
 
     public Mob getMob() {
@@ -496,18 +495,18 @@ public class MobTemporaryStat {
     }
 
     public void clear() {
-        for (Timer t : getBurnTimers().values()) {
-            t.cancel();
+        for (ScheduledFuture t : getBurnSchedules().values()) {
+            t.cancel(true);
         }
-        getBurnTimers().clear();
-        for (Timer t : getBurnCancelTimers().values()) {
-            t.cancel();
+        getBurnSchedules().clear();
+        for (ScheduledFuture t : getBurnCancelSchedules().values()) {
+            t.cancel(true);
         }
-        getBurnCancelTimers().clear();
-        for (Timer t : getTimers().values()) {
-            t.cancel();
+        getBurnCancelSchedules().clear();
+        for (ScheduledFuture t : getSchedules().values()) {
+            t.cancel(true);
         }
-        getTimers().clear();
+        getSchedules().clear();
         getCurrentStatVals().forEach((ms, o) -> removeMobStat(ms, false));
     }
 
@@ -537,18 +536,18 @@ public class MobTemporaryStat {
         }
         getBurnedInfos().add(bi);
         addStatOptionsAndBroadcast(MobStat.BurnedInfo, new Option());
-        Timer t = EventManager.addEvent(this, "removeBurnedInfo", time, charId, true);
-        Timer burn = EventManager.addRecurringEvent(getMob(), "damage", bi.getInterval(), bi.getDotCount(),
-                (long) bi.getDamage());
-        getBurnCancelTimers().put(charId, t);
-        getBurnTimers().put(charId, burn);
+        ScheduledFuture sf = EventManager.addEvent(() -> removeBurnedInfo(charId, true), time);
+        ScheduledFuture burn = EventManager.addFixedRateEvent(
+                () -> getMob().damage((long) bi.getDamage()), 0, bi.getInterval(), bi.getDotCount());
+        getBurnCancelSchedules().put(charId, sf);
+        getBurnSchedules().put(charId, burn);
     }
 
-    public Map<Integer, Timer> getBurnCancelTimers() {
-        return burnCancelTimers;
+    public Map<Integer, ScheduledFuture> getBurnCancelSchedules() {
+        return burnCancelSchedules;
     }
 
-    public Map<Integer, Timer> getBurnTimers() {
-        return burnTimers;
+    public Map<Integer, ScheduledFuture> getBurnSchedules() {
+        return burnSchedules;
     }
 }

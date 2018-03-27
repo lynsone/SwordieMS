@@ -445,7 +445,7 @@ CREATE TABLE guildskills (
     skillID int,
     fk_GuildSkillID int,
     primary key (guildSkill_id),
-	foreign key (Guild_id) references guilds(id), on delete cascade
+	foreign key (Guild_id) references guilds(id) on delete cascade,
     FOREIGN KEY (fk_GuildSkillID) REFERENCES GuildSkill(id) on delete cascade
 );
 

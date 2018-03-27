@@ -19,6 +19,7 @@ import util.Rect;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,7 @@ public class Field {
     private List<Life> lifes;
     private List<Char> chars;
     private Map<Life, Char> lifeToControllers;
-    private Map<Life, Timer> lifeTimers;
+    private Map<Life, ScheduledFuture> lifeSchedules;
     private String onFirstUserEnter = "", onUserEnter = "";
     private int fixedMobCapacity;
     private int objectIDCounter = 1000000;
@@ -55,7 +56,7 @@ public class Field {
         this.lifes = new ArrayList<>();
         this.chars = new ArrayList<>();
         this.lifeToControllers = new HashMap<>();
-        this.lifeTimers = new HashMap<>();
+        this.lifeSchedules = new HashMap<>();
     }
 
     public Rectangle getRect() {
@@ -376,8 +377,8 @@ public class Field {
             if (life instanceof Summon) {
                 Summon summon = (Summon) life;
                 if (summon.getSummonTerm() > 0) {
-                    Timer t = EventManager.addEvent(this, "removeLife", summon.getSummonTerm(), summon.getObjectId(), true);
-                    addLifeTimer(summon, t);
+                    ScheduledFuture sf = EventManager.addEvent(() -> removeLife(summon.getObjectId(), true), summon.getSummonTerm());
+                    addLifeSchedule(summon, sf);
                 }
                 broadcastPacket(CField.summonedCreated(summon.getCharID(), summon));
             }
@@ -490,7 +491,8 @@ public class Field {
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
         if (si != null) {
             int duration = si.getValue(time, aa.getSlv()) * 1000;
-            EventManager.addEvent(this, "removeLife", duration, aa.getObjectId(), true);
+            ScheduledFuture sf = EventManager.addEvent(() -> removeLife(aa.getObjectId(), true), duration);
+            addLifeSchedule(aa, sf);
         }
         broadcastPacket(CField.affectedAreaCreated(aa));
         getChars().forEach(chr -> aa.getField().checkCharInAffectedAreas(chr));
@@ -523,13 +525,13 @@ public class Field {
         return lifes;
     }
 
-    public synchronized void removeLife(Integer id, Boolean fromTimer) {
+    public synchronized void removeLife(Integer id, Boolean fromSchedule) {
         Life life = getLifeByObjectID(id);
         if (life == null) {
             return;
         }
         removeLife(id);
-        removeTimer(life, fromTimer);
+        removeSchedule(life, fromSchedule);
         if (life instanceof Summon) {
             Summon summon = (Summon) life;
             broadcastPacket(CField.summonedRemoved(summon, LeaveType.ANIMATION));
@@ -545,30 +547,30 @@ public class Field {
         }
     }
 
-    public synchronized void removeDrop(Integer dropID, Integer pickupUserID, Boolean fromTimer) {
+    public synchronized void removeDrop(Integer dropID, Integer pickupUserID, Boolean fromSchedule) {
         Life life = getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
-            removeLife(dropID, fromTimer);
+            removeLife(dropID, fromSchedule);
         }
     }
 
-    public Map<Life, Timer> getLifeTimers() {
-        return lifeTimers;
+    public Map<Life, ScheduledFuture> getLifeSchedules() {
+        return lifeSchedules;
     }
 
-    public void addLifeTimer(Life life, Timer timer) {
-        getLifeTimers().put(life, timer);
+    public void addLifeSchedule(Life life, ScheduledFuture scheduledFuture) {
+        getLifeSchedules().put(life, scheduledFuture);
     }
 
-    public void removeTimer(Life life, boolean fromTimer) {
-        if (!getLifeTimers().containsKey(life)) {
+    public void removeSchedule(Life life, boolean fromSchedule) {
+        if (!getLifeSchedules().containsKey(life)) {
             return;
         }
-        if (!fromTimer) {
-            getLifeTimers().get(life).cancel();
+        if (!fromSchedule) {
+            getLifeSchedules().get(life).cancel(false);
         }
-        getLifeTimers().remove(life);
+        getLifeSchedules().remove(life);
     }
 
     public List<AffectedArea> getAffectedAreas() {

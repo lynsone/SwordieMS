@@ -330,7 +330,7 @@ public class PinkBean extends Job {
 
     public void yoyoInterval() {
         yoyoIncrement();
-        EventManager.addEvent(this, "yoyoInterval", 1000);
+        EventManager.addEvent(this::yoyoInterval, 1000);
     }
 /*
     private void updateYoYo() {

@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.crypto.MapleCrypto;
 import org.apache.log4j.LogManager;
 import packet.Login;
+import server.EventManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class ChannelAcceptor implements Runnable{
                     ch.attr(CLIENT_KEY).set(c);
                     ch.attr(Client.CRYPTO_KEY).set(new MapleCrypto());
 
-                    c.sendPing();
+                    EventManager.addFixedRateEvent(c::sendPing, 0, 10000);
                 }
             });
 

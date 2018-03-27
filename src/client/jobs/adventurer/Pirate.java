@@ -655,7 +655,7 @@ public class Pirate extends Job {
 
     public void supplyInterval() {
         incrementSupply();
-        EventManager.addEvent(this, "supplyInterval", 1000);
+        EventManager.addEvent(this::supplyInterval, 1000);
     }
 
     private void updateSupply() {

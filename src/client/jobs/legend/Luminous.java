@@ -21,6 +21,7 @@ import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -156,7 +157,7 @@ public class Luminous extends Job {
                 o1.nOption = 1;
                 o1.rOption = EQUILIBRIUM;
                 tsm.putCharacterStatValue(Larkness, o1);
-                EventManager.addEvent(this, "changeMode", getMoreEquilibriumTime() * 1000);
+                EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
                 break;
 
             case HEROIC_MEMORIES_LUMI:
@@ -399,7 +400,7 @@ public class Luminous extends Job {
                     o1.rOption = EQUILIBRIUM;
 //                    o1.tOption = SkillData.getSkillInfoById(EQUILIBRIUM).getValue(time, 1);
                     tsm.putCharacterStatValue(Larkness, o1);
-                    EventManager.addEvent(this, "changeMode", getMoreEquilibriumTime() * 1000);
+                    EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
                     break;
             }
             tsm.sendSetStatPacket();
