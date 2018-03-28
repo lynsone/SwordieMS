@@ -11,6 +11,8 @@ import client.guild.Guild;
 import client.jobs.nova.Kaiser;
 import client.life.Life;
 import client.life.Mob;
+import client.shop.NpcShopDlg;
+import client.shop.NpcShopItem;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
 import enums.EquipBaseStat;
@@ -24,6 +26,7 @@ import packet.CField;
 import packet.MobPool;
 import packet.Stage;
 import packet.WvsContext;
+import server.Server;
 import util.Position;
 import util.Rect;
 import util.Util;
@@ -45,8 +48,26 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            tsm.sendSetStatPacket();
+            NpcShopDlg nsd = new NpcShopDlg();
+            nsd.setNpcTemplateID(1001100);
+            NpcShopItem nsi = new NpcShopItem();
+            nsi.setItemID(3010002);
+            nsi.setPrice(0);
+            nsi.setTokenItemID(4310080);
+            nsi.setTokenPrice(10);
+            nsi.setTabIndex(1);
+            nsi.setMaxPerSlot((short) 10);
+            nsd.addItem(nsi);
+            NpcShopItem nsi2 = new NpcShopItem();
+            nsi2.setItemID(4030028);
+            nsi2.setPrice(1337);
+            nsi2.setTabIndex(Integer.parseInt(args[1]));
+            nsd.addItem(nsi2);
+            OutPacket outPacket = new OutPacket(OutHeader.SHOP_OPEN);
+            outPacket.encodeByte(0);
+            nsd.encode(outPacket);
+
+            chr.write(outPacket);
         }
     }
 
@@ -811,6 +832,13 @@ public class AdminCommands {
             else {
                 chr.chatMessage(GAME_NOTICE, "Map does not exist.");
             }
+        }
+    }
+
+    public static class ClearCache extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            Server.getInstance().clearCache();
+            chr.chatMessage("Cache has been cleared.");
         }
     }
 

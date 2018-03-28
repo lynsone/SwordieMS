@@ -268,11 +268,11 @@ public class Field {
         Foothold res = null;
         int lastY = Integer.MAX_VALUE;
         for (Foothold fh : footholds) {
-            if (res == null) {
+            int y = fh.getYFromX(pos.getX());
+            if (res == null && y >= pos.getY()) {
                 res = fh;
-                lastY = fh.getYFromX(pos.getX());
+                lastY = y;
             } else {
-                int y = fh.getYFromX(pos.getX());
                 if (y < lastY && y >= pos.getY()) {
                     res = fh;
                     lastY = y;

@@ -1113,4 +1113,10 @@ public class ItemData {
     public static void addItemInfo(ItemInfo ii) {
         getItems().put(ii.getItemId(), ii);
     }
+
+    public static void clear() {
+        getEquips().clear();
+        getItems().clear();
+        getItemOptions().clear();
+    }
 }

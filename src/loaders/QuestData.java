@@ -645,4 +645,7 @@ public class QuestData {
         generateDatFiles();
     }
 
+    public static void clear() {
+        getBaseQuests().clear();
+    }
 }

@@ -671,7 +671,7 @@ public class SkillData {
         if(file.exists()) {
             return loadMobSkillFromFile(file);
         } else {
-            log.error(String.format("Could not load mob skill %d (level %d)!", id, level));
+            log.error(String.format("Could not load mob skill %d (level %d).", id, level));
             return null;
         }
     }
@@ -685,4 +685,7 @@ public class SkillData {
         generateDatFiles();
     }
 
+    public static void clear() {
+        getMobSkillInfos().clear();
+    }
 }

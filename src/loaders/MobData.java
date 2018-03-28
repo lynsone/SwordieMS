@@ -864,4 +864,8 @@ public class MobData {
     public static void main(String[] args) {
         generateDatFiles();
     }
+
+    public static void clear() {
+        getMobs().clear();
+    }
 }

@@ -14,6 +14,7 @@ import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.character.skills.*;
 import client.field.Field;
+import client.field.Foothold;
 import client.field.Portal;
 import client.guild.*;
 import client.jobs.Job;
@@ -26,6 +27,7 @@ import client.life.*;
 import client.life.movement.Movement;
 import client.party.*;
 import connection.InPacket;
+import constants.GameConstants;
 import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
@@ -187,7 +189,10 @@ public class WorldHandler {
                 item.removeQuantity(quantity);
                 drop = new Drop(-1, dropItem);
             }
-            chr.getField().drop(drop, chr.getPosition(), chr.getPosition());
+            int x = chr.getPosition().getX();
+            int y = chr.getPosition().getY();
+            Foothold fh = chr.getField().findFootHoldBelow(new Position(x, y - GameConstants.DROP_HEIGHT));
+            chr.getField().drop(drop, chr.getPosition(), new Position(x, fh.getYFromX(x)));
             if(fullDrop) {
                 c.write(WvsContext.inventoryOperation(true, false, REMOVE,
                         oldPos, newPos, 0, item));
@@ -2180,18 +2185,15 @@ public class WorldHandler {
         Char chr = c.getChr();
         Inventory inv = chr.getInventoryByType(invType);
         List<Item> items = inv.getItems();
-        List<Integer> oldIndexes = new ArrayList<>();
+        items.sort(Comparator.comparingInt(Item::getItemId));
         for (Item item : items) {
-            oldIndexes.add(item.getBagIndex());
             chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
                     (short) item.getBagIndex(), (short) 0, -1, item));
         }
-        int i = 0;
         for (Item item : items) {
-            item.setBagIndex(oldIndexes.get(i));
+            item.setBagIndex(items.indexOf(item) + 1);
             chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
                     (short) item.getBagIndex(), (short) 0, -1, item));
-            i++;
         }
         c.write(WvsContext.sortItemResult(invType.getVal()));
         chr.dispose();

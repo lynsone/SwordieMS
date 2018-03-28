@@ -178,4 +178,8 @@ public class DropData {
         builder.append(in);
         return builder.toString();
     }
+
+    public static void clear() {
+        getDrops().clear();
+    }
 }

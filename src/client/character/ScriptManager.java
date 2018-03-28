@@ -12,15 +12,18 @@ import client.guild.GuildMsg;
 import client.life.Mob;
 import client.party.Party;
 import client.party.PartyMember;
+import client.shop.NpcShopDlg;
 import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.*;
 import loaders.MobData;
+import loaders.NpcData;
 import loaders.QuestData;
 import loaders.ItemData;
 import org.apache.log4j.LogManager;
 import packet.CField;
 import packet.ScriptMan;
+import packet.ShopDlg;
 import packet.WvsContext;
 import util.FileTime;
 import util.Position;
@@ -40,6 +43,7 @@ import static enums.NpcMessageType.*;
 /**
  * Created on 2/19/2018.
  */
+@SuppressWarnings("unused")
 public class ScriptManager implements Observer {
     public static final String SCRIPT_ENGINE_NAME = "python";
     public static final String SCRIPT_ENGINE_EXTENSION = ".py";
@@ -670,5 +674,15 @@ public class ScriptManager implements Observer {
                 .filter(m -> m.getHp() > 0)
                 .findFirst()
                 .ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(mob))));
+    }
+
+    public void openShop(int shopID) {
+        NpcShopDlg nsd = NpcData.getShopById(shopID);
+        if(nsd != null) {
+            chr.write(ShopDlg.openShop(0, nsd));
+        } else {
+            chat(String.format("Could not find shop with id %d.", shopID));
+            log.error(String.format("Could not find shop with id %d.", shopID));
+        }
     }
 }

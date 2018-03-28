@@ -27,6 +27,10 @@ public class StringData {
     public static Map<Integer, String> itemStrings = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
+    public static Map<Integer, String> getItemStrings() {
+        return itemStrings;
+    }
+
     public static void loadItemStringsFromWz() {
         long start = System.currentTimeMillis();
         String wzDir = ServerConstants.WZ_DIR + "/String.wz/";
@@ -250,5 +254,10 @@ public class StringData {
             }
         }
         return res;
+    }
+
+    public static void clear() {
+        getSkillString().clear();
+        getItemStrings().clear();
     }
 }

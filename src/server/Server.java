@@ -6,7 +6,7 @@ import client.guild.Guild;
 import com.sun.media.jfxmedia.logging.Logger;
 import constants.ServerConfig;
 import constants.ServerConstants;
-import loaders.StringData;
+import loaders.*;
 import net.crypto.MapleCrypto;
 import net.db.DatabaseConnection;
 import net.db.DatabaseManager;
@@ -17,7 +17,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.FileTime;
 import util.Loader;
-import loaders.DataClasses;
 import util.Tuple;
 
 import java.io.*;
@@ -164,5 +163,15 @@ public class Server extends Properties {
 
     public void cleanSessions() {
         DatabaseManager.cleanUpSessions();
+    }
+
+    public void clearCache() {
+        DropData.clear();
+        FieldData.clear();
+        ItemData.clear();
+        MobData.clear();
+        NpcData.clear();
+        QuestData.clear();
+        SkillData.clear();
     }
 }

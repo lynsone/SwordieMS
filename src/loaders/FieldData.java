@@ -544,4 +544,8 @@ public class FieldData {
         copy.setObjectIDCounter(field.getNewObjectID());
         return copy;
     }
+
+    public static void clear() {
+        getFields().clear();
+    }
 }
