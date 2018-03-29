@@ -91,11 +91,11 @@ public class NpcData {
         if (res == null) {
             File file = new File(ServerConstants.DAT_DIR + "\\npc\\" + id + ".dat");
             if(file.exists()) {
-                res = loadNpcFromDat(file);
+                res = loadNpcFromDat(file).deepCopy();
                 getBaseNpcs().add(res);
             }
         }
-        return res.deepCopy();
+        return res;
     }
 
     private static Npc loadNpcFromDat(File file) {
