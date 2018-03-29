@@ -7,7 +7,6 @@ import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
-import client.guild.Guild;
 import client.jobs.nova.Kaiser;
 import client.life.Life;
 import client.life.Mob;
@@ -24,7 +23,6 @@ import loaders.*;
 import org.apache.log4j.LogManager;
 import packet.CField;
 import packet.MobPool;
-import packet.Stage;
 import packet.WvsContext;
 import server.Server;
 import util.Position;
@@ -206,6 +204,10 @@ public class AdminCommands {
             if (args.length > 2) {
                 count = Integer.parseInt(args[2]);
             }
+            int hp = Integer.MAX_VALUE;
+            if (args.length > 3) {
+                hp = Integer.parseInt(args[3]);
+            }
             for (int i = 0; i < count; i++) {
                 Mob mob = MobData.getMobDeepCopyById(id);
                 if(mob == null) {
@@ -218,8 +220,41 @@ public class AdminCommands {
                 mob.setPrevPos(pos.deepCopy());
                 mob.setPosition(pos.deepCopy());
                 mob.getForcedMobStat().setMaxMP(Integer.MAX_VALUE);
-                mob.setMaxHp(Integer.MAX_VALUE);
-                mob.setHp(Integer.MAX_VALUE);
+                mob.setMaxHp(hp);
+                mob.setHp(hp);
+                mob.setNotRespawnable(true);
+                if (mob.getField() == null) {
+                    mob.setField(field);
+                }
+                field.spawnLife(mob, null);
+
+                log.debug("Mob has id " + mob.getObjectId());
+            }
+        }
+    }
+
+
+    public static class TestDrop extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int id = Integer.parseInt(args[1]);
+            int count = 1;
+            if (args.length > 2) {
+                count = Integer.parseInt(args[2]);
+            }
+            for (int i = 0; i < count; i++) {
+                Mob mob = MobData.getMobDeepCopyById(id);
+                if(mob == null) {
+                    chr.chatMessage("Could not find a mob with that ID.");
+                    return;
+                }
+                Field field = chr.getField();
+                Position pos = chr.getPosition();
+                mob.setPosition(pos.deepCopy());
+                mob.setPrevPos(pos.deepCopy());
+                mob.setPosition(pos.deepCopy());
+                mob.getForcedMobStat().setMaxMP(3);
+                mob.setMaxHp(3);
+                mob.setHp(3);
                 mob.setNotRespawnable(true);
                 if (mob.getField() == null) {
                     mob.setField(field);
