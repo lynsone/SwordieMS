@@ -26,6 +26,7 @@ import client.jobs.sengoku.Kanna;
 import client.life.*;
 import client.life.movement.Movement;
 import client.party.*;
+import client.shop.*;
 import connection.InPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
@@ -33,10 +34,7 @@ import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
 import handling.OutHeader;
-import loaders.ItemData;
-import loaders.QuestData;
-import loaders.QuestInfo;
-import loaders.SkillData;
+import loaders.*;
 import net.db.DatabaseManager;
 import org.apache.log4j.LogManager;
 import org.hibernate.Session;
@@ -2657,5 +2655,85 @@ public class WorldHandler {
             sourceJobHandler.handleSkill(c, skillID, slv, inPacket);
         }
         WvsContext.dispose(c.getChr());
+    }
+
+    public static void handleUserShopRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        byte type = inPacket.decodeByte();
+        ShopRequestType shr = ShopRequestType.getByVal(type);
+        if(shr == null) {
+            log.error(String.format("Unhandled shop request type %d", type));
+        }
+        NpcShopDlg nsd = chr.getShop();
+        if(nsd == null) {
+            chr.chatMessage("You are currently not in a shop.");
+        }
+        switch(shr) {
+            case BUY:
+                short itemIndex = inPacket.decodeShort();
+                int itemID = inPacket.decodeInt();
+                short quantity = inPacket.decodeShort();
+                NpcShopItem nsi = nsd.getItemByIndex(itemIndex);
+                if(nsi == null || nsi.getItemID() != itemID) {
+                    chr.chatMessage("The server's item at that position was different than the client's.");
+                    log.warn(String.format("Possible hack: expected shop itemID %d, got %d (chr %d)", nsi.getItemID(), itemID, chr.getId()));
+                    return;
+                }
+                long cost = nsi.getPrice() * quantity;
+                if(chr.getMoney() < cost) {
+                    chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
+                    return;
+                }
+                Item item = ItemData.getItemDeepCopy(itemID);
+                item.setQuantity(quantity);
+                chr.deductMoney(cost);
+                chr.addItemToInventory(item);
+                chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.Success)));
+                break;
+            case RECHARGE:
+                short slot = inPacket.decodeShort();
+                item = chr.getConsumeInventory().getItemBySlot(slot);
+                if(item == null || !ItemConstants.isRechargable(item.getItemId())) {
+                    chr.chatMessage(String.format("Was not able to find a rechargable item at position %d.", slot));
+                    return;
+                }
+                ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
+                cost = ii.getSlotMax() - item.getQuantity();
+                if(chr.getMoney() < cost) {
+                    chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
+                    return;
+                }
+                chr.deductMoney(cost);
+                item.addQuantity(ii.getSlotMax());
+                chr.write(WvsContext.inventoryOperation(true, false,
+                        InventoryOperation.UPDATE_QUANTITY, slot, (short) 0, 0, item));
+                chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.Success)));
+                break;
+            case SELL:
+                slot = inPacket.decodeShort();
+                itemID = inPacket.decodeInt();
+                quantity = inPacket.decodeShort();
+                InvType it = ItemConstants.getInvTypeByItemID(itemID);
+                item = chr.getInventoryByType(it).getItemBySlot(slot);
+                if(item == null || item.getItemId() != itemID) {
+                    chr.chatMessage("Could not find that item.");
+                    return;
+                }
+                if(ItemConstants.isEquip(itemID)) {
+                    cost = ((Equip) item).getPrice();
+                } else {
+                    cost = ItemData.getItemInfoByID(itemID).getPrice() * quantity;
+                }
+                chr.consumeItem(itemID, quantity);
+                chr.addMoney(cost);
+                chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.Success)));
+                break;
+            case CLOSE:
+                chr.setShop(null);
+                break;
+            default:
+                log.error(String.format("Unhandled shop request type %s", shr));
+        }
+        chr.dispose();
     }
 }

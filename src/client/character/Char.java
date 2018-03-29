@@ -18,6 +18,7 @@ import client.life.Drop;
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.party.Party;
+import client.shop.NpcShopDlg;
 import connection.OutPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
@@ -25,6 +26,7 @@ import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
 import loaders.FieldData;
+import loaders.ItemInfo;
 import loaders.SkillData;
 import net.db.DatabaseManager;
 import org.hibernate.Session;
@@ -233,6 +235,8 @@ public class Char {
     private Map<Integer, Field> fields = new HashMap<>();
     @Transient
     private int bulletIDForAttack;
+    @Transient
+    private NpcShopDlg shop;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -351,7 +355,7 @@ public class Char {
             if (existingItem != null && existingItem.getInvType().isStackable()) {
                 existingItem.addQuantity(item.getQuantity());
                 write(WvsContext.inventoryOperation(true, false,
-                        UPDATE_BAG_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
+                        UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
             } else {
                 item.setInventoryId(inventory.getId());
                 if (!hasCorrectBagIndex) {
@@ -2496,5 +2500,26 @@ public class Char {
 
     public void setBulletIDForAttack(int bulletIDForAttack) {
         this.bulletIDForAttack = bulletIDForAttack;
+    }
+
+    public void setShop(NpcShopDlg shop) {
+        this.shop = shop;
+    }
+
+    public NpcShopDlg getShop() {
+        return shop;
+    }
+
+    public boolean canHold(int id) {
+        boolean canHold;
+        if (ItemConstants.isEquip(id)) {  //Equip
+            canHold = getEquipInventory().getSlots() > getEquipInventory().getItems().size();
+        } else {    //Item
+            ItemInfo ii = ItemData.getItemInfoByID(id);
+            Inventory inv = getInventoryByType(ii.getInvType());
+            Item curItem = inv.getItemByItemID(id);
+            canHold = (curItem != null && curItem.getQuantity() + 1 < ii.getSlotMax()) || inv.getSlots() > inv.getItems().size();
+        }
+        return canHold;
     }
 }

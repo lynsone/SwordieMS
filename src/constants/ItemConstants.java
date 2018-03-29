@@ -2,14 +2,20 @@ package constants;
 
 import client.character.items.Equip;
 import client.character.items.ItemOption;
+import enums.InvType;
 import enums.ItemGrade;
 import loaders.ItemData;
+import loaders.ItemInfo;
 import org.apache.log4j.LogManager;
 import util.Util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static enums.InvType.EQUIP;
 
 /**
  * Created on 12/12/2017.
@@ -445,5 +451,42 @@ public class ItemConstants {
 
     public static boolean isXBowArrow(int id) {
         return id / 1000 == 2061;
+    }
+
+    public static InvType getInvTypeByItemID(int itemID) {
+        if(isEquip(itemID)) {
+            return EQUIP;
+        } else {
+            ItemInfo ii = ItemData.getItemInfoByID(itemID);
+            if(ii == null) {
+                return null;
+            }
+            return ii.getInvType();
+        }
+    }
+
+    public static Set<Integer> getRechargeablesList() {
+        Set<Integer> itemList = new HashSet<>();
+        // all throwing stars
+        for(int i = 2070000; i <= 2070016; i++) {
+            itemList.add(i);
+        }
+        itemList.add(2070018);
+        itemList.add(2070023);
+        itemList.add(2070024);
+        itemList.add(2070026);
+        // all bullets
+        for(int i = 2330000; i <= 2330006; i++) {
+            itemList.add(i);
+        }
+        itemList.add(2330008);
+        itemList.add(2330016);
+        itemList.add(2331000);
+        itemList.add(2332000);
+        return itemList;
+    }
+
+    public static boolean isRechargable(int itemId) {
+        return isThrowingStar(itemId) || isBullet(itemId);
     }
 }

@@ -992,6 +992,9 @@ public class ItemData {
     }
 
     public static Item getItemDeepCopy(int id) {
+        if(ItemConstants.isEquip(id)) {
+            return getEquipDeepCopyFromId(id);
+        }
         return getDeepCopyByItemInfo(getItemInfoByID(id));
     }
 

@@ -1,6 +1,7 @@
 package packet;
 
 import client.shop.NpcShopDlg;
+import client.shop.ShopResult;
 import connection.OutPacket;
 import handling.OutHeader;
 
@@ -17,6 +18,15 @@ public class ShopDlg {
             outPacket.encodeInt(petTemplateID);
         }
         nsd.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket shopResult(ShopResult shopResult) {
+        OutPacket outPacket = new OutPacket(OutHeader.SHOP_RESULT);
+
+        outPacket.encodeByte(shopResult.getType().getVal());
+        shopResult.encode(outPacket);
 
         return outPacket;
     }

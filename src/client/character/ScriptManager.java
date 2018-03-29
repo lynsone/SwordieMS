@@ -16,10 +16,7 @@ import client.shop.NpcShopDlg;
 import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.*;
-import loaders.MobData;
-import loaders.NpcData;
-import loaders.QuestData;
-import loaders.ItemData;
+import loaders.*;
 import org.apache.log4j.LogManager;
 import packet.CField;
 import packet.ScriptMan;
@@ -543,16 +540,7 @@ public class ScriptManager implements Observer {
      * @return
      */
     public boolean canHold(int id) {
-        boolean canHold = true;
-        if (ItemConstants.isEquip(id)) {  //Equip
-            canHold = chr.getEquipInventory().getSlots() > chr.getEquipInventory().getItems().size();
-        } else {    //Item
-            Item item = ItemData.getItemDeepCopy(id);
-            Inventory inv = chr.getInventoryByType(item.getInvType());
-            Item curItem = inv.getItemByItemID(id);
-            canHold = (curItem != null && curItem.getQuantity() + 1 > 0) || inv.getSlots() > inv.getItems().size();
-        }
-        return canHold;
+        return chr.canHold(id);
     }
 
     /**
@@ -679,6 +667,7 @@ public class ScriptManager implements Observer {
     public void openShop(int shopID) {
         NpcShopDlg nsd = NpcData.getShopById(shopID);
         if(nsd != null) {
+            chr.setShop(nsd);
             chr.write(ShopDlg.openShop(0, nsd));
         } else {
             chat(String.format("Could not find shop with id %d.", shopID));

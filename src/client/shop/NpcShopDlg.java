@@ -1,6 +1,9 @@
 package client.shop;
 
 import connection.OutPacket;
+import constants.ItemConstants;
+import loaders.ItemData;
+import loaders.ItemInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,21 @@ public class NpcShopDlg {
     private int starCoin;
     private int shopVerNo;
     private List<NpcShopItem> items = new ArrayList<>();
+
+    public NpcShopDlg() {
+        for(int i : ItemConstants.getRechargeablesList()) {
+            ItemInfo ii = ItemData.getItemInfoByID(i);
+            if(ii == null) {
+                // atm just 2070014 (2070014) that somewhy isn't found
+                continue;
+            }
+            NpcShopItem nsi = new NpcShopItem();
+            nsi.setItemID(i);
+            nsi.setUnitPrice(1);
+            nsi.setMaxPerSlot((short) ii.getSlotMax());
+            addItem(nsi);
+        }
+    }
 
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getSelectNpcItemID());
@@ -81,5 +99,13 @@ public class NpcShopDlg {
 
     public void addItem(NpcShopItem nsi) {
         getItems().add(nsi);
+    }
+
+    public NpcShopItem getItemByIndex(int idx) {
+        NpcShopItem nsi = null;
+        if(idx >= 0 || idx < getItems().size()) {
+            return getItems().get(idx);
+        }
+        return nsi;
     }
 }

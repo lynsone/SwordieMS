@@ -162,7 +162,6 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case LOCALE:
                 case USER_CALC_DAMAGE_STAT_SET_REQUEST:
                     break;
-                // sorted from here ------------------
                 case CHAR_LOGIN:
                     WorldHandler.handleCharLogin(c, inPacket);
                     break;
@@ -186,6 +185,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_CHAT:
                     WorldHandler.handleUserChat(c, inPacket);
+                    break;
+                case USER_SHOP_REQUEST:
+                    WorldHandler.handleUserShopRequest(c, inPacket);
                     break;
                 case USER_CHANGE_SLOT_POSITION_REQUEST:
                     WorldHandler.handleUserChangeSlotPositionRequest(c, inPacket);
@@ -357,7 +359,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
 
     private void handleUnknown(InPacket inPacket, short opCode) {
         if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(opCode))) {
-            log.warn(String.format("Unhandled opcode %s/0x%s, packet %s", opCode, Integer.toHexString(opCode), inPacket));
+            log.warn(String.format("Unhandled opcode %s/0x%s, packet %s", opCode, Integer.toHexString(opCode).toUpperCase(), inPacket));
         }
     }
 

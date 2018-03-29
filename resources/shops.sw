@@ -12,9 +12,21 @@
     item1{
         id 2000000;
         price 30;
+        tabindex 2;
     }
     item2{
+        tabindex 1;
         id 2000001;
+        price 50;
+    }
+    item3{
+        tabindex 1;
+        id 2000002;
+        price 50;
+    }
+    item4{
+        tabindex 1;
+        id 1302208;
         price 50;
     }
 }
