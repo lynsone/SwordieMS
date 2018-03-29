@@ -204,6 +204,10 @@ public class AdminCommands {
             if (args.length > 2) {
                 count = Integer.parseInt(args[2]);
             }
+            int hp = Integer.MAX_VALUE;
+            if (args.length > 3) {
+                hp = Integer.parseInt(args[3]);
+            }
             for (int i = 0; i < count; i++) {
                 Mob mob = MobData.getMobDeepCopyById(id);
                 if(mob == null) {
@@ -216,8 +220,8 @@ public class AdminCommands {
                 mob.setPrevPos(pos.deepCopy());
                 mob.setPosition(pos.deepCopy());
                 mob.getForcedMobStat().setMaxMP(Integer.MAX_VALUE);
-                mob.setMaxHp(Integer.MAX_VALUE);
-                mob.setHp(Integer.MAX_VALUE);
+                mob.setMaxHp(hp);
+                mob.setHp(hp);
                 mob.setNotRespawnable(true);
                 if (mob.getField() == null) {
                     mob.setField(field);
@@ -229,7 +233,8 @@ public class AdminCommands {
         }
     }
 
-    public static class M extends AdminCommand {
+
+    public static class TestDrop extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
             int count = 1;
@@ -247,6 +252,7 @@ public class AdminCommands {
                 mob.setPosition(pos.deepCopy());
                 mob.setPrevPos(pos.deepCopy());
                 mob.setPosition(pos.deepCopy());
+                mob.getForcedMobStat().setMaxMP(3);
                 mob.setMaxHp(3);
                 mob.setHp(3);
                 mob.setNotRespawnable(true);
