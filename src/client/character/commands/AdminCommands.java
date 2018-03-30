@@ -220,8 +220,8 @@ public class AdminCommands {
                 mob.setPrevPos(pos.deepCopy());
                 mob.setPosition(pos.deepCopy());
                 mob.getForcedMobStat().setMaxMP(Integer.MAX_VALUE);
-                mob.setMaxHp(hp);
-                mob.setHp(hp);
+//                mob.setMaxHp(hp);
+//                mob.setHp(hp);
                 mob.setNotRespawnable(true);
                 if (mob.getField() == null) {
                     mob.setField(field);
@@ -229,6 +229,7 @@ public class AdminCommands {
                 field.spawnLife(mob, null);
 
                 log.debug("Mob has id " + mob.getObjectId());
+                chr.chatMessage("hp=" + mob.getMaxHp());
             }
         }
     }

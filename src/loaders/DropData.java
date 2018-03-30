@@ -62,6 +62,9 @@ public class DropData {
             int mobID = 0;
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
+                if(line.contains("//")) {
+                    continue;
+                }
                 String[] split = line.split(" ");
                 /*
                 Format, either:
@@ -76,7 +79,7 @@ public class DropData {
                     int itemID = Integer.parseInt(split[0]);
                     int chance = Integer.parseInt(split[1]);
                     int questReq = 0;
-                    if(split.length >= 3) {
+                    if(split.length >= 3 && Util.isNumber(split[2])) {
                         questReq = Integer.parseInt(split[2]);
                     }
                     DropInfo dropInfo = new DropInfo(itemID, 0, chance, questReq);

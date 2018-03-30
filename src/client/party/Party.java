@@ -299,4 +299,15 @@ public class Party {
             return field;
         }
     }
+
+    public boolean isPartyMember(Char chr) {
+        return getPartyMemberByID(chr.getId()) != null;
+    }
+
+    public void updatePartyMemberInfoByChr(Char chr) {
+        if(!isPartyMember(chr)) {
+            return;
+        }
+        updateFull();
+    }
 }

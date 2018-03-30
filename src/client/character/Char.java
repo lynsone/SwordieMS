@@ -2093,10 +2093,10 @@ public class Char {
      * @param quantity The amount to consume.
      */
     public void consumeItem(int id, int quantity) {
-        quantity = 1;
         Item checkItem = ItemData.getItemDeepCopy(id);
         Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
-        item.setQuantity(quantity);
+        int consumed = quantity > item.getQuantity() ? 0 : item.getQuantity() - quantity;
+        item.setQuantity(consumed + 1); // +1 because 1 gets consumed by called consumeItem(item)
         if (item != null) {
             consumeItem(item);
         }
@@ -2426,6 +2426,9 @@ public class Char {
                     new GuildUpdateMemberLogin(g.getId(), getId(), online, !this.online && online)), this);
         }
         this.online = online;
+        if(getParty() != null) {
+            party.updatePartyMemberInfoByChr(this);
+        }
     }
 
     public void setParty(Party party) {
