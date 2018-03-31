@@ -36,4 +36,40 @@ public class MobAttackInfo {
     public byte byteIdk5;
     public int psychicLockInfo;
     public byte rocketRushInfo;
+
+    public MobAttackInfo deepCopy() {
+        MobAttackInfo mai = new MobAttackInfo();
+        mai.mobId = mobId;
+        mai.idk1 = idk1;
+        mai.idk2 = idk2;
+        mai.idk3 = idk3;
+        mai.idk4 = idk4;
+        mai.idk5 = idk5;
+        mai.calcDamageStatIndex = calcDamageStatIndex;
+        mai.rcDstX = rcDstX;
+        mai.rectRight = rectRight;
+        mai.oldPosX = oldPosX;
+        mai.oldPosY = oldPosY;
+        mai.hpPerc = hpPerc;
+        mai.damages = new int[damages.length];
+        System.arraycopy(damages, 0, mai.damages, 0, damages.length);
+        mai.mobUpDownYRange = mobUpDownYRange;
+        mai.animationDeltaL = animationDeltaL;
+        System.arraycopy(hitPartRunTimes, 0, mai.hitPartRunTimes, 0, hitPartRunTimes.length);
+        mai.templateID = templateID;
+        mai.idk6 = idk6;
+        mai.isResWarriorLiftPress = isResWarriorLiftPress;
+        mai.pos1 = pos1 != null ? pos1.deepCopy() : null;
+        mai.pos2 = pos2 != null ? pos2.deepCopy() : null;
+        mai.rect = rect != null ? rect.deepCopy() : null;
+        mai.idkInt = idkInt;
+        mai.byteIdk1 = byteIdk1;
+        mai.byteIdk2 = byteIdk2;
+        mai.byteIdk3 = byteIdk3;
+        mai.byteIdk4 = byteIdk4;
+        mai.byteIdk5 = byteIdk5;
+        mai.psychicLockInfo = psychicLockInfo;
+        mai.rocketRushInfo = rocketRushInfo;
+        return mai;
+    }
 }

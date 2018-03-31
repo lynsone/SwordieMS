@@ -97,9 +97,8 @@ public class Mob extends Life {
     private boolean noDebuff;
     private boolean targetFromSvr;
     private int charismaEXP;
-    private boolean isSplit = false;
-    private int splitOriginalLife;
-    private int splitLife;
+    private boolean isSplit;
+    private int splitLink;
     private Map<Char, Long> damageDone = new HashMap<>();
     private Set<DropInfo> drops = new HashSet<>();
     private List<MobSkill> skills = new ArrayList<>();
@@ -1076,17 +1075,21 @@ public class Mob extends Life {
         return charismaEXP;
     }
 
-    public void setSplit(boolean isSplit) {this.isSplit = isSplit;}
+    public void setSplit(boolean isSplit) {
+        this.isSplit = isSplit;
+    }
 
-    public boolean getSplit() {return isSplit;}
+    public boolean isSplit() {
+        return isSplit;
+    }
 
-    public void setOriginalFromSplittedLife(int splitOriginalLife) {this.splitOriginalLife = splitOriginalLife;}
+    public void setSplitLink(int splitLinkID) {
+        this.splitLink = splitLinkID;
+    }
 
-    public int getOriginalFromSplittedLife() {return splitOriginalLife;}
-
-    public void setSplittedFromOriginaLife(int splitLife) {this.splitLife = splitLife;}
-
-    public int getSplittedFromOriginaLife() {return splitLife;}
+    public int getSplitLink() {
+        return splitLink;
+    }
 
     public void damage(Long totalDamage) {
         long maxHP = getMaxHp();
@@ -1110,10 +1113,13 @@ public class Mob extends Life {
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
         if (!isNotRespawnable()) { // double negative
             EventManager.addEvent(() -> field.respawn(this), (long) (5000 * (1 / field.getMobRate())));
+            field.putLifeController(this, null);
         } else {
             getField().removeLife(getObjectId());
         }
-        field.putLifeController(this, null);
+        if(isSplit()) {
+            return;
+        }
         distributeExp();
         dropDrops(); // xd
         setPosition(getHomePosition());
@@ -1215,12 +1221,11 @@ public class Mob extends Life {
         copy.setNotRespawnable(true);
         copy.setField(field);
 
-        copy.setOriginalFromSplittedLife(origin.getObjectId());
+        copy.setSplitLink(origin.getObjectId());
         //copy.setDrops(null);
 
         field.spawnLife(copy, null);
 
-        MobTemporaryStat mtsOrigin = origin.getTemporaryStat();
         MobTemporaryStat mtsCopy = copy.getTemporaryStat();
         Option o1 = new Option();
         Option o2 = new Option();

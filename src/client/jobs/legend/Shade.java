@@ -288,24 +288,7 @@ public class Shade extends Job {
             if(attackInfo.skillId == FOX_SPIRITS_ATOM || attackInfo.skillId == FOX_SPIRITS_ATOM_2) {
                 handleFoxSpiritsReCreation(skillID, slv, attackInfo);
             }
-
             handleWeaken(attackInfo, slv);
-
-
-            //TESTING
-            for(MobAttackInfo mai2 : attackInfo.mobAttackInfo) {
-                Mob copy = (Mob) chr.getField().getLifeByObjectID(mai2.mobId);
-
-                if(copy.getOriginalFromSplittedLife() != 0) {
-                    Mob original = (Mob) chr.getField().getLifeByObjectID(copy.getOriginalFromSplittedLife());
-                    long totaldmg = Arrays.stream(mai2.damages).sum();
-                    original.damage(totaldmg);
-                    c.write(UserRemote.attack(chr, attackInfo));
-                }
-
-            }
-            //TESTING
-
         }
 
         Option o1 = new Option();
@@ -355,7 +338,7 @@ public class Shade extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
 
                     //Spawns soul split mob
-                    if(!mob.getSplit()) {
+                    if(!mob.isSplit()) {
                         mob.soulSplitMob(chr, mob, duration, skill);
                     }
                 }

@@ -146,4 +146,12 @@ public class Rect {
     public Rect moveRight() {
         return new Rect(getRight(), getTop(), getRight() + getWidth(), getBottom());
     }
+
+    /**
+     * Returns a deep copy of this Rect.
+     * @return a deep copy of this Rect
+     */
+    public Rect deepCopy() {
+        return new Rect(getLeft(), getTop(), getRight(), getBottom());
+    }
 }

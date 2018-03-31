@@ -531,6 +531,16 @@ public class WorldHandler {
         log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
         c.getChr().getJobHandler().handleAttack(c, attackInfo);
+        List<MobAttackInfo> maisForSplit = new ArrayList<>();
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
+            if(mob.isSplit()) {
+                MobAttackInfo maiCopy = mai.deepCopy();
+                maiCopy.mobId = mob.getSplitLink();
+                maisForSplit.add(maiCopy);
+            }
+        }
+        attackInfo.mobAttackInfo.addAll(maisForSplit);
         chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
