@@ -2,20 +2,21 @@ package client.life;
 
 import client.character.Char;
 import client.character.ExpIncreaseInfo;
-import client.character.quest.Quest;
-import client.character.skills.AttackInfo;
-import client.character.skills.MobAttackInfo;
+import client.character.skills.Option;
+import client.character.skills.Skill;
 import client.field.Field;
 import client.field.Foothold;
 import client.field.fieldeffect.MobHPTagFieldEffect;
+import enums.MobStat;
+import loaders.MobData;
 import packet.CField;
 import packet.MobPool;
-import packet.WvsContext;
 import server.EventManager;
 import util.Position;
 import util.Tuple;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Mob extends Life {
 
@@ -96,6 +97,9 @@ public class Mob extends Life {
     private boolean noDebuff;
     private boolean targetFromSvr;
     private int charismaEXP;
+    private boolean isSplit = false;
+    private int splitOriginalLife;
+    private int splitLife;
     private Map<Char, Long> damageDone = new HashMap<>();
     private Set<DropInfo> drops = new HashSet<>();
     private List<MobSkill> skills = new ArrayList<>();
@@ -1072,6 +1076,18 @@ public class Mob extends Life {
         return charismaEXP;
     }
 
+    public void setSplit(boolean isSplit) {this.isSplit = isSplit;}
+
+    public boolean getSplit() {return isSplit;}
+
+    public void setOriginalFromSplittedLife(int splitOriginalLife) {this.splitOriginalLife = splitOriginalLife;}
+
+    public int getOriginalFromSplittedLife() {return splitOriginalLife;}
+
+    public void setSplittedFromOriginaLife(int splitLife) {this.splitLife = splitLife;}
+
+    public int getSplittedFromOriginaLife() {return splitLife;}
+
     public void damage(Long totalDamage) {
         long maxHP = getMaxHp();
         long oldHp = getHp();
@@ -1181,5 +1197,47 @@ public class Mob extends Life {
 
     public void addQuest(int questID) {
         getQuests().add(questID);
+    }
+
+    public void soulSplitMob(Char chr, Mob origin, int duration, Skill skill) {
+        Field field = chr.getField();
+        Position position = origin.getPosition();
+        origin.setSplit(true);
+
+        Mob copy;
+        copy = MobData.getMobDeepCopyById(origin.getTemplateId());
+        copy.setSplit(true);
+        copy.setPosition(position);
+        copy.setHp(origin.getHp());
+        copy.setMaxHp(origin.getMaxHp());
+        copy.setMp(origin.getMp());
+        copy.setMaxMp(origin.getMaxMp());
+        copy.setNotRespawnable(true);
+        copy.setField(field);
+
+        copy.setOriginalFromSplittedLife(origin.getObjectId());
+        //copy.setDrops(null);
+
+        field.spawnLife(copy, null);
+
+        MobTemporaryStat mtsOrigin = origin.getTemporaryStat();
+        MobTemporaryStat mtsCopy = copy.getTemporaryStat();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        o2.nOption = 1;
+        o2.rOption = skill.getSkillId();
+        o2.tOption = duration;
+        mtsCopy.addStatOptions(MobStat.Freeze, o2);
+        o1.nOption = 1;
+        o1.rOption = skill.getSkillId();
+        o1.tOption = duration;
+        mtsCopy.addStatOptionsAndBroadcast(MobStat.TrueSight, o1);
+        EventManager.addEvent(() -> removeSoulSplitLife(chr, origin, copy), duration, TimeUnit.SECONDS);
+    }
+
+    public void removeSoulSplitLife(Char chr, Mob origin, Mob copy) {
+        chr.getField().removeLife(copy.getObjectId());
+        chr.getField().broadcastPacket(MobPool.mobLeaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
+        origin.setSplit(false);
     }
 }

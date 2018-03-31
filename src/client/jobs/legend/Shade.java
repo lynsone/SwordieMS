@@ -17,6 +17,7 @@ import enums.ForceAtomEnum;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.CField;
+import packet.UserRemote;
 import packet.WvsContext;
 import util.Position;
 import util.Rect;
@@ -49,7 +50,8 @@ public class Shade extends Job {
 
     public static final int SPIRIT_WARD = 25121209; //Special Buff
     public static final int MAPLE_WARRIOR_SH = 25121108; //Buff
-    public static final int BOMB_PUNCH_FINAL = 25121003; //Special Attack (Stun Debuff)
+    public static final int BOMB_PUNCH = 25121000;
+    public static final int BOMB_PUNCH_FINAL = 25120003; //Special Attack (Stun Debuff)
     public static final int DEATH_MARK = 25121006; //Special Attack (Mark Debuff)
     public static final int SOUL_SPLITTER = 25121007; //Special Attack (Split)
     public static final int FIRE_FOX_SPIRIT_MASTERY = 25120110;
@@ -101,10 +103,10 @@ public class Shade extends Job {
                 tsm.putCharacterStatValue(HiddenPossession, o1);
                 break;
             case SUMMON_OTHER_SPIRIT:
-                o1.nOption = si.getValue(x, slv);
+                o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(NotDamaged, o1);
+                tsm.putCharacterStatValue(ReviveOnce, o1);
                 break;
             case SPIRIT_WARD:
                 o1.nOption = 3;
@@ -288,7 +290,24 @@ public class Shade extends Job {
             }
 
             handleWeaken(attackInfo, slv);
+
+
+            //TESTING
+            for(MobAttackInfo mai2 : attackInfo.mobAttackInfo) {
+                Mob copy = (Mob) chr.getField().getLifeByObjectID(mai2.mobId);
+
+                if(copy.getOriginalFromSplittedLife() != 0) {
+                    Mob original = (Mob) chr.getField().getLifeByObjectID(copy.getOriginalFromSplittedLife());
+                    long totaldmg = Arrays.stream(mai2.damages).sum();
+                    original.damage(totaldmg);
+                    c.write(UserRemote.attack(chr, attackInfo));
+                }
+
+            }
+            //TESTING
+
         }
+
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -305,13 +324,15 @@ public class Shade extends Job {
                 }
                 break;
             case BOMB_PUNCH_FINAL:
-                if (Util.succeedProp(si.getValue(prop, slv))) {
+                SkillInfo bpi = SkillData.getSkillInfoById(BOMB_PUNCH);
+                byte bombPunchslv = (byte) chr.getSkill(BOMB_PUNCH).getCurrentLevel();
+                if (Util.succeedProp(bpi.getValue(prop, bombPunchslv))) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.rOption = BOMB_PUNCH;
+                        o1.tOption = bpi.getValue(time, bombPunchslv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
@@ -328,18 +349,18 @@ public class Shade extends Job {
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                 }
                 break;
-            case SOUL_SPLITTER:
+            case SOUL_SPLITTER:     // TODO
+                int duration = si.getValue(time, slv); //Split Duration & Timer on when to removeLife
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(dotTime, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.SeperateSoulC, o1); //TODO
+
+                    //Spawns soul split mob
+                    if(!mob.getSplit()) {
+                        mob.soulSplitMob(chr, mob, duration, skill);
+                    }
                 }
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     public boolean isBuff(int skillID) {
