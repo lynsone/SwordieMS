@@ -1,11 +1,15 @@
 package client.character;
 
+import client.Account;
 import client.Client;
 import client.character.items.*;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.field.Field;
 import client.field.Portal;
+import client.friend.Friend;
+import client.friend.FriendFlag;
+import client.friend.FriendRequestor;
 import client.guild.Guild;
 import client.guild.GuildMember;
 import client.guild.GuildUpdate;
@@ -25,6 +29,7 @@ import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
+import handling.handlers.ChatHandler;
 import loaders.FieldData;
 import loaders.ItemInfo;
 import loaders.SkillData;
@@ -42,6 +47,7 @@ import javax.persistence.*;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.ChatMsgColour.YELLOW;
 import static enums.FieldInstanceType.*;
 import static enums.InvType.EQUIP;
@@ -100,9 +106,13 @@ public class Char {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FuncKeyMap funcKeyMap;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "charId")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Skill> skills;
+
+    @JoinColumn(name = "ownerID")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Friend> friends;
 
     @JoinColumn(name = "guild")
     @OneToOne(cascade = CascadeType.ALL)
@@ -120,7 +130,7 @@ public class Char {
     @Transient
     private List<Pet> pets;
     @Transient
-    private List<FriendRecord> friends;
+    private List<FriendRecord> friendRecords;
     @Transient
     private List<ExpConsumeItem> expConsumeItems;
     @Transient
@@ -237,6 +247,10 @@ public class Char {
     private int bulletIDForAttack;
     @Transient
     private NpcShopDlg shop;
+    @Transient // yes
+    private Account account;
+    @Transient
+    private Client chatClient;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -296,10 +310,11 @@ public class Char {
         chosenSkills = new ArrayList<>();
         questManager = new QuestManager(this);
         itemPots = new ArrayList<>();
-        friends = new ArrayList<>();
+        friendRecords = new ArrayList<>();
         expConsumeItems = new ArrayList<>();
         skills = new ArrayList<>();
         temporaryStatManager = new TemporaryStatManager(this);
+        friends = new ArrayList<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -450,7 +465,7 @@ public class Char {
         outPacket.encodeByte(0); // again unsure
         if (mask.isInMask(DBChar.Character)) {
             getAvatarData().getCharacterStat().encode(outPacket);
-            outPacket.encodeByte(getFriends().size());
+            outPacket.encodeByte(getFriendRecords().size());
             boolean hasBlessingOfFairy = getBlessingOfFairy() != null;
             outPacket.encodeByte(hasBlessingOfFairy);
             if (hasBlessingOfFairy) {
@@ -1226,12 +1241,12 @@ public class Char {
         this.pets = pets;
     }
 
-    public List<FriendRecord> getFriends() {
-        return friends;
+    public List<FriendRecord> getFriendRecords() {
+        return friendRecords;
     }
 
-    public void setFriends(List<FriendRecord> friends) {
-        this.friends = friends;
+    public void setFriendRecords(List<FriendRecord> friendRecords) {
+        this.friendRecords = friendRecords;
     }
 
     public long getMoney() {
@@ -1566,12 +1581,12 @@ public class Char {
     }
 
     /**
-     * Sends a message to this Char with a default colour {@link ChatMsgColour#YELLOW}.
+     * Sends a message to this Char with a default colour {@link ChatMsgColour#GAME_MESSAGE}.
      *
      * @param msg The message to display.
      */
     public void chatMessage(String msg) {
-        chatMessage(YELLOW, msg);
+        chatMessage(GAME_MESSAGE, msg);
     }
 
     /**
@@ -1774,8 +1789,17 @@ public class Char {
                 (byte) portal.getId(), false, 100, null, true, -1));
         if(characterData) {
             if(getGuild() != null) {
-
                 write(WvsContext.guildResult(new GuildUpdate(getGuild())));
+            }
+            for(Friend f : getFriends()) {
+                f.setFlag(getClient().getWorld().getCharByID(f.getFriendID()) != null
+                        ? FriendFlag.FriendOnline
+                        : FriendFlag.FriendOffline);
+            }
+            for(Friend f : getAccount().getFriends()) {
+                f.setFlag(getClient().getWorld().getAccountByID(f.getFriendAccountID()) != null
+                        ? FriendFlag.AccountFriendOnline
+                        : FriendFlag.AccountFriendOffline);
             }
         }
         toField.spawnLifesForChar(this);
@@ -2440,9 +2464,11 @@ public class Char {
     }
 
     public void logout() {
+        ChatHandler.removeClient(getAccId());
         setOnline(false);
         getField().removeChar(this);
-        DatabaseManager.saveToDB(this);
+//        DatabaseManager.saveToDB(this);
+        DatabaseManager.saveToDB(getAccount());
         getClient().getChannelInstance().removeChar(this);
     }
 
@@ -2524,5 +2550,66 @@ public class Char {
             canHold = (curItem != null && curItem.getQuantity() + 1 < ii.getSlotMax()) || inv.getSlots() > inv.getItems().size();
         }
         return canHold;
+    }
+
+    /**
+     * Returns the list of personal (i.e., non-account) friends of this Char.
+     * @return The list of personal friends
+     */
+    public List<Friend> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<Friend> friends) {
+        this.friends = friends;
+    }
+
+    /**
+     * Returns the total list of friends of this Char + the owning Account's friends.
+     * @return The total list of friends
+     */
+    public List<Friend> getAllFriends() {
+        List<Friend> res = new ArrayList<>(getFriends());
+        res.addAll(getAccount().getFriends());
+        return res;
+    }
+
+    public Friend getFriendByCharID(int charID) {
+        return getFriends().stream().filter(f -> f.getFriendID() == charID).findAny().orElse(null);
+    }
+
+    public Account getAccount() {
+        if(account == null) {
+            setAccount(Account.getFromDBById(getAccId()));
+        }
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public void removeFriend(Friend friend) {
+        if(friend != null && getFriends().contains(friend)) {
+            getFriends().remove(friend);
+        }
+    }
+
+    public void removeFriendByID(int charID) {
+        removeFriend(getFriendByCharID(charID));
+    }
+
+    public void addFriend(Friend friend) {
+        if(getFriendByCharID(friend.getFriendID()) == null) {
+            getFriends().add(friend);
+        }
+    }
+
+    public void setChatClient(Client chatClient) {
+        this.chatClient = chatClient;
+    }
+
+    public Client getChatClient() {
+        return chatClient;
     }
 }

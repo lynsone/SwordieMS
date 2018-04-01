@@ -433,8 +433,8 @@ public class Field {
     public void removeChar(Char chr) {
         if (getChars().contains(chr)) {
             getChars().remove(chr);
-            broadcastPacket(UserPool.userLeaveField(chr), chr);
         }
+        broadcastPacket(UserPool.userLeaveField(chr), chr);
         for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
             if (entry.getValue() != null && entry.getValue().equals(chr)) {
                 putLifeController(entry.getKey(), null);

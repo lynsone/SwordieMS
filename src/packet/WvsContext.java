@@ -6,6 +6,9 @@ import client.character.items.Item;
 import client.character.quest.Quest;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
+import client.friend.Friend;
+import client.friend.FriendRequestor;
+import client.friend.FriendResult;
 import client.guild.GuildResultInfo;
 import client.jobs.resistance.WildHunterInfo;
 import client.life.movement.*;
@@ -706,5 +709,25 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket friendResult(FriendResult friendResult) {
+        OutPacket outPacket = new OutPacket(OutHeader.FRIEND_RESULT);
 
+        outPacket.encodeByte(friendResult.getType().getVal());
+        friendResult.encode(outPacket);
+
+        return outPacket;
+    }
+
+
+    public static OutPacket loadAccountIDOfCharacterFriendResult(List<Friend> friends) {
+        OutPacket outPacket = new OutPacket(OutHeader.LOAD_ACCOUNT_ID_OF_CHARACTER_FRIEND_RESULT);
+
+        outPacket.encodeInt(friends.size());
+        for(Friend fr : friends) {
+            outPacket.encodeInt(fr.getFriendID());
+            outPacket.encodeInt(fr.getFriendAccountID());
+        }
+
+        return outPacket;
+    }
 }

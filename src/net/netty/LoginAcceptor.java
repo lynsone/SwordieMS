@@ -46,7 +46,7 @@ public class LoginAcceptor implements Runnable{
 
                     Client c = new Client(ch, siv, riv);
                     // remove after debug stage
-                    log.debug(String.format("Opened session with %s in LoginAcceptor", c.getIP()));
+//                    log.debug(String.format("Opened session with %s in LoginAcceptor", c.getIP()));
                     c.write(Login.sendConnect(riv, siv));
 //                  c.write("hi".getBytes());
 

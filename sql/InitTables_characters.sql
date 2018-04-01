@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS test;
 DROP TABLE IF EXISTS skills;
@@ -523,9 +524,25 @@ CREATE TABLE accounts (
 	censoredNxLoginID VARCHAR(255),
 	characterSlots int DEFAULT 4,
 	creationDate long,
+    lastLoggedIn varchar(255),
 	PRIMARY KEY (id)
+);
+
+CREATE TABLE friends (
+	id int not null auto_increment,
+    friendID int,
+    friendAccountID int,
+    name varchar(255),
+    flag tinyint,
+    groupName varchar(255),
+    mobile tinyint,
+    nickname varchar(255),
+    memo varchar(255),
+    accepted boolean,
+    primary key (id)   
 );
 
 
 INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('admin', 'admin', '7', '0', '0', '111111', '40');
 INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('asura', 'admin', '7', '0', '0', '111111', '40');
+INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('maigal', 'admin', '7', '0', '0', '111111', '40');

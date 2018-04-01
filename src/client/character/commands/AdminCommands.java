@@ -7,17 +7,13 @@ import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
 import client.field.Portal;
+import client.friend.*;
 import client.jobs.nova.Kaiser;
 import client.life.Life;
 import client.life.Mob;
-import client.shop.NpcShopDlg;
-import client.shop.NpcShopItem;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
-import enums.EquipBaseStat;
-import enums.ForceAtomEnum;
-import enums.InvType;
-import enums.Stat;
+import enums.*;
 import handling.OutHeader;
 import loaders.*;
 import org.apache.log4j.LogManager;
@@ -46,26 +42,14 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            NpcShopDlg nsd = new NpcShopDlg();
-            nsd.setNpcTemplateID(1001100);
-            NpcShopItem nsi = new NpcShopItem();
-            nsi.setItemID(3010002);
-            nsi.setPrice(0);
-            nsi.setTokenItemID(4310080);
-            nsi.setTokenPrice(10);
-            nsi.setTabIndex(1);
-            nsi.setMaxPerSlot((short) 10);
-            nsd.addItem(nsi);
-            NpcShopItem nsi2 = new NpcShopItem();
-            nsi2.setItemID(4030028);
-            nsi2.setPrice(1337);
-            nsi2.setTabIndex(Integer.parseInt(args[1]));
-            nsd.addItem(nsi2);
-            OutPacket outPacket = new OutPacket(OutHeader.SHOP_OPEN);
+            OutPacket outPacket = new OutPacket(OutHeader.CHAT_FRIEND_CHAT_MESSAGE);
+            outPacket.encodeInt(1); // unused
+            outPacket.encodeInt(5);
+            outPacket.encodeInt(2);
+            outPacket.encodeFT(System.currentTimeMillis());
+            outPacket.encodeString("Hoi!");
             outPacket.encodeByte(0);
-            nsd.encode(outPacket);
-
-            chr.write(outPacket);
+            chr.getChatClient().write(outPacket);
         }
     }
 

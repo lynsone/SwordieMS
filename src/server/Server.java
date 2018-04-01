@@ -11,6 +11,7 @@ import net.crypto.MapleCrypto;
 import net.db.DatabaseConnection;
 import net.db.DatabaseManager;
 import net.netty.ChannelAcceptor;
+import net.netty.ChatAcceptor;
 import net.netty.LoginAcceptor;
 import org.apache.log4j.LogManager;
 import org.hibernate.Session;
@@ -83,6 +84,7 @@ public class Server extends Properties {
 
         MapleCrypto.initialize(ServerConstants.VERSION);
         new Thread(new LoginAcceptor()).start();
+        new Thread(new ChatAcceptor()).start();
         worldList.add(new World(1, "Je Moeder", 3));
 
         for (World world : getWorlds()) {

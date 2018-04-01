@@ -9,7 +9,9 @@ public enum InHeader {
     PONG(147),
 
     // Login ops
+    CONNECT_CHAT(1),
     REDISPLAY_SERVERLIST(7),
+    FRIEND_CHAT(20),
     GUEST_LOGIN(22),
     TOS(29),
     VIEW_SERVERLIST(33),
@@ -281,7 +283,7 @@ public enum InHeader {
     FRIEND_REQUEST(404),
     STAR_FRIEND_REQUEST(405),
     STAR_PLANET_POINT_REQUEST(406),
-    LOAD_ACCOUNT_I_D_OF_CHARACTER_FRIEND_REQUEST(407),
+    LOAD_ACCOUNT_ID_OF_CHARACTER_FRIEND_REQUEST(407),
     MEMO_REQUEST(408),
     MEMO_FLAG_REQUEST(409),
     ENTER_TOWN_PORTAL_REQUEST(410),
@@ -1002,7 +1004,9 @@ public enum InHeader {
                 USER_CALC_DAMAGE_STAT_SET_REQUEST,
                 MOB_APPLY_CTRL,
                 USER_REQUEST_INSTANCE_TABLE,
-                USER_QUEST_REQUEST
+                USER_QUEST_REQUEST,
+                LOGIN_PASSWORD,
+                AUTH_SECOND_PASSWORD
         );
         return spam.contains(inHeaderByOp);
     }

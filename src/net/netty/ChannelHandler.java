@@ -5,6 +5,7 @@ import client.jobs.Job;
 import connection.InPacket;
 import enums.ChatMsgColour;
 import handling.InHeader;
+import handling.handlers.ChatHandler;
 import handling.handlers.LoginHandler;
 import handling.handlers.WorldHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -64,6 +65,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 log.debug(String.format("[In]\t| %s, %d/0x%s\t| %s", InHeader.getInHeaderByOp(op), +op, Integer.toHexString(op).toUpperCase(), inPacket));
             }
             switch(opHeader) {
+                case CONNECT_CHAT:
+                    ChatHandler.handleConnect(c, inPacket);
+                    break;
+                case FRIEND_CHAT:
+                    ChatHandler.handleFriendChat(c, inPacket);
+                    break;
                 case CONNECT:
                     LoginHandler.handleConnect(c, inPacket);
                     break;
@@ -80,6 +87,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_ACTIVATE_NICK_ITEM:
                     WorldHandler.handleUserActiveNickItem(c, inPacket);
+                    break;
+                case FRIEND_REQUEST:
+                    WorldHandler.handleFriendRequest(c, inPacket);
                     break;
                 case USER_GATHER_ITEM_REQUEST:
                     WorldHandler.handleUserGatherItemRequest(c, inPacket);
@@ -221,6 +231,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case REQUEST_SET_BLESS_OF_DARKNESS:
                     WorldHandler.handleRequestSetBlessOfDarkness(c, inPacket);
+                    break;
+                case LOAD_ACCOUNT_ID_OF_CHARACTER_FRIEND_REQUEST:
+                    WorldHandler.handleLoadAccountIDOfCharacterFriendRequest(c, inPacket);
                     break;
                 case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);

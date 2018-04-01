@@ -138,4 +138,13 @@ public class Channel {
     public Char getCharByName(String name) {
         return getChars().values().stream().filter(chr -> chr.getName().equalsIgnoreCase(name)).findAny().orElse(null);
     }
+
+    public Account getAccountByID(int accID) {
+        for(Char chr : getChars().values()) {
+            if(chr.getAccId() == accID) {
+                return chr.getAccount();
+            }
+        }
+        return null;
+    }
 }

@@ -1,5 +1,6 @@
 package server;
 
+import client.Account;
 import client.character.Char;
 import client.guild.Guild;
 import client.party.Party;
@@ -106,6 +107,16 @@ public class World {
         return null;
     }
 
+    public Char getCharByID(int id) {
+        for(Channel c : getChannels()) {
+            Char chr = c.getCharById(id);
+            if(chr != null) {
+                return chr;
+            }
+        }
+        return null;
+    }
+
     public Map<Integer, Party> getParties() {
         return parties;
     }
@@ -159,5 +170,15 @@ public class World {
 
     public void setPartyIDCounter(int partyIDCounter) {
         this.partyIDCounter = partyIDCounter;
+    }
+
+    public Account getAccountByID(int accID) {
+        for(Channel c : getChannels()) {
+            Account res = c.getAccountByID(accID);
+            if(res != null) {
+                return res;
+            }
+        }
+        return null;
     }
 }

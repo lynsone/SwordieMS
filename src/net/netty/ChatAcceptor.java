@@ -17,12 +17,13 @@ import java.util.Map;
 
 import static net.netty.NettyClient.CLIENT_KEY;
 
-public class ChannelAcceptor implements Runnable {
+/**
+ * Created by Tim on 2/18/2017.
+ */
+public class ChatAcceptor implements Runnable{
 
-    public Map<String, Channel> channelPool = new HashMap<>();
-    public server.Channel channel;
+    public static Map<String, Channel> channelPool = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
-
     @Override
     public void run() {
         // Taken from http://netty.io/wiki/user-guide-for-4.x.html
@@ -45,15 +46,14 @@ public class ChannelAcceptor implements Runnable {
 
                     Client c = new Client(ch, siv, riv);
                     // remove after debug stage
-//                    log.debug(String.format("Opened session with %s on channel %d", c.getIP(), channel.getChannelId()));
+                    log.debug(String.format("[CHAT] Opened session with %s in ChatAcceptor", c.getIP()));
                     c.write(Login.sendConnect(riv, siv));
 
                     channelPool.put(c.getIP(), ch);
 
+
                     ch.attr(CLIENT_KEY).set(c);
                     ch.attr(Client.CRYPTO_KEY).set(new MapleCrypto());
-
-                    EventManager.addFixedRateEvent(c::sendPing, 0, 10000);
                 }
             });
 
@@ -61,8 +61,8 @@ public class ChannelAcceptor implements Runnable {
             b.childOption(ChannelOption.SO_KEEPALIVE, true);
 
             // Bind and start to accept incoming connections.
-            ChannelFuture f = b.bind(channel.getPort()).sync();
-            log.info(String.format("Channel %d listening on port %d", channel.getChannelId(), channel.getPort()));
+            ChannelFuture f = b.bind(ServerConstants.CHAT_PORT).sync();
+
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
             // shut down your server.

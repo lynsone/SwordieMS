@@ -260,9 +260,10 @@ public class Login {
             outPacket.encodeArr(server);
             outPacket.encodeShort(port);
 
+            byte[] chatServer = new byte[]{8, 31, 99, ((byte) 133)};
             // chat stuff
-            outPacket.encodeInt(0);
-            outPacket.encodeShort(0);
+            outPacket.encodeArr(chatServer);
+            outPacket.encodeShort(ServerConstants.CHAT_PORT);
 
             outPacket.encodeInt(characterId);
             outPacket.encodeByte(0);

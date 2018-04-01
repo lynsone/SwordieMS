@@ -9,6 +9,7 @@ import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.character.quest.QuestProgressRequirement.*;
 import client.character.skills.Skill;
+import client.friend.Friend;
 import client.guild.Guild;
 import client.guild.GuildMember;
 import client.guild.GuildRequestor;
@@ -63,6 +64,7 @@ public class DatabaseManager {
                 GuildMember.class,
                 GuildRequestor.class,
                 GuildSkill.class,
+                Friend.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

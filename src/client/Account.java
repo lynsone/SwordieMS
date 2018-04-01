@@ -1,6 +1,7 @@
 package client;
 
 import client.character.Char;
+import client.friend.Friend;
 import enums.PicStatus;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -20,47 +21,35 @@ import java.util.List;
 public class Account {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
-    @Column(name = "username")
     private String username;
     @Column(name = "accountTypeMask")
     private int accountType;
-    @Column(name = "age")
     private int age;
-    @Column(name = "vipGrade")
     private int vipGrade;
-    @Column(name = "nBlockReason")
     private int nBlockReason;
-    @Column(name = "gmLevel")
     private int gmLevel;
-    @Column(name = "gender")
     private byte gender;
-    @Column(name = "msg2")
     private byte msg2;
-    @Column(name = "purchaseExp")
     private byte purchaseExp;
-    @Column(name = "pBlockReason")
     private byte pBlockReason;
-    @Column(name = "gradeCode")
     private byte gradeCode;
-    @Column(name = "chatUnblockDate")
     private long chatUnblockDate;
-    @Column(name = "hasCensoredNxLoginID")
     private boolean hasCensoredNxLoginID;
-    @Column(name = "censoredNxLoginID")
     private String censoredNxLoginID;
-    @Column(name = "pic")
     private String pic;
-    @Column(name = "characterSlots")
     private int characterSlots;
-    @Column(name = "creationDate")
     private long creationDate;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ownerAccID")
+    private List<Friend> friends;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accId")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Char> characters = new ArrayList<>();
+    private String lastLoggedIn;
+    @Transient
+    private Char currentChr;
 
     public Account(String username, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
@@ -82,6 +71,7 @@ public class Account {
         this.censoredNxLoginID = censoredNxLoginID;
         this.characterSlots = characterSlots;
         this.creationDate = creationDate;
+        friends = new ArrayList<>();
         setManager();
     }
 
@@ -300,5 +290,45 @@ public class Account {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public List<Friend> getFriends() {
+        return friends;
+    }
+
+    public void addFriend(Friend friend) {
+        if(getFriendByAccID(friend.getFriendAccountID()) == null) {
+            getFriends().add(friend);
+        }
+    }
+
+    public Friend getFriendByAccID(int accID) {
+        return getFriends().stream().filter(f -> f.getFriendAccountID() == accID).findAny().orElse(null);
+    }
+
+    public void removeFriend(int accID) {
+        removeFriend(getFriendByAccID(accID));
+    }
+
+    public void removeFriend(Friend f) {
+        if(f != null && getFriends().contains(f)) {
+            getFriends().remove(f);
+        }
+    }
+
+    public String getLastLoggedIn() {
+        return lastLoggedIn;
+    }
+
+    public void setLastLoggedIn(String lastLoggedIn) {
+        this.lastLoggedIn = lastLoggedIn;
+    }
+
+    public Char getCurrentChr() {
+        return currentChr;
+    }
+
+    public void setCurrentChr(Char currentChr) {
+        this.currentChr = currentChr;
     }
 }
