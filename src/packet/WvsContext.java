@@ -7,7 +7,6 @@ import client.character.quest.Quest;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.friend.Friend;
-import client.friend.FriendRequestor;
 import client.friend.FriendResult;
 import client.guild.GuildResultInfo;
 import client.jobs.resistance.WildHunterInfo;

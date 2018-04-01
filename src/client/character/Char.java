@@ -9,7 +9,6 @@ import client.field.Field;
 import client.field.Portal;
 import client.friend.Friend;
 import client.friend.FriendFlag;
-import client.friend.FriendRequestor;
 import client.guild.Guild;
 import client.guild.GuildMember;
 import client.guild.GuildUpdate;
@@ -2467,7 +2466,7 @@ public class Char {
         ChatHandler.removeClient(getAccId());
         setOnline(false);
         getField().removeChar(this);
-//        DatabaseManager.saveToDB(this);
+        DatabaseManager.saveToDB(this);
         DatabaseManager.saveToDB(getAccount());
         getClient().getChannelInstance().removeChar(this);
     }

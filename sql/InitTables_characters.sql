@@ -530,6 +530,8 @@ CREATE TABLE accounts (
 
 CREATE TABLE friends (
 	id int not null auto_increment,
+    ownerID int,
+    ownerAccID int,
     friendID int,
     friendAccountID int,
     name varchar(255),
@@ -538,7 +540,6 @@ CREATE TABLE friends (
     mobile tinyint,
     nickname varchar(255),
     memo varchar(255),
-    accepted boolean,
     primary key (id)   
 );
 
