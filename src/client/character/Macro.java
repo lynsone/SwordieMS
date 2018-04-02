@@ -56,7 +56,7 @@ public class Macro {
     }
 
     public void setSkillAtPos(int pos, int skillID) {
-        if(pos > 0 && pos < 3) {
+        if(pos >= 0 && pos < 3) {
             getSkills()[pos] = skillID;
         }
     }

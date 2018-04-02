@@ -3007,6 +3007,7 @@ public class WorldHandler {
             }
             macros.add(macro);
         }
-        c.getChr().setMacros(macros);
+        c.getChr().getMacros().clear();
+        c.getChr().getMacros().addAll(macros); // don't set macros directly, as a new row will be made in the DB
     }
 }
