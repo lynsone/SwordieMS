@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS macroSkills;
+DROP TABLE IF EXISTS macros;
 DROP TABLE IF EXISTS test;
 DROP TABLE IF EXISTS skills;
 DROP TABLE IF EXISTS characters;
@@ -501,6 +503,24 @@ CREATE TABLE skills (
     masterLevel int,
     PRIMARY KEY (id),
     FOREIGN KEY (charId) REFERENCES characters(id)  on delete cascade
+);
+
+CREATE TABLE macros (
+	id bigint not null auto_increment,
+    charID int,
+    muted boolean,
+    name varchar(255),
+    primary key (id),
+    foreign key (charID) references characters(id)
+);
+
+CREATE TABLE macroSkills (
+	id bigint not null auto_increment,
+    orderCol int,
+    skillID int,
+    macroID bigint,
+    primary key (id),
+    foreign key (macroID) references macros(id) on delete cascade
 );
 
 CREATE TABLE accounts (

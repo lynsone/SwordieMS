@@ -113,6 +113,10 @@ public class Char {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Friend> friends;
 
+    @JoinColumn(name = "charID")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Macro> macros = new ArrayList<>();
+
     @JoinColumn(name = "guild")
     @OneToOne(cascade = CascadeType.ALL)
     private Guild guild;
@@ -371,7 +375,7 @@ public class Char {
                 write(WvsContext.inventoryOperation(true, false,
                         UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
             } else {
-//                item.setInventoryId(inventory.getId());
+                item.setInventoryId(inventory.getId());
                 if (!hasCorrectBagIndex) {
                     item.setBagIndex(inventory.getFirstOpenSlot());
                 }
@@ -2628,5 +2632,13 @@ public class Char {
 
     public Client getChatClient() {
         return chatClient;
+    }
+
+    public List<Macro> getMacros() {
+        return macros;
+    }
+
+    public void setMacros(List<Macro> macros) {
+        this.macros = macros;
     }
 }

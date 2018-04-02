@@ -4,6 +4,7 @@ import client.Account;
 import client.Client;
 import client.character.Char;
 import client.character.ExtendSP;
+import client.character.Macro;
 import client.character.ScriptManager;
 import client.character.commands.AdminCommand;
 import client.character.commands.AdminCommands;
@@ -109,6 +110,7 @@ public class WorldHandler {
         }
         chr.setBulletIDForAttack(chr.calculateBulletIDForAttack());
         c.write(WvsContext.friendResult(new LoadFriendResult(chr.getAllFriends())));
+        c.write(WvsContext.macroSysDataInit(chr.getMacros()));
     }
 
     public static void handleMove(Client c, InPacket inPacket) {
@@ -2991,5 +2993,20 @@ public class WorldHandler {
                 log.error(String.format("Unhandled friend request type %s", ft.toString()));
                 break;
         }
+    }
+
+    public static void handleUserMacroSysDataModified(Client c, InPacket inPacket) {
+        byte size = inPacket.decodeByte();
+        List<Macro> macros = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            Macro macro = new Macro();
+            macro.setName(inPacket.decodeString());
+            macro.setMuted(inPacket.decodeByte() != 0);
+            for (int j = 0; j < 3; j++) {
+                macro.setSkillAtPos(j, inPacket.decodeInt());
+            }
+            macros.add(macro);
+        }
+        c.getChr().setMacros(macros);
     }
 }

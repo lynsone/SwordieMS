@@ -326,7 +326,7 @@ public enum OutHeader {
     TRADE_KING_SHOP_RES(371),
     PLAT_FORMAR_ENTER_RESULT(372),
     PLAT_FORMAR_OXYZEN(373),
-    MACRO_SYS_DATA_INIT(374),
+    MACRO_SYS_DATA_INIT(427),
 
     // CStage::OnPacket
     SET_FIELD(428),

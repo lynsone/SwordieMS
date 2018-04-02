@@ -103,6 +103,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_STAT_CHANGE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserStatChangeItemUseRequest(c, inPacket);
                     break;
+                case USER_MACRO_SYS_DATA_MODIFIED:
+                    WorldHandler.handleUserMacroSysDataModified(c, inPacket);
+                    break;
                 case USER_ACTIVATE_DAMAGE_SKIN:
                     WorldHandler.handleUserActivateDanageSkin(c, inPacket);
                     break;

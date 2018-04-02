@@ -1208,10 +1208,8 @@ public class Mob extends Life {
     public void soulSplitMob(Char chr, Mob origin, int duration, Skill skill) {
         Field field = chr.getField();
         Position position = origin.getPosition();
-        origin.setSplit(true);
 
-        Mob copy;
-        copy = MobData.getMobDeepCopyById(origin.getTemplateId());
+        Mob copy = MobData.getMobDeepCopyById(origin.getTemplateId());
         copy.setSplit(true);
         copy.setPosition(position);
         copy.setHp(origin.getHp());

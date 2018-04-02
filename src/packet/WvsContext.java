@@ -729,4 +729,14 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket macroSysDataInit(List<Macro> macros) {
+        OutPacket outPacket = new OutPacket(OutHeader.MACRO_SYS_DATA_INIT);
+
+        outPacket.encodeByte(macros.size());
+        for(Macro macro : macros) {
+            macro.encode(outPacket);
+        }
+        return outPacket;
+    }
 }

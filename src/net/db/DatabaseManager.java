@@ -65,6 +65,7 @@ public class DatabaseManager {
                 GuildRequestor.class,
                 GuildSkill.class,
                 Friend.class,
+                Macro.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);
