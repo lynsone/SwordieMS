@@ -262,7 +262,7 @@ public class MobPool {
         return mobStatReset(mob, byteCalcDamageStatIndex, sn, null);
     }
 
-    public static OutPacket mobStatReset(Mob mob, byte calcDamageStatIndex, boolean sn, List<BurnedInfo> biList) {
+    public synchronized static OutPacket mobStatReset(Mob mob, byte calcDamageStatIndex, boolean sn, List<BurnedInfo> biList) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_STAT_RESET);
         MobTemporaryStat resetStats = mob.getTemporaryStat();
         int[] mask = resetStats.getRemovedMask();

@@ -2467,16 +2467,15 @@ public class TemporaryStatManager {
             for(Option option : options) {
                 outPacket.encodeInt(option.nReason);
                 outPacket.encodeInt(option.nValue);
-                outPacket.encodeInt(option.nKey); // nKey
+                outPacket.encodeInt(option.nReason); // nKey
                 outPacket.encodeInt(curTime - option.tStart);
                 outPacket.encodeInt(option.tTerm); // tTerm
-                outPacket.encodeInt(0); // size
-            }
-            int idk = 0;
-            outPacket.encodeInt(idk);
-            for (int i = 0; i < idk; i++) {
-                outPacket.encodeInt(0); // nMValueKey
-                outPacket.encodeInt(0); // nMValue
+                int size = 0;
+                outPacket.encodeInt(size);
+                for (int i = 0; i < size; i++) {
+                    outPacket.encodeInt(0); // MValueKey
+                    outPacket.encodeInt(0); // MValue
+                }
             }
         }
     }
@@ -2484,6 +2483,7 @@ public class TemporaryStatManager {
     public void encodeRemovedIndieTempStat(OutPacket outPacket) {
         Map<CharacterTemporaryStat, List<Option>> stats = getRemovedStats().entrySet().stream()
                 .filter(stat -> stat.getKey().isIndie())
+                .sorted(Comparator.comparingInt(stat -> stat.getKey().getVal()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         for(Map.Entry<CharacterTemporaryStat, List<Option>> stat : stats.entrySet()) {
