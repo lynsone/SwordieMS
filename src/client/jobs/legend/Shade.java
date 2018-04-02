@@ -405,6 +405,7 @@ public class Shade extends Job {
                 resetSpiritGuard();
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     public void resetSpiritGuard() {

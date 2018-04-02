@@ -755,6 +755,7 @@ public class Warrior extends Job {
                 addCombo(chr);
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     private void resetDivineShield() {

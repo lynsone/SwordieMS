@@ -298,6 +298,7 @@ public class Phantom extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

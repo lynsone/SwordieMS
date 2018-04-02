@@ -448,6 +448,7 @@ public class Luminous extends Job {
                 }
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

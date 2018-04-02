@@ -419,6 +419,7 @@ public class Zero extends Job {
             tsm.putCharacterStatValue(ImmuneBarrier, o);
             tsm.sendSetStatPacket();
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

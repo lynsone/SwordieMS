@@ -807,6 +807,7 @@ public class Pirate extends Job {
         if(chr.hasSkill(PIRATE_REVENGE)) {
             handlePirateRevenge();
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

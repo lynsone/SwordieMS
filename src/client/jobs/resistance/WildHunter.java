@@ -468,6 +468,7 @@ public class WildHunter extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

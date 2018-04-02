@@ -409,6 +409,7 @@ public class Mihile extends Job {
             handleRoyalGuardAttack();
             handleRoyalGuard(tsm, c);
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

@@ -714,6 +714,7 @@ public class Demon extends Job {
                 }
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

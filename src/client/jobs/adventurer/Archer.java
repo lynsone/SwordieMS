@@ -509,6 +509,7 @@ public class Archer extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

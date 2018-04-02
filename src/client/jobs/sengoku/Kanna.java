@@ -253,6 +253,7 @@ public class Kanna extends Job {
                 tsm.sendSetStatPacket();
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     public void resetFireBarrier() {

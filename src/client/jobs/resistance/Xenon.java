@@ -402,6 +402,7 @@ public class Xenon extends Job {
                         null, 0, null));
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

@@ -342,6 +342,7 @@ public class Hayato extends Job {
             handleJinsoku();
             handleWillowDodge();
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

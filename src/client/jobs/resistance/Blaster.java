@@ -190,6 +190,7 @@ public class Blaster extends Job {
             tsm.putCharacterStatValue(RWBarrier, o);
             c.write(WvsContext.temporaryStatSet(tsm));
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     public void resetBlastShield() {

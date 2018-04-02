@@ -436,6 +436,7 @@ public class Thief extends Job {
             }
         }
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
