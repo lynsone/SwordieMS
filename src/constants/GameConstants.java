@@ -7,6 +7,8 @@ public class GameConstants {
     public static final long MAX_MONEY = 10_000_000_000L;
     public static final int DROP_HEIGHT = 100; // was 20
     public static final int DROP_DIFF = 25;
+    public static final int DROP_REMAIN_ON_GROUND_TIME = 120; // 2 minutes
+    public static final int DROP_REMOVE_OWNERSHIP_TIME = 30; // 30 sec
     public static long[] charExp = new long[251];
 
     static {

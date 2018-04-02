@@ -92,7 +92,7 @@ public class DropPool {
             case DELAYED_PICKUP:
                 outPacket.encodeShort(delay);
                 break;
-            case IDK_3:
+            case ABSORB:
                 outPacket.encodeInt(key);
                 break;
         }

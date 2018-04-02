@@ -7,6 +7,7 @@ import client.character.skills.TemporaryStatManager;
 import client.life.*;
 import connection.OutPacket;
 import constants.GameConstants;
+import enums.DropLeaveType;
 import enums.LeaveType;
 import enums.ScriptType;
 import loaders.ItemData;
@@ -20,6 +21,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -550,7 +552,12 @@ public class Field {
     public synchronized void removeDrop(Integer dropID, Integer pickupUserID, Boolean fromSchedule) {
         Life life = getLifeByObjectID(dropID);
         if (life instanceof Drop) {
-            broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
+            if(pickupUserID != 0) {
+                broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
+            } else {
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.FADE, 0, life.getObjectId(),
+                        (short) 0, 0, 0));
+            }
             removeLife(dropID, fromSchedule);
         }
     }
@@ -611,6 +618,9 @@ public class Field {
      */
     public void drop(Drop drop, Position posFrom, Position posTo) {
         addLife(drop);
+        getLifeSchedules().put(drop,
+                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true),
+                        GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
         broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
     }
 
@@ -637,6 +647,9 @@ public class Field {
             drop.setMoney(dropInfo.getMoney());
         }
         addLife(drop);
+        getLifeSchedules().put(drop,
+                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true),
+                        GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
         broadcastWithPredicate(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
                 (Char chr) -> dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq()));
     }
