@@ -13,7 +13,10 @@ import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
-import enums.*;
+import enums.ForceAtomEnum;
+import enums.MobStat;
+import enums.MoveAbility;
+import enums.Stat;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -22,8 +25,6 @@ import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -296,26 +297,23 @@ public class Archer extends Job {
 
     private void handleMortalBlow() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill;
-        SkillInfo si;
-        byte slv;
+        Option o = new Option();
+        Option o1 = new Option();
+        Skill skill = chr.getSkill(MORTAL_BLOW_BOW);
+        int amount = 1;
         if(chr.hasSkill(MORTAL_BLOW_BOW)) {
-            skill = chr.getSkill(MORTAL_BLOW_BOW);
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            Option o;
-            if(!tsm.hasStat(BowMasterMortalBlow)) {
-                o = new Option();
-                o.rOption = MORTAL_BLOW_BOW;
-            } else {
-                o = tsm.getOption(BowMasterMortalBlow);
+            if(tsm.hasStat(BowMasterMortalBlow)) {
+                amount = tsm.getOption(BowMasterMortalBlow).nOption;
+                if (amount < 9) {
+                    amount++;
+                } else {
+                    amount = 1;
+                }
             }
-            o.nOption = (o.nOption + 1) % (si.getValue(x, slv) + 1);
-            c.write(WvsContext.temporaryStatSet(tsm));
-        } else if(chr.hasSkill(MORTAL_BLOW_XBOW)) {
-            skill = chr.getSkill(MORTAL_BLOW_BOW);
-            //si = SkillData.getSkillInfoById(skill.getSkillId());
-            //slv = (byte) skill.getCurrentLevel();
+        o.nOption = amount;
+        o.rOption = MORTAL_BLOW_BOW;
+        tsm.putCharacterStatValue(BowMasterMortalBlow, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
         }
     }
 
@@ -323,19 +321,22 @@ public class Archer extends Job {
         if(!chr.hasSkill(FOCUSED_FURY)) {
             return;
         }
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = tsm.getOptByCTSAndSkill(AsrR, FOCUSED_FURY);
-        if(o == null) {
-            o = new Option();
-            o.nOption = 0;
-            o.rOption = FOCUSED_FURY;
-        }
         Skill skill = chr.getSkill(FOCUSED_FURY);
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(FOCUSED_FURY);
-        o.nOption = Math.min(o.nOption + si.getValue(x, slv), 100);
-        o.tOption = si.getValue(time, slv);
-        tsm.putCharacterStatValue(AsrR, o);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o2 = new Option();
+        int amount = 0;
+        if(tsm.hasStat(BowMasterConcentration)) {
+            amount = tsm.getOption(BowMasterConcentration).nOption;
+            if (amount < 20) {
+                amount++;
+            }
+        }
+        o2.nOption = amount;
+        o2.rOption = FOCUSED_FURY;
+        o2.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(BowMasterConcentration, o2);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
@@ -355,14 +356,8 @@ public class Archer extends Job {
                 case 1: // Blood
                     if(Util.succeedProp(si.getValue(w, slv))) {
                         quiverCartridge.decrementAmount();
-                        int maxHP = chr.getStat(Stat.mhp);
-                        int addHP = (int) (maxHP * 0.03);
-                        int curHP = chr.getStat(Stat.hp);
-                        int newHP = curHP + addHP > maxHP ? maxHP : curHP + addHP;
-                        chr.setStat(Stat.hp, (short) newHP);
-                        Map<Stat, Object> stats = new HashMap<>();
-                        stats.put(Stat.hp, newHP);
-                        c.write(WvsContext.statChanged(stats));
+                        int healrate = si.getValue(w, slv);
+                        chr.heal((int) (chr.getMaxHP() / ((double)100 / healrate)));
                     }
                     break;
                 case 2: // Poison
@@ -370,17 +365,12 @@ public class Archer extends Job {
                     quiverCartridge.decrementAmount();
                     break;
                 case 3: // Magic
-                    int num;
-                    if (new Random().nextBoolean()) {
-                    num = 50;
-                    } else {
-                    num = 130;
-                    }
+                    int num = new Random().nextInt(130)+50;
                     if(Util.succeedProp(si.getValue(u, slv))) {
                         quiverCartridge.decrementAmount();
                         int inc = ForceAtomEnum.BM_ARROW.getInc();
                         int type = ForceAtomEnum.BM_ARROW.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 15,
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 13, 12,
                                 num, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
                         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
@@ -519,7 +509,6 @@ public class Archer extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
             }
         }
-
     }
 
     private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {

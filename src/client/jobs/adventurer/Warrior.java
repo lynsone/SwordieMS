@@ -667,9 +667,12 @@ public class Warrior extends Job {
                     }
                     lastHpRecovery = cur;
                     break;
-                case THREATEN:
+                case THREATEN:  //TODO  Rect() is fucked
                     Rect rect = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
                     , inPacket.decodeShort(), inPacket.decodeShort());
+                    if(chr.isLeft()) {
+                        rect = rect.moveLeft();
+                    }
                     for(Life life : chr.getField().getLifesInRect(rect)) {
                         if(life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;

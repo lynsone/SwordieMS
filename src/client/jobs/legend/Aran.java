@@ -163,11 +163,6 @@ public class Aran extends Job {
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(AranDrain, o1);
-                o2.nReason = skillID;
-                o2.nValue = si.getValue(mhpR, slv);
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = 0;
-                tsm.putCharacterStatValue(IndieMHPR, o2);
                 break;
             case SNOW_CHARGE:
                 o1.nOption = 1;
@@ -293,6 +288,8 @@ public class Aran extends Job {
                    }
                }
             }
+            handleDrain();
+            handleSnowCharge(attackInfo);
         }
         handleSwingStudies(getOriginalSkillByID(skillID), tsm, c);
         Option o1 = new Option();
@@ -367,6 +364,7 @@ public class Aran extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     int hcProp = 5; //hcProp is defined yet still gives NPEs
                     int hcTime = 2; //hcTime is defined yet still gives NPE
+                    Skill judgementDrawSkill = chr.getSkill(JUDGEMENT_DRAW);
                     if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
@@ -377,7 +375,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr.getId(), judgementDrawSkill, 1);
                     }
                 }
                 break;
@@ -385,6 +383,7 @@ public class Aran extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     int hcProp = 5; //hcProp is defined yet still gives NPE
                     int hcTime = 2; //hcTime is defined yet still gives NPE
+                    Skill judgementDrawSkill = chr.getSkill(JUDGEMENT_DRAW);
                     if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
@@ -395,7 +394,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr.getId(), judgementDrawSkill, 1);
                     }
                 }
                 break;
@@ -403,6 +402,7 @@ public class Aran extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     int hcProp = 5; //hcProp is defined yet still gives NPEs
                     int hcTime = 2; //hcTime is defined yet still gives NPE
+                    Skill judgementDrawSkill = chr.getSkill(JUDGEMENT_DRAW);
                     if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
@@ -413,7 +413,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr.getId(), judgementDrawSkill, 1);
                     }
                 }
                 break;
@@ -524,4 +524,39 @@ public class Aran extends Job {
         this.combo = combo;
         c.write(WvsContext.modComboResponse(getCombo()));
     }
+
+    public void handleDrain() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(AranDrain)) {
+            Skill skill = chr.getSkill(DRAIN);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int healrate = si.getValue(x, slv);
+            chr.heal((int) (chr.getMaxHP() / ((double)100 / healrate)));
+        }
+    }
+
+    public void handleSnowCharge(AttackInfo attackInfo) {
+        if(!chr.hasSkill(SNOW_CHARGE)) {
+            return;
+        }
+        Skill skill = chr.getSkill(SNOW_CHARGE);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        if(tsm.getOptByCTSAndSkill(WeaponCharge, SNOW_CHARGE) != null) {
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                o1.nOption = - si.getValue(q, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = si.getValue(y, slv);
+                o1.mOption = 1;
+                mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+            }
+        }
+    }
+
+
 }

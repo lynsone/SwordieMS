@@ -17,7 +17,6 @@ import enums.ForceAtomEnum;
 import enums.MobStat;
 import loaders.SkillData;
 import packet.CField;
-import packet.UserRemote;
 import packet.WvsContext;
 import util.Position;
 import util.Rect;
@@ -289,6 +288,7 @@ public class Shade extends Job {
                 handleFoxSpiritsReCreation(skillID, slv, attackInfo);
             }
             handleWeaken(attackInfo, slv);
+            handleDeathMarkDoTHeal(attackInfo);
         }
 
         Option o1 = new Option();
@@ -320,7 +320,9 @@ public class Shade extends Job {
                     }
                 }
                 break;
-            case DEATH_MARK:        //TODO  AbsorbHP
+            case DEATH_MARK:
+                int healrate = si.getValue(x, slv);
+                chr.heal((int) (chr.getMaxHP() / ((double)100 / healrate)));
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
@@ -328,7 +330,6 @@ public class Shade extends Job {
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(dotTime, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.DebuffHealing, o1);
-
                     mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
                 }
                 break;
@@ -430,5 +431,20 @@ public class Shade extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    public void handleDeathMarkDoTHeal(AttackInfo attackInfo) {
+        Skill skill = chr.getSkill(DEATH_MARK);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        int healrate = si.getValue(x, slv);
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            if(mts.getBurnBySkill(DEATH_MARK) != null) {
+                long totaldmg = Arrays.stream(mai.damages).sum();
+                chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
+            }
+        }
     }
 }

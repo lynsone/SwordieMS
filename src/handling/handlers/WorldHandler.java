@@ -29,7 +29,9 @@ import client.jobs.sengoku.Kanna;
 import client.life.*;
 import client.life.movement.Movement;
 import client.party.*;
-import client.shop.*;
+import client.shop.MsgShopResult;
+import client.shop.NpcShopDlg;
+import client.shop.NpcShopItem;
 import connection.InPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
@@ -3009,5 +3011,14 @@ public class WorldHandler {
         }
         c.getChr().getMacros().clear();
         c.getChr().getMacros().addAll(macros); // don't set macros directly, as a new row will be made in the DB
+    }
+
+    public static void handleUserCreateHolidomRequest(Client c, InPacket inPacket) {
+        inPacket.decodeInt(); //tick
+        inPacket.decodeByte(); //unk
+        int skillID = inPacket.decodeInt();
+        inPacket.decodeInt(); //unk
+
+        c.getChr().heal( (int) (c.getChr().getMaxHP() / ((double) 100 / 40)) );
     }
 }

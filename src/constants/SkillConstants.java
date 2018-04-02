@@ -556,6 +556,31 @@ public class SkillConstants {
         switch (skillID) {
             case 101120206: //Zero - Severe Storm Break (Tile)
                 return 101120204; //Zero - Adv Storm Break
+
+            case 4221016: //Shadower - Assassinate 2
+                return 4221014; //Shadower - Assassinate 1
+
+            case 41121020: //Hayato - Tornado Blade-Battoujutsu Link
+                return 41121017; //Tornado Blade
+
+            case 41121021: //Hayato - Sudden Strike-Battoujutsu Link
+                return 41121018; //Sudden Strike
+
+            case 5121017: //Bucc - Double Blast
+                return 5121016; //Bucc - Buccaneer Blast
+
+            case 5101014: //Bucc - Energy Vortex
+                return 5101012; //Bucc - Tornado Uppercut
+
+            case 5121020: //Bucc - Octopunch (Max Charge)
+                return 5121007; //Bucc - Octopunch
+
+            case 5111013: //Bucc - Hedgehog Buster
+                return 5111002; //Bucc - Energy Burst
+
+            case 5111015: //Bucc - Static Thumper
+                return 5111012; //Bucc - Static Thumper
+
             default:
                 return skillID;
         }

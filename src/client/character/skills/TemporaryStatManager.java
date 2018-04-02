@@ -2224,6 +2224,11 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(HayatoHPR).rOption);
             outPacket.encodeInt(getOption(HayatoHPR).tOption);
         }
+        if (hasNewStat(BattoujutsuAdvance)) {
+            outPacket.encodeShort(getOption(BattoujutsuAdvance).nOption);
+            outPacket.encodeInt(getOption(BattoujutsuAdvance).rOption);
+            outPacket.encodeInt(getOption(BattoujutsuAdvance).tOption);
+        }
 
         if (hasNewStat(SoulMP)) {
             outPacket.encodeInt(getOption(SoulMP).xOption);

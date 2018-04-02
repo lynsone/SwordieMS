@@ -9,6 +9,7 @@ import client.jobs.Job;
 import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
+import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
 import enums.MobStat;
@@ -51,12 +52,14 @@ public class Thief extends Job {
     public static final int SHADOW_STARS = 4111009; //Buff
     public static final int DARK_FLARE_NL = 4111007; //Summon
     public static final int SHADOW_WEB = 4111003; //Special Attack (Dot + Bind)
+    public static final int VENOM_NL = 4110011; //Passive DoT
 
     public static final int MAPLE_WARRIOR_NL = 4121000; //Buff
     public static final int SHOWDOWN = 4121017; //Special Attack
     public static final int SUDDEN_RAID_NL = 4121016; //Special Attack
     public static final int FRAILTY_CURSE = 4121015; //AoE
     public static final int NIGHT_LORD_MARK = 4120018;
+    public static final int TOXIC_VENOM_NL = 4120011; //Passive DoT
 
 
     // Shadower
@@ -70,6 +73,7 @@ public class Thief extends Job {
     public static final int PICK_POCKET = 4211003; //Buff
     public static final int MESO_EXPLOSION = 4211006; //CreateForceAtom Attack
     public static final int MESO_EXPLOSION_ATOM = 4210014; // ?
+    public static final int VENOM_SHAD = 4210010; //Passive DoT
 
     public static final int BOOMERANG_STAB = 4221007; //Special Attack (Stun Debuff)
     public static final int MAPLE_WARRIOR_SHAD = 4221000; //Buff
@@ -77,6 +81,7 @@ public class Thief extends Job {
     public static final int SUDDEN_RAID_SHAD = 4221010; //Special Attack
     public static final int SMOKE_SCREEN = 4221006; //Affected Area
     public static final int PRIME_CRITICAL = 4220015; //Passive Buff
+    public static final int TOXIC_VENOM_SHAD = 4220011; //Passive DoT
 
 
     // Dual Blade
@@ -89,11 +94,15 @@ public class Thief extends Job {
 
     public static final int CHAINS_OF_HELL = 4331006; //Special Attack (Stun Debuff)
     public static final int MIRROR_IMAGE = 4331002; //Buff
+    public static final int SHADOW_MELD = 4330009;
+    public static final int VENOM_DB = 4320005;
+    public static final int LIFE_DRAIN = 4330007;
 
     public static final int FINAL_CUT = 4341002; //Special Attack
     public static final int SUDDEN_RAID_DB = 4341011; //Special Attack
     public static final int MAPLE_WARRIOR_DB = 4341000; //Buff
     public static final int MIRRORED_TARGET = 4341006; //Summon
+    public static final int TOXIC_VENOM_DB = 4340012;
 
 
     //Hyper skills
@@ -103,7 +112,7 @@ public class Thief extends Job {
     public static final int BLEED_DART = 4121054;
     public static final int FLIP_THE_COIN = 4221054;
     public static final int BLADE_CLONE = 4341054;
-    public static final int ASURAS_ANGER = 4341053;
+    public static final int ASURAS_ANGER = 4341052;
 
 
     //public AffectedArea aa;
@@ -147,6 +156,7 @@ public class Thief extends Job {
             BLEED_DART,
             FLIP_THE_COIN,
             BLADE_CLONE,
+            ASURAS_ANGER,
     };
 
     public Thief(Char chr) {
@@ -179,7 +189,7 @@ public class Thief extends Job {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skill.getSkillId());
             slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
+            skillID = SkillConstants.getActualSkillIDfromSkillID(skill.getSkillId());
         }
 
         if (chr.getJob() >= JobConstants.JobEnum.ASSASSIN.getJobId() && chr.getJob() <= JobConstants.JobEnum.NIGHTLORD.getJobId()) {
@@ -189,6 +199,11 @@ public class Thief extends Job {
                     setMarkonMob(attackInfo);
                     handleMark(attackInfo);
                 }
+
+                handleBleedDart(attackInfo);
+
+                //Venom & Toxic Venom Passives
+                handlePassiveDoTSkills(attackInfo);
             }
         }
 
@@ -208,18 +223,22 @@ public class Thief extends Job {
                 //Shadower Instinct
                 if (chr.hasSkill(SHADOWER_INSTINCT)) {
                     if (tsm.hasStat(IgnoreMobpdpR)) {
-                        if(skill == null) {
-                            handleShadowerInstinct(4221016, tsm, c);
-                        }
-                        handleShadowerInstinct(skill.getSkillId(), tsm, c);
+                        handleShadowerInstinct(skillID, tsm, c);
                     }
                 }
+
+                //Venom & Toxic Venom Passives
+                handlePassiveDoTSkills(attackInfo);
             }
         }
 
         if (chr.getJob() >= JobConstants.JobEnum.BLADE_RECRUIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.BLADE_MASTER.getJobId()) {
             if(hasHitMobs) {
+                //Venom & Toxic Venom Passives
+                handlePassiveDoTSkills(attackInfo);
 
+                //Life Drain
+                handleLifeDrain();
             }
         }
         Option o1 = new Option();
@@ -289,7 +308,6 @@ public class Thief extends Job {
                 break;
             case BOOMERANG_STAB:
             case FLYING_ASSAULTER:
-            case CHAINS_OF_HELL:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -301,9 +319,24 @@ public class Thief extends Job {
                     }
                 }
                 break;
-
+            case CHAINS_OF_HELL:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                o2.nOption = 1;
+                o2.tOption = 3;
+                tsm.putCharacterStatValue(NotDamaged, o2);
+                c.write(WvsContext.temporaryStatSet(tsm));
+                break;
             case FINAL_CUT:
-                o1.nOption = si.getValue(w, slv);
+                o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(FinalCut, o1);
@@ -311,14 +344,10 @@ public class Thief extends Job {
                 o2.rOption = skillID;
                 o2.tOption = 3;
                 tsm.putCharacterStatValue(NotDamaged, o2);
-                c.write(WvsContext.temporaryStatSet(tsm));
-                break;
-
-            case ASURAS_ANGER:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 10;
-                tsm.putCharacterStatValue(Asura, o1);
+                o3.nOption = si.getValue(w, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamR, o3);
                 c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
@@ -380,6 +409,32 @@ public class Thief extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+            // Dodged
+            if(chr.hasSkill(SHADOW_MELD)) {
+                if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
+                    Skill skill = chr.getSkill(SHADOW_MELD);
+                    byte slv = (byte) skill.getCurrentLevel();
+                    SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                    int dodgeProc = si.getValue(er, slv);
+                    if (Util.succeedProp(dodgeProc)) {
+                        Option o1 = new Option();
+                        Option o2 = new Option();
+                        o1.nOption = 100;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        tsm.putCharacterStatValue(CriticalBuff, o1);
+                        o2.nReason = skill.getSkillId();
+                        o2.nValue = si.getValue(indiePad, slv);
+                        o2.tStart = (int) System.currentTimeMillis();
+                        o2.tTerm = si.getValue(time, slv);
+                        tsm.putCharacterStatValue(IndiePAD, o2); //Indie
+                        c.write(WvsContext.temporaryStatSet(tsm));
+                    }
+                }
+            }
+        }
 
     }
 
@@ -515,7 +570,6 @@ public class Thief extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
-                //TODO DoT
                 break;
             case FLIP_THE_COIN:
                 handleFlipTheCoinStacking(tsm, c);
@@ -531,6 +585,12 @@ public class Thief extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamR, o2);
                 //TODO Final Attack Proc%
+                break;
+            case ASURAS_ANGER:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 10;
+                tsm.putCharacterStatValue(Asura, o1);
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -698,9 +758,12 @@ public class Thief extends Job {
 
     @Override
     public int getFinalAttackSkill() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.getOptByCTSAndSkill(WindBreakerFinal, BLADE_CLONE) != null) {
+            return BLADE_CLONE;
+        }
         return 0;
     }
-
 
     private void handleMark(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -736,8 +799,8 @@ public class Thief extends Job {
                                 type = ForceAtomEnum.NIGHTLORD_MARK.getForceAtomType();
                             }
 
-                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 4,
-                                    anglez, 200, (int) System.currentTimeMillis(), 1, 0,
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 40, 4,
+                                    anglez, 100, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
                             chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
                                     true, mobID, ASSASSINS_MARK_ATOM, forceAtomInfo, rect, 0, 300,
@@ -777,4 +840,125 @@ public class Thief extends Job {
         return supgrade;
     }
 
+    private void handlePassiveDoTSkills(AttackInfo attackInfo) {
+
+        //Night Lord
+        if(chr.hasSkill(TOXIC_VENOM_NL)) {
+            Skill skill = chr.getSkill(TOXIC_VENOM_NL);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if(Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(!mts.hasBurnFromSkill(TOXIC_VENOM_NL)) {
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    }
+                }
+            }
+        } else if(chr.hasSkill(VENOM_NL)) {
+            Skill skill = chr.getSkill(VENOM_NL);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(!mts.hasBurnFromSkill(VENOM_NL)) {
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    }
+                }
+            }
+        }
+
+        //Shadower
+        if(chr.hasSkill(TOXIC_VENOM_SHAD)) {
+            Skill skill = chr.getSkill(TOXIC_VENOM_SHAD);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if(Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(!mts.hasBurnFromSkill(TOXIC_VENOM_SHAD)) {
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    }
+                }
+            }
+        } else if(chr.hasSkill(VENOM_SHAD)) {
+            Skill skill = chr.getSkill(VENOM_SHAD);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(!mts.hasBurnFromSkill(VENOM_SHAD)) {
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    }
+                }
+            }
+        }
+
+        //Dual Blade
+        if(chr.hasSkill(TOXIC_VENOM_DB)) {
+            Skill skill = chr.getSkill(TOXIC_VENOM_DB);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if(Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(!mts.hasBurnFromSkill(TOXIC_VENOM_DB)) {
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    }
+                }
+            }
+        } else if(chr.hasSkill(VENOM_DB)) {
+            Skill skill = chr.getSkill(VENOM_DB);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if(!mts.hasBurnFromSkill(VENOM_DB)) {
+                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleBleedDart(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(BleedingToxin)) {
+            Skill skill = chr.getSkill(BLEED_DART);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+            }
+        }
+    }
+
+    private void handleLifeDrain() {
+        if(chr.hasSkill(LIFE_DRAIN)) {
+            Skill skill = chr.getSkill(LIFE_DRAIN);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            int amounthealed = si.getValue(x, slv);
+            if(Util.succeedProp(proc)) {
+                int healamount = (int) ((chr.getMaxHP()) / ((double)100 / amounthealed));
+                chr.heal(healamount);
+            }
+        }
+    }
 }

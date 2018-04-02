@@ -3,8 +3,8 @@ package client.jobs;
 import client.Client;
 import client.character.Char;
 import client.character.HitInfo;
-import client.character.skills.AttackInfo;
-import client.character.skills.SkillInfo;
+import client.character.skills.*;
+import client.jobs.adventurer.Magician;
 import connection.InPacket;
 import enums.Stat;
 import loaders.SkillData;
@@ -90,7 +90,21 @@ public abstract class Job {
      * @param inPacket The packet to be processed
      * @param hitInfo The hit info that should be altered if necessary
      */
-    public abstract void handleHit(Client c, InPacket inPacket, HitInfo hitInfo);
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(Magician.HOLY_MAGIC_SHELL);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        if(tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
+            if(Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
+                Magician.hmshits++;
+            } else {
+                Magician.hmshits = 0;
+                tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
+            }
+        }
+
+    }
 
     public abstract boolean isHandlerOfJob(short id);
 
