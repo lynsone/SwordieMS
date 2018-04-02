@@ -2625,6 +2625,19 @@ public class TemporaryStatManager {
         getChr().getClient().write(WvsContext.temporaryStatSet(this));
     }
 
+    public void removeAllDebuffs() {
+        removeStat(CharacterTemporaryStat.Stun, false);
+        removeStat(CharacterTemporaryStat.Poison, false);
+        removeStat(CharacterTemporaryStat.Seal, false);
+        removeStat(CharacterTemporaryStat.Darkness, false);
+        removeStat(CharacterTemporaryStat.Thaw, false);
+        removeStat(CharacterTemporaryStat.Weakness, false);
+        removeStat(CharacterTemporaryStat.Curse, false);
+        removeStat(CharacterTemporaryStat.Slow, false);
+        removeStat(CharacterTemporaryStat.Blind, false);
+        sendResetStatPacket();
+    }
+
     public void sendResetStatPacket() {
         getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
     }
