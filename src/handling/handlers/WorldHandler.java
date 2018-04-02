@@ -172,6 +172,8 @@ public class WorldHandler {
         short oldPos = inPacket.decodeShort();
         short newPos = inPacket.decodeShort();
         short quantity = inPacket.decodeShort();
+        log.debug("Equipped old: " + chr.getEquippedInventory());
+        log.debug("Equip old: " + chr.getEquipInventory());
         InvType invTypeFrom = invType == EQUIP ? oldPos < 0 ? EQUIPPED : EQUIP : invType;
         InvType invTypeTo = invType == EQUIP ? newPos < 0 ? EQUIPPED : EQUIP : invType;
         Item item = chr.getInventoryByType(invTypeFrom).getItemBySlot(oldPos);
@@ -211,7 +213,7 @@ public class WorldHandler {
         } else {
             Item swapItem = chr.getInventoryByType(invTypeTo).getItemBySlot(newPos);
             if (swapItem != null) {
-                chr.chatMessage(YELLOW, "SwapItem before: " + swapItem);
+                log.debug("SwapItem before: " + swapItem);
             }
             item.setBagIndex(newPos);
             int beforeSizeOn = chr.getEquippedInventory().getItems().size();
@@ -228,7 +230,7 @@ public class WorldHandler {
             }
             if (swapItem != null) {
                 swapItem.setBagIndex(oldPos);
-                chr.chatMessage(YELLOW, "SwapItem after:    " + swapItem);
+                log.debug("SwapItem after: " + swapItem);
             }
             int afterSizeOn = chr.getEquippedInventory().getItems().size();
             int afterSize = chr.getEquipInventory().getItems().size();
@@ -237,12 +239,11 @@ public class WorldHandler {
             }
             c.write(WvsContext.inventoryOperation(true, false, MOVE, oldPos, newPos,
                     0, item));
-            chr.chatMessage(YELLOW, "Item before: " + itemBefore);
-            chr.chatMessage(YELLOW, "Item after   : " + item);
-            chr.chatMessage(YELLOW, "--");
+            log.debug("Item before: " + itemBefore);
+            log.debug("Item before: " + item);
         }
-
-
+        log.debug("Equipped after: " + chr.getEquippedInventory());
+        log.debug("Equip after: " + chr.getEquipInventory());
     }
 
     public static void handleNonTargetForceAtomAttack(Client c, InPacket inPacket) {
@@ -541,16 +542,6 @@ public class WorldHandler {
         log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
         c.getChr().getJobHandler().handleAttack(c, attackInfo);
-        List<MobAttackInfo> maisForSplit = new ArrayList<>();
-        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
-            if(mob.isSplit()) {
-                MobAttackInfo maiCopy = mai.deepCopy();
-                maiCopy.mobId = mob.getSplitLink();
-                maisForSplit.add(maiCopy);
-            }
-        }
-        attackInfo.mobAttackInfo.addAll(maisForSplit);
         chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);

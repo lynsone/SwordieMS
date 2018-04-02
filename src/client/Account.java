@@ -296,6 +296,10 @@ public class Account {
         return friends;
     }
 
+    public void setFriends(List<Friend> friends) {
+        this.friends = friends;
+    }
+
     public void addFriend(Friend friend) {
         if(getFriendByAccID(friend.getFriendAccountID()) == null) {
             getFriends().add(friend);

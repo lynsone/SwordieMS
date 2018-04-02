@@ -371,7 +371,7 @@ public class Char {
                 write(WvsContext.inventoryOperation(true, false,
                         UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
             } else {
-                item.setInventoryId(inventory.getId());
+//                item.setInventoryId(inventory.getId());
                 if (!hasCorrectBagIndex) {
                     item.setBagIndex(inventory.getFirstOpenSlot());
                 }
@@ -1784,6 +1784,7 @@ public class Char {
         }
         setField(toField);
         toField.addChar(this);
+        fixBuggedItems();
         getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
                 (byte) portal.getId(), false, 100, null, true, -1));
         if(characterData) {
@@ -1809,6 +1810,23 @@ public class Char {
         }
         notifyChanges();
         toField.execUserEnterScript(this);
+    }
+
+    /**
+     * Hacky fix for a bug I can't seem to fix. If having 3 equips in your inventory (x, y, z):
+     * equip x, equip y, swap x and z, equip x. Upon relogging, x will be in the EQUIP inventory, but with InvType EQUIPPED.
+     * Server side it goes correctly, but when logging out, Hibernate puts x back into the EQUIP inventory.
+     */
+    private void fixBuggedItems() {
+        List<Item> buggedItems = new ArrayList<>();
+        for(Item item : getEquipInventory().getItems()) {
+            if(item.getInvType() == InvType.EQUIPPED) {
+                buggedItems.add(item);
+            }
+        }
+        getEquipInventory().getItems().removeAll(buggedItems);
+        getEquippedInventory().getItems().addAll(buggedItems);
+
     }
 
     /**

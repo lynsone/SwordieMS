@@ -2453,7 +2453,7 @@ public class TemporaryStatManager {
 
     private void encodeIndieTempStat(OutPacket outPacket) {
         Map<CharacterTemporaryStat, List<Option>> stats = getCurrentStats().entrySet().stream()
-                .filter(stat -> stat.getKey().isIndie())
+                .filter(stat -> stat.getKey().isIndie() && getNewStats().containsKey(stat.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         for(Map.Entry<CharacterTemporaryStat, List<Option>> stat : stats.entrySet()) {

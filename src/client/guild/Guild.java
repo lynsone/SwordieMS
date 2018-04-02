@@ -242,9 +242,6 @@ public class Guild {
     }
 
     public void broadcast(OutPacket outPacket) {
-        getOnlineMembers().forEach(gm -> {
-            System.out.println(gm.getChr() == null ? "Null!" : gm.getChr().getName() + ", " + gm.isOnline() + ", " + gm.getChr());
-        });
         getOnlineMembers().stream().filter(gm -> gm.getChr() != null).forEach(gm -> gm.getChr().write(outPacket));
     }
 

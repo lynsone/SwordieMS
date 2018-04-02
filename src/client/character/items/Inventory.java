@@ -133,4 +133,13 @@ public class Inventory {
     private boolean isFull() {
         return getItems().size() >= getSlots();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Items: ");
+        for(Item item : getItems()) {
+            sb.append(String.format("%d id=%d slot=%d | ", item.getItemId(), item.getId(), item.getBagIndex()));
+        }
+        return sb.toString();
+    }
 }
