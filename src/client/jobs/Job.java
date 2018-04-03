@@ -92,9 +92,6 @@ public abstract class Job {
      */
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(Magician.HOLY_MAGIC_SHELL);
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         if(tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
             if(Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
                 Magician.hmshits++;
@@ -103,7 +100,6 @@ public abstract class Job {
                 tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
             }
         }
-
     }
 
     public abstract boolean isHandlerOfJob(short id);
