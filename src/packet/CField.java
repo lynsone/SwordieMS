@@ -15,7 +15,10 @@ import client.life.Summon;
 import connection.OutPacket;
 import constants.ItemConstants;
 import constants.SkillConstants;
-import enums.*;
+import enums.EnchantStat;
+import enums.EquipmentEnchantType;
+import enums.LeaveType;
+import enums.Stat;
 import handling.OutHeader;
 import handling.handlers.PsychicLock;
 import util.FileTime;
@@ -97,10 +100,12 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket summonedAttackDone() {
-        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_ATTACK_DONE);
+    public static OutPacket summonedSkill(int charID, Summon summon, int summonSkillID) {
+        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_SKILL);
 
-        outPacket.encodeByte(true);
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(summon.getObjectId());
+        outPacket.encodeByte(summonSkillID);
 
         return outPacket;
     }

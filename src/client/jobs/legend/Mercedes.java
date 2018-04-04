@@ -46,6 +46,7 @@ public class Mercedes extends Job {
     public static final int STAGGERING_STRIKES = 23120013; //Special Attack
     public static final int ANCIENT_WARDING = 23121004; //Buff
     public static final int MAPLE_WARRIOR_MERC = 23121005; //Buff
+    public static final int LIGHTNING_EDGE = 23121003; //Debuff mobs
 
     public static final int HEROIC_MEMORIES_MERC = 23121053;
     public static final int ELVISH_BLESSING = 23121054;
@@ -87,7 +88,7 @@ public class Mercedes extends Job {
             ELEMENTAL_KNIGHTS_PURPLE,
     };
 
-    private int summonBoolean = 0;
+    private Summon eleKnightSummonID;
 
     public Mercedes(Char chr) {
         super(chr);
@@ -185,8 +186,8 @@ public class Mercedes extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o2);
                 break;
-            case ELEMENTAL_KNIGHTS_BLUE:
-                //handleEleKnightSummons(slv);
+            case ELEMENTAL_KNIGHTS_BLUE: //TODO     can spawn 2 summons in total
+
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -251,13 +252,28 @@ public class Mercedes extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case STUNNING_STRIKES:
-            case STAGGERING_STRIKES:
+                SkillInfo stunningStrikes = SkillData.getSkillInfoById(STUNNING_STRIKES);
+                int proc = stunningStrikes.getValue(prop, slv);
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(/*si.getValue(prop, slv)*/100)) {
+                    if(Util.succeedProp(proc)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.rOption = STUNNING_STRIKES;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+            case STAGGERING_STRIKES:
+                SkillInfo staggeringStrikes = SkillData.getSkillInfoById(STAGGERING_STRIKES);
+                int procc = staggeringStrikes.getValue(prop, slv);
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if(Util.succeedProp(procc)) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = STAGGERING_STRIKES;
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
@@ -271,22 +287,29 @@ public class Mercedes extends Job {
                         o1.nOption = si.getValue(x, slv);
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.AddDamSkill, o1); // ?
-                        // TODO Unsure about MobStat, Desc: Additional Damage Debuff
+                        mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1); // ?
                     }
                 }
                 break;
             case SPIKES_ROYALE:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Weakness, o1); // ?
-                        // TODO Unsure about MobStat, Desc: Enemy DEF Debuff
-                    }
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = - si.getValue(x, slv);
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                    mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
+                }
+                break;
+            case LIGHTNING_EDGE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = - si.getValue(x, slv);
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamSkill, o1);
                 }
                 break;
             case ELEMENTAL_KNIGHTS_BLUE:

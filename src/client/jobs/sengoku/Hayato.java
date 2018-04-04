@@ -89,7 +89,6 @@ public class Hayato extends Job {
     };
 
     private int swordEnergy = 0;
-    private boolean stance = false;
 
     public Hayato(Char chr) {
         super(chr);
@@ -135,14 +134,16 @@ public class Hayato extends Job {
                 tsm.putCharacterStatValue(HayatoStance, o1);
                 handleSwordEnergyLevels();
                 break;
-
             case BATTOUJUTSU_ADVANCE:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(BattoujutsuAdvance, o1);
+                o2.nOption = 8;
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamR, o2);
                 break;
-
             case KATANA_BOOSTER:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
@@ -235,6 +236,7 @@ public class Hayato extends Job {
         Skill skill = chr.getSkill(attackInfo.skillId);
         int skillID = 0;
         SkillInfo si = null;
+        chr.chatMessage(ChatMsgColour.CYAN, "Attack Speed:" + attackInfo.attackSpeed);
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
         int slv = 0;
         if (skill != null) {
@@ -248,6 +250,7 @@ public class Hayato extends Job {
         if(tsm.getOption(HayatoStance).nOption == 1) {
             resetNormalStanceBonus();
             handleQuickDrawStanceBonus();
+            handleQuickDrawStunBonus(attackInfo);
         } else
         if(tsm.getOption(HayatoStance).nOption == 0) {
             resetQuickDrawStanceBonus();
@@ -307,8 +310,8 @@ public class Hayato extends Job {
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieCr, o1);
                     c.write(WvsContext.temporaryStatSet(tsm));
-                    break;
                 }
+                break;
         }
     }
 
@@ -427,7 +430,7 @@ public class Hayato extends Job {
         //BossDmg
         o1.nOption = hayatoBD;
         o1.rOption = QUICK_DRAW_STANCE_BONUS;
-        tsm.putCharacterStatValue(BdR, o1);
+        tsm.putCharacterStatValue(HayatoBoss, o1);
 
         //Crit Rate
         o2.nOption = hayatoCrit;
@@ -437,7 +440,35 @@ public class Hayato extends Job {
         //Booster
         o3.nOption = hayatoBooster;
         o3.rOption = QUICK_DRAW_STANCE_BONUS;
-        tsm.putCharacterStatValue(Booster, o3);
+        tsm.putCharacterStatValue(HayatoBooster, o3);
+    }
+
+    public void handleQuickDrawStunBonus(AttackInfo attackInfo) {
+        Option o = new Option();
+        int stunProc = 30;
+        if(swordEnergy >= 200) {
+            stunProc += 5;
+        }
+        if(swordEnergy >= 400) {
+            stunProc += 5;
+        }
+        if(swordEnergy >= 700) {
+            stunProc += 5;
+        }
+        if(swordEnergy == 1000) {
+            stunProc += 5;
+        }
+
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if(Util.succeedProp(stunProc)) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                o.nOption = 1;
+                o.rOption = QUICK_DRAW;
+                o.tOption = 3;
+                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+            }
+        }
     }
 
     private void handleNormalStanceBonus() {
@@ -494,13 +525,13 @@ public class Hayato extends Job {
     public void resetNormalStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStatsBySkill(NORMAL_STANCE_BONUS);
-        //c.write(WvsContext.temporaryStatReset(tsm, false));
+        c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
     public void resetQuickDrawStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStatsBySkill(QUICK_DRAW_STANCE_BONUS);
-        //c.write(WvsContext.temporaryStatReset(tsm, false));
+        c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 
 

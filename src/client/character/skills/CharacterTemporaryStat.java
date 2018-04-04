@@ -533,7 +533,7 @@ public enum CharacterTemporaryStat {
     HayatoPAD(0x2000, 14),
     HayatoHPR(0x1000, 14),
     HayatoMPR(0x800, 14),
-    Unk60(0x400, 14),
+    HayatoBooster(0x400, 14),
     Unk70(0x200, 14), // Not a temp stat? Doesn't give buff
     Unk80(0x100, 14), // No buff
     

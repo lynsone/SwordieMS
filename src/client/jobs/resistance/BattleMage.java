@@ -9,10 +9,10 @@ import client.jobs.Job;
 import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
+import enums.AssistType;
 import enums.ChatMsgColour;
 import enums.MobStat;
 import loaders.SkillData;
-import packet.CField;
 import packet.WvsContext;
 import server.EventManager;
 import util.Rect;
@@ -78,6 +78,7 @@ public class BattleMage extends Job {
     };
 
     private Summon death;
+    private long drainAuraCD = Long.MIN_VALUE;
 
     public BattleMage(Char chr) {
         super(chr);
@@ -112,7 +113,6 @@ public class BattleMage extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
-                o1.xOption = 10;
                 tsm.putCharacterStatValue(BMageDeath, o1);
                 spawnDeath(skillID, slv);
                 break;
@@ -123,19 +123,16 @@ public class BattleMage extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                if(death != null) {
-                    c.write(CField.summonedAssistAttackRequest(chr.getId(), death.getObjectId()));
-                }
                 break;
 
             case HASTY_AURA:
                 o1.nReason = skillID;
-                o1.nValue = -1;//    si.getValue(indieSpeed, slv);
+                o1.nValue = si.getValue(indieSpeed, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = 0;
                 tsm.putCharacterStatValue(IndieSpeed, o1);
                 o2.nReason = skillID;
-                o2.nValue = si.getValue(indieBooster, slv);
+                o2.nValue = -1;//   si.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = 0;
                 tsm.putCharacterStatValue(IndieBooster, o2);
@@ -247,46 +244,32 @@ public class BattleMage extends Job {
         death.setFlyMob(true);
         death.setSummonTerm(0);
         death.setMoveAction((byte) 0);
-        death.setAssistType((byte) 0);  //0
+        death.setAssistType(AssistType.PASSIVE.getVal());  //0
         death.setAttackActive(false); //true
         death.setBeforeFirstAttack(false);
         field.spawnSummon(death);
     }
 
-    public static void deathAttack() {
 
-    }
-
-    private void handleCondemnation(int skillID, TemporaryStatManager tsm) {
+    private void handleCondemnation() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
-        SkillInfo condemnationInfo = SkillData.getSkillInfoById(CONDEMNATION);
-        int amount = 1;
-        if (chr.hasSkill(CONDEMNATION)) {
+        int amount = 2;
+
+        if(tsm.hasStat(BMageDeath)) {
             amount = tsm.getOption(BMageDeath).nOption;
-            if (amount < condemnationInfo.getValue(x, condemnationInfo.getCurrentLevel())) {
+            if(amount < 10) {
                 amount++;
-            } else if (amount >= 7 /*condemnationInfo.getValue(x, condemnationInfo.getCurrentLevel())*/) {
-
-
-
-                //c.write(CField.summonedSummonAttackActive(chr.getId(), death, true));
-
-
-                death.setAssistType((byte) 1);
-                //c.write(CField.summonedAssistAttackRequest(chr.getId(), death));
-
-
-                //amount = 1;
             }
         }
         o.nOption = amount;
-        o.rOption = getIcon(chr); //gets correct Icon for the passive upgrades
+        o.rOption = CONDEMNATION_III;
         o.tOption = 0;
         tsm.putCharacterStatValue(BMageDeath, o);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private int getIcon(Char chr) {
+    private int getIcon() {
         int skillinfo = CONDEMNATION;
         if (chr.hasSkill(CONDEMNATION)) {
             skillinfo = CONDEMNATION;
@@ -323,7 +306,7 @@ public class BattleMage extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        //handleCondemnation(skill.getSkillId(), tsm);
+        handleCondemnation();
         if(hasHitMobs) {
             handleDrainAuraActive(attackInfo);
             handleDrainAuraPassive(attackInfo);
@@ -415,8 +398,10 @@ public class BattleMage extends Job {
         Skill skill = chr.getSkill(DRAINING_AURA);
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        if (tsm.getOptByCTSAndSkill(BMageAura, DRAINING_AURA) != null) {
+        int duration = 1000* si.getValue(subTime, slv);
+        if ((tsm.getOptByCTSAndSkill(BMageAura, DRAINING_AURA) != null) && (drainAuraCD + duration < System.currentTimeMillis())) {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                drainAuraCD = System.currentTimeMillis();
                 int totaldmg = Arrays.stream(mai.damages).sum();
                 int healingrate = si.getValue(x, slv);
                 int restoration = (int) (totaldmg / ((double) 100 / healingrate));

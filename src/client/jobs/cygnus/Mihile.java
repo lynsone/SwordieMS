@@ -383,13 +383,16 @@ public class Mihile extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case MAGIC_CRASH:
-                    Rect rect2 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
-                            , inPacket.decodeShort(), inPacket.decodeShort());
-                    for(Life life : chr.getField().getLifesInRect(rect2)) {
+                    Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.moveRight();
+                    }
+                    for(Life life : chr.getField().getLifesInRect(rect)) {
                         if(life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             if(Util.succeedProp(si.getValue(prop, slv))) {
+                                mts.removeEnemyBuffs();
                                 o1.nOption = 1;
                                 o1.rOption = skillID;
                                 o1.tOption = si.getValue(time, slv);

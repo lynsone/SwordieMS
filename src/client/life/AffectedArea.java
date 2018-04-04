@@ -189,18 +189,15 @@ public class AffectedArea extends Life {
                 mts.addStatOptionsAndBroadcast(MobStat.MDR, o);
                 break;
             case Zero.TIME_DISTORTION:
+                mts.removeEnemyBuffs();
                 o.nOption = 1;
                 o.rOption = skillID;
-                o.tOption = si.getValue(time, slv);
+                o.tOption = 5;
                 mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
                 o1.nOption = si.getValue(SkillStat.x, slv);
                 o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
+                o1.tOption = 5;
                 mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
                 break;
         }
     }
@@ -220,9 +217,6 @@ public class AffectedArea extends Life {
         Option o3 = new Option();
         switch(skillID) {
             case Zero.TIME_DISTORTION:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
                 tsm.removeAllDebuffs();
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieBooster, slv);

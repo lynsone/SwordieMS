@@ -364,6 +364,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_CREATE_HOLIDOM_REQUEST:
                     WorldHandler.handleUserCreateHolidomRequest(c, inPacket);
                     break;
+                case SUMMONED_SKILL:
+                    WorldHandler.handleSummonedSkill(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

@@ -23,6 +23,7 @@ import client.guild.*;
 import client.jobs.Job;
 import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
+import client.jobs.adventurer.Warrior;
 import client.jobs.cygnus.BlazeWizard;
 import client.jobs.legend.Luminous;
 import client.jobs.sengoku.Kanna;
@@ -3020,5 +3021,21 @@ public class WorldHandler {
         inPacket.decodeInt(); //unk
 
         c.getChr().heal( (int) (c.getChr().getMaxHP() / ((double) 100 / 40)) );
+    }
+
+    public static void handleSummonedSkill(Client c, InPacket inPacket) {
+        int objectID = inPacket.decodeInt();
+        int skillID = inPacket.decodeInt();
+        //5 more bytes, unknown
+
+
+        Char chr = c.getChr();
+
+        if(skillID == Warrior.EVIL_EYE) {
+            chr.heal(20);
+        }
+        if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
+            Warrior.handleHexOfTheEvilEye(chr);
+        }
     }
 }

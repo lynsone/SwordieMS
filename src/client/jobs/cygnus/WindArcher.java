@@ -407,9 +407,7 @@ public class WindArcher extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            if(attackInfo.skillId == TRIFLING_WIND_ATOM || attackInfo.skillId == 0 || attackInfo.skillId == STORM_BRINGER) {
-
-            } else {
+            if(attackInfo.skillId != TRIFLING_WIND_ATOM && attackInfo.skillId != 0 && attackInfo.skillId != STORM_BRINGER) {
                 handleStormBringer(skillID, slv, attackInfo);
 
                 int maxtrif = getMaxTriffling(chr);
