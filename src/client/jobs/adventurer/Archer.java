@@ -70,6 +70,8 @@ public class Archer extends Job {
     public static final int SHARP_EYES_XBOW = 3221002;
     public static final int SHARP_EYES_XBOW_IED_H = 3220044;
     public static final int ILLUSION_STEP_XBOW = 3221006;
+    public static final int HEROS_WILL_BM = 3121009;
+    public static final int HEROS_WILL_MM = 3221008;
 
     public static final int EPIC_ADVENTURE_XBOW = 3221053;
     public static final int EPIC_ADVENTURE_BOW = 3121053;
@@ -468,6 +470,7 @@ public class Archer extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -484,7 +487,10 @@ public class Archer extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
-
+                case HEROS_WILL_BM:
+                case HEROS_WILL_MM:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }

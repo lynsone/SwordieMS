@@ -53,6 +53,7 @@ public class Warrior extends Job {
     public static final int ENRAGE = 1121010;
     public static final int PUNCTURE = 1121015;
     public static final int MAGIC_CRASH_HERO = 1121016;
+    public static final int HEROS_WILL_HERO = 1121011;
 
     //Paladin
     public static final int CLOSE_COMBAT = 1201013;
@@ -71,6 +72,7 @@ public class Warrior extends Job {
     public static final int BLAST = 1221009;
     public static final int DIVINE_SHIELD = 1210016;
     public static final int MAGIC_CRASH_PALLY = 1221014;
+    public static final int HEROS_WILL_PALA = 1221012;
 
     //Dark Knight
     public static final int SPEAR_SWEEP = 1301012;
@@ -86,7 +88,7 @@ public class Warrior extends Job {
     public static final int FINAL_PACT = 1320016;
     public static final int MAGIC_CRASH_DRK = 1321014;
     public static final int SACRIFICE = 1321015; //Resets summon
-
+    public static final int HEROS_WILL_DRK = 1321010;
 
     //Hyper Skills
     public static final int EPIC_ADVENTURE_HERO = 1121053; //Lv200
@@ -648,6 +650,7 @@ public class Warrior extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -715,6 +718,11 @@ public class Warrior extends Job {
                             }
                         }
                     }
+                    break;
+                case HEROS_WILL_HERO:
+                case HEROS_WILL_PALA:
+                case HEROS_WILL_DRK:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

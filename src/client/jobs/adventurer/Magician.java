@@ -61,6 +61,7 @@ public class Magician extends Job {
     public static final int ELEMENTAL_DRAIN = 2100009;  //TODO Set stacks per DoT
     public static final int FERVENT_DRAIN = 2120014;
     public static final int ARCANE_AIM_FP = 2120010;
+    public static final int HEROS_WILL_FP = 2121008;
 
 
     //Mage IL
@@ -83,6 +84,7 @@ public class Magician extends Job {
     public static final int ELQUINES = 2221005;
     public static final int ARCANE_AIM_IL = 2220010;
     public static final int MAPLE_WARRIOR_IL = 2221000;
+    public static final int HEROS_WILL_IL = 2221008;
 
     //Bishop
     public static final int HEAL = 2301002;
@@ -102,7 +104,7 @@ public class Magician extends Job {
     public static final int MAPLE_WARRIOR_BISH = 2321000;
     public static final int ARCANE_AIM_BISH = 2320011;
     public static final int ANGEL_RAY = 2321007;
-    public static final int HERO_WILL_BISH = 2321009;
+    public static final int HEROS_WILL_BISH = 2321009;
 
     //Hypers
     public static final int EPIC_ADVENTURE_FP = 2121053;
@@ -374,7 +376,7 @@ public class Magician extends Job {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        if(!chr.isLeft()) {
+        if (!chr.isLeft()) {
             rect = rect.moveRight();
         }
         List<Life> lifes = field.getLifesInRect(rect);
@@ -541,19 +543,12 @@ public class Magician extends Job {
                     chr.warp(toField);
                     break;
                 case FREEZING_BREATH:
-                    Rect rect = new Rect(
-                            new Position(
-                                    chr.getPosition().deepCopy().getX() - 530,
-                                    chr.getPosition().deepCopy().getY() - 190),
-                            new Position(
-                                    chr.getPosition().deepCopy().getX() + 20,
-                                    chr.getPosition().deepCopy().getY() + 40)
-                    );
-                    if(!chr.isLeft()) {
+                    Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                    if (!chr.isLeft()) {
                         rect = rect.moveRight();
                     }
-                    for(Life life : chr.getField().getLifesInRect(rect)) {
-                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                    for (Life life : chr.getField().getLifesInRect(rect)) {
+                        if (life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -595,18 +590,23 @@ public class Magician extends Job {
                     chr.heal(handleBishopHealingSkills(HEAL));
                     Rect rect3 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
                             , inPacket.decodeShort(), inPacket.decodeShort());
-                    for(Life life : chr.getField().getLifesInRect(rect3)) {
-                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                    for (Life life : chr.getField().getLifesInRect(rect3)) {
+                        if (life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();
-                                o1.nOption = si.getValue(x, slv);
-                                o1.rOption = skillID;
-                                o1.tOption = si.getValue(time, slv);
-                                mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+                            o1.nOption = si.getValue(x, slv);
+                            o1.rOption = skillID;
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
                         }
                     }
                     break;
                 case DISPEL:
+                    tsm.removeAllDebuffs();
+                    break;
+                case HEROS_WILL_FP:
+                case HEROS_WILL_IL:
+                case HEROS_WILL_BISH:
                     tsm.removeAllDebuffs();
                     break;
             }

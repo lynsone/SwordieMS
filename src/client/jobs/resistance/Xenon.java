@@ -62,6 +62,7 @@ public class Xenon extends Job {
     public static final int OOPARTS_CODE = 36121003; //Buff
     public static final int MAPLE_WARRIOR_XENON = 36121008; //Buff
     public static final int PINPOINT_SALVO_PERFECT_DESIGN = 36120015; //Sp. Attack Upgrade  (Passive Upgrade)
+    public static final int HEROS_WILL_XENON = 36121009;
 
     public static final int ORBITAL_CATACLYSM = 36121052;
     public static final int AMARANTH_GENERATOR = 36121054;
@@ -350,6 +351,9 @@ public class Xenon extends Job {
                     break;
                 case PINPOINT_SALVO:
                     handlePinPointSalvo();
+                    break;
+                case HEROS_WILL_XENON:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

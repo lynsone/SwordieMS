@@ -32,10 +32,9 @@ public class Hayato extends Job {
     public static final int QUICK_DRAW_STANCE_BONUS = 40011292;
     public static final int SUMMER_RAIN = 40011289;
     public static final int HITOKIRI_HUNDRED_STRIKE = 40011290;
-
-
     public static final int MASTER_OF_BLADES = 40010000;
     public static final int SHIMADA_HEART = 40010067;
+
 
     public static final int BATTOUJUTSU_ADVANCE = 41001010; //not sure what this skill does
 
@@ -54,6 +53,7 @@ public class Hayato extends Job {
     public static final int JINSOKU = 41120006;
     public static final int BLOODLETTER = 41120007;
     public static final int SUDDEN_STRIKE = 41121018;
+    public static final int AKATSUKI_BLOSSOMS = 41121004;
 
 
     public static final int GOD_OF_BLADES = 41121054;
@@ -332,7 +332,9 @@ public class Hayato extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
-
+                case AKATSUKI_BLOSSOMS:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }

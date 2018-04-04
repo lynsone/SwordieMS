@@ -60,7 +60,7 @@ public class Thief extends Job {
     public static final int FRAILTY_CURSE = 4121015; //AoE
     public static final int NIGHT_LORD_MARK = 4120018;
     public static final int TOXIC_VENOM_NL = 4120011; //Passive DoT
-
+    public static final int HEROS_WILL_NL = 4121009;
 
     // Shadower
     public static final int STEAL = 4201004; //Special Attack (Steal Debuff)?
@@ -82,6 +82,7 @@ public class Thief extends Job {
     public static final int SMOKE_SCREEN = 4221006; //Affected Area
     public static final int PRIME_CRITICAL = 4220015; //Passive Buff
     public static final int TOXIC_VENOM_SHAD = 4220011; //Passive DoT
+    public static final int HEROS_WILL_SHAD = 4221008;
 
 
     // Dual Blade
@@ -103,7 +104,7 @@ public class Thief extends Job {
     public static final int MAPLE_WARRIOR_DB = 4341000; //Buff
     public static final int MIRRORED_TARGET = 4341006; //Summon
     public static final int TOXIC_VENOM_DB = 4340012;
-
+    public static final int HEROS_WILL_DB = 4341008;
 
     //Hyper skills
     public static final int EPIC_ADVENTURE_NL = 4121053;
@@ -355,6 +356,7 @@ public class Thief extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -402,6 +404,11 @@ public class Thief extends Job {
                     break;
                 case MESO_EXPLOSION:
                     handleMesoExplosion();
+                    break;
+                case HEROS_WILL_NL:
+                case HEROS_WILL_SHAD:
+                case HEROS_WILL_DB:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

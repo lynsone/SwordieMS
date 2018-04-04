@@ -50,6 +50,7 @@ public class Kaiser extends Job {
     public static final int TEMPEST_BLADES_FIVE_FF = 61121217;
     public static final int GRAND_ARMOR = 61121009; //Buff
     public static final int NOVA_WARRIOR_KAISER = 61121014; //Buff
+    public static final int NOVA_TEMPERANCE_KAISER = 61121015;
 
     public static final int FINAL_TRANCE = 61121053;
     public static final int KAISERS_MAJESTY = 61121054;
@@ -732,6 +733,7 @@ public class Kaiser extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -746,6 +748,9 @@ public class Kaiser extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch (skillID) {
+                case NOVA_TEMPERANCE_KAISER:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }

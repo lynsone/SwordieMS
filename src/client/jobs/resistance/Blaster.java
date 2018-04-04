@@ -31,6 +31,7 @@ public class Blaster extends Job {
     public static final int HAMMER_SMASH_CHARGE = 37110001;
     public static final int ARM_CANNON_BOOST = 37101003;
     public static final int MAPLE_WARRIOR_BLASTER = 37121006;
+    public static final int HEROS_WILL_BLASTER = 37121007;
     public static final int FOR_LIBERTY_BLASTER = 37121053;
     public static final int CANNON_OVERDRIVE = 37121054;
 
@@ -172,6 +173,9 @@ public class Blaster extends Job {
                     break;
                 case VITALITY_SHIELD:
                     resetBlastShield();
+                    break;
+                case HEROS_WILL_BLASTER:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

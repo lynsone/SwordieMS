@@ -51,6 +51,7 @@ public class BattleMage extends Job {
     public static final int PARTY_SHIELD = 32121006; //TODO Area of Effect Skill
     public static final int BATTLE_RAGE = 32121010; //Buff (ON/OFF)
     public static final int MAPLE_WARRIOR_BAM = 32121007; //Buff
+    public static final int HEROS_WILL_BAM = 32121008;
 
     public static final int FOR_LIBERTY_BAM = 32121053;
     public static final int MASTER_OF_DEATH = 32121056; //TODO
@@ -343,6 +344,7 @@ public class BattleMage extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -372,6 +374,9 @@ public class BattleMage extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case HEROS_WILL_BAM:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

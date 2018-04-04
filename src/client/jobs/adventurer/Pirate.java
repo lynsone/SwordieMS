@@ -64,6 +64,7 @@ public class Pirate extends Job {
     public static final int MAPLE_WARRIOR_BUCC = 5121000; //Buff
     public static final int PIRATE_REVENGE = 5120011;
     public static final int ULTRA_CHARGE = 5120018;
+    public static final int HEROS_WILL_BUCC = 5121008;
 
 
     //Corsair
@@ -79,6 +80,7 @@ public class Pirate extends Job {
     public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
+    public static final int HEROS_WILL_SAIR = 5221010;
 
 
     //Cannoneer
@@ -96,6 +98,7 @@ public class Pirate extends Job {
     public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff TODO Special Buff
     public static final int PIRATE_SPIRIT = 5321010; //Buff
     public static final int MAPLE_WARRIOR_CANNON = 5321005; //Buff
+    public static final int HEROS_WILL_CANNON = 5321006;
 
     //Jett
     public static final int GALACTIC_MIGHT = 5081023; //Buff
@@ -108,6 +111,7 @@ public class Pirate extends Job {
 
     public static final int HIGH_GRAVITY = 5721066; //Buff
     public static final int MAPLE_WARRIOR_JETT = 5721000; //Buff
+    public static final int HEROS_WILL_JETT = 5721002;
 
 
     //Hyper
@@ -797,6 +801,12 @@ public class Pirate extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case HEROS_WILL_BUCC:
+                case HEROS_WILL_SAIR:
+                case HEROS_WILL_CANNON:
+                case HEROS_WILL_JETT:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

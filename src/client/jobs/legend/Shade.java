@@ -54,6 +54,7 @@ public class Shade extends Job {
     public static final int DEATH_MARK = 25121006; //Special Attack (Mark Debuff)
     public static final int SOUL_SPLITTER = 25121007; //Special Attack (Split)
     public static final int FIRE_FOX_SPIRIT_MASTERY = 25120110;
+    public static final int HEROS_WILL_SH = 25121211;
 
     public static final int HEROIC_MEMORIES_SH = 25121132;
     public static final int SPIRIT_BOND_MAX = 25121131;
@@ -353,6 +354,7 @@ public class Shade extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -380,6 +382,10 @@ public class Shade extends Job {
                 case FIRE_FOX_SPIRIT_MASTERY:
                 case FOX_SPIRITS_INIT:
                     handleFoxSpirits(skillID);
+                    break;
+                case HEROS_WILL_SH:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }

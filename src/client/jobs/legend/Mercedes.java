@@ -47,6 +47,7 @@ public class Mercedes extends Job {
     public static final int ANCIENT_WARDING = 23121004; //Buff
     public static final int MAPLE_WARRIOR_MERC = 23121005; //Buff
     public static final int LIGHTNING_EDGE = 23121003; //Debuff mobs
+    public static final int HEROS_WILL_MERC = 23121008;
 
     public static final int HEROIC_MEMORIES_MERC = 23121053;
     public static final int ELVISH_BLESSING = 23121054;
@@ -306,7 +307,7 @@ public class Mercedes extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = - si.getValue(x, slv);
+                    o1.nOption = si.getValue(x, slv);
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.AddDamSkill, o1);
@@ -337,6 +338,7 @@ public class Mercedes extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -351,7 +353,9 @@ public class Mercedes extends Job {
             Option o2 = new Option();
             Option o3 = new Option();
             switch(skillID) {
-
+                case HEROS_WILL_MERC:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }

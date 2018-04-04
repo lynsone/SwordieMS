@@ -67,6 +67,7 @@ public class AngelicBuster extends Job {
     public static final int STAR_GAZER = 65121004; //Buff
     public static final int NOVA_WARRIOR_AB = 65121009; //Buff
     public static final int SOUL_SEEKER_EXPERT = 65121011; //ON/OFF Buff
+    public static final int NOVA_TEMPERANCE_AB = 65121010;
 
 
     //Hypers
@@ -364,6 +365,7 @@ public class AngelicBuster extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -386,6 +388,9 @@ public class AngelicBuster extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case NOVA_TEMPERANCE_AB:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

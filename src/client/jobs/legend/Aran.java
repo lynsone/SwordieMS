@@ -44,6 +44,7 @@ public class Aran extends Job {
     public static final int AERO_SWING = 21110026; //Passive that activates when Combo'ing in Air TODO
 
     public static final int MAPLE_WARRIOR_ARAN = 21121000; //Buff
+    public static final int HEROS_WILL_ARAN = 21121008;
 
     public static final int HEROIC_MEMORIES_ARAN = 21121053;
     public static final int ADRENALINE_BURST = 21121058;
@@ -455,6 +456,9 @@ public class Aran extends Job {
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(mdi.getRects().get(0)));
                     chr.getField().spawnAffectedArea(aa);
+                    break;
+                case HEROS_WILL_ARAN:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

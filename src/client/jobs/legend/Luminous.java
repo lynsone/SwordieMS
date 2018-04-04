@@ -51,6 +51,7 @@ public class Luminous extends Job {
     public static final int MAPLE_WARRIOR_LUMI = 27121009; //Buff
     public static final int ENDER = 27121303;
     public static final int DARKNESS_MASTERY = 27120008;
+    public static final int HEROS_WILL_LUMI = 27121010;
 
     public static final int EQUALIZE = 27121054;
     public static final int HEROIC_MEMORIES_LUMI = 27121053;
@@ -401,6 +402,9 @@ public class Luminous extends Job {
 //                    o1.tOption = SkillData.getSkillInfoById(EQUILIBRIUM).getValue(time, 1);
                     tsm.putCharacterStatValue(Larkness, o1);
                     EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
+                    break;
+                case HEROS_WILL_LUMI:
+                    tsm.removeAllDebuffs();
                     break;
             }
             tsm.sendSetStatPacket();

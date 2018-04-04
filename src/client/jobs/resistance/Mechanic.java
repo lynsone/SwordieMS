@@ -58,6 +58,7 @@ public class Mechanic extends Job {
     public static final int BOTS_N_TOTS = 35121009; //Special Summon
     public static final int MAPLE_WARRIOR_MECH = 35121007; //Buff
     public static final int ENHANCED_SUPPORT_UNIT = 35120002;
+    public static final int HEROS_WILL_MECH = 35121008;
 
     public static final int FOR_LIBERTY_MECH = 35121053;
     public static final int FULL_SPREAD = 35121055;
@@ -264,6 +265,7 @@ public class Mechanic extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -287,6 +289,9 @@ public class Mechanic extends Job {
                     for(int i=0; i<4; i++) {
                         handleMechRockets();
                     }
+                    break;
+                case HEROS_WILL_MECH:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

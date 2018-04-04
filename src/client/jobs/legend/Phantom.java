@@ -55,6 +55,7 @@ public class Phantom extends Job {
     public static final int VOL_DAME = 24121007; // Special Buff TODO
     public static final int MAPLE_WARRIOR_PH = 24121008; //Buff
     public static final int CARTE_NOIR = 24120002;              //80001890
+    public static final int HEROS_WILL_PH = 24121009;
 
     public static final int HEROIC_MEMORIES_PH = 24121053;
     public static final int CARTE_ROSE_FINALE = 24121052;
@@ -258,6 +259,7 @@ public class Phantom extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -290,6 +292,9 @@ public class Phantom extends Job {
                 case JUDGMENT_DRAW_1:
                 case JUDGMENT_DRAW_2:
                     resetCardStack();
+                    break;
+                case HEROS_WILL_PH:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }

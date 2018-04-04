@@ -46,6 +46,7 @@ public class Kanna extends Job {
     public static final int AKATUSKI_HERO_KANNA = 42121006;
     public static final int NINE_TAILED_FURY = 42121024; //Attacking Skill + Buff
     public static final int BINDING_TEMPEST = 42121004;
+    public static final int BLOSSOMING_DAWN = 42121007;
 
     public static final int VERITABLE_PANDEMONIUM = 42121052; //Immobility Debuff
     public static final int PRINCESS_VOW_KANNA = 42121053;
@@ -218,6 +219,9 @@ public class Kanna extends Job {
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
                     c.write(WvsContext.temporaryStatSet(tsm));
+                    break;
+                case BLOSSOMING_DAWN:
+                    tsm.removeAllDebuffs();
                     break;
             }
         }
