@@ -7,19 +7,18 @@ import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
-import client.life.*;
+import client.life.AffectedArea;
+import client.life.Mob;
+import client.life.MobTemporaryStat;
+import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.ChatMsgColour;
-import enums.ForceAtomEnum;
 import enums.MobStat;
 import enums.MoveAbility;
 import loaders.SkillData;
-import packet.CField;
 import packet.WvsContext;
-import util.Position;
-import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
@@ -128,40 +127,6 @@ public class Kaiser extends Job {
             NOVA_WARRIOR_KAISER,
             FINAL_TRANCE,
             KAISERS_MAJESTY,
-    };
-
-    private final int[][] getGaugeIncrements2 = new int[][] {
-            {DRAGON_SLASH_1, 2},
-            {DRAGON_SLASH_2, 4},
-            {DRAGON_SLASH_3, 5},
-            {DRAGON_SLASH_1_FINAL_FORM, 4},
-
-            {FLAME_SURGE, 7},
-            {FLAME_SURGE_FINAL_FORM, 0},
-
-            {IMPACT_WAVE, 5},
-            {IMPACT_WAVE_FINAL_FORM, 0},
-
-            {PIERCING_BLAZE, 5},
-            {PIERCING_BLAZE_FINAL_FORM, 0},
-
-            {WING_BEAT, 2},
-            {WING_BEAT_FINAL_FORM, 1},
-
-            {PRESSURE_CHAIN, 8},
-            {PRESSURE_CHAIN_FINAL_FORM, 0},
-
-            {GIGA_WAVE, 8},
-            {GIGA_WAVE_FINAL_FORM, 0},
-
-            {INFERNO_BREATH, 14},
-            {INFERNO_BREATH_FINAL_FORM, 0},
-
-            {DRAGON_BARRAGE, 6},
-            {DRAGON_BARRAGE_FINAL_FORM, 0},
-
-            {BLADE_BURST, 6},
-            {BLADE_BURST_FINAL_FORM, 0},
     };
 
     public Kaiser(Char chr) {
@@ -439,7 +404,7 @@ public class Kaiser extends Job {
 
     private int getKaiserGauge(Char chr) {
         int maxGauge;
-        switch (chr.getJob()){
+        switch (chr.getJob()) {
             case 6100:
                 maxGauge = SkillData.getSkillInfoById(60000219).getValue(s, 1);
                 break;
@@ -450,32 +415,11 @@ public class Kaiser extends Job {
             case 6112:
                 maxGauge = SkillData.getSkillInfoById(60000219).getValue(v, 1);
                 break;
-            default: maxGauge = 0;
+            default:
+                maxGauge = 0;
         }
         return maxGauge;
     }
-
-
-    private void handleFlyingSwords() {
-        Field field = chr.getField();
-        SkillInfo si = SkillData.getSkillInfoById(TEMPEST_BLADES_FIVE);
-        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        List<Life> lifes = field.getLifesInRect(rect);
-        for(Life life : lifes) {
-            if(life instanceof Mob) {
-                int mobID = ((Mob) life).getRefImgMobID(); //
-                int inc = ForceAtomEnum.KAISER_WEAPON_THROW_1.getInc();
-                int type = ForceAtomEnum.KAISER_WEAPON_THROW_1.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 300, (int) System.currentTimeMillis(), 1, 0,
-                        new Position(0, 0));
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, TEMPEST_BLADES_FIVE, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), TEMPEST_BLADES_FIVE, life.getPosition()));
-            }
-        }
-    }
-
 
     public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
