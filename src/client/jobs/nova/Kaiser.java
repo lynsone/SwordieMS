@@ -10,6 +10,7 @@ import client.jobs.Job;
 import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
+import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
 import enums.MobStat;
@@ -22,6 +23,7 @@ import util.Rect;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -100,43 +102,6 @@ public class Kaiser extends Job {
 
     public static final int REALIGN_ATTACKER_MODE_III = 61120013;
     public static final int REALIGN_DEFENDER_MODE_III = 61120010;
-
-
-    public static int getOriginalSkillByID(int skillID) {
-        switch(skillID) {
-            case DRAGON_SLASH_1_FINAL_FORM:
-                return DRAGON_SLASH_1;
-
-            case FLAME_SURGE_FINAL_FORM:
-                return FLAME_SURGE;
-
-            case IMPACT_WAVE_FINAL_FORM:
-                return IMPACT_WAVE;
-
-            case PIERCING_BLAZE_FINAL_FORM:
-                return PIERCING_BLAZE;
-
-            case WING_BEAT_FINAL_FORM:
-                return WING_BEAT;
-
-            case PRESSURE_CHAIN_FINAL_FORM:
-                return PRESSURE_CHAIN;
-
-            case GIGA_WAVE_FINAL_FORM:
-                return GIGA_WAVE;
-
-            case INFERNO_BREATH_FINAL_FORM:
-                return INFERNO_BREATH;
-
-            case DRAGON_BARRAGE_FINAL_FORM:
-                return DRAGON_BARRAGE;
-
-            case BLADE_BURST_FINAL_FORM:
-                return BLADE_BURST;
-
-        }
-        return skillID; // no original skill linked with this one
-    }
 
     private final int[] addedSkills = new int[]{
             REALIGN_ATTACKER_MODE,
@@ -228,41 +193,10 @@ public class Kaiser extends Job {
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
-                SkillInfo ram = SkillData.getSkillInfoById(getRealignLevel(skillID));
-                byte reaaslv = (byte) chr.getSkill(getRealignLevel(skillID)).getCurrentLevel();
-                o1.nOption = getRealignStats(skillID, 1);
-                o1.rOption = getRealignLevel(skillID);
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(BdR, o1);
-                o2.nOption = getRealignStats(skillID, 2);
-                o2.rOption = getRealignLevel(skillID);
-                o2.tOption = 0;
-                tsm.putCharacterStatValue(CriticalBuff, o2);
-                o3.nOption = getRealignStats(skillID, 3);
-                o3.rOption = getRealignLevel(skillID);
-                o3.tOption = 0;
-                tsm.putCharacterStatValue(PAD, o3);
+                handleRealignAttackSkill();
                 break;
             case REALIGN_DEFENDER_MODE:
-                SkillInfo rdm = SkillData.getSkillInfoById(getRealignLevel(skillID));
-                byte readslv = (byte) chr.getSkill(getRealignLevel(skillID)).getCurrentLevel();
-                o1.nOption = getRealignStats(skillID, 7);
-                o1.rOption = getRealignLevel(skillID);
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(ACC, o1);
-                o2.nOption = getRealignStats(skillID, 6);
-                o2.rOption = getRealignLevel(skillID);
-                o2.tOption = 0;
-                tsm.putCharacterStatValue(MDD, o2);
-                o3.nOption =getRealignStats(skillID, 5);
-                o3.rOption = getRealignLevel(skillID);
-                o3.tOption = 0;
-                tsm.putCharacterStatValue(PDD, o3);
-                o4.nReason = getRealignLevel(skillID);
-                o4.nValue = getRealignStats(skillID, 4);
-                o4.tStart = (int) System.currentTimeMillis();
-                o4.tTerm = 0;
-                tsm.putCharacterStatValue(IndieMHPR, o4);
+                handleRealignDefendSkill();
                 break;
             case BLAZE_ON:
                 o1.nOption = si.getValue(x, slv);
@@ -397,10 +331,7 @@ public class Kaiser extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
-                o3.nOption = 1;
-                o3.rOption = skillID;
-                o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(ViperTimeLeap, o3);   //unsure
+                //TODO Cooldown Reset
                 break;
             case STONE_DRAGON:
             case STONE_DRAGON_FINAL_FORM:
@@ -415,69 +346,41 @@ public class Kaiser extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private int getGaugeIncrement(int skillID) { //TODO  Use a Array, not Switch case
-        switch (getOriginalSkillByID(skillID)) {
-            case DRAGON_SLASH_1:
-                return 2;
-            case DRAGON_SLASH_2:
-                return 4;
-            case DRAGON_SLASH_3:
-                return 5;
-            case DRAGON_SLASH_1_FINAL_FORM:
-                return 4;
+    private int getGaugeIncrement(int skillID) {
+        HashMap<Integer, Integer> hashMapIncrement = new HashMap<>();
+        hashMapIncrement.put(DRAGON_SLASH_1, 1);
+        hashMapIncrement.put(DRAGON_SLASH_2, 3);
+        hashMapIncrement.put(DRAGON_SLASH_3, 4);
+        hashMapIncrement.put(DRAGON_SLASH_1_FINAL_FORM, 1);
 
-            case FLAME_SURGE:
-                return 7;
-            case FLAME_SURGE_FINAL_FORM:
-                return 0;
+        hashMapIncrement.put(FLAME_SURGE, 2);
+        hashMapIncrement.put(FLAME_SURGE_FINAL_FORM, 2);
 
-            case IMPACT_WAVE:
-                return 5;
-            case IMPACT_WAVE_FINAL_FORM:
-                return 0;
+        hashMapIncrement.put(IMPACT_WAVE, 5);
+        hashMapIncrement.put(IMPACT_WAVE_FINAL_FORM, 0);
 
-            case PIERCING_BLAZE:
-                return 5;
-            case PIERCING_BLAZE_FINAL_FORM:
-                return 0;
+        hashMapIncrement.put(PIERCING_BLAZE, 5);
+        hashMapIncrement.put(PIERCING_BLAZE_FINAL_FORM, 0);
 
-            case WING_BEAT:
-                return 2;
-            case WING_BEAT_FINAL_FORM:
-                return 1;
+        hashMapIncrement.put(WING_BEAT, 2);
+        hashMapIncrement.put(WING_BEAT_FINAL_FORM, 1);
 
-            case PRESSURE_CHAIN:
-                return 8;
-            case PRESSURE_CHAIN_FINAL_FORM:
-                return 0;
+        hashMapIncrement.put(PRESSURE_CHAIN, 8);
+        hashMapIncrement.put(PRESSURE_CHAIN_FINAL_FORM, 0);
 
-            case GIGA_WAVE:
-                return 8;
-            case GIGA_WAVE_FINAL_FORM:
-                return 0;
+        hashMapIncrement.put(GIGA_WAVE, 8);
+        hashMapIncrement.put(GIGA_WAVE_FINAL_FORM, 0);
 
-            case INFERNO_BREATH:
-                return 14;
-            case INFERNO_BREATH_FINAL_FORM:
-                return 0;
+        hashMapIncrement.put(INFERNO_BREATH, 14);
+        hashMapIncrement.put(INFERNO_BREATH_FINAL_FORM, 0);
 
-            case DRAGON_BARRAGE:
-                return 6;
-            case DRAGON_BARRAGE_FINAL_FORM:
-                return 0;
+        hashMapIncrement.put(DRAGON_BARRAGE, 6);
+        hashMapIncrement.put(DRAGON_BARRAGE_FINAL_FORM, 0);
 
-            case BLADE_BURST:
-                return 6;
-            case BLADE_BURST_FINAL_FORM:
-                return 0;
-        }
-        return 0;
-    }
+        hashMapIncrement.put(BLADE_BURST, 6);
+        hashMapIncrement.put(BLADE_BURST_FINAL_FORM, 0);
 
-    public void resetFlyingSwords() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        tsm.removeStat(StopForceAtomInfo, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        return hashMapIncrement.get(skillID);
     }
 
     private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
@@ -593,7 +496,7 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(getOriginalSkillByID(skillID), tsm, c, 5); //TODO change increment depending on skill (with an Array)
+            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, getGaugeIncrement(attackInfo.skillId));
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -781,123 +684,76 @@ public class Kaiser extends Job {
         return 0;
     }
 
-    private int getRealignLevel(int skillID) {
-        int realignskill = 0;
-        if (skillID == REALIGN_ATTACKER_MODE) {
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE)) {
-                realignskill =  REALIGN_ATTACKER_MODE;
-            }
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE_I)) {
-                realignskill =  REALIGN_ATTACKER_MODE_I;
-            }
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE_II)) {
-                realignskill =  REALIGN_ATTACKER_MODE_II;
-            }
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE_III)) {
-                realignskill =  REALIGN_ATTACKER_MODE_III;
-            }
-            return realignskill;
-        } else {
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE)) {
-                realignskill =  REALIGN_DEFENDER_MODE;
-            }
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE_I)) {
-                realignskill =  REALIGN_DEFENDER_MODE_I;
-            }
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE_II)) {
-                realignskill =  REALIGN_DEFENDER_MODE_II;
-            }
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE_III)) {
-                realignskill =  REALIGN_DEFENDER_MODE_III;
-            }
-            return realignskill;
-        }
-    }
-
-    private int getRealignStats(int skillID, int skillstat) {
-        SkillInfo si = SkillData.getSkillInfoById(getRealignLevel(skillID));
-        byte slv = (byte)chr.getSkill(getRealignLevel(skillID)).getCurrentLevel();
-        if (skillID == REALIGN_ATTACKER_MODE) {
-            int zPadX = 0;
-            int zCr = 0;
-            int zBdr = 0;
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE)) {
+    public void handleRealignAttackSkill() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        int[] realignattack = new int[] {
+                REALIGN_ATTACKER_MODE,
+                REALIGN_ATTACKER_MODE_I,
+                REALIGN_ATTACKER_MODE_II,
+                REALIGN_ATTACKER_MODE_III,
+        };
+        int zPadX = 0;
+        int zCr = 0;
+        int zBdR = 0;
+        for(int i = 0; i<realignattack.length; i++) {
+            if (chr.hasSkill(realignattack[i])) {
+                Skill skill = chr.getSkill(realignattack[i]);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 zPadX += si.getValue(padX, slv);
                 zCr += si.getValue(cr, slv);
-                zBdr += si.getValue(bdR, slv);
-            }
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE_I)) {
-                zPadX += si.getValue(padX, slv);
-                zCr += si.getValue(cr, slv);
-                zBdr += si.getValue(bdR, slv);
-            }
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE_II)) {
-                zPadX += si.getValue(padX, slv);
-                zCr += si.getValue(cr, slv);
-                zBdr += si.getValue(bdR, slv);
-            }
-            if(chr.hasSkill(REALIGN_ATTACKER_MODE_III)) {
-                zPadX += si.getValue(padX, slv);
-                zCr += si.getValue(cr, slv);
-                zBdr += si.getValue(bdR, slv);
-            }
-
-            if(skillstat == 1) {
-                return zPadX;
-            }
-            if(skillstat == 2) {
-                return zCr;
-            }
-            if(skillstat == 3) {
-                return zBdr;
-            } else {
-                return 0;
-            }
-        } else {
-            int zIndieMHPR = 0;
-            int zPDD = 0;
-            int zMDD = 0;
-            int zAcc = 0;
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE)) {
-                zIndieMHPR += si.getValue(indieMhpR, slv);
-                zPDD += si.getValue(pddX, slv);
-                zMDD += si.getValue(mddX, slv);
-                zAcc += si.getValue(accX, slv);
-            }
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE_I)) {
-                zIndieMHPR += si.getValue(indieMhpR, slv);
-                zPDD += si.getValue(pddX, slv);
-                zMDD += si.getValue(mddX, slv);
-                zAcc += si.getValue(accX, slv);
-            }
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE_II)) {
-                zIndieMHPR += si.getValue(indieMhpR, slv);
-                zPDD += si.getValue(pddX, slv);
-                zMDD += si.getValue(mddX, slv);
-                zAcc += si.getValue(accX, slv);
-            }
-            if(chr.hasSkill(REALIGN_DEFENDER_MODE_III)) {
-                zIndieMHPR += si.getValue(indieMhpR, slv);
-                zPDD += si.getValue(pddX, slv);
-                zMDD += si.getValue(mddX, slv);
-                zAcc += si.getValue(accX, slv);
-            }
-
-            if(skillstat == 4) {
-                return zIndieMHPR;
-            }
-            if(skillstat == 5) {
-                return zPDD;
-            }
-            if(skillstat == 6) {
-                return zMDD;
-            }
-            if(skillstat == 7) {
-                return zAcc;
-            } else {
-                return 0;
+                zBdR += si.getValue(bdR, slv);
             }
         }
+        o1.nOption = zPadX;
+        o1.rOption = REALIGN_ATTACKER_MODE;
+        tsm.putCharacterStatValue(PAD, o1);
+        o2.nOption = zCr;
+        o2.rOption = REALIGN_ATTACKER_MODE;
+        tsm.putCharacterStatValue(CriticalBuff, o2);
+        o3.nOption = zBdR;
+        o3.rOption = REALIGN_ATTACKER_MODE;
+        tsm.putCharacterStatValue(HayatoBoss, o3);
+        tsm.sendSetStatPacket();
     }
 
+    public void handleRealignDefendSkill() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        int[] realigndefend = new int[] {
+                REALIGN_DEFENDER_MODE,
+                REALIGN_DEFENDER_MODE_I,
+                REALIGN_DEFENDER_MODE_II,
+                REALIGN_DEFENDER_MODE_III,
+        };
+        int zDef = 0;
+        int zAcc = 0;
+        int zMHPR = 0;
+        for(int i = 0; i<realigndefend.length; i++) {
+            if (chr.hasSkill(realigndefend[i])) {
+                Skill skill = chr.getSkill(realigndefend[i]);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                zDef += si.getValue(pddX, slv);
+                zAcc += si.getValue(accX, slv);
+                zMHPR += si.getValue(mhpR, slv);
+            }
+        }
+        o1.nOption = zDef;
+        o1.rOption = REALIGN_DEFENDER_MODE;
+        tsm.putCharacterStatValue(PDD, o1);
+        tsm.putCharacterStatValue(MDD, o1);
+        o2.nOption = zAcc;
+        o2.rOption = REALIGN_DEFENDER_MODE;
+        tsm.putCharacterStatValue(ACC, o2);
+        o3.nOption = zMHPR;
+        o3.rOption = REALIGN_DEFENDER_MODE;
+        tsm.putCharacterStatValue(HayatoHPR, o3);
+        tsm.sendSetStatPacket();
+    }
 }

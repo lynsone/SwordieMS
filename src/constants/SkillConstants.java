@@ -581,6 +581,63 @@ public class SkillConstants {
             case 5111015: //Bucc - Static Thumper
                 return 5111012; //Bucc - Static Thumper
 
+            case 31011004: //DA - Exceed Double Slash 2
+            case 31011005: //DA - Exceed Double Slash 3
+            case 31011006: //DA - Exceed Double Slash 4
+            case 31011007: //DA - Exceed Double Slash Purple
+                return 31011000; //DA - Exceed Double Slash 1
+
+            case 31201007: //DA - Exceed Demon Strike 2
+            case 31201008: //DA - Exceed Demon Strike 3
+            case 31201009: //DA - Exceed Demon Strike 4
+            case 31201010: //DA - Exceed Demon Strike Purple
+                return 31201000; //DA - Exceed Demon Strike 1
+
+            case 31211007: //DA - Exceed Lunar Slash 2
+            case 31211008: //DA - Exceed Lunar Slash 3
+            case 31211009: //DA - Exceed Lunar Slash 4
+            case 31211010: //DA - Exceed Lunar Slash Purple
+                return 31211000; //DA - Exceed Lunar Slash 1
+
+            case 31221009: //DA - Exceed Execution 2
+            case 31221010: //DA - Exceed Execution 3
+            case 31221011: //DA - Exceed Execution 4
+            case 31221012: //DA - Exceed Execution Purple
+                return 31221000; //DA - Exceed Execution 1
+
+            case 31211002: //DA - Shield Charge (Spikes)
+                return 31211011; //DA - Shield Charge (Rush)
+
+            case 61120219: //Kaiser - Dragon Slash (Final Form)
+                return 61001000; //Kaiser - Dragon Slash 1
+
+            case 61111215: //Kaiser - Flame Surge (Final Form)
+                return 61001101; //Kaiser - Flame Surge
+
+            case 61111216: //Kaiser - Impact Wave (Final Form)
+                return 61101100; //Kaiser - Impact Wave
+
+            case 61111217: //Kaiser - Piercing Blaze (Final Form)
+                return 61101101; //Kaiser - Piercing Blaze
+
+            case 61111111: //Kaiser - Wing Beat (Final Form)
+                return 61111100; //Kaiser - Wing Beat
+
+            case 61111219: //Kaiser - Pressure Chain (Final Form)
+                return 61111101; //Kaiser - Pressure Chain
+
+            case 61121201: //Kaiser - Gigas Wave (Final Form)
+                return 61121100; //Kaiser - Gigas Wave
+
+            case 61121222: //Kaiser - Inferno Breath (Final Form)
+                return 61121105; //Kaiser - Inferno Breath
+
+            case 61121203: //Kaiser - Dragon Barrage (Final Form)
+                return 61121102; //Kaiser - Dragon Barrage
+
+            case 61121221: //Kaiser - Blade Burst (Final Form)
+                return 61121104; //Kaiser - Blade Burst
+
             default:
                 return skillID;
         }

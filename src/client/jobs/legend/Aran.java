@@ -521,13 +521,16 @@ public class Aran extends Job {
         return proc;
     }
 
-    private int getCombo() {
+    public int getCombo() {
         return combo;
     }
 
-    private void setCombo(int combo) {
+    public void setCombo(int combo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         this.combo = combo;
+        tsm.getOption(ComboAbilityBuff).nOption = getCombo();
         c.write(WvsContext.modComboResponse(getCombo()));
+
     }
 
     public void handleDrain() {
@@ -562,6 +565,4 @@ public class Aran extends Job {
             }
         }
     }
-
-
 }

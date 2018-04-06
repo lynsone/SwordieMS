@@ -76,27 +76,31 @@ public enum MobStat {
     BahamutLightElemAddDam(0x80000000, 2), // 0000 0000 | 0000 0001 | 0000 0000 | 0000 0000
     BossPropPlus(0x40000000, 2),
     MultiDamSkill(0x20000000, 2),
-    RWLiftPress(0x10000000, 2),
-    RWChoppingHammer(0x8000000, 2),
-    TimeBomb(0x4000000, 2),
-    Treasure(0x2000000, 2),
-    AddEffect(0x1000000, 2),
+    //  -Unknown START-
+    RWLiftPress(0x10000000, 2), //UNKNOWN
+    RWChoppingHammer(0x8000000, 2), //UNKNOWN
+    TimeBomb(0x4000000, 2), //UNKNOWN
+    Treasure(0x2000000, 2), //UNKNOWN
+    AddEffect(0x1000000, 2), //UNKNOWN
+    Unknown1(0x800000, 2), //UNKNOWN
+    Unknown2(0x400000, 2), //UNKNOWN
+    //  -Unknown END-
 
-    Invincible(0x800000, 2),
-    Explosion(0x400000, 2),
-    HangOver(0x200000, 2),
-    BurnedInfo(0x40000, 2), // 0x1000 -> 0x400
-    InvincibleBalog(0x40000, 2), // 0x800
-    ExchangeAttack(0x40000, 2),
-    ExtraBuffStat(0x20000, 2),
-    LinkTeam(0x10000, 2),
+    Invincible(0x200000, 2),
+    Explosion(0x100000, 2),
+    HangOver(0x80000, 2),
+    BurnedInfo(0x040000, 2), // 0x1000 -> 0x400
+    InvincibleBalog(0x20000, 2),
+    ExchangeAttack(0x10000, 2),
+    ExtraBuffStat(0x8000, 2),
+    LinkTeam(0x4000, 2),
 
-    SoulExplosion(0x8000, 2), // { Might be wrong --v
-    SeperateSoulP(0x4000, 2),
-    SeperateSoulC(0x2000, 2),
-    Ember(0x1000, 2),
-    TrueSight(0x800, 2),
-    Laser(0x400, 2),
+    SoulExplosion(0x2000, 2),
+    SeperateSoulP(0x1000, 2),
+    SeperateSoulC(0x0800, 2),
+    Ember(0x0400, 2),
+    TrueSight(0x0200, 2),
+    Laser(0x0100, 2),
     ;
 
     private int val, position;

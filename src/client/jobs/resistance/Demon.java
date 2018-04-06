@@ -11,6 +11,7 @@ import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
 import constants.JobConstants;
+import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
 import enums.MobStat;
@@ -111,6 +112,7 @@ public class Demon extends Job {
     public static final int DIABOLIC_RECOVERY = 31211004; //Buff
     public static final int WARD_EVIL = 31211003; //Buff
     public static final int ADVANCED_LIFE_SAP = 31210006; //Passive Life Drain
+    public static final int PAIN_DAMPENER = 31210005;
 
     public static final int EXCEED_EXECUTION_1 = 31221000; //Special Attack     //TODO (EXCEED System)
     public static final int EXCEED_EXECUTION_2 = 31221009; //Special Attack     //TODO (EXCEED System)
@@ -164,62 +166,7 @@ public class Demon extends Job {
             WARD_EVIL,
     };
 
-    private int[] exceed = new int[] {
-            EXCEED_DOUBLE_SLASH_1,
-            EXCEED_DOUBLE_SLASH_2,
-            EXCEED_DOUBLE_SLASH_3,
-            EXCEED_DOUBLE_SLASH_4,
-            EXCEED_DOUBLE_SLASH_PURPLE,
-
-            EXCEED_DEMON_STRIKE_1,
-            EXCEED_DEMON_STRIKE_2,
-            EXCEED_DEMON_STRIKE_3,
-            EXCEED_DEMON_STRIKE_4,
-            EXCEED_DEMON_STRIKE_PURPLE,
-
-            EXCEED_LUNAR_SLASH_1,
-            EXCEED_LUNAR_SLASH_2,
-            EXCEED_LUNAR_SLASH_3,
-            EXCEED_LUNAR_SLASH_4,
-            EXCEED_LUNAR_SLASH_PURPLE,
-
-            EXCEED_EXECUTION_1,
-            EXCEED_EXECUTION_2,
-            EXCEED_EXECUTION_3,
-            EXCEED_EXECUTION_4,
-            EXCEED_EXECUTION_PURPLE,
-    };
-
-    public static int getOriginalSkillByID(int skillID) {
-        switch(skillID) {
-            case EXCEED_DOUBLE_SLASH_2:
-            case EXCEED_DOUBLE_SLASH_3:
-            case EXCEED_DOUBLE_SLASH_4:
-            case EXCEED_DOUBLE_SLASH_PURPLE:
-                return EXCEED_DOUBLE_SLASH_1;
-
-            case EXCEED_DEMON_STRIKE_2:
-            case EXCEED_DEMON_STRIKE_3:
-            case EXCEED_DEMON_STRIKE_4:
-            case EXCEED_DEMON_STRIKE_PURPLE:
-                return EXCEED_DEMON_STRIKE_1;
-
-            case EXCEED_LUNAR_SLASH_2:
-            case EXCEED_LUNAR_SLASH_3:
-            case EXCEED_LUNAR_SLASH_4:
-            case EXCEED_LUNAR_SLASH_PURPLE:
-                return EXCEED_LUNAR_SLASH_1;
-
-            case EXCEED_EXECUTION_2:
-            case EXCEED_EXECUTION_3:
-            case EXCEED_EXECUTION_4:
-            case EXCEED_EXECUTION_PURPLE:
-                return EXCEED_EXECUTION_1;
-            case SHIELD_CHARGE:
-                return SHIELD_CHARGE_RUSH;
-        }
-        return skillID; // no original skill linked with this one
-    }
+    private long leechAuraCD = Long.MIN_VALUE;
 
     public Demon(Char chr) {
         super(chr);
@@ -268,6 +215,7 @@ public class Demon extends Job {
                     o3.tOption = si.getValue(time, slv);
                     tsm.putCharacterStatValue(ExceedOverload, o3);
                     resetExceed(c, tsm);
+                    chr.heal(chr.getMaxHP());
                 }
                 break;
 
@@ -332,10 +280,11 @@ public class Demon extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMHPR, o1);
-                o2.nOption = si.getValue(x, slv);
+                o2.nOption = 1;
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DiabolikRecovery, o2); //TODO HP regen?
+                tsm.putCharacterStatValue(DiabolikRecovery, o2);
+                handleDiabolicRecovery();
                 break;
             case MAPLE_WARRIOR_DA:
             case MAPLE_WARRIOR_DS:
@@ -460,7 +409,7 @@ public class Demon extends Job {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
-                        o1.rOption = getOriginalSkillByID(skillID);
+                        o1.rOption = SkillConstants.getActualSkillIDfromSkillID(skillID);
                         o1.tOption = 5;
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
@@ -492,18 +441,14 @@ public class Demon extends Job {
                     o1.nOption = -si.getValue(y, slv);
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.PAD, o1);
-                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
-                    mts.addStatOptionsAndBroadcast(MobStat.MAD, o1);
-                    mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
+                    mts.addStatOptions(MobStat.PAD, o1);
+                    mts.addStatOptions(MobStat.PDR, o1);
+                    mts.addStatOptions(MobStat.MAD, o1);
+                    mts.addStatOptions(MobStat.MDR, o1);
                     o2.nOption = -si.getValue(z, slv);
                     o2.rOption = skill.getSkillId();
                     o2.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.ACC, o2);
-                    o3.nOption = si.getValue(v, slv);
-                    o3.rOption = skill.getSkillId();
-                    o3.tOption = si.getValue(time, slv);
-                    //mts.addStatOptionsAndBroadcast(MobStat.X, o3); //TODO Item Drop Buff & EXP buff       //TODO unlimited duration
                 }
                 break;
             case DEMON_IMPACT:
@@ -523,7 +468,7 @@ public class Demon extends Job {
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = skill.getSkillId();
                     o1.tOption = 30;
-                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                    mts.addStatOptions(MobStat.PDR, o1);
                     mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
                 }
                 break;
@@ -587,14 +532,12 @@ public class Demon extends Job {
                 int mobID = (life).getObjectId(); //
                 int inc = ForceAtomEnum.NETHER_SHIELD.getInc();
                 int type = ForceAtomEnum.NETHER_SHIELD.getForceAtomType();
-                for(int i = 0; i<2; i++) {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                            350 + (10*i), 500, (int) System.currentTimeMillis(), 1, 0,
+                            0, 500, (int) System.currentTimeMillis(), 1, 0,
                             new Position(0, -100));
                     chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
                             life.getPosition(), NETHER_SHIELD_ATOM, life.getPosition()));
-                }
             }
         }
     }
@@ -669,6 +612,7 @@ public class Demon extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case NETHER_SHIELD:
+                    handleNetherShield();
                     handleNetherShield();
                     break;
             }
@@ -830,14 +774,18 @@ public class Demon extends Job {
                 Skill skill = chr.getSkill(LEECH_AURA);
                 byte slv = (byte) skill.getCurrentLevel();
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    int totaldmg = Arrays.stream(mai.damages).sum();
-                    int hpheal = (int) (totaldmg * ((double) 100 / si.getValue(x, slv)));
-                    if(hpheal >= (chr.getMaxHP()/4)) {
-                        hpheal = (chr.getMaxHP()/4);
+                int cd = si.getValue(y, slv) * 1000;
+                if(cd + leechAuraCD < System.currentTimeMillis()) {
+                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        int totaldmg = Arrays.stream(mai.damages).sum();
+                        int hpheal = (int) (totaldmg * ((double) 100 / si.getValue(x, slv)));
+                        if (hpheal >= (chr.getMaxHP() / 4)) {
+                            hpheal = (chr.getMaxHP() / 4);
+                        }
+                        leechAuraCD = System.currentTimeMillis();
+                        chr.heal(hpheal);
                     }
-                    chr.heal(hpheal);
                 }
             }
         }
@@ -854,6 +802,9 @@ public class Demon extends Job {
             if(chr.hasSkill(ADVANCED_LIFE_SAP)) {
                 amounthealed = SkillData.getSkillInfoById(ADVANCED_LIFE_SAP).getValue(x, chr.getSkill(ADVANCED_LIFE_SAP).getCurrentLevel());
             }
+            if(chr.hasSkill(PAIN_DAMPENER)) {
+                amounthealed -= SkillData.getSkillInfoById(PAIN_DAMPENER).getValue(x, chr.getSkill(PAIN_DAMPENER).getCurrentLevel());
+            }
             int exceedamount = tsm.getOption(OverloadCount).nOption;
             int exceedpenalty = (int) Math.floor(exceedamount / 5);
             amounthealed -= exceedpenalty;
@@ -865,4 +816,16 @@ public class Demon extends Job {
     }
 
 
+    public void handleDiabolicRecovery() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(DiabolikRecovery)) {
+            Skill skill = chr.getSkill(DIABOLIC_RECOVERY);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int recovery = si.getValue(x, slv);
+            int duration = si.getValue(w, slv);
+            chr.heal((int) (chr.getMaxHP() / ((double) 100 / recovery)));
+            EventManager.addEvent(() -> handleDiabolicRecovery(), duration, TimeUnit.SECONDS);
+        }
+    }
 }
