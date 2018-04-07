@@ -7,7 +7,6 @@ import client.shop.NpcShopItem;
 import constants.ServerConstants;
 import dsl.SWEntity;
 import dsl.SWParser;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import util.FileTime;
 import util.Util;
@@ -372,8 +371,8 @@ public class NpcData {
     }
 
     public static void generateDatFiles() {
-//        loadNpcsFromWz();
-//        saveNpcsToDat(ServerConstants.DAT_DIR + "/npc");
+        loadNpcsFromWz();
+        saveNpcsToDat(ServerConstants.DAT_DIR + "/npc");
         loadShopsFromSw();
         saveShopsToDat(ServerConstants.DAT_DIR + "/shop");
     }
