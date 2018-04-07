@@ -12,6 +12,7 @@ import client.jobs.legend.Evan;
 import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.Summon;
+import client.trunk.TrunkDlg;
 import connection.OutPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
@@ -626,6 +627,15 @@ public class CField {
 
         outPacket.encodeByte(fe.getType().getVal());
         fe.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket trunkDlg(TrunkDlg trunkDlg) {
+        OutPacket outPacket = new OutPacket(OutHeader.TRUNK_DLG);
+
+        outPacket.encodeByte(trunkDlg.getType().getVal());
+        trunkDlg.encode(outPacket);
 
         return outPacket;
     }

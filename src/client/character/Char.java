@@ -663,14 +663,6 @@ public class Char {
                 outPacket.encodeLong(0);
             }
         }
-//        if (mask.isInMask(DBChar.Unsure)) {
-//            int val = 0;
-//            outPacket.encodeInt(val);
-//            for (int i = 0; i < val; i++) {
-//                new FileTime(0).encode(outPacket);
-//                outPacket.encodeLong(0);
-//            }
-//        }
         if (mask.isInMask(DBChar.ItemPot)) {
             boolean hasItemPot = getItemPots() != null;
             outPacket.encodeByte(hasItemPot);
@@ -997,11 +989,6 @@ public class Char {
             }
         }
         outPacket.encodeByte(0); // idk
-        // MonsterLifeInviteInfo
-//        int sizeInt = 0;
-//        for(int i = 0; i < sizeInt; i++) {
-//            getMonsterLifeInviteInfo().encode(outPacket);
-//        }
 //        outPacket.encodeArr(Util.getByteArrayByString("01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
         if (mask.isInMask(DBChar.Character)) {
             outPacket.encodeInt(0); // honor level
@@ -2652,5 +2639,9 @@ public class Char {
         for(DamageSkinSaveData dssd : getAccount().getDamageSkins()) {
             dssd.encode(outPacket);
         }
+    }
+
+    public boolean canAddMoney(long reqMoney) {
+        return getMoney() + reqMoney > 0 && getMoney() + reqMoney < GameConstants.MAX_MONEY;
     }
 }

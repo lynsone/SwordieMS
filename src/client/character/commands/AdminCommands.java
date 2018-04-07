@@ -42,14 +42,21 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            OutPacket outPacket = new OutPacket(OutHeader.CHAT_FRIEND_CHAT_MESSAGE);
-            outPacket.encodeInt(1); // unused
-            outPacket.encodeInt(5);
-            outPacket.encodeInt(2);
-            outPacket.encodeFT(System.currentTimeMillis());
-            outPacket.encodeString("Hoi!");
+            OutPacket outPacket = new OutPacket(OutHeader.TRUNK_DLG);
+
+            outPacket.encodeByte(22);
+            outPacket.encodeInt(1012009);
+            outPacket.encodeByte(20);
+            outPacket.encodeLong(DBChar.All.get());
+            outPacket.encodeLong(1337);
+            outPacket.encodeByte(1);
+            ItemData.getEquipDeepCopyFromId(1472001).encode(outPacket);
             outPacket.encodeByte(0);
-            chr.getChatClient().write(outPacket);
+            outPacket.encodeByte(0);
+            outPacket.encodeByte(0);
+            outPacket.encodeByte(0);
+
+            chr.write(outPacket);
         }
     }
 

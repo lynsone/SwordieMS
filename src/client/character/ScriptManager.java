@@ -14,6 +14,7 @@ import client.life.Mob;
 import client.party.Party;
 import client.party.PartyMember;
 import client.shop.NpcShopDlg;
+import client.trunk.TrunkOpen;
 import constants.GameConstants;
 import constants.ItemConstants;
 import constants.ServerConstants;
@@ -709,5 +710,9 @@ public class ScriptManager implements Observer {
             chr.write(WvsContext.questRecordMessage(q));
         }
         return error == null;
+    }
+
+    public void openTrunk(int npcTemplateID) {
+        chr.write(CField.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
     }
 }

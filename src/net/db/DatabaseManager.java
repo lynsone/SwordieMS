@@ -14,6 +14,7 @@ import client.guild.Guild;
 import client.guild.GuildMember;
 import client.guild.GuildRequestor;
 import client.guild.GuildSkill;
+import client.trunk.Trunk;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -67,6 +68,7 @@ public class DatabaseManager {
                 Friend.class,
                 Macro.class,
                 DamageSkinSaveData.class,
+                Trunk.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

@@ -87,6 +87,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_ACTIVATE_NICK_ITEM:
                     WorldHandler.handleUserActiveNickItem(c, inPacket);
                     break;
+                case USER_TRUNK_REQUEST:
+                    WorldHandler.handleUserTrunkRequest(c, inPacket);
+                    break;
                 case FRIEND_REQUEST:
                     WorldHandler.handleFriendRequest(c, inPacket);
                     break;

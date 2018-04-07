@@ -40,6 +40,14 @@ DROP TABLE IF EXISTS guildskills;
 DROP TABLE IF EXISTS guildskill;
 DROP TABLE IF EXISTS guilds;
 DROP TABLE IF EXISTS filetimes;
+DROP TABLE IF EXISTS trunks;
+
+CREATE TABLE trunks(
+	id int not null auto_increment,
+    slotcount tinyint,
+    money bigint,
+    primary key (id)
+);
 
 CREATE TABLE filetimes (
 	id int NOT NULL AUTO_INCREMENT,
@@ -93,7 +101,8 @@ CREATE TABLE inventories (
 
 CREATE TABLE items (
 	id bigint NOT NULL AUTO_INCREMENT,
-    inventoryId int,
+    inventoryId int, # item can be inside an inventory OR storage, so cannot be a foreign key :(
+    trunkID int,
     itemId int,
     bagIndex int,
     cashItemSerialNumber bigint,
@@ -103,8 +112,7 @@ CREATE TABLE items (
     isCash boolean,
     quantity int,
     owner varchar(255),
-    PRIMARY KEY (id),
-    FOREIGN KEY (inventoryId) REFERENCES inventories(id)  on delete cascade
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE equips (
@@ -546,7 +554,9 @@ CREATE TABLE accounts (
 	characterSlots int DEFAULT 4,
 	creationDate long,
     lastLoggedIn varchar(255),
-	PRIMARY KEY (id)
+    trunkID int,
+	PRIMARY KEY (id),
+    foreign key (trunkID) references trunks(id)
 );
 
 CREATE TABLE damageskinsavedatas (

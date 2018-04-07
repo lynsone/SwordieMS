@@ -33,6 +33,9 @@ import client.party.*;
 import client.shop.MsgShopResult;
 import client.shop.NpcShopDlg;
 import client.shop.NpcShopItem;
+import client.trunk.Trunk;
+import client.trunk.TrunkUpdate;
+import client.trunk.TrunkMsg;
 import connection.InPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
@@ -3041,6 +3044,77 @@ public class WorldHandler {
         }
         if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
             Warrior.handleHexOfTheEvilEye(chr);
+        }
+    }
+
+    public static void handleUserTrunkRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Trunk trunk = chr.getAccount().getTrunk();
+        byte req = inPacket.decodeByte();
+        TrunkType trunkType = TrunkType.getByVal(req);
+        if(trunkType == null) {
+            log.error(String.format("Unknown trunk request type %d.", req));
+            return;
+        }
+        switch(trunkType) {
+            case TrunkReq_Money:
+                long reqMoney = inPacket.decodeLong();
+                boolean put = reqMoney < 0;
+                long curMoney = chr.getMoney();
+                if(put) {
+                    reqMoney = -reqMoney;
+                    if (reqMoney > curMoney && trunk.canAddMoney(reqMoney)) {
+                        chr.write(CField.trunkDlg(new TrunkMsg(TrunkType.TrunkRes_PutNoMoney)));
+                        return;
+                    }
+                    trunk.addMoney(reqMoney);
+                    chr.deductMoney(reqMoney);
+                    chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_MoneySuccess, trunk)));
+                } else {
+                    if(reqMoney <= trunk.getMoney() && chr.canAddMoney(reqMoney)) {
+                        trunk.addMoney(-reqMoney);
+                        chr.addMoney(reqMoney);
+                        chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_MoneySuccess, trunk)));
+                    } else {
+                        chr.write(CField.trunkDlg(new TrunkMsg(TrunkType.TrunkRes_GetNoMoney)));
+                    }
+                }
+                break;
+            case TrunkReq_GetItem:
+                short pos = (short) (inPacket.decodeShort() - 1);
+                if(pos >= 0 && pos < trunk.getItems().size()) {
+                    Item getItem = trunk.getItems().get(pos);
+                    if(chr.getInventoryByType(getItem.getInvType()).canPickUp(getItem)) {
+                        trunk.removeItem(getItem);
+                        chr.addItemToInventory(getItem);
+                        chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_GetSuccess, trunk)));
+                    } else {
+                        chr.write(CField.trunkDlg(new TrunkMsg(TrunkType.TrunkRes_PutNoSpace)));
+                    }
+                } else {
+                    chr.write(CField.trunkDlg(new TrunkMsg(TrunkType.TrunkRes_GetUnknown)));
+                }
+                break;
+            case TrunkReq_PutItem:
+                short slot = inPacket.decodeShort();
+                int itemID = inPacket.decodeInt();
+                short quantity = inPacket.decodeShort();
+                InvType invType = ItemConstants.getInvTypeByItemID(itemID);
+                Item item = chr.getInventoryByType(invType).getItemBySlot(slot);
+                if(item != null && quantity > 0 && item.getQuantity() >= quantity && item.getItemId() == itemID) {
+                    chr.consumeItem(itemID, quantity);
+                    trunk.addItem(item, quantity);
+                    chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_PutSuccess, trunk)));
+                } else {
+                    chr.write(CField.trunkDlg(new TrunkMsg(TrunkType.TrunkRes_PutUnknown)));
+                }
+                break;
+            case TrunkReq_SortItem:
+//                trunk.getItems().sort(Comparator.comparingInt(Item::getItemId));
+                chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_SortItem, trunk)));
+                break;
+            default:
+                log.error(String.format("Unhandled trunk request type %s.", trunkType));
         }
     }
 }

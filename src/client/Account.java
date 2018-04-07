@@ -3,6 +3,7 @@ package client;
 import client.character.Char;
 import client.character.DamageSkinSaveData;
 import client.friend.Friend;
+import client.trunk.Trunk;
 import connection.OutPacket;
 import constants.ItemConstants;
 import enums.PicStatus;
@@ -45,6 +46,9 @@ public class Account {
     private String pic;
     private int characterSlots;
     private long creationDate;
+    @JoinColumn(name = "trunkID")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Trunk trunk;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ownerAccID")
     private List<Friend> friends;
@@ -80,6 +84,7 @@ public class Account {
         this.characterSlots = characterSlots;
         this.creationDate = creationDate;
         friends = new ArrayList<>();
+        trunk = new Trunk((byte) 20);
         setManager();
     }
 
@@ -363,5 +368,16 @@ public class Account {
 
     public DamageSkinSaveData getDamageSkinByItemID(int itemID) {
         return getDamageSkins().stream().filter(d -> d.getItemID() == itemID).findAny().orElse(null);
+    }
+
+    public Trunk getTrunk() {
+        if(trunk == null) {
+            trunk = new Trunk((byte) 20);
+        }
+        return trunk;
+    }
+
+    public void setTrunk(Trunk trunk) {
+        this.trunk = trunk;
     }
 }
