@@ -1,8 +1,13 @@
 package client;
 
 import client.character.Char;
+import client.character.DamageSkinSaveData;
 import client.friend.Friend;
+import connection.OutPacket;
+import constants.ItemConstants;
 import enums.PicStatus;
+import loaders.StringData;
+import net.db.DatabaseManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.Cascade;
@@ -43,9 +48,12 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ownerAccID")
     private List<Friend> friends;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "accID")
+    private List<DamageSkinSaveData> damageSkins = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "accId")
+    @JoinColumn(name = "accID")
     private List<Char> characters = new ArrayList<>();
     private String lastLoggedIn;
     @Transient
@@ -185,19 +193,7 @@ public class Account {
     }
 
     public static Account getFromDBById(int accountId) {
-        Account account = null;
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction transaction = session.beginTransaction();
-        String query = "FROM " + Account.class.getName() + " WHERE id = :id";
-        Query sql = session.createQuery(query);
-        sql.setParameter("id", accountId);
-        List list = sql.list();
-        if(list.size() > 0) {
-            account = (Account) list.get(0);
-        }
-        transaction.commit();
-        session.close();
-        return account;
+        return (Account) DatabaseManager.getObjFromDB(Account.class, accountId);
     }
 
     public List<Char> getCharacters() {
@@ -315,7 +311,7 @@ public class Account {
     }
 
     public void removeFriend(Friend f) {
-        if(f != null && getFriends().contains(f)) {
+        if(f != null) {
             getFriends().remove(f);
         }
     }
@@ -334,5 +330,38 @@ public class Account {
 
     public void setCurrentChr(Char currentChr) {
         this.currentChr = currentChr;
+    }
+
+    public List<DamageSkinSaveData> getDamageSkins() {
+        return damageSkins;
+    }
+
+    public void setDamageSkins(List<DamageSkinSaveData> damageSkins) {
+        this.damageSkins = damageSkins;
+    }
+
+    public void addDamageSkin(DamageSkinSaveData dssd) {
+        if(getDamageSkinByItemID(dssd.getItemID()) == null) {
+            getDamageSkins().add(dssd);
+        }
+    }
+
+    public void removeDamageSkin(DamageSkinSaveData dssd) {
+        if(dssd != null) {
+            getDamageSkins().remove(dssd);
+        }
+    }
+
+    public void removeDamageSkin(int itemID) {
+        removeDamageSkin(getDamageSkinByItemID(itemID));
+    }
+
+    public void addDamageSkinByItemID(int itemID) {
+        addDamageSkin(new DamageSkinSaveData(ItemConstants.getDamageSkinIDByItemID(itemID), itemID, false,
+                StringData.getItemStringById(itemID)));
+    }
+
+    public DamageSkinSaveData getDamageSkinByItemID(int itemID) {
+        return getDamageSkins().stream().filter(d -> d.getItemID() == itemID).findAny().orElse(null);
     }
 }

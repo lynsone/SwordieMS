@@ -5,8 +5,10 @@ import client.character.Char;
 import client.guild.Guild;
 import client.party.Party;
 import enums.ServerStatus;
+import net.db.DatabaseManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.boot.model.relational.Database;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -148,16 +150,7 @@ public class World {
     }
 
     public Guild loadGuildFromDB(int id) {
-        Guild res;
-        Session s = Server.getInstance().getNewDatabaseSession();
-        Transaction t = s.beginTransaction();
-        res = s.get(Guild.class, id);
-        t.commit();
-        s.close();
-        if(res != null) {
-            getGuilds().put(id, res);
-        }
-        return res;
+        return (Guild) DatabaseManager.getObjFromDB(Guild.class, id);
     }
 
     public int getPartyIdAndIncrement() {

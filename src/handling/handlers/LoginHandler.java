@@ -281,11 +281,7 @@ public class LoginHandler {
         String pic = inPacket.decodeString();
         c.getAccount().setPic(pic);
         // Update in DB
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction t = session.beginTransaction();
-        session.update(c.getAccount());
-        t.commit();
-        session.close();
+        DatabaseManager.saveToDB(c.getAccount());
         byte worldId = c.getWorldId();
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);

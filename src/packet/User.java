@@ -27,7 +27,7 @@ public class User {
         OutPacket outPacket = new OutPacket(OutHeader.SET_DAMAGE_SKIN);
 
         outPacket.encodeInt(chr.getId());
-        outPacket.encodeInt(chr.getDamageSkin());
+        outPacket.encodeInt(chr.getDamageSkin().getDamageSkinID());
 
         return outPacket;
     }
@@ -36,7 +36,7 @@ public class User {
         OutPacket outPacket = new OutPacket(OutHeader.SET_PREMIUM_DAMAGE_SKIN);
 
         outPacket.encodeInt(chr.getId());
-        outPacket.encodeInt(chr.getPremiumDamageSkin());
+        outPacket.encodeInt(chr.getPremiumDamageSkin().getDamageSkinID());
 
         return outPacket;
     }

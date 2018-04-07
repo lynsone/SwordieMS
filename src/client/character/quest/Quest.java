@@ -62,16 +62,6 @@ public class Quest {
         this.QRKey = QRKey;
     }
 
-    public String getQRValue() {
-        StringBuilder sb = new StringBuilder();
-        for(QuestProgressRequirement qpr : getProgressRequirements()) {
-            if(qpr instanceof QuestValueRequirement) {
-                sb.append(Util.leftPaddedString(3, '0', ((QuestValueRequirement) qpr).getValue()));
-            }
-        }
-        return sb.toString();
-    }
-
     public QuestStatus getStatus() {
         return status;
     }
@@ -178,7 +168,7 @@ public class Quest {
         }
     }
 
-    public String getQrValue() {
+    public String getQRValue() {
         if(qrValue != null && !qrValue.equalsIgnoreCase("")) {
             return qrValue;
         } else {

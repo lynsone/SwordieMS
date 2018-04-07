@@ -963,7 +963,7 @@ public enum InHeader {
     COPY_CHARACTER_TO_TEST_REQUEST(1114),
     NO(1115),
 
-
+    TRUNK(1308),
 
     ;
     /**

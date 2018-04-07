@@ -35,7 +35,6 @@ public class Hayato extends Job {
     public static final int MASTER_OF_BLADES = 40010000;
     public static final int SHIMADA_HEART = 40010067;
 
-
     public static final int BATTOUJUTSU_ADVANCE = 41001010; //not sure what this skill does
 
     public static final int KATANA_BOOSTER = 41101005; //Buff
@@ -120,7 +119,7 @@ public class Hayato extends Job {
                         return;
                     } else {
                         swordEnergy -= 150;
-                        c.write(UserLocal.ModHayatoCombo(swordEnergy));
+                        c.write(UserLocal.modHayatoCombo(swordEnergy));
                     }
                 }
                 if(tsm.getOption(HayatoStance).nOption == 0) {
@@ -236,7 +235,6 @@ public class Hayato extends Job {
         Skill skill = chr.getSkill(attackInfo.skillId);
         int skillID = 0;
         SkillInfo si = null;
-        chr.chatMessage(ChatMsgColour.CYAN, "Attack Speed:" + attackInfo.attackSpeed);
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
         int slv = 0;
         if (skill != null) {
@@ -299,7 +297,7 @@ public class Hayato extends Job {
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
                     c.write(WvsContext.temporaryStatSet(tsm));
                     swordEnergy = 0;
-                    c.write(UserLocal.ModHayatoCombo(swordEnergy));
+                    c.write(UserLocal.modHayatoCombo(swordEnergy));
                 }
                 break;
             case HITOKIRI_STRIKE:
@@ -387,8 +385,7 @@ public class Hayato extends Job {
                         swordEnergy += 2;
                     }
                 }
-
-                c.write(UserLocal.ModHayatoCombo(swordEnergy));
+                c.write(UserLocal.modHayatoCombo(swordEnergy));
             }
         }
     }

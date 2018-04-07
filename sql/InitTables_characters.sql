@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS damageskinsavedatas;
 DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS macroSkills;
@@ -405,7 +406,7 @@ CREATE TABLE guilds (
 
 CREATE TABLE characters (
 	id int NOT NULL AUTO_INCREMENT,
-    accId int,
+    accID int,
 	avatarData int,
     equippedInventory int,
     equipInventory int,
@@ -546,6 +547,17 @@ CREATE TABLE accounts (
 	creationDate long,
     lastLoggedIn varchar(255),
 	PRIMARY KEY (id)
+);
+
+CREATE TABLE damageskinsavedatas (
+	id bigint not null auto_increment,
+    damageSkinID int,
+    itemID int,
+    notSave boolean,
+    description varchar(255),
+    accID int,
+    primary key (id),
+    foreign key (accID) references accounts(id) on delete cascade
 );
 
 CREATE TABLE friends (

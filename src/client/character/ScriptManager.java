@@ -1,5 +1,6 @@
 package client.character;
 
+import client.Account;
 import client.character.items.Inventory;
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
@@ -13,15 +14,13 @@ import client.life.Mob;
 import client.party.Party;
 import client.party.PartyMember;
 import client.shop.NpcShopDlg;
+import constants.GameConstants;
 import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.*;
 import loaders.*;
 import org.apache.log4j.LogManager;
-import packet.CField;
-import packet.ScriptMan;
-import packet.ShopDlg;
-import packet.WvsContext;
+import packet.*;
 import util.FileTime;
 import util.Position;
 import util.Util;
@@ -121,7 +120,7 @@ public class ScriptManager implements Observer {
                 scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
         boolean exists = new File(dir).exists();
         if (!exists) {
-            log.error(String.format("[Error] Could not find script %s/%s.", scriptType.toString().toLowerCase(), name));
+            log.error(String.format("[Error] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
             chr.chatMessage(YELLOW, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
             dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
                     scriptType.toString().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
@@ -673,5 +672,42 @@ public class ScriptManager implements Observer {
             chat(String.format("Could not find shop with id %d.", shopID));
             log.error(String.format("Could not find shop with id %d.", shopID));
         }
+    }
+
+    public void consumeItem(int itemID) {
+        chr.consumeItem(itemID, 1);
+    }
+
+    public void consumeItem(int itemID, int amount) {
+        chr.consumeItem(itemID, amount);
+    }
+
+    public boolean addDamageSkin(int itemID) {
+        Account acc = chr.getAccount();
+        DamageSkinType error = null;
+        if(acc.getDamageSkins().size() >= GameConstants.DAMAGE_SKIN_MAX_SIZE) {
+            error = DamageSkinType.DamageSkinSave_Fail_SlotCount;
+        } else if(acc.getDamageSkinByItemID(itemID) != null) {
+//            error = DamageSkinType.DamageSkinSave_Fail_AlreadyExist;
+        }
+        if(error != null) {
+            chr.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_Reg, error, null));
+        } else {
+            QuestManager qm = chr.getQuestManager();
+            Quest q = qm.getQuests().getOrDefault(7291, null);
+            if(q == null) {
+                q = new Quest(7291, QuestStatus.STARTED);
+                qm.addQuest(q);
+            }
+            DamageSkinSaveData dssd = DamageSkinSaveData.getByItemID(itemID);
+            q.setQrValue(String.valueOf(dssd.getDamageSkinID()));
+            acc.addDamageSkin(dssd);
+            chr.setDamageSkin(dssd);
+            chr.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_Reg,
+                    DamageSkinType.DamageSkinSave_Success, chr));
+//            chr.write(User.setDamageSkin(chr));
+            chr.write(WvsContext.questRecordMessage(q));
+        }
+        return error == null;
     }
 }
