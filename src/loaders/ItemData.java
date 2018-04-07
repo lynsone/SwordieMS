@@ -464,6 +464,8 @@ public class ItemData {
             itemInfo.setMobID(dataInputStream.readInt());
             itemInfo.setNpcID(dataInputStream.readInt());
             itemInfo.setLinkedID(dataInputStream.readInt());
+            itemInfo.setScript(dataInputStream.readUTF());
+            itemInfo.setScriptNPC(dataInputStream.readInt());
             short size = dataInputStream.readShort();
             for (int i = 0; i < size; i++) {
                 ScrollStat ss = ScrollStat.getScrollStatByString(dataInputStream.readUTF());
@@ -514,6 +516,8 @@ public class ItemData {
                 dataOutputStream.writeInt(ii.getMobID());
                 dataOutputStream.writeInt(ii.getNpcID());
                 dataOutputStream.writeInt(ii.getLinkedID());
+                dataOutputStream.writeUTF(ii.getScript());
+                dataOutputStream.writeInt(ii.getScriptNPC());
                 dataOutputStream.writeShort(ii.getScrollStats().size());
                 for (Map.Entry<ScrollStat, Integer> entry : ii.getScrollStats().entrySet()) {
                     dataOutputStream.writeUTF(entry.getKey().toString());
@@ -965,6 +969,10 @@ public class ItemData {
                             switch (name) {
                                 case "script":
                                     item.setScript(value);
+                                    break;
+                                case "npc":
+                                    item.setScriptNPC(Integer.parseInt(value));
+                                    break;
                                 default:
                                     SpecStat ss = SpecStat.getSpecStatByName(name);
                                     if (ss != null && value != null) {

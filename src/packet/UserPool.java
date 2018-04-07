@@ -59,7 +59,7 @@ public class UserPool {
         outPacket.encodeInt(chr.getActiveEffectItemID());
         outPacket.encodeInt(chr.getMonkeyEffectItemID());
         outPacket.encodeInt(chr.getActiveNickItemID());
-        outPacket.encodeInt(chr.getDamageSkin());
+        outPacket.encodeInt(chr.getDamageSkin().getDamageSkinID());
         outPacket.encodeInt(0); // ptPos.x?
         outPacket.encodeInt(al.getDemonWingID());
         outPacket.encodeInt(al.getKaiserWingID());

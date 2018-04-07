@@ -111,6 +111,10 @@ public class WorldHandler {
         chr.setBulletIDForAttack(chr.calculateBulletIDForAttack());
         c.write(WvsContext.friendResult(new LoadFriendResult(chr.getAllFriends())));
         c.write(WvsContext.macroSysDataInit(chr.getMacros()));
+        c.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_SendInfo, null, chr));
+        if(chr.getQuestManager().hasQuestInProgress(7291)) { // damage skin update
+            c.write(WvsContext.questRecordMessage(chr.getQuestManager().getQuests().get(7291)));
+        }
     }
 
     public static void handleMove(Client c, InPacket inPacket) {
@@ -1419,7 +1423,7 @@ public class WorldHandler {
     }
 
     public static void handleRequestArrowPlatterObj(Client c, InPacket inPacket) {
-
+        // TODO
     }
 
     public static void handleUserCharacterInfoRequest(Client c, InPacket inPacket) {
@@ -1848,11 +1852,11 @@ public class WorldHandler {
         //TODO
     }
 
-    public static void handleUserActivateDanageSkin(Client c, InPacket inPacket) {
+    public static void handleUserActivateDamageSkin(Client c, InPacket inPacket) {
         int damageSkin = inPacket.decodeInt();
         Char chr = c.getChr();
         chr.setDamageSkin(damageSkin);
-        c.write(User.setDamageSkin(chr));
+//        c.write(User.setDamageSkin(chr));
     }
 
 
@@ -2221,7 +2225,12 @@ public class WorldHandler {
             chr.dispose();
             return;
         }
-        chr.getScriptManager().startScript(itemID, itemID + ".py", ScriptType.ITEM);
+        String script = String.valueOf(itemID);
+        ItemInfo ii = ItemData.getItemInfoByID(itemID);
+        if(ii.getScript() != null && !"".equals(ii.getScript())) {
+            script = ii.getScript();
+        }
+        chr.getScriptManager().startScript(itemID, script, ScriptType.ITEM);
         chr.dispose();
     }
 
@@ -2540,11 +2549,7 @@ public class WorldHandler {
         switch(grt) {
             case AcceptJoinRequest:
                 int guildID = inPacket.decodeInt();
-                Session s = Server.getInstance().getNewDatabaseSession();
-                Transaction t = s.beginTransaction();
-                guild = s.get(Guild.class, guildID);
-                t.commit();
-                s.close();
+                guild = (Guild) DatabaseManager.getObjFromDB(Guild.class, guildID);
                 if(guild != null && chr.getGuild() == null) {
                     guild.addMember(chr);
                     guild.broadcast(WvsContext.guildResult(
@@ -2555,8 +2560,8 @@ public class WorldHandler {
                 break;
             case Create:
                 String name = inPacket.decodeString();
-                s = Server.getInstance().getNewDatabaseSession();
-                t = s.beginTransaction();
+                Session s = Server.getInstance().getNewDatabaseSession();
+                Transaction t = s.beginTransaction();
                 Query q = s.createQuery("FROM Guild WHERE name = ?");
                 q.setParameter(0, name);
                 List<Guild> guilds = q.list();

@@ -13,7 +13,9 @@ import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.Summon;
 import connection.OutPacket;
+import constants.GameConstants;
 import constants.ItemConstants;
+import constants.ServerConstants;
 import constants.SkillConstants;
 import enums.*;
 import handling.OutHeader;
@@ -347,8 +349,8 @@ public class CField {
             marriage.encode(outPacket);
         }
         outPacket.encodeByte(0); // size(byte) of productSkill(Professions)(short); stuff like mining, herblore, etc...
-        outPacket.encodeString("-");
-        outPacket.encodeString("");
+        outPacket.encodeString("Community");
+        outPacket.encodeString("Alliance");
         outPacket.encodeByte(-1); // Forced pet IDx
         outPacket.encodeByte(0); // User state (?)
         outPacket.encodeByte(false); // pet activated
@@ -358,22 +360,9 @@ public class CField {
         Equip medal = (Equip) chr.getEquippedItemByBodyPart(BodyPart.MEDAL);
         outPacket.encodeInt(medal == null ? 0 : medal.getItemId());
         outPacket.encodeShort(0); // medal size
-        // for each medal, encode stuff (check ida)
+        // for each medal, encode int (itemID) and complete time (FT)
         // End MedalAchievementInfo::Decode
-        // DamageSkinSaveInfo::Decode
-        outPacket.encodeByte(1); // size
-        // check ida for structure
-        outPacket.encodeInt(0);
-        outPacket.encodeInt(2431965);
-        outPacket.encodeByte(0);
-        outPacket.encodeString("This is a basic Damage Skin.\r\n\r\n\r\n\r\n\r\n");
-        outPacket.encodeInt(-1);
-        outPacket.encodeInt(0);
-        outPacket.encodeByte(1);;
-        outPacket.encodeString("");
-        outPacket.encodeShort(0);
-        outPacket.encodeShort(0);
-        // End DamageSkinSaveInfo::Decode
+        chr.encodeDamageSkins(outPacket);
         outPacket.encodeByte(cs.getNonCombatStatDayLimit().getCharisma());
         outPacket.encodeByte(cs.getNonCombatStatDayLimit().getInsight());
         outPacket.encodeByte(cs.getNonCombatStatDayLimit().getWill());

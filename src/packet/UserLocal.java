@@ -1,8 +1,12 @@
 package packet;
 
+import client.character.Char;
+import client.character.DamageSkinSaveData;
 import client.character.skills.LarknessManager;
 import connection.OutPacket;
+import constants.GameConstants;
 import enums.ChatMsgColour;
+import enums.DamageSkinType;
 import handling.OutHeader;
 
 /**
@@ -86,11 +90,26 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket ModHayatoCombo(int amount) {
+    public static OutPacket modHayatoCombo(int amount) {
         OutPacket outPacket = new OutPacket(OutHeader.MOD_HAYATO_COMBO);
 
         outPacket.encodeInt(amount);
 
+        return outPacket;
+    }
+
+    public static OutPacket damageSkinSaveResult(DamageSkinType req, DamageSkinType res, Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.DAMAGE_SKIN_SAVE_RESULT);
+
+        outPacket.encodeByte(req.getVal());
+        if(req.getVal() <= 2) {
+            outPacket.encodeByte(res.getVal());
+            if(res == DamageSkinType.DamageSkinSave_Success) {
+                chr.encodeDamageSkins(outPacket);
+            }
+        } else if(req == DamageSkinType.DamageSkinSaveReq_SendInfo) {
+            chr.encodeDamageSkins(outPacket);
+        }
         return outPacket;
     }
 }

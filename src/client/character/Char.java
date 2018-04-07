@@ -29,16 +29,13 @@ import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
 import handling.handlers.ChatHandler;
-import loaders.FieldData;
-import loaders.ItemInfo;
-import loaders.SkillData;
+import loaders.*;
 import net.db.DatabaseManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import packet.*;
 import server.Server;
 import util.FileTime;
-import loaders.ItemData;
 import util.Position;
 import util.Rect;
 
@@ -47,7 +44,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static enums.ChatMsgColour.GAME_MESSAGE;
-import static enums.ChatMsgColour.YELLOW;
 import static enums.FieldInstanceType.*;
 import static enums.InvType.EQUIP;
 import static enums.InvType.EQUIPPED;
@@ -165,9 +161,9 @@ public class Char {
     @Transient
     private int nickItem;
     @Transient
-    private int damageSkin;
+    private DamageSkinSaveData damageSkin = new DamageSkinSaveData(18, 2433063, false, "Je moeder");
     @Transient
-    private int premiumDamageSkin;
+    private DamageSkinSaveData premiumDamageSkin = new DamageSkinSaveData();
     @Transient
     private boolean partyInvitable;
     @Transient
@@ -324,13 +320,7 @@ public class Char {
 
     }
     public static Char getFromDBById(int userId) {
-        Char chr;
-        Session session = Server.getInstance().getNewDatabaseSession();
-        Transaction transaction = session.beginTransaction();
-        chr = session.get(Char.class, userId);
-        transaction.commit();
-        session.close();
-        return chr;
+        return (Char) DatabaseManager.getObjFromDB(Char.class, userId);
     }
 
     public AvatarData getAvatarData() {
@@ -1790,7 +1780,7 @@ public class Char {
         toField.addChar(this);
         fixBuggedItems();
         getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
-                (byte) portal.getId(), false, 100, null, true, -1));
+                (byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
         if(characterData) {
             if(getGuild() != null) {
                 write(WvsContext.guildResult(new GuildUpdate(getGuild())));
@@ -1855,7 +1845,7 @@ public class Char {
         }
         long newExp = curExp + amount;
         Map<Stat, Object> stats = new HashMap<>();
-        while (newExp > GameConstants.charExp[level]) {
+        while (newExp >= GameConstants.charExp[level]) {
             newExp -= GameConstants.charExp[level];
             addStat(Stat.level, 1);
             stats.put(Stat.level, (byte) getStat(Stat.level));
@@ -1908,20 +1898,30 @@ public class Char {
         this.nickItem = nickItem;
     }
 
-    public void setDamageSkin(int damageSkin) {
+    public void setDamageSkin(int itemID) {
+        setDamageSkin(new DamageSkinSaveData(ItemConstants.getDamageSkinIDByItemID(itemID), itemID, false,
+                StringData.getItemStringById(itemID)));
+    }
+
+    public void setDamageSkin(DamageSkinSaveData damageSkin) {
         this.damageSkin = damageSkin;
     }
 
-    public int getDamageSkin() {
+    public DamageSkinSaveData getDamageSkin() {
         return damageSkin;
     }
 
-    public int getPremiumDamageSkin() {
+    public DamageSkinSaveData getPremiumDamageSkin() {
         return premiumDamageSkin;
     }
 
-    public void setPremiumDamageSkin(int premiumDamageSkin) {
+    public void setPremiumDamageSkin(DamageSkinSaveData premiumDamageSkin) {
         this.premiumDamageSkin = premiumDamageSkin;
+    }
+
+    public void setPremiumDamageSkin(int itemID) {
+        setPremiumDamageSkin(new DamageSkinSaveData(ItemConstants.getDamageSkinIDByItemID(itemID), itemID, false,
+                StringData.getItemStringById(itemID)));
     }
 
     public void setPartyInvitable(boolean partyInvitable) {
@@ -2640,5 +2640,17 @@ public class Char {
 
     public void setMacros(List<Macro> macros) {
         this.macros = macros;
+    }
+
+    public void encodeDamageSkins(OutPacket outPacket) {
+        outPacket.encodeByte(true); // hasDamageSkins. Always true in this design.
+        // check ida for structure
+        getDamageSkin().encode(outPacket);
+        getPremiumDamageSkin().encode(outPacket);
+        outPacket.encodeShort(getAccount().getDamageSkins().size() + 30); // slotCount
+        outPacket.encodeShort(getAccount().getDamageSkins().size());
+        for(DamageSkinSaveData dssd : getAccount().getDamageSkins()) {
+            dssd.encode(outPacket);
+        }
     }
 }

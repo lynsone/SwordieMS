@@ -36,6 +36,7 @@ public class ItemInfo {
     private boolean monsterBook;
     private boolean notConsume;
     private String script = "";
+    private int scriptNPC;
 
     public void setItemId(int itemId) {
         this.itemId = itemId;
@@ -227,5 +228,13 @@ public class ItemInfo {
 
     public void setSpecStats(Map<SpecStat, Integer> specStats) {
         this.specStats = specStats;
+    }
+
+    public void setScriptNPC(int scriptNPC) {
+        this.scriptNPC = scriptNPC;
+    }
+
+    public int getScriptNPC() {
+        return scriptNPC;
     }
 }

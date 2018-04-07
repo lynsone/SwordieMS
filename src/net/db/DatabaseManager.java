@@ -66,6 +66,7 @@ public class DatabaseManager {
                 GuildSkill.class,
                 Friend.class,
                 Macro.class,
+                DamageSkinSaveData.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);
@@ -104,5 +105,15 @@ public class DatabaseManager {
             }
         }
         cleanUpSessions();
+    }
+
+    public static Object getObjFromDB(Class clazz, int id) {
+        Object o;
+        try(Session session = getSession()) {
+            Transaction t = session.beginTransaction();
+            o = session.get(clazz, id);
+            t.commit();
+        }
+        return o;
     }
 }

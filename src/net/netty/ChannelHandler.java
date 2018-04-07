@@ -1,9 +1,7 @@
 package net.netty;
 
 import client.Client;
-import client.jobs.Job;
 import connection.InPacket;
-import enums.ChatMsgColour;
 import handling.InHeader;
 import handling.handlers.ChatHandler;
 import handling.handlers.LoginHandler;
@@ -12,7 +10,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.log4j.LogManager;
-import packet.WvsContext;
 
 import java.io.IOException;
 
@@ -107,7 +104,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     WorldHandler.handleUserMacroSysDataModified(c, inPacket);
                     break;
                 case USER_ACTIVATE_DAMAGE_SKIN:
-                    WorldHandler.handleUserActivateDanageSkin(c, inPacket);
+                    WorldHandler.handleUserActivateDamageSkin(c, inPacket);
                     break;
                 case EVENT_UI_REQ:
                     WorldHandler.handleEventUiReq(c, inPacket);

@@ -489,4 +489,262 @@ public class ItemConstants {
     public static boolean isRechargable(int itemId) {
         return isThrowingStar(itemId) || isBullet(itemId);
     }
+
+    public static int getDamageSkinIDByItemID(int itemID) {
+        switch(itemID) {
+            case 2431965: // base damage Skin:
+                return 0;
+            case 2431966: // digital Sunrise Skin Damage:
+            case 2432084: // digital Sunrise damage the skin
+                return 1;
+            case 2431967: // Kritias Skin Damage:
+                return 2;
+            case 2432131: // Party Quest Skin Damage:
+                return 3;
+            case 2432153: // Hard Hitting:
+            case 2432638: // Creative Impact Damage Skin
+            case 2432659: // Creative Impact Damage Skin
+                return 4;
+            case 2432154: // sweet traditional Han Skin Damage:
+            case 2432637: // sweet traditional one and damage the skin
+            case 2432658: // sweet traditional one and damage the skin
+                return 5;
+            case 2432207: // Club Henesys' damage Skin:
+                 return 6;
+            case 2432354: // Merry Christmas Skin Damage:
+                 return 7;
+            case 2432355: // Snow Blossom Skin Damage:
+            case 2432972: // Snow Blossom Skin Damage
+                 return 8;
+            case 2432465: // damage the skin of Alicia:
+                 return 9;
+            case 2432479: // Dorothy skin damage:
+                 return 10;
+            case 2432526: // Keyboard Warrior Skin Damage:
+            case 2432639: // Keyboard Warrior Skin Damage
+            case 2432660: // Keyboard Warrior Skin Damage
+                 return 11;
+            case 2432532: // spring breeze rustling skin damage:
+                 return 12;
+            case 2432592: // solo troops skin damage:
+                 return 13;
+            case 2432640: // Reminiscence skin damage:
+            case 2432661: // Remy you damage the skin Suns
+                 return 14;
+            case 2432710: // Orange Mushroom Skin Damage:
+                 return 15;
+            case 2432836: // crown damage Skin:
+                 return 16;
+            case 2432973: // monotone skin damage:
+                 return 17;
+            case 2433063: // Star Planet skin:
+                 return 18;
+            case 2433178: // Halloween Skin (bones):
+                 return 20;
+            case 2433456: // Hangul Skin:
+                 return 21;
+            case 2435960: // Fried Chicken Dmg Skin(Unknown ItemID):
+                 return 22;
+            case 2433715: // Striped Damage Skin:
+                 return 23;
+            case 2433804: // Couples Army Damage Skin:
+                 return 24;
+            case 5680343: // Star Damage Skin:
+                 return 25;
+            case 2433913: // Yeti and Pepe Damage Skin:
+                 return 26;
+            case 2433980: // Slime and Mushroom Damage Skin:
+                 return 27;
+            case 2433981: // Pink bean Damage skin:
+                 return 28;
+            case 2436229: // Pig Bar Dmg Skin(Unknown ItemID):
+                 return 29;
+//         case 2432659: // Hard-Hitting Dmg Skin (already in): 30
+//         case 2return 432526;: // Keyboard Warrior (already in): 31
+//         case 2432710: // Orange mushroom Skin Damage(already in): 32
+//         case 2432355: // Snowflake Dmg Skin(already in): 33
+            case 2434248: // Rainbow Boom Damage Skin:
+                 return 34;
+            case 2433362: // Night Sky Damage Skin:
+                 return 35;
+            case 2434274: // Marshmallow Damage Skin:
+                 return 36;
+            case 2434289: // Mu Lung Dojo Dmg Skin:
+                 return 37;
+            case 2434390: // Teddy Damage Skin:
+                 return 38;
+            case 2434391: // Mighty Ursus Damage Skin:
+                 return 39;
+            case 5680395: // Scorching Heat Damage Skin:
+                 return 40;
+            case 2434528: // USA Damage Skin:
+                 return 41;
+            case 2434529: // Churro Damage Skin:
+                 return 42;
+            case 2434530: // Singapore Night Damage Skin:
+                 return 43;
+            case 2433571: // Scribble Crush Damage Skin:
+                 return 44;
+            case 2434574: // Full Moon Damage Skin:
+                 return 45;
+            case 2433828: // White Heaven Sun Damage Skin:
+                 return 46;
+            case 2432804: // Princess No Damage Skin:
+                 return 47;
+            case 2434654: // Murgoth Damage Skin:
+                 return 48;
+            case 2435326: // Nine-Tailed Fox Damage Skin:
+                 return 49;
+            case 2432749: // Zombie Damage Skin:
+                 return 50;
+            case 2434710: // MVP Special Damage Skin:
+                 return 51;
+            case 2433777: // Black Heaven Damage Skin:
+                 return 52;
+            case 2434824: // Monster Park Damage Skin:
+                 return 53;
+                // case 2431966: // Digital Damage Skin(already in): 54 - (1)
+                // case 2431967: // Kritias Damage Skin(already in): 55 - (2)
+                // case 2432154: // Sweet tea cake Damage Skin(already in): 56 - (5)
+                // case 2432354: // Merry Christmas Damage Skin(already in): 57 - (7)
+                // case 2432532: // Gentle spring breeze damage skin(already in): 58 - (12)
+                // case 2433715: // Striped Damage Skin(already in): 59 - (23)
+                // case 2433063: // Star Damage Skin(already in): 60 - (25)
+                // case 2433913: // Yeti and Pepe Damage Skin(already in): 61 - (26)
+                // case 2433980: // Slime and Mushroom Damage Skin(already in): 62 - (27)
+                // case 2434248: // Rainbow Boom Damage Skin(already in): 63 - (34)
+                // case 2433362: // Night Sky Damage Skin(already in): 64 - (35)
+                // case 2434274: // Marshmallow Damage Skin(already in): 65 - (36)
+                // case 2434390: // Teddy Damage Skin(already in): 66 - (38)
+                // case 5680395: // Scorching Heat Damage Skin(already in): 67 - (40)
+                // case 2434528: // USA Damage Skin(already in): 68 - (41)
+                // case 2434529: // Churro Damage Skin(already in): 69 - (42)
+                // case 2434530: // Singapore Night Damage Skin(already in): 70 - (43)
+                // case 2433571: // Scribble Crush Damage Skin(already in): 71 - (44)
+                // case 2434574: // Full Moon Damage Skin(already in): 72 - (45)
+                // case 2433828: // White Heaven Sun Damage Skin(already in): 73 - (46)
+            case 2434662: // Jelly Beans Damage Skin:
+                return 74;
+            case 2434664: // Soft-Serve Damage Skin:
+                return 75;
+            case 2434868: // Christmas lights Damage skin:
+                return 76;
+            case 2436041: // Phantom Damage Skin:
+                return 77;
+            case 2436042: // Mercedes Damage Skin:
+                return 78;
+            case 2435046: // Fireworks Damage Skin:
+                return 79;
+            case 2435047: // Heart Balloon Damage Skin:
+                return 80;
+            case 2435836: // Neon Sign Damage Skin:
+                return 81;
+            case 2435141: // Freeze Tag Damage Skin:
+                return 82;
+            case 2435179: // Candy Damage Skin:
+                return 83;
+            case 2435162: // Antique Gold Damage Skin:
+                return 84;
+            case 2435157: // Calligraphy Damage Skin:
+                return 85;
+            case 2435835: // Explosion Damage Skin:
+                return 86;
+            case 2435159: // Snow-wing Damage Skin:
+                return 87;
+            case 2436044: // Miho Damage Skin:
+                return 88;
+            case 2434663: // Donut Damage Skin:
+                return 89;
+            case 2435182: // Music Score Damage Skin:
+                return 90;
+            case 2435850: // Moon Bunny Damage Skin:
+                return 91;
+            case 2435184: // Forest of Tenacity Damage Skin:
+                return 92;
+            case 2435222: // Festival Tortoise Damage Skin:
+                return 93;
+            case 2435293: // April Fools' Damage Skin:
+                return 94;
+            case 2435313: // Blackheart Day Damage Skin:
+                return 95;
+            case 2435331: // Bubble April Fools' Damage Skin:
+                return 96;
+            case 2435332: // Retro April Fools' Damage Skin:
+                return 97;
+            case 2435333: // Monochrome April Fools' Damage Skin:
+                return 98;
+            case 2435334: // Sparkling April Fools' Damage Skin:
+                return 99;
+            case 2435316: // Haste Damage Skin:
+                return 100;
+            case 2435408: // 13th Anniversary Maple Leaf Damage Skin:
+                return 101;
+            case 2435427: // Cyber Damage Skin:
+                return 102;
+            case 2435428: // Cosmic Damage Skin:
+                return 103;
+            case 2435429: // Choco Donut Damage Skin:
+                return 104;
+            case 2435456: // Lovely Damage Skin:
+                return 105;
+            case 2435493: // Monster Balloon Damage Skin:
+                return 106;
+                // case 2435331: // Bubble April Fools' Damage Skin(already in): 107 - (96)
+                // case 2435334: // Sparkling April Fools' Damage Skin(already in): 108 - (99)
+            case 2435959: // Henesys Damage Skin (unknown ID):
+                return 109;
+            case 2435958: // Leafre Damage Skin (unknown ID):
+                return 110;
+            case 2435431: // Algebraic Damage Skin:
+                return 111;
+            case 2435430: // Blue Fire Damage Skin:
+                return 112;
+            case 2435432: // Purple Damage Skin:
+                return 113;
+            case 2435433: // Nanopixel Damage Skin:
+                return 114;
+            case 2434601: // Invisible Damage Skin(unknown ID):
+                return 115;
+            case 2435521: // Crystal Damage Skin:
+                return 116;
+            case 2435196: // Crow Damage Skin:
+                return 117;
+            case 2435523: // Chocolate Damage Skin:
+                return 118;
+            case 2435524: // Spark Damage Skin:
+                return 119;
+            case 2435538: // Royal Damage Skin:
+                return 120;
+            case 2435832: // Chrome Damage Skin (Ver.1):
+                return 121;
+            case 2435833: // Neon Lights Damage Skin:
+                return 122;
+            case 2435839: // Cosmic Damage Skin(Cards):
+                return 123;
+            case 2435840: // Gilded Damage Skin:
+                return 124;
+            case 2435841: // Batty Damage Skin:
+                return 125;
+            case 2435849: // Monochrome April Fools' Damage Skin:
+                return 126;
+            case 2435972: // Vanishing Journey Damage Skin:
+                return 127;
+            case 2436023: // Chu Chu Damage Skin:
+                return 128;
+            case 2436024: // Lachelein Damage Skin:
+                return 129;
+            case 2436026: // Poison flame Damage Skin:
+                return 130;
+            case 2436027: // Blue Strike Damage Skin:
+                return 131;
+            case 2436028: // Music Power Damage Skin:
+                return 132;
+            case 2436029: // Collage Power Damage Skin:
+                return 133;
+            case 2436045: // Starlight Aurora Damage Skin:
+                return 134;
+            default:
+                return 0;
+        }
+    }
 }

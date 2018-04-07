@@ -332,7 +332,7 @@ public class Hayato extends Job {
                 }
             }
         }
-        c.write(UserLocal.ModHayatoCombo(swordEnergy));
+        c.write(UserLocal.modHayatoCombo(swordEnergy));
     }
 
     public void handleNormalStanceBonus() {
