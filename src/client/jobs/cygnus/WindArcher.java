@@ -12,6 +12,7 @@ import connection.InPacket;
 import constants.JobConstants;
 import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
+import enums.MoveAbility;
 import loaders.SkillData;
 import packet.CField;
 import packet.WvsContext;
@@ -54,6 +55,7 @@ public class WindArcher extends Job {
     public static final int SHARP_EYES = 13121005; //Buff
     public static final int TOUCH_OF_THE_WIND = 13121004; //Buff
     public static final int CALL_OF_CYGNUS_WA = 13121000; //Buff
+    public static final int EMERALD_DUST = 13120007;
 
     public static final int GLORY_OF_THE_GUARDIANS_WA = 13121053;
     public static final int STORM_BRINGER = 13121054;
@@ -74,6 +76,7 @@ public class WindArcher extends Job {
             ALBATROSS,
             ALBATROSS_MAX,
             EMERALD_FLOWER, //Summon
+            EMERALD_DUST, //Summon Upgrade
             SHARP_EYES,
             TOUCH_OF_THE_WIND,
             CALL_OF_CYGNUS_WA,
@@ -245,11 +248,12 @@ public class WindArcher extends Job {
                 break;
 
             case EMERALD_FLOWER:
+            case EMERALD_DUST:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 summon.setAttackActive(false);
                 summon.setAssistType((byte) 0);
                 field.spawnSummon(summon);
@@ -282,13 +286,14 @@ public class WindArcher extends Job {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             if (tsm.hasStat(TriflingWhimOnOff)) {
                 SkillInfo si = SkillData.getSkillInfoById(TRIFLING_WIND_I);
+                int firstImpact = 36;
+                int secondImpact = 6;
                 int anglenum;
                 if (new Random().nextBoolean()) {
                     anglenum = 0;
                 } else {
                     anglenum = 180;
                 }
-                int delaynum = new Random().nextInt(90); //Random delay between 0~90ms
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     int TW2subprop = getSubProp(chr);
@@ -298,22 +303,22 @@ public class WindArcher extends Job {
                             int mobID = mai.mobId;
                             int inc = ForceAtomEnum.WA_ARROW_2.getInc();
                             int type = ForceAtomEnum.WA_ARROW_2.getForceAtomType();
-                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 65, 15,
-                                    anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
-                                    new Position(35, 0)); //Slightly behind the player
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, firstImpact, secondImpact,
+                                    anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                    new Position(0, 0)); //Slightly behind the player
                             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                     true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                                    mob.getPosition(), 0, mob.getPosition()));
+                                    mob.getPosition(), TRIFLING_WIND_ATOM, mob.getPosition()));
                         } else {
                             int mobID = mai.mobId;
                             int inc = ForceAtomEnum.WA_ARROW_1.getInc();
                             int type = ForceAtomEnum.WA_ARROW_1.getForceAtomType();
-                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 65, 15,
-                                    anglenum, delaynum, (int) System.currentTimeMillis(), 1, 0,
-                                    new Position(35, 0)); //Slightly behind the player
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, firstImpact, secondImpact,
+                                    anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                    new Position(0, 0)); //Slightly behind the player
                             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                     true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                                    mob.getPosition(), 0, mob.getPosition()));
+                                    mob.getPosition(), TRIFLING_WIND_ATOM, mob.getPosition()));
                         }
                     }
                 }
@@ -402,7 +407,7 @@ public class WindArcher extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            if (skillID != 0 || skillID != STORM_BRINGER || skillID != TRIFLING_WIND_ATOM) { //TODO
+            if(attackInfo.skillId != TRIFLING_WIND_ATOM && attackInfo.skillId != 0 && attackInfo.skillId != STORM_BRINGER) {
                 handleStormBringer(skillID, slv, attackInfo);
 
                 int maxtrif = getMaxTriffling(chr);
@@ -448,6 +453,7 @@ public class WindArcher extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

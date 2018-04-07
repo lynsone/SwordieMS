@@ -2164,21 +2164,6 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(Stigma).rOption);
             outPacket.encodeInt(getOption(Stigma).tOption);
         }
-        if (hasNewStat(BeastMode)) {
-            outPacket.encodeShort(getOption(BeastMode).nOption);
-            outPacket.encodeInt(getOption(BeastMode).rOption);
-            outPacket.encodeInt(getOption(BeastMode).tOption);
-        }
-        if (hasNewStat(TeamRoar)) {
-            outPacket.encodeShort(getOption(TeamRoar).nOption);
-            outPacket.encodeInt(getOption(TeamRoar).rOption);
-            outPacket.encodeInt(getOption(TeamRoar).tOption);
-        }
-        if (hasNewStat(BlackHeartedCurse)) {
-            outPacket.encodeShort(getOption(BlackHeartedCurse).nOption);
-            outPacket.encodeInt(getOption(BlackHeartedCurse).rOption);
-            outPacket.encodeInt(getOption(BlackHeartedCurse).tOption);
-        }
         if (hasNewStat(HayatoStance)) {
             outPacket.encodeShort(getOption(HayatoStance).nOption);
             outPacket.encodeInt(getOption(HayatoStance).rOption);
@@ -2199,30 +2184,65 @@ public class TemporaryStatManager {
             outPacket.encodeInt(getOption(WillowDodge).rOption);
             outPacket.encodeInt(getOption(WillowDodge).tOption);
         }
-        if (hasNewStat(Jinsoku)) {
-            outPacket.encodeShort(getOption(Jinsoku).nOption);
-            outPacket.encodeInt(getOption(Jinsoku).rOption);
-            outPacket.encodeInt(getOption(Jinsoku).tOption);
-        }
         if (hasNewStat(HayatoPAD)) {
             outPacket.encodeShort(getOption(HayatoPAD).nOption);
             outPacket.encodeInt(getOption(HayatoPAD).rOption);
             outPacket.encodeInt(getOption(HayatoPAD).tOption);
         }
-        if (hasNewStat(HayatoCr)) {
-            outPacket.encodeShort(getOption(HayatoCr).nOption);
-            outPacket.encodeInt(getOption(HayatoCr).rOption);
-            outPacket.encodeInt(getOption(HayatoCr).tOption);
+        if (hasNewStat(HayatoHPR)) {
+            outPacket.encodeShort(getOption(HayatoHPR).nOption);
+            outPacket.encodeInt(getOption(HayatoHPR).rOption);
+            outPacket.encodeInt(getOption(HayatoHPR).tOption);
         }
         if (hasNewStat(HayatoMPR)) {
             outPacket.encodeShort(getOption(HayatoMPR).nOption);
             outPacket.encodeInt(getOption(HayatoMPR).rOption);
             outPacket.encodeInt(getOption(HayatoMPR).tOption);
         }
-        if (hasNewStat(HayatoHPR)) {
-            outPacket.encodeShort(getOption(HayatoHPR).nOption);
-            outPacket.encodeInt(getOption(HayatoHPR).rOption);
-            outPacket.encodeInt(getOption(HayatoHPR).tOption);
+        if (hasNewStat(HayatoBooster)) {
+            outPacket.encodeShort(getOption(HayatoBooster).nOption);
+            outPacket.encodeInt(getOption(HayatoBooster).rOption);
+            outPacket.encodeInt(getOption(HayatoBooster).tOption);
+        }
+        if (hasNewStat(Jinsoku)) {
+            outPacket.encodeShort(getOption(Jinsoku).nOption);
+            outPacket.encodeInt(getOption(Jinsoku).rOption);
+            outPacket.encodeInt(getOption(Jinsoku).tOption);
+        }
+        if (hasNewStat(HayatoCr)) {
+            outPacket.encodeShort(getOption(HayatoCr).nOption);
+            outPacket.encodeInt(getOption(HayatoCr).rOption);
+            outPacket.encodeInt(getOption(HayatoCr).tOption);
+        }
+        if (hasNewStat(HakuBlessing)) {
+            outPacket.encodeShort(getOption(HakuBlessing).nOption);
+            outPacket.encodeInt(getOption(HakuBlessing).rOption);
+            outPacket.encodeInt(getOption(HakuBlessing).tOption);
+        }
+        if (hasNewStat(HayatoBoss)) {
+            outPacket.encodeShort(getOption(HayatoBoss).nOption);
+            outPacket.encodeInt(getOption(HayatoBoss).rOption);
+            outPacket.encodeInt(getOption(HayatoBoss).tOption);
+        }
+        if (hasNewStat(BattoujutsuAdvance)) {
+            outPacket.encodeShort(getOption(BattoujutsuAdvance).nOption);
+            outPacket.encodeInt(getOption(BattoujutsuAdvance).rOption);
+            outPacket.encodeInt(getOption(BattoujutsuAdvance).tOption);
+        }
+        if (hasNewStat(BlackHeartedCurse)) {
+            outPacket.encodeShort(getOption(BlackHeartedCurse).nOption);
+            outPacket.encodeInt(getOption(BlackHeartedCurse).rOption);
+            outPacket.encodeInt(getOption(BlackHeartedCurse).tOption);
+        }
+        if (hasNewStat(BeastMode)) {
+            outPacket.encodeShort(getOption(BeastMode).nOption);
+            outPacket.encodeInt(getOption(BeastMode).rOption);
+            outPacket.encodeInt(getOption(BeastMode).tOption);
+        }
+        if (hasNewStat(TeamRoar)) {
+            outPacket.encodeShort(getOption(TeamRoar).nOption);
+            outPacket.encodeInt(getOption(TeamRoar).rOption);
+            outPacket.encodeInt(getOption(TeamRoar).tOption);
         }
 
         if (hasNewStat(SoulMP)) {

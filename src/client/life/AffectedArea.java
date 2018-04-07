@@ -5,6 +5,7 @@ import client.character.skills.*;
 import client.character.skills.SkillStat;
 import client.jobs.Zero;
 import client.jobs.adventurer.Archer;
+import client.jobs.adventurer.BeastTamer;
 import client.jobs.adventurer.Magician;
 import client.jobs.adventurer.Thief;
 import client.jobs.cygnus.BlazeWizard;
@@ -188,18 +189,15 @@ public class AffectedArea extends Life {
                 mts.addStatOptionsAndBroadcast(MobStat.MDR, o);
                 break;
             case Zero.TIME_DISTORTION:
+                mts.removeEnemyBuffs();
                 o.nOption = 1;
                 o.rOption = skillID;
-                o.tOption = si.getValue(time, slv);
+                o.tOption = 5;
                 mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
                 o1.nOption = si.getValue(SkillStat.x, slv);
                 o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
+                o1.tOption = 5;
                 mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
                 break;
         }
     }
@@ -219,10 +217,7 @@ public class AffectedArea extends Life {
         Option o3 = new Option();
         switch(skillID) {
             case Zero.TIME_DISTORTION:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                //tsm.putCharacterStatValue(DISPEL, o1);  TODO Removes Debuffs
+                tsm.removeAllDebuffs();
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
@@ -254,10 +249,22 @@ public class AffectedArea extends Life {
                 tsm.putCharacterStatValue(TerR, o2);
                 break;
             case Aran.MAHAS_DOMAIN:
-                // 20% HP/MP Recovery
-                // Dispel
+                chr.heal((int)(chr.getMaxHP() / ((double) 100 / si.getValue(w, slv))));
+                chr.healMP((int)(chr.getMaxHP() / ((double) 100 / si.getValue(w, slv))));
+                tsm.removeAllDebuffs();
+                break;
+            case Thief.SMOKE_SCREEN:
+                o1.nOption = 1;
+                tsm.putCharacterStatValue(Invincible, o1);
+                o2.nOption = si.getValue(SkillStat.x, slv);
+                tsm.putCharacterStatValue(IncCriticalDamMax, o2);
+                break;
+            case BeastTamer.PURR_ZONE:
+                chr.heal(si.getValue(hp, slv));
                 break;
         }
         tsm.sendSetStatPacket();
     }
+
+
 }

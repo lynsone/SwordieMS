@@ -14,6 +14,7 @@ import enums.ChatMsgColour;
 import enums.ForceAtomEnum;
 import loaders.SkillData;
 import packet.CField;
+import packet.UserLocal;
 import packet.WvsContext;
 import util.Position;
 import util.Rect;
@@ -29,6 +30,9 @@ import static client.character.skills.SkillStat.*;
  * Created on 12/14/2017.
  */
 public class Phantom extends Job {
+
+    public static final int JUDGMENT_DRAW_1 = 20031209;
+    public static final int JUDGMENT_DRAW_2 = 20031210;
 
     public static final int SKILL_SWIPE = 20031207;
     public static final int LOADOUT = 20031208;
@@ -51,6 +55,7 @@ public class Phantom extends Job {
     public static final int VOL_DAME = 24121007; // Special Buff TODO
     public static final int MAPLE_WARRIOR_PH = 24121008; //Buff
     public static final int CARTE_NOIR = 24120002;              //80001890
+    public static final int HEROS_WILL_PH = 24121009;
 
     public static final int HEROIC_MEMORIES_PH = 24121053;
     public static final int CARTE_ROSE_FINALE = 24121052;
@@ -58,6 +63,7 @@ public class Phantom extends Job {
     public static final int CARTE_ATOM = 80001890; //TODO maybe
 
     private int[] addedSkills = new int[] {
+            JUDGMENT_DRAW_2,
             SKILL_SWIPE,
             LOADOUT,
             TO_THE_SKIES,
@@ -78,6 +84,8 @@ public class Phantom extends Job {
             MAPLE_WARRIOR_PH,
             HEROIC_MEMORIES_PH,
     };
+
+    private int cardAmount;
 
     public Phantom(Char chr) {
         super(chr);
@@ -106,6 +114,7 @@ public class Phantom extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
+                c.write(UserLocal.IncJudgementStack((byte) 15));
                 break;
             case FINAL_FEINT:
                 //TODO
@@ -179,7 +188,7 @@ public class Phantom extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         //if (chr.hasSkill(CARTE_BLANCHE)) {
             SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
-            int anglenum = new Random().nextInt(300) + 290;
+            int anglenum = new Random().nextInt(315) + 295;
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 int TW1prop = 100;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change
@@ -188,7 +197,7 @@ public class Phantom extends Job {
                         int mobID = mai.mobId;
                         int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();    //TODO doesn't show the CarteNoir Image,  shows Carte Blanche
                         int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position()); //Slightly behind the player
                         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
@@ -208,23 +217,6 @@ public class Phantom extends Job {
                 }
             }
         //}
-    }
-
-    private void handleCardDeck(int skillId, TemporaryStatManager tsm, Client c) { //TODO 38s (TEMPORARY_STAT_SET / 74)
-        Option o = new Option();
-        int amount = 1;
-        if(chr.hasSkill(20030206)) {
-            amount = tsm.getOption(Judgement).xOption;
-            if(amount < 40) {
-                amount++;
-            }
-        }
-        o.nOption = 1;
-        o.rOption = 0;
-        o.tOption = 0;
-        o.xOption = amount;
-        tsm.putCharacterStatValue(Judgement, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     public boolean isBuff(int skillID) {
@@ -247,8 +239,9 @@ public class Phantom extends Job {
         }
         //handleCardDeck(skill.getSkillId(), tsm, c);
         if(hasHitMobs) {
-                handleCarte(attackInfo);
+            handleCarte(attackInfo);
         }
+        handleDeck();
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -266,6 +259,7 @@ public class Phantom extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -295,6 +289,13 @@ public class Phantom extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
+                case JUDGMENT_DRAW_1:
+                case JUDGMENT_DRAW_2:
+                    resetCardStack();
+                    break;
+                case HEROS_WILL_PH:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }
@@ -302,6 +303,7 @@ public class Phantom extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override
@@ -322,5 +324,41 @@ public class Phantom extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    private void handleDeck() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        cardAmount = 1;
+        if(tsm.hasStat(PDD)) {
+            cardAmount = tsm.getOption(PDD).nOption;
+            if(cardAmount < getMaxCards()) {
+                cardAmount++;
+            }
+        }
+        o.nOption = cardAmount;
+        o.rOption = 0;
+        o.tOption = 0;
+        tsm.putCharacterStatValue(PDD, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
+        c.write(UserLocal.IncJudgementStack((byte) cardAmount));
+    }
+
+    private int getMaxCards() {
+        int num = 0;
+        if(chr.hasSkill(JUDGMENT_DRAW_1)) {
+            num = 20;
+        }
+        if(chr.hasSkill(JUDGMENT_DRAW_2)) {
+            num = 40;
+        }
+        return num;
+    }
+
+    private void resetCardStack() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        cardAmount = 0;
+        tsm.removeStat(PDD, true);
+        c.write(WvsContext.temporaryStatReset(tsm, false));
     }
 }

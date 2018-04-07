@@ -1,7 +1,9 @@
 package net.netty;
 
 import client.Client;
+import client.jobs.legend.Aran;
 import connection.InPacket;
+import constants.JobConstants;
 import handling.InHeader;
 import handling.handlers.ChatHandler;
 import handling.handlers.LoginHandler;
@@ -360,6 +362,18 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_CREATE_AURA_BY_GRENADE:
                     WorldHandler.handleUserCreateAuraByGrenade(c, inPacket);
+                    break;
+                case USER_CREATE_HOLIDOM_REQUEST:
+                    WorldHandler.handleUserCreateHolidomRequest(c, inPacket);
+                    break;
+                case SUMMONED_SKILL:
+                    WorldHandler.handleSummonedSkill(c, inPacket);
+                    break;
+                case REQUEST_DEC_COMBO:
+                    if(c.getChr().getJob() >= JobConstants.JobEnum.ARAN1.getJobId() && c.getChr().getJob() <= JobConstants.JobEnum.ARAN4.getJobId()) {
+                        Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());
+                        aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
+                    }
                     break;
                 default:
                     handleUnknown(inPacket, op);

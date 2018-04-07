@@ -98,6 +98,14 @@ public class UserLocal {
         return outPacket;
     }
 
+    public static OutPacket IncJudgementStack(byte amount) {
+        OutPacket outPacket = new OutPacket(OutHeader.INC_JUDGEMENT_STACK_RESPONSE);
+
+        outPacket.encodeByte(amount);
+
+        return outPacket;
+    }
+
     public static OutPacket damageSkinSaveResult(DamageSkinType req, DamageSkinType res, Char chr) {
         OutPacket outPacket = new OutPacket(OutHeader.DAMAGE_SKIN_SAVE_RESULT);
 

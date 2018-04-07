@@ -80,6 +80,7 @@ public class WildHunter extends Job {
     public static final int DRILL_SALVO = 33121016; //Summon
     public static final int SHARP_EYES = 33121004; //Buff
     public static final int MAPLE_WARRIOR_WH = 33121007; //Buff
+    public static final int HEROS_WILL_WH = 33121008;
 
     //Final Attack
     public static final int FINAL_ATTACK_WH = 33100009;
@@ -407,6 +408,7 @@ public class WildHunter extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -447,6 +449,9 @@ public class WildHunter extends Job {
                     aa.setDelay((short) 4);
                     chr.getField().spawnAffectedArea(aa);
                     break;
+                case HEROS_WILL_WH:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }
@@ -468,6 +473,7 @@ public class WildHunter extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
             }
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

@@ -40,6 +40,7 @@ public class ThunderBreaker extends Job {
     public static final int ARC_CHARGER = 15121004; //Buff
     public static final int SPEED_INFUSION = 15121005; //Buff
     public static final int CALL_OF_CYGNUS_TB = 15121000; //Buff
+    public static final int TYPHOON = 15120003;
 
     public static final int GLORY_OF_THE_GUARDIANS_TB = 15121053;
     public static final int PRIMAL_BOLT = 15121054;
@@ -150,6 +151,15 @@ public class ThunderBreaker extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(StrikerHyperElectric, o1);
 
+                //o2.nReason = skillID;
+                //o2.nValue = (tsm.getOption(IgnoreTargetDEF).nOption * si.getValue(y, slv));
+                //o2.tStart = (int) System.currentTimeMillis();
+                //o2.tTerm = si.getValue(time, 1);
+                //tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o2);
+                o2.nOption = (tsm.getOption(IgnoreTargetDEF).nOption * si.getValue(y, slv));
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                 break;
 
         }
@@ -175,6 +185,8 @@ public class ThunderBreaker extends Job {
         Option o = new Option();
         Option o1 = new Option();
         SkillInfo lightningInfo = SkillData.getSkillInfoById(LIGHTNING_ELEMENTAL);
+        Skill skill = chr.getSkill(LIGHTNING_ELEMENTAL);
+        byte slv = (byte) skill.getCurrentLevel();
         int amount = 1;
         if(tsm.hasStat(IgnoreTargetDEF)) {
             amount = tsm.getOption(IgnoreTargetDEF).mOption;
@@ -186,14 +198,13 @@ public class ThunderBreaker extends Job {
         o.mOption = amount;
         o.rOption = LIGHTNING_ELEMENTAL;
         o.tOption = lightningInfo.getValue(y, lightningInfo.getCurrentLevel());
-        tsm.putCharacterStatValue(IgnoreTargetDEF, o);
-        if(tsm.hasStat(StrikerHyperElectric)) { //TODO Needs a Better fix
-            o1.nReason = LIGHTNING_ELEMENTAL;
-            o1.nValue = (amount * 9);
-            o1.tStart = (int) System.currentTimeMillis();
-            o1.tTerm = lightningInfo.getValue(time, lightningInfo.getCurrentLevel());
-            tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o1);
+        if(chr.hasSkill(PRIMAL_BOLT)) {
+            o1.nOption = (tsm.getOption(IgnoreTargetDEF).nOption * lightningInfo.getValue(y, slv));
+            o1.rOption = LIGHTNING_ELEMENTAL;
+            o1.tOption = lightningInfo.getValue(time, slv);
+            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
         }
+        tsm.putCharacterStatValue(IgnoreTargetDEF, o);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
@@ -249,6 +260,7 @@ public class ThunderBreaker extends Job {
     public void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int chargeStack = tsm.getOption(IgnoreTargetDEF).nOption;
         Skill skill = chr.getSkill(attackInfo.skillId);
         int skillID = 0;
         SkillInfo si = null;
@@ -275,6 +287,15 @@ public class ThunderBreaker extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case GALE:
+            case TYPHOON:
+                if((tsm.getOptByCTSAndSkill(IndieDamR, GALE) == null) || (tsm.getOptByCTSAndSkill(IndieDamR, TYPHOON) == null)) {
+                    o1.nReason = skillID;
+                    o1.nValue = chargeStack * si.getValue(y, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieStatR, o1); //Indie
+                    c.write(WvsContext.temporaryStatSet(tsm));
+                }
                 break;
         }
     }
@@ -306,6 +327,7 @@ public class ThunderBreaker extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

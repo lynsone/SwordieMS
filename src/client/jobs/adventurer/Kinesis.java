@@ -318,6 +318,7 @@ public class Kinesis extends Job {
         if(getPp() <= 0) {
             tsm.removeStat(KinesisPsychicShield, false);
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

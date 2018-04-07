@@ -556,4 +556,22 @@ public class MobTemporaryStat {
     public Map<Integer, ScheduledFuture> getBurnSchedules() {
         return burnSchedules;
     }
+
+    public void removeEnemyBuffs() {
+        removeMobStat(PowerUp, false);
+        removeMobStat(MagicUp, false);
+        removeMobStat(PGuardUp, false);
+        removeMobStat(MGuardUp, false);
+        removeMobStat(PImmune, false);
+        removeMobStat(MImmune, false);
+        removeMobStat(PCounter, false);
+        removeMobStat(MCounter, false);
+        if(hasCurrentMobStat(ACC) && getCurrentOptionsByMobStat(ACC).nOption > 0) {
+            removeMobStat(ACC, false);
+        }
+        if(hasCurrentMobStat(EVA) && getCurrentOptionsByMobStat(EVA).nOption > 0) {
+            removeMobStat(EVA, false);
+        }
+        getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 0, false));
+    }
 }

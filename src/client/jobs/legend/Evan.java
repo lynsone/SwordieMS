@@ -46,6 +46,7 @@ public class Evan extends Job {
     public static final int SUMMON_ONYX_DRAGON = 22171081; //Summon
     public static final int HEROIC_MEMORIES_EVAN = 22171082;
     public static final int ENHANCED_MAGIC_DEBRIS = 22170070;
+    public static final int HEROS_WILL_EVAN = 22171004;
 
     //Returns
     public static final int RETURN_FLASH = 22110013; //Return after Wind Skills (Mob Debuff)
@@ -284,6 +285,7 @@ public class Evan extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -339,6 +341,9 @@ public class Evan extends Job {
                 case ENHANCED_MAGIC_DEBRIS:
                     handleMagicDebris();
                     break;
+                case HEROS_WILL_EVAN:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }
@@ -346,6 +351,7 @@ public class Evan extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

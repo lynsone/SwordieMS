@@ -74,6 +74,7 @@ public class BeastTamer extends Job {
     public static final int CAT_CLAWS = 112120018;
     public static final int MOUSERS_INSIGHT = 112120022;
     public static final int FRIENDS_OF_ARBY = 112120016;
+    public static final int MEOW_CURE = 112121010;
 
 
     //Hyper
@@ -368,17 +369,15 @@ public class BeastTamer extends Job {
                 aa2.setDelay((short) 4);
                 chr.getField().spawnAffectedArea(aa2);
                 break;
-            case PURR_ZONE:
+            case PURR_ZONE: //TODO
                 SkillInfo pz = SkillData.getSkillInfoById(PURR_ZONE);
                 AffectedArea aa3 = AffectedArea.getAffectedArea(attackInfo);
                 aa3.setMobOrigin((byte) 0);
                 aa3.setCharID(chr.getId());
                 aa3.setSkillID(skillID);
-                //int x = chr.getPosition().getX();
-                //int y = chr.getPosition().getY() + 41;
                 aa3.setPosition(chr.getPosition());
                 aa3.setRect(aa3.getPosition().getRectAround(pz.getRects().get(0)));
-                //aa3.setDelay((short) 4);
+                aa3.setSlv((byte)skill.getCurrentLevel());
                 chr.getField().spawnAffectedArea(aa3);
                 break;
         }
@@ -386,6 +385,7 @@ public class BeastTamer extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -402,6 +402,12 @@ public class BeastTamer extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
+                case MEOW_CURE:
+                    tsm.removeAllDebuffs();
+                    break;
+                case MEOW_HEAL:
+                    chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(hp, slv))));
+                    break;
             }
         }
     }
@@ -409,6 +415,7 @@ public class BeastTamer extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

@@ -4,6 +4,10 @@ package enums;
  * Created on 1/7/2018.
  */
 public enum ForceAtomEnum {
+    DEMON_SLAYER_FURY_1(0,2), //Fury 1st ~ 3rd Job
+    DEMON_SLAYER_FURY_2(0,4), //Fury 4th Job
+    DEMON_SLAYER_FURY_1_BOSS(0,6), //Fury from Bosses (1st ~ 3rd Job)
+    DEMON_SLAYER_FURY_2_BOSS(0,10), //Fury from Bosses (4th Job)
     PHANTOM_CARD_1(1, 1), //Phantom - Carte Blanch (2nd Job)
     PHANTOM_CARD_2(1, 2), //Phantom - Carte Noir (4th Job)
     KAISER_WEAPON_THROW_1(2, 1), //Kaiser 3 Swords (2nd Job)

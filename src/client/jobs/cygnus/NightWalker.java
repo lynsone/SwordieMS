@@ -202,10 +202,10 @@ public class NightWalker extends Job {
                 if(tsm.hasStat(DarknessAscension)) {
                     return;
                 }
-                o1.nOption = si.getValue(x, slv);
+                o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DarknessAscension, o1);
+                tsm.putCharacterStatValue(ReviveOnce, o1);
                 break;
             case CALL_OF_CYGNUS_NW:
                 o1.nReason = skillID;
@@ -509,6 +509,7 @@ public class NightWalker extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
 

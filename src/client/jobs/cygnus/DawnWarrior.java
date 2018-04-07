@@ -69,7 +69,6 @@ public class DawnWarrior extends Job {
             SOUL_SPEED,
             FALLING_MOON,
             RISING_SUN,
-            TRUE_SIGHT,
             EQUINOX_CYCLE,
             CALL_OF_CYGNUS_DW,
             SOUL_FORGE,
@@ -328,6 +327,10 @@ public class DawnWarrior extends Job {
                     // Final Dmg on mob = s
                     Rect rect = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
                             , inPacket.decodeShort(), inPacket.decodeShort());
+
+                    if(!chr.isLeft()) {
+                        rect = rect.moveRight();
+                    }
                     for(Life life : chr.getField().getLifesInRect(rect)) {
                         if(life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
@@ -336,16 +339,8 @@ public class DawnWarrior extends Job {
                                 o1.nOption = -(si.getValue(v, slv));
                                 o1.rOption = skillID;
                                 o1.tOption = si.getValue(time, slv);
-                                mts.addStatOptions(MobStat.PDR, o1);
-                                mts.addStatOptions(MobStat.MDR, o1);
-                                o2.nOption = si.getValue(s, slv);
-                                o2.rOption = skillID;
-                                o2.tOption = si.getValue(time, slv);
-                                mts.addStatOptions(MobStat.AddDamParty, o2);
-                                o3.nOption = 1;
-                                o3.rOption = skillID;
-                                o3.tOption = si.getValue(time, slv);
-                                mts.addStatOptionsAndBroadcast(MobStat.TrueSight, o3);
+                                mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                                mts.addStatOptionsAndBroadcast(MobStat.MDR, o1);
                             }
                         }
                     }
@@ -362,6 +357,7 @@ public class DawnWarrior extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

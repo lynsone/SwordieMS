@@ -11,6 +11,7 @@ import client.life.MobTemporaryStat;
 import client.life.Summon;
 import connection.InPacket;
 import constants.JobConstants;
+import constants.SkillConstants;
 import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.MoveAbility;
@@ -21,6 +22,7 @@ import server.EventManager;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -62,6 +64,7 @@ public class Pirate extends Job {
     public static final int MAPLE_WARRIOR_BUCC = 5121000; //Buff
     public static final int PIRATE_REVENGE = 5120011;
     public static final int ULTRA_CHARGE = 5120018;
+    public static final int HEROS_WILL_BUCC = 5121008;
 
 
     //Corsair
@@ -77,6 +80,7 @@ public class Pirate extends Job {
     public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
+    public static final int HEROS_WILL_SAIR = 5221010;
 
 
     //Cannoneer
@@ -94,6 +98,7 @@ public class Pirate extends Job {
     public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff TODO Special Buff
     public static final int PIRATE_SPIRIT = 5321010; //Buff
     public static final int MAPLE_WARRIOR_CANNON = 5321005; //Buff
+    public static final int HEROS_WILL_CANNON = 5321006;
 
     //Jett
     public static final int GALACTIC_MIGHT = 5081023; //Buff
@@ -106,6 +111,7 @@ public class Pirate extends Job {
 
     public static final int HIGH_GRAVITY = 5721066; //Buff
     public static final int MAPLE_WARRIOR_JETT = 5721000; //Buff
+    public static final int HEROS_WILL_JETT = 5721002;
 
 
     //Hyper
@@ -176,7 +182,7 @@ public class Pirate extends Job {
     };
 
 
-    public int viprEnergy = 0;
+    public int viperEnergy = 0;
     private final int MAX_ENERGY = getMaxEnergy();
 
     public Pirate(Char chr) {
@@ -189,15 +195,17 @@ public class Pirate extends Job {
                     chr.addSkill(skill);
                 }
             }
-            if(chr.hasSkill(ENERGY_CHARGE)) {
-                TemporaryStatManager tsm = chr.getTemporaryStatManager();
-                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-                tsb.setNOption(viprEnergy);
-                tsb.setROption(0);
-                tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
-                tsm.sendSetStatPacket();
-                if(tsm.hasStat(Stimulate)) {
-                    supplyInterval();
+            if (chr.getJob() >= JobConstants.JobEnum.BRAWLER.getJobId() && chr.getJob() <= JobConstants.JobEnum.BUCCANEER.getJobId()) {
+                if (chr.hasSkill(ENERGY_CHARGE)) {
+                    TemporaryStatManager tsm = chr.getTemporaryStatManager();
+                    TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+                    tsb.setNOption(viperEnergy);
+                    tsb.setROption(0);
+                    tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+                    tsm.sendSetStatPacket();
+                    if (tsm.hasStat(Stimulate)) {
+                        supplyInterval();
+                    }
                 }
             }
         }
@@ -306,6 +314,14 @@ public class Pirate extends Job {
                 o7.tStart = (int) System.currentTimeMillis();
                 o7.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieSpeed, o7);
+                break;
+            case BARREL_ROULETTE:
+                int roulette = new Random().nextInt(4)+1;
+                o1.nOption = roulette;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Roulette, o1);
+                handleBarrelRoulette(roulette);
                 break;
             case BOUNTY_CHASER:
                 o1.nOption = si.getValue(dexX, slv);
@@ -549,58 +565,44 @@ public class Pirate extends Job {
         }
     }
 
-    public void handleViprEnergy(int skillid) { //TODO
-        chr.chatMessage(ChatMsgColour.YELLOW, "[Before] Energy: " + viprEnergy);
-        SkillInfo si = SkillData.getSkillInfoById(ENERGY_CHARGE);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-        Option o1 = new Option();
-
-        viprEnergy = tsb.getNOption();
-        int maxenergy = getMaxEnergy();
-        int energycharged = getEnergyincrease();
-        if(viprEnergy < maxenergy) {
-
-            if((viprEnergy + energycharged) > maxenergy) {
-                viprEnergy = maxenergy;
-                tsm.setViperEnergyCharge(1);
-            } else {
-                viprEnergy += 50;// energycharged;
+    public void handleViperEnergy() {
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o = new Option();
+            TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+            if(viperEnergy < getMaxEnergy()) {
                 tsm.setViperEnergyCharge(0);
+                if(viperEnergy + getEnergyincrease() > getMaxEnergy()) {
+                    viperEnergy = getMaxEnergy();
+                    tsm.setViperEnergyCharge(1);
+                } else {
+                    viperEnergy = viperEnergy + getEnergyincrease();
+                }
+            } else if(viperEnergy >= getMaxEnergy()) {
+                tsm.setViperEnergyCharge(1);
             }
-            o1.nOption = 1;
-            o1.rOption = ULTRA_CHARGE;
-            o1.tOption = 3;
-            tsm.putCharacterStatValue(BMageAura, o1);
-
-        } else {
-            viprEnergy = maxenergy;
-            tsm.setViperEnergyCharge(1);
-            o1.nOption = 1;
-            o1.rOption = getChargeIcon();
-            o1.tOption = 10;
-            tsm.putCharacterStatValue(PoseType, o1);
+            tsb.setNOption(viperEnergy);
+            tsb.setROption(getChargeIcon());
+            tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+            tsm.sendSetStatPacket();
         }
-        tsb.setNOption(viprEnergy);
-        tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
-        tsm.sendSetStatPacket();
-        chr.chatMessage(ChatMsgColour.YELLOW, "[After] Energy: " + viprEnergy);
     }
 
-    public void handleEnergyCost(int skillID, byte slv, SkillInfo si) {
+    public void handleViperEnergyCostSkills(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-        if (si == null) {
-            return;
+        Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+
+        if(si.getValue(forceCon, slv) > 0) {
+            int energyCost = si.getValue(forceCon, slv);
+            viperEnergy = viperEnergy - energyCost;
         }
-        if (si.getValue(forceCon, slv) > 0) {
-            viprEnergy -= si.getValue(forceCon, slv);
-            viprEnergy = Math.max(0, viprEnergy);
-        }
-        tsb.setNOption(viprEnergy);
+        tsb.setNOption(viperEnergy);
+        tsb.setROption(getChargeIcon());
         tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
         tsm.sendSetStatPacket();
-
     }
 
     public int getMaxEnergy() {
@@ -648,8 +650,8 @@ public class Pirate extends Job {
 
 
     private void incrementSupply(int amount) {
-        viprEnergy += amount;
-        viprEnergy = Math.min(MAX_ENERGY, viprEnergy);
+        viperEnergy += amount;
+        viperEnergy = Math.min(MAX_ENERGY, viperEnergy);
         updateSupply();
     }
 
@@ -662,7 +664,7 @@ public class Pirate extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
 
-        tsb.setNOption(viprEnergy);
+        tsb.setNOption(viperEnergy);
         chr.getTemporaryStatManager().putCharacterStatValue(EnergyCharged, tsb.getOption());
         chr.getTemporaryStatManager().sendSetStatPacket();
     }
@@ -708,13 +710,16 @@ public class Pirate extends Job {
             skillID = skill.getSkillId();
         }
 
-
-        handleViprEnergy(skillID);
-
         if (chr.getJob() >= JobConstants.JobEnum.BRAWLER.getJobId() && chr.getJob() <= JobConstants.JobEnum.BUCCANEER.getJobId()) {
             if(hasHitMobs) {
                 //Stun Mastery
                 handleStunMastery(attackInfo);
+
+                //Viper Energy
+                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy before: "+ viperEnergy);
+                handleViperEnergyCostSkills(attackInfo.skillId);
+                handleViperEnergy();
+                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ viperEnergy);
 
             }
         }
@@ -728,7 +733,8 @@ public class Pirate extends Job {
 
         if ((chr.getJob() >= JobConstants.JobEnum.CANNONEER.getJobId() && chr.getJob() <= JobConstants.JobEnum.CANNON_MASTER.getJobId()) || chr.getJob() == JobConstants.JobEnum.PIRATE_CANNONNEER.getJobId()) {
             if(hasHitMobs) {
-
+                //Barrel Roulette
+                handleBarrelRouletteDebuffs(attackInfo);
             }
         }
 
@@ -738,7 +744,7 @@ public class Pirate extends Job {
             }
         }
 
-        handleEnergyCost(skillID, (byte) slv, si);
+        //handleEnergyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -781,7 +787,6 @@ public class Pirate extends Job {
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        handleEnergyCost(skillID, slv, si);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -797,6 +802,12 @@ public class Pirate extends Job {
                     Field toField = c.getChannelInstance().getField(o1.nValue);
                     chr.warp(toField);
                     break;
+                case HEROS_WILL_BUCC:
+                case HEROS_WILL_SAIR:
+                case HEROS_WILL_CANNON:
+                case HEROS_WILL_JETT:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }
@@ -806,6 +817,7 @@ public class Pirate extends Job {
         if(chr.hasSkill(PIRATE_REVENGE)) {
             handlePirateRevenge();
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override
@@ -835,6 +847,62 @@ public class Pirate extends Job {
 
     @Override
     public int getFinalAttackSkill() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.getOption(Roulette).nOption == 1) {
+            return BARREL_ROULETTE;
+        }
         return 0;
+    }
+
+    public void handleBarrelRoulette(int roulette) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(BARREL_ROULETTE);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        switch (roulette) {
+            case 1: // Extra Attack (Final Attack)
+                //Handled, See Final Attack Handler
+                break;
+            case 2: // Max CritDmg
+                o.nOption = si.getValue(s, slv);
+                o.rOption = 0;
+                o.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IncCriticalDamMin, o);
+                c.write(WvsContext.temporaryStatSet(tsm));
+                break;
+            case 3: // Slow Debuff
+                //Handled, See Attack Handler
+                break;
+            case 4: // DoT
+                //Handled, See Attack Handler
+                break;
+        }
+    }
+
+    public void handleBarrelRouletteDebuffs(AttackInfo attackInfo) {
+        if(chr.hasSkill(BARREL_ROULETTE)) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o = new Option();
+            Skill skill = chr.getSkill(BARREL_ROULETTE);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                if (tsm.getOption(Roulette).nOption == 4) {  //DoT Debuff
+                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                } else
+                if (tsm.getOption(Roulette).nOption == 3) {  //Slow Debuff
+                    int slowProc = si.getValue(w, slv);
+                    if (Util.succeedProp(slowProc)) {
+                        o.nOption = 1;
+                        o.rOption = skill.getSkillId();
+                        o.tOption = si.getValue(v, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o);
+                    }
+                }
+            }
+        }
     }
 }

@@ -267,8 +267,8 @@ public class Zero extends Job {
             case REWIND:
                 o1.nOption = 1;
                 o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(HeavensDoor, o1);
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ReviveOnce, o1);
                 break;
             case FOCUSED_TIME:
                 o1.nReason = skillID;
@@ -419,6 +419,7 @@ public class Zero extends Job {
             tsm.putCharacterStatValue(ImmuneBarrier, o);
             tsm.sendSetStatPacket();
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override

@@ -556,6 +556,88 @@ public class SkillConstants {
         switch (skillID) {
             case 101120206: //Zero - Severe Storm Break (Tile)
                 return 101120204; //Zero - Adv Storm Break
+
+            case 4221016: //Shadower - Assassinate 2
+                return 4221014; //Shadower - Assassinate 1
+
+            case 41121020: //Hayato - Tornado Blade-Battoujutsu Link
+                return 41121017; //Tornado Blade
+
+            case 41121021: //Hayato - Sudden Strike-Battoujutsu Link
+                return 41121018; //Sudden Strike
+
+            case 5121017: //Bucc - Double Blast
+                return 5121016; //Bucc - Buccaneer Blast
+
+            case 5101014: //Bucc - Energy Vortex
+                return 5101012; //Bucc - Tornado Uppercut
+
+            case 5121020: //Bucc - Octopunch (Max Charge)
+                return 5121007; //Bucc - Octopunch
+
+            case 5111013: //Bucc - Hedgehog Buster
+                return 5111002; //Bucc - Energy Burst
+
+            case 5111015: //Bucc - Static Thumper
+                return 5111012; //Bucc - Static Thumper
+
+            case 31011004: //DA - Exceed Double Slash 2
+            case 31011005: //DA - Exceed Double Slash 3
+            case 31011006: //DA - Exceed Double Slash 4
+            case 31011007: //DA - Exceed Double Slash Purple
+                return 31011000; //DA - Exceed Double Slash 1
+
+            case 31201007: //DA - Exceed Demon Strike 2
+            case 31201008: //DA - Exceed Demon Strike 3
+            case 31201009: //DA - Exceed Demon Strike 4
+            case 31201010: //DA - Exceed Demon Strike Purple
+                return 31201000; //DA - Exceed Demon Strike 1
+
+            case 31211007: //DA - Exceed Lunar Slash 2
+            case 31211008: //DA - Exceed Lunar Slash 3
+            case 31211009: //DA - Exceed Lunar Slash 4
+            case 31211010: //DA - Exceed Lunar Slash Purple
+                return 31211000; //DA - Exceed Lunar Slash 1
+
+            case 31221009: //DA - Exceed Execution 2
+            case 31221010: //DA - Exceed Execution 3
+            case 31221011: //DA - Exceed Execution 4
+            case 31221012: //DA - Exceed Execution Purple
+                return 31221000; //DA - Exceed Execution 1
+
+            case 31211002: //DA - Shield Charge (Spikes)
+                return 31211011; //DA - Shield Charge (Rush)
+
+            case 61120219: //Kaiser - Dragon Slash (Final Form)
+                return 61001000; //Kaiser - Dragon Slash 1
+
+            case 61111215: //Kaiser - Flame Surge (Final Form)
+                return 61001101; //Kaiser - Flame Surge
+
+            case 61111216: //Kaiser - Impact Wave (Final Form)
+                return 61101100; //Kaiser - Impact Wave
+
+            case 61111217: //Kaiser - Piercing Blaze (Final Form)
+                return 61101101; //Kaiser - Piercing Blaze
+
+            case 61111111: //Kaiser - Wing Beat (Final Form)
+                return 61111100; //Kaiser - Wing Beat
+
+            case 61111219: //Kaiser - Pressure Chain (Final Form)
+                return 61111101; //Kaiser - Pressure Chain
+
+            case 61121201: //Kaiser - Gigas Wave (Final Form)
+                return 61121100; //Kaiser - Gigas Wave
+
+            case 61121222: //Kaiser - Inferno Breath (Final Form)
+                return 61121105; //Kaiser - Inferno Breath
+
+            case 61121203: //Kaiser - Dragon Barrage (Final Form)
+                return 61121102; //Kaiser - Dragon Barrage
+
+            case 61121221: //Kaiser - Blade Burst (Final Form)
+                return 61121104; //Kaiser - Blade Burst
+
             default:
                 return skillID;
         }
