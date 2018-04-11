@@ -3,20 +3,15 @@ package packet;
 import client.character.*;
 import client.character.items.BodyPart;
 import client.character.items.Equip;
-import client.character.skills.AttackInfo;
 import client.character.skills.ForceAtomInfo;
-import client.character.skills.MobAttackInfo;
 import client.character.skills.PsychicArea;
 import client.field.fieldeffect.FieldEffect;
-import client.jobs.legend.Evan;
 import client.life.AffectedArea;
 import client.life.Mob;
 import client.life.Summon;
 import client.trunk.TrunkDlg;
 import connection.OutPacket;
-import constants.GameConstants;
 import constants.ItemConstants;
-import constants.ServerConstants;
 import constants.SkillConstants;
 import enums.EnchantStat;
 import enums.EquipmentEnchantType;
@@ -109,6 +104,16 @@ public class CField {
         outPacket.encodeInt(charID);
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(summonSkillID);
+
+        return outPacket;
+    }
+
+    public static OutPacket summonBeholderRevengeAttack(int charID, Summon summon, int mob) {
+        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_BEHOLDER_REVENGE_ATTACK);
+
+        outPacket.encodeInt(charID);//char ID
+        outPacket.encodeInt(summon.getObjectId());//summon
+        outPacket.encodeInt(mob);//mob
 
         return outPacket;
     }
@@ -557,22 +562,31 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket addWreckage(Char chr, AttackInfo attackInfo, int debrisCount) {
+    public static OutPacket addWreckage(Char chr, Mob mob, int skillID, int debrisCount) {
         OutPacket outPacket = new OutPacket(OutHeader.ADD_WRECKAGE);
-        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
 
-            outPacket.encodeInt(chr.getId());  //v2
-            outPacket.encodeInt(mob.getX());  //position x
-            outPacket.encodeInt(mob.getY());  //position y
-            outPacket.encodeInt(chr.getClient().getChannelInstance().getField(chr.getFieldID()).getId());  //v4
-            outPacket.encodeInt(1);  //evanWreckage.nIDx
-            outPacket.encodeInt(Evan.ENHANCED_MAGIC_DEBRIS);  //nSkillID
-            outPacket.encodeInt(1);  //nType    must be 1
-            outPacket.encodeInt(debrisCount);  //Number on Skill Icon, # of Wreckages on map
+        outPacket.encodeInt(chr.getId());  //v2
+        outPacket.encodePositionInt(mob.getPosition());
+        outPacket.encodeInt(chr.getFieldID());  //v4
+        outPacket.encodeInt(1);  //evanWreckage.nIDx
+        outPacket.encodeInt(skillID);  //nSkillID
+        outPacket.encodeInt(1);  //nType
+
+        outPacket.encodeInt(debrisCount);  //Number on Skill Icon, # of Wreckages on map
+
+        return outPacket;
+    }
+
+    public static OutPacket delWreckage(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.DEL_WRECKAGE);
+
+        outPacket.encodeInt(chr.getId()); //Char ID
+        outPacket.encodeInt(1); //Count
+        outPacket.encodeByte(true); //Unk Boolean
+
+        outPacket.encodeInt(1); //Unk
 
 
-        }
         return outPacket;
     }
 

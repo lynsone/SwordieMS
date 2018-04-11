@@ -97,7 +97,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket IncJudgementStack(byte amount) {
+    public static OutPacket incJudgementStack(byte amount) {
         OutPacket outPacket = new OutPacket(OutHeader.INC_JUDGEMENT_STACK_RESPONSE);
 
         outPacket.encodeByte(amount);
