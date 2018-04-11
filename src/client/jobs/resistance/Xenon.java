@@ -210,6 +210,9 @@ public class Xenon extends Job {
 
     private void handleSupplyCost(int skillID, byte slv, SkillInfo si) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(skillID == PINPOINT_SALVO || skillID == PINPOINT_SALVO_REDESIGN_A || skillID == PINPOINT_SALVO_REDESIGN_B || skillID == PINPOINT_SALVO_PERFECT_DESIGN) {
+            return;
+        }
         if(tsm.hasStat(AmaranthGenerator)) {
             return;
         } else {
@@ -267,11 +270,14 @@ public class Xenon extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
+            //Increment Supply on attack
             if (Util.succeedProp(supplyProp)) {
                 incrementSupply();
             }
+
+            //Triangulation
+            handleTriangulation(attackInfo);
         }
-        handleTriangulation(attackInfo);
         handleSupplyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
         Option o2 = new Option();
@@ -420,55 +426,94 @@ public class Xenon extends Job {
         return 0;
     }
 
-    public void handleTriangulation(AttackInfo attackInfo) {        //TODO
+    public void handleTriangulation(AttackInfo attackInfo) {
+        if(!chr.hasSkill(TRIANGULATION)) {
+            return;
+        }
         Skill skill = chr.getSkill(TRIANGULATION);
         int slv = skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(TRIANGULATION);
+        int proc = si.getValue(prop, slv);
         Option o1 = new Option();
         Option o = new Option();
-        int amount = 4;
+        int amount = 1;
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
             MobTemporaryStat mts = mob.getTemporaryStat();
 
-            if (mts.hasCurrentMobStat(MobStat.Explosion)) {
-                amount = mts.getCurrentOptionsByMobStat(MobStat.Explosion).nOption;
-                if (amount < 3) {
-                    amount++;
+
+            if(attackInfo.skillId == TRIANGULATION) {
+                if(mts.hasCurrentMobStat(MobStat.Explosion)) {
+                    mts.removeMobStat(MobStat.Explosion, false);
+                    return;
                 }
             }
-            o1.nOption = amount;
-            o1.rOption = TRIANGULATION;
-            o1.tOption = 0;
-            mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
 
-            o.nOption = (si.getValue(x, slv) * amount);
-            o.rOption = TRIANGULATION;
-            o.tOption = 0;
-            mts.addStatOptionsAndBroadcast(MobStat.ACC, o);
-            mts.addStatOptionsAndBroadcast(MobStat.EVA, o);
+            if(Util.succeedProp(proc)) {
+                if (mts.hasCurrentMobStat(MobStat.Explosion)) {
+                    amount = mts.getCurrentOptionsByMobStat(MobStat.Explosion).nOption;
+                    if (amount <= 3) {
+                        amount++;
+                    } else {
+                        mts.removeMobStat(MobStat.Explosion, false);
+                        return;
+                    }
+                }
+                mts.removeMobStat(MobStat.Explosion, false);
+                //o.nOption = -(si.getValue(x, slv) * amount);
+                //o.rOption = TRIANGULATION;
+                //o.tOption = 0;
+                //mts.addStatOptions(MobStat.ACC, o);
+                //mts.addStatOptions(MobStat.EVA, o);
 
+                o1.nOption = amount;
+                o1.rOption = TRIANGULATION;
+                o1.tOption = 0;
+                o1.wOption = 1;
+                mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
+            }
         }
     }
 
-    private void handlePinPointSalvo() {
+    private void handlePinPointSalvo() { //TODO Cost
         Field field = chr.getField();
+
         SkillInfo si = SkillData.getSkillInfoById(PINPOINT_SALVO);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
         List<Life> lifes = field.getLifesInRect(rect);
-        for(Life life : lifes) {
-            if(life instanceof Mob) {
-                int anglenum = new Random().nextInt(160)+20;
+        //for(Life life : lifes) {
+        Life life = lifes.get(0);
+        if(life instanceof Mob) {
+            for(int i = 0; i<4; i++) {
+                int anglenum = new Random().nextInt(160) + 20;
                 int mobID = ((Mob) life).getRefImgMobID(); //
                 int inc = ForceAtomEnum.XENON_ROCKET_3.getInc();
                 int type = ForceAtomEnum.XENON_ROCKET_3.getForceAtomType();
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        anglenum, 250, (int) System.currentTimeMillis(), 1, 0,
+                        anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                         new Position());
                 chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, PINPOINT_SALVO, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), PINPOINT_SALVO, life.getPosition()));
+                        true, mobID, getPinPointSkill(), forceAtomInfo, new Rect(), 0, 300,
+                        life.getPosition(), getPinPointSkill(), life.getPosition()));
             }
         }
     }
+
+    public int getPinPointSkill() {
+        int skill = PINPOINT_SALVO;
+        if(chr.hasSkill(PINPOINT_SALVO_REDESIGN_A)) {
+            skill = PINPOINT_SALVO_REDESIGN_A;
+        }
+        if(chr.hasSkill(PINPOINT_SALVO_REDESIGN_B)) {
+            skill = PINPOINT_SALVO_REDESIGN_B;
+        }
+        if(chr.hasSkill(PINPOINT_SALVO_PERFECT_DESIGN)) {
+            skill = PINPOINT_SALVO_PERFECT_DESIGN;
+        }
+        return skill;
+    }
 }
+

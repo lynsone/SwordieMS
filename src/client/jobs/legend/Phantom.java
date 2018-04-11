@@ -114,7 +114,7 @@ public class Phantom extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                c.write(UserLocal.IncJudgementStack((byte) 15));
+                c.write(UserLocal.incJudgementStack((byte) 15));
                 break;
             case FINAL_FEINT:
                 //TODO
@@ -341,7 +341,7 @@ public class Phantom extends Job {
         o.tOption = 0;
         tsm.putCharacterStatValue(PDD, o);
         c.write(WvsContext.temporaryStatSet(tsm));
-        c.write(UserLocal.IncJudgementStack((byte) cardAmount));
+        c.write(UserLocal.incJudgementStack((byte) cardAmount));
     }
 
     private int getMaxCards() {

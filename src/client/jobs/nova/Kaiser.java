@@ -426,6 +426,7 @@ public class Kaiser extends Job {
     }
 
     @Override
+
     public void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -440,7 +441,7 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, getGaugeIncrement(attackInfo.skillId));
+            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, (getGaugeIncrement(attackInfo.skillId)*attackInfo.mobAttackInfo.size()));
         }
         Option o1 = new Option();
         Option o2 = new Option();

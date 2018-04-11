@@ -380,18 +380,17 @@ public class Magician extends Job {
             rect = rect.moveRight();
         }
         List<Life> lifes = field.getLifesInRect(rect);
-        for (Life life : lifes) {
-            if (life instanceof Mob) {
-                int mobID2 = (life).getObjectId();
-                int inc = ForceAtomEnum.DA_ORB.getInc();
-                int type = ForceAtomEnum.DA_ORB.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 500, (int) System.currentTimeMillis(), 1, 0,
-                        new Position(0, 0));
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID2, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
-            }
+        Life life = lifes.get(0);
+        if (life instanceof Mob) {
+            int mobID2 = (life).getObjectId();
+            int inc = ForceAtomEnum.DA_ORB.getInc();
+            int type = ForceAtomEnum.DA_ORB.getForceAtomType();
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                    0, 500, (int) System.currentTimeMillis(), 1, 0,
+                    new Position(0, -100));
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mobID2, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                    life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
         }
     }
 

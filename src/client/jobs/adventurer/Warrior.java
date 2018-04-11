@@ -100,7 +100,7 @@ public class Warrior extends Job {
     public static final int SMITE_SHIELD = 1221052; //Lv170
 
 
-    private Summon evilEye;
+
 
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
@@ -135,8 +135,11 @@ public class Warrior extends Job {
             SACROSANCTITY,
             DARK_THIRST,
     };
+
+    private Summon evilEye;
     private long lastPanicHit = Long.MIN_VALUE;
     private long lastDivineShieldHit = Long.MIN_VALUE;
+    private long revengeEvilEye = Long.MIN_VALUE;
     private int lastCharge = 0;
     private int divShieldAmount = 0;
 
@@ -270,7 +273,7 @@ public class Warrior extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o2);
-                c.write(CField.summonedSkill(chr.getId(), evilEye, 8));
+                //c.write(CField.summonedSkill(chr.getId(), evilEye, 8));
                 break;
             case EVIL_EYE:
                 spawnEvilEye(skillID, slv);
@@ -280,12 +283,16 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(PDD, o2);
                 break;
             case EVIL_EYE_OF_DOMINATION://TODO
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                o1.sOption = 1;
-                o1.ssOption = 1311014;
-                tsm.putCharacterStatValue(Beholder, o1);
+                if(tsm.hasStat(Beholder)) {
+                    tsm.removeStatsBySkill(EVIL_EYE_OF_DOMINATION);
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    o1.sOption = 1311013;
+                    //o1.ssOption = 1311014;
+                    tsm.putCharacterStatValue(Beholder, o1);
+                }
                 break;
             case SACRIFICE:
                 if(tsm.hasStat(Beholder)) {
@@ -730,8 +737,10 @@ public class Warrior extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+        //Paladin - Divine Shield
         if(chr.hasSkill(DIVINE_SHIELD)) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
             SkillInfo si = SkillData.getSkillInfoById(DIVINE_SHIELD);
             int slv = si.getCurrentLevel();
             int shieldprop = 50;//      si.getValue(SkillStat.prop, slv);       //TODO should be prop in WzFiles, but it's actually 0
@@ -764,6 +773,7 @@ public class Warrior extends Job {
             }
         }
 
+        //Hero - Combo Synergy
         if(chr.hasSkill(1110013)) {
             SkillInfo csi = SkillData.getSkillInfoById(1110013);
             int slv = csi.getCurrentLevel();
@@ -773,6 +783,7 @@ public class Warrior extends Job {
             }
         }
 
+        //Paladin - Shield Mastery
         if(chr.hasSkill(1210001)) { //If Wearing a Shield
             if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
                 // Guarded
@@ -793,6 +804,24 @@ public class Warrior extends Job {
             }
         }
 
+        //Dark Knight - Revenge of the Evil Eye
+        if(chr.hasSkill(1320011)) {
+            Skill skill = chr.getSkill(1320011);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            int cd = 1000 * si.getValue(cooltime, slv);
+            int heal = si.getValue(x, slv);
+            if(tsm.getOptByCTSAndSkill(PDD, EVIL_EYE) != null) {
+                if (cd + revengeEvilEye < System.currentTimeMillis()) {
+                    if (Util.succeedProp(proc)) {
+                        c.write(CField.summonBeholderRevengeAttack(chr.getId(), evilEye, hitInfo.mobID));
+                        chr.heal((int) (chr.getMaxHP() / ((double) 100 / heal)));
+                        revengeEvilEye = System.currentTimeMillis();
+                    }
+                }
+            }
+        }
         super.handleHit(c, inPacket, hitInfo);
     }
 

@@ -643,6 +643,20 @@ public class SkillConstants {
         }
     }
 
+    public static boolean isEvanFusionSkill(int skillID) {
+        switch (skillID) {
+            case 22110014:
+            case 22140014:
+            case 22140015:
+            case 22170065:
+            case 22170066:
+            case 22170067:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static boolean isShikigamiHauntingSkill(int skillID) {
         switch(skillID) {
             case 80001850:

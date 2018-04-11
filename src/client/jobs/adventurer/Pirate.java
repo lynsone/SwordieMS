@@ -62,7 +62,7 @@ public class Pirate extends Job {
     public static final int SPEED_INFUSION = 5121009; //Buff
     public static final int TIME_LEAP = 5121010; //Special Move / Buff
     public static final int MAPLE_WARRIOR_BUCC = 5121000; //Buff
-    public static final int PIRATE_REVENGE = 5120011;
+    public static final int PIRATE_REVENGE_BUCC = 5120011;
     public static final int ULTRA_CHARGE = 5120018;
     public static final int HEROS_WILL_BUCC = 5121008;
 
@@ -72,6 +72,7 @@ public class Pirate extends Job {
     public static final int INFINITY_BLAST = 5201008; //Buff
     public static final int GUN_BOOSTER = 5201003; //Buff
 
+    public static final int ALL_ABOARD = 5210015; //Summon
     public static final int ROLL_OF_THE_DICE_SAIR = 5211007; //Buff
     public static final int OCTO_CANNON = 5211014; //Summon
 
@@ -80,7 +81,9 @@ public class Pirate extends Job {
     public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
+    public static final int PIRATE_REVENGE_SAIR = 5220012;
     public static final int HEROS_WILL_SAIR = 5221010;
+    public static final int MAJESTIC_PRESENCE = 5220020;
 
 
     //Cannoneer
@@ -142,6 +145,7 @@ public class Pirate extends Job {
             MAPLE_WARRIOR_BUCC,
 
             SCURVY_SUMMONS,
+            ALL_ABOARD,
             INFINITY_BLAST,
             GUN_BOOSTER,
             ROLL_OF_THE_DICE_SAIR, //TODO
@@ -272,7 +276,7 @@ public class Pirate extends Job {
             case ROLL_OF_THE_DICE_BUCC:
             case ROLL_OF_THE_DICE_SAIR:
             case LUCK_OF_THE_DIE:
-                o1.nOption = 4;
+                o1.nOption = 6;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Dice, o1);
@@ -506,13 +510,9 @@ public class Pirate extends Job {
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
                 break;
+            case ALL_ABOARD:
             case SCURVY_SUMMONS: //Moves, Attacks
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(false);
-                summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
-                field.spawnSummon(summon);
+                summonScurvySummons(slv, skillID);
                 break;
             case ANCHOR_AWEIGH: //Stationary, Pulls mobs
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -549,7 +549,7 @@ public class Pirate extends Job {
         }
     }
 
-    public void handleStunMastery(AttackInfo attackInfo) {
+    private void handleStunMastery(AttackInfo attackInfo) {
         Option o1 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(STUN_MASTERY);
         int slv = si.getCurrentLevel();
@@ -565,7 +565,7 @@ public class Pirate extends Job {
         }
     }
 
-    public void handleViperEnergy() {
+    private void handleViperEnergy() {
         if(chr.hasSkill(ENERGY_CHARGE)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
@@ -588,7 +588,7 @@ public class Pirate extends Job {
         }
     }
 
-    public void handleViperEnergyCostSkills(int skillID) {
+    private void handleViperEnergyCostSkills(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
         Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
@@ -605,7 +605,7 @@ public class Pirate extends Job {
         tsm.sendSetStatPacket();
     }
 
-    public int getMaxEnergy() {
+    private int getMaxEnergy() {
         int maxenergy = 0;
         if(chr.hasSkill(ENERGY_CHARGE)) {
             maxenergy = 5000;
@@ -616,7 +616,7 @@ public class Pirate extends Job {
         return maxenergy;
     }
 
-    public int getEnergyincrease() {
+    private int getEnergyincrease() {
         int interval = 0;
         if(chr.hasSkill(ENERGY_CHARGE)) {
             interval = 150;
@@ -630,7 +630,7 @@ public class Pirate extends Job {
         return interval;
     }
 
-    public int getChargeIcon() {
+    private int getChargeIcon() {
         int icon = 0;
         if(chr.hasSkill(ENERGY_CHARGE)) {
             icon = ENERGY_CHARGE;
@@ -644,7 +644,7 @@ public class Pirate extends Job {
         return icon;
     }
 
-    public void incrementSupply() {
+    private void incrementSupply() {
         incrementSupply(800);
     }
 
@@ -655,7 +655,7 @@ public class Pirate extends Job {
         updateSupply();
     }
 
-    public void supplyInterval() {
+    private void supplyInterval() {
         incrementSupply();
         EventManager.addEvent(this::supplyInterval, 1000);
     }
@@ -669,26 +669,37 @@ public class Pirate extends Job {
         chr.getTemporaryStatManager().sendSetStatPacket();
     }
 
-    public void handlePirateRevenge() {
+    private void handlePirateRevenge() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        SkillInfo si = SkillData.getSkillInfoById(PIRATE_REVENGE);
-        Skill skill = chr.getSkill(PIRATE_REVENGE);
+        Skill skill = getPirateRevenge();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) skill.getCurrentLevel();
         Option o1 = new Option();
         Option o2 = new Option();
         int prop = si.getValue(SkillStat.prop, slv);
         if(Util.succeedProp(prop)) {
             o1.nOption = si.getValue(y, slv);
-            o1.rOption = PIRATE_REVENGE;
+            o1.rOption = getPirateRevenge().getSkillId();
             o1.tOption = si.getValue(time, slv);
             tsm.putCharacterStatValue(DamageReduce, o1);
-            o2.nReason = PIRATE_REVENGE;
+            o2.nReason = getPirateRevenge().getSkillId();
             o2.nValue = si.getValue(indieDamR, slv);
             o2.tStart = (int) System.currentTimeMillis();
             o2.tTerm = si.getValue(time, slv);
             tsm.putCharacterStatValue(IndieDamR, o2);
             c.write(WvsContext.temporaryStatSet(tsm));
         }
+    }
+
+    private Skill getPirateRevenge() {
+        Skill skill = null;
+        if(chr.hasSkill(PIRATE_REVENGE_SAIR)) {
+            skill = chr.getSkill(PIRATE_REVENGE_SAIR);
+        }
+        if(chr.hasSkill(PIRATE_REVENGE_BUCC)) {
+            skill = chr.getSkill(PIRATE_REVENGE_BUCC);
+        }
+        return skill;
     }
 
     public boolean isBuff(int skillID) {
@@ -764,12 +775,12 @@ public class Pirate extends Job {
             case MONKEY_WAVE:
             case STARLINE_TWO:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                    if (Util.succeedProp(si.getValue(hcProp, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
+                        o1.tOption = si.getValue(hcTime, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
@@ -814,7 +825,7 @@ public class Pirate extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        if(chr.hasSkill(PIRATE_REVENGE)) {
+        if(chr.hasSkill(PIRATE_REVENGE_BUCC) || chr.hasSkill(PIRATE_REVENGE_SAIR)) {
             handlePirateRevenge();
         }
         super.handleHit(c, inPacket, hitInfo);
@@ -848,13 +859,16 @@ public class Pirate extends Job {
     @Override
     public int getFinalAttackSkill() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr.hasSkill(MAJESTIC_PRESENCE)) {
+            return MAJESTIC_PRESENCE;
+        }
         if(tsm.getOption(Roulette).nOption == 1) {
-            return BARREL_ROULETTE;
+            return BARREL_ROULETTE; //TODO
         }
         return 0;
     }
 
-    public void handleBarrelRoulette(int roulette) {
+    private void handleBarrelRoulette(int roulette) {   //TODO
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         Skill skill = chr.getSkill(BARREL_ROULETTE);
@@ -880,7 +894,7 @@ public class Pirate extends Job {
         }
     }
 
-    public void handleBarrelRouletteDebuffs(AttackInfo attackInfo) {
+    private void handleBarrelRouletteDebuffs(AttackInfo attackInfo) {   //TODO
         if(chr.hasSkill(BARREL_ROULETTE)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
@@ -904,5 +918,23 @@ public class Pirate extends Job {
                 }
             }
         }
+    }
+
+    private void summonScurvySummons(byte slv, int skillID) {    //TODO
+        /*
+        5210015 - All Aboard
+        5210016 - All Aboard
+        5210017 - All Aboard
+        5210018 - All Aboard
+         */
+
+        Field field;
+        Summon summon;
+        summon = Summon.getSummonBy(c.getChr(), 5210018, slv);
+        field = c.getChr().getField();
+        summon.setFlyMob(false);
+        summon.setMoveAction((byte) 0);
+        summon.setMoveAbility(MoveAbility.SLOW_FORWARD.getVal());
+        field.spawnSummon(summon);
     }
 }

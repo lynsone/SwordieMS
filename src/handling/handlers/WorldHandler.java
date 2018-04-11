@@ -26,6 +26,7 @@ import client.jobs.adventurer.Archer;
 import client.jobs.adventurer.Warrior;
 import client.jobs.cygnus.BlazeWizard;
 import client.jobs.legend.Luminous;
+import client.jobs.resistance.Xenon;
 import client.jobs.sengoku.Kanna;
 import client.life.*;
 import client.life.movement.Movement;
@@ -3113,8 +3114,26 @@ public class WorldHandler {
 //                trunk.getItems().sort(Comparator.comparingInt(Item::getItemId));
                 chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_SortItem, trunk)));
                 break;
+            case TrunkReq_CloseDialog:
+                chr.dispose();
+                break;
             default:
                 log.error(String.format("Unhandled trunk request type %s.", trunkType));
         }
+    }
+
+    public static void handleMobExplosionStart(Client c, InPacket inPacket) {
+        int mobID = inPacket.decodeInt();
+        int charID = inPacket.decodeInt();
+        int skillID = inPacket.decodeInt(); //tick
+        Char chr = c.getChr();
+        if(chr.getJob() >= JobConstants.JobEnum.XENON1.getJobId() && chr.getJob() <= JobConstants.JobEnum.XENON4.getJobId()) {
+            skillID = Xenon.TRIANGULATION;
+        }
+        if(chr.getJob() >= JobConstants.JobEnum.BLAZEWIZARD1.getJobId() && chr.getJob() <= JobConstants.JobEnum.BLAZEWIZARD4.getJobId()) {
+            skillID = BlazeWizard.IGNITION;
+        }
+        Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
+        c.write(UserLocal.onExplosionAttack(skillID, mob.getPosition(), mobID, 1));
     }
 }

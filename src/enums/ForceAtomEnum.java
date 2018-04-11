@@ -57,7 +57,8 @@ public enum ForceAtomEnum {
     MECH_MEGA_ROCKET_1(20, 1),
     MECH_MEGA_ROCKET_2(20, 2),
     KINESIS_ORB_REAL(22, 1),
-    FAST_STAR_ORB(24, 1), //Evan's Magic Debris
+    WRECKAGE(23, 1), //Evan's Magic Debris
+    ADV_WRECKAGE(24, 1), //Evan's Advanced Magic Debris
     TRANSPARENT_AB_ORB(25, 1), // same for 26, but that disappears
     TRANSPARENT_AB_ORB_RECREATION(26,1),
 
