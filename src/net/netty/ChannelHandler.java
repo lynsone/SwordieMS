@@ -372,6 +372,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case SUMMONED_SKILL:
                     WorldHandler.handleSummonedSkill(c, inPacket);
                     break;
+                case MOB_EXPLOSION_START:
+                    WorldHandler.handleMobExplosionStart(c, inPacket);
+                    break;
                 case REQUEST_DEC_COMBO:
                     if(c.getChr().getJob() >= JobConstants.JobEnum.ARAN1.getJobId() && c.getChr().getJob() <= JobConstants.JobEnum.ARAN4.getJobId()) {
                         Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());

@@ -1,13 +1,12 @@
 package packet;
 
 import client.character.Char;
-import client.character.DamageSkinSaveData;
 import client.character.skills.LarknessManager;
 import connection.OutPacket;
-import constants.GameConstants;
 import enums.ChatMsgColour;
 import enums.DamageSkinType;
 import handling.OutHeader;
+import util.Position;
 
 /**
  * Created on 1/2/2018.
@@ -110,14 +109,25 @@ public class UserLocal {
         OutPacket outPacket = new OutPacket(OutHeader.DAMAGE_SKIN_SAVE_RESULT);
 
         outPacket.encodeByte(req.getVal());
-        if(req.getVal() <= 2) {
+        if (req.getVal() <= 2) {
             outPacket.encodeByte(res.getVal());
-            if(res == DamageSkinType.DamageSkinSave_Success) {
+            if (res == DamageSkinType.DamageSkinSave_Success) {
                 chr.encodeDamageSkins(outPacket);
             }
-        } else if(req == DamageSkinType.DamageSkinSaveReq_SendInfo) {
+        } else if (req == DamageSkinType.DamageSkinSaveReq_SendInfo) {
             chr.encodeDamageSkins(outPacket);
         }
+        return outPacket;
+    }
+
+    public static OutPacket onExplosionAttack(int skillID, Position position, int mobID, int count) {
+        OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
+
+        outPacket.encodeInt(skillID); //skillID
+        outPacket.encodePositionInt(position); //Position
+        outPacket.encodeInt(mobID); //MobID
+        outPacket.encodeInt(count); //Count
+
         return outPacket;
     }
 }
