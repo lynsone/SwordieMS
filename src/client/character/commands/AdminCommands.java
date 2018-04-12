@@ -2,15 +2,20 @@ package client.character.commands;
 
 import client.Client;
 import client.character.Char;
+import client.character.CharacterStat;
 import client.character.items.Equip;
 import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
+import client.field.Foothold;
 import client.field.Portal;
 import client.friend.*;
 import client.jobs.nova.Kaiser;
+import client.life.DeathType;
 import client.life.Life;
 import client.life.Mob;
+import client.life.Npc;
+import client.shop.NpcShopDlg;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
 import enums.*;
@@ -19,12 +24,14 @@ import loaders.*;
 import org.apache.log4j.LogManager;
 import packet.CField;
 import packet.MobPool;
+import packet.ShopDlg;
 import packet.WvsContext;
 import server.Server;
 import util.Position;
 import util.Rect;
 import util.Util;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -221,6 +228,40 @@ public class AdminCommands {
 
                 log.debug("Mob has id " + mob.getObjectId());
                 chr.chatMessage("hp=" + mob.getMaxHp());
+            }
+        }
+    }
+
+
+    public static class NPC extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int id = Integer.parseInt(args[1]);
+
+            int count = 1;
+            for (int i = 0; i < count; i++) {
+                Npc npc = NpcData.getNpcDeepCopyById(id);
+                if(npc == null) {
+                    chr.chatMessage("Could not find a npc with that ID.");
+                    return;
+                }
+                Field field = chr.getField();
+                Position pos = chr.getPosition();
+
+                npc.setPosition(pos.deepCopy());
+                npc.setCy(chr.getPosition().getY());
+                npc.setRx0(chr.getPosition().getX()+50);
+                npc.setRx1(chr.getPosition().getX()-50);
+
+
+                npc.setFh(chr.getFoothold());
+                npc.setNotRespawnable(true);
+                if (npc.getField() == null) {
+                    npc.setField(field);
+                }
+                field.spawnLife(npc, null);
+
+                log.debug("npc has id " + npc.getObjectId());
+
             }
         }
     }
@@ -868,5 +909,4 @@ public class AdminCommands {
             chr.chatMessage("Cache has been cleared.");
         }
     }
-
 }

@@ -52,6 +52,7 @@ public class ScriptManager implements Observer {
     private Char chr;
     private NpcScriptInfo npcScriptInfo;
     private Map<ScriptType, ScriptInfo> scripts;
+    private int oldField = 0;
 
     public ScriptManager(Char chr) {
         this.chr = chr;
@@ -413,6 +414,7 @@ public class ScriptManager implements Observer {
     public void warp(int mid, int pid) {
         Field field = chr.getClient().getChannelInstance().getField(mid);
         Portal portal = chr.getField().getPortalByID(pid);
+        saveOldField();
         chr.warp(field, portal);
     }
 
@@ -423,6 +425,7 @@ public class ScriptManager implements Observer {
      */
     public void warp(int id) {
         Field field = chr.getClient().getChannelInstance().getField(id);
+        saveOldField();
         chr.warp(field);
     }
 
@@ -714,5 +717,14 @@ public class ScriptManager implements Observer {
 
     public void openTrunk(int npcTemplateID) {
         chr.write(CField.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
+    }
+
+    public void saveOldField (){
+        oldField = chr.getField().getId();
+    }
+    //temp ardent/fm portal fix (only works when entering fm/ardent through portals)
+    public int getOldFieldID (){
+
+        return oldField;
     }
 }
