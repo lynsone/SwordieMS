@@ -3,11 +3,9 @@ def init():
 	if currentMap == 101020400:
 		map = 101020401
 		portal = 10
-		
 	elif currentMap == 101050000:
 		map = 101050000
 		portal = 9
-		
 	elif currentMap == 106030600:
 		map = 106030600
 		portal = 3
@@ -44,6 +42,24 @@ def init():
 	elif currentMap == 106030201:
 		map = 106030210
 		portal = 4
+	elif currentMap == 865000000:
+		map = 865020000
+		portal = 3
+	elif currentMap == 865020000:
+		map = 865020100
+		portal = 3
+	elif currentMap == 865030200:
+		map = 865030201
+		portal = 2
+	elif currentMap == 863010500:
+		map = 863010420
+		portal = 2
+	elif currentMap == 863010320:
+		map = 863010500
+		portal = 1
+	elif currentMap == 863010430:
+		map = 863010500
+		portal = 0
 	else:
 		map = sm.getChr().getField().getReturnMap()
 		portal = 0

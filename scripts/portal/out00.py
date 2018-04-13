@@ -20,6 +20,42 @@ def init():
 	elif fieldID == 271040000:
 		map = 271030600
 		portal = 0
+	elif fieldID == 866000220:
+		map = 865000000
+		portal = 0
+	elif fieldID == 863010220:
+		map = 863010100
+		portal = 9
+	elif fieldID == 863010300:
+		map = 863010100
+		portal = 7
+	elif fieldID == 863010310:
+		map = 863010300
+		portal = 1
+	elif fieldID == 863010400:
+		map = 863010100
+		portal = 6
+	elif fieldID == 863010410:
+		map = 863010400
+		portal = 1
+	elif fieldID == 863010230:
+		map =863010220
+		portal = 2
+	elif fieldID == 863010240:
+		map =863010210
+		portal = 2
+	elif fieldID == 863010500:
+		map = 863010240
+		portal = 0
+	elif fieldID == 863010600:
+		map = 863010700
+		portal = 0
+	elif fieldID == 863010430:
+		map = 863010420
+		portal = 3
+	elif fieldID == 863010330:
+		map = 863010320
+		portal = 3
 	elif fieldID == 930100500:
 	    map = 930100000
 	    portal = 0

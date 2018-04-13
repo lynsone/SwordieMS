@@ -646,11 +646,15 @@ public class SkillConstants {
     public static boolean isEvanFusionSkill(int skillID) {
         switch (skillID) {
             case 22110014:
+            case 22110025:
             case 22140014:
             case 22140015:
+            case 22140024:
+            case 22140023:
             case 22170065:
             case 22170066:
             case 22170067:
+            case 22170094:
                 return true;
             default:
                 return false;
