@@ -123,7 +123,7 @@ public class Inventory {
     }
 
     public boolean containsItem(int itemID) {
-        return getItems().stream().anyMatch(item -> item.getItemId() == itemID);
+        return getItemByItemID(itemID) != null;
     }
 
     public boolean canPickUp(Item item) {

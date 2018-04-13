@@ -391,6 +391,9 @@ public class Field {
                     chr.write(NpcPool.npcChangeController(npc, false));
                 }
             }
+            if(life instanceof Drop) {
+                onlyChar.write(DropPool.dropEnterField((Drop) life, life.getPosition(), 0));
+            }
         }
     }
 
@@ -733,5 +736,19 @@ public class Field {
 
     public void setUserFirstEnter(boolean userFirstEnter) {
         this.userFirstEnter = userFirstEnter;
+    }
+
+    public int getAliveMobCount() {
+        return getLifes().stream()
+                .filter(life -> life instanceof Mob && ((Mob) life).isAlive())
+                .collect(Collectors.toList())
+                .size();
+    }
+
+    public int getAliveMobCount(int mobID) {
+        return getLifes().stream()
+                .filter(life -> life instanceof Mob && life.getTemplateId() == mobID && ((Mob) life).isAlive())
+                .collect(Collectors.toList())
+                .size();
     }
 }

@@ -1920,10 +1920,15 @@ public class WorldHandler {
         byte lastType = inPacket.decodeByte();
         byte action = inPacket.decodeByte();
         int answer = 0;
+        boolean hasAnswer = false;
         if (inPacket.getUnreadAmount() >= 4) {
             answer = inPacket.decodeInt();
+            hasAnswer = true;
         }
-        chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
+        if (lastType != 5 || hasAnswer) {
+            // else -> User pressed escape in a selection (choice) screen
+            chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
+        }
     }
 
     public static void handleDropPickUpRequest(Client c, InPacket inPacket) {

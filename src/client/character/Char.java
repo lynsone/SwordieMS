@@ -2128,7 +2128,7 @@ public class Char {
         Item checkItem = ItemData.getItemDeepCopy(id);
         Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
         int consumed = quantity > item.getQuantity() ? 0 : item.getQuantity() - quantity;
-        item.setQuantity(consumed + 1); // +1 because 1 gets consumed by called consumeItem(item)
+        item.setQuantity(consumed + 1); // +1 because 1 gets consumed by consumeItem(item)
         if (item != null) {
             consumeItem(item);
         }
@@ -2160,6 +2160,7 @@ public class Char {
 
     public void setGuild(Guild guild) {
         if(guild != null) {
+            // to ensure that the same instance of a guild is retrieved for all characters
             this.guild = getClient().getWorld().getGuildByID(guild.getId());
         } else {
             this.guild = null;

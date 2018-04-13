@@ -26,7 +26,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) {
         NettyClient o = ctx.channel().attr(CLIENT_KEY).get();
 //        if(!LoginAcceptor.channelPool.containsKey(o.getIP())) {
 //            System.out.println("[Dropping currently unknown client]");
@@ -35,7 +35,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         log.debug("[ChannelHandler] | Channel inactive.");
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
         if(c != null && c.getChr() != null) {
@@ -357,7 +357,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_PORTABLE_CHAIR_SIT_REQUEST:
                     WorldHandler.handleShowChair(c, inPacket);
                     break;
-                case R_W_MULTI_CHARGE_CANCEL_REQUEST:
+                case RW_MULTI_CHARGE_CANCEL_REQUEST:
                     WorldHandler.handleRWMultiChargeCancelRequest(c, inPacket);
                     break;
                 case FOX_MAN_ACTION_SET_USE_REQUEST:

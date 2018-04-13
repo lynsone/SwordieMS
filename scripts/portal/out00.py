@@ -53,19 +53,14 @@ def init():
 
 		#fm
 	elif fieldID == 910000000:
-		oldFieldID = sm.getOldFieldID()
-		if oldFieldID == 0:
-			sm.chat("(Portal) Cannot find your previous map ID, warping to Henesys.")
-			map = 100000000
-			portal = 0
-		elif oldFieldID == 910000000:
+		oldFieldID = sm.getReturnField()
+		if oldFieldID == 0 or oldFieldID == 910000000:
 			sm.chat("(Portal) Cannot find your previous map ID, warping to Henesys.")
 			map = 100000000
 			portal = 0
 		else:
 			map = oldFieldID
 			portal = 0
-
 	else:
 		sm.chat("(Portal) This script (out00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
 		map = sm.getChr().getField().getReturnMap()

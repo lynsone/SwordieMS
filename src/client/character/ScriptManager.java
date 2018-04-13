@@ -1,7 +1,6 @@
 package client.character;
 
 import client.Account;
-import client.character.items.Inventory;
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.character.items.Equip;
@@ -31,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static enums.ChatMsgColour.*;
 import static enums.InventoryOperation.ADD;
@@ -52,7 +50,7 @@ public class ScriptManager implements Observer {
     private Char chr;
     private NpcScriptInfo npcScriptInfo;
     private Map<ScriptType, ScriptInfo> scripts;
-    private int oldField = 0;
+    private int returnField = 0;
 
     public ScriptManager(Char chr) {
         this.chr = chr;
@@ -97,6 +95,7 @@ public class ScriptManager implements Observer {
     }
 
     private void startScript(int parentID, String scriptName, ScriptType scriptType, String initFuncName) {
+        chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
         ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
         scriptEngine.put("sm", this);
         scriptEngine.put("parentID", parentID);
@@ -160,6 +159,7 @@ public class ScriptManager implements Observer {
     public void handleAction(ScriptType scriptType, byte lastType, byte response, int answer) {
         switch (response) {
             case -1:
+            case 5:
                 stop(scriptType);
                 break;
             case 0:
@@ -414,7 +414,6 @@ public class ScriptManager implements Observer {
     public void warp(int mid, int pid) {
         Field field = chr.getClient().getChannelInstance().getField(mid);
         Portal portal = chr.getField().getPortalByID(pid);
-        saveOldField();
         chr.warp(field, portal);
     }
 
@@ -425,7 +424,6 @@ public class ScriptManager implements Observer {
      */
     public void warp(int id) {
         Field field = chr.getClient().getChannelInstance().getField(id);
-        saveOldField();
         chr.warp(field);
     }
 
@@ -719,12 +717,19 @@ public class ScriptManager implements Observer {
         chr.write(CField.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
     }
 
-    public void saveOldField (){
-        oldField = chr.getField().getId();
+    public int getReturnField() {
+        return returnField;
     }
-    //temp ardent/fm portal fix (only works when entering fm/ardent through portals)
-    public int getOldFieldID (){
 
-        return oldField;
+    public void setReturnField(int returnField) {
+        this.returnField = returnField;
+    }
+
+    public void setReturnField() {
+        setReturnField(chr.getFieldID());
+    }
+
+    public void saveOldField() {
+       setReturnField(chr.getField().getId());
     }
 }

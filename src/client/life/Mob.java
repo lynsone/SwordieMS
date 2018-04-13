@@ -1243,4 +1243,8 @@ public class Mob extends Life {
         chr.getField().broadcastPacket(MobPool.mobLeaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
         origin.setSplit(false);
     }
+
+    public boolean isAlive() {
+        return getHp() <= 0;
+    }
 }
