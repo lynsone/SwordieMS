@@ -1,12 +1,27 @@
 def init():
     warp = True
     fieldID = sm.getFieldID()
-    if fieldID == 106030200:
-        map = 106030300
-        portal = 2
-    elif fieldID == 401060000:
-        map = 401053002
-        portal = 2
+	if fieldID == 106030200:
+		map = 106030300
+		portal = 2
+	elif fieldID == 401060000:
+		map = 401053002
+		portal = 2
+	elif fieldID == 865020000:
+		map = 865000000
+		portal = 10
+	elif fieldID == 865020100:
+		map = 865020000
+		portal = 4
+	elif fieldID == 863010420:
+		map = 863010500
+		portal = 5
+	elif fieldID == 863010500:
+		map = 863010320
+		portal = 1
+	elif fieldID == 863010330:
+		map = 863010500
+		portal = 0
     elif fieldID == 101050000:
         map = 101050100
         portal = 2

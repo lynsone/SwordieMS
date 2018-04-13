@@ -530,6 +530,20 @@ public class Field {
         return lifes;
     }
 
+    public List<Mob> getMobsInRect(Rect rect) {
+        List<Mob> mobs = new ArrayList<>();
+        for (Mob mob : getMobs()) {
+            Position position = mob.getPosition();
+            int x = position.getX();
+            int y = position.getY();
+            if (x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                mobs.add(mob);
+            }
+        }
+        return mobs;
+    }
+
     public synchronized void removeLife(Integer id, Boolean fromSchedule) {
         Life life = getLifeByObjectID(id);
         if (life == null) {

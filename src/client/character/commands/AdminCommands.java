@@ -2,20 +2,15 @@ package client.character.commands;
 
 import client.Client;
 import client.character.Char;
-import client.character.CharacterStat;
 import client.character.items.Equip;
 import client.character.items.Item;
 import client.character.skills.*;
 import client.field.Field;
-import client.field.Foothold;
 import client.field.Portal;
-import client.friend.*;
 import client.jobs.nova.Kaiser;
-import client.life.DeathType;
 import client.life.Life;
 import client.life.Mob;
 import client.life.Npc;
-import client.shop.NpcShopDlg;
 import connection.OutPacket;
 import constants.JobConstants.JobEnum;
 import enums.*;
@@ -24,19 +19,18 @@ import loaders.*;
 import org.apache.log4j.LogManager;
 import packet.CField;
 import packet.MobPool;
-import packet.ShopDlg;
 import packet.WvsContext;
 import server.Server;
 import util.Position;
 import util.Rect;
 import util.Util;
 
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
 import static client.character.skills.CharacterTemporaryStat.Morph;
+import static client.character.skills.CharacterTemporaryStat.NotDamaged;
 import static enums.ChatMsgColour.*;
 import static enums.InventoryOperation.ADD;
 
@@ -146,7 +140,7 @@ public class AdminCommands {
         }
     }
 
-    public static class checkID extends AdminCommand {
+    public static class CheckID extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             chr.chatMessage(GM_BLUE_CHAT, "your charID = " + chr.getId() + " \r\nYour accID = " + chr.getAccId());
         }
@@ -232,40 +226,29 @@ public class AdminCommands {
         }
     }
 
-
     public static class NPC extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
-
-            int count = 1;
-            for (int i = 0; i < count; i++) {
-                Npc npc = NpcData.getNpcDeepCopyById(id);
-                if(npc == null) {
-                    chr.chatMessage("Could not find a npc with that ID.");
-                    return;
-                }
-                Field field = chr.getField();
-                Position pos = chr.getPosition();
-
-                npc.setPosition(pos.deepCopy());
-                npc.setCy(chr.getPosition().getY());
-                npc.setRx0(chr.getPosition().getX()+50);
-                npc.setRx1(chr.getPosition().getX()-50);
-
-
-                npc.setFh(chr.getFoothold());
-                npc.setNotRespawnable(true);
-                if (npc.getField() == null) {
-                    npc.setField(field);
-                }
-                field.spawnLife(npc, null);
-
-                log.debug("npc has id " + npc.getObjectId());
-
+            Npc npc = NpcData.getNpcDeepCopyById(id);
+            if(npc == null) {
+                chr.chatMessage("Could not find an npc with that ID.");
+                return;
             }
+            Field field = chr.getField();
+            Position pos = chr.getPosition();
+            npc.setPosition(pos.deepCopy());
+            npc.setCy(chr.getPosition().getY());
+            npc.setRx0(chr.getPosition().getX()+50);
+            npc.setRx1(chr.getPosition().getX()-50);
+            npc.setFh(chr.getFoothold());
+            npc.setNotRespawnable(true);
+            if (npc.getField() == null) {
+                npc.setField(field);
+            }
+            field.spawnLife(npc, null);
+            log.debug("npc has id " + npc.getObjectId());
         }
     }
-
 
     public static class TestDrop extends AdminCommand {
         public static void execute(Char chr, String[] args) {
@@ -451,8 +434,6 @@ public class AdminCommands {
                     ADD, (short) item3.getBagIndex(), (byte) -1, 0, item3));
             chr.getClient().write(WvsContext.inventoryOperation(true, false,
                     ADD, (short) item4.getBagIndex(), (byte) -1, 0, item4));
-
-
             int num = 1000;
             int hp = 250000;
             int lv = 200;
@@ -629,6 +610,47 @@ public class AdminCommands {
         }
     }
 
+    public static class CurHP extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int num = Integer.parseInt(args[1]);
+            if (num >= 0) {
+                chr.setStat(Stat.hp, (short) num);
+                Map<Stat, Object> stats = new HashMap<>();
+                stats.put(Stat.hp, (short) num);
+                chr.getClient().write(WvsContext.statChanged(stats));
+            }
+        }
+    }
+
+    public static class CurMP extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int num = Integer.parseInt(args[1]);
+            if (num >= 0) {
+                chr.setStat(Stat.mp, (short) num);
+                Map<Stat, Object> stats = new HashMap<>();
+                stats.put(Stat.mp, (short) num);
+                chr.getClient().write(WvsContext.statChanged(stats));
+            }
+        }
+    }
+
+    public static class Invincible extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            Client c = chr.getClient();
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o1 = new Option();
+            if(tsm.getOption(NotDamaged).nOption == 3) {
+                tsm.removeStat(NotDamaged, false);
+                chr.chatMessage(GAME_NOTICE, "You are no longer invincible.");
+            } else {
+                o1.nOption = 3;
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                c.write(WvsContext.temporaryStatSet(tsm));
+                chr.chatMessage(GAME_NOTICE, "You are invincible.");
+            }
+        }
+    }
+
     public static class Morph extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int morphID = Integer.parseInt(args[1]);
@@ -659,9 +681,21 @@ public class AdminCommands {
 
     public static class SetMap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-
             Field toField = chr.getClient().getChannelInstance().getField(Integer.parseInt(args[1]));
             chr.warp(toField);
+        }
+    }
+
+    public static class SetPortal extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int portalID = Integer.parseInt(args[1]);
+            Portal portal = chr.getField().getPortalByID(portalID);
+            if(portal == null) {
+                chr.chatMessage(GAME_NOTICE, "Portal does not exist.");
+                return;
+            }
+            Position position = new Position(portal.getX(), portal.getY());
+            chr.write(CField.teleport(position, chr));
         }
     }
 
