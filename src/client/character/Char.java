@@ -43,6 +43,7 @@ import javax.persistence.*;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static client.character.items.BodyPart.*;
 import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.FieldInstanceType.*;
 import static enums.InvType.EQUIP;
@@ -544,67 +545,121 @@ public class Char {
             outPacket.encodeByte(0); // ?
             List<Item> equippedItems = getEquippedInventory().getItems();
             equippedItems.sort(Comparator.comparingInt(Item::getBagIndex));
+            // Normal equipped items
             for (Item item : equippedItems) {
                 Equip equip = (Equip) item;
-                if (item.getBagIndex() > 0 && item.getBagIndex() < 100) {
+                if (item.getBagIndex() > BP_BASE.getVal() && item.getBagIndex() < BP_END.getVal()) {
                     outPacket.encodeShort(equip.getBagIndex());
                     equip.encode(outPacket);
                 }
             }
             outPacket.encodeShort(0);
+            // Cash equipped items
             for (Item item : getEquippedInventory().getItems()) {
                 Equip equip = (Equip) item;
-                if (item.getBagIndex() > 100 && item.getBagIndex() < 1000) {
-                    outPacket.encodeShort(equip.getBagIndex());
+                if (item.getBagIndex() >= CBP_BASE.getVal() && item.getBagIndex() <= CBP_END.getVal()) {
+                    outPacket.encodeShort(equip.getBagIndex() - 100);
                     equip.encode(outPacket);
                 }
             }
             outPacket.encodeShort(0);
+            // Equip inventory
             for (Item item : getEquipInventory().getItems()) {
                 Equip equip = (Equip) item;
                 outPacket.encodeShort(equip.getBagIndex());
                 equip.encode(outPacket);
             }
             outPacket.encodeShort(0);
-            // NonBPEquip::Decode
+            // NonBPEquip::Decode (Evan)
             for (Item item : getEquippedInventory().getItems()) {
                 Equip equip = (Equip) item;
-                if (item.getBagIndex() > 1000 && item.getBagIndex() < 1100) {
+                if (item.getBagIndex() >= EVAN_BASE.getVal() && item.getBagIndex() < EVAN_END.getVal()) {
                     outPacket.encodeShort(equip.getBagIndex());
                     equip.encode(outPacket);
                 }
             }
             outPacket.encodeShort(0);
-            // VirtualEquipInventory::Decode
+            // VirtualEquipInventory::Decode (Android)
+            // >= 20k < 200024?
             for (Item item : getEquippedInventory().getItems()) {
                 Equip equip = (Equip) item;
-                if (item.getBagIndex() >= 1100 && item.getBagIndex() < 1200) {
+                if (item.getBagIndex() >= MECH_BASE.getVal() && item.getBagIndex() < MECH_END.getVal()) {
                     outPacket.encodeShort(equip.getBagIndex());
                     equip.encode(outPacket);
                 }
             }
             outPacket.encodeShort(0);
-            outPacket.encodeShort(0);
+            // Guessing pet consume items, could very well be wrong
             for (Item item : getEquippedInventory().getItems()) {
                 Equip equip = (Equip) item;
-                if (item.getBagIndex() >= 1200 && item.getBagIndex() <= 1300) {
+                if (item.getBagIndex() >= 200 && item.getBagIndex() <= 300) {
                     outPacket.encodeShort(equip.getBagIndex());
                     equip.encode(outPacket);
                 }
             }
             outPacket.encodeShort(0);
-            outPacket.encodeShort(0);
-            outPacket.encodeShort(0);
-            outPacket.encodeShort(0);
+            // Android
             for (Item item : getEquippedInventory().getItems()) {
                 Equip equip = (Equip) item;
-                if (item.getBagIndex() >= 5000 && item.getBagIndex() <= 5003) {
+                if (item.getBagIndex() >= AP_BASE.getVal() && item.getBagIndex() <= AP_END.getVal()) {
                     outPacket.encodeShort(equip.getBagIndex());
                     equip.encode(outPacket);
                 }
             }
             outPacket.encodeShort(0);
+            // Angelic Buster
+            for (Item item : getEquippedInventory().getItems()) {
+                Equip equip = (Equip) item;
+                if (item.getBagIndex() >= DU_BASE.getVal() && item.getBagIndex() < DU_END.getVal()) {
+                    outPacket.encodeShort(equip.getBagIndex());
+                    equip.encode(outPacket);
+                }
+            }
             outPacket.encodeShort(0);
+            // Bits
+            for (Item item : getEquippedInventory().getItems()) {
+                Equip equip = (Equip) item;
+                if (item.getBagIndex() >= BITS_BASE.getVal() && item.getBagIndex() < BITS_END.getVal()) {
+                    outPacket.encodeShort(equip.getBagIndex());
+                    equip.encode(outPacket);
+                }
+            }
+            outPacket.encodeShort(0);
+            // Zero
+            for (Item item : getEquippedInventory().getItems()) {
+                Equip equip = (Equip) item;
+                if (item.getBagIndex() >= ZERO_BASE.getVal() && item.getBagIndex() < ZERO_END.getVal()) {
+                    outPacket.encodeShort(equip.getBagIndex());
+                    equip.encode(outPacket);
+                }
+            }
+            outPacket.encodeShort(0);
+            // Totems
+            for (Item item : getEquippedInventory().getItems()) {
+                Equip equip = (Equip) item;
+                if (item.getBagIndex() >= TOTEM_BASE.getVal() && item.getBagIndex() < TOTEM_END.getVal()) {
+                    outPacket.encodeShort(equip.getBagIndex());
+                    equip.encode(outPacket);
+                }
+            }
+            outPacket.encodeShort(0);
+            // Maybe zero beta cash?
+            for (Item item : getEquippedInventory().getItems()) {
+                Equip equip = (Equip) item;
+                if (item.getBagIndex() >= MBP_BASE.getVal() && item.getBagIndex() < MBP_END.getVal()) {
+                    outPacket.encodeShort(equip.getBagIndex());
+                    equip.encode(outPacket);
+                }
+            }
+            outPacket.encodeShort(0);
+            // Haku
+            for (Item item : getEquippedInventory().getItems()) {
+                Equip equip = (Equip) item;
+                if (item.getBagIndex() >= FP_START.getVal() && item.getBagIndex() < FP_END.getVal()) {
+                    outPacket.encodeShort(equip.getBagIndex());
+                    equip.encode(outPacket);
+                }
+            }
             outPacket.encodeShort(0);
             outPacket.encodeShort(0);
             outPacket.encodeShort(0);

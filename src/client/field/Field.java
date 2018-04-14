@@ -398,9 +398,7 @@ public class Field {
     }
 
     private void removeLife(Life life) {
-        if (getLifes().contains(life)) {
-            getLifes().remove(life);
-        }
+        getLifes().remove(life);
     }
 
     public Foothold getFootholdById(int fh) {
