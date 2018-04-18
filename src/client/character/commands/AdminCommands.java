@@ -195,8 +195,8 @@ public class AdminCommands {
                 mob.setPrevPos(pos.deepCopy());
                 mob.setPosition(pos.deepCopy());
                 mob.getForcedMobStat().setMaxMP(Integer.MAX_VALUE);
-//                mob.setMaxHp(hp);
-//                mob.setHp(hp);
+                mob.setMaxHp(hp);
+                mob.setHp(hp);
                 mob.setNotRespawnable(true);
                 if (mob.getField() == null) {
                     mob.setField(field);
@@ -360,59 +360,38 @@ public class AdminCommands {
 
     public static class GetProjectiles extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int subi = 2070000;
-            int arrowBow = 2060000;
-            int arrowXBow = 2061001;
-            int bullet = 2330000;
-            Item item = ItemData.getItemDeepCopy(subi);
-            chr.addItemToInventory(item.getInvType(), item, false);
-            Item item2 = ItemData.getItemDeepCopy(arrowBow);
-            chr.addItemToInventory(item.getInvType(), item2, false);
-            Item item3 = ItemData.getItemDeepCopy(arrowXBow);
-            chr.addItemToInventory(item.getInvType(), item3, false);
-            Item item4 = ItemData.getItemDeepCopy(bullet);
-            chr.addItemToInventory(item.getInvType(), item4, false);
-            item.setQuantity(2000);
-            item2.setQuantity(2000);
-            item3.setQuantity(2000);
-            item4.setQuantity(2000);
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item2.getBagIndex(), (byte) -1, 0, item2));
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item3.getBagIndex(), (byte) -1, 0, item3));
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item4.getBagIndex(), (byte) -1, 0, item4));
+            int[] projectiles = new int[] {
+                    2070000,
+                    2060000,
+                    2061000,
+                    2330000
+            };
+            for(int projectile : projectiles) {
+                Item item = ItemData.getItemDeepCopy(projectile);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                item.setQuantity(1000);
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            }
         }
     }
 
     public static class Done extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int subi = 2070000;
-            int arrowBow = 2060000;
-            int arrowXBow = 2061001;
-            int bullet = 2330000;
-            Item item = ItemData.getItemDeepCopy(subi);
-            chr.addItemToInventory(item.getInvType(), item, false);
-            Item item2 = ItemData.getItemDeepCopy(arrowBow);
-            chr.addItemToInventory(item.getInvType(), item2, false);
-            Item item3 = ItemData.getItemDeepCopy(arrowXBow);
-            chr.addItemToInventory(item.getInvType(), item3, false);
-            Item item4 = ItemData.getItemDeepCopy(bullet);
-            chr.addItemToInventory(item.getInvType(), item4, false);
-            item.setQuantity(2000);
-            item2.setQuantity(2000);
-            item3.setQuantity(2000);
-            item4.setQuantity(2000);
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item2.getBagIndex(), (byte) -1, 0, item2));
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item3.getBagIndex(), (byte) -1, 0, item3));
-            chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) item4.getBagIndex(), (byte) -1, 0, item4));
+            int[] projectiles = new int[] {
+                    2070000,
+                    2060000,
+                    2061000,
+                    2330000
+            };
+            for(int projectile : projectiles) {
+                Item item = ItemData.getItemDeepCopy(projectile);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                item.setQuantity(1000);
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            }
+
             int num = 1000;
             int hp = 250000;
             int lv = 200;
@@ -920,6 +899,161 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             Server.getInstance().clearCache();
             chr.chatMessage("Cache has been cleared.");
+        }
+    }
+
+    public static class SaveMap extends AdminCommand {
+        private static HashMap<String, Integer> quickmaps = new HashMap<>();
+        public static void execute(Char chr, String[] args) {
+            int mapid = chr.getFieldID();
+            if (args.length < 1 && !args[1].equalsIgnoreCase("list")) {
+                chr.chatMessage(BLACK_ON_WHITE, "Incorrect Syntax: !SaveMap <save/go> <key>");
+                chr.chatMessage(BLACK_ON_WHITE, "To see the list of saved maps, use: !SaveMap list");
+            }
+            if (args[1].equalsIgnoreCase("save")) {
+                String key = args[2];
+                quickmaps.put(key, mapid);
+                chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] Map: "+ mapid +" has been saved as key '"+ key +"'.");
+            }
+            else if (args[1].equalsIgnoreCase("go")) {
+                String key = args[2];
+                if (quickmaps.get(key) == null) {
+                    chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] There is no map saved as key '" + args[2] + "'.");
+                    return;
+                }
+                Field toField = chr.getClient().getChannelInstance().getField((quickmaps.get(key)));
+                Portal portal = chr.getField().getPortalByID(0);
+                chr.warp(toField, portal);
+            }
+            else if (args[1].equalsIgnoreCase("list")) {
+                Set keys = quickmaps.keySet();
+                chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] " + quickmaps.size() + " saved maps.");
+                for (Object maps : keys) {
+                    chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] Stored map: " + quickmaps.get(maps) + " as '" + maps + "'.");
+                }
+            }
+            else {
+                chr.chatMessage(BLACK_ON_WHITE, "Incorrect Syntax: !SaveMap <save/go> <key>");
+                chr.chatMessage(BLACK_ON_WHITE, "To see the list of saved maps, use: !SaveMap list");
+            }
+        }
+    }
+
+    public static class WarriorEquips extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int[] warEquips = new int[] {
+                    1302000,
+                    1312000,
+                    1322000,
+                    1402000,
+                    1412000,
+                    1422000,
+                    1432000,
+                    1442000,
+                    1542000,
+                    1232000,
+                    1582000,
+                    1353400,
+                    1352500,
+            };
+            for (int warEquip : warEquips) {
+                Item item = ItemData.getItemDeepCopy(warEquip);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            }
+        }
+    }
+
+    public static class MageEquips extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int[] mageEquips = new int[] {
+                    1382000,
+                    1372000,
+                    1552000,
+                    1252000,
+                    1262000,
+                    1353200,
+            };
+            for (int mageEquip : mageEquips) {
+                Item item = ItemData.getItemDeepCopy(mageEquip);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            }
+        }
+    }
+
+    public static class ArcherEquips extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int[] archerEquips = new int[] {
+                    1452000,
+                    1462000,
+                    1522000,
+                    1352004,
+            };
+            for (int archerEquip : archerEquips) {
+                Item item = ItemData.getItemDeepCopy(archerEquip);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            }
+        }
+    }
+
+    public static class ThiefEquips extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int[] thiefEquips = new int[] {
+                    1472000,
+                    1332000,
+                    1342000,
+                    1242000,
+                    1362000,
+                    1352100
+            };
+            for (int thiefEquip : thiefEquips) {
+                Item item = ItemData.getItemDeepCopy(thiefEquip);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            }
+        }
+    }
+
+    public static class PirateEquips extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int[] pirateEquips = new int[] {
+                    1482000,
+                    1353100,
+                    1492000,
+                    1222000,
+                    1352600,
+                    1532000,
+                    1242000,
+            };
+            for (int pirateEquip : pirateEquips) {
+                Item item = ItemData.getItemDeepCopy(pirateEquip);
+                chr.addItemToInventory(item.getInvType(), item, false);
+                chr.getClient().write(WvsContext.inventoryOperation(true, false,
+                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+            }
+        }
+    }
+
+    public static class ClearInv extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            short startIndex = Short.parseShort(args[1]);
+            short endIndex = Short.parseShort(args[2]);
+            if(args.length < 2) {
+                chr.chatMessage(GAME_NOTICE, "Syntax Error: !ClearInv [Start Index] [End Index]");
+                return;
+            }
+            for(int i = startIndex; i < endIndex; i++) {
+                Item removeItem = chr.getInventoryByType(InvType.EQUIP).getItemBySlot((short) i);
+                chr.getInventoryByType(InvType.EQUIP).removeItem(removeItem);
+                chr.chatMessage(GAME_NOTICE, "Please change channel, as this Command is still shit right now. ");
+                chr.dispose();
+            }
         }
     }
 }

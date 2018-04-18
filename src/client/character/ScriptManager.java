@@ -1,10 +1,10 @@
 package client.character;
 
 import client.Account;
-import client.character.quest.Quest;
-import client.character.quest.QuestManager;
 import client.character.items.Equip;
 import client.character.items.Item;
+import client.character.quest.Quest;
+import client.character.quest.QuestManager;
 import client.field.Field;
 import client.field.Portal;
 import client.field.fieldeffect.MobHPTagFieldEffect;
@@ -18,6 +18,7 @@ import constants.GameConstants;
 import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.*;
+import enums.NpcMessageType;
 import loaders.*;
 import org.apache.log4j.LogManager;
 import packet.*;
@@ -29,7 +30,10 @@ import javax.script.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import static enums.ChatMsgColour.*;
 import static enums.InventoryOperation.ADD;
@@ -531,11 +535,17 @@ public class ScriptManager implements Observer {
         int q = 1;
         if (ItemConstants.isEquip(id)) {  //Equip
             Item equip = chr.getInventoryByType(InvType.EQUIP).getItemByItemID(id);
+            if(equip == null) {
+                return false;
+            }
             q = equip.getQuantity();
         } else {
             Item item2 = ItemData.getItemDeepCopy(id);
             InvType invType = item2.getInvType();
             Item item = chr.getInventoryByType(invType).getItemByItemID(id);
+            if(item == null) {
+                return false;
+            }
             q = item.getQuantity();
         }
 
@@ -827,5 +837,31 @@ public class ScriptManager implements Observer {
      */
     public void setReturnField() {
         setReturnField(chr.getFieldID());
+    }
+
+    public void saveOldField() {
+       setReturnField(chr.getField().getId());
+    }
+
+    public boolean mobsPresentInField() {
+        return mobsPresentInField(chr.getFieldID());
+    }
+
+    public boolean mobsPresentInField(int fieldid) {
+        Field field = FieldData.getFieldById(fieldid);
+        if (field.getMobs().size() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public int numberMobsInField() {
+        return numberMobsInField(chr.getFieldID());
+    }
+
+    public int numberMobsInField(int fieldid) {
+        Field field = FieldData.getFieldById(fieldid);
+        return field.getMobs().size();
     }
 }
