@@ -653,7 +653,7 @@ public class Field {
         Drop drop = new Drop(-1);
         drop.setOwnerID(ownerID);
         if (itemID != 0) {
-            item = ItemData.getEquipDeepCopyFromId(itemID);
+            item = ItemData.getEquipDeepCopyFromID(itemID);
             if (item == null) {
                 item = ItemData.getItemDeepCopy(itemID);
             }

@@ -1,7 +1,6 @@
 package client.character.quest.questReward;
 
 import client.character.Char;
-import client.character.items.Equip;
 import client.character.items.Item;
 import constants.ItemConstants;
 import loaders.DatSerializable;
@@ -42,7 +41,7 @@ public class QuestItemReward implements QuestReward{
     public void giveReward(Char chr) {
         Item item;
         if(ItemConstants.isEquip(getId())) {
-            item = ItemData.getEquipDeepCopyFromId(getId());
+            item = ItemData.getEquipDeepCopyFromID(getId());
         } else {
             item = ItemData.getItemDeepCopy(getId());
             item.setQuantity(getQuantity());

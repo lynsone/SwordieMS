@@ -839,27 +839,37 @@ public class ScriptManager implements Observer {
         setReturnField(chr.getFieldID());
     }
 
-    public void saveOldField() {
-       setReturnField(chr.getField().getId());
-    }
-
+    /**
+     * Checks whether there are any mobs present in the Char's current field.
+     * @return whether there are any mobs present in the Char's current field
+     */
     public boolean mobsPresentInField() {
         return mobsPresentInField(chr.getFieldID());
     }
 
+    /**
+     * Checks whether there are any mobs present in a given field.
+     * @param fieldid the field's id
+     * @return whether there are any mobs present in a given field
+     */
     public boolean mobsPresentInField(int fieldid) {
-        Field field = FieldData.getFieldById(fieldid);
-        if (field.getMobs().size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        Field field = chr.getClient().getChannelInstance().getField(fieldid);
+        return field.getMobs().size() > 0;
     }
 
+    /**
+     * Returns the number of mobs in the Char's current field.
+     * @return the number of mobs in the Char's current field.
+     */
     public int numberMobsInField() {
         return numberMobsInField(chr.getFieldID());
     }
 
+    /**
+     * Returns the number of mobs in a given field.
+     * @param fieldid the field's id
+     * @return the number of mobs in a given field.
+     */
     public int numberMobsInField(int fieldid) {
         Field field = FieldData.getFieldById(fieldid);
         return field.getMobs().size();

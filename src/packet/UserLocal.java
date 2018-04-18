@@ -1,6 +1,7 @@
 package packet;
 
 import client.character.Char;
+import client.character.Pet;
 import client.character.skills.LarknessManager;
 import connection.OutPacket;
 import enums.ChatMsgColour;
@@ -120,13 +121,29 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onExplosionAttack(int skillID, Position position, int mobID, int count) {
+    public static OutPacket explosionAttack(int skillID, Position position, int mobID, int count) {
         OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
 
         outPacket.encodeInt(skillID); //skillID
         outPacket.encodePositionInt(position); //Position
         outPacket.encodeInt(mobID); //MobID
         outPacket.encodeInt(count); //Count
+
+        return outPacket;
+    }
+
+    public static OutPacket petActivateChange(int charID, Pet pet, boolean active, byte removedReason) {
+        OutPacket outPacket = new OutPacket(OutHeader.PET_ACTIVATED);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(pet.getIdx());
+        outPacket.encodeByte(active);
+        if(active) {
+            outPacket.encodeByte(true); // init
+            pet.encode(outPacket);
+        } else {
+            outPacket.encodeByte(removedReason);
+        }
 
         return outPacket;
     }

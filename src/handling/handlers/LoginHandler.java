@@ -2,7 +2,6 @@ package handling.handlers;
 
 import client.Account;
 import client.Client;
-import client.character.AvatarLook;
 import client.character.Char;
 import client.character.CharacterStat;
 import client.character.FuncKeyMap;
@@ -18,8 +17,6 @@ import handling.OutHeader;
 import loaders.ItemData;
 import net.db.DatabaseManager;
 import org.apache.log4j.LogManager;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import packet.Login;
 import server.Channel;
 import server.Server;
@@ -200,7 +197,7 @@ public class LoginHandler {
         cs.setPosMap(100000000);
         DatabaseManager.saveToDB(chr);
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
-            Equip equip = ItemData.getEquipDeepCopyFromId(i);
+            Equip equip = ItemData.getEquipDeepCopyFromID(i);
             if (equip != null && equip.getItemId() >= 1000000) {
                 equip.setBagIndex(ItemConstants.getBodyPartFromItem(
                         equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
@@ -208,7 +205,7 @@ public class LoginHandler {
             }
         }
         if(curSelectedRace == 15) { // Zero hack for adding 2nd weapon (removing it in hairequips for zero look)
-            Equip equip = ItemData.getEquipDeepCopyFromId(1562000);
+            Equip equip = ItemData.getEquipDeepCopyFromID(1562000);
             equip.setBagIndex(ItemConstants.getBodyPartFromItem(
                     equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
             chr.addItemToInventory(EQUIPPED, equip, true);

@@ -37,6 +37,7 @@ public class ItemInfo {
     private boolean notConsume;
     private String script = "";
     private int scriptNPC;
+    private int life;
 
     public void setItemId(int itemId) {
         this.itemId = itemId;
@@ -236,5 +237,13 @@ public class ItemInfo {
 
     public int getScriptNPC() {
         return scriptNPC;
+    }
+
+    public void setLife(int life) {
+        this.life = life;
+    }
+
+    public int getLife() {
+        return life;
     }
 }

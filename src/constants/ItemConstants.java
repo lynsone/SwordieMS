@@ -747,4 +747,8 @@ public class ItemConstants {
                 return 0;
         }
     }
+
+    public static boolean isPet(int itemId) {
+        return itemId / 10000 == 500;
+    }
 }

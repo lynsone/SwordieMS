@@ -31,10 +31,7 @@ import enums.*;
 import handling.handlers.ChatHandler;
 import loaders.*;
 import net.db.DatabaseManager;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import packet.*;
-import server.Server;
 import util.FileTime;
 import util.Position;
 import util.Rect;
@@ -42,6 +39,7 @@ import util.Rect;
 import javax.persistence.*;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static client.character.items.BodyPart.*;
 import static enums.ChatMsgColour.GAME_MESSAGE;
@@ -268,7 +266,7 @@ public class Char {
         avatarLook.setHair(items.length > 1 ? items[1] : 0);
         List<Integer> hairEquips = new ArrayList<>();
         for (int itemId : items) {
-            Equip equip = ItemData.getEquipDeepCopyFromId(itemId);
+            Equip equip = ItemData.getEquipDeepCopyFromID(itemId);
             if (equip != null) {
                 hairEquips.add(itemId);
                 if ("Wp".equals(equip.getiSlot())) {
@@ -303,9 +301,6 @@ public class Char {
         setFieldInstanceType(CHANNEL);
         ranking = new Ranking();
         pets = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            pets.add(new Pet(-1));
-        }
         stolenSkills = new ArrayList<>();
         chosenSkills = new ArrayList<>();
         questManager = new QuestManager(this);
@@ -440,8 +435,12 @@ public class Char {
         // CharacterData::Decode
         outPacket.encodeLong(mask.get());
         outPacket.encodeByte(getCombatOrders());
-        for (Pet pet : getPets()) {
-            outPacket.encodeInt(pet.getActiveSkillCoolTime());
+        for(int i = 0; i < GameConstants.MAX_PET_AMOUNT; i++) {
+            if(i < getPets().size()) {
+                outPacket.encodeInt(getPets().get(i).getActiveSkillCoolTime());
+            } else {
+                outPacket.encodeInt(0);
+            }
         }
         outPacket.encodeByte(0); // unk, not in kmst
         byte sizeByte = 0;
@@ -1846,6 +1845,7 @@ public class Char {
         }
         notifyChanges();
         toField.execUserEnterScript(this);
+        initPets();
     }
 
     /**
@@ -2699,5 +2699,24 @@ public class Char {
 
     public boolean canAddMoney(long reqMoney) {
         return getMoney() + reqMoney > 0 && getMoney() + reqMoney < GameConstants.MAX_MONEY;
+    }
+
+    public void addPet(Pet pet) {
+        getPets().add(pet);
+    }
+
+    public void removePet(Pet pet) {
+        getPets().remove(pet);
+    }
+
+    public void initPets() {
+        for(PetItem pi : getCashInventory().getItems()
+                .stream()
+                .filter(i -> i instanceof PetItem && ((PetItem) i).getActiveState() > 0)
+                .map(i -> (PetItem) i).collect(Collectors.toList())) {
+            Pet p = pi.createPet(this);
+            addPet(p);
+            getField().broadcastPacket(UserLocal.petActivateChange(getId(), p, true, (byte) 0));
+        }
     }
 }

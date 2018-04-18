@@ -5,6 +5,7 @@ import client.character.*;
 import client.character.items.Equip;
 import client.character.items.Inventory;
 import client.character.items.Item;
+import client.character.items.PetItem;
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.character.quest.QuestProgressRequirement.*;
@@ -69,6 +70,7 @@ public class DatabaseManager {
                 Macro.class,
                 DamageSkinSaveData.class,
                 Trunk.class,
+                PetItem.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

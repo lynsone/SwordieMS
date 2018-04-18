@@ -1,5 +1,6 @@
 package client.character;
 
+import client.character.items.PetItem;
 import client.life.Life;
 import connection.OutPacket;
 
@@ -15,6 +16,7 @@ public class Pet extends Life {
     private short giantRate;
     private boolean transformed;
     private boolean reinforced;
+    private PetItem item;
 
     public Pet(int objectId) {
         super(objectId);
@@ -100,5 +102,13 @@ public class Pet extends Life {
 
     public void setReinforced(boolean reinforced) {
         this.reinforced = reinforced;
+    }
+
+    public void setItem(PetItem item) {
+        this.item = item;
+    }
+
+    public PetItem getItem() {
+        return item;
     }
 }

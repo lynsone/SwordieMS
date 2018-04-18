@@ -2,16 +2,10 @@ package handling.handlers;
 
 import client.Account;
 import client.Client;
-import client.character.Char;
-import client.character.ExtendSP;
-import client.character.Macro;
-import client.character.ScriptManager;
+import client.character.*;
 import client.character.commands.AdminCommand;
 import client.character.commands.AdminCommands;
-import client.character.items.Equip;
-import client.character.items.EquipAttribute;
-import client.character.items.Inventory;
-import client.character.items.Item;
+import client.character.items.*;
 import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.character.skills.*;
@@ -3139,6 +3133,62 @@ public class WorldHandler {
             skillID = BlazeWizard.IGNITION;
         }
         Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
-        c.write(UserLocal.onExplosionAttack(skillID, mob.getPosition(), mobID, 1));
+        c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
+    }
+
+    public static void handleUserActivateEffectItem(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        chr.setActiveEffectItemID(inPacket.decodeInt());
+    }
+
+    public static void handleUserActivatePetRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        short slot = inPacket.decodeShort();
+        Item item = chr.getCashInventory().getItemBySlot(slot);
+        if(!(item instanceof PetItem)) {
+            item = chr.getConsumeInventory().getItemBySlot(slot);
+        }
+        // Two of the same condition, as item had to be re-assigned
+        if(!(item instanceof PetItem)) {
+            chr.chatMessage(String.format("Could not find a pet on that slot (slot %s).", slot));
+        }
+        PetItem petItem = (PetItem) item;
+        if(petItem.getActiveState() == 0) {
+            if(chr.getPets().size() >= GameConstants.MAX_PET_AMOUNT) {
+                return;
+            }
+            Pet pet = petItem.createPet(chr);
+            petItem.setActiveState((byte) (pet.getIdx() + 1));
+            chr.addPet(pet);
+            c.write(UserLocal.petActivateChange(chr.getId(), pet, true, (byte) 0));
+        } else {
+            Pet pet = chr.getPets().get(petItem.getActiveState() - 1);
+            petItem.setActiveState((byte) 0);
+            chr.removePet(pet);
+            c.write(UserLocal.petActivateChange(chr.getId(), pet, false, (byte) 0));
+        }
+
+//        c.write(WvsContext.inventoryOperation(true, false,
+//                InventoryOperation.ADD, (short) petItem.getBagIndex(), (short) 0, 0, petItem));
+        chr.dispose();
+    }
+
+    public static void handleUserPetFoodItemUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        short slot = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
+        // TODO check properly for items here
+        Item item = chr.getConsumeInventory().getItemBySlot(slot);
+        if(item != null) {
+            chr.consumeItem(item);
+            for(Pet pet : chr.getPets()) {
+                PetItem pi = pet.getItem();
+                pi.setRepleteness((byte) (Math.max(100, pi.getRepleteness() + 30)));
+                c.write(WvsContext.inventoryOperation(true, false,
+                        InventoryOperation.ADD, (short) pi.getBagIndex(), (short) 0, 0, pi));
+            }
+        }
     }
 }

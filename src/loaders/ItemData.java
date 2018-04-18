@@ -1,9 +1,6 @@
 package loaders;
 
-import client.character.items.Equip;
-import client.character.items.Item;
-import client.character.items.ItemOption;
-import client.character.items.ItemState;
+import client.character.items.*;
 import constants.ItemConstants;
 import constants.ServerConstants;
 import enums.InvType;
@@ -26,6 +23,7 @@ import static enums.ScrollStat.*;
 public class ItemData {
     public static Map<Integer, Equip> equips = new HashMap<>();
     public static Map<Integer, ItemInfo> items = new HashMap<>();
+    public static Map<Integer, PetInfo> pets = new HashMap<>();
     public static List<ItemOption> itemOptions = new ArrayList<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
@@ -37,7 +35,7 @@ public class ItemData {
      * @return A deep copy of the default values of the corresponding Equip, or null if there is no equip with itemId
      * <code>itemId</code>.
      */
-    public static Equip getEquipDeepCopyFromId(int itemId) {
+    public static Equip getEquipDeepCopyFromID(int itemId) {
         Equip e = getEquipById(itemId);
         Equip ret = e == null ? null : e.deepCopy();
         if (ret != null) {
@@ -529,12 +527,272 @@ public class ItemData {
                     dataOutputStream.writeInt(entry.getValue());
                 }
                 dataOutputStream.writeShort(ii.getQuestIDs().size());
-                for(int i : ii.getQuestIDs()) {
+                for (int i : ii.getQuestIDs()) {
                     dataOutputStream.writeInt(i);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void savePets(String dir) {
+        Util.makeDirIfAbsent(dir);
+        for (PetInfo pi : getPets().values()) {
+            File file = new File(String.format("%s/%d.dat", dir, pi.getItemID()));
+            try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
+                dos.writeInt(pi.getItemID());
+                dos.writeByte(pi.getInvType().getVal());
+                dos.writeInt(pi.getLife());
+                dos.writeInt(pi.getSetItemID());
+                dos.writeInt(pi.getLimitedLife());
+                dos.writeInt(pi.getEvolutionID());
+                dos.writeInt(pi.getType());
+                dos.writeInt(pi.getEvolReqItemID());
+                dos.writeInt(pi.getEvolNo());
+                dos.writeInt(pi.getEvol1());
+                dos.writeInt(pi.getEvol2());
+                dos.writeInt(pi.getEvol3());
+                dos.writeInt(pi.getEvol4());
+                dos.writeInt(pi.getEvol5());
+                dos.writeInt(pi.getProbEvol1());
+                dos.writeInt(pi.getProbEvol2());
+                dos.writeInt(pi.getProbEvol3());
+                dos.writeInt(pi.getProbEvol4());
+                dos.writeInt(pi.getProbEvol5());
+                dos.writeInt(pi.getEvolReqPetLvl());
+                dos.writeBoolean(pi.isAllowOverlappedSet());
+                dos.writeBoolean(pi.isNoRevive());
+                dos.writeBoolean(pi.isNoScroll());
+                dos.writeBoolean(pi.isCash());
+                dos.writeBoolean(pi.isGiantPet());
+                dos.writeBoolean(pi.isPermanent());
+                dos.writeBoolean(pi.isPickupItem());
+                dos.writeBoolean(pi.isInteractByUserAction());
+                dos.writeBoolean(pi.isLongRange());
+                dos.writeBoolean(pi.isMultiPet());
+                dos.writeBoolean(pi.isAutoBuff());
+                dos.writeBoolean(pi.isStarPlanetPet());
+                dos.writeBoolean(pi.isEvol());
+                dos.writeBoolean(pi.isAutoReact());
+                dos.writeBoolean(pi.isPickupAll());
+                dos.writeBoolean(pi.isSweepForDrop());
+                dos.writeBoolean(pi.isConsumeMP());
+                dos.writeUTF(pi.getRunScript() == null ? "" : pi.getRunScript());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static PetInfo getPetInfoByID(int id) {
+        return getPets().getOrDefault(id, loadPetByID(id));
+    }
+
+    public static PetInfo loadPetByID(int id) {
+        File file = new File(String.format("%s/pets/%d.dat", ServerConstants.DAT_DIR, id));
+        if (file.exists()) {
+            return loadPetFromFile(file);
+        } else {
+            return null;
+        }
+    }
+
+    private static PetInfo loadPetFromFile(File file) {
+        PetInfo pi = null;
+        try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
+            pi = new PetInfo();
+            pi.setItemID(dis.readInt());
+            pi.setInvType(InvType.getInvTypeByVal(dis.readByte()));
+            pi.setLife(dis.readInt());
+            pi.setSetItemID(dis.readInt());
+            pi.setLimitedLife(dis.readInt());
+            pi.setEvolutionID(dis.readInt());
+            pi.setType(dis.readInt());
+            pi.setEvolReqItemID(dis.readInt());
+            pi.setEvolNo(dis.readInt());
+            pi.setEvol1(dis.readInt());
+            pi.setEvol2(dis.readInt());
+            pi.setEvol3(dis.readInt());
+            pi.setEvol4(dis.readInt());
+            pi.setEvol5(dis.readInt());
+            pi.setProbEvol1(dis.readInt());
+            pi.setProbEvol2(dis.readInt());
+            pi.setProbEvol3(dis.readInt());
+            pi.setProbEvol4(dis.readInt());
+            pi.setProbEvol5(dis.readInt());
+            pi.setEvolReqPetLvl(dis.readInt());
+            pi.setAllowOverlappedSet(dis.readBoolean());
+            pi.setNoRevive(dis.readBoolean());
+            pi.setNoScroll(dis.readBoolean());
+            pi.setCash(dis.readBoolean());
+            pi.setGiantPet(dis.readBoolean());
+            pi.setPermanent(dis.readBoolean());
+            pi.setPickupItem(dis.readBoolean());
+            pi.setInteractByUserAction(dis.readBoolean());
+            pi.setLongRange(dis.readBoolean());
+            pi.setMultiPet(dis.readBoolean());
+            pi.setAutoBuff(dis.readBoolean());
+            pi.setStarPlanetPet(dis.readBoolean());
+            pi.setEvol(dis.readBoolean());
+            pi.setAutoReact(dis.readBoolean());
+            pi.setPickupAll(dis.readBoolean());
+            pi.setSweepForDrop(dis.readBoolean());
+            pi.setConsumeMP(dis.readBoolean());
+            pi.setRunScript(dis.readUTF());
+            addPetInfo(pi);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return pi;
+    }
+
+    public static void loadPetsFromWZ() {
+        String wzDir = ServerConstants.WZ_DIR + "/Item.wz";
+        File petDir = new File(String.format("%s/%s", wzDir, "Pet"));
+        for (File file : petDir.listFiles()) {
+            Document doc = XMLApi.getRoot(file);
+            int id = Integer.parseInt(file.getName().replace(".img.xml", ""));
+            PetInfo pi = new PetInfo();
+            pi.setItemID(id);
+            pi.setInvType(InvType.CONSUME);
+            Node infoNode = XMLApi.getFirstChildByNameBF(doc, "info");
+            for (Node node : XMLApi.getAllChildren(infoNode)) {
+                String name = XMLApi.getNamedAttribute(node, "name");
+                String value = XMLApi.getNamedAttribute(node, "value");
+                switch (name) {
+                    case "icon":
+                    case "iconD":
+                    case "iconRaw":
+                    case "iconRawD":
+                    case "hungry":
+                    case "nameTag":
+                    case "chatBalloon":
+                    case "noHungry":
+                        break;
+                    case "life":
+                        pi.setLife(Integer.parseInt(value));
+                        break;
+                    case "setItemID":
+                        pi.setSetItemID(Integer.parseInt(value));
+                        break;
+                    case "evolutionID":
+                        pi.setEvolutionID(Integer.parseInt(value));
+                        break;
+                    case "type":
+                        pi.setType(Integer.parseInt(value));
+                        break;
+                    case "limitedLife":
+                        pi.setLimitedLife(Integer.parseInt(value));
+                        break;
+                    case "evol1":
+                        pi.setEvol1(Integer.parseInt(value));
+                        break;
+                    case "evol2":
+                        pi.setEvol2(Integer.parseInt(value));
+                        break;
+                    case "evol3":
+                        pi.setEvol3(Integer.parseInt(value));
+                        break;
+                    case "evol4":
+                        pi.setEvol4(Integer.parseInt(value));
+                        break;
+                    case "evol5":
+                        pi.setEvol5(Integer.parseInt(value));
+                        break;
+                    case "evolProb1":
+                        pi.setProbEvol1(Integer.parseInt(value));
+                        break;
+                    case "evolProb2":
+                        pi.setProbEvol2(Integer.parseInt(value));
+                        break;
+                    case "evolProb3":
+                        pi.setProbEvol3(Integer.parseInt(value));
+                        break;
+                    case "evolProb4":
+                        pi.setProbEvol4(Integer.parseInt(value));
+                        break;
+                    case "evolProb5":
+                        pi.setProbEvol5(Integer.parseInt(value));
+                        break;
+                    case "evolReqItemID":
+                        pi.setEvolReqItemID(Integer.parseInt(value));
+                        break;
+                    case "evolReqPetLvl":
+                        pi.setEvolReqPetLvl(Integer.parseInt(value));
+                        break;
+                    case "evolNo":
+                        pi.setEvolNo(Integer.parseInt(value));
+                        break;
+                    case "permanent":
+                        pi.setPermanent(Integer.parseInt(value) != 0);
+                        break;
+                    case "pickupItem":
+                        pi.setPickupItem(Integer.parseInt(value) != 0);
+                        break;
+                    case "interactByUserAction":
+                        pi.setInteractByUserAction(Integer.parseInt(value) != 0);
+                        break;
+                    case "longRange":
+                        pi.setLongRange(Integer.parseInt(value) != 0);
+                        break;
+                    case "giantPet":
+                        pi.setGiantPet(Integer.parseInt(value) != 0);
+                        break;
+                    case "noMoveToLocker":
+                        pi.setAllowOverlappedSet(Integer.parseInt(value) != 0);
+                        break;
+                    case "allowOverlappedSet":
+                        pi.setAllowOverlappedSet(Integer.parseInt(value) != 0);
+                        break;
+                    case "noRevive":
+                        pi.setNoRevive(Integer.parseInt(value) != 0);
+                        break;
+                    case "noScroll":
+                        pi.setNoScroll(Integer.parseInt(value) != 0);
+                        break;
+                    case "autoBuff":
+                        pi.setAutoBuff(Integer.parseInt(value) != 0);
+                        break;
+                    case "multiPet":
+                        pi.setAutoBuff(Integer.parseInt(value) != 0);
+                        break;
+                    case "autoReact":
+                        pi.setAutoReact(Integer.parseInt(value) != 0);
+                        break;
+                    case "pickupAll":
+                        pi.setPickupAll(Integer.parseInt(value) != 0);
+                        break;
+                    case "sweepForDrop":
+                        pi.setSweepForDrop(Integer.parseInt(value) != 0);
+                        break;
+                    case "consumeMP":
+                        pi.setConsumeMP(Integer.parseInt(value) != 0);
+                        break;
+                    case "evol":
+                        pi.setEvol(Integer.parseInt(value) != 0);
+                        break;
+                    case "starPlanetPet":
+                        pi.setStarPlanetPet(Integer.parseInt(value) != 0);
+                        break;
+                    case "cash":
+                        pi.setCash(Integer.parseInt(value) != 0);
+                        pi.setInvType(InvType.CASH);
+                        pi.setCash(true);
+                        break;
+                    case "runScript":
+                        pi.setRunScript(value);
+                        break;
+                    default:
+                        log.error(String.format("Unhandled pet node, name = %s, value = %s.", name, value));
+                        break;
+                }
+            }
+            addPetInfo(pi);
+            ItemInfo ii = new ItemInfo();
+            ii.setItemId(pi.getItemID());
+            ii.setInvType(pi.getInvType());
+            addItemInfo(ii);
         }
     }
 
@@ -988,7 +1246,7 @@ public class ItemData {
     }
 
     public static Item getDeepCopyByItemInfo(ItemInfo itemInfo) {
-        if(itemInfo == null) {
+        if (itemInfo == null) {
             return null;
         }
         Item res = new Item();
@@ -1000,17 +1258,23 @@ public class ItemData {
     }
 
     public static Item getItemDeepCopy(int id) {
-        if(ItemConstants.isEquip(id)) {
-            return getEquipDeepCopyFromId(id);
+        if (ItemConstants.isEquip(id)) {
+            return getEquipDeepCopyFromID(id);
+        } else if (ItemConstants.isPet(id)) {
+            return getPetDeepCopyFromID(id);
         }
         return getDeepCopyByItemInfo(getItemInfoByID(id));
     }
 
+    private static PetItem getPetDeepCopyFromID(int id) {
+        return getPetInfoByID(id) == null ? null : getPetInfoByID(id).createPetItem();
+    }
+
     public static ItemInfo getItemInfoByID(int itemID) {
         ItemInfo ii = getItems().getOrDefault(itemID, null);
-        if(ii == null) {
+        if (ii == null) {
             File file = new File(String.format("%s/items/%d.dat", ServerConstants.DAT_DIR, itemID));
-            if(!file.exists()) {
+            if (!file.exists()) {
                 return null;
             } else {
                 ii = loadItemByFile(file);
@@ -1036,23 +1300,23 @@ public class ItemData {
             io.setId(Integer.parseInt(nodeName));
             int optionType = 0;
             Node typeNode = XMLApi.getFirstChildByNameBF(mainNode, "optionType");
-            if(typeNode != null) {
+            if (typeNode != null) {
                 optionType = Integer.parseInt(XMLApi.getNamedAttribute(typeNode, "value"));
             }
             int weight = 0;
             Node weightNode = XMLApi.getFirstChildByNameBF(mainNode, "weight");
-            if(weightNode != null) {
+            if (weightNode != null) {
                 weight = Integer.parseInt(XMLApi.getNamedAttribute(weightNode, "value"));
             }
             int reqLevel = 0;
             Node reqLevelNode = XMLApi.getFirstChildByNameBF(mainNode, "reqLevel");
-            if(reqLevelNode != null) {
+            if (reqLevelNode != null) {
                 reqLevel = Integer.parseInt(XMLApi.getNamedAttribute(reqLevelNode, "value"));
             }
             io.setOptionType(optionType);
             io.setWeight(weight);
             io.setReqLevel(reqLevel);
-            if(weight == 0) {
+            if (weight == 0) {
                 io.setWeight(1);
             }
             getItemOptions().add(io);
@@ -1068,7 +1332,7 @@ public class ItemData {
         try {
             DataOutputStream dos = new DataOutputStream(new FileOutputStream(file));
             dos.writeInt(getItemOptions().size());
-            for(ItemOption io : getItemOptions()) {
+            for (ItemOption io : getItemOptions()) {
                 dos.writeInt(io.getId());
                 dos.writeInt(io.getOptionType());
                 dos.writeInt(io.getWeight());
@@ -1081,7 +1345,7 @@ public class ItemData {
 
     @Loader(varName = "itemOptions")
     public static void loadItemOptions(File file, boolean exists) {
-        if(!exists) {
+        if (!exists) {
             loadItemOptionsFromWZ();
             saveItemOptions(ServerConstants.DAT_DIR);
         } else {
@@ -1106,10 +1370,12 @@ public class ItemData {
     public static void generateDatFiles() {
         loadEquipsFromWz();
         loadItemsFromWZ();
+        loadPetsFromWZ();
+        loadItemOptionsFromWZ();
         QuestData.linkItemData();
         saveEquips(ServerConstants.DAT_DIR + "/equips");
         saveItems(ServerConstants.DAT_DIR + "/items");
-        loadItemOptionsFromWZ();
+        savePets(ServerConstants.DAT_DIR + "/pets");
         saveItemOptions(ServerConstants.DAT_DIR);
     }
 
@@ -1123,6 +1389,14 @@ public class ItemData {
 
     public static void addItemInfo(ItemInfo ii) {
         getItems().put(ii.getItemId(), ii);
+    }
+
+    private static Map<Integer, PetInfo> getPets() {
+        return pets;
+    }
+
+    public static void addPetInfo(PetInfo pi) {
+        getPets().put(pi.getItemID(), pi);
     }
 
     public static void clear() {

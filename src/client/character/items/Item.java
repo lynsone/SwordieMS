@@ -52,6 +52,30 @@ public class Item implements Serializable {
     @Column(name = "owner")
     private String owner = "";
 
+
+    public enum Type {
+        EQUIP(1),
+        ITEM(2),
+        PET(3);
+
+        private byte val;
+
+        Type(byte val) {
+            this.val = val;
+        }
+
+        Type(int val) {
+            this((byte) val);
+        }
+
+        public byte getVal() {
+            return val;
+        }
+
+        public static Type getTypeById(int id) {
+            return Arrays.stream(Type.values()).filter(type -> type.getVal() == id).findFirst().orElse(null);
+        }
+    }
     public long getId() {
         return id;
     }
@@ -92,29 +116,6 @@ public class Item implements Serializable {
         }
     }
 
-    public enum Type {
-        EQUIP(1),
-        ITEM(2),
-        PET(3);
-
-        private byte val;
-
-        Type(byte val) {
-            this.val = val;
-        }
-
-        Type(int val) {
-            this((byte) val);
-        }
-
-        public byte getVal() {
-            return val;
-        }
-
-        public static Type getTypeById(int id) {
-            return Arrays.stream(Type.values()).filter(type -> type.getVal() == id).findFirst().orElse(null);
-        }
-    }
 
     public Item() {
     }
@@ -128,6 +129,21 @@ public class Item implements Serializable {
         this.invType = invType;
         this.isCash = isCash;
         this.type = type;
+    }
+
+    public Item deepCopy() {
+        Item item = new Item();
+        item.setItemId(getItemId());
+        item.setBagIndex(getBagIndex());
+        item.setCashItemSerialNumber(getCashItemSerialNumber());
+        item.setDateExpire(getDateExpire().deepCopy());
+        item.setInvType(getInvType());
+        item.setCash(isCash());
+        item.setType(getType());
+        item.setOwner(getOwner());
+        item.setQuantity(getQuantity());
+        item.setInventoryId(getInventoryId());
+        return item;
     }
 
     public int getItemId() {
@@ -172,8 +188,8 @@ public class Item implements Serializable {
             outPacket.encodeLong(getId());
         }
         getDateExpire().encode(outPacket);
-        outPacket.encodeInt(-1); // bagindex?
-        if (getType() != Type.EQUIP) {
+        outPacket.encodeInt(getBagIndex());
+        if (getType() == Type.ITEM) {
             outPacket.encodeShort(getQuantity()); // nQuantity
             outPacket.encodeString(getOwner()); // sOwner
             outPacket.encodeShort(0); // flag

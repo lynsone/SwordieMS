@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS characterCards;
 DROP TABLE IF EXISTS avatarLook;
 DROP TABLE IF EXISTS options;
 DROP TABLE IF EXISTS equips;
+DROP TABLE IF EXISTS petitems;
 DROP TABLE IF EXISTS items;
 DROP TABLE IF EXISTS inventories;
 DROP TABLE IF EXISTS questProgressRequirements;
@@ -50,7 +51,7 @@ CREATE TABLE trunks(
 );
 
 CREATE TABLE filetimes (
-	id int NOT NULL AUTO_INCREMENT,
+	id bigint NOT NULL AUTO_INCREMENT,
     lowDateTime int,
     highDateTime int,
     PRIMARY KEY (id)
@@ -61,7 +62,7 @@ CREATE TABLE quests (
     qrKey int,
     qrValue VARCHAR(255),
     status int,
-    completedTime int,
+    completedTime bigint,
 	PRIMARY KEY (id),
     FOREIGN KEY (completedTime) REFERENCES filetimes(id)
 );
@@ -106,7 +107,7 @@ CREATE TABLE items (
     itemId int,
     bagIndex int,
     cashItemSerialNumber bigint,
-    dateExpire int,
+    dateExpire bigint,
     invType int,
     type int,
     isCash boolean,
@@ -115,11 +116,31 @@ CREATE TABLE items (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE petitems (
+	itemId bigint,
+    name varchar(255),
+    level tinyint,
+    tameness smallint,
+    repleteness tinyint,
+    petAttribute smallint,
+    petSkill int,
+    dateDead bigint,
+    remainLife int,
+    attribute smallint,
+    activeState tinyint,
+    autoBuffSkill int,
+    petHue int,
+    giantRate smallint,
+    primary key (itemId),
+    foreign key (itemId) references items(id) on delete cascade,
+    foreign key (dateDead) references filetimes(id)
+);
+
 CREATE TABLE equips (
 	serialNumber bigint,
     itemId bigint,
     title varchar(255),
-    equippedDate int,
+    equippedDate bigint,
     prevBonusExpRate int,
     ruc smallint,
     cuc smallint,
@@ -281,7 +302,7 @@ CREATE TABLE nonCombatStatDayLimit (
     will smallint,
     craft smallint,
     sense smallint,
-    ftLastUpdateCharmByCashPR int,
+    ftLastUpdateCharmByCashPR bigint,
     charmByCashPR tinyint,
     PRIMARY KEY (id),
     FOREIGN KEY (ftLastUpdateCharmByCashPR) REFERENCES filetimes(id)
@@ -345,13 +366,13 @@ CREATE TABLE characterStats (
     pvpModeType int,
     eventPoint int,
     albaActivityID int,
-    albaStartTime int,
+    albaStartTime bigint,
     albaDuration int,
     albaSpecialReward int,
     burning boolean,
     characterCard int,
     accountLastLogout int,
-    lastLogout int,
+    lastLogout bigint,
     gachExp int,
     PRIMARY KEY (id),
     FOREIGN KEY (extendSP) REFERENCES extendSP(id),
@@ -443,7 +464,7 @@ CREATE TABLE GuildSkill (
 	id int not null auto_increment,
     skillID int,
     level int,
-    expireDate int,
+    expireDate bigint,
     buyCharacterName varchar(255),
     extendCharacterName varchar(255),
     primary key (id),
@@ -470,7 +491,7 @@ CREATE TABLE guildmembers (
     commitment int,
     dayCommitment int,
     igp int,
-    commitmentIncTime int,
+    commitmentIncTime bigint,
     name varchar(255),
     job int,
     level int,

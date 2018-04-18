@@ -90,6 +90,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_TRUNK_REQUEST:
                     WorldHandler.handleUserTrunkRequest(c, inPacket);
                     break;
+                case USER_PET_FOOD_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserPetFoodItemUseRequest(c, inPacket);
+                    break;
                 case FRIEND_REQUEST:
                     WorldHandler.handleFriendRequest(c, inPacket);
                     break;
@@ -110,6 +113,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_ACTIVATE_DAMAGE_SKIN:
                     WorldHandler.handleUserActivateDamageSkin(c, inPacket);
+                    break;
+                case USER_ACTIVATE_PET_REQUEST:
+                    WorldHandler.handleUserActivatePetRequest(c, inPacket);
+                    break;
+                case USER_ACTIVATE_EFFECT_ITEM:
+                    WorldHandler.handleUserActivateEffectItem(c, inPacket);
                     break;
                 case EVENT_UI_REQ:
                     WorldHandler.handleEventUiReq(c, inPacket);
