@@ -430,7 +430,7 @@ public class ScriptManager implements Observer {
     /**
      * Sends a red message in the main chat box.
      *
-     * @param text
+     * @param text the text to display
      */
     public void chat(String text) {
         chatRed(text);
@@ -439,7 +439,7 @@ public class ScriptManager implements Observer {
     /**
      * Sends a red message in the main chat box.
      *
-     * @param text
+     * @param text the text to display
      */
     public void chatRed(String text) {
         chr.chatMessage(GAME_MESSAGE, text);
@@ -448,7 +448,7 @@ public class ScriptManager implements Observer {
     /**
      * Sends a blue message in the main chat box.
      *
-     * @param text
+     * @param text the text to display
      */
     public void chatBlue(String text) {
         chr.chatMessage(GAME_NOTICE, text);
@@ -457,12 +457,16 @@ public class ScriptManager implements Observer {
     /**
      * Gives the client mesos. Positive amount = add, Negative amount = deduct.
      *
-     * @param mesos
+     * @param mesos the amount of mesos to give
      */
     public void giveMesos(int mesos) {
         chr.addMoney(mesos);
     }
 
+    /**
+     * Completes a quest without giving rewards
+     * @param id the quest ID to complete
+     */
     public void completeQuestNoRewards(int id) {
         QuestManager qm = chr.getQuestManager();
         Quest quest = qm.getQuests().get(id);
@@ -475,6 +479,10 @@ public class ScriptManager implements Observer {
         chr.write(WvsContext.questRecordMessage(quest));
     }
 
+    /**
+     * Start a quest, without checking quest start requirements.
+     * @param id the quest ID to start
+     */
     public void startQuestNoCheck(int id) {
         QuestManager qm = chr.getQuestManager();
         qm.addQuest(QuestData.createQuestFromId(id));
@@ -491,13 +499,13 @@ public class ScriptManager implements Observer {
     /**
      * Gives the client a certain quantity of an item.
      *
-     * @param id
-     * @param quantity
+     * @param id the item id to give
+     * @param quantity the amount of items the client gets. Does not do anything for equips
      */
     public void giveItem(int id, int quantity) {
         double isEquip = Math.floor((id / 1000000));
         if (isEquip == 1) {  //Equip
-            Equip equip = ItemData.getEquipDeepCopyFromId(id);
+            Equip equip = ItemData.getEquipDeepCopyFromID(id);
             chr.addItemToInventory(equip.getInvType(), equip, false);
             chr.getClient().write(WvsContext.inventoryOperation(true, false,
                     ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
@@ -515,9 +523,9 @@ public class ScriptManager implements Observer {
     /**
      * Checks if the client has a certain quantity of an item.
      *
-     * @param id
-     * @param quantity
-     * @return
+     * @param id the item id
+     * @param quantity the quantity of the item
+     * @return whether or not the client has <code>quantity</code> of the given item
      */
     public boolean hasItem(int id, int quantity) {
         int q = 1;
@@ -537,8 +545,8 @@ public class ScriptManager implements Observer {
     /**
      * Checks if the client has enough space in their inventory to hold an item.
      *
-     * @param id
-     * @return
+     * @param id the id to check
+     * @return Whether or not the chr can hold some item
      */
     public boolean canHold(int id) {
         return chr.canHold(id);
@@ -551,18 +559,34 @@ public class ScriptManager implements Observer {
         chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.InputGuildName)));
     }
 
+    /**
+     * Gets the Party of the chr.
+     * @return the Party of the chr
+     */
     public Party getParty() {
         return chr.getParty();
     }
 
+    /**
+     * Sets the chr's field instance type to Party, so all maps are unique per party.
+     */
     public void setPartyField() {
         chr.setFieldInstanceType(FieldInstanceType.PARTY);
     }
 
+    /**
+     * Checks if this chr is the party leader, if they have a party.
+     * @return
+     */
     public boolean isPartyLeader() {
         return chr.getParty() != null & chr.getParty().getPartyLeaderID() == chr.getId();
     }
 
+    /**
+     * Checks whether or not all the party members are online and in the same channel, and whether or not this chr
+     * is the party leader
+     * @return see description
+     */
     public boolean checkParty() {
         if (chr.getParty() == null) {
             chat("You are not in a party.");
@@ -589,10 +613,18 @@ public class ScriptManager implements Observer {
         return res;
     }
 
+    /**
+     * Warps a whole party to a given field id. Immediately sets the field instance type to PARTY.
+     * @param id the field id to warp to
+     */
     public void warpParty(int id) {
         warpParty(id, true);
     }
 
+    /**
+     * Warps a whole party to a given field id. Immediately sets the field instance type to CHANNEL.
+     * @param id the field id to warp to
+     */
     public void warpPartyOut(int id) {
         warpParty(id, false);
     }
@@ -615,28 +647,56 @@ public class ScriptManager implements Observer {
         }
     }
 
+    /**
+     * Resets the party's field instance info, ensuring new field instances are created.
+     */
     public void clearPartyInfo() {
         if (chr.getParty() != null) {
             chr.getParty().clearFieldInstances();
         }
     }
 
+    /**
+     * Spawns a mob at position 0,0 in the map.
+     * @param id the mob template id.
+     */
     public void spawnMob(int id) {
         spawnMob(id, 0, 0, false);
     }
 
+    /**
+     * Spawns a mob at position 0,0 in the map.
+     * @param id the mob template id
+     * @param respawnable whether or not the mob should respawn
+     */
     public void spawnMob(int id, boolean respawnable) {
         spawnMob(id, 0, 0, respawnable);
     }
 
+    /**
+     * Spawns a mob on the Char's current position.
+     * @param id the mob template id
+     */
     public void spawnMobOnChar(int id) {
         spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), false);
     }
 
+    /**
+     * Spawns a mob on the Char's current position.
+     * @param id the mob template id
+     * @param respawnable whether or not the mob should respawn
+     */
     public void spawnMobOnChar(int id, boolean respawnable) {
         spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), respawnable);
     }
 
+    /**
+     * Spawns a mob on a given position.
+     * @param id the mob template id
+     * @param x the starting x position
+     * @param y the starting y position
+     * @param respawnable whether or not the mob should respawn
+     */
     public void spawnMob(int id, int x, int y, boolean respawnable) {
         Mob mob = MobData.getMobDeepCopyById(id);
         Position pos = new Position(x, y);
@@ -651,6 +711,10 @@ public class ScriptManager implements Observer {
         field.spawnLife(mob, null);
     }
 
+    /**
+     * Shows the hp of a given mob.
+     * @param templateID the template id of the mob
+     */
     public void showHP(int templateID) {
         chr.getField().getMobs().stream()
                 .filter(m -> m.getTemplateId() == templateID)
@@ -658,6 +722,9 @@ public class ScriptManager implements Observer {
                 .ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(mob))));
     }
 
+    /**
+     * Shows the hp of the first alive mob.
+     */
     public void showHP() {
         chr.getField().getMobs().stream()
                 .filter(m -> m.getHp() > 0)
@@ -665,6 +732,10 @@ public class ScriptManager implements Observer {
                 .ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(mob))));
     }
 
+    /**
+     * Opens a shop given an id
+     * @param shopID the shop id
+     */
     public void openShop(int shopID) {
         NpcShopDlg nsd = NpcData.getShopById(shopID);
         if(nsd != null) {
@@ -676,14 +747,28 @@ public class ScriptManager implements Observer {
         }
     }
 
+    /**
+     * Removes a single item from the Char's inventory.
+     * @param itemID the item's itemid
+     */
     public void consumeItem(int itemID) {
         chr.consumeItem(itemID, 1);
     }
 
+    /**
+     * Removes a <code>quantity</code> amount of items from the Char's inventory.
+     * @param itemID the item's itemid
+     * @param amount the amount of items to remove
+     */
     public void consumeItem(int itemID, int amount) {
         chr.consumeItem(itemID, amount);
     }
 
+    /**
+     * Adds a damage skin to the Char's Account.
+     * @param itemID the damage skin's itemID
+     * @return Whether or not the damage skin was added
+     */
     public boolean addDamageSkin(int itemID) {
         Account acc = chr.getAccount();
         DamageSkinType error = null;
@@ -713,23 +798,34 @@ public class ScriptManager implements Observer {
         return error == null;
     }
 
+    /**
+     * Opens a trunk (storage) with a given npc.
+     * @param npcTemplateID the npc's template id
+     */
     public void openTrunk(int npcTemplateID) {
         chr.write(CField.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
     }
 
+    /**
+     * Gets the return field of the Char, for FM/Ardentmill.
+     * @return the return field of the Char, for FM/Ardentmill
+     */
     public int getReturnField() {
         return returnField;
     }
 
+    /**
+     * Sets the return field of the Char, for FM/Ardentmill.
+     * @param returnField the return fieldID of the Char, for FM/Ardentmill
+     */
     public void setReturnField(int returnField) {
         this.returnField = returnField;
     }
 
+    /**
+     * Sets the return field of this Char to the Char's current field.
+     */
     public void setReturnField() {
         setReturnField(chr.getFieldID());
-    }
-
-    public void saveOldField() {
-       setReturnField(chr.getField().getId());
     }
 }
