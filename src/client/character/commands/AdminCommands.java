@@ -17,9 +17,7 @@ import enums.*;
 import handling.OutHeader;
 import loaders.*;
 import org.apache.log4j.LogManager;
-import packet.CField;
-import packet.MobPool;
-import packet.WvsContext;
+import packet.*;
 import server.Server;
 import util.Position;
 import util.Rect;
@@ -43,21 +41,6 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            OutPacket outPacket = new OutPacket(OutHeader.TRUNK_DLG);
-
-            outPacket.encodeByte(22);
-            outPacket.encodeInt(1012009);
-            outPacket.encodeByte(20);
-            outPacket.encodeLong(DBChar.All.get());
-            outPacket.encodeLong(1337);
-            outPacket.encodeByte(1);
-            ItemData.getEquipDeepCopyFromId(1472001).encode(outPacket);
-            outPacket.encodeByte(0);
-            outPacket.encodeByte(0);
-            outPacket.encodeByte(0);
-            outPacket.encodeByte(0);
-
-            chr.write(outPacket);
         }
     }
 
@@ -291,7 +274,7 @@ public class AdminCommands {
             int stat = Integer.parseInt(args[2]);
             int atk = Integer.parseInt(args[3]);
             int flames = Integer.parseInt(args[4]);
-            Equip equip = ItemData.getEquipDeepCopyFromId(id);
+            Equip equip = ItemData.getEquipDeepCopyFromID(id);
             equip.setBaseStat(EquipBaseStat.iStr, stat);
             equip.setBaseStat(EquipBaseStat.iDex, stat);
             equip.setBaseStat(EquipBaseStat.iInt, stat);
@@ -316,25 +299,21 @@ public class AdminCommands {
             if (Util.isNumber(args[1])) {
 
                 int id = Integer.parseInt(args[1]);
-                Equip equip = ItemData.getEquipDeepCopyFromId(id);
+                Equip equip = ItemData.getEquipDeepCopyFromID(id);
                 if (equip == null) {
                     Item item = ItemData.getItemDeepCopy(id);
                     if (item == null) {
                         chr.chatMessage(YELLOW, String.format("Could not find an item with id %d", id));
                         return;
                     }
-                    chr.addItemToInventory(item);
                     short quant = 1;
                     if (args.length > 2) {
                         quant = Short.parseShort(args[2]);
                     }
                     item.setQuantity(quant);
-                    chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                            ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                    chr.addItemToInventory(item);
                 } else {
                     chr.addItemToInventory(InvType.EQUIP, equip, false);
-                    chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                            ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
                 }
             } else {
                 StringBuilder query = new StringBuilder();
@@ -354,7 +333,7 @@ public class AdminCommands {
                 }
                 for (Map.Entry<Integer, String> entry : map.entrySet()) {
                     int id = entry.getKey();
-                    Item item = ItemData.getEquipDeepCopyFromId(id);
+                    Item item = ItemData.getEquipDeepCopyFromID(id);
                     if (item != null) {
                         Equip equip = (Equip) item;
                         if (equip.getItemId() < 1000000) {
@@ -821,7 +800,7 @@ public class AdminCommands {
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
-                        Item item = ItemData.getEquipDeepCopyFromId(id);
+                        Item item = ItemData.getEquipDeepCopyFromID(id);
                         if (item == null) {
                             item = ItemData.getItemDeepCopy(id);
                         }
