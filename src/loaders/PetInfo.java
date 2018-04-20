@@ -2,6 +2,7 @@ package loaders;
 
 import client.character.items.PetItem;
 import enums.InvType;
+import enums.PetSkill;
 
 /**
  * Created on 4/14/2018.
@@ -360,6 +361,21 @@ public class PetInfo {
         pi.setName(StringData.getItemStringById(getItemID()));
         pi.setLevel((byte) 1);
         pi.setPetHue(-1);
+        if(isAutoBuff()) {
+            pi.addPetSkill(PetSkill.AUTO_BUFF);
+        }
+        if(isAutoReact()) {
+            pi.addPetSkill(PetSkill.AUTO_FEED); // correct one?
+        }
+        if(isSweepForDrop()) {
+            pi.addPetSkill(PetSkill.AUTO_MOVE);
+        }
+        if(isLongRange()) {
+            pi.addPetSkill(PetSkill.EXPANDED_AUTO_MOVE);
+        }
+        if(isPickupItem()) {
+            pi.addPetSkill(PetSkill.ITEM_PICKUP);
+        }
 
         return pi;
     }

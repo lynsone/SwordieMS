@@ -45,7 +45,7 @@ public class Pet extends Life {
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getId());
         outPacket.encodeString(getName());
-        outPacket.encodeLong(getPetLockerSN());
+        outPacket.encodeLong(getItem().getId());
         outPacket.encodePosition(getPosition());
         outPacket.encodeByte(getMoveAction());
         outPacket.encodeShort(getFh());
