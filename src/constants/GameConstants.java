@@ -11,6 +11,7 @@ public class GameConstants {
     public static final int DROP_REMOVE_OWNERSHIP_TIME = 30; // 30 sec
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
+    public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static long[] charExp = new long[251];
 
     static {

@@ -3,7 +3,11 @@ package client.character.items;
 import client.character.Char;
 import client.character.Pet;
 import connection.OutPacket;
+import constants.GameConstants;
+import enums.PetSkill;
+import org.apache.log4j.Logger;
 import util.FileTime;
+import util.Util;
 
 import javax.persistence.*;
 
@@ -14,6 +18,8 @@ import javax.persistence.*;
 @Table(name = "petitems")
 @PrimaryKeyJoinColumn(name = "itemId")
 public class PetItem extends Item {
+    @Transient
+    private final Logger log = Logger.getLogger(PetItem.class);
 
     private String name;
     private byte level;
@@ -40,11 +46,12 @@ public class PetItem extends Item {
         super.encode(outPacket);
         outPacket.encodeString(getName(), 13);
         outPacket.encodeByte(getLevel());
-        outPacket.encodeShort(getTameness());
+        outPacket.encodeShort(getTameness() + 1);
         outPacket.encodeByte(getRepleteness());
-        outPacket.encodeFT(getDateDead());
+//        outPacket.encodeFT(FileTime.getTimeFromLong(System.currentTimeMillis() + 10000000));
+        outPacket.encodeArr(Util.getByteArrayByString("00 40 E0 FD 3B 37 4F 01"));
         outPacket.encodeShort(getPetAttribute());
-        outPacket.encodeShort(getPetSkill());
+        outPacket.encodeShort(PetSkill.AUTO_MOVE.getVal() | PetSkill.ITEM_PICKUP.getVal());
         outPacket.encodeInt(getRemainLife());
         outPacket.encodeShort(getAttribute());
         outPacket.encodeByte(getActiveState());
@@ -162,7 +169,11 @@ public class PetItem extends Item {
         pet.setFh(chr.getFoothold());
         pet.setPosition(chr.getPosition());
         pet.setId(getItemId());
-        pet.setIdx(chr.getPets().size());
+        int chosenIdx = chr.getFirstPetIdx();
+        if(chosenIdx == -1) {
+            log.error("Tried to create a pet while 3 pets already exist.");
+        }
+        pet.setIdx(chosenIdx);
         pet.setName(getName());
         pet.setPetLockerSN(getId());
         pet.setHue(getPetHue());
@@ -188,5 +199,13 @@ public class PetItem extends Item {
         petItem.setGiantRate(getGiantRate());
 
         return petItem;
+    }
+
+    public void addPetSkill(PetSkill petSkill) {
+        setPetSkill(getPetSkill() | petSkill.getVal());
+    }
+
+    public void removePetSkill(PetSkill petSkill) {
+        setPetSkill(getPetSkill() ^ petSkill.getVal());
     }
 }

@@ -690,7 +690,7 @@ public class WorldHandler {
         ai.fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
-        ai.mobCount = (byte) (mask >>> 4);
+        ai.mobCount = (mask >>> 4) & 0xF;
         ai.skillId = inPacket.decodeInt();
         ai.slv = inPacket.decodeByte();
         ai.addAttackProc = inPacket.decodeByte();
@@ -849,7 +849,7 @@ public class WorldHandler {
         ai.fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
-        ai.mobCount = (byte) (mask >>> 4);
+        ai.mobCount = (mask >>> 4) & 0xF;
         ai.skillId = inPacket.decodeInt();
         ai.slv = inPacket.decodeByte();
         inPacket.decodeInt(); // crc
@@ -1100,7 +1100,7 @@ public class WorldHandler {
         byte idk2 = (byte) (maskIdk >>> 8);
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
-        ai.mobCount = (byte) (mask >>> 4);
+        ai.mobCount = (mask >>> 4) & 0xF;
         byte nul2 = inPacket.decodeByte();
         ai.attackAction = inPacket.decodeShort();
         ai.attackCount = inPacket.decodeShort();
@@ -1164,7 +1164,7 @@ public class WorldHandler {
         ai.fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
-        ai.mobCount = (byte) (mask >>> 4);
+        ai.mobCount = (mask >>> 4) & 0xF;
         ai.skillId = inPacket.decodeInt();
         ai.bulletID = c.getChr().getBulletIDForAttack();
         ai.slv = inPacket.decodeByte();
@@ -3163,14 +3163,17 @@ public class WorldHandler {
             chr.addPet(pet);
             c.write(UserLocal.petActivateChange(chr.getId(), pet, true, (byte) 0));
         } else {
-            Pet pet = chr.getPets().get(petItem.getActiveState() - 1);
+            Pet pet = chr.getPets()
+                    .stream()
+                    .filter(p -> p.getItem().getActiveState() == petItem.getActiveState())
+                    .findFirst().orElse(null);
             petItem.setActiveState((byte) 0);
             chr.removePet(pet);
-            c.write(UserLocal.petActivateChange(chr.getId(), pet, false, (byte) 0));
+//            c.write(UserLocal.petActivateChange(chr.getId(), pet, false, (byte) 0));
         }
 
-//        c.write(WvsContext.inventoryOperation(true, false,
-//                InventoryOperation.ADD, (short) petItem.getBagIndex(), (short) 0, 0, petItem));
+        c.write(WvsContext.inventoryOperation(true, false,
+                InventoryOperation.ADD, (short) petItem.getBagIndex(), (short) 0, 0, petItem));
         chr.dispose();
     }
 
@@ -3185,7 +3188,8 @@ public class WorldHandler {
             chr.consumeItem(item);
             for(Pet pet : chr.getPets()) {
                 PetItem pi = pet.getItem();
-                pi.setRepleteness((byte) (Math.max(100, pi.getRepleteness() + 30)));
+                // max repleteness is 100
+                pi.setRepleteness((byte) (Math.min(100, pi.getRepleteness() + 30)));
                 c.write(WvsContext.inventoryOperation(true, false,
                         InventoryOperation.ADD, (short) pi.getBagIndex(), (short) 0, 0, pi));
             }

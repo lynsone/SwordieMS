@@ -263,22 +263,25 @@ public class MobSkill {
         o.slv = level;
         o.tOption = msi.getSkillStatIntValue(time);
         switch(msID) {
-            case PowerUp:
-            case PowerUp2:
-            case PowerUp3:
+            case POWERUP:
+            case POWERUP_M:
+            case PAD:
                 o.nOption = msi.getSkillStatIntValue(x);
                 mts.addMobSkillOptionsAndBroadCast(MobStat.PowerUp, o);
                 break;
-            case PGuardUp:
+            case PGUARDUP:
                 o.nOption = msi.getSkillStatIntValue(x);
                 mts.addMobSkillOptionsAndBroadCast(MobStat.PGuardUp, o);
                 break;
-            case MGuardUp:
+            case MGUARDUP:
                 o.nOption = msi.getSkillStatIntValue(x);
                 mts.addMobSkillOptionsAndBroadCast(MobStat.MGuardUp, o);
                 break;
+            case UNK:
+                log.warn(String.format("Unknown mob skill %d, slv = %d", skill, level));
+                break;
             default:
-                log.warn(String.format("Unhandled mob skill %d, slv = %d", getSkill(), getLevel()));
+                log.warn(String.format("Unhandled mob skill %s, slv = %d", msID, getLevel()));
                 break;
         }
     }

@@ -352,12 +352,15 @@ public class PetInfo {
 
     public PetItem createPetItem() {
         PetItem pi = new PetItem();
+
         pi.setRepleteness((byte) 100);
         pi.setItemId(getItemID());
         pi.setInvType(getInvType());
         pi.setQuantity(1);
         pi.setName(StringData.getItemStringById(getItemID()));
         pi.setLevel((byte) 1);
+        pi.setPetHue(-1);
+
         return pi;
     }
 }

@@ -80,8 +80,7 @@ public class Util {
      * @return A random number from 0 up to and including inclBound
      */
     public static int getRandom(int inclBound) {
-        Random random = new Random();
-        return random.nextInt(inclBound + 1);
+        return new Random().nextInt(inclBound + 1);
     }
 
     /**

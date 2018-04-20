@@ -7,6 +7,7 @@ import client.character.skills.Skill;
 import client.field.Field;
 import client.field.Foothold;
 import client.field.fieldeffect.MobHPTagFieldEffect;
+import constants.GameConstants;
 import enums.MobStat;
 import loaders.MobData;
 import packet.CField;
@@ -1112,7 +1113,8 @@ public class Mob extends Life {
         Field field = getField();
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
         if (!isNotRespawnable()) { // double negative
-            EventManager.addEvent(() -> field.respawn(this), (long) (5000 * (1 / field.getMobRate())));
+            EventManager.addEvent(() -> field.respawn(this),
+                    (long) (GameConstants.BASE_MOB_RESPAWN_RATE * (1 / field.getMobRate())));
             field.putLifeController(this, null);
         } else {
             getField().removeLife(getObjectId());

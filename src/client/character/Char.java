@@ -1898,6 +1898,8 @@ public class Char {
         stats.put(Stat.exp, newExp);
         write(WvsContext.incExpMessage(eii));
         getClient().write(WvsContext.statChanged(stats));
+        heal(getMaxHP());
+        heal(getMaxMP());
     }
 
     /**
@@ -2718,5 +2720,24 @@ public class Char {
             addPet(p);
             getField().broadcastPacket(UserLocal.petActivateChange(getId(), p, true, (byte) 0));
         }
+    }
+
+    public Pet getPetByIdx(int idx) {
+        return getPets().stream()
+                .filter(p -> p.getIdx() == idx)
+                .findAny()
+                .orElse(null);
+    }
+
+    public int getFirstPetIdx() {
+        int chosenIdx = -1;
+        for(int i = 0; i < GameConstants.MAX_PET_AMOUNT; i++) {
+            Pet p = getPetByIdx(i);
+            if(p == null) {
+                chosenIdx = i;
+                break;
+            }
+        }
+        return chosenIdx;
     }
 }

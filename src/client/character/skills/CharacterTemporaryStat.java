@@ -69,7 +69,7 @@ public enum CharacterTemporaryStat {
     IndieUNK4(0x200, 1),
     IndieUNK5(0x100, 1), // 56
 
-    IndieUNK6(0x80, 1),
+    IndieStatCount(0x80, 1),
     PAD(0x40, 1),
     PDD(0x20, 1),
     MAD(0x10, 1),

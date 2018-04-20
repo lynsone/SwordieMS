@@ -3,6 +3,7 @@ package packet;
 import client.character.*;
 import client.character.items.BodyPart;
 import client.character.items.Equip;
+import client.character.items.PetItem;
 import client.character.skills.ForceAtomInfo;
 import client.character.skills.PsychicArea;
 import client.field.fieldeffect.FieldEffect;
@@ -360,12 +361,26 @@ public class CField {
             marriage.encode(outPacket);
         }
         outPacket.encodeByte(0); // size(byte) of productSkill(Professions)(short); stuff like mining, herblore, etc...
-        outPacket.encodeString("Community");
-        outPacket.encodeString("Alliance");
+        outPacket.encodeString(chr.getGuild() == null ? "-" : chr.getGuild().getName());
+        outPacket.encodeString("Unimpl ally");
         outPacket.encodeByte(-1); // Forced pet IDx
         outPacket.encodeByte(0); // User state (?)
-        outPacket.encodeByte(false); // pet activated
-        outPacket.encodeByte(0); // CUIUserInfo::SetPetInfo
+        outPacket.encodeByte(chr.getPets().size() > 0); // pet activated
+        for(Pet pet : chr.getPets()) {
+            PetItem pi = pet.getItem();
+            outPacket.encodeByte(1);
+            outPacket.encodeInt(pet.getIdx());
+            outPacket.encodeInt(pi.getItemId());
+            outPacket.encodeString(pet.getName());
+            outPacket.encodeByte(pi.getLevel());
+            outPacket.encodeShort(pi.getTameness());
+            outPacket.encodeByte(pi.getRepleteness());
+            outPacket.encodeShort(pi.getPetSkill());
+            outPacket.encodeInt(0); // equip 1
+            outPacket.encodeInt(0); // equip 2
+        }
+        outPacket.encodeByte(0); // CUIUserInfo::SetPetInfo end
+
         outPacket.encodeByte(0); // old Wish list
         // MedalAchievementInfo::Decode
         Equip medal = (Equip) chr.getEquippedItemByBodyPart(BodyPart.MEDAL);
