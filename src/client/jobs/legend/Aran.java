@@ -289,8 +289,8 @@ public class Aran extends Job {
                    }
                }
             }
-            handleDrain();
-            handleSnowCharge(attackInfo);
+            aranDrain();
+            snowCharge(attackInfo);
         }
         handleSwingStudies(getOriginalSkillByID(skillID), tsm, c);
         Option o1 = new Option();
@@ -533,7 +533,7 @@ public class Aran extends Job {
 
     }
 
-    public void handleDrain() {
+    public void aranDrain() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(AranDrain)) {
             Skill skill = chr.getSkill(DRAIN);
@@ -544,7 +544,7 @@ public class Aran extends Job {
         }
     }
 
-    public void handleSnowCharge(AttackInfo attackInfo) {
+    public void snowCharge(AttackInfo attackInfo) {
         if(!chr.hasSkill(SNOW_CHARGE)) {
             return;
         }

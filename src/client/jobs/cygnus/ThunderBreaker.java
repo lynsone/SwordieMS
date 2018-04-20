@@ -190,7 +190,7 @@ public class ThunderBreaker extends Job {
         int amount = 1;
         if(tsm.hasStat(IgnoreTargetDEF)) {
             amount = tsm.getOption(IgnoreTargetDEF).mOption;
-            if(amount < getMaxCharge(chr)) {
+            if(amount < getMaxCharge()) {
                 amount++;
             }
         }
@@ -208,23 +208,19 @@ public class ThunderBreaker extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private int getChargeProp(Char chr) {
+    private int getChargeProp() {
         int prop = 0;
         if (chr.hasSkill(15001022)) { //Lightning Elemental
             prop += 10;
-
         }
         if (chr.hasSkill(15000023)) { //Electrified
             prop += 20;
-
         }
         if (chr.hasSkill(15100025)) { //Lightning Boost
             prop += 20;
-
         }
         if (chr.hasSkill(15110026)) { //Light Lord
             prop += 30;
-
         }
         if (chr.hasSkill(15120008)) { //Thunder God
             prop += 20;
@@ -232,7 +228,7 @@ public class ThunderBreaker extends Job {
         return prop;
     }
 
-    private int getMaxCharge(Char c) {
+    private int getMaxCharge() {
         int num = 0;
         if (chr.hasSkill(15001022)) { //Lightning Elemental
             num += 1;
@@ -271,7 +267,7 @@ public class ThunderBreaker extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        int chargeProp = getChargeProp(chr);
+        int chargeProp = getChargeProp();
         if (tsm.hasStat(CygnusElementSkill)) {
             if (hasHitMobs && Util.succeedProp(chargeProp)) {
                 handleLightning(skill.getSkillId(), tsm, c);

@@ -30,6 +30,7 @@ public class TemporaryStatManager {
     private byte defenseState;
     private byte defenseAtt;
     private int[] diceInfo = new int[22];
+    private int[] diceOption = new int[8];
     private List<Integer> mobZoneStates;
     private int viperEnergyCharge;
     private StopForceAtom stopForceAtom;
@@ -2599,6 +2600,40 @@ public class TemporaryStatManager {
 
     public void setDiceInfo(int[] diceInfo) {
         this.diceInfo = diceInfo;
+    }
+
+    public void throwDice(int roll) {
+        int[] array = {0, 0, 30, 20, 15, 20, 30, 20};
+        for(int i = 0; i < diceOption.length; i++) {
+            diceOption[i] = 0;
+        }
+        diceOption[roll] = array[roll];
+        int[] diceinfo = new int[] {
+                diceOption[3],  //nOption 3 (HP)
+                diceOption[3],  //nOption 3 (MP)
+                diceOption[4],  //nOption 4 (CRIT)
+                0,  //Unknown
+                0,  //Unknown
+                0,  //Unknown
+                0,  //Unknown
+                0,  //Unknown
+                diceOption[2],  //nOption 2 (DEF)
+                0,  //Unknown
+                0,  //Unknown
+                0,  //Unknown
+                diceOption[5], //nOption 5 (DAMR)
+                0,  //Unknown
+                0,  //Unknown
+                0,  //Unknown
+                0,  //Unknown
+                diceOption[6], //nOption 6 (EXP)
+                diceOption[7], //nOption 7 (IED)
+                0,  //Unknown
+                0,  //Unknown
+                0,  //Unknown
+                0,
+        };
+        setDiceInfo(diceinfo);
     }
 
     public List<Integer> getMobZoneStates() {

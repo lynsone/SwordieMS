@@ -1,7 +1,8 @@
 package constants;
 
-import static client.jobs.legend.Mercedes.STAGGERING_STRIKES;
-import static client.jobs.legend.Mercedes.STUNNING_STRIKES;
+import static client.jobs.legend.Aran.*;
+import static client.jobs.legend.Mercedes.*;
+import static client.jobs.nova.AngelicBuster.*;
 
 /**
  * Created on 12/18/2017.
@@ -653,6 +654,22 @@ public class SkillConstants {
             case STAGGERING_STRIKES:
                 return STUNNING_STRIKES;
 
+            case SMASH_WAVE_COMBO:
+                return SMASH_WAVE;
+
+            case FINAL_BLOW_COMBO:
+            case FINAL_BLOW_SMASH_SWING_COMBO:
+                return FINAL_BLOW;
+
+            case SOUL_SEEKER_ATOM:
+                return SOUL_SEEKER;
+
+            case 65101006: //AB - Lovely Sting Explosion
+                return LOVELY_STING;
+
+            case 65121007:
+            case 65121008:
+                return TRINITY;
             default:
                 return skillID;
         }
