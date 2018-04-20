@@ -779,6 +779,7 @@ public class Thief extends Job {
         SkillInfo si = SkillData.getSkillInfoById(ASSASSINS_MARK);
         byte slv = (byte) skill.getCurrentLevel();
         int skillId = skill.getSkillId();
+
         if(tsm.hasStat(NightLordMark)) {
 
             if (attackInfo.skillId != ASSASSINS_MARK_ATOM) {
@@ -787,16 +788,25 @@ public class Thief extends Job {
                     int mobID = mai.mobId;
                     Rect rect = new Rect(
                             new Position(
-                                    mob.getPosition().getX() - 5000,
-                                    mob.getPosition().getY() - 5000),
+                                    mob.getPosition().getX() - 1500,
+                                    mob.getPosition().getY() - 1500),
                             new Position(
-                                    mob.getPosition().getX() + 5000,
-                                    mob.getPosition().getY() + 5000)
+                                    mob.getPosition().getX() + 1500,
+                                    mob.getPosition().getY() + 1500)
                     );
-
                     MobTemporaryStat mts = mob.getTemporaryStat();
+
+                    List<Mob> lifes = chr.getField().getMobsInRect(rect);
+                    List<Mob> bossLifes = chr.getField().getBossMobsInRect(rect);
                     if(mts.hasBurnFromSkill(getCurMarkLv())) {
                         for (int i = 0; i < 6; i++) {
+
+                            Mob life = Util.getRandomFromList(lifes);
+                            if(bossLifes.size() > 0) {
+                                life = Util.getRandomFromList(bossLifes);
+                            }
+
+
                             int anglez = (360 / 6) * i;
 
                             int inc = ForceAtomEnum.ASSASSIN_MARK.getInc();
@@ -807,12 +817,12 @@ public class Thief extends Job {
                                 type = ForceAtomEnum.NIGHTLORD_MARK.getForceAtomType();
                             }
 
-                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 40, 4,
+                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 45, 4,
                                     anglez, 100, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
-                            chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
-                                    true, mobID, ASSASSINS_MARK_ATOM, forceAtomInfo, rect, 0, 300,
-                                    mob.getPosition(), chr.getBulletIDForAttack(), mob.getPosition()));
+                            chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), /*mobID*/life.getObjectId(), type,
+                                    true, /*mobID*/life.getObjectId(), ASSASSINS_MARK_ATOM, forceAtomInfo, rect, 0, 300,
+                                    life.getPosition(), chr.getBulletIDForAttack(), life.getPosition()));
                         }
                     }
                 }
