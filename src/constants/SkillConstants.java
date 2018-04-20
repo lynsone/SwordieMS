@@ -1,5 +1,8 @@
 package constants;
 
+import static client.jobs.legend.Mercedes.STAGGERING_STRIKES;
+import static client.jobs.legend.Mercedes.STUNNING_STRIKES;
+
 /**
  * Created on 12/18/2017.
  */
@@ -637,6 +640,18 @@ public class SkillConstants {
 
             case 61121221: //Kaiser - Blade Burst (Final Form)
                 return 61121104; //Kaiser - Blade Burst
+
+            case 14101021: //NW - Quint. Throw Finisher
+                return 14101020; //NW - Quint. Throw
+
+            case 14111021: //NW - Quad Throw Finisher
+                return 14111020; //NW - Quad Throw
+
+            case 14121002: //NW - Triple Throw Finisher
+                return 14121001; //NW - Triple Throw
+
+            case STAGGERING_STRIKES:
+                return STUNNING_STRIKES;
 
             default:
                 return skillID;
