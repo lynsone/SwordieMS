@@ -393,6 +393,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                         aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
                     }
                     break;
+                case USER_EQUIPMENT_ENCHANT_WITH_SINGLE_UI_REQUEST:
+                    WorldHandler.handleUserEquipmentEnchantWithSingleUIRequest(c, inPacket);
+                    break;
+                case USER_SKILL_LEARN_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserLearnItemUseRequest(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

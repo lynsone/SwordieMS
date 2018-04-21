@@ -1,9 +1,12 @@
 package enums;
 
+import java.util.Arrays;
+
 /**
  * Created on 1/25/2018.
  */
 public enum EquipmentEnchantType {
+    HyperUpgradeResult(1),
     ScrollUpgradeDisplay(50),
     ScrollTimerEffective(51),
     HyperUpgradeDisplay(52),
@@ -19,6 +22,10 @@ public enum EquipmentEnchantType {
 
     EquipmentEnchantType(int val) {
         this.val = (byte) val;
+    }
+
+    public static EquipmentEnchantType getByVal(byte val) {
+        return Arrays.stream(values()).filter(tt -> tt.getVal() == val).findAny().orElse(null);
     }
 
     public byte getVal() {

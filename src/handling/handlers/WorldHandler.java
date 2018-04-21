@@ -3123,6 +3123,9 @@ public class WorldHandler {
         if(chr.getJob() >= JobConstants.JobEnum.BLAZEWIZARD1.getJobId() && chr.getJob() <= JobConstants.JobEnum.BLAZEWIZARD4.getJobId()) {
             skillID = BlazeWizard.IGNITION;
         }
+        if(chr.getJob() >= JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId() && chr.getJob() <= JobConstants.JobEnum.ANGELIC_BUSTER4.getJobId()) {
+            skillID = 65101006; //Lovely Sting Explosion
+        }
         Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
         c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
     }
@@ -3210,5 +3213,76 @@ public class WorldHandler {
         } else {
             chr.getScriptManager().startScript(templateID, action, ScriptType.REACTOR);
         }
+    }
+
+    public static void handleUserEquipmentEnchantWithSingleUIRequest(Client c, InPacket inPacket) {
+        byte equipmentEnchantType = inPacket.decodeByte();
+
+        Char chr = c.getChr();
+        EquipmentEnchantType eeType = EquipmentEnchantType.getByVal(equipmentEnchantType);
+
+        switch (eeType) {
+            case HyperUpgradeResult:
+                inPacket.decodeInt(); //tick
+                short eqpPos = inPacket.decodeShort();
+                int extraChanceFromMiniGame = inPacket.decodeByte() != 0 ? 50 : 0;
+                Equip eqp = (Equip) chr.getEquipInventory().getItemBySlot(eqpPos);
+                int result = 1;
+                boolean boom = false;
+                Equip oldEquip = eqp.deepCopy();
+                c.write(CField.showUpgradeResult(eeType, oldEquip));
+                break;
+            case ScrollUpgradeDisplay:
+                c.write(CField.scrollUpgradeDisplay());
+                break;
+            /*case ScrollTimerEffective:
+                break;*/
+            case HyperUpgradeDisplay:
+                int ePos = inPacket.decodeInt();
+                Equip equip = (Equip) chr.getEquipInventory().getItemBySlot((short) ePos);
+                c.write(CField.hyperUpgradeDisplay(equip, true, 20, 0, 1000, 0, false, 1));
+                break;
+            case MiniGameDisplay:
+                c.write(CField.miniGameDisplay(eeType));
+                break;
+            //case ShowScrollUpgradeResult:
+            case ShowHyperUpgradeResult:
+                break;
+            /*
+            case ShowScrollVestigeCompensationResult:
+            case ShowTransmissionResult:
+            case ShowUnknownFailResult:
+                break;*/
+            default:
+                log.debug("Unhandled Equipment Enchant Type: " + eeType);
+                break;
+        }
+    }
+
+    public static void handleUserLearnItemUseRequest(Client c, InPacket inPacket) {
+        inPacket.decodeInt(); //tick
+        short uPos = inPacket.decodeShort(); //uPos
+        int itemID = inPacket.decodeInt(); //item ID
+        Char chr = c.getChr();
+        int skillCheck = ItemConstants.getSkillidByMasteryBook(itemID);
+
+        if(skillCheck == 0) {
+            chr.chatMessage(LESS_YELLOW, "Unhandled Mastery Book.");
+            chr.dispose();
+            return;
+        }
+
+        Skill skill = chr.getSkill(ItemConstants.getSkillidByMasteryBook(itemID));
+        if(skill.getMasterLevel() < ItemConstants.getMaxSkillLevelByMasteryBook(itemID)) {
+            skill.setMasterLevel(ItemConstants.getMaxSkillLevelByMasteryBook(itemID));
+            List<Skill> list = new ArrayList<>();
+            list.add(skill);
+            chr.addSkill(skill);
+            chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+        } else {
+            chr.dispose();
+            return;
+        }
+        chr.dispose();
     }
 }

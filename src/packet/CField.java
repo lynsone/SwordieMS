@@ -472,6 +472,53 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket miniGameDisplay(EquipmentEnchantType eeType) {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+
+        outPacket.encodeShort(eeType.getVal());
+        outPacket.encodeByte(0);
+        outPacket.encodeInt(2000); //nSeed
+
+        return outPacket;
+    }
+
+    public static OutPacket showUpgradeResult(EquipmentEnchantType eeType, Equip equip) {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+
+        outPacket.encodeShort(EquipmentEnchantType.HyperUpgradeResult.getVal());
+        outPacket.encodeInt(1);   //result 0=fail, 1=succeed
+        outPacket.encodeByte(false); //boom
+        equip.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket scrollUpgradeDisplay() {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+        boolean bool = false;
+
+        outPacket.encodeShort(EquipmentEnchantType.ScrollUpgradeDisplay.getVal());
+        outPacket.encodeByte(bool); //boolean
+        if(!bool) {
+            //ResetScrollInfo
+            outPacket.encodeByte(true); //while 1,
+
+            outPacket.encodeInt(2046301); //Scroll Icon ID
+            outPacket.encodeString("AccINT"); //Scroll Name
+            outPacket.encodeInt(2046301); //Scroll Type
+            outPacket.encodeInt(2046301); //Scroll Option
+
+            outPacket.encodeInt(0); //Flag
+            outPacket.encodeInt(0); //Unk0
+
+            outPacket.encodeInt(5); //Cost
+            outPacket.encodeByte(true); //Unk1
+
+        }
+
+        return outPacket;
+    }
+
     public static OutPacket redCubeResult(int charID, boolean upgrade, int cubeID, int ePos, Equip equip) {
         OutPacket outPacket = new OutPacket(OutHeader.RED_CUBE_RESULT);
 
