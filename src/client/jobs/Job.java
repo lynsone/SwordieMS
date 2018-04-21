@@ -41,8 +41,12 @@ public abstract class Job {
         byte idk3 = inPacket.decodeByte();
         int damage = inPacket.decodeInt();
         short idk4 = inPacket.decodeShort();
-        int templateID = inPacket.decodeInt();
-        int mobID = inPacket.decodeInt();
+        int templateID = 0;
+        int mobID = 0;
+        if(inPacket.getUnreadAmount() >= 8) {
+            templateID = inPacket.decodeInt();
+            mobID = inPacket.decodeInt();
+        }
         HitInfo hitInfo = new HitInfo();
         hitInfo.HPDamage = damage;
         hitInfo.templateID = templateID;

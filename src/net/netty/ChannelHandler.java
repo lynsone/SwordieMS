@@ -381,6 +381,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case SUMMONED_SKILL:
                     WorldHandler.handleSummonedSkill(c, inPacket);
                     break;
+                case REACTOR_CLICK:
+                    WorldHandler.handleReactorClick(c, inPacket);
+                    break;
                 case MOB_EXPLOSION_START:
                     WorldHandler.handleMobExplosionStart(c, inPacket);
                     break;

@@ -361,6 +361,7 @@ public class PetInfo {
         pi.setName(StringData.getItemStringById(getItemID()));
         pi.setLevel((byte) 1);
         pi.setPetHue(-1);
+        pi.addPetSkill(PetSkill.ITEM_PICKUP); // each pet has this now
         if(isAutoBuff()) {
             pi.addPetSkill(PetSkill.AUTO_BUFF);
         }
@@ -372,9 +373,6 @@ public class PetInfo {
         }
         if(isLongRange()) {
             pi.addPetSkill(PetSkill.EXPANDED_AUTO_MOVE);
-        }
-        if(isPickupItem()) {
-            pi.addPetSkill(PetSkill.ITEM_PICKUP);
         }
 
         return pi;

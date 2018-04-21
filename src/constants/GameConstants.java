@@ -12,6 +12,8 @@ public class GameConstants {
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
+    public static final int MIN_MONEY_MULT = 6;
+    public static final int MAX_MONEY_MULT = 9;
     public static long[] charExp = new long[251];
 
     static {

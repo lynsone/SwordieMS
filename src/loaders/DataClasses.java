@@ -23,7 +23,9 @@ public class DataClasses {
                 MobData.class,
                 StringData.class,
                 NpcData.class,
-                QuestData.class
+                QuestData.class,
+                DropData.class,
+                ReactorData.class
                 )
         );
     }

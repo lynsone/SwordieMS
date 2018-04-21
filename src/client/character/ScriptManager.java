@@ -10,6 +10,7 @@ import client.field.Portal;
 import client.field.fieldeffect.MobHPTagFieldEffect;
 import client.guild.GuildMsg;
 import client.life.Mob;
+import client.life.Reactor;
 import client.party.Party;
 import client.party.PartyMember;
 import client.shop.NpcShopDlg;
@@ -103,6 +104,7 @@ public class ScriptManager implements Observer {
         ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
         scriptEngine.put("sm", this);
         scriptEngine.put("parentID", parentID);
+        scriptEngine.put("scriptType", scriptType);
         if (scriptType == ScriptType.QUEST) {
             chat(scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) + "");
             scriptEngine.put("startQuest",
@@ -182,7 +184,7 @@ public class ScriptManager implements Observer {
         }
     }
 
-    private boolean isActive(ScriptType scriptType) {
+    public boolean isActive(ScriptType scriptType) {
         return getScriptInfoByType(scriptType) != null && getScriptInfoByType(scriptType).isActive();
     }
 
@@ -403,6 +405,7 @@ public class ScriptManager implements Observer {
         stop(ScriptType.PORTAL);
         stop(ScriptType.ITEM);
         stop(ScriptType.QUEST);
+        stop(ScriptType.REACTOR);
     }
 
     public void dispose(ScriptType scriptType) {
@@ -873,5 +876,19 @@ public class ScriptManager implements Observer {
     public int numberMobsInField(int fieldid) {
         Field field = FieldData.getFieldById(fieldid);
         return field.getMobs().size();
+    }
+
+    /**
+     * Removes the current active reactor from the map.
+     */
+    public void removeReactor() {
+        Field field = chr.getField();
+        Reactor reactor = field.getReactors().stream()
+                .filter(r -> r.getTemplateId() == getParentIDByScriptType(ScriptType.REACTOR))
+                .findAny().orElse(null);
+        if(reactor != null) {
+            field.removeReactor(reactor);
+            field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
+        }
     }
 }

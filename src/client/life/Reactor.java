@@ -1,5 +1,8 @@
 package client.life;
 
+import loaders.ReactorInfo;
+import loaders.ReactorData;
+
 /**
  * Created on 4/21/2018.
  */
@@ -7,9 +10,11 @@ public class Reactor extends Life {
 
     private byte state;
     private boolean flip;
-    private String name;
+    private String name = "";
     private int ownerID;
     private int properEventIdx;
+    private int reactorTime;
+    private boolean phantomForest;
 
     public Reactor(int objectId) {
         super(objectId);
@@ -53,5 +58,28 @@ public class Reactor extends Life {
 
     public void setProperEventIdx(int properEventIdx) {
         this.properEventIdx = properEventIdx;
+    }
+
+    public void setReactorTime(int reactorTime) {
+        this.reactorTime = reactorTime;
+    }
+
+    public int getReactorTime() {
+        return reactorTime;
+    }
+
+    public void setPhantomForest(boolean phantomForest) {
+        this.phantomForest = phantomForest;
+    }
+
+    public boolean isPhantomForest() {
+        return phantomForest;
+    }
+
+    public void init() {
+        ReactorInfo ri = ReactorData.getReactorByID(getTemplateId());
+        setState((byte) 0);
+        setName(ri.getViewName());
+        setPosition(getHomePosition());
     }
 }

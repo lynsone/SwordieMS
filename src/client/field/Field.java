@@ -48,6 +48,7 @@ public class Field {
     private int fixedMobCapacity;
     private int objectIDCounter = 1000000;
     private boolean userFirstEnter = false;
+    private Set<Reactor> reactors;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -59,6 +60,7 @@ public class Field {
         this.chars = new ArrayList<>();
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
+        this.reactors = new HashSet<>();
     }
 
     public Rectangle getRect() {
@@ -394,6 +396,10 @@ public class Field {
             if(life instanceof Drop) {
                 onlyChar.write(DropPool.dropEnterField((Drop) life, life.getPosition(), 0));
             }
+            if(life instanceof Reactor) {
+                ((Reactor) life).init();
+                broadcastPacket(ReactorPool.reactorEnterField((Reactor) life));
+            }
         }
     }
 
@@ -418,6 +424,7 @@ public class Field {
             getChars().add(chr);
             if(!isUserFirstEnter() && hasUserFirstEnterScript()) {
                 chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FIELD);
+                setUserFirstEnter(true);
             }
         }
         broadcastPacket(UserPool.userEnterField(chr), chr);
@@ -468,6 +475,9 @@ public class Field {
     public void spawnLifesForChar(Char chr) {
         for (Life life : getLifes()) {
             spawnLife(life, chr);
+        }
+        for (Reactor reactor : getReactors()) {
+            spawnLife(reactor, chr);
         }
     }
 
@@ -729,6 +739,9 @@ public class Field {
                 Position posTo = new Position(x, fh.getYFromX(x));
                 drop(dropInfo, position, posTo, ownerID);
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
+                if(dropInfo.isMoney()) {
+                    dropInfo.generateNextMoneyDrop();
+                }
             }
         }
     }
@@ -778,5 +791,27 @@ public class Field {
                 .filter(life -> life instanceof Mob && life.getTemplateId() == mobID && ((Mob) life).isAlive())
                 .collect(Collectors.toList())
                 .size();
+    }
+
+    public Set<Reactor> getReactors() {
+        return reactors;
+    }
+
+    public void addReactor(Reactor reactor) {
+        getReactors().add(reactor);
+    }
+
+    public void removeReactor(Reactor reactor) {
+        if(reactor != null) {
+            getReactors().remove(reactor);
+        }
+    }
+
+    public void removeReactorByObjID(int reactorObjID) {
+        removeReactor(getReactorByObjID(reactorObjID));
+    }
+
+    public Reactor getReactorByObjID(int reactorObjID) {
+        return getReactors().stream().filter(r -> r.getObjectId() == reactorObjID).findAny().orElse(null);
     }
 }

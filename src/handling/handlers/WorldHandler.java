@@ -50,6 +50,7 @@ import server.Server;
 import server.World;
 import util.*;
 
+import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -3183,6 +3184,31 @@ public class WorldHandler {
                 c.write(WvsContext.inventoryOperation(true, false,
                         InventoryOperation.ADD, (short) pi.getBagIndex(), (short) 0, 0, pi));
             }
+        }
+    }
+
+    public static void handleReactorClick(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int objID = inPacket.decodeInt();
+        int idk = inPacket.decodeInt();
+        byte type = inPacket.decodeByte();
+        Reactor reactor = chr.getField().getReactorByObjID(objID);
+        if(reactor == null) {
+            log.error("Could not find reactor with objID " + objID);
+            return;
+        }
+        int templateID = reactor.getTemplateId();
+        ReactorInfo ri = ReactorData.getReactorByID(templateID);
+        String action = ri.getAction();
+        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+            try {
+                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", type);
+            } catch (ScriptException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        } else {
+            chr.getScriptManager().startScript(templateID, action, ScriptType.REACTOR);
         }
     }
 }

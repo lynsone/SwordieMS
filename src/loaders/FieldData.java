@@ -6,6 +6,7 @@ import client.field.Portal;
 import client.life.Life;
 import client.life.Mob;
 import client.life.Npc;
+import client.life.Reactor;
 import constants.ServerConstants;
 import enums.PortalType;
 import org.apache.log4j.LogManager;
@@ -36,8 +37,8 @@ public class FieldData {
         Util.makeDirIfAbsent(dir);
         try {
             DataOutputStream dataOutputStream;
-            for(Field field : getFields()) {
-                File file = new File(dir + "/" + field.getId()+".dat");
+            for (Field field : getFields()) {
+                File file = new File(String.format("%s/%d.dat", dir, field.getId()));
                 dataOutputStream = new DataOutputStream(new FileOutputStream(file));
                 dataOutputStream.writeInt(field.getId());
                 dataOutputStream.writeBoolean(field.isTown());
@@ -61,7 +62,7 @@ public class FieldData {
                 dataOutputStream.writeInt(field.getConsumeItemCoolTime());
                 dataOutputStream.writeInt(field.getLink());
                 dataOutputStream.writeShort(field.getFootholds().size());
-                for(Foothold fh : field.getFootholds()) {
+                for (Foothold fh : field.getFootholds()) {
                     dataOutputStream.writeInt(fh.getId());
                     dataOutputStream.writeInt(fh.getLayerId());
                     dataOutputStream.writeInt(fh.getGroupId());
@@ -75,7 +76,7 @@ public class FieldData {
                     dataOutputStream.writeBoolean(fh.isForbidFallDown());
                 }
                 dataOutputStream.writeShort(field.getPortals().size());
-                for(Portal p : field.getPortals()) {
+                for (Portal p : field.getPortals()) {
                     dataOutputStream.writeInt(p.getId());
                     dataOutputStream.writeInt(p.getType().getVal());
                     dataOutputStream.writeUTF(p.getName());
@@ -90,7 +91,7 @@ public class FieldData {
                     dataOutputStream.writeInt(p.getDelay());
                 }
                 dataOutputStream.writeShort(field.getLifes().size());
-                for(Life l : field.getLifes()){
+                for (Life l : field.getLifes()) {
                     dataOutputStream.writeUTF(l.getLifeType());
                     dataOutputStream.writeInt(l.getTemplateId());
                     dataOutputStream.writeInt(l.getX());
@@ -113,6 +114,16 @@ public class FieldData {
                     dataOutputStream.writeInt(l.getRegenStart());
                     dataOutputStream.writeInt(l.getMobAliveReq());
                 }
+                dataOutputStream.writeShort(field.getReactors().size());
+                for (Reactor r : field.getReactors()) {
+                    dataOutputStream.writeInt(r.getTemplateId());
+                    dataOutputStream.writeShort(r.getHomePosition().getX());
+                    dataOutputStream.writeShort(r.getHomePosition().getY());
+                    dataOutputStream.writeInt(r.getReactorTime());
+                    dataOutputStream.writeInt(r.getF());
+                    dataOutputStream.writeUTF(r.getName());
+                    dataOutputStream.writeBoolean(r.isPhantomForest());
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -124,7 +135,7 @@ public class FieldData {
         File dir = new File(wzDir);
         File[] files = dir.listFiles();
         for (File file : files) {
-            if(file.listFiles() == null) {
+            if (file.listFiles() == null) {
                 continue;
             }
             for (File mapFile : file.listFiles()) {
@@ -136,73 +147,73 @@ public class FieldData {
                 int id = Integer.parseInt(XMLApi.getAttributes(node).get("name").replace(".img", ""));
                 Field field = new Field(id, -1);
                 Node infoNode = XMLApi.getFirstChildByNameBF(node, "info");
-                for(Node n : XMLApi.getAllChildren(infoNode)) {
+                for (Node n : XMLApi.getAllChildren(infoNode)) {
                     Map<String, String> attr = XMLApi.getAttributes(n);
                     String name = attr.get("name");
                     String value = attr.get("value");
-                    if(name.equalsIgnoreCase("town")) {
+                    if (name.equalsIgnoreCase("town")) {
                         field.setTown(Integer.parseInt(value) != 0);
                     }
-                    if(name.equalsIgnoreCase("swim")) {
+                    if (name.equalsIgnoreCase("swim")) {
                         field.setSwim(Integer.parseInt(value) != 0);
                     }
-                    if(name.equalsIgnoreCase("returnMap")) {
+                    if (name.equalsIgnoreCase("returnMap")) {
                         field.setReturnMap(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("forcedReturn")) {
+                    if (name.equalsIgnoreCase("forcedReturn")) {
                         field.setForcedReturn(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("mobRate")) {
+                    if (name.equalsIgnoreCase("mobRate")) {
                         field.setMobRate(Double.parseDouble(value));
                     }
-                    if(name.equalsIgnoreCase("fly")) {
+                    if (name.equalsIgnoreCase("fly")) {
                         field.setFly(Integer.parseInt(value) != 0);
                     }
-                    if(name.equalsIgnoreCase("onFirstUserEnter")) {
+                    if (name.equalsIgnoreCase("onFirstUserEnter")) {
                         field.setOnFirstUserEnter(value);
                     }
-                    if(name.equalsIgnoreCase("onUserEnter")) {
+                    if (name.equalsIgnoreCase("onUserEnter")) {
                         field.setOnUserEnter(value);
                     }
-                    if(name.equalsIgnoreCase("reactorShuffle")) {
+                    if (name.equalsIgnoreCase("reactorShuffle")) {
                         field.setReactorShuffle(Integer.parseInt(value) != 0);
                     }
-                    if(name.equalsIgnoreCase("expeditionOnly")) {
+                    if (name.equalsIgnoreCase("expeditionOnly")) {
                         field.setExpeditionOnly(Integer.parseInt(value) != 0);
                     }
-                    if(name.equalsIgnoreCase("partyOnly")) {
+                    if (name.equalsIgnoreCase("partyOnly")) {
                         field.setPartyOnly(Integer.parseInt(value) != 0);
                     }
-                    if(name.equalsIgnoreCase("isNeedSkillForFly")) {
+                    if (name.equalsIgnoreCase("isNeedSkillForFly")) {
                         field.setNeedSkillForFly(Integer.parseInt(value) != 0);
                     }
-                    if(name.equalsIgnoreCase("fixedMobCapacity")) {
+                    if (name.equalsIgnoreCase("fixedMobCapacity")) {
                         field.setFixedMobCapacity(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("createMobInterval")) {
+                    if (name.equalsIgnoreCase("createMobInterval")) {
                         field.setCreateMobInterval(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("timeOut")) {
+                    if (name.equalsIgnoreCase("timeOut")) {
                         field.setTimeOut(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("timeLimit")) {
+                    if (name.equalsIgnoreCase("timeLimit")) {
                         field.setTimeLimit(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("lvLimit")) {
+                    if (name.equalsIgnoreCase("lvLimit")) {
                         field.setLvLimit(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("lvForceMove")) {
+                    if (name.equalsIgnoreCase("lvForceMove")) {
                         field.setLvForceMove(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("consumeItemCoolTime")) {
+                    if (name.equalsIgnoreCase("consumeItemCoolTime")) {
                         field.setConsumeItemCoolTime(Integer.parseInt(value));
                     }
-                    if(name.equalsIgnoreCase("link")) {
+                    if (name.equalsIgnoreCase("link")) {
                         field.setLink(Integer.parseInt(value));
                     }
                 }
                 Node fhNode = XMLApi.getFirstChildByNameBF(node, "foothold");
-                if(fhNode != null) {
+                if (fhNode != null) {
                     for (Node layerIDNode : XMLApi.getAllChildren(fhNode)) {
                         int layerID = Integer.parseInt(XMLApi.getNamedAttribute(layerIDNode, "name"));
                         for (Node groupIDNode : XMLApi.getAllChildren(layerIDNode)) {
@@ -244,8 +255,8 @@ public class FieldData {
                     }
                 }
                 Node portalNode = XMLApi.getFirstChildByNameBF(node, "portal");
-                if(portalNode != null) {
-                    for(Node idNode : XMLApi.getAllChildren(portalNode)) {
+                if (portalNode != null) {
+                    for (Node idNode : XMLApi.getAllChildren(portalNode)) {
                         int portalId = Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name"));
                         Portal portal = new Portal(portalId);
                         for (Node n : XMLApi.getAllChildren(idNode)) {
@@ -289,23 +300,23 @@ public class FieldData {
                     }
                 }
                 Node lifeNode = XMLApi.getFirstChildByNameBF(node, "life");
-                if(lifeNode != null) {
+                if (lifeNode != null) {
                     List<Node> idNodes = new ArrayList<>();
-                    if(XMLApi.getFirstChildByNameBF(lifeNode, "isCategory") != null) {
-                        for(Node catNode : XMLApi.getAllChildren(lifeNode)) {
-                            if(!XMLApi.getNamedAttribute(catNode, "name").equals("isCategory")){
+                    if (XMLApi.getFirstChildByNameBF(lifeNode, "isCategory") != null) {
+                        for (Node catNode : XMLApi.getAllChildren(lifeNode)) {
+                            if (!XMLApi.getNamedAttribute(catNode, "name").equals("isCategory")) {
                                 idNodes.addAll(XMLApi.getAllChildren(catNode));
                             }
                         }
                     } else {
                         idNodes = XMLApi.getAllChildren(lifeNode);
                     }
-                    for(Node idNode : idNodes) {
+                    for (Node idNode : idNodes) {
                         Life life = new Life(-1);
-                        for(Node n : XMLApi.getAllChildren(idNode)) {
+                        for (Node n : XMLApi.getAllChildren(idNode)) {
                             String name = XMLApi.getNamedAttribute(n, "name");
                             String value = XMLApi.getNamedAttribute(n, "value");
-                            switch(name) {
+                            switch (name) {
                                 case "type":
                                     life.setLifeType(value);
                                     break;
@@ -377,6 +388,53 @@ public class FieldData {
                         field.addLife(life);
                     }
                 }
+                Node reactorNode = XMLApi.getFirstChildByNameBF(node, "reactor");
+                if (reactorNode != null) {
+                    for (Node reactorIdNode : XMLApi.getAllChildren(reactorNode)) {
+                        Reactor reactor = new Reactor(-1);
+                        for (Node valNode : XMLApi.getAllChildren(reactorIdNode)) {
+                            String name = XMLApi.getNamedAttribute(valNode, "name");
+                            String value = XMLApi.getNamedAttribute(valNode, "value");
+                            int iVal = Util.isNumber(value) ? Integer.parseInt(value) : 0;
+                            switch (name) {
+                                case "id":
+                                    reactor.setTemplateId(iVal);
+                                    break;
+                                case "x":
+                                    Position curPos = reactor.getHomePosition();
+                                    if (curPos == null) {
+                                        curPos = new Position();
+                                    }
+                                    curPos.setX(iVal);
+                                    reactor.setHomePosition(curPos);
+                                    break;
+                                case "y":
+                                    curPos = reactor.getHomePosition();
+                                    if (curPos == null) {
+                                        curPos = new Position();
+                                    }
+                                    curPos.setY(iVal);
+                                    reactor.setHomePosition(curPos);
+                                    break;
+                                case "reactorTime":
+                                    reactor.setReactorTime(iVal);
+                                    break;
+                                case "f":
+                                    reactor.setF(iVal);
+                                    break;
+                                case "name":
+                                    reactor.setName(value);
+                                    break;
+                                case "phantomForest":
+                                    reactor.setPhantomForest(iVal != 0);
+                                    break;
+                                default:
+                                    log.warn(String.format("Unknown reactor property %s with value %s", name, value));
+                            }
+                        }
+                        field.addReactor(reactor);
+                    }
+                }
                 getFields().add(field);
             }
         }
@@ -387,8 +445,8 @@ public class FieldData {
     }
 
     public static Field getFieldById(int id) {
-        for(Field f : getFields()) {
-            if(f.getId() == id) {
+        for (Field f : getFields()) {
+            if (f.getId() == id) {
                 return f;
             }
         }
@@ -398,7 +456,7 @@ public class FieldData {
     private static Field getFieldFromFile(int id) {
         String fieldDir = ServerConstants.DAT_DIR + "/fields/" + id + ".dat";
         File file = new File(fieldDir);
-        if(!file.exists()) {
+        if (!file.exists()) {
             log.warn("Could not find field " + id);
             return null;
         } else {
@@ -487,7 +545,7 @@ public class FieldData {
                 l.setMobTimeOnDie(dataInputStream.readBoolean());
                 l.setRegenStart(dataInputStream.readInt());
                 l.setMobAliveReq(dataInputStream.readInt());
-                if("m".equalsIgnoreCase(l.getLifeType())) {
+                if ("m".equalsIgnoreCase(l.getLifeType())) {
                     Mob mob = l.createMobFromLife();
                     field.addLife(mob);
                 } else if ("n".equalsIgnoreCase(l.getLifeType())) {
@@ -497,8 +555,19 @@ public class FieldData {
                     field.addLife(l);
                 }
             }
+            short reactSize = dataInputStream.readShort();
+            for (int i = 0; i < reactSize; i++) {
+                Reactor r = new Reactor(-1);
+                r.setTemplateId(dataInputStream.readInt());
+                r.setHomePosition(new Position(dataInputStream.readShort(), dataInputStream.readShort()));
+                r.setReactorTime(dataInputStream.readInt());
+                r.setF(dataInputStream.readInt());
+                r.setName(dataInputStream.readUTF());
+                r.setPhantomForest(dataInputStream.readBoolean());
+                field.addReactor(r);
+            }
             getFields().add(field);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return field;
@@ -532,14 +601,17 @@ public class FieldData {
         copy.setLvForceMove(field.getLvForceMove());
         copy.setConsumeItemCoolTime(field.getConsumeItemCoolTime());
         copy.setLink(field.getLink());
-        for(Foothold fh : field.getFootholds()) {
+        for (Foothold fh : field.getFootholds()) {
             copy.addFoothold(fh.deepCopy());
         }
-        for(Portal p : field.getPortals()) {
+        for (Portal p : field.getPortals()) {
             copy.addPortal(p.deepCopy());
         }
-        for(Life l : field.getLifes()) {
+        for (Life l : field.getLifes()) {
             copy.addLife(l.deepCopy());
+        }
+        for (Reactor r : field.getReactors()) {
+            copy.addReactor(r);
         }
         copy.setObjectIDCounter(field.getNewObjectID());
         return copy;

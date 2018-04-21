@@ -269,6 +269,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
                 chr.chatMessage(GAME_NOTICE, "Needs more args! <id> <Stat> <Attack> <Flame stats>");
+                return;
             }
             int id = Integer.parseInt(args[1]);
             int stat = Integer.parseInt(args[2]);
@@ -897,6 +898,7 @@ public class AdminCommands {
 
     public static class ClearCache extends AdminCommand {
         public static void execute(Char chr, String[] args) {
+            chr.getScriptManager().dispose();
             Server.getInstance().clearCache();
             chr.chatMessage("Cache has been cleared.");
         }
