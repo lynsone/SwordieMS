@@ -15,8 +15,8 @@ public enum PetSkill {
     AUTO_FEED(0x100),
     FATTEN_UP(0x200),
     PET_SHOP(0x400),
-    WHISTLE(0x800),
-    CHAT(0x1000),
+    RECALL(0x800),
+    AUTO_SPEAKING(0x1000),
     AUTO_ALL_CURE(0x2000),
 
     ;

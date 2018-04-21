@@ -1305,28 +1305,18 @@ public class WorldHandler {
         int mask = inPacket.decodeInt();
         List<Stat> stats = Stat.getStatsByFlag(mask); // should be in correct order
         inPacket.decodeInt();
-        HashMap hashMap = new HashMap();
+        HashMap<Stat, Short> hashMap = new HashMap();
         for (Stat stat : stats) {
             hashMap.put(stat, inPacket.decodeShort()); // always short?
         }
-        Map<Stat, Object> newStats = new HashMap<>();
         byte option = inPacket.decodeByte();
         if (hashMap.containsKey(Stat.hp)) {
-            int curHP = chr.getStat(Stat.hp);
-            int maxHP = chr.getStat(Stat.mhp);
-            short extra = (short) hashMap.get(Stat.hp);
-            int newHP = curHP + extra > maxHP ? maxHP : curHP + extra;
-            chr.setStat(Stat.hp, newHP);
-            newStats.put(Stat.hp, newHP);
-        } else if (hashMap.containsKey(Stat.mp)) {
-            int curMP = chr.getStat(Stat.mp);
-            int maxMP = chr.getStat(Stat.mmp);
-            short extra = (short) hashMap.get(Stat.mp);
-            int newMP = curMP + extra > maxMP ? maxMP : curMP + extra;
-            chr.setStat(Stat.mp, newMP);
-            newStats.put(Stat.mp, newMP);
+            chr.heal(hashMap.get(Stat.hp));
         }
-        c.write(WvsContext.statChanged(newStats));
+        if (hashMap.containsKey(Stat.mp)) {
+            chr.healMP(hashMap.get(Stat.mp));
+        }
+//        c.write(WvsContext.statChanged(newStats));
     }
 
     public static void handleCreateKinesisPsychicArea(Client c, InPacket inPacket) {

@@ -51,7 +51,7 @@ public class PetItem extends Item {
 //        outPacket.encodeFT(FileTime.getTimeFromLong(System.currentTimeMillis() + 10000000));
         outPacket.encodeArr(Util.getByteArrayByString("00 40 E0 FD 3B 37 4F 01"));
         outPacket.encodeShort(getPetAttribute());
-        outPacket.encodeShort(PetSkill.AUTO_MOVE.getVal() | PetSkill.ITEM_PICKUP.getVal());
+        outPacket.encodeShort(getPetSkill());
         outPacket.encodeInt(getRemainLife());
         outPacket.encodeShort(getAttribute());
         outPacket.encodeByte(getActiveState());
