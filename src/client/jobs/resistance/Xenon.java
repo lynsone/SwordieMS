@@ -155,6 +155,10 @@ public class Xenon extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(EVAR, o1);
                 hybridDefenseCount = si.getValue(x, slv);
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.mOption = hybridDefenseCount;
+                tsm.putCharacterStatValue(StackBuff, o1);
                 break;
             case AEGIS_SYSTEM:
                 o1.nOption = 1;
@@ -368,25 +372,44 @@ public class Xenon extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        if(chr.hasSkill(HYBRID_DEFENSES)) {
+            Skill skill = chr.getSkill(HYBRID_DEFENSES);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 
-        Skill hybrid = chr.getSkill(HYBRID_DEFENSES);
-        Option o1 = tsm.getOptByCTSAndSkill(EVAR, HYBRID_DEFENSES);
-        if (hybrid != null && o1 != null) {
-            SkillInfo si = SkillData.getSkillInfoById(HYBRID_DEFENSES);
-            byte slv = (byte) hybrid.getCurrentLevel();
-            if (hitInfo.HPDamage > 0) {
-                o1.nOption -= si.getValue(y, slv);
-                hitInfo.HPDamage -= hitInfo.HPDamage * 0.05;
-                tsm.putCharacterStatValue(EVAR, o1);
-                tsm.sendSetStatPacket();
-            } else {
-                hybridDefenseCount--;
-                if (hybridDefenseCount <= 0) {
-                    tsm.removeStat(EVAR, false);
-                    tsm.sendResetStatPacket();
+            if (tsm.getOptByCTSAndSkill(StackBuff, HYBRID_DEFENSES) != null) {
+                if (hitInfo.HPDamage > 0) {
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.mOption = hybridDefenseCount;
+                    tsm.putCharacterStatValue(StackBuff, o1);
+                    o2.nOption -= si.getValue(y, slv);
+                    o2.rOption = skill.getSkillId();
+                    tsm.putCharacterStatValue(EVAR, o2);
+
+                    tsm.sendSetStatPacket();
+                } else {
+                    hybridDefenseCount--;
+                    if (hybridDefenseCount <= 0) {
+                        tsm.removeStatsBySkill(HYBRID_DEFENSES);
+                        tsm.sendResetStatPacket();
+                        return;
+                    }
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.mOption = hybridDefenseCount;
+                    tsm.putCharacterStatValue(StackBuff, o1);
+                    o2.nOption -= 0;
+                    o2.rOption = skill.getSkillId();
+                    tsm.putCharacterStatValue(EVAR, o2);
+                    tsm.sendSetStatPacket();
                 }
+
             }
         }
+
         Skill aegis = chr.getSkill(AEGIS_SYSTEM);
         if (tsm.hasStat(XenonAegisSystem) && aegis != null) {
             SkillInfo si = SkillData.getSkillInfoById(AEGIS_SYSTEM);

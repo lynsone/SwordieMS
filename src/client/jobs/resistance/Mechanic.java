@@ -149,7 +149,15 @@ public class Mechanic extends Job {
                 tsm.putCharacterStatValue(PowerGuard, o1);
                 break;
             case ROLL_OF_THE_DICE:
-                //TODO
+                int random = new Random().nextInt(6)+1;
+                o1.nOption = random;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                if(random < 2) {
+                    return;
+                }
+                tsm.throwDice(random);
+                tsm.putCharacterStatValue(Dice, o1);
                 break;
             case MAPLE_WARRIOR_MECH:
                 o1.nReason = skillID;

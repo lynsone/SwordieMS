@@ -9,6 +9,7 @@ import client.jobs.Job;
 import client.life.*;
 import connection.InPacket;
 import constants.JobConstants;
+import constants.SkillConstants;
 import enums.*;
 import loaders.SkillData;
 import packet.CField;
@@ -255,18 +256,18 @@ public class Evan extends Job {
             }
 
             // Wreckage / Magic Debris
-            //if(SkillConstants.isEvanFusionSkill(skillID)) {
-            if(attackInfo.skillId != MAGIC_DEBRIS && attackInfo.skillId != ENHANCED_MAGIC_DEBRIS) {
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    if(debrisCount < getMaxDebris()) {
-                        debrisPos.put(debrisCount, mob.getPosition());
-                        debrisCount++;
-                        c.write(CField.addWreckage(chr, mob, getDebrisSkill(), debrisCount));
+            if(SkillConstants.isEvanFusionSkill(attackInfo.skillId)) {
+                if(attackInfo.skillId != MAGIC_DEBRIS && attackInfo.skillId != ENHANCED_MAGIC_DEBRIS) {
+                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(debrisCount < getMaxDebris()) {
+                            debrisPos.put(debrisCount, mob.getPosition());
+                            debrisCount++;
+                            c.write(CField.addWreckage(chr, mob, getDebrisSkill(), debrisCount));
+                        }
                     }
                 }
             }
-            //}
         }
         chr.chatMessage("Debris Count: " + debrisCount);
         Option o1 = new Option();
@@ -437,25 +438,23 @@ public class Evan extends Job {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(getDebrisSkill());
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        List<Life> lifes = field.getLifesInRect(rect);
+        List<Mob> lifes =  field.getMobsInRect(rect);
         for(int i = 0; i<debrisCount; i++) {
             c.write(CField.delWreckage(chr));
-            Life life = lifes.get(i);
-            if(life instanceof Mob) {
-                int mobID = (life).getObjectId(); //
-                int inc = ForceAtomEnum.WRECKAGE.getInc();
-                int type = ForceAtomEnum.WRECKAGE.getForceAtomType();
-                if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
-                    inc = ForceAtomEnum.ADV_WRECKAGE.getInc();
-                    type = ForceAtomEnum.ADV_WRECKAGE.getForceAtomType();
-                }
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 10,
-                        0, 200, (int) System.currentTimeMillis(), 1, 0,
-                        debrisPos.get(i));
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, getDebrisSkill(), forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), getDebrisSkill(), life.getPosition()));
+            Life life = Util.getRandomFromList(lifes);
+            int mobID = (life).getObjectId(); //
+            int inc = ForceAtomEnum.WRECKAGE.getInc();
+            int type = ForceAtomEnum.WRECKAGE.getForceAtomType();
+            if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
+                inc = ForceAtomEnum.ADV_WRECKAGE.getInc();
+                type = ForceAtomEnum.ADV_WRECKAGE.getForceAtomType();
             }
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 10,
+                    0, 200, (int) System.currentTimeMillis(), 1, 0,
+                    debrisPos.get(i));
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mobID, getDebrisSkill(), forceAtomInfo, new Rect(), 0, 300,
+                    life.getPosition(), getDebrisSkill(), life.getPosition()));
         }
         debrisCount = 0;
     }
