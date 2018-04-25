@@ -104,6 +104,7 @@ public class Mob extends Life {
     private Set<DropInfo> drops = new HashSet<>();
     private List<MobSkill> skills = new ArrayList<>();
     private Set<Integer> quests = new HashSet<>();
+    private Set<Integer> revives = new HashSet<>();
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -251,6 +252,9 @@ public class Mob extends Life {
         copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
         for (MobSkill ms : getSkills()) {
             copy.addSkill(ms);
+        }
+        for (int rev : getRevives()) {
+            copy.addRevive(rev);
         }
         for (int i : getQuests()) {
             copy.addQuest(i);
@@ -1095,6 +1099,16 @@ public class Mob extends Life {
         return splitLink;
     }
 
+    public Set<Integer> getRevives() {
+        return revives;
+    }
+
+    public void setRevives(Set<Integer> revives) {
+        this.revives = revives;
+    }
+
+    public void addRevive(int revive) {revives.add(revive);}
+
     public void damage(Long totalDamage) {
         long maxHP = getMaxHp();
         long oldHp = getHp();
@@ -1132,6 +1146,9 @@ public class Mob extends Life {
             chr.getQuestManager().handleMobKill(this);
         }
         getDamageDone().clear();
+
+        //TEST
+        reviveMob();
     }
 
     private void dropDrops() {
@@ -1251,5 +1268,17 @@ public class Mob extends Life {
 
     public boolean isAlive() {
         return getHp() <= 0;
+    }
+
+    public void reviveMob() {
+        Position position = getPosition();
+        Field field = getField();
+        if(revives.size() > 0) {
+            for(int rev2 : getRevives()) {
+                Mob mob = MobData.getMobDeepCopyById(rev2);
+                mob.setPosition(position);
+                field.spawnLife(mob, null);
+            }
+        }
     }
 }

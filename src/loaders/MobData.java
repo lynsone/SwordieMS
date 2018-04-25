@@ -633,6 +633,11 @@ public class MobData {
                     case "patrol":
                         mob.setPatrolMob(true);
                         break;
+                    case "revive":
+                        for(Node reviveNode : XMLApi.getAllChildren(n)) {
+                            mob.addRevive(Integer.parseInt((XMLApi.getNamedAttribute(reviveNode, "value"))));
+                        }
+                        break;
                     case "skill":
                         for(Node skillIDNode : XMLApi.getAllChildren(n)) {
                             MobSkill mobSkill = new MobSkill();
@@ -728,10 +733,10 @@ public class MobData {
                             }
                             mob.addSkill(mobSkill);
                         }
+                        break;
                     case "speak":
                     case "thumbnail":
                     case "attack":
-                    case "revive":
                     case "ban":
                     case "default":
                     case "defaultHP":
