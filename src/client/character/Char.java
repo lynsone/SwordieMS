@@ -1826,12 +1826,15 @@ public class Char {
             if(getGuild() != null) {
                 write(WvsContext.guildResult(new GuildUpdate(getGuild())));
             }
-            for(Friend f : getFriends()) {
+            // Seperate initialization and loop for hibernate "Operation not allowed after ResultSet closed"
+            List<Friend> friends = getFriends();
+            for(Friend f : friends) {
                 f.setFlag(getClient().getWorld().getCharByID(f.getFriendID()) != null
                         ? FriendFlag.FriendOnline
                         : FriendFlag.FriendOffline);
             }
-            for(Friend f : getAccount().getFriends()) {
+            friends = getAccount().getFriends();
+            for(Friend f : friends) {
                 f.setFlag(getClient().getWorld().getAccountByID(f.getFriendAccountID()) != null
                         ? FriendFlag.AccountFriendOnline
                         : FriendFlag.AccountFriendOffline);

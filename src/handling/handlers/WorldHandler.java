@@ -603,6 +603,7 @@ public class WorldHandler {
         Field field = chr.getField();
         Field toField;
         switch (itemID) {
+            // TODO use WZ ({itemID}/spec)
             case 2030000: //Return to Nearest Town
                 toField = c.getChannelInstance().getField(field.getReturnMap());
                 break;
@@ -1675,12 +1676,14 @@ public class WorldHandler {
                     equip.removeAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION);
                 }
             }
+            if(equip.hasAttribute(EquipAttribute.LUCKY_DAY)) {
+                equip.removeAttribute(EquipAttribute.LUCKY_DAY);
+            }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
         c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
                 0, equip));
         chr.consumeItem(scroll);
-
     }
 
     public static void handleUserItemOptionUpgradeItemUseRequest(Client c, InPacket inPacket) {
@@ -1688,7 +1691,7 @@ public class WorldHandler {
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort();
         short ePos = inPacket.decodeShort();
-        byte bEnchantSkill = inPacket.decodeByte();
+        byte bEnchantSkill = inPacket.decodeByte(); // bool or byte?
         Item scroll = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(uPos);
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
@@ -2775,7 +2778,7 @@ public class WorldHandler {
                 String name = inPacket.decodeString();
                 other = c.getWorld().getCharByName(name);
                 if(other == null) {
-                    c.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_Unknown)));
+                    c.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_UnknownUser)));
                     return;
                 }
                 String groupName = inPacket.decodeString();

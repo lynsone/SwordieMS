@@ -15,7 +15,7 @@ public class MetaProgramming {
     public static void fixTempStats() {
 //        Invincible(0x10000000, 2),
         int plus = 5;
-        File file = new File("D:\\SwordieMS\\Swordie\\info txts\\tempstats.txt");
+        File file = new File("D:/SwordieMS/Swordie/info txts/tempstats.txt");
         try {
             Scanner scanner = new Scanner(file);
             String s = "";
@@ -59,7 +59,7 @@ public class MetaProgramming {
 
     public static void makeHeaders() {
 
-        File file = new File("D:\\SwordieMS\\Swordie\\src\\headerText.txt");
+        File file = new File("D:/SwordieMS/Swordie/src/headerText.txt");
         try {
             Scanner scanner = new Scanner(file);
             String s = "";
@@ -94,7 +94,7 @@ public class MetaProgramming {
     }
 
     public static void makeCTS() {
-        File file = new File("D:\\SwordieMS\\Swordie\\src\\decodeforlocal.txt");
+        File file = new File("D:/SwordieMS/Swordie/src/decodeforlocal.txt");
         try {
             Scanner scanner = new Scanner(file);
             StringBuilder s = new StringBuilder();
@@ -126,7 +126,7 @@ public class MetaProgramming {
     }
 
     public static void makeInHeaders() {
-        File file = new File("D:\\SwordieMS\\Swordie\\src\\ins.txt");
+        File file = new File("D:/SwordieMS/Swordie/src/ins.txt");
         int change = 0;
         try {
             Scanner scanner = new Scanner(file);

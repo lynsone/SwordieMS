@@ -1235,6 +1235,8 @@ public class ItemData {
                                     SpecStat ss = SpecStat.getSpecStatByName(name);
                                     if (ss != null && value != null) {
                                         item.putSpecStat(ss, Integer.parseInt(value));
+                                    } else {
+                                        log.error(String.format("Unhandled spec for id %d, name %s, value %s", id, name, value));
                                     }
                             }
                         }

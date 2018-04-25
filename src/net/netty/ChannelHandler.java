@@ -388,10 +388,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     WorldHandler.handleMobExplosionStart(c, inPacket);
                     break;
                 case REQUEST_DEC_COMBO:
-                    if(c.getChr().getJob() >= JobConstants.JobEnum.ARAN1.getJobId() && c.getChr().getJob() <= JobConstants.JobEnum.ARAN4.getJobId()) {
-                        Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());
-                        aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
-                    }
+                    WorldHandler.handleRequestDecCombo(c, inPacket);
                     break;
                 case USER_EQUIPMENT_ENCHANT_WITH_SINGLE_UI_REQUEST:
                     WorldHandler.handleUserEquipmentEnchantWithSingleUIRequest(c, inPacket);
