@@ -10,7 +10,9 @@ def init():
 	elif currentMap == 103020000:
 		map = 103020100
 		portal = 2
-	
+	elif currentMap == 200000300:
+		map = 200000301
+		portal = 3
 	elif currentMap == 103020310: 
 		map = 103020320
 		portal = 2

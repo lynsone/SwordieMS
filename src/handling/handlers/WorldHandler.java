@@ -3126,6 +3126,9 @@ public class WorldHandler {
         if(chr.getJob() >= JobConstants.JobEnum.BLAZEWIZARD1.getJobId() && chr.getJob() <= JobConstants.JobEnum.BLAZEWIZARD4.getJobId()) {
             skillID = BlazeWizard.IGNITION;
         }
+        if(chr.getJob() >= JobConstants.JobEnum.DAWNWARRIOR1.getJobId() && chr.getJob() <= JobConstants.JobEnum.DAWNWARRIOR4.getJobId()) {
+            skillID = 11121013;
+        }
         if(chr.getJob() >= JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId() && chr.getJob() <= JobConstants.JobEnum.ANGELIC_BUSTER4.getJobId()) {
             skillID = 65101006; //Lovely Sting Explosion
         }
