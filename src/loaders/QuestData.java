@@ -29,7 +29,7 @@ public class QuestData {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static void loadQuestsFromWZ() {
-        String wzDir = ServerConstants.WZ_DIR + "\\Quest.wz\\";
+        String wzDir = String.format("%s/Quest.wz/", ServerConstants.WZ_DIR);
         String checkDir = wzDir + "Check.img.xml";
         File file = new File(checkDir);
         Node root = XMLApi.getRoot(file);
@@ -491,13 +491,13 @@ public class QuestData {
         if (getBaseQuests().size() == 0) {
             loadQuestsFromWZ();
         }
-        saveAllQuestInfos(ServerConstants.DAT_DIR + "\\quests");
+        saveAllQuestInfos(String.format("%s/quests", ServerConstants.DAT_DIR));
     }
 
     private static void saveAllQuestInfos(String dir) {
         Util.makeDirIfAbsent(dir);
         for (QuestInfo qi : getBaseQuests()) {
-            File file = new File(dir + "\\" + qi.getQuestID() + ".dat");
+            File file = new File(String.format("%s/%d.dat", dir, qi.getQuestID()));
             try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
                 dos.writeInt(qi.getQuestID());
                 dos.writeInt(qi.getStartNpc());
@@ -562,7 +562,7 @@ public class QuestData {
     }
 
     private static QuestInfo loadQuestInfoById(int id) {
-        File file = new File(String.format("%s\\quests\\%d.dat", ServerConstants.DAT_DIR, id));
+        File file = new File(String.format("%s/quests/%d.dat", ServerConstants.DAT_DIR, id));
         boolean exists = file.exists();
         return exists ? loadQuestInfoByFile(file) : null;
     }

@@ -292,7 +292,7 @@ public class LoginHandler {
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
         if (c.isAuthorized()) {
-            Server.getInstance().getWorldById(worldId).getChannelById(worldId).addClientInTransfer(channelId, characterId, c);
+            Server.getInstance().getWorldById(worldId).getChannelById(channelId).addClientInTransfer(channelId, characterId, c);
             c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
         }
     }

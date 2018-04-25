@@ -32,7 +32,7 @@ public class NpcData {
     }
 
     private static void loadNpcsFromWz() {
-        String wzDir = ServerConstants.WZ_DIR + "\\Npc.wz";
+        String wzDir = String.format("%s/Npc.wz", ServerConstants.WZ_DIR);
         for(File file : new File(wzDir).listFiles()) {
             Npc npc = new Npc(-1);
             Node node = XMLApi.getRoot(file);
@@ -62,7 +62,7 @@ public class NpcData {
     public static void saveNpcsToDat(String dir) {
         Util.makeDirIfAbsent(dir);
         for(Npc npc : getBaseNpcs()) {
-            File file = new File(dir + "\\" + npc.getTemplateId() + ".dat");
+            File file = new File(String.format("%s/%d.dat", dir, npc.getTemplateId()));
             try {
                 DataOutputStream das = new DataOutputStream(new FileOutputStream(file));
                 das.writeInt(npc.getTemplateId());
@@ -88,7 +88,7 @@ public class NpcData {
     public static Npc getNpcDeepCopyById(int id) {
         Npc res = getNpc(id);
         if (res == null) {
-            File file = new File(ServerConstants.DAT_DIR + "\\npc\\" + id + ".dat");
+            File file = new File(String.format("%s/npc/%d.dat", ServerConstants.DAT_DIR, id));
             if(file.exists()) {
                 res = loadNpcFromDat(file).deepCopy();
                 getBaseNpcs().add(res);

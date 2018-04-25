@@ -640,8 +640,12 @@ public class AdminCommands {
 
     public static class SetMap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            Field toField = chr.getClient().getChannelInstance().getField(Integer.parseInt(args[1]));
-            chr.warp(toField);
+            if(args.length > 1 && Util.isNumber(args[1])) {
+                Field toField = chr.getClient().getChannelInstance().getField(Integer.parseInt(args[1]));
+                chr.warp(toField);
+            } else {
+                chr.chatMessage("Please input a number as first argument.");
+            }
         }
     }
 
