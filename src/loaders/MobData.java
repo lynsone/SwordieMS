@@ -149,6 +149,10 @@ public class MobData {
                 for(int i : mob.getQuests()) {
                     dataOutputStream.writeInt(i);
                 }
+                dataOutputStream.writeShort(mob.getRevives().size());
+                for(int i : mob.getRevives()) {
+                    dataOutputStream.writeInt(i);
+                }
                 dataOutputStream.writeShort(mob.getSkills().size());
                 for(MobSkill ms : mob.getSkills()) {
                     dataOutputStream.writeInt(ms.getSkillID());
@@ -286,6 +290,10 @@ public class MobData {
             short size = dataInputStream.readShort();
             for (int i = 0; i < size; i++) {
                 mob.addQuest(dataInputStream.readInt());
+            }
+            size = dataInputStream.readShort();
+            for (int i = 0; i < size; i++) {
+                mob.addRevive(dataInputStream.readInt());
             }
             short skillSize = dataInputStream.readShort();
             for (int i = 0; i < skillSize; i++) {

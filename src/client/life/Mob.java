@@ -1271,13 +1271,12 @@ public class Mob extends Life {
     }
 
     public void reviveMob() {
-        Position position = getPosition();
-        Field field = getField();
-        if(revives.size() > 0) {
-            for(int rev2 : getRevives()) {
-                Mob mob = MobData.getMobDeepCopyById(rev2);
-                mob.setPosition(position);
-                field.spawnLife(mob, null);
+        if(getRevives().size() > 0) {
+            for(int reviveTemplateID : getRevives()) {
+                Mob mob = MobData.getMobDeepCopyById(reviveTemplateID);
+                mob.setNotRespawnable(true);
+                mob.setPosition(getPosition());
+                getField().spawnLife(mob, null);
             }
         }
     }

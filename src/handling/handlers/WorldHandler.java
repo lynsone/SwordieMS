@@ -19,6 +19,7 @@ import client.jobs.JobManager;
 import client.jobs.adventurer.Archer;
 import client.jobs.adventurer.Warrior;
 import client.jobs.cygnus.BlazeWizard;
+import client.jobs.legend.Aran;
 import client.jobs.legend.Luminous;
 import client.jobs.resistance.Xenon;
 import client.jobs.sengoku.Kanna;
@@ -3290,5 +3291,13 @@ public class WorldHandler {
             return;
         }
         chr.dispose();
+    }
+
+    public static void handleRequestDecCombo(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        if (chr.getJob() >= JobConstants.JobEnum.ARAN1.getJobId() && chr.getJob() <= JobConstants.JobEnum.ARAN4.getJobId()) {
+            Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());
+            aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
+        }
     }
 }
