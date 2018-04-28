@@ -254,7 +254,7 @@ public class Blaster extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.BLASTER_1.getJobId() && id <= JobConstants.JobEnum.BLASTER_4.getJobId();
+        return JobConstants.isBlaster(id);
     }
 
     @Override

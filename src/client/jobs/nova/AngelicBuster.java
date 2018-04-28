@@ -444,17 +444,7 @@ public class AngelicBuster extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case ANGELIC_BUSTER:
-            case ANGELIC_BUSTER1:
-            case ANGELIC_BUSTER2:
-            case ANGELIC_BUSTER3:
-            case ANGELIC_BUSTER4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isAngelicBuster(id);
     }
 
     @Override

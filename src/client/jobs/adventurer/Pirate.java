@@ -218,7 +218,7 @@ public class Pirate extends Job {
                     chr.addSkill(skill);
                 }
             }
-            if (chr.getJob() >= JobConstants.JobEnum.BRAWLER.getJobId() && chr.getJob() <= JobConstants.JobEnum.BUCCANEER.getJobId()) {
+            if (JobConstants.isBuccaneer(chr.getJob())) {
                 if (chr.hasSkill(ENERGY_CHARGE)) {
                     TemporaryStatManager tsm = chr.getTemporaryStatManager();
                     TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
@@ -725,7 +725,7 @@ public class Pirate extends Job {
             skillID = skill.getSkillId();
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.BRAWLER.getJobId() && chr.getJob() <= JobConstants.JobEnum.BUCCANEER.getJobId()) {
+        if (JobConstants.isBuccaneer(chr.getJob())) {
             if(hasHitMobs && attackInfo.skillId != 0) {
                 //Stun Mastery
                 handleStunMastery(attackInfo);
@@ -739,21 +739,21 @@ public class Pirate extends Job {
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.GUNSLINGER.getJobId() && chr.getJob() <= JobConstants.JobEnum.CORSAIR.getJobId()) {
+        if (JobConstants.isCorsair(chr.getJob())) {
             if(hasHitMobs) {
                 //Quickdraw
                 handleQuickdraw(attackInfo, tsm, c);
             }
         }
 
-        if ((chr.getJob() >= JobConstants.JobEnum.CANNONEER.getJobId() && chr.getJob() <= JobConstants.JobEnum.CANNON_MASTER.getJobId()) || chr.getJob() == JobConstants.JobEnum.PIRATE_CANNONNEER.getJobId()) {
+        if (JobConstants.isCannonShooter(chr.getJob())) {
             if(hasHitMobs) {
                 //Barrel Roulette
                 handleBarrelRouletteDebuffs(attackInfo);
             }
         }
 
-        if ((chr.getJob() >= JobConstants.JobEnum.JETT2.getJobId() && chr.getJob() <= JobConstants.JobEnum.JETT4.getJobId()) || chr.getJob() == JobConstants.JobEnum.JETT1.getJobId()) {
+        if (JobConstants.isJett(chr.getJob())) {
             if(hasHitMobs) {
 
             }
@@ -839,27 +839,10 @@ public class Pirate extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case PIRATE:
-            case PIRATE_CANNONNEER:
-            case JETT1:
-            case BRAWLER:
-            case MARAUDER:
-            case BUCCANEER:
-            case GUNSLINGER:
-            case OUTLAW:
-            case CORSAIR:
-            case CANNONEER:
-            case CANNON_BLASTER:
-            case CANNON_MASTER:
-            case JETT2:
-            case JETT3:
-            case JETT4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isAdventurerPirate(id) ||
+                JobConstants.isBuccaneer(id) ||
+                JobConstants.isCorsair(id) ||
+                JobConstants.isJett(id);
     }
 
     @Override

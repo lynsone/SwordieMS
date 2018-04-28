@@ -268,8 +268,7 @@ public class Kanna extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id == JobConstants.JobEnum.KANNA.getJobId() ||
-                (id >= JobConstants.JobEnum.KANNA1.getJobId() && id <= JobConstants.JobEnum.KANNA4.getJobId());
+        return JobConstants.isKanna(id);
     }
 
     @Override

@@ -550,16 +550,7 @@ public class NightWalker extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case NIGHTWALKER1:
-            case NIGHTWALKER2:
-            case NIGHTWALKER3:
-            case NIGHTWALKER4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isNightWalker(id);
     }
 
     @Override

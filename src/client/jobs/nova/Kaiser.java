@@ -611,17 +611,7 @@ public class Kaiser extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case KAISER:
-            case KAISER1:
-            case KAISER2:
-            case KAISER3:
-            case KAISER4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isKaiser(id);
     }
 
     @Override

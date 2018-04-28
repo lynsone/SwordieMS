@@ -422,17 +422,7 @@ public class Shade extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case SHADE:
-            case SHADE1:
-            case SHADE2:
-            case SHADE3:
-            case SHADE4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isShade(id);
     }
 
     @Override

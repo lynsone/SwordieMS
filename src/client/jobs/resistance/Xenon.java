@@ -440,8 +440,7 @@ public class Xenon extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id == JobConstants.JobEnum.XENON.getJobId() ||
-                (id >= JobConstants.JobEnum.XENON1.getJobId() && id <= JobConstants.JobEnum.XENON4.getJobId());
+        return JobConstants.isXenon(id);
     }
 
     @Override

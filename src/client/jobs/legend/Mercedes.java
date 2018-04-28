@@ -376,17 +376,7 @@ public class Mercedes extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case MERCEDES:
-            case MERCEDES1:
-            case MERCEDES2:
-            case MERCEDES3:
-            case MERCEDES4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isMercedes(id);
     }
 
     @Override

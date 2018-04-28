@@ -328,16 +328,7 @@ public class ThunderBreaker extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case THUNDERBREAKER1:
-            case THUNDERBREAKER2:
-            case THUNDERBREAKER3:
-            case THUNDERBREAKER4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isThunderBreaker(id);
     }
 
     @Override

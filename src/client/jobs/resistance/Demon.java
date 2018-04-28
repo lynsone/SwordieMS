@@ -171,7 +171,7 @@ public class Demon extends Job {
     public Demon(Char chr) {
         super(chr);
         if(isHandlerOfJob(chr.getJob())) {
-            if (chr.getJob() == JobConstants.JobEnum.DEMON_SLAYER.getJobId() || (chr.getJob() >= JobConstants.JobEnum.DEMON_SLAYER1.getJobId() && chr.getJob() <= JobConstants.JobEnum.DEMON_SLAYER4.getJobId())) {
+            if (JobConstants.isDemonSlayer(chr.getJob())) {
                 for (int id : addedSkillsDS) {
                     if (!chr.hasSkill(id)) {
                         Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -179,10 +179,10 @@ public class Demon extends Job {
                         chr.addSkill(skill);
                     }
                 }
-                if(chr.hasSkill(MAX_FURY)) {
+                if (chr.hasSkill(MAX_FURY)) {
                     //regenDFInterval(); //TODO  WVsCrash
                 }
-            } else if (chr.getJob() == 3101 || chr.getJob() == 3120 || chr.getJob() == 3121 || chr.getJob() == 3122) {
+            } else if (JobConstants.isDemonAvenger(chr.getJob())) {
                 for (int id : addedSkillsDA) {
                     if (!chr.hasSkill(id)) {
                         Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -343,7 +343,7 @@ public class Demon extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        if(chr.getJob() >= JobConstants.JobEnum.DEMON_SLAYER1.getJobId() && chr.getJob() <= JobConstants.JobEnum.DEMON_SLAYER4.getJobId()) {
+        if(JobConstants.isDemonSlayer(chr.getJob())) {
             if(hasHitMobs) {
                 //Demon Slayer Fury Atoms
                 handleFuryForceAtom(attackInfo);
@@ -366,7 +366,7 @@ public class Demon extends Job {
             }
         }
 
-        if(chr.getJob() >= JobConstants.JobEnum.DEMON_AVENGER1.getJobId() && chr.getJob() <= JobConstants.JobEnum.DEMON_AVENGER4.getJobId()) {
+        if(JobConstants.isDemonAvenger(chr.getJob())) {
             if(hasHitMobs) {
                 //Nether Shield Recreation
                 if (attackInfo.skillId == NETHER_SHIELD_ATOM) {

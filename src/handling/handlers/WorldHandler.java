@@ -3121,16 +3121,16 @@ public class WorldHandler {
         int charID = inPacket.decodeInt();
         int skillID = inPacket.decodeInt(); //tick
         Char chr = c.getChr();
-        if(chr.getJob() >= JobConstants.JobEnum.XENON1.getJobId() && chr.getJob() <= JobConstants.JobEnum.XENON4.getJobId()) {
+        if(JobConstants.isXenon(chr.getJob())) {
             skillID = Xenon.TRIANGULATION;
         }
-        if(chr.getJob() >= JobConstants.JobEnum.BLAZEWIZARD1.getJobId() && chr.getJob() <= JobConstants.JobEnum.BLAZEWIZARD4.getJobId()) {
+        if(JobConstants.isBlazeWizard(chr.getJob())) {
             skillID = BlazeWizard.IGNITION;
         }
-        if(chr.getJob() >= JobConstants.JobEnum.DAWNWARRIOR1.getJobId() && chr.getJob() <= JobConstants.JobEnum.DAWNWARRIOR4.getJobId()) {
+        if(JobConstants.isDawnWarrior(chr.getJob())) {
             skillID = 11121013;
         }
-        if(chr.getJob() >= JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId() && chr.getJob() <= JobConstants.JobEnum.ANGELIC_BUSTER4.getJobId()) {
+        if(JobConstants.isAngelicBuster(chr.getId())) {
             skillID = 65101006; //Lovely Sting Explosion
         }
         Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
@@ -3267,9 +3267,9 @@ public class WorldHandler {
     }
 
     public static void handleUserLearnItemUseRequest(Client c, InPacket inPacket) {
-        inPacket.decodeInt(); //tick
-        short uPos = inPacket.decodeShort(); //uPos
-        int itemID = inPacket.decodeInt(); //item ID
+        inPacket.decodeInt();
+        short pos = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
         Char chr = c.getChr();
         int skillCheck = ItemConstants.getSkillidByMasteryBook(itemID);
 
@@ -3295,7 +3295,7 @@ public class WorldHandler {
 
     public static void handleRequestDecCombo(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        if (chr.getJob() >= JobConstants.JobEnum.ARAN1.getJobId() && chr.getJob() <= JobConstants.JobEnum.ARAN4.getJobId()) {
+        if (JobConstants.isAran(chr.getJob())) {
             Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());
             aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
         }

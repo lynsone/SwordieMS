@@ -199,7 +199,7 @@ public class Magician extends Job {
             handleArcaneAim();
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.FP_WIZARD.getJobId() && chr.getJob() <= JobConstants.JobEnum.FP_ARCHMAGE.getJobId()) {
+        if (JobConstants.isFirePoison(chr.getJob())) {
             if(hasHitMobs) {
                 //Ignite
                 handleIgnite(attackInfo, chr, tsm);
@@ -213,7 +213,7 @@ public class Magician extends Job {
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.IL_WIZARD.getJobId() && chr.getJob() <= JobConstants.JobEnum.IL_ARCHMAGE.getJobId()) {
+        if (JobConstants.isIceLightning(chr.getJob())) {
             if(hasHitMobs) {
                 //Freezing Crush / Frozen Clutch
                 handleFreezingCrush(attackInfo, slv);
@@ -221,7 +221,7 @@ public class Magician extends Job {
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.CLERIC.getJobId() && chr.getJob() <= JobConstants.JobEnum.BISHOP.getJobId()) {
+        if (JobConstants.isCleric(chr.getJob())) {
             if(hasHitMobs) {
 
             }

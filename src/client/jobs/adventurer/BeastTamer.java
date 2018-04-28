@@ -420,17 +420,7 @@ public class BeastTamer extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case BEAST_TAMER:
-            case BEAST_TAMER_1:
-            case BEAST_TAMER_2:
-            case BEAST_TAMER_3:
-            case BEAST_TAMER_4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isBeastTamer(id);
     }
 
     @Override

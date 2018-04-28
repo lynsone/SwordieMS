@@ -417,17 +417,7 @@ public class Mihile extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case NAMELESS_WARDEN:
-            case MIHILE1:
-            case MIHILE2:
-            case MIHILE3:
-            case MIHILE4:
-                return true;
-            default:
-                return false;
-        }
+        return id == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() || JobConstants.isMihile(id);
     }
 
     @Override

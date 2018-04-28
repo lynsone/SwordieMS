@@ -297,14 +297,7 @@ public class PinkBean extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case PINK_BEAN_0:
-            case PINK_BEAN_1:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isPinkBean(id);
     }
 
     @Override

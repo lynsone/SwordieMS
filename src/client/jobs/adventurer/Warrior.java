@@ -403,7 +403,7 @@ public class Warrior extends Job {
             skillID = skill.getSkillId();
         }
         int comboProp = getComboProp(chr);
-        if (chr.getJob() >= JobConstants.JobEnum.FIGHTER.getJobId() && chr.getJob() <= JobConstants.JobEnum.HERO.getJobId()) {
+        if (JobConstants.isHero(chr.getJob())) {
             if(hasHitMobs) {
                 //Combo
                 if(Util.succeedProp(comboProp)) {
@@ -418,13 +418,13 @@ public class Warrior extends Job {
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.PAGE.getJobId() && chr.getJob() <= JobConstants.JobEnum.PALADIN.getJobId()) {
+        if (JobConstants.isPage(chr.getJob())) {
             if(hasHitMobs) {
 
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.SPEARMAN.getJobId() && chr.getJob() <= JobConstants.JobEnum.DARKKNIGHT.getJobId()) {
+        if (JobConstants.isDarkKnight(chr.getJob())) {
             if(hasHitMobs) {
                 //Lord of Darkness
                 handleLordOfDarkness();

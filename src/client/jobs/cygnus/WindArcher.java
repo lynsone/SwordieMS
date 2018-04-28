@@ -458,16 +458,7 @@ public class WindArcher extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case WINDARCHER1:
-            case WINDARCHER2:
-            case WINDARCHER3:
-            case WINDARCHER4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isWindArcher(id);
     }
 
     @Override

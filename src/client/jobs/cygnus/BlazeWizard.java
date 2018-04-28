@@ -310,16 +310,7 @@ public class BlazeWizard extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case BLAZEWIZARD1:
-            case BLAZEWIZARD2:
-            case BLAZEWIZARD3:
-            case BLAZEWIZARD4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isBlazeWizard(id);
     }
 
     @Override

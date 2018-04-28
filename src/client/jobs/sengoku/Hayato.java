@@ -350,8 +350,7 @@ public class Hayato extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id == JobConstants.JobEnum.HAYATO.getJobId() ||
-                (id >= JobConstants.JobEnum.HAYATO1.getJobId() && id <= JobConstants.JobEnum.HAYATO4.getJobId());
+        return JobConstants.isHayato(id);
     }
 
     @Override

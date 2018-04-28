@@ -424,7 +424,7 @@ public class Zero extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.ZERO.getJobId() && id <= JobConstants.JobEnum.ZERO4.getJobId();
+        return JobConstants.isZero(id);
     }
 
     @Override

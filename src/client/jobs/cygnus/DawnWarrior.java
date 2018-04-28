@@ -362,16 +362,7 @@ public class DawnWarrior extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case DAWNWARRIOR1:
-            case DAWNWARRIOR2:
-            case DAWNWARRIOR3:
-            case DAWNWARRIOR4:
-                return true;
-            default:
-                return false;
-        }
+        return JobConstants.isDawnWarrior(id);
     }
 
     @Override

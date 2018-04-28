@@ -171,7 +171,7 @@ public class Thief extends Job {
                     chr.addSkill(skill);
                 }
             }
-            if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.SHADOWER.getJobId()) {
+            if (JobConstants.isShadower(chr.getJob())) {
                 EventManager.addFixedRateEvent(this::incrementCritGrowing, 0, 2000);
             }
         }
@@ -193,7 +193,7 @@ public class Thief extends Job {
             skillID = SkillConstants.getActualSkillIDfromSkillID(skill.getSkillId());
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.ASSASSIN.getJobId() && chr.getJob() <= JobConstants.JobEnum.NIGHTLORD.getJobId()) {
+        if (JobConstants.isNightLord(chr.getJob())) {
             if(hasHitMobs) {
                 //NightLord's Mark & ForceAtom
                 if(chr.hasSkill(ASSASSINS_MARK)) {
@@ -209,7 +209,7 @@ public class Thief extends Job {
         }
 
 
-        if (chr.getJob() >= JobConstants.JobEnum.BANDIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.SHADOWER.getJobId()) {
+        if (JobConstants.isShadower(chr.getJob())) {
             if(hasHitMobs) {
                 //Critical Growth & Prime Critical
                 if(chr.hasSkill(CRITICAL_GROWTH)) {
@@ -233,7 +233,7 @@ public class Thief extends Job {
             }
         }
 
-        if (chr.getJob() >= JobConstants.JobEnum.BLADE_RECRUIT.getJobId() && chr.getJob() <= JobConstants.JobEnum.BLADE_MASTER.getJobId()) {
+        if (JobConstants.isDualBlade(chr.getJob())) {
             if(hasHitMobs) {
                 //Venom & Toxic Venom Passives
                 handlePassiveDoTSkills(attackInfo);

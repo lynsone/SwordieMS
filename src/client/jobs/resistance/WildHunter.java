@@ -478,7 +478,7 @@ public class WildHunter extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.WILD_HUNTER_1.getJobId() && id <= JobConstants.JobEnum.WILD_HUNTER_4.getJobId();
+        return JobConstants.isWildHunter(id);
     }
 
     @Override
