@@ -49,6 +49,7 @@ public class FieldData {
                 dataOutputStream.writeBoolean(field.isFly());
                 dataOutputStream.writeUTF(field.getOnFirstUserEnter());
                 dataOutputStream.writeUTF(field.getOnUserEnter());
+                dataOutputStream.writeUTF(field.getFieldScript());
                 dataOutputStream.writeBoolean(field.isReactorShuffle());
                 dataOutputStream.writeBoolean(field.isExpeditionOnly());
                 dataOutputStream.writeBoolean(field.isPartyOnly());
@@ -174,6 +175,9 @@ public class FieldData {
                     }
                     if (name.equalsIgnoreCase("onUserEnter")) {
                         field.setOnUserEnter(value);
+                    }
+                    if (name.equalsIgnoreCase("fieldScript")) {
+                        field.setFieldScript(value);
                     }
                     if (name.equalsIgnoreCase("reactorShuffle")) {
                         field.setReactorShuffle(Integer.parseInt(value) != 0);
@@ -477,6 +481,7 @@ public class FieldData {
             field.setFly(dataInputStream.readBoolean());
             field.setOnFirstUserEnter(dataInputStream.readUTF());
             field.setOnUserEnter(dataInputStream.readUTF());
+            field.setFieldScript(dataInputStream.readUTF());
             field.setReactorShuffle(dataInputStream.readBoolean());
             field.setExpeditionOnly(dataInputStream.readBoolean());
             field.setPartyOnly(dataInputStream.readBoolean());
@@ -589,6 +594,7 @@ public class FieldData {
         copy.setFly(field.isFly());
         copy.setOnFirstUserEnter(field.getOnFirstUserEnter());
         copy.setOnUserEnter(field.getOnUserEnter());
+        copy.setFieldScript(field.getFieldScript());
         copy.setReactorShuffle(field.isReactorShuffle());
         copy.setExpeditionOnly(field.isExpeditionOnly());
         copy.setPartyOnly(field.isPartyOnly());

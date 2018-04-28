@@ -1,6 +1,7 @@
 package client.field;
 
 import client.character.Char;
+import client.character.ScriptManager;
 import client.character.items.Item;
 import client.character.skills.SkillInfo;
 import client.character.skills.TemporaryStatManager;
@@ -12,6 +13,7 @@ import enums.LeaveType;
 import enums.ScriptType;
 import loaders.ItemData;
 import loaders.SkillData;
+import org.apache.log4j.Logger;
 import packet.*;
 import server.EventManager;
 import util.Position;
@@ -31,6 +33,7 @@ import static client.character.skills.SkillStat.time;
  * Created on 12/14/2017.
  */
 public class Field {
+    private static final Logger log = Logger.getLogger(Field.class);
     private Rectangle rect;
     private double mobRate;
     private int id;
@@ -49,6 +52,8 @@ public class Field {
     private int objectIDCounter = 1000000;
     private boolean userFirstEnter = false;
     private Set<Reactor> reactors;
+    private String fieldScript = "";
+    private ScriptManager scriptManager;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -61,6 +66,16 @@ public class Field {
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
         this.reactors = new HashSet<>();
+        startFieldScript();
+    }
+
+    private void startFieldScript() {
+        String script = getFieldScript();
+        if(!"".equalsIgnoreCase(script)) {
+            scriptManager = new ScriptManager(this);
+            log.debug(String.format("Starting field script %s.", script));
+            scriptManager.startScript(getId(), script, ScriptType.FIELD);
+        }
     }
 
     public Rectangle getRect() {
@@ -813,5 +828,13 @@ public class Field {
 
     public Reactor getReactorByObjID(int reactorObjID) {
         return getReactors().stream().filter(r -> r.getObjectId() == reactorObjID).findAny().orElse(null);
+    }
+
+    public String getFieldScript() {
+        return fieldScript;
+    }
+
+    public void setFieldScript(String fieldScript) {
+        this.fieldScript = fieldScript;
     }
 }

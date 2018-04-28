@@ -53,14 +53,25 @@ public class ScriptManager implements Observer {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     private Char chr;
+    private Field field;
+    private final boolean isField;
     private NpcScriptInfo npcScriptInfo;
     private Map<ScriptType, ScriptInfo> scripts;
     private int returnField = 0;
 
     public ScriptManager(Char chr) {
         this.chr = chr;
+        field = chr.getField();
         npcScriptInfo = new NpcScriptInfo();
         scripts = new HashMap<>();
+        isField = false;
+    }
+
+    public ScriptManager(Field field) {
+        this.field = field;
+        npcScriptInfo = new NpcScriptInfo();
+        scripts = new HashMap<>();
+        isField = true;
     }
 
     public ScriptEngine getScriptEngineByType(ScriptType scriptType) {
@@ -100,7 +111,10 @@ public class ScriptManager implements Observer {
     }
 
     private void startScript(int parentID, String scriptName, ScriptType scriptType, String initFuncName) {
-        chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
+        if (!isField()) {
+            chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
+            log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
+        }
         ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
         scriptEngine.put("sm", this);
         scriptEngine.put("parentID", parentID);
@@ -206,8 +220,15 @@ public class ScriptManager implements Observer {
         return res;
     }
 
+    public boolean isField() {
+        return isField;
+    }
 
-    // Start of the sends/asks ----------------------------------------------------------------------
+    public Field getField() {
+        return field;
+    }
+
+    // Start of the sends/asks -----------------------------------------------------------------------------------------
 
     /**
      * Sends a normal chat window with prev/next buttons enabled.
@@ -395,7 +416,7 @@ public class ScriptManager implements Observer {
         sendGeneralSay(text, AskAvatar);
     }
 
-    // Start helper methods for scripts -------------------------------------------------------------
+    // Start helper methods for scripts --------------------------------------------------------------------------------
 
     /**
      * Fully disposes the npc script.
