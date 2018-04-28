@@ -85,6 +85,7 @@ public class WorldHandler {
         Char chr = info.getRight().getChr();
         if (chr == null || chr.getId() != charId) {
             chr = Char.getFromDBById(charId);
+            chr.initEquips();
         }
         chr.setClient(c);
         c.setChr(chr);
@@ -1930,7 +1931,7 @@ public class WorldHandler {
         // rest is some info about foreground info, not interested
         Field field = chr.getField();
         Life life = field.getLifeByObjectID(dropID);
-        if (life != null && life instanceof Drop) {
+        if (life instanceof Drop) {
             Drop drop = (Drop) life;
             boolean success = chr.addDrop(drop);
             if(success) {
@@ -3228,16 +3229,65 @@ public class WorldHandler {
         Char chr = c.getChr();
         EquipmentEnchantType eeType = EquipmentEnchantType.getByVal(equipmentEnchantType);
 
+        if(eeType == null) {
+            log.error(String.format("Unknown enchant UI request %d", equipmentEnchantType));
+            chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+            return;
+        }
+
         switch (eeType) {
             case HyperUpgradeResult:
                 inPacket.decodeInt(); //tick
                 short eqpPos = inPacket.decodeShort();
-                int extraChanceFromMiniGame = inPacket.decodeByte() != 0 ? 50 : 0;
-                Equip eqp = (Equip) chr.getEquipInventory().getItemBySlot(eqpPos);
-                int result = 1;
+                int extraChanceFromMiniGame = inPacket.decodeByte() != 0 ? 50 : 0; // 5% extra chance
+                Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(eqpPos);
+                if(equip == null) {
+                    chr.chatMessage("Could not find the given equip.");
+                    chr.dispose();
+                    return;
+                }
+                Equip oldEquip = equip.deepCopy();
+                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc());
+                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc()) + extraChanceFromMiniGame;
+                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc());
+                boolean success = Util.succeedProp(successProp, 1000);
                 boolean boom = false;
-                Equip oldEquip = eqp.deepCopy();
-                c.write(CField.showUpgradeResult(eeType, oldEquip));
+                boolean canDegrade = equip.getChuc() > 5 && equip.getChuc() % 5 != 0;
+                if(success) {
+                    equip.setChuc((short) (equip.getChuc() + 1));
+                } else if (Util.succeedProp(destroyProp, 1000)){
+                    equip.setChuc((short) 0);
+                    equip.addSpecialAttribute(EquipSpecialAttribute.TRACE);
+                    boom = true;
+                } else if (canDegrade){
+                    equip.setChuc((short) (equip.getChuc() - 1));
+                }
+                chr.deductMoney(cost);
+                equip.recalcEnchantmentStats();
+                oldEquip.recalcEnchantmentStats();
+                c.write(WvsContext.inventoryOperation(true, false, ADD,
+                        (short) equip.getBagIndex(), (short) 0, 0, equip));
+                c.write(CField.showUpgradeResult(oldEquip, equip, success, boom, canDegrade));
+                chr.dispose();
+                break;
+            case TransmissionResult:
+                inPacket.decodeInt(); // tick
+                short toPos = inPacket.decodeShort();
+                short fromPos = inPacket.decodeShort();
+                Equip fromEq = (Equip) chr.getEquipInventory().getItemBySlot(fromPos);
+                Equip toEq = (Equip) chr.getEquipInventory().getItemBySlot(toPos);
+                if (fromEq == null || toEq == null || fromEq.getItemId() != fromEq.getItemId() ||
+                        !fromEq.hasSpecialAttribute(EquipSpecialAttribute.TRACE)) {
+                    log.error(String.format("Equip transmission failed: from = %s, to = %s", fromEq, toEq));
+                    c.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
+                fromEq.removeSpecialAttribute(EquipSpecialAttribute.TRACE);
+                fromEq.setChuc((short) 0);
+                chr.consumeItem(toEq);
+                c.write(WvsContext.inventoryOperation(true, false, ADD,
+                        (short) fromEq.getBagIndex(), (short) 0, 0, fromEq));
+                c.write(CField.showTranmissionResult(fromEq, toEq));
                 break;
             case ScrollUpgradeDisplay:
                 c.write(CField.scrollUpgradeDisplay());
@@ -3246,8 +3296,11 @@ public class WorldHandler {
                 break;*/
             case HyperUpgradeDisplay:
                 int ePos = inPacket.decodeInt();
-                Equip equip = (Equip) chr.getEquipInventory().getItemBySlot((short) ePos);
-                c.write(CField.hyperUpgradeDisplay(equip, true, 20, 0, 1000, 0, false, 1));
+                equip = (Equip) chr.getEquipInventory().getItemBySlot((short) ePos);
+                c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
+                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc()),
+                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc()),
+                        GameConstants.getEnchantmentDestroyRate(equip.getChuc()), false));
                 break;
             case MiniGameDisplay:
                 c.write(CField.miniGameDisplay(eeType));

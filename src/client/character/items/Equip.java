@@ -1,14 +1,12 @@
 package client.character.items;
 
 import connection.OutPacket;
+import constants.GameConstants;
 import constants.ItemConstants;
 import enums.EnchantStat;
 import enums.EquipBaseStat;
 import enums.InvType;
 import enums.ItemGrade;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.annotations.Cascade;
 import util.FileTime;
 import util.Util;
 
@@ -22,145 +20,82 @@ import java.util.*;
 @Table(name = "equips")
 @PrimaryKeyJoinColumn(name = "itemId")
 public class Equip extends Item {
-    @Column(name = "serialNumber")
     private long serialNumber;
-    @Column(name = "title")
     private String title;
     @JoinColumn(name = "equippedDate")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FileTime equippedDate = new FileTime();
-    @Column(name = "prevBonusExpRate")
     private int prevBonusExpRate;
-    @Column(name = "ruc")
     private short ruc;
-    @Column(name = "cuc")
     private short cuc;
-    @Column(name = "iStr")
     private short iStr;
-    @Column(name = "iDex")
     private short iDex;
-    @Column(name = "iInt")
     private short iInt;
-    @Column(name = "iLuk")
     private short iLuk;
-    @Column(name = "iMaxHp")
     private short iMaxHp;
-    @Column(name = "iMaxMp")
     private short iMaxMp;
-    @Column(name = "iPad")
     private short iPad;
-    @Column(name = "iMad")
     private short iMad;
-    @Column(name = "iPDD")
     private short iPDD;
-    @Column(name = "iMDD")
     private short iMDD;
-    @Column(name = "iAcc")
     private short iAcc;
-    @Column(name = "iEva")
     private short iEva;
-    @Column(name = "iCraft")
     private short iCraft;
-    @Column(name = "iSpeed")
     private short iSpeed;
-    @Column(name = "iJump")
     private short iJump;
-    @Column(name = "attribute")
     private short attribute;
-    @Column(name = "levelUpType")
     private short levelUpType;
-    @Column(name = "level")
     private short level;
-    @Column(name = "exp")
     private short exp;
-    @Column(name = "durability")
     private short durability;
-    @Column(name = "iuc")
     private short iuc;
-    @Column(name = "iPvpDamage")
     private short iPvpDamage;
-    @Column(name = "iReduceReq")
     private short iReduceReq;
-    @Column(name = "specialAttribute")
     private short specialAttribute;
-    @Column(name = "durabilityMax")
     private short durabilityMax;
-    @Column(name = "iIncReq")
     private short iIncReq;
-    @Column(name = "growthEnchant")
     private short growthEnchant;
-    @Column(name = "psEnchant")
     private short psEnchant;
-    @Column(name = "bdr")
     private short bdr;
-    @Column(name = "imdr")
     private short imdr;
-    @Column(name = "damR")
     private short damR;
-    @Column(name = "statR")
     private short statR;
-    @Column(name = "cuttable")
     private short cuttable;
-    @Column(name = "exGradeOption")
     private short exGradeOption;
-    @Column(name = "itemState")
     private short itemState;
-    @Column(name = "chuc")
     private short chuc;
-    @Column(name = "soulOptionId")
     private short soulOptionId;
-    @Column(name = "soulSocketId")
     private short soulSocketId;
-    @Column(name = "soulOption")
     private short soulOption;
-    @Column(name = "rStr")
     private short rStr;
-    @Column(name = "rDex")
     private short rDex;
-    @Column(name = "rInt")
     private short rInt;
-    @Column(name = "rLuk")
     private short rLuk;
-    @Column(name = "rLevel")
     private short rLevel;
-    @Column(name = "rJob")
     private short rJob;
-    @Column(name = "rPop")
     private short rPop;
     @ElementCollection
     @CollectionTable(name = "options", joinColumns = @JoinColumn(name = "equipId"))
     @Column(name = "optionId")
-    private List<Integer> options = new ArrayList<>(); // base + add pot
-    @Column(name = "specialGrade")
+    private List<Integer> options = new ArrayList<>(); // base + add pot + anvil
     private int specialGrade;
-    @Column(name = "fixedPotential")
     private boolean fixedPotential;
-    @Column(name = "tradeBlock")
     private boolean tradeBlock;
     @Column(name = "isOnly")
     private boolean only;
-    @Column(name = "notSale")
     private boolean notSale;
-    @Column(name = "attackSpeed")
     private int attackSpeed;
-    @Column(name = "price")
     private int price;
-    @Column(name = "charmEXP")
     private int charmEXP;
-    @Column(name = "expireOnLogout")
     private boolean expireOnLogout;
-    @Column(name = "setItemID")
     private int setItemID;
-    @Column(name = "exItem")
     private boolean exItem;
-    @Column(name = "equipTradeBlock")
     private boolean equipTradeBlock;
-    @Column(name = "iSlot")
     private String iSlot;
-    @Column(name = "vSlot")
     private String vSlot;
-    @Column(name = "fixedGrade")
     private int fixedGrade;
+    @Transient
+    private Map<EnchantStat, Integer> enchantStats = new HashMap<>();
 
     public Equip() {
         super();
@@ -252,6 +187,8 @@ public class Equip extends Item {
 
     public Equip deepCopy() {
         Equip ret = new Equip();
+        ret.quantity = quantity;
+        ret.bagIndex = bagIndex;
         ret.serialNumber = serialNumber;
         ret.title = title;
         ret.equippedDate = equippedDate.deepCopy();
@@ -682,6 +619,7 @@ public class Equip extends Item {
 
     public void setChuc(short chuc) {
         this.chuc = chuc;
+        recalcEnchantmentStats();
     }
 
     public short getSoulOptionId() {
@@ -917,8 +855,8 @@ public class Equip extends Item {
 //        getEquippedDate().encode(outPacket);
 //        outPacket.encodeInt(getPrevBonusExpRate());
         // GW_ItemSlotEquipBase
-        int mask0 = getStatMask(0);
-        outPacket.encodeInt(mask0);
+        int mask = getStatMask(0);
+        outPacket.encodeInt(mask);
         if(hasStat(EquipBaseStat.ruc)) {
             outPacket.encodeByte(getRuc());
         }
@@ -926,49 +864,49 @@ public class Equip extends Item {
             outPacket.encodeByte(getCuc());
         }
         if(hasStat(EquipBaseStat.iStr)) {
-            outPacket.encodeShort(getiStr());
+            outPacket.encodeShort(getiStr() + getEnchantStat(EnchantStat.STR));
         }
         if(hasStat(EquipBaseStat.iDex)) {
-            outPacket.encodeShort(getiDex());
+            outPacket.encodeShort(getiDex() + getEnchantStat(EnchantStat.DEX));
         }
         if(hasStat(EquipBaseStat.iInt)) {
-            outPacket.encodeShort(getiInt());
+            outPacket.encodeShort(getiInt() +  + getEnchantStat(EnchantStat.INT));
         }
         if(hasStat(EquipBaseStat.iLuk)) {
-            outPacket.encodeShort(getiLuk());
+            outPacket.encodeShort(getiLuk() + getEnchantStat(EnchantStat.LUK));
         }
         if(hasStat(EquipBaseStat.iMaxHP)) {
-            outPacket.encodeShort(getiMaxHp());
+            outPacket.encodeShort(getiMaxHp() + getEnchantStat(EnchantStat.MHP));
         }
         if(hasStat(EquipBaseStat.iMaxMP)) {
-            outPacket.encodeShort(getiMaxMp());
+            outPacket.encodeShort(getiMaxMp() + getEnchantStat(EnchantStat.MMP));
         }
         if(hasStat(EquipBaseStat.iPAD)) {
-            outPacket.encodeShort(getiPad());
+            outPacket.encodeShort(getiPad() + getEnchantStat(EnchantStat.PAD));
         }
         if(hasStat(EquipBaseStat.iMAD)) {
-            outPacket.encodeShort(getiMad());
+            outPacket.encodeShort(getiMad() + getEnchantStat(EnchantStat.MAD));
         }
         if(hasStat(EquipBaseStat.iPDD)) {
-            outPacket.encodeShort(getiPDD());
+            outPacket.encodeShort(getiPDD() + getEnchantStat(EnchantStat.PDD));
         }
         if(hasStat(EquipBaseStat.iMDD)) {
-            outPacket.encodeShort(getiMDD());
+            outPacket.encodeShort(getiMDD() + getEnchantStat(EnchantStat.MDD));
         }
         if(hasStat(EquipBaseStat.iACC)) {
-            outPacket.encodeShort(getiAcc());
+            outPacket.encodeShort(getiAcc() + getEnchantStat(EnchantStat.ACC));
         }
         if(hasStat(EquipBaseStat.iEVA)) {
-            outPacket.encodeShort(getiEva());
+            outPacket.encodeShort(getiEva() + getEnchantStat(EnchantStat.EVA));
         }
         if(hasStat(EquipBaseStat.iCraft)) {
             outPacket.encodeShort(getiCraft());
         }
         if(hasStat(EquipBaseStat.iSpeed)) {
-            outPacket.encodeShort(getiSpeed());
+            outPacket.encodeShort(getiSpeed() + getEnchantStat(EnchantStat.SPEED));
         }
         if(hasStat(EquipBaseStat.iJump)) {
-            outPacket.encodeShort(getiJump());
+            outPacket.encodeShort(getiJump() + getEnchantStat(EnchantStat.JUMP));
         }
         if(hasStat(EquipBaseStat.attribute)) {
             outPacket.encodeShort(getAttribute());
@@ -1298,6 +1236,12 @@ public class Equip extends Item {
     public TreeMap<EnchantStat, Integer> getHyperUpgradeStats() {
         Comparator<EnchantStat> comparator = Comparator.comparingInt(EnchantStat::getVal);
         TreeMap<EnchantStat, Integer> res = new TreeMap<>(comparator);
+        for(EnchantStat es : EnchantStat.values()) {
+            int curAmount = (int) getBaseStat(es.getEquipBaseStat());
+            if(curAmount > 0) {
+                res.put(es, GameConstants.getEnchantmentValByChuc(es, getChuc(), curAmount));
+            }
+        }
         return res;
     }
 
@@ -1376,5 +1320,36 @@ public class Equip extends Item {
                 }
             }
         }
+    }
+
+    public Map<EnchantStat, Integer> getEnchantStats() {
+        return enchantStats;
+    }
+
+    public void putEnchantStat(EnchantStat es, int val) {
+        getEnchantStats().put(es, val);
+    }
+
+    public void setEnchantStats(Map<EnchantStat, Integer> enchantStats) {
+        this.enchantStats = enchantStats;
+    }
+
+    public void recalcEnchantmentStats() {
+        getEnchantStats().clear();
+        for (int i = 1; i <= getChuc(); i++) {
+            for(EnchantStat es : getHyperUpgradeStats().keySet()) {
+                putEnchantStat(es, getEnchantStats().getOrDefault(es, 0) +
+                        GameConstants.getEnchantmentValByChuc(es, (short) i, (int) getBaseStat(es.getEquipBaseStat())));
+            }
+        }
+    }
+
+    /**
+     * Returns the current value of an EnchantStat. Zero if absent.
+     * @param es The EnchantStat to get
+     * @return the corresponding stat value
+     */
+    public int getEnchantStat(EnchantStat es) {
+        return getEnchantStats().getOrDefault(es, 0);
     }
 }

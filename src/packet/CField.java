@@ -449,7 +449,7 @@ public class CField {
     }
 
     public static OutPacket hyperUpgradeDisplay(Equip equip, boolean downgradeable, long meso, long beforeMVP, int successChance,
-                                                int destroyChance, boolean chanceTime, int flag) {
+                                                int destroyChance, boolean chanceTime) {
         OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
 
         outPacket.encodeByte(EquipmentEnchantType.HyperUpgradeDisplay.getVal());
@@ -459,7 +459,6 @@ public class CField {
         outPacket.encodeInt(successChance);
         outPacket.encodeInt(destroyChance);
         outPacket.encodeByte(chanceTime);
-        outPacket.encodeInt(flag);
         TreeMap<EnchantStat, Integer> vals =  equip.getHyperUpgradeStats();
         int mask = 0;
         for(EnchantStat es : vals.keySet()) {
@@ -467,7 +466,6 @@ public class CField {
         }
         outPacket.encodeInt(mask);
         vals.forEach((es, val) -> outPacket.encodeInt(val));
-        // TODO incomplete
 
         return outPacket;
     }
@@ -475,20 +473,32 @@ public class CField {
     public static OutPacket miniGameDisplay(EquipmentEnchantType eeType) {
         OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
 
-        outPacket.encodeShort(eeType.getVal());
+        outPacket.encodeByte(eeType.getVal());
         outPacket.encodeByte(0);
-        outPacket.encodeInt(2000); //nSeed
+        outPacket.encodeInt(2000); // TODO nSeed
 
         return outPacket;
     }
 
-    public static OutPacket showUpgradeResult(EquipmentEnchantType eeType, Equip equip) {
+    public static OutPacket showUpgradeResult(Equip oldEquip, Equip equip, boolean succeed, boolean boom, boolean canDegrade) {
         OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
 
-        outPacket.encodeShort(EquipmentEnchantType.HyperUpgradeResult.getVal());
-        outPacket.encodeInt(1);   //result 0=fail, 1=succeed
-        outPacket.encodeByte(false); //boom
-        equip.encode(outPacket);
+        outPacket.encodeByte(EquipmentEnchantType.ShowHyperUpgradeResult.getVal());
+        outPacket.encodeInt(boom ? 2 : succeed ? 1 : canDegrade ? 0 : 3);
+        outPacket.encodeByte(boom);
+        oldEquip.encode(outPacket);
+        if (!boom) { // for now
+            equip.encode(outPacket);
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket showUnknownEnchantFailResult(byte msg) {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+
+        outPacket.encodeByte(EquipmentEnchantType.ShowUnknownFailResult.getVal());
+        outPacket.encodeByte(msg);
 
         return outPacket;
     }
@@ -497,7 +507,7 @@ public class CField {
         OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
         boolean bool = false;
 
-        outPacket.encodeShort(EquipmentEnchantType.ScrollUpgradeDisplay.getVal());
+        outPacket.encodeByte(EquipmentEnchantType.ScrollUpgradeDisplay.getVal());
         outPacket.encodeByte(bool); //boolean
         if(!bool) {
             //ResetScrollInfo
@@ -515,6 +525,16 @@ public class CField {
             outPacket.encodeByte(true); //Unk1
 
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket showTranmissionResult(Equip fromEq, Equip toEq) {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+
+        outPacket.encodeByte(EquipmentEnchantType.ShowTransmissionResult.getVal());
+        fromEq.encode(outPacket);
+        toEq.encode(outPacket);
 
         return outPacket;
     }

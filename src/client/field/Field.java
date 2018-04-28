@@ -813,7 +813,11 @@ public class Field {
     }
 
     public void addReactor(Reactor reactor) {
+        if (reactor.getObjectId() < 0) {
+            reactor.setObjectId(getNewObjectID());
+        }
         getReactors().add(reactor);
+        reactor.setField(this);
     }
 
     public void removeReactor(Reactor reactor) {

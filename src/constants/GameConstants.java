@@ -1,5 +1,7 @@
 package constants;
 
+import enums.EnchantStat;
+
 /**
  * Created on 1/23/2018.
  */
@@ -15,9 +17,11 @@ public class GameConstants {
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
     public static long[] charExp = new long[251];
+    private static int[][] enchantSuccessRates = new int[25][2];
 
     static {
         initCharExp();
+        initEnchantRates();
     }
 
     private static void initCharExp() {
@@ -84,5 +88,70 @@ public class GameConstants {
         for(int i = 241; i <= 249; i++) {
             charExp[i] = (long) (charExp[i-1] * 1.01);
         }
+    }
+
+    private static void initEnchantRates() {
+        // kms rates: success / destroy
+        // out of 1000
+        enchantSuccessRates = new int[][]{
+                {950, 0},
+                {900, 0},
+                {850, 0},
+                {850, 0},
+                {800, 0},
+
+                {750, 0},
+                {700, 0},
+                {650, 0},
+                {600, 0},
+                {550, 0},
+
+                {450, 0},
+                {350, 0},
+                {300, 7},
+                {300, 14},
+                {300, 14},
+
+                {300, 21},
+                {300, 21},
+                {300, 21},
+                {300, 28},
+                {300, 28},
+
+                {300, 70},
+                {300, 70},
+                {30, 194},
+                {20, 294},
+                {10, 396},
+        };
+    }
+
+    public static long getEnchantmentMesoCost(int reqLevel, int chuc) {
+        if (chuc < 10) {
+            return (long) (1000 + Math.pow(reqLevel, 3) * (chuc + 1) / 25);
+        } else if (chuc < 15) {
+            return (long) (1000 + Math.pow(reqLevel, 3) * Math.pow(chuc + 1, 2.7) / 400);
+        } else {
+            return (long) (1000 + Math.pow(reqLevel, 3) * Math.pow(chuc + 1, 2.7) / 200);
+        }
+    }
+
+    public static int getEnchantmentSuccessRate(short chuc) {
+        if(chuc < 0 || chuc > 24) {
+            return 0;
+        }
+        return enchantSuccessRates[chuc][0];
+    }
+
+    public static int getEnchantmentDestroyRate(short chuc) {
+        if(chuc < 0 || chuc > 24) {
+            return 0;
+        }
+        return enchantSuccessRates[chuc][1];
+    }
+
+    public static int getEnchantmentValByChuc(EnchantStat es, short chuc, int curAmount) {
+        // TODO implement formula for this, depending on stat + weapon type
+        return chuc + 1 + (curAmount / 50);
     }
 }

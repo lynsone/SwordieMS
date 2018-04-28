@@ -66,10 +66,8 @@ public class Inventory {
         }
     }
     public void removeItem(Item item) {
-        if(getItems().contains(item)) {
-            getItems().remove(item);
-            sortItemsByIndex();
-        }
+        getItems().remove(item);
+        sortItemsByIndex();
     }
 
     public int getFirstOpenSlot() {

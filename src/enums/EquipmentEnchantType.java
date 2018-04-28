@@ -7,6 +7,7 @@ import java.util.Arrays;
  */
 public enum EquipmentEnchantType {
     HyperUpgradeResult(1),
+    TransmissionResult(2),
     ScrollUpgradeDisplay(50),
     ScrollTimerEffective(51),
     HyperUpgradeDisplay(52),

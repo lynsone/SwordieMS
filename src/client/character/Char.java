@@ -1865,6 +1865,14 @@ public class Char {
         }
         getEquipInventory().getItems().removeAll(buggedItems);
         getEquippedInventory().getItems().addAll(buggedItems);
+        buggedItems = new ArrayList<>();
+        for(Item item : getEquippedInventory().getItems()) {
+            if(item.getInvType() == InvType.EQUIP) {
+                buggedItems.add(item);
+            }
+        }
+        getEquippedInventory().getItems().removeAll(buggedItems);
+        getEquipInventory().getItems().addAll(buggedItems);
 
     }
 
@@ -2742,5 +2750,14 @@ public class Char {
             }
         }
         return chosenIdx;
+    }
+
+    public void initEquips() {
+        for(Equip e : getEquippedInventory().getItems().stream().map(e -> (Equip) e).collect(Collectors.toList())) {
+            e.recalcEnchantmentStats();
+        }
+        for(Equip e : getEquipInventory().getItems().stream().map(e -> (Equip) e).collect(Collectors.toList())) {
+            e.recalcEnchantmentStats();
+        }
     }
 }
