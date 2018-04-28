@@ -28,13 +28,9 @@ public class Item implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
-    @Column(name = "inventoryId")
     protected int inventoryId;
-    @Column(name = "itemId")
     protected int itemId;
-    @Column(name = "bagIndex")
     protected int bagIndex;
-    @Column(name = "cashItemSerialNumber")
     protected long cashItemSerialNumber;
     @JoinColumn(name = "dateExpire")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -45,11 +41,8 @@ public class Item implements Serializable {
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "type")
     protected Type type;
-    @Column(name = "isCash")
     protected boolean isCash;
-    @Column(name = "quantity")
     protected int quantity;
-    @Column(name = "owner")
     private String owner = "";
 
 

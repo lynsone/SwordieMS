@@ -105,7 +105,7 @@ public class Char {
     private List<Skill> skills;
 
     @JoinColumn(name = "ownerID")
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Friend> friends;
 
     @JoinColumn(name = "charID")
@@ -1660,6 +1660,11 @@ public class Char {
      * @param item The Item to equip.
      */
     public void equip(Item item) {
+        Equip equip = (Equip) item;
+        if(equip.isEquipTradeBlock()) {
+            equip.setTradeBlock(true);
+            equip.setEquipTradeBlock(false);
+        }
         AvatarLook al = getAvatarData().getAvatarLook();
         int itemID = item.getItemId();
         getInventoryByType(EQUIP).removeItem(item);
@@ -1826,15 +1831,12 @@ public class Char {
             if(getGuild() != null) {
                 write(WvsContext.guildResult(new GuildUpdate(getGuild())));
             }
-            // Seperate initialization and loop for hibernate "Operation not allowed after ResultSet closed"
-            List<Friend> friends = getFriends();
-            for(Friend f : friends) {
+            for(Friend f : getFriends()) {
                 f.setFlag(getClient().getWorld().getCharByID(f.getFriendID()) != null
                         ? FriendFlag.FriendOnline
                         : FriendFlag.FriendOffline);
             }
-            friends = getAccount().getFriends();
-            for(Friend f : friends) {
+            for(Friend f : getAccount().getFriends()) {
                 f.setFlag(getClient().getWorld().getAccountByID(f.getFriendAccountID()) != null
                         ? FriendFlag.AccountFriendOnline
                         : FriendFlag.AccountFriendOffline);

@@ -14,6 +14,7 @@ public class ScriptInfo {
     private int parentID;
     private String scriptName;
     private Invocable invocable;
+    private int objectID;
 
     public ScriptInfo(ScriptType scriptType, ScriptEngine scriptEngine, int parentID, String scriptName) {
         this.scriptType = scriptType;
@@ -79,5 +80,13 @@ public class ScriptInfo {
         setParentID(0);
         setScriptName("");
         setInvocable(null);
+    }
+
+    public int getObjectID() {
+        return objectID;
+    }
+
+    public void setObjectID(int objectID) {
+        this.objectID = objectID;
     }
 }

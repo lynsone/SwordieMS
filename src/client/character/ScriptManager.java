@@ -23,6 +23,7 @@ import enums.NpcMessageType;
 import loaders.*;
 import org.apache.log4j.LogManager;
 import packet.*;
+import sun.font.Script;
 import util.FileTime;
 import util.Position;
 import util.Util;
@@ -98,19 +99,31 @@ public class ScriptManager implements Observer {
         return getScriptInfoByType(scriptType) != null ? getScriptInfoByType(scriptType).getParentID() : 2007;
     }
 
-    public void startScript(int parentID, ScriptType scriptType) {
-        startScript(parentID, parentID + ".py", scriptType);
+    public int getObjectIDByScriptType(ScriptType scriptType) {
+        return getScriptInfoByType(scriptType) != null ? getScriptInfoByType(scriptType).getObjectID() : 0;
     }
 
-    private void startScript(int parentID, ScriptType scriptType, String initFuncName) {
-        startScript(parentID, parentID + ".py", scriptType, initFuncName);
+    public void startScript(int parentID, ScriptType scriptType) {
+        startScript(parentID, 0, scriptType);
     }
 
     public void startScript(int parentID, String scriptName, ScriptType scriptType) {
-        startScript(parentID, scriptName, scriptType, "init");
+        startScript(parentID, 0, scriptName, scriptType);
     }
 
-    private void startScript(int parentID, String scriptName, ScriptType scriptType, String initFuncName) {
+    public void startScript(int parentID, int objID, ScriptType scriptType) {
+        startScript(parentID, objID, parentID + ".py", scriptType);
+    }
+
+    private void startScript(int parentID, int objID, ScriptType scriptType, String initFuncName) {
+        startScript(parentID, objID, parentID + ".py", scriptType, initFuncName);
+    }
+
+    public void startScript(int parentID, int objID, String scriptName, ScriptType scriptType) {
+        startScript(parentID, objID, scriptName, scriptType, "init");
+    }
+
+    private void startScript(int parentID, int objID, String scriptName, ScriptType scriptType, String initFuncName) {
         if (!isField()) {
             chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
             log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
@@ -119,6 +132,7 @@ public class ScriptManager implements Observer {
         scriptEngine.put("sm", this);
         scriptEngine.put("parentID", parentID);
         scriptEngine.put("scriptType", scriptType);
+        scriptEngine.put("objectID", objID);
         if (scriptType == ScriptType.QUEST) {
             chat(scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) + "");
             scriptEngine.put("startQuest",
@@ -126,6 +140,7 @@ public class ScriptManager implements Observer {
                             QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
         }
         ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);
+        scriptInfo.setObjectID(objID);
         getScripts().put(scriptType, scriptInfo);
         Invocable inv = getInvocableFromScriptNameAndType(scriptName, scriptType);
         getScripts().get(scriptType).setInvocable(inv);
@@ -905,7 +920,7 @@ public class ScriptManager implements Observer {
     public void removeReactor() {
         Field field = chr.getField();
         Reactor reactor = field.getReactors().stream()
-                .filter(r -> r.getTemplateId() == getParentIDByScriptType(ScriptType.REACTOR))
+                .filter(r -> r.getTemplateId() == getObjectIDByScriptType(ScriptType.REACTOR))
                 .findAny().orElse(null);
         if(reactor != null) {
             field.removeReactor(reactor);

@@ -1901,7 +1901,7 @@ public class WorldHandler {
         if (script == null) {
             script = String.valueOf(npc.getTemplateId());
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
     }
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
@@ -3219,7 +3219,7 @@ public class WorldHandler {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
         }
     }
 
