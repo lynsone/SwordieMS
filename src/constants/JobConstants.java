@@ -34,7 +34,7 @@ public class JobConstants {
     }
 
     public static boolean isAngelicBuster(int id) {
-        return id == JobConstants.JobEnum.ANGELIC_BUSTER.getJobId() || id / 100 == 61;
+        return id == JobConstants.JobEnum.ANGELIC_BUSTER.getJobId() || id / 100 == 65;
     }
 
     public static boolean isBlazeWizard(short job) {
@@ -522,7 +522,7 @@ public class JobConstants {
     }
 
     public static boolean isKaiser(short jobId) {
-        return jobId / 1000 == 6;
+        return jobId == JobConstants.JobEnum.KAISER.getJobId() || jobId / 100 == 61;
     }
 
     public static boolean isZero(short jobId) {
