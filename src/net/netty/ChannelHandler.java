@@ -1,9 +1,7 @@
 package net.netty;
 
 import client.Client;
-import client.jobs.legend.Aran;
 import connection.InPacket;
-import constants.JobConstants;
 import handling.InHeader;
 import handling.handlers.ChatHandler;
 import handling.handlers.LoginHandler;
@@ -384,6 +382,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case REACTOR_CLICK:
                     WorldHandler.handleReactorClick(c, inPacket);
                     break;
+                case REACTOR_RECT_IN_MOB:
+                    WorldHandler.handleReactorRectInMob(c, inPacket);
+                    break;
                 case MOB_EXPLOSION_START:
                     WorldHandler.handleMobExplosionStart(c, inPacket);
                     break;
@@ -395,6 +396,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_SKILL_LEARN_ITEM_USE_REQUEST:
                     WorldHandler.handleUserLearnItemUseRequest(c, inPacket);
+                    break;
+                case USER_REQUEST_FLYING_SWORD_START:
+                    WorldHandler.handleUserRequestFlyingSwordStart(c, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

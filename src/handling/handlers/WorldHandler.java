@@ -21,6 +21,7 @@ import client.jobs.adventurer.Warrior;
 import client.jobs.cygnus.BlazeWizard;
 import client.jobs.legend.Aran;
 import client.jobs.legend.Luminous;
+import client.jobs.nova.Kaiser;
 import client.jobs.resistance.Xenon;
 import client.jobs.sengoku.Kanna;
 import client.life.*;
@@ -30,8 +31,8 @@ import client.shop.MsgShopResult;
 import client.shop.NpcShopDlg;
 import client.shop.NpcShopItem;
 import client.trunk.Trunk;
-import client.trunk.TrunkUpdate;
 import client.trunk.TrunkMsg;
+import client.trunk.TrunkUpdate;
 import connection.InPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
@@ -3223,6 +3224,30 @@ public class WorldHandler {
         }
     }
 
+    public static void handleReactorRectInMob(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int objID = inPacket.decodeInt();
+
+        Reactor reactor = chr.getField().getReactorByObjID(objID);
+        if(reactor == null) {
+            log.error("Could not find reactor with objID " + objID);
+            return;
+        }
+        int templateID = reactor.getTemplateId();
+        ReactorInfo ri = ReactorData.getReactorByID(templateID);
+        String action = ri.getAction();
+        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+            try {
+                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", 0);
+            } catch (ScriptException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        } else {
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+        }
+    }
+
     public static void handleUserEquipmentEnchantWithSingleUIRequest(Client c, InPacket inPacket) {
         byte equipmentEnchantType = inPacket.decodeByte();
 
@@ -3352,5 +3377,83 @@ public class WorldHandler {
             Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());
             aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
         }
+    }
+
+    public static void handleUserRequestFlyingSwordStart(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int maxCount = 3;
+        if(Kaiser.getTempBladeSkill(chr, tsm) == Kaiser.TEMPEST_BLADES_FIVE || Kaiser.getTempBladeSkill(chr, tsm) == Kaiser.TEMPEST_BLADES_FIVE_FF) {
+            maxCount = 5;
+        }
+        int mobCount = inPacket.decodeInt();
+        int lastMobID = 0;
+        int mobid = 0;
+
+        for(int i = 0; i<mobCount; i++) {
+            mobid = inPacket.decodeInt();
+
+
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mobid);
+            int inc = ForceAtomEnum.KAISER_WEAPON_THROW_1.getInc();
+            int type = ForceAtomEnum.KAISER_WEAPON_THROW_1.getForceAtomType();
+
+            switch (tsm.getOption(StopForceAtomInfo).nOption) {
+                case 3:
+                    inc = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_1.getInc();
+                    type = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_1.getForceAtomType();
+                    break;
+                case 2:
+                    inc = ForceAtomEnum.KAISER_WEAPON_THROW_2.getInc();
+                    type = ForceAtomEnum.KAISER_WEAPON_THROW_2.getForceAtomType();
+                    break;
+                case 4:
+                    inc = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_2.getInc();
+                    type = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_2.getForceAtomType();
+                    break;
+            }
+
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 30,
+                    0, 10*i, (int) System.currentTimeMillis(), 1, 0,
+                    new Position());
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), Kaiser.getTempBladeSkill(chr, tsm), mob.getPosition()));
+
+            lastMobID = mobid;
+        }
+
+
+        for(int i = mobCount; i<maxCount; i++) {
+
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(lastMobID);
+            int inc = ForceAtomEnum.KAISER_WEAPON_THROW_1.getInc();
+            int type = ForceAtomEnum.KAISER_WEAPON_THROW_1.getForceAtomType();
+
+            switch (tsm.getOption(StopForceAtomInfo).nOption) {
+                case 3:
+                    inc = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_1.getInc();
+                    type = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_1.getForceAtomType();
+                    break;
+                case 2:
+                    inc = ForceAtomEnum.KAISER_WEAPON_THROW_2.getInc();
+                    type = ForceAtomEnum.KAISER_WEAPON_THROW_2.getForceAtomType();
+                    break;
+                case 4:
+                    inc = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_2.getInc();
+                    type = ForceAtomEnum.KAISER_WEAPON_THROW_MORPH_2.getForceAtomType();
+                    break;
+            }
+
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 30,
+                    0, 12*i, (int) System.currentTimeMillis(), 1, 0,
+                    new Position());
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), Kaiser.getTempBladeSkill(chr, tsm), mob.getPosition()));
+        }
+
+        tsm.removeStat(StopForceAtomInfo, false);
+        c.write(WvsContext.temporaryStatReset(tsm, true));
     }
 }
