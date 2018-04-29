@@ -22,7 +22,6 @@ import packet.WvsContext;
 import util.Util;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -155,6 +154,7 @@ public class Kaiser extends Job {
         Summon summon;
         Field field;
         Item item = chr.getEquippedInventory().getItemBySlot((short) 11);
+        StopForceAtom stopForceAtom = new StopForceAtom();
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
@@ -205,13 +205,12 @@ public class Kaiser extends Job {
                 }
                 o1.nOption = 1;
                 o1.rOption = skillID;
-                StopForceAtom stopForceAtom1 = new StopForceAtom();
-                List<Integer> angles1 = Arrays.asList(0, 0, 0);
-                stopForceAtom1.setCount(3);
-                stopForceAtom1.setIdx(1);
-                stopForceAtom1.setWeaponId(weaponID);
-                stopForceAtom1.setAngleInfo(angles1);
-                tsm.setStopForceAtom(stopForceAtom1);
+                List<Integer> angles = Arrays.asList(0, 0, 0);
+                stopForceAtom.setCount(3);
+                stopForceAtom.setIdx(1);
+                stopForceAtom.setWeaponId(weaponID);
+                stopForceAtom.setAngleInfo(angles);
+                tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
@@ -222,13 +221,12 @@ public class Kaiser extends Job {
                 }
                 o1.nOption = 3;
                 o1.rOption = skillID;
-                StopForceAtom stopForceAtom2 = new StopForceAtom();
-                List<Integer> angles2 = Arrays.asList(0, 0, 0);
-                stopForceAtom2.setCount(3);
-                stopForceAtom2.setIdx(3);
-                stopForceAtom2.setWeaponId(weaponID);
-                stopForceAtom2.setAngleInfo(angles2);
-                tsm.setStopForceAtom(stopForceAtom2);
+                angles = Arrays.asList(0, 0, 0);
+                stopForceAtom.setCount(3);
+                stopForceAtom.setIdx(3);
+                stopForceAtom.setWeaponId(weaponID);
+                stopForceAtom.setAngleInfo(angles);
+                tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
@@ -240,13 +238,12 @@ public class Kaiser extends Job {
                 }
                 o1.nOption = 2;
                 o1.rOption = skillID;
-                StopForceAtom stopForceAtom3 = new StopForceAtom();
-                List<Integer> angles3 = Arrays.asList(0, 0, 0, 0, 0);
-                stopForceAtom3.setCount(5);
-                stopForceAtom3.setIdx(2);
-                stopForceAtom3.setWeaponId(weaponID);
-                stopForceAtom3.setAngleInfo(angles3);
-                tsm.setStopForceAtom(stopForceAtom3);
+                angles = Arrays.asList(0, 0, 0, 0, 0);
+                stopForceAtom.setCount(5);
+                stopForceAtom.setIdx(2);
+                stopForceAtom.setWeaponId(weaponID);
+                stopForceAtom.setAngleInfo(angles);
+                tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
@@ -257,13 +254,12 @@ public class Kaiser extends Job {
                 }
                 o1.nOption = 4;
                 o1.rOption = skillID;
-                StopForceAtom stopForceAtom4 = new StopForceAtom();
-                List<Integer> angles4 = Arrays.asList(0, 0, 0, 0, 0);
-                stopForceAtom4.setCount(5);
-                stopForceAtom4.setIdx(4);
-                stopForceAtom4.setWeaponId(weaponID);
-                stopForceAtom4.setAngleInfo(angles4);
-                tsm.setStopForceAtom(stopForceAtom4);
+                angles = Arrays.asList(0, 0, 0, 0, 0);
+                stopForceAtom.setCount(5);
+                stopForceAtom.setIdx(4);
+                stopForceAtom.setWeaponId(weaponID);
+                stopForceAtom.setAngleInfo(angles);
+                tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
@@ -361,49 +357,6 @@ public class Kaiser extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private int getGaugeIncrement(int skillID) {
-        HashMap<Integer, Integer> hashMapIncrement = new HashMap<>();
-        hashMapIncrement.put(DRAGON_SLASH_1, 1);
-        hashMapIncrement.put(DRAGON_SLASH_2, 3);
-        hashMapIncrement.put(DRAGON_SLASH_3, 4);
-        hashMapIncrement.put(DRAGON_SLASH_1_FINAL_FORM, 1);
-
-        hashMapIncrement.put(FLAME_SURGE, 2);
-        hashMapIncrement.put(FLAME_SURGE_FINAL_FORM, 2);
-
-        hashMapIncrement.put(IMPACT_WAVE, 5);
-        hashMapIncrement.put(IMPACT_WAVE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(PIERCING_BLAZE, 5);
-        hashMapIncrement.put(PIERCING_BLAZE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(WING_BEAT, 2);
-        hashMapIncrement.put(WING_BEAT_FINAL_FORM, 1);
-
-        hashMapIncrement.put(PRESSURE_CHAIN, 8);
-        hashMapIncrement.put(PRESSURE_CHAIN_FINAL_FORM, 0);
-
-        hashMapIncrement.put(GIGA_WAVE, 8);
-        hashMapIncrement.put(GIGA_WAVE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(INFERNO_BREATH, 14);
-        hashMapIncrement.put(INFERNO_BREATH_FINAL_FORM, 0);
-
-        hashMapIncrement.put(DRAGON_BARRAGE, 6);
-        hashMapIncrement.put(DRAGON_BARRAGE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(BLADE_BURST, 6);
-        hashMapIncrement.put(BLADE_BURST_FINAL_FORM, 0);
-
-        hashMapIncrement.put(TEMPEST_BLADES_FIVE, 15);
-        hashMapIncrement.put(TEMPEST_BLADES_FIVE_FF, 0);
-
-        hashMapIncrement.put(TEMPEST_BLADES_THREE, 15);
-        hashMapIncrement.put(TEMPEST_BLADES_THREE_FF, 0);
-
-        return hashMapIncrement.get(skillID);
-    }
-
     private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
         Option o = new Option();
         Option o1 = new Option();
@@ -497,7 +450,7 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, (getGaugeIncrement(attackInfo.skillId)*attackInfo.mobAttackInfo.size()));
+            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -680,7 +633,7 @@ public class Kaiser extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int[] realignattack = new int[] {
+        int[] realignattacks = new int[] {
                 REALIGN_ATTACKER_MODE,
                 REALIGN_ATTACKER_MODE_I,
                 REALIGN_ATTACKER_MODE_II,
@@ -689,9 +642,9 @@ public class Kaiser extends Job {
         int zPadX = 0;
         int zCr = 0;
         int zBdR = 0;
-        for (int aRealignattack : realignattack) {
-            if (chr.hasSkill(aRealignattack)) {
-                Skill skill = chr.getSkill(aRealignattack);
+        for (int realignattack : realignattacks) {
+            if (chr.hasSkill(realignattack)) {
+                Skill skill = chr.getSkill(realignattack);
                 byte slv = (byte) skill.getCurrentLevel();
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 zPadX += si.getValue(padX, slv);
@@ -716,7 +669,7 @@ public class Kaiser extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int[] realigndefend = new int[] {
+        int[] realigndefends = new int[] {
                 REALIGN_DEFENDER_MODE,
                 REALIGN_DEFENDER_MODE_I,
                 REALIGN_DEFENDER_MODE_II,
@@ -725,9 +678,9 @@ public class Kaiser extends Job {
         int zDef = 0;
         int zAcc = 0;
         int zMHPR = 0;
-        for (int aRealigndefend : realigndefend) {
-            if (chr.hasSkill(aRealigndefend)) {
-                Skill skill = chr.getSkill(aRealigndefend);
+        for (int realigndefend : realigndefends) {
+            if (chr.hasSkill(realigndefend)) {
+                Skill skill = chr.getSkill(realigndefend);
                 byte slv = (byte) skill.getCurrentLevel();
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 zDef += si.getValue(pddX, slv);

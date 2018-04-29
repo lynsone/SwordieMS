@@ -1,8 +1,11 @@
 package constants;
 
+import java.util.HashMap;
+
 import static client.jobs.legend.Aran.*;
 import static client.jobs.legend.Mercedes.*;
 import static client.jobs.nova.AngelicBuster.*;
+import static client.jobs.nova.Kaiser.*;
 
 /**
  * Created on 12/18/2017.
@@ -673,6 +676,49 @@ public class SkillConstants {
             default:
                 return skillID;
         }
+    }
+
+    public static int getKaiserGaugeIncrementBySkill(int skillID) {
+        HashMap<Integer, Integer> hashMapIncrement = new HashMap<>();
+        hashMapIncrement.put(DRAGON_SLASH_1, 1);
+        hashMapIncrement.put(DRAGON_SLASH_2, 3);
+        hashMapIncrement.put(DRAGON_SLASH_3, 4);
+        hashMapIncrement.put(DRAGON_SLASH_1_FINAL_FORM, 1);
+
+        hashMapIncrement.put(FLAME_SURGE, 2);
+        hashMapIncrement.put(FLAME_SURGE_FINAL_FORM, 2);
+
+        hashMapIncrement.put(IMPACT_WAVE, 5);
+        hashMapIncrement.put(IMPACT_WAVE_FINAL_FORM, 0);
+
+        hashMapIncrement.put(PIERCING_BLAZE, 5);
+        hashMapIncrement.put(PIERCING_BLAZE_FINAL_FORM, 0);
+
+        hashMapIncrement.put(WING_BEAT, 2);
+        hashMapIncrement.put(WING_BEAT_FINAL_FORM, 1);
+
+        hashMapIncrement.put(PRESSURE_CHAIN, 8);
+        hashMapIncrement.put(PRESSURE_CHAIN_FINAL_FORM, 0);
+
+        hashMapIncrement.put(GIGA_WAVE, 8);
+        hashMapIncrement.put(GIGA_WAVE_FINAL_FORM, 0);
+
+        hashMapIncrement.put(INFERNO_BREATH, 14);
+        hashMapIncrement.put(INFERNO_BREATH_FINAL_FORM, 0);
+
+        hashMapIncrement.put(DRAGON_BARRAGE, 6);
+        hashMapIncrement.put(DRAGON_BARRAGE_FINAL_FORM, 0);
+
+        hashMapIncrement.put(BLADE_BURST, 6);
+        hashMapIncrement.put(BLADE_BURST_FINAL_FORM, 0);
+
+        hashMapIncrement.put(TEMPEST_BLADES_FIVE, 15);
+        hashMapIncrement.put(TEMPEST_BLADES_FIVE_FF, 0);
+
+        hashMapIncrement.put(TEMPEST_BLADES_THREE, 15);
+        hashMapIncrement.put(TEMPEST_BLADES_THREE_FF, 0);
+
+        return hashMapIncrement.get(skillID);
     }
 
     public static boolean isEvanFusionSkill(int skillID) {
