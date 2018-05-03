@@ -3,6 +3,7 @@ package client.character;
 import client.Account;
 import client.Client;
 import client.character.items.*;
+import client.character.skills.Option;
 import client.character.skills.Skill;
 import client.character.skills.TemporaryStatManager;
 import client.field.Field;
@@ -42,6 +43,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static client.character.items.BodyPart.*;
+import static client.character.skills.CharacterTemporaryStat.SoulMP;
 import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.FieldInstanceType.*;
 import static enums.InvType.EQUIP;
@@ -1652,6 +1654,10 @@ public class Char {
         }
         byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
         getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
+        if(getTemporaryStatManager().hasStat(SoulMP)) {
+            getTemporaryStatManager().removeStat(SoulMP, false);
+            getTemporaryStatManager().sendResetStatPacket();
+        }
     }
 
     /**
@@ -1678,6 +1684,7 @@ public class Char {
         }
         byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
         getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
+        initSoulMP();
     }
 
     public TemporaryStatManager getTemporaryStatManager() {
@@ -1828,6 +1835,7 @@ public class Char {
         getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
                 (byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
         if(characterData) {
+            initSoulMP();
             if(getGuild() != null) {
                 write(WvsContext.guildResult(new GuildUpdate(getGuild())));
             }
@@ -2760,6 +2768,18 @@ public class Char {
         }
         for(Equip e : getEquipInventory().getItems().stream().map(e -> (Equip) e).collect(Collectors.toList())) {
             e.recalcEnchantmentStats();
+        }
+    }
+
+    public void initSoulMP() {
+        Equip weapon = (Equip) getEquippedItemByBodyPart(WEAPON);
+        TemporaryStatManager tsm = getTemporaryStatManager();
+        if (weapon != null && weapon.getSoulSocketId() != 0 && !tsm.hasStat(SoulMP)) {
+            Option o = new Option();
+            o.rOption = ItemConstants.getSoulSkillFromSoulID(weapon.getSoulOptionId());
+            o.xOption = ItemConstants.MAX_SOUL_CAPACITY;
+            tsm.putCharacterStatValue(SoulMP, o);
+            tsm.sendSetStatPacket();
         }
     }
 }

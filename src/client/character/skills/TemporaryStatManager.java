@@ -1,9 +1,12 @@
 package client.character.skills;
 
 import client.character.Char;
+import client.character.items.BodyPart;
+import client.character.items.Equip;
 import client.life.AffectedArea;
 import com.sun.istack.internal.NotNull;
 import connection.OutPacket;
+import constants.ItemConstants;
 import enums.TSIndex;
 import org.apache.log4j.LogManager;
 import packet.WvsContext;
@@ -2751,5 +2754,25 @@ public class TemporaryStatManager {
         outPacket.encodeByte(0);
         new StopForceAtom().encode(outPacket);
         outPacket.encodeInt(0); // viperEnergy
+    }
+
+    public void addSoulMPFromMobDeath() {
+        if(hasStat(CharacterTemporaryStat.SoulMP)) {
+            Option o = getOption(SoulMP);
+            o.nOption = Math.min(ItemConstants.MAX_SOUL_CAPACITY, o.nOption + ItemConstants.MOB_DEATH_SOUL_MP_COUNT);
+            putCharacterStatValue(SoulMP, o);
+            if (o.nOption >= ItemConstants.MAX_SOUL_CAPACITY && !hasStat(FullSoulMP)) {
+                Option o2 = new Option();
+                o2.rOption = ItemConstants.getSoulSkillFromSoulID(((Equip) chr.getEquippedItemByBodyPart(BodyPart.WEAPON)).getSoulOptionId());
+                if (o2.rOption == 0) {
+                    chr.chatMessage(String.format("Unknown corresponding skill for soul socket id %d!",
+                            ((Equip) chr.getEquippedItemByBodyPart(BodyPart.WEAPON)).getSoulOptionId()));
+                }
+                o2.nOption = ItemConstants.MAX_SOUL_CAPACITY;
+                o2.xOption = ItemConstants.MAX_SOUL_CAPACITY;
+                putCharacterStatValue(FullSoulMP, o2);
+            }
+            sendSetStatPacket();
+        }
     }
 }

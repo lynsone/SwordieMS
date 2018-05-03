@@ -1,6 +1,7 @@
 package net.netty;
 
 import client.Client;
+import client.character.Char;
 import connection.InPacket;
 import handling.InHeader;
 import handling.handlers.ChatHandler;
@@ -51,6 +52,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
             Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
+            Char chr = c.getChr();
             InPacket inPacket = (InPacket) msg;
             short op = ((InPacket) msg).decodeShort();
             InHeader opHeader = InHeader.getInHeaderByOp(op);
@@ -90,6 +92,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_PET_FOOD_ITEM_USE_REQUEST:
                     WorldHandler.handleUserPetFoodItemUseRequest(c, inPacket);
+                    break;
+                case USER_ITEM_SKILL_SOCKET_UPGRADE_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserItemSkillSocketUpdateItemUseRequest(c, inPacket);
+                    break;
+                case USER_ITEM_SKILL_OPTION_UPGRADE_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserItemSkillOptionUpdateItemUseRequest(c, inPacket);
                     break;
                 case FRIEND_REQUEST:
                     WorldHandler.handleFriendRequest(c, inPacket);
@@ -201,6 +209,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case WHISPER:
                     WorldHandler.handleWhisper(c, inPacket);
+                    break;
+                case USER_SOUL_EFFECT_REQUEST:
+                    WorldHandler.handleUserSoulEffectRequest(c, inPacket);
+                    break;
+                case USER_WEAPON_TEMP_ITEM_OPTION_REQUEST:
+                    WorldHandler.handleUserWeaponTempItemOptionRequest(chr, inPacket);
                     break;
                 case USER_FINAL_ATTACK_REQUEST:
                     WorldHandler.handleUserFinalAttackRequest(c, inPacket);

@@ -31,6 +31,19 @@ public class Util {
     }
 
     /**
+     * Gets a random element from a given List. This is done by utilizing {@link #getRandom(int)}.
+     * @param list The list to select the element from
+     * @param <T> The type of elements of the list
+     * @return A random element from the list, or null if the list is null or empty.
+     */
+    public static <T> T getRandomFromList(T[] list) {
+        if(list != null && list.length > 0) {
+            return list[getRandom(list.length - 1)];
+        }
+        return null;
+    }
+
+    /**
      * Reads a file and returns the contents as a single String.
      * @param path The path to the file
      * @param encoding The encoding the file is in.

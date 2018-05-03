@@ -9,10 +9,7 @@ import loaders.ItemInfo;
 import org.apache.log4j.LogManager;
 import util.Util;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static enums.InvType.EQUIP;
@@ -23,9 +20,16 @@ import static enums.InvType.EQUIP;
 public class ItemConstants {
     public static final int EMPTY_SOCKET_ID = 3;
     public static final short INACTIVE_SOCKET = 0;
+    public static final short MIN_LEVEL_FOR_SOUL_SOCKET = 75;
+    public static final int SOUL_ENCHANTER_BASE_ID = 2590000;
+    public static final int SOUL_ITEM_BASE_ID = 2591000;
+    public static final int MAX_SOUL_CAPACITY = 1000;
+    public static final int MOB_DEATH_SOUL_MP_COUNT = 150;
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     public static final int THIRD_LINE_CHANCE = 50;
     public static int NEBILITE_BASE_ID = 3060000;
+    private static final Integer[] soulPotList = new Integer[]{32001, 32002, 32003, 32004, 32005, 32006, 32011, 32012, // flat
+            32041, 32042, 32043, 32044, 32045, 32046, 32051, 32052}; // rate
 
     public static int getGenderFromId(int nItemID) {
         int result; // eax
@@ -776,5 +780,40 @@ public class ItemConstants {
 
     public static boolean isPet(int itemId) {
         return itemId / 10000 == 500;
+    }
+
+    public static boolean isSoulEnchanter(int itemID) {
+        return itemID / 1000 == 2590;
+    }
+
+    public static boolean isSoul(int itemID) {
+        return itemID / 1000 == 2591;
+    }
+
+    public static short getSoulOptionFromSoul(int itemId) {
+        short id = 0;
+        switch(itemId) {
+
+        }
+        return id;
+    }
+
+    public static int getRandomSoulOption() {
+        return Util.getRandomFromList(soulPotList);
+    }
+
+    public static int getSoulSkillFromSoulID(int soulID) {
+        switch(soulID) {
+            case 256:
+            case 257:
+            case 258:
+            case 259:
+            case 260:
+            case 261:
+            case 262:
+            case 263:
+                return 80001340; // Advance of Magnus
+        }
+        return 0;
     }
 }

@@ -3515,4 +3515,69 @@ public class WorldHandler {
         equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
         equip.updateToChar(chr);
     }
+
+    public static void handleUserItemSkillSocketUpdateItemUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        short uPos = inPacket.decodeShort();
+        short ePos = inPacket.decodeShort();
+        Item item = chr.getConsumeInventory().getItemBySlot(uPos);
+        Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
+        if(item == null || equip == null || !ItemConstants.isWeapon(equip.getItemId()) ||
+                !ItemConstants.isSoulEnchanter(item.getItemId()) || equip.getrLevel() < ItemConstants.MIN_LEVEL_FOR_SOUL_SOCKET) {
+            chr.dispose();
+            return;
+        }
+        int successProp = ItemData.getItemInfoByID(item.getItemId()).getScrollStats().get(ScrollStat.success);
+        boolean success = Util.succeedProp(successProp);
+        if(success) {
+            equip.setSoulSocketId((short) (item.getItemId() % ItemConstants.SOUL_ENCHANTER_BASE_ID));
+            equip.updateToChar(chr);
+        }
+        chr.getField().broadcastPacket(User.showItemSkillSocketUpgradeEffect(chr.getId(), success));
+        chr.consumeItem(item);
+    }
+
+    public static void handleUserItemSkillOptionUpdateItemUseRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        short uPos = inPacket.decodeShort();
+        short ePos = inPacket.decodeShort();
+        Item item = chr.getConsumeInventory().getItemBySlot(uPos);
+        Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
+        if(item == null || equip == null || !ItemConstants.isWeapon(equip.getItemId()) ||
+                !ItemConstants.isSoul(item.getItemId()) || equip.getSoulSocketId() == 0) {
+            chr.dispose();
+            return;
+        }
+        equip.setSoulOptionId((short) (1 + item.getItemId() % ItemConstants.SOUL_ITEM_BASE_ID));
+        short option = ItemConstants.getSoulOptionFromSoul(item.getItemId());
+        if (option == 0) {
+            option = (short) ItemConstants.getRandomSoulOption();
+        }
+        equip.setSoulOption(option);
+        equip.updateToChar(chr);
+        chr.getField().broadcastPacket(User.showItemSkillOptionUpgradeEffect(chr.getId(), true, false));
+    }
+
+    public static void handleUserSoulEffectRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        boolean set = inPacket.decodeByte() != 0;
+        chr.getField().broadcastPacket(User.SetSoulEffect(chr.getId(), set));
+    }
+
+    public static void handleUserWeaponTempItemOptionRequest(Char chr, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(SoulMP) && tsm.getOption(SoulMP).nOption >= ItemConstants.MAX_SOUL_CAPACITY) {
+            Option o = new Option();
+            o.nOption = tsm.getOption(SoulMP).nOption;
+            o.xOption = tsm.getOption(SoulMP).xOption;
+            o.rOption = ItemConstants.getSoulSkillFromSoulID(
+                    ((Equip) chr.getEquippedItemByBodyPart(BodyPart.WEAPON)).getSoulOptionId()
+            );
+            tsm.putCharacterStatValue(FullSoulMP, o);
+            tsm.sendSetStatPacket();
+        }
+        chr.dispose();
+    }
 }

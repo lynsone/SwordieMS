@@ -1005,9 +1005,9 @@ public class Equip extends Item {
         for (int i = 0; i < 2; i++) {
             outPacket.encodeLong(0);
         }
-        outPacket.encodeShort(getSoulOptionId());
-        outPacket.encodeShort(getSoulSocketId());
-        outPacket.encodeShort(getSoulOption());
+        outPacket.encodeShort(getSoulOptionId()); // soul ID
+        outPacket.encodeShort(getSoulSocketId()); // enchanter ID
+        outPacket.encodeShort(getSoulOption()); // optionID (same as potentials)
     }
 
     private boolean hasStat(EquipBaseStat ebs) {

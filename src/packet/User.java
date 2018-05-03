@@ -51,4 +51,32 @@ public class User {
 
         return outPacket;
     }
+
+    public static OutPacket showItemSkillSocketUpgradeEffect(int charID, boolean success) {
+        OutPacket outPacket = new OutPacket(OutHeader.SHOW_ITEM_SKILL_SOCKET_UPGRADE_EFFECT);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(success);
+
+        return outPacket;
+    }
+
+    public static OutPacket showItemSkillOptionUpgradeEffect(int charID, boolean success, boolean boom) {
+        OutPacket outPacket = new OutPacket(OutHeader.SHOW_ITEM_SKILL_OPTION_UPGRADE_EFFECT);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(success);
+        outPacket.encodeByte(boom);
+
+        return outPacket;
+    }
+
+    public static OutPacket SetSoulEffect(int charID, boolean set) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_SOUL_EFFECT);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(set);
+
+        return outPacket;
+    }
 }

@@ -2,12 +2,15 @@ package client.life;
 
 import client.character.Char;
 import client.character.ExpIncreaseInfo;
+import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.Option;
 import client.character.skills.Skill;
+import client.character.skills.TemporaryStatManager;
 import client.field.Field;
 import client.field.Foothold;
 import client.field.fieldeffect.MobHPTagFieldEffect;
 import constants.GameConstants;
+import constants.ItemConstants;
 import enums.MobStat;
 import loaders.MobData;
 import packet.CField;
@@ -1144,6 +1147,8 @@ public class Mob extends Life {
         setPosition(getHomePosition());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
+            // add soulMP
+            chr.getTemporaryStatManager().addSoulMPFromMobDeath();
         }
         getDamageDone().clear();
 
