@@ -1553,8 +1553,20 @@ public class WorldHandler {
                         0, equip));
                 chr.consumeItem(item);
                 break;
+            case 5750001: // Nebulite Diffuser
+                ePos = inPacket.decodeShort();
+                equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
+                if(equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
+                    chr.chatMessage("That item currently does not have an active socket.");
+                    chr.dispose();
+                    return;
+                }
+                chr.consumeItem(item);
+                equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+                equip.updateToChar(chr);
+                break;
             default:
-                chr.chatMessage(YELLOW, "Cash item " + itemID + " is not implemented, notify Sjonnie pls.");
+                chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
                 chr.dispose();
                 break;
         }
@@ -3383,14 +3395,14 @@ public class WorldHandler {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int maxCount = 3;
-        if(Kaiser.getTempBladeSkill(chr, tsm) == Kaiser.TEMPEST_BLADES_FIVE || Kaiser.getTempBladeSkill(chr, tsm) == Kaiser.TEMPEST_BLADES_FIVE_FF) {
+        if (Kaiser.getTempBladeSkill(chr, tsm) == Kaiser.TEMPEST_BLADES_FIVE || Kaiser.getTempBladeSkill(chr, tsm) == Kaiser.TEMPEST_BLADES_FIVE_FF) {
             maxCount = 5;
         }
         int mobCount = inPacket.decodeInt();
         int lastMobID = 0;
         int mobid = 0;
 
-        for(int i = 0; i<mobCount; i++) {
+        for (int i = 0; i < mobCount; i++) {
             mobid = inPacket.decodeInt();
 
 
@@ -3414,7 +3426,7 @@ public class WorldHandler {
             }
 
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 30,
-                    0, 10*i, (int) System.currentTimeMillis(), 1, 0,
+                    0, 10 * i, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                     true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
@@ -3424,7 +3436,7 @@ public class WorldHandler {
         }
 
 
-        for(int i = mobCount; i<maxCount; i++) {
+        for (int i = mobCount; i < maxCount; i++) {
 
             Mob mob = (Mob) chr.getField().getLifeByObjectID(lastMobID);
             int inc = ForceAtomEnum.KAISER_WEAPON_THROW_1.getInc();
@@ -3446,7 +3458,7 @@ public class WorldHandler {
             }
 
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 30,
-                    0, 12*i, (int) System.currentTimeMillis(), 1, 0,
+                    0, 12 * i, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                     true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
