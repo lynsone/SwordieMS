@@ -22,7 +22,6 @@ import packet.WvsContext;
 import util.Util;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import static client.character.skills.CharacterTemporaryStat.*;
@@ -155,6 +154,7 @@ public class Kaiser extends Job {
         Summon summon;
         Field field;
         Item item = chr.getEquippedInventory().getItemBySlot((short) 11);
+        StopForceAtom stopForceAtom = new StopForceAtom();
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
@@ -168,6 +168,7 @@ public class Kaiser extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
+                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case CURSEBITE:
                 o1.nOption = si.getValue(asrR, slv);
@@ -198,35 +199,76 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
             case TEMPEST_BLADES_THREE:
-            case TEMPEST_BLADES_THREE_FF:
-                o1.nOption = 5;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                StopForceAtom stopForceAtom2 = new StopForceAtom();
-                List<Integer> angles = Arrays.asList(0, 0, 0);
-                stopForceAtom2.setCount(3);
-                stopForceAtom2.setIdx(0);
-                stopForceAtom2.setWeaponId(weaponID);
-                stopForceAtom2.setAngleInfo(angles);
-                tsm.setStopForceAtom(stopForceAtom2);
-                tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                break;
-            case TEMPEST_BLADES_FIVE:
-            case TEMPEST_BLADES_FIVE_FF:
+                if(tsm.getOption(StopForceAtomInfo).nOption != 1 && tsm.hasStat(StopForceAtomInfo)) {
+                    tsm.removeStat(StopForceAtomInfo, true);
+                    tsm.sendResetStatPacket();
+                }
                 o1.nOption = 1;
                 o1.rOption = skillID;
-                o1.tOption = 0;
-                StopForceAtom stopForceAtom = new StopForceAtom();
-                List<Integer> angles2 = Arrays.asList(0, 0, 0, 0, 0);
-                stopForceAtom.setCount(5);
-                stopForceAtom.setIdx(0);
+                List<Integer> angles = Arrays.asList(0, 0, 0);
+                stopForceAtom.setCount(3);
+                stopForceAtom.setIdx(1);
                 stopForceAtom.setWeaponId(weaponID);
-                stopForceAtom.setAngleInfo(angles2);
+                stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
+                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
+                break;
+            case TEMPEST_BLADES_THREE_FF: //Final Form
+                if(tsm.getOption(StopForceAtomInfo).nOption != 3 && tsm.hasStat(StopForceAtomInfo)) {
+                    tsm.removeStat(StopForceAtomInfo, true);
+                    tsm.sendResetStatPacket();
+                }
+                o1.nOption = 3;
+                o1.rOption = skillID;
+                angles = Arrays.asList(0, 0, 0);
+                stopForceAtom.setCount(3);
+                stopForceAtom.setIdx(3);
+                stopForceAtom.setWeaponId(weaponID);
+                stopForceAtom.setAngleInfo(angles);
+                tsm.setStopForceAtom(stopForceAtom);
+                tsm.putCharacterStatValue(StopForceAtomInfo, o1);
+                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
+                break;
+
+            case TEMPEST_BLADES_FIVE:
+                if(tsm.getOption(StopForceAtomInfo).nOption != 2 && tsm.hasStat(StopForceAtomInfo)) {
+                    tsm.removeStat(StopForceAtomInfo, true);
+                    tsm.sendResetStatPacket();
+                }
+                o1.nOption = 2;
+                o1.rOption = skillID;
+                angles = Arrays.asList(0, 0, 0, 0, 0);
+                stopForceAtom.setCount(5);
+                stopForceAtom.setIdx(2);
+                stopForceAtom.setWeaponId(weaponID);
+                stopForceAtom.setAngleInfo(angles);
+                tsm.setStopForceAtom(stopForceAtom);
+                tsm.putCharacterStatValue(StopForceAtomInfo, o1);
+                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
+                break;
+            case TEMPEST_BLADES_FIVE_FF: //Final Form
+                if(tsm.getOption(StopForceAtomInfo).nOption != 4 && tsm.hasStat(StopForceAtomInfo)) {
+                    tsm.removeStat(StopForceAtomInfo, true);
+                    tsm.sendResetStatPacket();
+                }
+                o1.nOption = 4;
+                o1.rOption = skillID;
+                angles = Arrays.asList(0, 0, 0, 0, 0);
+                stopForceAtom.setCount(5);
+                stopForceAtom.setIdx(4);
+                stopForceAtom.setWeaponId(weaponID);
+                stopForceAtom.setAngleInfo(angles);
+                tsm.setStopForceAtom(stopForceAtom);
+                tsm.putCharacterStatValue(StopForceAtomInfo, o1);
+                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
 
             case FINAL_FORM_THIRD:
+                if(tsm.hasStat(StopForceAtomInfo)) {
+                    tsm.removeStat(StopForceAtomInfo, true);
+                    tsm.sendResetStatPacket();
+                }
                 o6.nOption = 1200;
                 o6.rOption = skillID;
                 o6.tOption = si.getValue(time, slv);
@@ -257,6 +299,10 @@ public class Kaiser extends Job {
 
             case FINAL_TRANCE:
             case FINAL_FORM_FOURTH:
+                if(tsm.hasStat(StopForceAtomInfo)) {
+                    tsm.removeStat(StopForceAtomInfo, true);
+                    tsm.sendResetStatPacket();
+                }
                 o6.nOption = 1201;
                 o6.rOption = skillID;
                 o6.tOption = si.getValue(time, slv);
@@ -309,43 +355,6 @@ public class Kaiser extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
-    }
-
-    private int getGaugeIncrement(int skillID) {
-        HashMap<Integer, Integer> hashMapIncrement = new HashMap<>();
-        hashMapIncrement.put(DRAGON_SLASH_1, 1);
-        hashMapIncrement.put(DRAGON_SLASH_2, 3);
-        hashMapIncrement.put(DRAGON_SLASH_3, 4);
-        hashMapIncrement.put(DRAGON_SLASH_1_FINAL_FORM, 1);
-
-        hashMapIncrement.put(FLAME_SURGE, 2);
-        hashMapIncrement.put(FLAME_SURGE_FINAL_FORM, 2);
-
-        hashMapIncrement.put(IMPACT_WAVE, 5);
-        hashMapIncrement.put(IMPACT_WAVE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(PIERCING_BLAZE, 5);
-        hashMapIncrement.put(PIERCING_BLAZE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(WING_BEAT, 2);
-        hashMapIncrement.put(WING_BEAT_FINAL_FORM, 1);
-
-        hashMapIncrement.put(PRESSURE_CHAIN, 8);
-        hashMapIncrement.put(PRESSURE_CHAIN_FINAL_FORM, 0);
-
-        hashMapIncrement.put(GIGA_WAVE, 8);
-        hashMapIncrement.put(GIGA_WAVE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(INFERNO_BREATH, 14);
-        hashMapIncrement.put(INFERNO_BREATH_FINAL_FORM, 0);
-
-        hashMapIncrement.put(DRAGON_BARRAGE, 6);
-        hashMapIncrement.put(DRAGON_BARRAGE_FINAL_FORM, 0);
-
-        hashMapIncrement.put(BLADE_BURST, 6);
-        hashMapIncrement.put(BLADE_BURST_FINAL_FORM, 0);
-
-        return hashMapIncrement.get(skillID);
     }
 
     private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
@@ -441,7 +450,7 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, (getGaugeIncrement(attackInfo.skillId)*attackInfo.mobAttackInfo.size()));
+            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -624,7 +633,7 @@ public class Kaiser extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int[] realignattack = new int[] {
+        int[] realignattacks = new int[] {
                 REALIGN_ATTACKER_MODE,
                 REALIGN_ATTACKER_MODE_I,
                 REALIGN_ATTACKER_MODE_II,
@@ -633,9 +642,9 @@ public class Kaiser extends Job {
         int zPadX = 0;
         int zCr = 0;
         int zBdR = 0;
-        for(int i = 0; i<realignattack.length; i++) {
-            if (chr.hasSkill(realignattack[i])) {
-                Skill skill = chr.getSkill(realignattack[i]);
+        for (int realignattack : realignattacks) {
+            if (chr.hasSkill(realignattack)) {
+                Skill skill = chr.getSkill(realignattack);
                 byte slv = (byte) skill.getCurrentLevel();
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 zPadX += si.getValue(padX, slv);
@@ -660,7 +669,7 @@ public class Kaiser extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int[] realigndefend = new int[] {
+        int[] realigndefends = new int[] {
                 REALIGN_DEFENDER_MODE,
                 REALIGN_DEFENDER_MODE_I,
                 REALIGN_DEFENDER_MODE_II,
@@ -669,9 +678,9 @@ public class Kaiser extends Job {
         int zDef = 0;
         int zAcc = 0;
         int zMHPR = 0;
-        for(int i = 0; i<realigndefend.length; i++) {
-            if (chr.hasSkill(realigndefend[i])) {
-                Skill skill = chr.getSkill(realigndefend[i]);
+        for (int realigndefend : realigndefends) {
+            if (chr.hasSkill(realigndefend)) {
+                Skill skill = chr.getSkill(realigndefend);
                 byte slv = (byte) skill.getCurrentLevel();
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 zDef += si.getValue(pddX, slv);
@@ -690,5 +699,22 @@ public class Kaiser extends Job {
         o3.rOption = REALIGN_DEFENDER_MODE;
         tsm.putCharacterStatValue(HayatoHPR, o3);
         tsm.sendSetStatPacket();
+    }
+
+    public static int getTempBladeSkill(Char chr, TemporaryStatManager tsm) {
+        int skill = 0;
+        if(chr.hasSkill(TEMPEST_BLADES_THREE)) {
+            skill = TEMPEST_BLADES_THREE;
+        }
+        if(chr.hasSkill(TEMPEST_BLADES_THREE) && tsm.hasStat(Morph)) {
+            skill = TEMPEST_BLADES_THREE_FF;
+        }
+        if(chr.hasSkill(TEMPEST_BLADES_FIVE)) {
+            skill = TEMPEST_BLADES_FIVE;
+        }
+        if(chr.hasSkill(TEMPEST_BLADES_FIVE) && tsm.hasStat(Morph)) {
+            skill = TEMPEST_BLADES_FIVE_FF;
+        }
+        return skill;
     }
 }

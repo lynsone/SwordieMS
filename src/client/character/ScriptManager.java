@@ -23,7 +23,6 @@ import enums.NpcMessageType;
 import loaders.*;
 import org.apache.log4j.LogManager;
 import packet.*;
-import sun.font.Script;
 import util.FileTime;
 import util.Position;
 import util.Util;
@@ -920,7 +919,7 @@ public class ScriptManager implements Observer {
     public void removeReactor() {
         Field field = chr.getField();
         Reactor reactor = field.getReactors().stream()
-                .filter(r -> r.getTemplateId() == getObjectIDByScriptType(ScriptType.REACTOR))
+                .filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
                 .findAny().orElse(null);
         if(reactor != null) {
             field.removeReactor(reactor);

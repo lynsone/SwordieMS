@@ -569,25 +569,25 @@ public class AdminCommands {
         }
     }
 
-    public static class CurHP extends AdminCommand {
+    public static class CurHp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.hp, (short) num);
+                chr.setStat(Stat.hp, num);
                 Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.hp, (short) num);
+                stats.put(Stat.hp, num);
                 chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
 
-    public static class CurMP extends AdminCommand {
+    public static class CurMp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.mp, (short) num);
+                chr.setStat(Stat.mp, num);
                 Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.mp, (short) num);
+                stats.put(Stat.mp, num);
                 chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
@@ -1057,9 +1057,9 @@ public class AdminCommands {
             for(int i = startIndex; i < endIndex; i++) {
                 Item removeItem = chr.getInventoryByType(InvType.EQUIP).getItemBySlot((short) i);
                 chr.getInventoryByType(InvType.EQUIP).removeItem(removeItem);
-                chr.chatMessage(GAME_NOTICE, "Please change channel, as this Command is still shit right now. ");
                 chr.dispose();
             }
+            chr.chatMessage(GAME_NOTICE, "Please change channel, as this Command is still shit right now. ");
         }
     }
 }

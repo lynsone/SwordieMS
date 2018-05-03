@@ -16,11 +16,16 @@ import enums.ChatMsgColour;
 import enums.MobStat;
 import enums.MoveAbility;
 import loaders.SkillData;
+import packet.UserLocal;
 import packet.WvsContext;
+import server.EventManager;
 import util.Position;
 import util.Util;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static client.character.skills.CharacterTemporaryStat.*;
 import static client.character.skills.SkillStat.*;
@@ -94,6 +99,8 @@ public class BlazeWizard extends Job {
     boolean used;
     Position chrPos;
     int prevmap;
+    private HashMap<Mob,ScheduledFuture> hashMap = new HashMap<>();
+    private ScheduledFuture schFuture;
 
     public BlazeWizard(Char chr) {
         super(chr);
@@ -215,7 +222,7 @@ public class BlazeWizard extends Job {
         }
     }
 
-    private void handleIgnite(AttackInfo attackInfo) {
+    private void handleIgnite(AttackInfo attackInfo) {  //TODO only registers Explosion attack if >1 mob is hit
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         if(tsm.hasStat(WizardIgnite)) {
@@ -226,12 +233,23 @@ public class BlazeWizard extends Job {
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    //mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
 
-                    o.nOption = 5;
-                    o.rOption = 12101024;
-                    o.tOption = 20;
-                    o.wOption = 1;
+
+                    if(hashMap.get(mob) != null && !hashMap.get(mob).isDone()) {
+                        hashMap.get(mob).cancel(true);
+                    }
+
+                    schFuture = EventManager.addEvent(() ->
+                            c.write(UserLocal.explosionAttack(12100029, mob.getPosition(), mob.getObjectId(), 10)), 10, TimeUnit.SECONDS);
+
+                    hashMap.put(mob, schFuture);
+
+
+                    o.nOption = 1;
+                    o.rOption = skill.getSkillId();
+                    o.tOption = 10;
+                    o.wOption = 10;
                     mts.addStatOptionsAndBroadcast(MobStat.Ember, o);
                 }
             }

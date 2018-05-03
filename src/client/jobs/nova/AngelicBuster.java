@@ -305,10 +305,6 @@ public class AngelicBuster extends Job {
             skillID = skill.getSkillId();
         }
 
-        Skill ah4 = chr.getSkill(AFFINITY_HEART_IV);
-        byte ah4LV = (byte) ah4.getCurrentLevel();
-        SkillInfo ah4SI = SkillData.getSkillInfoById(ah4.getSkillId());
-
         if(hasHitMobs) {
             //Soul Seeker Recreation
             if (attackInfo.skillId == SOUL_SEEKER_ATOM) {
@@ -320,6 +316,7 @@ public class AngelicBuster extends Job {
                 soulSeekerExpert(skillID, slv, attackInfo);
             }
 
+
             //Recharging System
             if(Util.succeedProp(getRechargeProc(attackInfo))) {
                 c.write(UserLocal.onEffectRechargeAB());
@@ -328,11 +325,17 @@ public class AngelicBuster extends Job {
             } else {
 
                 //Affinity Heart IV passive
-                if(Util.succeedProp(ah4SI.getValue(x, slv)) && Util.succeedProp(getRechargeProc(attackInfo))) {
-                    c.write(UserLocal.onEffectRechargeAB());
-                    c.write(UserLocal.onResetStateForOffSkill());
-                    affinityHeartIIIcounter = 0;
-                    affinityHeartIV(tsm, ah4LV);
+                if(chr.hasSkill(AFFINITY_HEART_IV) && Util.succeedProp(getRechargeProc(attackInfo))) {
+                    Skill ah4Skill = chr.getSkill(AFFINITY_HEART_IV);
+                    byte ah4LV = (byte) ah4Skill.getCurrentLevel();
+                    SkillInfo ah4SI = SkillData.getSkillInfoById(skill.getSkillId());
+                    if(Util.succeedProp(ah4SI.getValue(x, ah4LV))) {
+                        c.write(UserLocal.onEffectRechargeAB());
+                        c.write(UserLocal.onResetStateForOffSkill());
+                        affinityHeartIIIcounter = 0;
+                        affinityHeartIV(tsm, ah4LV);
+                    }
+
                 } else {
 
                     //Affinity Heart III passive
@@ -346,6 +349,7 @@ public class AngelicBuster extends Job {
                     }
                 }
             }
+
             affinityHeartII(attackInfo);
         }
         Option o1 = new Option();

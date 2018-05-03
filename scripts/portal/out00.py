@@ -92,9 +92,31 @@ def init():
     elif fieldID == 223030210:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
-    elif fieldID ==272030400:
+    elif fieldID == 272030400:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
+
+    #From CQueen
+    elif fieldID == 105200310:
+        sm.sendAskYesNo("Would you like to leave?")
+        warp = False
+
+    #From Pierre
+    elif fieldID == 105200210:
+        sm.sendAskYesNo("Would you like to leave?")
+        warp = False
+
+    #From VonBon
+    elif fieldID == 105200110:
+        sm.sendAskYesNo("Would you like to leave?")
+        warp = False
+
+    #From Vellum
+    elif fieldID == 105200410:
+        sm.sendAskYesNo("Would you like to leave?")
+        warp = False
+
+
 
         #fm
     elif fieldID == 910000000:
@@ -122,10 +144,22 @@ def action(response, answer):
             sm.warpPartyOut(271040000)
             sm.dispose()
         elif fieldID == 223030210:
-            sm.warpParty(223030200)
+            sm.warpPartyOut(223030200)
             sm.dispose()
         elif fieldID == 272030400:
-            sm.warpParty(272030300)
+            sm.warpPartyOut(272030300)
+            sm.dispose()
+        elif fieldID == 105200310:
+            sm.warpPartyOut(105200000)
+            sm.dispose()
+        elif fieldID == 105200210:
+            sm.warpPartyOut(105200000)
+            sm.dispose()
+        elif fieldID == 105200110:
+            sm.warpPartyOut(105200000)
+            sm.dispose()
+        elif fieldID == 105200410:
+            sm.warpPartyOut(105200000)
             sm.dispose()
         else:
             sm.chat("(Portal) This script (out00.py) is not coded for the exit of this map. (ID: " + str(fieldID) + ")")
