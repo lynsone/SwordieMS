@@ -193,7 +193,7 @@ public class ItemData {
     public static void loadEquipsFromWz() {
         String wzDir = ServerConstants.WZ_DIR + "/Character.wz";
         String[] subMaps = new String[]{"Accessory", "Android", "Cap", "Cape", "Coat", "Dragon", "Face", "Glove",
-                "Longcoat", "Mechanic", "Pants", "PetEquip", "Ring", "Shield", "Shoes", "Totem", "Weapon"};
+                "Longcoat", "Mechanic", "Pants", "PetEquip", "Ring", "Shield", "Shoes", "Totem", "Weapon", "MonsterBook"};
         for (String subMap : subMaps) {
             File subDir = new File(String.format("%s/%s", wzDir, subMap));
             File[] files = subDir.listFiles();

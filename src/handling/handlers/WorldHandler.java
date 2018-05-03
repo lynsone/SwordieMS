@@ -196,7 +196,8 @@ public class WorldHandler {
         if (newPos == 0) { // Drop
             boolean fullDrop;
             Drop drop;
-            if(!item.getInvType().isStackable() || quantity >= item.getQuantity()) {
+            if(!item.getInvType().isStackable() || quantity >= item.getQuantity() ||
+                    ItemConstants.isThrowingStar(item.getItemId()) || ItemConstants.isBullet(item.getItemId())) {
                 // Whole item is dropped (equip/stackable items with all their quantity)
                 fullDrop = true;
                 chr.getInventoryByType(invTypeFrom).removeItem(item);
@@ -803,8 +804,8 @@ public class WorldHandler {
             mai.hitPartRunTimes = hitPartRunTimes;
             mai.isResWarriorLiftPress = isResWarriorLiftPress;
             ai.mobAttackInfo.add(mai);
-            c.getChr().chatMessage(YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
-                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", idk4 = " + idk4 + ", idk5 = " + idk5);
+//            c.getChr().chatMessage(YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
+//                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", idk4 = " + idk4 + ", idk5 = " + idk5);
         }
         if (skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
             ai.ptTarget.setX(inPacket.decodeShort());
@@ -844,7 +845,6 @@ public class WorldHandler {
                 ai.grenadePos.setY(inPacket.decodeShort());
             }
         }
-        c.getChr().chatMessage(YELLOW, "aap = " + ai.addAttackProc);
         handleAttack(c, ai);
     }
 
@@ -1174,7 +1174,6 @@ public class WorldHandler {
         ai.bulletID = c.getChr().getBulletIDForAttack();
         ai.slv = inPacket.decodeByte();
         ai.addAttackProc = inPacket.decodeByte();
-        c.getChr().chatMessage(YELLOW, "addAttackProc: " + ai.addAttackProc);
         inPacket.decodeInt(); // crc
         int skillID = ai.skillId;
         if (SkillConstants.isKeyDownSkill(skillID) || SkillConstants.isSuperNovaSkill(skillID)) {
@@ -3580,5 +3579,15 @@ public class WorldHandler {
             tsm.sendSetStatPacket();
         }
         chr.dispose();
+    }
+
+    public static void handleMonsterBookMobInfo(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        int cardID = inPacket.decodeInt();
+        ItemInfo ii = ItemData.getItemInfoByID(cardID);
+        Mob mob = MobData.getMobById(ii.getMobID());
+        if (mob != null) {
+
+        }
     }
 }

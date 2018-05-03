@@ -5,6 +5,7 @@ import client.Client;
 import client.character.Char;
 import client.character.CharacterStat;
 import client.character.FuncKeyMap;
+import client.character.items.BodyPart;
 import client.character.items.Equip;
 import client.character.skills.CharacterTemporaryStat;
 import connection.InPacket;
@@ -204,6 +205,10 @@ public class LoginHandler {
                 chr.addItemToInventory(EQUIPPED, equip, true);
             }
         }
+        Equip codex = ItemData.getEquipDeepCopyFromID(1172000);
+        codex.setInvType(EQUIPPED);
+        codex.setBagIndex(BodyPart.BOOK.getVal());
+        chr.addItemToInventory(EQUIPPED, codex, true);
         if(curSelectedRace == 15) { // Zero hack for adding 2nd weapon (removing it in hairequips for zero look)
             Equip equip = ItemData.getEquipDeepCopyFromID(1562000);
             equip.setBagIndex(ItemConstants.getBodyPartFromItem(

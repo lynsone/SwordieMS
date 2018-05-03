@@ -2,6 +2,7 @@ package client.character.commands;
 
 import client.Client;
 import client.character.Char;
+import client.character.items.BodyPart;
 import client.character.items.Equip;
 import client.character.items.Item;
 import client.character.skills.*;
@@ -11,7 +12,9 @@ import client.jobs.nova.Kaiser;
 import client.life.Life;
 import client.life.Mob;
 import client.life.Npc;
+import client.life.Summon;
 import connection.OutPacket;
+import constants.ItemConstants;
 import constants.JobConstants.JobEnum;
 import enums.*;
 import handling.OutHeader;
@@ -27,8 +30,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
-import static client.character.skills.CharacterTemporaryStat.Morph;
-import static client.character.skills.CharacterTemporaryStat.NotDamaged;
+import static client.character.items.BodyPart.WEAPON;
+import static client.character.skills.CharacterTemporaryStat.*;
 import static enums.ChatMsgColour.*;
 import static enums.InventoryOperation.ADD;
 
@@ -41,6 +44,13 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
+            OutPacket outPacket = new OutPacket(OutHeader.MONSTER_BOOK_SET_CARD);
+
+            outPacket.encodeByte(true);
+            outPacket.encodeInt(0);
+            outPacket.encodeInt(2);
+
+            chr.write(outPacket);
         }
     }
 
@@ -630,7 +640,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             List<Life> lifes = chr.getField().getLifes();
             Life l = lifes.get(lifes.size() - 1);
-            if (l == null || !(l instanceof Mob)) {
+            if (!(l instanceof Mob)) {
                 return;
             }
             Mob mob = (Mob) l;
@@ -1060,6 +1070,32 @@ public class AdminCommands {
                 chr.dispose();
             }
             chr.chatMessage(GAME_NOTICE, "Please change channel, as this Command is still shit right now. ");
+        }
+    }
+
+    public static class MobInfo extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            Rect rect = new Rect(
+                    chr.getPosition().deepCopy().getX() - 100,
+                    chr.getPosition().deepCopy().getY() - 100,
+                    chr.getPosition().deepCopy().getX() + 100,
+                    chr.getPosition().deepCopy().getY() + 100
+            );
+            Mob mob = chr.getField().getMobs().stream().filter(m -> rect.hasPositionInside(m.getPosition())).findFirst().orElse(null);
+            if (mob != null) {
+                chr.chatMessage(GM_BLUE_CHAT, String.format("Mob ID: %s | Template ID: %s | HP: %s/%s | MP: %s/%s",
+                        NumberFormat.getNumberInstance(Locale.US).format(mob.getObjectId()),
+                        NumberFormat.getNumberInstance(Locale.US).format(mob.getTemplateId()),
+                        NumberFormat.getNumberInstance(Locale.US).format(mob.getHp()),
+                        NumberFormat.getNumberInstance(Locale.US).format(mob.getMaxHp()),
+                        NumberFormat.getNumberInstance(Locale.US).format(mob.getMp()),
+                        NumberFormat.getNumberInstance(Locale.US).format(mob.getMaxMp())
+                        )
+                );
+            } else {
+                chr.chatMessage(GM_BLUE_CHAT, "Could not find mob.");
+            }
         }
     }
 }

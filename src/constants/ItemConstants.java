@@ -25,6 +25,7 @@ public class ItemConstants {
     public static final int SOUL_ITEM_BASE_ID = 2591000;
     public static final int MAX_SOUL_CAPACITY = 1000;
     public static final int MOB_DEATH_SOUL_MP_COUNT = 150;
+    public static final int MOB_CARD_BASE_ID = 2380000;
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     public static final int THIRD_LINE_CHANCE = 50;
     public static int NEBILITE_BASE_ID = 3060000;
@@ -815,5 +816,9 @@ public class ItemConstants {
                 return 80001340; // Advance of Magnus
         }
         return 0;
+    }
+
+    public static boolean isMobCard(int itemID) {
+        return itemID / 10000 == 238;
     }
 }

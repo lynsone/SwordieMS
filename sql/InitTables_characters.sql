@@ -41,6 +41,8 @@ DROP TABLE IF EXISTS guildrequestors;
 DROP TABLE IF EXISTS guildskills;
 DROP TABLE IF EXISTS guildskill;
 DROP TABLE IF EXISTS guilds;
+DROP TABLE IF EXISTS monsterBookCards;
+DROP TABLE IF EXISTS monsterBookInfos;
 DROP TABLE IF EXISTS filetimes;
 DROP TABLE IF EXISTS trunks;
 
@@ -228,6 +230,21 @@ CREATE TABLE sockets (
     socketID int,
     PRIMARY KEY (id),
     FOREIGN KEY (equipID) REFERENCES equips(itemID) on delete cascade
+);
+
+CREATE TABLE monsterBookInfos (
+	id int not null auto_increment,
+    setID int,
+    coverID int,
+    primary key (id)
+);
+
+CREATE TABLE monsterBookCards (
+	id bigint not null auto_increment,
+    bookID int,
+    cardID int,
+    primary key (id),
+    foreign key (bookID) references monsterBookInfos(id)
 );
 
 CREATE TABLE avatarLook (
@@ -458,17 +475,19 @@ CREATE TABLE characters (
     fieldID int,
     questManager bigint,
     guild int,
+    monsterBook int,
 	PRIMARY KEY (id),
-    FOREIGN KEY (avatarData) REFERENCES avatarData(id) ON DELETE CASCADE,
-    FOREIGN KEY (equippedInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (equipInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (consumeInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (etcInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (installInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (cashInventory) REFERENCES inventories(id) ON DELETE CASCADE,
-    FOREIGN KEY (funcKeyMap_id) REFERENCES funckeymap(id) ON DELETE CASCADE,
-    FOREIGN KEY (questManager) REFERENCES questmanagers(id) ON DELETE CASCADE,
-    FOREIGN KEY (guild) REFERENCES guilds(id)
+    FOREIGN KEY (avatarData) REFERENCES avatarData(id),
+    FOREIGN KEY (equippedInventory) REFERENCES inventories(id),
+    FOREIGN KEY (equipInventory) REFERENCES inventories(id),
+    FOREIGN KEY (consumeInventory) REFERENCES inventories(id),
+    FOREIGN KEY (etcInventory) REFERENCES inventories(id),
+    FOREIGN KEY (installInventory) REFERENCES inventories(id),
+    FOREIGN KEY (cashInventory) REFERENCES inventories(id),
+    FOREIGN KEY (funcKeyMap_id) REFERENCES funckeymap(id),
+    FOREIGN KEY (questManager) REFERENCES questmanagers(id),
+    FOREIGN KEY (guild) REFERENCES guilds(id),
+    FOREIGN KEY (monsterBook) references monsterBookInfos(id)
 );
 
 CREATE TABLE GuildSkill (

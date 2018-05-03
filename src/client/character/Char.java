@@ -23,6 +23,7 @@ import client.character.quest.Quest;
 import client.character.quest.QuestManager;
 import client.party.Party;
 import client.shop.NpcShopDlg;
+import connection.InPacket;
 import connection.OutPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
@@ -30,6 +31,7 @@ import constants.JobConstants;
 import constants.SkillConstants;
 import enums.*;
 import handling.handlers.ChatHandler;
+import handling.handlers.WorldHandler;
 import loaders.*;
 import net.db.DatabaseManager;
 import packet.*;
@@ -118,6 +120,11 @@ public class Char {
     @JoinColumn(name = "guild")
     @OneToOne(cascade = CascadeType.ALL)
     private Guild guild;
+
+    @JoinColumn(name = "monsterBook")
+    @OneToOne(cascade = CascadeType.ALL)
+    private MonsterBookInfo monsterBookInfo;
+
     @Transient
     private Ranking ranking;
     @Transient
@@ -313,6 +320,7 @@ public class Char {
         skills = new ArrayList<>();
         temporaryStatManager = new TemporaryStatManager(this);
         friends = new ArrayList<>();
+        monsterBookInfo = new MonsterBookInfo();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -881,17 +889,17 @@ public class Char {
             }
         }
         if (mask.isInMask(DBChar.MonsterBookCover)) {
-            outPacket.encodeInt(0); // nMonsterBookCoverID?
+            outPacket.encodeInt(getMonsterBookInfo().getCoverID());
         }
         if (mask.isInMask(DBChar.MonsterBookCard)) {
             boolean isCompleted = false;
             outPacket.encodeByte(isCompleted);
             if (!isCompleted) {
-                short size = 1;
+                short size = (short) getMonsterBookInfo().getCards().size();
                 outPacket.encodeShort(size);
-                for (int i = 0; i < size; i++) {
-                    outPacket.encodeShort(1);
-                    outPacket.encodeByte(1);
+                for (int card : getMonsterBookInfo().getCards()) {
+                    outPacket.encodeShort(card);
+                    outPacket.encodeByte(true); // bEnabled?
                 }
             } else {
                 outPacket.encodeShort(0); // card list size
@@ -902,7 +910,7 @@ public class Char {
                 outPacket.encodeShort(encSize);
                 outPacket.encodeArr(new byte[encSize]);
             }
-            outPacket.encodeInt(-1); // monsterbook set
+            outPacket.encodeInt(getMonsterBookInfo().getSetID()); // monsterbook set
         }
         if (mask.isInMask(DBChar.QuestCompleteOld)) {
             short size = 0;
@@ -2072,7 +2080,13 @@ public class Char {
             return true;
         } else {
             Item item = drop.getItem();
-            if(getInventoryByType(item.getInvType()).canPickUp(item)) {
+            ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
+            boolean isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
+            if (isConsume) {
+                consumeItemOnPickup(item);
+                dispose();
+                return true;
+            } else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
                 addItemToInventory(item);
                 write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
                 return true;
@@ -2080,6 +2094,19 @@ public class Char {
                 write(WvsContext.dropPickupMessage(0, (byte) -1, (short) 0, (short) 0, (short) 0));
                 return false;
             }
+        }
+    }
+
+    private void consumeItemOnPickup(Item item) {
+        int itemID = item.getItemId();
+        if (ItemConstants.isMobCard(itemID)) {
+            MonsterBookInfo mbi = getMonsterBookInfo();
+            int id = 0;
+            if(!mbi.hasCard(itemID)) {
+                mbi.addCard(itemID);
+                id = itemID;
+            }
+            write(WvsContext.monsterBookSetCard(id));
         }
     }
 
@@ -2783,5 +2810,13 @@ public class Char {
             tsm.putCharacterStatValue(SoulMP, o);
             tsm.sendSetStatPacket();
         }
+    }
+
+    public MonsterBookInfo getMonsterBookInfo() {
+        return monsterBookInfo;
+    }
+
+    public void setMonsterBookInfo(MonsterBookInfo monsterBookInfo) {
+        this.monsterBookInfo = monsterBookInfo;
     }
 }

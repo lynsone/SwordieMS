@@ -228,6 +228,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_CHANGE_SLOT_POSITION_REQUEST:
                     WorldHandler.handleUserChangeSlotPositionRequest(c, inPacket);
                     break;
+                case MONSTER_BOOK_MOB_INFO:
+                    WorldHandler.handleMonsterBookMobInfo(chr, inPacket);
+                    break;
                 case USER_CONSUME_CASH_ITEM_USE_REQUEST:
                     WorldHandler.handleUserConsumeCashItemUseRequest(c, inPacket);
                     break;

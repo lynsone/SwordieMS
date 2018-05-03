@@ -71,6 +71,7 @@ public class DatabaseManager {
                 DamageSkinSaveData.class,
                 Trunk.class,
                 PetItem.class,
+                MonsterBookInfo.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

@@ -739,4 +739,17 @@ public class WvsContext {
         }
         return outPacket;
     }
+
+    public static OutPacket monsterBookSetCard(int id) {
+//        OutPacket outPacket = new OutPacket(OutHeader.MONSTER_LIFE_INVITE_ITEM_RESULT);
+        OutPacket outPacket = new OutPacket(OutHeader.MONSTER_BOOK_SET_CARD);
+
+        outPacket.encodeByte(id > 0); // false -> already added msg
+        if (id > 0) {
+            outPacket.encodeInt(id);
+            outPacket.encodeInt(1); // card count, but we're just going to stuck with 1.
+        }
+
+        return outPacket;
+    }
 }

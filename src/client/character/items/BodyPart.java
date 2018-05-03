@@ -44,6 +44,7 @@ public enum BodyPart {
     EXT_4(35),
     EXT_5(36),
     EXT_6(37),
+    BOOK(55),
     STICKER(100),
     BP_END(100),
     CBP_BASE(101), // CASH
