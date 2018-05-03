@@ -37,6 +37,7 @@ public class WindArcher extends Job {
     public static final int ELEMENTAL_SLASH = 10001244;
     public static final int NOBLE_MIND = 10000202;
     public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_SHIFT2 = 10000252;
     public static final int ELEMENTAL_HARMONY_DEX = 10000247;
 
     public static final int STORM_ELEMENTAL = 13001022; //Buff
@@ -67,6 +68,7 @@ public class WindArcher extends Job {
             ELEMENTAL_SLASH,
             NOBLE_MIND,
             ELEMENTAL_SHIFT,
+            ELEMENTAL_SHIFT2
     };
 
     private int[] buffs = new int[] {
