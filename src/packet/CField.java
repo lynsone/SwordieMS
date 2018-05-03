@@ -735,4 +735,12 @@ public class CField {
 
         return outPacket;
     }
+
+    public static OutPacket socketCreateResult(boolean success) {
+        OutPacket outPacket = new OutPacket(OutHeader.SOCKET_CREATE_RESULT);
+
+        outPacket.encodeByte(success ? 2 : 3);
+
+        return outPacket;
+    }
 }

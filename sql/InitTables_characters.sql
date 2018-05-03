@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS nonCombatStatDayLimit;
 DROP TABLE IF EXISTS systemtimes;
 DROP TABLE IF EXISTS characterCards;
 DROP TABLE IF EXISTS avatarLook;
+DROP TABLE IF EXISTS sockets;
 DROP TABLE IF EXISTS options;
 DROP TABLE IF EXISTS equips;
 DROP TABLE IF EXISTS petitems;
@@ -211,12 +212,22 @@ CREATE TABLE equips (
     FOREIGN KEY (itemId) REFERENCES items(id) on delete cascade,
     FOREIGN KEY (equippedDate) REFERENCES filetimes(id)
 );
+
 CREATE TABLE options (
 	id int NOT NULL AUTO_INCREMENT,
-    equipId bigint,
-    optionId int,
+    equipID bigint,
+    optionID int,
     PRIMARY KEY (id),
-    FOREIGN KEY (equipId) REFERENCES equips(itemId) on delete cascade
+    FOREIGN KEY (equipID) REFERENCES equips(itemID) on delete cascade
+);
+
+CREATE TABLE sockets (
+	id bigint NOT NULL AUTO_INCREMENT,
+    equipID bigint,
+    ord int,
+    socketID int,
+    PRIMARY KEY (id),
+    FOREIGN KEY (equipID) REFERENCES equips(itemID) on delete cascade
 );
 
 CREATE TABLE avatarLook (

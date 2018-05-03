@@ -1,5 +1,6 @@
 package client.character.items;
 
+import client.character.Char;
 import connection.OutPacket;
 import constants.ItemConstants;
 import enums.EquipBaseStat;
@@ -8,12 +9,15 @@ import enums.ScrollStat;
 import jdk.nashorn.internal.runtime.ScriptObject;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import packet.WvsContext;
 import server.Server;
 import util.FileTime;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+
+import static enums.InventoryOperation.ADD;
 
 /**
  * GW_ItemSlotBase
@@ -229,6 +233,15 @@ public class Item implements Serializable {
     public String toString() {
         return "Id: " + getId() + ", ItemId: " + getItemId() + ", Qty: " + getQuantity() + ", InvType: " + getInvType()
                 + ", BagIndex: " + getBagIndex();
+    }
+
+    /**
+     * Sends a packet to the given Char to show that this Item has updated.
+     * @param chr The Char to give the update to
+     */
+    public void updateToChar(Char chr) {
+        chr.write(WvsContext.inventoryOperation(true, false, ADD,
+                (short) getBagIndex(), (short) 0, 0, this));
     }
 
 }

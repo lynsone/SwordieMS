@@ -348,6 +348,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_GROWTH_HELPER_REQUEST:
                     WorldHandler.handleUserGrowthRequestHelper(c, inPacket);
                     break;
+                case SOCKET_CREATE_REQUEST:
+                    WorldHandler.handleSocketCreateRequest(c, inPacket);
+                    break;
+                case NEBULITE_INSERT_REQUEST:
+                    WorldHandler.handleNebuliteInsertRequest(c, inPacket);
+                    break;
                 case DROP_PICK_UP_REQUEST:
                     WorldHandler.handleDropPickUpRequest(c, inPacket);
                     break;

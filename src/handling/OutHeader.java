@@ -1061,6 +1061,8 @@ public enum OutHeader {
     SERVER_ON_CALC_REQUEST_RESULT(1475),
     AGGRO_MONITORING_INFO(1476),
     SKILL_DAMAGE_LOG(1477),
+
+    SOCKET_CREATE_RESULT(1481),
     ;
 
     private short value;

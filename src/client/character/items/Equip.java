@@ -75,8 +75,8 @@ public class Equip extends Item {
     private short rJob;
     private short rPop;
     @ElementCollection
-    @CollectionTable(name = "options", joinColumns = @JoinColumn(name = "equipId"))
-    @Column(name = "optionId")
+    @CollectionTable(name = "options", joinColumns = @JoinColumn(name = "equipID"))
+    @Column(name = "optionID")
     private List<Integer> options = new ArrayList<>(); // base + add pot + anvil
     private int specialGrade;
     private boolean fixedPotential;
@@ -96,6 +96,11 @@ public class Equip extends Item {
     private int fixedGrade;
     @Transient
     private Map<EnchantStat, Integer> enchantStats = new HashMap<>();
+    @ElementCollection
+    @CollectionTable(name = "sockets", joinColumns = @JoinColumn(name = "equipID"))
+    @Column(name = "socketID")
+    @OrderColumn(name = "ord")
+    private short[] sockets = new short[3];
 
     public Equip() {
         super();
@@ -265,6 +270,7 @@ public class Equip extends Item {
         ret.invType = invType;
         ret.type = type;
         ret.isCash = isCash;
+        System.arraycopy(sockets, 0, ret.sockets, 0, sockets.length);
         return ret;
     }
 
@@ -855,6 +861,7 @@ public class Equip extends Item {
 //        getEquippedDate().encode(outPacket);
 //        outPacket.encodeInt(getPrevBonusExpRate());
         // GW_ItemSlotEquipBase
+        setItemState((short) 0x100);
         int mask = getStatMask(0);
         outPacket.encodeInt(mask);
         if(hasStat(EquipBaseStat.ruc)) {
@@ -973,9 +980,21 @@ public class Equip extends Item {
         for (int i = 0; i < 7; i++) {
             outPacket.encodeShort(getOptions().get(i)); // 7x, last is fusion anvil
         }
-        outPacket.encodeShort(0); // socket state
+        short socketMask = 0; // 0b0nnn_kkkb: from right to left: boolean active, k empty, n has socket
+        for (int i = 0; i < getSockets().length; i++) {
+            int socket = getSockets()[i];
+            // Self made numbers for socket: 3 == empty (since 0 is already taken for STR+1, similar for 1/2)
+            if (socket != 0) {
+                socketMask |= 1;
+                socketMask |= 1 << i + 1;
+                if (socket != ItemConstants.EMPTY_SOCKET_ID) {
+                    socketMask |= 1 << (i + 4); // 3 sockets, look at the comment at socketMask.
+                }
+            }
+        }
+        outPacket.encodeShort(socketMask); // socket state, 0 = nothing, 0xFF = see loop
         for(int i = 0; i < 3; i++) {
-            outPacket.encodeShort(-1); // sockets 0 through 2 (-1 = none, 0 = empty, >0 = filled
+            outPacket.encodeShort(getSockets()[i]); // sockets 0 through 2 (-1 = none, 0 = empty, >0 = filled
         }
         outPacket.encodeLong(getId()); // ?
         outPacket.encodeInt(-1); // ?
@@ -1351,5 +1370,13 @@ public class Equip extends Item {
      */
     public int getEnchantStat(EnchantStat es) {
         return getEnchantStats().getOrDefault(es, 0);
+    }
+
+    public short[] getSockets() {
+        return sockets;
+    }
+
+    public void setSockets(short[] sockets) {
+        this.sockets = sockets;
     }
 }

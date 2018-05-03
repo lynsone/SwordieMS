@@ -627,6 +627,10 @@ public enum InHeader {
     FUNTIFOOTHOLD_MAN(733),
     E_N_D__U_S_E_R(734),
 
+    // Where?
+    NEBULITE_INSERT_REQUEST(740),
+    SOCKET_CREATE_REQUEST(741),
+
     B_E_G_I_N__F_I_E_L_D(735),
     B_E_G_I_N__L_I_F_E_P_O_O_L(736),
     B_E_G_I_N__M_O_B(824),
@@ -964,6 +968,7 @@ public enum InHeader {
     NO(1115),
 
     ;
+
     /**
      * Created on 2/18/2017.
      */

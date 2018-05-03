@@ -21,8 +21,11 @@ import static enums.InvType.EQUIP;
  * Created on 12/12/2017.
  */
 public class ItemConstants {
+    public static final int EMPTY_SOCKET_ID = 3;
+    public static final short INACTIVE_SOCKET = 0;
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     public static final int THIRD_LINE_CHANCE = 50;
+    public static int NEBILITE_BASE_ID = 3060000;
 
     public static int getGenderFromId(int nItemID) {
         int result; // eax

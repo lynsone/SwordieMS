@@ -3353,4 +3353,51 @@ public class WorldHandler {
             aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
         }
     }
+
+    public static void handleSocketCreateRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        short uPos = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
+        short ePos = inPacket.decodeShort();
+        Item item = chr.getConsumeInventory().getItemBySlot(uPos);
+        Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
+        if(equip == null || item == null || item.getItemId() != itemID) {
+            log.error("Unknown equip or mismatching use items.");
+            return;
+        }
+        boolean success = true;
+        if(equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET) {
+            equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+        } else {
+            success = false;
+        }
+        chr.consumeItem(item);
+        c.write(CField.socketCreateResult(success));
+        equip.updateToChar(chr);
+    }
+
+    public static void handleNebuliteInsertRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        inPacket.decodeInt(); // tick
+        short nebPos = inPacket.decodeShort();
+        int nebID = inPacket.decodeInt();
+        Item item = chr.getInstallInventory().getItemBySlot(nebPos);
+        short ePos = inPacket.decodeShort();
+        Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
+        if(item == null || equip == null || item.getItemId() != nebID) {
+            log.error("Nebulite or equip was not found when inserting.");
+            chr.dispose();
+            return;
+        }
+        if(equip.getSockets()[0] != ItemConstants.EMPTY_SOCKET_ID) {
+            log.error("Tried to socket an item without an empty socket.");
+            chr.chatMessage("You can only socket an item that has an empty socket slot.");
+            chr.dispose();
+            return;
+        }
+        chr.consumeItem(item);
+        equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
+        equip.updateToChar(chr);
+    }
 }
