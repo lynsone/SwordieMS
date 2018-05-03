@@ -408,6 +408,9 @@ public class Mercedes extends Job {
 
     private int getFinalAttackProc() {
         Skill skill = getFinalAtkSkill(chr);
+        if(skill == null) {
+            return 0;
+        }
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
         int proc = si.getValue(prop, slv);

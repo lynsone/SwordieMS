@@ -43,6 +43,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static client.character.items.BodyPart.*;
+import static client.character.skills.CharacterTemporaryStat.FullSoulMP;
 import static client.character.skills.CharacterTemporaryStat.SoulMP;
 import static enums.ChatMsgColour.GAME_MESSAGE;
 import static enums.FieldInstanceType.*;
@@ -1656,6 +1657,7 @@ public class Char {
         getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
         if(getTemporaryStatManager().hasStat(SoulMP)) {
             getTemporaryStatManager().removeStat(SoulMP, false);
+            getTemporaryStatManager().removeStat(FullSoulMP, false);
             getTemporaryStatManager().sendResetStatPacket();
         }
     }

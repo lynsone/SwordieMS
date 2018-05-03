@@ -1279,7 +1279,7 @@ public class WorldHandler {
             if (SkillConstants.isKeydownSkillRectMoveXY(skillID)) {
                 ai.keyDownRectMoveXY = inPacket.decodePosition();
             }
-            if (skillID == 23121002 || skillID == 80001914) {
+            if (/*skillID == 23121002 ||*/ skillID == 80001914) { // first skill is Spikes Royale, not needed?
                 ai.fh = inPacket.decodeByte();
             }
         }
@@ -3557,6 +3557,7 @@ public class WorldHandler {
         }
         equip.setSoulOption(option);
         equip.updateToChar(chr);
+        chr.consumeItem(item);
         chr.getField().broadcastPacket(User.showItemSkillOptionUpgradeEffect(chr.getId(), true, false));
     }
 

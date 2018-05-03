@@ -115,7 +115,7 @@ public class InPacket extends Packet {
 
     @Override
     public String toString() {
-        return Util.readableByteArray(Arrays.copyOfRange(getData(), 2, getData().length)); // Substring after copy of range xd
+        return Util.readableByteArray(Arrays.copyOfRange(getData(), getData().length - getUnreadAmount(), getData().length)); // Substring after copy of range xd
     }
 
 
