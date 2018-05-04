@@ -343,9 +343,8 @@ public class BeastTamer extends Job {
         switch (attackInfo.skillId) {
             case MAJESTIC_TRUMPET:
                 SkillInfo rca = SkillData.getSkillInfoById(skillID);
-                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
                 aa.setSkillID(skillID);
                 int x = chr.getPosition().getX();
                 int y = chr.getPosition().getY() + 41;
@@ -357,9 +356,8 @@ public class BeastTamer extends Job {
             case THUNDER_DASH:
             case ADV_THUNDER_DASH:
                 SkillInfo tdi = SkillData.getSkillInfoById(THUNDER_TRAIL);
-                AffectedArea aa2 = AffectedArea.getAffectedArea(attackInfo);
+                AffectedArea aa2 = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa2.setMobOrigin((byte) 0);
-                aa2.setCharID(chr.getId());
                 aa2.setSkillID(THUNDER_TRAIL);
                 //int x = chr.getPosition().getX();
                 //int y = chr.getPosition().getY() + 41;
@@ -371,9 +369,8 @@ public class BeastTamer extends Job {
                 break;
             case PURR_ZONE: //TODO
                 SkillInfo pz = SkillData.getSkillInfoById(PURR_ZONE);
-                AffectedArea aa3 = AffectedArea.getAffectedArea(attackInfo);
+                AffectedArea aa3 = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa3.setMobOrigin((byte) 0);
-                aa3.setCharID(chr.getId());
                 aa3.setSkillID(skillID);
                 aa3.setPosition(chr.getPosition());
                 aa3.setRect(aa3.getPosition().getRectAround(pz.getRects().get(0)));
@@ -458,7 +455,7 @@ public class BeastTamer extends Job {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
             MobTemporaryStat mts = mob.getTemporaryStat();
             if (Util.succeedProp(si.getValue(prop, slv))) {
-                mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                mts.createAndAddBurnedInfo(chr, skill, 1);
             }
         }
     }

@@ -550,6 +550,7 @@ public class WorldHandler {
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
+        chr.chatMessage("Total damage: " + c.getChr().getDamageCalc().calcPDamageForPvM(attackInfo.skillId, attackInfo.slv));
         chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
         log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
@@ -2181,6 +2182,9 @@ public class WorldHandler {
             chr.consumeItem(item);
         } else {
             switch(itemID) {
+                case 2050004: // All cure
+                    tsm.removeAllDebuffs();
+                    break;
                 default:
                     chr.chatMessage(YELLOW, String.format("Unhandled stat change item %d", itemID));
             }
@@ -2657,10 +2661,9 @@ public class WorldHandler {
         Char chr = c.getChr();
         SkillInfo fci = SkillData.getSkillInfoById(skillID);
         byte slv = (byte) chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID)).getCurrentLevel();
-        AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+        AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
         aa.setObjectId(objID);
         aa.setMobOrigin((byte) 0);
-        aa.setCharID(chr.getId());
         aa.setPosition(position);
         aa.setSkillID(skillID);
         aa.setSlv(slv);

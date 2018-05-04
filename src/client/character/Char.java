@@ -259,6 +259,8 @@ public class Char {
     private Account account;
     @Transient
     private Client chatClient;
+    @Transient
+    private DamageCalc damageCalc;
 
     public Char() {
         this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -2818,5 +2820,31 @@ public class Char {
 
     public void setMonsterBookInfo(MonsterBookInfo monsterBookInfo) {
         this.monsterBookInfo = monsterBookInfo;
+    }
+
+    public void setDamageCalc(DamageCalc damageCalc) {
+        this.damageCalc = damageCalc;
+    }
+
+    public DamageCalc getDamageCalc() {
+        return damageCalc;
+    }
+
+    public int getTotalStat(BaseStat mainStat) {
+        // TODO
+        return mainStat.toStat() == null ? 0 : getStat(mainStat.toStat());
+    }
+
+    public Map<BaseStat, Integer> getBasicStats() {
+        Map<BaseStat, Integer> stats = new HashMap<>();
+        for(BaseStat bs : BaseStat.values()) {
+            stats.put(bs, getTotalStat(bs));
+        }
+        for(Item item : getEquippedInventory().getItems()) {
+            Equip equip = (Equip) item;
+            stats.put(BaseStat.pad, stats.getOrDefault(BaseStat.pad, 0) + equip.getiPad());
+            stats.put(BaseStat.mad, stats.getOrDefault(BaseStat.mad, 0) + equip.getiMad());
+        }
+        return stats;
     }
 }

@@ -124,9 +124,8 @@ public class Blaster extends Job {
         switch (attackInfo.skillId) {
             case HAMMER_SMASH_CHARGE:
                 SkillInfo hmc = SkillData.getSkillInfoById(HAMMER_SMASH);
-                AffectedArea hmci = AffectedArea.getPassiveAA(HAMMER_SMASH, (byte) slv);
+                AffectedArea hmci = AffectedArea.getPassiveAA(chr, HAMMER_SMASH, (byte) slv);
                 hmci.setMobOrigin((byte) 0);
-                hmci.setCharID(chr.getId());
                 hmci.setPosition(chr.getPosition());
                 hmci.setRect(hmci.getPosition().getRectAround(hmc.getRects().get(0)));
                 hmci.setDelay((short) 5);

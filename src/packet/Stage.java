@@ -1,5 +1,6 @@
 package packet;
 
+import client.character.DamageCalc;
 import client.field.Field;
 import client.character.Char;
 import client.field.FieldCustom;
@@ -54,6 +55,7 @@ public class Stage {
             outPacket.encodeInt(s2);
             outPacket.encodeInt(s3);
 
+            chr.setDamageCalc(new DamageCalc(chr, s1, s2, s3));
             chr.encode(outPacket, DBChar.All); // <<<<------------------------------------
             // unk sub (not in kmst)
             // logout event (mushy)

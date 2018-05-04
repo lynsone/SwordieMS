@@ -322,9 +322,8 @@ public class Mihile extends Job {
                 }
                 if(chr.hasSkill(RADIANT_CROSS_AA)) {
                     SkillInfo rca = SkillData.getSkillInfoById(RADIANT_CROSS_AA); //TODO stay forever, need to dissapear after 7s
-                    AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setSkillID(RADIANT_CROSS_AA);
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));

@@ -259,9 +259,8 @@ public class Mechanic extends Job {
         Option o3 = new Option();
         switch (skillID) {
             case DISTORTION_BOMB:
-                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
                 int x = attackInfo.forcedX;
                 int y = attackInfo.forcedY;
                 aa.setPosition(new Position(x, y));

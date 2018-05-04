@@ -516,7 +516,7 @@ public class Warrior extends Job {
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptions(MobStat.AddDamParty, o1);
                     if(Util.succeedProp(si.getValue(prop, slv))) {
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
                 break;
@@ -538,7 +538,7 @@ public class Warrior extends Job {
                     if(Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
                 break;
@@ -566,7 +566,7 @@ public class Warrior extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
                 break;

@@ -338,7 +338,7 @@ public class Mercedes extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill, 1);
                 }
                 break;
         }

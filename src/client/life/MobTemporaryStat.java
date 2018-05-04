@@ -1,5 +1,6 @@
 package client.life;
 
+import client.character.Char;
 import client.character.skills.Option;
 import client.character.skills.Skill;
 import client.character.skills.SkillInfo;
@@ -516,7 +517,8 @@ public class MobTemporaryStat {
         getCurrentStatVals().forEach((ms, o) -> removeMobStat(ms, false));
     }
 
-    public void createAndAddBurnedInfo(int charId, Skill skill, int max) {
+    public void createAndAddBurnedInfo(Char chr, Skill skill, int max) {
+        int charId = chr.getId();
         BurnedInfo bu = getBurnedInfos().stream().
                 filter(b -> b.getSkillId() == skill.getId() && b.getCharacterId() == charId)
                 .findFirst().orElse(null);
@@ -525,7 +527,7 @@ public class MobTemporaryStat {
         BurnedInfo bi = new BurnedInfo();
         bi.setCharacterId(charId);
         bi.setSkillId(skill.getSkillId());
-        bi.setDamage(si.getValue(dot, slv));
+        bi.setDamage((int) chr.getDamageCalc().calcPDamageForPvM(skill.getSkillId(), (byte) skill.getCurrentLevel()));
         bi.setInterval(si.getValue(dotInterval, slv) * 1000);
         int time = si.getValue(dotTime, slv) * 1000;
         bi.setEnd((int) (System.currentTimeMillis() + time));

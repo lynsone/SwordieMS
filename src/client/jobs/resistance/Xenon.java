@@ -346,9 +346,8 @@ public class Xenon extends Job {
                     incrementSupply(si.getValue(x, slv));
                     break;
                 case TEMPORAL_POD:
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     aa.setDelay((short) 4);

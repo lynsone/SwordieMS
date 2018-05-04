@@ -245,9 +245,8 @@ public class Magician extends Job {
                 }
                 break;
             case POISON_MIST:
-                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
                 int x = attackInfo.forcedX;
                 int y = attackInfo.forcedY;
                 aa.setPosition(new Position(x, y));
@@ -283,9 +282,8 @@ public class Magician extends Job {
                         mts.addStatOptions(MobStat.Speed, o1);
                         fpBurnedInfo(mob, skill, slv); //Global Burned Info Handler to regulate Fervent Drain/Element Drain
                     }
-                    AffectedArea aa2 = AffectedArea.getAffectedArea(attackInfo);
+                    AffectedArea aa2 = AffectedArea.getAffectedArea(chr, attackInfo);
                     aa2.setMobOrigin((byte) 0);
-                    aa2.setCharID(chr.getId());
                     int x2 = mob.getX();
                     int y2 = mob.getY();
                     aa2.setPosition(new Position(x2, y2));
@@ -368,7 +366,7 @@ public class Magician extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr.getId(), megiddoSkill, 1); //TODO change to the FP global Burned Info Handler
+                    mts.createAndAddBurnedInfo(chr, megiddoSkill, 1); //TODO change to the FP global Burned Info Handler
                 }
                 break;
         }
@@ -462,9 +460,8 @@ public class Magician extends Job {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 if (Util.succeedProp(igniteInfo.getValue(prop, slv))) {
-                    AffectedArea aa = AffectedArea.getPassiveAA(IGNITE, (byte) 10);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, IGNITE, (byte) 10);
                     aa.setMobOrigin((byte) 1);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(mob.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(igniteInfo.getRects().get(0)));
                     aa.setDelay((short) 2);
@@ -482,9 +479,8 @@ public class Magician extends Job {
                 SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
                 Skill skill = chr.getSkill(CHILLING_STEP);
                 int slv = skill.getCurrentLevel();
-                AffectedArea aa = AffectedArea.getPassiveAA(CHILLING_STEP, (byte) slv);
+                AffectedArea aa = AffectedArea.getPassiveAA(chr, CHILLING_STEP, (byte) slv);
                 aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
                 int x = chr.isLeft() ? chr.getPosition().getX() - i : chr.getPosition().getX() + i;
                 int y = chr.getPosition().getY();
                 aa.setPosition(new Position(x, y));
@@ -551,9 +547,8 @@ public class Magician extends Job {
                     handleMegiddoFlame();
                     break;
                 case HOLY_FOUNTAIN:
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     aa.setDelay((short) 4);
@@ -996,10 +991,10 @@ public class Magician extends Job {
         byte edLv = (byte) skill.getCurrentLevel();
         int biDuration = SkillData.getSkillInfoById(attackSkill.getSkillId()).getValue(dotTime, attackSlv);
         MobTemporaryStat mts = mob.getTemporaryStat();
-        mts.createAndAddBurnedInfo(chr.getId(), attackSkill, attackSlv);
+        mts.createAndAddBurnedInfo(chr, attackSkill, attackSlv);
         setFerventDrainStack(getFerventDrainStack() + 1);
         updateElementDrain();
-        EventManager.addEvent(() -> eventSetFerventDrain(), biDuration, TimeUnit.SECONDS);
+        EventManager.addEvent(this::eventSetFerventDrain, biDuration, TimeUnit.SECONDS);
     }
 
     private void eventSetFerventDrain() {
