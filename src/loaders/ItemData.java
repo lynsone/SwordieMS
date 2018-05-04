@@ -480,6 +480,15 @@ public class ItemData {
             for (int i = 0; i < size; i++) {
                 itemInfo.addQuest(dataInputStream.readInt());
             }
+
+            size = dataInputStream.readShort();
+            for (int i = 0; i < size; i++) {
+                itemInfo.addSkill(dataInputStream.readInt());
+            }
+            itemInfo.setReqSkillLv(dataInputStream.readInt());
+            itemInfo.setMasterLv(dataInputStream.readInt());
+
+            itemInfo.setMoveTo(dataInputStream.readInt());
             getItems().put(itemInfo.getItemId(), itemInfo);
 
         } catch (IOException e) {
@@ -530,6 +539,15 @@ public class ItemData {
                 for (int i : ii.getQuestIDs()) {
                     dataOutputStream.writeInt(i);
                 }
+
+                dataOutputStream.writeShort(ii.getSkills().size());
+                for (int i : ii.getSkills()) {
+                    dataOutputStream.writeInt(i);
+                }
+                dataOutputStream.writeInt(ii.getReqSkillLv());
+                dataOutputStream.writeInt(ii.getMasterLv());
+
+                dataOutputStream.writeInt(ii.getMoveTo());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -870,9 +888,20 @@ public class ItemData {
                                 case "pquest":
                                 case "bonusEXPRate":
                                 case "notExtend":
+                                    break;
+
                                 case "skill":
+                                    for(Node masteryBookSkillIdNode : XMLApi.getAllChildren(info)) {
+                                        item.addSkill(Integer.parseInt((XMLApi.getNamedAttribute(masteryBookSkillIdNode, "value"))));
+                                    }
+                                    break;
                                 case "reqSkillLevel":
+                                    item.setReqSkillLv(Integer.parseInt(value));
+                                    break;
                                 case "masterLevel":
+                                    item.setMasterLv(Integer.parseInt(value));
+                                    break;
+
                                 case "stateChangeItem":
                                 case "direction":
                                 case "reqEquipLevelMax":
@@ -1230,6 +1259,9 @@ public class ItemData {
                                     break;
                                 case "npc":
                                     item.setScriptNPC(Integer.parseInt(value));
+                                    break;
+                                case "moveTo":
+                                    item.setMoveTo(Integer.parseInt(value));
                                     break;
                                 default:
                                     SpecStat ss = SpecStat.getSpecStatByName(name);

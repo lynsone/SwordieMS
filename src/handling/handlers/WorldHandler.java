@@ -604,49 +604,18 @@ public class WorldHandler {
         inPacket.decodeInt(); //tick
         short slot = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
+        ItemInfo ii = ItemData.getItemInfoByID(itemID);
         Field field = chr.getField();
         Field toField;
-        switch (itemID) {
-            // TODO use WZ ({itemID}/spec)
-            case 2030000: //Return to Nearest Town
-                toField = c.getChannelInstance().getField(field.getReturnMap());
-                break;
-            case 2030001: //Return to Lith Harbor
-                toField = c.getChannelInstance().getField(104000000);
-                break;
-            case 2030002: //Return to Ellinia
-                toField = c.getChannelInstance().getField(101000000);
-                break;
-            case 2030003: //Return to Perion
-                toField = c.getChannelInstance().getField(102000000);
-                break;
-            case 2030004: //Return to Henesys
-                toField = c.getChannelInstance().getField(100000000);
-                break;
-            case 2030005: //Return to Kerning City
-                toField = c.getChannelInstance().getField(103000000);
-                break;
-            case 2030006: //Return to Sleepy Wood
-                toField = c.getChannelInstance().getField(105000000);
-                break;
-            case 2030007: //Return to Dead Mine (Map = Ice Valley II)
-                toField = c.getChannelInstance().getField(211040200);
-                break;
-            case 2030019: //Return to Nautilus
-                toField = c.getChannelInstance().getField(120000000);
-                break;
-            case 2030020: //Return to New Leaf City
-                toField = c.getChannelInstance().getField(600000000);
-                break;
-            case 2030025: //Return to Elluel
-                toField = c.getChannelInstance().getField(101050000);
-                break;
-            default:
-                toField = c.getChannelInstance().getField(field.getReturnMap());
-                log.warn(String.format("Unhandled Return Scroll: %d in WorldHandler.java", itemID));
-                break;
+
+        if(itemID != 2030000) {
+            toField = c.getChannelInstance().getField(ii.getMoveTo());
+        } else {
+            toField = c.getChannelInstance().getField(field.getReturnMap());
         }
-        chr.warp(toField);
+        Portal portal = toField.getPortalByID(0);
+        chr.warp(toField, portal);
+        chr.consumeItem(itemID, 1);
     }
 
     public static void handleUserSkillUpRequest(Client c, InPacket inPacket) {
@@ -3137,9 +3106,6 @@ public class WorldHandler {
         if(JobConstants.isXenon(chr.getJob())) {
             skillID = Xenon.TRIANGULATION;
         }
-        if(JobConstants.isBlazeWizard(chr.getJob())) {
-            skillID = BlazeWizard.IGNITION;
-        }
         if(JobConstants.isDawnWarrior(chr.getJob())) {
             skillID = 11121013;
         }
@@ -3356,28 +3322,50 @@ public class WorldHandler {
     }
 
     public static void handleUserLearnItemUseRequest(Client c, InPacket inPacket) {
-        inPacket.decodeInt();
+        inPacket.decodeInt(); //tick
         short pos = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
         Char chr = c.getChr();
-        int skillCheck = ItemConstants.getSkillidByMasteryBook(itemID);
 
-        if(skillCheck == 0) {
-            chr.chatMessage(LESS_YELLOW, "Unhandled Mastery Book.");
+        ItemInfo ii = ItemData.getItemInfoByID(itemID);
+        int masterLevel = ii.getMasterLv();
+        int reqSkillLv = ii.getReqSkillLv();
+        int skillid = 0;
+        Map<ScrollStat, Integer> vals = ii.getScrollStats();
+        int chance = vals.getOrDefault(ScrollStat.success, 100);
+
+        for(int skill : ii.getSkills()) {
+            if(chr.hasSkill(skill)) {
+                skillid = skill;
+                break;
+            }
+        }
+        Skill skill = chr.getSkill(skillid);
+        if(skill == null) {
+            chr.chatMessage(GAME_NOTICE, "An error has occured. Mastery Book ID: "+ itemID +",  skill ID: "+ skillid +".");
+            chr.dispose();
+            return;
+        }
+        if (skillid == 0 || (skill.getMasterLevel() >= masterLevel) || skill.getCurrentLevel() < reqSkillLv) {
+            chr.chatMessage(GAME_MESSAGE, "You cannot use this Mastery Book.");
             chr.dispose();
             return;
         }
 
-        Skill skill = chr.getSkill(ItemConstants.getSkillidByMasteryBook(itemID));
-        if(skill.getMasterLevel() < ItemConstants.getMaxSkillLevelByMasteryBook(itemID)) {
-            skill.setMasterLevel(ItemConstants.getMaxSkillLevelByMasteryBook(itemID));
-            List<Skill> list = new ArrayList<>();
-            list.add(skill);
-            chr.addSkill(skill);
-            chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
-        } else {
-            chr.dispose();
-            return;
+        if(skill.getCurrentLevel() > reqSkillLv && skill.getMasterLevel() < masterLevel) {
+            chr.chatMessage(YELLOW, "Success Chance: "+chance+"%.");
+            if(Util.succeedProp(chance)) {
+                skill.setMasterLevel(masterLevel);
+                List<Skill> list = new ArrayList<>();
+                list.add(skill);
+                chr.addSkill(skill);
+                chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+                chr.chatMessage(GAME_NOTICE, "[Mastery Book] Item id: " + itemID + "  set Skill id: " + skillid + "'s Master Level to: " + masterLevel + ".");
+            }
+            else {
+                chr.chatMessage(GAME_NOTICE, "[Mastery Book] Item id: " + itemID + " was used, however it was unsuccessful.");
+            }
+            chr.consumeItem(itemID, 1);
         }
         chr.dispose();
     }

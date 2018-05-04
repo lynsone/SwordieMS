@@ -38,6 +38,10 @@ public class ItemInfo {
     private String script = "";
     private int scriptNPC;
     private int life;
+    private int masterLv;
+    private int reqSkillLv;
+    private Set<Integer> skills = new HashSet<>();
+    private int moveTo;
 
     public void setItemId(int itemId) {
         this.itemId = itemId;
@@ -245,5 +249,39 @@ public class ItemInfo {
 
     public int getLife() {
         return life;
+    }
+
+    public int getMasterLv() {
+        return masterLv;
+    }
+
+    public void setMasterLv(int masterLv) {
+        this.masterLv = masterLv;
+    }
+
+    public int getReqSkillLv() {
+        return reqSkillLv;
+    }
+
+    public void setReqSkillLv(int reqSkillLv) {
+        this.reqSkillLv = reqSkillLv;
+    }
+
+    public Set<Integer> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(Set<Integer> skills) {
+        this.skills = skills;
+    }
+
+    public void addSkill(int skill) {skills.add(skill); }
+
+    public int getMoveTo() {
+        return moveTo;
+    }
+
+    public void setMoveTo(int moveTo) {
+        this.moveTo = moveTo;
     }
 }

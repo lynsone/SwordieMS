@@ -756,27 +756,8 @@ public class ItemConstants {
         }
     }
 
-    public static int getSkillidByMasteryBook(int masteryBookID) {
-        switch (masteryBookID) {
-            case 2290866:   //Enrage 20
-                return 1121010;
-            default:
-                return 0;
-        }
-    }
-
-    public static int getMaxSkillLevelByMasteryBook(int masteryBookID) {
-        switch (masteryBookID) {
-            case 2290895:   //Execution 30
-                return 30;
-
-            case 2290866:   //Enrage 20
-            case 2290894:   //Execution 20
-                return 20;
-
-            default:
-                return 0;
-        }
+    public static boolean isMasteryBook(int itemId) {
+        return itemId / 10000 == 229;
     }
 
     public static boolean isPet(int itemId) {
