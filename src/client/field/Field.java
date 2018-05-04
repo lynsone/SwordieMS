@@ -12,6 +12,7 @@ import enums.DropLeaveType;
 import enums.LeaveType;
 import enums.ScriptType;
 import loaders.ItemData;
+import loaders.MobData;
 import loaders.SkillData;
 import org.apache.log4j.Logger;
 import packet.*;
@@ -438,6 +439,7 @@ public class Field {
         if (!getChars().contains(chr)) {
             getChars().add(chr);
             if(!isUserFirstEnter() && hasUserFirstEnterScript()) {
+                chr.chatMessage("First enter script!");
                 chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FIELD);
                 setUserFirstEnter(true);
             }
@@ -551,6 +553,20 @@ public class Field {
             }
         }
         return lifes;
+    }
+
+    public List<Char> getCharsInRect(Rect rect) {
+        List<Char> chars = new ArrayList<>();
+        for (Char chr : getChars()) {
+            Position position = chr.getPosition();
+            int x = position.getX();
+            int y = position.getY();
+            if (x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                chars.add(chr);
+            }
+        }
+        return chars;
     }
 
     public List<Mob> getMobsInRect(Rect rect) {
@@ -840,5 +856,18 @@ public class Field {
 
     public void setFieldScript(String fieldScript) {
         this.fieldScript = fieldScript;
+    }
+
+    public void spawnMob(int id, int x, int y, boolean respawnable) {
+        Mob mob = MobData.getMobDeepCopyById(id);
+        Position pos = new Position(x, y);
+        mob.setPosition(pos.deepCopy());
+        mob.setPrevPos(pos.deepCopy());
+        mob.setPosition(pos.deepCopy());
+        mob.setNotRespawnable(!respawnable);
+        if (mob.getField() == null) {
+            mob.setField(this);
+        }
+        spawnLife(mob, null);
     }
 }

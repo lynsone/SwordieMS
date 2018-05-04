@@ -1084,13 +1084,14 @@ public class AdminCommands {
             );
             Mob mob = chr.getField().getMobs().stream().filter(m -> rect.hasPositionInside(m.getPosition())).findFirst().orElse(null);
             if (mob != null) {
-                chr.chatMessage(GM_BLUE_CHAT, String.format("Mob ID: %s | Template ID: %s | HP: %s/%s | MP: %s/%s",
+                chr.chatMessage(GM_BLUE_CHAT, String.format("Mob ID: %s | Template ID: %s | HP: %s/%s | MP: %s/%s | Left: %s",
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getObjectId()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getTemplateId()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getHp()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getMaxHp()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getMp()),
-                        NumberFormat.getNumberInstance(Locale.US).format(mob.getMaxMp())
+                        NumberFormat.getNumberInstance(Locale.US).format(mob.getMaxMp()),
+                        mob.isLeft()
                         )
                 );
             } else {

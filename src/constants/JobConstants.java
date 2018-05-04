@@ -133,6 +133,61 @@ public class JobConstants {
         return id / 100 == 51;
     }
 
+    public static double getDamageConstant(short job) {
+        // get_job_damage_const 
+        if ( job > 222 )
+        {
+            if ( job > 1200 )
+            {
+                if ( job >= 1210 && job <= 1212 )
+                    return 0.2;
+            }
+            else if ( job == 1200 || job >= 230 && job <= 232 )
+            {
+                return 0.2;
+            }
+            return 0.0;
+        }
+        if ( job < 220 )
+        {
+            switch ( job )
+            {
+                case 110:
+                case 111:
+                case 112:
+                    return 0.1;
+                case 200:
+                case 210:
+                case 211:
+                case 212:
+                    return 0.2;
+                default:
+                    return 0.0;
+            }
+        }
+        return 0.2;
+    }
+
+    public static int getJobCategory(short job) {
+        int res = 0;
+        switch (job / 100) {
+            case 27:
+            case 140:
+            case 142:
+                res = 2;
+                break;
+            case 36:
+                res = 4;
+                break;
+            case 37:
+                res = 1;
+                break;
+            default:
+                res = job % 1000 / 100;
+        }
+        return res;
+    }
+
     public enum JobEnum {
         BEGINNER(0),
         WARRIOR(100),

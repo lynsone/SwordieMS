@@ -1,6 +1,9 @@
 package constants;
 
+import client.character.skills.CharacterTemporaryStat;
+import enums.BaseStat;
 import enums.EnchantStat;
+import enums.Stat;
 
 /**
  * Created on 1/23/2018.
@@ -153,5 +156,49 @@ public class GameConstants {
     public static int getEnchantmentValByChuc(EnchantStat es, short chuc, int curAmount) {
         // TODO implement formula for this, depending on stat + weapon type
         return chuc + 1 + (curAmount / 50);
+    }
+
+    public static BaseStat getMainStatForJob(short job) {
+        if (JobConstants.isBeginnerJob(job) || JobConstants.isBuccaneer(job) || JobConstants.isAdventurerPirate(job)
+                || JobConstants.isPinkBean(job) || JobConstants.isDawnWarrior(job) || JobConstants.isKaiser(job)
+                || JobConstants.isZero(job) || JobConstants.isDemon(job)
+                || JobConstants.isDemonSlayer(job) || JobConstants.isAran(job) || JobConstants.isCannonShooter(job)
+            || JobConstants.isDarkKnight(job) || JobConstants.isHero(job) || JobConstants.isPage(job)
+            || JobConstants.isBlaster(job) || JobConstants.isHayato(job) || JobConstants.isMihile(job)
+            || JobConstants.isShade(job) || JobConstants.isThunderBreaker(job) || JobConstants.isAdventurerWarrior(job)) {
+            return BaseStat.str;
+        } else if (JobConstants.isJett(job) || JobConstants.isCorsair(job) || JobConstants.isWildHunter(job)
+                || JobConstants.isMercedes(job) || JobConstants.isAngelicBuster(job) || JobConstants.isWindArcher(job)
+                || JobConstants.isAdventurerArcher(job)) {
+            return BaseStat.dex;
+        } else if (JobConstants.isBeastTamer(job) || JobConstants.isBlazeWizard(job) || JobConstants.isCleric(job)
+                || JobConstants.isEvan(job) || JobConstants.isIceLightning(job) || JobConstants.isFirePoison(job)
+                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isBlazeWizard(job)
+                || JobConstants.isKenesis(job) || JobConstants.isLuminous(job)) {
+            return BaseStat.inte;
+        } else if (JobConstants.isAdventurerThief(job) || JobConstants.isNightLord(job) || JobConstants.isShadower(job)
+                || JobConstants.isPhantom(job) || JobConstants.isNightWalker(job) || JobConstants.isDualBlade(job)) {
+            return BaseStat.luk;
+        } else if (JobConstants.isDemonAvenger(job)) {
+            return BaseStat.mhp;
+        }
+        return null;
+    }
+
+    public static BaseStat getSecStatByMainStat(BaseStat mainStat) {
+        if(mainStat == null) {
+            return null;
+        }
+        switch(mainStat) {
+            case str:
+                return BaseStat.dex;
+            case dex:
+                return BaseStat.str;
+            case inte:
+                return BaseStat.luk;
+            case luk:
+                return BaseStat.dex;
+        }
+        return null;
     }
 }

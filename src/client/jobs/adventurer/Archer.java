@@ -181,10 +181,9 @@ public class Archer extends Job {
                 break;
             case FLAME_SURGE:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     int x = mob.getX();
                     int y = mob.getY();
                     Foothold fh = mob.getCurFoodhold();
@@ -363,7 +362,7 @@ public class Archer extends Job {
                     }
                     break;
                 case 2: // Poison
-                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill, 1);
                     quiverCartridge.decrementAmount();
                     break;
                 case 3: // Magic

@@ -39,6 +39,12 @@ public class Position {
         this.y = y;
     }
 
+    /**
+     * Creates a Rect around this Position at its center.
+     * Corners will be (pos.x + left, pos.y + top), (pos.x + right, pos.y + bottom)
+     * @param rect The Rect around this Position
+     * @return The newly created Rect
+     */
     public Rect getRectAround(Rect rect) {
         int x = getX();
         int y = getY();

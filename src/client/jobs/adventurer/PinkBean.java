@@ -257,9 +257,8 @@ public class PinkBean extends Job {
 
                 case INSTANT_GARDEN_BREEZY:
                     SkillInfo isb = SkillData.getSkillInfoById(INSTANT_GARDEN_BREEZY);
-                    AffectedArea aa = AffectedArea.getPassiveAA(INSTANT_GARDEN_BREEZY, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, INSTANT_GARDEN_BREEZY, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     if (chr.isLeft()) {
                         aa.setFlip(false);
@@ -272,9 +271,8 @@ public class PinkBean extends Job {
                     break;
                 case INSTANT_GARDEN_POSIE:
                     SkillInfo isp = SkillData.getSkillInfoById(INSTANT_GARDEN_POSIE);
-                    AffectedArea aa2 = AffectedArea.getPassiveAA(INSTANT_GARDEN_POSIE, slv);
+                    AffectedArea aa2 = AffectedArea.getPassiveAA(chr, INSTANT_GARDEN_POSIE, slv);
                     aa2.setMobOrigin((byte) 0);
-                    aa2.setCharID(chr.getId());
                     aa2.setPosition(chr.getPosition());
                     if (chr.isLeft()) {
                         aa2.setFlip(false);

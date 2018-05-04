@@ -768,4 +768,9 @@ public class SkillConstants {
                 return false;
         }
     }
+
+    public static boolean isStealableSkill(int skillID) {
+        // TODO
+        return false;
+    }
 }

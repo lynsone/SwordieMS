@@ -746,17 +746,7 @@ public class ScriptManager implements Observer {
      * @param respawnable whether or not the mob should respawn
      */
     public void spawnMob(int id, int x, int y, boolean respawnable) {
-        Mob mob = MobData.getMobDeepCopyById(id);
-        Position pos = new Position(x, y);
-        mob.setPosition(pos.deepCopy());
-        mob.setPrevPos(pos.deepCopy());
-        mob.setPosition(pos.deepCopy());
-        mob.setNotRespawnable(!respawnable);
-        Field field = chr.getField();
-        if (mob.getField() == null) {
-            mob.setField(field);
-        }
-        field.spawnLife(mob, null);
+        chr.getField().spawnMob(id, x, y, respawnable);
     }
 
     /**

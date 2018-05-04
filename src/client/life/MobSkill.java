@@ -1,7 +1,10 @@
 package client.life;
 
+import client.character.Char;
+import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.Option;
 import client.character.skills.SkillInfo;
+import client.character.skills.TemporaryStatManager;
 import enums.MobSkillID;
 import enums.MobSkillStat;
 import enums.MobStat;
@@ -10,6 +13,11 @@ import loaders.MobSkillInfo;
 import loaders.SkillData;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import util.Position;
+import util.Rect;
+import util.Util;
+
+import java.util.List;
 
 import static enums.MobSkillStat.*;
 
@@ -276,6 +284,56 @@ public class MobSkill {
             case MGUARDUP:
                 o.nOption = msi.getSkillStatIntValue(x);
                 mts.addMobSkillOptionsAndBroadCast(MobStat.MGuardUp, o);
+                break;
+            case SEAL:
+                Rect rect = mob.getPosition().getRectAround(new Rect(msi.getLt(), msi.getRb()));
+                if(!mob.isLeft()) {
+                    rect = rect.horizontalFlipAround(mob.getPosition().getX());
+                }
+                List<Char> chars = mob.getField().getCharsInRect(rect);
+                Char chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                if (chr == null) {
+                    return;
+                }
+                TemporaryStatManager tsm = chr.getTemporaryStatManager();
+                // TODO add check for AsrR
+                if(Util.succeedProp(msi.getSkillStatIntValue(prop))) {
+                    o.nOption = 1;
+                    o.tOption = msi.getSkillStatIntValue(time);
+                    tsm.putCharacterStatValueFromMobSkill(CharacterTemporaryStat.Seal, o);
+                    tsm.sendSetStatPacket();
+                }
+                break;
+            case CURSE:
+                rect = mob.getPosition().getRectAround(new Rect(msi.getLt(), msi.getRb()));
+                if(!mob.isLeft()) {
+                    rect = rect.horizontalFlipAround(mob.getPosition().getX());
+                }
+                chars = mob.getField().getCharsInRect(rect);
+                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                if (chr == null) {
+                    return;
+                }
+                tsm = chr.getTemporaryStatManager();
+                // TODO add check for AsrR
+                if(Util.succeedProp(msi.getSkillStatIntValue(prop))) {
+                    o.nOption = 1;
+                    o.tOption = msi.getSkillStatIntValue(time);
+                    tsm.putCharacterStatValue(CharacterTemporaryStat.Curse, o);
+                    tsm.sendSetStatPacket();
+                }
+                break;
+            case TELEPORT:
+                int xPos = msi.getSkillStatIntValue(x);
+                int yPos = msi.getSkillStatIntValue(y);
+                Rect possibleRect = mob.getPosition().getRectAround(new Rect(-xPos, -yPos, xPos, yPos));
+                mob.setPosition(new Position(Util.getRandom(possibleRect.getLeft(), possibleRect.getRight()),
+                        Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
+                break;
+            case SUMMON:
+                for(int i : msi.getInts()) {
+//                    mob.getField().spawnMob(i, mob.getPosition().getX(), mob.getPosition().getY(), false);
+                }
                 break;
             case UNK:
                 log.warn(String.format("Unknown mob skill %d, slv = %d", skill, level));

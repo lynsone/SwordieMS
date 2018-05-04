@@ -247,9 +247,8 @@ public class Phantom extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case CARTE_ROSE_FINALE:
-                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa.setMobOrigin((byte) 1);
-                aa.setCharID(chr.getId());
                 aa.setPosition(chr.getPosition());
                 aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                 chr.getField().spawnAffectedArea(aa);

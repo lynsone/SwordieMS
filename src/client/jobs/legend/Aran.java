@@ -376,7 +376,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
                     }
                 }
                 break;
@@ -395,7 +395,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
                     }
                 }
                 break;
@@ -414,7 +414,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
                     }
                 }
                 break;
@@ -450,9 +450,8 @@ public class Aran extends Job {
                     break;
                 case MAHAS_DOMAIN:
                     SkillInfo mdi = SkillData.getSkillInfoById(MAHAS_DOMAIN);
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(mdi.getRects().get(0)));
                     chr.getField().spawnAffectedArea(aa);

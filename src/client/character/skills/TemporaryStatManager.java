@@ -2775,4 +2775,9 @@ public class TemporaryStatManager {
             sendSetStatPacket();
         }
     }
+
+    public void putCharacterStatValueFromMobSkill(CharacterTemporaryStat cts, Option o) {
+        o.rOption |= o.slv << 16; // mob skills are encoded differently: not an int, but short (skill ID), then short (slv).
+        putCharacterStatValue(cts, o);
+    }
 }

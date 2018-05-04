@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Mob extends Life {
 
-    private boolean sealedInsteadDead, patrolMob, isLeft;
+    private boolean sealedInsteadDead, patrolMob;
     private int option, effectItemID, patrolScopeX1, patrolScopeX2, detectX, senseX, phase, curZoneDataType;
     private int refImgMobID, lifeReleaseOwnerAID, afterAttack, currentAction, scale, eliteGrade, eliteType, targetUserIdFromServer;
     private long hp, maxHp;
@@ -145,7 +145,6 @@ public class Mob extends Life {
         // end life
         copy.setSealedInsteadDead(isSealedInsteadDead());
         copy.setPatrolMob(isPatrolMob());
-        copy.setLeft(isLeft());
         copy.setOption(getOption());
         copy.setEffectItemID(getEffectItemID());
         copy.setPatrolScopeX1(getPatrolScopeX1());
@@ -304,14 +303,6 @@ public class Mob extends Life {
 
     public void setPatrolMob(boolean patrolMob) {
         this.patrolMob = patrolMob;
-    }
-
-    public boolean isLeft() {
-        return isLeft;
-    }
-
-    public void setLeft(boolean left) {
-        isLeft = left;
     }
 
     public int getOption() {

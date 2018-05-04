@@ -23,8 +23,8 @@ import static client.character.skills.SkillStat.*;
  */
 public class AffectedArea extends Life {
 
+    private Char owner;
     private Rect rect;
-    private int charID;
     private int skillID;
     private int force;
     private int option;
@@ -48,11 +48,15 @@ public class AffectedArea extends Life {
     }
 
     public int getCharID() {
-        return charID;
+        return owner.getId();
     }
 
-    public void setCharID(int charID) {
-        this.charID = charID;
+    public void setOwner(Char owner) {
+        this.owner = owner;
+    }
+
+    public Char getOwner() {
+        return owner;
     }
 
     public int getSkillID() {
@@ -127,18 +131,20 @@ public class AffectedArea extends Life {
         this.flip = flip;
     }
 
-    public static AffectedArea getAffectedArea(AttackInfo attackInfo) {
+    public static AffectedArea getAffectedArea(Char chr, AttackInfo attackInfo) {
         AffectedArea aa = new AffectedArea(-1);
         aa.setSkillID(attackInfo.skillId);
         aa.setSlv(attackInfo.slv);
         aa.setElemAttr(attackInfo.elemAttr);
         aa.setForce(attackInfo.force);
         aa.setOption(attackInfo.option);
+        aa.setOwner(chr);
         return aa;
     }
 
-    public static AffectedArea getPassiveAA(int skillID, byte slv) {
+    public static AffectedArea getPassiveAA(Char chr, int skillID, byte slv) {
         AffectedArea aa = new AffectedArea(-1);
+        aa.setOwner(chr);
         aa.setSkillID(skillID);
         aa.setSlv(slv);
 
@@ -165,7 +171,7 @@ public class AffectedArea extends Life {
             case Archer.FLAME_SURGE:
             case Kanna.NIMBUS_CURSE:
                 if(!mts.hasBurnFromSkill(skillID)) {
-                    mts.createAndAddBurnedInfo(getCharID(), skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill, 1);
                 }
                 break;
             case Shade.SPIRIT_TRAP:

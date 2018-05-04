@@ -323,7 +323,7 @@ public class Shade extends Job {
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(dotTime, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.DebuffHealing, o1);
-                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill, 1);
                 }
                 break;
             case SOUL_SPLITTER:     // TODO
@@ -363,9 +363,8 @@ public class Shade extends Job {
             switch (skillID) {
                 case SPIRIT_TRAP:
                     SkillInfo fci = SkillData.getSkillInfoById(skillID);
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
                     aa.setDelay((short) 4);

@@ -271,7 +271,7 @@ public class Thief extends Job {
                     }else{
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
                 break;
@@ -292,7 +292,7 @@ public class Thief extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                 }
                 break;
             case FLASHBANG:
@@ -377,9 +377,8 @@ public class Thief extends Job {
                     chr.warp(toField);
                     break;
                 case SMOKE_SCREEN:
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     aa.setDelay((short) 4);
@@ -389,9 +388,8 @@ public class Thief extends Job {
                     SkillInfo fci = SkillData.getSkillInfoById(skillID);
                     int lt1 = si.getValue(lt, slv);
                     int rb1 = si.getValue(rb, slv);
-                    AffectedArea aa2 = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa2 = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa2.setMobOrigin((byte) 0);
-                    aa2.setCharID(chr.getId());
                     aa2.setPosition(chr.getPosition());
                     aa2.setRect(aa2.getPosition().getRectAround(fci.getRects().get(0)));
                     if (chr.isLeft()) {
@@ -841,7 +839,7 @@ public class Thief extends Job {
                 if (Util.succeedProp(markprop)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill, 1);
                 }
             }
         }
@@ -871,7 +869,7 @@ public class Thief extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(!mts.hasBurnFromSkill(TOXIC_VENOM_NL)) {
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
             }
@@ -885,7 +883,7 @@ public class Thief extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(!mts.hasBurnFromSkill(VENOM_NL)) {
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
             }
@@ -902,7 +900,7 @@ public class Thief extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(!mts.hasBurnFromSkill(TOXIC_VENOM_SHAD)) {
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
             }
@@ -916,7 +914,7 @@ public class Thief extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(!mts.hasBurnFromSkill(VENOM_SHAD)) {
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
             }
@@ -933,7 +931,7 @@ public class Thief extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(!mts.hasBurnFromSkill(TOXIC_VENOM_DB)) {
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
             }
@@ -947,7 +945,7 @@ public class Thief extends Job {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(!mts.hasBurnFromSkill(VENOM_DB)) {
-                        mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
             }
@@ -961,7 +959,7 @@ public class Thief extends Job {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 MobTemporaryStat mts = mob.getTemporaryStat();
-                mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                mts.createAndAddBurnedInfo(chr, skill, 1);
             }
         }
     }

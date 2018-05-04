@@ -573,9 +573,8 @@ public class Kaiser extends Job {
             case INFERNO_BREATH:
             case INFERNO_BREATH_FINAL_FORM:
                 SkillInfo rca = SkillData.getSkillInfoById(INFERNO_BREATH);
-                AffectedArea aa = AffectedArea.getAffectedArea(attackInfo);
+                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
                 aa.setSkillID(INFERNO_BREATH);
                 aa.setPosition(chr.getPosition());
                 aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));

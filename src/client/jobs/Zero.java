@@ -340,9 +340,8 @@ public class Zero extends Job {
                 //break;
             case ADV_EARTH_BREAK_SHOCK_INIT:
                 SkillInfo fci = SkillData.getSkillInfoById(ADV_EARTH_BREAK);
-                AffectedArea aa = AffectedArea.getPassiveAA(ADV_EARTH_BREAK, slv);
+                AffectedArea aa = AffectedArea.getPassiveAA(chr, ADV_EARTH_BREAK, slv);
                 aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
                 aa.setPosition(chr.getPosition());
                 aa.setSkillID(ADV_EARTH_BREAK);
                 aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
@@ -381,9 +380,8 @@ public class Zero extends Job {
                     chr.warp(toField);
                     break;
                 case TIME_DISTORTION:
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     aa.setDelay((short) 5);
@@ -446,7 +444,7 @@ public class Zero extends Job {
         for (MobAttackInfo mai : ai.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                mob.getTemporaryStat().createAndAddBurnedInfo(chr.getId(), skill, 1);
+                mob.getTemporaryStat().createAndAddBurnedInfo(chr, skill, 1);
             }
         }
     }

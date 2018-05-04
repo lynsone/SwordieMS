@@ -436,9 +436,8 @@ public class WildHunter extends Job {
                     chr.warp(toField);
                     break;
                 case HUNTING_ASSISTANT_UNIT:
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     if(chr.isLeft()) {

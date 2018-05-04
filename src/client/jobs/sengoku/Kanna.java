@@ -104,9 +104,8 @@ public class Kanna extends Job {
 
                 break;
             case NIMBUS_CURSE:
-                AffectedArea aa = AffectedArea.getPassiveAA(skillID, (byte) slv);
+                AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, (byte) slv);
                 aa.setMobOrigin((byte) 0);
-                aa.setCharID(chr.getId());
                 aa.setPosition(chr.getPosition());
                 aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                 aa.setDelay((short) 5);
@@ -204,9 +203,8 @@ public class Kanna extends Job {
             switch (skillID) {
                 case BLOSSOM_BARRIER:
                 case BELLFLOWER_BARRIER:
-                    AffectedArea aa = AffectedArea.getPassiveAA(skillID, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     aa.setDelay((short) 3);

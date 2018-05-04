@@ -326,9 +326,8 @@ public class Evan extends Job {
                     break;
                 case RETURN_FLAME:
                     SkillInfo rft = SkillData.getSkillInfoById(RETURN_FLAME_TILE);
-                    AffectedArea aa = AffectedArea.getPassiveAA(RETURN_FLAME_TILE, slv);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, RETURN_FLAME_TILE, slv);
                     aa.setMobOrigin((byte) 0);
-                    aa.setCharID(chr.getId());
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(rft.getRects().get(0)));
                     //aa.setRect(rect);

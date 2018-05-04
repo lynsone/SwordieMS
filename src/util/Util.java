@@ -97,6 +97,16 @@ public class Util {
     }
 
     /**
+     * Returns a random number from <code>start</code> up to <code>end</code>. Creates a new Random class upon call.
+     * @param start the lower bound of the random number
+     * @param end the upper bound of the random number
+     * @return A random number from <code>start</code> up to <code>end</code>
+     */
+    public static int getRandom(int start, int end) {
+        return start + new Random().nextInt(end - start);
+    }
+
+    /**
      * Checks if some action succeeds, given a chance and maximum number.
      * @param chance The threshold at which something is classified as success
      * @param max The maximum number that is generated, exclusive
