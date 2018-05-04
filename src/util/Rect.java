@@ -148,10 +148,29 @@ public class Rect {
     }
 
     /**
+     * Flips this Rect horizontally around a certain Position's x .
+     * @param x The x to flip around
+     * @return The flipped Rect
+     */
+    public Rect horizontalFlipAround(int x) {
+        return new Rect(getRight() - 2 * (getRight() - x), getTop(), getLeft() + 2 * (x - getLeft()), getBottom());
+    }
+
+    /**
      * Returns a deep copy of this Rect.
      * @return a deep copy of this Rect
      */
     public Rect deepCopy() {
         return new Rect(getLeft(), getTop(), getRight(), getBottom());
+    }
+
+    @Override
+    public String toString() {
+        return "Rect{" +
+                "left=" + left +
+                ", top=" + top +
+                ", right=" + right +
+                ", bottom=" + bottom +
+                '}';
     }
 }

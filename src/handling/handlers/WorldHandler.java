@@ -988,22 +988,23 @@ public class WorldHandler {
         Char controller = field.getLifeToControllers().get(mob);
         byte idk0 = inPacket.decodeByte(); // check if the templateID / 10000 == 250 or 251. No idea for what it's used
         short moveID = inPacket.decodeShort();
+        byte actionAndDirMask = inPacket.decodeByte();
+        msai.actionAndDirMask = actionAndDirMask;
+        boolean usedSkill = actionAndDirMask != 0;
         byte actionAndDir = inPacket.decodeByte();
-        msai.actionAndDirMask = actionAndDir;
-        boolean usedSkill = actionAndDir != 0;
-        byte lastSkillUsed = inPacket.decodeByte();
-        msai.actionAndDir = lastSkillUsed;
+        msai.actionAndDir = actionAndDir;
+        life.setMoveAction(actionAndDir);
         int skillID = 0;
         int slv = 0;
         int targetInfo = inPacket.decodeInt();
         msai.targetInfo = targetInfo;
-        if (usedSkill && lastSkillUsed != -1) {
+        if (usedSkill && actionAndDir != -1) {
             MobSkill mobSkill = null;
             List<MobSkill> skillList = mob.getSkills();
             if (skillList.size() > 0) {
-                if (lastSkillUsed != -1) {
+                if (actionAndDir != -1) {
                     mobSkill = skillList.stream()
-                            .filter(ms -> ms.getSkillID() == lastSkillUsed).findFirst().orElse(null);
+                            .filter(ms -> ms.getSkillID() == actionAndDir).findFirst().orElse(null);
                 }
                 if (mobSkill == null) {
                     mobSkill = skillList.get(Randomizer.nextInt(skillList.size()));
@@ -1191,6 +1192,7 @@ public class WorldHandler {
         ai.isJablin = inPacket.decodeByte() != 0;
         short maskie = inPacket.decodeShort();
         ai.left = ((maskie >> 15) & 1) != 0;
+
         ai.attackAction = (short) (maskie & 0x7FFF);
         if (skillID == Archer.ARROW_PLATTER) { // very unsure
             short idk9 = inPacket.decodeShort();

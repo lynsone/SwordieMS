@@ -232,6 +232,10 @@ public class Life {
         this.notRespawnable = notRespawnable;
     }
 
+    public boolean isLeft() {
+        return moveAction > 0 && (moveAction % 2) == 1;
+    }
+
     public Life deepCopy() {
         Life copy = new Life(getObjectId());
         copy.setLifeType(getLifeType());
