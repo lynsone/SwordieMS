@@ -7,7 +7,6 @@ import client.character.skills.*;
 import client.field.Field;
 import client.jobs.Job;
 import client.life.AffectedArea;
-import client.life.Life;
 import client.life.Mob;
 import client.life.MobTemporaryStat;
 import connection.InPacket;
@@ -164,7 +163,7 @@ public class Shade extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleFoxSpirits(int skillID) {
+    private void handleFoxSpirits(int skillID) {    //
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(HiddenPossession)) {
             SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
@@ -180,33 +179,26 @@ public class Shade extends Job {
                             chr.getPosition().getY() + 750)
             );
 
-            List<Life> lifes = field.getLifesInRect(rect);
-            for(Life life : lifes) {
-                if(life instanceof Mob) {
-                    int anglenum = 305;// new Random().nextInt(270);
-                    int mobID = ((Mob) life).getRefImgMobID();
-                    if(skillID == FIRE_FOX_SPIRIT_MASTERY) {
-                        int inc = ForceAtomEnum.FLAMING_RABBIT_ORB.getInc();
-                        int type = ForceAtomEnum.FLAMING_RABBIT_ORB.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 7,
-                                anglenum, 400, (int) System.currentTimeMillis(), 1, 0,
-                                new Position(chr.isLeft() ? 0 : -50,-50));
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                                true, mobID, FOX_SPIRITS_ATOM_2, forceAtomInfo, new Rect(), 0, 300,
-                                life.getPosition(), FOX_SPIRITS_ATOM_2, life.getPosition()));
-                    }
-                    if(skillID == FOX_SPIRITS_INIT) {
-                        int inc = ForceAtomEnum.RABBIT_ORB.getInc();
-                        int type = ForceAtomEnum.RABBIT_ORB.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 7,
-                                anglenum, 400, (int) System.currentTimeMillis(), 1, 0,
-                                new Position(chr.isLeft() ? 0 : -50, -50));
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                                true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                                life.getPosition(), FOX_SPIRITS_ATOM, life.getPosition()));
-                    }
-                }
+            List<Mob> mobs = chr.getField().getBossMobsInRect(rect);
+            Mob mob = Util.getRandomFromList(mobs);
+            int anglenum = 305;// new Random().nextInt(270);
+            int mobID = mob.getObjectId();
+
+            int atomid = FOX_SPIRITS_ATOM;
+            int inc = ForceAtomEnum.RABBIT_ORB.getInc();
+            int type = ForceAtomEnum.RABBIT_ORB.getForceAtomType();
+
+            if(skillID == FIRE_FOX_SPIRIT_MASTERY) {
+                atomid = FOX_SPIRITS_ATOM_2;
+                inc = ForceAtomEnum.FLAMING_RABBIT_ORB.getInc();
+                type = ForceAtomEnum.FLAMING_RABBIT_ORB.getForceAtomType();
             }
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 7,
+                    anglenum, 400, (int) System.currentTimeMillis(), 1, 0,
+                    new Position(chr.isLeft() ? 0 : -50, -50));
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mobID, atomid, forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), atomid, mob.getPosition()));
         }
     }
 

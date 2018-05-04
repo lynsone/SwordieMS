@@ -188,7 +188,7 @@ public class Phantom extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         //if (chr.hasSkill(CARTE_BLANCHE)) {
             SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
-            int anglenum = new Random().nextInt(315) + 295;
+            int anglenum = new Random().nextInt(30) + 295;
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 int TW1prop = 100;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change

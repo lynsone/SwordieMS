@@ -37,7 +37,7 @@ public class Kinesis extends Job {
     public static final int PSYCHIC_BLAST_DOWN = 142100001;
     public static final int PSYCHIC_ASSAULT_FWD = 142110000;
     public static final int PSYCHIC_ASSAULT_DOWN = 142110001;
-    public static final int PSYCHIC_DRAIN = 142101009; // TODO, AffectedArea?
+    public static final int PSYCHIC_DRAIN = 142101009;
     public static final int PSYCHIC_ARMOR = 142101004;
     public static final int ULTIMATE_DEEP_IMPACT = 142101003;
     public static final int PSYCHIC_BULWARK = 142110009;
@@ -55,6 +55,7 @@ public class Kinesis extends Job {
     public static final int MENTAL_TEMPEST = 142121030;
     public static final int MENTAL_SHOCK = 142121031;
     public static final int MENTAL_OVERDRIVE = 142121032;
+    public static final int CLEAR_MIND = 142121007;
 
 
     private static final int MAX_PP = 30;
@@ -130,7 +131,7 @@ public class Kinesis extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
+                    mts.createAndAddBurnedInfo(chr.getId(), skill, slv);
                 }
                 break;
             case MIND_BREAK:

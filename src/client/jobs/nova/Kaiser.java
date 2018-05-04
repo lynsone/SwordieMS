@@ -36,7 +36,7 @@ public class Kaiser extends Job {
     public static final int TRANSFIGURATION = 60000219; //Morph Gauge (SmashStack)
     public static final int DRAGON_LINK = 60001225;
 
-    public static final int TEMPEST_BLADES_THREE = 61101002;    //TODO Special Buff (w/ Icon) 3
+    public static final int TEMPEST_BLADES_THREE = 61101002;
     public static final int TEMPEST_BLADES_THREE_FF = 61110211;
     public static final int BLAZE_ON = 61101004; //Buff
 
@@ -46,7 +46,7 @@ public class Kaiser extends Job {
     public static final int CURSEBITE = 61111003; //Buff
 
     public static final int FINAL_FORM_FOURTH = 61120008; //Buff 4rd Job
-    public static final int TEMPEST_BLADES_FIVE = 61120007;     //TODO  Special Buff (w/ Icon) 5
+    public static final int TEMPEST_BLADES_FIVE = 61120007;
     public static final int TEMPEST_BLADES_FIVE_FF = 61121217;
     public static final int GRAND_ARMOR = 61121009; //Buff
     public static final int NOVA_WARRIOR_KAISER = 61121014; //Buff
@@ -65,18 +65,15 @@ public class Kaiser extends Job {
     public static final int FLAME_SURGE = 61001101;
     public static final int FLAME_SURGE_FINAL_FORM = 61111215;
 
-
     public static final int IMPACT_WAVE = 61101100;
     public static final int IMPACT_WAVE_FINAL_FORM = 61111216;
     public static final int PIERCING_BLAZE = 61101101; //Special Attack (Stun Debuff)
     public static final int PIERCING_BLAZE_FINAL_FORM = 61111217;
 
-
     public static final int WING_BEAT = 61111100; //Special Attack (Speed Debuff)
     public static final int WING_BEAT_FINAL_FORM = 61111111;
     public static final int PRESSURE_CHAIN = 61111101; //Special Attack (Stun Debuff)
     public static final int PRESSURE_CHAIN_FINAL_FORM = 61111219;
-
 
     public static final int GIGA_WAVE = 61121100; //Special Attack (Speed Debuff)
     public static final int GIGA_WAVE_FINAL_FORM = 61121201;
@@ -88,7 +85,7 @@ public class Kaiser extends Job {
     public static final int BLADE_BURST_FINAL_FORM = 61121221;
 
 
-    //Realign Skills        //TODO
+    //Realign Skills
     public static final int REALIGN_ATTACKER_MODE = 60001217; //Unlimited Duration
     public static final int REALIGN_DEFENDER_MODE = 60001216; //Unlimited Duration
 

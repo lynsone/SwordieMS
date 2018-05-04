@@ -2,7 +2,6 @@ package client.life;
 
 import client.character.Char;
 import client.character.skills.*;
-import client.character.skills.SkillStat;
 import client.jobs.Zero;
 import client.jobs.adventurer.Archer;
 import client.jobs.adventurer.BeastTamer;
@@ -265,6 +264,4 @@ public class AffectedArea extends Life {
         }
         tsm.sendSetStatPacket();
     }
-
-
 }

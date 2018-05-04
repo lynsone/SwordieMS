@@ -367,6 +367,10 @@ public class Demon extends Job {
         }
 
         if(JobConstants.isDemonAvenger(chr.getJob())) {
+
+            //DA HP Cost System
+            hpRCostDASkills(SkillConstants.getActualSkillIDfromSkillID(attackInfo.skillId));
+
             if(hasHitMobs) {
                 //Nether Shield Recreation
                 if (attackInfo.skillId == NETHER_SHIELD_ATOM) {
@@ -825,6 +829,23 @@ public class Demon extends Job {
             int duration = si.getValue(w, slv);
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / recovery)));
             EventManager.addEvent(() -> handleDiabolicRecovery(), duration, TimeUnit.SECONDS);
+        }
+    }
+
+    private void hpRCostDASkills(int skillID) {
+        if(skillID == NETHER_SHIELD_ATOM || skillID == 0) {
+            return;
+        }
+        Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        int hpRCost = si.getValue(hpRCon, slv);
+        if(hpRCost > 0) {
+            int skillcost = (int) (chr.getMaxHP() / ((double) 100 / hpRCost));
+            if(chr.getHP() < skillcost) {
+                return;
+            }
+            chr.heal(-skillcost);
         }
     }
 }

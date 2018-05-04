@@ -13,10 +13,10 @@ import enums.AssistType;
 import enums.ChatMsgColour;
 import enums.MobStat;
 import loaders.SkillData;
+import packet.CField;
 import packet.WvsContext;
 import server.EventManager;
 import util.Rect;
-import util.Util;
 
 import java.util.Arrays;
 import java.util.List;
@@ -251,23 +251,29 @@ public class BattleMage extends Job {
         field.spawnSummon(death);
     }
 
-
-    private void handleCondemnation() {
+    private void handleCondemnation(AttackInfo attackInfo) {
+        Field field = chr.getField();
+        Skill skill = chr.getSkill(getIcon());
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         int amount = 2;
 
-        if(tsm.hasStat(BMageDeath)) {
+        if (tsm.hasStat(BMageDeath)) {
             amount = tsm.getOption(BMageDeath).nOption;
-            if(amount < 10) {
+            if (amount < 5) {
                 amount++;
+            } else {
+                amount = 1;
+                //TODO Summon Attack
+                c.write(CField.summonedAssistAttackRequest(chr.getId(), death.getObjectId()));
             }
+            o.nOption = amount;
+            o.rOption = CONDEMNATION_II;
+            o.tOption = 0;
+            tsm.putCharacterStatValue(BMageDeath, o);
+            c.write(WvsContext.temporaryStatSet(tsm));
         }
-        o.nOption = amount;
-        o.rOption = CONDEMNATION_III;
-        o.tOption = 0;
-        tsm.putCharacterStatValue(BMageDeath, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     private int getIcon() {
@@ -287,8 +293,6 @@ public class BattleMage extends Job {
         return skillinfo;
     }
 
-
-
     public boolean isBuff(int skillID) {
         return Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
@@ -307,7 +311,7 @@ public class BattleMage extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleCondemnation();
+        handleCondemnation(attackInfo);
         if(hasHitMobs) {
             handleDrainAuraActive(attackInfo);
             handleDrainAuraPassive(attackInfo);
@@ -319,14 +323,14 @@ public class BattleMage extends Job {
         switch (attackInfo.skillId) {
             case DARK_CHAIN:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(hcProp, slv))) {
+                    //if (Util.succeedProp(si.getValue(hcProp, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
+                    //}
                 }
                 break;
             case DARK_GENESIS:
@@ -384,7 +388,6 @@ public class BattleMage extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
         super.handleHit(c, inPacket, hitInfo);
     }
 

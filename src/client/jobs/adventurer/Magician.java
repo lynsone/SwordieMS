@@ -201,7 +201,7 @@ public class Magician extends Job {
         }
 
         if (hasHitMobs) {
-            //handleArcaneAim();
+            handleArcaneAim();
         }
 
         if (JobConstants.isFirePoison(chr.getJob())) {
