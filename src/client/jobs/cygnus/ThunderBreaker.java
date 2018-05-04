@@ -28,6 +28,7 @@ public class ThunderBreaker extends Job {
     public static final int ELEMENTAL_SLASH = 10001244;
     public static final int NOBLE_MIND = 10000202;
     public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_SHIFT2 = 10000252;
     public static final int ELEMENTAL_HARMONY_STR = 10000246;
 
     public static final int LIGHTNING_ELEMENTAL = 15001022; //Buff (Charge) //Stackable Charge
@@ -52,6 +53,7 @@ public class ThunderBreaker extends Job {
             ELEMENTAL_SLASH,
             NOBLE_MIND,
             ELEMENTAL_SHIFT,
+            ELEMENTAL_SHIFT2
     };
 
     private int[] buffs = new int[] {

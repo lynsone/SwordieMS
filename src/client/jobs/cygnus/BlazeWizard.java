@@ -40,6 +40,7 @@ public class BlazeWizard extends Job {
     public static final int ELEMENTAL_SLASH = 10001244;
     public static final int NOBLE_MIND = 10000202;
     public static final int ELEMENTAL_SHIFT = 10001254;
+    public static final int ELEMENTAL_SHIFT2 = 10000252;
     public static final int ELEMENTAL_HARMONY_INT = 10000248;
 
     public static final int ORBITAL_FLAME = 12001020;
@@ -83,6 +84,7 @@ public class BlazeWizard extends Job {
             ELEMENTAL_SLASH,
             NOBLE_MIND,
             ELEMENTAL_SHIFT,
+            ELEMENTAL_SHIFT2
     };
 
     private int[] buffs = new int[] {
