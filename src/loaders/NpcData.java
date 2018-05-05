@@ -40,6 +40,7 @@ public class NpcData {
             int id = Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name")
                     .replace(".xml", "").replace(".img", ""));
             npc.setTemplateId(id);
+            npc.setMove(XMLApi.getFirstChildByNameBF(mainNode, "move") != null);
             Node scriptNode = XMLApi.getFirstChildByNameBF(mainNode, "script");
             if(scriptNode != null) {
                 for (Node idNode : XMLApi.getAllChildren(scriptNode)) {
@@ -66,6 +67,7 @@ public class NpcData {
             try {
                 DataOutputStream das = new DataOutputStream(new FileOutputStream(file));
                 das.writeInt(npc.getTemplateId());
+                das.writeBoolean(npc.isMove());
                 das.writeShort(npc.getScripts().size());
                 npc.getScripts().forEach((key, val) -> {
                     try {
@@ -102,6 +104,7 @@ public class NpcData {
             DataInputStream dis = new DataInputStream(new FileInputStream(file));
             Npc npc = new Npc(-1);
             npc.setTemplateId(dis.readInt());
+            npc.setMove(dis.readBoolean());
             short size = dis.readShort();
             for (int i = 0; i < size; i++) {
                 int id = dis.readInt();

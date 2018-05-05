@@ -22,6 +22,7 @@ public class Npc extends Life {
     private String localRepeatEffect;
     private ScreenInfo screenInfo;
     private Map<Integer, String> scripts = new HashMap<>();
+    private boolean move;
 
 
     public Npc(int objectId) {
@@ -31,7 +32,7 @@ public class Npc extends Life {
     public void encode(OutPacket outPacket) {
         // CNpc::Init
         outPacket.encodePosition(getPosition());
-        outPacket.encodeByte(getMoveAction() != 0);
+        outPacket.encodeByte(isMove());
         outPacket.encodeByte(getMoveAction());
         outPacket.encodeShort(getFh());
         outPacket.encodeShort(getRx0()); // rgHorz.low
@@ -149,6 +150,7 @@ public class Npc extends Life {
         copy.setSpine(isSpine());
         copy.setMobTimeOnDie(isMobTimeOnDie());
         copy.setRegenStart(getRegenStart());
+        copy.setMove(isMove());
         copy.setMobAliveReq(getMobAliveReq());
         copy.getScripts().putAll(getScripts());
         return copy;
@@ -166,5 +168,18 @@ public class Npc extends Life {
             chr.write(NpcPool.npcEnterField(this));
             chr.write(NpcPool.npcChangeController(this, chr == controller));
         }
+    }
+
+    public boolean isMove() {
+        return move;
+    }
+
+    public void setMove(boolean move) {
+        this.move = move;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", Move: " + isMove();
     }
 }

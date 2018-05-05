@@ -3610,6 +3610,31 @@ public class WorldHandler {
         byte oneTimeAction = inPacket.decodeByte();
         byte chatIdx = inPacket.decodeByte();
         int duration = inPacket.decodeInt();
-        chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration));
+        Npc npc = (Npc) chr.getField().getLifeByObjectID(objectID);
+        boolean move = npc.isMove();
+        Position oldPos = null, oldVPos = null;
+        int encodedGatherDuration = 0;
+        List<Movement> movements = new ArrayList<>();
+        byte keyPadState = 0;
+        if (move) {
+            encodedGatherDuration = inPacket.decodeInt();
+            oldPos = inPacket.decodePosition();
+            oldVPos = inPacket.decodePosition();
+            if(oldVPos.equals(new Position())) {
+                // prevents NPCs from flying from 0,0 to their current position
+                // is this intended, though?
+                oldVPos = oldPos;
+            }
+            movements = WvsContext.parseMovement(inPacket);
+            for (Movement m : movements) {
+                Position pos = m.getPosition();
+                npc.setPosition(pos);
+                npc.setMoveAction(m.getMoveAction());
+                npc.setFh(m.getFh());
+            }
+            keyPadState = inPacket.decodeByte();
+        }
+        chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move, oldPos,
+                oldVPos, encodedGatherDuration, movements, keyPadState));
     }
 }

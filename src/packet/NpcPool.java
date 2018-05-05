@@ -1,8 +1,12 @@
 package packet;
 
 import client.life.Npc;
+import client.life.movement.Movement;
 import connection.OutPacket;
 import handling.OutHeader;
+import util.Position;
+
+import java.util.List;
 
 /**
  * Created on 2/19/2018.
@@ -38,13 +42,26 @@ public class NpcPool {
         return outPacket;
     }
 
-    public static OutPacket npcMove(int objectID, byte oneTimeAction, byte chatIdx, int duration) {
+    public static OutPacket npcMove(int objectID, byte oneTimeAction, byte chatIdx, int duration, boolean move,
+                                    Position oldPos, Position oldVPos, int encodedGatherDuration,
+                                    List<Movement> movements, byte keyPadState) {
         OutPacket outPacket = new OutPacket(OutHeader.NPC_MOVE);
 
         outPacket.encodeInt(objectID);
         outPacket.encodeByte(oneTimeAction);
         outPacket.encodeByte(chatIdx);
         outPacket.encodeInt(duration);
+
+        if (move) {
+            outPacket.encodePosition(oldPos);
+            outPacket.encodePosition(oldVPos);
+            outPacket.encodeInt(encodedGatherDuration);
+            outPacket.encodeByte(movements.size());
+            for (Movement m : movements) {
+                m.encode(outPacket);
+            }
+            outPacket.encodeByte(keyPadState);
+        }
 
         return outPacket;
     }
