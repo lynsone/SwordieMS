@@ -108,6 +108,8 @@ public class Mob extends Life {
     private List<MobSkill> skills = new ArrayList<>();
     private Set<Integer> quests = new HashSet<>();
     private Set<Integer> revives = new HashSet<>();
+    private Map<Integer, Long> skillCooldowns = new HashMap<>();
+    private long nextPossibleSkillTime = 0;
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -1138,7 +1140,6 @@ public class Mob extends Life {
         setPosition(getHomePosition());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
-            // add soulMP
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
         }
         getDamageDone().clear();
@@ -1274,6 +1275,61 @@ public class Mob extends Life {
                 mob.setPosition(getPosition());
                 getField().spawnLife(mob, null);
             }
+        }
+    }
+
+    private Map<Integer, Long> getSkillCooldowns() {
+        return skillCooldowns;
+    }
+
+    public boolean hasSkillOnCooldown(int skillID, int slv) {
+        return System.currentTimeMillis() < getSkillCooldowns().getOrDefault(skillID | (slv << 16), 0L);
+    }
+
+    public void putSkillCooldown(int skillID, int slv, long nextUseableTime) {
+        getSkillCooldowns().put(skillID | (slv << 16), nextUseableTime);
+    }
+
+    public boolean hasSkillDelayExpired() {
+        return System.currentTimeMillis() > getNextPossibleSkillTime();
+    }
+
+    /**
+     * Sets when a next skill can be used (in ms from current time).
+     * @param delay The delay until the next skill can be used
+     */
+    public void setSkillDelay(long delay) {
+        setNextPossibleSkillTime(getNextPossibleSkillTime() + delay);
+    }
+
+    private long getNextPossibleSkillTime() {
+        return nextPossibleSkillTime;
+    }
+
+    private void setNextPossibleSkillTime(long nextPossibleSkillTime) {
+        this.nextPossibleSkillTime = nextPossibleSkillTime;
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        setTemporaryStat(new MobTemporaryStat(this));
+        Field field = getField();
+        Position pos = getPosition();
+        Foothold fh = field.getFootholdById(getFh());
+        if (fh == null) {
+            fh = field.findFootHoldBelow(pos);
+        }
+        setHomeFoothold(fh.deepCopy());
+        setCurFoodhold(fh.deepCopy());
+        Char controller = getField().getLifeToControllers().get(this);
+        if (onlyChar == null) {
+            for (Char chr : field.getChars()) {
+                chr.write(MobPool.mobEnterField(this, false));
+                chr.write(MobPool.mobChangeController(this, false, controller == chr));
+            }
+        } else {
+            onlyChar.getClient().write(MobPool.mobEnterField(this, false));
+            onlyChar.getClient().write(MobPool.mobChangeController(this, false, controller == onlyChar));
         }
     }
 }

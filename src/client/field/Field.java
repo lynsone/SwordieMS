@@ -371,51 +371,7 @@ public class Field {
                 controller = getChars().get(0);
                 putLifeController(life, controller);
             }
-            Mob mob = null;
-            if (life instanceof Mob) {
-                mob = (Mob) life;
-                mob.setTemporaryStat(new MobTemporaryStat(mob));
-            }
-            if (mob != null) {
-                Position pos = mob.getPosition();
-                Foothold fh = getFootholdById(mob.getFh());
-                if (fh == null) {
-                    fh = findFootHoldBelow(pos);
-                }
-                mob.setHomeFoothold(fh.deepCopy());
-                mob.setCurFoodhold(fh.deepCopy());
-                if (onlyChar == null) {
-                    for (Char chr : getChars()) {
-                        chr.write(MobPool.mobEnterField(mob, false));
-                        chr.write(MobPool.mobChangeController(mob, false, controller == chr));
-                    }
-                } else {
-                    onlyChar.getClient().write(MobPool.mobEnterField(mob, false));
-                    onlyChar.getClient().write(MobPool.mobChangeController(mob, false, controller == onlyChar));
-                }
-            }
-            if (life instanceof Summon) {
-                Summon summon = (Summon) life;
-                if (summon.getSummonTerm() > 0) {
-                    ScheduledFuture sf = EventManager.addEvent(() -> removeLife(summon.getObjectId(), true), summon.getSummonTerm());
-                    addLifeSchedule(summon, sf);
-                }
-                broadcastPacket(CField.summonedCreated(summon.getCharID(), summon));
-            }
-            if (life instanceof Npc) {
-                Npc npc = (Npc) life;
-                for (Char chr : getChars()) {
-                    chr.write(NpcPool.npcEnterField(npc));
-                    chr.write(NpcPool.npcChangeController(npc, false));
-                }
-            }
-            if(life instanceof Drop) {
-                onlyChar.write(DropPool.dropEnterField((Drop) life, life.getPosition(), 0));
-            }
-            if(life instanceof Reactor) {
-                ((Reactor) life).init();
-                broadcastPacket(ReactorPool.reactorEnterField((Reactor) life));
-            }
+            life.broadcastSpawnPacket(onlyChar);
         }
     }
 
@@ -858,7 +814,7 @@ public class Field {
         this.fieldScript = fieldScript;
     }
 
-    public void spawnMob(int id, int x, int y, boolean respawnable) {
+    public Mob spawnMob(int id, int x, int y, boolean respawnable) {
         Mob mob = MobData.getMobDeepCopyById(id);
         Position pos = new Position(x, y);
         mob.setPosition(pos.deepCopy());
@@ -869,5 +825,6 @@ public class Field {
             mob.setField(this);
         }
         spawnLife(mob, null);
+        return mob;
     }
 }

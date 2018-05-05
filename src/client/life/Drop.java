@@ -1,9 +1,15 @@
 package client.life;
 
+import client.character.Char;
 import client.character.items.Equip;
 import client.character.items.Item;
+import constants.GameConstants;
 import enums.DropType;
+import packet.DropPool;
+import server.EventManager;
 import util.FileTime;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created on 2/21/2018.
@@ -104,5 +110,11 @@ public class Drop extends Life {
             res = (byte) ((Equip) getItem()).getGrade();
         }
         return res;
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        onlyChar.write(DropPool.dropEnterField(this, getPosition(), getOwnerID()));
+        EventManager.addEvent(() -> setOwnerID(0), GameConstants.DROP_REMOVE_OWNERSHIP_TIME, TimeUnit.SECONDS);
     }
 }

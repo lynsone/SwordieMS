@@ -5,12 +5,16 @@ import client.character.Char;
 import client.character.skills.Skill;
 import client.character.skills.SkillInfo;
 import client.character.skills.SkillStat;
+import client.field.Field;
 import enums.Stat;
 import loaders.SkillData;
+import packet.CField;
+import server.EventManager;
 import util.Position;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * Created on 1/6/2018.
@@ -220,5 +224,15 @@ public class Summon extends Life {
 
     public void setHp(int hp) {
         this.hp = hp;
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        Field field = getField();
+        if (getSummonTerm() > 0) {
+            ScheduledFuture sf = EventManager.addEvent(() -> field.removeLife(getObjectId(), true), getSummonTerm());
+            field.addLifeSchedule(this, sf);
+        }
+        field.broadcastPacket(CField.summonedCreated(getCharID(), this));
     }
 }

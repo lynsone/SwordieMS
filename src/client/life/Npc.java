@@ -1,6 +1,9 @@
 package client.life;
 
+import client.character.Char;
+import client.field.Field;
 import connection.OutPacket;
+import packet.NpcPool;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -153,5 +156,15 @@ public class Npc extends Life {
 
     public Map<Integer, String> getScripts() {
         return scripts;
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        Field field = getField();
+        Char controller = field.getLifeToControllers().get(this);
+        for (Char chr : field.getChars()) {
+            chr.write(NpcPool.npcEnterField(this));
+            chr.write(NpcPool.npcChangeController(this, chr == controller));
+        }
     }
 }

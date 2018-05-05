@@ -37,4 +37,15 @@ public class NpcPool {
 
         return outPacket;
     }
+
+    public static OutPacket npcMove(int objectID, byte oneTimeAction, byte chatIdx, int duration) {
+        OutPacket outPacket = new OutPacket(OutHeader.NPC_MOVE);
+
+        outPacket.encodeInt(objectID);
+        outPacket.encodeByte(oneTimeAction);
+        outPacket.encodeByte(chatIdx);
+        outPacket.encodeInt(duration);
+
+        return outPacket;
+    }
 }

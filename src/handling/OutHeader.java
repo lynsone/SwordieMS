@@ -619,7 +619,7 @@ public enum OutHeader {
     DEATH_COUNT_INFO(746),
     DEATH_COUNT_INFO_2(747),
     SET_DRESS_CHANGED(748),
-    SEVER_ACK_MOB_ZONE_STATE_CHANGE(749),
+    SERVER_ACK_MOB_ZONE_STATE_CHANGE(749),
     RANDOM_EMOTION(752),
     SET_FLIP_THE_COIN_ENABLED(753),
     TRICK_OR_TREAT_RESULT(754),
@@ -1096,7 +1096,8 @@ public enum OutHeader {
                 MOB_MOVE,
                 REMOTE_MOVE,
                 REMOTE_EMOTION,
-                EXCL_REQUEST
+                EXCL_REQUEST,
+                NPC_MOVE
 
                 );
         return spam.contains(outHeader);

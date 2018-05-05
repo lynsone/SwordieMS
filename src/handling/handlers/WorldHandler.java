@@ -34,6 +34,7 @@ import client.trunk.Trunk;
 import client.trunk.TrunkMsg;
 import client.trunk.TrunkUpdate;
 import connection.InPacket;
+import connection.OutPacket;
 import constants.GameConstants;
 import constants.ItemConstants;
 import constants.JobConstants;
@@ -966,23 +967,37 @@ public class WorldHandler {
         life.setMoveAction(actionAndDir);
         int skillID = 0;
         int slv = 0;
-        int targetInfo = inPacket.decodeInt();
-        msai.targetInfo = targetInfo;
-        if (usedSkill && actionAndDir != -1) {
+        msai.targetInfo = inPacket.decodeInt();
+        if (usedSkill && actionAndDir != -1 && mob.hasSkillDelayExpired()) {
             MobSkill mobSkill = null;
             List<MobSkill> skillList = mob.getSkills();
             if (skillList.size() > 0) {
                 if (actionAndDir != -1) {
                     mobSkill = skillList.stream()
-                            .filter(ms -> ms.getSkillID() == actionAndDir).findFirst().orElse(null);
+                            .filter(ms -> ms.getSkillID() == actionAndDir
+                                    && !mob.hasSkillOnCooldown(ms.getSkill(), ms.getLevel()))
+                            .findFirst()
+                            .orElse(null);
                 }
                 if (mobSkill == null) {
-                    mobSkill = skillList.get(Randomizer.nextInt(skillList.size()));
+                    skillList = skillList.stream()
+                            .filter(ms -> !mob.hasSkillOnCooldown(ms.getSkill(), ms.getLevel()))
+                            .collect(Collectors.toList());
+                    if (skillList.size() > 0) {
+                        mobSkill = skillList.get(Randomizer.nextInt(skillList.size()));
+                    }
                 }
-                skillID = mobSkill.getSkill();
-                slv = mobSkill.getLevel();
-                c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID = %d, skill = %d, level = %d", mobSkill.getSkillID(), mobSkill.getSkill(), mobSkill.getLevel()));
-                mobSkill.handleEffect(mob);
+                if (mobSkill != null) {
+                    skillID = mobSkill.getSkill();
+                    slv = mobSkill.getLevel();
+                    MobSkillInfo msi = SkillData.getMobSkillInfoByIdAndLevel(skillID, slv);
+                    long curTime = System.currentTimeMillis();
+                    long interval = msi.getSkillStatIntValue(MobSkillStat.interval) * 1000;
+                    long nextUseableTime = curTime + interval;
+                    mob.putSkillCooldown(skillID, slv, nextUseableTime);
+                    c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID %d, level = %d", mobSkill.getSkill(), mobSkill.getLevel()));
+                    mobSkill.handleEffect(mob);
+                }
             }
         }
         byte multiTargetForBallSize = inPacket.decodeByte();
@@ -2549,13 +2564,14 @@ public class WorldHandler {
                 break;
             case Create:
                 String name = inPacket.decodeString();
-                Session s = Server.getInstance().getNewDatabaseSession();
-                Transaction t = s.beginTransaction();
-                Query q = s.createQuery("FROM Guild WHERE name = ?");
-                q.setParameter(0, name);
-                List<Guild> guilds = q.list();
-                t.commit();
-                s.close();
+                List<Guild> guilds;
+                try(Session s = Server.getInstance().getNewDatabaseSession()) {
+                    Transaction t = s.beginTransaction();
+                    Query q = s.createQuery("FROM Guild WHERE name = ?");
+                    q.setParameter(0, name);
+                    guilds = q.list();
+                    t.commit();
+                }
                 if(guilds == null || guilds.size() == 0) {
                     guild = new Guild();
                     guild.setLevel(1);
@@ -3582,5 +3598,19 @@ public class WorldHandler {
         if (mob != null) {
 
         }
+    }
+
+    public static void handleUserRequestChangeMobZoneState(Client c, InPacket inPacket) {
+        OutPacket outPacket = new OutPacket(OutHeader.SERVER_ACK_MOB_ZONE_STATE_CHANGE);
+        outPacket.encodeByte(true);
+        c.write(outPacket);
+    }
+
+    public static void handleNpcMove(Char chr, InPacket inPacket) {
+        int objectID = inPacket.decodeInt();
+        byte oneTimeAction = inPacket.decodeByte();
+        byte chatIdx = inPacket.decodeByte();
+        int duration = inPacket.decodeInt();
+        chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration));
     }
 }

@@ -1,7 +1,6 @@
 package client.character;
 
 import client.character.items.BodyPart;
-import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.SkillInfo;
 import client.character.skills.SkillStat;
 import client.character.skills.TemporaryStatManager;
@@ -10,7 +9,6 @@ import constants.ItemConstants;
 import constants.JobConstants;
 import constants.SkillConstants;
 import enums.BaseStat;
-import enums.Stat;
 import loaders.SkillData;
 
 import java.util.Map;
@@ -61,7 +59,7 @@ public class DamageCalc {
         int mainAmount = chr.getTotalStat(mainStat);
         int secAmount = chr.getTotalStat(secStat);
         int attAmount = chr.getTotalStat(attStat);
-        Map<BaseStat, Integer> basicStats = chr.getBasicStats();
+        Map<BaseStat, Integer> basicStats = chr.getTotalBasicStats();
         int setBaseDamage = tsm.hasStat(SetBaseDamage) ? tsm.getOption(SetBaseDamage).nOption : 0;
         long damage = calcDamageByWT(weaponType, basicStats, setBaseDamage, skillID);
         return (long) (damage * mult);

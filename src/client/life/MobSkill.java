@@ -3,12 +3,12 @@ package client.life;
 import client.character.Char;
 import client.character.skills.CharacterTemporaryStat;
 import client.character.skills.Option;
-import client.character.skills.SkillInfo;
+import client.character.skills.TemporaryStatBase;
 import client.character.skills.TemporaryStatManager;
+import enums.BaseStat;
 import enums.MobSkillID;
-import enums.MobSkillStat;
 import enums.MobStat;
-import loaders.MobData;
+import enums.TSIndex;
 import loaders.MobSkillInfo;
 import loaders.SkillData;
 import org.apache.log4j.LogManager;
@@ -296,8 +296,8 @@ public class MobSkill {
                     return;
                 }
                 TemporaryStatManager tsm = chr.getTemporaryStatManager();
-                // TODO add check for AsrR
-                if(Util.succeedProp(msi.getSkillStatIntValue(prop))) {
+                if(Util.succeedProp(msi.getSkillStatIntValue(prop))
+                        && Util.succeedProp(100 - chr.getTotalStat(BaseStat.asr))) {
                     o.nOption = 1;
                     o.tOption = msi.getSkillStatIntValue(time);
                     tsm.putCharacterStatValueFromMobSkill(CharacterTemporaryStat.Seal, o);
@@ -315,11 +315,53 @@ public class MobSkill {
                     return;
                 }
                 tsm = chr.getTemporaryStatManager();
-                // TODO add check for AsrR
-                if(Util.succeedProp(msi.getSkillStatIntValue(prop))) {
+                if(Util.succeedProp(msi.getSkillStatIntValue(prop))
+                        && Util.succeedProp(100 - chr.getTotalStat(BaseStat.asr))) {
                     o.nOption = 1;
                     o.tOption = msi.getSkillStatIntValue(time);
-                    tsm.putCharacterStatValue(CharacterTemporaryStat.Curse, o);
+                    tsm.putCharacterStatValueFromMobSkill(CharacterTemporaryStat.Curse, o);
+                    tsm.sendSetStatPacket();
+                }
+                break;
+            case SLOW:
+                rect = mob.getPosition().getRectAround(new Rect(msi.getLt(), msi.getRb()));
+                if(!mob.isLeft()) {
+                    rect = rect.horizontalFlipAround(mob.getPosition().getX());
+                }
+                chars = mob.getField().getCharsInRect(rect);
+                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                if (chr == null) {
+                    return;
+                }
+                tsm = chr.getTemporaryStatManager();
+                if(Util.succeedProp(msi.getSkillStatIntValue(prop))
+                        && Util.succeedProp(100 - chr.getTotalStat(BaseStat.asr))) {
+                    o.nOption = 1;
+                    o.tOption = msi.getSkillStatIntValue(time);
+                    tsm.putCharacterStatValueFromMobSkill(CharacterTemporaryStat.Slow, o);
+                    tsm.sendSetStatPacket();
+                }
+                break;
+            case UNDEAD:
+                rect = mob.getPosition().getRectAround(new Rect(msi.getLt(), msi.getRb()));
+                if(!mob.isLeft()) {
+                    rect = rect.horizontalFlipAround(mob.getPosition().getX());
+                }
+                chars = mob.getField().getCharsInRect(rect);
+                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                if (chr == null) {
+                    return;
+                }
+                tsm = chr.getTemporaryStatManager();
+                if(Util.succeedProp(msi.getSkillStatIntValue(prop))
+                        && Util.succeedProp(100 - chr.getTotalStat(BaseStat.asr))) {
+                    o.nOption = 1;
+                    o.tOption = msi.getSkillStatIntValue(time);
+                    tsm.putCharacterStatValueFromMobSkill(CharacterTemporaryStat.Undead, o);
+                    TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.Undead);
+                    tsb.setNOption(o.nOption);
+                    tsb.setROption(skill << level | 16);
+                    tsb.setExpireTerm(o.tOption);
                     tsm.sendSetStatPacket();
                 }
                 break;
@@ -332,7 +374,11 @@ public class MobSkill {
                 break;
             case SUMMON:
                 for(int i : msi.getInts()) {
-//                    mob.getField().spawnMob(i, mob.getPosition().getX(), mob.getPosition().getY(), false);
+                    Mob m = mob.getField().spawnMob(i, mob.getPosition().getX(), mob.getPosition().getY(), false);
+                    if (msi.getSkillStatIntValue(hp) > 0) {
+                        m.setMaxHp(msi.getSkillStatIntValue(hp));
+                        m.setHp(msi.getSkillStatIntValue(hp));
+                    }
                 }
                 break;
             case UNK:

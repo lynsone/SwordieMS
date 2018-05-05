@@ -3,7 +3,9 @@ package net.netty;
 import client.Client;
 import client.character.Char;
 import connection.InPacket;
+import connection.OutPacket;
 import handling.InHeader;
+import handling.OutHeader;
 import handling.handlers.ChatHandler;
 import handling.handlers.LoginHandler;
 import handling.handlers.WorldHandler;
@@ -86,6 +88,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_ACTIVATE_NICK_ITEM:
                     WorldHandler.handleUserActiveNickItem(c, inPacket);
+                    break;
+                case USER_REQUEST_CHANGE_MOB_ZONE_STATE:
+                    WorldHandler.handleUserRequestChangeMobZoneState(c, inPacket);
                     break;
                 case USER_TRUNK_REQUEST:
                     WorldHandler.handleUserTrunkRequest(c, inPacket);
@@ -410,6 +415,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case MOB_EXPLOSION_START:
                     WorldHandler.handleMobExplosionStart(c, inPacket);
+                    break;
+                case NPC_MOVE:
+                    WorldHandler.handleNpcMove(chr, inPacket);
                     break;
                 case REQUEST_DEC_COMBO:
                     WorldHandler.handleRequestDecCombo(c, inPacket);

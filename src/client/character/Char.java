@@ -107,11 +107,11 @@ public class Char {
 
     @JoinColumn(name = "charId")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Skill> skills;
+    private Set<Skill> skills;
 
     @JoinColumn(name = "ownerID")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Friend> friends;
+    private Set<Friend> friends;
 
     @JoinColumn(name = "charID")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -319,9 +319,9 @@ public class Char {
         itemPots = new ArrayList<>();
         friendRecords = new ArrayList<>();
         expConsumeItems = new ArrayList<>();
-        skills = new ArrayList<>();
+        skills = new HashSet<>();
         temporaryStatManager = new TemporaryStatManager(this);
-        friends = new ArrayList<>();
+        friends = new HashSet<>();
         monsterBookInfo = new MonsterBookInfo();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
@@ -1435,11 +1435,11 @@ public class Char {
         }
     }
 
-    public List<Skill> getSkills() {
+    public Set<Skill> getSkills() {
         return skills;
     }
 
-    public void setSkills(List<Skill> skills) {
+    public void setSkills(Set<Skill> skills) {
         this.skills = skills;
     }
 
@@ -2671,14 +2671,14 @@ public class Char {
     }
 
     /**
-     * Returns the list of personal (i.e., non-account) friends of this Char.
-     * @return The list of personal friends
+     * Returns the set of personal (i.e., non-account) friends of this Char.
+     * @return The set of personal friends
      */
-    public List<Friend> getFriends() {
+    public Set<Friend> getFriends() {
         return friends;
     }
 
-    public void setFriends(List<Friend> friends) {
+    public void setFriends(Set<Friend> friends) {
         this.friends = friends;
     }
 
@@ -2686,8 +2686,8 @@ public class Char {
      * Returns the total list of friends of this Char + the owning Account's friends.
      * @return The total list of friends
      */
-    public List<Friend> getAllFriends() {
-        List<Friend> res = new ArrayList<>(getFriends());
+    public Set<Friend> getAllFriends() {
+        Set<Friend> res = new HashSet<>(getFriends());
         res.addAll(getAccount().getFriends());
         return res;
     }
@@ -2835,7 +2835,7 @@ public class Char {
         return mainStat.toStat() == null ? 0 : getStat(mainStat.toStat());
     }
 
-    public Map<BaseStat, Integer> getBasicStats() {
+    public Map<BaseStat, Integer> getTotalBasicStats() {
         Map<BaseStat, Integer> stats = new HashMap<>();
         for(BaseStat bs : BaseStat.values()) {
             stats.put(bs, getTotalStat(bs));

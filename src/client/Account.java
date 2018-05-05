@@ -17,7 +17,9 @@ import server.Server;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Tim on 4/30/2017.
@@ -51,14 +53,14 @@ public class Account {
     private Trunk trunk;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ownerAccID")
-    private List<Friend> friends;
+    private Set<Friend> friends;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accID")
-    private List<DamageSkinSaveData> damageSkins = new ArrayList<>();
+    private Set<DamageSkinSaveData> damageSkins = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accID")
-    private List<Char> characters = new ArrayList<>();
+    private Set<Char> characters = new HashSet<>();
     private String lastLoggedIn;
     @Transient
     private Char currentChr;
@@ -83,7 +85,7 @@ public class Account {
         this.censoredNxLoginID = censoredNxLoginID;
         this.characterSlots = characterSlots;
         this.creationDate = creationDate;
-        friends = new ArrayList<>();
+        friends = new HashSet<>();
         trunk = new Trunk((byte) 20);
         setManager();
     }
@@ -201,7 +203,7 @@ public class Account {
         return (Account) DatabaseManager.getObjFromDB(Account.class, accountId);
     }
 
-    public List<Char> getCharacters() {
+    public Set<Char> getCharacters() {
         return characters;
     }
 
@@ -293,11 +295,11 @@ public class Account {
         this.id = id;
     }
 
-    public List<Friend> getFriends() {
+    public Set<Friend> getFriends() {
         return friends;
     }
 
-    public void setFriends(List<Friend> friends) {
+    public void setFriends(Set<Friend> friends) {
         this.friends = friends;
     }
 
@@ -337,11 +339,11 @@ public class Account {
         this.currentChr = currentChr;
     }
 
-    public List<DamageSkinSaveData> getDamageSkins() {
+    public Set<DamageSkinSaveData> getDamageSkins() {
         return damageSkins;
     }
 
-    public void setDamageSkins(List<DamageSkinSaveData> damageSkins) {
+    public void setDamageSkins(Set<DamageSkinSaveData> damageSkins) {
         this.damageSkins = damageSkins;
     }
 

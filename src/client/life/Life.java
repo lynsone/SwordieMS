@@ -1,5 +1,6 @@
 package client.life;
 
+import client.character.Char;
 import client.field.Field;
 import loaders.MobData;
 import loaders.NpcData;
@@ -364,5 +365,9 @@ public class Life {
             homePosition = getPosition().deepCopy();
         }
         return homePosition;
+    }
+
+    public void broadcastSpawnPacket(Char onlyChar) {
+        // Life itself doesn't have a spawn apcket
     }
 }

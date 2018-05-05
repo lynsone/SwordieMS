@@ -15,6 +15,7 @@ import server.World;
 import util.FileTime;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Tim on 2/28/2017.
@@ -193,7 +194,7 @@ public class Login {
         }
         boolean isEdited = false;
         outPacket.encodeByte(isEdited); //edited characters
-        List<Char> chars = account.getCharacters();
+        Set<Char> chars = account.getCharacters();
         int nSecond = chars.size();
         outPacket.encodeInt(nSecond); // nSecond
         for (Char chr : chars) {

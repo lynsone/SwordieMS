@@ -660,11 +660,11 @@ public enum InHeader {
     MOB_DOWN_RESPONSE(847),
     E_N_D__M_O_B(848),
 
-    B_E_G_I_N__N_P_C(849),
-    NPC_MOVE(850),
-    NPC_SPECIAL_ACTION(851),
-    E_N_D__N_P_C(852),
-    E_N_D__L_I_F_E_P_O_O_L(853),
+    B_E_G_I_N__N_P_C(850),
+    NPC_MOVE(851),
+    NPC_SPECIAL_ACTION(852),
+    E_N_D__N_P_C(853),
+    E_N_D__L_I_F_E_P_O_O_L(854),
 
     B_E_G_I_N__D_R_O_P_P_O_O_L(855),
     DROP_PICK_UP_REQUEST(856),
@@ -1010,7 +1010,8 @@ public enum InHeader {
                 USER_REQUEST_INSTANCE_TABLE,
                 USER_QUEST_REQUEST,
                 LOGIN_PASSWORD,
-                AUTH_SECOND_PASSWORD
+                AUTH_SECOND_PASSWORD,
+                NPC_MOVE
         );
         return spam.contains(inHeaderByOp);
     }

@@ -1,7 +1,9 @@
 package client.life;
 
+import client.character.Char;
 import loaders.ReactorInfo;
 import loaders.ReactorData;
+import packet.ReactorPool;
 
 /**
  * Created on 4/21/2018.
@@ -81,5 +83,11 @@ public class Reactor extends Life {
         setState((byte) 0);
         setName(ri.getViewName());
         setPosition(getHomePosition());
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        init();
+        getField().broadcastPacket(ReactorPool.reactorEnterField(this));
     }
 }

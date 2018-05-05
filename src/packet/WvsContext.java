@@ -718,7 +718,7 @@ public class WvsContext {
     }
 
 
-    public static OutPacket loadAccountIDOfCharacterFriendResult(List<Friend> friends) {
+    public static OutPacket loadAccountIDOfCharacterFriendResult(Set<Friend> friends) {
         OutPacket outPacket = new OutPacket(OutHeader.LOAD_ACCOUNT_ID_OF_CHARACTER_FRIEND_RESULT);
 
         outPacket.encodeInt(friends.size());

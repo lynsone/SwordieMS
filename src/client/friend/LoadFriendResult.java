@@ -3,16 +3,16 @@ package client.friend;
 import connection.OutPacket;
 import enums.FriendType;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created on 3/31/2018.
  */
 public class LoadFriendResult implements FriendResult {
 
-    private List<Friend> friends;
+    private Set<Friend> friends;
 
-    public LoadFriendResult(List<Friend> friends) {
+    public LoadFriendResult(Set<Friend> friends) {
         this.friends = friends;
     }
 
