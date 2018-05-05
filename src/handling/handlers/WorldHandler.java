@@ -551,7 +551,6 @@ public class WorldHandler {
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
-        chr.chatMessage("Total damage: " + c.getChr().getDamageCalc().calcPDamageForPvM(attackInfo.skillId, attackInfo.slv));
         chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
         log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();

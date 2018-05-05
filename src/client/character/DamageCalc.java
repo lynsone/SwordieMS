@@ -169,13 +169,11 @@ public class DamageCalc {
 
     private long calcHybridBaseDamage(int stat1, int stat2, int stat3, int stat4, int att, double finalDamage) {
         long dmg = (long) ((stat1 * 3.5 + stat2 * 3.5 + stat3 * 3.5 + stat4) / 100.0 * (att * finalDamage) + 0.5);
-        chr.chatMessage("Base dmg: " + dmg);
         return dmg;
     }
 
     private long calcBaseDamage(int mainStat, int secStat, int tertStat, int att, double finalDamage) {
         long dmg = (long) ((tertStat + secStat + 4 * mainStat) / 100.0 * (att * finalDamage) + 0.5);
-        chr.chatMessage("Base dmg: " + dmg);
         return dmg;
     }
 }
