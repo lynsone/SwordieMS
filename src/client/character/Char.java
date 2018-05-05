@@ -130,9 +130,9 @@ public class Char {
     @Transient
     private int combatOrders;
     @Transient
-    private List<Skill> stolenSkills;
+    private int[] stolenSkills = new int[15]; // Stolen size is always 15
     @Transient
-    private List<Skill> chosenSkills;
+    private int[] chosenSkills = new int[5]; // Chosen size is always 5
     @Transient
     private List<ItemPot> itemPots;
     @Transient
@@ -313,8 +313,6 @@ public class Char {
         setFieldInstanceType(CHANNEL);
         ranking = new Ranking();
         pets = new ArrayList<>();
-        stolenSkills = new ArrayList<>();
-        chosenSkills = new ArrayList<>();
         questManager = new QuestManager(this);
         itemPots = new ArrayList<>();
         friendRecords = new ArrayList<>();
@@ -988,8 +986,8 @@ public class Char {
         }
         if (mask.isInMask(DBChar.StolenSkills)) {
             if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
-                for (Skill skill : getStolenSkills()) {
-                    outPacket.encodeInt(skill.getSkillId());
+                for (int skillID : getStolenSkills()) {
+                    outPacket.encodeInt(skillID);
                 }
             } else {
                 outPacket.encodeInt(0);
@@ -1015,8 +1013,8 @@ public class Char {
         }
         if (mask.isInMask(DBChar.ChosenSkills)) {
             if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
-                for (Skill skill : getChosenSkills()) {
-                    outPacket.encodeInt(skill.getSkillId());
+                for (int skillID : getChosenSkills()) {
+                    outPacket.encodeInt(skillID);
                 }
             } else {
                 for (int i = 0; i < 5; i++) {
@@ -1249,15 +1247,19 @@ public class Char {
         return combatOrders;
     }
 
-    public List<Skill> getStolenSkills() {
+    public int[] getStolenSkills() {
         return stolenSkills;
     }
 
-    public List<Skill> getChosenSkills() {
+    public void setStolenSkills(int[] stolenSkills) {
+        this.stolenSkills = stolenSkills;
+    }
+
+    public int[] getChosenSkills() {
         return chosenSkills;
     }
 
-    public void setChosenSkills(List<Skill> chosenSkills) {
+    public void setChosenSkills(int[] chosenSkills) {
         this.chosenSkills = chosenSkills;
     }
 
