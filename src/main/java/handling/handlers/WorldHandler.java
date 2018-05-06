@@ -3613,7 +3613,7 @@ public class WorldHandler {
         Npc npc = (Npc) chr.getField().getLifeByObjectID(objectID);
         boolean move = npc.isMove();
         Position oldPos = npc.getPosition();
-        Position oldVPos = npc.getPosition();
+        Position oldVPos = npc.getVPosition();
         int encodedGatherDuration = 0;
         List<Movement> movements = new ArrayList<>();
         byte keyPadState = 0;
@@ -3624,8 +3624,12 @@ public class WorldHandler {
             movements = WvsContext.parseMovement(inPacket);
             for (Movement m : movements) {
                 Position pos = m.getPosition();
+                Position vPos = m.getVPosition();
                 if (pos != null) {
                     npc.setPosition(pos);
+                }
+                if (vPos != null) {
+                    npc.setvPosition(vPos);
                 }
                 npc.setMoveAction(m.getMoveAction());
                 npc.setFh(m.getFh());

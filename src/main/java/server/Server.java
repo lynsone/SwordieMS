@@ -176,5 +176,6 @@ public class Server extends Properties {
 		NpcData.clear();
 		QuestData.clear();
 		SkillData.clear();
+		ReactorData.clear();
 	}
 }

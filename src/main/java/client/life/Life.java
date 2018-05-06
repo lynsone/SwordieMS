@@ -27,6 +27,7 @@ public class Life {
     private byte moveAction;
     private Field field;
     private Position homePosition;
+    private Position vPosition;
 
     public Life(int objectId) {
         this.objectId = objectId;
@@ -369,5 +370,13 @@ public class Life {
 
     public void broadcastSpawnPacket(Char onlyChar) {
         // Life itself doesn't have a spawn apcket
+    }
+
+    public Position getVPosition() {
+        return vPosition;
+    }
+
+    public void setvPosition(Position vPosition) {
+        this.vPosition = vPosition;
     }
 }

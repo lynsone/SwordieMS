@@ -2,6 +2,7 @@ package packet;
 
 import client.life.Npc;
 import client.life.movement.Movement;
+import client.life.movement.Movement3;
 import connection.OutPacket;
 import handling.OutHeader;
 import util.Position;
