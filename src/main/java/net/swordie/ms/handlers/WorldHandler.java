@@ -43,6 +43,8 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.scripts.ScriptManagerImpl;
+import net.swordie.ms.scripts.ScriptType;
 import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -2287,7 +2289,7 @@ public class WorldHandler {
                 QuestInfo qi = QuestData.getQuestInfoById(questID);
                 String scriptName = qi.getStartScript();
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
-                    scriptName = String.format("%d%s.py", questID, ScriptManager.QUEST_START_SCRIPT_END_TAG);
+                    scriptName = String.format("%d%s.py", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
                 }
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
                 break;
@@ -2295,7 +2297,7 @@ public class WorldHandler {
                 qi = QuestData.getQuestInfoById(questID);
                 scriptName = qi.getEndScript();
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
-                    scriptName = String.format("%d%s.py", questID, ScriptManager.QUEST_COMPLETE_SCRIPT_END_TAG);
+                    scriptName = String.format("%d%s.py", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
                 break;

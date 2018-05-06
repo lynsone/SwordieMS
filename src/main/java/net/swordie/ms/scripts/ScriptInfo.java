@@ -1,6 +1,4 @@
-package net.swordie.ms.client.character;
-
-import net.swordie.ms.enums.ScriptType;
+package net.swordie.ms.scripts;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

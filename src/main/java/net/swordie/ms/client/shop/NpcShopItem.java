@@ -2,6 +2,7 @@ package net.swordie.ms.client.shop;
 
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.enums.ItemGrade;
 import net.swordie.ms.util.FileTime;
 
 /**
@@ -279,7 +280,7 @@ public class NpcShopItem {
     }
 
     /**
-     * Sets the potential grade of this item (see {@link net.swordie.ms.enums.ItemGrade}). Will do nothing if this item is not an equip.
+     * Sets the potential grade of this item (see {@link ItemGrade}). Will do nothing if this item is not an equip.
      * @param potentialGrade The potential grade of this item
      */
     public void setPotentialGrade(int potentialGrade) {

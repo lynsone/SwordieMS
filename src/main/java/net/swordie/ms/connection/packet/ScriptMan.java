@@ -1,10 +1,10 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.NpcScriptInfo;
-import net.swordie.ms.client.character.ScriptManager;
+import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.NpcMessageType;
-import net.swordie.ms.enums.ScriptType;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.handlers.header.OutHeader;
 
 /**
@@ -12,7 +12,7 @@ import net.swordie.ms.handlers.header.OutHeader;
  */
 public class ScriptMan {
 
-    public static OutPacket scriptMessage(ScriptManager sm, NpcMessageType nmt) {
+    public static OutPacket scriptMessage(ScriptManagerImpl sm, NpcMessageType nmt) {
         NpcScriptInfo nsi = sm.getNpcScriptInfo();
 
         OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_MESSAGE);

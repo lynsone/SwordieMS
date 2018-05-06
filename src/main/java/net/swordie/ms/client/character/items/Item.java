@@ -230,7 +230,7 @@ public class Item implements Serializable {
     }
 
     /**
-     * Sends a net.swordie.ms.connection.packet to the given Char to show that this Item has updated.
+     * Sends a packet to the given Char to show that this Item has updated.
      * @param chr The Char to give the update to
      */
     public void updateToChar(Char chr) {

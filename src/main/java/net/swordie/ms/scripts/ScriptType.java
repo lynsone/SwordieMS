@@ -1,4 +1,4 @@
-package net.swordie.ms.enums;
+package net.swordie.ms.scripts;
 
 /**
  * Created on 2/19/2018.

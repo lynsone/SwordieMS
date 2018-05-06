@@ -1,7 +1,7 @@
 package net.swordie.ms.client.field;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.ScriptManager;
+import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.SkillInfo;
 import net.swordie.ms.client.character.skills.TemporaryStatManager;
@@ -10,7 +10,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.DropLeaveType;
 import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.ScriptType;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
@@ -54,7 +54,7 @@ public class Field {
     private boolean userFirstEnter = false;
     private Set<Reactor> reactors;
     private String fieldScript = "";
-    private ScriptManager scriptManager;
+    private ScriptManagerImpl scriptManagerImpl;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -73,9 +73,9 @@ public class Field {
     private void startFieldScript() {
         String script = getFieldScript();
         if(!"".equalsIgnoreCase(script)) {
-            scriptManager = new ScriptManager(this);
+            scriptManagerImpl = new ScriptManagerImpl(this);
             log.debug(String.format("Starting field script %s.", script));
-            scriptManager.startScript(getId(), script, ScriptType.FIELD);
+            scriptManagerImpl.startScript(getId(), script, ScriptType.FIELD);
         }
     }
 
@@ -638,7 +638,7 @@ public class Field {
 
     /**
      * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
-     * Immediately broadcasts the drop net.swordie.ms.connection.packet.
+     * Immediately broadcasts the drop packet.
      *
      * @param drop    The Drop to drop.
      * @param posFrom The Position that the drop starts off from.
