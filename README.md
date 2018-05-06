@@ -1,1 +1,1 @@
-"# A server emulator for Maplestory." 
+#A server emulator for Maplestory.
