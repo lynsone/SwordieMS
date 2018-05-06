@@ -1280,6 +1280,10 @@ public class Equip extends Item {
         return new int[] {getOptions().get(3), getOptions().get(4), getOptions().get(5)};
     }
 
+    public int getOption(int num, boolean bonus) {
+        return bonus ? getOptionBonus(num) : getOptionBase(num);
+    }
+
     public int getOptionBonus(int num) {
         return getOptions().get(num + 3);
     }
@@ -1326,17 +1330,9 @@ public class Equip extends Item {
     }
 
     public void releaseOptions(boolean bonus) {
-        if(bonus) {
-            for (int i = 0; i < 3; i++) {
-                if(getOptionBonus(i) != 0) {
-                    setOptionBonus(i, getRandomOption(bonus));
-                }
-            }
-        } else {
-            for (int i = 0; i < 3; i++) {
-                if(getOptionBase(i) != 0) {
-                    setOptionBase(i, getRandomOption(bonus));
-                }
+        for (int i = 0; i < 3; i++) {
+            if(getOption(i, bonus) != 0) {
+                setOptionBonus(i, getRandomOption(bonus));
             }
         }
     }

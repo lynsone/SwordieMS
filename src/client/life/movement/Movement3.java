@@ -11,14 +11,14 @@ public class Movement3 extends MovementBase {
     public Movement3(InPacket inPacket, byte command) {
         super();
         this.command = command;
-        this.position = new Position(0, 0);
 
         short xv = inPacket.decodeShort();
         short xy = inPacket.decodeShort();
         vPosition = new Position(xv, xy);
 
-        if (command == 21 || command == 22)
+        if (command == 21 || command == 22) {
             footStart = inPacket.decodeShort();
+        }
 
         moveAction = inPacket.decodeByte();
         elapse = inPacket.decodeShort();

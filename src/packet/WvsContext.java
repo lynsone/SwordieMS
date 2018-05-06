@@ -225,6 +225,8 @@ public class WvsContext {
     }
 
     public static List<Movement> parseMovement(InPacket inPacket) {
+        // Taken from mushy when my IDA wasn't able to show this properly
+        // Made by Maxcloud
         List<Movement> res = new ArrayList<>();
         byte size = inPacket.decodeByte();
         for (int i = 0; i < size; i++) {
@@ -240,11 +242,6 @@ public class WvsContext {
                 case 69:
                     res.add(new Movement1(inPacket, type));
                     break;
-                case 56:
-                case 66:
-                case 85:
-                    res.add(new Movement2(inPacket, type));
-                    break;
                 case 1:
                 case 2:
                 case 18:
@@ -256,6 +253,38 @@ public class WvsContext {
                 case 64:
                 case 65:
                     res.add(new Movement3(inPacket, type));
+                    break;
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 9:
+                case 10:
+                case 11:
+                case 13:
+                case 26:
+                case 27:
+                case 52:
+                case 53:
+                case 54:
+                case 61:
+                case 76:
+                case 77:
+                case 78:
+                case 80:
+                case 82:
+                    res.add(new Movement5(inPacket, type));
+                    break;
+                case 12:
+                    res.add(new Movement8(inPacket, type));
+                    break;
+                case 14:
+                case 16:
+                    res.add(new Movement6(inPacket, type));
+                    break;
+                case 23:
+                    res.add(new Movement7(inPacket, type));
                     break;
                 case 29:
                 case 30:
@@ -293,37 +322,10 @@ public class WvsContext {
                 case 83:
                     res.add(new Movement4(inPacket, type));
                     break;
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 9:
-                case 10:
-                case 11:
-                case 13:
-                case 26:
-                case 27:
-                case 52:
-                case 53:
-                case 54:
-                case 61:
-                case 76:
-                case 77:
-                case 78:
-                case 80:
-                case 82:
-                    res.add(new Movement5(inPacket, type));
-                    break;
-                case 14:
-                case 16:
-                    res.add(new Movement6(inPacket, type));
-                    break;
-                case 23:
-                    res.add(new Movement7(inPacket, type));
-                    break;
-                case 12:
-                    res.add(new Movement8(inPacket, type));
+                case 56:
+                case 66:
+                case 85:
+                    res.add(new Movement2(inPacket, type));
                     break;
                 default:
                     log.warn(String.format("[WvsContext.parseMovement] The type (%s) is unhandled.", type));

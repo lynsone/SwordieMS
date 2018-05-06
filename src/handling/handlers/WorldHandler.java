@@ -1811,7 +1811,7 @@ public class WorldHandler {
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort();
         short ePos = inPacket.decodeShort();
-        Item item = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(uPos);
+        Item item = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(uPos); // old system with magnifying glasses
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (equip == null) {
@@ -3612,7 +3612,8 @@ public class WorldHandler {
         int duration = inPacket.decodeInt();
         Npc npc = (Npc) chr.getField().getLifeByObjectID(objectID);
         boolean move = npc.isMove();
-        Position oldPos = null, oldVPos = null;
+        Position oldPos = npc.getPosition();
+        Position oldVPos = npc.getPosition();
         int encodedGatherDuration = 0;
         List<Movement> movements = new ArrayList<>();
         byte keyPadState = 0;
@@ -3620,15 +3621,12 @@ public class WorldHandler {
             encodedGatherDuration = inPacket.decodeInt();
             oldPos = inPacket.decodePosition();
             oldVPos = inPacket.decodePosition();
-            if(oldVPos.equals(new Position())) {
-                // prevents NPCs from flying from 0,0 to their current position
-                // is this intended, though?
-                oldVPos = oldPos;
-            }
             movements = WvsContext.parseMovement(inPacket);
             for (Movement m : movements) {
                 Position pos = m.getPosition();
-                npc.setPosition(pos);
+                if (pos != null) {
+                    npc.setPosition(pos);
+                }
                 npc.setMoveAction(m.getMoveAction());
                 npc.setFh(m.getFh());
             }
