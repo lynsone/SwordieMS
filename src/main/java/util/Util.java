@@ -89,10 +89,14 @@ public class Util {
 
     /**
      * Returns a random number from 0 up to (and <b>including</b>) inclBound. Creates a new Random class upon call.
+     * If a bound smaller or equal to 0 is given, always returns 0.
      * @param inclBound the upper bound of the random number
      * @return A random number from 0 up to and including inclBound
      */
     public static int getRandom(int inclBound) {
+        if (inclBound <= 0) {
+            return 0;
+        }
         return new Random().nextInt(inclBound + 1);
     }
 

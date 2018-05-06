@@ -212,9 +212,6 @@ public class AdminCommands {
                     mob.setField(field);
                 }
                 field.spawnLife(mob, null);
-
-                log.debug("Mob has id " + mob.getObjectId());
-                chr.chatMessage("hp=" + mob.getMaxHp());
             }
         }
     }

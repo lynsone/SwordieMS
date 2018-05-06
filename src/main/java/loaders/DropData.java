@@ -67,22 +67,33 @@ public class DropData {
                 }
                 String[] split = line.split(" ");
                 /*
-                Format, either:
+                Format:
                 mobID (int)
                 or:
+                itemID (int) chance (int out of 1000) minCount (int) maxCount (int) questReq?
                 itemID (int) chance (int out of 1000) questReq?(int)
-                So, single line = mobID, else 2/3 ints
+                So, single line = mobID, else 2/3/4/5 ints
                  */
                 if(split.length == 1 && !split[0].equals("")) {
                     mobID = Integer.parseInt(split[0]);
                 } else if(split.length >= 2) {
                     int itemID = Integer.parseInt(split[0]);
                     int chance = Integer.parseInt(split[1]);
+                    int minQuant = 1;
+                    int maxQuant = 1;
                     int questReq = 0;
-                    if(split.length >= 3 && Util.isNumber(split[2])) {
+                    if (split.length >= 4 && Util.isNumber(split[3])) { // hack to make you able to comment stuff
+                        // min/max count
+                        minQuant = Integer.parseInt(split[2]);
+                        maxQuant = Integer.parseInt(split[3]);
+                        if (split.length >= 5 && Util.isNumber(split[4])) {
+                            questReq = Integer.parseInt(split[4]);
+                        }
+                    }
+                    else if(split.length >= 3 && Util.isNumber(split[2])) {
                         questReq = Integer.parseInt(split[2]);
                     }
-                    DropInfo dropInfo = new DropInfo(itemID, 0, chance, questReq);
+                    DropInfo dropInfo = new DropInfo(itemID, 0, chance, questReq, minQuant, maxQuant);
                     addDrop(mobID, dropInfo);
                 }
 
@@ -107,6 +118,8 @@ public class DropData {
                     das.writeInt(dropInfo.getItemID());
                     das.writeInt(dropInfo.getChance());
                     das.writeInt(dropInfo.getQuestReq());
+                    das.writeInt(dropInfo.getMinQuant());
+                    das.writeInt(dropInfo.getMaxQuant());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -131,7 +144,6 @@ public class DropData {
     }
 
     public static void loadDropsFromFile(File file) {
-        Set<DropInfo> drops = null;
         try {
             DataInputStream dis = new DataInputStream(new FileInputStream(file));
             int mobID = dis.readInt();
@@ -141,6 +153,8 @@ public class DropData {
                 dropInfo.setItemID(dis.readInt());
                 dropInfo.setChance(dis.readInt());
                 dropInfo.setQuestReq(dis.readInt());
+                dropInfo.setMinQuant(dis.readInt());
+                dropInfo.setMaxQuant(dis.readInt());
                 addDrop(mobID, dropInfo);
             }
         } catch (IOException e) {

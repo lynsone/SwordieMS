@@ -1,10 +1,7 @@
 package loaders;
 
 import client.character.skills.Option;
-import client.life.ForcedMobStat;
-import client.life.Mob;
-import client.life.MobSkill;
-import client.life.MobTemporaryStat;
+import client.life.*;
 import constants.ServerConstants;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
@@ -340,6 +337,9 @@ public class MobData {
             mob.setMp(fms.getMaxMP());
             mob.setMaxMp(fms.getMaxMP());
             mob.setDrops(DropData.getDropInfoByID(mob.getTemplateId()));
+            for(DropInfo di : mob.getDrops()) {
+                di.generateNextDrop();
+            }
             addMob(mob);
         } catch (IOException e) {
             e.printStackTrace();

@@ -11,6 +11,9 @@ public class DropInfo {
     private int questReq;
     private int money;
     private int minMoney, maxmoney;
+    private int minQuant = 1;
+    private int maxQuant = 1;
+    private int quantity = 1;
 
     public DropInfo() {
     }
@@ -28,11 +31,25 @@ public class DropInfo {
         this.questReq = questReq;
         this.minMoney = minMoney;
         this.maxmoney = maxmoney;
-        generateNextMoneyDrop();
+        generateNextDrop();
     }
 
-    public void generateNextMoneyDrop() {
-        setMoney(getMinMoney() + Util.getRandom(getMaxmoney() - getMinMoney()));
+    public DropInfo(int itemID, int money, int chance, int questReq, int minQuant, int maxQuant) {
+        this.itemID = itemID;
+        this.money = money;
+        this.chance = chance;
+        this.questReq = questReq;
+        this.minQuant = minQuant;
+        this.maxQuant = maxQuant;
+        generateNextDrop();
+    }
+
+    public void generateNextDrop() {
+        if (getMaxmoney() > 0) {
+            setMoney(getMinMoney() + Util.getRandom(getMaxmoney() - getMinMoney()));
+        } else {
+            setQuantity(getMinQuant() + Util.getRandom(getMaxQuant() - getMinQuant()));
+        }
     }
 
     public int getMinMoney() {
@@ -102,5 +119,29 @@ public class DropInfo {
 
     public boolean isMoney() {
         return getMoney() > 0 || getMinMoney() > 0;
+    }
+
+    public int getMinQuant() {
+        return minQuant;
+    }
+
+    public void setMinQuant(int minQuant) {
+        this.minQuant = minQuant;
+    }
+
+    public int getMaxQuant() {
+        return maxQuant;
+    }
+
+    public void setMaxQuant(int maxQuant) {
+        this.maxQuant = maxQuant;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

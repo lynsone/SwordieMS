@@ -666,10 +666,8 @@ public class Field {
         Drop drop = new Drop(-1);
         drop.setOwnerID(ownerID);
         if (itemID != 0) {
-            item = ItemData.getEquipDeepCopyFromID(itemID);
-            if (item == null) {
-                item = ItemData.getItemDeepCopy(itemID);
-            }
+            item = ItemData.getItemDeepCopy(itemID);
+            item.setQuantity(dropInfo.getQuantity());
             drop.setItem(item);
         } else {
             drop.setMoney(dropInfo.getMoney());
@@ -726,9 +724,7 @@ public class Field {
                 Position posTo = new Position(x, fh.getYFromX(x));
                 drop(dropInfo, position, posTo, ownerID);
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
-                if(dropInfo.isMoney()) {
-                    dropInfo.generateNextMoneyDrop();
-                }
+                dropInfo.generateNextDrop();
             }
         }
     }
