@@ -1411,8 +1411,8 @@ public class Char {
         if (job == null) {
             return;
         }
-        setJobHandler(JobManager.getJobById(getJob(), this));
         getAvatarData().getCharacterStat().setJob(id);
+        setJobHandler(JobManager.getJobById((short) id, this));
         List<Skill> skills = SkillData.getSkillsByJob((short) id);
         skills.forEach(this::addSkill);
         getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
@@ -1546,6 +1546,9 @@ public class Char {
         }
     }
 
+    /**
+     * Notifies all groups (such as party, guild) about all your changes, such as level and job.
+     */
     private void notifyChanges() {
         if (getParty() != null) {
             getParty().updateFull();
