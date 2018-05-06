@@ -4,7 +4,6 @@ import client.character.Char;
 import client.character.items.BodyPart;
 import client.character.items.Equip;
 import client.life.AffectedArea;
-import com.sun.istack.internal.NotNull;
 import connection.OutPacket;
 import constants.ItemConstants;
 import enums.TSIndex;
@@ -69,7 +68,7 @@ public class TemporaryStatManager {
         return twoStates;
     }
 
-    public TemporaryStatBase getTSBByTSIndex(@NotNull TSIndex tsi) {
+    public TemporaryStatBase getTSBByTSIndex(TSIndex tsi) {
         return getTwoStates().get(tsi.getIndex());
     }
 

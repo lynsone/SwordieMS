@@ -3,14 +3,8 @@ package client.character.items;
 import client.character.Char;
 import connection.OutPacket;
 import constants.ItemConstants;
-import enums.EquipBaseStat;
 import enums.InvType;
-import enums.ScrollStat;
-import jdk.nashorn.internal.runtime.ScriptObject;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import packet.WvsContext;
-import server.Server;
 import util.FileTime;
 
 import javax.persistence.*;
