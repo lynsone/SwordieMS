@@ -1,10 +1,10 @@
 package net.swordie.ms.life.mob.skill;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.skills.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.Option;
-import net.swordie.ms.client.character.skills.TemporaryStatBase;
-import net.swordie.ms.client.character.skills.TemporaryStatManager;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.life.mob.Mob;

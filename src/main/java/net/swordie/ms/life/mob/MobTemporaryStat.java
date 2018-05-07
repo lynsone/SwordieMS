@@ -3,7 +3,7 @@ package net.swordie.ms.life.mob;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.SkillInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.mob.skill.BurnedInfo;
 import net.swordie.ms.loaders.SkillData;

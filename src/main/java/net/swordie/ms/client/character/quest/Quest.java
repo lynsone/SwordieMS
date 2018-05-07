@@ -1,7 +1,7 @@
 package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.quest.QuestProgressRequirement.*;
+import net.swordie.ms.client.character.quest.progress.*;
 import net.swordie.ms.enums.QuestStatus;
 import org.hibernate.annotations.Cascade;
 import net.swordie.ms.util.FileTime;

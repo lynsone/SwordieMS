@@ -2,10 +2,10 @@ package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.quest.QuestProgressRequirement.QuestProgressItemRequirement;
-import net.swordie.ms.client.character.quest.questRequirements.QuestStartCompletionRequirement;
-import net.swordie.ms.client.character.quest.questRequirements.QuestStartRequirement;
-import net.swordie.ms.client.character.quest.questReward.QuestReward;
+import net.swordie.ms.client.character.quest.progress.QuestProgressItemRequirement;
+import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionRequirement;
+import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
+import net.swordie.ms.client.character.quest.reward.QuestReward;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.loaders.ItemData;

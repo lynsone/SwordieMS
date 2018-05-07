@@ -2,8 +2,14 @@ package net.swordie.ms.client.jobs.legend;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.HitInfo;
+import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.info.AttackInfo;
+import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
+import net.swordie.ms.client.character.skills.info.MobAttackInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.MobStat;
@@ -27,7 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static net.swordie.ms.client.character.skills.CharacterTemporaryStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 
 /**

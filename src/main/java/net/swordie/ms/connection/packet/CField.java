@@ -1,10 +1,12 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.*;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.PetItem;
-import net.swordie.ms.client.character.skills.ForceAtomInfo;
+import net.swordie.ms.client.character.keys.FuncKeyMap;
+import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.PsychicArea;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;

@@ -1,6 +1,6 @@
 package net.swordie.ms.enums;
 
-import net.swordie.ms.client.character.skills.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 
 import java.util.ArrayList;
 import java.util.Arrays;

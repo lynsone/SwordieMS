@@ -1,7 +1,7 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.SkillInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.life.mob.skill.MobSkillStat;

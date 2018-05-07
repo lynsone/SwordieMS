@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character;
 
+import net.swordie.ms.client.character.cards.CharacterCard;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.util.SystemTime;

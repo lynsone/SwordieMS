@@ -1,11 +1,14 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.*;
+import net.swordie.ms.client.character.cards.CharacterCard;
+import net.swordie.ms.client.character.info.ExpIncreaseInfo;
+import net.swordie.ms.client.character.info.ZeroInfo;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.TemporaryStatManager;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
 import net.swordie.ms.client.guild.result.GuildResultInfo;

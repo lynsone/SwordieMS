@@ -5,7 +5,7 @@ import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.enums.DamageSkinType;
+import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.util.Position;
 

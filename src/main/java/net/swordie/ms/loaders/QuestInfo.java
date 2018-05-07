@@ -1,8 +1,8 @@
 package net.swordie.ms.loaders;
 
-import net.swordie.ms.client.character.quest.QuestProgressRequirement.QuestProgressRequirement;
-import net.swordie.ms.client.character.quest.questReward.QuestReward;
-import net.swordie.ms.client.character.quest.questRequirements.QuestStartRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressRequirement;
+import net.swordie.ms.client.character.quest.reward.QuestReward;
+import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
 
 import java.util.ArrayList;
 import java.util.HashSet;

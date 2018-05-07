@@ -1,9 +1,9 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.quest.Quest;
-import net.swordie.ms.client.character.quest.QuestProgressRequirement.*;
-import net.swordie.ms.client.character.quest.questRequirements.*;
-import net.swordie.ms.client.character.quest.questReward.*;
+import net.swordie.ms.client.character.quest.progress.*;
+import net.swordie.ms.client.character.quest.requirement.*;
+import net.swordie.ms.client.character.quest.reward.*;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.ServerConstants;

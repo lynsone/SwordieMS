@@ -1,8 +1,8 @@
 package net.swordie.ms.life;
 
-import net.swordie.ms.client.character.AvatarLook;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.skills.SkillInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.enums.Stat;

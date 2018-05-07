@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.skills;
 
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.loaders.SkillData;
 
 import java.util.ArrayList;

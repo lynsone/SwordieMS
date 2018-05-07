@@ -3,7 +3,7 @@ package net.swordie.ms.client.jobs;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
-import net.swordie.ms.client.character.skills.AttackInfo;
+import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.jobs.adventurer.*;
 import net.swordie.ms.client.jobs.cygnus.*;
 import net.swordie.ms.client.jobs.legend.*;

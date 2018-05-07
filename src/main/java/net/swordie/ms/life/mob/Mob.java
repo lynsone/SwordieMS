@@ -1,7 +1,7 @@
 package net.swordie.ms.life.mob;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.ExpIncreaseInfo;
+import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.life.DeathType;

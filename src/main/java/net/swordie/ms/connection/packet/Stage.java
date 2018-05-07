@@ -1,6 +1,6 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.character.DamageCalc;
+import net.swordie.ms.client.character.damage.DamageCalc;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.world.field.FieldCustom;

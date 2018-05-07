@@ -2,7 +2,8 @@ package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.DamageSkinSaveData;
+import net.swordie.ms.client.character.damage.DamageSkinSaveData;
+import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
