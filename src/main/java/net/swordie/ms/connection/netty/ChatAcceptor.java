@@ -1,7 +1,7 @@
 package net.swordie.ms.connection.netty;
 
 import net.swordie.ms.client.Client;
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.ServerConstants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -36,7 +36,7 @@ public class ChatAcceptor implements Runnable{
             b.childHandler(new ChannelInitializer<SocketChannel>() {
 
                 @Override
-                protected void initChannel(SocketChannel ch) throws Exception {
+                protected void initChannel(SocketChannel ch) {
 
                     ch.pipeline().addLast(new PacketDecoder(), new ChannelHandler(), new PacketEncoder());
 

@@ -6,7 +6,7 @@ import net.swordie.ms.client.character.skills.AttackInfo;
 import net.swordie.ms.client.character.skills.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.MobAttackInfo;
 import net.swordie.ms.client.character.skills.TemporaryStatManager;
-import net.swordie.ms.client.life.movement.Movement;
+import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AvatarModifiedMask;

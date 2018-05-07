@@ -3,14 +3,14 @@ package net.swordie.ms.client.character.skills;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
-import net.swordie.ms.client.life.AffectedArea;
+import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.TSIndex;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.WvsContext;
-import net.swordie.ms.EventManager;
-import net.swordie.ms.util.Tuple;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.util.container.Tuple;
 
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;

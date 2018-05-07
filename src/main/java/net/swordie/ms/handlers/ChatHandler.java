@@ -5,7 +5,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.ChatSocket;
 import net.swordie.ms.Server;
-import net.swordie.ms.World;
+import net.swordie.ms.world.World;
 
 import java.util.HashMap;
 import java.util.Map;

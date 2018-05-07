@@ -4,7 +4,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.HitInfo;
 import net.swordie.ms.client.character.skills.*;
-import net.swordie.ms.client.field.Field;
+import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;

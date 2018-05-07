@@ -1,7 +1,7 @@
 package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.field.Field;
+import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
 
 /**

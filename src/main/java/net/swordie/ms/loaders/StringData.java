@@ -1,6 +1,6 @@
 package net.swordie.ms.loaders;
 
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.ServerConstants;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

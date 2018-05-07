@@ -1,12 +1,15 @@
 package net.swordie.ms.client.party;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.field.Field;
+import net.swordie.ms.client.party.result.LeavePartyResult;
+import net.swordie.ms.client.party.result.PartyJoinResult;
+import net.swordie.ms.client.party.updates.UpdatePartyResult;
+import net.swordie.ms.world.field.Field;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.FieldInstanceType;
+import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.loaders.FieldData;
 import net.swordie.ms.connection.packet.WvsContext;
-import net.swordie.ms.World;
+import net.swordie.ms.world.World;
 
 import java.util.*;
 import java.util.stream.Collectors;

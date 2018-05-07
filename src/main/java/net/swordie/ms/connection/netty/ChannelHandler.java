@@ -6,7 +6,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
-import net.swordie.ms.handlers.WorldHandler;
+import net.swordie.ms.world.WorldHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;

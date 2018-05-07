@@ -20,7 +20,7 @@
  */
 package net.swordie.ms.connection.db;
 
-import net.swordie.ms.constants.ServerConfig;
+import net.swordie.ms.ServerConfig;
 import org.apache.log4j.LogManager;
 
 import java.sql.Connection;

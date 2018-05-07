@@ -1,6 +1,6 @@
 package net.swordie.ms.client.character.skills;
 
-import net.swordie.ms.client.life.Summon;
+import net.swordie.ms.life.Summon;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;

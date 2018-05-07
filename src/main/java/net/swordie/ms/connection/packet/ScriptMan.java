@@ -1,9 +1,9 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.character.NpcScriptInfo;
+import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.NpcMessageType;
+import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.handlers.header.OutHeader;
 

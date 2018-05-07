@@ -11,7 +11,7 @@ import net.swordie.ms.client.character.skills.CharacterTemporaryStat;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.CharNameResult;
 import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -19,7 +19,7 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
-import net.swordie.ms.Channel;
+import net.swordie.ms.world.Channel;
 import net.swordie.ms.Server;
 
 import java.sql.Connection;

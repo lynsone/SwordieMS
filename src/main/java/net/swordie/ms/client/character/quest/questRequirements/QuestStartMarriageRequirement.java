@@ -17,12 +17,12 @@ public class QuestStartMarriageRequirement implements QuestStartRequirement {
     }
 
     @Override
-    public void write(DataOutputStream dos) throws IOException {
+    public void write(DataOutputStream dos) {
 
     }
 
     @Override
-    public DatSerializable load(DataInputStream dis) throws IOException {
+    public DatSerializable load(DataInputStream dis) {
         return new QuestStartMarriageRequirement();
     }
 }

@@ -37,7 +37,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
-    protected void decode(ChannelHandlerContext chc, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext chc, ByteBuf in, List<Object> out) {
         NettyClient c = chc.channel().attr(NettyClient.CLIENT_KEY).get();
         MapleCrypto mCr = chc.channel().attr(NettyClient.CRYPTO_KEY).get();
         if (c != null) {

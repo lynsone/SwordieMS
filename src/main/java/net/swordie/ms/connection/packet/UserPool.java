@@ -3,7 +3,7 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.client.character.AvatarLook;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
-import net.swordie.ms.client.character.Pet;
+import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.client.character.skills.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.TemporaryStatManager;
 import net.swordie.ms.client.guild.Guild;

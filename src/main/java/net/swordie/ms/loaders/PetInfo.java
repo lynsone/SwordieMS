@@ -2,7 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.enums.InvType;
-import net.swordie.ms.enums.PetSkill;
+import net.swordie.ms.life.pet.PetSkill;
 
 /**
  * Created on 4/14/2018.

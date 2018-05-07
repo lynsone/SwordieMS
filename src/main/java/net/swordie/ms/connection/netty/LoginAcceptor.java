@@ -1,7 +1,7 @@
 package net.swordie.ms.connection.netty;
 
 import net.swordie.ms.client.Client;
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.ServerConstants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -10,7 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.swordie.ms.connection.crypto.MapleCrypto;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
-import net.swordie.ms.EventManager;
+import net.swordie.ms.handlers.EventManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class LoginAcceptor implements Runnable{
             b.childHandler(new ChannelInitializer<SocketChannel>() {
 
                 @Override
-                protected void initChannel(SocketChannel ch) throws Exception {
+                protected void initChannel(SocketChannel ch) {
 
                     ch.pipeline().addLast(new PacketDecoder(), new ChannelHandler(), new PacketEncoder());
 

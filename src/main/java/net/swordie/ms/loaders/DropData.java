@@ -1,7 +1,7 @@
 package net.swordie.ms.loaders;
 
-import net.swordie.ms.client.life.DropInfo;
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.life.drop.DropInfo;
+import net.swordie.ms.ServerConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.Util;

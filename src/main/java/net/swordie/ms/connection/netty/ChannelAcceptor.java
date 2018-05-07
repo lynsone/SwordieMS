@@ -9,7 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.swordie.ms.connection.crypto.MapleCrypto;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
-import net.swordie.ms.EventManager;
+import net.swordie.ms.handlers.EventManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +19,7 @@ import static net.swordie.ms.connection.netty.NettyClient.CLIENT_KEY;
 public class ChannelAcceptor implements Runnable {
 
     public Map<String, Channel> channelPool = new HashMap<>();
-    public net.swordie.ms.Channel channel;
+    public net.swordie.ms.world.Channel channel;
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
@@ -35,7 +35,7 @@ public class ChannelAcceptor implements Runnable {
             b.childHandler(new ChannelInitializer<SocketChannel>() {
 
                 @Override
-                protected void initChannel(SocketChannel ch) throws Exception {
+                protected void initChannel(SocketChannel ch) {
 
                     ch.pipeline().addLast(new PacketDecoder(), new ChannelHandler(), new PacketEncoder());
 

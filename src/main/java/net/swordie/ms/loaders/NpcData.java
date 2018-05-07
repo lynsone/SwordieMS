@@ -1,12 +1,12 @@
 package net.swordie.ms.loaders;
 
-import net.swordie.ms.client.life.Npc;
-import net.swordie.ms.client.shop.BuyLimitInfo;
-import net.swordie.ms.client.shop.NpcShopDlg;
-import net.swordie.ms.client.shop.NpcShopItem;
-import net.swordie.ms.constants.ServerConstants;
-import net.swordie.ms.dsl.SWEntity;
-import net.swordie.ms.dsl.SWParser;
+import net.swordie.ms.life.npc.Npc;
+import net.swordie.ms.world.shop.BuyLimitInfo;
+import net.swordie.ms.world.shop.NpcShopDlg;
+import net.swordie.ms.world.shop.NpcShopItem;
+import net.swordie.ms.ServerConstants;
+import net.swordie.ms.util.dsl.SWEntity;
+import net.swordie.ms.util.dsl.SWParser;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;

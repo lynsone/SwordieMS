@@ -1,9 +1,9 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.DamageCalc;
-import net.swordie.ms.client.field.Field;
+import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.field.FieldCustom;
+import net.swordie.ms.world.field.FieldCustom;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.DBChar;
 import net.swordie.ms.handlers.header.OutHeader;

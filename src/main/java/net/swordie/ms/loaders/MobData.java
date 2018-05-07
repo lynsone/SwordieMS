@@ -1,8 +1,12 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.skills.Option;
-import net.swordie.ms.client.life.*;
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.ServerConstants;
+import net.swordie.ms.life.drop.DropInfo;
+import net.swordie.ms.life.mob.ForcedMobStat;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.skill.MobSkill;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -12,7 +16,7 @@ import net.swordie.ms.util.XMLApi;
 import java.io.*;
 import java.util.*;
 
-import static net.swordie.ms.enums.MobStat.*;
+import static net.swordie.ms.life.mob.MobStat.*;
 
 /**
  * Created on 12/30/2017.

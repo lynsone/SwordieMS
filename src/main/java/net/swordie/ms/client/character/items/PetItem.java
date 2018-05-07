@@ -1,9 +1,9 @@
 package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.Pet;
+import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.PetSkill;
+import net.swordie.ms.life.pet.PetSkill;
 import org.apache.log4j.Logger;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;

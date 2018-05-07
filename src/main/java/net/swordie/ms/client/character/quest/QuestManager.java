@@ -6,7 +6,7 @@ import net.swordie.ms.client.character.quest.QuestProgressRequirement.QuestProgr
 import net.swordie.ms.client.character.quest.questRequirements.QuestStartCompletionRequirement;
 import net.swordie.ms.client.character.quest.questRequirements.QuestStartRequirement;
 import net.swordie.ms.client.character.quest.questReward.QuestReward;
-import net.swordie.ms.client.life.Mob;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.QuestData;

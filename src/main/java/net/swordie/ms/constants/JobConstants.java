@@ -395,9 +395,8 @@ public class JobConstants {
         PINK_BEAN_EMPTY_13(800018),
         PINK_BEAN_EMPTY_14(800019),
         PINK_BEAN_EMPTY_15(800022);
-        ;
 
-        private short jobId;
+	    private short jobId;
 
         JobEnum(short jobId) {
             this.jobId = jobId;
