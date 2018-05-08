@@ -1,7 +1,7 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.life.npc.Npc;
-import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.client.life.Npc;
+import net.swordie.ms.client.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.util.Position;

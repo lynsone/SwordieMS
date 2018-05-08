@@ -79,7 +79,7 @@ public class Util {
 
     /**
      * Returns the current time. Simply calls System.currentTimeMillis().
-     * @return
+     * @return The current time as milliseconds since unix start time
      */
     public static long getCurrentTimeLong() {
         return System.currentTimeMillis();

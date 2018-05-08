@@ -12,9 +12,9 @@ public class Movement3 extends MovementBase {
         super();
         this.command = command;
 
-        short xv = inPacket.decodeShort();
-        short xy = inPacket.decodeShort();
-        vPosition = new Position(xv, xy);
+        short vx = inPacket.decodeShort();
+        short vy = inPacket.decodeShort();
+        position = new Position(vx, vy);
 
         if (command == 21 || command == 22) {
             footStart = inPacket.decodeShort();

@@ -211,4 +211,8 @@ public class ReactorData {
     public static void main(String[] args) {
         generateDatFiles();
     }
+
+    public static void clear() {
+        getReactorInfo().clear();
+    }
 }
