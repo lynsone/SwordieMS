@@ -2,8 +2,11 @@ package net.swordie.ms.client.jobs;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.skills.info.AttackInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.enums.Stat;

@@ -1,6 +1,7 @@
 package net.swordie.ms.client.character.skills;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.skills.info.LarknessInfo;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 

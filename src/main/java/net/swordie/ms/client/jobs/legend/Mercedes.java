@@ -2,19 +2,23 @@ package net.swordie.ms.client.jobs.legend;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.HitInfo;
+import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
-import net.swordie.ms.client.field.Field;
+import net.swordie.ms.client.character.skills.info.AttackInfo;
+import net.swordie.ms.client.character.skills.info.MobAttackInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.client.life.Mob;
-import net.swordie.ms.client.life.MobTemporaryStat;
-import net.swordie.ms.client.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.MobStat;
+import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
@@ -26,7 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static net.swordie.ms.client.character.skills.CharacterTemporaryStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 
 /**

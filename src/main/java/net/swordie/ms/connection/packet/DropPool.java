@@ -1,6 +1,6 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.life.Drop;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.DropEnterType;
 import net.swordie.ms.enums.DropLeaveType;

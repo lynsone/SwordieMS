@@ -127,8 +127,7 @@ public class SkillConstants {
                 }
             } else if (skillId != 5220012) {
                 if (skillId > 4340012) {
-                    if (skillId < 5120011 || skillId > 5120012)
-                        return false;
+	                return skillId >= 5120011 && skillId <= 5120012;
                 } else if (skillId != 4340012) {
                     return skillId == 4340010;
                 }

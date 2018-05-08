@@ -2,26 +2,29 @@ package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.DamageSkinSaveData;
-import net.swordie.ms.client.character.NpcScriptInfo;
+import net.swordie.ms.client.character.damage.DamageSkinSaveData;
+import net.swordie.ms.client.character.damage.DamageSkinType;
+import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
-import net.swordie.ms.client.field.Field;
-import net.swordie.ms.client.field.Portal;
-import net.swordie.ms.client.field.fieldeffect.MobHPTagFieldEffect;
-import net.swordie.ms.client.guild.GuildMsg;
-import net.swordie.ms.client.life.Reactor;
+import net.swordie.ms.client.guild.result.GuildResultType;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.fieldeffect.MobHPTagFieldEffect;
+import net.swordie.ms.client.guild.result.GuildMsg;
+import net.swordie.ms.life.Reactor;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
-import net.swordie.ms.client.shop.NpcShopDlg;
+import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.client.trunk.TrunkOpen;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.*;
-import net.swordie.ms.enums.NpcMessageType;
+import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.loaders.*;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.*;
@@ -39,7 +42,7 @@ import java.util.Observer;
 
 import static net.swordie.ms.enums.ChatMsgColour.*;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
-import static net.swordie.ms.enums.NpcMessageType.*;
+import static net.swordie.ms.life.npc.NpcMessageType.*;
 
 /**
  * Created on 2/19/2018.

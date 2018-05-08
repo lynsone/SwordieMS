@@ -1,10 +1,12 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.life.*;
-import net.swordie.ms.client.life.movement.Movement;
+import net.swordie.ms.life.mob.*;
+import net.swordie.ms.life.mob.skill.BurnedInfo;
+import net.swordie.ms.life.mob.skill.ShootingMoveStat;
+import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.MobStat;
+import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.util.Position;
 

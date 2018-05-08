@@ -27,7 +27,7 @@ import net.swordie.ms.connection.InPacket;
  */
 public interface PacketHandler<E extends NettyClient> {
     
-    public boolean validateState(E c);
+    boolean validateState(E c);
     
-    public void handle(E c, InPacket r);
+    void handle(E c, InPacket r);
 }

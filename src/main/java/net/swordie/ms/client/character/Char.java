@@ -2,27 +2,44 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.character.avatar.AvatarData;
+import net.swordie.ms.client.character.avatar.AvatarLook;
+import net.swordie.ms.client.character.cards.MonsterBookInfo;
+import net.swordie.ms.client.character.damage.DamageCalc;
+import net.swordie.ms.client.character.damage.DamageSkinSaveData;
+import net.swordie.ms.client.character.info.ExpIncreaseInfo;
+import net.swordie.ms.client.character.info.FarmUserInfo;
+import net.swordie.ms.client.character.info.FreezeHotEventInfo;
+import net.swordie.ms.client.character.info.ZeroInfo;
 import net.swordie.ms.client.character.items.*;
+import net.swordie.ms.client.character.keys.FuncKeyMap;
+import net.swordie.ms.client.character.monsterbattle.MonsterBattleLadder;
+import net.swordie.ms.client.character.monsterbattle.MonsterBattleMobInfo;
+import net.swordie.ms.client.character.monsterbattle.MonsterBattleRankInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.TemporaryStatManager;
-import net.swordie.ms.client.field.Field;
-import net.swordie.ms.client.field.Portal;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.friend.FriendRecord;
+import net.swordie.ms.client.friend.FriendshipRingRecord;
+import net.swordie.ms.life.pet.Pet;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.GuildUpdate;
-import net.swordie.ms.client.guild.GuildUpdateMemberLogin;
+import net.swordie.ms.client.guild.updates.GuildUpdate;
+import net.swordie.ms.client.guild.updates.GuildUpdateMemberLogin;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.client.life.AffectedArea;
-import net.swordie.ms.client.life.Drop;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.party.Party;
-import net.swordie.ms.client.shop.NpcShopDlg;
+import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
@@ -44,10 +61,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
-import static net.swordie.ms.client.character.skills.CharacterTemporaryStat.FullSoulMP;
-import static net.swordie.ms.client.character.skills.CharacterTemporaryStat.SoulMP;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
-import static net.swordie.ms.enums.FieldInstanceType.*;
+import static net.swordie.ms.world.field.FieldInstanceType.*;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
@@ -523,7 +540,7 @@ public class Char {
 			outPacket.encodeInt(0);
 			outPacket.encodeInt(0);
 			outPacket.encodeInt(0);
-			outPacket.encodeInt(0); // ^-- idk
+			outPacket.encodeInt(0);
 
 			boolean hasMonsterBattleLadder = getMonsterBattleLadder() != null;
 			outPacket.encodeByte(hasMonsterBattleLadder);
@@ -2770,7 +2787,7 @@ public class Char {
 	}
 
 	public void removeFriend(Friend friend) {
-		if (friend != null && getFriends().contains(friend)) {
+		if (friend != null) {
 			getFriends().remove(friend);
 		}
 	}

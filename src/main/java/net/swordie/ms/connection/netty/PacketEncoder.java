@@ -36,7 +36,7 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
-    protected void encode(ChannelHandlerContext chc, Packet in, ByteBuf bb) throws Exception {
+    protected void encode(ChannelHandlerContext chc, Packet in, ByteBuf bb) {
         byte[] data = in.getData();
         NettyClient c = chc.channel().attr(NettyClient.CLIENT_KEY).get();
         MapleCrypto mCr = chc.channel().attr(NettyClient.CRYPTO_KEY).get();

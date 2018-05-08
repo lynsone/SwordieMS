@@ -1,6 +1,6 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.life.Reactor;
+import net.swordie.ms.life.Reactor;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.handlers.header.OutHeader;
 

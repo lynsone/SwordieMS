@@ -30,11 +30,11 @@ public interface IntegerValue {
      * Gets the value associated with this integer value.
      * @return the value.
      */
-    public int getValue();
+    int getValue();
 
     /**
      * Sets the value associated with this integer value.
      * @param val the value.
      */
-    public void setValue(int val);
+    void setValue(int val);
 }

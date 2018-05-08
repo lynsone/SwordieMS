@@ -2,7 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.constants.ServerConstants;
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ScrollStat;
 import net.swordie.ms.enums.SpecStat;

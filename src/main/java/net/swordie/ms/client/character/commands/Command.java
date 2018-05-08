@@ -10,8 +10,9 @@ public interface Command {
     char prefix = '@';
     static void execute(Char chr, String[] args){
 
-    };
-    static char getPrefix() {
+    }
+
+	static char getPrefix() {
         return prefix;
     }
 }

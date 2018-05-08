@@ -1,6 +1,6 @@
 package net.swordie.ms.loaders;
 
-import net.swordie.ms.enums.MobSkillStat;
+import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.util.Position;
 
 import java.util.HashMap;

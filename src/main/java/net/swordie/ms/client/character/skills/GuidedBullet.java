@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.skills;
 
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.connection.OutPacket;
 
 /**

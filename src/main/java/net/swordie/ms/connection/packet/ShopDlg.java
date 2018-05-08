@@ -1,7 +1,7 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.shop.NpcShopDlg;
-import net.swordie.ms.client.shop.ShopResult;
+import net.swordie.ms.world.shop.NpcShopDlg;
+import net.swordie.ms.world.shop.result.ShopResult;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.handlers.header.OutHeader;
 
