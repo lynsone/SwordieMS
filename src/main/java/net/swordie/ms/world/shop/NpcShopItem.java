@@ -36,6 +36,7 @@ public class NpcShopItem {
     private long unitPrice;
     private short maxPerSlot;
     private int discountPerc;
+    private int location;
 
     public NpcShopItem() {
         sellEnd = FileTime.getFTFromLong(-1);
@@ -349,6 +350,14 @@ public class NpcShopItem {
 
     public int getDiscountPerc() {
         return discountPerc;
+    }
+
+    public int getLocation() {
+        return location;
+    }
+
+    public void setLocation(int location) {
+        this.location = location;
     }
 
     /**

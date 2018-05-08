@@ -7,7 +7,7 @@ import net.swordie.ms.constants.JobConstants;
  */
 public class ServerConstants {
 
-	public static final String DIR = "D:/SwordieMS/Swordie";
+	public static final String DIR = "C:/Users/Me/Desktop/MapleStory - Server/swordie";
 	public static final byte LOCALE = 8;
 	public static final String WZ_DIR = DIR + "/WZ";
 	public static final String DAT_DIR = DIR + "/dat";

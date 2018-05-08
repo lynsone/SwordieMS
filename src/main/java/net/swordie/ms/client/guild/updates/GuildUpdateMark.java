@@ -1,5 +1,7 @@
 package net.swordie.ms.client.guild.updates;
 
+import net.swordie.ms.client.guild.Guild;
+import net.swordie.ms.client.guild.result.GuildResultInfo;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.client.guild.result.GuildResultType;
 
