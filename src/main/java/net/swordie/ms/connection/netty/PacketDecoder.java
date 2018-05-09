@@ -46,7 +46,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
                 if (in.readableBytes() >= 4) {
                     int h = in.readInt();
                     if (!MapleCrypto.checkPacket(h, iv)) {
-                        log.error(String.format("[PacketDecoder] | Incorrect net.swordie.ms.connection.packet seq! Dropping net.swordie.ms.client %s.", c.getIP()));
+                        log.error(String.format("[PacketDecoder] | Incorrect packet seq! Dropping client %s.", c.getIP()));
                         c.close();
                         return;
                     }

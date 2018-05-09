@@ -61,7 +61,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
             if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(op))) {
-                log.debug(String.format("[In]\t| %s, %d/0x%s\t| %s", InHeader.getInHeaderByOp(op), +op, Integer.toHexString(op).toUpperCase(), inPacket));
+                log.debug(String.format("[In]\t| %s, %d/0x%s\t| %s", InHeader.getInHeaderByOp(op), op, Integer.toHexString(op).toUpperCase(), inPacket));
             }
             switch(opHeader) {
                 case CONNECT_CHAT:

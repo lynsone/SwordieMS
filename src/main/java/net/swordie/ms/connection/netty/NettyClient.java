@@ -161,9 +161,9 @@ public class NettyClient {
     }
     
     /**
-     * Writes a net.swordie.ms.connection.packet message to the channel. Gets encoded later in the
+     * Writes a message to the channel. Gets encoded later in the
      * pipeline.
-     * @param msg the net.swordie.ms.connection.packet message to be sent.
+     * @param msg the message to be sent.
      */
     public void write(Packet msg) {
         ch.writeAndFlush(msg);

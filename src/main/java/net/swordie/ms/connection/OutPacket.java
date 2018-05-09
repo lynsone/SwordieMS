@@ -1,5 +1,7 @@
 package net.swordie.ms.connection;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import net.swordie.ms.handlers.header.OutHeader;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.util.FileTime;
@@ -11,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 public class OutPacket extends Packet {
-    private ByteArrayOutputStream baos;
+    private ByteBuf baos;
     private boolean loopback = false;
     private boolean encryptedByShanda = false;
     private short op;
@@ -23,7 +25,7 @@ public class OutPacket extends Packet {
      */
     public OutPacket(short op) {
         super(new byte[]{});
-        baos = new ByteArrayOutputStream();
+        baos = ByteBufAllocator.DEFAULT.buffer();
         encodeShort(op);
         this.op = op;
     }
@@ -41,7 +43,7 @@ public class OutPacket extends Packet {
      */
     public OutPacket() {
         super(new byte[]{});
-        baos = new ByteArrayOutputStream();
+        baos = ByteBufAllocator.DEFAULT.buffer();
     }
 
     /**
@@ -50,7 +52,7 @@ public class OutPacket extends Packet {
      */
     public OutPacket(byte[] data) {
         super(data);
-        baos = new ByteArrayOutputStream();
+        baos = ByteBufAllocator.DEFAULT.buffer();
         encodeArr(data);
     }
 
@@ -84,7 +86,7 @@ public class OutPacket extends Packet {
      * @param b The byte to encode.
      */
     public void encodeByte(byte b) {
-        baos.write(b);
+        baos.writeByte(b);
     }
 
     /**
@@ -93,17 +95,15 @@ public class OutPacket extends Packet {
      * @param bArr The byte array to encode.
      */
     public void encodeArr(byte[] bArr) {
-        for (byte b : bArr) {
-            baos.write(b);
-        }
+        baos.writeBytes(bArr);
     }
 
     /**
-     * Encodes a character to this OutPacket.
+     * Encodes a character to this OutPacket, UTF-8.
      * @param c The character to encode
      */
     public void encodeChar(char c) {
-        baos.write(c);
+        baos.writeByte(c);
     }
 
     /**
@@ -111,7 +111,7 @@ public class OutPacket extends Packet {
      * @param b The boolean to encode (0/1)
      */
     public void encodeByte(boolean b) {
-        baos.write(b ? 1 : 0);
+        baos.writeBoolean(b);
     }
 
     /**
@@ -119,19 +119,15 @@ public class OutPacket extends Packet {
      * @param s The short to encode.
      */
     public void encodeShort(short s) {
-        baos.write((byte) s);
-        baos.write((byte) (s >>> 8));
+        baos.writeShortLE(s);
     }
 
     public void encodeShortBE(short s) {
-        baos.write(s);
+        baos.writeShort(s);
     }
 
     public void encodeIntBE(int i) {
-        baos.write((byte) (i >>> 24));
-        baos.write((byte) (i >>> 16));
-        baos.write((byte) (i >>> 8));
-        baos.write((byte) i);
+        baos.writeInt(i);
     }
 
     /**
@@ -139,10 +135,7 @@ public class OutPacket extends Packet {
      * @param i The integer to encode.
      */
     public void encodeInt(int i) {
-        baos.write((byte) i);
-        baos.write((byte) (i >>> 8));
-        baos.write((byte) (i >>> 16));
-        baos.write((byte) (i >>> 24));
+        baos.writeIntLE(i);
     }
 
     /**
@@ -150,22 +143,7 @@ public class OutPacket extends Packet {
      * @param l The long to encode.
      */
     public void encodeLong(long l) {
-        baos.write((byte) l);
-        baos.write((byte) (l >>> 8));
-        baos.write((byte) (l >>> 16));
-        baos.write((byte) (l >>> 24));
-        baos.write((byte) (l >>> 32));
-        baos.write((byte) (l >>> 40));
-        baos.write((byte) (l >>> 48));
-        baos.write((byte) (l >>> 56));
-    }
-
-    /**
-     * Encodes a FileTime to this OutPacket.
-     * @param fileTime The FileTime to encode.
-     */
-    public void encodeLong(FileTime fileTime) {
-        encodeFT(fileTime);
+        baos.writeLongLE(l);
     }
 
     /**
@@ -208,13 +186,19 @@ public class OutPacket extends Packet {
     @Override
     public void setData(byte[] nD) {
         super.setData(nD);
-        baos.reset();
+        baos.clear();
         encodeArr(nD);
     }
 
     @Override
     public byte[] getData() {
-        return baos.toByteArray();
+        if (baos.hasArray()) {
+            return baos.array();
+        } else {
+            byte[] arr = new byte[baos.writerIndex()];
+            baos.nioBuffer().get(arr, 0, baos.writerIndex());
+            return arr;
+        }
     }
 
     @Override
@@ -228,7 +212,7 @@ public class OutPacket extends Packet {
      */
     @Override
     public int getLength() {
-        return baos.size();
+        return getData().length;
     }
 
     public boolean isLoopback() {

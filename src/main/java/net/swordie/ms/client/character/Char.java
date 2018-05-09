@@ -1186,7 +1186,7 @@ public class Char {
 			outPacket.encodeInt(1);
 			outPacket.encodeInt(0);
 			outPacket.encodeInt(100);
-			outPacket.encodeLong(FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME));
+			outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME));
 			outPacket.encodeShort(0);
 			outPacket.encodeShort(0);
 		}

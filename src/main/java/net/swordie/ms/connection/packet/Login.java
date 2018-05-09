@@ -25,7 +25,7 @@ public class Login {
         OutPacket oPacket = new OutPacket();
 
         // version (short) + MapleString (short + char array size) + local IV (int) + remote IV (int) + locale (byte)
-        //0xE
+        // 0xE
         oPacket.encodeShort((short) 15);
         oPacket.encodeShort(ServerConstants.VERSION);
         oPacket.encodeString(ServerConstants.MINOR_VERSION);
@@ -37,8 +37,7 @@ public class Login {
     }
 
     public static OutPacket sendPing() {
-        OutPacket outPacket = new OutPacket(OutHeader.PING.getValue());
-        return outPacket;
+        return new OutPacket(OutHeader.PING.getValue());
     }
 
     public static OutPacket sendAuthServer(boolean useAuthServer) {
