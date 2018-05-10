@@ -149,9 +149,6 @@ public class QuestManager {
         quest.setCompletedTime(FileTime.getTime());
         chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
         chr.write(WvsContext.questRecordMessage(quest));
-        for(QuestProgressItemRequirement qpir : quest.getItemReqs()) {
-            chr.consumeItem(qpir.getItemID(), qpir.getRequiredCount());
-        }
         for(QuestReward qr : questInfo.getQuestRewards()) {
             qr.giveReward(chr);
         }

@@ -2289,7 +2289,7 @@ public class Char {
 			item.setQuantity(0);
 			inventory.removeItem(item);
 			write(WvsContext.inventoryOperation(true, false,
-					REMOVE, (short) item.getBagIndex(), (byte) -1, 0, item));
+					REMOVE, (short) item.getBagIndex(), (byte) 0, 0, item));
 		} else {
 			item.setQuantity(item.getQuantity() - 1);
 			write(WvsContext.inventoryOperation(true, false,
@@ -2312,9 +2312,9 @@ public class Char {
 	public void consumeItem(int id, int quantity) {
 		Item checkItem = ItemData.getItemDeepCopy(id);
 		Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
-		int consumed = quantity > item.getQuantity() ? 0 : item.getQuantity() - quantity;
-		item.setQuantity(consumed + 1); // +1 because 1 gets consumed by consumeItem(item)
 		if (item != null) {
+			int consumed = quantity > item.getQuantity() ? 0 : item.getQuantity() - quantity;
+			item.setQuantity(consumed + 1); // +1 because 1 gets consumed by consumeItem(item)
 			consumeItem(item);
 		}
 	}

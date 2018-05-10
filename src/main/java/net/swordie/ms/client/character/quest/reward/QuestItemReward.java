@@ -39,14 +39,13 @@ public class QuestItemReward implements QuestReward{
 
     @Override
     public void giveReward(Char chr) {
-        Item item;
-        if(ItemConstants.isEquip(getId())) {
-            item = ItemData.getEquipDeepCopyFromID(getId());
+        Item item = ItemData.getItemDeepCopy(getId());
+        item.setQuantity(getQuantity());
+        if (getQuantity() < 0) {
+            chr.consumeItem(item.getItemId(), -getQuantity());
         } else {
-            item = ItemData.getItemDeepCopy(getId());
-            item.setQuantity(getQuantity());
+            chr.addItemToInventory(item);
         }
-        chr.addItemToInventory(item);
     }
 
     public void setPotentialGrade(String potentialGrade) {
