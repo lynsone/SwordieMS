@@ -1,6 +1,5 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
@@ -158,13 +157,8 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket resultStealSkillList(Client c, int nPhantomStealResult, int targetChrId, int targetJobId) {
+    public static OutPacket resultStealSkillList(Set<Skill> targetSkillsList, int nPhantomStealResult, int targetChrId, int targetJobId) {
         OutPacket outPacket = new OutPacket(OutHeader.RESULT_STEAL_SKILL_LIST);
-        Char chr = c.getChr();
-
-        Char targetChr = chr.getField().getCharByID(targetChrId);
-        Set<Skill> targetSkillsList = targetChr.getSkills();
-
         outPacket.encodeByte(0); //Set Excl Request
         outPacket.encodeInt(targetChrId);
         outPacket.encodeInt(nPhantomStealResult); //   Gets a check  if == 4,   else:   nPhantomStealWrongResult
@@ -174,7 +168,7 @@ public class UserLocal {
 
             for (Skill skills : targetSkillsList) {
                 // if v9 (index??) > 0
-                outPacket.encodeInt(skills.getId());
+                outPacket.encodeInt(skills.getSkillId());
             }
         }
 

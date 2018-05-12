@@ -3693,9 +3693,12 @@ public class WorldHandler {
 
     public static void handleUserRequestStealSkillList(Client c, InPacket inPacket) {
         int targetChrID = inPacket.decodeInt();
-        Char targetChr = c.getChr().getField().getCharByID(targetChrID);
 
-        c.write(UserLocal.resultStealSkillList(c, 4, targetChrID, targetChr.getJob()));
+        Char chr = c.getChr();
+        Char targetChr = chr.getField().getCharByID(targetChrID);
+        Set<Skill> targetSkillsList = targetChr.getSkills();
+
+        c.write(UserLocal.resultStealSkillList(targetSkillsList, 4, targetChrID, targetChr.getJob()));
     }
 
     public static void handleUserRequestStealSkillMemory(Client c, InPacket inPacket) {
