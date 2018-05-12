@@ -21,6 +21,8 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.FriendRecord;
 import net.swordie.ms.client.friend.FriendshipRingRecord;
+import net.swordie.ms.client.jobs.legend.StealSkillInfo;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
@@ -57,6 +59,8 @@ import net.swordie.ms.util.Rect;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -145,6 +149,8 @@ public class Char {
 	private Ranking ranking;
 	@Transient
 	private int combatOrders;
+	@Transient
+	private StealSkillInfo stealSkillInfo = new StealSkillInfo();
 	@Transient
 	private int[] stolenSkills = new int[15]; // Stolen size is always 15
 	@Transient
@@ -277,6 +283,10 @@ public class Char {
 	private Client chatClient;
 	@Transient
 	private DamageCalc damageCalc;
+	@Transient
+	private int comboCounter;
+	@Transient
+	private ScheduledFuture scheduledFuture;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -2504,6 +2514,14 @@ public class Char {
 		this.friendshipRingRecord = friendshipRingRecord;
 	}
 
+	public int getComboCounter() {
+		return comboCounter;
+	}
+
+	public void setComboCounter(int comboCounter) {
+		this.comboCounter = comboCounter;
+	}
+
 	public int getEvanDragonGlide() {
 		return evanDragonGlide;
 	}
@@ -2925,5 +2943,20 @@ public class Char {
 			stats.put(BaseStat.mad, stats.getOrDefault(BaseStat.mad, 0) + equip.getiMad());
 		}
 		return stats;
+	}
+
+	public void comboKillTimer() {
+		if(scheduledFuture != null && !scheduledFuture.isDone()) {
+			scheduledFuture.cancel(true);
+		}
+		scheduledFuture = EventManager.addEvent(() -> setComboCounter(0), 5, TimeUnit.SECONDS);
+	}
+
+	public StealSkillInfo getStealSkillInfo() {
+		return stealSkillInfo;
+	}
+
+	public void setStealSkillInfo(StealSkillInfo stealSkillInfo) {
+		this.stealSkillInfo = stealSkillInfo;
 	}
 }

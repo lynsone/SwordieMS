@@ -772,4 +772,157 @@ public class SkillConstants {
         // TODO
         return false;
     }
+
+    public static int getStealSkillManagerTabFromSkill(int skillID) {
+        int smJobID = 0;
+        switch (skillID / 10000) {
+
+            // 1st Job Tab
+            case 100:
+            case 200:
+            case 300:
+            case 400:
+            case 430:
+            case 500:
+            case 501:
+                smJobID = 1;
+                break;
+
+            // 2nd Job Tab
+            case 110:
+            case 120:
+            case 130:
+
+            case 210:
+            case 220:
+            case 230:
+
+
+            case 310:
+            case 320:
+
+            case 410:
+            case 420:
+            case 431:
+            case 432:
+
+            case 510:
+            case 520:
+            case 530:
+                smJobID = 2;
+                break;
+
+            // 3rd Job Tab
+            case 111:
+            case 121:
+            case 131:
+
+            case 211:
+            case 221:
+            case 231:
+
+            case 311:
+            case 321:
+
+            case 411:
+            case 421:
+            case 433:
+
+            case 511:
+            case 521:
+            case 531:
+                smJobID = 3;
+                break;
+
+            // 4th job Tab
+            case 112:
+            case 122:
+            case 132:
+
+            case 212:
+            case 222:
+            case 232:
+
+            case 312:
+            case 322:
+
+            case 412:
+            case 422:
+            case 434:
+
+            case 512:
+            case 522:
+            case 532:
+                smJobID = 4;
+                break;
+
+            default: //Should Work for Hypers Tab
+                smJobID = 5;
+                break;
+
+        }
+        return smJobID;
+    }
+
+    public static int getMaxPosBysmJobID(int smJobID) {
+        int maxPos = 0;
+        switch (smJobID) {
+            case 1:
+            case 2:
+                maxPos = 3;
+                break;
+            case 3:
+                maxPos = 2;
+                break;
+            case 4:
+            case 5:
+                maxPos = 1;
+                break;
+        }
+        return maxPos;
+    }
+
+    public static int getStartPosBysmJobID(int smJobID) {
+        int startPos = 0;
+        switch (smJobID) {
+            case 1:
+                startPos = 0;
+                break;
+            case 2:
+                startPos = 4;
+                break;
+            case 3:
+                startPos = 8;
+                break;
+            case 4:
+                startPos = 11;
+                break;
+            case 5:
+                startPos = 13;
+                break;
+        }
+        return startPos;
+    }
+
+    public static int getImpecSkillIDBysmJobID(int smJobID) {
+        int impecSkillID = 0;
+        switch (smJobID) {
+            case 1:
+                impecSkillID = 24001001;
+                break;
+            case 2:
+                impecSkillID = 24101001;
+                break;
+            case 3:
+                impecSkillID = 24111001;
+                break;
+            case 4:
+                impecSkillID = 24121001;
+                break;
+            case 5:
+                impecSkillID = 24121054;
+                break;
+        }
+        return impecSkillID;
+    }
 }

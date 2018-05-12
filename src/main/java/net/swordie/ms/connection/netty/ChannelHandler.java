@@ -429,6 +429,15 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_REQUEST_FLYING_SWORD_START:
                     WorldHandler.handleUserRequestFlyingSwordStart(c, inPacket);
                     break;
+                case USER_REQUEST_STEAL_SKILL_LIST:
+                    WorldHandler.handleUserRequestStealSkillList(c, inPacket);
+                    break;
+                case USER_REQUEST_STEAL_SKILL_MEMORY:
+                    WorldHandler.handleUserRequestStealSkillMemory(c, inPacket);
+                    break;
+                case USER_REQUEST_SET_STEAL_SKILL_SLOT:
+                    WorldHandler.handleUserRequestSetStealSkillSlot(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

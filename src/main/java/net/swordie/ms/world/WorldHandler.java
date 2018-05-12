@@ -1,8 +1,11 @@
 package net.swordie.ms.world;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
-import net.swordie.ms.client.character.*;
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.Macro;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
 import net.swordie.ms.client.character.damage.DamageSkinType;
@@ -15,32 +18,17 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.friend.Friend;
+import net.swordie.ms.client.friend.FriendFlag;
+import net.swordie.ms.client.friend.FriendType;
 import net.swordie.ms.client.friend.result.*;
+import net.swordie.ms.client.guild.Guild;
+import net.swordie.ms.client.guild.GuildMember;
+import net.swordie.ms.client.guild.GuildRequestType;
 import net.swordie.ms.client.guild.result.*;
 import net.swordie.ms.client.guild.updates.GuildUpdateGradeNames;
 import net.swordie.ms.client.guild.updates.GuildUpdateMark;
 import net.swordie.ms.client.guild.updates.GuildUpdateMemberGrade;
-import net.swordie.ms.client.party.request.PartyApplyRequest;
-import net.swordie.ms.client.party.request.PartyJoinRequestBlue;
-import net.swordie.ms.client.party.request.PartyRequestType;
-import net.swordie.ms.client.party.result.*;
-import net.swordie.ms.client.trunk.TrunkType;
-import net.swordie.ms.handlers.ClientSocket;
-import net.swordie.ms.handlers.PsychicLock;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.life.drop.Drop;
-import net.swordie.ms.life.mob.skill.MobSkillStat;
-import net.swordie.ms.life.npc.Npc;
-import net.swordie.ms.life.Reactor;
-import net.swordie.ms.life.npc.NpcMessageType;
-import net.swordie.ms.life.pet.Pet;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.FieldInstanceType;
-import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.Portal;
-import net.swordie.ms.client.friend.*;
-import net.swordie.ms.client.guild.*;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
@@ -48,42 +36,66 @@ import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Luminous;
+import net.swordie.ms.client.jobs.legend.StealSkillInfo;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
-import net.swordie.ms.life.movement.Movement;
-import net.swordie.ms.client.party.*;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.skill.MobSkill;
-import net.swordie.ms.world.shop.ShopRequestType;
-import net.swordie.ms.world.shop.result.ShopResultType;
-import net.swordie.ms.world.shop.result.MsgShopResult;
-import net.swordie.ms.world.shop.NpcShopDlg;
-import net.swordie.ms.world.shop.NpcShopItem;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.client.party.PartyRequestResultType;
+import net.swordie.ms.client.party.request.PartyApplyRequest;
+import net.swordie.ms.client.party.request.PartyJoinRequestBlue;
+import net.swordie.ms.client.party.request.PartyRequestType;
+import net.swordie.ms.client.party.result.*;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.client.trunk.TrunkMsg;
+import net.swordie.ms.client.trunk.TrunkType;
 import net.swordie.ms.client.trunk.TrunkUpdate;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.handlers.ClientSocket;
+import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.skill.MobSkill;
+import net.swordie.ms.life.mob.skill.MobSkillStat;
+import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.npc.Npc;
+import net.swordie.ms.life.npc.NpcMessageType;
+import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
-import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
+import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Randomizer;
+import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Foothold;
+import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.shop.NpcShopDlg;
+import net.swordie.ms.world.shop.NpcShopItem;
+import net.swordie.ms.world.shop.ShopRequestType;
+import net.swordie.ms.world.shop.result.MsgShopResult;
+import net.swordie.ms.world.shop.result.ShopResultType;
 import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.Server;
-import net.swordie.ms.util.*;
 
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
@@ -597,6 +609,12 @@ public class WorldHandler {
                 long totalDamage = Arrays.stream(mai.damages).sum();
                 mob.addDamage(chr, totalDamage);
                 mob.damage(totalDamage);
+                if(mob.getHp() < 0) {
+                    int newChrComboCount = chr.getComboCounter() + 1;
+                    c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
+                    chr.setComboCounter(newChrComboCount);
+                    chr.comboKillTimer();
+                }
             }
         }
     }
@@ -3670,5 +3688,49 @@ public class WorldHandler {
         }
         chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move, oldPos,
                 oldVPos, encodedGatherDuration, movements, keyPadState));
+    }
+
+    public static void handleUserRequestStealSkillList(Client c, InPacket inPacket) {
+        int targetChrID = inPacket.decodeInt();
+        Char targetChr = c.getChr().getField().getCharByID(targetChrID);
+
+        c.write(UserLocal.resultStealSkillList(c, 4, targetChrID, targetChr.getJob()));
+    }
+
+    public static void handleUserRequestStealSkillMemory(Client c, InPacket inPacket) {
+        int stealSkillID = inPacket.decodeInt();
+        int targetChrID = inPacket.decodeInt();
+        byte type = inPacket.decodeByte(); // 0 = add  |  1 = remove
+
+
+        Char targetChr = c.getChr().getField().getCharByID(targetChrID);
+        Skill stolenSkill = SkillData.getSkillDeepCopyById(stealSkillID);
+        int stealSkillMaxLv = stolenSkill.getMasterLevel();
+        int stealSkillCurLv = targetChr.getSkill(stealSkillID).getCurrentLevel();
+
+        StealSkillInfo stealSkillInfo = c.getChr().getStealSkillInfo();
+
+
+        if(type == 0) {
+            // /Add Stolen Skill
+            int nPos = stealSkillInfo.getEmptyNPos(c.getChr(), stealSkillID);
+            c.write(UserLocal.changeStealMemoryResult((byte) 0, SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), nPos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
+            stealSkillInfo.setSkill(c.getChr(), stealSkillID);
+            c.getChr().chatMessage(GREY, "nPos = " + nPos + ".");
+
+        } else {
+            //Remove Stolen Skill
+            int nPos = stealSkillInfo.getNPosBySkillID(c.getChr(), stealSkillID);
+            c.write(UserLocal.changeStealMemoryResult((byte) 3, SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), nPos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
+            stealSkillInfo.removeSkill(c.getChr(), stealSkillID);
+            c.getChr().chatMessage(GREY, "nPos = " + nPos + ".");
+        }
+    }
+
+    public static void handleUserRequestSetStealSkillSlot(Client c, InPacket inPacket) {
+        int impeccableSkillID = inPacket.decodeInt();
+        int stealSkillID = inPacket.decodeInt(); // 0 if unequip
+
+        c.write(UserLocal.resultSetStealSkill(true, impeccableSkillID, stealSkillID));
     }
 }
