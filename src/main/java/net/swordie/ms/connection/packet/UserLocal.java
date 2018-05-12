@@ -113,7 +113,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket changeStealMemoryResult(byte type, int stealManagerJobID, int nPos, int skillid, int stealSkillLv, int stealSkillMaxLv) {
+    public static OutPacket changeStealMemoryResult(byte type, int stealManagerJobID, int position, int skillid, int stealSkillLv, int stealSkillMaxLv) {
         OutPacket outPacket = new OutPacket(OutHeader.CHANGE_STEAL_MEMORY_RESULT);
         StealMemoryType smType = StealMemoryType.getByVal(type);
 
@@ -123,7 +123,7 @@ public class UserLocal {
         switch (smType) {
             case STEAL_SKILL:
                 outPacket.encodeInt(stealManagerJobID); //jobId  1~5 | 1 = 1stJob , 2 = 2ndJob ... ..
-                outPacket.encodeInt(nPos); //impecMemSkillID // nPOS  0,1,2,3
+                outPacket.encodeInt(position); //impecMemSkillID // nPOS  0,1,2,3
                 outPacket.encodeInt(skillid);//MagicCrash(Hero) //skill
                 outPacket.encodeInt(stealSkillLv);   //StealSkill Lv
                 outPacket.encodeInt(stealSkillMaxLv);   //StealSkill Max Lv
@@ -133,7 +133,7 @@ public class UserLocal {
                 break;
             case REMOVE_STEAL_MEMORY:
                 outPacket.encodeInt(stealManagerJobID);
-                outPacket.encodeInt(nPos);
+                outPacket.encodeInt(position);
                 outPacket.encodeByte(0);
                 break;
             case REMOVE_MEMORY_ALL_SLOT:

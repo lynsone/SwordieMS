@@ -2945,11 +2945,11 @@ public class Char {
 		return stats;
 	}
 
-	public void comboKillTimer() {
+	public void comboKillResetTimer() {
 		if(scheduledFuture != null && !scheduledFuture.isDone()) {
 			scheduledFuture.cancel(true);
 		}
-		scheduledFuture = EventManager.addEvent(() -> setComboCounter(0), 5, TimeUnit.SECONDS);
+		scheduledFuture = EventManager.addEvent(() -> setComboCounter(0), GameConstants.COMBO_KILL_RESET_TIMER, TimeUnit.SECONDS);
 	}
 
 	public StealSkillInfo getStealSkillInfo() {

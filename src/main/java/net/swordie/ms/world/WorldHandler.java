@@ -111,6 +111,7 @@ import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.enums.Stat.sp;
+import static net.swordie.ms.enums.StealMemoryType.*;
 
 /**
  * Created on 12/14/2017.
@@ -613,7 +614,7 @@ public class WorldHandler {
                     int newChrComboCount = chr.getComboCounter() + 1;
                     c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
                     chr.setComboCounter(newChrComboCount);
-                    chr.comboKillTimer();
+                    chr.comboKillResetTimer();
                 }
             }
         }
@@ -3700,36 +3701,33 @@ public class WorldHandler {
     public static void handleUserRequestStealSkillMemory(Client c, InPacket inPacket) {
         int stealSkillID = inPacket.decodeInt();
         int targetChrID = inPacket.decodeInt();
-        byte type = inPacket.decodeByte(); // 0 = add  |  1 = remove
-
+        boolean add = inPacket.decodeByte() != 0;   // 0 = add  |  1 = remove
 
         Char targetChr = c.getChr().getField().getCharByID(targetChrID);
+        StealSkillInfo stealSkillInfo = c.getChr().getStealSkillInfo();
         Skill stolenSkill = SkillData.getSkillDeepCopyById(stealSkillID);
         int stealSkillMaxLv = stolenSkill.getMasterLevel();
         int stealSkillCurLv = targetChr.getSkill(stealSkillID).getCurrentLevel();
 
-        StealSkillInfo stealSkillInfo = c.getChr().getStealSkillInfo();
-
-
-        if(type == 0) {
+        if(!add) {
             // /Add Stolen Skill
-            int nPos = stealSkillInfo.getEmptyNPos(c.getChr(), stealSkillID);
-            c.write(UserLocal.changeStealMemoryResult((byte) 0, SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), nPos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
+            int pos = stealSkillInfo.getEmptyPosition(c.getChr(), stealSkillID);
+            c.write(UserLocal.changeStealMemoryResult(STEAL_SKILL.getVal(), SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), pos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
             stealSkillInfo.setSkill(c.getChr(), stealSkillID);
-            c.getChr().chatMessage(GREY, "nPos = " + nPos + ".");
+            c.getChr().chatMessage(GREY, "Position = " + pos + "."); //Debug Comment
 
         } else {
             //Remove Stolen Skill
-            int nPos = stealSkillInfo.getNPosBySkillID(c.getChr(), stealSkillID);
-            c.write(UserLocal.changeStealMemoryResult((byte) 3, SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), nPos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
+            int pos = stealSkillInfo.getPositionBySkillID(c.getChr(), stealSkillID);
+            c.write(UserLocal.changeStealMemoryResult(REMOVE_STEAL_MEMORY.getVal(), SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), pos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
             stealSkillInfo.removeSkill(c.getChr(), stealSkillID);
-            c.getChr().chatMessage(GREY, "nPos = " + nPos + ".");
+            c.getChr().chatMessage(GREY, "Position = " + pos + "."); //Debug Comment
         }
     }
 
     public static void handleUserRequestSetStealSkillSlot(Client c, InPacket inPacket) {
         int impeccableSkillID = inPacket.decodeInt();
-        int stealSkillID = inPacket.decodeInt(); // 0 if unequip
+        int stealSkillID = inPacket.decodeInt();
 
         c.write(UserLocal.resultSetStealSkill(true, impeccableSkillID, stealSkillID));
     }

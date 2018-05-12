@@ -37,32 +37,32 @@ public class StealSkillInfo {
         }
     }
 
-    public int getEmptyNPos(Char chr, int skillID) {
+    public int getEmptyPosition(Char chr, int skillID) {
         int smJobID = SkillConstants.getStealSkillManagerTabFromSkill(skillID);
         int maxPos = SkillConstants.getMaxPosBysmJobID(smJobID);
         int startingPos = SkillConstants.getStartPosBysmJobID(smJobID);
-        int nPos = 5;
+        int pos = 5;
 
         for(int i = startingPos; i <= (startingPos+maxPos); i++) {
             if(chr.getStolenSkills()[i] == 0) {
-                nPos = (i - startingPos);
+                pos = (i - startingPos);
                 break;
             }
         }
-        return nPos;
+        return pos;
     }
 
-    public int getNPosBySkillID(Char chr, int skillID) {
+    public int getPositionBySkillID(Char chr, int skillID) {
         int smJobID = SkillConstants.getStealSkillManagerTabFromSkill(skillID);
         int maxPos = SkillConstants.getMaxPosBysmJobID(smJobID);
         int startingPos = SkillConstants.getStartPosBysmJobID(smJobID);
-        int nPos = 5;
+        int pos = 5;
 
         for(int i = startingPos; i <= (startingPos+maxPos); i++) {
             if(chr.getStolenSkills()[i] == skillID) {
-                nPos = (i - startingPos);
+                pos = (i - startingPos);
             }
         }
-        return nPos;
+        return pos;
     }
 }
