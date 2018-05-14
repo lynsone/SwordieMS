@@ -139,25 +139,6 @@ public class AdminCommands {
         }
     }
 
-    public static class TestPh1 extends AdminCommand {
-        public static void execute(Char chr, String[] args) {
-            chr.write(UserLocal.resultStealSkillList(chr.getClient(), 4, 1, 132));
-        }
-    }
-
-    public static class TestPh2 extends AdminCommand {
-        public static void execute(Char chr, String[] args) {
-            chr.write(UserLocal.resultSetStealSkill(true, 1, 1301006));
-        }
-    }
-
-    public static class TestPh3 extends AdminCommand {
-        public static void execute(Char chr, String[] args) {
-            chr.write(UserLocal.changeStealMemoryResult((byte) 0, 4, 0, 1121016, 5, 7));
-            //chr.write(UserLocal.resultSetStealSkill(true, 1, 1301006));
-        }
-    }
-
     public static class GetPhantomStolenSkills extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int i = 0;
