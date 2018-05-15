@@ -43,7 +43,7 @@ public enum ScrollStat {
     }
 
     public static EquipBaseStat[] getRandStats() {
-        return new EquipBaseStat[]{iStr, iDex, iInt, iLuk, iACC, iEVA, iPAD, iMAD, iPDD, iMDD};
+        return new EquipBaseStat[]{iStr, iDex, iInt, iLuk, iMaxHP, iMaxMP, iPAD, iMAD, iPDD, iMDD, iACC, iEVA};
     }
 
     public EquipBaseStat getEquipStat() {

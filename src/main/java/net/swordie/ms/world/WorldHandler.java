@@ -3734,4 +3734,47 @@ public class WorldHandler {
 
         c.write(UserLocal.resultSetStealSkill(true, impeccableSkillID, stealSkillID));
     }
+
+    public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) { //TODO  Work in Progress
+        inPacket.decodeInt(); //tick
+        short usePosition = inPacket.decodeShort(); //Use Position
+        short eqpPosition = inPacket.decodeShort(); //Equip Position
+        byte echantSkill = inPacket.decodeByte(); //boolean
+
+        Char chr = c.getChr();
+        Item flame = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(usePosition);
+        InvType invType = eqpPosition < 0 ? EQUIPPED : EQUIP;
+        Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(eqpPosition);
+        if (flame == null || equip == null) {
+            chr.chatMessage(GAME_MESSAGE, "Could not find flame or equip.");
+            chr.dispose();
+            return;
+        }
+        int flameID = flame.getItemId();
+        int max;
+        boolean success = true;
+        switch (flameID) { //TODO   Needs all cases to be added with their correct bonus stats
+            case 2048716: //Powerful Rebirth Flame
+                max = 10; //Not Correct
+                break;
+            default:
+                max = 5; //Not Correct
+        }
+
+        for (EquipBaseStat ebs : ScrollStat.getRandStats()) {
+            int cur = (int) equip.getBaseStat(ebs);
+            if (cur == 0) {
+                continue;
+            }
+            int randStat = Util.getRandom(max);
+            randStat = Util.succeedProp(50) ? -randStat : randStat;
+            equip.addStat(ebs, randStat);
+            equip.updateToChar(chr);
+        }
+        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flameID, equip.getItemId()));
+        c.write(WvsContext.inventoryOperation(true, false, ADD, eqpPosition, (short) 0,
+                0, equip));
+        chr.consumeItem(flame);
+        chr.dispose();
+    }
 }

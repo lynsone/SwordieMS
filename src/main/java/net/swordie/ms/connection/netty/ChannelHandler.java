@@ -438,6 +438,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_REQUEST_SET_STEAL_SKILL_SLOT:
                     WorldHandler.handleUserRequestSetStealSkillSlot(c, inPacket);
                     break;
+                case USER_EX_ITEM_UPGRADE_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserExItemUpgradeItemUseRequest(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

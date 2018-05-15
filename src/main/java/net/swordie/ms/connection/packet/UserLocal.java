@@ -157,12 +157,12 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket resultStealSkillList(Set<Skill> targetSkillsList, int nPhantomStealResult, int targetChrId, int targetJobId) {
+    public static OutPacket resultStealSkillList(Set<Skill> targetSkillsList, int phantomStealResult, int targetChrId, int targetJobId) {
         OutPacket outPacket = new OutPacket(OutHeader.RESULT_STEAL_SKILL_LIST);
         outPacket.encodeByte(0); //Set Excl Request
         outPacket.encodeInt(targetChrId);
-        outPacket.encodeInt(nPhantomStealResult); //   Gets a check  if == 4,   else:   nPhantomStealWrongResult
-        if(nPhantomStealResult == 4) {
+        outPacket.encodeInt(phantomStealResult); //   Gets a check  if == 4,   else:   nPhantomStealWrongResult
+        if(phantomStealResult == 4) {
             outPacket.encodeInt(targetJobId);
             outPacket.encodeInt(targetSkillsList.size());
 
