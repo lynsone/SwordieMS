@@ -1,6 +1,7 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.connection.OutPacket;
@@ -124,10 +125,10 @@ public class UserLocal {
     public static OutPacket explosionAttack(int skillID, Position position, int mobID, int count) {
         OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
 
-        outPacket.encodeInt(skillID); //skillID
-        outPacket.encodePositionInt(position); //Position
-        outPacket.encodeInt(mobID); //MobID
-        outPacket.encodeInt(count); //Count
+        outPacket.encodeInt(skillID);
+        outPacket.encodePositionInt(position);
+        outPacket.encodeInt(mobID);
+        outPacket.encodeInt(count);
 
         return outPacket;
     }
@@ -143,6 +144,41 @@ public class UserLocal {
             pet.encode(outPacket);
         } else {
             outPacket.encodeByte(removedReason);
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket setDead(boolean tremble) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_DEAD);
+
+        outPacket.encodeByte(tremble);
+
+        return outPacket;
+    }
+
+    public static OutPacket openUIOnDead(boolean onDeadRevive, boolean onDeadProtectForBuff, boolean onDeadProtectExpMaplePoint,
+                                         boolean onDeadProtectBuffMaplePoint, boolean anniversary, int reviveType, int protectType) {
+        OutPacket outPacket = new OutPacket(OutHeader.OPEN_UI_DEAD);
+
+        int reviveMask = 0;
+        if (onDeadRevive) {
+            reviveMask |= 0x1;
+        }
+        if (onDeadProtectForBuff) {
+            reviveMask |= 0x2;
+        }
+        if (onDeadProtectBuffMaplePoint) {
+            reviveMask |= 0x4;
+        }
+        if (onDeadProtectExpMaplePoint) {
+            reviveMask |= 0x8;
+        }
+        outPacket.encodeInt(reviveMask);
+        outPacket.encodeByte(anniversary);
+        outPacket.encodeInt(reviveType);
+        if (onDeadProtectForBuff || onDeadProtectExpMaplePoint) {
+            outPacket.encodeInt(protectType);
         }
 
         return outPacket;

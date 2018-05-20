@@ -3,6 +3,7 @@ package net.swordie.ms.connection.netty;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.Packet;
 import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
@@ -28,7 +29,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) {
         NettyClient o = ctx.channel().attr(CLIENT_KEY).get();
 //        if(!LoginAcceptor.channelPool.containsKey(o.getIP())) {
-//            System.out.println("[Dropping currently unknown net.swordie.ms.client]");
+//            System.out.println("[Dropping currently unknown client]");
 //            o.close();
 //        }
     }
@@ -315,6 +316,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_TRANSFER_FIELD_REQUEST:
                     WorldHandler.handleChangeFieldRequest(c, inPacket);
                     break;
+                case USER_PROTECT_BUFF_DIE_ITEM_REQUEST:
+                    WorldHandler.handleUserProtectBuffDieItemRequest(chr, inPacket);
+                    break;
                 case USER_PORTAL_SCRIPT_REQUEST:
                     WorldHandler.handleUserPortalScriptRequest(c, inPacket);
                     break;
@@ -435,12 +439,15 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
             }
         }finally {
             ReferenceCountUtil.release(msg);
+            if (msg instanceof Packet) {
+                ((Packet) msg).release();
+            }
         }
     }
 
     private void handleUnknown(InPacket inPacket, short opCode) {
         if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(opCode))) {
-            log.warn(String.format("Unhandled opcode %s/0x%s, net.swordie.ms.connection.packet %s", opCode, Integer.toHexString(opCode).toUpperCase(), inPacket));
+            log.warn(String.format("Unhandled opcode %s/0x%s, packet %s", opCode, Integer.toHexString(opCode).toUpperCase(), inPacket));
         }
     }
 

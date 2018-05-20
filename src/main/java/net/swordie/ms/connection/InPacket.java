@@ -157,4 +157,8 @@ public class InPacket extends Packet {
     public int getUnreadAmount() {
         return byteBuf.readableBytes();
     }
+
+    public void release() {
+        byteBuf.release();
+    }
 }

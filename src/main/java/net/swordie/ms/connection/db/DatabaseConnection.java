@@ -124,7 +124,7 @@ public class DatabaseConnection {
             try {
                 return DriverManager.getConnection("jdbc:mysql://127.0.0.1:" + ServerConfig.SQL_PORT + "/" + ServerConfig.SQL_SCHEMA + "?autoReconnect=true&useSSL=false", ServerConfig.SQL_USERNAME, ServerConfig.SQL_PASSWORD);
             } catch (SQLException e) {
-                log.fatal("[SEVERE] Unable to make net.swordie.ms.connection.db connection.");
+                log.fatal("[SEVERE] Unable to make db connection.");
                 e.printStackTrace();
                 return null;
             }

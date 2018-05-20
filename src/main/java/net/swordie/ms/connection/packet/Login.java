@@ -114,7 +114,7 @@ public class Login {
         }
         outPacket.encodeShort(0); //*(result._m_pStr + 311) = CInPacket::Decode2(iPacket_1);
         // if > 0, write a position (short x/y) and a string. Something with a login balloon with a message, I think?
-        outPacket.encodeInt(0); // net.swordie.ms.connection.packet offset
+        outPacket.encodeInt(0); // packet offset
         outPacket.encodeByte(false);
         // write int if true.
         // Int is used for CUILoginStart::SetViewWorldButtonMakeShining(v54); v52 = decode4, then v54 = *(v39 + 293);

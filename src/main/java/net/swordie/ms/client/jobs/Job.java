@@ -9,6 +9,8 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.enums.ReviveType;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.WvsContext;
@@ -72,11 +74,11 @@ public abstract class Job {
 	 */
 	public void handleHit(Client c, HitInfo hitInfo) {
 		Char chr = c.getChr();
+		hitInfo.HPDamage = Math.max(0, hitInfo.HPDamage); // to prevent -1 (dodges) healing the player.
 		int curHP = chr.getStat(Stat.hp);
 		int newHP = curHP - hitInfo.HPDamage;
 		if (newHP <= 0) {
-			// TODO Dying
-			curHP = chr.getStat(Stat.mhp);
+			curHP = 0;
 		} else {
 			curHP = newHP;
 		}
@@ -95,6 +97,12 @@ public abstract class Job {
 		chr.setStat(Stat.mp, curMP);
 		stats.put(Stat.mp, curMP);
 		c.write(WvsContext.statChanged(stats));
+		if (curHP <= 0) {
+			// TODO Add more items for protecting exp and whatnot
+			c.write(UserLocal.openUIOnDead(true, chr.getBuffProtectorItem() != null,
+					false, false, false,
+					ReviveType.NORMAL.getVal(),0));
+		}
 	}
 
 	/**

@@ -381,9 +381,9 @@ public class WorldHandler {
             }
             // End PACKETMAKER::MakeAttackInfoPacket
             mai.mobId = mobId;
-            mai.idk1 = idk1;
-            mai.idk2 = idk2;
-            mai.idk3 = idk3;
+            mai.hitAction = idk1;
+            mai.left = idk2;
+            mai.frameIdx = idk3;
             mai.idk4 = idk4;
             mai.idk5 = idk5;
             mai.templateID = templateID;
@@ -496,9 +496,9 @@ public class WorldHandler {
             }
             // End PACKETMAKER::MakeAttackInfoPacket
             mai.mobId = mobId;
-            mai.idk1 = idk1;
-            mai.idk2 = idk2;
-            mai.idk3 = idk3;
+            mai.hitAction = idk1; // ?
+            mai.left = idk2; // ?
+            mai.frameIdx = idk3; // ?
             mai.idk4 = idk4;
             mai.idk5 = idk5;
             mai.templateID = templateID;
@@ -605,18 +605,35 @@ public class WorldHandler {
     public static void handleChangeFieldRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte fieldKey = inPacket.decodeByte();
-        int idk1 = inPacket.decodeInt();
+        int targetField = inPacket.decodeInt();
         int x = inPacket.decodeShort();
         int y = inPacket.decodeShort();
         String portalName = inPacket.decodeString();
-        Field field = chr.getField();
-        Portal portal = field.getPortalByName(portalName);
-        if (portal.getScript() != null && !portal.getScript().equals("")) {
-            chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
+        if (portalName != null && !"".equals(portalName)) {
+            Field field = chr.getField();
+            Portal portal = field.getPortalByName(portalName);
+            if (portal.getScript() != null && !portal.getScript().equals("")) {
+                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
+            } else {
+                Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
+                Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
+                chr.warp(toField, toPortal);
+            }
         } else {
-            Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
-            Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
-            chr.warp(toField, toPortal);
+            // Character is dead
+            inPacket.decodeByte(); // always 0
+            byte tarfield = inPacket.decodeByte(); // ?
+            byte reviveType = inPacket.decodeByte();
+            int returnMap = chr.getField().getReturnMap();
+            switch(reviveType) {
+                // so far only got 0?
+            }
+            if (!chr.hasBuffProtector()) {
+                chr.getTemporaryStatManager().removeAllStats();
+            }
+            chr.warp(chr.getOrCreateFieldByCurrentInstanceType(returnMap));
+            chr.heal(chr.getMaxHP());
+            chr.setBuffProtector(false);
         }
     }
 
@@ -786,9 +803,9 @@ public class WorldHandler {
             }
             // End PACKETMAKER::MakeAttackInfoPacket
             mai.mobId = mobId;
-            mai.idk1 = idk1;
-            mai.idk2 = idk2;
-            mai.idk3 = idk3;
+            mai.hitAction = idk1;
+            mai.left = idk2;
+            mai.frameIdx = idk3;
             mai.idk4 = idk4;
             mai.idk5 = idk5;
             mai.templateID = templateID;
@@ -878,7 +895,7 @@ public class WorldHandler {
                 mai.templateID = inPacket.decodeInt();
                 mai.rect = new Rect(inPacket.decodePosition(), inPacket.decodePosition());
                 mai.idk6 = inPacket.decodeShort();
-                mai.idk1 = inPacket.decodeByte();
+                mai.hitAction = inPacket.decodeByte();
                 int[] damages = new int[ai.hits];
                 for (int j = 0; j < ai.hits; j++) {
                     damages[j] = inPacket.decodeInt();
@@ -2732,7 +2749,7 @@ public class WorldHandler {
                 short quantity = inPacket.decodeShort();
                 NpcShopItem nsi = nsd.getItemByIndex(itemIndex);
                 if(nsi == null || nsi.getItemID() != itemID) {
-                    chr.chatMessage("The server's item at that position was different than the net.swordie.ms.client's.");
+                    chr.chatMessage("The server's item at that position was different than the client's.");
                     log.warn(String.format("Possible hack: expected shop itemID %d, got %d (chr %d)", nsi.getItemID(), itemID, chr.getId()));
                     return;
                 }
@@ -3670,5 +3687,20 @@ public class WorldHandler {
         }
         chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move, oldPos,
                 oldVPos, encodedGatherDuration, movements, keyPadState));
+    }
+
+    public static void handleUserProtectBuffDieItemRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        boolean used = inPacket.decodeByte() != 0;
+        if (used) {
+            // grabs the first one from the list of buffItems
+            Item buffProtector = chr.getBuffProtectorItem();
+            if (buffProtector != null) {
+                chr.setBuffProtector(true);
+                chr.consumeItem(buffProtector);
+            } else {
+                log.error(String.format("Character id %d tried to use a buff without having the appropriate item.", chr.getId()));
+            }
+        }
     }
 }

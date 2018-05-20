@@ -280,4 +280,8 @@ public class OutPacket extends Packet {
         encodeByte(false);
         encodeInt(time);
     }
+
+    public void release() {
+
+    }
 }

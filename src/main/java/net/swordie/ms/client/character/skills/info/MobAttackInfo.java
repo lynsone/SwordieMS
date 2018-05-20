@@ -5,9 +5,9 @@ import net.swordie.ms.util.Rect;
 
 public class MobAttackInfo {
     public int mobId;
-    public byte idk1;
-    public byte idk2;
-    public byte idk3;
+    public byte hitAction;
+    public byte left;
+    public byte frameIdx;
     public byte idk4;
     public byte idk5;
     public byte calcDamageStatIndex;
@@ -40,9 +40,9 @@ public class MobAttackInfo {
     public MobAttackInfo deepCopy() {
         MobAttackInfo mai = new MobAttackInfo();
         mai.mobId = mobId;
-        mai.idk1 = idk1;
-        mai.idk2 = idk2;
-        mai.idk3 = idk3;
+        mai.hitAction = hitAction;
+        mai.left = left;
+        mai.frameIdx = frameIdx;
         mai.idk4 = idk4;
         mai.idk5 = idk5;
         mai.calcDamageStatIndex = calcDamageStatIndex;

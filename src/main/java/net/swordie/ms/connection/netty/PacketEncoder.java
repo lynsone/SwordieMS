@@ -17,6 +17,8 @@
 */
 package net.swordie.ms.connection.netty;
 
+import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.connection.crypto.MapleCrypto;
 import io.netty.buffer.ByteBuf;
@@ -36,14 +38,14 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     @Override
-    protected void encode(ChannelHandlerContext chc, Packet in, ByteBuf bb) {
-        byte[] data = in.getData();
+    protected void encode(ChannelHandlerContext chc, Packet outPacket, ByteBuf bb) {
+        byte[] data = outPacket.getData();
         NettyClient c = chc.channel().attr(NettyClient.CLIENT_KEY).get();
         MapleCrypto mCr = chc.channel().attr(NettyClient.CRYPTO_KEY).get();
 
         if (c != null) {
-            if(!OutHeader.isSpamHeader(OutHeader.getOutHeaderByOp(in.getHeader()))) {
-                log.debug("[Out]\t| " + in);
+            if(!OutHeader.isSpamHeader(OutHeader.getOutHeaderByOp(outPacket.getHeader()))) {
+                log.debug("[Out]\t| " + outPacket);
             }
             byte[] iv = c.getSendIV();
             byte[] head = MapleCrypto.getHeader(data.length, iv);
@@ -62,8 +64,10 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
             bb.writeBytes(data);
             
         } else {
-            log.debug("[PacketEncoder] | Plain sending " + in);
+            log.debug("[PacketEncoder] | Plain sending " + outPacket);
             bb.writeBytes(data);
         }
+//        outPacket.release();
+//        bb.release();
     }
 }

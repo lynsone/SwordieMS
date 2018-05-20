@@ -141,4 +141,13 @@ public class Portal {
         Portal copy = new Portal(getId(), getType(), getName(), getTargetMapId(), getTargetPortalName(), getX(), getY(), getHorizontalImpact(), getVerticalImpact(), getScript(), isOnlyOnce(), isHideTooltip(), getDelay());
         return copy;
     }
+
+    @Override
+    public String toString() {
+        return "Portal{" +
+                "name='" + name + '\'' +
+                ", targetPortalName='" + targetPortalName + '\'' +
+                ", script='" + script + '\'' +
+                '}';
+    }
 }

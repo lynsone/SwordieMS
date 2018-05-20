@@ -277,6 +277,8 @@ public class Char {
 	private Client chatClient;
 	@Transient
 	private DamageCalc damageCalc;
+	@Transient
+	private boolean buffProtector;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1395,11 +1397,6 @@ public class Char {
 
 	private void setFieldID(int fieldID) {
 		getAvatarData().getCharacterStat().setPosMap(fieldID);
-	}
-
-	public boolean hasBuffProtector() {
-		// TODO
-		return false;
 	}
 
 	public Position getPosition() {
@@ -2925,5 +2922,41 @@ public class Char {
 			stats.put(BaseStat.mad, stats.getOrDefault(BaseStat.mad, 0) + equip.getiMad());
 		}
 		return stats;
+	}
+
+	/**
+	 * Sets whether or not this user has chosen to use up an item to protect their buffs upon next respawn.
+	 * @param buffProtector buff protectability
+	 */
+	public void setBuffProtector(boolean buffProtector) {
+		this.buffProtector = buffProtector;
+	}
+
+	/**
+	 * Returns whether this user has chosen to activate a buff protector for their next respawn.
+	 * @return buff protectability
+	 */
+	public boolean hasBuffProtector() {
+		return buffProtector;
+	}
+
+	/**
+	 * Returns the item the user has for protecting buffs.
+	 * @return the Item the user has for prtoecting buffs, or null if there is none.
+	 */
+	public Item getBuffProtectorItem() {
+		int[] buffItems = {5133000, 5133001, 4143000};
+		Item item = null;
+		for (int id : buffItems) {
+			item = getConsumeInventory().getItemByItemID(id);
+			if (item == null) {
+				item = getCashInventory().getItemByItemID(id);
+			}
+			if (item != null) {
+				// just break when an item was found.
+				break;
+			}
+		}
+		return item;
 	}
 }

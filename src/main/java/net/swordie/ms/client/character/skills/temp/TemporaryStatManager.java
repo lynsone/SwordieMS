@@ -2780,4 +2780,11 @@ public class TemporaryStatManager {
         o.rOption |= o.slv << 16; // mob skills are encoded differently: not an int, but short (skill ID), then short (slv).
         putCharacterStatValue(cts, o);
     }
+
+    public void removeAllStats() {
+        Set<CharacterTemporaryStat> currentStats = new HashSet<>();
+        currentStats.addAll(getNewStats().keySet());
+        currentStats.addAll(getCurrentStats().keySet());
+        currentStats.forEach(stat -> removeStat(stat, false));
+    }
 }

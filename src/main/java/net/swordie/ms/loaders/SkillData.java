@@ -524,7 +524,7 @@ public class SkillData {
                         case "command":
                         case "damIncPos": // May be useful
                         case "option_poison": // ?
-                        case "phaseUserCount": // I think this is done net.swordie.ms.client side (users hit mapped to phase?)
+                        case "phaseUserCount": // I think this is done client side (users hit mapped to phase?)
                             break;
                         default:
                             if(!unks.contains(name)) {
