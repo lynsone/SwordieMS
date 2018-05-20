@@ -3,12 +3,19 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.life.pet.Pet;
+import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.client.character.damage.DamageSkinType;
+import net.swordie.ms.enums.MessageType;
+import net.swordie.ms.enums.StealMemoryType;
+import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
+
+import java.util.Set;
 
 /**
  * Created on 1/2/2018.
@@ -107,6 +114,69 @@ public class UserLocal {
         return outPacket;
     }
 
+    public static OutPacket changeStealMemoryResult(byte type, int stealManagerJobID, int position, int skillid, int stealSkillLv, int stealSkillMaxLv) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHANGE_STEAL_MEMORY_RESULT);
+        StealMemoryType smType = StealMemoryType.getByVal(type);
+
+        outPacket.encodeByte(1); //Set Excl Request
+        outPacket.encodeByte(smType.getVal());    //Type
+
+        switch (smType) {
+            case STEAL_SKILL:
+                outPacket.encodeInt(stealManagerJobID); //jobId  1~5 | 1 = 1stJob , 2 = 2ndJob ... ..
+                outPacket.encodeInt(position); //impecMemSkillID // nPOS  0,1,2,3
+                outPacket.encodeInt(skillid);//MagicCrash(Hero) //skill
+                outPacket.encodeInt(stealSkillLv);   //StealSkill Lv
+                outPacket.encodeInt(stealSkillMaxLv);   //StealSkill Max Lv
+                break;
+            case NO_TARGETS:
+            case FAILED_UNK_REASON:
+                break;
+            case REMOVE_STEAL_MEMORY:
+                outPacket.encodeInt(stealManagerJobID);
+                outPacket.encodeInt(position);
+                outPacket.encodeByte(0);
+                break;
+            case REMOVE_MEMORY_ALL_SLOT:
+                outPacket.encodeInt(skillid);
+                break;
+            case REMOVE_ALL_MEMORY:
+                break;
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket resultSetStealSkill(boolean set, int impecMemSkilLID, int skillId) {
+        OutPacket outPacket = new OutPacket(OutHeader.RESULT_SET_STEAL_SKILL);
+
+        outPacket.encodeByte(1); //Set Excl Request
+        outPacket.encodeByte(set); //bSet
+        outPacket.encodeInt(impecMemSkilLID); //impecMemSkilLID
+        if(set) {
+            outPacket.encodeInt(skillId); //skill Id
+        }
+        return outPacket;
+    }
+
+    public static OutPacket resultStealSkillList(Set<Skill> targetSkillsList, int phantomStealResult, int targetChrId, int targetJobId) {
+        OutPacket outPacket = new OutPacket(OutHeader.RESULT_STEAL_SKILL_LIST);
+        outPacket.encodeByte(0); //Set Excl Request
+        outPacket.encodeInt(targetChrId);
+        outPacket.encodeInt(phantomStealResult); //   Gets a check  if == 4,   else:   nPhantomStealWrongResult
+        if(phantomStealResult == 4) {
+            outPacket.encodeInt(targetJobId);
+            outPacket.encodeInt(targetSkillsList.size());
+
+            for (Skill skills : targetSkillsList) {
+                // if v9 (index??) > 0
+                outPacket.encodeInt(skills.getSkillId());
+            }
+        }
+
+        return outPacket;
+    }
+
     public static OutPacket damageSkinSaveResult(DamageSkinType req, DamageSkinType res, Char chr) {
         OutPacket outPacket = new OutPacket(OutHeader.DAMAGE_SKIN_SAVE_RESULT);
 
@@ -144,6 +214,28 @@ public class UserLocal {
             pet.encode(outPacket);
         } else {
             outPacket.encodeByte(removedReason);
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket comboCounter(byte type, int comboCount, int mobID) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+        outPacket.encodeByte(MessageType.STYLISH_KILL_MESSAGE.getVal());
+        StylishKillType smType = StylishKillType.getByVal(type);
+
+        outPacket.encodeByte(type); //1 for Combo   |  0 for MultiKill
+
+        switch (smType) {
+            case COMBO: //Combo Kill Message
+                outPacket.encodeInt(comboCount); //count
+                outPacket.encodeInt(mobID); //mobID
+                break;
+
+            case MULTI_KILL: //MultiKill Pop-up
+                outPacket.encodeLong(comboCount); //nBonus
+                outPacket.encodeInt(mobID); //count
+                break;
         }
 
         return outPacket;

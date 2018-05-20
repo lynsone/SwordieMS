@@ -139,6 +139,23 @@ public class AdminCommands {
         }
     }
 
+    public static class GetPhantomStolenSkills extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int i = 0;
+            for(int skill : chr.getStolenSkills()) {
+                chr.chatMessage(BLACK_ON_WHITE, "[Character ID: "+ chr.getId() +"] On position: "+ i +",  Skill ID: "+ skill +".");
+                i++;
+            }
+        }
+    }
+
+    public static class ResetPhantomStolenSkills extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int[] sk = new int[15];
+            chr.setStolenSkills(sk);
+        }
+    }
+
     public static class NP extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             Rect rect = new Rect(

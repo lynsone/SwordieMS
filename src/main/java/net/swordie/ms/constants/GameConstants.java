@@ -17,6 +17,7 @@ public class GameConstants {
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
+    public static final int COMBO_KILL_RESET_TIMER = 5;
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
 
