@@ -720,6 +720,7 @@ public enum OutHeader {
 
 
     MOD_HAYATO_COMBO(886),
+    SKILL_COOLTIME_SET(890),
 
     // CSummonedPool::OnPacket
     SUMMONED_CREATED(892),

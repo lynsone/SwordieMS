@@ -144,4 +144,8 @@ public class SkillInfo {
     public void setMassSpell(boolean massSpell) {
         this.massSpell = massSpell;
     }
+
+    public boolean hasCooltime() {
+        return getValue(SkillStat.cooltime, 1) > 0 || getValue(SkillStat.cooltimeMS, 1) > 0;
+    }
 }

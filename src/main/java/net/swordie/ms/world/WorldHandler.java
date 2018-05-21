@@ -596,29 +596,30 @@ public class WorldHandler {
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
-        chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
-        log.debug("SkillID: " + attackInfo.skillId);
-        Field field = c.getChr().getField();
-        c.getChr().getJobHandler().handleAttack(c, attackInfo);
-        if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK) {
-            chr.getField().broadcastPacket(Summoned.summonedAttack(attackInfo), chr);
-        } else {
-            chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
-        }
-        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
-            if (mob == null) {
-                chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
+        if (chr.checkAndSetSkillCooltime(attackInfo.skillId)) {
+            chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
+            log.debug("SkillID: " + attackInfo.skillId);
+            Field field = c.getChr().getField();
+            c.getChr().getJobHandler().handleAttack(c, attackInfo);
+            if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK) {
+                chr.getField().broadcastPacket(Summoned.summonedAttack(attackInfo), chr);
+            } else {
+                chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
             }
-            else if (mob.getHp() > 0) {
-                long totalDamage = Arrays.stream(mai.damages).sum();
-                mob.addDamage(chr, totalDamage);
-                mob.damage(totalDamage);
-                if(mob.getHp() < 0) {
-                    int newChrComboCount = chr.getComboCounter() + 1;
-                    c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
-                    chr.setComboCounter(newChrComboCount);
-                    chr.comboKillResetTimer();
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
+                } else if (mob.getHp() > 0) {
+                    long totalDamage = Arrays.stream(mai.damages).sum();
+                    mob.addDamage(chr, totalDamage);
+                    mob.damage(totalDamage);
+                    if (mob.getHp() < 0) {
+                        int newChrComboCount = chr.getComboCounter() + 1;
+                        c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
+                        chr.setComboCounter(newChrComboCount);
+                        chr.comboKillResetTimer();
+                    }
                 }
             }
         }
@@ -2732,24 +2733,26 @@ public class WorldHandler {
         inPacket.decodeInt(); // crc
         int skillID = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
-        log.debug("SkillID: " + skillID);
-        c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        Job sourceJobHandler = c.getChr().getJobHandler();
-        SkillInfo si = SkillData.getSkillInfoById(skillID);
-        if(si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
-            Rect r = si.getFirstRect();
-            if(r != null) {
-                Rect rectAround = chr.getRectAround(r);
-                for(PartyMember pm : chr.getParty().getOnlineMembers()) {
-                    if(pm.getChr() != null
-                            && pm.getFieldID() == chr.getFieldID()
-                            && rectAround.hasPositionInside(pm.getChr().getPosition())) {
-                        sourceJobHandler.handleSkill(pm.getChr().getClient(), skillID, slv, inPacket);
+        if (chr.checkAndSetSkillCooltime(skillID)) {
+            log.debug("SkillID: " + skillID);
+            c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+            Job sourceJobHandler = c.getChr().getJobHandler();
+            SkillInfo si = SkillData.getSkillInfoById(skillID);
+            if (si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
+                Rect r = si.getFirstRect();
+                if (r != null) {
+                    Rect rectAround = chr.getRectAround(r);
+                    for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+                        if (pm.getChr() != null
+                                && pm.getFieldID() == chr.getFieldID()
+                                && rectAround.hasPositionInside(pm.getChr().getPosition())) {
+                            sourceJobHandler.handleSkill(pm.getChr().getClient(), skillID, slv, inPacket);
+                        }
                     }
                 }
+            } else {
+                sourceJobHandler.handleSkill(c, skillID, slv, inPacket);
             }
-        } else {
-            sourceJobHandler.handleSkill(c, skillID, slv, inPacket);
         }
         WvsContext.dispose(c.getChr());
     }

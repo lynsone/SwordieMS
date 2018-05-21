@@ -18,6 +18,8 @@ import net.swordie.ms.client.character.monsterbattle.MonsterBattleMobInfo;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleRankInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.FriendRecord;
 import net.swordie.ms.client.friend.FriendshipRingRecord;
@@ -288,7 +290,9 @@ public class Char {
 	@Transient
 	private int comboCounter;
 	@Transient
-	private ScheduledFuture scheduledFuture;
+	private ScheduledFuture comboKillResetTimer;
+	@Transient
+	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -2979,10 +2983,10 @@ public class Char {
 	}
 
 	public void comboKillResetTimer() {
-		if(scheduledFuture != null && !scheduledFuture.isDone()) {
-			scheduledFuture.cancel(true);
+		if(comboKillResetTimer != null && !comboKillResetTimer.isDone()) {
+			comboKillResetTimer.cancel(true);
 		}
-		scheduledFuture = EventManager.addEvent(() -> setComboCounter(0), GameConstants.COMBO_KILL_RESET_TIMER, TimeUnit.SECONDS);
+		comboKillResetTimer = EventManager.addEvent(() -> setComboCounter(0), GameConstants.COMBO_KILL_RESET_TIMER, TimeUnit.SECONDS);
 	}
 
 	public StealSkillInfo getStealSkillInfo() {
@@ -2991,5 +2995,53 @@ public class Char {
 
 	public void setStealSkillInfo(StealSkillInfo stealSkillInfo) {
 		this.stealSkillInfo = stealSkillInfo;
+	}
+
+	public Map<Integer, Long> getSkillCoolTimes() {
+		return skillCoolTimes;
+	}
+
+	/**
+	 * Checks whether or not a skill is currently on cooldown.
+	 * @param skillID the skill's id to check
+	 * @return whether or not a skill is currently on cooldown
+	 */
+	public boolean hasSkillOnCooldown(int skillID) {
+		return System.currentTimeMillis() < getSkillCoolTimes().getOrDefault(skillID, 0L);
+	}
+
+	/**
+	 * Checks if a skill is allowed to be cast, according to its cooltime. If it is allowed, it immediately sets
+	 * the cooltime and stores the next moment where the skill is allowed. Skills without cooltime are always allowed.
+	 * @param skillID the skill id of the skill to put on cooldown
+	 * @return whether or not the skill was allowed
+	 */
+	public boolean checkAndSetSkillCooltime(int skillID) {
+		if (hasSkillOnCooldown(skillID)) {
+			return false;
+		} else {
+			Skill skill = getSkill(skillID);
+			if (skill != null && SkillData.getSkillInfoById(skillID).hasCooltime()) {
+				setSkillCooldown(skillID, (byte) skill.getCurrentLevel());
+			}
+			return true;
+		}
+	}
+
+	/**
+	 * Sets a skill's cooltime according to their property in the WZ files, and stores the moment where the skill
+	 * comes off of cooldown.
+	 * @param skillID the skill's id to set
+	 * @param slv the current skill level
+	 */
+	public void setSkillCooldown(int skillID, byte slv) {
+		SkillInfo si = SkillData.getSkillInfoById(skillID);
+		if (si != null) {
+			int cdInSec = si.getValue(SkillStat.cooltime, slv);
+			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
+			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
+			write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
+		}
+
 	}
 }

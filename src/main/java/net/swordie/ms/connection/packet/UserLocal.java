@@ -15,6 +15,8 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -272,6 +274,36 @@ public class UserLocal {
         if (onDeadProtectForBuff || onDeadProtectExpMaplePoint) {
             outPacket.encodeInt(protectType);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket skillCooltimeSetM(int skillID, int cdMS) {
+        Map<Integer, Integer> cds = new HashMap<>();
+        cds.put(skillID, cdMS);
+        return skillCooltimeSetM(cds);
+    }
+
+    public static OutPacket skillCooltimeSetM(Map<Integer, Integer> cooldowns) {
+        OutPacket outPacket = new OutPacket(OutHeader.SKILL_COOLTIME_SET_M);
+
+        outPacket.encodeInt(cooldowns.size());
+        cooldowns.forEach((skillID, cooldown) -> {
+            outPacket.encodeInt(skillID);
+            outPacket.encodeInt(cooldown);
+        });
+
+        return outPacket;
+    }
+
+    public static OutPacket skillCooltimeSet(Map<Integer, Integer> cooldowns) {
+        OutPacket outPacket = new OutPacket(OutHeader.SKILL_COOLTIME_SET_M);
+
+        outPacket.encodeInt(cooldowns.size());
+        cooldowns.forEach((skillID, cooldown) -> {
+            outPacket.encodeInt(skillID);
+            outPacket.encodeInt(cooldown);
+        });
 
         return outPacket;
     }
