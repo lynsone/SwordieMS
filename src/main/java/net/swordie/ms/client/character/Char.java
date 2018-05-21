@@ -2160,8 +2160,11 @@ public class Char {
 			return true;
 		} else {
 			Item item = drop.getItem();
-			ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
-			boolean isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
+			boolean isConsume = false;
+			if (!ItemConstants.isEquip(item.getItemId())) {
+				ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
+				isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
+			}
 			if (isConsume) {
 				consumeItemOnPickup(item);
 				dispose();

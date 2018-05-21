@@ -3692,16 +3692,18 @@ public class WorldHandler {
             switch (life.getTemplateId()) {
                 case 8880002: // Normal magnus
                     double perc = mob.getHp() / (double) mob.getMaxHp();
-                    if (perc < 0.25) {
+                    if (perc <= 0.25) {
                         dataType = 4;
-                    } else if (perc < 0.5) {
+                    } else if (perc <= 0.5) {
                         dataType = 3;
-                    } else if (perc < 0.75) {
+                    } else if (perc <= 0.75) {
                         dataType = 2;
                     } else {
                         dataType = 1;
                     }
                     break;
+                default:
+                    log.error("Unhandled mob zone stat for mob template id " + life.getTemplateId());
             }
             chr.getField().broadcastPacket(CField.changeMobZone(mobID, dataType));
         }
