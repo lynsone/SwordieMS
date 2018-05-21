@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
@@ -672,7 +673,7 @@ public class Warrior extends Job {
 
         tsm.removeStatsBySkill(EVIL_EYE);
         c.write(WvsContext.temporaryStatReset(tsm, false));
-        c.write(CField.summonedRemoved(evilEye, LeaveType.ANIMATION));
+        c.write(Summoned.summonedRemoved(evilEye, LeaveType.ANIMATION));
     }
 
     @Override
@@ -835,7 +836,7 @@ public class Warrior extends Job {
             if(tsm.getOptByCTSAndSkill(PDD, EVIL_EYE) != null) {
                 if (cd + revengeEvilEye < System.currentTimeMillis()) {
                     if (Util.succeedProp(proc)) {
-                        c.write(CField.summonBeholderRevengeAttack(chr.getId(), evilEye, hitInfo.mobID));
+                        c.write(Summoned.summonBeholderRevengeAttack(chr.getId(), evilEye, hitInfo.mobID));
                         chr.heal((int) (chr.getMaxHP() / ((double) 100 / heal)));
                         revengeEvilEye = System.currentTimeMillis();
                     }

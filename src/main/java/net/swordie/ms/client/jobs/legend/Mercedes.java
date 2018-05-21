@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.mob.Mob;
@@ -459,7 +460,7 @@ public class Mercedes extends Job {
 
         summonList.add(summon);
         if(summonList.size() > 2) {
-            c.write(CField.summonedRemoved(summonList.get(0), LeaveType.ANIMATION));
+            c.write(Summoned.summonedRemoved(summonList.get(0), LeaveType.ANIMATION));
             summonList.remove(0);
         }
 

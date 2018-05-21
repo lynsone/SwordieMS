@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.world.field.Field;
@@ -274,7 +275,7 @@ public class BattleMage extends Job {
             } else {
                 amount = 1;
                 //TODO Summon Attack
-                c.write(CField.summonedAssistAttackRequest(chr.getId(), death.getObjectId()));
+                c.write(Summoned.summonedAssistAttackRequest(chr.getId(), death.getObjectId()));
             }
             o.nOption = amount;
             o.rOption = CONDEMNATION_II;

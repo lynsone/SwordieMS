@@ -1106,6 +1106,10 @@ public class Mob extends Life {
 
     public void addRevive(int revive) {revives.add(revive);}
 
+    /**
+     * Damages a mob.
+     * @param totalDamage the total damage that should be applied to the mob
+     */
     public void damage(Long totalDamage) {
         long maxHP = getMaxHp();
         long oldHp = getHp();
@@ -1157,6 +1161,12 @@ public class Mob extends Life {
         return damageDone;
     }
 
+    /**
+     * Adds a damage amount to the given Char's current damage. Purely used for keeping track of total damage done by
+     * a Char.
+     * @param chr the Char the damage originates from
+     * @param damage the damage done
+     */
     public void addDamage(Char chr, long damage) {
         long cur = 0;
         if (getDamageDone().containsKey(chr)) {

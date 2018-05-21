@@ -600,13 +600,17 @@ public class WorldHandler {
         log.debug("SkillID: " + attackInfo.skillId);
         Field field = c.getChr().getField();
         c.getChr().getJobHandler().handleAttack(c, attackInfo);
-        chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
+        if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK) {
+            chr.getField().broadcastPacket(Summoned.summonedAttack(attackInfo), chr);
+        } else {
+            chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
+        }
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
             if (mob == null) {
                 chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
             }
-            if (mob != null && mob.getHp() > 0) {
+            else if (mob.getHp() > 0) {
                 long totalDamage = Arrays.stream(mai.damages).sum();
                 mob.addDamage(chr, totalDamage);
                 mob.damage(totalDamage);
@@ -1152,10 +1156,10 @@ public class WorldHandler {
         ai.summon = (Summon) field.getLifeByObjectID(summonedID);
         ai.updateTime = inPacket.decodeInt();
         ai.skillId = inPacket.decodeInt();
-        int nul = inPacket.decodeInt();
-        byte maskIdk = inPacket.decodeByte();
-        byte idk = (byte) (maskIdk & 0x7F);
-        byte idk2 = (byte) (maskIdk >>> 8);
+        int zero = inPacket.decodeInt();
+        byte leftAndAction = inPacket.decodeByte();
+        ai.attackActionType = (byte) (leftAndAction & 0x7F);
+        ai.left = (byte) (leftAndAction >>> 7) != 0;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (mask >>> 4) & 0xF;
@@ -1166,17 +1170,17 @@ public class WorldHandler {
         int minOne = inPacket.decodeInt();
         short idk3 = inPacket.decodeShort();
         int idk4 = inPacket.decodeInt();
-        int nul3 = inPacket.decodeInt();
+        int zero3 = inPacket.decodeInt();
         ai.bulletID = inPacket.decodeInt();
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             mai.mobId = inPacket.decodeInt();
             mai.templateID = inPacket.decodeInt();
-            byte byteIdk1 = inPacket.decodeByte();
-            byte byteIdk2 = inPacket.decodeByte();
-            byte byteIdk3 = inPacket.decodeByte();
-            byte byteIdk4 = inPacket.decodeByte();
-            byte byteIdk5 = inPacket.decodeByte();
+            mai.byteIdk1 = inPacket.decodeByte();
+            mai.byteIdk2 = inPacket.decodeByte();
+            mai.byteIdk3 = inPacket.decodeByte();
+            mai.byteIdk4 = inPacket.decodeByte();
+            mai.byteIdk5 = inPacket.decodeByte();
             int idk5 = inPacket.decodeInt(); // another template id, same as the one above
             byte byteIdk6 = inPacket.decodeByte();
             mai.rect = inPacket.decodeShortRect();

@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.loaders.SkillData;
@@ -232,6 +233,6 @@ public class Summon extends Life {
             ScheduledFuture sf = EventManager.addEvent(() -> field.removeLife(getObjectId(), true), getSummonTerm());
             field.addLifeSchedule(this, sf);
         }
-        field.broadcastPacket(CField.summonedCreated(getCharID(), this));
+        field.broadcastPacket(Summoned.summonedCreated(getCharID(), this));
     }
 }

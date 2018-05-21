@@ -107,8 +107,7 @@ public abstract class Job {
 
 	/**
 	 * Handles the 'middle' part of hit processing, namely the job-specific stuff like Magic Guard,
-	 * and puts this info
-	 * in <code>hitInfo</code>.
+	 * and puts this info in <code>hitInfo</code>.
 	 *
 	 * @param c
 	 * 		The client

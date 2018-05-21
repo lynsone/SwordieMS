@@ -568,7 +568,7 @@ public class Field {
         removeSchedule(life, fromSchedule);
         if (life instanceof Summon) {
             Summon summon = (Summon) life;
-            broadcastPacket(CField.summonedRemoved(summon, LeaveType.ANIMATION));
+            broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
         } else if (life instanceof AffectedArea) {
             AffectedArea aa = (AffectedArea) life;
             broadcastPacket(CField.affectedAreaRemoved(aa, false));

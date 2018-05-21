@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
@@ -328,7 +329,7 @@ public class NightWalker extends Job {
     private void removeBat() {
         //c.write(CField.summonedRemoved(bats, LeaveType.ANIMATION));
         Field field = c.getChr().getField();
-        c.write(CField.summonedRemoved(bats, LeaveType.ANIMATION));
+        c.write(Summoned.summonedRemoved(bats, LeaveType.ANIMATION));
         //field.removeLife(getBatType(chr),true);
         batcount = batcount -1;
     }
@@ -346,9 +347,7 @@ public class NightWalker extends Job {
         }
         return batType;
     }
-
-
-
+    
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
