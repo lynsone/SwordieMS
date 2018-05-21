@@ -4,21 +4,22 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.MobPool;
+import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
-import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.Life;
+import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
+import net.swordie.ms.loaders.MobData;
+import net.swordie.ms.util.Position;
+import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.MobHPTagFieldEffect;
-import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.loaders.MobData;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.MobPool;
-import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.util.Position;
-import net.swordie.ms.util.container.Tuple;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -1342,5 +1343,10 @@ public class Mob extends Life {
             onlyChar.getClient().write(MobPool.mobEnterField(this, false));
             onlyChar.getClient().write(MobPool.mobChangeController(this, false, controller == onlyChar));
         }
+    }
+
+    public boolean isInfestedByViralSlime() {
+        MobTemporaryStat mts = getTemporaryStat();
+        return mts.hasBurnFromSkill(Magician.VIRAL_SLIME);
     }
 }

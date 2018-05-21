@@ -1,11 +1,14 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.jobs.adventurer.Magician;
+
 import java.util.HashMap;
 
 import static net.swordie.ms.client.jobs.legend.Aran.*;
 import static net.swordie.ms.client.jobs.legend.Mercedes.*;
 import static net.swordie.ms.client.jobs.nova.AngelicBuster.*;
 import static net.swordie.ms.client.jobs.nova.Kaiser.*;
+import static net.swordie.ms.client.jobs.resistance.Blaster.*;
 
 /**
  * Created on 12/18/2017.
@@ -672,6 +675,10 @@ public class SkillConstants {
             case 65121007:
             case 65121008:
                 return TRINITY;
+
+            case REVOLVING_CANNON_2:
+            case REVOLVING_CANNON_3:
+                return REVOLVING_CANNON;
             default:
                 return skillID;
         }
@@ -924,5 +931,22 @@ public class SkillConstants {
                 break;
         }
         return impecSkillID;
+    }
+
+    public static boolean isIceSkill(int skillID) {
+        switch (skillID) {
+            case Magician.CHILLING_STEP:
+            case Magician.COLD_BEAM:
+            case Magician.ICE_STRIKE:
+            case Magician.GLACIER_CHAIN:
+            case Magician.FREEZING_BREATH:
+            case Magician.BLIZZARD:
+            case Magician.FROZEN_ORB:
+            case Magician.ELQUINES:
+                return true;
+
+            default:
+                return false;
+        }
     }
 }

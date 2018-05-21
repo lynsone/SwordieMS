@@ -3,25 +3,24 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.IndieMaxDamageOverR;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -35,8 +34,10 @@ public class Blaster extends Job {
     public static final int ARM_CANNON_BOOST = 37101003;
     public static final int MAPLE_WARRIOR_BLASTER = 37121006;
     public static final int HEROS_WILL_BLASTER = 37121007;
+
     public static final int FOR_LIBERTY_BLASTER = 37121053;
     public static final int CANNON_OVERDRIVE = 37121054;
+    public static final int HYPER_MAGNUM_PUNCH = 37121052;
 
 
     //Revolving Cannon
@@ -80,7 +81,7 @@ public class Blaster extends Job {
     };
 
     private int gauge = 0;
-    private int ammo = 0;
+    private int ammo = getMaxAmmo();
     private int lastAttack = 0;
 
     public Blaster(Char chr) {
@@ -93,17 +94,7 @@ public class Blaster extends Job {
                     chr.addSkill(skill);
                 }
             }
-            entranceCylinderState();
         }
-    }
-
-    public static int getOriginalSkill(int skillID) {
-        switch(skillID) {
-            case REVOLVING_CANNON_2:
-            case REVOLVING_CANNON_3:
-                return REVOLVING_CANNON;
-        }
-        return skillID; // no original skill linked with this one
     }
 
     @Override
@@ -140,6 +131,14 @@ public class Blaster extends Job {
             case BUNKER_BUSTER_EXPLOSION_6:
 
                 break;
+
+            case HYPER_MAGNUM_PUNCH:
+                o1.nOption = 5;
+                o1.rOption = skillID;
+                o1.tOption = 10;
+                tsm.putCharacterStatValue(RWMagnumBlow, o1);
+                tsm.sendSetStatPacket();
+                break;
         }
     }
 
@@ -168,10 +167,14 @@ public class Blaster extends Job {
                     break;
                 case REVOLVING_CANNON_3:
                 case REVOLVING_CANNON_2:
-                //case REVOLVING_CANNON:
-                    handleAmmoCost();
-                    handleGaugeIncrease();
-                    c.write(UserLocal.onRWMultiChargeCancelRequest((byte)1, skillID));
+                case REVOLVING_CANNON:
+                    if(getAmmo() > 0) {
+                        removeAmmo();
+                    }
+                    if(getGauge() < 6) {
+                        addGauge();
+                    }
+                    //c.write(UserLocal.onRWMultiChargeCancelRequest((byte)1, skillID));
                     break;
                 case VITALITY_SHIELD:
                     resetBlastShield();
@@ -230,7 +233,6 @@ public class Blaster extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-
             case FOR_LIBERTY_BLASTER:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
@@ -243,7 +245,6 @@ public class Blaster extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
-
             case CANNON_OVERDRIVE:
                 o1.nOption = 1;
                 o1.rOption = skillID;
@@ -262,70 +263,6 @@ public class Blaster extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
-    }
-
-    public void entranceCylinderState() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        o.nOption = 1;
-        o.bOption = getMaxAmmo(); //ammo
-        o.cOption = 0; //gauge
-        tsm.putCharacterStatValue(RWCylinder, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
-    }
-
-    public void handleCylinderReload() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        ammo = tsm.getOption(RWCylinder).bOption;
-        gauge = tsm.getOption(RWCylinder).cOption;
-        Option o = new Option();
-        o.nOption = 1;
-        o.bOption = getMaxAmmo(); //ammo
-        o.cOption = gauge; //gauge
-        tsm.putCharacterStatValue(RWCylinder, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
-    }
-
-    public void handleAmmoCost() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        ammo = tsm.getOption(RWCylinder).bOption;
-        gauge = tsm.getOption(RWCylinder).cOption;
-        Option o = new Option();
-        if (ammo > 0) {
-            o.nOption = 1;
-            o.bOption = ammo - 1; //ammo
-            o.cOption = gauge;
-            tsm.putCharacterStatValue(RWCylinder, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
-        }
-    }
-
-    public void handleGaugeIncrease() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        ammo = tsm.getOption(RWCylinder).bOption;
-        gauge = tsm.getOption(RWCylinder).cOption;
-        Option o = new Option();
-        if (gauge < getMaxAmmo()) {
-            o.nOption = 1;
-            o.cOption = gauge + 1; //gauge
-            o.bOption = ammo;
-            tsm.putCharacterStatValue(RWCylinder, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
-        }
-    }
-
-    public int getMaxAmmo() {
-        int maxAmmo = 3;
-        if(chr.hasSkill(REVOLVING_CANNON_PLUS)) {
-            maxAmmo = 4;
-        }
-        if(chr.hasSkill(REVOLVING_CANNON_PLUS_II)) {
-            maxAmmo = 5;
-        }
-        if(chr.hasSkill(REVOLVING_CANNON_PLUS_III)) {
-            maxAmmo = 6;
-        }
-        return maxAmmo;
     }
 
     private void handleComboTraining(int skillId, TemporaryStatManager tsm, Client c) {
@@ -349,4 +286,101 @@ public class Blaster extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
+    public int getGauge() {
+        return gauge;
+    }
+
+    public void setGauge(int gauge) {
+        this.gauge = gauge;
+    }
+
+    public int getAmmo() {
+        return ammo;
+    }
+
+    public void setAmmo(int ammo) {
+        this.ammo = ammo;
+    }
+
+    public void addAmmo() {
+        addAmmo(1);
+    }
+
+    public void addAmmo(int amount) {
+        ammoChange(amount);
+    }
+
+    public void removeAmmo() {
+        removeAmmo(1);
+    }
+
+    public void removeAmmo(int amount) {
+        ammoChange(-amount);
+    }
+
+    public void ammoChange(int amount) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        if(getAmmo() > 0) {
+            setAmmo(getAmmo() + amount);
+            o.nOption = 1;
+            o.bOption = getAmmo();
+            o.cOption = getGauge();
+            tsm.putCharacterStatValue(RWCylinder, o);
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    public void addGauge() {
+        addGauge(1);
+    }
+
+    public void addGauge(int amount) {
+        gaugeChange(amount);
+    }
+
+    public void removeGauge() {
+        removeGauge(1);
+    }
+
+    public void removeGauge(int amount) {
+        gaugeChange(-amount);
+    }
+
+    public void gaugeChange(int amount) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        if(getGauge() < 6) {
+            setGauge(getGauge() + amount);
+            o.nOption = 1;
+            o.bOption = getAmmo();
+            o.cOption = getGauge();
+            tsm.putCharacterStatValue(RWCylinder, o);
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    public int getMaxAmmo() {
+        int maxAmmo = 3;
+        if(chr.hasSkill(REVOLVING_CANNON_PLUS)) {
+            maxAmmo = 4;
+        }
+        if(chr.hasSkill(REVOLVING_CANNON_PLUS_II)) {
+            maxAmmo = 5;
+        }
+        if(chr.hasSkill(REVOLVING_CANNON_PLUS_III)) {
+            maxAmmo = 6;
+        }
+        return maxAmmo;
+    }
+
+    public void handleCylinderReload() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        o.nOption = 1;
+        o.bOption = getMaxAmmo(); //ammo
+        o.cOption = getGauge(); //gauge
+        tsm.putCharacterStatValue(RWCylinder, o);
+        c.write(WvsContext.temporaryStatSet(tsm));
+    }
 }
