@@ -43,10 +43,11 @@ public class Account {
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    // no eager -> sometimes get a "resultset closed" when fetching friends/damage skins
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "ownerAccID")
     private Set<Friend> friends;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<DamageSkinSaveData> damageSkins = new HashSet<>();
 

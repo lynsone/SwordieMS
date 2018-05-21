@@ -305,6 +305,25 @@ public class MobSkill {
                     tsm.sendSetStatPacket();
                 }
                 break;
+            case WEAKNESS:
+                rect = mob.getPosition().getRectAround(new Rect(msi.getLt(), msi.getRb()));
+                if(!mob.isLeft()) {
+                    rect = rect.horizontalFlipAround(mob.getPosition().getX());
+                }
+                chars = mob.getField().getCharsInRect(rect);
+                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                if (chr == null) {
+                    return;
+                }
+                tsm = chr.getTemporaryStatManager();
+                if(Util.succeedProp(msi.getSkillStatIntValue(prop))
+                        && Util.succeedProp(100 - chr.getTotalStat(BaseStat.asr))) {
+                    o.nOption = 1;
+                    o.tOption = msi.getSkillStatIntValue(time);
+                    tsm.putCharacterStatValueFromMobSkill(CharacterTemporaryStat.Weakness, o);
+                    tsm.sendSetStatPacket();
+                }
+                break;
             case CURSE:
                 rect = mob.getPosition().getRectAround(new Rect(msi.getLt(), msi.getRb()));
                 if(!mob.isLeft()) {

@@ -654,4 +654,13 @@ public class CField {
 
         return outPacket;
     }
+
+    public static OutPacket changeMobZone(int mobID, int dataType) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHANGE_MOB_ZONE);
+
+        outPacket.encodeInt(mobID);
+        outPacket.encodeInt(dataType);
+
+        return outPacket;
+    }
 }

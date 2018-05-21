@@ -3681,6 +3681,30 @@ public class WorldHandler {
     }
 
     public static void handleUserRequestChangeMobZoneState(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int mobID = inPacket.decodeInt();
+        Position pos = inPacket.decodePositionInt();
+        Life life = chr.getField().getLifeByObjectID(mobID);
+        if (life instanceof Mob) {
+            Mob mob = (Mob) life;
+            // Should this be handled like this? I doubt it, but it works :D
+            int dataType = 0;
+            switch (life.getTemplateId()) {
+                case 8880002: // Normal magnus
+                    double perc = mob.getHp() / (double) mob.getMaxHp();
+                    if (perc < 0.25) {
+                        dataType = 4;
+                    } else if (perc < 0.5) {
+                        dataType = 3;
+                    } else if (perc < 0.75) {
+                        dataType = 2;
+                    } else {
+                        dataType = 1;
+                    }
+                    break;
+            }
+            chr.getField().broadcastPacket(CField.changeMobZone(mobID, dataType));
+        }
         OutPacket outPacket = new OutPacket(OutHeader.SERVER_ACK_MOB_ZONE_STATE_CHANGE);
         outPacket.encodeByte(true);
         c.write(outPacket);
