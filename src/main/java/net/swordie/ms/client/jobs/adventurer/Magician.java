@@ -13,6 +13,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
@@ -388,7 +389,7 @@ public class Magician extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     fpBurnedInfo(mob, skill);
-                    EventManager.addEvent(() -> c.write(CField.summonedRemoved(viralSlime, LeaveType.NO_ANIMATION)), 800, TimeUnit.MILLISECONDS);
+                    EventManager.addEvent(() -> c.write(Summoned.summonedRemoved(viralSlime, LeaveType.NO_ANIMATION)), 800, TimeUnit.MILLISECONDS);
                     viralSlimeList.add(viralSlime);
                 }
                 break;
