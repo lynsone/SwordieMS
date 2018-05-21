@@ -3,38 +3,41 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.*;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.world.field.Field;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 //TODO Bishop Skills
 //TODO FP - Ignite doens't create AoE
@@ -92,6 +95,8 @@ public class Magician extends Job {
     public static final int ELEMENTAL_ADAPTATION_IL = 2211012;
     public static final int CHAIN_LIGHTNING = 2221006;
     public static final int FREEZING_BREATH = 2221011;
+    public static final int BLIZZARD = 2221007;
+    public static final int FROZEN_ORB = 2221012;
     public static final int INFINITY_IL = 2221004;
     public static final int ELQUINES = 2221005;
     public static final int ARCANE_AIM_IL = 2220010;
@@ -181,6 +186,8 @@ public class Magician extends Job {
     private int ferventDrainStack = 0;
     private int elementalAdaptationFP = 5;
     private int infinityStack = 0;
+    private static Summon viralSlime;
+    private static List<Summon> viralSlimeList;
 
     public Magician(Char chr) {
         super(chr);
@@ -230,7 +237,7 @@ public class Magician extends Job {
         if (JobConstants.isIceLightning(chr.getJob())) {
             if(hasHitMobs) {
                 //Freezing Crush / Frozen Clutch
-                handleFreezingCrush(attackInfo, slv);
+                handleFreezingCrush(attackInfo, skillID, slv);
 
             }
         }
@@ -244,13 +251,13 @@ public class Magician extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        switch (skillID) {
+        switch (attackInfo.skillId) {
             case POISON_BREATH:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        fpBurnedInfo(mob, skill, slv);
+                        fpBurnedInfo(mob, skill);
                     }
                 }
                 break;
@@ -273,7 +280,7 @@ public class Magician extends Job {
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptions(MobStat.Stun, o1);
-                        fpBurnedInfo(mob, skill, slv);
+                        fpBurnedInfo(mob, skill);
                     }
                 }
                 break;
@@ -285,12 +292,12 @@ public class Magician extends Job {
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptions(MobStat.Invincible, o1);
+                        mts.addStatOptions(MobStat.Showdown, o1); //Untouchable (physical dmg) Mob Stat
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptions(MobStat.Speed, o1);
-                        fpBurnedInfo(mob, skill, slv); //Global Burned Info Handler to regulate Fervent Drain/Element Drain
+                        fpBurnedInfo(mob, skill); //Global Burned Info Handler to regulate Fervent Drain/Element Drain
                     }
                     AffectedArea aa2 = AffectedArea.getAffectedArea(chr, attackInfo);
                     aa2.setMobOrigin((byte) 0);
@@ -304,7 +311,7 @@ public class Magician extends Job {
             case IFRIT:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    fpBurnedInfo(mob, skill, slv);
+                    fpBurnedInfo(mob, skill);
                 }
                 break;
             case PARALYZE:
@@ -315,7 +322,7 @@ public class Magician extends Job {
                     o1.rOption = skillID;
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    fpBurnedInfo(mob, skill, slv);
+                    fpBurnedInfo(mob, skill);
                 }
                 break;
             case COLD_BEAM:
@@ -370,13 +377,19 @@ public class Magician extends Job {
             case ANGEL_RAY:
                 chr.heal(handleBishopHealingSkills(ANGEL_RAY));
                 break;
-            case MEGIDDO_FLAME_ATOM:    //TODO - Megiddo DoT
-            case MEGIDDO_FLAME:
-                Skill megiddoSkill = chr.getSkill(MEGIDDO_FLAME);
+            case MEGIDDO_FLAME_ATOM:
+                Skill megSkill = chr.getSkill(MEGIDDO_FLAME);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr, megiddoSkill, 1); //TODO change to the FP global Burned Info Handler
+                    fpBurnedInfo(mob, megSkill);
+                }
+                break;
+            case VIRAL_SLIME:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    fpBurnedInfo(mob, skill);
+                    EventManager.addEvent(() -> c.write(CField.summonedRemoved(viralSlime, LeaveType.NO_ANIMATION)), 800, TimeUnit.MILLISECONDS);
+                    viralSlimeList.add(viralSlime);
                 }
                 break;
         }
@@ -482,7 +495,7 @@ public class Magician extends Job {
         }
     }
 
-    private void handleChillingStep(Char chr) {
+    private void handleChillingStep() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(ChillingStep)) {
             for (int i = 0; i < 168; i += 56) {
@@ -565,7 +578,7 @@ public class Magician extends Job {
                     chr.getField().spawnAffectedArea(aa);
                     break;
                 case TELEPORT:
-                    handleChillingStep(chr);
+                    handleChillingStep();
                     break;
                 case HEAL:
                     chr.heal(handleBishopHealingSkills(HEAL));
@@ -708,11 +721,9 @@ public class Magician extends Job {
                 infinity();
                 break;
             case VIRAL_SLIME:
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.SLOW_FORWARD.getVal());
-                field.spawnSummon(summon);
+                Skill skill = chr.getSkill(skillID);
+                viralSlimeList = new ArrayList<>();
+                summonViralSlime(chr, skill, chr.getPosition());
                 break;
             case BLESS:
                 o1.nOption = si.getValue(u, slv);
@@ -793,11 +804,10 @@ public class Magician extends Job {
                 field.spawnSummon(summon);
                 break;
             case CHILLING_STEP:
-                o1.nOption = 1;
+                o1.nOption = 5;
                 o1.rOption = skillID;
                 tsm.putCharacterStatValue(ChillingStep, o1);
                 break;
-
             case EPIC_ADVENTURE_FP:
             case EPIC_ADVENTURE_IL:
             case EPIC_ADVENTURE_BISH:
@@ -913,26 +923,29 @@ public class Magician extends Job {
         return res;
     }
 
-    private void handleFreezingCrush(AttackInfo attackInfo, byte slv) {
+    private void handleFreezingCrush(AttackInfo attackInfo, int skillID, byte slv) {
+        if(!SkillConstants.isIceSkill(skillID)){
+            return;
+        }
         Option o1 = new Option();
         Option o2 = new Option();
+        Option o3 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(FROST_CLUTCH);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            //if (Util.succeedProp(si.getValue(prop, slv))) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
             MobTemporaryStat mts = mob.getTemporaryStat();
-            o1.nOption = -10;
-            o1.rOption = FREEZING_CRUSH;
-            o1.tOption = 5; //si.getValue(subTime, slv);
-            o1.mOption = 2; //Should be Amount
-            mts.addStatOptionsAndBroadcast(MobStat.Speed, o1); // IDA says it's Speed, but it doesn't broadcast the Debuff over the mob
-
-            o2.nOption = 21;
-            o2.rOption = 100001;
-            o2.tOption = 5;
-            o2.cOption = 2;
-            mts.addStatOptionsAndBroadcast(MobStat.Freeze, o2);
-            //}
+            int counter = 1;
+            if(mts.hasCurrentMobStat(MobStat.Speed)) {
+                counter = mts.getCurrentOptionsByMobStat(MobStat.Speed).mOption;
+                if (counter < 5) {
+                    counter++;
+                }
+            }
+            o1.nOption = 20;
+            o1.rOption = skillID;
+            o1.tOption = 15; //No Duration given
+            o1.mOption = counter;
+            mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
         }
     }
 
@@ -995,10 +1008,8 @@ public class Magician extends Job {
         return res;
     }
 
-    private void fpBurnedInfo(Mob mob, Skill attackSkill, byte attackSlv) {
-        Skill skill = chr.getSkill(getElementalDrainSkill());
-        SkillInfo edi = SkillData.getSkillInfoById(skill.getSkillId());
-        byte edLv = (byte) skill.getCurrentLevel();
+    private void fpBurnedInfo(Mob mob, Skill attackSkill) {
+        int attackSlv = attackSkill.getCurrentLevel();
         int biDuration = SkillData.getSkillInfoById(attackSkill.getSkillId()).getValue(dotTime, attackSlv);
         MobTemporaryStat mts = mob.getTemporaryStat();
         mts.createAndAddBurnedInfo(chr, attackSkill, attackSlv);
@@ -1086,9 +1097,7 @@ public class Magician extends Job {
             o1.tStart = (int) System.currentTimeMillis();
             tsm.putCharacterStatValue(IndieMADR, o1);
             tsm.sendSetStatPacket();
-
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv))));
-
             EventManager.addEvent(this::infinity, 4, TimeUnit.SECONDS);
         } else {
             tsm.removeStatsBySkill(getInfinitySkill()+100);
@@ -1109,6 +1118,24 @@ public class Magician extends Job {
             skill = INFINITY_BISH;
         }
         return skill;
+    }
+
+    public static void summonViralSlime(Char chr, Skill skill, Position position) {
+        viralSlime = Summon.getSummonBy(chr, skill.getSkillId(), (byte) skill.getCurrentLevel());
+        Field field = chr.getField();
+        viralSlime.setFlyMob(false);
+        viralSlime.setPosition(position);
+        viralSlime.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
+        viralSlime.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+        field.spawnAddSummon(viralSlime);
+    }
+
+    public static void infestViralSlime(Client c, Mob mob) {
+        Char chr = c.getChr();
+        if(viralSlimeList.size() < 10) {
+            summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
+            summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
+        }
     }
 }
 
