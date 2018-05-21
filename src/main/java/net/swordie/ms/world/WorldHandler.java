@@ -32,6 +32,7 @@ import net.swordie.ms.client.guild.updates.GuildUpdateMemberGrade;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
@@ -111,7 +112,8 @@ import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.enums.Stat.sp;
-import static net.swordie.ms.enums.StealMemoryType.*;
+import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
+import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
 
 /**
  * Created on 12/14/2017.
@@ -615,6 +617,10 @@ public class WorldHandler {
                     c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
                     chr.setComboCounter(newChrComboCount);
                     chr.comboKillResetTimer();
+
+                    if(mob.isInfestedByViralSlime()) {
+                        Magician.infestViralSlime(c, mob);
+                    }
                 }
             }
         }

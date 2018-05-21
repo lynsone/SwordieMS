@@ -937,7 +937,7 @@ public class Pirate extends Job {
         Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
         Field field = chr.getField();
         summon.setFlyMob(false);
-        summon.setMoveAbility(MoveAbility.SLOW_FORWARD.getVal());
+        summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
         field.spawnSummon(summon);
         if(chr.hasSkill(AHOY_MATEYS)) {
             Skill skill = chr.getSkill(AHOY_MATEYS);

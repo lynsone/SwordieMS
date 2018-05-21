@@ -444,7 +444,7 @@ public class BeastTamer extends Job {
                     summon.setFlyMob(false);
                     summon.setPosition(mob.getPosition());
                     summon.setSummonTerm(si.getValue(x, slv));
-                    summon.setMoveAbility(MoveAbility.SLOW_FORWARD.getVal());
+                    summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
                     field.spawnAddSummon(summon);
                 }
             }

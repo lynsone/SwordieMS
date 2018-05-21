@@ -6,7 +6,7 @@ package net.swordie.ms.enums;
 public enum MoveAbility {
     STATIC(0),
     FOLLOW(1),
-    SLOW_FORWARD(2),
+    ROAM_AROUND(2),
     FLY_AROUND_CHAR(3),
     FLY_AWAY(4),
     FLY_AROUND_CHAR_2(5),
