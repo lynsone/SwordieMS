@@ -392,6 +392,12 @@ public class MobSkill {
                 mob.setPosition(new Position(Util.getRandom(possibleRect.getLeft(), possibleRect.getRight()),
                         Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
                 break;
+            case PM_COUNTER:
+                o.nOption = msi.getSkillStatIntValue(x);
+                o.mOption = 100;
+                o.wOption = msi.getSkillStatIntValue(y);
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PCounter, o);
+                break;
             case SUMMON:
                 for(int i : msi.getInts()) {
                     Mob m = mob.getField().spawnMob(i, mob.getPosition().getX(), mob.getPosition().getY(), false);

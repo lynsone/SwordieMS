@@ -2320,7 +2320,6 @@ public class WorldHandler {
         Char chr = c.getChr();
         QuestManager qm = chr.getQuestManager();
         byte type = inPacket.decodeByte();
-        chr.chatMessage("Quest type = " + type);
         int questID = 0;
         int npcTemplateID = 0;
         Position position = null;
@@ -3715,34 +3714,37 @@ public class WorldHandler {
         byte oneTimeAction = inPacket.decodeByte();
         byte chatIdx = inPacket.decodeByte();
         int duration = inPacket.decodeInt();
-        Npc npc = (Npc) chr.getField().getLifeByObjectID(objectID);
-        boolean move = npc.isMove();
-        Position oldPos = npc.getPosition();
-        Position oldVPos = npc.getVPosition();
-        int encodedGatherDuration = 0;
-        List<Movement> movements = new ArrayList<>();
-        byte keyPadState = 0;
-        if (move) {
-            encodedGatherDuration = inPacket.decodeInt();
-            oldPos = inPacket.decodePosition();
-            oldVPos = inPacket.decodePosition();
-            movements = WvsContext.parseMovement(inPacket);
-            for (Movement m : movements) {
-                Position pos = m.getPosition();
-                Position vPos = m.getVPosition();
-                if (pos != null) {
-                    npc.setPosition(pos);
+        Life life = chr.getField().getLifeByObjectID(objectID);
+        if (life instanceof Npc && ((Npc) life).isMove()){
+            Npc npc = (Npc) chr.getField().getLifeByObjectID(objectID);
+            boolean move = npc.isMove();
+            Position oldPos = npc.getPosition();
+            Position oldVPos = npc.getVPosition();
+            int encodedGatherDuration = 0;
+            List<Movement> movements = new ArrayList<>();
+            byte keyPadState = 0;
+            if (move) {
+                encodedGatherDuration = inPacket.decodeInt();
+                oldPos = inPacket.decodePosition();
+                oldVPos = inPacket.decodePosition();
+                movements = WvsContext.parseMovement(inPacket);
+                for (Movement m : movements) {
+                    Position pos = m.getPosition();
+                    Position vPos = m.getVPosition();
+                    if (pos != null) {
+                        npc.setPosition(pos);
+                    }
+                    if (vPos != null) {
+                        npc.setvPosition(vPos);
+                    }
+                    npc.setMoveAction(m.getMoveAction());
+                    npc.setFh(m.getFh());
                 }
-                if (vPos != null) {
-                    npc.setvPosition(vPos);
-                }
-                npc.setMoveAction(m.getMoveAction());
-                npc.setFh(m.getFh());
+                keyPadState = inPacket.decodeByte();
             }
-            keyPadState = inPacket.decodeByte();
+            chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move, oldPos,
+                    oldVPos, encodedGatherDuration, movements, keyPadState));
         }
-        chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move, oldPos,
-                oldVPos, encodedGatherDuration, movements, keyPadState));
     }
 
     public static void handleUserProtectBuffDieItemRequest(Char chr, InPacket inPacket) {
@@ -3754,6 +3756,7 @@ public class WorldHandler {
             if (buffProtector != null) {
                 chr.setBuffProtector(true);
                 chr.consumeItem(buffProtector);
+                chr.write(UserLocal.setBuffProtector(buffProtector.getItemId(), true));
             } else {
                 log.error(String.format("Character id %d tried to use a buff without having the appropriate item.", chr.getId()));
             }

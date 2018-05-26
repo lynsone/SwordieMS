@@ -307,4 +307,13 @@ public class UserLocal {
 
         return outPacket;
     }
+
+    public static OutPacket setBuffProtector(int itemID, boolean active) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_BUFF_PROTECTOR);
+
+        outPacket.encodeInt(itemID);
+        outPacket.encodeByte(active);
+
+        return outPacket;
+    }
 }
