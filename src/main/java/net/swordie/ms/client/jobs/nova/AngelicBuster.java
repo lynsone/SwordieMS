@@ -435,7 +435,7 @@ public class AngelicBuster extends Job {
                     break;
                 case DAY_DREAMER:
                     o1.nValue = si.getValue(x, slv);
-                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
                     chr.warp(toField);
                     break;
                 case NOVA_TEMPERANCE_AB:

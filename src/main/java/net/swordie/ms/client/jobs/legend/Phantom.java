@@ -404,7 +404,7 @@ public class Phantom extends Job {
                     break;
                 case TO_THE_SKIES:
                     o1.nValue = si.getValue(x, slv);
-                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
                     chr.warp(toField);
                     break;
                 case JUDGMENT_DRAW_1:

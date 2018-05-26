@@ -821,7 +821,7 @@ public class Pirate extends Job {
                     break;
                 case MAPLE_RETURN:
                     o1.nValue = si.getValue(x, slv);
-                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
                     chr.warp(toField);
                     break;
                 case HEROS_WILL_BUCC:

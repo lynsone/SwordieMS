@@ -665,7 +665,7 @@ public class AdminCommands {
     public static class SetMap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length > 1 && Util.isNumber(args[1])) {
-                Field toField = chr.getClient().getChannelInstance().getField(Integer.parseInt(args[1]));
+                Field toField = chr.getOrCreateFieldByCurrentInstanceType(Integer.parseInt(args[1]));
                 chr.warp(toField);
             } else {
                 chr.chatMessage("Please input a number as first argument.");
@@ -951,7 +951,7 @@ public class AdminCommands {
                     chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] There is no map saved as key '" + args[2] + "'.");
                     return;
                 }
-                Field toField = chr.getClient().getChannelInstance().getField((quickmaps.get(key)));
+                Field toField = chr.getOrCreateFieldByCurrentInstanceType((quickmaps.get(key)));
                 Portal portal = chr.getField().getPortalByID(0);
                 chr.warp(toField, portal);
             } else if (args[1].equalsIgnoreCase("list")) {

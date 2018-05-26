@@ -380,7 +380,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void warp(int mid, int pid) {
-		Field field = chr.getClient().getChannelInstance().getField(mid);
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(mid);
 		Portal portal = chr.getField().getPortalByID(pid);
 		chr.warp(field, portal);
 	}
@@ -688,7 +688,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public boolean mobsPresentInField(int fieldid) {
-		Field field = chr.getClient().getChannelInstance().getField(fieldid);
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldid);
 		return field.getMobs().size() > 0;
 	}
 

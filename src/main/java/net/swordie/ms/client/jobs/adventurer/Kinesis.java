@@ -301,7 +301,7 @@ public class Kinesis extends Job {
                     break;
                 case RETURN_KINESIS:
                     o1.nValue = si.getValue(x, slv);
-                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
                     chr.warp(toField);
                     break;
             }

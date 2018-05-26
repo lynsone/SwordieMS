@@ -148,9 +148,7 @@ public class WorldHandler {
         chr.getAccount().setLastLoggedIn(chr.getName());
         chr.getAccount().setCurrentChr(chr);
         DatabaseManager.saveToDB(chr.getAccount());
-        Field field = c.getChannelInstance().getField(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
-        field.addChar(chr);
-        chr.setField(field);
+        Field field = chr.getOrCreateFieldByCurrentInstanceType(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
         chr.warp(field, true);
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         if(chr.getGuild() != null) {
@@ -689,9 +687,9 @@ public class WorldHandler {
         Field toField;
 
         if(itemID != 2030000) {
-            toField = c.getChannelInstance().getField(ii.getMoveTo());
+            toField = chr.getOrCreateFieldByCurrentInstanceType(ii.getMoveTo());
         } else {
-            toField = c.getChannelInstance().getField(field.getReturnMap());
+            toField = chr.getOrCreateFieldByCurrentInstanceType(field.getReturnMap());
         }
         Portal portal = toField.getPortalByID(0);
         chr.warp(toField, portal);
@@ -1570,7 +1568,7 @@ public class WorldHandler {
             case 5040004: // Hyper Teleport Rock
                 short idk = inPacket.decodeShort();
                 int mapID = inPacket.decodeInt();
-                Field field = c.getChannelInstance().getField(mapID);
+                Field field = chr.getOrCreateFieldByCurrentInstanceType(mapID);
                 chr.warp(field);
                 break;
             case 5062009: // Red Cube
