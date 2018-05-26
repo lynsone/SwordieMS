@@ -757,4 +757,38 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket characterPotentialReset(PotentialResetType prt, int arg) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHARACTER_POTENTIAL_RESET);
+
+        outPacket.encodeByte(prt.ordinal());
+        switch (prt) {
+            case Pos:
+                outPacket.encodeShort(arg);
+                break;
+            case Skill:
+                outPacket.encodeInt(arg);
+                break;
+            case All:
+                break;
+        }
+        return outPacket;
+    }
+
+    public static OutPacket characterPotentialSet(boolean exclRequest, boolean changed, short pos, int skillID,
+                                                  short skillLevel, short grade, boolean updatePassive) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHARACTER_POTENTIAL_SET);
+
+        outPacket.encodeByte(exclRequest);
+        outPacket.encodeByte(changed);
+        if (changed) {
+            outPacket.encodeShort(pos);
+            outPacket.encodeInt(skillID);
+            outPacket.encodeShort(skillLevel);
+            outPacket.encodeShort(grade);
+            outPacket.encodeByte(updatePassive);
+        }
+
+        return outPacket;
+    }
 }

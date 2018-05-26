@@ -4,6 +4,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
@@ -1109,6 +1110,13 @@ public class AdminCommands {
             } else {
                 chr.chatMessage(GM_BLUE_CHAT, "Could not find mob.");
             }
+        }
+    }
+
+    public static class CompleteQuest extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            chr.getQuestManager().completeQuest(Integer.parseInt(args[1]));
         }
     }
 }

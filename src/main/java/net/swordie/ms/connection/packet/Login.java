@@ -14,6 +14,9 @@ import net.swordie.ms.Server;
 import net.swordie.ms.world.World;
 import net.swordie.ms.util.FileTime;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -192,7 +195,8 @@ public class Login {
         }
         boolean isEdited = false;
         outPacket.encodeByte(isEdited); //edited characters
-        Set<Char> chars = account.getCharacters();
+        List<Char> chars = new ArrayList<>(account.getCharacters());
+        chars.sort(Comparator.comparingInt(Char::getId));
         int nSecond = chars.size();
         outPacket.encodeInt(nSecond); // nSecond
         for (Char chr : chars) {
