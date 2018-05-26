@@ -141,9 +141,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		scriptEngine.put("scriptType", scriptType);
 		scriptEngine.put("objectID", objID);
 		if (scriptType == ScriptType.QUEST) {
-			chat(scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) + "");
+			chat(scriptName.charAt(scriptName.length() - 1) + "");
 			scriptEngine.put("startQuest",
-					scriptName.charAt(scriptName.length() - SCRIPT_ENGINE_EXTENSION.length() - 1) ==
+					scriptName.charAt(scriptName.length() - 1) ==
 							QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
 		}
 		ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);

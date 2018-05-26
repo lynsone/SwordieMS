@@ -1331,6 +1331,10 @@ public class Mob extends Life {
         if (fh == null) {
             fh = field.findFootHoldBelow(pos);
         }
+        if (fh == null) {
+            // Some weird edge case where the mob is spawned on some weird foothold
+            return;
+        }
         setHomeFoothold(fh.deepCopy());
         setCurFoodhold(fh.deepCopy());
         Char controller = getField().getLifeToControllers().get(this);

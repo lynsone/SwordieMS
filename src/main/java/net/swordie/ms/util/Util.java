@@ -100,11 +100,20 @@ public class Util {
 
     /**
      * Returns a random number from <code>start</code> up to <code>end</code>. Creates a new Random class upon call.
+     * If <code>start</code> is greater than <code>end</code>, <code>start</code> will be swapped with <code>end</code>.
      * @param start the lower bound of the random number
      * @param end the upper bound of the random number
      * @return A random number from <code>start</code> up to <code>end</code>
      */
     public static int getRandom(int start, int end) {
+        if (end - start == 0) {
+            return start;
+        }
+        if (start > end) {
+            int temp = end;
+            end = start;
+            start = temp;
+        }
         return start + new Random().nextInt(end - start);
     }
 

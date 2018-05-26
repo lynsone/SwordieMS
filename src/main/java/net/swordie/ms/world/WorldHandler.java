@@ -2320,41 +2320,39 @@ public class WorldHandler {
         Char chr = c.getChr();
         QuestManager qm = chr.getQuestManager();
         byte type = inPacket.decodeByte();
+        chr.chatMessage("Quest type = " + type);
         int questID = 0;
         int npcTemplateID = 0;
         Position position = null;
-        switch(type) {
-            case 1: // Quest start
-            case 2: // Quest end
-                questID = inPacket.decodeInt();
-                npcTemplateID = inPacket.decodeInt();
-                if(inPacket.getUnreadAmount() > 4) {
-                    position = inPacket.decodePosition();
-                }
-                break;
-            case 3: // Scripted quest start
-            case 4: // Scripted quest end
-                questID = inPacket.decodeInt();
-                npcTemplateID = inPacket.decodeInt();
-                if(inPacket.getUnreadAmount() > 4) {
-                    position = inPacket.decodePosition();
-                }
-                break;
-            default:
-                log.error(String.format("Unkown quest request %d!", type));
-                break;
+        QuestType qt = QuestType.getQTFromByte(type);
+        if (qt != null) {
+            switch (qt) {
+                case QuestReq_AcceptQuest: // Quest start
+                case QuestReq_CompleteQuest: // Quest end
+                case QuestReq_OpeningScript: // Scripted quest start
+                case QuestReq_CompleteScript: // Scripted quest end
+                    questID = inPacket.decodeInt();
+                    npcTemplateID = inPacket.decodeInt();
+                    if (inPacket.getUnreadAmount() > 4) {
+                        position = inPacket.decodePosition();
+                    }
+                    break;
+                default:
+                    log.error(String.format("Unhandled quest request %s!", qt));
+                    break;
+            }
         }
-        if(questID == 0) {
+        if(questID == 0 || qt == null) {
             chr.chatMessage(GAME_MESSAGE, "Could not start quest.");
             return;
         }
-        switch(type) {
-            case 1:
+        switch(qt) {
+            case QuestReq_AcceptQuest:
                 if(qm.canStartQuest(questID)) {
                     qm.addQuest(QuestData.createQuestFromId(questID));
                 }
                 break;
-            case 2:
+            case QuestReq_CompleteQuest:
                 if(qm.hasQuestInProgress(questID)) {
                     Quest quest = qm.getQuests().get(questID);
                     if(quest.isComplete()) {
@@ -2362,19 +2360,19 @@ public class WorldHandler {
                     }
                 }
                 break;
-            case 3:
+            case QuestReq_OpeningScript:
                 QuestInfo qi = QuestData.getQuestInfoById(questID);
                 String scriptName = qi.getStartScript();
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
-                    scriptName = String.format("%d%s.py", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
+                    scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
                 }
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
                 break;
-            case 4:
+            case QuestReq_CompleteScript:
                 qi = QuestData.getQuestInfoById(questID);
                 scriptName = qi.getEndScript();
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
-                    scriptName = String.format("%d%s.py", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
+                    scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
                 break;
