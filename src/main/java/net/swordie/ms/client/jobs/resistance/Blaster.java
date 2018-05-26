@@ -159,7 +159,7 @@ public class Blaster extends Job {
             switch(skillID) {
                 case SECRET_ASSEMBLY:
                     o1.nValue = si.getValue(x, slv);
-                    Field toField = c.getChannelInstance().getField(o1.nValue);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
                     chr.warp(toField);
                     break;
                 case REVOLVING_CANNON_RELOAD:

@@ -281,7 +281,7 @@ public class Party {
             chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
             int returnMap = chr.getField().getReturnMap();
             if(returnMap != 999999999 && returnMap != chr.getField().getReturnMap()) {
-                Field field = chr.getClient().getChannelInstance().getField(returnMap);
+                Field field = chr.getOrCreateFieldByCurrentInstanceType(returnMap);
                 chr.warp(field);
             }
         }
