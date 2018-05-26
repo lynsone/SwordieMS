@@ -6,7 +6,9 @@ import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
@@ -116,11 +118,11 @@ public class ThunderBreaker extends Job {
                 tsm.putCharacterStatValue(ShadowPartner, o1);
                 break;
             case SPEED_INFUSION:
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(x, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv); //Unlimited duration?  needs to be fixed
-                tsm.putCharacterStatValue(IndieBooster, o1); //Indie, so that it stacks with Knuckle_Booster
+                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.PartyBooster);
+                tsb.setNOption(-1);
+                tsb.setROption(skillID);
+                tsb.setExpireTerm(1);
+                tsm.putCharacterStatValue(PartyBooster, tsb.getOption());
                 break;
             case CALL_OF_CYGNUS_TB:
                 o1.nReason = skillID;
@@ -156,15 +158,11 @@ public class ThunderBreaker extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(StrikerHyperElectric, o1);
 
-                //o2.nReason = skillID;
-                //o2.nValue = (tsm.getOption(IgnoreTargetDEF).nOption * si.getValue(y, slv));
-                //o2.tStart = (int) System.currentTimeMillis();
-                //o2.tTerm = si.getValue(time, 1);
-                //tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o2);
-                o2.nOption = (tsm.getOption(IgnoreTargetDEF).nOption * si.getValue(y, slv));
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(indieDamR, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o2);
                 break;
 
         }
@@ -186,11 +184,11 @@ public class ThunderBreaker extends Job {
         }
     }
 
-    private void handleLightning(int skillId, TemporaryStatManager tsm, Client c) {
+    private void handleLightning(TemporaryStatManager tsm) {
         Option o = new Option();
-        Option o1 = new Option();
-        SkillInfo lightningInfo = SkillData.getSkillInfoById(LIGHTNING_ELEMENTAL);
         Skill skill = chr.getSkill(LIGHTNING_ELEMENTAL);
+        SkillInfo leInfo = SkillData.getSkillInfoById(skill.getSkillId());
+        SkillInfo pbInfo = SkillData.getSkillInfoById(PRIMAL_BOLT);
         byte slv = (byte) skill.getCurrentLevel();
         int amount = 1;
         if(tsm.hasStat(IgnoreTargetDEF)) {
@@ -199,16 +197,10 @@ public class ThunderBreaker extends Job {
                 amount++;
             }
         }
-        o.nOption = 1;
+        o.nOption = (tsm.hasStat(StrikerHyperElectric) ? (pbInfo.getValue(x, slv)) : (leInfo.getValue(x, slv))) * amount;
         o.mOption = amount;
         o.rOption = LIGHTNING_ELEMENTAL;
-        o.tOption = lightningInfo.getValue(y, lightningInfo.getCurrentLevel());
-        if(chr.hasSkill(PRIMAL_BOLT)) {
-            o1.nOption = (tsm.getOption(IgnoreTargetDEF).nOption * lightningInfo.getValue(y, slv));
-            o1.rOption = LIGHTNING_ELEMENTAL;
-            o1.tOption = lightningInfo.getValue(time, slv);
-            tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
-        }
+        o.tOption = leInfo.getValue(y, leInfo.getCurrentLevel());
         tsm.putCharacterStatValue(IgnoreTargetDEF, o);
         c.write(WvsContext.temporaryStatSet(tsm));
     }
@@ -261,7 +253,6 @@ public class ThunderBreaker extends Job {
     public void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        int chargeStack = tsm.getOption(IgnoreTargetDEF).nOption;
         Skill skill = chr.getSkill(attackInfo.skillId);
         int skillID = 0;
         SkillInfo si = null;
@@ -275,7 +266,7 @@ public class ThunderBreaker extends Job {
         int chargeProp = getChargeProp();
         if (tsm.hasStat(CygnusElementSkill)) {
             if (hasHitMobs && Util.succeedProp(chargeProp)) {
-                handleLightning(skill.getSkillId(), tsm, c);
+                handleLightning(tsm);
             }
         }
         if(chr.hasSkill(15110025)) {
@@ -283,18 +274,20 @@ public class ThunderBreaker extends Job {
                 handleLinkMastery(skill.getSkillId(), tsm, c);
             }
         }
+        chr.chatMessage(ChatMsgColour.GUILD_PURPLE, "Attack Speed: "+attackInfo.attackSpeed);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
             case GALE:
-            case TYPHOON:
+            case TYPHOON: //TODO
+                int chargeStack = tsm.getOption(IgnoreTargetDEF).mOption;
                 if((tsm.getOptByCTSAndSkill(IndieDamR, GALE) == null) || (tsm.getOptByCTSAndSkill(IndieDamR, TYPHOON) == null)) {
                     o1.nReason = skillID;
                     o1.nValue = chargeStack * si.getValue(y, slv);
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieStatR, o1); //Indie
+                    tsm.putCharacterStatValue(IndieDamR, o1); //Indie
                     c.write(WvsContext.temporaryStatSet(tsm));
                 }
                 break;
