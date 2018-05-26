@@ -350,7 +350,7 @@ public class Blaster extends Job {
     public void gaugeChange(int amount) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
-        if(getGauge() < 6) {
+        if(getGauge() < getMaxAmmo()) {
             setGauge(getGauge() + amount);
             o.nOption = 1;
             o.bOption = getAmmo();
