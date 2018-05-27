@@ -252,8 +252,17 @@ public interface ScriptManager {
 	void chatBlue(String text);
 
 	/**
+	 * Completes a quest, and gives the rewards to the character.
+	 * Example: "sm.completeQuest(10001)"
+	 *
+	 * @param questID
+	 * 		The ID of the quest.
+	 */
+	void completeQuest(int questID);
+
+	/**
 	 * Completes a quest without giving quest rewards.
-	 * Example: "sm.completeQuestNoRewards(100)"
+	 * Example: "sm.completeQuestNoRewards(10001)"
 	 *
 	 * @param questID
 	 * 		The ID of the quest.
@@ -577,5 +586,12 @@ public interface ScriptManager {
 	 * Example: "sm.removeReactor()"
 	 */
 	void removeReactor();
+
+	/**
+	 * Sets the current speaker template id for npc chat.
+	 * Example: "sm.setSpeakerID(1010100)"
+	 * @param templateID the speaker's template id
+	 */
+	void setSpeakerID(int templateID);
 
 }

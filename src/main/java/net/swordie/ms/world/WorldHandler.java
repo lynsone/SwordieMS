@@ -2001,7 +2001,7 @@ public class WorldHandler {
         }
         if (lastType != 5 || hasAnswer) {
             // else -> User pressed escape in a selection (choice) screen
-            chr.getScriptManager().handleAction(ScriptType.NPC, lastType, action, answer);
+            chr.getScriptManager().handleAction(lastType, action, answer);
         }
     }
 

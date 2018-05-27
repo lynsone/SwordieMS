@@ -22,6 +22,7 @@ public class ScriptMan {
         int overrideTemplate = nsi.getOverrideSpeakerTemplateID();
         outPacket.encodeByte(overrideTemplate > 0);
         if(overrideTemplate > 0) {
+            nsi.setParam((byte) (nsi.getParam() | 4));
             outPacket.encodeInt(overrideTemplate);
         }
         outPacket.encodeByte(nmt.getVal());

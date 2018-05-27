@@ -64,6 +64,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	private NpcScriptInfo npcScriptInfo;
 	private Map<ScriptType, ScriptInfo> scripts;
 	private int returnField = 0;
+	private ScriptType lastActiveScriptType;
 
 	private ScriptManagerImpl(Char chr, Field field) {
 		this.chr = chr;
@@ -71,6 +72,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		this.npcScriptInfo = new NpcScriptInfo();
 		this.scripts = new HashMap<>();
 		this.isField = chr == null;
+		this.lastActiveScriptType = ScriptType.NONE;
 	}
 
 	public ScriptManagerImpl(Char chr) {
@@ -131,6 +133,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	private void startScript(int parentID, int objID, String scriptName, ScriptType scriptType, String initFuncName) {
+		if (scriptType == ScriptType.NONE) {
+			return;
+		}
 		if (!isField()) {
 			chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
@@ -154,6 +159,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		} catch (ScriptException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
+		setLastActiveScriptType(scriptType);
 	}
 
 	private Invocable getInvocableFromScriptNameAndType(String name, ScriptType scriptType) {
@@ -185,8 +191,12 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	public void stop(ScriptType scriptType) {
+		setSpeakerID(0);
 		if (getScriptInfoByType(scriptType) != null) {
 			getScriptInfoByType(scriptType).reset();
+		}
+		if (getLastActiveScriptType() == scriptType) {
+			setLastActiveScriptType(ScriptType.NONE);
 		}
 		WvsContext.dispose(chr);
 	}
@@ -194,6 +204,10 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		// TODO listening for updates if needed
+	}
+
+	public void handleAction(byte lastType, byte response, int answer) {
+		handleAction(getLastActiveScriptType(), lastType, response, answer);
 	}
 
 	public void handleAction(ScriptType scriptType, byte lastType, byte response, int answer) {
@@ -246,6 +260,14 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	public Field getField() {
 		return field;
+	}
+
+	public ScriptType getLastActiveScriptType() {
+		return lastActiveScriptType;
+	}
+
+	public void setLastActiveScriptType(ScriptType lastActiveScriptType) {
+		this.lastActiveScriptType = lastActiveScriptType;
 	}
 
 	// Start of the sends/asks -----------------------------------------------------------------------------------------
@@ -371,6 +393,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		stop(ScriptType.ITEM);
 		stop(ScriptType.QUEST);
 		stop(ScriptType.REACTOR);
+		setLastActiveScriptType(ScriptType.NONE);
 	}
 
 	public void dispose(ScriptType scriptType) {
@@ -408,6 +431,10 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	@Override
 	public void giveMesos(long mesos) {
 		chr.addMoney(mesos);
+	}
+
+	public void completeQuest(int id) {
+		chr.getQuestManager().completeQuest(id);
 	}
 
 	@Override
@@ -712,5 +739,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 			field.removeReactor(reactor);
 			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
 		}
+	}
+
+	public void setSpeakerID(int templateID) {
+		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
 	}
 }

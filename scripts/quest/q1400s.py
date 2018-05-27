@@ -28,6 +28,7 @@ selections = [
 status = -1
 
 def init():
+    sm.setSpeakerID(1010100)
     #sm.startQuestNoCheck(parentID)
     sm.sendNext("I see you have reached level 10!\r\nIt is time for you to select your future.")
 
