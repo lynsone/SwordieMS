@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.info.ZeroInfo;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
@@ -775,6 +776,10 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket characterPotentialSet(CharacterPotential cp) {
+        return characterPotentialSet(true, true, cp.getKey(), cp.getSkillID(), cp.getSlv(), cp.getGrade(), true);
+    }
+
     public static OutPacket characterPotentialSet(boolean exclRequest, boolean changed, short pos, int skillID,
                                                   short skillLevel, short grade, boolean updatePassive) {
         OutPacket outPacket = new OutPacket(OutHeader.CHARACTER_POTENTIAL_SET);
@@ -788,6 +793,14 @@ public class WvsContext {
             outPacket.encodeShort(grade);
             outPacket.encodeByte(updatePassive);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket characterHonorExp(int exp) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHARACTER_HONOR_EXP);
+
+        outPacket.encodeInt(exp);
 
         return outPacket;
     }

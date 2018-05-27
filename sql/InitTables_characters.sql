@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS macroSkills;
 DROP TABLE IF EXISTS macros;
+DROP TABLE IF EXISTS characterPotentials;
 DROP TABLE IF EXISTS test;
 DROP TABLE IF EXISTS skills;
 DROP TABLE IF EXISTS characters;
@@ -402,6 +403,7 @@ CREATE TABLE characterStats (
     accountLastLogout int,
     lastLogout bigint,
     gachExp int,
+    honorExp int,
     PRIMARY KEY (id),
     FOREIGN KEY (extendSP) REFERENCES extendSP(id),
     FOREIGN KEY (nonCombatStatDayLimit) REFERENCES nonCombatStatDayLimit(id),
@@ -488,6 +490,17 @@ CREATE TABLE characters (
     FOREIGN KEY (questManager) REFERENCES questmanagers(id),
     FOREIGN KEY (guild) REFERENCES guilds(id),
     FOREIGN KEY (monsterBook) references monsterBookInfos(id)
+);
+
+CREATE TABLE characterPotentials (
+	id bigint not null auto_increment,
+    potKey tinyint,
+    skillID int,
+    slv tinyint,
+    grade tinyint,
+    charID int,
+    primary key (id),
+    foreign key (charID) references characters(id)
 );
 
 CREATE TABLE GuildSkill (

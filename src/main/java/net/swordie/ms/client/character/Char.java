@@ -16,6 +16,8 @@ import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleLadder;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleMobInfo;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleRankInfo;
+import net.swordie.ms.client.character.potential.CharacterPotential;
+import net.swordie.ms.client.character.potential.CharacterPotentialMan;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
@@ -136,6 +138,10 @@ public class Char {
 	private Set<Friend> friends;
 
 	@JoinColumn(name = "charID")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	private Set<CharacterPotential> potentials;
+
+	@JoinColumn(name = "charID")
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Macro> macros = new ArrayList<>();
 
@@ -146,6 +152,9 @@ public class Char {
 	@JoinColumn(name = "monsterBook")
 	@OneToOne(cascade = CascadeType.ALL)
 	private MonsterBookInfo monsterBookInfo;
+
+	@Transient
+	private CharacterPotentialMan potentialMan;
 
 	@Transient
 	private Ranking ranking;
@@ -353,6 +362,7 @@ public class Char {
 		temporaryStatManager = new TemporaryStatManager(this);
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
+		potentialMan = new CharacterPotentialMan(this);
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -1058,13 +1068,9 @@ public class Char {
 			}
 		}
 		if (mask.isInMask(DBChar.CharacterPotentialSkill)) {
-			short size = 0;
-			outPacket.encodeShort(size);
-			for (int i = 0; i < size; i++) {
-				outPacket.encodeByte(0); // nKey
-				outPacket.encodeInt(0); // nSkillID
-				outPacket.encodeByte(0); // nSLV
-				outPacket.encodeByte(0); // nGrade
+			outPacket.encodeShort(getPotentials().size());
+			for (CharacterPotential cp : getPotentials()) {
+				cp.encode(outPacket);
 			}
 		}
 		if (mask.isInMask(DBChar.SoulCollection)) {
@@ -1091,8 +1097,8 @@ public class Char {
 		outPacket.encodeByte(0); // idk
 //        outPacket.encodeArr(Util.getByteArrayByString("01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
 		if (mask.isInMask(DBChar.Character)) {
-			outPacket.encodeInt(0); // honor level
-			outPacket.encodeInt(0); // honor exp
+			outPacket.encodeInt(0); // honor level, deprecated
+			outPacket.encodeInt(getHonorExp()); // honor exp
 		}
 		if (mask.isInMask(DBChar.Money)) {
 			boolean shouldIEncodeThis = true;
@@ -3045,6 +3051,35 @@ public class Char {
 			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
 			write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
 		}
+	}
 
+	public CharacterPotentialMan getPotentialMan() {
+		return potentialMan;
+	}
+
+	public Set<CharacterPotential> getPotentials() {
+		return potentials;
+	}
+
+	public void setPotentials(Set<CharacterPotential> potentials) {
+		this.potentials = potentials;
+	}
+
+	public int getHonorExp() {
+		return getAvatarData().getCharacterStat().getHonorExp();
+	}
+
+	public void setHonorExp(int honorExp) {
+		getAvatarData().getCharacterStat().setHonorExp(honorExp);
+	}
+
+	/**
+	 * Adds honor exp to this Char, and sends a packet to the client with the new honor exp.
+	 * Honor exp added may be negative, but the total honor exp will never go below 0.
+	 * @param exp the exp to add (may be negative)
+	 */
+	public void addHonorExp(int exp) {
+		setHonorExp(Math.max(0, getHonorExp() + exp));
+		write(WvsContext.characterHonorExp(getHonorExp()));
 	}
 }

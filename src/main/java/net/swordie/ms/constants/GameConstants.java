@@ -18,6 +18,15 @@ public class GameConstants {
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
     public static final int COMBO_KILL_RESET_TIMER = 5;
+    public static final int CHAR_POT_BASE_ID = 70000000;
+    public static final int CHAR_POT_END_ID = 70000062;
+    public static final int BASE_CHAR_POT_UP_RATE = 10; // 10%
+    public static final int BASE_CHAR_POT_DOWN_RATE = 10; // 10%
+    public static final int CHAR_POT_RESET_COST = 100;
+    public static final int CHAR_POT_GRADE_LOCK_COST = 10000;
+    public static final int CHAR_POT_LOCK_1_COST = 3000;
+    public static final int CHAR_POT_LOCK_2_COST = 5000;
+
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
 

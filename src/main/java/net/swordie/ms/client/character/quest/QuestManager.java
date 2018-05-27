@@ -198,6 +198,11 @@ public class QuestManager {
         this.chr = chr;
     }
 
+    /**
+     * Removes a given quest from this QuestManager, and notifies the client of this change. Does nothing if the Char
+     * does not currently have the quest.
+     * @param questID the id of the quest that should be removed
+     */
     public void removeQuest(int questID) {
         Quest q = getQuests().get(questID);
         if(q != null) {

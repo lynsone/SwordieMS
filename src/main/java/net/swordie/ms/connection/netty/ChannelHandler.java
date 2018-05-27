@@ -445,6 +445,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_EX_ITEM_UPGRADE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserExItemUpgradeItemUseRequest(c, inPacket);
                     break;
+                case USER_REQUEST_CHARACTER_POTENTIAL_SKILL_RAND_SET_UI:
+                    WorldHandler.handleUserRequestCharacterPotentialSkillRandSetUi(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

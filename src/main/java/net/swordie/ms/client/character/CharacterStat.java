@@ -21,110 +21,62 @@ public class CharacterStat {
     private int id;
     @Column(name = "characterId")
     private int characterId;
-    @Column(name = "characterIdForLog")
     private int characterIdForLog;
-    @Column(name = "worldIdForLog")
     private int worldIdForLog;
-    @Column(name = "name")
     private String name;
-    @Column(name = "gender")
     private int gender;
-    @Column(name = "skin")
     private int skin;
-    @Column(name = "face")
     private int face;
-    @Column(name = "hair")
     private int hair;
-    @Column(name = "mixBaseHairColor")
     private int mixBaseHairColor;
-    @Column(name = "mixAddHairColor")
     private int mixAddHairColor;
-    @Column(name = "mixHairBaseProb")
     private int mixHairBaseProb;
-    @Column(name = "level")
     private int level;
-    @Column(name = "job")
     private int job;
-    @Column(name = "str")
     private int str;
-    @Column(name = "dex")
     private int dex;
-    @Column(name = "inte")
     private int inte;
-    @Column(name = "luk")
     private int luk;
-    @Column(name = "hp")
     private int hp;
-    @Column(name = "maxHp")
     private int maxHp;
-    @Column(name = "mp")
     private int mp;
-    @Column(name = "maxMp")
     private int maxMp;
-    @Column(name = "ap")
     private int ap;
-    @Column(name = "sp")
     private int sp;
-    @Column(name = "exp")
     private long exp;
-    @Column(name = "pop")
     private int pop; // fame
-    @Column(name = "money")
     private long money;
-    @Column(name = "wp")
     private int wp;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "extendSP")
     private ExtendSP extendSP;
-    @Column(name = "posMap")
     private long posMap;
-    @Column(name = "portal")
     private int portal;
-    @Column(name = "subJob")
     private int subJob;
-    @Column(name = "defFaceAcc")
     private int defFaceAcc;
-    @Column(name = "fatigue")
     private int fatigue;
-    @Column(name = "lastFatigueUpdateTime")
     private int lastFatigueUpdateTime;
-    @Column(name = "charismaExp")
     private int charismaExp;
-    @Column(name = "insightExp")
     private int insightExp;
-    @Column(name = "willExp")
     private int willExp;
-    @Column(name = "craftExp")
     private int craftExp;
-    @Column(name = "senseExp")
     private int senseExp;
-    @Column(name = "charmExp")
     private int charmExp;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "nonCombatStatDayLimit")
     private NonCombatStatDayLimit nonCombatStatDayLimit;
-    @Column(name = "pvpExp")
     private int pvpExp;
-    @Column(name = "pvpGrade")
     private int pvpGrade;
-    @Column(name = "pvpPoint")
     private int pvpPoint;
-    @Column(name = "pvpModeLevel")
     private int pvpModeLevel;
-    @Column(name = "pvpModeType")
     private int pvpModeType;
-    @Column(name = "eventPoint")
     private int eventPoint;
-    @Column(name = "albaActivityID")
     private int albaActivityID;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "albaStartTime")
     private FileTime albaStartTime;
-    @Column(name = "albaDuration")
     private int albaDuration;
-    @Column(name = "albaSpecialReward")
     private int albaSpecialReward;
-    @Column(name = "burning")
     private boolean burning;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "characterCard")
@@ -135,8 +87,8 @@ public class CharacterStat {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "lastLogout")
     private FileTime lastLogout;
-    @Column(name = "gachExp")
     private int gachExp;
+    private int honorExp;
 
     public CharacterStat() {
         extendSP = new ExtendSP(5);
@@ -675,6 +627,14 @@ public class CharacterStat {
 
     public void setAccountLastLogout(SystemTime accountLastLogout) {
         this.accountLastLogout = accountLastLogout;
+    }
+
+    public int getHonorExp() {
+        return honorExp;
+    }
+
+    public void setHonorExp(int honorExp) {
+        this.honorExp = honorExp;
     }
 }
 

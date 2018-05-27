@@ -13,6 +13,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.keys.Keymapping;
+import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.quest.progress.*;
@@ -79,6 +80,8 @@ public class DatabaseManager {
                 Trunk.class,
                 PetItem.class,
                 MonsterBookInfo.class,
+                CharacterPotential.class,
+
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

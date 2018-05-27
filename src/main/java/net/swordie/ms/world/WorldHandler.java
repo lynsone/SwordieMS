@@ -10,6 +10,8 @@ import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.*;
+import net.swordie.ms.client.character.potential.CharacterPotential;
+import net.swordie.ms.client.character.potential.CharacterPotentialMan;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.*;
@@ -204,18 +206,25 @@ public class WorldHandler {
                 DatabaseManager.saveToDB(chr);
             }
         } else if (msg.charAt(0) == AdminCommand.getPrefix()) {
+            boolean executed = false;
+            String command = msg.split(" ")[0];
             for (Class clazz : AdminCommands.class.getClasses()) {
-                if (!(AdminCommand.getPrefix() + clazz.getSimpleName()).equalsIgnoreCase(msg.split(" ")[0])) {
+                if (!(AdminCommand.getPrefix() + clazz.getSimpleName()).equalsIgnoreCase(command)) {
                     continue;
                 }
+                executed = true;
+                String[] split = null;
                 try {
                     AdminCommand adminCommand = (AdminCommand) clazz.getConstructor().newInstance();
                     Method method = clazz.getDeclaredMethod("execute", Char.class, String[].class);
-                    String[] split = msg.split(" ");
+                    split = msg.split(" ");
                     method.invoke(adminCommand, c.getChr(), split);
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
                     e.printStackTrace();
                 }
+            }
+            if (!executed) {
+                chr.chatMessage(CYAN, "Unknown command \"" + command + "\"");
             }
         } else {
             chr.getField().broadcastPacket(User.chat(chr.getId(), ChatType.USER, msg, false, 0, c.getWorldId()));
@@ -3846,5 +3855,50 @@ public class WorldHandler {
                 0, equip));
         chr.consumeItem(flame);
         chr.dispose();
+    }
+
+    public static void handleUserRequestCharacterPotentialSkillRandSetUi(Char chr, InPacket inPacket) {
+        // what a name
+        int cost = GameConstants.CHAR_POT_RESET_COST;
+        int rate = inPacket.decodeInt();
+        int size = inPacket.decodeInt();
+        Set<Integer> lockedLines = new HashSet<>();
+        for (int i = 0; i < size; i++) {
+            lockedLines.add(inPacket.decodeInt());
+            if (lockedLines.size() == 0) {
+                cost += GameConstants.CHAR_POT_LOCK_1_COST;
+            } else {
+                cost += GameConstants.CHAR_POT_LOCK_2_COST;
+            }
+        }
+        boolean locked = rate > 0;
+        if (locked) {
+            cost += GameConstants.CHAR_POT_GRADE_LOCK_COST;
+        }
+        if (cost > chr.getHonorExp()) {
+            chr.chatMessage("You do not have enough honor exp for that action.");
+            log.warn(String.format("Character %d tried to reset honor without having enough exp (required %d, has %d)",
+                    chr.getId(), cost, chr.getHonorExp()));
+            return;
+        }
+        chr.addHonorExp(-cost);
+
+        CharacterPotentialMan cpm = chr.getPotentialMan();
+        boolean gradeUp = !locked && Util.succeedProp(GameConstants.BASE_CHAR_POT_UP_RATE);
+        boolean gradeDown = !locked && Util.succeedProp(GameConstants.BASE_CHAR_POT_DOWN_RATE);
+        byte grade = cpm.getGrade();
+        // update grades
+        if (grade < CharPotGrade.LEGENDARY.ordinal() && gradeUp) {
+            grade++;
+        } else if (grade > CharPotGrade.RARE.ordinal() && gradeDown) {
+            grade--;
+        }
+        // set new potentials that weren't locked
+        for(CharacterPotential cp : chr.getPotentials()) {
+            cp.setGrade(grade);
+            if (!lockedLines.contains((int) cp.getKey())) {
+                cpm.addPotential(cpm.generateRandomPotential(cp.getKey()));
+            }
+        }
     }
 }

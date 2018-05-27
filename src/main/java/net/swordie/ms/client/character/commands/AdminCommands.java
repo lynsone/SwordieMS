@@ -44,14 +44,15 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            NpcData.loadShopsFromSw();
-//            OutPacket outPacket = new OutPacket(OutHeader.MONSTER_BOOK_SET_CARD);
-//
+            OutPacket outPacket = new OutPacket(OutHeader.CHARACTER_HONOR_EXP);
+
+            outPacket.encodeInt(Integer.parseInt(args[1]));
+
 //            outPacket.encodeByte(true);
 //            outPacket.encodeInt(0);
 //            outPacket.encodeInt(2);
-//
-//            chr.write(outPacket);
+
+            chr.write(outPacket);
         }
     }
 
@@ -1117,6 +1118,26 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
             chr.getQuestManager().completeQuest(Integer.parseInt(args[1]));
+        }
+    }
+
+    public static class RemoveQuest extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            chr.getQuestManager().removeQuest(Integer.parseInt(args[1]));
+        }
+    }
+
+    public static class SetHonor extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 2) {
+                chr.chatMessage(GM_BLUE_CHAT, "Format: !sethonor <honor exp>");
+                return;
+            }
+            int honor = Integer.parseInt(args[1]);
+            chr.setHonorExp(honor);
+            chr.write(WvsContext.characterHonorExp(honor));
         }
     }
 }
