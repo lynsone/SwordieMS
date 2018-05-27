@@ -107,6 +107,9 @@ public class ScriptMan {
                 outPacket.encodeByte(0); // Some int array, no clue what it stands for
                 break;
         }
+        if ((nsi.getParam() & 4) != 0) {
+            nsi.setParam((byte) (nsi.getParam() ^ 4));
+        }
 
         return outPacket;
     }
