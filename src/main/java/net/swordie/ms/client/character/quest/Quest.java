@@ -25,10 +25,7 @@ public class Quest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "qrKey")
     private int QRKey;
-
-    @Column(name = "qrValue")
     private String qrValue;
 
     @Column(name = "status")

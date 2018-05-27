@@ -14,11 +14,8 @@ public class FileTime implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private int id;
-	@Column(name = "lowDateTime")
 	private int lowDateTime;
-	@Column(name = "highDateTime")
 	private int highDateTime;
 
 	public long getLongValue() {

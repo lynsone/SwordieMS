@@ -16,11 +16,8 @@ public class Guild {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "name")
     private String name;
-    @JoinColumn(name = "leaderID")
     private int leaderID;
-    @Column(name = "worldID")
     private int worldID;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @CollectionTable(name = "guildrequestors", joinColumns = @JoinColumn(name = "guildID"))
@@ -32,36 +29,21 @@ public class Guild {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "guildID")
     private List<GuildMember> members = new ArrayList<>();
-    @Column(name = "markBg")
     private int markBg;
-    @Column(name = "markBgColor")
     private int markBgColor;
-    @Column(name = "mark")
     private int mark;
-    @Column(name = "markColor")
     private int markColor;
-    @Column(name = "maxMembers")
     private int maxMembers;
-    @Column(name = "notice")
     private String notice;
-    @Column(name = "points")
     private int points;
-    @Column(name = "seasonPoints")
     private int seasonPoints;
-    @Column(name = "allianceID")
     private int allianceID;
-    @Column(name = "level")
     private int level;
-    @Column(name = "rank")
     private int rank;
-    @Column(name = "ggp")
     private int ggp;
     // Start GUILDSETTING struct
-    @Column(name = "appliable")
     private boolean appliable;
-    @Column(name = "joinSetting")
     private int joinSetting;
-    @Column(name = "reqLevel")
     private int reqLevel;
     // End GUILDSETTING struct
 

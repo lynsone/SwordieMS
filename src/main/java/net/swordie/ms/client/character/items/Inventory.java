@@ -24,7 +24,6 @@ public class Inventory {
     private List<Item> items;
     @Column(name = "type")
     private InvType type;
-    @Column(name = "slots")
     private byte slots;
 
     public Inventory() {

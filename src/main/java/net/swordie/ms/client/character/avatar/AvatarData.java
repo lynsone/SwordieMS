@@ -14,7 +14,6 @@ import javax.persistence.*;
 public class AvatarData {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
     @JoinColumn(name = "characterStat")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

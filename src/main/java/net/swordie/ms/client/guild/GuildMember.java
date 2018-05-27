@@ -12,19 +12,13 @@ public class GuildMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "charID")
     private int charID;
     @Transient
     private Char chr;
-    @Column(name = "grade")
     private int grade;
-    @Column(name = "allianceGrade")
     private int allianceGrade;
-    @Column(name = "commitment")
     private int commitment;
-    @Column(name = "dayCommitment")
     private int dayCommitment;
-    @Column(name = "igp")
     private int igp;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "commitmentIncTime")

@@ -11,13 +11,9 @@ import javax.persistence.*;
 @Table(name = "characterCards")
 public class CharacterCard {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
-    @Column(name = "characterId")
     private int characterId;
-    @Column(name = "job")
     private int job;
-    @Column(name = "level")
     private byte level;
 
     public CharacterCard(){}

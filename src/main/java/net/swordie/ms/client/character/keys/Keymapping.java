@@ -12,9 +12,7 @@ public class Keymapping {
     private int id;
     @Column(name = "idx")
     private int index;
-    @Column(name = "type")
     private byte type;
-    @Column(name = "val")
     private int val;
 
     public Keymapping(){}

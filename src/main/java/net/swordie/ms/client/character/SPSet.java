@@ -12,11 +12,8 @@ import javax.persistence.*;
 @Table(name = "spSet")
 public class SPSet {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
-    @Column(name = "jobLevel")
     private byte jobLevel;
-    @Column(name = "sp")
     private int sp;
 
     public SPSet() {

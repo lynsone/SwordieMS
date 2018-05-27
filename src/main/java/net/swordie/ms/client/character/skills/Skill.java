@@ -14,19 +14,12 @@ import java.util.Map;
 public class Skill {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
-    @Column(name = "charId")
     private int charId;
-    @Column(name = "skillId")
     private int skillId;
-    @Column(name = "rootId")
     private int rootId;
-    @Column(name = "maxLevel")
     private int maxLevel;
-    @Column(name = "currentLevel")
     private int currentLevel;
-    @Column(name = "masterLevel")
     private int masterLevel;
 
     public int getSkillId() {
