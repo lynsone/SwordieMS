@@ -744,4 +744,51 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	public void setSpeakerID(int templateID) {
 		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
 	}
+
+	public void setJob(short jobID) {
+		chr.setJob(jobID);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.subJob, jobID);
+		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+	}
+
+	public void addSP(int amount) {
+		int currentSP = chr.getAvatarData().getCharacterStat().getSp();
+		setSP(currentSP + amount);
+	}
+
+	public void deductSP(int amount) {
+		int currentSP = chr.getAvatarData().getCharacterStat().getSp();
+		setSP(currentSP - amount);
+	}
+
+	public void setSP(int amount) {
+		chr.setSpToCurrentJob(amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+	}
+
+	public void addAP(int amount) {
+		int currentAP = chr.getAvatarData().getCharacterStat().getAp();
+		setAP(currentAP + amount);
+	}
+
+	public void deductAP(int amount) {
+		int currentAP = chr.getAvatarData().getCharacterStat().getAp();
+		setAP(currentAP - amount);
+	}
+
+	public void setAP(int amount) {
+		chr.setStat(Stat.ap, (short) amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.ap, (short) amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	public void jobAdvance(short jobID) {
+		setJob(jobID);
+		addAP(5); //Standard added AP upon Job Advancing
+		addSP(3); //Standard added SP upon Job Advancing
+	}
 }
