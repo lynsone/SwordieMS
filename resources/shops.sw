@@ -6418,3 +6418,96 @@
         price 6000;
     }
 }
+1540894{
+    absolab_katana{
+        loc 1;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1542108;
+    }
+    absolab_summoner{
+        loc 2;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1552110;
+    }
+    absolab_scepter{
+        loc 3;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1252093;
+    }
+    absolab_lucky_item_scroll{
+        loc 4;
+        tabindex 2;
+        tokenitemid 4310199;
+        tokenprice 1;
+        id 2048915;
+    }
+    absolab_soul_shooter{
+        loc 5;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1222109;
+    }
+    absolab_desperado{
+        loc 6;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1232109;
+    }
+    absolab_whip_thief{
+        loc 7;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1242116;
+    }
+    absolab_whip_pirate{
+        loc 8;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1242120;
+    }
+    absolab_psy_limiter{
+        loc 9;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1262017;
+    }
+    absolab_saber{
+        loc 10;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1302333;
+    }
+    absolab_axe{
+        loc 11;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1312199;
+    }
+    absolab_bit_hammer{
+        loc 12;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1322250;
+    }
+    absolab_blade_lord{
+        loc 13;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1332274;
+    }
+}

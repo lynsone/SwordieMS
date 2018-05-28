@@ -2,6 +2,7 @@ package net.swordie.ms.constants;
 
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
+import net.swordie.ms.enums.ItemJob;
 
 /**
  * Created on 1/23/2018.
@@ -191,6 +192,38 @@ public class GameConstants {
             return BaseStat.mhp;
         }
         return null;
+    }
+
+    public static ItemJob getItemJobByJob(int jobArg) {
+        short job = (short) jobArg;
+        if (JobConstants.isPinkBean(job) || JobConstants.isDawnWarrior(job) || JobConstants.isKaiser(job)
+                || JobConstants.isZero(job) || JobConstants.isDemon(job) || JobConstants.isDemonSlayer(job)
+                || JobConstants.isAran(job) || JobConstants.isDarkKnight(job) || JobConstants.isHero(job)
+                || JobConstants.isPage(job) || JobConstants.isBlaster(job) || JobConstants.isHayato(job)
+                || JobConstants.isMihile(job) || JobConstants.isAdventurerWarrior(job)) {
+            return ItemJob.WARRIOR;
+        }
+        if (JobConstants.isWildHunter(job) || JobConstants.isMercedes(job) || JobConstants.isWindArcher(job) ||
+                JobConstants.isAdventurerArcher(job)) {
+            return ItemJob.BOWMAN;
+        }
+        if (JobConstants.isBeastTamer(job) || JobConstants.isBlazeWizard(job) || JobConstants.isCleric(job)
+                || JobConstants.isEvan(job) || JobConstants.isIceLightning(job) || JobConstants.isFirePoison(job)
+                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isBlazeWizard(job)
+                || JobConstants.isKenesis(job) || JobConstants.isLuminous(job)) {
+            return ItemJob.MAGICIAN;
+        }
+        if (JobConstants.isAdventurerThief(job) || JobConstants.isNightLord(job) || JobConstants.isShadower(job)
+                || JobConstants.isPhantom(job) || JobConstants.isNightWalker(job) || JobConstants.isDualBlade(job)) {
+            return ItemJob.THIEF;
+        }
+        if (JobConstants.isBuccaneer(job) || JobConstants.isAdventurerPirate(job) || JobConstants.isCannonShooter(job)
+                || JobConstants.isShade(job) || JobConstants.isThunderBreaker(job) || JobConstants.isCorsair(job)
+                || JobConstants.isAngelicBuster(job) || JobConstants.isJett(job)) {
+            return ItemJob.PIRATE;
+        } else {
+            return ItemJob.BEGINNER;
+        }
     }
 
     public static BaseStat getSecStatByMainStat(BaseStat mainStat) {
