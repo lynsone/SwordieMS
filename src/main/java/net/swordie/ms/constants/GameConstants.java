@@ -8,6 +8,7 @@ import net.swordie.ms.enums.ItemJob;
  * Created on 1/23/2018.
  */
 public class GameConstants {
+    public static final int EXP_RATE = 10;
     public static final long MAX_MONEY = 10_000_000_000L;
     public static final int DROP_HEIGHT = 100; // was 20
     public static final int DROP_DIFF = 25;

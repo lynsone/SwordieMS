@@ -145,6 +145,13 @@ public abstract class Job {
 		chr.addStat(Stat.mhp, 500);
 		chr.addStat(Stat.mmp, 500);
 		chr.addStat(Stat.ap, 5);
+		chr.addSpToJobByCurrentLevel(3);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+		stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+		chr.write(WvsContext.statChanged(stats));
 	}
 
 	public abstract boolean isBuff(int skillID);

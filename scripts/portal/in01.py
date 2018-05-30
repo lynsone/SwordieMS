@@ -1,5 +1,4 @@
 if sm.getFieldID() == 863010000:
-
     def init():
         sm.sendAskYesNo("Would you like to battle Gollux?")
 
@@ -17,7 +16,6 @@ if sm.getFieldID() == 863010000:
 
 
 else:
-
     def init():
         warp = True
         fieldID = sm.getFieldID()
@@ -30,10 +28,17 @@ else:
         elif fieldID == 104020100:
             map = 104020120
             portal = 2
+        elif fieldID == 130020000: # Entrance to Drill Hall
+            if sm.hasQuest(20873): # WA 2nd job quest
+                map = 913001000
+                portal = 0
+            else:
+                sm.chat("Sorry, only knights looking to job advance to the second job may enter here.")
         else:
             sm.chat("(Portal) This script (in01.py) is not coded for this map. (ID: " + str(fieldID) + ")")
             map = sm.getChr().getField().getReturnMap()
             portal = 0
+            warp = False
         if warp:
             sm.warp(map, portal)
             sm.dispose()

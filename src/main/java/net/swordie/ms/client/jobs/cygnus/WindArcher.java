@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.mob.Mob;
@@ -302,6 +303,10 @@ public class WindArcher extends Job {
                     anglenum = 180;
                 }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Life life = chr.getField().getLifeByObjectID(mai.mobId);
+                    if (!(life instanceof Mob)) {
+                        continue;
+                    }
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     int TW2subprop = getSubProp(chr);
                     int TW1prop = getProp(chr);
@@ -392,7 +397,8 @@ public class WindArcher extends Job {
         if (chr.hasSkill(TRIFLING_WIND_III)) {
             skill = chr.getSkill(TRIFLING_WIND_III);
         }
-        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
+        return skill != null ? SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel())
+                : 0;
     }
 
     public boolean isBuff(int skillID) {

@@ -769,6 +769,7 @@ public class SkillConstants {
             case 23121002:
             case 23121052:
             case 23120013:
+            case 13101020:
                 return true;
             default:
                 return false;

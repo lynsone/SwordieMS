@@ -1,5 +1,6 @@
 def init():
 	currentMap = sm.getFieldID()
+	warp = True
 	if currentMap == 101020400:
 		map = 101020401
 		portal = 10
@@ -60,9 +61,15 @@ def init():
 	elif currentMap == 863010430:
 		map = 863010500
 		portal = 0
+	elif currentMap == 100020200:
+		map = 100040000
+		portal = 3
 	else:
+		sm.chat("(Portal - east00) This script has currently not been coded for this map.")
 		map = sm.getChr().getField().getReturnMap()
 		portal = 0
-	
-	sm.warp(map, portal)
+		warp = False
+
+	if warp:
+		sm.warp(map, portal)
 	sm.dispose()

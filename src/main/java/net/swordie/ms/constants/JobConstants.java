@@ -622,15 +622,33 @@ public class JobConstants {
 
     public static int getJobLevel(short jobId) {
         int prefix;
-        if ( isBeginnerJob(jobId) || (jobId % 100 == 0) || jobId == 501 || jobId == 3101 )
+        if (isBeginnerJob(jobId) || (jobId % 100 == 0) || jobId == 501 || jobId == 3101) {
             return 1;
-        if ( isEvan(jobId) )
+        }
+        if (isEvan(jobId)) {
             return getEvanJobLevel(jobId);
-        if ( isDualJob(jobId) )
+        }
+        if (isDualJob(jobId)) {
             prefix = jobId % 10 / 2;
-        else
+        }
+        else {
             prefix = jobId % 10;
+        }
         return prefix <= 2 ? prefix + 2 : 0;
+    }
+
+    public static int getJobLevelByCharLevel(byte charLevel) {
+        if (charLevel <= 10) {
+            return 0;
+        } else if (charLevel <= 30) {
+            return 1;
+        } else if (charLevel <= 60) {
+            return 2;
+        } else if (charLevel <= 100) {
+            return 3;
+        } else {
+            return 4;
+        }
     }
 
     private static boolean isDualJob(short jobId) {

@@ -456,6 +456,13 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		qm.addQuest(QuestData.createQuestFromId(id));
 	}
 
+	public void startQuest(int id) {
+		QuestManager qm = chr.getQuestManager();
+		if (qm.canStartQuest(id)) {
+			qm.addQuest(QuestData.createQuestFromId(id));
+		}
+	}
+
 	@Override
 	public int getFieldID() {
 		return chr.getField().getId();
@@ -790,5 +797,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		setJob(jobID);
 		addAP(5); //Standard added AP upon Job Advancing
 		addSP(3); //Standard added SP upon Job Advancing
+	}
+
+	public boolean hasQuest(int id) {
+		return chr.getQuestManager().hasQuestInProgress(id);
 	}
 }

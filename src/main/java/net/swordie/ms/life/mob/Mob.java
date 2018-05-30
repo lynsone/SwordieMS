@@ -1187,10 +1187,7 @@ public class Mob extends Life {
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
             long appliedExp = (long) (exp * damagePerc);
-            ExpIncreaseInfo eii = chr.getExpIncreaseInfo();
-            eii.setLastHit(true);
-            eii.setIncEXP(appliedExp > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) appliedExp);
-            chr.addExp(appliedExp, eii);
+            chr.addExp(appliedExp);
         }
     }
 

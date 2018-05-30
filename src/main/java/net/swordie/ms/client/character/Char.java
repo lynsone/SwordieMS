@@ -1464,6 +1464,23 @@ public class Char {
 			getAvatarData().getCharacterStat().setSp(num);
 		}
 	}
+	/**
+	 * Sets the SP to the job level according to the current level.
+	 *
+	 * @param num
+	 * 		The amount of SP to add
+	 */
+	public void addSpToJobByCurrentLevel(int num) {
+		CharacterStat cs = getAvatarData().getCharacterStat();
+		if (JobConstants.isExtendSpJob(getJob())) {
+			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel((byte) getLevel());
+			num += cs.getExtendSP().getSpByJobLevel(jobLevel);
+			getAvatarData().getCharacterStat().getExtendSP().setSpToJobLevel(jobLevel, num);
+		} else {
+			num += cs.getSp();
+			getAvatarData().getCharacterStat().setSp(num);
+		}
+	}
 
 	public Set<Skill> getSkills() {
 		return skills;
@@ -1628,6 +1645,30 @@ public class Char {
 
 	public void addStat(Stat charStat, int amount) {
 		setStat(charStat, getStat(charStat) + amount);
+	}
+
+	public void addStatAndSendPacket(Stat charStat, int amount) {
+		addStat(charStat, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		switch(charStat) {
+			case level:
+				stats.put(charStat, (byte) getStat(charStat));
+				break;
+			case str:
+			case dex:
+			case inte:
+			case luk:
+			case ap:
+				stats.put(charStat, (short) getStat(charStat));
+				break;
+			case hp:
+			case mhp:
+			case mp:
+			case mmp:
+				stats.put(charStat, getStat(charStat));
+				break;
+		}
+		write(WvsContext.statChanged(stats));
 	}
 
 	/**
@@ -1977,13 +2018,14 @@ public class Char {
 	 * 		The amount of exp to add.
 	 */
 	public void addExp(long amount) {
+		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE;
 		ExpIncreaseInfo eii = new ExpIncreaseInfo();
 		eii.setLastHit(true);
 		eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, amount));
 		addExp(amount, eii);
 	}
 
-	public void addExp(long amount, ExpIncreaseInfo eii) {
+	private void addExp(long amount, ExpIncreaseInfo eii) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		int level = getStat(Stat.level);
@@ -2004,7 +2046,7 @@ public class Char {
 		write(WvsContext.incExpMessage(eii));
 		getClient().write(WvsContext.statChanged(stats));
 		heal(getMaxHP());
-		heal(getMaxMP());
+		healMP(getMaxMP());
 	}
 
 	/**
