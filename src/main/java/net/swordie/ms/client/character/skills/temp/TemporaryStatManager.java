@@ -2480,7 +2480,9 @@ public class TemporaryStatManager {
                 .filter(stat -> stat.getKey().isIndie() && getNewStats().containsKey(stat.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        for(Map.Entry<CharacterTemporaryStat, List<Option>> stat : stats.entrySet()) {
+        TreeMap<CharacterTemporaryStat, List<Option>> sortedStats = new TreeMap<>(stats);
+        for(Map.Entry<CharacterTemporaryStat, List<Option>> stat : sortedStats.entrySet()) {
+            System.out.println(stat.getKey() + ", " + stat.getValue());
             int curTime = (int) System.currentTimeMillis();
             List<Option> options = stat.getValue();
             if(options == null) {

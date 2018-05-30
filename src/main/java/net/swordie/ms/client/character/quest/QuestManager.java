@@ -211,4 +211,15 @@ public class QuestManager {
             chr.write(WvsContext.questRecordMessage(q));
         }
     }
+
+    /**
+     * Adds a quest to this QuestManager with a given id. If there is no quest with that id, does nothing.
+     * @param id the quest's id to add
+     */
+    public void addQuest(int id) {
+        Quest q = QuestData.createQuestFromId(id);
+        if (q != null) {
+            addQuest(q);
+        }
+    }
 }

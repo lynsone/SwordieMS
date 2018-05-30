@@ -1140,4 +1140,20 @@ public class AdminCommands {
             chr.write(WvsContext.characterHonorExp(honor));
         }
     }
+
+    public static class StartQuest extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 2) {
+                chr.chatMessage(GM_BLUE_CHAT, "Format: !startquest <quest id>");
+                return;
+            }
+            Quest q = QuestData.createQuestFromId(Integer.parseInt(args[1]));
+            if (q != null) {
+                chr.getQuestManager().addQuest(q);
+            } else {
+                chr.chatMessage("Could not find quest with id " + args[1]);
+            }
+        }
+    }
 }

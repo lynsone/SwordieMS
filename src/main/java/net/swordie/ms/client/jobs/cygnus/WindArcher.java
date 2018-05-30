@@ -478,4 +478,12 @@ public class WindArcher extends Job {
     public int getFinalAttackSkill() {
         return 0;
     }
+
+    @Override
+    public void handleLevelUp() {
+        super.handleLevelUp();
+        if (chr.getLevel() == 60) {
+            chr.getQuestManager().addQuest(20880);
+        }
+    }
 }

@@ -676,6 +676,7 @@ public class Field {
                 drop.setItem(item);
             } else {
                 log.error("Was not able to find the item to drop! id = " + itemID);
+                return;
             }
         } else {
             drop.setMoney(dropInfo.getMoney());

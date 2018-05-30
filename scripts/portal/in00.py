@@ -29,8 +29,8 @@ def init():
 		map = 106030300
 		portal = 2
 	elif currentMap == 120041800:
-	    map = 120041900
-	    portal = 2
+		map = 120041900
+		portal = 2
 	elif currentMap == 106030501:
 		map = 106030600
 		portal = 2
@@ -85,16 +85,22 @@ def init():
 	elif currentMap == 240010102:
 		map = 915020200
 		portal = 1
-
+	elif currentMap == 222020000: # Ludi tower: Helios Tower <Library> (CoK 3rd job portal)
+		if sm.hasQuest(20880): # 3rd job quest
+			map = 922030400
+			portal = 0
+		else:
+			sm.chat("Only knights looking to job advance to the third job may enter here.")
 	elif currentMap == 223030200:
 		sm.sendAskYesNo("Would you like to battle scarlion and targa?")
 		warp = False
-
 	elif currentMap == 271040000:
 		sm.sendAskYesNo("Would you like to battle cygnus?")
 		warp = False
 	else:
+		sm.chat("(Portal - in00) This script isn't coded for this map.")
 		map = sm.getChr().getField().getReturnMap()
+		warp = False
 		portal = 0
 	if warp:
 		sm.warp(map, portal)
