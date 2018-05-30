@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
@@ -165,23 +166,12 @@ public class LoginHandler {
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
         // Start job specific handling ----------------------------------------------------------------
-        if (curSelectedRace == 5) { //Mercedes
-            chr.getAvatarData().getAvatarLook().setDrawElfEar(true);
-        }
+        JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
         if (curSelectedRace == 15) { //Zero
-            chr.getAvatarData().setZeroAvatarLook(chr.getAvatarData().getAvatarLook().deepCopy());
-            chr.getAvatarData().getAvatarLook().getHairEquips().remove(new Integer(1562000));
-            chr.getAvatarData().getZeroAvatarLook().getHairEquips().remove(new Integer(1572000));
-            chr.getAvatarData().getZeroAvatarLook().setWeaponId(1562000);
-            chr.getAvatarData().getZeroAvatarLook().setGender(1);
             chr.getAvatarData().getZeroAvatarLook().setSkin(skin);
             chr.getAvatarData().getZeroAvatarLook().setFace(items[0]);
             chr.getAvatarData().getZeroAvatarLook().setHair(items[1]);
-            chr.getAvatarData().getZeroAvatarLook().setZeroBetaLook(true);
-            chr.getAvatarData().getCharacterStat().setLevel(100);
-            chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats
         }
-
         // End job specific handling ------------------------------------------------------------------
 
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());

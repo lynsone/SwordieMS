@@ -2,6 +2,7 @@ package net.swordie.ms.client.jobs;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
@@ -147,4 +148,18 @@ public abstract class Job {
 	}
 
 	public abstract boolean isBuff(int skillID);
+
+	public void setCharCreationStats(Char chr) {
+		CharacterStat characterStat = chr.getAvatarData().getCharacterStat();
+		characterStat.setLevel(1);
+		characterStat.setStr(4);
+		characterStat.setDex(4);
+		characterStat.setInt(4);
+		characterStat.setLuk(4);
+		characterStat.setHp(50);
+		characterStat.setMaxHp(50);
+		characterStat.setMp(50);
+		characterStat.setMaxMp(50);
+		characterStat.setPosMap(100000000);
+	}
 }
