@@ -1820,6 +1820,7 @@ public class WorldHandler {
                     equip.setHiddenOptionBase(val, thirdLineChance);
                 case 2049762: // Unique Pot
                 case 2049764:
+                case 2049758:
                     val = ItemGrade.HIDDEN_UNIQUE.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
