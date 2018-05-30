@@ -188,19 +188,19 @@ public class LoginHandler {
         cs.setPosMap(100000000);
         DatabaseManager.saveToDB(chr);
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
-            Equip equip = ItemData.getEquipDeepCopyFromID(i);
+            Equip equip = ItemData.getEquipDeepCopyFromID(i, false);
             if (equip != null && equip.getItemId() >= 1000000) {
                 equip.setBagIndex(ItemConstants.getBodyPartFromItem(
                         equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
                 chr.addItemToInventory(EQUIPPED, equip, true);
             }
         }
-        Equip codex = ItemData.getEquipDeepCopyFromID(1172000);
+        Equip codex = ItemData.getEquipDeepCopyFromID(1172000, false);
         codex.setInvType(EQUIPPED);
         codex.setBagIndex(BodyPart.BOOK.getVal());
         chr.addItemToInventory(EQUIPPED, codex, true);
         if(curSelectedRace == 15) { // Zero hack for adding 2nd weapon (removing it in hairequips for zero look)
-            Equip equip = ItemData.getEquipDeepCopyFromID(1562000);
+            Equip equip = ItemData.getEquipDeepCopyFromID(1562000, false);
             equip.setBagIndex(ItemConstants.getBodyPartFromItem(
                     equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
             chr.addItemToInventory(EQUIPPED, equip, true);

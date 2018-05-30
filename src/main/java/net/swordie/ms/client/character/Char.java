@@ -319,7 +319,7 @@ public class Char {
 		avatarLook.setHair(items.length > 1 ? items[1] : 0);
 		List<Integer> hairEquips = new ArrayList<>();
 		for (int itemId : items) {
-			Equip equip = ItemData.getEquipDeepCopyFromID(itemId);
+			Equip equip = ItemData.getEquipDeepCopyFromID(itemId, false);
 			if (equip != null) {
 				hairEquips.add(itemId);
 				if ("Wp".equals(equip.getiSlot())) {
@@ -2018,7 +2018,7 @@ public class Char {
 	 * 		The amount of exp to add.
 	 */
 	public void addExp(long amount) {
-		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE;
+		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		ExpIncreaseInfo eii = new ExpIncreaseInfo();
 		eii.setLastHit(true);
 		eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, amount));

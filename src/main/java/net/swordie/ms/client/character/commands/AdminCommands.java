@@ -301,7 +301,7 @@ public class AdminCommands {
             int stat = Integer.parseInt(args[2]);
             int atk = Integer.parseInt(args[3]);
             int flames = Integer.parseInt(args[4]);
-            Equip equip = ItemData.getEquipDeepCopyFromID(id);
+            Equip equip = ItemData.getEquipDeepCopyFromID(id, false);
             equip.setBaseStat(EquipBaseStat.iStr, stat);
             equip.setBaseStat(EquipBaseStat.iDex, stat);
             equip.setBaseStat(EquipBaseStat.iInt, stat);
@@ -326,9 +326,9 @@ public class AdminCommands {
             if (Util.isNumber(args[1])) {
 
                 int id = Integer.parseInt(args[1]);
-                Equip equip = ItemData.getEquipDeepCopyFromID(id);
+                Equip equip = ItemData.getEquipDeepCopyFromID(id, true);
                 if (equip == null) {
-                    Item item = ItemData.getItemDeepCopy(id);
+                    Item item = ItemData.getItemDeepCopy(id, true);
                     if (item == null) {
                         chr.chatMessage(YELLOW, String.format("Could not find an item with id %d", id));
                         return;
@@ -360,7 +360,7 @@ public class AdminCommands {
                 }
                 for (Map.Entry<Integer, String> entry : map.entrySet()) {
                     int id = entry.getKey();
-                    Item item = ItemData.getEquipDeepCopyFromID(id);
+                    Item item = ItemData.getEquipDeepCopyFromID(id, false);
                     if (item != null) {
                         Equip equip = (Equip) item;
                         if (equip.getItemId() < 1000000) {
@@ -810,7 +810,7 @@ public class AdminCommands {
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
-                        Item item = ItemData.getEquipDeepCopyFromID(id);
+                        Item item = ItemData.getEquipDeepCopyFromID(id, false);
                         if (item == null) {
                             item = ItemData.getItemDeepCopy(id);
                         }

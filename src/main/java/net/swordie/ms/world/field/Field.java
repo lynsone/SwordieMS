@@ -670,7 +670,7 @@ public class Field {
         Drop drop = new Drop(-1);
         drop.setOwnerID(ownerID);
         if (itemID != 0) {
-            item = ItemData.getItemDeepCopy(itemID);
+            item = ItemData.getItemDeepCopy(itemID, true);
             if (item != null) {
                 item.setQuantity(dropInfo.getQuantity());
                 drop.setItem(item);

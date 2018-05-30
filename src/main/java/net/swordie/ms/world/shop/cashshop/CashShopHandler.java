@@ -23,7 +23,7 @@ public class CashShopHandler {
         cii.setCharacterID(chr.getId());
         cii.setCashItemSN(1);
         cii.setUnsure(1);
-        Equip equip = ItemData.getEquipDeepCopyFromID(1000000);
+        Equip equip = ItemData.getEquipDeepCopyFromID(1000000, false);
 
         OutPacket outPacket = new OutPacket(OutHeader.CASH_SHOP_CASH_ITEM_RESULT);
 //        outPacket.encodeByte(2); // type

@@ -475,9 +475,8 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void giveItem(int id, int quantity) {
-		double isEquip = Math.floor((id / 1000000));
-		if (isEquip == 1) {  //Equip
-			Equip equip = ItemData.getEquipDeepCopyFromID(id);
+		if (ItemConstants.isEquip(id)) {  //Equip
+			Equip equip = ItemData.getEquipDeepCopyFromID(id, false);
 			chr.addItemToInventory(equip.getInvType(), equip, false);
 			chr.getClient().write(WvsContext.inventoryOperation(true, false,
 					ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
