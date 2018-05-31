@@ -271,16 +271,18 @@ public class Party {
 
     /**
      * Clears the current Fields. Will return any character that is currently on any of the Fields to the Field's return field.
+     *
+     * @param warpToID the field id that all chars should be warped to
      */
-    public void clearFieldInstances() {
+    public void clearFieldInstances(int warpToID) {
         Set<Char> chrs = new HashSet<>();
         for(Field f : getFields().values()) {
             chrs.addAll(f.getChars());
         }
         for(Char chr : chrs) {
             chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
-            int returnMap = chr.getField().getReturnMap();
-            if(returnMap != 999999999 && returnMap != chr.getField().getReturnMap()) {
+            int returnMap = warpToID == 0 ? chr.getField().getForcedReturn() : warpToID;
+            if(returnMap != 999999999) {
                 Field field = chr.getOrCreateFieldByCurrentInstanceType(returnMap);
                 chr.warp(field);
             }

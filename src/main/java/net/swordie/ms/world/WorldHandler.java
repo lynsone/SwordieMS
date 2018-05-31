@@ -660,7 +660,7 @@ public class WorldHandler {
                 chr.warp(toField, toPortal);
             }
         } else {
-            // Character is dead
+            // Character is dead, respawn request
             inPacket.decodeByte(); // always 0
             byte tarfield = inPacket.decodeByte(); // ?
             byte reviveType = inPacket.decodeByte();
@@ -671,7 +671,22 @@ public class WorldHandler {
             if (!chr.hasBuffProtector()) {
                 chr.getTemporaryStatManager().removeAllStats();
             }
-            chr.warp(chr.getOrCreateFieldByCurrentInstanceType(returnMap));
+            int deathcount = chr.getDeathCount();
+            if (deathcount != 0) {
+                if (deathcount > 0) {
+                    deathcount--;
+                    chr.setDeathCount(deathcount);
+                    chr.write(UserLocal.deathCountInfo(deathcount));
+                }
+                chr.warp(chr.getOrCreateFieldByCurrentInstanceType(returnMap));
+
+            } else {
+                if (chr.getParty() != null) {
+                    chr.getParty().clearFieldInstances(0);
+                } else {
+                    chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getField().getForcedReturn()));
+                }
+            }
             chr.heal(chr.getMaxHP());
             chr.setBuffProtector(false);
         }

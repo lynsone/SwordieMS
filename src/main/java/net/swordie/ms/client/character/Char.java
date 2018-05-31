@@ -302,6 +302,8 @@ public class Char {
 	private ScheduledFuture comboKillResetTimer;
 	@Transient
 	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
+	@Transient
+	private int deathCount = -1;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1983,6 +1985,9 @@ public class Char {
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();
+		if (getDeathCount() > 0) {
+			write(UserLocal.deathCountInfo(getDeathCount()));
+		}
 	}
 
 	/**
@@ -3116,5 +3121,13 @@ public class Char {
 	public void addHonorExp(int exp) {
 		setHonorExp(Math.max(0, getHonorExp() + exp));
 		write(WvsContext.characterHonorExp(getHonorExp()));
+	}
+
+	public int getDeathCount() {
+		return deathCount;
+	}
+
+	public void setDeathCount(int deathCount) {
+		this.deathCount = deathCount;
 	}
 }

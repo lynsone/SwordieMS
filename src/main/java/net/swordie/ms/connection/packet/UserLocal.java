@@ -316,4 +316,12 @@ public class UserLocal {
 
         return outPacket;
     }
+
+    public static OutPacket deathCountInfo(int deathCount) {
+        OutPacket outPacket = new OutPacket(OutHeader.DEATH_COUNT_INFO);
+
+        outPacket.encodeInt(deathCount);
+
+        return outPacket;
+    }
 }

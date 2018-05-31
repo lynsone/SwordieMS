@@ -566,7 +566,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
-	public void warpParty(int id) {
+	public void warpPartyIn(int id) {
 		warpParty(id, true);
 	}
 
@@ -593,10 +593,17 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		}
 	}
 
-	@Override
 	public void clearPartyInfo() {
+		clearPartyInfo(0);
+	}
+
+	@Override
+	public void clearPartyInfo(int warpToID) {
 		if (chr.getParty() != null) {
-			chr.getParty().clearFieldInstances();
+			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+				pm.getChr().setDeathCount(-1);
+			}
+			chr.getParty().clearFieldInstances(warpToID);
 		}
 	}
 
@@ -800,5 +807,18 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	public boolean hasQuest(int id) {
 		return chr.getQuestManager().hasQuestInProgress(id);
+	}
+
+	public void setDeathCount(int deathCount) {
+		chr.setDeathCount(deathCount);
+		chr.write(UserLocal.deathCountInfo(deathCount));
+	}
+
+	public void setPartyDeathCount(int deathCount) {
+		if (chr.getParty() != null) {
+			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+				pm.getChr().setDeathCount(deathCount);
+			}
+		}
 	}
 }
