@@ -653,6 +653,9 @@ public class WorldHandler {
                 chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
             } else {
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
+                if (toField == null) {
+                    return;
+                }
                 Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
                 chr.warp(toField, toPortal);
             }

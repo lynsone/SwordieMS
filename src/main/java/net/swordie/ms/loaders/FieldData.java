@@ -461,7 +461,7 @@ public class FieldData {
         String fieldDir = ServerConstants.DAT_DIR + "/fields/" + id + ".dat";
         File file = new File(fieldDir);
         if (!file.exists()) {
-            log.warn("Could not find field " + id);
+            log.error("Could not find a field with id " + id);
             return null;
         } else {
             return readFieldFromFile(file);
@@ -585,6 +585,9 @@ public class FieldData {
 
     public static Field getFieldCopyById(int id) {
         Field field = getFieldById(id);
+        if (field == null) {
+            return null;
+        }
         Field copy = new Field(id, -1);
         copy.setTown(field.isTown());
         copy.setSwim(field.isSwim());

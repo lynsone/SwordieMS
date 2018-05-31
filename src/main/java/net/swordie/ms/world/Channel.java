@@ -91,6 +91,7 @@ public class Channel {
 
     /**
      * Gets a {@link Field} corresponding to a given ID. If it doesn't exist, creates one.
+     *
      * @param id The map ID of the field.
      * @return The (possibly newly created) Field.
      */
@@ -100,12 +101,14 @@ public class Channel {
 
     private Field createAndReturnNewField(int id) {
         Field newField = FieldData.getFieldCopyById(id);
-        getFields().add(newField);
+        if (newField != null) {
+            getFields().add(newField);
+        }
         return newField;
     }
 
     public Map<Integer, Tuple<Byte, Client>> getTransfers() {
-        if(transfers == null) {
+        if (transfers == null) {
             transfers = new HashMap<>();
         }
         return transfers;
@@ -140,8 +143,8 @@ public class Channel {
     }
 
     public Account getAccountByID(int accID) {
-        for(Char chr : getChars().values()) {
-            if(chr.getAccId() == accID) {
+        for (Char chr : getChars().values()) {
+            if (chr.getAccId() == accID) {
                 return chr.getAccount();
             }
         }

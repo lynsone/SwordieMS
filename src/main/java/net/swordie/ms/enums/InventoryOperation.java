@@ -12,7 +12,7 @@ public enum InventoryOperation {
     UPDATE_BAG_POS(5),
     UPDATE_BAG_QUANTITY(6),
     UNK_1(7),
-    UPDATE_ITEM_INFO(8),
+    UPDATE_ITEM_INFO(9),
     UNK_2(9),
     UNK_3(10),
     ;

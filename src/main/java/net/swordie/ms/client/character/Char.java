@@ -1943,6 +1943,9 @@ public class Char {
 	 * 		The {@link Portal} where to spawn at.
 	 */
 	public void warp(Field toField, Portal portal, boolean characterData) {
+		if (toField == null) {
+			return;
+		}
 		TemporaryStatManager tsm = getTemporaryStatManager();
 		for (AffectedArea aa : tsm.getAffectedAreas()) {
 			tsm.removeStatsBySkill(aa.getSkillID());
