@@ -668,7 +668,11 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             if (args.length > 1 && Util.isNumber(args[1])) {
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType(Integer.parseInt(args[1]));
-                chr.warp(toField);
+                if (toField != null) {
+                    chr.warp(toField);
+                } else {
+                    chr.chatMessage(GAME_NOTICE, "Could not find a field with id " + args[1]);
+                }
             } else {
                 chr.chatMessage("Please input a number as first argument.");
             }
