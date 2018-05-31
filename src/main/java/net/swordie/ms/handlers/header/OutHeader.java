@@ -1099,7 +1099,9 @@ public enum OutHeader {
                 REMOTE_MOVE,
                 REMOTE_EMOTION,
                 EXCL_REQUEST,
-                NPC_MOVE
+                NPC_MOVE,
+                DROP_LEAVE_FIELD,
+                TEMPORARY_STAT_RESET
 
                 );
         return spam.contains(outHeader);

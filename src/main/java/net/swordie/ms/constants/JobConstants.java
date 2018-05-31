@@ -637,7 +637,7 @@ public class JobConstants {
         return prefix <= 2 ? prefix + 2 : 0;
     }
 
-    public static int getJobLevelByCharLevel(byte charLevel) {
+    public static int getJobLevelByCharLevel(int charLevel) {
         if (charLevel <= 10) {
             return 0;
         } else if (charLevel <= 30) {

@@ -91,6 +91,37 @@ def init():
 			portal = 0
 		else:
 			sm.chat("Only knights looking to job advance to the third job may enter here.")
+	elif currentMap == 270000000: # Time Lane: Three doors
+		if sm.hasQuestCompleted(3500): # time lane quest
+			map = 270010000
+			portal = 3
+		else:
+			sm.chat("You have not completed the appropriate quest to enter here.")
+	elif currentMap == 270010100: # Time Lane: Memory Lane 1
+		if sm.hasQuestCompleted(3501): # time lane quest
+			map = 270010110
+			portal = 0
+		else:
+			sm.chat("You have not completed the appropriate quest to enter here.")
+	elif currentMap == 270010200: # Time Lane: Memory Lane 2
+		if sm.hasQuestCompleted(3502): # time lane quest
+			map = 270010300
+			portal = 0
+		else:
+			sm.chat("You have not completed the appropriate quest to enter here.")
+	elif currentMap == 270010300: # Time Lane: Memory Lane 3
+		if sm.hasQuestCompleted(3503): # time lane quest
+			map = 270010400
+			portal = 5
+		else:
+			sm.chat("You have not completed the appropriate quest to enter here.")
+	elif currentMap == 270010400: # Time Lane: Memory Lane 4
+		if sm.hasQuestCompleted(3504): # time lane quest
+			map = 270010500
+			portal = 0
+		else:
+			sm.chat("You have not completed the appropriate quest to enter here.")
+
 	elif currentMap == 223030200:
 		sm.sendAskYesNo("Would you like to battle scarlion and targa?")
 		warp = False
@@ -115,7 +146,7 @@ def action(response, answer):
 			sm.sendSayOkay("Please have your party leader enter if you wish to face Cygnus.")
 		elif sm.checkParty():
 			if currentMap == 271040000:
-				sm.warpParty(271040100)
+				sm.warpPartyIn(271040100)
 			elif currentMap == 223030200:
-				sm.warpParty(223030210)
+				sm.warpPartyIn(223030210)
 	sm.dispose()

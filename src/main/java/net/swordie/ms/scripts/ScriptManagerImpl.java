@@ -809,6 +809,10 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		return chr.getQuestManager().hasQuestInProgress(id);
 	}
 
+	public boolean hasQuestCompleted(int id) {
+		return chr.getQuestManager().hasQuestCompleted(id);
+	}
+
 	public void setDeathCount(int deathCount) {
 		chr.setDeathCount(deathCount);
 		chr.write(UserLocal.deathCountInfo(deathCount));

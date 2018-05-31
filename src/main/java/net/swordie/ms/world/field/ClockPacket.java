@@ -42,7 +42,41 @@ public class ClockPacket {
     }
 
     public static ClockPacket hmsClock(byte hour, byte minutes, byte seconds) {
-        return new ClockPacket(ClockType.EventTimer, hour, minutes, seconds);
+        return new ClockPacket(ClockType.HMSClock, hour, minutes, seconds);
+    }
+
+    public static ClockPacket secondsClock(int seconds) {
+        return new ClockPacket(ClockType.SecondsClock, seconds);
+    }
+
+    public static ClockPacket templateClock(byte template) {
+        return new ClockPacket(ClockType.FromDefault, template);
+    }
+
+    public static ClockPacket timerGauge(int current, int max) {
+        return new ClockPacket(ClockType.TimerGauge, max, current);
+    }
+
+    public static ClockPacket shiftTimer(boolean left, int time) {
+        ClockPacket cp = new ClockPacket(ClockType.ShiftTimer, time);
+        cp.bool = left;
+        return cp;
+    }
+
+    public static ClockPacket stopWatch(int time) {
+        return new ClockPacket(ClockType.StopWatch, time);
+    }
+
+    public static ClockPacket pauseTimer(boolean paused, int time) {
+        ClockPacket cp = new ClockPacket(ClockType.PauseTimer, time);
+        cp.bool = paused;
+        return cp;
+    }
+
+    public static ClockPacket withoutField(boolean clear, int time) {
+        ClockPacket cp = new ClockPacket(ClockType.WithoutField, time);
+        cp.bool = clear;
+        return cp;
     }
 
     public void encode(OutPacket outPacket) {
