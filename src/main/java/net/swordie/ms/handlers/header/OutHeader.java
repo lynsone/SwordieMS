@@ -348,6 +348,7 @@ public enum OutHeader {
     ADMIN_RESULT(450),
     QUIZ(451),
     FIELD_SET_DESC(452),
+    CLOCK(453),
     SET_QUEST_CLEAR(456),
     SET_QUEST_TIME(457),
     SET_OBJECT_STATE(458),

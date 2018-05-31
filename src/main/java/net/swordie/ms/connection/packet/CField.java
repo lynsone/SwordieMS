@@ -10,6 +10,7 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.PsychicArea;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.life.pet.Pet;
+import net.swordie.ms.world.field.ClockPacket;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
@@ -683,6 +684,14 @@ public class CField {
                 atomInfo.getObtacleDiagonalInfo().encode(outPacket);
             }
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket clock(ClockPacket clockPacket) {
+        OutPacket outPacket = new OutPacket(OutHeader.CLOCK);
+
+        clockPacket.encode(outPacket);
 
         return outPacket;
     }

@@ -145,7 +145,11 @@ public abstract class Job {
 		chr.addStat(Stat.mhp, 500);
 		chr.addStat(Stat.mmp, 500);
 		chr.addStat(Stat.ap, 5);
-		chr.addSpToJobByCurrentLevel(3);
+		int sp = 3;
+		if (chr.getLevel() > 100 && (chr.getLevel() % 10) % 3 == 0) {
+			sp = 6; // double sp on levels ending in 3/6/9
+		}
+		chr.addSpToJobByCurrentLevel(sp);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.mhp, chr.getStat(Stat.mhp));
 		stats.put(Stat.mmp, chr.getStat(Stat.mmp));

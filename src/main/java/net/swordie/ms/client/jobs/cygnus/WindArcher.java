@@ -57,7 +57,7 @@ public class WindArcher extends Job {
     public static final int ALBATROSS = 13111023; //Buff //TODO new ID upon levelling the 4th Job upgrade
     public static final int EMERALD_FLOWER = 13111024; //Summon (Stationary, No Attack, Aggros)
 
-    public static final int ALBATROSS_MAX = 23120008; //Upgrade on Albatross
+    public static final int ALBATROSS_MAX = 13120008; //Upgrade on Albatross
     public static final int TRIFLING_WIND_III = 13120003; //Special Buff Upgrade
     public static final int SHARP_EYES = 13121005; //Buff
     public static final int TOUCH_OF_THE_WIND = 13121004; //Buff
