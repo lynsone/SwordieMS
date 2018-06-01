@@ -653,11 +653,14 @@ public class WorldHandler {
                 chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
             } else {
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
+                if (toField == null) {
+                    return;
+                }
                 Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
                 chr.warp(toField, toPortal);
             }
         } else {
-            // Character is dead
+            // Character is dead, respawn request
             inPacket.decodeByte(); // always 0
             byte tarfield = inPacket.decodeByte(); // ?
             byte reviveType = inPacket.decodeByte();
@@ -668,7 +671,22 @@ public class WorldHandler {
             if (!chr.hasBuffProtector()) {
                 chr.getTemporaryStatManager().removeAllStats();
             }
-            chr.warp(chr.getOrCreateFieldByCurrentInstanceType(returnMap));
+            int deathcount = chr.getDeathCount();
+            if (deathcount != 0) {
+                if (deathcount > 0) {
+                    deathcount--;
+                    chr.setDeathCount(deathcount);
+                    chr.write(UserLocal.deathCountInfo(deathcount));
+                }
+                chr.warp(chr.getOrCreateFieldByCurrentInstanceType(returnMap));
+
+            } else {
+                if (chr.getParty() != null) {
+                    chr.getParty().clearFieldInstances(0);
+                } else {
+                    chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getField().getForcedReturn()));
+                }
+            }
             chr.heal(chr.getMaxHP());
             chr.setBuffProtector(false);
         }
@@ -1820,6 +1838,7 @@ public class WorldHandler {
                     equip.setHiddenOptionBase(val, thirdLineChance);
                 case 2049762: // Unique Pot
                 case 2049764:
+                case 2049758:
                     val = ItemGrade.HIDDEN_UNIQUE.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;

@@ -1288,8 +1288,16 @@ public class Equip extends Item {
         return getOptions().get(num + 3);
     }
 
-    public int setOptionBonus(int num, int val) {
-        return getOptions().set(num + 3, val);
+    public void setOptionBonus(int num, int val) {
+        getOptions().set(num + 3, val);
+    }
+
+    public void setOption(int num, int val, boolean bonus) {
+        if (bonus) {
+            setOptionBonus(num, val);
+        } else {
+            setOptionBase(num, val);
+        }
     }
 
     public int getRandomOption(boolean bonus) {
@@ -1331,8 +1339,8 @@ public class Equip extends Item {
 
     public void releaseOptions(boolean bonus) {
         for (int i = 0; i < 3; i++) {
-            if(getOption(i, bonus) != 0) {
-                setOptionBonus(i, getRandomOption(bonus));
+            if(getOption(i, bonus) < 0) {
+                setOption(i, getRandomOption(bonus), bonus);
             }
         }
     }

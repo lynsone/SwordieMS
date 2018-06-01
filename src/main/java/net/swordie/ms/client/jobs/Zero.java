@@ -556,4 +556,16 @@ public class Zero extends Job {
             c.write(WvsContext.temporaryStatSet(tsm));
         }
     }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        chr.getAvatarData().setZeroAvatarLook(chr.getAvatarData().getAvatarLook().deepCopy());
+        chr.getAvatarData().getAvatarLook().getHairEquips().remove(new Integer(1562000));
+        chr.getAvatarData().getZeroAvatarLook().getHairEquips().remove(new Integer(1572000));
+        chr.getAvatarData().getZeroAvatarLook().setWeaponId(1562000);
+        chr.getAvatarData().getZeroAvatarLook().setGender(1);
+        chr.getAvatarData().getZeroAvatarLook().setZeroBetaLook(true);
+        chr.getAvatarData().getCharacterStat().setLevel(100);
+        chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats
+    }
 }

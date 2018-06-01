@@ -302,6 +302,8 @@ public class Char {
 	private ScheduledFuture comboKillResetTimer;
 	@Transient
 	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
+	@Transient
+	private int deathCount = -1;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -319,7 +321,7 @@ public class Char {
 		avatarLook.setHair(items.length > 1 ? items[1] : 0);
 		List<Integer> hairEquips = new ArrayList<>();
 		for (int itemId : items) {
-			Equip equip = ItemData.getEquipDeepCopyFromID(itemId);
+			Equip equip = ItemData.getEquipDeepCopyFromID(itemId, false);
 			if (equip != null) {
 				hairEquips.add(itemId);
 				if ("Wp".equals(equip.getiSlot())) {
@@ -336,21 +338,11 @@ public class Char {
 		avatarLook.setHairEquips(hairEquips);
 		avatarLook.setJob(job);
 		CharacterStat characterStat = new CharacterStat(name, job);
-		characterStat.setLevel(1);
-		characterStat.setStr(4);
-		characterStat.setDex(4);
-		characterStat.setInt(4);
-		characterStat.setLuk(4);
-		characterStat.setHp(50);
-		characterStat.setMaxHp(50);
-		characterStat.setMp(50);
-		characterStat.setMaxMp(50);
+		getAvatarData().setCharacterStat(characterStat);
 		characterStat.setGender(gender);
 		characterStat.setSkin(skin);
 		characterStat.setFace(items.length > 0 ? items[0] : 0);
 		characterStat.setHair(items.length > 1 ? items[1] : 0);
-		characterStat.setPosMap(100000000);
-		getAvatarData().setCharacterStat(characterStat);
 		setFieldInstanceType(CHANNEL);
 		ranking = new Ranking();
 		pets = new ArrayList<>();
@@ -1474,6 +1466,23 @@ public class Char {
 			getAvatarData().getCharacterStat().setSp(num);
 		}
 	}
+	/**
+	 * Sets the SP to the job level according to the current level.
+	 *
+	 * @param num
+	 * 		The amount of SP to add
+	 */
+	public void addSpToJobByCurrentLevel(int num) {
+		CharacterStat cs = getAvatarData().getCharacterStat();
+		if (JobConstants.isExtendSpJob(getJob())) {
+			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel(getLevel());
+			num += cs.getExtendSP().getSpByJobLevel(jobLevel);
+			getAvatarData().getCharacterStat().getExtendSP().setSpToJobLevel(jobLevel, num);
+		} else {
+			num += cs.getSp();
+			getAvatarData().getCharacterStat().setSp(num);
+		}
+	}
 
 	public Set<Skill> getSkills() {
 		return skills;
@@ -1638,6 +1647,30 @@ public class Char {
 
 	public void addStat(Stat charStat, int amount) {
 		setStat(charStat, getStat(charStat) + amount);
+	}
+
+	public void addStatAndSendPacket(Stat charStat, int amount) {
+		addStat(charStat, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		switch(charStat) {
+			case level:
+				stats.put(charStat, (byte) getStat(charStat));
+				break;
+			case str:
+			case dex:
+			case inte:
+			case luk:
+			case ap:
+				stats.put(charStat, (short) getStat(charStat));
+				break;
+			case hp:
+			case mhp:
+			case mp:
+			case mmp:
+				stats.put(charStat, getStat(charStat));
+				break;
+		}
+		write(WvsContext.statChanged(stats));
 	}
 
 	/**
@@ -1912,6 +1945,9 @@ public class Char {
 	 * 		The {@link Portal} where to spawn at.
 	 */
 	public void warp(Field toField, Portal portal, boolean characterData) {
+		if (toField == null) {
+			return;
+		}
 		TemporaryStatManager tsm = getTemporaryStatManager();
 		for (AffectedArea aa : tsm.getAffectedAreas()) {
 			tsm.removeStatsBySkill(aa.getSkillID());
@@ -1949,6 +1985,9 @@ public class Char {
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();
+		if (getDeathCount() > 0) {
+			write(UserLocal.deathCountInfo(getDeathCount()));
+		}
 	}
 
 	/**
@@ -1987,13 +2026,14 @@ public class Char {
 	 * 		The amount of exp to add.
 	 */
 	public void addExp(long amount) {
+		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		ExpIncreaseInfo eii = new ExpIncreaseInfo();
 		eii.setLastHit(true);
 		eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, amount));
 		addExp(amount, eii);
 	}
 
-	public void addExp(long amount, ExpIncreaseInfo eii) {
+	private void addExp(long amount, ExpIncreaseInfo eii) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		int level = getStat(Stat.level);
@@ -2014,7 +2054,7 @@ public class Char {
 		write(WvsContext.incExpMessage(eii));
 		getClient().write(WvsContext.statChanged(stats));
 		heal(getMaxHP());
-		heal(getMaxMP());
+		healMP(getMaxMP());
 	}
 
 	/**
@@ -3081,5 +3121,13 @@ public class Char {
 	public void addHonorExp(int exp) {
 		setHonorExp(Math.max(0, getHonorExp() + exp));
 		write(WvsContext.characterHonorExp(getHonorExp()));
+	}
+
+	public int getDeathCount() {
+		return deathCount;
+	}
+
+	public void setDeathCount(int deathCount) {
+		this.deathCount = deathCount;
 	}
 }

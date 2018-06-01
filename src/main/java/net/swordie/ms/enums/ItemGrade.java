@@ -80,15 +80,19 @@ public enum ItemGrade {
         ItemGrade arg = getGradeByVal(val);
         switch(arg) {
             case RARE:
+            case HIDDEN_RARE:
                 ig = HIDDEN_RARE;
                 break;
             case EPIC:
+            case HIDDEN_EPIC:
                 ig = HIDDEN_EPIC;
                 break;
             case UNIQUE:
+            case HIDDEN_UNIQUE:
                 ig = HIDDEN_UNIQUE;
                 break;
             case LEGENDARY:
+            case HIDDEN_LEGENDARY:
                 ig = HIDDEN_LEGENDARY;
                 break;
         }

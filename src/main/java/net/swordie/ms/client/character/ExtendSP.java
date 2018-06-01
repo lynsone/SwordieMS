@@ -59,10 +59,7 @@ public class ExtendSP {
     }
 
     public void setSpToJobLevel(int jobLevel, int sp) {
-        SPSet spSet = getSpSet().stream().filter(sps -> sps.getJobLevel() == jobLevel).findFirst().orElse(null);
-        if(spSet != null) {
-            spSet.setSp(sp);
-        }
+        getSpSet().stream().filter(sps -> sps.getJobLevel() == jobLevel).findFirst().ifPresent(spSet -> spSet.setSp(sp));
     }
 
     public int getSpByJobLevel(byte jobLevel) {

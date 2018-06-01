@@ -2,6 +2,7 @@ package net.swordie.ms.client.jobs;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
@@ -144,7 +145,32 @@ public abstract class Job {
 		chr.addStat(Stat.mhp, 500);
 		chr.addStat(Stat.mmp, 500);
 		chr.addStat(Stat.ap, 5);
+		int sp = 3;
+		if (chr.getLevel() > 100 && (chr.getLevel() % 10) % 3 == 0) {
+			sp = 6; // double sp on levels ending in 3/6/9
+		}
+		chr.addSpToJobByCurrentLevel(sp);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+		stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+		chr.write(WvsContext.statChanged(stats));
 	}
 
 	public abstract boolean isBuff(int skillID);
+
+	public void setCharCreationStats(Char chr) {
+		CharacterStat characterStat = chr.getAvatarData().getCharacterStat();
+		characterStat.setLevel(1);
+		characterStat.setStr(4);
+		characterStat.setDex(4);
+		characterStat.setInt(4);
+		characterStat.setLuk(4);
+		characterStat.setHp(50);
+		characterStat.setMaxHp(50);
+		characterStat.setMp(50);
+		characterStat.setMaxMp(50);
+		characterStat.setPosMap(100000000);
+	}
 }

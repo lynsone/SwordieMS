@@ -630,7 +630,8 @@ public class QuestData {
         Quest quest = new Quest();
         quest.setQRKey(questID);
         if (qi.isAutoComplete()) {
-            quest.completeQuest();
+            quest.setStatus(QuestStatus.STARTED);
+//            quest.completeQuest(); // TODO check what autocomplete actually means
         } else {
             quest.setStatus(QuestStatus.STARTED);
         }

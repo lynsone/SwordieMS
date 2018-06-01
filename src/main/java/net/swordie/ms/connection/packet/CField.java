@@ -8,7 +8,9 @@ import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.PsychicArea;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.life.pet.Pet;
+import net.swordie.ms.world.field.ClockPacket;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
@@ -17,19 +19,19 @@ import net.swordie.ms.client.trunk.TrunkDlg;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.EnchantStat;
-import net.swordie.ms.enums.EquipmentEnchantType;
-import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
+import net.swordie.ms.world.field.obtacleatom.ObtacleAtomInfo;
+import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
+import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class CField {
@@ -660,6 +662,36 @@ public class CField {
 
         outPacket.encodeInt(mobID);
         outPacket.encodeInt(dataType);
+
+        return outPacket;
+    }
+
+    public static OutPacket createObtacle(ObtacleAtomCreateType oact, ObtacleInRowInfo oiri, ObtacleRadianInfo ori,
+                                          Set<ObtacleAtomInfo> atomInfos) {
+        OutPacket outPacket = new OutPacket(OutHeader.CREATE_OBTACLE);
+
+        outPacket.encodeInt(0); // ? gets used in 1 function, which forwards it to another, which does nothing with it
+        outPacket.encodeInt(atomInfos.size());
+        outPacket.encodeByte(oact.getVal());
+        if (oact == ObtacleAtomCreateType.IN_ROW) {
+            oiri.encode(outPacket);
+        } else if (oact == ObtacleAtomCreateType.RADIAL) {
+            ori.encode(outPacket);
+        }
+        for(ObtacleAtomInfo atomInfo : atomInfos) {
+            atomInfo.encode(outPacket);
+            if (oact == ObtacleAtomCreateType.DIAGONAL) {
+                atomInfo.getObtacleDiagonalInfo().encode(outPacket);
+            }
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket clock(ClockPacket clockPacket) {
+        OutPacket outPacket = new OutPacket(OutHeader.CLOCK);
+
+        clockPacket.encode(outPacket);
 
         return outPacket;
     }

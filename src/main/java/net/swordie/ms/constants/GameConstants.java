@@ -8,6 +8,7 @@ import net.swordie.ms.enums.ItemJob;
  * Created on 1/23/2018.
  */
 public class GameConstants {
+    public static final int EXP_RATE = 10;
     public static final long MAX_MONEY = 10_000_000_000L;
     public static final int DROP_HEIGHT = 100; // was 20
     public static final int DROP_DIFF = 25;
@@ -27,6 +28,10 @@ public class GameConstants {
     public static final int CHAR_POT_GRADE_LOCK_COST = 10000;
     public static final int CHAR_POT_LOCK_1_COST = 3000;
     public static final int CHAR_POT_LOCK_2_COST = 5000;
+    public static final int RANDOM_EQUIP_UNIQUE_CHANCE = 1; // out of a 100
+    public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
+    public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
+
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];

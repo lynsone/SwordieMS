@@ -456,6 +456,13 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		qm.addQuest(QuestData.createQuestFromId(id));
 	}
 
+	public void startQuest(int id) {
+		QuestManager qm = chr.getQuestManager();
+		if (qm.canStartQuest(id)) {
+			qm.addQuest(QuestData.createQuestFromId(id));
+		}
+	}
+
 	@Override
 	public int getFieldID() {
 		return chr.getField().getId();
@@ -468,9 +475,8 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void giveItem(int id, int quantity) {
-		double isEquip = Math.floor((id / 1000000));
-		if (isEquip == 1) {  //Equip
-			Equip equip = ItemData.getEquipDeepCopyFromID(id);
+		if (ItemConstants.isEquip(id)) {  //Equip
+			Equip equip = ItemData.getEquipDeepCopyFromID(id, false);
 			chr.addItemToInventory(equip.getInvType(), equip, false);
 			chr.getClient().write(WvsContext.inventoryOperation(true, false,
 					ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
@@ -560,7 +566,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
-	public void warpParty(int id) {
+	public void warpPartyIn(int id) {
 		warpParty(id, true);
 	}
 
@@ -587,10 +593,17 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		}
 	}
 
-	@Override
 	public void clearPartyInfo() {
+		clearPartyInfo(0);
+	}
+
+	@Override
+	public void clearPartyInfo(int warpToID) {
 		if (chr.getParty() != null) {
-			chr.getParty().clearFieldInstances();
+			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+				pm.getChr().setDeathCount(-1);
+			}
+			chr.getParty().clearFieldInstances(warpToID);
 		}
 	}
 
@@ -790,5 +803,26 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		setJob(jobID);
 		addAP(5); //Standard added AP upon Job Advancing
 		addSP(3); //Standard added SP upon Job Advancing
+	}
+
+	public boolean hasQuest(int id) {
+		return chr.getQuestManager().hasQuestInProgress(id);
+	}
+
+	public boolean hasQuestCompleted(int id) {
+		return chr.getQuestManager().hasQuestCompleted(id);
+	}
+
+	public void setDeathCount(int deathCount) {
+		chr.setDeathCount(deathCount);
+		chr.write(UserLocal.deathCountInfo(deathCount));
+	}
+
+	public void setPartyDeathCount(int deathCount) {
+		if (chr.getParty() != null) {
+			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+				pm.getChr().setDeathCount(deathCount);
+			}
+		}
 	}
 }

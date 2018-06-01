@@ -2,10 +2,12 @@ package net.swordie.ms.client.character.skills.temp;
 
 import org.apache.log4j.LogManager;
 
+import java.util.Comparator;
+
 /**
  * Created on 1/2/2018.
  */
-public enum CharacterTemporaryStat {
+public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat> {
     IndiePAD(0x80000000, 0),
     IndieMAD(0x40000000, 0),
     IndiePDD(0x20000000, 0),
@@ -739,5 +741,31 @@ public enum CharacterTemporaryStat {
                 log.debug("Corresponds to " + cts);
             }
         }
+    }
+
+    @Override
+    public int compare(CharacterTemporaryStat o1, CharacterTemporaryStat o2) {
+        if (o1.getPos() < o2.getPos()) {
+            return -1;
+        } else if (o1.getPos() > o2.getPos()) {
+            return 1;
+        }
+        // hacky way to circumvent java not having unsigned ints
+        int o1Val = o1.getVal();
+        if (o1Val == 0x8000_0000) {
+            o1Val = Integer.MAX_VALUE;
+        }
+        int o2Val = o2.getVal();
+        if (o2Val == 0x8000_0000) {
+            o2Val = Integer.MAX_VALUE;
+        }
+
+        if (o1Val > o2Val) {
+            // bigger value = earlier in the int => smaller
+            return -1;
+        } else if (o1Val < o2Val) {
+            return 1;
+        }
+        return 0;
     }
 }

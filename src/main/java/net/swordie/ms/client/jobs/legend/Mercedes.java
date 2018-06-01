@@ -466,4 +466,10 @@ public class Mercedes extends Job {
 
         field.spawnSummon(summon);
     }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getAvatarLook().setDrawElfEar(true);
+    }
 }

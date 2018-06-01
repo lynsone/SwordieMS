@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.mob.Mob;
@@ -56,7 +57,7 @@ public class WindArcher extends Job {
     public static final int ALBATROSS = 13111023; //Buff //TODO new ID upon levelling the 4th Job upgrade
     public static final int EMERALD_FLOWER = 13111024; //Summon (Stationary, No Attack, Aggros)
 
-    public static final int ALBATROSS_MAX = 23120008; //Upgrade on Albatross
+    public static final int ALBATROSS_MAX = 13120008; //Upgrade on Albatross
     public static final int TRIFLING_WIND_III = 13120003; //Special Buff Upgrade
     public static final int SHARP_EYES = 13121005; //Buff
     public static final int TOUCH_OF_THE_WIND = 13121004; //Buff
@@ -302,6 +303,10 @@ public class WindArcher extends Job {
                     anglenum = 180;
                 }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Life life = chr.getField().getLifeByObjectID(mai.mobId);
+                    if (!(life instanceof Mob)) {
+                        continue;
+                    }
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     int TW2subprop = getSubProp(chr);
                     int TW1prop = getProp(chr);
@@ -392,7 +397,8 @@ public class WindArcher extends Job {
         if (chr.hasSkill(TRIFLING_WIND_III)) {
             skill = chr.getSkill(TRIFLING_WIND_III);
         }
-        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
+        return skill != null ? SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel())
+                : 0;
     }
 
     public boolean isBuff(int skillID) {
@@ -471,5 +477,13 @@ public class WindArcher extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    @Override
+    public void handleLevelUp() {
+        super.handleLevelUp();
+        if (chr.getLevel() == 60) {
+            chr.getQuestManager().addQuest(20880);
+        }
     }
 }

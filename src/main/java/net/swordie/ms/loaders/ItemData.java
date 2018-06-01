@@ -1,11 +1,10 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.items.*;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.ServerConstants;
-import net.swordie.ms.enums.InvType;
-import net.swordie.ms.enums.ScrollStat;
-import net.swordie.ms.enums.SpecStat;
+import net.swordie.ms.enums.*;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -32,16 +31,42 @@ public class ItemData {
      * Creates a new Equip given an itemId.
      *
      * @param itemId The itemId of the wanted equip.
+     * @param randomizeStats whether or not to randomize the stats of the created object
      * @return A deep copy of the default values of the corresponding Equip, or null if there is no equip with itemId
      * <code>itemId</code>.
      */
-    public static Equip getEquipDeepCopyFromID(int itemId) {
+    public static Equip getEquipDeepCopyFromID(int itemId, boolean randomizeStats) {
         Equip e = getEquipById(itemId);
         Equip ret = e == null ? null : e.deepCopy();
         if (ret != null) {
             ret.setQuantity(1);
             ret.setCuttable((short) -1);
             ret.setItemState((short) ItemState.ENHANCABLE.getVal());
+            if (randomizeStats) {
+                EquipBaseStat[] ebsStat = new EquipBaseStat[]{EquipBaseStat.iStr, EquipBaseStat.iInt, EquipBaseStat.iDex,
+                        EquipBaseStat.iLuk, EquipBaseStat.iPAD, EquipBaseStat.iMAD, EquipBaseStat.iMaxHP, EquipBaseStat.iMaxMP,
+                        EquipBaseStat.iPAD, EquipBaseStat.iMAD};
+                for(EquipBaseStat ebs : ebsStat) {
+                    int max = ebs == EquipBaseStat.iPAD || ebs == EquipBaseStat.iMAD ? 5 : 3; // Att +-5, the rest +-3
+                    if (ret.getBaseStat(ebs) > 0) {
+                        int rand = Util.getRandom(max);
+                        rand = new Random().nextBoolean() ? rand : -rand;
+                        int newStat = (int) Math.max(0, ret.getBaseStat(ebs) + rand);
+                        ret.setBaseStat(ebs, newStat);
+                    }
+                }
+                ItemGrade grade = ItemGrade.NONE;
+                if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
+                    grade = ItemGrade.HIDDEN_UNIQUE;
+                } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
+                    grade = ItemGrade.HIDDEN_EPIC;
+                } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
+                    grade = ItemGrade.HIDDEN_RARE;
+                }
+                if (grade != ItemGrade.NONE) {
+                    ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
+                }
+            }
         }
         return ret;
     }
@@ -1292,8 +1317,12 @@ public class ItemData {
     }
 
     public static Item getItemDeepCopy(int id) {
+        return getItemDeepCopy(id, false);
+    }
+
+    public static Item getItemDeepCopy(int id, boolean randomize) {
         if (ItemConstants.isEquip(id)) {
-            return getEquipDeepCopyFromID(id);
+            return getEquipDeepCopyFromID(id, randomize);
         } else if (ItemConstants.isPet(id)) {
             return getPetDeepCopyFromID(id);
         }

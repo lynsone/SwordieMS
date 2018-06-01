@@ -383,7 +383,7 @@ public interface ScriptManager {
 	 * @param fieldID
 	 * 		The ID of the field to warp to.
 	 */
-	void warpParty(int fieldID);
+	void warpPartyIn(int fieldID);
 
 	/**
 	 * Warps a whole party to a given field id. Immediately sets the field instance type to CHANNEL.
@@ -397,8 +397,11 @@ public interface ScriptManager {
 	/**
 	 * Resets the party's field instance info, ensuring new field instances are created.
 	 * Example: "sm.clearPartyInfo()"
+	 *
+	 * @param warpToID
+	 * 		The field id that all chars should be warped to
 	 */
-	void clearPartyInfo();
+	void clearPartyInfo(int warpToID);
 
 	/**
 	 * Spawns a mob on the {@link Char} linked to the {@link ScriptManager}.

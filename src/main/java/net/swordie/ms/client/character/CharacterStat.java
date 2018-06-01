@@ -171,7 +171,7 @@ public class CharacterStat {
     }
 
     public long getExp() {
-        return (short) exp;
+        return exp;
     }
 
     public long getMoney() {
