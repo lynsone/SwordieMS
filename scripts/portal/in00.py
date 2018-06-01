@@ -6,7 +6,11 @@ def init():
 	
 	elif currentMap == 102010100:
 		sm.chatRed("There seems to be a mysterious presence blocking you from entering.")
-	
+
+	elif currentMap == 240010500:
+		map = 240010501
+		portal = 1
+
 	elif currentMap == 103020000:
 		map = 103020100
 		portal = 2
