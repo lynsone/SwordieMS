@@ -804,4 +804,13 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket cashPetPickUpOnOffResult(boolean changed, boolean on) {
+        OutPacket outPacket = new OutPacket(OutHeader.CASHPET_PICK_UP_ON_OFF_RESULT);
+
+        outPacket.encodeByte(on);
+        outPacket.encodeByte(changed);
+
+        return outPacket;
+    }
 }

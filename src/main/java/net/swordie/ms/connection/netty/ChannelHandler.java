@@ -448,6 +448,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_REQUEST_CHARACTER_POTENTIAL_SKILL_RAND_SET_UI:
                     WorldHandler.handleUserRequestCharacterPotentialSkillRandSetUi(chr, inPacket);
                     break;
+                case USER_CASH_PET_PICK_UP_ON_OFF_REQUEST:
+                    WorldHandler.handleUserCashPetPickUpOnOffRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

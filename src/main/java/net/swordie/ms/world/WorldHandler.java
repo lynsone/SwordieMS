@@ -3702,7 +3702,7 @@ public class WorldHandler {
         ItemInfo ii = ItemData.getItemInfoByID(cardID);
         Mob mob = MobData.getMobById(ii.getMobID());
         if (mob != null) {
-
+            // TODO Figure out which packet to send
         }
     }
 
@@ -3922,5 +3922,17 @@ public class WorldHandler {
                 cpm.addPotential(cpm.generateRandomPotential(cp.getKey()));
             }
         }
+    }
+
+    public static void handleUserCashPetPickUpOnOffRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        boolean on = inPacket.decodeByte() != 0;
+        boolean channelChange = inPacket.decodeByte() != 0;
+        int attribute = 0;
+        if (channelChange) {
+            attribute = inPacket.decodeInt();
+        }
+        chr.write(WvsContext.cashPetPickUpOnOffResult(true, on));
+
     }
 }
