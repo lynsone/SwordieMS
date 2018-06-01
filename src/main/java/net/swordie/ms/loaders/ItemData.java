@@ -30,7 +30,7 @@ public class ItemData {
     /**
      * Creates a new Equip given an itemId.
      *
-     * @param itemId The itemId of the wanted equip.
+     * @param itemId         The itemId of the wanted equip.
      * @param randomizeStats whether or not to randomize the stats of the created object
      * @return A deep copy of the default values of the corresponding Equip, or null if there is no equip with itemId
      * <code>itemId</code>.
@@ -46,7 +46,7 @@ public class ItemData {
                 EquipBaseStat[] ebsStat = new EquipBaseStat[]{EquipBaseStat.iStr, EquipBaseStat.iInt, EquipBaseStat.iDex,
                         EquipBaseStat.iLuk, EquipBaseStat.iPAD, EquipBaseStat.iMAD, EquipBaseStat.iMaxHP, EquipBaseStat.iMaxMP,
                         EquipBaseStat.iPAD, EquipBaseStat.iMAD};
-                for(EquipBaseStat ebs : ebsStat) {
+                for (EquipBaseStat ebs : ebsStat) {
                     int max = ebs == EquipBaseStat.iPAD || ebs == EquipBaseStat.iMAD ? 5 : 3; // Att +-5, the rest +-3
                     if (ret.getBaseStat(ebs) > 0) {
                         int rand = Util.getRandom(max);
@@ -157,10 +157,8 @@ public class ItemData {
     @Saver(varName = "equips")
     public static void saveEquips(String dir) {
         Util.makeDirIfAbsent(dir);
-        DataOutputStream dataOutputStream;
-        try {
-            for (Equip equip : getEquips().values()) {
-                dataOutputStream = new DataOutputStream(new FileOutputStream(dir + "/" + equip.getItemId() + ".dat"));
+        for (Equip equip : getEquips().values()) {
+            try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(dir + "/" + equip.getItemId() + ".dat"))) {
                 dataOutputStream.writeInt(equip.getItemId());
                 dataOutputStream.writeUTF(equip.getiSlot());
                 dataOutputStream.writeUTF(equip.getvSlot());
@@ -207,9 +205,9 @@ public class ItemData {
                 }
                 dataOutputStream.writeInt(equip.getFixedGrade());
                 dataOutputStream.writeInt(equip.getSpecialGrade());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -464,9 +462,8 @@ public class ItemData {
 
     public static ItemInfo loadItemByFile(File file) {
         ItemInfo itemInfo = null;
-        try {
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             itemInfo = new ItemInfo();
-            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
             itemInfo.setItemId(dataInputStream.readInt());
             itemInfo.setInvType(InvType.getInvTypeByString(dataInputStream.readUTF()));
             itemInfo.setCash(dataInputStream.readBoolean());
@@ -524,10 +521,8 @@ public class ItemData {
 
     public static void saveItems(String dir) {
         Util.makeDirIfAbsent(dir);
-        DataOutputStream dataOutputStream;
-        try {
-            for (ItemInfo ii : getItems().values()) {
-                dataOutputStream = new DataOutputStream(new FileOutputStream(new File(dir + "/" + ii.getItemId() + ".dat")));
+        for (ItemInfo ii : getItems().values()) {
+            try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(new File(dir + "/" + ii.getItemId() + ".dat")))) {
                 dataOutputStream.writeInt(ii.getItemId());
                 dataOutputStream.writeUTF(ii.getInvType().toString());
                 dataOutputStream.writeBoolean(ii.isCash());
@@ -572,9 +567,9 @@ public class ItemData {
                 dataOutputStream.writeInt(ii.getMasterLv());
 
                 dataOutputStream.writeInt(ii.getMoveTo());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -915,7 +910,7 @@ public class ItemData {
                                     break;
 
                                 case "skill":
-                                    for(Node masteryBookSkillIdNode : XMLApi.getAllChildren(info)) {
+                                    for (Node masteryBookSkillIdNode : XMLApi.getAllChildren(info)) {
                                         item.addSkill(Integer.parseInt((XMLApi.getNamedAttribute(masteryBookSkillIdNode, "value"))));
                                     }
                                     break;
@@ -1391,8 +1386,7 @@ public class ItemData {
 
     public static void saveItemOptions(String dir) {
         File file = new File(String.format("%s/itemOptions.dat", dir));
-        try {
-            DataOutputStream dos = new DataOutputStream(new FileOutputStream(file));
+        try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
             dos.writeInt(getItemOptions().size());
             for (ItemOption io : getItemOptions()) {
                 dos.writeInt(io.getId());
@@ -1411,8 +1405,7 @@ public class ItemData {
             loadItemOptionsFromWZ();
             saveItemOptions(ServerConstants.DAT_DIR);
         } else {
-            try {
-                DataInputStream dis = new DataInputStream(new FileInputStream(file));
+            try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
                 int size = dis.readInt();
                 for (int i = 0; i < size; i++) {
                     ItemOption io = new ItemOption();

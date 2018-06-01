@@ -56,8 +56,7 @@ public class DropData {
     }
 
     public static void loadCompleteDropsFromTxt(File file) {
-        try {
-            Scanner scanner = new Scanner(new FileInputStream(file));
+        try (Scanner scanner = new Scanner(new FileInputStream(file))) {
             int mobID = 0;
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -109,8 +108,7 @@ public class DropData {
             int mobID = entry.getKey();
             Set<DropInfo> drops = entry.getValue();
             File file = new File(String.format("%s/%d.dat", dir, mobID));
-            try {
-                DataOutputStream das = new DataOutputStream(new FileOutputStream(file));
+            try (DataOutputStream das = new DataOutputStream(new FileOutputStream(file))) {
                 das.writeInt(mobID);
                 das.writeShort(drops.size());
                 for(DropInfo dropInfo : drops) {
