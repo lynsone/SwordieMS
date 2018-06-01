@@ -34,6 +34,7 @@ else:
                 portal = 0
             else:
                 sm.chat("Sorry, only knights looking to job advance to the second job may enter here.")
+                warp = False
         else:
             sm.chat("(Portal) This script (in01.py) is not coded for this map. (ID: " + str(fieldID) + ")")
             map = sm.getChr().getField().getReturnMap()
@@ -41,4 +42,4 @@ else:
             warp = False
         if warp:
             sm.warp(map, portal)
-            sm.dispose()
+        sm.dispose()
