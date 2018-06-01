@@ -10,7 +10,7 @@ import javax.persistence.*;
  * Created on 2/18/2017.
  */
 @Entity
-@Table(name = "avatarData")
+@Table(name = "avatardata")
 public class AvatarData {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

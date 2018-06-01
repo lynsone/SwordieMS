@@ -10,7 +10,7 @@ import java.util.List;
  * Created by Tim on 2/18/2017.
  */
 @Entity
-@Table(name = "extendSP")
+@Table(name = "extendsp")
 public class ExtendSP {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -10,7 +10,7 @@ import javax.persistence.*;
  * Created on 2/18/2017.
  */
 @Entity
-@Table(name = "nonCombatStatDayLimit")
+@Table(name = "noncombatstatdaylimit")
 public class NonCombatStatDayLimit {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -13,7 +13,7 @@ import javax.persistence.*;
  * Created by Tim on 2/18/2017.
  */
 @Entity
-@Table(name = "characterStats")
+@Table(name = "characterstats")
 public class CharacterStat {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

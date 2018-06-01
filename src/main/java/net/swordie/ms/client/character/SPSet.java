@@ -9,7 +9,7 @@ import javax.persistence.*;
  * Created on 2/18/2017.
  */
 @Entity
-@Table(name = "spSet")
+@Table(name = "spset")
 public class SPSet {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

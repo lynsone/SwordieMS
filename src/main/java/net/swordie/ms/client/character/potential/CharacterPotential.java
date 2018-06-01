@@ -11,7 +11,7 @@ import java.util.Objects;
  * Created on 5/27/2018.
  */
 @Entity
-@Table(name = "characterPotentials")
+@Table(name = "characterpotentials")
 public class CharacterPotential {
 
     @Id

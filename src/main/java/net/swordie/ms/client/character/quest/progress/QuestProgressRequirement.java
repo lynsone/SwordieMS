@@ -9,7 +9,7 @@ import javax.persistence.*;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@Table(name = "questProgressRequirements")
+@Table(name = "questprogressrequirements")
 @DiscriminatorColumn(name = "progressType")
 public abstract class QuestProgressRequirement implements DatSerializable {
 

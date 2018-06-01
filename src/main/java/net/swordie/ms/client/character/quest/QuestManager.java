@@ -25,7 +25,7 @@ import static net.swordie.ms.enums.QuestStatus.*;
  * Created on 12/20/2017.
  */
 @Entity
-@Table(name = "questManagers")
+@Table(name = "questmanagers")
 public class QuestManager {
 
     @Id

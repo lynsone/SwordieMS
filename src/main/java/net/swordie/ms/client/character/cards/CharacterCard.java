@@ -8,7 +8,7 @@ import javax.persistence.*;
  * Created on 2/18/2017.
  */
 @Entity
-@Table(name = "characterCards")
+@Table(name = "charactercards")
 public class CharacterCard {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
