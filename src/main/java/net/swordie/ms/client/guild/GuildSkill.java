@@ -9,6 +9,7 @@ import javax.persistence.*;
  * Created on 3/21/2018.
  */
 @Entity
+@Table(name = "guildskill")
 public class GuildSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -10,6 +10,7 @@ import java.util.List;
  * Created on 1/4/2018.
  */
 @Entity
+@Table(name = "funckeymap")
 public class FuncKeyMap {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
