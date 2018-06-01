@@ -41,8 +41,8 @@ public class MobData {
     }
 
     public static Mob getMobById(int id) {
-        for(Mob mob : getMobs()) {
-            if(mob.getTemplateId() == id) {
+        for (Mob mob : getMobs()) {
+            if (mob.getTemplateId() == id) {
                 return mob;
             }
         }
@@ -53,7 +53,7 @@ public class MobData {
     public static Mob getMobDeepCopyById(int id) {
         Mob from = getMobById(id);
         Mob copy = null;
-        if(from != null) {
+        if (from != null) {
             copy = from.deepCopy();
         }
         return copy;
@@ -61,11 +61,9 @@ public class MobData {
 
     private static void saveToFile(String dir) {
         Util.makeDirIfAbsent(dir);
-        DataOutputStream dataOutputStream;
-        try {
-            for (Mob mob : getMobs()) {
-                File file = new File(dir + "/" + mob.getTemplateId() + ".dat");
-                dataOutputStream = new DataOutputStream(new FileOutputStream(file));
+        for (Mob mob : getMobs()) {
+            File file = new File(dir + "/" + mob.getTemplateId() + ".dat");
+            try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
                 ForcedMobStat fms = mob.getForcedMobStat();
                 MobTemporaryStat mts = mob.getTemporaryStat();
                 dataOutputStream.writeInt(mob.getTemplateId());
@@ -147,15 +145,15 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getWillEXP());
                 dataOutputStream.writeUTF(mob.getFixedMoveDir());
                 dataOutputStream.writeShort(mob.getQuests().size());
-                for(int i : mob.getQuests()) {
+                for (int i : mob.getQuests()) {
                     dataOutputStream.writeInt(i);
                 }
                 dataOutputStream.writeShort(mob.getRevives().size());
-                for(int i : mob.getRevives()) {
+                for (int i : mob.getRevives()) {
                     dataOutputStream.writeInt(i);
                 }
                 dataOutputStream.writeShort(mob.getSkills().size());
-                for(MobSkill ms : mob.getSkills()) {
+                for (MobSkill ms : mob.getSkills()) {
                     dataOutputStream.writeInt(ms.getSkillID());
                     dataOutputStream.writeInt(ms.getSkill());
                     dataOutputStream.writeByte(ms.getAction());
@@ -183,21 +181,19 @@ public class MobData {
                     dataOutputStream.writeUTF(ms.getSpeak());
                 }
                 dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PImmune) != null ? mts.getNewOptionsByMobStat(PImmune).nOption : 0);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     private static Mob loadMobFromFile(int id) {
         File file = new File(ServerConstants.DAT_DIR + "/mobs/" + id + ".dat");
-        if(!file.exists()) {
+        if (!file.exists()) {
             return null;
         }
-        DataInputStream dataInputStream;
         Mob mob = null;
-        try {
-            dataInputStream = new DataInputStream(new FileInputStream(file));
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             mob = new Mob(dataInputStream.readInt(), -1);
             ForcedMobStat fms = mob.getForcedMobStat();
             MobTemporaryStat mts = mob.getTemporaryStat();
@@ -341,7 +337,7 @@ public class MobData {
             mob.setMp(fms.getMaxMP());
             mob.setMaxMp(fms.getMaxMP());
             mob.setDrops(DropData.getDropInfoByID(mob.getTemplateId()));
-            for(DropInfo di : mob.getDrops()) {
+            for (DropInfo di : mob.getDrops()) {
                 di.generateNextDrop();
             }
             addMob(mob);
@@ -646,12 +642,12 @@ public class MobData {
                         mob.setPatrolMob(true);
                         break;
                     case "revive":
-                        for(Node reviveNode : XMLApi.getAllChildren(n)) {
+                        for (Node reviveNode : XMLApi.getAllChildren(n)) {
                             mob.addRevive(Integer.parseInt((XMLApi.getNamedAttribute(reviveNode, "value"))));
                         }
                         break;
                     case "skill":
-                        for(Node skillIDNode : XMLApi.getAllChildren(n)) {
+                        for (Node skillIDNode : XMLApi.getAllChildren(n)) {
                             MobSkill mobSkill = new MobSkill();
                             mobSkill.setSkillID(Integer.parseInt(XMLApi.getNamedAttribute(skillIDNode, "name")));
 //                            Node firstAttackNode = XMLApi.getFirstChildByNameBF(skillIDNode, "firstAttack");
@@ -661,10 +657,10 @@ public class MobData {
 //                                    System.err.printf("Firstattack = %d", Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")));
 //                                }
 //                            }
-                            for(Node skillInfoNode : XMLApi.getAllChildren(skillIDNode)) {
+                            for (Node skillInfoNode : XMLApi.getAllChildren(skillIDNode)) {
                                 String skillNodeName = XMLApi.getNamedAttribute(skillInfoNode, "name");
                                 String skillNodeValue = XMLApi.getNamedAttribute(skillInfoNode, "value");
-                                switch(skillNodeName) {
+                                switch (skillNodeName) {
                                     case "skill":
                                         mobSkill.setSkill(Integer.parseInt(skillNodeValue));
                                         break;
@@ -675,7 +671,7 @@ public class MobData {
                                         mobSkill.setLevel(Integer.parseInt(skillNodeValue));
                                         break;
                                     case "effectAfter":
-                                        if(!skillNodeValue.equals("")) {
+                                        if (!skillNodeValue.equals("")) {
                                             mobSkill.setEffectAfter(Integer.parseInt(skillNodeValue));
                                         }
                                         break;

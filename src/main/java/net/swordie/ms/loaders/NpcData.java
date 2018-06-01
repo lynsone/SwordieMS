@@ -64,8 +64,7 @@ public class NpcData {
 		Util.makeDirIfAbsent(dir);
 		for (Npc npc : getBaseNpcs()) {
 			File file = new File(String.format("%s/%d.dat", dir, npc.getTemplateId()));
-			try {
-				DataOutputStream das = new DataOutputStream(new FileOutputStream(file));
+			try(DataOutputStream das = new DataOutputStream(new FileOutputStream(file))) {
 				das.writeInt(npc.getTemplateId());
 				das.writeBoolean(npc.isMove());
 				das.writeShort(npc.getScripts().size());
@@ -100,8 +99,7 @@ public class NpcData {
 	}
 
 	private static Npc loadNpcFromDat(File file) {
-		try {
-			DataInputStream dis = new DataInputStream(new FileInputStream(file));
+		try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
 			Npc npc = new Npc(-1);
 			npc.setTemplateId(dis.readInt());
 			npc.setMove(dis.readBoolean());

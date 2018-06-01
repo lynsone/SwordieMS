@@ -87,8 +87,7 @@ public class ItemData {
 
     private static Equip readEquipFromFile(File file) {
         Equip equip = null;
-        try {
-            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             int itemId = dataInputStream.readInt();
             String islot = dataInputStream.readUTF();
             String vslot = dataInputStream.readUTF();

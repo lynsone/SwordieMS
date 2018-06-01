@@ -36,8 +36,7 @@ public class DropData {
     }
 
     public static void saveDropsToTxt(File file) {
-        try {
-            PrintWriter das = new PrintWriter(new FileOutputStream(file));
+            try(PrintWriter das = new PrintWriter(new FileOutputStream(file))) {
             for (Map.Entry<Integer, Set<DropInfo>> entry : getDrops().entrySet()) {
                 int mobID = entry.getKey();
                 Set<DropInfo> drops = entry.getValue();
@@ -144,8 +143,7 @@ public class DropData {
     }
 
     public static void loadDropsFromFile(File file) {
-        try {
-            DataInputStream dis = new DataInputStream(new FileInputStream(file));
+        try(DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
             int mobID = dis.readInt();
             short size = dis.readShort();
             for (int i = 0; i < size; i++) {

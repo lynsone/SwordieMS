@@ -10,6 +10,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.*;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.*;
 
@@ -24,9 +25,7 @@ public class SkillData {
 
     @Saver(varName = "skills")
     public static void saveSkills(File file) {
-        DataOutputStream dataOutputStream = null;
-        try {
-            dataOutputStream = new DataOutputStream(new FileOutputStream(file));
+        try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
             dataOutputStream.writeShort(skills.size());
             for(Map.Entry<Integer, SkillInfo> entry : skills.entrySet()) {
                 SkillInfo si = entry.getValue();
@@ -56,12 +55,6 @@ public class SkillData {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                dataOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -71,9 +64,7 @@ public class SkillData {
             loadSkillsFromWz();
             saveSkills(file);
         } else {
-            DataInputStream dataInputStream;
-            try {
-                dataInputStream = new DataInputStream(new FileInputStream(file));
+            try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
                 short size = dataInputStream.readShort();
                 for (int i = 0; i < size; i++) {
                     SkillInfo skillInfo = new SkillInfo();

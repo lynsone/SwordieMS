@@ -35,100 +35,98 @@ public class FieldData {
 
     private static void saveFields(String dir) {
         Util.makeDirIfAbsent(dir);
-        try {
-            DataOutputStream dataOutputStream;
             for (Field field : getFields()) {
                 File file = new File(String.format("%s/%d.dat", dir, field.getId()));
-                dataOutputStream = new DataOutputStream(new FileOutputStream(file));
-                dataOutputStream.writeInt(field.getId());
-                dataOutputStream.writeBoolean(field.isTown());
-                dataOutputStream.writeBoolean(field.isSwim());
-                dataOutputStream.writeInt(field.getReturnMap());
-                dataOutputStream.writeInt(field.getForcedReturn());
-                dataOutputStream.writeDouble(field.getMobRate());
-                dataOutputStream.writeBoolean(field.isFly());
-                dataOutputStream.writeUTF(field.getOnFirstUserEnter());
-                dataOutputStream.writeUTF(field.getOnUserEnter());
-                dataOutputStream.writeUTF(field.getFieldScript());
-                dataOutputStream.writeBoolean(field.isReactorShuffle());
-                dataOutputStream.writeBoolean(field.isExpeditionOnly());
-                dataOutputStream.writeBoolean(field.isPartyOnly());
-                dataOutputStream.writeBoolean(field.isNeedSkillForFly());
-                dataOutputStream.writeInt(field.getFixedMobCapacity());
-                dataOutputStream.writeInt(field.getCreateMobInterval());
-                dataOutputStream.writeInt(field.getTimeOut());
-                dataOutputStream.writeInt(field.getTimeLimit());
-                dataOutputStream.writeInt(field.getLvLimit());
-                dataOutputStream.writeInt(field.getLvForceMove());
-                dataOutputStream.writeInt(field.getConsumeItemCoolTime());
-                dataOutputStream.writeInt(field.getLink());
-                dataOutputStream.writeShort(field.getFootholds().size());
-                for (Foothold fh : field.getFootholds()) {
-                    dataOutputStream.writeInt(fh.getId());
-                    dataOutputStream.writeInt(fh.getLayerId());
-                    dataOutputStream.writeInt(fh.getGroupId());
-                    dataOutputStream.writeInt(fh.getX1());
-                    dataOutputStream.writeInt(fh.getY1());
-                    dataOutputStream.writeInt(fh.getX2());
-                    dataOutputStream.writeInt(fh.getY2());
-                    dataOutputStream.writeInt(fh.getNext());
-                    dataOutputStream.writeInt(fh.getPrev());
-                    dataOutputStream.writeInt(fh.getForce());
-                    dataOutputStream.writeBoolean(fh.isForbidFallDown());
-                }
-                dataOutputStream.writeShort(field.getPortals().size());
-                for (Portal p : field.getPortals()) {
-                    dataOutputStream.writeInt(p.getId());
-                    dataOutputStream.writeInt(p.getType().getVal());
-                    dataOutputStream.writeUTF(p.getName());
-                    dataOutputStream.writeInt(p.getTargetMapId());
-                    dataOutputStream.writeUTF(p.getTargetPortalName());
-                    dataOutputStream.writeInt(p.getX());
-                    dataOutputStream.writeInt(p.getY());
-                    dataOutputStream.writeInt(p.getHorizontalImpact());
-                    dataOutputStream.writeInt(p.getVerticalImpact());
-                    dataOutputStream.writeUTF(p.getScript());
-                    dataOutputStream.writeBoolean(p.isOnlyOnce());
-                    dataOutputStream.writeInt(p.getDelay());
-                }
-                dataOutputStream.writeShort(field.getLifes().size());
-                for (Life l : field.getLifes()) {
-                    dataOutputStream.writeUTF(l.getLifeType());
-                    dataOutputStream.writeInt(l.getTemplateId());
-                    dataOutputStream.writeInt(l.getX());
-                    dataOutputStream.writeInt(l.getY());
-                    dataOutputStream.writeInt(l.getMobTime());
-                    dataOutputStream.writeInt(l.getF());
-                    dataOutputStream.writeBoolean(l.isHide());
-                    dataOutputStream.writeInt(l.getFh());
-                    dataOutputStream.writeInt(l.getCy());
-                    dataOutputStream.writeInt(l.getRx0());
-                    dataOutputStream.writeInt(l.getRx1());
-                    dataOutputStream.writeUTF(l.getLimitedName());
-                    dataOutputStream.writeBoolean(l.isUseDay());
-                    dataOutputStream.writeBoolean(l.isUseNight());
-                    dataOutputStream.writeBoolean(l.isHold());
-                    dataOutputStream.writeBoolean(l.isNoFoothold());
-                    dataOutputStream.writeBoolean(l.isDummy());
-                    dataOutputStream.writeBoolean(l.isSpine());
-                    dataOutputStream.writeBoolean(l.isMobTimeOnDie());
-                    dataOutputStream.writeInt(l.getRegenStart());
-                    dataOutputStream.writeInt(l.getMobAliveReq());
-                }
-                dataOutputStream.writeShort(field.getReactors().size());
-                for (Reactor r : field.getReactors()) {
-                    dataOutputStream.writeInt(r.getTemplateId());
-                    dataOutputStream.writeShort(r.getHomePosition().getX());
-                    dataOutputStream.writeShort(r.getHomePosition().getY());
-                    dataOutputStream.writeInt(r.getReactorTime());
-                    dataOutputStream.writeInt(r.getF());
-                    dataOutputStream.writeUTF(r.getName());
-                    dataOutputStream.writeBoolean(r.isPhantomForest());
+                try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
+                    dataOutputStream.writeInt(field.getId());
+                    dataOutputStream.writeBoolean(field.isTown());
+                    dataOutputStream.writeBoolean(field.isSwim());
+                    dataOutputStream.writeInt(field.getReturnMap());
+                    dataOutputStream.writeInt(field.getForcedReturn());
+                    dataOutputStream.writeDouble(field.getMobRate());
+                    dataOutputStream.writeBoolean(field.isFly());
+                    dataOutputStream.writeUTF(field.getOnFirstUserEnter());
+                    dataOutputStream.writeUTF(field.getOnUserEnter());
+                    dataOutputStream.writeUTF(field.getFieldScript());
+                    dataOutputStream.writeBoolean(field.isReactorShuffle());
+                    dataOutputStream.writeBoolean(field.isExpeditionOnly());
+                    dataOutputStream.writeBoolean(field.isPartyOnly());
+                    dataOutputStream.writeBoolean(field.isNeedSkillForFly());
+                    dataOutputStream.writeInt(field.getFixedMobCapacity());
+                    dataOutputStream.writeInt(field.getCreateMobInterval());
+                    dataOutputStream.writeInt(field.getTimeOut());
+                    dataOutputStream.writeInt(field.getTimeLimit());
+                    dataOutputStream.writeInt(field.getLvLimit());
+                    dataOutputStream.writeInt(field.getLvForceMove());
+                    dataOutputStream.writeInt(field.getConsumeItemCoolTime());
+                    dataOutputStream.writeInt(field.getLink());
+                    dataOutputStream.writeShort(field.getFootholds().size());
+                    for (Foothold fh : field.getFootholds()) {
+                        dataOutputStream.writeInt(fh.getId());
+                        dataOutputStream.writeInt(fh.getLayerId());
+                        dataOutputStream.writeInt(fh.getGroupId());
+                        dataOutputStream.writeInt(fh.getX1());
+                        dataOutputStream.writeInt(fh.getY1());
+                        dataOutputStream.writeInt(fh.getX2());
+                        dataOutputStream.writeInt(fh.getY2());
+                        dataOutputStream.writeInt(fh.getNext());
+                        dataOutputStream.writeInt(fh.getPrev());
+                        dataOutputStream.writeInt(fh.getForce());
+                        dataOutputStream.writeBoolean(fh.isForbidFallDown());
+                    }
+                    dataOutputStream.writeShort(field.getPortals().size());
+                    for (Portal p : field.getPortals()) {
+                        dataOutputStream.writeInt(p.getId());
+                        dataOutputStream.writeInt(p.getType().getVal());
+                        dataOutputStream.writeUTF(p.getName());
+                        dataOutputStream.writeInt(p.getTargetMapId());
+                        dataOutputStream.writeUTF(p.getTargetPortalName());
+                        dataOutputStream.writeInt(p.getX());
+                        dataOutputStream.writeInt(p.getY());
+                        dataOutputStream.writeInt(p.getHorizontalImpact());
+                        dataOutputStream.writeInt(p.getVerticalImpact());
+                        dataOutputStream.writeUTF(p.getScript());
+                        dataOutputStream.writeBoolean(p.isOnlyOnce());
+                        dataOutputStream.writeInt(p.getDelay());
+                    }
+                    dataOutputStream.writeShort(field.getLifes().size());
+                    for (Life l : field.getLifes()) {
+                        dataOutputStream.writeUTF(l.getLifeType());
+                        dataOutputStream.writeInt(l.getTemplateId());
+                        dataOutputStream.writeInt(l.getX());
+                        dataOutputStream.writeInt(l.getY());
+                        dataOutputStream.writeInt(l.getMobTime());
+                        dataOutputStream.writeInt(l.getF());
+                        dataOutputStream.writeBoolean(l.isHide());
+                        dataOutputStream.writeInt(l.getFh());
+                        dataOutputStream.writeInt(l.getCy());
+                        dataOutputStream.writeInt(l.getRx0());
+                        dataOutputStream.writeInt(l.getRx1());
+                        dataOutputStream.writeUTF(l.getLimitedName());
+                        dataOutputStream.writeBoolean(l.isUseDay());
+                        dataOutputStream.writeBoolean(l.isUseNight());
+                        dataOutputStream.writeBoolean(l.isHold());
+                        dataOutputStream.writeBoolean(l.isNoFoothold());
+                        dataOutputStream.writeBoolean(l.isDummy());
+                        dataOutputStream.writeBoolean(l.isSpine());
+                        dataOutputStream.writeBoolean(l.isMobTimeOnDie());
+                        dataOutputStream.writeInt(l.getRegenStart());
+                        dataOutputStream.writeInt(l.getMobAliveReq());
+                    }
+                    dataOutputStream.writeShort(field.getReactors().size());
+                    for (Reactor r : field.getReactors()) {
+                        dataOutputStream.writeInt(r.getTemplateId());
+                        dataOutputStream.writeShort(r.getHomePosition().getX());
+                        dataOutputStream.writeShort(r.getHomePosition().getY());
+                        dataOutputStream.writeInt(r.getReactorTime());
+                        dataOutputStream.writeInt(r.getF());
+                        dataOutputStream.writeUTF(r.getName());
+                        dataOutputStream.writeBoolean(r.isPhantomForest());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private static void loadFieldInfoFromWz() {
@@ -470,8 +468,7 @@ public class FieldData {
 
     private static Field readFieldFromFile(File file) {
         Field field = null;
-        try {
-            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+        try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             field = new Field(dataInputStream.readInt(), -1);
             field.setTown(dataInputStream.readBoolean());
             field.setSwim(dataInputStream.readBoolean());

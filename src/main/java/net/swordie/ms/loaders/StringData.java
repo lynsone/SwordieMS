@@ -119,9 +119,8 @@ public class StringData {
         Util.makeDirIfAbsent(dir);
 //        String fileDir = dir + "/skills";
 //        Util.makeDirIfAbsent(fileDir);
-        try {
-            File file = new File(dir + "/skills.dat");
-            DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
+        File file = new File(dir + "/skills.dat");
+        try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
             dataOutputStream.writeInt(getSkillString().size());
             for(Map.Entry<Integer, SkillStringInfo> entry : getSkillString().entrySet()) {
                 int id = entry.getKey();
@@ -139,8 +138,7 @@ public class StringData {
     public static void loadSkillStrings() {
         long start = System.currentTimeMillis();
         File file = new File(ServerConstants.DAT_DIR + "/strings/skills.dat");
-        try {
-            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             int size = dataInputStream.readInt();
             for (int i = 0; i < size; i++) {
                 int id = dataInputStream.readInt();
@@ -158,9 +156,8 @@ public class StringData {
 
     private static void saveItemStrings(String dir) {
         Util.makeDirIfAbsent(dir);
-        try {
-            File file = new File(dir + "/items.dat");
-            DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
+        File file = new File(dir + "/items.dat");
+        try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
             dataOutputStream.writeInt(itemStrings.size());
             for(Map.Entry<Integer, String> entry : itemStrings.entrySet()) {
                 int id = entry.getKey();
@@ -176,8 +173,7 @@ public class StringData {
     public static void loadItemStrings() {
         long start = System.currentTimeMillis();
         File file = new File(ServerConstants.DAT_DIR + "/strings/items.dat");
-        try {
-            DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             int size = dataInputStream.readInt();
             for (int i = 0; i < size; i++) {
                 int id = dataInputStream.readInt();
