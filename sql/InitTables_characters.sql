@@ -1,655 +1,655 @@
-DROP TABLE IF EXISTS damageskinsavedatas;
-DROP TABLE IF EXISTS friends;
-DROP TABLE IF EXISTS accounts;
-DROP TABLE IF EXISTS macroSkills;
-DROP TABLE IF EXISTS macros;
-DROP TABLE IF EXISTS characterPotentials;
-DROP TABLE IF EXISTS test;
-DROP TABLE IF EXISTS skills;
-DROP TABLE IF EXISTS characters;
-DROP TABLE IF EXISTS avatarData;
-DROP TABLE IF EXISTS keymaps;
-DROP TABLE IF EXISTS funckeymap;
-DROP TABLE IF EXISTS characterStats;
-DROP TABLE IF exists hairEquips;
-DROP TABLE IF EXISTS unseenEquips;
-DROP TABLE IF EXISTS petIDs;
-DROP TABLE IF EXISTS totems;
-DROP TABLE IF EXISTS spSet;
-DROP TABLE IF EXISTS extendSP;
-DROP TABLE IF EXISTS nonCombatStatDayLimit;
-DROP TABLE IF EXISTS systemtimes;
-DROP TABLE IF EXISTS characterCards;
-DROP TABLE IF EXISTS avatarLook;
-DROP TABLE IF EXISTS sockets;
-DROP TABLE IF EXISTS options;
-DROP TABLE IF EXISTS equips;
-DROP TABLE IF EXISTS petitems;
-DROP TABLE IF EXISTS items;
-DROP TABLE IF EXISTS inventories;
-DROP TABLE IF EXISTS questProgressRequirements;
-DROP TABLE IF EXISTS questProgressItemRequirements;
-DROP TABLE IF EXISTS questProgressLevelRequirements;
-DROP TABLE IF EXISTS questProgressMoneyRequirements;
-DROP TABLE IF EXISTS questProgressMobRequirements;
-DROP TABLE IF EXISTS questlists;
-DROP TABLE IF EXISTS questManagers;
-DROP TABLE IF EXISTS quests;
-DROP TABLE IF EXISTS guildrequestors;
-DROP TABLE IF EXISTS gradeNames;
-DROP TABLE IF EXISTS guildmembers;
-DROP TABLE IF EXISTS guildrequestors;
-DROP TABLE IF EXISTS guildskills;
-DROP TABLE IF EXISTS guildskill;
-DROP TABLE IF EXISTS guilds;
-DROP TABLE IF EXISTS monsterBookCards;
-DROP TABLE IF EXISTS monsterBookInfos;
-DROP TABLE IF EXISTS filetimes;
-DROP TABLE IF EXISTS trunks;
+drop table if exists damageskinsavedatas;
+drop table if exists friends;
+drop table if exists accounts;
+drop table if exists macroskills;
+drop table if exists macros;
+drop table if exists characterpotentials;
+drop table if exists test;
+drop table if exists skills;
+drop table if exists characters;
+drop table if exists avatardata;
+drop table if exists keymaps;
+drop table if exists funckeymap;
+drop table if exists characterstats;
+drop table if exists hairequips;
+drop table if exists unseenequips;
+drop table if exists petids;
+drop table if exists totems;
+drop table if exists spset;
+drop table if exists extendsp;
+drop table if exists noncombatstatdaylimit;
+drop table if exists systemtimes;
+drop table if exists charactercards;
+drop table if exists avatarlook;
+drop table if exists sockets;
+drop table if exists options;
+drop table if exists equips;
+drop table if exists petitems;
+drop table if exists items;
+drop table if exists inventories;
+drop table if exists questprogressrequirements;
+drop table if exists questprogressitemrequirements;
+drop table if exists questprogresslevelrequirements;
+drop table if exists questprogressmoneyrequirements;
+drop table if exists questprogressmobrequirements;
+drop table if exists questlists;
+drop table if exists questmanagers;
+drop table if exists quests;
+drop table if exists guildrequestors;
+drop table if exists gradenames;
+drop table if exists guildmembers;
+drop table if exists guildrequestors;
+drop table if exists guildskills;
+drop table if exists guildskill;
+drop table if exists guilds;
+drop table if exists monsterbookcards;
+drop table if exists monsterbookinfos;
+drop table if exists filetimes;
+drop table if exists trunks;
 
-CREATE TABLE trunks(
+create table trunks(
 	id int not null auto_increment,
     slotcount tinyint,
     money bigint,
     primary key (id)
 );
 
-CREATE TABLE filetimes (
-	id bigint NOT NULL AUTO_INCREMENT,
-    lowDateTime int,
-    highDateTime int,
-    PRIMARY KEY (id)
+create table filetimes (
+	id bigint not null auto_increment,
+    lowdatetime int,
+    highdatetime int,
+    primary key (id)
 );
 
-CREATE TABLE quests (
-	id bigint NOT NULL AUTO_INCREMENT,
-    qrKey int,
-    qrValue VARCHAR(255),
+create table quests (
+	id bigint not null auto_increment,
+    qrkey int,
+    qrvalue varchar(255),
     status int,
-    completedTime bigint,
-	PRIMARY KEY (id),
-    FOREIGN KEY (completedTime) REFERENCES filetimes(id)
+    completedtime bigint,
+	primary key (id),
+    foreign key (completedtime) references filetimes(id)
 );
 
-CREATE TABLE questManagers (
-	id bigint NOT NULL AUTO_INCREMENT,
-    PRIMARY KEY(id)
+create table questmanagers (
+	id bigint not null auto_increment,
+    primary key(id)
 );
 
-CREATE TABLE questlists (
-	questList_id bigint NOT NULL AUTO_INCREMENT,
-	QuestManager_id bigint,
-    questID int,
-    fk_questID bigint,
-    PRIMARY KEY (questList_id),
-    FOREIGN KEY (QuestManager_id) REFERENCES questManagers(id)  on delete cascade,
-    FOREIGN KEY (fk_questID) REFERENCES quests(id) 
+create table questlists (
+	questlist_id bigint not null auto_increment,
+	questmanager_id bigint,
+    questid int,
+    fk_questid bigint,
+    primary key (questlist_id),
+    foreign key (questmanager_id) references questmanagers(id)  on delete cascade,
+    foreign key (fk_questid) references quests(id)
 );
 
-CREATE TABLE questProgressRequirements (
-	id bigint NOT NULL AUTO_INCREMENT,
-    progressType VARCHAR(255),
-	questID bigint,
-    unitID int,
-    requiredCount int,
-    currentCount int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (questID) REFERENCES quests(id)  on delete cascade
+create table questprogressrequirements (
+	id bigint not null auto_increment,
+    progresstype varchar(255),
+	questid bigint,
+    unitid int,
+    requiredcount int,
+    currentcount int,
+    primary key (id),
+    foreign key (questid) references quests(id)  on delete cascade
 );
 
-CREATE TABLE inventories (
-	id int NOT NULL AUTO_INCREMENT,
+create table inventories (
+	id int not null auto_increment,
     type int,
     slots tinyint,
-    PRIMARY KEY (id)
+    primary key (id)
 );
 
-CREATE TABLE items (
-	id bigint NOT NULL AUTO_INCREMENT,
-    inventoryId int, # item can be inside an inventory OR storage, so cannot be a foreign key :(
-    trunkID int,
-    itemId int,
-    bagIndex int,
-    cashItemSerialNumber bigint,
-    dateExpire bigint,
-    invType int,
+create table items (
+	id bigint not null auto_increment,
+    inventoryid int, # item can be inside an inventory or storage, so cannot be a foreign key :(
+    trunkid int,
+    itemid int,
+    bagindex int,
+    cashitemserialnumber bigint,
+    dateexpire bigint,
+    invtype int,
     type int,
-    isCash boolean,
+    iscash boolean,
     quantity int,
     owner varchar(255),
-    PRIMARY KEY (id)
+    primary key (id)
 );
 
-CREATE TABLE petitems (
-	itemId bigint,
+create table petitems (
+	itemid bigint,
     name varchar(255),
     level tinyint,
     tameness smallint,
     repleteness tinyint,
-    petAttribute smallint,
-    petSkill int,
-    dateDead bigint,
-    remainLife int,
+    petattribute smallint,
+    petskill int,
+    datedead bigint,
+    remainlife int,
     attribute smallint,
-    activeState tinyint,
-    autoBuffSkill int,
-    petHue int,
-    giantRate smallint,
-    primary key (itemId),
-    foreign key (itemId) references items(id) on delete cascade,
-    foreign key (dateDead) references filetimes(id)
+    activestate tinyint,
+    autobuffskill int,
+    pethue int,
+    giantrate smallint,
+    primary key (itemid),
+    foreign key (itemid) references items(id) on delete cascade,
+    foreign key (datedead) references filetimes(id)
 );
 
-CREATE TABLE equips (
-	serialNumber bigint,
-    itemId bigint,
+create table equips (
+	serialnumber bigint,
+    itemid bigint,
     title varchar(255),
-    equippedDate bigint,
-    prevBonusExpRate int,
+    equippeddate bigint,
+    prevbonusexprate int,
     ruc smallint,
     cuc smallint,
-    iStr smallint,
-    iDex smallint,
-    iInt smallint,
-    iLuk smallint,
-    iMaxHp smallint,
-    iMaxMp smallint,
-    iPad smallint,
-    iMad smallint,
-    iPDD smallint,
-    iMDD smallint,
-    iAcc smallint,
-    iEva smallint,
-    iCraft smallint,
-    iSpeed smallint,
-    iJump smallint,
+    istr smallint,
+    idex smallint,
+    iint smallint,
+    iluk smallint,
+    imaxhp smallint,
+    imaxmp smallint,
+    ipad smallint,
+    imad smallint,
+    ipdd smallint,
+    imdd smallint,
+    iacc smallint,
+    ieva smallint,
+    icraft smallint,
+    ispeed smallint,
+    ijump smallint,
     attribute smallint,
-    levelUpType smallint,
+    leveluptype smallint,
     level smallint,
     exp smallint,
     durability smallint,
     iuc smallint,
-    iPvpDamage smallint,
-    iReduceReq smallint,
-    specialAttribute smallint,
-    durabilityMax smallint,
-    iIncReq smallint,
-    growthEnchant smallint,
-    psEnchant smallint,
+    ipvpdamage smallint,
+    ireducereq smallint,
+    specialattribute smallint,
+    durabilitymax smallint,
+    iincreq smallint,
+    growthenchant smallint,
+    psenchant smallint,
     bdr smallint,
     imdr smallint,
-    damR smallint,
-    statR smallint,
+    damr smallint,
+    statr smallint,
     cuttable smallint,
-    exGradeOption smallint,
-    itemState smallint,
+    exgradeoption smallint,
+    itemstate smallint,
     grade smallint,
     chuc smallint,
-    soulOptionId smallint,
-    soulSocketId smallint,
-    soulOption smallint,
-    rStr smallint,
-    rDex smallint,
-    rInt smallint,
-    rLuk smallint,
-    rLevel smallint,
-    rJob smallint,
-    rPop smallint,
-    specialGrade int,
-    fixedPotential boolean,
-    tradeBlock boolean,
-    isOnly boolean,
-    notSale boolean,
-    attackSpeed int,
+    souloptionid smallint,
+    soulsocketid smallint,
+    souloption smallint,
+    rstr smallint,
+    rdex smallint,
+    rint smallint,
+    rluk smallint,
+    rlevel smallint,
+    rjob smallint,
+    rpop smallint,
+    specialgrade int,
+    fixedpotential boolean,
+    tradeblock boolean,
+    isonly boolean,
+    notsale boolean,
+    attackspeed int,
     price int,
     tuc int,
-    charmEXP int,
-    expireOnLogout boolean,
-    setItemID int,
-    exItem boolean,
-    equipTradeBlock boolean,
-    iSlot varchar(255),
-    vSlot varchar(255),
-    fixedGrade int,
-    PRIMARY KEY (itemId),
-    FOREIGN KEY (itemId) REFERENCES items(id) on delete cascade,
-    FOREIGN KEY (equippedDate) REFERENCES filetimes(id)
+    charmexp int,
+    expireonlogout boolean,
+    setitemid int,
+    exitem boolean,
+    equiptradeblock boolean,
+    islot varchar(255),
+    vslot varchar(255),
+    fixedgrade int,
+    primary key (itemid),
+    foreign key (itemid) references items(id) on delete cascade,
+    foreign key (equippeddate) references filetimes(id)
 );
 
-CREATE TABLE options (
-	id int NOT NULL AUTO_INCREMENT,
-    equipID bigint,
-    optionID int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (equipID) REFERENCES equips(itemID) on delete cascade
-);
-
-CREATE TABLE sockets (
-	id bigint NOT NULL AUTO_INCREMENT,
-    equipID bigint,
-    ord int,
-    socketID int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (equipID) REFERENCES equips(itemID) on delete cascade
-);
-
-CREATE TABLE monsterBookInfos (
+create table options (
 	id int not null auto_increment,
-    setID int,
-    coverID int,
+    equipid bigint,
+    optionid int,
+    primary key (id),
+    foreign key (equipid) references equips(itemid) on delete cascade
+);
+
+create table sockets (
+	id bigint not null auto_increment,
+    equipid bigint,
+    ord int,
+    socketid int,
+    primary key (id),
+    foreign key (equipid) references equips(itemid) on delete cascade
+);
+
+create table monsterbookinfos (
+	id int not null auto_increment,
+    setid int,
+    coverid int,
     primary key (id)
 );
 
-CREATE TABLE monsterBookCards (
+create table monsterbookcards (
 	id bigint not null auto_increment,
-    bookID int,
-    cardID int,
+    bookid int,
+    cardid int,
     primary key (id),
-    foreign key (bookID) references monsterBookInfos(id)
+    foreign key (bookid) references monsterbookinfos(id)
 );
 
-CREATE TABLE avatarLook (
-	id int NOT NULL AUTO_INCREMENT,
+create table avatarlook (
+	id int not null auto_increment,
     gender int,
     skin int,
     face int,
     hair int,
-    weaponStickerId int,
-    weaponId int,
-    subWeaponId int,
+    weaponstickerid int,
+    weaponid int,
+    subweaponid int,
     job int,
-    drawElfEar boolean,
-    demonSlayerDefFaceAcc int,
-    xenonDefFaceAcc int,
-	beastTamerDefFaceAcc int,
-    isZeroBetaLook boolean,
-    mixedHairColor int,
-    mixHairPercent int,
+    drawelfear boolean,
+    demonslayerdeffaceacc int,
+    xenondeffaceacc int,
+	beasttamerdeffaceacc int,
+    iszerobetalook boolean,
+    mixedhaircolor int,
+    mixhairpercent int,
     ears int,
     tail int,
-    PRIMARY KEY (id)
+    primary key (id)
 );
 
-CREATE TABLE hairEquips (
-	id int NOT NULL AUTO_INCREMENT,
-    alId int,
-    equipId int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
+create table hairequips (
+	id int not null auto_increment,
+    alid int,
+    equipid int,
+    primary key (id),
+    foreign key (alid) references avatarlook(id) on delete cascade
 );
 
-CREATE TABLE unseenEquips (
-	id int NOT NULL AUTO_INCREMENT,
-    alId int,
-    equipId int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
+create table unseenequips (
+	id int not null auto_increment,
+    alid int,
+    equipid int,
+    primary key (id),
+    foreign key (alid) references avatarlook(id) on delete cascade
 );
 
-CREATE TABLE petIDs (
-	id int NOT NULL AUTO_INCREMENT,
-    alId int,
-    petId int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
+create table petids (
+	id int not null auto_increment,
+    alid int,
+    petid int,
+    primary key (id),
+    foreign key (alid) references avatarlook(id) on delete cascade
 );
 
-CREATE TABLE totems (
-	id int NOT NULL AUTO_INCREMENT,
-    alId int,
-    totemId int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (alId) REFERENCES avatarlook(id) on delete cascade
+create table totems (
+	id int not null auto_increment,
+    alid int,
+    totemid int,
+    primary key (id),
+    foreign key (alid) references avatarlook(id) on delete cascade
 );
 
-CREATE TABLE extendSP (
-	id int NOT NULL AUTO_INCREMENT,
-    PRIMARY KEY (id)
+create table extendsp (
+	id int not null auto_increment,
+    primary key (id)
 );
 
-CREATE TABLE spSet (
-	id int NOT NULL AUTO_INCREMENT,
-    extendSP_id int,
-    jobLevel tinyint,
+create table spset (
+	id int not null auto_increment,
+    extendsp_id int,
+    joblevel tinyint,
     sp int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (extendSP_id) REFERENCES extendSP(id) on delete cascade
+    primary key (id),
+    foreign key (extendsp_id) references extendsp(id) on delete cascade
 );
 
-CREATE TABLE systemtimes (
-	id int NOT NULL AUTO_INCREMENT,
+create table systemtimes (
+	id int not null auto_increment,
     yr int,
     mnth int,
-    PRIMARY KEY (id)
+    primary key (id)
 );
 
-CREATE TABLE nonCombatStatDayLimit (
-	id int NOT NULL AUTO_INCREMENT,
+create table noncombatstatdaylimit (
+	id int not null auto_increment,
     charisma smallint,
     charm smallint,
     insight smallint,
     will smallint,
     craft smallint,
     sense smallint,
-    ftLastUpdateCharmByCashPR bigint,
-    charmByCashPR tinyint,
-    PRIMARY KEY (id),
-    FOREIGN KEY (ftLastUpdateCharmByCashPR) REFERENCES filetimes(id)
+    ftlastupdatecharmbycashpr bigint,
+    charmbycashpr tinyint,
+    primary key (id),
+    foreign key (ftlastupdatecharmbycashpr) references filetimes(id)
 );
 
-CREATE TABLE characterCards (
-	id int NOT NULL AUTO_INCREMENT,
-    characterId int,
+create table charactercards (
+	id int not null auto_increment,
+    characterid int,
     job int,
     level tinyint,
-    PRIMARY KEY (id)
+    primary key (id)
 );
 
-CREATE TABLE characterStats (
-	id int NOT NULL AUTO_INCREMENT,
-    characterId int,
-    characterIdForLog int,
-    worldIdForLog int,
-    name VARCHAR(255),
+create table characterstats (
+	id int not null auto_increment,
+    characterid int,
+    characteridforlog int,
+    worldidforlog int,
+    name varchar(255),
     gender int,
     skin int,
     face int,
     hair int,
-    mixBaseHairColor int,
-    mixAddHairColor int,
-    mixHairBaseProb int,
+    mixbasehaircolor int,
+    mixaddhaircolor int,
+    mixhairbaseprob int,
     level int,
     job int,
     str int,
     dex int,
     inte int,
     luk int,
-    hp int, 
-    maxHp int,
+    hp int,
+    maxhp int,
     mp int,
-    maxMp int,
+    maxmp int,
     ap int,
     sp int,
     exp long,
     pop int,
     money long,
     wp int,
-    extendSP int,
-    posMap long,
+    extendsp int,
+    posmap long,
     portal int,
-    subJob int,
-    defFaceAcc int,
+    subjob int,
+    deffaceacc int,
 	fatigue int,
-    lastFatigueUpdateTime int,
-    charismaExp int,
-    insightExp int,
-    willExp int,
-    craftExp int,
-    senseExp int,
-    charmExp int,
-    nonCombatStatDayLimit int,
-    pvpExp int,
-    pvpGrade int,
-    pvpPoint int,
-    pvpModeLevel int,
-    pvpModeType int,
-    eventPoint int,
-    albaActivityID int,
-    albaStartTime bigint,
-    albaDuration int,
-    albaSpecialReward int,
+    lastfatigueupdatetime int,
+    charismaexp int,
+    insightexp int,
+    willexp int,
+    craftexp int,
+    senseexp int,
+    charmexp int,
+    noncombatstatdaylimit int,
+    pvpexp int,
+    pvpgrade int,
+    pvppoint int,
+    pvpmodelevel int,
+    pvpmodetype int,
+    eventpoint int,
+    albaactivityid int,
+    albastarttime bigint,
+    albaduration int,
+    albaspecialreward int,
     burning boolean,
-    characterCard int,
-    accountLastLogout int,
-    lastLogout bigint,
-    gachExp int,
-    honorExp int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (extendSP) REFERENCES extendSP(id),
-    FOREIGN KEY (nonCombatStatDayLimit) REFERENCES nonCombatStatDayLimit(id),
-    FOREIGN KEY (albaStartTime) REFERENCES filetimes(id),
-    FOREIGN KEY (characterCard) REFERENCES characterCards(id),
-    FOREIGN KEY (accountLastLogout) REFERENCES systemtimes(id),
-    FOREIGN KEY (lastLogout) REFERENCES filetimes(id)
+    charactercard int,
+    accountlastlogout int,
+    lastlogout bigint,
+    gachexp int,
+    honorexp int,
+    primary key (id),
+    foreign key (extendsp) references extendsp(id),
+    foreign key (noncombatstatdaylimit) references noncombatstatdaylimit(id),
+    foreign key (albastarttime) references filetimes(id),
+    foreign key (charactercard) references charactercards(id),
+    foreign key (accountlastlogout) references systemtimes(id),
+    foreign key (lastlogout) references filetimes(id)
 );
 
-CREATE TABLE avatarData (
-	id int NOT NULL AUTO_INCREMENT,
-    characterStat int,
-    avatarLook int,
-    zeroAvatarLook int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (characterStat) REFERENCES characterstats(id),
-    FOREIGN KEY (avatarLook) REFERENCES avatarlook(id),
-    FOREIGN KEY (zeroAvatarLook) REFERENCES avatarlook(id)
+create table avatardata (
+	id int not null auto_increment,
+    characterstat int,
+    avatarlook int,
+    zeroavatarlook int,
+    primary key (id),
+    foreign key (characterstat) references characterstats(id),
+    foreign key (avatarlook) references avatarlook(id),
+    foreign key (zeroavatarlook) references avatarlook(id)
 );
 
-CREATE TABLE funckeymap (
-	id int NOT NULL AUTO_INCREMENT,
-    PRIMARY KEY (id)
+create table funckeymap (
+	id int not null auto_increment,
+    primary key (id)
 );
 
-CREATE TABLE keymaps (
-	id int NOT NULL AUTO_INCREMENT,
-    fkMapId int,
+create table keymaps (
+	id int not null auto_increment,
+    fkmapid int,
     idx int,
     type tinyint,
     val int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (fkMapId) REFERENCES funckeymap(id)
+    primary key (id),
+    foreign key (fkmapid) references funckeymap(id)
 );
 
 
-CREATE TABLE guilds (
-	id int NOT NULL AUTO_INCREMENT,
+create table guilds (
+	id int not null auto_increment,
     name varchar(255),
-    leaderID int,
-    worldID int,
-    markBg int,
-    markBgColor int,
+    leaderid int,
+    worldid int,
+    markbg int,
+    markbgcolor int,
     mark int,
-    markColor int,
-    maxMembers int,
+    markcolor int,
+    maxmembers int,
     notice varchar(255),
     points int,
-    seasonPoints int,
-    allianceID int,
+    seasonpoints int,
+    allianceid int,
     level int,
     rank int,
     ggp int,
     appliable boolean,
-    joinSetting int,
-    reqLevel int,
-    PRIMARY KEY (id)    
+    joinsetting int,
+    reqlevel int,
+    primary key (id)
 );
 
-CREATE TABLE characters (
-	id int NOT NULL AUTO_INCREMENT,
-    accID int,
-	avatarData int,
-    equippedInventory int,
-    equipInventory int,
-    consumeInventory int,
-    etcInventory int,
-    installInventory int,
-    cashInventory int,
-    funcKeyMap_id int,
-    fieldID int,
-    questManager bigint,
+create table characters (
+	id int not null auto_increment,
+    accid int,
+	avatardata int,
+    equippedinventory int,
+    equipinventory int,
+    consumeinventory int,
+    etcinventory int,
+    installinventory int,
+    cashinventory int,
+    funckeymap_id int,
+    fieldid int,
+    questmanager bigint,
     guild int,
-    monsterBook int,
-	PRIMARY KEY (id),
-    FOREIGN KEY (avatarData) REFERENCES avatarData(id),
-    FOREIGN KEY (equippedInventory) REFERENCES inventories(id),
-    FOREIGN KEY (equipInventory) REFERENCES inventories(id),
-    FOREIGN KEY (consumeInventory) REFERENCES inventories(id),
-    FOREIGN KEY (etcInventory) REFERENCES inventories(id),
-    FOREIGN KEY (installInventory) REFERENCES inventories(id),
-    FOREIGN KEY (cashInventory) REFERENCES inventories(id),
-    FOREIGN KEY (funcKeyMap_id) REFERENCES funckeymap(id),
-    FOREIGN KEY (questManager) REFERENCES questmanagers(id),
-    FOREIGN KEY (guild) REFERENCES guilds(id),
-    FOREIGN KEY (monsterBook) references monsterBookInfos(id)
+    monsterbook int,
+	primary key (id),
+    foreign key (avatardata) references avatardata(id),
+    foreign key (equippedinventory) references inventories(id),
+    foreign key (equipinventory) references inventories(id),
+    foreign key (consumeinventory) references inventories(id),
+    foreign key (etcinventory) references inventories(id),
+    foreign key (installinventory) references inventories(id),
+    foreign key (cashinventory) references inventories(id),
+    foreign key (funckeymap_id) references funckeymap(id),
+    foreign key (questmanager) references questmanagers(id),
+    foreign key (guild) references guilds(id),
+    foreign key (monsterbook) references monsterbookinfos(id)
 );
 
-CREATE TABLE characterPotentials (
+create table characterpotentials (
 	id bigint not null auto_increment,
-    potKey tinyint,
-    skillID int,
+    potkey tinyint,
+    skillid int,
     slv tinyint,
     grade tinyint,
-    charID int,
+    charid int,
     primary key (id),
-    foreign key (charID) references characters(id)
+    foreign key (charid) references characters(id)
 );
 
-CREATE TABLE GuildSkill (
+create table guildskill (
 	id int not null auto_increment,
-    skillID int,
+    skillid int,
     level int,
-    expireDate bigint,
-    buyCharacterName varchar(255),
-    extendCharacterName varchar(255),
+    expiredate bigint,
+    buycharactername varchar(255),
+    extendcharactername varchar(255),
     primary key (id),
-    foreign key (expireDate) references filetimes(id) on delete cascade
+    foreign key (expiredate) references filetimes(id) on delete cascade
 );
 
-CREATE TABLE guildskills (
-	guildSkill_id int not null auto_increment,
+create table guildskills (
+	guildskill_id int not null auto_increment,
     skills_id int,
-    Guild_id int,
-    skillID int,
-    fk_GuildSkillID int,
-    primary key (guildSkill_id),
-	foreign key (Guild_id) references guilds(id) on delete cascade,
-    FOREIGN KEY (fk_GuildSkillID) REFERENCES GuildSkill(id) on delete cascade
+    guild_id int,
+    skillid int,
+    fk_guildskillid int,
+    primary key (guildskill_id),
+	foreign key (guild_id) references guilds(id) on delete cascade,
+    foreign key (fk_guildskillid) references guildskill(id) on delete cascade
 );
 
-CREATE TABLE guildmembers (
-	id int NOT NULL AUTO_INCREMENT,
-    charID int,
-    guildID int,
+create table guildmembers (
+	id int not null auto_increment,
+    charid int,
+    guildid int,
     grade int,
-    allianceGrade int,
+    alliancegrade int,
     commitment int,
-    dayCommitment int,
+    daycommitment int,
     igp int,
-    commitmentIncTime bigint,
+    commitmentinctime bigint,
     name varchar(255),
     job int,
     level int,
-    loggedIn boolean,
-	PRIMARY KEY (id),
-    FOREIGN KEY (guildID) REFERENCES guilds(id),
-    FOREIGN KEY (commitmentIncTime) REFERENCES filetimes(id) on delete cascade
+    loggedin boolean,
+	primary key (id),
+    foreign key (guildid) references guilds(id),
+    foreign key (commitmentinctime) references filetimes(id) on delete cascade
 );
 
-CREATE TABLE guildrequestors (
-	id int NOT NULL AUTO_INCREMENT,
+create table guildrequestors (
+	id int not null auto_increment,
     requestors_id int,
-    charID int,
-    guildID int,
+    charid int,
+    guildid int,
     name varchar(255),
     job int,
     level int,
-    loggedIn boolean,
-	PRIMARY KEY (id),
-    FOREIGN KEY (guildID) REFERENCES guilds(id) on delete cascade
+    loggedin boolean,
+	primary key (id),
+    foreign key (guildid) references guilds(id) on delete cascade
 );
 
-CREATE TABLE gradeNames (
-	id int NOT NULL AUTO_INCREMENT,
-	gradeName varchar(255),
-    guildID int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (guildID) references guilds(id) on delete cascade
+create table gradenames (
+	id int not null auto_increment,
+	gradename varchar(255),
+    guildid int,
+    primary key (id),
+    foreign key (guildid) references guilds(id) on delete cascade
 );
 
 
-CREATE TABLE skills (
-	id int NOT NULL AUTO_INCREMENT,
-    charId int,
-    skillId int,
-    rootId int,
-    maxLevel int,
-    currentLevel int,
-    masterLevel int,
-    PRIMARY KEY (id),
-    FOREIGN KEY (charId) REFERENCES characters(id)  on delete cascade
+create table skills (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    rootid int,
+    maxlevel int,
+    currentlevel int,
+    masterlevel int,
+    primary key (id),
+    foreign key (charid) references characters(id)  on delete cascade
 );
 
-CREATE TABLE macros (
+create table macros (
 	id bigint not null auto_increment,
-    charID int,
+    charid int,
     muted boolean,
     name varchar(255),
     primary key (id),
-    foreign key (charID) references characters(id)
+    foreign key (charid) references characters(id)
 );
 
-CREATE TABLE macroSkills (
+create table macroskills (
 	id bigint not null auto_increment,
-    orderCol int,
-    skillID int,
-    macroID bigint,
+    ordercol int,
+    skillid int,
+    macroid bigint,
     primary key (id),
-    foreign key (macroID) references macros(id) on delete cascade
+    foreign key (macroid) references macros(id) on delete cascade
 );
 
-CREATE TABLE accounts (
-	id int NOT NULL AUTO_INCREMENT,
-	username VARCHAR(255),
-	password VARCHAR(255),
-	pic VARCHAR(255),
-	mac VARCHAR(255),
-	gmLevel int DEFAULT 0,
-	accountTypeMask int DEFAULT 2,
-	age int DEFAULT 0,
-	vipGrade int DEFAULT 0,
-	nBlockReason int DEFAULT 0,
-	gender tinyint DEFAULT 0,
-	msg2 tinyint DEFAULT 0,
-	purchaseExp tinyint DEFAULT 0,
-	pBlockReason tinyint DEFAULT 3,
-	chatUnblockDate long,
-	hasCensoredNxLoginID boolean DEFAULT 0,
-	gradeCode tinyint DEFAULT 0,
-	censoredNxLoginID VARCHAR(255),
-	characterSlots int DEFAULT 4,
-	creationDate long,
-    lastLoggedIn varchar(255),
-    trunkID int,
-	PRIMARY KEY (id),
-    foreign key (trunkID) references trunks(id)
-);
-
-CREATE TABLE damageskinsavedatas (
-	id bigint not null auto_increment,
-    damageSkinID int,
-    itemID int,
-    notSave boolean,
-    description varchar(255),
-    accID int,
-    primary key (id),
-    foreign key (accID) references accounts(id) on delete cascade
-);
-
-CREATE TABLE friends (
+create table accounts (
 	id int not null auto_increment,
-    ownerID int,
-    ownerAccID int,
-    friendID int,
-    friendAccountID int,
+	username varchar(255),
+	password varchar(255),
+	pic varchar(255),
+	mac varchar(255),
+	gmlevel int default 0,
+	accounttypemask int default 2,
+	age int default 0,
+	vipgrade int default 0,
+	nblockreason int default 0,
+	gender tinyint default 0,
+	msg2 tinyint default 0,
+	purchaseexp tinyint default 0,
+	pblockreason tinyint default 3,
+	chatunblockdate long,
+	hascensorednxloginid boolean default 0,
+	gradecode tinyint default 0,
+	censorednxloginid varchar(255),
+	characterslots int default 4,
+	creationdate long,
+    lastloggedin varchar(255),
+    trunkid int,
+	primary key (id),
+    foreign key (trunkid) references trunks(id)
+);
+
+create table damageskinsavedatas (
+	id bigint not null auto_increment,
+    damageskinid int,
+    itemid int,
+    notsave boolean,
+    description varchar(255),
+    accid int,
+    primary key (id),
+    foreign key (accid) references accounts(id) on delete cascade
+);
+
+create table friends (
+	id int not null auto_increment,
+    ownerid int,
+    owneraccid int,
+    friendid int,
+    friendaccountid int,
     name varchar(255),
     flag tinyint,
-    groupName varchar(255),
+    groupname varchar(255),
     mobile tinyint,
     nickname varchar(255),
     memo varchar(255),
-    primary key (id)   
+    primary key (id)
 );
 
 
-INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('admin', 'admin', '7', '0', '0', '111111', '40');
-INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('asura', 'admin', '7', '0', '0', '111111', '40');
-INSERT INTO `accounts` (`username`, `password`, `gmLevel`, `chatUnblockDate`, `creationDate`, `pic`, `characterSlots`) VALUES ('maigal', 'admin', '7', '0', '0', '111111', '40');
+insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('admin', 'admin', '7', '0', '0', '111111', '40');
+insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '0', '111111', '40');
+insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '0', '111111', '40');
