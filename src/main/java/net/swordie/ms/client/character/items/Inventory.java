@@ -135,4 +135,8 @@ public class Inventory {
         }
         return sb.toString();
     }
+
+    public int getEmptySlots() {
+        return getSlots() - getItems().size();
+    }
 }

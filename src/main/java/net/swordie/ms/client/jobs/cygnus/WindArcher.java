@@ -262,6 +262,9 @@ public class WindArcher extends Job {
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
+                summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
+                summon.setPosition(position);
                 summon.setAttackActive(false);
                 summon.setAssistType((byte) 0);
                 field.spawnSummon(summon);
@@ -419,6 +422,7 @@ public class WindArcher extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        chr.chatMessage(ChatMsgColour.GREY, "Atk Speed: "+attackInfo.attackSpeed);
         if(hasHitMobs) {
             if(attackInfo.skillId != TRIFLING_WIND_ATOM && attackInfo.skillId != 0 && attackInfo.skillId != STORM_BRINGER) {
                 handleStormBringer(skillID, slv, attackInfo);

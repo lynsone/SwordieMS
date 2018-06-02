@@ -437,11 +437,14 @@ public class Evan extends Job {
 
     private int getFinalAttackProc() {
         Skill skill = getFinalAtkSkill(chr);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-        int proc = si.getValue(prop, slv);
+        if(skill != null) {
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+            int proc = si.getValue(prop, slv);
 
-        return proc;
+            return proc;
+        }
+        return 0;
     }
 
     private void handleMagicDebris() {

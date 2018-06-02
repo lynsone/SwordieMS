@@ -825,4 +825,8 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 			}
 		}
 	}
+
+	public int getEmptyInventorySlots(InvType invType) {
+		return chr.getInventoryByType(invType).getEmptySlots();
+	}
 }

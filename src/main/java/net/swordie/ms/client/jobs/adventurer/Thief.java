@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.world.field.Field;
@@ -53,8 +54,8 @@ public class Thief extends Job {
 
     // Night Lord
     public static final int ASSASSINS_MARK = 4101011; //Buff (ON/OFF)
-    //public static final int ASSASSINS_MARK_ATOM = 4100012;
-    public static final int ASSASSINS_MARK_ATOM = 4120019;
+    public static final int ASSASSIN_MARK_ATOM = 4100012;
+    public static final int NIGHTLORD_MARK_ATOM = 4120019;
     public static final int CLAW_BOOSTER = 4101003; //Buff
 
     public static final int SHADOW_PARTNER_NL = 4111002; //Buff
@@ -557,7 +558,7 @@ public class Thief extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
                 break;
 
@@ -789,7 +790,7 @@ public class Thief extends Job {
 
         if(tsm.hasStat(NightLordMark)) {
 
-            if (attackInfo.skillId != ASSASSINS_MARK_ATOM) {
+            if (attackInfo.skillId != NIGHTLORD_MARK_ATOM && attackInfo.skillId != ASSASSIN_MARK_ATOM) {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     int mobID = mai.mobId;
@@ -818,17 +819,19 @@ public class Thief extends Job {
 
                             int inc = ForceAtomEnum.ASSASSIN_MARK.getInc();
                             int type = ForceAtomEnum.ASSASSIN_MARK.getForceAtomType();
+                            int atom = ASSASSIN_MARK_ATOM;
 
                             if(chr.hasSkill(NIGHT_LORD_MARK)) {
                                 inc = ForceAtomEnum.NIGHTLORD_MARK.getInc();
                                 type = ForceAtomEnum.NIGHTLORD_MARK.getForceAtomType();
+                                atom = NIGHTLORD_MARK_ATOM;
                             }
 
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 45, 4,
                                     anglez, 100, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
                             chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), /*mobID*/life.getObjectId(), type,
-                                    true, /*mobID*/life.getObjectId(), ASSASSINS_MARK_ATOM, forceAtomInfo, rect, 0, 300,
+                                    true, /*mobID*/life.getObjectId(), atom, forceAtomInfo, rect, 0, 300,
                                     life.getPosition(), chr.getBulletIDForAttack(), life.getPosition()));
                         }
                     }
