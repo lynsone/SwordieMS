@@ -110,9 +110,10 @@ public class Summoned {
         return outPacket;
     }
 
-    public static OutPacket summonedAttack(AttackInfo ai) {
+    public static OutPacket summonedAttack(int charID, AttackInfo ai) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_ATTACK);
 
+        outPacket.encodeInt(charID);
         outPacket.encodeInt(ai.summon.getObjectId());
 
         outPacket.encodeByte(ai.summon.getCharLevel());
@@ -134,9 +135,11 @@ public class Summoned {
         return outPacket;
     }
 
-    public static OutPacket summonedMove(int summonID, int encodedGatherDuration, Position oldPos,
+    public static OutPacket summonedMove(int charID, int summonID, int encodedGatherDuration, Position oldPos,
                                          Position oldVPos, List<Movement> movements) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_MOVE);
+
+        outPacket.encodeInt(charID);
 
         outPacket.encodeInt(summonID);
         outPacket.encodePosition(oldPos);
