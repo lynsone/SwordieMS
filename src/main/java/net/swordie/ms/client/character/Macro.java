@@ -18,7 +18,7 @@ public class Macro {
     private String name;
     private boolean muted;
     @ElementCollection
-    @CollectionTable(name = "macroSkills", joinColumns = @JoinColumn(name = "macroID"))
+    @CollectionTable(name = "macroskills", joinColumns = @JoinColumn(name = "macroID"))
     @OrderColumn(name = "orderCol")
     @Column(name = "skillID")
     private int[] skills = new int[3];

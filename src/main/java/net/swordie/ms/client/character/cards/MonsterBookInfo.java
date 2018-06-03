@@ -17,7 +17,7 @@ public class MonsterBookInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @ElementCollection
-    @CollectionTable(name = "monsterBookCards", joinColumns = @JoinColumn(name = "bookID"))
+    @CollectionTable(name = "monsterbookcards", joinColumns = @JoinColumn(name = "bookID"))
     @Column(name = "cardID")
     private Set<Integer> cards = new HashSet<>();
     private int setID;

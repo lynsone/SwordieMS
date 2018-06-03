@@ -23,7 +23,7 @@ public class Guild {
     @CollectionTable(name = "guildrequestors", joinColumns = @JoinColumn(name = "guildID"))
     private List<GuildRequestor> requestors = new ArrayList<>();
     @ElementCollection
-    @CollectionTable(name = "gradeNames", joinColumns = @JoinColumn(name = "guildID"))
+    @CollectionTable(name = "gradenames", joinColumns = @JoinColumn(name = "guildID"))
     @Column(name = "gradeName")
     private List<String> gradeNames = new ArrayList<>();
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

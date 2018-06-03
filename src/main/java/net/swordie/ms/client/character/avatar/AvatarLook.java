@@ -26,16 +26,16 @@ public class AvatarLook {
     private int weaponId;
     private int subWeaponId;
     @ElementCollection
-    @CollectionTable(name = "hairEquips", joinColumns = @JoinColumn(name = "alId"))
+    @CollectionTable(name = "hairequips", joinColumns = @JoinColumn(name = "alId"))
     @Column(name = "equipId")
     private List<Integer> hairEquips;
 
     @ElementCollection
-    @CollectionTable(name = "unseenEquips", joinColumns = @JoinColumn(name = "alId"))
+    @CollectionTable(name = "unseenequips", joinColumns = @JoinColumn(name = "alId"))
     @Column(name = "equipId")
     private List<Integer> unseenEquips;
     @ElementCollection
-    @CollectionTable(name = "petIDs", joinColumns = @JoinColumn(name = "alId"))
+    @CollectionTable(name = "petids", joinColumns = @JoinColumn(name = "alId"))
     @Column(name = "petId")
     private List<Integer> petIDs;
     private int job;
