@@ -213,7 +213,6 @@ public class LoginHandler {
         if (handleAuthSecondPassword(c, inPacket)) {
             int charId = inPacket.decodeInt();
             Char chr = Char.getFromDBById(charId);
-            DatabaseManager.deleteFromDB(chr);
             Account a = Account.getFromDBById(c.getAccount().getId());
             a.getCharacters().remove(chr);
             DatabaseManager.saveToDB(a);

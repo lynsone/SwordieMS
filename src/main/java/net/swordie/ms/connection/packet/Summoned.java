@@ -142,9 +142,9 @@ public class Summoned {
         outPacket.encodeInt(charID);
 
         outPacket.encodeInt(summonID);
+        outPacket.encodeInt(encodedGatherDuration);
         outPacket.encodePosition(oldPos);
         outPacket.encodePosition(oldVPos);
-        outPacket.encodeInt(encodedGatherDuration);
         outPacket.encodeByte(movements.size());
         for(Movement m : movements) {
             m.encode(outPacket);
