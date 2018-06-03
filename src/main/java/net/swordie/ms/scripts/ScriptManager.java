@@ -1,6 +1,7 @@
 package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.enums.UIType;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
 
@@ -523,6 +524,17 @@ public interface ScriptManager {
 	void openTrunk(int npcTemplateID);
 
 	/**
+	 * Opens an ui with a given ID.
+	 * Look at enums/UIType for all ID's.
+	 * Add from net.swordie.ms.enums import UIType at the top of the npc script to use this.
+	 * Example: "sm.openUI(UIType.UI_EQUIP)"
+	 *
+	 * @param uiID
+	 * 		The ui id to show.
+	**/
+	void openUI(UIType uiID);
+
+	/**
 	 * Gets the ID of the current return {@link Field}.
 	 * Example: "sm.getReturnField()"
 	 *
@@ -596,5 +608,6 @@ public interface ScriptManager {
 	 * @param templateID the speaker's template id
 	 */
 	void setSpeakerID(int templateID);
+
 
 }

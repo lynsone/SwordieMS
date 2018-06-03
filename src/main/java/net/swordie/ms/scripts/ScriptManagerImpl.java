@@ -706,6 +706,12 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
+	public void openUI(UIType uiID){
+		int uiIDValue = uiID.getVal();
+		chr.write(CField.openUI(uiIDValue));
+	}
+
+	@Override
 	public int getReturnField() {
 		return returnField;
 	}
