@@ -195,17 +195,13 @@ public class WorldHandler {
     }
 
     public static void handleSummonedMove(Char chr, InPacket inPacket) {
+        // CVecCtrlSummoned::EndUpdateActive
         int summonID = inPacket.decodeInt();
         Life life = chr.getField().getLifeByObjectID(summonID);
         if (!(life instanceof Summon)) {
             return;
         }
         Summon summon = (Summon) life;
-        // CVecCtrlSummoned::EndUpdateActive
-        byte fieldKey = inPacket.decodeByte();
-        inPacket.decodeInt(); // ? something with field
-        inPacket.decodeInt(); // tick
-        inPacket.decodeByte(); // ? doesn't get set at all
         // CMovePathCommon::Encode
         int encodedGatherDuration = inPacket.decodeInt();
         Position oldPos = inPacket.decodePosition();
