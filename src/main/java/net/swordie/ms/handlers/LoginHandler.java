@@ -134,7 +134,7 @@ public class LoginHandler {
             Connection connection = Server.getInstance().getDatabaseConnection();
             PreparedStatement ps = null;
             try {
-                ps = connection.prepareStatement("SELECT * FROM characterStats WHERE name = ?");
+                ps = connection.prepareStatement("SELECT * FROM characterstats WHERE name = ?");
                 ps.setString(1, name);
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
