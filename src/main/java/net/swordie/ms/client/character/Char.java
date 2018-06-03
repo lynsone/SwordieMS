@@ -101,27 +101,27 @@ public class Char {
 
 	@JoinColumn(name = "equippedInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory equippedInventory = new Inventory(InvType.EQUIPPED, 50);
+	private Inventory equippedInventory = new Inventory(InvType.EQUIPPED, 52);
 
 	@JoinColumn(name = "equipInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory equipInventory = new Inventory(InvType.EQUIP, 50);
+	private Inventory equipInventory = new Inventory(InvType.EQUIP, 52);
 
 	@JoinColumn(name = "consumeInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory consumeInventory = new Inventory(InvType.CONSUME, 50);
+	private Inventory consumeInventory = new Inventory(InvType.CONSUME, 52);
 
 	@JoinColumn(name = "etcInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory etcInventory = new Inventory(InvType.ETC, 50);
+	private Inventory etcInventory = new Inventory(InvType.ETC, 52);
 
 	@JoinColumn(name = "installInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory installInventory = new Inventory(InvType.INSTALL, 50);
+	private Inventory installInventory = new Inventory(InvType.INSTALL, 52);
 
 	@JoinColumn(name = "cashInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory cashInventory = new Inventory(InvType.CASH, 50);
+	private Inventory cashInventory = new Inventory(InvType.CASH, 52);
 
 	@JoinColumn(name = "avatarData")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.mob.Mob;
@@ -558,6 +559,9 @@ public class Pirate extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
+                summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
+                summon.setPosition(position);
                 summon.setSummonTerm(20);
                 field.spawnSummon(summon);
                 break;

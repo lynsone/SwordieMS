@@ -579,10 +579,14 @@ public class Archer extends Job {
             case RECKLESS_HUNT_BOW:
                 o1.nValue = -si.getValue(x, slv);
                 o1.nReason = skillID;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = 0;
                 tsm.putCharacterStatValue(IndiePADR, o1);
                 tsm.putCharacterStatValue(IndieMADR, o1);
                 o2.nValue = si.getValue(indieDamR, slv);
                 o2.nReason = skillID;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = 0;
                 tsm.putCharacterStatValue(IndieDamR, o2);
                 o3.nOption = si.getValue(padX, slv);
                 o3.rOption = skillID;
@@ -654,6 +658,9 @@ public class Archer extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 summon.setMaxHP(si.getValue(x, slv));
+                Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
+                summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
+                summon.setPosition(position);
                 field = c.getChr().getField();
                 field.spawnSummon(summon);
                 break;
