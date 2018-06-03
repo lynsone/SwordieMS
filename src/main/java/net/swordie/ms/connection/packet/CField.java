@@ -648,9 +648,9 @@ public class CField {
 
         return outPacket;
     }
-    public static OutPacket openUI(int ui_ID){
+    public static OutPacket openUI(int uiID){
         OutPacket outpacket = new OutPacket(OutHeader.OPEN_UI);
-        outpacket.encodeInt(ui_ID);
+        outpacket.encodeInt(uiID);
         return outpacket;
     }
 
