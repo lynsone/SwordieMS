@@ -263,7 +263,11 @@ public class AvatarLook {
         outPacket.encodeByte(isDrawElfEar());
         // outPacket.encodeByte(-1); //smth to do with a new class
         for (int i = 0; i < 3; i++) {
-            outPacket.encodeInt(getPetIDs().get(i)); // always 3
+            if (getPetIDs().size() > i) {
+                outPacket.encodeInt(getPetIDs().get(i)); // always 3
+            } else {
+                outPacket.encodeInt(0);
+            }
         }
         if (JobConstants.isZero((short) getJob())) {
              outPacket.encodeByte(isZeroBetaLook());
