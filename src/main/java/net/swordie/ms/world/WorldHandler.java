@@ -219,7 +219,7 @@ public class WorldHandler {
             summon.setMoveAction(m.getMoveAction());
             summon.setFh(m.getFh());
         }
-        chr.getField().broadcastPacket(Summoned.summonedMove(chr.getId(), summonID, encodedGatherDuration, oldPos, oldVPos, movements));
+        chr.getField().broadcastPacket(Summoned.summonedMove(chr.getId(), summonID, encodedGatherDuration, oldPos, oldVPos, movements), chr);
     }
 
     public static void handleUserChat(Client c, InPacket inPacket) {
