@@ -1213,6 +1213,7 @@ public class WorldHandler {
         Field field = chr.getField();
         AttackInfo ai = new AttackInfo();
         int summonedID = inPacket.decodeInt();
+        ai.attackHeader = OutHeader.SUMMONED_ATTACK;
         ai.summon = (Summon) field.getLifeByObjectID(summonedID);
         ai.updateTime = inPacket.decodeInt();
         ai.skillId = inPacket.decodeInt();
