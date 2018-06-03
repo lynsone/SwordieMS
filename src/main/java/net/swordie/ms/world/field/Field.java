@@ -69,7 +69,7 @@ public class Field {
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
         this.lifes = new ArrayList<>();
-        this.chars = new ArrayList<>();
+        this.chars = Collections.synchronizedList(new ArrayList<>());
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
         this.reactors = new HashSet<>();

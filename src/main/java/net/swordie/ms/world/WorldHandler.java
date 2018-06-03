@@ -194,6 +194,34 @@ public class WorldHandler {
         chr.getField().broadcastPacket(UserRemote.move(chr, encodedGatherDuration, oldPos, oldVPos, (byte) 0, movements), chr);
     }
 
+    public static void handleSummonedMove(Char chr, InPacket inPacket) {
+        int summonID = inPacket.decodeInt();
+        Life life = chr.getField().getLifeByObjectID(summonID);
+        if (!(life instanceof Summon)) {
+            return;
+        }
+        Summon summon = (Summon) life;
+        // CVecCtrlSummoned::EndUpdateActive
+        byte fieldKey = inPacket.decodeByte();
+        inPacket.decodeInt(); // ? something with field
+        inPacket.decodeInt(); // tick
+        inPacket.decodeByte(); // ? doesn't get set at all
+        // CMovePathCommon::Encode
+        int encodedGatherDuration = inPacket.decodeInt();
+        Position oldPos = inPacket.decodePosition();
+        Position oldVPos = inPacket.decodePosition();
+        summon.setPosition(oldPos);
+        summon.setvPosition(oldVPos);
+        List<Movement> movements = WvsContext.parseMovement(inPacket);
+        for (Movement m : movements) {
+            summon.setPosition(m.getPosition());
+            summon.setvPosition(m.getVPosition());
+            summon.setMoveAction(m.getMoveAction());
+            summon.setFh(m.getFh());
+        }
+        chr.getField().broadcastPacket(Summoned.summonedMove(summonID, encodedGatherDuration, oldPos, oldVPos, movements));
+    }
+
     public static void handleUserChat(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         inPacket.decodeInt();

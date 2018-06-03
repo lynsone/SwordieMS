@@ -1,5 +1,6 @@
 package net.swordie.ms.connection.packet;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -7,7 +8,10 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.util.Position;
+
+import java.util.List;
 
 /**
  * Created on 5/21/2018.
@@ -124,8 +128,25 @@ public class Summoned {
         }
         outPacket.encodeByte(0); // bCounterAttack
         outPacket.encodeByte(ai.attackAction == 0);
-        outPacket.encodeShort(0); // ?
-        outPacket.encodeShort(0); // ? TODO, one of these is probably attackAction
+        outPacket.encodeShort(ai.attackAction); // ?
+        outPacket.encodeShort(ai.attackAction); // ? TODO, one of these is probably attackAction
+
+        return outPacket;
+    }
+
+    public static OutPacket summonedMove(int summonID, int encodedGatherDuration, Position oldPos,
+                                         Position oldVPos, List<Movement> movements) {
+        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_MOVE);
+
+        outPacket.encodeInt(summonID);
+        outPacket.encodePosition(oldPos);
+        outPacket.encodePosition(oldVPos);
+        outPacket.encodeInt(encodedGatherDuration);
+        outPacket.encodeByte(movements.size());
+        for(Movement m : movements) {
+            m.encode(outPacket);
+        }
+        outPacket.encodeByte(0);
 
         return outPacket;
     }

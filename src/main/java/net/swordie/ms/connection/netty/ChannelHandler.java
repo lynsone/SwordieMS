@@ -271,6 +271,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);
                     break;
+                case SUMMONED_MOVE:
+                    WorldHandler.handleSummonedMove(chr, inPacket);
+                    break;
                 case SUMMONED_REMOVE:
                     WorldHandler.handleSummonedRemove(c, inPacket);
                     break;
