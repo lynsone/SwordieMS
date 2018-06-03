@@ -523,6 +523,16 @@ public interface ScriptManager {
 	void openTrunk(int npcTemplateID);
 
 	/**
+	 * Opens an ui with a given ID.
+	 * Look at resources/UI id's.txt for all known ui ID's.
+	 * Example: "sm.openUI(0x01)"
+	 *
+	 * @param ui_ID
+	 * 		The ui id to show.
+	**/
+	void openUI(int ui_ID);
+
+	/**
 	 * Gets the ID of the current return {@link Field}.
 	 * Example: "sm.getReturnField()"
 	 *
@@ -596,5 +606,6 @@ public interface ScriptManager {
 	 * @param templateID the speaker's template id
 	 */
 	void setSpeakerID(int templateID);
+
 
 }

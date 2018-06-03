@@ -648,6 +648,11 @@ public class CField {
 
         return outPacket;
     }
+    public static OutPacket openUI(int ui_ID){
+        OutPacket outpacket = new OutPacket(OutHeader.OPEN_UI);
+        outpacket.encodeInt(ui_ID);
+        return outpacket;
+    }
 
     public static OutPacket socketCreateResult(boolean success) {
         OutPacket outPacket = new OutPacket(OutHeader.SOCKET_CREATE_RESULT);
