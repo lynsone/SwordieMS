@@ -1,4 +1,4 @@
-maps = [104000000, 100000000, 103000000, 101000000, 102000000]
+from net.swordie.ms.enums import UIType
 
 def init():
-    sm.openUI(0x2A);
+    sm.openUI(UIType.UI_MAKING_SKILL)
