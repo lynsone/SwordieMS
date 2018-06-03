@@ -1,6 +1,7 @@
 package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.enums.UIType;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
 
@@ -524,13 +525,14 @@ public interface ScriptManager {
 
 	/**
 	 * Opens an ui with a given ID.
-	 * Look at resources/UI id's.txt for all known ui ID's.
-	 * Example: "sm.openUI(0x01)"
+	 * Look at enums/UIType for all ID's.
+	 * Add from net.swordie.ms.enums import UIType at the top of the npc script to use this.
+	 * Example: "sm.openUI(UIType.UI_EQUIP)"
 	 *
-	 * @param ui_ID
+	 * @param uiID
 	 * 		The ui id to show.
 	**/
-	void openUI(int ui_ID);
+	void openUI(UIType uiID);
 
 	/**
 	 * Gets the ID of the current return {@link Field}.
