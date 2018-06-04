@@ -1,6 +1,7 @@
 package net.swordie.ms.world.field;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.drop.Drop;
@@ -653,7 +654,13 @@ public class Field {
         getLifeSchedules().put(drop,
                 EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true),
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
-        broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
+
+        if(ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) { // Check for Collision Items such as Exp Orbs from Combo Kills
+            broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
+        } else {
+            broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
+        }
+
     }
 
     /**

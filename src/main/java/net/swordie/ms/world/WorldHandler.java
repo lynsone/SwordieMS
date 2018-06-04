@@ -648,11 +648,30 @@ public class WorldHandler {
                     mob.addDamage(chr, totalDamage);
                     mob.damage(totalDamage);
                     if (mob.getHp() < 0) {
+
+                        // Combo Counter per Kill
                         int newChrComboCount = chr.getComboCounter() + 1;
                         c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
                         chr.setComboCounter(newChrComboCount);
                         chr.comboKillResetTimer();
+                        
+                        // Exp Orb spawning from Mob every 50 combos
+                        if(chr.getComboCounter() % 50 == 0) {
+                            Drop drop;
+                            Item item = ItemData.getItemDeepCopy(2023484); // Blue Exp Orb
 
+                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
+                                item = ItemData.getItemDeepCopy(2023494); // Purple Exp Orb
+                            }
+                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
+                                item = ItemData.getItemDeepCopy(2023495); // Red Exp Orb
+                            }
+
+                            drop = new Drop(-1, item);
+                            chr.getField().drop(drop, mob.getPosition());
+                        }
+
+                        // Mage FP skill
                         if(mob.isInfestedByViralSlime()) {
                             Magician.infestViralSlime(c, mob);
                         }

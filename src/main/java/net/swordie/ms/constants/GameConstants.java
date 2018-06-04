@@ -19,7 +19,10 @@ public class GameConstants {
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
-    public static final int COMBO_KILL_RESET_TIMER = 5;
+    public static final int COMBO_KILL_RESET_TIMER = 5; // 5 sec
+    public static final int COMBO_KILL_REWARD_BLUE = 50; // Combo kills
+    public static final int COMBO_KILL_REWARD_PURPLE = 350; // Combo kills
+    public static final int COMBO_KILL_REWARD_RED = 750; // Combo kills
     public static final int CHAR_POT_BASE_ID = 70000000;
     public static final int CHAR_POT_END_ID = 70000062;
     public static final int BASE_CHAR_POT_UP_RATE = 10; // 10%

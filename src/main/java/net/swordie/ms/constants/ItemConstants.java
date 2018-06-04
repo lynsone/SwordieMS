@@ -802,4 +802,16 @@ public class ItemConstants {
     public static boolean isMobCard(int itemID) {
         return itemID / 10000 == 238;
     }
+
+    public static boolean isCollisionLootItem(int itemID) {
+        switch (itemID) {
+            case 2023484: // Blue Exp Orb
+            case 2023494: // Purple Exp Orb
+            case 2023495: // Red Exp Orb
+                return true;
+
+            default:
+                return false;
+        }
+    }
 }
