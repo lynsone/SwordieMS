@@ -132,7 +132,7 @@ public class Thief extends Job {
     private int critAmount;
     private int supposedCrit;
     private final int MAX_CRIT = 100;
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture critGrowthTimer;
 
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
@@ -184,10 +184,10 @@ public class Thief extends Job {
                 }
             }
             if (JobConstants.isShadower(chr.getJob())) {
-                if(scheduledFuture != null && !scheduledFuture.isDone()) {
-                    scheduledFuture.cancel(true);
+                if(critGrowthTimer != null && !critGrowthTimer.isDone()) {
+                    critGrowthTimer.cancel(true);
                 }
-                scheduledFuture = EventManager.addFixedRateEvent(this::incrementCritGrowing, 0, 2000);
+                critGrowthTimer = EventManager.addFixedRateEvent(this::incrementCritGrowing, 0, 2000);
             }
         }
 

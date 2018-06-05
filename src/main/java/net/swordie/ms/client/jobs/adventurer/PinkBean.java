@@ -56,7 +56,7 @@ public class PinkBean extends Job {
 
     private int yoyo;
     private final int MAX_YOYO_STACK = 8;
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture yoyoStackTimer;
 
     private int[] buffs = new int[]{
             CHILL_OUT_ZZZ,
@@ -72,8 +72,8 @@ public class PinkBean extends Job {
 
     public PinkBean(Char chr) {
         super(chr);
-        if(scheduledFuture != null && !scheduledFuture.isDone()) {
-            scheduledFuture.cancel(true);
+        if(yoyoStackTimer != null && !yoyoStackTimer.isDone()) {
+            yoyoStackTimer.cancel(true);
         }
         //yoyoInterval();
     }
@@ -335,7 +335,7 @@ public class PinkBean extends Job {
 
     public void yoyoInterval() {
         yoyoIncrement();
-        scheduledFuture = EventManager.addEvent(this::yoyoInterval, 1000);
+        yoyoStackTimer = EventManager.addEvent(this::yoyoInterval, 1000);
     }
 /*
     private void updateYoYo() {

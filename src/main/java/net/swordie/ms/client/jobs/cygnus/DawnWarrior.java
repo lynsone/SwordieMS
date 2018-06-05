@@ -86,7 +86,7 @@ public class DawnWarrior extends Job {
             GLORY_OF_THE_GUARDIANS_DW,
     };
 
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture willOfSteelTimer;
 
     public DawnWarrior(Char chr) {
         super(chr);
@@ -98,8 +98,8 @@ public class DawnWarrior extends Job {
                     chr.addSkill(skill);
                 }
             }
-            if(scheduledFuture != null && !scheduledFuture.isDone()) {
-                scheduledFuture.cancel(true);
+            if(willOfSteelTimer != null && !willOfSteelTimer.isDone()) {
+                willOfSteelTimer.cancel(true);
             }
             //willOfSteel();
         }
@@ -445,6 +445,6 @@ public class DawnWarrior extends Job {
             }
             chr.heal(heal);
         }
-        scheduledFuture = EventManager.addEvent(() -> willOfSteel(), 4, TimeUnit.SECONDS);
+        willOfSteelTimer = EventManager.addEvent(() -> willOfSteel(), 4, TimeUnit.SECONDS);
     }
 }

@@ -173,7 +173,7 @@ public class Demon extends Job {
     };
 
     private long leechAuraCD = Long.MIN_VALUE;
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture diabolicRecoveryTimer;
 
     public Demon(Char chr) {
         super(chr);
@@ -291,8 +291,8 @@ public class Demon extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DiabolikRecovery, o2);
-                if(scheduledFuture != null && !scheduledFuture.isDone()) {
-                    scheduledFuture.cancel(true);
+                if(diabolicRecoveryTimer != null && !diabolicRecoveryTimer.isDone()) {
+                    diabolicRecoveryTimer.cancel(true);
                 }
                 handleDiabolicRecovery();
                 break;
@@ -838,7 +838,7 @@ public class Demon extends Job {
             int recovery = si.getValue(x, slv);
             int duration = si.getValue(w, slv);
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / recovery)));
-            scheduledFuture = EventManager.addEvent(() -> handleDiabolicRecovery(), duration, TimeUnit.SECONDS);
+            diabolicRecoveryTimer = EventManager.addEvent(() -> handleDiabolicRecovery(), duration, TimeUnit.SECONDS);
         }
     }
 

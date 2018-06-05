@@ -90,7 +90,7 @@ public class BattleMage extends Job {
 
     private Summon death;
     private long drainAuraCD = Long.MIN_VALUE;
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture WeaknessAuraTimer;
 
     public BattleMage(Char chr) {
         super(chr);
@@ -194,8 +194,8 @@ public class BattleMage extends Job {
                 o3.rOption = skillID;
                 o3.tOption = 0;
                 tsm.putCharacterStatValue(BMageAura, o3);
-                if(scheduledFuture != null && !scheduledFuture.isDone()) {
-                    scheduledFuture.cancel(true);
+                if(WeaknessAuraTimer != null && !WeaknessAuraTimer.isDone()) {
+                    WeaknessAuraTimer.cancel(true);
                 }
                 handleWeakeningAura();
                 break;
@@ -469,7 +469,7 @@ public class BattleMage extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
                 }
             }
-        scheduledFuture = EventManager.addEvent(() -> handleWeakeningAura(), delay, TimeUnit.SECONDS);
+        WeaknessAuraTimer = EventManager.addEvent(() -> handleWeakeningAura(), delay, TimeUnit.SECONDS);
         }
     }
 

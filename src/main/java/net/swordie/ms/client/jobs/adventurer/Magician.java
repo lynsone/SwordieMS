@@ -190,7 +190,7 @@ public class Magician extends Job {
     private int infinityStack = 0;
     private static Summon viralSlime;
     private static List<Summon> viralSlimeList;
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture infinityTimer;
 
     public Magician(Char chr) {
         super(chr);
@@ -721,8 +721,8 @@ public class Magician extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o2);
                 infinityStack = 0;
-                if(scheduledFuture != null && !scheduledFuture.isDone()) {
-                    scheduledFuture.cancel(true);
+                if(infinityTimer != null && !infinityTimer.isDone()) {
+                    infinityTimer.cancel(true);
                 }
                 infinity();
                 break;
@@ -1104,7 +1104,7 @@ public class Magician extends Job {
             tsm.putCharacterStatValue(IndieMADR, o1);
             tsm.sendSetStatPacket();
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv))));
-            scheduledFuture = EventManager.addEvent(this::infinity, 4, TimeUnit.SECONDS);
+            infinityTimer = EventManager.addEvent(this::infinity, 4, TimeUnit.SECONDS);
         } else {
             tsm.removeStatsBySkill(getInfinitySkill()+100);
             tsm.sendResetStatPacket();

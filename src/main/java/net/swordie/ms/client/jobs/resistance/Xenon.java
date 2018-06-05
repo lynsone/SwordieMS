@@ -84,7 +84,7 @@ public class Xenon extends Job {
     private int supply;
     private int supplyProp;
     private int hybridDefenseCount;
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture supplyTimer;
 
     private int[] addedSkills = new int[]{
             SUPPLY_SURPLUS,
@@ -122,8 +122,8 @@ public class Xenon extends Job {
                 }
             }
             supplyProp = SkillData.getSkillInfoById(SUPPLY_SURPLUS).getValue(prop, 1);
-            if(scheduledFuture != null && !scheduledFuture.isDone()) {
-                scheduledFuture.cancel(true);
+            if(supplyTimer != null && !supplyTimer.isDone()) {
+                supplyTimer.cancel(true);
             }
             supplyInterval();
         }
@@ -260,7 +260,7 @@ public class Xenon extends Job {
     public void supplyInterval() {
         // done this way so we don't have to manually stop the schedule once the chr has logged out
         incrementSupply();
-        scheduledFuture = EventManager.addEvent(this::supplyInterval, 4000);
+        supplyTimer = EventManager.addEvent(this::supplyInterval, 4000);
     }
 
     private void updateSupply() {
