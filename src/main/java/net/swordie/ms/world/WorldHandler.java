@@ -639,6 +639,7 @@ public class WorldHandler {
             } else {
                 chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
             }
+            int multiKillMessage = 0;
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
                 if (mob == null) {
@@ -654,7 +655,7 @@ public class WorldHandler {
                         c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
                         chr.setComboCounter(newChrComboCount);
                         chr.comboKillResetTimer();
-                        
+
                         // Exp Orb spawning from Mob every 50 combos
                         if(chr.getComboCounter() % 50 == 0) {
                             Drop drop;
@@ -671,12 +672,20 @@ public class WorldHandler {
                             chr.getField().drop(drop, mob.getPosition());
                         }
 
+                        // MultiKill +1,  per killed mob
+                        multiKillMessage++;
+
                         // Mage FP skill
                         if(mob.isInfestedByViralSlime()) {
                             Magician.infestViralSlime(c, mob);
                         }
                     }
                 }
+            }
+
+            // MultiKill Message Popup
+            if(multiKillMessage > 2) {
+                chr.write(UserLocal.comboCounter((byte) 0, 5, multiKillMessage > 10 ? 10 : multiKillMessage));
             }
         }
     }
