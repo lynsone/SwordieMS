@@ -3,36 +3,37 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.util.Rect;
+import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.util.Rect;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -89,6 +90,7 @@ public class BattleMage extends Job {
 
     private Summon death;
     private long drainAuraCD = Long.MIN_VALUE;
+    private ScheduledFuture scheduledFuture;
 
     public BattleMage(Char chr) {
         super(chr);
@@ -192,6 +194,9 @@ public class BattleMage extends Job {
                 o3.rOption = skillID;
                 o3.tOption = 0;
                 tsm.putCharacterStatValue(BMageAura, o3);
+                if(scheduledFuture != null && !scheduledFuture.isDone()) {
+                    scheduledFuture.cancel(true);
+                }
                 handleWeakeningAura();
                 break;
             case DARK_SHOCK:
@@ -464,7 +469,7 @@ public class BattleMage extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
                 }
             }
-        EventManager.addEvent(() -> handleWeakeningAura(), delay, TimeUnit.SECONDS);
+        scheduledFuture = EventManager.addEvent(() -> handleWeakeningAura(), delay, TimeUnit.SECONDS);
         }
     }
 

@@ -33,6 +33,7 @@ import net.swordie.ms.life.mob.MobTemporaryStat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -131,6 +132,7 @@ public class Thief extends Job {
     private int critAmount;
     private int supposedCrit;
     private final int MAX_CRIT = 100;
+    private ScheduledFuture scheduledFuture;
 
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
@@ -182,7 +184,10 @@ public class Thief extends Job {
                 }
             }
             if (JobConstants.isShadower(chr.getJob())) {
-                EventManager.addFixedRateEvent(this::incrementCritGrowing, 0, 2000);
+                if(scheduledFuture != null && !scheduledFuture.isDone()) {
+                    scheduledFuture.cancel(true);
+                }
+                scheduledFuture = EventManager.addFixedRateEvent(this::incrementCritGrowing, 0, 2000);
             }
         }
 

@@ -25,6 +25,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -85,6 +86,8 @@ public class DawnWarrior extends Job {
             GLORY_OF_THE_GUARDIANS_DW,
     };
 
+    private ScheduledFuture scheduledFuture;
+
     public DawnWarrior(Char chr) {
         super(chr);
         if(isHandlerOfJob(chr.getJob())) {
@@ -94,6 +97,9 @@ public class DawnWarrior extends Job {
                     skill.setCurrentLevel(skill.getMasterLevel());
                     chr.addSkill(skill);
                 }
+            }
+            if(scheduledFuture != null && !scheduledFuture.isDone()) {
+                scheduledFuture.cancel(true);
             }
             //willOfSteel();
         }
@@ -439,6 +445,6 @@ public class DawnWarrior extends Job {
             }
             chr.heal(heal);
         }
-        EventManager.addEvent(() -> willOfSteel(), 4, TimeUnit.SECONDS);
+        scheduledFuture = EventManager.addEvent(() -> willOfSteel(), 4, TimeUnit.SECONDS);
     }
 }

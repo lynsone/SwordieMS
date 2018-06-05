@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -83,6 +84,7 @@ public class Xenon extends Job {
     private int supply;
     private int supplyProp;
     private int hybridDefenseCount;
+    private ScheduledFuture scheduledFuture;
 
     private int[] addedSkills = new int[]{
             SUPPLY_SURPLUS,
@@ -120,6 +122,9 @@ public class Xenon extends Job {
                 }
             }
             supplyProp = SkillData.getSkillInfoById(SUPPLY_SURPLUS).getValue(prop, 1);
+            if(scheduledFuture != null && !scheduledFuture.isDone()) {
+                scheduledFuture.cancel(true);
+            }
             supplyInterval();
         }
     }
@@ -255,7 +260,7 @@ public class Xenon extends Job {
     public void supplyInterval() {
         // done this way so we don't have to manually stop the schedule once the chr has logged out
         incrementSupply();
-        EventManager.addEvent(this::supplyInterval, 4000);
+        scheduledFuture = EventManager.addEvent(this::supplyInterval, 4000);
     }
 
     private void updateSupply() {

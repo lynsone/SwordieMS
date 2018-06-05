@@ -27,6 +27,7 @@ import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 
 import java.util.Arrays;
+import java.util.concurrent.ScheduledFuture;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -55,6 +56,7 @@ public class PinkBean extends Job {
 
     private int yoyo;
     private final int MAX_YOYO_STACK = 8;
+    private ScheduledFuture scheduledFuture;
 
     private int[] buffs = new int[]{
             CHILL_OUT_ZZZ,
@@ -70,6 +72,9 @@ public class PinkBean extends Job {
 
     public PinkBean(Char chr) {
         super(chr);
+        if(scheduledFuture != null && !scheduledFuture.isDone()) {
+            scheduledFuture.cancel(true);
+        }
         //yoyoInterval();
     }
 
@@ -330,7 +335,7 @@ public class PinkBean extends Job {
 
     public void yoyoInterval() {
         yoyoIncrement();
-        EventManager.addEvent(this::yoyoInterval, 1000);
+        scheduledFuture = EventManager.addEvent(this::yoyoInterval, 1000);
     }
 /*
     private void updateYoYo() {

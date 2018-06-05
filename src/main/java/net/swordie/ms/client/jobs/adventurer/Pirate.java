@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -212,6 +213,7 @@ public class Pirate extends Job {
     private int viperEnergy = 0;
     private final int MAX_ENERGY = getMaxEnergy();
     private int corsairSummonID = 0;
+    private ScheduledFuture scheduledFuture;
 
 
     public Pirate(Char chr) {
@@ -483,6 +485,9 @@ public class Pirate extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamR, o2);
+                if(scheduledFuture != null && !scheduledFuture.isDone()) {
+                    scheduledFuture.cancel(true);
+                }
                 handleStimulatingConversation();
                 break;
             case BIONIC_MAXIMIZER:
@@ -1017,7 +1022,7 @@ public class Pirate extends Job {
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             handleViperEnergy(si.getValue(x, slv));
             chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
-            EventManager.addEvent(this::handleStimulatingConversation, 4, TimeUnit.SECONDS);
+            scheduledFuture = EventManager.addEvent(this::handleStimulatingConversation, 4, TimeUnit.SECONDS);
         }
     }
 }
