@@ -1,5 +1,7 @@
 package net.swordie.ms.util.container;
 
+import java.util.Objects;
+
 /**
  * Created on 1/1/2018.
  */
@@ -29,11 +31,16 @@ public class Tuple<L, R> {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof Tuple)) {
-            return false;
-        }
-        Tuple tuple = (Tuple) obj;
-        return tuple.getLeft().equals(left) && tuple.getRight().equals(right);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tuple<?, ?> tuple = (Tuple<?, ?>) o;
+        return Objects.equals(left, tuple.left) &&
+                Objects.equals(right, tuple.right);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(left, right);
     }
 }
