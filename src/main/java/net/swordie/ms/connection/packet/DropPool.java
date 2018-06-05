@@ -20,6 +20,12 @@ public class DropPool {
                 (byte) 0, 0, false);
     }
 
+    public static OutPacket dropEnterFieldCollisionPickUp(Drop drop, Position dropPosition, int charID) {
+        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
+                (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
+                (byte) 0, 1, false);
+    }
+
     public static OutPacket dropEnterField(Drop drop, Position dropPositionFrom, Position dropPositionTo, int charID) {
         return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
                 (byte) 2, dropPositionTo, charID, dropPositionFrom, 0, true, (short) 0, false,
