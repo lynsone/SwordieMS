@@ -110,7 +110,7 @@ public class Summoned {
         return outPacket;
     }
 
-    public static OutPacket summonedAttack(int charID, AttackInfo ai) {
+    public static OutPacket summonedAttack(int charID, AttackInfo ai, boolean counter) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_ATTACK);
 
         outPacket.encodeInt(charID);
@@ -118,7 +118,7 @@ public class Summoned {
 
         outPacket.encodeByte(ai.summon.getCharLevel());
         byte left = (byte) (ai.left ? 1 : 0);
-        outPacket.encodeByte(ai.attackActionType | (left << 7));
+        outPacket.encodeByte((left << 7) | ai.attackActionType);
         outPacket.encodeByte((ai.mobCount << 4) | (ai.attackCount & 0xF));
         for (MobAttackInfo mai : ai.mobAttackInfo) {
             outPacket.encodeInt(mai.mobId);
@@ -127,7 +127,7 @@ public class Summoned {
                 outPacket.encodeInt(dmg);
             }
         }
-        outPacket.encodeByte(0); // bCounterAttack
+        outPacket.encodeByte(counter); // bCounterAttack
         outPacket.encodeByte(ai.attackAction == 0);
         outPacket.encodeShort(ai.attackAction); // ?
         outPacket.encodeShort(ai.attackAction); // ? TODO, one of these is probably attackAction

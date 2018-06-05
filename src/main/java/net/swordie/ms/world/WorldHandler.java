@@ -635,7 +635,7 @@ public class WorldHandler {
             Field field = c.getChr().getField();
             c.getChr().getJobHandler().handleAttack(c, attackInfo);
             if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK) {
-                chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo), chr);
+                chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
             } else {
                 chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
             }

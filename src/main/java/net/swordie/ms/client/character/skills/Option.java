@@ -5,6 +5,7 @@ import net.swordie.ms.loaders.SkillData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created on 1/3/2018.
@@ -81,10 +82,17 @@ public class Option {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Option &&
-                ((((Option) obj).rOption == rOption && ((Option) obj).rOption > 0) ||
-                        ((((Option) obj).nReason == nReason && ((Option) obj).nReason > 0)));
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Option option = (Option) o;
+        return rOption == option.rOption &&
+                nReason == option.nReason;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rOption, nReason);
     }
 
     @Override
