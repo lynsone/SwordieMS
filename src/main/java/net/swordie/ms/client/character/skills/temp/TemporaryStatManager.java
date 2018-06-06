@@ -2488,10 +2488,11 @@ public class TemporaryStatManager {
                 continue;
             }
             outPacket.encodeInt(options.size());
+            int j = 1;
             for(Option option : options) {
                 outPacket.encodeInt(option.nReason);
                 outPacket.encodeInt(option.nValue);
-                outPacket.encodeInt(option.nReason); // nKey
+                outPacket.encodeInt(j++); // nKey
                 outPacket.encodeInt(curTime - option.tStart);
                 outPacket.encodeInt(option.tTerm); // tTerm
                 int size = 0;

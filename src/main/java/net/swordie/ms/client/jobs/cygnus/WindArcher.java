@@ -290,7 +290,7 @@ public class WindArcher extends Job {
                 tsm.putCharacterStatValue(StormBringer, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleTriflingWind(int skillID, byte slv, AttackInfo attackInfo) {
