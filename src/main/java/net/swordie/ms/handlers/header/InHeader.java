@@ -635,6 +635,9 @@ public enum InHeader {
 
     B_E_G_I_N__F_I_E_L_D(735),
     B_E_G_I_N__L_I_F_E_P_O_O_L(736),
+
+    GUILD_BBS(766),
+
     B_E_G_I_N__M_O_B(824),
     MOB_MOVE(825),
     MOB_APPLY_CTRL(826),

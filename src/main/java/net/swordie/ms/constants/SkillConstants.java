@@ -204,7 +204,7 @@ public class SkillConstants {
 
     public static boolean isScreenCenterAttackSkill(int skillID) {
         return skillID == 80001431 || skillID == 100001283 || skillID == 21121057 || skillID == 13121052 ||
-                skillID == 14121052 || skillID == 15121052;
+                skillID == 14121052 || skillID == 15121052 || skillID == 80001431 || skillID == 80001429;
     }
 
     public static boolean isAranFallingStopSkill(int skillID) {

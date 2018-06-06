@@ -14,6 +14,7 @@ import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.potential.CharacterPotentialMan;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
@@ -113,6 +114,7 @@ import static net.swordie.ms.enums.EquipBaseStat.ruc;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
+import static net.swordie.ms.enums.Stat.level;
 import static net.swordie.ms.enums.Stat.sp;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
@@ -3987,5 +3989,36 @@ public class WorldHandler {
         }
         chr.write(WvsContext.cashPetPickUpOnOffResult(true, on));
 
+    }
+
+    public static void handleRuneStoneUseRequest(Client c, InPacket inPacket) {
+        int unknown = inPacket.decodeInt(); // unknown
+        RuneType runeType = RuneType.getByVal((byte) inPacket.decodeInt());
+
+        Char chr = c.getChr();
+        int minLevel = chr.getField().getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0);
+
+        // Rune is too strong for user
+        if(minLevel > c.getChr().getStat(level)) {
+            c.write(CField.runeStoneUseAck(4));
+            return;
+        }
+
+        // Send Arrow Message
+        c.write(CField.runeStoneUseAck(5));
+        chr.dispose();
+    }
+
+    public static void handleRuneStoneSkillRequest(Client c, InPacket inPacket) {
+        boolean success = inPacket.decodeByte() != 0; //Successfully done the Arrow Shit for runes
+
+        if(success) {
+            RuneStone runeStone = c.getChr().getField().getRuneStone();
+
+            c.getChr().getField().useRuneStone(runeStone);
+            //c.write(CField.runeStoneSkillAck(runeStone.getRuneType()));
+            runeStone.activateRuneStoneEffect(c.getChr());
+        }
+        c.getChr().dispose();
     }
 }
