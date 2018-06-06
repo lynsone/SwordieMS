@@ -10,12 +10,15 @@ import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.RuneType;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.Foothold;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
-import static net.swordie.ms.client.character.skills.SkillStat.indieSpeed;
-import static net.swordie.ms.client.character.skills.SkillStat.time;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
@@ -69,9 +72,15 @@ public class RuneStone {
         chr.write(CField.runeStoneClearAndAllRegister());
     }
 
-    public RuneStone getRandomRuneStone(Position position) {
+    public RuneStone getRandomRuneStone(Field field) {
         RuneStone runeStone = new RuneStone();
         runeStone.setRuneType(RuneType.getByVal((byte) new Random().nextInt(RuneType.values().length)));
+
+        List<Foothold> listOfFootHolds = new ArrayList();
+        listOfFootHolds.addAll(field.getFootholds());
+        Foothold foothold = Util.getRandomFromList(listOfFootHolds);
+        Position position = foothold.getRandomPosition();
+
         runeStone.setPosition(position);
         runeStone.setFlip(false);
         return runeStone;

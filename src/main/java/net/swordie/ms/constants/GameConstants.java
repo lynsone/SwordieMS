@@ -37,7 +37,7 @@ public class GameConstants {
     public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
 
-    public static final int RUNE_RESPAWN_TIME = 5; // 5 minutes
+    public static final int RUNE_RESPAWN_TIME = 1; // 5 minutes
 
     public static final int BLUE_EXP_ORB_ID = 2023484;
     public static final double BLUE_EXP_ORB_MULT = 2;

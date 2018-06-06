@@ -621,7 +621,7 @@ public class FieldData {
             copy.addReactor(r);
         }
         copy.setObjectIDCounter(field.getNewObjectID());
-        copy.setRuneStone(new RuneStone().getRandomRuneStone(new Position(0,0)));
+        copy.setRuneStone(new RuneStone().getRandomRuneStone(copy));
         return copy;
     }
 

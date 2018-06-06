@@ -862,7 +862,7 @@ public class Field {
             return;
         }
         if(getRuneStone() == null) {
-            RuneStone runeStone = new RuneStone().getRandomRuneStone(new Position(0, 0));
+            RuneStone runeStone = new RuneStone().getRandomRuneStone(this);
             setRuneStone(runeStone);
             broadcastPacket(CField.runeStoneAppear(runeStone));
         }
