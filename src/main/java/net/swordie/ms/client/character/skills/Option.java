@@ -32,6 +32,7 @@ public class Option {
     public int pOption;
     public int slv;
     public List<Option> extraOpts = new ArrayList<>();
+    public boolean isInMillis = false;
 
     public Option(int skillID) {
         this.nReason = skillID;
@@ -103,4 +104,18 @@ public class Option {
             return "Indie: true, skill: " + nReason + ", val: " + nValue + ", time: " + tTerm;
         }
     }
+
+    /**
+     * Sets the time options of this Option to milliseconds, if they currently aren't. By default, an Option's time
+     * is in seconds.
+     */
+    public void setTimeToMillis() {
+        if (!isInMillis) {
+            tTerm *= 1000;
+            tOption *= 1000;
+            isInMillis = true;
+        }
+    }
+
+
 }

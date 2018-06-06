@@ -75,8 +75,7 @@ public class TemporaryStatManager {
 
     public void putCharacterStatValue(CharacterTemporaryStat cts, Option option) {
         boolean indie = cts.isIndie();
-        option.tOption *= 1000;
-        option.tTerm *= 1000;
+        option.setTimeToMillis();
         if(cts == CombatOrders) {
             chr.setCombatOrders(option.nOption);
         }
