@@ -95,7 +95,7 @@ public class WindArcher extends Job {
 
     public WindArcher(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -290,7 +290,7 @@ public class WindArcher extends Job {
                 tsm.putCharacterStatValue(StormBringer, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleTriflingWind(int skillID, byte slv, AttackInfo attackInfo) {

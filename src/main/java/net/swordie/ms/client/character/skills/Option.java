@@ -2,15 +2,18 @@ package net.swordie.ms.client.character.skills;
 
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Created on 1/3/2018.
  */
 public class Option {
+    private static final Random keyRng = new Random();
     public int nOption;
     public int rOption;
     public int tOption;
@@ -26,30 +29,34 @@ public class Option {
     public int yOption;
     public int nReason;
     public int nValue;
-    public int nKey = Integer.MAX_VALUE;
+    public int nKey = keyRng.nextInt();
     public int tStart;
     public int tTerm;
     public int pOption;
     public int slv;
     public List<Option> extraOpts = new ArrayList<>();
+    public boolean isInMillis = false;
 
     public Option(int skillID) {
         this.nReason = skillID;
         this.rOption = skillID;
+        this.tStart = Util.getCurrentTime();
     }
 
     public Option(int itemID, long duration) {
-        // hack to have a constructorfor items
-            this.tTerm = (int) duration;
-            this.nReason = itemID;
-            this.rOption = itemID;
-            this.tOption = (int) duration;
+        // hack to have a constructor for items
+        this.tTerm = (int) duration;
+        this.nReason = itemID;
+        this.rOption = itemID;
+        this.tOption = (int) duration;
+        this.tStart = Util.getCurrentTime();
     }
 
     public Option(int skillID, byte slv) {
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         rOption = skillID;
         tOption = si.getValue(SkillStat.time, slv);
+        this.tStart = Util.getCurrentTime();
     }
 
     public Option() {
@@ -103,4 +110,18 @@ public class Option {
             return "Indie: true, skill: " + nReason + ", val: " + nValue + ", time: " + tTerm;
         }
     }
+
+    /**
+     * Sets the time options of this Option to milliseconds, if they currently aren't. By default, an Option's time
+     * is in seconds.
+     */
+    public void setTimeToMillis() {
+        if (!isInMillis) {
+            tTerm *= 1000;
+            tOption *= 1000;
+            isInMillis = true;
+        }
+    }
+
+
 }

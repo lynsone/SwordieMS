@@ -34,7 +34,14 @@ public class GameConstants {
     public static final int RANDOM_EQUIP_UNIQUE_CHANCE = 1; // out of a 100
     public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
-    public static final int RUNE_RESPAWN_TIME = 5; // 5 minutes
+
+    public static final int BLUE_EXP_ORB_ID = 2023484;
+    public static final double BLUE_EXP_ORB_MULT = 2;
+    public static final int PURPLE_EXP_ORB_ID = 2023494;
+    public static final double PURPLE_EXP_ORB_MULT = 3.5;
+    public static final int RED_EXP_ORB_ID = 2023495;
+    public static final double RED_EXP_ORB_MULT = 5;
+
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
@@ -249,5 +256,17 @@ public class GameConstants {
                 return BaseStat.dex;
         }
         return null;
+    }
+
+    public static double getExpOrbExpModifierById(int itemID) {
+        switch (itemID) {
+            case BLUE_EXP_ORB_ID:
+                return BLUE_EXP_ORB_MULT;
+            case PURPLE_EXP_ORB_ID:
+                return PURPLE_EXP_ORB_MULT;
+            case RED_EXP_ORB_ID:
+                return RED_EXP_ORB_MULT;
+        }
+        return 0;
     }
 }

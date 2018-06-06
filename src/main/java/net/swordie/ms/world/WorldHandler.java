@@ -660,17 +660,15 @@ public class WorldHandler {
 
                         // Exp Orb spawning from Mob every 50 combos
                         if(chr.getComboCounter() % 50 == 0) {
-                            Drop drop;
-                            Item item = ItemData.getItemDeepCopy(2023484); // Blue Exp Orb
-
+                            Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
                             if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
-                                item = ItemData.getItemDeepCopy(2023494); // Purple Exp Orb
+                                item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
                             }
                             if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
-                                item = ItemData.getItemDeepCopy(2023495); // Red Exp Orb
+                                item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
                             }
-
-                            drop = new Drop(-1, item);
+                            Drop drop = new Drop(-1, item);
+                            drop.setMobExp(mob.getForcedMobStat().getExp());
                             chr.getField().drop(drop, mob.getPosition());
                         }
 
@@ -2064,8 +2062,10 @@ public class WorldHandler {
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        NpcMessageType nmt = chr.getScriptManager().getNpcScriptInfo().getMessageType();
         byte lastType = inPacket.decodeByte();
+        NpcMessageType nmt = lastType < NpcMessageType.values().length ?
+                Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
+                NpcMessageType.None;
         byte action = inPacket.decodeByte();
         int answer = 0;
         boolean hasAnswer = false;
@@ -2073,7 +2073,7 @@ public class WorldHandler {
             answer = inPacket.decodeInt();
             hasAnswer = true;
         }
-        if (lastType != 5 || hasAnswer) {
+        if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu) || hasAnswer) {
             // else -> User pressed escape in a selection (choice) screen
             chr.getScriptManager().handleAction(lastType, action, answer);
         } else {

@@ -75,8 +75,7 @@ public class TemporaryStatManager {
 
     public void putCharacterStatValue(CharacterTemporaryStat cts, Option option) {
         boolean indie = cts.isIndie();
-        option.tOption *= 1000;
-        option.tTerm *= 1000;
+        option.setTimeToMillis();
         if(cts == CombatOrders) {
             chr.setCombatOrders(option.nOption);
         }
@@ -184,9 +183,7 @@ public class TemporaryStatManager {
         if(hasStat(cts)) {
             return getCurrentStats().get(cts);
         }
-        List<Option> res = new ArrayList<>();
-        res.add(new Option());
-        return res;
+        return new ArrayList<>();
     }
 
     public int[] getMaskByCollection(Map<CharacterTemporaryStat, List<Option>> map) {
@@ -2492,9 +2489,9 @@ public class TemporaryStatManager {
             for(Option option : options) {
                 outPacket.encodeInt(option.nReason);
                 outPacket.encodeInt(option.nValue);
-                outPacket.encodeInt(option.nReason); // nKey
-                outPacket.encodeInt(curTime - option.tStart);
-                outPacket.encodeInt(option.tTerm); // tTerm
+                outPacket.encodeInt(option.nKey);
+                outPacket.encodeInt(curTime - option.tStart); // elapsedTime
+                outPacket.encodeInt(option.tTerm);
                 int size = 0;
                 outPacket.encodeInt(size);
                 for (int i = 0; i < size; i++) {
@@ -2513,22 +2510,6 @@ public class TemporaryStatManager {
 
         for(Map.Entry<CharacterTemporaryStat, List<Option>> stat : stats.entrySet()) {
             int curTime = (int) System.currentTimeMillis();
-//            List<Option> options = stat.getValue();
-//            if(options == null) {
-//                outPacket.encodeInt(0);
-//                continue;
-//            }
-//            outPacket.encodeInt(options.size());
-//            for(Option option : options) {
-//                outPacket.encodeInt(option.nReason);
-//                outPacket.encodeInt(option.nValue);
-//                outPacket.encodeInt(option.nKey); // nKey
-//                outPacket.encodeInt(curTime - option.tStart);
-//                outPacket.encodeInt(option.tTerm); // tTerm
-//                outPacket.encodeInt(0); // size
-//                // pw.writeInt(0); // nMValueKey
-//                // pw.writeInt(0); // nMValue
-//            }
             // encode remaining stats
             CharacterTemporaryStat key = stat.getKey();
             List<Option> options = getOptions(key);
@@ -2725,8 +2706,9 @@ public class TemporaryStatManager {
     public void removeStatsBySkill(int skillId) {
         Map<CharacterTemporaryStat, Option> removedMap = new HashMap<>();
         for (CharacterTemporaryStat cts : getCurrentStats().keySet()) {
-            Option checkOpt = new Option(skillId);
-            if (cts.isIndie() && getOptions(cts).contains(checkOpt)) {
+            Option checkOpt = new Option();
+            checkOpt.nReason = skillId;
+            if (cts.isIndie() && getOptions(cts) != null && getOptions(cts).contains(checkOpt)) {
                 Option o = getOptions(cts).stream().filter(opt -> opt.equals(checkOpt)).findFirst().orElse(null);
                 if (o == null) {
                     log.error("Found option null, yet the options contained it?");

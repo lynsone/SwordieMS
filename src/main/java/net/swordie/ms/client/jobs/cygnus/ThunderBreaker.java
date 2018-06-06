@@ -76,7 +76,7 @@ public class ThunderBreaker extends Job {
 
     public ThunderBreaker(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -269,8 +269,8 @@ public class ThunderBreaker extends Job {
                 handleLightning(tsm);
             }
         }
-        if(chr.hasSkill(15110025)) {
-            if (hasHitMobs) {
+        if(chr.hasSkill(LINK_MASTERY)) {
+            if (hasHitMobs && skill != null) {
                 handleLinkMastery(skill.getSkillId(), tsm, c);
             }
         }

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -189,10 +190,11 @@ public class Magician extends Job {
     private int infinityStack = 0;
     private static Summon viralSlime;
     private static List<Summon> viralSlimeList;
+    private ScheduledFuture infinityTimer;
 
     public Magician(Char chr) {
         super(chr);
-        if (isHandlerOfJob(chr.getJob())) {
+        if (chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -719,6 +721,9 @@ public class Magician extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o2);
                 infinityStack = 0;
+                if(infinityTimer != null && !infinityTimer.isDone()) {
+                    infinityTimer.cancel(true);
+                }
                 infinity();
                 break;
             case VIRAL_SLIME:
@@ -1099,7 +1104,7 @@ public class Magician extends Job {
             tsm.putCharacterStatValue(IndieMADR, o1);
             tsm.sendSetStatPacket();
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv))));
-            EventManager.addEvent(this::infinity, 4, TimeUnit.SECONDS);
+            infinityTimer = EventManager.addEvent(this::infinity, 4, TimeUnit.SECONDS);
         } else {
             tsm.removeStatsBySkill(getInfinitySkill()+100);
             tsm.sendResetStatPacket();

@@ -31,6 +31,7 @@ import net.swordie.ms.util.Util;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -172,10 +173,11 @@ public class Demon extends Job {
     };
 
     private long leechAuraCD = Long.MIN_VALUE;
+    private ScheduledFuture diabolicRecoveryTimer;
 
     public Demon(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             if (JobConstants.isDemonSlayer(chr.getJob())) {
                 for (int id : addedSkillsDS) {
                     if (!chr.hasSkill(id)) {
@@ -289,6 +291,9 @@ public class Demon extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DiabolikRecovery, o2);
+                if(diabolicRecoveryTimer != null && !diabolicRecoveryTimer.isDone()) {
+                    diabolicRecoveryTimer.cancel(true);
+                }
                 handleDiabolicRecovery();
                 break;
             case MAPLE_WARRIOR_DA:
@@ -833,7 +838,7 @@ public class Demon extends Job {
             int recovery = si.getValue(x, slv);
             int duration = si.getValue(w, slv);
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / recovery)));
-            EventManager.addEvent(() -> handleDiabolicRecovery(), duration, TimeUnit.SECONDS);
+            diabolicRecoveryTimer = EventManager.addEvent(() -> handleDiabolicRecovery(), duration, TimeUnit.SECONDS);
         }
     }
 
