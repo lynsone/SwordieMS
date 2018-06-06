@@ -48,6 +48,7 @@ public enum NpcMessageType {
     OnAskNumberUseKeyPad(47),
     OnSpinOffGuitarRhythmGame(48),
     OnGhostParkEnter(49),
+    None(-1),
     ;
 
     private byte val;

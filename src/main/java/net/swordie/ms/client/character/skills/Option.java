@@ -13,6 +13,7 @@ import java.util.Random;
  * Created on 1/3/2018.
  */
 public class Option {
+    private static final Random keyRng = new Random();
     public int nOption;
     public int rOption;
     public int tOption;
@@ -28,7 +29,7 @@ public class Option {
     public int yOption;
     public int nReason;
     public int nValue;
-    public int nKey = new Random().nextInt();
+    public int nKey = keyRng.nextInt();
     public int tStart;
     public int tTerm;
     public int pOption;

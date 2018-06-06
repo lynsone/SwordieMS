@@ -269,8 +269,8 @@ public class ThunderBreaker extends Job {
                 handleLightning(tsm);
             }
         }
-        if(chr.hasSkill(15110025)) {
-            if (hasHitMobs) {
+        if(chr.hasSkill(LINK_MASTERY)) {
+            if (hasHitMobs && skill != null) {
                 handleLinkMastery(skill.getSkillId(), tsm, c);
             }
         }

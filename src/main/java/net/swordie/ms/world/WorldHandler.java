@@ -2062,8 +2062,10 @@ public class WorldHandler {
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        NpcMessageType nmt = chr.getScriptManager().getNpcScriptInfo().getMessageType();
         byte lastType = inPacket.decodeByte();
+        NpcMessageType nmt = lastType < NpcMessageType.values().length ?
+                Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
+                NpcMessageType.None;
         byte action = inPacket.decodeByte();
         int answer = 0;
         boolean hasAnswer = false;
@@ -2071,7 +2073,7 @@ public class WorldHandler {
             answer = inPacket.decodeInt();
             hasAnswer = true;
         }
-        if (lastType != 5 || hasAnswer) {
+        if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu) || hasAnswer) {
             // else -> User pressed escape in a selection (choice) screen
             chr.getScriptManager().handleAction(lastType, action, answer);
         } else {
