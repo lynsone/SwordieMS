@@ -531,6 +531,8 @@ public class Demon extends Job {
                 handleOverloadCount(attackInfo, skillID, tsm, c);
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleNetherShield() {

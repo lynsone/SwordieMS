@@ -408,6 +408,8 @@ public class WildHunter extends Job {
                 break;
 
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
 

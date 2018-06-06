@@ -358,6 +358,8 @@ public class BattleMage extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

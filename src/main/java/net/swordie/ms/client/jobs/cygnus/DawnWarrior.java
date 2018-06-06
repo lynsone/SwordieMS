@@ -351,6 +351,8 @@ public class DawnWarrior extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleSoulElement(AttackInfo attackInfo, byte slv) {

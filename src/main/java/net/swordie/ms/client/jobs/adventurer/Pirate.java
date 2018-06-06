@@ -806,6 +806,8 @@ public class Pirate extends Job {
                 powerUnity();
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

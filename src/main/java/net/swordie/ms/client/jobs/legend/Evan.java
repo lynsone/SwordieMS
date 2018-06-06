@@ -286,6 +286,8 @@ public class Evan extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     public void handlePartners(int skillID) {

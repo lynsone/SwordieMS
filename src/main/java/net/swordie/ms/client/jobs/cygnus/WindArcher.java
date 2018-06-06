@@ -56,6 +56,7 @@ public class WindArcher extends Job {
     public static final int TRIFLING_WIND_II = 13110022; //Special Buff Upgrade
     public static final int ALBATROSS = 13111023; //Buff //TODO new ID upon levelling the 4th Job upgrade
     public static final int EMERALD_FLOWER = 13111024; //Summon (Stationary, No Attack, Aggros)
+    public static final int SECOND_WIND = 13110026; //
 
     public static final int ALBATROSS_MAX = 13120008; //Upgrade on Albatross
     public static final int TRIFLING_WIND_III = 13120003; //Special Buff Upgrade
@@ -95,7 +96,7 @@ public class WindArcher extends Job {
 
     public WindArcher(Char chr) {
         super(chr);
-        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
+        if(isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -290,14 +291,15 @@ public class WindArcher extends Job {
                 tsm.putCharacterStatValue(StormBringer, o1);
                 break;
         }
-        tsm.sendSetStatPacket();
+        c.write(WvsContext.temporaryStatSet(tsm));
     }
 
     private void handleTriflingWind(int skillID, byte slv, AttackInfo attackInfo) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             if (tsm.hasStat(TriflingWhimOnOff)) {
                 SkillInfo si = SkillData.getSkillInfoById(TRIFLING_WIND_I);
-                int firstImpact = 36;
+                Random random = new Random();
+                int firstImpact = random.nextInt(10) + 31; // 36
                 int secondImpact = 6;
                 int anglenum;
                 if (new Random().nextBoolean()) {
@@ -400,8 +402,7 @@ public class WindArcher extends Job {
         if (chr.hasSkill(TRIFLING_WIND_III)) {
             skill = chr.getSkill(TRIFLING_WIND_III);
         }
-        return skill != null ? SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel())
-                : 0;
+        return skill != null ? SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel()) : 0;
     }
 
     public boolean isBuff(int skillID) {
@@ -440,6 +441,8 @@ public class WindArcher extends Job {
         switch (attackInfo.skillId) {
 
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override
@@ -469,6 +472,33 @@ public class WindArcher extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        if(chr.hasSkill(SECOND_WIND)) {
+            if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+                Skill skill = chr.getSkill(SECOND_WIND);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+                o1.nOption = si.getValue(er, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 5; // time isn't a variable in the skill Info
+                tsm.putCharacterStatValue(EVAR, o1);
+                o2.nOption = si.getValue(pddX, slv);
+                o2.rOption = skill.getSkillId();
+                o2.tOption = 5; // time isn't a variable in the skill Info
+                tsm.putCharacterStatValue(PDD, o2);
+                tsm.putCharacterStatValue(MDD, o2);
+                o3.nReason = skill.getSkillId();
+                o3.nValue = si.getValue(indiePad, slv);
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = 5; // time isn't a variable in the skill Info
+                tsm.putCharacterStatValue(IndiePAD, o3);
+                tsm.sendSetStatPacket();
+            }
+        }
+
 
         super.handleHit(c, inPacket, hitInfo);
     }

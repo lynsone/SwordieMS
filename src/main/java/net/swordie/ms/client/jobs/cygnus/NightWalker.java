@@ -403,6 +403,8 @@ public class NightWalker extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleDarkElemental(AttackInfo attackInfo, byte slv) {

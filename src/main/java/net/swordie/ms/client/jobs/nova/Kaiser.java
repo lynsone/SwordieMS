@@ -592,6 +592,8 @@ public class Kaiser extends Job {
                 chr.getField().spawnAffectedArea(aa);
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

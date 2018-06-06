@@ -397,6 +397,7 @@ public class Magician extends Job {
                 break;
         }
 
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleMegiddoFlame() {
