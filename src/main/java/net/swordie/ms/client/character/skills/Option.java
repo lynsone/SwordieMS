@@ -2,10 +2,12 @@ package net.swordie.ms.client.character.skills;
 
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Created on 1/3/2018.
@@ -26,7 +28,7 @@ public class Option {
     public int yOption;
     public int nReason;
     public int nValue;
-    public int nKey = Integer.MAX_VALUE;
+    public int nKey = new Random().nextInt();
     public int tStart;
     public int tTerm;
     public int pOption;
@@ -37,20 +39,23 @@ public class Option {
     public Option(int skillID) {
         this.nReason = skillID;
         this.rOption = skillID;
+        this.tStart = Util.getCurrentTime();
     }
 
     public Option(int itemID, long duration) {
-        // hack to have a constructorfor items
-            this.tTerm = (int) duration;
-            this.nReason = itemID;
-            this.rOption = itemID;
-            this.tOption = (int) duration;
+        // hack to have a constructor for items
+        this.tTerm = (int) duration;
+        this.nReason = itemID;
+        this.rOption = itemID;
+        this.tOption = (int) duration;
+        this.tStart = Util.getCurrentTime();
     }
 
     public Option(int skillID, byte slv) {
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         rOption = skillID;
         tOption = si.getValue(SkillStat.time, slv);
+        this.tStart = Util.getCurrentTime();
     }
 
     public Option() {
