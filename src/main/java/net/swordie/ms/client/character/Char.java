@@ -2206,9 +2206,15 @@ public class Char {
 			return true;
 		} else {
 			Item item = drop.getItem();
+			int itemID = item.getItemId();
 			boolean isConsume = false;
-			if (!ItemConstants.isEquip(item.getItemId())) {
-				ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
+			if (itemID == GameConstants.BLUE_EXP_ORB_ID || itemID == GameConstants.PURPLE_EXP_ORB_ID ||
+					itemID == GameConstants.RED_EXP_ORB_ID) {
+				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
+				addExp(expGain);
+			}
+			else if (!ItemConstants.isEquip(itemID)) {
+				ItemInfo ii = ItemData.getItemInfoByID(itemID);
 				isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
 			}
 			if (isConsume) {

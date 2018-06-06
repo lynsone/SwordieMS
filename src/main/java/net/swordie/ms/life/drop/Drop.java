@@ -24,6 +24,7 @@ public class Drop extends Life {
     private boolean explosiveDrop;
     private FileTime expireTime;
     private boolean byPet;
+    private long mobExp;
 
     public Drop(int objectId) {
         super(objectId);
@@ -117,5 +118,13 @@ public class Drop extends Life {
     public void broadcastSpawnPacket(Char onlyChar) {
         onlyChar.write(DropPool.dropEnterField(this, getPosition(), getOwnerID()));
         EventManager.addEvent(() -> setOwnerID(0), GameConstants.DROP_REMOVE_OWNERSHIP_TIME, TimeUnit.SECONDS);
+    }
+
+    public void setMobExp(long mobExp) {
+        this.mobExp = mobExp;
+    }
+
+    public long getMobExp() {
+        return mobExp;
     }
 }
