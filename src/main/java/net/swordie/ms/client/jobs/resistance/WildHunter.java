@@ -129,7 +129,7 @@ public class WildHunter extends Job {
 
     public WildHunter(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             if (chr.getWildHunterInfo() == null) {
                 chr.setWildHunterInfo(new WildHunterInfo());
             }

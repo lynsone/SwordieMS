@@ -186,7 +186,6 @@ public class LoginHandler {
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
         cs.setPosMap(100000000);
-        DatabaseManager.saveToDB(chr);
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromID(i, false);
             if (equip != null && equip.getItemId() >= 1000000) {
@@ -205,7 +204,7 @@ public class LoginHandler {
                     equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
             chr.addItemToInventory(EQUIPPED, equip, true);
         }
-        DatabaseManager.saveToDB(chr.getInventoryByType(EQUIPPED));
+        DatabaseManager.saveToDB(chr);
         c.write(Login.createNewCharacterResult(LoginType.SUCCESS, chr));
     }
 
