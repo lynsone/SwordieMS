@@ -1190,11 +1190,11 @@ public class Mob extends Life {
 
             if(getField().getBurningFieldLevel() > 0) {
                 ExpIncreaseInfo eei = new ExpIncreaseInfo();
-                eei.setMobKillBonusExp((int) appliedExp);
                 int burningFieldBonusExp = (int) (appliedExp * getField().getBonusExpByBurningFieldLevel()  /  100);
-                eei.setPartyBonusExp(burningFieldBonusExp);
+                eei.setRestFieldBonusExp(burningFieldBonusExp);
+                eei.setRestFieldExpRate(getField().getBonusExpByBurningFieldLevel());
                 eei.setLastHit(true);
-                eei.setIncEXP((int) appliedExp+burningFieldBonusExp);
+                eei.setIncEXP((int) appliedExp);
                 chr.addExp((appliedExp+burningFieldBonusExp), eei);
             } else {
                 chr.addExp(appliedExp);
