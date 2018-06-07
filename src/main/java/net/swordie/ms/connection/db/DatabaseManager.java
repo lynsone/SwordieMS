@@ -46,6 +46,7 @@ public class DatabaseManager {
 
     public static void init() {
         Configuration configuration = new Configuration().configure();
+        configuration.setProperty("autoReconnect", "true");
         Class[] dbClasses = new Class[] {
                 FileTime.class,
                 SystemTime.class,
