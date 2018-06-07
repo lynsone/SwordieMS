@@ -1736,6 +1736,14 @@ public class Char {
 	}
 
 	/**
+	 * Sends a message to this Char through the ScriptProgress packet.
+	 *
+	 * @param msg
+	 * 		The message to display.
+	 */
+	public void chatScriptMessage(String msg) { write(User.scriptProgressMessage(msg));}
+
+	/**
 	 * Sends a message to this Char with a default colour {@link ChatMsgColour#GAME_MESSAGE}.
 	 *
 	 * @param msg
