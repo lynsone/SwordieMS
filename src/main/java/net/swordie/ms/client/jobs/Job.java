@@ -4,6 +4,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
@@ -11,6 +12,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ReviveType;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.loaders.SkillData;
@@ -142,11 +144,12 @@ public abstract class Job {
 	public abstract int getFinalAttackSkill();
 
 	public void handleLevelUp() {
+		short level = chr.getLevel();
 		chr.addStat(Stat.mhp, 500);
 		chr.addStat(Stat.mmp, 500);
 		chr.addStat(Stat.ap, 5);
 		int sp = 3;
-		if (chr.getLevel() > 100 && (chr.getLevel() % 10) % 3 == 0) {
+		if (level > 100 && (level % 10) % 3 == 0) {
 			sp = 6; // double sp on levels ending in 3/6/9
 		}
 		chr.addSpToJobByCurrentLevel(sp);
@@ -156,6 +159,24 @@ public abstract class Job {
 		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
 		chr.write(WvsContext.statChanged(stats));
+		byte linkSkillLevel = 0;
+		if (level >= SkillConstants.LINK_SKILL_3_LEVEL) {
+			linkSkillLevel = 3;
+		} else if (level >= SkillConstants.LINK_SKILL_2_LEVEL) {
+			linkSkillLevel = 2;
+		} else if (level >= SkillConstants.LINK_SKILL_1_LEVEL) {
+			linkSkillLevel = 1;
+		}
+		int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
+		if (linkSkillID != 0) {
+			Skill skill = chr.getSkill(linkSkillID);
+			if (skill != null) {
+				skill = SkillData.getSkillDeepCopyById(linkSkillID);
+			}
+			if (skill.getCurrentLevel() != linkSkillLevel) {
+				skill.setCurrentLevel(linkSkillLevel);
+			}
+		}
 	}
 
 	public abstract boolean isBuff(int skillID);

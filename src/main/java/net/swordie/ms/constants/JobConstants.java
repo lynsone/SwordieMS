@@ -188,6 +188,10 @@ public class JobConstants {
         return res;
     }
 
+    public static boolean isKoC(short job) {
+        return job / 1000 == 1;
+    }
+
     public enum JobEnum {
         BEGINNER(0),
         WARRIOR(100),

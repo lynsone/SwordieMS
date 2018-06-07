@@ -1,6 +1,7 @@
 package net.swordie.ms.constants;
 
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 
@@ -14,6 +15,12 @@ import static net.swordie.ms.client.jobs.resistance.Blaster.*;
  * Created on 12/18/2017.
  */
 public class SkillConstants {
+
+    private static final Logger log = Logger.getLogger(SkillConstants.class);
+
+    public static final short LINK_SKILL_1_LEVEL = 70;
+    public static final short LINK_SKILL_2_LEVEL = 120;
+    public static final short LINK_SKILL_3_LEVEL = 210;
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
@@ -367,7 +374,7 @@ public class SkillConstants {
                 result = 110;
                 break;
             case 80000001:
-//                result = &_unwindfunclet___1CField_PvP__UAE_XZ_13;
+                result = 30010112;
                 break;
             case 80000002:
                 result = 20030204;
@@ -379,7 +386,7 @@ public class SkillConstants {
                 result = 60000222;
                 break;
             case 80000047:
-//                result = &_unwindfunclet__ShowOneTimeEffect_CField_RhythmGame__AAEXV__ZXString_G___Z_8 + 1;
+                result = 30020233;
                 break;
             case 80000050:
                 result = 30010241;
@@ -408,6 +415,14 @@ public class SkillConstants {
             case 80000188:
                 result = 140000292;
                 break;
+            case 80000004:
+                result = 40020002;
+                break;
+            case 0:
+                result = 0;
+                break;
+            default:
+                log.error("Unknown corresponding link skill for link skill id " + skillID);
         }
         return result;
     }
@@ -949,5 +964,40 @@ public class SkillConstants {
             default:
                 return false;
         }
+    }
+
+    public static int getLinkSkillByJob(short job) {
+        if (JobConstants.isCannonShooter(job)) { // Pirate Blessing
+            return 80000000;
+        } else if (JobConstants.isKoC(job)) { // Cygnus Blessing
+            return 80000070;
+        } else if (JobConstants.isMercedes(job)) { // Elven Blessing
+            return 80001040;
+        } else if (JobConstants.isDemonSlayer(job)) { // Fury Unleashed
+            return 80000001;
+        } else if (JobConstants.isDemonAvenger(job)) { // Wild Rage
+            return 80000050;
+        } else if (JobConstants.isJett(job)) { // Core Aura
+            return 80001151;
+        } else if (JobConstants.isPhantom(job)) { // Phantom Instinct
+            return 80000002;
+        } else if (JobConstants.isMihile(job)) { // Knight's Watch
+            return 80001140;
+        } else if (JobConstants.isLuminous(job)) { // Light Wash
+            return 80000005;
+        } else if (JobConstants.isAngelicBuster(job)) { // Terms and Conditions
+            return 80001155;
+        } else if (JobConstants.isHayato(job)) { // Keen Edge
+            return 80000003;
+        } else if (JobConstants.isKanna(job)) { // Elementalism
+            return 80000004;
+        } else if (JobConstants.isKaiser(job)) { // Iron Will
+            return 80000006;
+        } else if (JobConstants.isXenon(job)) { // Hybrid Logic
+            return 80000047;
+        } else if (JobConstants.isBeastTamer(job)) { // Focus Spirit
+            return 80010006;
+        }
+        return 0;
     }
 }
