@@ -2,6 +2,7 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.LinkSkill;
 import net.swordie.ms.client.character.avatar.AvatarData;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.cards.MonsterBookInfo;
@@ -60,6 +61,7 @@ import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import org.apache.log4j.Logger;
 
 import javax.persistence.*;
 import java.util.*;
@@ -72,6 +74,7 @@ import static net.swordie.ms.client.character.items.BodyPart.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
+import static net.swordie.ms.enums.ChatMsgColour.YELLOW;
 import static net.swordie.ms.world.field.FieldInstanceType.*;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
@@ -83,6 +86,9 @@ import static net.swordie.ms.enums.InventoryOperation.*;
 @Entity
 @Table(name = "characters")
 public class Char {
+
+	@Transient
+	private static final Logger log = Logger.getLogger(Char.class);
 
 	@Transient
 	private Client client;
@@ -780,7 +786,8 @@ public class Char {
 			boolean encodeSkills = getSkills().size() > 0;
 			outPacket.encodeByte(encodeSkills);
 			if (encodeSkills) {
-				short size = (short) getSkills().size();
+				Set<LinkSkill> linkSkills = getLinkSkills();
+				short size = (short) (getSkills().size() + linkSkills.size());
 				outPacket.encodeShort(size);
 				for (Skill skill : getSkills()) {
 					outPacket.encodeInt(skill.getSkillId());
@@ -790,11 +797,18 @@ public class Char {
 						outPacket.encodeInt(skill.getMasterLevel());
 					}
 				}
-				short size2 = 0;
-				outPacket.encodeShort(size2);
-				for (int i = 0; i < size2; i++) {
-					outPacket.encodeInt(0); // another nCount
-					outPacket.encodeShort(0); // idk
+				for (LinkSkill linkSkill : linkSkills) {
+					outPacket.encodeInt(linkSkill.getLinkSkillID());
+					outPacket.encodeInt(linkSkill.getOwnerID());
+					outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+					if (SkillConstants.isSkillNeedMasterLevel(linkSkill.getLinkSkillID())) {
+						outPacket.encodeInt(3); // whatevs
+					}
+				}
+				outPacket.encodeShort(linkSkills.size());
+				for (LinkSkill linkSkill : linkSkills) {
+					outPacket.encodeInt(linkSkill.getLinkSkillID()); // another nCount
+					outPacket.encodeShort(linkSkill.getLevel() - 1); // idk
 				}
 			} else {
 				short size = 0;
@@ -3135,5 +3149,34 @@ public class Char {
 
 	public void setDeathCount(int deathCount) {
 		this.deathCount = deathCount;
+	}
+
+	public Set<LinkSkill> getLinkSkills() {
+		return getAccount().getLinkSkills().stream()
+				.filter(ls -> ls.getOwnerID() != getId())
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Adds a skill to this Char. If the Char already has this skill, just changes the levels.
+	 * @param skillID the skill's id to add
+	 * @param currentLevel the current level of the skill
+	 * @param masterLevel the master level of the skill
+	 */
+	public void addSkill(int skillID, int currentLevel, int masterLevel) {
+		Skill skill = getSkill(skillID);
+		if (skill == null) {
+			skill = SkillData.getSkillDeepCopyById(skillID);
+		}
+		if (skill == null) {
+			log.error("No such skill found.");
+			return;
+		}
+		skill.setCurrentLevel(currentLevel);
+		skill.setMasterLevel(masterLevel);
+		List<Skill> list = new ArrayList<>();
+		list.add(skill);
+		addSkill(skill);
+		getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
 	}
 }

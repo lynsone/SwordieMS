@@ -1,5 +1,6 @@
 drop table if exists damageskinsavedatas;
 drop table if exists friends;
+drop table if exists linkskills;
 drop table if exists accounts;
 drop table if exists macroskills;
 drop table if exists macros;
@@ -621,6 +622,16 @@ create table accounts (
     trunkid int,
 	primary key (id),
     foreign key (trunkid) references trunks(id)
+);
+
+create table linkskills (
+	id bigint not null auto_increment,
+    accid int,
+    ownerid int,
+    linkskillid int,
+    level int,
+    primary key (id),
+    foreign key (accid) references accounts(id)
 );
 
 create table damageskinsavedatas (

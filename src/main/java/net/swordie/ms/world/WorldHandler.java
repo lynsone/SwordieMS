@@ -3,6 +3,7 @@ package net.swordie.ms.world;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.LinkSkill;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.ExtendSP;
 import net.swordie.ms.client.character.Macro;
@@ -4020,5 +4021,28 @@ public class WorldHandler {
             runeStone.activateRuneStoneEffect(c.getChr());
         }
         c.getChr().dispose();
+    }
+
+    public static void handleSetSonOfLinkedSkillRequest(Char chr, InPacket inPacket) {
+        int skillID = inPacket.decodeInt();
+        int sonID = inPacket.decodeInt();
+        short jobID = chr.getJob();
+        Account acc = chr.getAccount();
+        Char son = acc.getCharacters().stream().filter(c -> c.getId() == sonID).findAny().orElse(null);
+        // remove old link skill if another with the same skill exists
+        acc.getLinkSkills().stream()
+                .filter(ls -> SkillConstants.getOriginalOfLinkedSkill(ls.getLinkSkillID()) == skillID)
+                .findAny()
+                .ifPresent(oldLinkSkill -> acc.removeLinkSkillByOwnerID(oldLinkSkill.getOwnerID()));
+        // if the skill is not null and we expect this link skill id from the given job
+        int linkSkillID = SkillConstants.getLinkSkillByJob(jobID);
+        if (son != null && SkillConstants.getOriginalOfLinkedSkill(linkSkillID) == skillID) {
+            acc.addLinkSkill(chr, sonID, linkSkillID);
+            chr.write(WvsContext.setSonOfLinkedSkillResult(LinkedSkillResultType.SetSonOfLinkedSkillResult_Success,
+                    son.getId(), son.getName(), skillID, null));
+        } else {
+            chr.write(WvsContext.setSonOfLinkedSkillResult(LinkedSkillResultType.SetSonOfLinkedSkillResult_Fail_Unknown,
+                    0, null, 0, null));
+        }
     }
 }

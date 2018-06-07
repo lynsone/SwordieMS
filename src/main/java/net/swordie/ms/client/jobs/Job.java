@@ -226,22 +226,12 @@ public abstract class Job {
 		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
 		chr.write(WvsContext.statChanged(stats));
-		byte linkSkillLevel = 0;
-		if (level >= SkillConstants.LINK_SKILL_3_LEVEL) {
-			linkSkillLevel = 3;
-		} else if (level >= SkillConstants.LINK_SKILL_2_LEVEL) {
-			linkSkillLevel = 2;
-		} else if (level >= SkillConstants.LINK_SKILL_1_LEVEL) {
-			linkSkillLevel = 1;
-		}
+		byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
 		int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
-		if (linkSkillID != 0) {
-			Skill skill = chr.getSkill(linkSkillID);
-			if (skill != null) {
-				skill = SkillData.getSkillDeepCopyById(linkSkillID);
-			}
+		if (linkSkillID != 0 && linkSkillLevel > 0) {
+			Skill skill = chr.getSkill(linkSkillID, true);
 			if (skill.getCurrentLevel() != linkSkillLevel) {
-				skill.setCurrentLevel(linkSkillLevel);
+				chr.addSkill(linkSkillID, linkSkillLevel, 3);
 			}
 		}
 	}

@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
@@ -57,6 +58,9 @@ public class Account {
     private String lastLoggedIn;
     @Transient
     private Char currentChr;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "accID")
+    private Set<LinkSkill> linkSkills = new HashSet<>();
 
     public Account(String username, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
@@ -374,5 +378,29 @@ public class Account {
 
     public void setTrunk(Trunk trunk) {
         this.trunk = trunk;
+    }
+
+    public void addLinkSkill(LinkSkill linkSkill) {
+        removeLinkSkillByOwnerID(linkSkill.getOwnerID());
+        getLinkSkills().add(linkSkill);
+    }
+
+    public void addLinkSkill(Char originChar, int sonID, int linkedSkill) {
+        int level = SkillConstants.getLinkSkillLevelByCharLevel(originChar.getLevel());
+        LinkSkill ls = new LinkSkill(originChar.getId(), linkedSkill, level);
+        addLinkSkill(ls);
+    }
+
+    public void removeLinkSkillByOwnerID(int ownerID) {
+        getLinkSkills().stream().filter(l -> l.getOwnerID() == ownerID).findFirst()
+                .ifPresent(ls -> getLinkSkills().remove(ls));
+    }
+
+    public Set<LinkSkill> getLinkSkills() {
+        return linkSkills;
+    }
+
+    public void setLinkSkills(Set<LinkSkill> linkSkills) {
+        this.linkSkills = linkSkills;
     }
 }

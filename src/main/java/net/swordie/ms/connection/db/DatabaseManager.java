@@ -1,6 +1,7 @@
 package net.swordie.ms.connection.db;
 
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.LinkSkill;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.avatar.AvatarData;
 import net.swordie.ms.client.character.avatar.AvatarLook;
@@ -81,6 +82,7 @@ public class DatabaseManager {
                 PetItem.class,
                 MonsterBookInfo.class,
                 CharacterPotential.class,
+                LinkSkill.class,
 
         };
         for(Class clazz : dbClasses) {

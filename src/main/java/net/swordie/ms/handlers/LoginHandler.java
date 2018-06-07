@@ -213,6 +213,7 @@ public class LoginHandler {
             int charId = inPacket.decodeInt();
             Char chr = Char.getFromDBById(charId);
             Account a = Account.getFromDBById(c.getAccount().getId());
+            a.removeLinkSkillByOwnerID(chr.getId());
             a.getCharacters().remove(chr);
             DatabaseManager.saveToDB(a);
             c.write(Login.sendDeleteCharacterResult(charId, LoginType.SUCCESS));

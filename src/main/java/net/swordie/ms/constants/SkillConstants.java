@@ -1000,4 +1000,16 @@ public class SkillConstants {
         }
         return 0;
     }
+
+    public static int getLinkSkillLevelByCharLevel(short level) {
+        int res = 0;
+        if (level >= LINK_SKILL_3_LEVEL) {
+            res = 3;
+        } else if (level >= LINK_SKILL_2_LEVEL) {
+            res = 2;
+        } else if (level >= LINK_SKILL_1_LEVEL) {
+            res = 1;
+        }
+        return res;
+    }
 }

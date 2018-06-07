@@ -460,6 +460,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case RUNE_STONE_SKILL_REQ:
                     WorldHandler.handleRuneStoneSkillRequest(c, inPacket);
                     break;
+                case SET_SON_OF_LINKED_SKILL_REQUEST:
+                    WorldHandler.handleSetSonOfLinkedSkillRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

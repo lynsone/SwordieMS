@@ -801,4 +801,31 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket setSonOfLinkedSkillResult(LinkedSkillResultType lsrt, int sonID, String sonName,
+                                                      int originalSkillID, String existingParentName) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_SON_OF_LINKED_SKILL_RESULT);
+
+        outPacket.encodeInt(lsrt.getVal());
+        outPacket.encodeInt(originalSkillID);
+        switch (lsrt) {
+            case SetSonOfLinkedSkillResult_Success:
+                outPacket.encodeInt(sonID);
+                outPacket.encodeString(sonName);
+                break;
+            case SetSonOfLinkedSkillResult_Fail_ParentAlreadyExist:
+                outPacket.encodeString(existingParentName);
+                outPacket.encodeString(sonName);
+                break;
+            case SetSonOfLinkedSkillResult_Fail_Unknown:
+                break;
+            case SetSonOfLinkedSkillResult_Fail_MaxCount:
+                outPacket.encodeString(existingParentName);
+                break;
+            case SetSonOfLinkedSkillResult_Fail_DBRequestFail:
+                break;
+        }
+
+        return outPacket;
+    }
 }

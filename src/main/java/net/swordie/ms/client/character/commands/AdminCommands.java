@@ -578,6 +578,7 @@ public class AdminCommands {
                 stats.put(Stat.level, (byte) num);
                 stats.put(Stat.exp, (long) 0);
                 chr.getClient().write(WvsContext.statChanged(stats));
+                chr.getJobHandler().handleLevelUp();
             }
         }
     }
@@ -722,20 +723,7 @@ public class AdminCommands {
             int id = Integer.parseInt(args[1]);
             int cur = Integer.parseInt(args[2]);
             int max = Integer.parseInt(args[3]);
-            Skill skill = chr.getSkill(Integer.parseInt(args[1]));
-            if (skill == null) {
-                skill = SkillData.getSkillDeepCopyById(Integer.parseInt(args[1]));
-            }
-            if (skill == null) {
-                chr.chatMessage(YELLOW, "No such skill found.");
-                return;
-            }
-            skill.setCurrentLevel(cur);
-            skill.setMasterLevel(max);
-            List<Skill> list = new ArrayList<>();
-            list.add(skill);
-            chr.addSkill(skill);
-            chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+            chr.addSkill(id, cur, max);
         }
     }
 
