@@ -2237,7 +2237,7 @@ public class Char {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
 				addExp(expGain);
 			}
-			else if (!ItemConstants.isEquip(itemID)) {
+			if (!ItemConstants.isEquip(itemID)) {
 				ItemInfo ii = ItemData.getItemInfoByID(itemID);
 				isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
 			}
