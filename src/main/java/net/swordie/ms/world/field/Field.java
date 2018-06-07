@@ -493,9 +493,9 @@ public class Field {
         if (getRuneStone() != null && getMobs().size() > 0) {
             broadcastPacket(CField.runeStoneAppear(runeStone));
         }
-        if (getMobs().size() > 0 && getBurningFieldLevel() > 0) {
-            showBurningLevel();
-        }
+        //if (getMobs().size() > 0 && getBurningFieldLevel() > 0) { //Burning Level shown per map entry is commented out.
+        //    showBurningLevel();
+        //}
     }
 
     @Override
@@ -957,9 +957,6 @@ public class Field {
 
         if(showMessage) {
             showBurningLevel();
-        }
-        for(Char chr : getChars()) {
-            chr.chatMessage("Burning Level: "+getBurningFieldLevel());
         }
     }
 }

@@ -79,4 +79,21 @@ public class User {
 
         return outPacket;
     }
+
+    public static OutPacket setStigmaEffect(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.STIGMA_EFFECT);
+
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodeByte(true);
+
+        return outPacket;
+    }
+
+    public static OutPacket scriptProgressMessage(String string) {
+        OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_PROGRESS_MESSAGE);
+
+        outPacket.encodeString(string);
+
+        return outPacket;
+    }
 }
