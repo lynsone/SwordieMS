@@ -4015,7 +4015,7 @@ public class WorldHandler {
         if(success) {
             RuneStone runeStone = c.getChr().getField().getRuneStone();
 
-            c.getChr().getField().useRuneStone(runeStone);
+            c.getChr().getField().useRuneStone(c, runeStone);
             //c.write(CField.runeStoneSkillAck(runeStone.getRuneType()));
             runeStone.activateRuneStoneEffect(c.getChr());
         }

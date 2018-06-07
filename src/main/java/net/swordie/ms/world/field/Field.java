@@ -1,15 +1,13 @@
 package net.swordie.ms.world.field;
 
+import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.DropPool;
-import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.connection.packet.UserPool;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropLeaveType;
@@ -68,6 +66,8 @@ public class Field {
     private ScriptManagerImpl scriptManagerImpl;
     private RuneStone runeStone;
     private ScheduledFuture runeStoneHordesTimer;
+    private int burningFieldLevel;
+    private ScheduledFuture burningFieldCheckTimer;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -304,6 +304,14 @@ public class Field {
         this.runeStone = runeStone;
     }
 
+    public int getBurningFieldLevel() {
+        return burningFieldLevel;
+    }
+
+    public void setBurningFieldLevel(int burningFieldLevel) {
+        this.burningFieldLevel = burningFieldLevel;
+    }
+
     public Foothold findFootHoldBelow(Position pos) {
         Set<Foothold> footholds = getFootholds().stream().filter(fh -> fh.getX1() <= pos.getX() && fh.getX2() >= pos.getX()).collect(Collectors.toSet());
         Foothold res = null;
@@ -473,6 +481,9 @@ public class Field {
         }
         if (getRuneStone() != null && getMobs().size() > 0) {
             broadcastPacket(CField.runeStoneAppear(runeStone));
+        }
+        if (getMobs().size() > 0 && getBurningFieldLevel() > 0) {
+            showBurningLevel();
         }
     }
 
@@ -868,13 +879,12 @@ public class Field {
         }
     }
 
-    public void useRuneStone(RuneStone runeStone) {
+    public void useRuneStone(Client c, RuneStone runeStone) {
         broadcastPacket(CField.runeStoneSkillAck(runeStone.getRuneType()));
 
-        for(Char chr : getChars()) {
-            broadcastPacket(CField.completeRune(chr));
-            broadcastPacket(CField.runeStoneDisappear());
-        }
+        broadcastPacket(CField.completeRune(c.getChr()));
+        c.write(CField.runeStoneDisappear());
+
         setRuneStone(null);
 
         EventManager.addEvent(() -> spawnRuneStone(), GameConstants.RUNE_RESPAWN_TIME, TimeUnit.MINUTES);
@@ -887,5 +897,58 @@ public class Field {
             runeStoneHordesTimer.cancel(true);
         }
         runeStoneHordesTimer = EventManager.addEvent(() -> setMobRate(prevMobRate), duration, TimeUnit.SECONDS);
+    }
+
+    public int getBonusExpByBurningFieldLevel() {
+        return burningFieldLevel * 10; //Level 1 BurningField = 10% EXP
+    }
+
+    public void showBurningLevel() {
+        String string = "Burning Field has been destroyed.";
+        if(getBurningFieldLevel() > 0) {
+            string = "Burning Stage " + getBurningFieldLevel() + ": " + getBonusExpByBurningFieldLevel() + "% Bonus EXP";
+        }
+        Effect effect = Effect.createBurningFieldTextEffect(string);
+        broadcastPacket(CField.onEffect(effect));
+    }
+
+    public void increaseBurningLevel() {
+        setBurningFieldLevel(getBurningFieldLevel() + 1);
+    }
+
+    public void decreaseBurningLevel() {
+        setBurningFieldLevel(getBurningFieldLevel() - 1);
+    }
+
+    public void startBurningFieldTimer() {
+        if(getMobs().size() > 0 &&
+                getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
+            setBurningFieldLevel(GameConstants.BURNING_FIELD_LEVEL_ON_START);
+            burningFieldCheckTimer = EventManager.addFixedRateEvent(() -> changeBurningLevel(), 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
+        }
+    }
+
+    public void changeBurningLevel() {
+        boolean showMessage = true;
+
+        if(getBurningFieldLevel() <= 0) {
+            showMessage = false;
+        }
+
+        //If there are players on the map,  decrease the level  else  increase the level
+        if(getChars().size() > 0 && getBurningFieldLevel() > 0) {
+            decreaseBurningLevel();
+
+        } else if(getChars().size() <= 0 && getBurningFieldLevel() < 10){
+            increaseBurningLevel();
+            showMessage = true;
+        }
+
+        if(showMessage) {
+            showBurningLevel();
+        }
+        for(Char chr : getChars()) {
+            chr.chatMessage("Burning Level: "+getBurningFieldLevel());
+        }
     }
 }

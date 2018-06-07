@@ -2033,7 +2033,7 @@ public class Char {
 		addExp(amount, eii);
 	}
 
-	private void addExp(long amount, ExpIncreaseInfo eii) {
+	public void addExp(long amount, ExpIncreaseInfo eii) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		int level = getStat(Stat.level);

@@ -622,6 +622,7 @@ public class FieldData {
         }
         copy.setObjectIDCounter(field.getNewObjectID());
         copy.setRuneStone(new RuneStone().getRandomRuneStone(copy));
+        copy.startBurningFieldTimer();
         return copy;
     }
 
