@@ -257,6 +257,8 @@ public class Archer extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleAggresiveResistance(AttackInfo ai) {

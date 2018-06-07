@@ -140,6 +140,8 @@ public class Blaster extends Job {
                 tsm.sendSetStatPacket();
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

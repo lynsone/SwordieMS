@@ -376,6 +376,8 @@ public class Luminous extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

@@ -454,6 +454,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_CASH_PET_PICK_UP_ON_OFF_REQUEST:
                     WorldHandler.handleUserCashPetPickUpOnOffRequest(chr, inPacket);
                     break;
+                case RUNE_STONE_USE_REQ:
+                    WorldHandler.handleRuneStoneUseRequest(c, inPacket);
+                    break;
+                case RUNE_STONE_SKILL_REQ:
+                    WorldHandler.handleRuneStoneSkillRequest(c, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

@@ -1,5 +1,6 @@
 package net.swordie.ms.loaders;
 
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
@@ -620,6 +621,7 @@ public class FieldData {
             copy.addReactor(r);
         }
         copy.setObjectIDCounter(field.getNewObjectID());
+        copy.setRuneStone(new RuneStone().getRandomRuneStone(copy));
         return copy;
     }
 

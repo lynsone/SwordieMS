@@ -367,6 +367,8 @@ public class Thief extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

@@ -1,31 +1,35 @@
 package net.swordie.ms.world.field;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.life.drop.Drop;
-import net.swordie.ms.life.Reactor;
-import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.DropPool;
+import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.connection.packet.UserPool;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropLeaveType;
 import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.scripts.ScriptType;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.drop.DropInfo;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.drop.DropInfo;
-import net.swordie.ms.life.mob.Mob;
-import org.apache.log4j.Logger;
-import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.scripts.ScriptManagerImpl;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import org.apache.log4j.Logger;
 
 import java.awt.*;
 import java.util.*;
@@ -62,6 +66,8 @@ public class Field {
     private Set<Reactor> reactors;
     private String fieldScript = "";
     private ScriptManagerImpl scriptManagerImpl;
+    private RuneStone runeStone;
+    private ScheduledFuture runeStoneHordesTimer;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -290,6 +296,14 @@ public class Field {
         return getPortals().stream().filter(portal -> portal.getId() == id).findAny().orElse(null);
     }
 
+    public RuneStone getRuneStone() {
+        return runeStone;
+    }
+
+    public void setRuneStone(RuneStone runeStone) {
+        this.runeStone = runeStone;
+    }
+
     public Foothold findFootHoldBelow(Position pos) {
         Set<Foothold> footholds = getFootholds().stream().filter(fh -> fh.getX1() <= pos.getX() && fh.getX2() >= pos.getX()).collect(Collectors.toSet());
         Foothold res = null;
@@ -456,6 +470,9 @@ public class Field {
         }
         for (Reactor reactor : getReactors()) {
             spawnLife(reactor, chr);
+        }
+        if (getRuneStone() != null && getMobs().size() > 0) {
+            broadcastPacket(CField.runeStoneAppear(runeStone));
         }
     }
 
@@ -838,5 +855,37 @@ public class Field {
         }
         spawnLife(mob, null);
         return mob;
+    }
+
+    public void spawnRuneStone() {
+        if(getMobs().size() <= 0) {
+            return;
+        }
+        if(getRuneStone() == null) {
+            RuneStone runeStone = new RuneStone().getRandomRuneStone(this);
+            setRuneStone(runeStone);
+            broadcastPacket(CField.runeStoneAppear(runeStone));
+        }
+    }
+
+    public void useRuneStone(RuneStone runeStone) {
+        broadcastPacket(CField.runeStoneSkillAck(runeStone.getRuneType()));
+
+        for(Char chr : getChars()) {
+            broadcastPacket(CField.completeRune(chr));
+            broadcastPacket(CField.runeStoneDisappear());
+        }
+        setRuneStone(null);
+
+        EventManager.addEvent(() -> spawnRuneStone(), GameConstants.RUNE_RESPAWN_TIME, TimeUnit.MINUTES);
+    }
+
+    public void runeStoneHordeEffect(int mobRateMultiplier, int duration) {
+        double prevMobRate = getMobRate();
+        setMobRate(getMobRate() * mobRateMultiplier); //Temporary increase in mob Spawn
+        if(runeStoneHordesTimer != null && !runeStoneHordesTimer.isDone()) {
+            runeStoneHordesTimer.cancel(true);
+        }
+        runeStoneHordesTimer = EventManager.addEvent(() -> setMobRate(prevMobRate), duration, TimeUnit.SECONDS);
     }
 }

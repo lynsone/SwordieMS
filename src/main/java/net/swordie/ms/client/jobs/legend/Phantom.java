@@ -314,6 +314,8 @@ public class Phantom extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

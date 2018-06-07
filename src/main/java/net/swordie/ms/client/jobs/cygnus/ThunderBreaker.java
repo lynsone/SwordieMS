@@ -292,6 +292,8 @@ public class ThunderBreaker extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

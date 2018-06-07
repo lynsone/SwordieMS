@@ -383,18 +383,6 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket explosionAttack(int skillID, Position pos, int mobID, int count) {
-        OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
-
-        outPacket.encodeInt(skillID);
-        outPacket.encodeInt(pos.getX());
-        outPacket.encodeInt(pos.getY());
-        outPacket.encodeInt(mobID);
-        outPacket.encodeInt(count);
-
-        return outPacket;
-    }
-
     public static OutPacket dropPickupMessage(int money, short internetCafeExtra, short smallChangeExtra) {
         return dropPickupMessage(money, (byte) 1, internetCafeExtra, smallChangeExtra, (short) 0);
     }

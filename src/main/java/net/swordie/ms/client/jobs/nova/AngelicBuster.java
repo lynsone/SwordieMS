@@ -410,6 +410,8 @@ public class AngelicBuster extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

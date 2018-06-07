@@ -3,31 +3,32 @@ package net.swordie.ms.client.jobs.sengoku;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -116,6 +117,8 @@ public class Kanna extends Job {
                 chr.getField().spawnAffectedArea(aa);
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -143,15 +146,21 @@ public class Kanna extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 getHakuFollow();
                 break;
-            case KISHIN_SHOUKAN:
+            case KISHIN_SHOUKAN: //TODO
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
 
-                int x1 = chr.getPosition().deepCopy().getX() - 500;
-                int x2 = chr.getPosition().deepCopy().getX() + 500;
-                summon.setKishinPositions(new Position[]{ new Position(x1, chr.getPosition().getY()),  new Position(x2, chr.getPosition().getY()) });
+                Position leftKishin = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
+                Position rightKishin = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
 
+                summon.setKishinPositions(new Position[]{
+                        leftKishin,
+                        rightKishin
+                });
+
+                summon.setCurFoothold((short) chr.getField().findFootHoldBelow(leftKishin).getId());
+                summon.setPosition(leftKishin);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnAddSummon(summon);
                 break;

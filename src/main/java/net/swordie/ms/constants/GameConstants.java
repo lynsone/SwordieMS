@@ -19,10 +19,12 @@ public class GameConstants {
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
+
     public static final int COMBO_KILL_RESET_TIMER = 5; // 5 sec
     public static final int COMBO_KILL_REWARD_BLUE = 50; // Combo kills
     public static final int COMBO_KILL_REWARD_PURPLE = 350; // Combo kills
     public static final int COMBO_KILL_REWARD_RED = 750; // Combo kills
+
     public static final int CHAR_POT_BASE_ID = 70000000;
     public static final int CHAR_POT_END_ID = 70000062;
     public static final int BASE_CHAR_POT_UP_RATE = 10; // 10%
@@ -35,12 +37,15 @@ public class GameConstants {
     public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
 
+    public static final int RUNE_RESPAWN_TIME = 1; // 5 minutes
+
     public static final int BLUE_EXP_ORB_ID = 2023484;
     public static final double BLUE_EXP_ORB_MULT = 2;
     public static final int PURPLE_EXP_ORB_ID = 2023494;
     public static final double PURPLE_EXP_ORB_MULT = 3.5;
     public static final int RED_EXP_ORB_ID = 2023495;
     public static final double RED_EXP_ORB_MULT = 5;
+
 
 
     public static long[] charExp = new long[251];

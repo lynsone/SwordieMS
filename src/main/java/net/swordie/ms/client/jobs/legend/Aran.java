@@ -423,6 +423,8 @@ public class Aran extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

@@ -343,6 +343,8 @@ public class Shade extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     public boolean isBuff(int skillID) {

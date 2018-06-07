@@ -656,6 +656,8 @@ public class Warrior extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     public void spawnEvilEye(int skillID, byte slv) {

@@ -226,6 +226,8 @@ public class BlazeWizard extends Job {
                 summonFlameElement();
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleIgnite(AttackInfo attackInfo) {  //TODO only registers Explosion attack if >1 mob is hit

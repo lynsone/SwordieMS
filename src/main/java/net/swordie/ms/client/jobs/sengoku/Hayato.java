@@ -315,6 +315,8 @@ public class Hayato extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

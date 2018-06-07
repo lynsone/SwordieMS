@@ -382,6 +382,8 @@ public class BeastTamer extends Job {
                 chr.getField().spawnAffectedArea(aa3);
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

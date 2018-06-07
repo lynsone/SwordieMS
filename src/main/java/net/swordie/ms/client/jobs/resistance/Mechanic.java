@@ -273,6 +273,8 @@ public class Mechanic extends Job {
                 chr.getField().spawnAffectedArea(aa);
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override
