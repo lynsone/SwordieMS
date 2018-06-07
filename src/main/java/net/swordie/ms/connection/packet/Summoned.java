@@ -119,7 +119,8 @@ public class Summoned {
         outPacket.encodeByte(ai.summon.getCharLevel());
         byte left = (byte) (ai.left ? 1 : 0);
         outPacket.encodeByte((left << 7) | ai.attackActionType);
-        outPacket.encodeByte((ai.mobCount << 4) | (ai.attackCount & 0xF));
+        byte attackCount = (byte) (ai.mobAttackInfo.size() > 0 ? ai.mobAttackInfo.get(0).damages.length : 0);
+        outPacket.encodeByte((ai.mobCount << 4) | (attackCount & 0xF));
         for (MobAttackInfo mai : ai.mobAttackInfo) {
             outPacket.encodeInt(mai.mobId);
             outPacket.encodeByte(mai.byteIdk1);

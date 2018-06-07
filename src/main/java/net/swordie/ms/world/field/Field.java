@@ -75,7 +75,7 @@ public class Field {
         this.rect = new Rectangle(800, 600);
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
-        this.lifes = new ArrayList<>();
+        this.lifes = Collections.synchronizedList(new ArrayList<>());
         this.chars = Collections.synchronizedList(new ArrayList<>());
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
@@ -445,10 +445,21 @@ public class Field {
     public void removeChar(Char chr) {
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
+        // set controllers to null
         for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
             if (entry.getValue() != null && entry.getValue().equals(chr)) {
                 putLifeController(entry.getKey(), null);
             }
+        }
+        // remove summons of that char
+        List<Integer> removedList = new ArrayList<>();
+        for (Life life : getLifes()) {
+            if (life instanceof Summon && ((Summon) life).getCharID() == chr.getId()) {
+                removedList.add(life.getObjectId());
+            }
+        }
+        for (int id : removedList) {
+            removeLife(id, false);
         }
     }
 
