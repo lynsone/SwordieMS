@@ -1187,7 +1187,19 @@ public class Mob extends Life {
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
             long appliedExp = (long) (exp * damagePerc);
-            chr.addExp(appliedExp);
+
+            if(getField().getBurningFieldLevel() > 0) {
+                ExpIncreaseInfo eei = new ExpIncreaseInfo();
+                int burningFieldBonusExp = (int) (appliedExp * getField().getBonusExpByBurningFieldLevel()  /  100);
+                eei.setRestFieldBonusExp(burningFieldBonusExp);
+                eei.setRestFieldExpRate(getField().getBonusExpByBurningFieldLevel());
+                eei.setLastHit(true);
+                eei.setIncEXP((int) appliedExp);
+                chr.addExp((appliedExp+burningFieldBonusExp), eei);
+            } else {
+                chr.addExp(appliedExp);
+            }
+
         }
     }
 
