@@ -1219,7 +1219,14 @@ public class WorldHandler {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int skillId = inPacket.decodeInt();
         tsm.removeStatsBySkill(skillId);
-        c.write(WvsContext.temporaryStatReset(chr.getTemporaryStatManager(), false));
+        tsm.sendResetStatPacket();
+    }
+
+    public static void handleUserStatChangeItemCancelRequest(Char chr, InPacket inPacket) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int itemID = inPacket.decodeInt();
+        tsm.removeStatsBySkill(itemID);
+        tsm.sendResetStatPacket();
     }
 
     public static void handleKeymapUpdateRequest(Client c, InPacket inPacket) {
@@ -2145,9 +2152,9 @@ public class WorldHandler {
             for (Map.Entry<SpecStat, Integer> entry : specStats.entrySet()) {
                 SpecStat ss = entry.getKey();
                 int value = entry.getValue();
-                Option o = new Option(itemID, time);
+                Option o = new Option(-itemID, time);
                 o.nOption = value;
-                o.nReason = value;
+                o.nValue = value;
                 switch (ss) {
                     case hp:
                         chr.heal(value);
