@@ -911,13 +911,13 @@ public class Field {
     }
 
     public int getBonusExpByBurningFieldLevel() {
-        return burningFieldLevel * 10; //Level 1 BurningField = 10% EXP
+        return burningFieldLevel * GameConstants.BURNING_FIELD_BONUS_EXP_MULTIPLIER_PER_LEVEL; //Burning Field Level * The GameConstant
     }
 
     public void showBurningLevel() {
-        String string = "Burning Field has been destroyed.";
+        String string = "#fn ExtraBold##fs26##e          Burning Field has been destroyed.          ";
         if(getBurningFieldLevel() > 0) {
-            string = "Burning Stage " + getBurningFieldLevel() + ": " + getBonusExpByBurningFieldLevel() + "% Bonus EXP";
+            string = "#fn ExtraBold##fs26##e          Burning Stage " + getBurningFieldLevel() + ": " + getBonusExpByBurningFieldLevel() + "% Bonus EXP!          ";
         }
         Effect effect = Effect.createBurningFieldTextEffect(string);
         broadcastPacket(CField.onEffect(effect));
@@ -950,7 +950,7 @@ public class Field {
         if(getChars().size() > 0 && getBurningFieldLevel() > 0) {
             decreaseBurningLevel();
 
-        } else if(getChars().size() <= 0 && getBurningFieldLevel() < 10){
+        } else if(getChars().size() <= 0 && getBurningFieldLevel() < GameConstants.BURNING_FIELD_MAX_LEVEL){
             increaseBurningLevel();
             showMessage = true;
         }

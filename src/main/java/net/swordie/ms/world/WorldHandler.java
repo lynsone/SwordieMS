@@ -4007,7 +4007,13 @@ public class WorldHandler {
             // Send Arrow Message
             c.write(CField.runeStoneUseAck(5));
         } else {
-            chr.chatScriptMessage("You cannot use another Rune for "+ (((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) - System.currentTimeMillis()) / 1000) +" seconds");
+            long minutes = (((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) - System.currentTimeMillis()) / 60000);
+            long seconds = (((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) - System.currentTimeMillis()) / 1000);
+            chr.chatScriptMessage("You cannot use another Rune for "+
+                    (minutes > 0 ?
+                            minutes  +" minute"+  (minutes > 1 ? "s" : "")  +" and "+  (seconds - (minutes*60))  +" second"+  ((seconds - (minutes*60)) > 1 ? "s" : "")  +""  :
+                            seconds  +" second"+  (seconds > 1 ? "s" : "")
+                    ));
         }
         chr.dispose();
     }

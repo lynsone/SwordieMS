@@ -43,14 +43,16 @@ public class GameConstants {
 
     //Rune
     public static final int RUNE_RESPAWN_TIME = 5; // minutes
-    public static final int RUNE_COOLDOWN_TIME = 2; // minutes
+    public static final int RUNE_COOLDOWN_TIME = 4; // minutes
     public static final int THUNDER_RUNE_ATTACK_DELAY = 4; // seconds
-    public static final int DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED = 3;
+    public static final int DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED = 3; // number of elites spawned when activating Rune of Darkness
 
-    //Burning Info
+    //BurningField
+    public static final int BURNING_FIELD_MAX_LEVEL = 10; //Maximum Burning Field Level
+    public static final int BURNING_FIELD_LEVEL_ON_START = BURNING_FIELD_MAX_LEVEL; //Starts Burning Maps at BurningLevel 10
     public static final int BURNING_FIELD_TIMER = 10; // minutes
     public static final int BURNING_FIELD_MIN_MOB_LEVEL = 0; //Minimum Mob Level for the Field to become a Burning Field
-    public static final int BURNING_FIELD_LEVEL_ON_START = 10; //Starts Burning Maps at BurningLevel 10
+    public static final int BURNING_FIELD_BONUS_EXP_MULTIPLIER_PER_LEVEL = 10; // multiplied by the BurningField Level  =  Bonus Exp% given
 
     //Exp Orb
     public static final int BLUE_EXP_ORB_ID = 2023484;
