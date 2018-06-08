@@ -86,8 +86,7 @@ public class RuneStone {
         RuneStone runeStone = new RuneStone();
         runeStone.setRuneType(RuneType.getByVal((byte) new Random().nextInt(RuneType.values().length)));
 
-        List<Foothold> listOfFootHolds = new ArrayList<>();
-        listOfFootHolds.addAll(field.getFootholds());
+        List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
         Foothold foothold = Util.getRandomFromList(listOfFootHolds);
         Position position = foothold.getRandomPosition();
 
@@ -292,8 +291,7 @@ public class RuneStone {
 
     private void applyRuneDarkness(Char chr) { //TODO change to Elite Mobs.
         Field field = chr.getField();
-        List<Foothold> listOfFootHolds = new ArrayList<>();
-        listOfFootHolds.addAll(field.getFootholds());
+        List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
 
         int numberOfEliteMobsSpawned = GameConstants.DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED;
         for(int i = 0; i < numberOfEliteMobsSpawned; i++) {

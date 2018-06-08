@@ -997,4 +997,8 @@ public class Field {
     public EliteState getEliteState() {
         return eliteState;
     }
+
+    public List<Foothold> getNonWallFootholds() {
+        return getFootholds().stream().filter(fh -> !fh.isWall()).collect(Collectors.toList());
+    }
 }

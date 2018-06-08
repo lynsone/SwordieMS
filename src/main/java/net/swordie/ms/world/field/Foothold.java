@@ -156,4 +156,12 @@ public class Foothold {
         int randX = Util.getRandom(getX1(), getX2());
         return new Position(randX, getYFromX(randX));
     }
+
+    /**
+     * Checks whether or not this Foothold is a wall (i.e., vertical)
+     * @return whether or not this Foothold is a wall
+     */
+    public boolean isWall() {
+        return getX1() == getX2();
+    }
 }
