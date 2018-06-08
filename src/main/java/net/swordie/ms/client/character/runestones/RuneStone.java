@@ -6,8 +6,12 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.RuneType;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
@@ -17,6 +21,8 @@ import net.swordie.ms.world.field.Foothold;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -28,6 +34,7 @@ public class RuneStone {
     private RuneType runeType;
     private Position position;
     private boolean flip;
+    private ScheduledFuture thunderTimer;
 
     public static final int LIBERATE_THE_SWIFT_RUNE = 80001427;
     public static final int LIBERATE_THE_RECOVERY_RUNE = 80001428;
@@ -39,6 +46,9 @@ public class RuneStone {
     public static final int LIBERATE_THE_RUNE_OF_RICHES = 80001755;
     public static final int LIBERATE_THE_RUNE_OF_HORDES = 80001874;
     public static final int LIBERATE_THE_RUNE_OF_SKILL = 80001875;
+
+    public static final int LIBERATE_THE_RUNE_OF_MIGHT_2 = 80001761;
+    public static final int LIBERATE_THE_RUNE_OF_THUNDER_2 = 80001762;
 
     public RuneType getRuneType() {
         return runeType;
@@ -76,7 +86,7 @@ public class RuneStone {
         RuneStone runeStone = new RuneStone();
         runeStone.setRuneType(RuneType.getByVal((byte) new Random().nextInt(RuneType.values().length)));
 
-        List<Foothold> listOfFootHolds = new ArrayList();
+        List<Foothold> listOfFootHolds = new ArrayList<>();
         listOfFootHolds.addAll(field.getFootholds());
         Foothold foothold = Util.getRandomFromList(listOfFootHolds);
         Position position = foothold.getRandomPosition();
@@ -103,9 +113,6 @@ public class RuneStone {
                 runeBuffID = LIBERATE_THE_DESTRUCTIVE_RUNE_BUFF;
                 break;
             case Thunder:
-
-                //TODO  Lightning that strikes mobs on the Map
-
                 applyRuneThunder(chr);
                 runeBuffID = LIBERATE_THE_RUNE_OF_THUNDER;
                 break;
@@ -222,11 +229,8 @@ public class RuneStone {
     }
 
     private void applyRuneHordes(Char chr) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = SkillData.getSkillDeepCopyById(LIBERATE_THE_RUNE_OF_HORDES);
-        int skillID = skill.getSkillId();
-        skill.setCurrentLevel(1);
-        byte slv = (byte) skill.getCurrentLevel();
+        byte slv = 1;
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 
         // Map Effect
@@ -236,15 +240,68 @@ public class RuneStone {
     }
 
     private void applyRuneThunder(Char chr) {
-        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been implemented.");
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = SkillData.getSkillDeepCopyById(LIBERATE_THE_RUNE_OF_THUNDER_2);
+        int skillID = skill.getSkillId();
+        skill.setCurrentLevel(1);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        Option o1 = new Option();
+
+        // RandAreaAttack Buff
+        o1.nOption = 1;
+        o1.rOption = skillID;
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(RandAreaAttack, o1);
+        tsm.sendSetStatPacket();
+
+        int fieldID = chr.getFieldID();
+        randAreaAttack(fieldID, tsm, chr);
+    }
+
+    private void randAreaAttack(int fieldID, TemporaryStatManager tsm, Char chr) {
+        if((tsm.getOptByCTSAndSkill(RandAreaAttack, LIBERATE_THE_RUNE_OF_THUNDER_2) == null) && fieldID != chr.getFieldID()) {
+            return;
+        }
+
+        Mob randomMob = Util.getRandomFromList(chr.getField().getMobs());
+        chr.write(UserLocal.userRandAreaAttackRequest(randomMob, LIBERATE_THE_RUNE_OF_THUNDER_2));
+
+        if(thunderTimer != null && !thunderTimer.isDone()) {
+            thunderTimer.cancel(true);
+        }
+        thunderTimer = EventManager.addEvent(() -> randAreaAttack(fieldID, tsm, chr), GameConstants.THUNDER_RUNE_ATTACK_DELAY, TimeUnit.SECONDS);
     }
 
     private void applyRuneMight(Char chr) {
-        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been implemented.");
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = SkillData.getSkillDeepCopyById(LIBERATE_THE_RUNE_OF_MIGHT_2);
+        int skillID = skill.getSkillId();
+        skill.setCurrentLevel(1);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        Option o1 = new Option();
+        o1.nOption = 101;
+        o1.rOption = -2003517; //Adv G Potion       Errrr
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(Inflation, o1);
+        tsm.sendSetStatPacket();
+
+        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been fully implemented.");
     }
 
-    private void applyRuneDarkness(Char chr) {
-        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been implemented.");
+    private void applyRuneDarkness(Char chr) { //TODO change to Elite Mobs.
+        Field field = chr.getField();
+        List<Foothold> listOfFootHolds = new ArrayList<>();
+        listOfFootHolds.addAll(field.getFootholds());
+
+        int numberOfEliteMobsSpawned = GameConstants.DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED;
+        for(int i = 0; i < numberOfEliteMobsSpawned; i++) {
+            Foothold foothold = Util.getRandomFromList(listOfFootHolds);
+            Position position = foothold.getRandomPosition();
+            field.spawnMob(2600316, position.getX(), position.getY(), false);
+        }
+        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been fully implemented.");
     }
 
     private void applyRuneRiches(Char chr) {

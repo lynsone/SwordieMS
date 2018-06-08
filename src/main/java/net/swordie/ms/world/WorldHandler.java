@@ -3,7 +3,6 @@ package net.swordie.ms.world;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
-import net.swordie.ms.client.LinkSkill;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.ExtendSP;
 import net.swordie.ms.client.character.Macro;
@@ -83,10 +82,7 @@ import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
-import net.swordie.ms.util.Position;
-import net.swordie.ms.util.Randomizer;
-import net.swordie.ms.util.Rect;
-import net.swordie.ms.util.Util;
+import net.swordie.ms.util.*;
 import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
@@ -4006,14 +4002,20 @@ public class WorldHandler {
         Char chr = c.getChr();
         int minLevel = chr.getField().getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0);
 
-        // Rune is too strong for user
-        if(minLevel > c.getChr().getStat(level)) {
-            c.write(CField.runeStoneUseAck(4));
-            return;
-        }
+        // User is on RuneStone Cooldown
+        if((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) < System.currentTimeMillis()) {
 
-        // Send Arrow Message
-        c.write(CField.runeStoneUseAck(5));
+            // Rune is too strong for user
+            if (minLevel > c.getChr().getStat(level)) {
+                c.write(CField.runeStoneUseAck(4));
+                return;
+            }
+
+            // Send Arrow Message
+            c.write(CField.runeStoneUseAck(5));
+        } else {
+            chr.chatScriptMessage("You cannot use another Rune for "+ (((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) - System.currentTimeMillis()) / 1000) +" seconds");
+        }
         chr.dispose();
     }
 
@@ -4026,6 +4028,7 @@ public class WorldHandler {
             c.getChr().getField().useRuneStone(c, runeStone);
             //c.write(CField.runeStoneSkillAck(runeStone.getRuneType()));
             runeStone.activateRuneStoneEffect(c.getChr());
+            c.getChr().setRuneCooldown(System.currentTimeMillis());
         }
         c.getChr().dispose();
     }

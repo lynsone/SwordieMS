@@ -42,10 +42,13 @@ public class GameConstants {
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
 
     //Rune
-    public static final int RUNE_RESPAWN_TIME = 3; // minutes
+    public static final int RUNE_RESPAWN_TIME = 5; // minutes
+    public static final int RUNE_COOLDOWN_TIME = 2; // minutes
+    public static final int THUNDER_RUNE_ATTACK_DELAY = 4; // seconds
+    public static final int DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED = 3;
 
     //Burning Info
-    public static final int BURNING_FIELD_TIMER = 5; // minutes
+    public static final int BURNING_FIELD_TIMER = 10; // minutes
     public static final int BURNING_FIELD_MIN_MOB_LEVEL = 0; //Minimum Mob Level for the Field to become a Burning Field
     public static final int BURNING_FIELD_LEVEL_ON_START = 10; //Starts Burning Maps at BurningLevel 10
 

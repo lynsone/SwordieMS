@@ -12,6 +12,7 @@ import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.info.FarmUserInfo;
 import net.swordie.ms.client.character.info.FreezeHotEventInfo;
 import net.swordie.ms.client.character.info.ZeroInfo;
+import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleLadder;
@@ -19,48 +20,48 @@ import net.swordie.ms.client.character.monsterbattle.MonsterBattleMobInfo;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleRankInfo;
 import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.potential.CharacterPotentialMan;
+import net.swordie.ms.client.character.quest.Quest;
+import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.friend.FriendRecord;
-import net.swordie.ms.client.friend.FriendshipRingRecord;
-import net.swordie.ms.client.jobs.legend.StealSkillInfo;
-import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.life.pet.Pet;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.FieldInstanceType;
-import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
+import net.swordie.ms.client.friend.FriendRecord;
+import net.swordie.ms.client.friend.FriendshipRingRecord;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.updates.GuildUpdate;
 import net.swordie.ms.client.guild.updates.GuildUpdateMemberLogin;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
+import net.swordie.ms.client.jobs.legend.StealSkillInfo;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.drop.Drop;
-import net.swordie.ms.client.character.quest.Quest;
-import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.party.Party;
-import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ChatHandler;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
-import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
@@ -74,11 +75,10 @@ import static net.swordie.ms.client.character.items.BodyPart.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
-import static net.swordie.ms.enums.ChatMsgColour.YELLOW;
-import static net.swordie.ms.world.field.FieldInstanceType.*;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
+import static net.swordie.ms.world.field.FieldInstanceType.CHANNEL;
 
 /**
  * Created on 11/17/2017.
@@ -310,6 +310,8 @@ public class Char {
 	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
 	@Transient
 	private int deathCount = -1;
+	@Transient
+	private long runeStoneCooldown;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1734,6 +1736,14 @@ public class Char {
 	}
 
 	/**
+	 * Sends a message to this Char through the ScriptProgress packet.
+	 *
+	 * @param msg
+	 * 		The message to display.
+	 */
+	public void chatScriptMessage(String msg) { write(User.scriptProgressMessage(msg));}
+
+	/**
 	 * Sends a message to this Char with a default colour {@link ChatMsgColour#GAME_MESSAGE}.
 	 *
 	 * @param msg
@@ -2227,7 +2237,7 @@ public class Char {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
 				addExp(expGain);
 			}
-			else if (!ItemConstants.isEquip(itemID)) {
+			if (!ItemConstants.isEquip(itemID)) {
 				ItemInfo ii = ItemData.getItemInfoByID(itemID);
 				isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
 			}
@@ -3178,5 +3188,13 @@ public class Char {
 		list.add(skill);
 		addSkill(skill);
 		getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+	}
+
+	public long getRuneCooldown() {
+		return runeStoneCooldown;
+	}
+
+	public void setRuneCooldown(long runeCooldown) {
+		this.runeStoneCooldown = runeCooldown;
 	}
 }

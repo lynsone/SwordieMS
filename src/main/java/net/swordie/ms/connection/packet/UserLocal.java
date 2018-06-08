@@ -1,8 +1,6 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
@@ -12,6 +10,7 @@ import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.enums.StealMemoryType;
 import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
@@ -201,6 +200,18 @@ public class UserLocal {
         outPacket.encodePositionInt(position);
         outPacket.encodeInt(mobID);
         outPacket.encodeInt(count);
+
+        return outPacket;
+    }
+
+    public static OutPacket userRandAreaAttackRequest(Mob mob, int skillID) {
+        OutPacket outPacket = new OutPacket(OutHeader.USER_RAND_AREA_ATTACK_REQUEST);
+
+        outPacket.encodeInt(skillID);
+        outPacket.encodeInt(1); //# of mobs to attack
+
+        outPacket.encodePositionInt(mob.getPosition());
+        outPacket.encodeInt(mob.getObjectId());
 
         return outPacket;
     }
