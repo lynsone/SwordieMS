@@ -111,9 +111,9 @@ public class ForcedMobStat {
     }
 
     public void encode(OutPacket outPacket) {
-        outPacket.encodeInt((int) getMaxHP());
-        outPacket.encodeInt((int) getMaxMP());
-        outPacket.encodeInt((int) getExp());
+        outPacket.encodeInt((int) Math.min(Integer.MAX_VALUE, getMaxHP()));
+        outPacket.encodeInt((int) Math.min(Integer.MAX_VALUE, getMaxMP()));
+        outPacket.encodeInt((int) Math.min(Integer.MAX_VALUE, getExp()));
         outPacket.encodeInt(getPad());
         outPacket.encodeInt(getMad());
         outPacket.encodeInt(getPdr());

@@ -73,9 +73,9 @@ public class MobData {
                 dataOutputStream.writeLong(fms.getMaxHP());
                 dataOutputStream.writeLong(fms.getMaxMP());
                 dataOutputStream.writeInt(fms.getPad());
-                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(PDR) != null ? mts.getNewOptionsByMobStat(PDR).nOption : 0);
+                dataOutputStream.writeInt(fms.getPdr());
                 dataOutputStream.writeInt(fms.getMad());
-                dataOutputStream.writeInt(mts.getNewOptionsByMobStat(MDR) != null ? mts.getNewOptionsByMobStat(MDR).nOption : 0);
+                dataOutputStream.writeInt(fms.getMdr());
                 dataOutputStream.writeInt(fms.getAcc());
                 dataOutputStream.writeInt(fms.getEva());
                 dataOutputStream.writeInt(fms.getPushed());
@@ -196,7 +196,6 @@ public class MobData {
         try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             mob = new Mob(dataInputStream.readInt(), -1);
             ForcedMobStat fms = mob.getForcedMobStat();
-            MobTemporaryStat mts = mob.getTemporaryStat();
             fms.setLevel(dataInputStream.readInt());
             mob.setFirstAttack(dataInputStream.readInt());
             Option bodyOpt = new Option();
@@ -205,17 +204,9 @@ public class MobData {
             fms.setMaxHP(dataInputStream.readLong());
             fms.setMaxMP(dataInputStream.readLong());
             fms.setPad(dataInputStream.readInt());
-
-            Option pdrOpt = new Option();
-            pdrOpt.nOption = dataInputStream.readInt();
-//            mts.addStatOptions(PDR, pdrOpt);
-
+            fms.setPdr(dataInputStream.readInt());
             fms.setMad(dataInputStream.readInt());
-
-            Option mdrOpt = new Option();
-            mdrOpt.nOption = dataInputStream.readInt();
-//            mts.addStatOptions(MDR, mdrOpt);
-
+            fms.setMdr(dataInputStream.readInt());
             fms.setAcc(dataInputStream.readInt());
             fms.setEva(dataInputStream.readInt());
             fms.setPushed(dataInputStream.readInt());
@@ -408,9 +399,7 @@ public class MobData {
 //                            mts.addStatOptions(PDR, "nPDR", Integer.parseInt(value));
                         break;
                     case "PDRate":
-                        Option pdrOpt = new Option();
-                        pdrOpt.nOption = Integer.parseInt(value);
-                        mts.addStatOptions(PDR, pdrOpt);
+                        fms.setPdr(Integer.parseInt(value));
                         break;
                     case "MADamage":
                         fms.setMad(Integer.parseInt(value));
@@ -419,9 +408,7 @@ public class MobData {
 //                            mts.addStatOptions(PDR, "nMDR", Integer.parseInt(value));
                         break;
                     case "MDRate":
-                        Option mdrOpt = new Option();
-                        mdrOpt.nOption = Integer.parseInt(value);
-                        mts.addStatOptions(PDR, mdrOpt);
+                        fms.setMdr(Integer.parseInt(value));
                         break;
                     case "acc":
                         fms.setAcc(Integer.parseInt(value));

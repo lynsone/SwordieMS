@@ -2012,6 +2012,9 @@ public class Char {
 		if (getDeathCount() > 0) {
 			write(UserLocal.deathCountInfo(getDeathCount()));
 		}
+		if (field.getEliteState() == EliteState.ELITE_BOSS) {
+			write(CField.eliteState(EliteState.ELITE_BOSS, true, GameConstants.ELITE_BOSS_BGM, null, null));
+		}
 	}
 
 	/**

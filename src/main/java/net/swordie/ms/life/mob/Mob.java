@@ -8,6 +8,7 @@ import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.MobPool;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
@@ -15,7 +16,10 @@ import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
 import net.swordie.ms.loaders.MobData;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Util;
+import net.swordie.ms.util.container.Triple;
 import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
@@ -29,8 +33,8 @@ public class Mob extends Life {
     private boolean sealedInsteadDead, patrolMob;
     private int option, effectItemID, patrolScopeX1, patrolScopeX2, detectX, senseX, phase, curZoneDataType;
     private int refImgMobID, lifeReleaseOwnerAID, afterAttack, currentAction, scale, eliteGrade, eliteType, targetUserIdFromServer;
-    private long hp, maxHp;
-    private long mp, maxMp;
+    private long hp;
+    private long mp;
     private byte calcDamageIndex = 1, moveAction, appearType, teamForMCarnival;
     private Position prevPos;
     private Foothold curFoodhold;
@@ -112,6 +116,7 @@ public class Mob extends Life {
     private Set<Integer> revives = new HashSet<>();
     private Map<Integer, Long> skillCooldowns = new HashMap<>();
     private long nextPossibleSkillTime = 0;
+    private List<Tuple<Integer, Integer>> eliteSkills = new ArrayList<>();
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -534,11 +539,11 @@ public class Mob extends Life {
     }
 
     public long getMaxHp() {
-        return maxHp;
+        return getForcedMobStat().getMaxHP();
     }
 
     public void setMaxHp(long maxHp) {
-        this.maxHp = maxHp;
+        getForcedMobStat().setMaxHP(maxHp);
     }
 
     public long getMp() {
@@ -550,11 +555,11 @@ public class Mob extends Life {
     }
 
     public long getMaxMp() {
-        return maxMp;
+        return getForcedMobStat().getMaxMP();
     }
 
     public void setMaxMp(long maxMp) {
-        this.maxMp = maxMp;
+        getForcedMobStat().setMaxMP(maxMp);
     }
 
     public void setTemporaryStat(MobTemporaryStat temporaryStat) {
@@ -1149,6 +1154,32 @@ public class Mob extends Life {
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
         }
         getDamageDone().clear();
+        if (field.canSpawnElite() && getEliteType() == 0 && !isNotRespawnable() &&
+                Util.succeedProp(GameConstants.ELITE_MOB_SPAWN_CHANCE, 1000)) {
+            spawnEliteVersion();
+        } else if (getEliteType() == 1) {
+            field.incrementEliteKillCount();
+            if (field.getKilledElites() >= GameConstants.ELITE_BOSS_REQUIRED_KILLS) {
+                field.setKilledElites(field.getKilledElites() % GameConstants.ELITE_BOSS_REQUIRED_KILLS);
+                int bossTemplate = Util.getRandomFromList(GameConstants.ELITE_BOSS_TEMPLATES);
+                Mob mob = MobData.getMobDeepCopyById(bossTemplate);
+                mob.setEliteType(3);
+                mob.setNotRespawnable(true);
+                mob.setMaxHp(MobData.getMobDeepCopyById(getTemplateId()).getMaxHp() * GameConstants.ELITE_BOSS_HP_RATE);
+                mob.setHp(mob.getMaxHp());
+                mob.setHomeFoothold(getCurFoodhold().deepCopy());
+                mob.setCurFoodhold(getCurFoodhold().deepCopy());
+                mob.setPosition(getPosition().deepCopy());
+                mob.setHomePosition(getPosition().deepCopy());
+                field.spawnLife(mob, null);
+                field.setEliteState(EliteState.ELITE_BOSS);
+                field.broadcastPacket(CField.eliteState(EliteState.ELITE_BOSS, false, GameConstants.ELITE_BOSS_BGM,
+                        null, null));
+            }
+        } else if (getEliteType() == 3) {
+            field.broadcastPacket(CField.eliteState(EliteState.NORMAL, true, null, null, null));
+            field.setEliteState(EliteState.NORMAL);
+        }
 
         //TEST
         reviveMob();
@@ -1361,5 +1392,47 @@ public class Mob extends Life {
     public boolean isInfestedByViralSlime() {
         MobTemporaryStat mts = getTemporaryStat();
         return mts.hasBurnFromSkill(Magician.VIRAL_SLIME);
+    }
+
+    public void spawnEliteVersion() {
+        Mob elite = MobData.getMobDeepCopyById(getTemplateId());
+        elite.setHomePosition(getPosition().deepCopy());
+        elite.setPosition(getPosition().deepCopy());
+        elite.setCurFoodhold(getCurFoodhold().deepCopy());
+        elite.setHomeFoothold(getCurFoodhold().deepCopy());
+        elite.setNotRespawnable(true);
+        List<Triple<Integer, Double, Double>> eliteInfos = GameConstants.getEliteInfoByMobLevel(elite.getForcedMobStat().getLevel());
+        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromList(eliteInfos);
+        int eliteGrade = eliteInfo.getLeft();
+        long newHp = (long) (eliteInfo.getMiddle() * elite.getMaxHp());
+        long newExp = (long) (eliteInfo.getRight() * elite.getForcedMobStat().getExp());
+        elite.setEliteType(1);
+        elite.setEliteGrade(eliteGrade);
+        Map<Integer, Integer> possibleSkillsMap = SkillData.getEliteMobSkillsByGrade(eliteGrade);
+        List<Tuple<Integer, Integer>> possibleSkills = new ArrayList<>();
+        possibleSkillsMap.forEach((k, v) -> possibleSkills.add(new Tuple(k, v)));
+        for (int i = 0; i < GameConstants.ELITE_MOB_SKILL_COUNT; i++) {
+            Tuple<Integer, Integer> randomSkill = Util.getRandomFromList(possibleSkills);
+            elite.addEliteSkill(randomSkill.getLeft(), randomSkill.getRight());
+            possibleSkills.remove(randomSkill);
+        }
+        elite.setMaxHp(newHp);
+        elite.setHp(newHp);
+        elite.getForcedMobStat().setExp(newExp);
+        getField().setNextEliteSpawnTime(System.currentTimeMillis() + GameConstants.ELITE_MOB_RESPAWN_TIME * 1000);
+        getField().spawnLife(elite, null);
+    }
+
+    public List<Tuple<Integer, Integer>> getEliteSkills() {
+        return eliteSkills;
+    }
+
+    public void addEliteSkill(int skillID, int skillLevel) {
+        MobSkill ms = new MobSkill();
+        ms.setSkillID(-1);
+        ms.setSkill(skillID);
+        ms.setLevel(skillLevel);
+        addSkill(ms);
+        getEliteSkills().add(new Tuple<>(skillID, skillID));
     }
 }

@@ -3,6 +3,11 @@ package net.swordie.ms.constants;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
+import net.swordie.ms.util.container.Triple;
+import net.swordie.ms.util.container.Tuple;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created on 1/23/2018.
@@ -60,7 +65,16 @@ public class GameConstants {
     public static final int RED_EXP_ORB_ID = 2023495;
     public static final double RED_EXP_ORB_MULT = 5;
 
-
+    // Elite mob
+    public static final int ELITE_MOB_SKILL_COUNT = 2;
+    public static final int ELITE_MOB_RESPAWN_TIME = 3; // seconds
+    public static final int ELITE_MOB_SPAWN_CHANCE = 500; // out of a 1000
+    public static final int ELITE_MOB_DARK_NOTIFICATION = 2;
+    public static final int ELITE_BOSS_REQUIRED_KILLS = 5;
+    public static final Integer[] ELITE_BOSS_TEMPLATES = new Integer[]{9303130, 9303131, 9303132, 9303133, 9303134, // 2 types, easy/hard I think
+            9303135, 9303136, 9303137, 9303138, 9303139};
+    public static final String ELITE_BOSS_BGM = "Bgm45/Anthem For Heroes";
+    public static final long ELITE_BOSS_HP_RATE = 500; // multiplier for boss' hp compared to the mobs on the map
 
 
     public static long[] charExp = new long[251];
@@ -288,5 +302,29 @@ public class GameConstants {
                 return RED_EXP_ORB_MULT;
         }
         return 0;
+    }
+
+    /**
+     * Gets a list of possible elite stats by mob level.
+     * @param level the level of the mob
+     * @return list of Triples, each triple indicating the level (left), extra hp rate (mid) and the extra exp/meso drop rate (right).
+     */
+    public static List<Triple<Integer, Double, Double>> getEliteInfoByMobLevel(int level) {
+        List<Triple<Integer, Double, Double>> list = new ArrayList<>();
+        if (level < 100) {
+            list.add(new Triple<>(0, 21D, 10.5));
+            list.add(new Triple<>(1, 29D, 14.5));
+            list.add(new Triple<>(2, 38D, 19D));
+        } else if (level < 200) {
+            list.add(new Triple<>(0, 30D, 15D));
+            list.add(new Triple<>(1, 45D, 22.5));
+            list.add(new Triple<>(2, 60D, 30D));
+        } else {
+            // level >= 200
+            list.add(new Triple<>(0, 35D, 17.5));
+            list.add(new Triple<>(1, 52.5, 26.25));
+            list.add(new Triple<>(2, 70D, 35D));
+        }
+        return list;
     }
 }

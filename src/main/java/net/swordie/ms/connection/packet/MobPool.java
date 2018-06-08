@@ -9,6 +9,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.container.Tuple;
 
 import java.util.List;
 
@@ -74,11 +75,10 @@ public class MobPool {
             outPacket.encodeInt(mob.getScale());
             outPacket.encodeInt(mob.getEliteGrade());
             if(mob.getEliteGrade() >= 0) {
-                size = 0;
-                outPacket.encodeInt(size);
-                for (int i = 0; i < size; i++) {
-                    outPacket.encodeInt(0); // first skillID?
-                    outPacket.encodeInt(0); // second skillID?
+                outPacket.encodeInt(mob.getEliteSkills().size());
+                for (Tuple<Integer, Integer> skill : mob.getEliteSkills()) {
+                    outPacket.encodeInt(skill.getLeft()); // skill id
+                    outPacket.encodeInt(skill.getRight()); // skill level
                 }
                 outPacket.encodeInt(mob.getEliteType()); // 1 normal, 3 elite boss probably
             }

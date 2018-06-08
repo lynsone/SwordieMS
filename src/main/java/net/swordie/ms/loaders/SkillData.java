@@ -10,7 +10,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.*;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.*;
 
@@ -20,6 +19,7 @@ import java.util.*;
 public class SkillData {
 
     private static Map<Integer, SkillInfo> skills = new HashMap<>();
+    private static Map<Integer, Map<Integer, Integer>> eliteMobSkills = new HashMap<>();
     private static Map<Short, Map<Short, MobSkillInfo>> mobSkillInfos = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
@@ -247,6 +247,75 @@ public class SkillData {
         Map<Short, MobSkillInfo> msiLevelMap = getMobSkillInfos().get(msi.getId());
         msiLevelMap.put(msi.getLevel(), msi);
         getMobSkillInfos().put(msi.getId(), msiLevelMap);
+    }
+
+    private static void loadEliteMobSkillsFromWZ() {
+        String wzDir = ServerConstants.WZ_DIR + "/Skill.wz/EliteMobSkill.img.xml";
+        File file = new File(wzDir);
+        Node root = XMLApi.getRoot(file);
+        Node mainNode = XMLApi.getAllChildren(root).get(0);
+        List<Node> nodes = XMLApi.getAllChildren(mainNode);
+        for(Node node : nodes) {
+            int grade = Integer.parseInt(XMLApi.getNamedAttribute(node, "name"));
+            for (Node skillNode : XMLApi.getAllChildren(node)) {
+                Node skillIdNode = XMLApi.getFirstChildByNameBF(skillNode, "skill");
+                Node skillLevelNode = XMLApi.getFirstChildByNameBF(skillNode, "level");
+                int skillID = Integer.parseInt(XMLApi.getNamedAttribute(skillIdNode, "value"));
+                int skillLevel = Integer.parseInt(XMLApi.getNamedAttribute(skillLevelNode, "value"));
+                addEliteMobSkill(grade, skillID, skillLevel);
+            }
+        }
+    }
+
+    private static void addEliteMobSkill(int grade, int skillID, int skillLevel) {
+        if (!eliteMobSkills.containsKey(grade)) {
+            eliteMobSkills.put(grade, new HashMap<>());
+        }
+        eliteMobSkills.get(grade).put(skillID, skillLevel);
+    }
+
+    @Saver(varName = "eliteMobSkills")
+    private static void saveEliteMobSkills(File file) {
+        try(DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
+            dos.writeInt(eliteMobSkills.size());
+            for (Map.Entry<Integer, Map<Integer, Integer>> entry : eliteMobSkills.entrySet()) {
+                dos.writeInt(entry.getKey()); // grade
+                dos.writeInt(entry.getValue().size());
+                for (Map.Entry<Integer, Integer> innerEntry : eliteMobSkills.get(entry.getKey()).entrySet()) {
+                    dos.writeInt(innerEntry.getKey()); // skillID
+                    dos.writeInt(innerEntry.getValue()); // skillLevel
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Loader(varName = "eliteMobSkills")
+    public static void loadEliteMobSkills(File file, boolean exists) {
+        if(!exists) {
+            loadEliteMobSkillsFromWZ();
+            saveEliteMobSkills(file);
+        } else {
+            try(DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
+                int gradeSize = dis.readInt();
+                for (int i = 0; i < gradeSize; i++) {
+                    int grade = dis.readInt();
+                    int gradeSkillSize = dis.readInt();
+                    for (int j = 0; j < gradeSkillSize; j++) {
+                        int skillID = dis.readInt();
+                        int skillLevel = dis.readInt();
+                        addEliteMobSkill(grade, skillID, skillLevel);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static Map<Integer, Integer> getEliteMobSkillsByGrade(int grade) {
+        return eliteMobSkills.getOrDefault(grade, null);
     }
 
     public static void loadMobSkillsFromWz() {

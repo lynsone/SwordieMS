@@ -11,6 +11,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropLeaveType;
+import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
@@ -68,6 +69,9 @@ public class Field {
     private ScheduledFuture runeStoneHordesTimer;
     private int burningFieldLevel;
     private ScheduledFuture burningFieldCheckTimer;
+    private long nextEliteSpawnTime = System.currentTimeMillis();
+    private int killedElites;
+    private EliteState eliteState;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -958,5 +962,37 @@ public class Field {
         if(showMessage) {
             showBurningLevel();
         }
+    }
+
+    public void setNextEliteSpawnTime(long nextEliteSpawnTime) {
+        this.nextEliteSpawnTime = nextEliteSpawnTime;
+    }
+
+    public long getNextEliteSpawnTime() {
+        return nextEliteSpawnTime;
+    }
+
+    public boolean canSpawnElite() {
+        return getEliteState() == EliteState.NORMAL && nextEliteSpawnTime < System.currentTimeMillis();
+    }
+
+    public int getKilledElites() {
+        return killedElites;
+    }
+
+    public void setKilledElites(int killedElites) {
+        this.killedElites = killedElites;
+    }
+
+    public void incrementEliteKillCount() {
+        setKilledElites(getKilledElites() + 1);
+    }
+
+    public void setEliteState(EliteState eliteState) {
+        this.eliteState = eliteState;
+    }
+
+    public EliteState getEliteState() {
+        return eliteState;
     }
 }

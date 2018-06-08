@@ -783,4 +783,30 @@ public class CField {
 
         return outPacket;
     }
+
+    /**
+     * Creates a packet for changing the elite state of a field.
+     * @param eliteState The new elite state
+     * @param notShowPopup whether or not the popup should show up (warning message for boss spawn, countdown for bonus)
+     * @param bgm The new bgm if the state is ELITE_BOSS
+     * @param propSpecialEliteEffect special elite effect
+     * @param backUOL back uol
+     * @return
+     */
+    public static OutPacket eliteState(EliteState eliteState, boolean notShowPopup, String bgm, String propSpecialEliteEffect,
+                                      String backUOL) {
+
+        OutPacket outPacket = new OutPacket(OutHeader.ELITE_STATE);
+
+        outPacket.encodeInt(eliteState.getVal()); // elite state
+        outPacket.encodeInt(notShowPopup ? 1 : 0); // ?
+        if (eliteState == EliteState.ELITE_BOSS) {
+            outPacket.encodeString(bgm); // bgm
+        } else {
+            outPacket.encodeString(propSpecialEliteEffect);
+            outPacket.encodeString(backUOL);
+        }
+
+        return outPacket;
+    }
 }
