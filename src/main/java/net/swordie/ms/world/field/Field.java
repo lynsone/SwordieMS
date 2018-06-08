@@ -13,6 +13,7 @@ import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropLeaveType;
 import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.enums.LeaveType;
+import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Life;
@@ -923,8 +924,9 @@ public class Field {
         if(getBurningFieldLevel() > 0) {
             string = "#fn ExtraBold##fs26##e          Burning Stage " + getBurningFieldLevel() + ": " + getBonusExpByBurningFieldLevel() + "% Bonus EXP!          ";
         }
-        Effect effect = Effect.createBurningFieldTextEffect(string);
-        broadcastPacket(CField.onEffect(effect));
+        Effect effect = Effect.createFieldTextEffect(string, 50, 2000, 4,
+                new Position(0, -200), 1, 4 , TextEffectType.BurningField, 0, 0);
+        broadcastPacket(User.onEffect(effect));
     }
 
     public void increaseBurningLevel() {
@@ -973,7 +975,7 @@ public class Field {
     }
 
     public boolean canSpawnElite() {
-        return getEliteState() == EliteState.NORMAL && nextEliteSpawnTime < System.currentTimeMillis();
+        return getEliteState() == null || getEliteState() == EliteState.NORMAL && nextEliteSpawnTime < System.currentTimeMillis();
     }
 
     public int getKilledElites() {

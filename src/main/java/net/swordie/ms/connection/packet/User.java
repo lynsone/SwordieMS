@@ -96,4 +96,12 @@ public class User {
 
         return outPacket;
     }
+
+    public static OutPacket onEffect(Effect effect) {
+        OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
+
+        effect.encode(outPacket);
+
+        return outPacket;
+    }
 }

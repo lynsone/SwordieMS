@@ -768,14 +768,6 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket onEffect(Effect effect) {
-        OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
-
-        effect.encode(outPacket);
-
-        return outPacket;
-    }
-
     public static OutPacket clock(ClockPacket clockPacket) {
         OutPacket outPacket = new OutPacket(OutHeader.CLOCK);
 

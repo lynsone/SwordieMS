@@ -4,6 +4,7 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.enums.UserEffectType;
+import net.swordie.ms.util.Position;
 
 import static net.swordie.ms.enums.UserEffectType.*;
 
@@ -30,23 +31,45 @@ public class Effect {
         switch (getUserEffectType()) {
             case TextEffect:
                 outPacket.encodeString(getString());
-                outPacket.encodeInt(getArg2()); //Delay per letter
-                outPacket.encodeInt(getArg1()); //Duration of Box
-                outPacket.encodeInt(getArg3()); //Positioning on Client  ( 4 = middle )
-                outPacket.encodeInt(getArg4()); // xPos
+                outPacket.encodeInt(getArg1()); // letter delay
+                outPacket.encodeInt(getArg2()); // box duration
+                outPacket.encodeInt(getArg3()); // Positioning on Client  ( 4 = middle )
 
+                outPacket.encodeInt(getArg4()); // xPos
                 outPacket.encodeInt(getArg5()); // yPos
 
                 outPacket.encodeInt(getArg6()); // Align
-                outPacket.encodeInt(getArg3()); // Line space
-                outPacket.encodeInt(getArg7()); // Type
-                outPacket.encodeInt(getArg4()); // Text Box enter ( 0 = fade in)
-                outPacket.encodeInt(getArg4()); // Text Box enter ( 0 = fade in)
+                outPacket.encodeInt(getArg7()); // Line space
+                outPacket.encodeInt(getArg8()); // Enter type (0 = fade in)
+                outPacket.encodeInt(getArg9()); // Leave type?
+                outPacket.encodeInt(getArg10()); // Type
                 break;
             case ResetOnStateForOnOffSkill:
                 outPacket.encodeByte(getArg1());
                 break;
         }
+    }
+
+
+    public static Effect createFieldTextEffect(String msg, int letterDelay, int showTime, int clientPosition,
+                                               Position boxPos, int align, int lineSpace, TextEffectType type,
+                                               int enterType, int leaveType) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(TextEffect);
+        effect.setString(msg);
+        effect.setArg1(letterDelay);
+        effect.setArg2(showTime);
+        effect.setArg3(clientPosition);
+        effect.setArg4(boxPos.getX());
+        effect.setArg5(boxPos.getY());
+        effect.setArg6(align);
+        effect.setArg7(lineSpace);
+        effect.setArg8(type.getVal());
+        effect.setArg9(enterType);
+        effect.setArg10(leaveType);
+
+        return effect;
     }
 
     public void setUserEffectType(UserEffectType userEffectType) {
@@ -143,23 +166,6 @@ public class Effect {
 
     public void setArg10(int arg10) {
         this.arg10 = arg10;
-    }
-
-
-    public static Effect createBurningFieldTextEffect(String string) {
-        Effect effect = new Effect();
-
-        effect.setUserEffectType(TextEffect);
-        effect.setString(string);
-        effect.setArg1(2000);
-        effect.setArg2(50);
-        effect.setArg3(4);
-        effect.setArg4(0);
-        effect.setArg5(0xFFFFFF38);
-        effect.setArg6(1);
-        effect.setArg7(TextEffectType.BurningField.getVal());// Type
-
-        return effect;
     }
 
     public static Effect createABRechargeEffect() {

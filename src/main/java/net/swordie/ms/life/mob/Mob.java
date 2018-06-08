@@ -6,9 +6,12 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.MobPool;
+import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.EliteState;
+import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
@@ -1159,6 +1162,7 @@ public class Mob extends Life {
             spawnEliteVersion();
         } else if (getEliteType() == 1) {
             field.incrementEliteKillCount();
+            String msg = null;
             if (field.getKilledElites() >= GameConstants.ELITE_BOSS_REQUIRED_KILLS) {
                 field.setKilledElites(field.getKilledElites() % GameConstants.ELITE_BOSS_REQUIRED_KILLS);
                 int bossTemplate = Util.getRandomFromList(GameConstants.ELITE_BOSS_TEMPLATES);
@@ -1175,7 +1179,14 @@ public class Mob extends Life {
                 field.setEliteState(EliteState.ELITE_BOSS);
                 field.broadcastPacket(CField.eliteState(EliteState.ELITE_BOSS, false, GameConstants.ELITE_BOSS_BGM,
                         null, null));
+            } else if (field.getKilledElites() >= GameConstants.ELITE_MOB_DARK_NOTIFICATION) {
+                msg = "You feel something in the dark energy...";
+            } else {
+                msg = "The dark energy is still here. It's making the place quite grim.";
             }
+            Effect effect = Effect.createFieldTextEffect(msg, 75, 2000, 4,
+                    new Position(0, -200), 1, 4, TextEffectType.BlackFadedBrush, 0, 0);
+            getField().broadcastPacket(User.onEffect(effect));
         } else if (getEliteType() == 3) {
             field.broadcastPacket(CField.eliteState(EliteState.NORMAL, true, null, null, null));
             field.setEliteState(EliteState.NORMAL);

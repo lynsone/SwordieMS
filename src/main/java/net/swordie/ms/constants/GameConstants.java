@@ -69,10 +69,10 @@ public class GameConstants {
 
     // Elite mob
     public static final int ELITE_MOB_SKILL_COUNT = 2;
-    public static final int ELITE_MOB_RESPAWN_TIME = 3; // seconds
-    public static final int ELITE_MOB_SPAWN_CHANCE = 500; // out of a 1000
-    public static final int ELITE_MOB_DARK_NOTIFICATION = 2;
-    public static final int ELITE_BOSS_REQUIRED_KILLS = 5;
+    public static final int ELITE_MOB_RESPAWN_TIME = 120; // seconds
+    public static final int ELITE_MOB_SPAWN_CHANCE = 5; // out of a 1000
+    public static final int ELITE_MOB_DARK_NOTIFICATION = 17;
+    public static final int ELITE_BOSS_REQUIRED_KILLS = 20;
     public static final Integer[] ELITE_BOSS_TEMPLATES = new Integer[]{9303130, 9303131, 9303132, 9303133, 9303134, // 2 types, easy/hard I think
             9303135, 9303136, 9303137, 9303138, 9303139};
     public static final String ELITE_BOSS_BGM = "Bgm45/Anthem For Heroes";
