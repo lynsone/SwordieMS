@@ -87,16 +87,6 @@ public class UserLocal {
         outPacket.encodeInt(0);
 
         return outPacket;
-
-    }
-
-    public static OutPacket onEffectRechargeAB() {
-        OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
-
-        outPacket.encodeByte(0x31);
-        outPacket.encodeByte(1);
-
-        return outPacket;
     }
 
     public static OutPacket modHayatoCombo(int amount) {

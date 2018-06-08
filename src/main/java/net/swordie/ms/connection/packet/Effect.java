@@ -2,6 +2,7 @@ package net.swordie.ms.connection.packet;
 
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.enums.UserEffectType;
 
 import static net.swordie.ms.enums.UserEffectType.*;
@@ -32,17 +33,19 @@ public class Effect {
                 outPacket.encodeInt(getArg2()); //Delay per letter
                 outPacket.encodeInt(getArg1()); //Duration of Box
                 outPacket.encodeInt(getArg3()); //Positioning on Client  ( 4 = middle )
-                outPacket.encodeInt(getArg4()); // Unknown
+                outPacket.encodeInt(getArg4()); // xPos
 
-                outPacket.encodeInt(getArg5()); //Positioning on Client
+                outPacket.encodeInt(getArg5()); // yPos
 
-                outPacket.encodeInt(getArg6()); // Unknown2
-                outPacket.encodeInt(getArg3()); // Unknown3
-                outPacket.encodeInt(getArg7()); // Unknown4
+                outPacket.encodeInt(getArg6()); // Align
+                outPacket.encodeInt(getArg3()); // Line space
+                outPacket.encodeInt(getArg7()); // Type
                 outPacket.encodeInt(getArg4()); // Text Box enter ( 0 = fade in)
                 outPacket.encodeInt(getArg4()); // Text Box enter ( 0 = fade in)
                 break;
-
+            case ResetOnStateForOnOffSkill:
+                outPacket.encodeByte(getArg1());
+                break;
         }
     }
 
@@ -148,13 +151,21 @@ public class Effect {
 
         effect.setUserEffectType(TextEffect);
         effect.setString(string);
-        effect.setArg1(1500);       // Duration of TextBox
-        effect.setArg2(50);         // Delay between each letter appearing
-        effect.setArg3(4);          // Position on the Client ( 4 = middle )
-        effect.setArg4(0);          // Unknown
-        effect.setArg5(0xFFFFFF38); // Vertical Positioning on the Client (?)
-        effect.setArg6(1);          // Unknown
-        effect.setArg7(2);          // Unknown
+        effect.setArg1(2000);
+        effect.setArg2(50);
+        effect.setArg3(4);
+        effect.setArg4(0);
+        effect.setArg5(0xFFFFFF38);
+        effect.setArg6(1);
+        effect.setArg7(TextEffectType.BurningField.getVal());// Type
+
+        return effect;
+    }
+
+    public static Effect createABRechargeEffect() {
+        Effect effect = new Effect();
+
+        effect.setArg1(1);
 
         return effect;
     }
