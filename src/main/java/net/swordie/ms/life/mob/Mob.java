@@ -26,7 +26,7 @@ import net.swordie.ms.util.container.Triple;
 import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.fieldeffect.MobHPTagFieldEffect;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -1128,9 +1128,9 @@ public class Mob extends Life {
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (newHp <= 0) {
             die();
-            getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(this)));
+            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else if (isBoss()) {
-            getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(this)));
+            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {
             getField().broadcastPacket(MobPool.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }

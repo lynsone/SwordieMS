@@ -632,11 +632,10 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket fieldEffect(FieldEffect fe) {
+    public static OutPacket fieldEffect(FieldEffect fieldEffect) {
         OutPacket outPacket = new OutPacket(OutHeader.FIELD_EFFECT);
 
-        outPacket.encodeByte(fe.getType().getVal());
-        fe.encode(outPacket);
+        fieldEffect.encode(outPacket);
 
         return outPacket;
     }
