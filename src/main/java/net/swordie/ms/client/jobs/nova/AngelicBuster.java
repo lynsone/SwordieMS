@@ -534,7 +534,7 @@ public class AngelicBuster extends Job {
 
     private void rechargeABSkills() {
         Effect effect = Effect.createABRechargeEffect();
-        chr.write(User.onEffect(effect));
-        chr.write(UserLocal.onResetStateForOffSkill());
+        chr.write(User.effect(effect));
+        chr.write(UserLocal.resetStateForOffSkill());
     }
 }

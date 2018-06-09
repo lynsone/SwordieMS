@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.info.ZeroInfo;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.items.MemorialCubeInfo;
 import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Skill;
@@ -825,6 +826,25 @@ public class WvsContext {
             case SetSonOfLinkedSkillResult_Fail_DBRequestFail:
                 break;
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket memorialCubeResult(Equip equip, MemorialCubeInfo mci) {
+        OutPacket outPacket = new OutPacket(OutHeader.MEMORIAL_CUBE_RESULT);
+
+        outPacket.encodeLong(equip.getSerialNumber());
+        mci.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket blackCubeResult(Equip equip, MemorialCubeInfo mci) {
+        OutPacket outPacket = new OutPacket(OutHeader.BLACK_CUBE_RESULT);
+
+        outPacket.encodeLong(equip.getSerialNumber());
+        mci.encode(outPacket);
+        outPacket.encodeInt(equip.getBagIndex());
 
         return outPacket;
     }

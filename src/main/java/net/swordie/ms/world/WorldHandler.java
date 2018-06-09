@@ -1655,7 +1655,8 @@ public class WorldHandler {
                 Field field = chr.getOrCreateFieldByCurrentInstanceType(mapID);
                 chr.warp(field);
                 break;
-            case 5062009: // Red Cube
+            case ItemConstants.RED_CUBE: // Red Cube
+            case ItemConstants.BLACK_CUBE: // Black cube
                 short ePos = (short) inPacket.decodeInt();
                 InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
                 Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
@@ -1663,6 +1664,7 @@ public class WorldHandler {
                     chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
                     return;
                 }
+                Equip oldEquip = equip.deepCopy();
                 int tierUpChance = ItemConstants.getTierUpChance(itemID);
                 short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
                 boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
@@ -1671,13 +1673,21 @@ public class WorldHandler {
                 }
                 equip.setHiddenOptionBase(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
                 equip.releaseOptions(false);
-                c.write(CField.redCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
-                c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
+                if (itemID == ItemConstants.RED_CUBE) {
+                    c.write(CField.redCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
+                    c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
+                } else {
+                    if (chr.getMemorialCubeInfo() == null) {
+                        chr.setMemorialCubeInfo(new MemorialCubeInfo(equip, oldEquip, itemID));
+                    }
+                    chr.getField().broadcastPacket(User.showItemMemorialEffect(chr.getId(), true, itemID));
+                    c.write(WvsContext.blackCubeResult(equip, chr.getMemorialCubeInfo()));
+                }
                 c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
                         0, equip));
                 chr.consumeItem(item);
                 break;
-            case 5062500: // Bonus potential cube
+            case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
                 ePos = (short) inPacket.decodeInt();
                 invType = ePos < 0 ? EQUIPPED : EQUIP;
                 equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
@@ -4060,5 +4070,21 @@ public class WorldHandler {
             chr.write(WvsContext.setSonOfLinkedSkillResult(LinkedSkillResultType.SetSonOfLinkedSkillResult_Fail_Unknown,
                     0, null, 0, null));
         }
+    }
+
+    public static void handleUserMemorialCubeOptionRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        MemorialCubeInfo mci = chr.getMemorialCubeInfo();
+        boolean chooseBefore = inPacket.decodeByte() == 7;
+        if (chooseBefore) {
+            Inventory equipInv = chr.getEquipInventory();
+            Equip equip = mci.getOldEquip();
+            Equip invEquip = (Equip) equipInv.getItemBySlot((short) equip.getBagIndex());
+            equipInv.removeItem(invEquip);
+            equipInv.addItem(equip);
+            chr.write(WvsContext.inventoryOperation(true, false, ADD,
+                    (short) equip.getBagIndex(), (short) 0, 0, equip));
+        }
+        chr.setMemorialCubeInfo(null);
     }
 }

@@ -312,6 +312,8 @@ public class Char {
 	private int deathCount = -1;
 	@Transient
 	private long runeStoneCooldown;
+	@Transient
+	private MemorialCubeInfo memorialCubeInfo;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -3199,5 +3201,13 @@ public class Char {
 
 	public void setRuneCooldown(long runeCooldown) {
 		this.runeStoneCooldown = runeCooldown;
+	}
+
+	public MemorialCubeInfo getMemorialCubeInfo() {
+		return memorialCubeInfo;
+	}
+
+	public void setMemorialCubeInfo(MemorialCubeInfo memorialCubeInfo) {
+		this.memorialCubeInfo = memorialCubeInfo;
 	}
 }
