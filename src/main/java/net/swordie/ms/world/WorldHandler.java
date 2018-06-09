@@ -187,7 +187,7 @@ public class WorldHandler {
             chr.setFoothold(m.getFh());
         }
         chr.getField().checkCharInAffectedAreas(chr);
-        chr.getField().broadcastPacket(UserRemote.move(chr, encodedGatherDuration, oldPos, oldVPos, (byte) 0, movements), chr);
+        chr.getField().broadcastPacket(UserRemote.move(chr, encodedGatherDuration, oldPos, oldVPos, movements), chr);
     }
 
     public static void handleSummonedMove(Char chr, InPacket inPacket) {
@@ -3922,5 +3922,47 @@ public class WorldHandler {
             familiar.setVitality((short) Math.min(familiar.getVitality() + 1, 3));
         }
         chr.write(UserLocal.familiarAddResult(familiar, showInfo, false));
+    }
+
+    public static void handleFamiliarSpawnRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        int familiarID = inPacket.decodeInt();
+        boolean on = inPacket.decodeByte() != 0;
+        Familiar familiar = chr.getFamiliarByID(familiarID);
+        if (familiar != null) {
+            if (chr.getActiveFamiliar() != null && chr.getActiveFamiliar() != familiar) {
+                chr.getField().broadcastPacket(CFamiliar.familiarEnterField(chr.getId(), false,
+                        chr.getActiveFamiliar(), false, true));
+            }
+            chr.setActiveFamiliar(on ? familiar : null);
+            if (on) {
+                familiar.setPosition(chr.getPosition().deepCopy());
+                familiar.setFh(chr.getFoothold());
+            }
+            chr.getField().broadcastPacket(CFamiliar.familiarEnterField(chr.getId(), false, familiar, on, true));
+        }
+        chr.dispose();
+    }
+
+    public static void handleFamiliarRenameRequest(Char chr, InPacket inPacket) {
+        int familiarID = inPacket.decodeInt();
+        String name = inPacket.decodeString();
+        if (name.length() > 13) {
+            name = name.substring(0, 13);
+        }
+        Familiar familiar = chr.getFamiliarByID(familiarID);
+        if (familiar != null) {
+            familiar.setName(name);
+        }
+    }
+
+    public static void handleFamiliarMove(Char chr, InPacket inPacket) {
+        inPacket.decodeByte(); // ?
+        inPacket.decodeInt(); // familiar id
+        int encodedGatherDuration = inPacket.decodeInt();
+        Position oldPos = inPacket.decodePosition();
+        Position oldVPos = inPacket.decodePosition();
+        List<Movement> movements = WvsContext.parseMovement(inPacket);
+        chr.getField().broadcastPacket(CFamiliar.familiarMove(chr.getId(), encodedGatherDuration, oldPos, oldVPos, movements) ,chr);
     }
 }

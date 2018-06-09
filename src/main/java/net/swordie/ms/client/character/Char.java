@@ -318,6 +318,8 @@ public class Char {
 	private long runeStoneCooldown;
 	@Transient
 	private MemorialCubeInfo memorialCubeInfo;
+	@Transient
+	private Familiar activeFamiliar;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -2024,6 +2026,9 @@ public class Char {
 		if (field.getEliteState() == EliteState.ELITE_BOSS) {
 			write(CField.eliteState(EliteState.ELITE_BOSS, true, GameConstants.ELITE_BOSS_BGM, null, null));
 		}
+		if (getActiveFamiliar() != null) {
+			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
+		}
 	}
 
 	/**
@@ -3250,5 +3255,13 @@ public class Char {
 		if (familiar != null) {
 			getFamiliars().remove(familiar);
 		}
+	}
+
+	public void setActiveFamiliar(Familiar activeFamiliar) {
+		this.activeFamiliar = activeFamiliar;
+	}
+
+	public Familiar getActiveFamiliar() {
+		return activeFamiliar;
 	}
 }

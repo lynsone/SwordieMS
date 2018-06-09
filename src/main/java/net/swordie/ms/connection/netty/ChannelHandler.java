@@ -472,6 +472,15 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case FAMILIAR_ADD_REQUEST:
                     WorldHandler.handleFamiliarAddRequest(chr, inPacket);
                     break;
+                case FAMILIAR_SPAWN_REQUEST:
+                    WorldHandler.handleFamiliarSpawnRequest(chr, inPacket);
+                    break;
+                case FAMILIAR_RENAME_REQUEST:
+                    WorldHandler.handleFamiliarRenameRequest(chr, inPacket);
+                    break;
+                case FAMILIAR_MOVE:
+                    WorldHandler.handleFamiliarMove(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

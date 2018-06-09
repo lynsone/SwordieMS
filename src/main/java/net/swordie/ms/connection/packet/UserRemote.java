@@ -29,13 +29,13 @@ public class UserRemote {
     }
 
     public static OutPacket move(Char chr, int encodedGatherDuration, Position oldPos, Position oldVPos,
-                                 byte exceptionObject, List<Movement> movements) {
+                                 List<Movement> movements) {
         OutPacket outPacket = new OutPacket(OutHeader.REMOTE_MOVE);
 
         outPacket.encodeInt(chr.getId());
+        outPacket.encodeInt(encodedGatherDuration);
         outPacket.encodePosition(oldPos);
         outPacket.encodePosition(oldVPos);
-        outPacket.encodeInt(encodedGatherDuration);
         outPacket.encodeByte(movements.size());
         for(Movement m : movements) {
             m.encode(outPacket);

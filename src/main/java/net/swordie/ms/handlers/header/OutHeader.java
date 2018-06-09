@@ -507,7 +507,14 @@ public enum OutHeader {
     SKILL_PET_ACTION(607),
     SKILL_PET_STATE(608),
 
-    // More here? Kmst goes from skill -> remote instantly, this doesn't
+    // CFamiliar::OnPacket
+    FAMILIAR_ENTER_FIELD(622),
+    FAMILIAR_MOVE(623),
+    FAMILIAR_HIT(624),
+    FAMILIAR_ATTACK(625),
+    FAMILIAR_RENAME(626),
+    FAMILIAR_TRANSFER_FIELD(627),
+    FAMILIAR_UPDATE_INFO(628),
 
     // CUserRemote::OnPacket
     REMOTE_MOVE(633),
@@ -722,6 +729,7 @@ public enum OutHeader {
     OPEN_MESO_SACK_FAIL(848),
 
     FAMILIAR_ADD_RESULT(862),
+    FAMILIAR_INVALID_NAME(863),
 
     MOD_HAYATO_COMBO(886),
     SKILL_COOLTIME_SET(890),

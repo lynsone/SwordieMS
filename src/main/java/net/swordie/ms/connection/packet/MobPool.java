@@ -342,18 +342,6 @@ public class MobPool {
         outPacket.encodeByte(0);
 
 
-        /*
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
-        */
-
-
         return outPacket;
     }
 }

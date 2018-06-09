@@ -632,6 +632,11 @@ public enum InHeader {
 
     FAMILIAR_ADD_REQUEST(753),
     FAMILIAR_SPAWN_REQUEST(754),
+    FAMILIAR_RENAME_REQUEST(755),
+
+    FAMILIAR_MOVE(811),
+    FAMILIAR_ATTACK(813),
+    FAMILIAR_SKILL(814),
 
     GUILD_BBS(766),
 
@@ -1018,7 +1023,8 @@ public enum InHeader {
                 USER_QUEST_REQUEST,
                 LOGIN_PASSWORD,
                 AUTH_SECOND_PASSWORD,
-                NPC_MOVE
+                NPC_MOVE,
+                FAMILIAR_MOVE
         );
         return spam.contains(inHeaderByOp);
     }
