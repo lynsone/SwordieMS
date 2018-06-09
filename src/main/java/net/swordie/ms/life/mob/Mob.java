@@ -1434,6 +1434,34 @@ public class Mob extends Life {
         getField().spawnLife(elite, null);
     }
 
+    public void spawnEliteMobRuneOfDarkness() {
+        Mob elite = MobData.getMobDeepCopyById(getTemplateId());
+        elite.setHomePosition(getPosition().deepCopy());
+        elite.setPosition(getPosition().deepCopy());
+        elite.setCurFoodhold(getCurFoodhold().deepCopy());
+        elite.setHomeFoothold(getCurFoodhold().deepCopy());
+        elite.setNotRespawnable(true);
+        List<Triple<Integer, Double, Double>> eliteInfos = GameConstants.getEliteInfoByMobLevel(elite.getForcedMobStat().getLevel());
+        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromList(eliteInfos);
+        int eliteGrade = eliteInfo.getLeft();
+        long newHp = (long) (eliteInfo.getMiddle() * elite.getMaxHp());
+        long newExp = (long) (eliteInfo.getRight() * elite.getForcedMobStat().getExp());
+        elite.setEliteType(1);
+        elite.setEliteGrade(eliteGrade);
+        Map<Integer, Integer> possibleSkillsMap = SkillData.getEliteMobSkillsByGrade(eliteGrade);
+        List<Tuple<Integer, Integer>> possibleSkills = new ArrayList<>();
+        possibleSkillsMap.forEach((k, v) -> possibleSkills.add(new Tuple(k, v)));
+        for (int i = 0; i < GameConstants.ELITE_MOB_SKILL_COUNT; i++) {
+            Tuple<Integer, Integer> randomSkill = Util.getRandomFromList(possibleSkills);
+            elite.addEliteSkill(randomSkill.getLeft(), randomSkill.getRight());
+            possibleSkills.remove(randomSkill);
+        }
+        elite.setMaxHp(newHp);
+        elite.setHp(newHp);
+        elite.getForcedMobStat().setExp(newExp);
+        getField().spawnLife(elite, null);
+    }
+
     public List<Tuple<Integer, Integer>> getEliteSkills() {
         return eliteSkills;
     }
