@@ -1156,7 +1156,7 @@ public class AdminCommands {
                 chr.setSkillCDBypass(true);
                 chr.chatMessage(GAME_NOTICE, "Skill Cooldown bypass: ON");
             } else {
-                chr.setSkillCDBypass(true);
+                chr.setSkillCDBypass(false);
                 chr.chatMessage(GAME_NOTICE, "Skill Cooldown bypass: OFF");
             }
             chr.dispose();
