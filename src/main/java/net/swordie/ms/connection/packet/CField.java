@@ -733,8 +733,8 @@ public class CField {
     public static OutPacket runeStoneDisappear() { //RuneStone is Used
         OutPacket outPacket = new OutPacket(OutHeader.RUNE_STONE_DISAPPEAR);
 
-        outPacket.encodeInt(0);
-        outPacket.encodeInt(6041607); // idk?  // was 7032481
+        outPacket.encodeInt(0); // Has to be 0
+        outPacket.encodeInt(0); // Doesn't matter what number this is
 
         return outPacket;
     }

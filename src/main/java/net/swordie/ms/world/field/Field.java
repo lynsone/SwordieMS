@@ -896,10 +896,9 @@ public class Field {
     }
 
     public void useRuneStone(Client c, RuneStone runeStone) {
-        broadcastPacket(CField.runeStoneSkillAck(runeStone.getRuneType()));
-
         broadcastPacket(CField.completeRune(c.getChr()));
-        c.write(CField.runeStoneDisappear());
+        broadcastPacket(CField.runeStoneDisappear());
+        c.write(CField.runeStoneSkillAck(runeStone.getRuneType()));
 
         setRuneStone(null);
 
