@@ -630,10 +630,17 @@ public class WorldHandler {
             log.debug("SkillID: " + attackInfo.skillId);
             Field field = c.getChr().getField();
             c.getChr().getJobHandler().handleAttack(c, attackInfo);
-            if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK) {
-                chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
-            } else {
-                chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
+            switch (attackInfo.attackHeader) {
+                case SUMMONED_ATTACK:
+                    chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
+                    break;
+                case FAMILIAR_ATTACK:
+                    chr.getField().broadcastPacket(CFamiliar.familiarAttack(chr.getId(), attackInfo), chr);
+                    break;
+                default:
+                    if (attackInfo.attackHeader != null) {
+                        chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
+                    }
             }
             int multiKillMessage = 0;
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -3964,5 +3971,40 @@ public class WorldHandler {
         Position oldVPos = inPacket.decodePosition();
         List<Movement> movements = WvsContext.parseMovement(inPacket);
         chr.getField().broadcastPacket(CFamiliar.familiarMove(chr.getId(), encodedGatherDuration, oldPos, oldVPos, movements) ,chr);
+    }
+
+    public static void handleFamiliarAttack(Char chr, InPacket inPacket) {
+        inPacket.decodeByte(); // ?
+        int familiarID = inPacket.decodeInt();
+        if (chr.getActiveFamiliar() == null || chr.getActiveFamiliar().getFamiliarID() != familiarID) {
+            return;
+        }
+        AttackInfo ai = new AttackInfo();
+        ai.attackHeader = OutHeader.FAMILIAR_ATTACK;
+        ai.fieldKey = inPacket.decodeByte();
+        ai.skillId = inPacket.decodeInt();
+        ai.idk = inPacket.decodeByte();
+        ai.slv = 1;
+        ai.mobCount = inPacket.decodeByte();
+        for (int i = 0; i < ai.mobCount; i++) {
+            MobAttackInfo mai = new MobAttackInfo();
+            mai.mobId = inPacket.decodeInt();
+            mai.byteIdk1 = inPacket.decodeByte();
+            mai.byteIdk2 = inPacket.decodeByte();
+            mai.byteIdk3 = inPacket.decodeByte();
+            mai.byteIdk4 = inPacket.decodeByte();
+            mai.byteIdk5 = inPacket.decodeByte();
+            int idk1 = inPacket.decodeInt();
+            byte idk2 = inPacket.decodeByte();
+            int idk3 = inPacket.decodeInt();
+            mai.damages = new int[inPacket.decodeByte()];
+            for (int j = 0; j < mai.damages.length; j++) {
+                mai.damages[j] = inPacket.decodeInt();
+            }
+            ai.mobAttackInfo.add(mai);
+        }
+        handleAttack(chr.getClient(), ai);
+        // 4 more bytes after this, not sure what it is
+
     }
 }

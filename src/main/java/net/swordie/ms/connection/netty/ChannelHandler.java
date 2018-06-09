@@ -481,6 +481,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case FAMILIAR_MOVE:
                     WorldHandler.handleFamiliarMove(chr, inPacket);
                     break;
+                case FAMILIAR_ATTACK:
+                    WorldHandler.handleFamiliarAttack(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

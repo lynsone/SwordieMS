@@ -78,6 +78,9 @@ public class GameConstants {
     public static final String ELITE_BOSS_BGM = "Bgm45/Anthem For Heroes";
     public static final long ELITE_BOSS_HP_RATE = 500; // multiplier for boss' hp compared to the mobs on the map
 
+    // Familiar
+    public static final short FAMILIAR_ORB_VITALITY = 300;
+
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];

@@ -1,5 +1,7 @@
 package net.swordie.ms.connection.packet;
 
+import net.swordie.ms.client.character.skills.info.AttackInfo;
+import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -50,6 +52,25 @@ public class CFamiliar {
             m.encode(outPacket);
         }
         outPacket.encodeByte(0);
+
+        return outPacket;
+    }
+
+    public static OutPacket familiarAttack(int charID, AttackInfo attackInfo){
+        OutPacket outPacket = new OutPacket(OutHeader.FAMILIAR_ATTACK);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(0); // ?
+        outPacket.encodeByte(attackInfo.idk);
+        outPacket.encodeByte(attackInfo.mobCount);
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            outPacket.encodeInt(mai.mobId);
+            outPacket.encodeByte(mai.byteIdk1);
+            outPacket.encodeByte(mai.damages.length);
+            for (int dmg : mai.damages) {
+                outPacket.encodeInt(dmg);
+            }
+        }
 
         return outPacket;
     }
