@@ -466,6 +466,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case SET_SON_OF_LINKED_SKILL_REQUEST:
                     WorldHandler.handleSetSonOfLinkedSkillRequest(chr, inPacket);
                     break;
+                case USER_MEMORIAL_CUBE_OPTION_REQUEST:
+                    WorldHandler.handleUserMemorialCubeOptionRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

@@ -97,10 +97,20 @@ public class User {
         return outPacket;
     }
 
-    public static OutPacket onEffect(Effect effect) {
+    public static OutPacket effect(Effect effect) {
         OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
 
         effect.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket showItemMemorialEffect(int charID, boolean success, int itemID) {
+        OutPacket outPacket = new OutPacket(OutHeader.SHOW_ITEM_MEMORIAL_EFFECT);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(success);
+        outPacket.encodeInt(itemID);
 
         return outPacket;
     }

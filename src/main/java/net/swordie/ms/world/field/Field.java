@@ -926,7 +926,7 @@ public class Field {
         }
         Effect effect = Effect.createFieldTextEffect(string, 50, 2000, 4,
                 new Position(0, -200), 1, 4 , TextEffectType.BurningField, 0, 0);
-        broadcastPacket(User.onEffect(effect));
+        broadcastPacket(User.effect(effect));
     }
 
     public void increaseBurningLevel() {

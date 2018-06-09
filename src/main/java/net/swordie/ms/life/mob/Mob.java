@@ -1186,7 +1186,7 @@ public class Mob extends Life {
             }
             Effect effect = Effect.createFieldTextEffect(msg, 75, 2000, 4,
                     new Position(0, -200), 1, 4, TextEffectType.BlackFadedBrush, 0, 0);
-            getField().broadcastPacket(User.onEffect(effect));
+            getField().broadcastPacket(User.effect(effect));
         } else if (getEliteType() == 3) {
             field.broadcastPacket(CField.eliteState(EliteState.NORMAL, true, null, null, null));
             field.setEliteState(EliteState.NORMAL);

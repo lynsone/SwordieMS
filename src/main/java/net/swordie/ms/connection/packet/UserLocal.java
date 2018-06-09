@@ -81,7 +81,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onResetStateForOffSkill() {
+    public static OutPacket resetStateForOffSkill() {
         OutPacket outPacket = new OutPacket(OutHeader.RESET_STATE_FOR_OFF_SKILL);
 
         outPacket.encodeInt(0);

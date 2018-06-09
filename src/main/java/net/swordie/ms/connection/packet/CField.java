@@ -782,7 +782,7 @@ public class CField {
      * @param bgm The new bgm if the state is ELITE_BOSS
      * @param propSpecialEliteEffect special elite effect
      * @param backUOL back uol
-     * @return
+     * @return packet for the client
      */
     public static OutPacket eliteState(EliteState eliteState, boolean notShowPopup, String bgm, String propSpecialEliteEffect,
                                       String backUOL) {

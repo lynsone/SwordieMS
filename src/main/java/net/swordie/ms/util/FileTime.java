@@ -101,7 +101,7 @@ public class FileTime implements Serializable {
 	}
 
 	public static FileTime getFTFromLong(long value) {
-		return new FileTime((int) value, (int) (value >> 32));
+		return new FileTime((int) value, (int) (value >>> 32));
 	}
 
 	public void encode(OutPacket outPacket) {
