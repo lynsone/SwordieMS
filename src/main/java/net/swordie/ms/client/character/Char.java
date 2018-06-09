@@ -72,8 +72,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
@@ -2239,6 +2238,10 @@ public class Char {
 					itemID == GameConstants.RED_EXP_ORB_ID) {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
 				addExp(expGain);
+
+				// Exp Orb Buff On Pickup
+				TemporaryStatManager tsm = getTemporaryStatManager();
+				ItemBuffs.giveItemBuffsFromItemID(this, tsm, itemID);
 			}
 			if (!ItemConstants.isEquip(itemID)) {
 				ItemInfo ii = ItemData.getItemInfoByID(itemID);

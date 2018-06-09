@@ -24,6 +24,7 @@ public enum SpecStat {
     immp,
     indieAllStat,
     indieSpeed,
+    indieJump,
     indieSTR,
     indieDEX,
     indieINT,
