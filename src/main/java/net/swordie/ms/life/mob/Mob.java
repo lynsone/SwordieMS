@@ -26,7 +26,7 @@ import net.swordie.ms.util.container.Triple;
 import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.fieldeffect.MobHPTagFieldEffect;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -1128,9 +1128,9 @@ public class Mob extends Life {
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (newHp <= 0) {
             die();
-            getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(this)));
+            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else if (isBoss()) {
-            getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(this)));
+            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {
             getField().broadcastPacket(MobPool.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }
@@ -1431,6 +1431,34 @@ public class Mob extends Life {
         elite.setHp(newHp);
         elite.getForcedMobStat().setExp(newExp);
         getField().setNextEliteSpawnTime(System.currentTimeMillis() + GameConstants.ELITE_MOB_RESPAWN_TIME * 1000);
+        getField().spawnLife(elite, null);
+    }
+
+    public void spawnEliteMobRuneOfDarkness() {
+        Mob elite = MobData.getMobDeepCopyById(getTemplateId());
+        elite.setHomePosition(getPosition().deepCopy());
+        elite.setPosition(getPosition().deepCopy());
+        elite.setCurFoodhold(getCurFoodhold().deepCopy());
+        elite.setHomeFoothold(getCurFoodhold().deepCopy());
+        elite.setNotRespawnable(true);
+        List<Triple<Integer, Double, Double>> eliteInfos = GameConstants.getEliteInfoByMobLevel(elite.getForcedMobStat().getLevel());
+        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromList(eliteInfos);
+        int eliteGrade = eliteInfo.getLeft();
+        long newHp = (long) (eliteInfo.getMiddle() * elite.getMaxHp());
+        long newExp = (long) (eliteInfo.getRight() * elite.getForcedMobStat().getExp());
+        elite.setEliteType(1);
+        elite.setEliteGrade(eliteGrade);
+        Map<Integer, Integer> possibleSkillsMap = SkillData.getEliteMobSkillsByGrade(eliteGrade);
+        List<Tuple<Integer, Integer>> possibleSkills = new ArrayList<>();
+        possibleSkillsMap.forEach((k, v) -> possibleSkills.add(new Tuple(k, v)));
+        for (int i = 0; i < GameConstants.ELITE_MOB_SKILL_COUNT; i++) {
+            Tuple<Integer, Integer> randomSkill = Util.getRandomFromList(possibleSkills);
+            elite.addEliteSkill(randomSkill.getLeft(), randomSkill.getRight());
+            possibleSkills.remove(randomSkill);
+        }
+        elite.setMaxHp(newHp);
+        elite.setHp(newHp);
+        elite.getForcedMobStat().setExp(newExp);
         getField().spawnLife(elite, null);
     }
 

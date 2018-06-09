@@ -289,17 +289,13 @@ public class RuneStone {
         chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been fully implemented.");
     }
 
-    private void applyRuneDarkness(Char chr) { //TODO change to Elite Mobs.
+    private void applyRuneDarkness(Char chr) {
         Field field = chr.getField();
-        List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
-
         int numberOfEliteMobsSpawned = GameConstants.DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED;
         for(int i = 0; i < numberOfEliteMobsSpawned; i++) {
-            Foothold foothold = Util.getRandomFromList(listOfFootHolds);
-            Position position = foothold.getRandomPosition();
-            field.spawnMob(2600316, position.getX(), position.getY(), false);
+            Mob mob = Util.getRandomFromList(field.getMobs());
+            mob.spawnEliteMobRuneOfDarkness();
         }
-        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been fully implemented.");
     }
 
     private void applyRuneRiches(Char chr) {
