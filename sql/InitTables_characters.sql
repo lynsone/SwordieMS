@@ -493,6 +493,23 @@ create table characters (
     foreign key (monsterbook) references monsterbookinfos(id)
 );
 
+create table familiars (
+	id bigint not null auto_increment,
+    charid int,
+    idk1 int,
+    familiarid int,
+    name varchar(13),
+    idk2 boolean,
+    idk3 smallint,
+    fatigue int,
+    idk4 bigint,
+    idk5 bigint,
+    expiredate int,
+    vitality smallint,
+    primary key (id),
+    foreign key (charid) references characters(id) on delete cascade
+);
+
 create table characterpotentials (
 	id bigint not null auto_increment,
     potkey tinyint,

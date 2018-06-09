@@ -10,6 +10,7 @@ import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.enums.StealMemoryType;
 import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
@@ -322,6 +323,17 @@ public class UserLocal {
         OutPacket outPacket = new OutPacket(OutHeader.DEATH_COUNT_INFO);
 
         outPacket.encodeInt(deathCount);
+
+        return outPacket;
+    }
+
+    public static OutPacket familiarAddResult(Familiar familiar, boolean showInfoChanged, boolean adminMob) {
+        OutPacket outPacket = new OutPacket(OutHeader.FAMILIAR_ADD_RESULT);
+
+        outPacket.encodeLong(familiar.getId());
+        familiar.encode(outPacket);
+        outPacket.encodeByte(showInfoChanged);
+        outPacket.encodeByte(adminMob);
 
         return outPacket;
     }

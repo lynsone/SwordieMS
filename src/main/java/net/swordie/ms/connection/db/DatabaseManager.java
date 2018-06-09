@@ -25,6 +25,7 @@ import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.GuildRequestor;
 import net.swordie.ms.client.guild.GuildSkill;
 import net.swordie.ms.client.trunk.Trunk;
+import net.swordie.ms.life.Familiar;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -84,6 +85,7 @@ public class DatabaseManager {
                 MonsterBookInfo.class,
                 CharacterPotential.class,
                 LinkSkill.class,
+                Familiar.class,
 
         };
         for(Class clazz : dbClasses) {

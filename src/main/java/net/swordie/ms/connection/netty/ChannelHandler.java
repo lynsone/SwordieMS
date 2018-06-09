@@ -469,6 +469,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_MEMORIAL_CUBE_OPTION_REQUEST:
                     WorldHandler.handleUserMemorialCubeOptionRequest(chr, inPacket);
                     break;
+                case FAMILIAR_ADD_REQUEST:
+                    WorldHandler.handleFamiliarAddRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

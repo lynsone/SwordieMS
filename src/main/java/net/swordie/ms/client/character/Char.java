@@ -51,6 +51,7 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
@@ -145,6 +146,10 @@ public class Char {
 	@JoinColumn(name = "charID")
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<CharacterPotential> potentials;
+
+	@JoinColumn(name = "charID")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	private Set<Familiar> familiars;
 
 	@JoinColumn(name = "charID")
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -364,6 +369,7 @@ public class Char {
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
+		familiars = new HashSet<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -974,8 +980,10 @@ public class Char {
 			}
 		}
 		if (mask.isInMask(DBChar.Familiar)) {
-			outPacket.encodeInt(0);
-			// if int is > 0: sub_72AEB0
+			outPacket.encodeInt(getFamiliars().size());
+			for (Familiar familiar : getFamiliars()) {
+				familiar.encode(outPacket);
+			}
 		}
 		if (mask.isInMask(DBChar.NewYearCard)) {
 			short size = 0;
@@ -3212,5 +3220,35 @@ public class Char {
 
 	public void setMemorialCubeInfo(MemorialCubeInfo memorialCubeInfo) {
 		this.memorialCubeInfo = memorialCubeInfo;
+	}
+
+	public Set<Familiar> getFamiliars() {
+		return familiars;
+	}
+
+	public void setFamiliars(Set<Familiar> familiars) {
+		this.familiars = familiars;
+	}
+
+	public boolean hasFamiliar(int familiarID) {
+		return getFamiliars().stream().anyMatch(f -> f.getFamiliarID() == familiarID);
+	}
+
+	public Familiar getFamiliarByID(int familiarID) {
+		return getFamiliars().stream().filter(f -> f.getFamiliarID() == familiarID).findAny().orElse(null);
+	}
+
+	public void addFamiliar(Familiar familiar) {
+		getFamiliars().add(familiar);
+	}
+
+	public void removeFamiliarByID(int familiarID) {
+		removeFamiliar(getFamiliarByID(familiarID));
+	}
+
+	public void removeFamiliar(Familiar familiar) {
+		if (familiar != null) {
+			getFamiliars().remove(familiar);
+		}
 	}
 }

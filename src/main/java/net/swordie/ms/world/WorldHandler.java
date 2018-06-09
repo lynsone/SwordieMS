@@ -67,10 +67,7 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.Reactor;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.skill.MobSkill;
@@ -3902,5 +3899,28 @@ public class WorldHandler {
                     (short) equip.getBagIndex(), (short) 0, 0, equip));
         }
         chr.setMemorialCubeInfo(null);
+    }
+
+    public static void handleFamiliarAddRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        short slot = inPacket.decodeShort();
+        int itemID = inPacket.decodeInt();
+        Item item = chr.getConsumeInventory().getItemBySlot(slot);
+        if (item == null || item.getItemId() != itemID || !ItemConstants.isFamiliar(itemID)) {
+            chr.chatMessage("Could not find that item.");
+            log.error(String.format("Character %d tried to add a familiar it doesn't have. (item id %d)", chr.getId(), itemID));
+        }
+        int suffix = itemID % 10000;
+        int familiarID = (ItemConstants.FAMILIAR_PREFIX * 10000) + suffix;
+        Familiar familiar = chr.getFamiliarByID(familiarID);
+        boolean showInfo = true;
+        if (familiar == null) {
+            familiar = new Familiar(0, familiarID, "Familiar", FileTime.getFileTimeFromType(FileTime.Type.PERMANENT), (short) 1);
+            showInfo = false;
+            chr.addFamiliar(familiar);
+        } else {
+            familiar.setVitality((short) Math.min(familiar.getVitality() + 1, 3));
+        }
+        chr.write(UserLocal.familiarAddResult(familiar, showInfo, false));
     }
 }

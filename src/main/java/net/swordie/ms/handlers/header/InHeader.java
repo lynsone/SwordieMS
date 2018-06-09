@@ -626,17 +626,20 @@ public enum InHeader {
     RW_MULTI_CHARGE_CANCEL_REQUEST(732),
     FUNTION_FOOTHOLD_MAN(733),
 
-    // Where?
     MONSTER_BOOK_MOB_INFO(737),
     NEBULITE_INSERT_REQUEST(740),
     SOCKET_CREATE_REQUEST(741),
 
-    E_N_D__U_S_E_R(734),
-
-    B_E_G_I_N__F_I_E_L_D(735),
-    B_E_G_I_N__L_I_F_E_P_O_O_L(736),
+    FAMILIAR_ADD_REQUEST(753),
+    FAMILIAR_SPAWN_REQUEST(754),
 
     GUILD_BBS(766),
+
+    E_N_D__U_S_E_R(821),
+
+    B_E_G_I_N__F_I_E_L_D(822),
+    B_E_G_I_N__L_I_F_E_P_O_O_L(823),
+
 
     B_E_G_I_N__M_O_B(824),
     MOB_MOVE(825),
