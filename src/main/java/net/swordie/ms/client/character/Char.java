@@ -2089,13 +2089,45 @@ public class Char {
 			stats.put(Stat.level, (byte) getStat(Stat.level));
 			getJobHandler().handleLevelUp();
 			level++;
+			heal(getMaxHP());
+			healMP(getMaxMP());
 		}
 		cs.setExp(newExp);
 		stats.put(Stat.exp, newExp);
 		write(WvsContext.incExpMessage(eii));
 		getClient().write(WvsContext.statChanged(stats));
-		heal(getMaxHP());
-		healMP(getMaxMP());
+	}
+
+	/**
+	 * Adds a given amount of exp to this Char, however it does not display the Exp Message.
+	 * Immediately checks for level-up possibility, and sends the updated
+	 * stats to the client. Allows multi-leveling.
+	 *
+	 *
+	 * @param amount
+	 * 		The amount of exp to add.
+	 */
+	public void addExpNoMsg(long amount) {
+		CharacterStat cs = getAvatarData().getCharacterStat();
+		long curExp = cs.getExp();
+		int level = getStat(Stat.level);
+		if (level >= GameConstants.charExp.length - 1) {
+			return;
+		}
+		long newExp = curExp + amount;
+		Map<Stat, Object> stats = new HashMap<>();
+		while (newExp >= GameConstants.charExp[level]) {
+			newExp -= GameConstants.charExp[level];
+			addStat(Stat.level, 1);
+			stats.put(Stat.level, (byte) getStat(Stat.level));
+			getJobHandler().handleLevelUp();
+			level++;
+			heal(getMaxHP());
+			healMP(getMaxMP());
+		}
+		cs.setExp(newExp);
+		stats.put(Stat.exp, newExp);
+		getClient().write(WvsContext.statChanged(stats));
 	}
 
 	/**

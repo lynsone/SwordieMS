@@ -4,7 +4,6 @@ import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
 import net.swordie.ms.util.container.Triple;
-import net.swordie.ms.util.container.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +29,9 @@ public class GameConstants {
     public static final int COMBO_KILL_REWARD_BLUE = 50; // Combo kills
     public static final int COMBO_KILL_REWARD_PURPLE = 350; // Combo kills
     public static final int COMBO_KILL_REWARD_RED = 750; // Combo kills
+
+    //Multi Kill
+    public static final float MULTI_KILL_BONUS_EXP_MULTIPLIER = 0.01f; // Multi Kill Bonus Exp given  =  mobEXP * (( multi Kill Amount - 2 ) * 5) * BONUS_EXP_FOR_MULTI_KILL
 
     //Inner Ability
     public static final int CHAR_POT_BASE_ID = 70000000;
