@@ -320,6 +320,8 @@ public class Char {
 	private MemorialCubeInfo memorialCubeInfo;
 	@Transient
 	private Familiar activeFamiliar;
+	@Transient
+	private boolean skillCDBypass = false;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -2089,13 +2091,45 @@ public class Char {
 			stats.put(Stat.level, (byte) getStat(Stat.level));
 			getJobHandler().handleLevelUp();
 			level++;
+			heal(getMaxHP());
+			healMP(getMaxMP());
 		}
 		cs.setExp(newExp);
 		stats.put(Stat.exp, newExp);
 		write(WvsContext.incExpMessage(eii));
 		getClient().write(WvsContext.statChanged(stats));
-		heal(getMaxHP());
-		healMP(getMaxMP());
+	}
+
+	/**
+	 * Adds a given amount of exp to this Char, however it does not display the Exp Message.
+	 * Immediately checks for level-up possibility, and sends the updated
+	 * stats to the client. Allows multi-leveling.
+	 *
+	 *
+	 * @param amount
+	 * 		The amount of exp to add.
+	 */
+	public void addExpNoMsg(long amount) {
+		CharacterStat cs = getAvatarData().getCharacterStat();
+		long curExp = cs.getExp();
+		int level = getStat(Stat.level);
+		if (level >= GameConstants.charExp.length - 1) {
+			return;
+		}
+		long newExp = curExp + amount;
+		Map<Stat, Object> stats = new HashMap<>();
+		while (newExp >= GameConstants.charExp[level]) {
+			newExp -= GameConstants.charExp[level];
+			addStat(Stat.level, 1);
+			stats.put(Stat.level, (byte) getStat(Stat.level));
+			getJobHandler().handleLevelUp();
+			level++;
+			heal(getMaxHP());
+			healMP(getMaxMP());
+		}
+		cs.setExp(newExp);
+		stats.put(Stat.exp, newExp);
+		getClient().write(WvsContext.statChanged(stats));
 	}
 
 	/**
@@ -2252,7 +2286,9 @@ public class Char {
 			if (itemID == GameConstants.BLUE_EXP_ORB_ID || itemID == GameConstants.PURPLE_EXP_ORB_ID ||
 					itemID == GameConstants.RED_EXP_ORB_ID) {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
-				addExp(expGain);
+
+				write(User.effect(Effect.fieldItemConsumed((int) (expGain > Integer.MAX_VALUE ? Integer.MAX_VALUE : expGain))));
+				addExpNoMsg(expGain);
 
 				// Exp Orb Buff On Pickup
 				TemporaryStatManager tsm = getTemporaryStatManager();
@@ -3140,7 +3176,9 @@ public class Char {
 			int cdInSec = si.getValue(SkillStat.cooltime, slv);
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
 			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
-			write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
+			if(!hasSkillCDBypass()) {
+				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
+			}
 		}
 	}
 
@@ -3263,5 +3301,13 @@ public class Char {
 
 	public Familiar getActiveFamiliar() {
 		return activeFamiliar;
+	}
+
+	public boolean hasSkillCDBypass() {
+		return skillCDBypass;
+	}
+
+	public void setSkillCDBypass(boolean skillCDBypass) {
+		this.skillCDBypass = skillCDBypass;
 	}
 }

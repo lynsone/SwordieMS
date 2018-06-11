@@ -643,6 +643,7 @@ public class WorldHandler {
                     }
             }
             int multiKillMessage = 0;
+            long mobexp = 0;
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
                 if (mob == null) {
@@ -675,6 +676,7 @@ public class WorldHandler {
 
                         // MultiKill +1,  per killed mob
                         multiKillMessage++;
+                        mobexp = mob.getForcedMobStat().getExp();
 
                         // Mage FP skill
                         if(mob.isInfestedByViralSlime()) {
@@ -684,9 +686,12 @@ public class WorldHandler {
                 }
             }
 
-            // MultiKill Message Popup
+            // MultiKill Message Popup & Exp
             if(multiKillMessage > 2) {
-                chr.write(UserLocal.comboCounter((byte) 0, 5, multiKillMessage > 10 ? 10 : multiKillMessage));
+                int bonusExpMultiplier = (multiKillMessage - 2) * 5;
+                long totalBonusExp = (long) (mobexp * (bonusExpMultiplier * GameConstants.MULTI_KILL_BONUS_EXP_MULTIPLIER));
+                chr.write(UserLocal.comboCounter((byte) 0, (int) totalBonusExp, multiKillMessage > 10 ? 10 : multiKillMessage));
+                chr.addExpNoMsg(totalBonusExp);
             }
         }
     }

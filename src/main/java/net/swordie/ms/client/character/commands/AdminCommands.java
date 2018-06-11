@@ -1148,4 +1148,18 @@ public class AdminCommands {
             }
         }
     }
+
+    public static class BypassSkillCD extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (!chr.hasSkillCDBypass()) {
+                chr.setSkillCDBypass(true);
+                chr.chatMessage(GAME_NOTICE, "Skill Cooldown bypass: ON");
+            } else {
+                chr.setSkillCDBypass(false);
+                chr.chatMessage(GAME_NOTICE, "Skill Cooldown bypass: OFF");
+            }
+            chr.dispose();
+        }
+    }
 }
