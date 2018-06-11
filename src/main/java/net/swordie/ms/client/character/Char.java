@@ -2286,7 +2286,9 @@ public class Char {
 			if (itemID == GameConstants.BLUE_EXP_ORB_ID || itemID == GameConstants.PURPLE_EXP_ORB_ID ||
 					itemID == GameConstants.RED_EXP_ORB_ID) {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
-				addExp(expGain);
+
+				write(User.effect(Effect.fieldItemConsumed((int) (expGain > Integer.MAX_VALUE ? Integer.MAX_VALUE : expGain))));
+				addExpNoMsg(expGain);
 
 				// Exp Orb Buff On Pickup
 				TemporaryStatManager tsm = getTemporaryStatManager();

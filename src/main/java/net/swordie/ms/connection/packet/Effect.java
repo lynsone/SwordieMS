@@ -45,7 +45,10 @@ public class Effect {
                 outPacket.encodeInt(getArg10()); // Type
                 break;
             case ResetOnStateForOnOffSkill:
-                outPacket.encodeByte(getArg1());
+                outPacket.encodeByte(getArg1()); //Boolean: Set Skill ON or OFF  state
+                break;
+            case FieldExpItemConsumed:
+                outPacket.encodeInt(getArg1()); // Exp Gained
                 break;
         }
     }
@@ -71,6 +74,25 @@ public class Effect {
 
         return effect;
     }
+
+    public static Effect createABRechargeEffect() {
+        Effect effect = new Effect();
+        effect.setUserEffectType(ResetOnStateForOnOffSkill);
+
+        effect.setArg1(1);
+
+        return effect;
+    }
+
+    public static Effect fieldItemConsumed(int expGained) {
+        Effect effect = new Effect();
+        effect.setUserEffectType(FieldExpItemConsumed);
+
+        effect.setArg1(expGained);
+
+        return effect;
+    }
+
 
     public void setUserEffectType(UserEffectType userEffectType) {
         this.userEffectType = userEffectType;
@@ -166,13 +188,5 @@ public class Effect {
 
     public void setArg10(int arg10) {
         this.arg10 = arg10;
-    }
-
-    public static Effect createABRechargeEffect() {
-        Effect effect = new Effect();
-
-        effect.setArg1(1);
-
-        return effect;
     }
 }
