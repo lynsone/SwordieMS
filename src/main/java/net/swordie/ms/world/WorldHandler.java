@@ -3961,6 +3961,7 @@ public class WorldHandler {
         if (familiar != null) {
             familiar.setName(name);
         }
+        chr.dispose();
     }
 
     public static void handleFamiliarMove(Char chr, InPacket inPacket) {
@@ -4005,6 +4006,5 @@ public class WorldHandler {
         }
         handleAttack(chr.getClient(), ai);
         // 4 more bytes after this, not sure what it is
-
     }
 }

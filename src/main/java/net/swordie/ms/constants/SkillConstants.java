@@ -776,15 +776,16 @@ public class SkillConstants {
 
     public static boolean needsOneMoreByte(int skillId) {
         switch(skillId) {
-            case 23120012:
-            case 23121000:
-            case 23101000:
-            case 23001000:
-            case 23111001:
-            case 23121002:
-            case 23121052:
-            case 23120013:
-            case 13101020:
+            case 23100006: // Merc FA
+            case 23120012: // Merc Advanced Final Attack
+            case 23121000: // Ishtar's Ring
+            case 23101000: // Piercing Storm
+            case 23001000: // Swift Dual Shot
+            case 23111001: // Leap Tornado
+            case 23121002: // Spikes Royale
+            case 23121052: // Wrath of Enlil
+            case 23120013: // Staggering Strikes
+            case 13101020: // Fairy Spiral
                 return true;
             default:
                 return false;

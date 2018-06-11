@@ -74,4 +74,15 @@ public class CFamiliar {
 
         return outPacket;
     }
+
+    public static OutPacket familiarUpdateInfo(int charID, Familiar familiar) {
+        OutPacket outPacket = new OutPacket(OutHeader.FAMILIAR_UPDATE_INFO);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(familiar.getFamiliarID());
+        outPacket.encodeInt(familiar.getFatigue());
+        outPacket.encodeFT(familiar.getExpiration());
+
+        return outPacket;
+    }
 }

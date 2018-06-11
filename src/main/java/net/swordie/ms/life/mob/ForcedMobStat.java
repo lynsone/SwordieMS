@@ -121,7 +121,7 @@ public class ForcedMobStat {
         outPacket.encodeInt(getAcc());
         outPacket.encodeInt(getEva());
         outPacket.encodeInt(getPushed());
-        outPacket.encodeInt(getSpeed());
+        outPacket.encodeInt(getSpeed() > 0 ? -getSpeed() : getSpeed());
         outPacket.encodeInt(getLevel());
         outPacket.encodeInt(getUserCount());
     }

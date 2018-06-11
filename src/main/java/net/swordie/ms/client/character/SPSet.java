@@ -47,4 +47,8 @@ public class SPSet {
     public void setId(int id) {
         this.id = id;
     }
+
+    public void addSp(int sp) {
+        setSp(getSp() + sp);
+    }
 }

@@ -2,12 +2,15 @@ package net.swordie.ms.client.jobs;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
@@ -25,6 +28,8 @@ import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -556,6 +561,37 @@ public class Zero extends Job {
             o.tOption = 20;
             tsm.putCharacterStatValue(TimeFastBBuff, o);
             c.write(WvsContext.temporaryStatSet(tsm));
+        }
+    }
+
+    @Override
+    public void handleLevelUp() {
+        short level = chr.getLevel();
+        chr.addStat(Stat.mhp, 500);
+        chr.addStat(Stat.mmp, 500);
+        chr.addStat(Stat.ap, 5);
+        int sp = 3;
+        if (level > 100 && (level % 10) % 3 == 0) {
+            sp = 6; // double sp on levels ending in 3/6/9
+        }
+        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        SPSet alphaSpSet = esp.getSpSet().get(1);
+        SPSet betaSpSet = esp.getSpSet().get(2);
+        alphaSpSet.addSp(sp);
+        betaSpSet.addSp(sp);
+        Map<Stat, Object> stats = new HashMap<>();
+        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+        chr.write(WvsContext.statChanged(stats));
+        byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
+        int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
+        if (linkSkillID != 0 && linkSkillLevel > 0) {
+            Skill skill = chr.getSkill(linkSkillID, true);
+            if (skill.getCurrentLevel() != linkSkillLevel) {
+                chr.addSkill(linkSkillID, linkSkillLevel, 3);
+            }
         }
     }
 

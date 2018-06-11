@@ -2067,7 +2067,6 @@ public class Char {
 	 * 		The amount of exp to add.
 	 */
 	public void addExp(long amount) {
-		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		ExpIncreaseInfo eii = new ExpIncreaseInfo();
 		eii.setLastHit(true);
 		eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, amount));
@@ -2075,6 +2074,7 @@ public class Char {
 	}
 
 	public void addExp(long amount, ExpIncreaseInfo eii) {
+		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		int level = getStat(Stat.level);
