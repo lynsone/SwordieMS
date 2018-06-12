@@ -47,8 +47,8 @@ public class RuneStone {
     public static final int LIBERATE_THE_RUNE_OF_HORDES = 80001874;
     public static final int LIBERATE_THE_RUNE_OF_SKILL = 80001875;
 
-    public static final int LIBERATE_THE_RUNE_OF_MIGHT_2 = 80001761;
-    public static final int LIBERATE_THE_RUNE_OF_THUNDER_2 = 80001762;
+    public static final int LIBERATE_THE_RUNE_OF_MIGHT_2 = 80001757;
+    public static final int LIBERATE_THE_RUNE_OF_THUNDER_2 = 80001756;
 
     public RuneType getRuneType() {
         return runeType;
@@ -280,13 +280,18 @@ public class RuneStone {
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         Option o1 = new Option();
-        o1.nOption = 101;
-        o1.rOption = -2003517; //Adv G Potion       Errrr
+        Option o2 = new Option();
+        o1.nOption = si.getValue(x, slv);
+        o1.rOption = skillID;
         o1.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(Inflation, o1);
+        o2.nReason = skillID;
+        o2.nValue = si.getValue(indieSpeed, slv);
+        o2.tStart = (int) System.currentTimeMillis();
+        o2.tTerm = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IndieSpeed, o2);
+        tsm.putCharacterStatValue(IndieJump, o2);
         tsm.sendSetStatPacket();
-
-        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been fully implemented.");
     }
 
     private void applyRuneDarkness(Char chr) {

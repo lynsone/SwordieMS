@@ -200,6 +200,9 @@ public class ItemBuffs {
                     tsm.putCharacterStatValue(ItemUpByItem, o);
                     tsm.putCharacterStatValue(MesoUpByItem, o);
                     break;
+                case inflation:
+                    tsm.putCharacterStatValue(Inflation, o);
+                    break;
             }
         }
         tsm.sendSetStatPacket();
