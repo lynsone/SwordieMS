@@ -848,7 +848,7 @@ public class WorldHandler {
         ai.buckShot = inPacket.decodeByte();
         ai.someMask = inPacket.decodeByte();
         short maskie = inPacket.decodeShort();
-        ai.left = ((maskie >> 15) & 1) != 0;
+        ai.left = ((maskie >>> 15) & 1) != 0;
         ai.attackAction = (short) (maskie & 0x7FFF);
         inPacket.decodeInt(); // crc
         ai.attackActionType = inPacket.decodeByte();
@@ -1344,7 +1344,7 @@ public class WorldHandler {
         int idk3 = inPacket.decodeInt();
         ai.isJablin = inPacket.decodeByte() != 0;
         short maskie = inPacket.decodeShort();
-        ai.left = ((maskie >> 15) & 1) != 0;
+        ai.left = ((maskie >>> 15) & 1) != 0;
 
         ai.attackAction = (short) (maskie & 0x7FFF);
         if (skillID == Archer.ARROW_PLATTER) { // very unsure
