@@ -4,6 +4,9 @@ drop table if exists linkskills;
 drop table if exists accounts;
 drop table if exists macroskills;
 drop table if exists macros;
+drop table if exists familiars;
+drop table if exists stolenskills;
+drop table if exists chosenskills;
 drop table if exists characterpotentials;
 drop table if exists test;
 drop table if exists skills;
@@ -47,9 +50,6 @@ drop table if exists monsterbookcards;
 drop table if exists monsterbookinfos;
 drop table if exists filetimes;
 drop table if exists trunks;
-drop table if exists familiars;
-drop table if exists stolenskills;
-drop table if exists chosenskills;
 
 create table trunks(
 	id int not null auto_increment,
