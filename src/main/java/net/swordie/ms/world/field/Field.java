@@ -496,7 +496,7 @@ public class Field {
             spawnLife(reactor, chr);
         }
         if (getRuneStone() != null && getMobs().size() > 0) {
-            broadcastPacket(CField.runeStoneAppear(runeStone));
+            chr.write(CField.runeStoneAppear(runeStone));
         }
         //if (getMobs().size() > 0 && getBurningFieldLevel() > 0) { //Burning Level shown per map entry is commented out.
         //    showBurningLevel();
@@ -919,9 +919,9 @@ public class Field {
     }
 
     public void showBurningLevel() {
-        String string = "#fn ExtraBold##fs26##e          Burning Field has been destroyed.          ";
+        String string = "#fn ExtraBold##fs26#          Burning Field has been destroyed.          ";
         if(getBurningFieldLevel() > 0) {
-            string = "#fn ExtraBold##fs26##e          Burning Stage " + getBurningFieldLevel() + ": " + getBonusExpByBurningFieldLevel() + "% Bonus EXP!          ";
+            string = "#fn ExtraBold##fs26#          Burning Stage " + getBurningFieldLevel() + ": " + getBonusExpByBurningFieldLevel() + "% Bonus EXP!          ";
         }
         Effect effect = Effect.createFieldTextEffect(string, 50, 2000, 4,
                 new Position(0, -200), 1, 4 , TextEffectType.BurningField, 0, 0);

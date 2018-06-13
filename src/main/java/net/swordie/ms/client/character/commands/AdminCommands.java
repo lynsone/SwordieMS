@@ -161,6 +161,7 @@ public class AdminCommands {
                     1101006, //Rage
                     1101011, //Brandish
                     1101012, //Combo Fury
+                    1101013, //Combo Attack
 
                     1111014, //Shout
                     1111012, //Rush
@@ -420,7 +421,7 @@ public class AdminCommands {
                 skillSet.add(skill);
             }
 
-            chr.write(UserLocal.resultStealSkillList(skillSet, 4, 5, 2412));
+            chr.write(UserLocal.resultStealSkillList(skillSet, 4, 1, 2412));
         }
     }
 

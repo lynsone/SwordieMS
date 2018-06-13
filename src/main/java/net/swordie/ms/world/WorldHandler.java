@@ -3692,7 +3692,8 @@ public class WorldHandler {
         Char targetChr = chr.getField().getCharByID(targetChrID);
         Set<Skill> targetSkillsList = targetChr.getSkills();
 
-        c.write(UserLocal.resultStealSkillList(targetSkillsList, 4, targetChrID, targetChr.getJob()));
+        chr.write(UserLocal.resultStealSkillList(targetSkillsList, 4, targetChrID, targetChr.getJob()));
+        chr.dispose();
     }
 
     public static void handleUserRequestStealSkillMemory(Client c, InPacket inPacket) {
@@ -3732,6 +3733,7 @@ public class WorldHandler {
             StolenSkill.removeSkill(chr, stealSkillID);
             c.write(UserLocal.changeStealMemoryResult(REMOVE_STEAL_MEMORY.getVal(), SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), position, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
         }
+        chr.dispose();
     }
 
     public static void handleUserRequestSetStealSkillSlot(Client c, InPacket inPacket) {
@@ -3740,6 +3742,7 @@ public class WorldHandler {
 
         ChosenSkill.setChosenSkill(c.getChr(), stealSkillID, impeccableSkillID);
         c.write(UserLocal.resultSetStealSkill(true, impeccableSkillID, stealSkillID));
+        c.getChr().dispose();
     }
 
     public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) { //TODO  Work in Progress

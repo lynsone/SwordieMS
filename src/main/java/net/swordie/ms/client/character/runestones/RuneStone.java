@@ -48,7 +48,7 @@ public class RuneStone {
     public static final int LIBERATE_THE_RUNE_OF_SKILL = 80001875;
 
     public static final int LIBERATE_THE_RUNE_OF_MIGHT_2 = 80001757;
-    public static final int LIBERATE_THE_RUNE_OF_THUNDER_2 = 80001756;
+    public static final int LIBERATE_THE_RUNE_OF_THUNDER_2 = 80001762;
 
     public RuneType getRuneType() {
         return runeType;
@@ -116,16 +116,10 @@ public class RuneStone {
                 runeBuffID = LIBERATE_THE_RUNE_OF_THUNDER;
                 break;
             case Might:
-
-                //TODO  Giant Potion effect
-
                 applyRuneMight(chr);
                 runeBuffID = LIBERATE_THE_RUNE_OF_MIGHT;
                 break;
             case Darkness:
-
-                //TODO  Spawn 3 Elite mobs
-
                 applyRuneDarkness(chr);
                 runeBuffID = LIBERATE_THE_RUNE_OF_DARKNESS;
                 break;
@@ -142,7 +136,7 @@ public class RuneStone {
                 break;
             case Skill:
 
-                //TODO  Cooldowns get 90% CDR
+                //TODO Cooldown reduction for cooldowns that are longer than 5sec
 
                 applyRuneSkill(chr);
                 runeBuffID = LIBERATE_THE_RUNE_OF_SKILL;
@@ -250,7 +244,7 @@ public class RuneStone {
         // RandAreaAttack Buff
         o1.nOption = 1;
         o1.rOption = skillID;
-        o1.tOption = si.getValue(time, slv);
+        o1.tOption = SkillData.getSkillInfoById(80001756).getValue(time, slv);
         tsm.putCharacterStatValue(RandAreaAttack, o1);
         tsm.sendSetStatPacket();
 
@@ -259,7 +253,7 @@ public class RuneStone {
     }
 
     private void randAreaAttack(int fieldID, TemporaryStatManager tsm, Char chr) {
-        if((tsm.getOptByCTSAndSkill(RandAreaAttack, LIBERATE_THE_RUNE_OF_THUNDER_2) == null) && fieldID != chr.getFieldID()) {
+        if((tsm.getOptByCTSAndSkill(RandAreaAttack, LIBERATE_THE_RUNE_OF_THUNDER_2) == null) || fieldID != chr.getFieldID()) {
             return;
         }
 
