@@ -77,6 +77,7 @@ public class Magician extends Job {
     public static final int MAPLE_WARRIOR_FP = 2121000;
     public static final int ELEMENTAL_DRAIN = 2100009;
     public static final int FERVENT_DRAIN = 2120014;
+    public static final int METEOR_SHOWER_CD_ATTACK = 2120013;
     public static final int ARCANE_AIM_FP = 2120010;
     public static final int HEROS_WILL_FP = 2121008;
 
@@ -98,6 +99,7 @@ public class Magician extends Job {
     public static final int CHAIN_LIGHTNING = 2221006;
     public static final int FREEZING_BREATH = 2221011;
     public static final int BLIZZARD = 2221007;
+    public static final int BLIZZARD_CD_ATTACK = 2220014;
     public static final int FROZEN_ORB = 2221012;
     public static final int INFINITY_IL = 2221004;
     public static final int ELQUINES = 2221005;
@@ -223,11 +225,11 @@ public class Magician extends Job {
         if (hasHitMobs) {
             handleArcaneAim();
         }
-
+        //Ignite
+        handleIgnite(attackInfo, chr, tsm);
         if (JobConstants.isFirePoison(chr.getJob())) {
             if(hasHitMobs) {
-                //Ignite
-                handleIgnite(attackInfo, chr, tsm);
+
 
                 //Megiddo Flame Recreation
                 if(attackInfo.skillId == MEGIDDO_FLAME_ATOM) {
@@ -304,8 +306,8 @@ public class Magician extends Job {
                     }
                     AffectedArea aa2 = AffectedArea.getAffectedArea(chr, attackInfo);
                     aa2.setMobOrigin((byte) 0);
-                    int x2 = mob.getX();
-                    int y2 = mob.getY();
+                    int x2 = mob.deepCopy().getPosition().getX();
+                    int y2 = mob.deepCopy().getPosition().getY();
                     aa2.setPosition(new Position(x2, y2));
                     aa2.setRect(aa2.getPosition().getRectAround(si.getRects().get(0)));
                     chr.getField().spawnAffectedArea(aa2);
@@ -915,6 +917,12 @@ public class Magician extends Job {
 
     @Override
     public int getFinalAttackSkill() {
+        if(JobConstants.isFirePoison(chr.getJob())) {
+            return METEOR_SHOWER_CD_ATTACK;
+        }
+        if(JobConstants.isIceLightning(chr.getJob())) {
+            return BLIZZARD_CD_ATTACK;
+        }
         return 0;
     }
 

@@ -22,9 +22,7 @@ import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.potential.CharacterPotentialMan;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
-import net.swordie.ms.client.character.skills.Option;
-import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
@@ -37,7 +35,6 @@ import net.swordie.ms.client.guild.updates.GuildUpdate;
 import net.swordie.ms.client.guild.updates.GuildUpdateMemberLogin;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
-import net.swordie.ms.client.jobs.legend.StealSkillInfo;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.connection.OutPacket;
@@ -73,7 +70,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
@@ -163,6 +161,14 @@ public class Char {
 	@OneToOne(cascade = CascadeType.ALL)
 	private MonsterBookInfo monsterBookInfo;
 
+	@JoinColumn(name = "charID")
+	@OneToMany(cascade = CascadeType.ALL)
+	private Set<StolenSkill> stolenSkills;
+
+	@JoinColumn(name = "charID")
+	@OneToMany(cascade = CascadeType.ALL)
+	private Set<ChosenSkill> chosenSkills;
+
 	@Transient
 	private CharacterPotentialMan potentialMan;
 
@@ -170,12 +176,6 @@ public class Char {
 	private Ranking ranking;
 	@Transient
 	private int combatOrders;
-	@Transient
-	private StealSkillInfo stealSkillInfo = new StealSkillInfo();
-	@Transient
-	private int[] stolenSkills = new int[15]; // Stolen size is always 15
-	@Transient
-	private int[] chosenSkills = new int[5]; // Chosen size is always 5
 	@Transient
 	private List<ItemPot> itemPots;
 	@Transient
@@ -1052,8 +1052,9 @@ public class Char {
 		}
 		if (mask.isInMask(DBChar.StolenSkills)) {
 			if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
-				for (int skillID : getStolenSkills()) {
-					outPacket.encodeInt(skillID);
+				for (int i = 0; i<15; i++) {
+					StolenSkill stolenSkill = getStolenSkillByPosition(i);
+					outPacket.encodeInt(stolenSkill == null ? 0 : stolenSkill.getSkillid());
 				}
 			} else {
 				outPacket.encodeInt(0);
@@ -1079,8 +1080,9 @@ public class Char {
 		}
 		if (mask.isInMask(DBChar.ChosenSkills)) {
 			if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
-				for (int skillID : getChosenSkills()) {
-					outPacket.encodeInt(skillID);
+				for (int i = 1; i <= 5; i++) { //Shifted by +1 to accomodate the Skill Management Tabs
+					ChosenSkill chosenSkill = getChosenSkillByPosition(i);
+					outPacket.encodeInt(chosenSkill == null ? 0 : ( isChosenSkillInStolenSkillList(chosenSkill.getSkillId()) ? chosenSkill.getSkillId() : 0) );
 				}
 			} else {
 				for (int i = 0; i < 5; i++) {
@@ -1307,22 +1309,6 @@ public class Char {
 
 	public int getCombatOrders() {
 		return combatOrders;
-	}
-
-	public int[] getStolenSkills() {
-		return stolenSkills;
-	}
-
-	public void setStolenSkills(int[] stolenSkills) {
-		this.stolenSkills = stolenSkills;
-	}
-
-	public int[] getChosenSkills() {
-		return chosenSkills;
-	}
-
-	public void setChosenSkills(int[] chosenSkills) {
-		this.chosenSkills = chosenSkills;
 	}
 
 	public QuestManager getQuestManager() {
@@ -3125,14 +3111,6 @@ public class Char {
 		comboKillResetTimer = EventManager.addEvent(() -> setComboCounter(0), GameConstants.COMBO_KILL_RESET_TIMER, TimeUnit.SECONDS);
 	}
 
-	public StealSkillInfo getStealSkillInfo() {
-		return stealSkillInfo;
-	}
-
-	public void setStealSkillInfo(StealSkillInfo stealSkillInfo) {
-		this.stealSkillInfo = stealSkillInfo;
-	}
-
 	public Map<Integer, Long> getSkillCoolTimes() {
 		return skillCoolTimes;
 	}
@@ -3309,5 +3287,59 @@ public class Char {
 
 	public void setSkillCDBypass(boolean skillCDBypass) {
 		this.skillCDBypass = skillCDBypass;
+	}
+
+
+	public Set<StolenSkill> getStolenSkills() {
+		return stolenSkills;
+	}
+
+	public void setStolenSkills(Set<StolenSkill> stolenSkills) {
+		this.stolenSkills = stolenSkills;
+	}
+
+	public void addStolenSkill(StolenSkill stolenSkill) {
+		getStolenSkills().add(stolenSkill);
+	}
+
+	public void removeStolenSkill(StolenSkill stolenSkill) {
+		if(stolenSkill != null) {
+			getStolenSkills().remove(stolenSkill);
+		}
+	}
+
+	public StolenSkill getStolenSkillByPosition(int position) {
+		return getStolenSkills().stream().filter(ss -> ss.getPosition() == position).findAny().orElse(null);
+	}
+
+	public StolenSkill getStolenSkillBySkillId(int skillId) {
+		return getStolenSkills().stream().filter(ss -> ss.getSkillid() == skillId).findAny().orElse(null);
+	}
+
+
+	public Set<ChosenSkill> getChosenSkills() {
+		return chosenSkills;
+	}
+
+	public void setChosenSkills(Set<ChosenSkill> chosenSkills) {
+		this.chosenSkills = chosenSkills;
+	}
+
+	public void addChosenSkill(ChosenSkill chosenSkill) {
+		getChosenSkills().add(chosenSkill);
+	}
+
+	public void removeSkillFromChosenSkills(ChosenSkill chosenSkill) {
+		if(chosenSkill != null) {
+			getChosenSkills().remove(chosenSkill);
+		}
+	}
+
+	public ChosenSkill getChosenSkillByPosition(int position) {
+		return getChosenSkills().stream().filter(ss -> ss.getPosition() == position).findAny().orElse(null);
+	}
+
+	public boolean isChosenSkillInStolenSkillList(int skillId) {
+		return getStolenSkills().stream().filter(ss -> ss.getSkillid() == skillId).findAny().orElse(null) != null;
 	}
 }

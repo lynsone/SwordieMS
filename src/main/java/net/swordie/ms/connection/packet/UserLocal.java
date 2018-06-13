@@ -117,7 +117,7 @@ public class UserLocal {
             case STEAL_SKILL:
                 outPacket.encodeInt(stealManagerJobID); //jobId  1~5 | 1 = 1stJob , 2 = 2ndJob ... ..
                 outPacket.encodeInt(position); //impecMemSkillID // nPOS  0,1,2,3
-                outPacket.encodeInt(skillid);//MagicCrash(Hero) //skill
+                outPacket.encodeInt(skillid); //skill
                 outPacket.encodeInt(stealSkillLv);   //StealSkill Lv
                 outPacket.encodeInt(stealSkillMaxLv);   //StealSkill Max Lv
                 break;

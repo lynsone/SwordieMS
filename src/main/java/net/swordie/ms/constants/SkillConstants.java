@@ -798,7 +798,7 @@ public class SkillConstants {
     }
 
     public static int getStealSkillManagerTabFromSkill(int skillID) {
-        int smJobID = 0;
+        int smJobID;
         switch (skillID / 10000) {
 
             // 1st Job Tab
@@ -948,6 +948,22 @@ public class SkillConstants {
                 break;
         }
         return impecSkillID;
+    }
+
+    public static int getSMJobIdByImpecSkillId(int impecSkillId) {
+        switch (impecSkillId) {
+            case 24001001:  // 1st Job
+                return 1;
+            case 24101001:  // 2nd Job
+                return 2;
+            case 24111001:  // 3rd job
+                return 3;
+            case 24121001:  // 4th Job
+                return 4;
+            case 24121054:  // Hyper Skill
+                return 5;
+        }
+        return -1;
     }
 
     public static boolean isIceSkill(int skillID) {

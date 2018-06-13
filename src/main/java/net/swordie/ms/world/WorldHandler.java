@@ -40,7 +40,6 @@ import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Luminous;
-import net.swordie.ms.client.jobs.legend.StealSkillInfo;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
@@ -3701,25 +3700,37 @@ public class WorldHandler {
         int targetChrID = inPacket.decodeInt();
         boolean add = inPacket.decodeByte() != 0;   // 0 = add  |  1 = remove
 
+        Char chr = c.getChr();
         Char targetChr = c.getChr().getField().getCharByID(targetChrID);
-        StealSkillInfo stealSkillInfo = c.getChr().getStealSkillInfo();
+
         Skill stolenSkill = SkillData.getSkillDeepCopyById(stealSkillID);
         int stealSkillMaxLv = stolenSkill.getMasterLevel();
-        int stealSkillCurLv = targetChr.getSkill(stealSkillID).getCurrentLevel();
+        int stealSkillCurLv = targetChr == null ? stealSkillMaxLv : targetChr.getSkill(stealSkillID).getCurrentLevel(); //TODO this is for testing,  needs to be:    targetChr.getSkill(stealSkillID).getCurrentLevel();
 
         if(!add) {
             // /Add Stolen Skill
-            int pos = stealSkillInfo.getEmptyPosition(c.getChr(), stealSkillID);
-            c.write(UserLocal.changeStealMemoryResult(STEAL_SKILL.getVal(), SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), pos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
-            stealSkillInfo.setSkill(c.getChr(), stealSkillID);
-            c.getChr().chatMessage(GREY, "Position = " + pos + "."); //Debug Comment
 
+            if(chr.getStolenSkillBySkillId(stealSkillID) != null) {
+                chr.chatMessage("You already have this stolen skill.");
+                chr.dispose();
+                return;
+            }
+
+            int position = StolenSkill.getFirstEmptyPosition(chr, stealSkillID);
+            if(position == -1) {
+                chr.chatMessage("Could not continue with stealing skills due to an unknown error.");
+                chr.dispose();
+                return;
+            }
+            StolenSkill.setSkill(chr, stealSkillID, position, (byte) stealSkillCurLv);
+
+            int positionPerTab = StolenSkill.getPositionForTab(position, stealSkillID);
+            c.write(UserLocal.changeStealMemoryResult(STEAL_SKILL.getVal(), SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), positionPerTab, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
         } else {
             //Remove Stolen Skill
-            int pos = stealSkillInfo.getPositionBySkillID(c.getChr(), stealSkillID);
-            c.write(UserLocal.changeStealMemoryResult(REMOVE_STEAL_MEMORY.getVal(), SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), pos, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
-            stealSkillInfo.removeSkill(c.getChr(), stealSkillID);
-            c.getChr().chatMessage(GREY, "Position = " + pos + "."); //Debug Comment
+            int position = StolenSkill.getPositionPerTabFromStolenSkill(chr.getStolenSkillBySkillId(stealSkillID));
+            StolenSkill.removeSkill(chr, stealSkillID);
+            c.write(UserLocal.changeStealMemoryResult(REMOVE_STEAL_MEMORY.getVal(), SkillConstants.getStealSkillManagerTabFromSkill(stealSkillID), position, stealSkillID, stealSkillCurLv, stealSkillMaxLv));
         }
     }
 
@@ -3727,6 +3738,7 @@ public class WorldHandler {
         int impeccableSkillID = inPacket.decodeInt();
         int stealSkillID = inPacket.decodeInt();
 
+        ChosenSkill.setChosenSkill(c.getChr(), stealSkillID, impeccableSkillID);
         c.write(UserLocal.resultSetStealSkill(true, impeccableSkillID, stealSkillID));
     }
 

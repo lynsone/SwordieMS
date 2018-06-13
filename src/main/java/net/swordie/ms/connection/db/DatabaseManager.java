@@ -18,7 +18,9 @@ import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.quest.progress.*;
+import net.swordie.ms.client.character.skills.ChosenSkill;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.StolenSkill;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
@@ -86,6 +88,8 @@ public class DatabaseManager {
                 CharacterPotential.class,
                 LinkSkill.class,
                 Familiar.class,
+                StolenSkill.class,
+                ChosenSkill.class,
 
         };
         for(Class clazz : dbClasses) {

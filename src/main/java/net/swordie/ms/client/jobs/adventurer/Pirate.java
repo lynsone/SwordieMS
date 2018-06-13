@@ -762,10 +762,11 @@ public class Pirate extends Job {
 
         if (JobConstants.isCannonShooter(chr.getJob())) {
             if(hasHitMobs) {
-                //Barrel Roulette
-                handleBarrelRouletteDebuffs(attackInfo);
+
             }
         }
+        //Barrel Roulette
+        handleBarrelRouletteDebuffs(attackInfo);
 
         if (JobConstants.isJett(chr.getJob())) {
             if(hasHitMobs) {

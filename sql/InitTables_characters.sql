@@ -47,6 +47,9 @@ drop table if exists monsterbookcards;
 drop table if exists monsterbookinfos;
 drop table if exists filetimes;
 drop table if exists trunks;
+drop table if exists familiars;
+drop table if exists stolenskills;
+drop table if exists chosenskills;
 
 create table trunks(
 	id int not null auto_increment,
@@ -508,6 +511,25 @@ create table familiars (
     vitality smallint,
     primary key (id),
     foreign key (charid) references characters(id) on delete cascade
+);
+
+create table stolenskills (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    position int,
+    currentlv tinyint,
+    primary key (id),
+    foreign key (charid) references characters(id)
+);
+
+create table chosenskills (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    position int,
+    primary key (id),
+    foreign key (charid) references characters(id)
 );
 
 create table characterpotentials (

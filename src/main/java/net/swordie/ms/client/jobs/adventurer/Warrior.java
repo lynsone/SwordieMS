@@ -434,10 +434,10 @@ public class Warrior extends Job {
                 //Lord of Darkness
                 lordOfDarkness();
 
-                //Dark Thirst
-                darkThirst(tsm);
             }
         }
+        //Dark Thirst
+        darkThirst(tsm);
 
         Option o1 = new Option();
         Option o2 = new Option();
