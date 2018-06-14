@@ -136,10 +136,10 @@ public class ZeroInfo {
             outPacket.encodeByte(true);
         }
         if ((mask & 0x2) != 0) {
-            outPacket.encodeInt(getSubHP() / 2);
+            outPacket.encodeInt(getSubHP());
         }
         if ((mask & 0x4) != 0) {
-            outPacket.encodeInt(getSubMP() / 3);
+            outPacket.encodeInt(getSubMP());
         }
         if ((mask & 0x8) != 0) {
             outPacket.encodeByte(getSubSkin());

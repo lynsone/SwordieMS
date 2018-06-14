@@ -787,6 +787,9 @@ public class WorldHandler {
         int amount = inPacket.decodeInt();
         Skill skill = chr.getSkill(skillID, true);
         byte jobLevel = (byte) JobConstants.getJobLevel((short) skill.getRootId());
+        if (JobConstants.isZero((short) skill.getRootId())) {
+            jobLevel = JobConstants.getJobLevelByZeroSkillID(skillID);
+        }
         Map<Stat, Object> stats = null;
         if (JobConstants.isExtendSpJob(chr.getJob())) {
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();

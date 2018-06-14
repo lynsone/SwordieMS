@@ -4,6 +4,7 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
@@ -167,19 +168,10 @@ public class LoginHandler {
                 curSelectedSubJob, gender, skin, items);
         // Start job specific handling ----------------------------------------------------------------
         JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
-        if (curSelectedRace == 15) { //Zero
-            chr.getAvatarData().getZeroAvatarLook().setSkin(skin);
-            chr.getAvatarData().getZeroAvatarLook().setFace(items[0]);
-            chr.getAvatarData().getZeroAvatarLook().setHair(items[1]);
-        }
         // End job specific handling ------------------------------------------------------------------
 
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
-//        chr.createInDB();
-        chr.getAvatarData().getAvatarLook().setDemonSlayerDefFaceAcc(1012279);
         c.getAccount().addCharacter(chr);
-//        chr.setAccId(c.getAccount().getId());
-//        chr.updateDB();
         DatabaseManager.saveToDB(c.getAccount());
 
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
@@ -216,6 +208,7 @@ public class LoginHandler {
             a.removeLinkSkillByOwnerID(chr.getId());
             a.getCharacters().remove(chr);
             DatabaseManager.saveToDB(a);
+            DatabaseManager.deleteFromDB(chr);
             c.write(Login.sendDeleteCharacterResult(charId, LoginType.SUCCESS));
         }
     }

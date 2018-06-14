@@ -2229,9 +2229,9 @@ public class Char {
 		cs.setMaxMp(oldInfo.getSubMMP());
 		Map<Stat, Object> updatedStats = new HashMap<>();
 		updatedStats.put(Stat.hp, cs.getHp());
-		updatedStats.put(Stat.mhp, cs.getHp());
-		updatedStats.put(Stat.mp, cs.getHp());
-		updatedStats.put(Stat.mmp, cs.getHp());
+		updatedStats.put(Stat.mhp, cs.getMaxHp());
+		updatedStats.put(Stat.mp, cs.getMp());
+		updatedStats.put(Stat.mmp, cs.getMaxMp());
 		write(WvsContext.statChanged(updatedStats));
 //        write(WvsContext.zeroInfo(currentInfo));
 	}

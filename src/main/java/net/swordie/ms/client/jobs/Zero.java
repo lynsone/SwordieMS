@@ -2,8 +2,10 @@ package net.swordie.ms.client.jobs;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.ExtendSP;
 import net.swordie.ms.client.character.SPSet;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -575,8 +577,8 @@ public class Zero extends Job {
             sp = 6; // double sp on levels ending in 3/6/9
         }
         ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
-        SPSet alphaSpSet = esp.getSpSet().get(1);
-        SPSet betaSpSet = esp.getSpSet().get(2);
+        SPSet alphaSpSet = esp.getSpSet().get(0);
+        SPSet betaSpSet = esp.getSpSet().get(1);
         alphaSpSet.addSp(sp);
         betaSpSet.addSp(sp);
         Map<Stat, Object> stats = new HashMap<>();
@@ -597,13 +599,35 @@ public class Zero extends Job {
 
     @Override
     public void setCharCreationStats(Char chr) {
-        chr.getAvatarData().setZeroAvatarLook(chr.getAvatarData().getAvatarLook().deepCopy());
-        chr.getAvatarData().getAvatarLook().getHairEquips().remove(new Integer(1562000));
-        chr.getAvatarData().getZeroAvatarLook().getHairEquips().remove(new Integer(1572000));
-        chr.getAvatarData().getZeroAvatarLook().setWeaponId(1562000);
-        chr.getAvatarData().getZeroAvatarLook().setGender(1);
-        chr.getAvatarData().getZeroAvatarLook().setZeroBetaLook(true);
-        chr.getAvatarData().getCharacterStat().setLevel(100);
-        chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats
+        AvatarLook mainLook = chr.getAvatarData().getAvatarLook();
+        chr.getAvatarData().setZeroAvatarLook(mainLook.deepCopy());
+        AvatarLook zeroLook = chr.getAvatarData().getZeroAvatarLook();
+        mainLook.getHairEquips().remove(new Integer(1562000));
+        zeroLook.getHairEquips().remove(new Integer(1572000));
+        zeroLook.setWeaponId(1562000);
+        zeroLook.setGender(1);
+        zeroLook.setSkin(chr.getAvatarData().getAvatarLook().getSkin());
+        zeroLook.setFace(21290);
+        zeroLook.setHair(37623);
+        zeroLook.setZeroBetaLook(true);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setLevel(100);
+        cs.setStr(518);
+        cs.setHp(5000);
+        cs.setMaxHp(5000);
+        cs.setMp(100);
+        cs.setMaxMp(100);
+        cs.setJob(10112);
+        cs.setPosMap(100000000);ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        SPSet alphaSpSet = esp.getSpSet().get(0);
+        SPSet betaSpSet = esp.getSpSet().get(1);
+        alphaSpSet.addSp(6);
+        betaSpSet.addSp(6);
+        Map<Stat, Object> stats = new HashMap<>();
+        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+        chr.write(WvsContext.statChanged(stats));
     }
 }
