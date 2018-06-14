@@ -1,5 +1,6 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.jobs.Zero;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import org.apache.log4j.Logger;
 
@@ -1024,5 +1025,15 @@ public class SkillConstants {
             res = 1;
         }
         return res;
+    }
+
+    public static int getLinkedSkill(int skillID) {
+        switch(skillID) {
+            case Zero.STORM_BREAK_INIT:
+                return Zero.STORM_BREAK;
+            case Zero.ADV_STORM_BREAK_SHOCK_INIT:
+                return Zero.ADV_STORM_BREAK;
+        }
+        return skillID;
     }
 }

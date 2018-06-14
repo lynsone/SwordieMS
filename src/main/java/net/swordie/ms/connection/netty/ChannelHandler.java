@@ -484,6 +484,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case FAMILIAR_ATTACK:
                     WorldHandler.handleFamiliarAttack(chr, inPacket);
                     break;
+                case USER_THROW_GRENADE:
+                    WorldHandler.handleUserThrowGrenade(chr, inPacket);
+                    break;
+                case USER_DESTROY_GRENADE:
+                    WorldHandler.handleUserDestroyGrenade(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

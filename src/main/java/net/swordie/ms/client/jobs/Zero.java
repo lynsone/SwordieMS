@@ -66,6 +66,8 @@ public class Zero extends Job {
     public static final int AIR_RIOT = 101000101; //Special Attack (Stun Debuff)
     public static final int THROWING_WEAPON = 101100100; //Special Attack (Throw Sword)
     public static final int ADVANCED_THROWING_WEAPON = 101100101; //Special Attack (Throw Sword)
+    public static final int STORM_BREAK = 101120202;
+    public static final int STORM_BREAK_INIT = 101120203;
     public static final int ADV_EARTH_BREAK = 101120104;
     public static final int ADV_STORM_BREAK = 101120204;
     public static final int ADV_EARTH_BREAK_SHOCK_INIT = 101120105; //Attack to initialise the Shockwave

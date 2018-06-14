@@ -4030,4 +4030,29 @@ public class WorldHandler {
         handleAttack(chr.getClient(), ai);
         // 4 more bytes after this, not sure what it is
     }
+
+    public static void handleUserThrowGrenade(Char chr, InPacket inPacket) {
+        Position pos = inPacket.decodePositionInt();
+        int y = inPacket.decodeInt(); // another y?
+        int keyDown = inPacket.decodeInt();
+        int skillID = inPacket.decodeInt();
+        inPacket.decodeInt(); // slv according to ida, but let's just take that server side
+        boolean left = inPacket.decodeByte() != 0;
+        int attackSpeed = inPacket.decodeInt();
+        int grenadeID = inPacket.decodeInt();
+        Skill skill = chr.getSkill(SkillConstants.getLinkedSkill(skillID));
+        int slv = skill == null ? 0 : skill.getCurrentLevel();
+        if (slv == 0) {
+            log.error(String.format("Character %d tried to make a grenade with a skill they do not possess (id %d)", chr.getId(), skillID));
+        }
+        chr.getField().broadcastPacket(UserRemote.throwGrenade(chr.getId(), grenadeID, pos, keyDown, skillID,
+                0, slv, left, attackSpeed));
+
+    }
+
+    public static void handleUserDestroyGrenade(Char chr, InPacket inPacket) {
+        int grenadeID = inPacket.decodeInt();
+        int skillID = inPacket.decodeInt();
+        chr.getField().broadcastPacket(UserRemote.destroyGrenade(chr.getId(), grenadeID));
+    }
 }

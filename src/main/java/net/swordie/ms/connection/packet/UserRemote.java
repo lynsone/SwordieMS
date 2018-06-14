@@ -207,4 +207,31 @@ public class UserRemote {
 
         return outPacket;
     }
+
+    public static OutPacket throwGrenade(int charID, int grenadeID, Position pos, int keyDown, int skillID, int bySummonedID,
+                                         int slv, boolean left, int attackSpeed) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_THROW_GRENADE);
+
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeInt(grenadeID);
+        outPacket.encodePositionInt(pos);
+        outPacket.encodeInt(keyDown);
+        outPacket.encodeInt(skillID);
+        outPacket.encodeInt(bySummonedID);
+        outPacket.encodeInt(slv);
+        outPacket.encodeByte(left);
+        outPacket.encodeInt(attackSpeed);
+
+        return outPacket;
+    }
+
+    public static OutPacket destroyGrenade(int charID, int grenadeID) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_DESTROY_GRENADE);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(grenadeID);
+
+        return outPacket;
+    }
 }
