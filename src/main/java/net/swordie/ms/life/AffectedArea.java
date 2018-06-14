@@ -39,6 +39,7 @@ public class AffectedArea extends Life {
     private byte mobOrigin;
     private short delay;
     private boolean flip;
+    private int duration;
 
     public AffectedArea(int objectId) {
         super(objectId);
@@ -274,5 +275,13 @@ public class AffectedArea extends Life {
                 break;
         }
         tsm.sendSetStatPacket();
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

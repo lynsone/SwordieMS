@@ -490,6 +490,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_DESTROY_GRENADE:
                     WorldHandler.handleUserDestroyGrenade(chr, inPacket);
                     break;
+                case USER_AREA_DOT_ATTACK:
+                    WorldHandler.handleUserAreaDotAttack(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

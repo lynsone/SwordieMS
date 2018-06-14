@@ -4,6 +4,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
+import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.OutPacket;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static net.swordie.ms.client.character.skills.SkillStat.subTime;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**
@@ -525,9 +527,11 @@ public class Field {
         addLife(aa);
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
         if (si != null) {
-            int duration = si.getValue(time, aa.getSlv()) * 1000;
-            ScheduledFuture sf = EventManager.addEvent(() -> removeLife(aa.getObjectId(), true), duration);
-            addLifeSchedule(aa, sf);
+            int duration = aa.getDuration() == 0 ? si.getValue(time, aa.getSlv()) * 1000 : aa.getDuration();
+            if (duration > 0) {
+                ScheduledFuture sf = EventManager.addEvent(() -> removeLife(aa.getObjectId(), true), duration);
+                addLifeSchedule(aa, sf);
+            }
         }
         broadcastPacket(CField.affectedAreaCreated(aa));
         getChars().forEach(chr -> aa.getField().checkCharInAffectedAreas(chr));

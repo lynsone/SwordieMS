@@ -2799,6 +2799,7 @@ public class Char {
 	}
 
 	public void logout() {
+		System.out.println("Logging out " + getName());
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);

@@ -2642,18 +2642,16 @@ public class WorldHandler {
         int skillID = inPacket.decodeInt();
         Position position = inPacket.decodePosition();
         byte isLeft = inPacket.decodeByte();
-
         Char chr = c.getChr();
         SkillInfo fci = SkillData.getSkillInfoById(skillID);
         byte slv = (byte) chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID)).getCurrentLevel();
         AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
-        aa.setObjectId(objID);
         aa.setMobOrigin((byte) 0);
         aa.setPosition(position);
         aa.setSkillID(skillID);
         aa.setSlv(slv);
         aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
-        c.write(CField.affectedAreaCreated(aa));
+        chr.getField().spawnAffectedArea(aa);
     }
 
     public static void handleUserSkillUseRequest(Client c, InPacket inPacket) {
@@ -4036,7 +4034,7 @@ public class WorldHandler {
         int y = inPacket.decodeInt(); // another y?
         int keyDown = inPacket.decodeInt();
         int skillID = inPacket.decodeInt();
-        inPacket.decodeInt(); // slv according to ida, but let's just take that server side
+        int bySummonedID = inPacket.decodeInt(); // slv according to ida, but let's just take that server side
         boolean left = inPacket.decodeByte() != 0;
         int attackSpeed = inPacket.decodeInt();
         int grenadeID = inPacket.decodeInt();
@@ -4046,13 +4044,170 @@ public class WorldHandler {
             log.error(String.format("Character %d tried to make a grenade with a skill they do not possess (id %d)", chr.getId(), skillID));
         }
         chr.getField().broadcastPacket(UserRemote.throwGrenade(chr.getId(), grenadeID, pos, keyDown, skillID,
-                0, slv, left, attackSpeed));
+                bySummonedID, slv, left, attackSpeed), chr);
 
     }
 
     public static void handleUserDestroyGrenade(Char chr, InPacket inPacket) {
         int grenadeID = inPacket.decodeInt();
         int skillID = inPacket.decodeInt();
-        chr.getField().broadcastPacket(UserRemote.destroyGrenade(chr.getId(), grenadeID));
+        chr.getField().broadcastPacket(UserRemote.destroyGrenade(chr.getId(), grenadeID), chr);
+    }
+
+    public static void handleUserAreaDotAttack(Char chr, InPacket inPacket) {
+        // ez copy paste (with some differences) from melee attack
+        AttackInfo ai = new AttackInfo();
+        ai.fieldKey = inPacket.decodeByte();
+        byte mask = inPacket.decodeByte();
+        ai.hits = (byte) (mask & 0xF);
+        ai.mobCount = (mask >>> 4) & 0xF;
+        ai.skillId = inPacket.decodeInt();
+        ai.slv = inPacket.decodeByte();
+        inPacket.decodeInt(); // crc
+        int skillID = ai.skillId;
+        if (SkillConstants.isKeyDownSkill(skillID) || SkillConstants.isSuperNovaSkill(skillID)) {
+            ai.keyDown = inPacket.decodeInt();
+        }
+        if (SkillConstants.isRushBombSkill(skillID) || skillID == 5300007 || skillID == 27120211 || skillID == 14111023) {
+            ai.grenadeId = inPacket.decodeInt();
+        }
+        if (SkillConstants.isZeroSkill(skillID)) {
+            ai.zero = inPacket.decodeByte();
+        }
+        if (SkillConstants.isUsercloneSummonedAbleSkill(skillID)) {
+            ai.bySummonedID = inPacket.decodeInt();
+        }
+        ai.buckShot = inPacket.decodeByte();
+        ai.someMask = inPacket.decodeByte();
+        short maskie = inPacket.decodeShort();
+        ai.left = ((maskie >>> 15) & 1) != 0;
+        ai.attackAction = (short) (maskie & 0x7FFF);
+        inPacket.decodeInt(); // crc
+        ai.attackActionType = inPacket.decodeByte();
+        ai.attackSpeed = inPacket.decodeByte();
+        ai.tick = inPacket.decodeInt();
+        ai.ptTarget.setY(inPacket.decodeInt());
+        ai.finalAttackLastSkillID = inPacket.decodeInt();
+        if (ai.finalAttackLastSkillID > 0) {
+            ai.finalAttackByte = inPacket.decodeByte();
+        }
+        if (skillID == 5111009) {
+            ai.ignorePCounter = inPacket.decodeByte() != 0;
+        }
+        /*if ( v1756 )
+          {
+            COutPacket::Encode2(&a, v1747);
+            if ( v674 || is_noconsume_usebullet_melee_attack(v669) )
+              COutPacket::Encode4(&a, v1748);
+          }*/
+        if (skillID == 25111005) {
+            ai.spiritCoreEnhance = inPacket.decodeInt();
+        }
+        for (int i = 0; i < ai.mobCount; i++) {
+            MobAttackInfo mai = new MobAttackInfo();
+            int mobId = inPacket.decodeInt();
+            byte idk1 = inPacket.decodeByte();
+            byte idk2 = inPacket.decodeByte();
+            byte idk3 = inPacket.decodeByte();
+            byte idk4 = inPacket.decodeByte();
+            byte idk5 = inPacket.decodeByte();
+            int templateID = inPacket.decodeInt();
+            byte calcDamageStatIndex = inPacket.decodeByte();
+            short rcDstX = inPacket.decodeShort();
+            short rectRight = inPacket.decodeShort();
+            short idk6 = inPacket.decodeShort();
+            short oldPosX = inPacket.decodeShort(); // ?
+            short oldPosY = inPacket.decodeShort(); // ?
+            int[] damages = new int[ai.hits];
+            for (int j = 0; j < ai.hits; j++) {
+                damages[j] = inPacket.decodeInt();
+            }
+            int mobUpDownYRange = inPacket.decodeInt();
+            inPacket.decodeInt(); // crc
+            boolean isResWarriorLiftPress = false;
+            if (skillID == 37111005) {
+                isResWarriorLiftPress = inPacket.decodeByte() != 0;
+            }
+            // Begin PACKETMAKER::MakeAttackInfoPacket
+            byte type = inPacket.decodeByte();
+            String currentAnimationName = "";
+            int animationDeltaL = 0;
+            String[] hitPartRunTimes = new String[0];
+            if (type == 1) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+                int hitPartRunTimesSize = inPacket.decodeInt();
+                hitPartRunTimes = new String[hitPartRunTimesSize];
+                for (int j = 0; j < hitPartRunTimesSize; j++) {
+                    hitPartRunTimes[j] = inPacket.decodeString();
+                }
+            } else if (type == 2) {
+                currentAnimationName = inPacket.decodeString();
+                animationDeltaL = inPacket.decodeInt();
+            }
+            // End PACKETMAKER::MakeAttackInfoPacket
+            mai.mobId = mobId;
+            mai.hitAction = idk1;
+            mai.left = idk2;
+            mai.frameIdx = idk3;
+            mai.idk4 = idk4;
+            mai.idk5 = idk5;
+            mai.templateID = templateID;
+            mai.calcDamageStatIndex = calcDamageStatIndex;
+            mai.rcDstX = rcDstX;
+            mai.rectRight = rectRight;
+            mai.oldPosX = oldPosX;
+            mai.oldPosY = oldPosY;
+            mai.idk6 = idk6;
+            mai.damages = damages;
+            mai.mobUpDownYRange = mobUpDownYRange;
+            mai.type = type;
+            mai.currentAnimationName = currentAnimationName;
+            mai.animationDeltaL = animationDeltaL;
+            mai.hitPartRunTimes = hitPartRunTimes;
+            mai.isResWarriorLiftPress = isResWarriorLiftPress;
+            ai.mobAttackInfo.add(mai);
+//            c.getChr().chatMessage(YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
+//                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", idk4 = " + idk4 + ", idk5 = " + idk5);
+        }
+        if (skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
+            ai.ptTarget.setX(inPacket.decodeShort());
+            ai.ptTarget.setY(inPacket.decodeShort());
+        } else {
+            if (SkillConstants.isSuperNovaSkill(skillID)) {
+                ai.ptAttackRefPoint.setX(inPacket.decodeShort());
+                ai.ptAttackRefPoint.setY(inPacket.decodeShort());
+            }
+            if (skillID == 101000102) {
+                ai.idkPos.setX(inPacket.decodeShort());
+                ai.idkPos.setY(inPacket.decodeShort());
+            }
+            ai.pos.setX(inPacket.decodeShort());
+            ai.pos.setY(inPacket.decodeShort());
+            if (SkillConstants.isAranFallingStopSkill(skillID)) {
+                ai.fh = inPacket.decodeByte();
+            }
+            if (skillID == 21120019 || skillID == 37121052) {
+                ai.teleportPt.setX(inPacket.decodeInt());
+                ai.teleportPt.setY(inPacket.decodeInt());
+            }
+            if (skillID == 61121105 || skillID == 61121222 || skillID == 24121052) {
+                ai.Vx = inPacket.decodeShort();
+                short x, y;
+                for (int i = 0; i < ai.Vx; i++) {
+                    x = inPacket.decodeShort();
+                    y = inPacket.decodeShort();
+                }
+            }
+            if (skillID == 101120104) {
+                // CUser::EncodeAdvancedEarthBreak
+                // TODO
+            }
+            if (skillID == 14111006 && ai.grenadeId != 0) {
+                ai.grenadePos.setX(inPacket.decodeShort());
+                ai.grenadePos.setY(inPacket.decodeShort());
+            }
+        }
+        handleAttack(chr.getClient(), ai);
     }
 }

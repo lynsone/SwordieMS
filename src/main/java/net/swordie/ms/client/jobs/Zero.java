@@ -352,13 +352,15 @@ public class Zero extends Job {
                 }
                 //break;
             case ADV_EARTH_BREAK_SHOCK_INIT:
+                slv = (byte) chr.getSkill(ADV_EARTH_BREAK).getCurrentLevel();
                 SkillInfo fci = SkillData.getSkillInfoById(ADV_EARTH_BREAK);
                 AffectedArea aa = AffectedArea.getPassiveAA(chr, ADV_EARTH_BREAK, slv);
                 aa.setMobOrigin((byte) 0);
                 aa.setPosition(chr.getPosition());
                 aa.setSkillID(ADV_EARTH_BREAK);
                 aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
-                c.write(CField.affectedAreaCreated(aa));
+                aa.setDuration(fci.getValue(v, slv) * 1000);
+                chr.getField().spawnAffectedArea(aa);
                 break;
 
         }
@@ -572,7 +574,6 @@ public class Zero extends Job {
     public void handleLevelUp() {
         short level = chr.getLevel();
         chr.addStat(Stat.mhp, 500);
-        chr.addStat(Stat.mmp, 500);
         chr.addStat(Stat.ap, 5);
         int sp = 3;
         if (level > 100 && (level % 10) % 3 == 0) {
