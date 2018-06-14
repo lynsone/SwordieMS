@@ -799,6 +799,11 @@ public class SkillConstants {
 
     public static int getStealSkillManagerTabFromSkill(int skillID) {
         int smJobID;
+
+        //Hyper Skills
+        if(skillID % 100 == 54) {
+            return 5;
+        }
         switch (skillID / 10000) {
 
             // 1st Job Tab
@@ -809,8 +814,7 @@ public class SkillConstants {
             case 430:
             case 500:
             case 501:
-                smJobID = 1;
-                break;
+                return 1;
 
             // 2nd Job Tab
             case 110:
@@ -833,8 +837,7 @@ public class SkillConstants {
             case 510:
             case 520:
             case 530:
-                smJobID = 2;
-                break;
+                return 2;
 
             // 3rd Job Tab
             case 111:
@@ -855,8 +858,7 @@ public class SkillConstants {
             case 511:
             case 521:
             case 531:
-                smJobID = 3;
-                break;
+                return 3;
 
             // 4th job Tab
             case 112:
@@ -877,15 +879,9 @@ public class SkillConstants {
             case 512:
             case 522:
             case 532:
-                smJobID = 4;
-                break;
-
-            default: //Should Work for Hypers Tab
-                smJobID = 5;
-                break;
-
+                return 4;
         }
-        return smJobID;
+        return -1;
     }
 
     public static int getMaxPosBysmJobID(int smJobID) {

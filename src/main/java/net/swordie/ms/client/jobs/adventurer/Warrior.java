@@ -409,7 +409,7 @@ public class Warrior extends Job {
             skillID = skill.getSkillId();
         }
         int comboProp = getComboProp(chr);
-        if (JobConstants.isHero(chr.getJob())) {
+        //if (JobConstants.isHero(chr.getJob())) {
             if(hasHitMobs) {
                 //Combo
                 if(Util.succeedProp(comboProp)) {
@@ -421,7 +421,7 @@ public class Warrior extends Job {
                     }
                 }
             }
-        }
+        //}
 
         if (JobConstants.isPage(chr.getJob())) {
             if(hasHitMobs) {

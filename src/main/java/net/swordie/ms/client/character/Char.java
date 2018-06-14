@@ -3329,7 +3329,7 @@ public class Char {
 		getChosenSkills().add(chosenSkill);
 	}
 
-	public void removeSkillFromChosenSkills(ChosenSkill chosenSkill) {
+	public void removeChosenSkill(ChosenSkill chosenSkill) {
 		if(chosenSkill != null) {
 			getChosenSkills().remove(chosenSkill);
 		}
