@@ -424,13 +424,13 @@ public class WorldHandler {
             mai.mobId = mobId;
             mai.hitAction = idk1;
             mai.left = idk2;
-            mai.frameIdx = idk3;
-            mai.idk4 = idk4;
-            mai.idk5 = idk5;
+            mai.idk3 = idk3;
+            mai.foreAction = idk4;
+            mai.frameIdx = idk5;
             mai.templateID = templateID;
             mai.calcDamageStatIndex = calcDamageStatIndex;
-            mai.rcDstX = rcDstX;
-            mai.rectRight = rectRight;
+            mai.hitX = rcDstX;
+            mai.hitY = rectRight;
             mai.oldPosX = oldPosX;
             mai.oldPosY = oldPosY;
             mai.damages = damages;
@@ -539,13 +539,13 @@ public class WorldHandler {
             mai.mobId = mobId;
             mai.hitAction = idk1; // ?
             mai.left = idk2; // ?
-            mai.frameIdx = idk3; // ?
-            mai.idk4 = idk4;
-            mai.idk5 = idk5;
+            mai.idk3 = idk3; // ?
+            mai.foreAction = idk4;
+            mai.frameIdx = idk5;
             mai.templateID = templateID;
             mai.calcDamageStatIndex = calcDamageStatIndex;
-            mai.rcDstX = rcDstX;
-            mai.rectRight = rectRight;
+            mai.hitX = rcDstX;
+            mai.hitY = rectRight;
             mai.oldPosX = oldPosX;
             mai.oldPosY = oldPosY;
             mai.hpPerc = hpPerc;
@@ -629,17 +629,17 @@ public class WorldHandler {
             log.debug("SkillID: " + attackInfo.skillId);
             Field field = c.getChr().getField();
             c.getChr().getJobHandler().handleAttack(c, attackInfo);
-            switch (attackInfo.attackHeader) {
-                case SUMMONED_ATTACK:
-                    chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
-                    break;
-                case FAMILIAR_ATTACK:
-                    chr.getField().broadcastPacket(CFamiliar.familiarAttack(chr.getId(), attackInfo), chr);
-                    break;
-                default:
-                    if (attackInfo.attackHeader != null) {
+            if (attackInfo.attackHeader != null) {
+                switch (attackInfo.attackHeader) {
+                    case SUMMONED_ATTACK:
+                        chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
+                        break;
+                    case FAMILIAR_ATTACK:
+                        chr.getField().broadcastPacket(CFamiliar.familiarAttack(chr.getId(), attackInfo), chr);
+                        break;
+                    default:
                         chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
-                    }
+                }
             }
             int multiKillMessage = 0;
             long mobexp = 0;
@@ -920,13 +920,13 @@ public class WorldHandler {
             mai.mobId = mobId;
             mai.hitAction = idk1;
             mai.left = idk2;
-            mai.frameIdx = idk3;
-            mai.idk4 = idk4;
-            mai.idk5 = idk5;
+            mai.idk3 = idk3;
+            mai.foreAction = idk4;
+            mai.frameIdx = idk5;
             mai.templateID = templateID;
             mai.calcDamageStatIndex = calcDamageStatIndex;
-            mai.rcDstX = rcDstX;
-            mai.rectRight = rectRight;
+            mai.hitX = rcDstX;
+            mai.hitY = rectRight;
             mai.oldPosX = oldPosX;
             mai.oldPosY = oldPosY;
             mai.idk6 = idk6;
@@ -939,7 +939,7 @@ public class WorldHandler {
             mai.isResWarriorLiftPress = isResWarriorLiftPress;
             ai.mobAttackInfo.add(mai);
 //            c.getChr().chatMessage(YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
-//                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", idk4 = " + idk4 + ", idk5 = " + idk5);
+//                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", foreAction = " + foreAction + ", frameIdx = " + frameIdx);
         }
         if (skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
             ai.ptTarget.setX(inPacket.decodeShort());
@@ -4106,15 +4106,15 @@ public class WorldHandler {
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             int mobId = inPacket.decodeInt();
-            byte idk1 = inPacket.decodeByte();
-            byte idk2 = inPacket.decodeByte();
+            byte hitAction = inPacket.decodeByte();
+            byte left = inPacket.decodeByte();
             byte idk3 = inPacket.decodeByte();
-            byte idk4 = inPacket.decodeByte();
-            byte idk5 = inPacket.decodeByte();
+            byte foreActionAndLeft = inPacket.decodeByte();
+            byte frameIdx = inPacket.decodeByte();
             int templateID = inPacket.decodeInt();
-            byte calcDamageStatIndex = inPacket.decodeByte();
-            short rcDstX = inPacket.decodeShort();
-            short rectRight = inPacket.decodeShort();
+            byte calcDamageStatIndexAndDoomed = inPacket.decodeByte();
+            short hitX = inPacket.decodeShort();
+            short hitY = inPacket.decodeShort();
             short idk6 = inPacket.decodeShort();
             short oldPosX = inPacket.decodeShort(); // ?
             short oldPosY = inPacket.decodeShort(); // ?
@@ -4147,15 +4147,15 @@ public class WorldHandler {
             }
             // End PACKETMAKER::MakeAttackInfoPacket
             mai.mobId = mobId;
-            mai.hitAction = idk1;
-            mai.left = idk2;
-            mai.frameIdx = idk3;
-            mai.idk4 = idk4;
-            mai.idk5 = idk5;
+            mai.hitAction = hitAction;
+            mai.left = left; // not left? TODO check
+            mai.idk3 = idk3;
+            mai.foreAction = foreActionAndLeft;
+            mai.frameIdx = frameIdx;
             mai.templateID = templateID;
-            mai.calcDamageStatIndex = calcDamageStatIndex;
-            mai.rcDstX = rcDstX;
-            mai.rectRight = rectRight;
+            mai.calcDamageStatIndex = calcDamageStatIndexAndDoomed; // 1st bit for bDoomed, rest for calcDamageStatIndex
+            mai.hitX = hitX;
+            mai.hitY = hitY;
             mai.oldPosX = oldPosX;
             mai.oldPosY = oldPosY;
             mai.idk6 = idk6;
@@ -4167,8 +4167,6 @@ public class WorldHandler {
             mai.hitPartRunTimes = hitPartRunTimes;
             mai.isResWarriorLiftPress = isResWarriorLiftPress;
             ai.mobAttackInfo.add(mai);
-//            c.getChr().chatMessage(YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
-//                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", idk4 = " + idk4 + ", idk5 = " + idk5);
         }
         if (skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
             ai.ptTarget.setX(inPacket.decodeShort());
