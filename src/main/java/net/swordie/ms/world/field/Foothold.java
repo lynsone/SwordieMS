@@ -1,6 +1,7 @@
 package net.swordie.ms.world.field;
 
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Util;
 
 public class Foothold {
     private int id;
@@ -133,6 +134,11 @@ public class Foothold {
         return "Id: " + getId() + ", Start = " + new Position(getX1(), getY1()) + ", End = " + new Position(getX2(), getY2());
     }
 
+    /**
+     * Gets the y value of this Foothold according to a given x value.
+     * @param x the x where the y should correspond to
+     * @return the y such that (x,y) lies on this Foothold
+     */
     public int getYFromX(int x) {
         // interpolate between the two foothold ends for the y value below pos.x
         int x1 = getX1();
@@ -140,5 +146,22 @@ public class Foothold {
         x = x - x1;
         double perc = (double) x / (double) x2;
         return (int) (getY1() + (perc * (getY2() - getY1())));
+    }
+
+    /**
+     * Gets a random Position that is part of this Foothold.
+     * @return the randomly generated Position.
+     */
+    public Position getRandomPosition() {
+        int randX = Util.getRandom(getX1(), getX2());
+        return new Position(randX, getYFromX(randX));
+    }
+
+    /**
+     * Checks whether or not this Foothold is a wall (i.e., vertical)
+     * @return whether or not this Foothold is a wall
+     */
+    public boolean isWall() {
+        return getX1() == getX2();
     }
 }

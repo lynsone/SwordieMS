@@ -1,6 +1,7 @@
 package net.swordie.ms.client.character.info;
 
 import net.swordie.ms.connection.OutPacket;
+
 import static net.swordie.ms.enums.ExpIncreaseInfoFlags.*;
 
 /**
@@ -289,79 +290,79 @@ public class ExpIncreaseInfo {
 
     public long getMask() {
         long mask = 0;
-        if(getSelectedMobBonusExp() > 0) {
+        if (getSelectedMobBonusExp() > 0) {
             mask |= SelectedMobBonusExp.getVal();
         }
-        if(getPartyBonusPercentage() > 0) {
+        if (getPartyBonusPercentage() > 0) {
             mask |= PartyBonusPercentage.getVal();
         }
-        if(getWeddingBonusExp() > 0) {
+        if (getWeddingBonusExp() > 0) {
             mask |= WeddingBonusExp.getVal();
         }
-        if(getPartyBonusExp() > 0) {
+        if (getPartyBonusExp() > 0) {
             mask |= PartyBonusExp.getVal();
         }
-        if(getItemBonusExp() > 0) {
+        if (getItemBonusExp() > 0) {
             mask |= ItemBonusExp.getVal();
         }
-        if(getPremiumIPBonusExp() > 0) {
+        if (getPremiumIPBonusExp() > 0) {
             mask |= PremiumIPBonusExp.getVal();
         }
-        if(getRainbowWeekEventBonusExp() > 0) {
+        if (getRainbowWeekEventBonusExp() > 0) {
             mask |= RainbowWeekEventBonusExp.getVal();
         }
-        if(getBoomupEventBonusExp() > 0) {
+        if (getBoomupEventBonusExp() > 0) {
             mask |= BoomUpEventBonusExp.getVal();
         }
-        if(getPlusExpBuffBonusExp() > 0) {
+        if (getPlusExpBuffBonusExp() > 0) {
             mask |= PlusExpBuffBonusExp.getVal();
         }
-        if(getPsdBonusExpRate() > 0) {
+        if (getPsdBonusExpRate() > 0) {
             mask |= PsdBonusExpRate.getVal();
         }
-        if(getIndieBonusExp() > 0) {
+        if (getIndieBonusExp() > 0) {
             mask |= IndieBonusExp.getVal();
         }
-        if(getRelaxBonusExp() > 0) {
+        if (getRelaxBonusExp() > 0) {
             mask |= RelaxBonusExp.getVal();
         }
-        if(getInstallItemBonusExp() > 0) {
+        if (getInstallItemBonusExp() > 0) {
             mask |= InstallItemBonusExp.getVal();
         }
-        if(getAswanWinnerBonusExp() > 0) {
+        if (getAswanWinnerBonusExp() > 0) {
             mask |= AswanWinnerBonusExp.getVal();
         }
-        if(getExpByIncExpR() > 0) {
+        if (getExpByIncExpR() > 0) {
             mask |= ExpByIncExpR.getVal();
         }
-        if(getValuePackBonusExp() > 0) {
+        if (getValuePackBonusExp() > 0) {
             mask |= ValuePackBonusExp.getVal();
         }
-        if(getExpByIncPQExpR() > 0) {
+        if (getExpByIncPQExpR() > 0) {
             mask |= ExpByIncPQExpR.getVal();
         }
-        if(getBaseAddExp() > 0) {
+        if (getBaseAddExp() > 0) {
             mask |= BaseAddExp.getVal();
         }
-        if(getBloodAllianceBonusExp() > 0) {
+        if (getBloodAllianceBonusExp() > 0) {
             mask |= BloodAllianceBonusExp.getVal();
         }
-        if(getFreezeHotEventBonusExp() > 0) {
+        if (getFreezeHotEventBonusExp() > 0) {
             mask |= FreezeHotEventBonusExp.getVal();
         }
-        if(getRestFieldBonusExp() > 0 || getRestFieldExpRate() > 0) {
+        if (getRestFieldBonusExp() > 0 || getRestFieldExpRate() > 0) {
             mask |= RestField.getVal();
         }
-        if(getUserHPRateBonusExp() > 0) {
+        if (getUserHPRateBonusExp() > 0) {
             mask |= UserHPRateBonusExp.getVal();
         }
-        if(getFieldValueBonusExp() > 0) {
+        if (getFieldValueBonusExp() > 0) {
             mask |= FieldValueBonusExp.getVal();
         }
-        if(getMobKillBonusExp() > 0) {
+        if (getMobKillBonusExp() > 0) {
             mask |= MobKillBonusExp.getVal();
         }
-        if(getLiveEventBonusExp() > 0) {
+        if (getLiveEventBonusExp() > 0) {
             mask |= LiveEventBonusExp.getVal();
         }
 
@@ -372,88 +373,89 @@ public class ExpIncreaseInfo {
         outPacket.encodeByte(isLastHit());
         outPacket.encodeInt(getIncEXP());
         outPacket.encodeByte(isOnQuest());
-        outPacket.encodeLong(getMask());
-        if(getSelectedMobBonusExp() > 0) {
+        long mask = getMask();
+        outPacket.encodeLong(mask);
+        if ((mask & SelectedMobBonusExp.getVal()) != 0) {
             outPacket.encodeInt(getSelectedMobBonusExp());
         }
-        if(getPartyBonusPercentage() > 0) {
+        if ((mask & PartyBonusPercentage.getVal()) != 0) {
             outPacket.encodeInt(getPartyBonusPercentage());
         }
-        if(isOnQuest()) {
+        if (isOnQuest()) {
             outPacket.encodeByte(getQuestBonusRate());
         }
-        if(getQuestBonusRate() > 0) {
+        if (getQuestBonusRemainCount() > 0) {
             outPacket.encodeByte(getQuestBonusRemainCount());
         }
-        if(getWeddingBonusExp() > 0) {
-            outPacket.encodeByte(getWeddingBonusExp());
+        if ((mask & WeddingBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getWeddingBonusExp());
         }
-        if(getPartyBonusExp() > 0) {
-            outPacket.encodeByte(getPartyBonusExp());
+        if ((mask & PartyBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getPartyBonusExp());
         }
-        if(getItemBonusExp() > 0) {
-            outPacket.encodeByte(getItemBonusExp());
+        if ((mask & ItemBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getItemBonusExp());
         }
-        if(getPremiumIPBonusExp() > 0) {
-            outPacket.encodeByte(getPremiumIPBonusExp());
+        if ((mask & PremiumIPBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getPremiumIPBonusExp());
         }
-        if(getRainbowWeekEventBonusExp() > 0) {
-            outPacket.encodeByte(getRainbowWeekEventBonusExp());
+        if ((mask & RainbowWeekEventBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getRainbowWeekEventBonusExp());
         }
-        if(getBoomupEventBonusExp() > 0) {
-            outPacket.encodeByte(getBoomupEventBonusExp());
+        if ((mask & BoomUpEventBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getBoomupEventBonusExp());
         }
-        if(getPlusExpBuffBonusExp() > 0) {
-            outPacket.encodeByte(getPlusExpBuffBonusExp());
+        if ((mask & PlusExpBuffBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getPlusExpBuffBonusExp());
         }
-        if(getPsdBonusExpRate() > 0) {
-            outPacket.encodeByte(getPsdBonusExpRate());
+        if ((mask & PsdBonusExpRate.getVal()) != 0) {
+            outPacket.encodeInt(getPsdBonusExpRate());
         }
-        if(getIndieBonusExp() > 0) {
-            outPacket.encodeByte(getIndieBonusExp());
+        if ((mask & IndieBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getIndieBonusExp());
         }
-        if(getRelaxBonusExp() > 0) {
-            outPacket.encodeByte(getRelaxBonusExp());
+        if ((mask & RelaxBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getRelaxBonusExp());
         }
-        if(getInstallItemBonusExp() > 0) {
-            outPacket.encodeByte(getInstallItemBonusExp());
+        if ((mask & InstallItemBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getInstallItemBonusExp());
         }
-        if(getAswanWinnerBonusExp() > 0) {
-            outPacket.encodeByte(getAswanWinnerBonusExp());
+        if ((mask & AswanWinnerBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getAswanWinnerBonusExp());
         }
-        if(getExpByIncExpR() > 0) {
-            outPacket.encodeByte(getExpByIncExpR());
+        if ((mask & ExpByIncExpR.getVal()) != 0) {
+            outPacket.encodeInt(getExpByIncExpR());
         }
-        if(getValuePackBonusExp() > 0) {
-            outPacket.encodeByte(getValuePackBonusExp());
+        if ((mask & ValuePackBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getValuePackBonusExp());
         }
-        if(getExpByIncPQExpR() > 0) {
-            outPacket.encodeByte(getExpByIncPQExpR());
+        if ((mask & ExpByIncPQExpR.getVal()) != 0) {
+            outPacket.encodeInt(getExpByIncPQExpR());
         }
-        if(getBaseAddExp() > 0) {
-            outPacket.encodeByte(getBaseAddExp());
+        if ((mask & BaseAddExp.getVal()) != 0) {
+            outPacket.encodeInt(getBaseAddExp());
         }
-        if(getBloodAllianceBonusExp() > 0) {
-            outPacket.encodeByte(getBloodAllianceBonusExp());
+        if ((mask & BloodAllianceBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getBloodAllianceBonusExp());
         }
-        if(getFreezeHotEventBonusExp() > 0) {
-            outPacket.encodeByte(getFreezeHotEventBonusExp());
+        if ((mask & FreezeHotEventBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getFreezeHotEventBonusExp());
         }
-        if(getRestFieldBonusExp() > 0 || getRestFieldExpRate() > 0) {
-            outPacket.encodeByte(getRestFieldBonusExp());
-            outPacket.encodeByte(getRestFieldExpRate());
+        if ((mask & RestField.getVal()) != 0) {
+            outPacket.encodeInt(getRestFieldBonusExp());
+            outPacket.encodeInt(getRestFieldExpRate());
         }
-        if(getUserHPRateBonusExp() > 0) {
-            outPacket.encodeByte(getUserHPRateBonusExp());
+        if ((mask & UserHPRateBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getUserHPRateBonusExp());
         }
-        if(getFieldValueBonusExp() > 0) {
-            outPacket.encodeByte(getFieldValueBonusExp());
+        if ((mask & FieldValueBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getFieldValueBonusExp());
         }
-        if(getMobKillBonusExp() > 0) {
-            outPacket.encodeByte(getMobKillBonusExp());
+        if ((mask & MobKillBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getMobKillBonusExp());
         }
-        if(getLiveEventBonusExp() > 0) {
-            outPacket.encodeByte(getLiveEventBonusExp());
+        if ((mask & LiveEventBonusExp.getVal()) != 0) {
+            outPacket.encodeInt(getLiveEventBonusExp());
         }
 
     }

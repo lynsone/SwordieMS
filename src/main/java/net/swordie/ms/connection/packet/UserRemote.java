@@ -29,13 +29,13 @@ public class UserRemote {
     }
 
     public static OutPacket move(Char chr, int encodedGatherDuration, Position oldPos, Position oldVPos,
-                                 byte exceptionObject, List<Movement> movements) {
+                                 List<Movement> movements) {
         OutPacket outPacket = new OutPacket(OutHeader.REMOTE_MOVE);
 
         outPacket.encodeInt(chr.getId());
+        outPacket.encodeInt(encodedGatherDuration);
         outPacket.encodePosition(oldPos);
         outPacket.encodePosition(oldVPos);
-        outPacket.encodeInt(encodedGatherDuration);
         outPacket.encodeByte(movements.size());
         for(Movement m : movements) {
             m.encode(outPacket);
@@ -204,6 +204,33 @@ public class UserRemote {
         }
         outPacket.encodeInt(chr.getCompletedSetItemID());
         outPacket.encodeInt(chr.getTotalChuc());
+
+        return outPacket;
+    }
+
+    public static OutPacket throwGrenade(int charID, int grenadeID, Position pos, int keyDown, int skillID, int bySummonedID,
+                                         int slv, boolean left, int attackSpeed) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_THROW_GRENADE);
+
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeInt(grenadeID);
+        outPacket.encodePositionInt(pos);
+        outPacket.encodeInt(keyDown);
+        outPacket.encodeInt(skillID);
+        outPacket.encodeInt(bySummonedID);
+        outPacket.encodeInt(slv);
+        outPacket.encodeByte(left);
+        outPacket.encodeInt(attackSpeed);
+
+        return outPacket;
+    }
+
+    public static OutPacket destroyGrenade(int charID, int grenadeID) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_DESTROY_GRENADE);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(grenadeID);
 
         return outPacket;
     }

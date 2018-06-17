@@ -1,6 +1,8 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.jobs.Zero;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 
@@ -14,6 +16,12 @@ import static net.swordie.ms.client.jobs.resistance.Blaster.*;
  * Created on 12/18/2017.
  */
 public class SkillConstants {
+
+    private static final Logger log = Logger.getLogger(SkillConstants.class);
+
+    public static final short LINK_SKILL_1_LEVEL = 70;
+    public static final short LINK_SKILL_2_LEVEL = 120;
+    public static final short LINK_SKILL_3_LEVEL = 210;
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
@@ -204,7 +212,7 @@ public class SkillConstants {
 
     public static boolean isScreenCenterAttackSkill(int skillID) {
         return skillID == 80001431 || skillID == 100001283 || skillID == 21121057 || skillID == 13121052 ||
-                skillID == 14121052 || skillID == 15121052;
+                skillID == 14121052 || skillID == 15121052 || skillID == 80001431 || skillID == 80001429;
     }
 
     public static boolean isAranFallingStopSkill(int skillID) {
@@ -367,7 +375,7 @@ public class SkillConstants {
                 result = 110;
                 break;
             case 80000001:
-//                result = &_unwindfunclet___1CField_PvP__UAE_XZ_13;
+                result = 30010112;
                 break;
             case 80000002:
                 result = 20030204;
@@ -379,7 +387,7 @@ public class SkillConstants {
                 result = 60000222;
                 break;
             case 80000047:
-//                result = &_unwindfunclet__ShowOneTimeEffect_CField_RhythmGame__AAEXV__ZXString_G___Z_8 + 1;
+                result = 30020233;
                 break;
             case 80000050:
                 result = 30010241;
@@ -408,6 +416,14 @@ public class SkillConstants {
             case 80000188:
                 result = 140000292;
                 break;
+            case 80000004:
+                result = 40020002;
+                break;
+            case 0:
+                result = 0;
+                break;
+            default:
+                log.error("Unknown corresponding link skill for link skill id " + skillID);
         }
         return result;
     }
@@ -761,15 +777,16 @@ public class SkillConstants {
 
     public static boolean needsOneMoreByte(int skillId) {
         switch(skillId) {
-            case 23120012:
-            case 23121000:
-            case 23101000:
-            case 23001000:
-            case 23111001:
-            case 23121002:
-            case 23121052:
-            case 23120013:
-            case 13101020:
+            case 23100006: // Merc FA
+            case 23120012: // Merc Advanced Final Attack
+            case 23121000: // Ishtar's Ring
+            case 23101000: // Piercing Storm
+            case 23001000: // Swift Dual Shot
+            case 23111001: // Leap Tornado
+            case 23121002: // Spikes Royale
+            case 23121052: // Wrath of Enlil
+            case 23120013: // Staggering Strikes
+            case 13101020: // Fairy Spiral
                 return true;
             default:
                 return false;
@@ -782,7 +799,12 @@ public class SkillConstants {
     }
 
     public static int getStealSkillManagerTabFromSkill(int skillID) {
-        int smJobID = 0;
+        int smJobID;
+
+        //Hyper Skills
+        if(skillID % 100 == 54) {
+            return 5;
+        }
         switch (skillID / 10000) {
 
             // 1st Job Tab
@@ -793,8 +815,7 @@ public class SkillConstants {
             case 430:
             case 500:
             case 501:
-                smJobID = 1;
-                break;
+                return 1;
 
             // 2nd Job Tab
             case 110:
@@ -817,8 +838,7 @@ public class SkillConstants {
             case 510:
             case 520:
             case 530:
-                smJobID = 2;
-                break;
+                return 2;
 
             // 3rd Job Tab
             case 111:
@@ -839,8 +859,7 @@ public class SkillConstants {
             case 511:
             case 521:
             case 531:
-                smJobID = 3;
-                break;
+                return 3;
 
             // 4th job Tab
             case 112:
@@ -861,15 +880,9 @@ public class SkillConstants {
             case 512:
             case 522:
             case 532:
-                smJobID = 4;
-                break;
-
-            default: //Should Work for Hypers Tab
-                smJobID = 5;
-                break;
-
+                return 4;
         }
-        return smJobID;
+        return -1;
     }
 
     public static int getMaxPosBysmJobID(int smJobID) {
@@ -934,6 +947,22 @@ public class SkillConstants {
         return impecSkillID;
     }
 
+    public static int getSMJobIdByImpecSkillId(int impecSkillId) {
+        switch (impecSkillId) {
+            case 24001001:  // 1st Job
+                return 1;
+            case 24101001:  // 2nd Job
+                return 2;
+            case 24111001:  // 3rd job
+                return 3;
+            case 24121001:  // 4th Job
+                return 4;
+            case 24121054:  // Hyper Skill
+                return 5;
+        }
+        return -1;
+    }
+
     public static boolean isIceSkill(int skillID) {
         switch (skillID) {
             case Magician.CHILLING_STEP:
@@ -949,6 +978,63 @@ public class SkillConstants {
             default:
                 return false;
         }
+    }
+
+    public static int getLinkSkillByJob(short job) {
+        if (JobConstants.isCannonShooter(job)) { // Pirate Blessing
+            return 80000000;
+        } else if (JobConstants.isKoC(job)) { // Cygnus Blessing
+            return 80000070;
+        } else if (JobConstants.isMercedes(job)) { // Elven Blessing
+            return 80001040;
+        } else if (JobConstants.isDemonSlayer(job)) { // Fury Unleashed
+            return 80000001;
+        } else if (JobConstants.isDemonAvenger(job)) { // Wild Rage
+            return 80000050;
+        } else if (JobConstants.isJett(job)) { // Core Aura
+            return 80001151;
+        } else if (JobConstants.isPhantom(job)) { // Phantom Instinct
+            return 80000002;
+        } else if (JobConstants.isMihile(job)) { // Knight's Watch
+            return 80001140;
+        } else if (JobConstants.isLuminous(job)) { // Light Wash
+            return 80000005;
+        } else if (JobConstants.isAngelicBuster(job)) { // Terms and Conditions
+            return 80001155;
+        } else if (JobConstants.isHayato(job)) { // Keen Edge
+            return 80000003;
+        } else if (JobConstants.isKanna(job)) { // Elementalism
+            return 80000004;
+        } else if (JobConstants.isKaiser(job)) { // Iron Will
+            return 80000006;
+        } else if (JobConstants.isXenon(job)) { // Hybrid Logic
+            return 80000047;
+        } else if (JobConstants.isBeastTamer(job)) { // Focus Spirit
+            return 80010006;
+        }
+        return 0;
+    }
+
+    public static int getLinkSkillLevelByCharLevel(short level) {
+        int res = 0;
+        if (level >= LINK_SKILL_3_LEVEL) {
+            res = 3;
+        } else if (level >= LINK_SKILL_2_LEVEL) {
+            res = 2;
+        } else if (level >= LINK_SKILL_1_LEVEL) {
+            res = 1;
+        }
+        return res;
+    }
+
+    public static int getLinkedSkill(int skillID) {
+        switch(skillID) {
+            case Zero.STORM_BREAK_INIT:
+                return Zero.STORM_BREAK;
+            case Zero.ADV_STORM_BREAK_SHOCK_INIT:
+                return Zero.ADV_STORM_BREAK;
+        }
+        return skillID;
     }
 
     public static boolean isPassiveSkill(int skillId) {

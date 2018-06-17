@@ -32,7 +32,7 @@ public class Noblesse extends Job {
 
     public Noblesse(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -46,6 +46,7 @@ public class Noblesse extends Job {
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
 
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

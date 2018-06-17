@@ -113,7 +113,7 @@ public class Xenon extends Job {
 
     public Xenon(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -337,6 +337,8 @@ public class Xenon extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

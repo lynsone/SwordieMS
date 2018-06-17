@@ -12,6 +12,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.jobs.adventurer.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.UserLocal;
@@ -29,9 +30,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -51,20 +50,20 @@ public class Phantom extends Job {
     public static final int TO_THE_SKIES = 20031203;
     public static final int DEXTEROUS_TRAINING = 20030206;
 
-    public static final int IMPECCABLE_MEMORY_I = 24001001; //TODO
+    public static final int IMPECCABLE_MEMORY_I = 24001001;
 
-    public static final int IMPECCABLE_MEMORY_II = 24101001; //TODO
+    public static final int IMPECCABLE_MEMORY_II = 24101001;
     public static final int CANE_BOOSTER = 24101005; //Buff
     public static final int CARTE_BLANCHE = 24100003;
 
-    public static final int IMPECCABLE_MEMORY_III = 24111001; //TODO
+    public static final int IMPECCABLE_MEMORY_III = 24111001;
     public static final int FINAL_FEINT = 24111002; //Buff (Unlimited Duration) Gone upon Death
     public static final int BAD_LUCK_WARD = 24111003; //Buff
     public static final int CLAIR_DE_LUNE = 24111005; //Buff
 
-    public static final int IMPECCABLE_MEMORY_IV = 24121001; //TODO
+    public static final int IMPECCABLE_MEMORY_IV = 24121001;
     public static final int PRIERE_DARIA = 24121004; //Buff
-    public static final int VOL_DAME = 24121007; // Special Buff TODO
+    public static final int VOL_DAME = 24121007; // Special Buff
     public static final int MAPLE_WARRIOR_PH = 24121008; //Buff
     public static final int CARTE_NOIR = 24120002;              //80001890
     public static final int HEROS_WILL_PH = 24121009;
@@ -72,7 +71,7 @@ public class Phantom extends Job {
     public static final int HEROIC_MEMORIES_PH = 24121053;
     public static final int CARTE_ROSE_FINALE = 24121052;
 
-    public static final int CARTE_ATOM = 80001890; //TODO maybe
+    public static final int CARTE_ATOM = 80001890;
 
     private int[] addedSkills = new int[]{
             JUDGMENT_DRAW_2,
@@ -97,10 +96,11 @@ public class Phantom extends Job {
     };
 
     private byte cardAmount;
+    private Set<Job> stealJobHandlers = new HashSet<>();
 
     public Phantom(Char chr) {
         super(chr);
-        if (isHandlerOfJob(chr.getJob())) {
+        if (chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -109,6 +109,11 @@ public class Phantom extends Job {
                 }
             }
         }
+        stealJobHandlers.add(new Warrior(chr));
+        stealJobHandlers.add(new Magician(chr));
+        stealJobHandlers.add(new Archer(chr));
+        stealJobHandlers.add(new Thief(chr));
+        stealJobHandlers.add(new Pirate(chr));
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -125,7 +130,6 @@ public class Phantom extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                c.write(UserLocal.incJudgementStack((byte) 15));
                 break;
             case FINAL_FEINT:
                 //TODO
@@ -279,6 +283,9 @@ public class Phantom extends Job {
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
+        for(Job jobHandler : stealJobHandlers) {
+            jobHandler.handleAttack(c, attackInfo);
+        }
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = chr.getSkill(attackInfo.skillId);
@@ -314,10 +321,15 @@ public class Phantom extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        for(Job jobHandler : stealJobHandlers) {
+            jobHandler.handleSkill(c, skillID, slv, inPacket);
+        }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -376,7 +388,7 @@ public class Phantom extends Job {
                             o1.nOption = si.getValue(x, slv);
                             o1.rOption = skillID;
                             o1.tOption = 30;
-                            tsm.putCharacterStatValue(MagicGuard, o1); //as a check to allow for DmgReduction in the Hit Handler
+                            tsm.putCharacterStatValue(CharacterTemporaryStat.EVA, o1); //as a check to allow for DmgReduction in the Hit Handler
                             break;
                         case PowerUp:
                         case MagicUp:
@@ -421,11 +433,14 @@ public class Phantom extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        for(Job jobHandler : stealJobHandlers) {
+            jobHandler.handleHit(c, inPacket, hitInfo);
+        }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (!chr.hasSkill(VOL_DAME)) {
             return;
         }
-        if (tsm.getOptByCTSAndSkill(MagicGuard, VOL_DAME) != null) {
+        if (tsm.getOptByCTSAndSkill(CharacterTemporaryStat.EVA, VOL_DAME) != null) {
             Skill skill = chr.getSkill(VOL_DAME);
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int dmgPerc = si.getValue(x, skill.getCurrentLevel());

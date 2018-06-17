@@ -2,12 +2,17 @@ package net.swordie.ms.client.jobs;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.SPSet;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
@@ -25,6 +30,8 @@ import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -59,6 +66,8 @@ public class Zero extends Job {
     public static final int AIR_RIOT = 101000101; //Special Attack (Stun Debuff)
     public static final int THROWING_WEAPON = 101100100; //Special Attack (Throw Sword)
     public static final int ADVANCED_THROWING_WEAPON = 101100101; //Special Attack (Throw Sword)
+    public static final int STORM_BREAK = 101120202;
+    public static final int STORM_BREAK_INIT = 101120203;
     public static final int ADV_EARTH_BREAK = 101120104;
     public static final int ADV_STORM_BREAK = 101120204;
     public static final int ADV_EARTH_BREAK_SHOCK_INIT = 101120105; //Attack to initialise the Shockwave
@@ -150,7 +159,7 @@ public class Zero extends Job {
 
     public Zero(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -343,16 +352,20 @@ public class Zero extends Job {
                 }
                 //break;
             case ADV_EARTH_BREAK_SHOCK_INIT:
+                slv = (byte) chr.getSkill(ADV_EARTH_BREAK).getCurrentLevel();
                 SkillInfo fci = SkillData.getSkillInfoById(ADV_EARTH_BREAK);
                 AffectedArea aa = AffectedArea.getPassiveAA(chr, ADV_EARTH_BREAK, slv);
                 aa.setMobOrigin((byte) 0);
                 aa.setPosition(chr.getPosition());
                 aa.setSkillID(ADV_EARTH_BREAK);
                 aa.setRect(aa.getPosition().getRectAround(fci.getRects().get(0)));
-                c.write(CField.affectedAreaCreated(aa));
+                aa.setDuration(fci.getValue(v, slv) * 1000);
+                chr.getField().spawnAffectedArea(aa);
                 break;
 
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override
@@ -558,14 +571,66 @@ public class Zero extends Job {
     }
 
     @Override
+    public void handleLevelUp() {
+        short level = chr.getLevel();
+        chr.addStat(Stat.mhp, 500);
+        chr.addStat(Stat.ap, 5);
+        int sp = 3;
+        if (level > 100 && (level % 10) % 3 == 0) {
+            sp = 6; // double sp on levels ending in 3/6/9
+        }
+        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        SPSet alphaSpSet = esp.getSpSet().get(0);
+        SPSet betaSpSet = esp.getSpSet().get(1);
+        alphaSpSet.addSp(sp);
+        betaSpSet.addSp(sp);
+        Map<Stat, Object> stats = new HashMap<>();
+        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+        chr.write(WvsContext.statChanged(stats));
+        byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
+        int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
+        if (linkSkillID != 0 && linkSkillLevel > 0) {
+            Skill skill = chr.getSkill(linkSkillID, true);
+            if (skill.getCurrentLevel() != linkSkillLevel) {
+                chr.addSkill(linkSkillID, linkSkillLevel, 3);
+            }
+        }
+    }
+
+    @Override
     public void setCharCreationStats(Char chr) {
-        chr.getAvatarData().setZeroAvatarLook(chr.getAvatarData().getAvatarLook().deepCopy());
-        chr.getAvatarData().getAvatarLook().getHairEquips().remove(new Integer(1562000));
-        chr.getAvatarData().getZeroAvatarLook().getHairEquips().remove(new Integer(1572000));
-        chr.getAvatarData().getZeroAvatarLook().setWeaponId(1562000);
-        chr.getAvatarData().getZeroAvatarLook().setGender(1);
-        chr.getAvatarData().getZeroAvatarLook().setZeroBetaLook(true);
-        chr.getAvatarData().getCharacterStat().setLevel(100);
-        chr.getAvatarData().getCharacterStat().setStr(300); //TODO give lv 100 zero proper stats
+        AvatarLook mainLook = chr.getAvatarData().getAvatarLook();
+        chr.getAvatarData().setZeroAvatarLook(mainLook.deepCopy());
+        AvatarLook zeroLook = chr.getAvatarData().getZeroAvatarLook();
+        mainLook.getHairEquips().remove(new Integer(1562000));
+        zeroLook.getHairEquips().remove(new Integer(1572000));
+        zeroLook.setWeaponId(1562000);
+        zeroLook.setGender(1);
+        zeroLook.setSkin(chr.getAvatarData().getAvatarLook().getSkin());
+        zeroLook.setFace(21290);
+        zeroLook.setHair(37623);
+        zeroLook.setZeroBetaLook(true);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setLevel(100);
+        cs.setStr(518);
+        cs.setHp(5000);
+        cs.setMaxHp(5000);
+        cs.setMp(100);
+        cs.setMaxMp(100);
+        cs.setJob(10112);
+        cs.setPosMap(100000000);ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        SPSet alphaSpSet = esp.getSpSet().get(0);
+        SPSet betaSpSet = esp.getSpSet().get(1);
+        alphaSpSet.addSp(6);
+        betaSpSet.addSp(6);
+        Map<Stat, Object> stats = new HashMap<>();
+        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+        chr.write(WvsContext.statChanged(stats));
     }
 }

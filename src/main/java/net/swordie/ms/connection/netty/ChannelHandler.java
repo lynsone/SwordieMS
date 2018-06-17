@@ -118,6 +118,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_STAT_CHANGE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserStatChangeItemUseRequest(c, inPacket);
                     break;
+                case USER_STAT_CHANGE_ITEM_CANCEL_REQUEST:
+                    WorldHandler.handleUserStatChangeItemCancelRequest(chr ,inPacket);
+                    break;
                 case USER_MACRO_SYS_DATA_MODIFIED:
                     WorldHandler.handleUserMacroSysDataModified(c, inPacket);
                     break;
@@ -453,6 +456,42 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_CASH_PET_PICK_UP_ON_OFF_REQUEST:
                     WorldHandler.handleUserCashPetPickUpOnOffRequest(chr, inPacket);
+                    break;
+                case RUNE_STONE_USE_REQ:
+                    WorldHandler.handleRuneStoneUseRequest(c, inPacket);
+                    break;
+                case RUNE_STONE_SKILL_REQ:
+                    WorldHandler.handleRuneStoneSkillRequest(c, inPacket);
+                    break;
+                case SET_SON_OF_LINKED_SKILL_REQUEST:
+                    WorldHandler.handleSetSonOfLinkedSkillRequest(chr, inPacket);
+                    break;
+                case USER_MEMORIAL_CUBE_OPTION_REQUEST:
+                    WorldHandler.handleUserMemorialCubeOptionRequest(chr, inPacket);
+                    break;
+                case FAMILIAR_ADD_REQUEST:
+                    WorldHandler.handleFamiliarAddRequest(chr, inPacket);
+                    break;
+                case FAMILIAR_SPAWN_REQUEST:
+                    WorldHandler.handleFamiliarSpawnRequest(chr, inPacket);
+                    break;
+                case FAMILIAR_RENAME_REQUEST:
+                    WorldHandler.handleFamiliarRenameRequest(chr, inPacket);
+                    break;
+                case FAMILIAR_MOVE:
+                    WorldHandler.handleFamiliarMove(chr, inPacket);
+                    break;
+                case FAMILIAR_ATTACK:
+                    WorldHandler.handleFamiliarAttack(chr, inPacket);
+                    break;
+                case USER_THROW_GRENADE:
+                    WorldHandler.handleUserThrowGrenade(chr, inPacket);
+                    break;
+                case USER_DESTROY_GRENADE:
+                    WorldHandler.handleUserDestroyGrenade(chr, inPacket);
+                    break;
+                case USER_AREA_DOT_ATTACK:
+                    WorldHandler.handleUserAreaDotAttack(chr, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

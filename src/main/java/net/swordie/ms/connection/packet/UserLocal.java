@@ -1,8 +1,6 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
@@ -12,6 +10,8 @@ import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.enums.StealMemoryType;
 import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.Familiar;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
@@ -82,20 +82,10 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onResetStateForOffSkill() {
+    public static OutPacket resetStateForOffSkill() {
         OutPacket outPacket = new OutPacket(OutHeader.RESET_STATE_FOR_OFF_SKILL);
 
         outPacket.encodeInt(0);
-
-        return outPacket;
-
-    }
-
-    public static OutPacket onEffectRechargeAB() {
-        OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
-
-        outPacket.encodeByte(0x31);
-        outPacket.encodeByte(1);
 
         return outPacket;
     }
@@ -127,7 +117,7 @@ public class UserLocal {
             case STEAL_SKILL:
                 outPacket.encodeInt(stealManagerJobID); //jobId  1~5 | 1 = 1stJob , 2 = 2ndJob ... ..
                 outPacket.encodeInt(position); //impecMemSkillID // nPOS  0,1,2,3
-                outPacket.encodeInt(skillid);//MagicCrash(Hero) //skill
+                outPacket.encodeInt(skillid); //skill
                 outPacket.encodeInt(stealSkillLv);   //StealSkill Lv
                 outPacket.encodeInt(stealSkillMaxLv);   //StealSkill Max Lv
                 break;
@@ -201,6 +191,18 @@ public class UserLocal {
         outPacket.encodePositionInt(position);
         outPacket.encodeInt(mobID);
         outPacket.encodeInt(count);
+
+        return outPacket;
+    }
+
+    public static OutPacket userRandAreaAttackRequest(Mob mob, int skillID) {
+        OutPacket outPacket = new OutPacket(OutHeader.USER_RAND_AREA_ATTACK_REQUEST);
+
+        outPacket.encodeInt(skillID);
+        outPacket.encodeInt(1); //# of mobs to attack
+
+        outPacket.encodePositionInt(mob.getPosition());
+        outPacket.encodeInt(mob.getObjectId());
 
         return outPacket;
     }
@@ -321,6 +323,17 @@ public class UserLocal {
         OutPacket outPacket = new OutPacket(OutHeader.DEATH_COUNT_INFO);
 
         outPacket.encodeInt(deathCount);
+
+        return outPacket;
+    }
+
+    public static OutPacket familiarAddResult(Familiar familiar, boolean showInfoChanged, boolean adminMob) {
+        OutPacket outPacket = new OutPacket(OutHeader.FAMILIAR_ADD_RESULT);
+
+        outPacket.encodeLong(familiar.getId());
+        familiar.encode(outPacket);
+        outPacket.encodeByte(showInfoChanged);
+        outPacket.encodeByte(adminMob);
 
         return outPacket;
     }

@@ -10,7 +10,7 @@ def action(response, answer):
     if response == 1:
         sm.setJob(1310)
         sm.getChr().addStatAndSendPacket(Stat.ap, 5)
-        sm.setSP(5)
+        sm.addSP(5)
         sm.completeQuest(20873)
         sm.sendSayOkay("You have been officially promoted to a Cygnus Knight! I've also given you some AP and SP to work with.")
     else:

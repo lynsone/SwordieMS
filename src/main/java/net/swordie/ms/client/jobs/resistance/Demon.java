@@ -177,7 +177,7 @@ public class Demon extends Job {
 
     public Demon(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             if (JobConstants.isDemonSlayer(chr.getJob())) {
                 for (int id : addedSkillsDS) {
                     if (!chr.hasSkill(id)) {
@@ -531,6 +531,8 @@ public class Demon extends Job {
                 handleOverloadCount(attackInfo, skillID, tsm, c);
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleNetherShield() {

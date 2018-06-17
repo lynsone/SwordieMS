@@ -129,7 +129,7 @@ public class BeastTamer extends Job {
 
     public BeastTamer(Char chr) {
         super(chr);
-        if (isHandlerOfJob(chr.getJob())) {
+        if (chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -382,6 +382,8 @@ public class BeastTamer extends Job {
                 chr.getField().spawnAffectedArea(aa3);
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

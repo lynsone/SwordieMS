@@ -2,6 +2,7 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.LinkSkill;
 import net.swordie.ms.client.character.avatar.AvatarData;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.cards.MonsterBookInfo;
@@ -11,6 +12,7 @@ import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.info.FarmUserInfo;
 import net.swordie.ms.client.character.info.FreezeHotEventInfo;
 import net.swordie.ms.client.character.info.ZeroInfo;
+import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleLadder;
@@ -18,21 +20,15 @@ import net.swordie.ms.client.character.monsterbattle.MonsterBattleMobInfo;
 import net.swordie.ms.client.character.monsterbattle.MonsterBattleRankInfo;
 import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.potential.CharacterPotentialMan;
-import net.swordie.ms.client.character.skills.Option;
-import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.client.character.quest.Quest;
+import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.friend.FriendRecord;
-import net.swordie.ms.client.friend.FriendshipRingRecord;
-import net.swordie.ms.client.jobs.legend.StealSkillInfo;
-import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.life.pet.Pet;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.FieldInstanceType;
-import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
+import net.swordie.ms.client.friend.FriendRecord;
+import net.swordie.ms.client.friend.FriendshipRingRecord;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.updates.GuildUpdate;
@@ -40,26 +36,31 @@ import net.swordie.ms.client.guild.updates.GuildUpdateMemberLogin;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.drop.Drop;
-import net.swordie.ms.client.character.quest.Quest;
-import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.party.Party;
-import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ChatHandler;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Familiar;
+import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
-import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.shop.NpcShopDlg;
+import org.apache.log4j.Logger;
 
 import javax.persistence.*;
 import java.util.*;
@@ -72,10 +73,10 @@ import static net.swordie.ms.client.character.items.BodyPart.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
-import static net.swordie.ms.world.field.FieldInstanceType.*;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
+import static net.swordie.ms.world.field.FieldInstanceType.CHANNEL;
 
 /**
  * Created on 11/17/2017.
@@ -83,6 +84,9 @@ import static net.swordie.ms.enums.InventoryOperation.*;
 @Entity
 @Table(name = "characters")
 public class Char {
+
+	@Transient
+	private static final Logger log = Logger.getLogger(Char.class);
 
 	@Transient
 	private Client client;
@@ -142,6 +146,10 @@ public class Char {
 	private Set<CharacterPotential> potentials;
 
 	@JoinColumn(name = "charID")
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	private Set<Familiar> familiars;
+
+	@JoinColumn(name = "charID")
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Macro> macros = new ArrayList<>();
 
@@ -153,6 +161,14 @@ public class Char {
 	@OneToOne(cascade = CascadeType.ALL)
 	private MonsterBookInfo monsterBookInfo;
 
+	@JoinColumn(name = "charID")
+	@OneToMany(cascade = CascadeType.ALL)
+	private Set<StolenSkill> stolenSkills;
+
+	@JoinColumn(name = "charID")
+	@OneToMany(cascade = CascadeType.ALL)
+	private Set<ChosenSkill> chosenSkills;
+
 	@Transient
 	private CharacterPotentialMan potentialMan;
 
@@ -160,12 +176,6 @@ public class Char {
 	private Ranking ranking;
 	@Transient
 	private int combatOrders;
-	@Transient
-	private StealSkillInfo stealSkillInfo = new StealSkillInfo();
-	@Transient
-	private int[] stolenSkills = new int[15]; // Stolen size is always 15
-	@Transient
-	private int[] chosenSkills = new int[5]; // Chosen size is always 5
 	@Transient
 	private List<ItemPot> itemPots;
 	@Transient
@@ -304,6 +314,14 @@ public class Char {
 	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
 	@Transient
 	private int deathCount = -1;
+	@Transient
+	private long runeStoneCooldown;
+	@Transient
+	private MemorialCubeInfo memorialCubeInfo;
+	@Transient
+	private Familiar activeFamiliar;
+	@Transient
+	private boolean skillCDBypass = false;
 	// TODO Move this to CharacterStat?
 	@Transient
 	private Map<BaseStat, Long> baseStats = new HashMap<>();
@@ -358,6 +376,7 @@ public class Char {
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
+		familiars = new HashSet<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -783,7 +802,8 @@ public class Char {
 			boolean encodeSkills = getSkills().size() > 0;
 			outPacket.encodeByte(encodeSkills);
 			if (encodeSkills) {
-				short size = (short) getSkills().size();
+				Set<LinkSkill> linkSkills = getLinkSkills();
+				short size = (short) (getSkills().size() + linkSkills.size());
 				outPacket.encodeShort(size);
 				for (Skill skill : getSkills()) {
 					outPacket.encodeInt(skill.getSkillId());
@@ -793,11 +813,18 @@ public class Char {
 						outPacket.encodeInt(skill.getMasterLevel());
 					}
 				}
-				short size2 = 0;
-				outPacket.encodeShort(size2);
-				for (int i = 0; i < size2; i++) {
-					outPacket.encodeInt(0); // another nCount
-					outPacket.encodeShort(0); // idk
+				for (LinkSkill linkSkill : linkSkills) {
+					outPacket.encodeInt(linkSkill.getLinkSkillID());
+					outPacket.encodeInt(linkSkill.getOwnerID());
+					outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+					if (SkillConstants.isSkillNeedMasterLevel(linkSkill.getLinkSkillID())) {
+						outPacket.encodeInt(3); // whatevs
+					}
+				}
+				outPacket.encodeShort(linkSkills.size());
+				for (LinkSkill linkSkill : linkSkills) {
+					outPacket.encodeInt(linkSkill.getLinkSkillID()); // another nCount
+					outPacket.encodeShort(linkSkill.getLevel() - 1); // idk
 				}
 			} else {
 				short size = 0;
@@ -960,8 +987,10 @@ public class Char {
 			}
 		}
 		if (mask.isInMask(DBChar.Familiar)) {
-			outPacket.encodeInt(0);
-			// if int is > 0: sub_72AEB0
+			outPacket.encodeInt(getFamiliars().size());
+			for (Familiar familiar : getFamiliars()) {
+				familiar.encode(outPacket);
+			}
 		}
 		if (mask.isInMask(DBChar.NewYearCard)) {
 			short size = 0;
@@ -1026,8 +1055,9 @@ public class Char {
 		}
 		if (mask.isInMask(DBChar.StolenSkills)) {
 			if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
-				for (int skillID : getStolenSkills()) {
-					outPacket.encodeInt(skillID);
+				for (int i = 0; i<15; i++) {
+					StolenSkill stolenSkill = getStolenSkillByPosition(i);
+					outPacket.encodeInt(stolenSkill == null ? 0 : stolenSkill.getSkillid());
 				}
 			} else {
 				outPacket.encodeInt(0);
@@ -1053,8 +1083,9 @@ public class Char {
 		}
 		if (mask.isInMask(DBChar.ChosenSkills)) {
 			if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
-				for (int skillID : getChosenSkills()) {
-					outPacket.encodeInt(skillID);
+				for (int i = 1; i <= 5; i++) { //Shifted by +1 to accomodate the Skill Management Tabs
+					ChosenSkill chosenSkill = getChosenSkillByPosition(i);
+					outPacket.encodeInt(chosenSkill == null ? 0 : ( isChosenSkillInStolenSkillList(chosenSkill.getSkillId()) ? chosenSkill.getSkillId() : 0) );
 				}
 			} else {
 				for (int i = 0; i < 5; i++) {
@@ -1281,22 +1312,6 @@ public class Char {
 
 	public int getCombatOrders() {
 		return combatOrders;
-	}
-
-	public int[] getStolenSkills() {
-		return stolenSkills;
-	}
-
-	public void setStolenSkills(int[] stolenSkills) {
-		this.stolenSkills = stolenSkills;
-	}
-
-	public int[] getChosenSkills() {
-		return chosenSkills;
-	}
-
-	public void setChosenSkills(int[] chosenSkills) {
-		this.chosenSkills = chosenSkills;
 	}
 
 	public QuestManager getQuestManager() {
@@ -1776,6 +1791,14 @@ public class Char {
 	}
 
 	/**
+	 * Sends a message to this Char through the ScriptProgress packet.
+	 *
+	 * @param msg
+	 * 		The message to display.
+	 */
+	public void chatScriptMessage(String msg) { write(User.scriptProgressMessage(msg));}
+
+	/**
 	 * Sends a message to this Char with a default colour {@link ChatMsgColour#GAME_MESSAGE}.
 	 *
 	 * @param msg
@@ -2044,6 +2067,12 @@ public class Char {
 		if (getDeathCount() > 0) {
 			write(UserLocal.deathCountInfo(getDeathCount()));
 		}
+		if (field.getEliteState() == EliteState.ELITE_BOSS) {
+			write(CField.eliteState(EliteState.ELITE_BOSS, true, GameConstants.ELITE_BOSS_BGM, null, null));
+		}
+		if (getActiveFamiliar() != null) {
+			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
+		}
 	}
 
 	/**
@@ -2082,14 +2111,14 @@ public class Char {
 	 * 		The amount of exp to add.
 	 */
 	public void addExp(long amount) {
-		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		ExpIncreaseInfo eii = new ExpIncreaseInfo();
 		eii.setLastHit(true);
 		eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, amount));
 		addExp(amount, eii);
 	}
 
-	private void addExp(long amount, ExpIncreaseInfo eii) {
+	public void addExp(long amount, ExpIncreaseInfo eii) {
+		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		int level = getStat(Stat.level);
@@ -2104,13 +2133,45 @@ public class Char {
 			stats.put(Stat.level, (byte) getStat(Stat.level));
 			getJobHandler().handleLevelUp();
 			level++;
+			heal(getMaxHP());
+			healMP(getMaxMP());
 		}
 		cs.setExp(newExp);
 		stats.put(Stat.exp, newExp);
 		write(WvsContext.incExpMessage(eii));
 		getClient().write(WvsContext.statChanged(stats));
-		heal(getMaxHP());
-		healMP(getMaxMP());
+	}
+
+	/**
+	 * Adds a given amount of exp to this Char, however it does not display the Exp Message.
+	 * Immediately checks for level-up possibility, and sends the updated
+	 * stats to the client. Allows multi-leveling.
+	 *
+	 *
+	 * @param amount
+	 * 		The amount of exp to add.
+	 */
+	public void addExpNoMsg(long amount) {
+		CharacterStat cs = getAvatarData().getCharacterStat();
+		long curExp = cs.getExp();
+		int level = getStat(Stat.level);
+		if (level >= GameConstants.charExp.length - 1) {
+			return;
+		}
+		long newExp = curExp + amount;
+		Map<Stat, Object> stats = new HashMap<>();
+		while (newExp >= GameConstants.charExp[level]) {
+			newExp -= GameConstants.charExp[level];
+			addStat(Stat.level, 1);
+			stats.put(Stat.level, (byte) getStat(Stat.level));
+			getJobHandler().handleLevelUp();
+			level++;
+			heal(getMaxHP());
+			healMP(getMaxMP());
+		}
+		cs.setExp(newExp);
+		stats.put(Stat.exp, newExp);
+		getClient().write(WvsContext.statChanged(stats));
 	}
 
 	/**
@@ -2224,9 +2285,9 @@ public class Char {
 		cs.setMaxMp(oldInfo.getSubMMP());
 		Map<Stat, Object> updatedStats = new HashMap<>();
 		updatedStats.put(Stat.hp, cs.getHp());
-		updatedStats.put(Stat.mhp, cs.getHp());
-		updatedStats.put(Stat.mp, cs.getHp());
-		updatedStats.put(Stat.mmp, cs.getHp());
+		updatedStats.put(Stat.mhp, cs.getMaxHp());
+		updatedStats.put(Stat.mp, cs.getMp());
+		updatedStats.put(Stat.mmp, cs.getMaxMp());
 		write(WvsContext.statChanged(updatedStats));
 //        write(WvsContext.zeroInfo(currentInfo));
 	}
@@ -2262,9 +2323,21 @@ public class Char {
 			return true;
 		} else {
 			Item item = drop.getItem();
+			int itemID = item.getItemId();
 			boolean isConsume = false;
-			if (!ItemConstants.isEquip(item.getItemId())) {
-				ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
+			if (itemID == GameConstants.BLUE_EXP_ORB_ID || itemID == GameConstants.PURPLE_EXP_ORB_ID ||
+					itemID == GameConstants.RED_EXP_ORB_ID) {
+				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
+
+				write(User.effect(Effect.fieldItemConsumed((int) (expGain > Integer.MAX_VALUE ? Integer.MAX_VALUE : expGain))));
+				addExpNoMsg(expGain);
+
+				// Exp Orb Buff On Pickup
+				TemporaryStatManager tsm = getTemporaryStatManager();
+				ItemBuffs.giveItemBuffsFromItemID(this, tsm, itemID);
+			}
+			if (!ItemConstants.isEquip(itemID)) {
+				ItemInfo ii = ItemData.getItemInfoByID(itemID);
 				isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
 			}
 			if (isConsume) {
@@ -2782,6 +2855,7 @@ public class Char {
 	}
 
 	public void logout() {
+		System.out.println("Logging out " + getName());
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);
@@ -2997,7 +3071,7 @@ public class Char {
 	}
 
 	/**
-	 * Initializes the equips by
+	 * Initializes the equips' enchantment stats.
 	 */
 	public void initEquips() {
 		for (Equip e : getEquippedInventory().getItems().stream().map(e -> (Equip) e).collect(Collectors.toList())) {
@@ -3121,14 +3195,6 @@ public class Char {
 		comboKillResetTimer = EventManager.addEvent(() -> setComboCounter(0), GameConstants.COMBO_KILL_RESET_TIMER, TimeUnit.SECONDS);
 	}
 
-	public StealSkillInfo getStealSkillInfo() {
-		return stealSkillInfo;
-	}
-
-	public void setStealSkillInfo(StealSkillInfo stealSkillInfo) {
-		this.stealSkillInfo = stealSkillInfo;
-	}
-
 	public Map<Integer, Long> getSkillCoolTimes() {
 		return skillCoolTimes;
 	}
@@ -3172,7 +3238,9 @@ public class Char {
 			int cdInSec = si.getValue(SkillStat.cooltime, slv);
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
 			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
-			write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
+			if(!hasSkillCDBypass()) {
+				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
+			}
 		}
 	}
 
@@ -3212,6 +3280,151 @@ public class Char {
 
 	public void setDeathCount(int deathCount) {
 		this.deathCount = deathCount;
+	}
+
+	public Set<LinkSkill> getLinkSkills() {
+		return getAccount().getLinkSkills().stream()
+				.filter(ls -> ls.getOwnerID() != getId())
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Adds a skill to this Char. If the Char already has this skill, just changes the levels.
+	 * @param skillID the skill's id to add
+	 * @param currentLevel the current level of the skill
+	 * @param masterLevel the master level of the skill
+	 */
+	public void addSkill(int skillID, int currentLevel, int masterLevel) {
+		Skill skill = getSkill(skillID);
+		if (skill == null) {
+			skill = SkillData.getSkillDeepCopyById(skillID);
+		}
+		if (skill == null) {
+			log.error("No such skill found.");
+			return;
+		}
+		skill.setCurrentLevel(currentLevel);
+		skill.setMasterLevel(masterLevel);
+		List<Skill> list = new ArrayList<>();
+		list.add(skill);
+		addSkill(skill);
+		getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+	}
+
+	public long getRuneCooldown() {
+		return runeStoneCooldown;
+	}
+
+	public void setRuneCooldown(long runeCooldown) {
+		this.runeStoneCooldown = runeCooldown;
+	}
+
+	public MemorialCubeInfo getMemorialCubeInfo() {
+		return memorialCubeInfo;
+	}
+
+	public void setMemorialCubeInfo(MemorialCubeInfo memorialCubeInfo) {
+		this.memorialCubeInfo = memorialCubeInfo;
+	}
+
+	public Set<Familiar> getFamiliars() {
+		return familiars;
+	}
+
+	public void setFamiliars(Set<Familiar> familiars) {
+		this.familiars = familiars;
+	}
+
+	public boolean hasFamiliar(int familiarID) {
+		return getFamiliars().stream().anyMatch(f -> f.getFamiliarID() == familiarID);
+	}
+
+	public Familiar getFamiliarByID(int familiarID) {
+		return getFamiliars().stream().filter(f -> f.getFamiliarID() == familiarID).findAny().orElse(null);
+	}
+
+	public void addFamiliar(Familiar familiar) {
+		getFamiliars().add(familiar);
+	}
+
+	public void removeFamiliarByID(int familiarID) {
+		removeFamiliar(getFamiliarByID(familiarID));
+	}
+
+	public void removeFamiliar(Familiar familiar) {
+		if (familiar != null) {
+			getFamiliars().remove(familiar);
+		}
+	}
+
+	public void setActiveFamiliar(Familiar activeFamiliar) {
+		this.activeFamiliar = activeFamiliar;
+	}
+
+	public Familiar getActiveFamiliar() {
+		return activeFamiliar;
+	}
+
+	public boolean hasSkillCDBypass() {
+		return skillCDBypass;
+	}
+
+	public void setSkillCDBypass(boolean skillCDBypass) {
+		this.skillCDBypass = skillCDBypass;
+	}
+
+
+	public Set<StolenSkill> getStolenSkills() {
+		return stolenSkills;
+	}
+
+	public void setStolenSkills(Set<StolenSkill> stolenSkills) {
+		this.stolenSkills = stolenSkills;
+	}
+
+	public void addStolenSkill(StolenSkill stolenSkill) {
+		getStolenSkills().add(stolenSkill);
+	}
+
+	public void removeStolenSkill(StolenSkill stolenSkill) {
+		if(stolenSkill != null) {
+			getStolenSkills().remove(stolenSkill);
+		}
+	}
+
+	public StolenSkill getStolenSkillByPosition(int position) {
+		return getStolenSkills().stream().filter(ss -> ss.getPosition() == position).findAny().orElse(null);
+	}
+
+	public StolenSkill getStolenSkillBySkillId(int skillId) {
+		return getStolenSkills().stream().filter(ss -> ss.getSkillid() == skillId).findAny().orElse(null);
+	}
+
+
+	public Set<ChosenSkill> getChosenSkills() {
+		return chosenSkills;
+	}
+
+	public void setChosenSkills(Set<ChosenSkill> chosenSkills) {
+		this.chosenSkills = chosenSkills;
+	}
+
+	public void addChosenSkill(ChosenSkill chosenSkill) {
+		getChosenSkills().add(chosenSkill);
+	}
+
+	public void removeChosenSkill(ChosenSkill chosenSkill) {
+		if(chosenSkill != null) {
+			getChosenSkills().remove(chosenSkill);
+		}
+	}
+
+	public ChosenSkill getChosenSkillByPosition(int position) {
+		return getChosenSkills().stream().filter(ss -> ss.getPosition() == position).findAny().orElse(null);
+	}
+
+	public boolean isChosenSkillInStolenSkillList(int skillId) {
+		return getStolenSkills().stream().filter(ss -> ss.getSkillid() == skillId).findAny().orElse(null) != null;
 	}
 
 	public Map<BaseStat, Long> getBaseStats() {

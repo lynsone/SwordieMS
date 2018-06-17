@@ -72,7 +72,9 @@ public class DropData {
                 itemID (int) chance (int out of 1000) questReq?(int)
                 So, single line = mobID, else 2/3/4/5 ints
                  */
-                if(split.length == 1 && !split[0].equals("")) {
+                if(split.length == 1 && split[0].equalsIgnoreCase("global")) {
+                    mobID = -1;
+                } else if(split.length == 1 && !split[0].equals("")) {
                     mobID = Integer.parseInt(split[0]);
                 } else if(split.length >= 2) {
                     int itemID = Integer.parseInt(split[0]);
@@ -94,7 +96,13 @@ public class DropData {
                     DropInfo dropInfo = new DropInfo(itemID, 0, chance, questReq, minQuant, maxQuant);
                     addDrop(mobID, dropInfo);
                 }
-
+            }
+            for (DropInfo globalDrop : getDropInfoByID(-1)) {
+                for (int key : getDrops().keySet()) {
+                    if (key != -1) {
+                        addDrop(key, globalDrop);
+                    }
+                }
             }
 
         } catch (IOException e) {
@@ -131,6 +139,13 @@ public class DropData {
             if (file.exists()) {
                 loadDropsFromFile(file);
                 drops = getCachedDropInfoById(mobID);
+            } else {
+                // just take global drops otherwise
+                file = new File(String.format("%s/mobDrops/%d.dat", ServerConstants.DAT_DIR, -1));
+                if (file.exists()) {
+                    loadDropsFromFile(file);
+                    drops = getCachedDropInfoById(-1);
+                }
             }
         }
         return drops;

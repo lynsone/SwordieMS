@@ -1,30 +1,31 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.character.*;
-import net.swordie.ms.client.character.avatar.AvatarLook;
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
+import net.swordie.ms.client.character.MarriageRecord;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
-import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.PsychicArea;
-import net.swordie.ms.enums.*;
-import net.swordie.ms.life.pet.Pet;
-import net.swordie.ms.world.field.ClockPacket;
-import net.swordie.ms.world.field.fieldeffect.FieldEffect;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.trunk.TrunkDlg;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.PsychicLock;
+import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
+import net.swordie.ms.world.field.ClockPacket;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.field.obtacleatom.ObtacleAtomInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
@@ -631,11 +632,10 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket fieldEffect(FieldEffect fe) {
+    public static OutPacket fieldEffect(FieldEffect fieldEffect) {
         OutPacket outPacket = new OutPacket(OutHeader.FIELD_EFFECT);
 
-        outPacket.encodeByte(fe.getType().getVal());
-        fe.encode(outPacket);
+        fieldEffect.encode(outPacket);
 
         return outPacket;
     }
@@ -693,10 +693,110 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket runeStoneAppear(RuneStone runeStone) { //Spawn in RuneStone
+        OutPacket outPacket = new OutPacket(OutHeader.RUNE_STONE_APPEAR);
+
+        outPacket.encodeInt(0); // object id ??
+        outPacket.encodeInt(runeStone.getRuneType().getVal()); // Rune Type
+        outPacket.encodePositionInt(runeStone.getPosition()); // Position
+        outPacket.encodeByte(runeStone.isFlip()); // flip
+
+        return outPacket;
+    }
+
+    public static OutPacket completeRune(Char chr) { //RuneStone Disappears
+        OutPacket outPacket = new OutPacket(OutHeader.COMPLETE_RUNE);
+
+        outPacket.encodeInt(0);
+        outPacket.encodeInt(chr.getId());
+
+        return outPacket;
+    }
+
+    public static OutPacket runeStoneUseAck(int type) {
+        OutPacket outPacket = new OutPacket(OutHeader.RUNE_STONE_USE_ACK);
+
+        outPacket.encodeInt(type);
+        switch (type) {
+            case 2:// Rune Delay time
+                outPacket.encodeInt(0);
+                break;
+            case 4://That rune is to strong for you to handle
+                break;
+            case 5://Shows arrows
+                break;
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket runeStoneDisappear() { //RuneStone is Used
+        OutPacket outPacket = new OutPacket(OutHeader.RUNE_STONE_DISAPPEAR);
+
+        outPacket.encodeInt(0); // Has to be 0
+        outPacket.encodeInt(0); // Doesn't matter what number this is
+
+        return outPacket;
+    }
+
+    public static OutPacket runeActSuccess(RuneType runeType, int time) {
+        OutPacket outPacket = new OutPacket(OutHeader.RUNE_ACT_SUCCESS);
+
+        outPacket.encodeInt(runeType.getVal());
+        outPacket.encodeInt(time);
+
+        return outPacket;
+    }
+
+    public static OutPacket runeStoneSkillAck(RuneType runeType) {
+        OutPacket outPacket = new OutPacket(OutHeader.RUNE_STONE_SKILL_ACK);
+
+        outPacket.encodeInt(runeType.getVal());
+
+        return outPacket;
+    }
+
+    public static OutPacket runeStoneClearAndAllRegister() {
+        OutPacket outPacket = new OutPacket(OutHeader.RUNE_STONE_CLEAR_AND_ALL_REGISTER);
+        int count = 0;
+        outPacket.encodeInt(count); // count
+        for (int i = 0; i < count; i++) {
+            outPacket.encodeInt(0); // not sure, but whatever
+        }
+
+        return outPacket;
+    }
+
     public static OutPacket clock(ClockPacket clockPacket) {
         OutPacket outPacket = new OutPacket(OutHeader.CLOCK);
 
         clockPacket.encode(outPacket);
+
+        return outPacket;
+    }
+
+    /**
+     * Creates a packet for changing the elite state of a field.
+     * @param eliteState The new elite state
+     * @param notShowPopup whether or not the popup should show up (warning message for boss spawn, countdown for bonus)
+     * @param bgm The new bgm if the state is ELITE_BOSS
+     * @param propSpecialEliteEffect special elite effect
+     * @param backUOL back uol
+     * @return packet for the client
+     */
+    public static OutPacket eliteState(EliteState eliteState, boolean notShowPopup, String bgm, String propSpecialEliteEffect,
+                                      String backUOL) {
+
+        OutPacket outPacket = new OutPacket(OutHeader.ELITE_STATE);
+
+        outPacket.encodeInt(eliteState.getVal()); // elite state
+        outPacket.encodeInt(notShowPopup ? 1 : 0); // ?
+        if (eliteState == EliteState.ELITE_BOSS) {
+            outPacket.encodeString(bgm); // bgm
+        } else {
+            outPacket.encodeString(propSpecialEliteEffect);
+            outPacket.encodeString(backUOL);
+        }
 
         return outPacket;
     }

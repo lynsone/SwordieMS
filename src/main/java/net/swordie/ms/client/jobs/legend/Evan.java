@@ -108,7 +108,7 @@ public class Evan extends Job {
 
     public Evan(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -286,6 +286,8 @@ public class Evan extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     public void handlePartners(int skillID) {

@@ -19,6 +19,7 @@ public class Legend extends Job {
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
 
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

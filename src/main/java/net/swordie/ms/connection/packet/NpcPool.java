@@ -53,11 +53,9 @@ public class NpcPool {
 		outPacket.encodeInt(duration);
 
 		if (move) {
-			// KMST has the following swapped, but encoding them like this has better results (not teleporting from 0,0)
-			// Idk if it's gms that changed it, or that something else is wrong. 
-			outPacket.encodePosition(oldVPos);
-			outPacket.encodePosition(oldPos);
 			outPacket.encodeInt(encodedGatherDuration);
+			outPacket.encodePosition(oldPos);
+			outPacket.encodePosition(oldVPos);
 			outPacket.encodeByte(movements.size());
 			for (Movement m : movements) {
 				m.encode(outPacket);

@@ -1,8 +1,12 @@
 drop table if exists damageskinsavedatas;
 drop table if exists friends;
+drop table if exists linkskills;
 drop table if exists accounts;
 drop table if exists macroskills;
 drop table if exists macros;
+drop table if exists familiars;
+drop table if exists stolenskills;
+drop table if exists chosenskills;
 drop table if exists characterpotentials;
 drop table if exists test;
 drop table if exists skills;
@@ -492,6 +496,42 @@ create table characters (
     foreign key (monsterbook) references monsterbookinfos(id)
 );
 
+create table familiars (
+	id bigint not null auto_increment,
+    charid int,
+    idk1 int,
+    familiarid int,
+    name varchar(13),
+    idk2 boolean,
+    idk3 smallint,
+    fatigue int,
+    idk4 bigint,
+    idk5 bigint,
+    expiredate int,
+    vitality smallint,
+    primary key (id),
+    foreign key (charid) references characters(id) on delete cascade
+);
+
+create table stolenskills (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    position int,
+    currentlv tinyint,
+    primary key (id),
+    foreign key (charid) references characters(id)
+);
+
+create table chosenskills (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    position int,
+    primary key (id),
+    foreign key (charid) references characters(id)
+);
+
 create table characterpotentials (
 	id bigint not null auto_increment,
     potkey tinyint,
@@ -621,6 +661,16 @@ create table accounts (
     trunkid int,
 	primary key (id),
     foreign key (trunkid) references trunks(id)
+);
+
+create table linkskills (
+	id bigint not null auto_increment,
+    accid int,
+    ownerid int,
+    linkskillid int,
+    level int,
+    primary key (id),
+    foreign key (accid) references accounts(id)
 );
 
 create table damageskinsavedatas (

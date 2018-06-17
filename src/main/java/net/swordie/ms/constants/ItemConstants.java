@@ -26,8 +26,12 @@ public class ItemConstants {
     public static final int MAX_SOUL_CAPACITY = 1000;
     public static final int MOB_DEATH_SOUL_MP_COUNT = 150;
     public static final int MOB_CARD_BASE_ID = 2380000;
+    public static final int FAMILIAR_PREFIX = 996;
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     public static final int THIRD_LINE_CHANCE = 50;
+    public static final int RED_CUBE = 5062009;
+    public static final int BONUS_POT_CUBE = 5062500;
+    public static final int BLACK_CUBE = 5062010;
     public static int NEBILITE_BASE_ID = 3060000;
     private static final Integer[] soulPotList = new Integer[]{32001, 32002, 32003, 32004, 32005, 32006, 32011, 32012, // flat
             32041, 32042, 32043, 32044, 32045, 32046, 32051, 32052}; // rate
@@ -429,9 +433,12 @@ public class ItemConstants {
     public static int getTierUpChance(int id) {
         int res = 0;
         switch(id) {
-            case 5062009: // Red cube
-            case 5062500: // Bonus potential cube
+            case ItemConstants.RED_CUBE: // Red cube
+            case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
                 res = 30;
+                break;
+            case ItemConstants.BLACK_CUBE:
+                res = 40;
                 break;
         }
         return res;

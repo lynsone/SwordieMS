@@ -1,6 +1,7 @@
 package net.swordie.ms.connection.db;
 
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.LinkSkill;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.avatar.AvatarData;
 import net.swordie.ms.client.character.avatar.AvatarLook;
@@ -17,13 +18,16 @@ import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.quest.progress.*;
+import net.swordie.ms.client.character.skills.ChosenSkill;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.StolenSkill;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.GuildRequestor;
 import net.swordie.ms.client.guild.GuildSkill;
 import net.swordie.ms.client.trunk.Trunk;
+import net.swordie.ms.life.Familiar;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -45,6 +49,7 @@ public class DatabaseManager {
 
     public static void init() {
         Configuration configuration = new Configuration().configure();
+        configuration.setProperty("autoReconnect", "true");
         Class[] dbClasses = new Class[] {
                 FileTime.class,
                 SystemTime.class,
@@ -81,6 +86,10 @@ public class DatabaseManager {
                 PetItem.class,
                 MonsterBookInfo.class,
                 CharacterPotential.class,
+                LinkSkill.class,
+                Familiar.class,
+                StolenSkill.class,
+                ChosenSkill.class,
 
         };
         for(Class clazz : dbClasses) {

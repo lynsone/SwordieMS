@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.info.ZeroInfo;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.items.MemorialCubeInfo;
 import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Skill;
@@ -14,17 +15,18 @@ import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
 import net.swordie.ms.client.guild.result.GuildResultInfo;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.life.movement.*;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.result.PartyResultInfo;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
-import org.apache.log4j.LogManager;
+import net.swordie.ms.life.movement.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
+import org.apache.log4j.LogManager;
 
 import java.util.*;
 
@@ -383,18 +385,6 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket explosionAttack(int skillID, Position pos, int mobID, int count) {
-        OutPacket outPacket = new OutPacket(OutHeader.EXPLOSION_ATTACK);
-
-        outPacket.encodeInt(skillID);
-        outPacket.encodeInt(pos.getX());
-        outPacket.encodeInt(pos.getY());
-        outPacket.encodeInt(mobID);
-        outPacket.encodeInt(count);
-
-        return outPacket;
-    }
-
     public static OutPacket dropPickupMessage(int money, short internetCafeExtra, short smallChangeExtra) {
         return dropPickupMessage(money, (byte) 1, internetCafeExtra, smallChangeExtra, (short) 0);
     }
@@ -571,8 +561,17 @@ public class WvsContext {
                 break;
             case QUEST_RECORD_EX_MESSAGE:
             case WORLD_SHARE_RECORD_MESSAGE:
+            case COLLECTION_RECORD_MESSAGE:
                 outPacket.encodeInt(i);
                 outPacket.encodeString(string);
+                break;
+            case INC_HARDCORE_EXP_MESSAGE:
+                outPacket.encodeInt(i); //You have gained x EXP
+                outPacket.encodeInt(i); //Field Bonus Exp
+                break;
+            case BARRIER_EFFECT_IGNORE_MESSAGE:
+                outPacket.encodeByte(type); //protection/shield scroll pop-up Message
+                break;
         }
 
         return outPacket;
@@ -810,6 +809,60 @@ public class WvsContext {
 
         outPacket.encodeByte(on);
         outPacket.encodeByte(changed);
+
+        return outPacket;
+    }
+
+    public static OutPacket setSonOfLinkedSkillResult(LinkedSkillResultType lsrt, int sonID, String sonName,
+                                                      int originalSkillID, String existingParentName) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_SON_OF_LINKED_SKILL_RESULT);
+
+        outPacket.encodeInt(lsrt.getVal());
+        outPacket.encodeInt(originalSkillID);
+        switch (lsrt) {
+            case SetSonOfLinkedSkillResult_Success:
+                outPacket.encodeInt(sonID);
+                outPacket.encodeString(sonName);
+                break;
+            case SetSonOfLinkedSkillResult_Fail_ParentAlreadyExist:
+                outPacket.encodeString(existingParentName);
+                outPacket.encodeString(sonName);
+                break;
+            case SetSonOfLinkedSkillResult_Fail_Unknown:
+                break;
+            case SetSonOfLinkedSkillResult_Fail_MaxCount:
+                outPacket.encodeString(existingParentName);
+                break;
+            case SetSonOfLinkedSkillResult_Fail_DBRequestFail:
+                break;
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket memorialCubeResult(Equip equip, MemorialCubeInfo mci) {
+        OutPacket outPacket = new OutPacket(OutHeader.MEMORIAL_CUBE_RESULT);
+
+        outPacket.encodeLong(equip.getSerialNumber());
+        mci.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket blackCubeResult(Equip equip, MemorialCubeInfo mci) {
+        OutPacket outPacket = new OutPacket(OutHeader.BLACK_CUBE_RESULT);
+
+        outPacket.encodeLong(equip.getSerialNumber());
+        mci.encode(outPacket);
+        outPacket.encodeInt(equip.getBagIndex());
+
+        return outPacket;
+    }
+
+    public static OutPacket broadcastMsg(BroadcastMsg broadcastMsg) {
+        OutPacket outPacket = new OutPacket(OutHeader.BROADCAST_MSG);
+
+        broadcastMsg.encode(outPacket);
 
         return outPacket;
     }

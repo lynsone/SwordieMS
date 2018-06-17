@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.Life;
@@ -21,9 +22,6 @@ import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -113,7 +111,7 @@ public class AngelicBuster extends Job {
 
     public AngelicBuster(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -324,8 +322,7 @@ public class AngelicBuster extends Job {
 
             //Recharging System
             if(Util.succeedProp(getRechargeProc(attackInfo))) {
-                c.write(UserLocal.onEffectRechargeAB());
-                c.write(UserLocal.onResetStateForOffSkill());
+                rechargeABSkills();
                 affinityHeartIIIcounter = 0;
             } else {
 
@@ -335,8 +332,7 @@ public class AngelicBuster extends Job {
                     byte ah4LV = (byte) ah4Skill.getCurrentLevel();
                     SkillInfo ah4SI = SkillData.getSkillInfoById(skill.getSkillId());
                     if(Util.succeedProp(ah4SI.getValue(x, ah4LV))) {
-                        c.write(UserLocal.onEffectRechargeAB());
-                        c.write(UserLocal.onResetStateForOffSkill());
+                        rechargeABSkills();
                         affinityHeartIIIcounter = 0;
                         affinityHeartIV(tsm, ah4LV);
                     }
@@ -349,8 +345,7 @@ public class AngelicBuster extends Job {
                     }
                     affinityHeartIIIcounter++;
                     if (affinityHeartIIIcounter > 2) {
-                        c.write(UserLocal.onEffectRechargeAB());
-                        c.write(UserLocal.onResetStateForOffSkill());
+                        rechargeABSkills();
                     }
                 }
             }
@@ -410,6 +405,8 @@ public class AngelicBuster extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override
@@ -482,8 +479,7 @@ public class AngelicBuster extends Job {
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
             if(affinityHeartIIcounter >= 10) {
-                c.write(UserLocal.onEffectRechargeAB());
-                c.write(UserLocal.onResetStateForOffSkill());
+                rechargeABSkills();
                 affinityHeartIIcounter = 0;
                 affinityHeartIIIcounter = 0;
             } else {
@@ -534,5 +530,11 @@ public class AngelicBuster extends Job {
         tsm.putCharacterStatValue(IndieDamR, o2);
         tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o2);
         tsm.sendSetStatPacket();
+    }
+
+    private void rechargeABSkills() {
+        Effect effect = Effect.createABRechargeEffect();
+        chr.write(User.effect(effect));
+        chr.write(UserLocal.resetStateForOffSkill());
     }
 }

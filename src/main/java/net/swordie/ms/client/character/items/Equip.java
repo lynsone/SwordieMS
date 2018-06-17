@@ -858,7 +858,6 @@ public class Equip extends Item {
 //        getEquippedDate().encode(outPacket);
 //        outPacket.encodeInt(getPrevBonusExpRate());
         // GW_ItemSlotEquipBase
-        setItemState((short) 0x100);
         int mask = getStatMask(0);
         outPacket.encodeInt(mask);
         if(hasStat(EquipBaseStat.ruc)) {

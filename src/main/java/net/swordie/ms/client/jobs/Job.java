@@ -4,20 +4,33 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.runestones.RuneStone;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
+import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.ReviveType;
 import net.swordie.ms.enums.Stat;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+
 
 /**
  * Created on 1/2/2018.
@@ -31,7 +44,63 @@ public abstract class Job {
 		this.c = chr.getClient();
 	}
 
-	public abstract void handleAttack(Client c, AttackInfo attackInfo);
+	public void handleAttack(Client c, AttackInfo attackInfo) {
+		Char chr = c.getChr();
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		Skill skill = SkillData.getSkillDeepCopyById(attackInfo.skillId);
+		int skillID = 0;
+		SkillInfo si = null;
+		boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+		byte slv = 0;
+		if (skill != null) {
+			si = SkillData.getSkillInfoById(skill.getSkillId());
+			slv = (byte) skill.getCurrentLevel();
+			skillID = skill.getSkillId();
+		}
+
+		// Recovery Rune  HP Recovery
+		if(tsm.getOptByCTSAndSkill(IgnoreMobDamR, RuneStone.LIBERATE_THE_RECOVERY_RUNE) != null) {
+			SkillInfo recoveryRuneInfo = SkillData.getSkillInfoById(RuneStone.LIBERATE_THE_RECOVERY_RUNE);
+			byte recoveryRuneSLV = 1; //Hardcode Skill Level to 1
+			int healrate = recoveryRuneInfo.getValue(dotHealHPPerSecondR, recoveryRuneSLV);
+			int healing = chr.getMaxHP() / (100 / healrate);
+			chr.heal(healing);
+		}
+
+
+		Option o1 = new Option();
+		Option o2 = new Option();
+		Option o3 = new Option();
+		Option o4 = new Option();
+		switch (skillID) {
+			case RuneStone.LIBERATE_THE_DESTRUCTIVE_RUNE:
+				// Attack of the Rune
+				AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
+				aa.setMobOrigin((byte) 0);
+				aa.setPosition(chr.getPosition());
+				aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+				chr.getField().spawnAffectedArea(aa);
+
+				skill.setCurrentLevel(1);
+				for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+					Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+					MobTemporaryStat mts = mob.getTemporaryStat();
+					mts.createAndAddBurnedInfo(chr, skill, 1);
+				}
+
+				// Buff of the Rune
+				si = SkillData.getSkillInfoById(RuneStone.LIBERATE_THE_DESTRUCTIVE_RUNE_BUFF); //Buff Info
+				slv = (byte) skill.getCurrentLevel();
+				o1.nReason = RuneStone.LIBERATE_THE_DESTRUCTIVE_RUNE_BUFF;
+				o1.nValue = si.getValue(indieDamR, slv); //50% DamR
+				o1.tStart = (int) System.currentTimeMillis();
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieDamR, o1);
+
+				tsm.sendSetStatPacket();
+				break;
+		}
+	}
 
 	public abstract void handleSkill(Client c, int skillID, byte slv, InPacket inPacket);
 
@@ -142,11 +211,12 @@ public abstract class Job {
 	public abstract int getFinalAttackSkill();
 
 	public void handleLevelUp() {
+		short level = chr.getLevel();
 		chr.addStat(Stat.mhp, 500);
 		chr.addStat(Stat.mmp, 500);
 		chr.addStat(Stat.ap, 5);
 		int sp = 3;
-		if (chr.getLevel() > 100 && (chr.getLevel() % 10) % 3 == 0) {
+		if (level > 100 && (level % 10) % 3 == 0) {
 			sp = 6; // double sp on levels ending in 3/6/9
 		}
 		chr.addSpToJobByCurrentLevel(sp);
@@ -156,6 +226,14 @@ public abstract class Job {
 		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
 		chr.write(WvsContext.statChanged(stats));
+		byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
+		int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
+		if (linkSkillID != 0 && linkSkillLevel > 0) {
+			Skill skill = chr.getSkill(linkSkillID, true);
+			if (skill.getCurrentLevel() != linkSkillLevel) {
+				chr.addSkill(linkSkillID, linkSkillLevel, 3);
+			}
+		}
 	}
 
 	public abstract boolean isBuff(int skillID);

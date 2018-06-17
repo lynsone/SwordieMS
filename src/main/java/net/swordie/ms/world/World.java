@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.ServerStatus;
+import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 
 import java.util.ArrayList;
@@ -170,5 +171,11 @@ public class World {
             }
         }
         return null;
+    }
+
+    public void broadcastPacket(OutPacket outPacket) {
+        for(Channel channel : getChannels()) {
+            channel.broadcastPacket(outPacket);
+        }
     }
 }

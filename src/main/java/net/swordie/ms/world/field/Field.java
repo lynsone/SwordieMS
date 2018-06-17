@@ -1,31 +1,36 @@
 package net.swordie.ms.world.field;
 
+import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.life.drop.Drop;
-import net.swordie.ms.life.Reactor;
-import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.runestones.RuneStone;
+import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropLeaveType;
+import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.scripts.ScriptType;
+import net.swordie.ms.enums.TextEffectType;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.drop.DropInfo;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.drop.DropInfo;
-import net.swordie.ms.life.mob.Mob;
-import org.apache.log4j.Logger;
-import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.scripts.ScriptManagerImpl;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import org.apache.log4j.Logger;
 
 import java.awt.*;
 import java.util.*;
@@ -35,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static net.swordie.ms.client.character.skills.SkillStat.subTime;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**
@@ -62,6 +68,13 @@ public class Field {
     private Set<Reactor> reactors;
     private String fieldScript = "";
     private ScriptManagerImpl scriptManagerImpl;
+    private RuneStone runeStone;
+    private ScheduledFuture runeStoneHordesTimer;
+    private int burningFieldLevel;
+    private ScheduledFuture burningFieldCheckTimer;
+    private long nextEliteSpawnTime = System.currentTimeMillis();
+    private int killedElites;
+    private EliteState eliteState;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -69,7 +82,7 @@ public class Field {
         this.rect = new Rectangle(800, 600);
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
-        this.lifes = new ArrayList<>();
+        this.lifes = Collections.synchronizedList(new ArrayList<>());
         this.chars = Collections.synchronizedList(new ArrayList<>());
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
@@ -290,6 +303,22 @@ public class Field {
         return getPortals().stream().filter(portal -> portal.getId() == id).findAny().orElse(null);
     }
 
+    public RuneStone getRuneStone() {
+        return runeStone;
+    }
+
+    public void setRuneStone(RuneStone runeStone) {
+        this.runeStone = runeStone;
+    }
+
+    public int getBurningFieldLevel() {
+        return burningFieldLevel;
+    }
+
+    public void setBurningFieldLevel(int burningFieldLevel) {
+        this.burningFieldLevel = burningFieldLevel;
+    }
+
     public Foothold findFootHoldBelow(Position pos) {
         Set<Foothold> footholds = getFootholds().stream().filter(fh -> fh.getX1() <= pos.getX() && fh.getX2() >= pos.getX()).collect(Collectors.toSet());
         Foothold res = null;
@@ -423,10 +452,21 @@ public class Field {
     public void removeChar(Char chr) {
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
+        // set controllers to null
         for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
             if (entry.getValue() != null && entry.getValue().equals(chr)) {
                 putLifeController(entry.getKey(), null);
             }
+        }
+        // remove summons of that char
+        List<Integer> removedList = new ArrayList<>();
+        for (Life life : getLifes()) {
+            if (life instanceof Summon && ((Summon) life).getCharID() == chr.getId()) {
+                removedList.add(life.getObjectId());
+            }
+        }
+        for (int id : removedList) {
+            removeLife(id, false);
         }
     }
 
@@ -457,6 +497,12 @@ public class Field {
         for (Reactor reactor : getReactors()) {
             spawnLife(reactor, chr);
         }
+        if (getRuneStone() != null && getMobs().size() > 0) {
+            chr.write(CField.runeStoneAppear(runeStone));
+        }
+        //if (getMobs().size() > 0 && getBurningFieldLevel() > 0) { //Burning Level shown per map entry is commented out.
+        //    showBurningLevel();
+        //}
     }
 
     @Override
@@ -481,9 +527,11 @@ public class Field {
         addLife(aa);
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
         if (si != null) {
-            int duration = si.getValue(time, aa.getSlv()) * 1000;
-            ScheduledFuture sf = EventManager.addEvent(() -> removeLife(aa.getObjectId(), true), duration);
-            addLifeSchedule(aa, sf);
+            int duration = aa.getDuration() == 0 ? si.getValue(time, aa.getSlv()) * 1000 : aa.getDuration();
+            if (duration > 0) {
+                ScheduledFuture sf = EventManager.addEvent(() -> removeLife(aa.getObjectId(), true), duration);
+                addLifeSchedule(aa, sf);
+            }
         }
         broadcastPacket(CField.affectedAreaCreated(aa));
         getChars().forEach(chr -> aa.getField().checkCharInAffectedAreas(chr));
@@ -838,5 +886,122 @@ public class Field {
         }
         spawnLife(mob, null);
         return mob;
+    }
+
+    public void spawnRuneStone() {
+        if(getMobs().size() <= 0) {
+            return;
+        }
+        if(getRuneStone() == null) {
+            RuneStone runeStone = new RuneStone().getRandomRuneStone(this);
+            setRuneStone(runeStone);
+            broadcastPacket(CField.runeStoneAppear(runeStone));
+        }
+    }
+
+    public void useRuneStone(Client c, RuneStone runeStone) {
+        broadcastPacket(CField.completeRune(c.getChr()));
+        broadcastPacket(CField.runeStoneDisappear());
+        c.write(CField.runeStoneSkillAck(runeStone.getRuneType()));
+
+        setRuneStone(null);
+
+        EventManager.addEvent(() -> spawnRuneStone(), GameConstants.RUNE_RESPAWN_TIME, TimeUnit.MINUTES);
+    }
+
+    public void runeStoneHordeEffect(int mobRateMultiplier, int duration) {
+        double prevMobRate = getMobRate();
+        setMobRate(getMobRate() * mobRateMultiplier); //Temporary increase in mob Spawn
+        if(runeStoneHordesTimer != null && !runeStoneHordesTimer.isDone()) {
+            runeStoneHordesTimer.cancel(true);
+        }
+        runeStoneHordesTimer = EventManager.addEvent(() -> setMobRate(prevMobRate), duration, TimeUnit.SECONDS);
+    }
+
+    public int getBonusExpByBurningFieldLevel() {
+        return burningFieldLevel * GameConstants.BURNING_FIELD_BONUS_EXP_MULTIPLIER_PER_LEVEL; //Burning Field Level * The GameConstant
+    }
+
+    public void showBurningLevel() {
+        String string = "#fn ExtraBold##fs26#          Burning Field has been destroyed.          ";
+        if(getBurningFieldLevel() > 0) {
+            string = "#fn ExtraBold##fs26#          Burning Stage " + getBurningFieldLevel() + ": " + getBonusExpByBurningFieldLevel() + "% Bonus EXP!          ";
+        }
+        Effect effect = Effect.createFieldTextEffect(string, 50, 2000, 4,
+                new Position(0, -200), 1, 4 , TextEffectType.BurningField, 0, 0);
+        broadcastPacket(User.effect(effect));
+    }
+
+    public void increaseBurningLevel() {
+        setBurningFieldLevel(getBurningFieldLevel() + 1);
+    }
+
+    public void decreaseBurningLevel() {
+        setBurningFieldLevel(getBurningFieldLevel() - 1);
+    }
+
+    public void startBurningFieldTimer() {
+        if(getMobs().size() > 0 &&
+                getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
+            setBurningFieldLevel(GameConstants.BURNING_FIELD_LEVEL_ON_START);
+            burningFieldCheckTimer = EventManager.addFixedRateEvent(() -> changeBurningLevel(), 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
+        }
+    }
+
+    public void changeBurningLevel() {
+        boolean showMessage = true;
+
+        if(getBurningFieldLevel() <= 0) {
+            showMessage = false;
+        }
+
+        //If there are players on the map,  decrease the level  else  increase the level
+        if(getChars().size() > 0 && getBurningFieldLevel() > 0) {
+            decreaseBurningLevel();
+
+        } else if(getChars().size() <= 0 && getBurningFieldLevel() < GameConstants.BURNING_FIELD_MAX_LEVEL){
+            increaseBurningLevel();
+            showMessage = true;
+        }
+
+        if(showMessage) {
+            showBurningLevel();
+        }
+    }
+
+    public void setNextEliteSpawnTime(long nextEliteSpawnTime) {
+        this.nextEliteSpawnTime = nextEliteSpawnTime;
+    }
+
+    public long getNextEliteSpawnTime() {
+        return nextEliteSpawnTime;
+    }
+
+    public boolean canSpawnElite() {
+        return getEliteState() == null || getEliteState() == EliteState.NORMAL && nextEliteSpawnTime < System.currentTimeMillis();
+    }
+
+    public int getKilledElites() {
+        return killedElites;
+    }
+
+    public void setKilledElites(int killedElites) {
+        this.killedElites = killedElites;
+    }
+
+    public void incrementEliteKillCount() {
+        setKilledElites(getKilledElites() + 1);
+    }
+
+    public void setEliteState(EliteState eliteState) {
+        this.eliteState = eliteState;
+    }
+
+    public EliteState getEliteState() {
+        return eliteState;
+    }
+
+    public List<Foothold> getNonWallFootholds() {
+        return getFootholds().stream().filter(fh -> !fh.isWall()).collect(Collectors.toList());
     }
 }

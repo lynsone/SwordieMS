@@ -218,7 +218,7 @@ public class Pirate extends Job {
 
     public Pirate(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -762,10 +762,11 @@ public class Pirate extends Job {
 
         if (JobConstants.isCannonShooter(chr.getJob())) {
             if(hasHitMobs) {
-                //Barrel Roulette
-                handleBarrelRouletteDebuffs(attackInfo);
+
             }
         }
+        //Barrel Roulette
+        handleBarrelRouletteDebuffs(attackInfo);
 
         if (JobConstants.isJett(chr.getJob())) {
             if(hasHitMobs) {
@@ -806,6 +807,8 @@ public class Pirate extends Job {
                 powerUnity();
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override

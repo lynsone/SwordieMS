@@ -1,35 +1,41 @@
 package net.swordie.ms.scripts;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
-import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.guild.result.GuildMsg;
 import net.swordie.ms.client.guild.result.GuildResultType;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.client.trunk.TrunkOpen;
+import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.QuestStatus;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.enums.UIType;
+import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.npc.NpcMessageType;
+import net.swordie.ms.life.npc.NpcScriptInfo;
+import net.swordie.ms.loaders.FieldData;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.NpcData;
+import net.swordie.ms.loaders.QuestData;
+import net.swordie.ms.util.FileTime;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
-import net.swordie.ms.world.field.fieldeffect.MobHPTagFieldEffect;
-import net.swordie.ms.client.guild.result.GuildMsg;
-import net.swordie.ms.life.Reactor;
-import net.swordie.ms.client.party.Party;
-import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.shop.NpcShopDlg;
-import net.swordie.ms.client.trunk.TrunkOpen;
-import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.ServerConstants;
-import net.swordie.ms.enums.*;
-import net.swordie.ms.life.npc.NpcMessageType;
-import net.swordie.ms.loaders.*;
 import org.apache.log4j.LogManager;
-import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.util.FileTime;
-import net.swordie.ms.util.Util;
 
 import javax.script.*;
 import java.io.File;
@@ -637,15 +643,16 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.getField().getMobs().stream()
 				.filter(m -> m.getTemplateId() == templateID)
 				.findFirst()
-				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(mob))));
+				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
 	}
 
 	@Override
 	public void showHP() {
+
 		chr.getField().getMobs().stream()
 				.filter(m -> m.getHp() > 0)
 				.findFirst()
-				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(new MobHPTagFieldEffect(mob))));
+				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
 	}
 
 	@Override

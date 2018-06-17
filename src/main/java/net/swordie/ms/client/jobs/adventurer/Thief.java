@@ -175,7 +175,7 @@ public class Thief extends Job {
     public Thief(Char chr) {
         super(chr);
 
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -207,6 +207,18 @@ public class Thief extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = SkillConstants.getActualSkillIDfromSkillID(skill.getSkillId());
         }
+        if(hasHitMobs) {
+            //Venom & Toxic Venom Passives
+            handlePassiveDoTSkills(attackInfo);
+
+            //Shadower Hyper
+            if(chr.hasSkill(FLIP_THE_COIN)) {
+                handleFlipTheCoinActivation(tsm);
+            }
+
+            //Night Lord Hyper
+            handleBleedDart(attackInfo);
+        }
 
         if (JobConstants.isNightLord(chr.getJob())) {
             if(hasHitMobs) {
@@ -216,10 +228,6 @@ public class Thief extends Job {
                     handleMark(attackInfo);
                 }
 
-                handleBleedDart(attackInfo);
-
-                //Venom & Toxic Venom Passives
-                handlePassiveDoTSkills(attackInfo);
             }
         }
 
@@ -231,11 +239,6 @@ public class Thief extends Job {
                     incrementCritGrowing();
                 }
 
-                //Flip of the Coin
-                if(chr.hasSkill(FLIP_THE_COIN)) {
-                    handleFlipTheCoinActivation(tsm);
-                }
-
                 //Shadower Instinct
                 if (chr.hasSkill(SHADOWER_INSTINCT)) {
                     if (tsm.hasStat(IgnoreMobpdpR)) {
@@ -243,16 +246,11 @@ public class Thief extends Job {
                     }
                 }
 
-                //Venom & Toxic Venom Passives
-                handlePassiveDoTSkills(attackInfo);
             }
         }
 
         if (JobConstants.isDualBlade(chr.getJob())) {
             if(hasHitMobs) {
-                //Venom & Toxic Venom Passives
-                handlePassiveDoTSkills(attackInfo);
-
                 //Life Drain
                 handleLifeDrain();
             }
@@ -367,6 +365,8 @@ public class Thief extends Job {
                 c.write(WvsContext.temporaryStatSet(tsm));
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override
@@ -835,9 +835,9 @@ public class Thief extends Job {
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 45, 4,
                                     anglez, 100, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
-                            chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), /*mobID*/life.getObjectId(), type,
-                                    true, /*mobID*/life.getObjectId(), atom, forceAtomInfo, rect, 0, 300,
-                                    life.getPosition(), chr.getBulletIDForAttack(), life.getPosition()));
+                            chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), life.getObjectId(), type,
+                                    true, life.getObjectId(), atom, forceAtomInfo, rect, 0, 300,
+                                    life.getPosition(), atom, life.getPosition()));
                         }
                     }
                 }

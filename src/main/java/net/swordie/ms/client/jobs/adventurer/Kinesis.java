@@ -167,6 +167,8 @@ public class Kinesis extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void handleOrb(int skillID, byte slv, AttackInfo attackInfo) {

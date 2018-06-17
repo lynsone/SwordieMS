@@ -188,6 +188,17 @@ public class JobConstants {
         return res;
     }
 
+    public static boolean isKoC(short job) {
+        return job / 1000 == 1;
+    }
+
+    public static byte getJobLevelByZeroSkillID(int skillID) {
+        int prefix = (skillID % 1000) / 100;
+        return (byte) (prefix == 1 ? 2
+                        : prefix == 2 ? 1
+                        : 3);
+    }
+
     public enum JobEnum {
         BEGINNER(0),
         WARRIOR(100),

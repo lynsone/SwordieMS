@@ -24,6 +24,7 @@ public enum SpecStat {
     immp,
     indieAllStat,
     indieSpeed,
+    indieJump,
     indieSTR,
     indieDEX,
     indieINT,
@@ -78,6 +79,7 @@ public enum SpecStat {
     craftEXP,
     senseEXP,
     charmEXP,
+    inflation,
     ;
     public static SpecStat getSpecStatByName(String name) {
         if("int".equalsIgnoreCase(name)) {

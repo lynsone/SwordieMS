@@ -153,7 +153,7 @@ public class Warrior extends Job {
 
     public Warrior(Char chr) {
         super(chr);
-        if(isHandlerOfJob(chr.getJob())) {
+        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -409,7 +409,7 @@ public class Warrior extends Job {
             skillID = skill.getSkillId();
         }
         int comboProp = getComboProp(chr);
-        if (JobConstants.isHero(chr.getJob())) {
+        //if (JobConstants.isHero(chr.getJob())) {
             if(hasHitMobs) {
                 //Combo
                 if(Util.succeedProp(comboProp)) {
@@ -421,7 +421,7 @@ public class Warrior extends Job {
                     }
                 }
             }
-        }
+        //}
 
         if (JobConstants.isPage(chr.getJob())) {
             if(hasHitMobs) {
@@ -434,10 +434,10 @@ public class Warrior extends Job {
                 //Lord of Darkness
                 lordOfDarkness();
 
-                //Dark Thirst
-                darkThirst(tsm);
             }
         }
+        //Dark Thirst
+        darkThirst(tsm);
 
         Option o1 = new Option();
         Option o2 = new Option();
@@ -656,6 +656,8 @@ public class Warrior extends Job {
                 }
                 break;
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     public void spawnEvilEye(int skillID, byte slv) {

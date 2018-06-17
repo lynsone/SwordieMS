@@ -4,6 +4,7 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
@@ -167,26 +168,16 @@ public class LoginHandler {
                 curSelectedSubJob, gender, skin, items);
         // Start job specific handling ----------------------------------------------------------------
         JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
-        if (curSelectedRace == 15) { //Zero
-            chr.getAvatarData().getZeroAvatarLook().setSkin(skin);
-            chr.getAvatarData().getZeroAvatarLook().setFace(items[0]);
-            chr.getAvatarData().getZeroAvatarLook().setHair(items[1]);
-        }
         // End job specific handling ------------------------------------------------------------------
 
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
-//        chr.createInDB();
-        chr.getAvatarData().getAvatarLook().setDemonSlayerDefFaceAcc(1012279);
         c.getAccount().addCharacter(chr);
-//        chr.setAccId(c.getAccount().getId());
-//        chr.updateDB();
         DatabaseManager.saveToDB(c.getAccount());
 
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
         cs.setPosMap(100000000);
-        DatabaseManager.saveToDB(chr);
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromID(i, false);
             if (equip != null && equip.getItemId() >= 1000000) {
@@ -205,7 +196,7 @@ public class LoginHandler {
                     equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
             chr.addItemToInventory(EQUIPPED, equip, true);
         }
-        DatabaseManager.saveToDB(chr.getInventoryByType(EQUIPPED));
+        DatabaseManager.saveToDB(chr);
         c.write(Login.createNewCharacterResult(LoginType.SUCCESS, chr));
     }
 
@@ -214,8 +205,10 @@ public class LoginHandler {
             int charId = inPacket.decodeInt();
             Char chr = Char.getFromDBById(charId);
             Account a = Account.getFromDBById(c.getAccount().getId());
+            a.removeLinkSkillByOwnerID(chr.getId());
             a.getCharacters().remove(chr);
             DatabaseManager.saveToDB(a);
+            DatabaseManager.deleteFromDB(chr);
             c.write(Login.sendDeleteCharacterResult(charId, LoginType.SUCCESS));
         }
     }

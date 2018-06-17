@@ -224,6 +224,8 @@ public class PinkBean extends Job {
         Option o3 = new Option();
         switch (attackInfo.skillId) {
         }
+
+        super.handleAttack(c, attackInfo);
     }
 
     @Override
