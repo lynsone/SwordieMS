@@ -1,5 +1,9 @@
 package net.swordie.ms.client.character.skills;
 
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.enums.BaseStat;
+import net.swordie.ms.util.container.Tuple;
+
 /**
  * Created on 12/20/2017.
  */
@@ -284,6 +288,149 @@ public enum SkillStat {
             if(skillStat.toString().equals(s)) {
                 return skillStat;
             }
+        }
+        return null;
+    }
+
+    public BaseStat getBaseStat() {
+        switch (this) {
+            case pddX:
+            case mdd2pdd:
+            case pdd:
+            case epdd:
+            case indiePdd:
+                return BaseStat.pdd;
+            case pddR:
+            case indiePddR:
+                return BaseStat.pddR;
+            case mddX:
+            case pdd2mdd:
+            case emdd:
+            case mdd:
+            case indieMdd:
+                return BaseStat.mdd;
+            case mddR:
+            case indieMddR:
+                return BaseStat.mddR;
+            case lv2mhp:
+            case mhpX:
+            case emhp:
+            case indieMhp:
+            case hp:
+            case hcHp:
+            case eva2hp:
+                return BaseStat.mhp;
+            case mhpR:
+            case indieMhpR:
+                return BaseStat.mhpR;
+            case mmpX:
+            case indieMmp:
+            case lv2mmp:
+            case emmp:
+                return BaseStat.mmp;
+            case mmpR:
+            case indieMmpR:
+                return BaseStat.mmpR;
+            case psdSpeed:
+            case speed:
+            case speedMax:
+            case indieForceSpeed:
+            case indieSpeed:
+                return BaseStat.speed;
+            case psdJump:
+            case indieForceJump:
+            case indieJump:
+            case jump:
+                return BaseStat.jump;
+            case stanceProp:
+            case indieStance:
+                return BaseStat.stance;
+            case asrR:
+            case indieAsrR:
+                return BaseStat.asr;
+            case pad:
+            case padX:
+            case indiePad:
+            case lv2pad:
+            case epad:
+                return BaseStat.pad;
+            case padR:
+            case indiePadR:
+                return BaseStat.padR;
+            case indieMad:
+            case mad:
+            case madX:
+            case lv2mad:
+            case emad:
+                return BaseStat.mad;
+            case madR:
+            case indieMadR:
+                return BaseStat.madR;
+            case indieTerR:
+            case terR:
+                return BaseStat.ter;
+            case indieEva:
+            case eva:
+                return BaseStat.eva;
+            case indieBooster:
+                return BaseStat.booster;
+            case mastery:
+                return BaseStat.mastery;
+            case strFX:
+            case strX:
+            case dex2str:
+            case lv2str:
+                return BaseStat.str;
+            case strR:
+                return BaseStat.strR;
+            case dex:
+            case dexFX:
+            case dexX:
+            case luk2dex:
+            case lv2dex:
+            case str2dex:
+                return BaseStat.dex;
+            case dexR:
+                return BaseStat.dexR;
+            case intFX:
+            case intX:
+            case luk2int:
+            case lv2int:
+                return BaseStat.inte;
+            case intR:
+                return BaseStat.intR;
+            case lukFX:
+            case lukX:
+            case lv2luk:
+            case dex2luk:
+            case int2luk:
+                return BaseStat.luk;
+            case lukR:
+                return BaseStat.lukR;
+            case bdR:
+            case indieBDR:
+            case nbdR:
+                return BaseStat.bd;
+            case ignoreMobpdpR:
+            case indieIgnoreMobpdpR:
+                return BaseStat.ied;
+            case indieAllStat:
+                return BaseStat.allStat;
+            case criticaldamageMin:
+                return BaseStat.minCd;
+            case criticaldamageMax:
+                return BaseStat.maxCd;
+            case cr:
+            case indieCr:
+                return BaseStat.cr;
+            case expR:
+            case indieExp:
+                return BaseStat.expR;
+            case dropR:
+                return BaseStat.dropR;
+            case mesoR:
+            case mesoG:
+                return BaseStat.mesoR;
         }
         return null;
     }

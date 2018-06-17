@@ -3,10 +3,7 @@ package net.swordie.ms.client.character.items;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.enums.EnchantStat;
-import net.swordie.ms.enums.EquipBaseStat;
-import net.swordie.ms.enums.InvType;
-import net.swordie.ms.enums.ItemGrade;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
 
@@ -1382,5 +1379,73 @@ public class Equip extends Item {
 
     public void setSockets(short[] sockets) {
         this.sockets = sockets;
+    }
+
+    public int getBaseStat(BaseStat baseStat) {
+        // TODO Potentials + sockets
+        int res = 0;
+        switch (baseStat) {
+            case str:
+                res += getiStr();
+                break;
+            case dex:
+                res += getiDex();
+                break;
+            case inte:
+                res += getiInt();
+                break;
+            case luk:
+                res += getiLuk();
+                break;
+            case pad:
+                res += getiPad();
+                break;
+            case mad:
+                res += getiMad();
+                break;
+            case pdd:
+                res += getiPDD();
+                break;
+            case mdd:
+                res += getiMDD();
+                break;
+            case mhp:
+                res += getiMaxHp();
+                break;
+            case mmp:
+                res += getiMaxMp();
+                break;
+            case fd:
+                res += getDamR();
+                break;
+            case bd:
+                res += getBdr();
+                break;
+            case ied:
+                res += getImdr();
+                break;
+            case eva:
+                res += getiEva();
+                break;
+            case acc:
+                res += getiAcc();
+                break;
+            case speed:
+                res += getiSpeed();
+                break;
+            case jump:
+                res += getiJump();
+                break;
+            case booster:
+                res += getAttackSpeed();
+                break;
+            case strR:
+            case dexR:
+            case intR:
+            case lukR:
+                res += getStatR();
+                break;
+        }
+        return res;
     }
 }

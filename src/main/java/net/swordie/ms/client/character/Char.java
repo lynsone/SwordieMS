@@ -304,6 +304,9 @@ public class Char {
 	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
 	@Transient
 	private int deathCount = -1;
+	// TODO Move this to CharacterStat?
+	@Transient
+	private Map<BaseStat, Long> baseStats = new HashMap<>();
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1501,13 +1504,51 @@ public class Char {
 	 */
 	public void addSkill(Skill skill) {
 		skill.setCharId(getId());
+		boolean isPassive = SkillConstants.isPassiveSkill(skill.getSkillId());
 		if (getSkills().stream().noneMatch(s -> s.getSkillId() == skill.getSkillId())) {
 			getSkills().add(skill);
 		} else {
 			Skill oldSkill = getSkill(skill.getSkillId());
+			if (isPassive) {
+				removeFromBaseStatCache(oldSkill);
+			}
 			oldSkill.setCurrentLevel(skill.getCurrentLevel());
 			oldSkill.setMasterLevel(skill.getMasterLevel());
 		}
+		// Change cache accordingly
+		if (isPassive) {
+			addToBaseStatCache(skill);
+		}
+		addToBaseStatCache(skill);
+	}
+
+	/**
+	 * Initializes the BaseStat cache, by going through all the needed passive stat changers.
+	 */
+	public void initBaseStats() {
+		getBaseStats().clear();
+		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill(skill.getSkillId())).
+				forEach(this::addToBaseStatCache);
+	}
+
+	/**
+	 * Adds a Skill's info to the current base stat cache.
+	 * @param skill The skill to add
+	 */
+	private void addToBaseStatCache(Skill skill) {
+		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
+		stats.forEach(this::addBaseStat);
+	}
+
+	/**
+	 * Removes a Skill's info from the current base stat cache.
+	 * @param skill The skill to remove
+	 */
+	private void removeFromBaseStatCache(Skill skill) {
+		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
+		stats.forEach(this::removeBaseStat);
 	}
 
 	/**
@@ -1618,6 +1659,11 @@ public class Char {
 		}
 	}
 
+	/**
+	 * Gets a raw Stat from this Char, unaffected by things such as equips and skills.
+	 * @param charStat The requested Stat
+	 * @return the requested stat's value
+	 */
 	public int getStat(Stat charStat) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		switch (charStat) {
@@ -1645,10 +1691,20 @@ public class Char {
 		return -1;
 	}
 
+	/**
+	 * Adds a Stat to this Char.
+	 * @param charStat which Stat to add
+	 * @param amount the amount of Stat to add
+	 */
 	public void addStat(Stat charStat, int amount) {
 		setStat(charStat, getStat(charStat) + amount);
 	}
 
+	/**
+	 * Adds a Stat to this Char, and immediately sends the packet to the client notifying the change.
+	 * @param charStat which Stat to change
+	 * @param amount the amount of Stat to add
+	 */
 	public void addStatAndSendPacket(Stat charStat, int amount) {
 		addStat(charStat, amount);
 		Map<Stat, Object> stats = new HashMap<>();
@@ -2940,6 +2996,9 @@ public class Char {
 		return chosenIdx;
 	}
 
+	/**
+	 * Initializes the equips by
+	 */
 	public void initEquips() {
 		for (Equip e : getEquippedInventory().getItems().stream().map(e -> (Equip) e).collect(Collectors.toList())) {
 			e.recalcEnchantmentStats();
@@ -2977,20 +3036,41 @@ public class Char {
 		return damageCalc;
 	}
 
+	/**
+	 * Gets the current amount of a given stat the character has. Includes things such as skills, items, etc...
+	 * @param mainStat the requested stat
+	 * @return the amount of stat
+	 */
 	public int getTotalStat(BaseStat mainStat) {
-		// TODO
-		return mainStat.toStat() == null ? 0 : getStat(mainStat.toStat());
+		// TODO cache this completely
+		int stat = 0;
+		// Stat allocated by sp
+		stat += mainStat.toStat() == null ? 0 : getStat(mainStat.toStat());
+		// Stat gained by passives
+		stat += getBaseStats().getOrDefault(mainStat, 0L);
+		// Stat gained by buffs
+		int ctsStat = getTemporaryStatManager().getBaseStats().getOrDefault(mainStat, 0);
+		stat += ctsStat;
+		// Stat gained by the stat's corresponding rate value
+		if (mainStat.getRateVar() != null) {
+			stat += stat * (getTotalStat(mainStat.getRateVar()) / 100D);
+		}
+		// Stat gained by equips
+		for (Item item : getEquippedInventory().getItems()) {
+			Equip equip = (Equip) item;
+			stat += equip.getBaseStat(mainStat);
+		}
+		return stat;
 	}
 
+	/**
+	 * Gets a total list of basic stats that a character has, including skills, items, etc...
+	 * @return the total list of basic stats
+	 */
 	public Map<BaseStat, Integer> getTotalBasicStats() {
 		Map<BaseStat, Integer> stats = new HashMap<>();
 		for (BaseStat bs : BaseStat.values()) {
 			stats.put(bs, getTotalStat(bs));
-		}
-		for (Item item : getEquippedInventory().getItems()) {
-			Equip equip = (Equip) item;
-			stats.put(BaseStat.pad, stats.getOrDefault(BaseStat.pad, 0) + equip.getiPad());
-			stats.put(BaseStat.mad, stats.getOrDefault(BaseStat.mad, 0) + equip.getiMad());
 		}
 		return stats;
 	}
@@ -3031,6 +3111,9 @@ public class Char {
 		return item;
 	}
 
+	/**
+	 * Resets the combo kill's timer. Interrupts the previous timer if there was one.
+	 */
 	public void comboKillResetTimer() {
 		if(comboKillResetTimer != null && !comboKillResetTimer.isDone()) {
 			comboKillResetTimer.cancel(true);
@@ -3129,5 +3212,27 @@ public class Char {
 
 	public void setDeathCount(int deathCount) {
 		this.deathCount = deathCount;
+	}
+
+	public Map<BaseStat, Long> getBaseStats() {
+		return baseStats;
+	}
+
+	/**
+	 * Adds a BaseStat's amount to this Char's BaseStat cache.
+	 * @param bs The BaseStat
+	 * @param amount the amount of BaseStat to add
+	 */
+	public void addBaseStat(BaseStat bs, int amount) {
+		getBaseStats().put(bs, getBaseStats().getOrDefault(bs, 0L) + amount);
+	}
+
+	/**
+	 * Removes a BaseStat's amount from this Char's BaseStat cache.
+	 * @param bs The BaseStat
+	 * @param amount the amount of BaseStat to remove
+	 */
+	public void removeBaseStat(BaseStat bs, int amount) {
+		addBaseStat(bs, -amount);
 	}
 }

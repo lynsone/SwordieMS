@@ -1,8 +1,12 @@
 package net.swordie.ms.client.character.skills.info;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.enums.BaseStat;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.util.container.Tuple;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -147,5 +151,53 @@ public class SkillInfo {
 
     public boolean hasCooltime() {
         return getValue(SkillStat.cooltime, 1) > 0 || getValue(SkillStat.cooltimeMS, 1) > 0;
+    }
+
+    public Map<BaseStat, Integer> getBaseStatValues(Char chr, int slv) {
+        Map<BaseStat, Integer> stats = new HashMap<>();
+        for (SkillStat ss : getSkillStatInfo().keySet()) {
+            Tuple<BaseStat, Integer> bs = getBaseStatValue(ss, slv, chr);
+            stats.put(bs.getLeft(), bs.getRight());
+        }
+        return stats;
+    }
+
+    private Tuple<BaseStat, Integer> getBaseStatValue(SkillStat ss, int slv, Char chr) {
+        BaseStat bs = ss.getBaseStat();
+        int value = getValue(ss, slv);
+        switch (ss) {
+            case lv2damX:
+            case lv2dex:
+            case lv2int:
+            case lv2luk:
+            case lv2mad:
+            case lv2mhp:
+            case lv2mmp:
+            case lv2pad:
+            case lv2str:
+                value = chr.getLevel();
+                break;
+            case str2dex:
+                value *= chr.getStat(Stat.str);
+                break;
+            case dex2luk:
+            case dex2str:
+                value *= chr.getStat(Stat.dex);
+                break;
+            case int2luk:
+                value *= chr.getStat(Stat.inte);
+                break;
+            case luk2dex:
+            case luk2int:
+                value *= chr.getStat(Stat.luk);
+                break;
+            case mhp2damX:
+                value *= chr.getStat(Stat.mhp);
+                break;
+            case mmp2damX:
+                value *= chr.getStat(Stat.mmp);
+                break;
+        }
+        return new Tuple<>(bs, value);
     }
 }

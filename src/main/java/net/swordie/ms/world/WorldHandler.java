@@ -137,6 +137,7 @@ public class WorldHandler {
         if (chr == null || chr.getId() != charId) {
             chr = Char.getFromDBById(charId);
             chr.initEquips();
+            chr.initBaseStats();
         }
         chr.setClient(c);
         c.setChr(chr);
@@ -225,6 +226,11 @@ public class WorldHandler {
         if (msg.length() > 0 && msg.charAt(0) == '@') {
             if (msg.equalsIgnoreCase("@check")) {
                 WvsContext.dispose(c.getChr());
+                Map<BaseStat, Integer> basicStats = chr.getTotalBasicStats();
+                StringBuilder sb = new StringBuilder();
+                for (BaseStat bs : BaseStat.values()) {
+                    sb.append(String.format("%s = %d, ", bs, basicStats.getOrDefault(bs, 0)));
+                }
                 chr.chatMessage(YELLOW, String.format("X=%d, Y=%d", chr.getPosition().getX(), chr.getPosition().getY()));
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);

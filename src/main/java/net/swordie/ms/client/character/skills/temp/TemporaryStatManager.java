@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
@@ -41,6 +42,7 @@ public class TemporaryStatManager {
     private Char chr;
     private List<TemporaryStatBase> twoStates = new ArrayList<>();
     private Set<AffectedArea> affectedAreas = new HashSet<>();
+    private Map<BaseStat, Integer> baseStats = new HashMap<>();
 
     public TemporaryStatManager(Char chr){
         this.chr = chr;
@@ -83,8 +85,18 @@ public class TemporaryStatManager {
         if(!indie) {
             List<Option> optList = new ArrayList<>();
             optList.add(option);
+            if (hasStat(cts)) {
+                Option oldOption = getCurrentStats().get(cts).get(0);
+                // remove old base stats from map
+                for (Map.Entry<BaseStat, Integer> stats : BaseStat.getFromCTS(cts, oldOption).entrySet()) {
+                    removeBaseStat(stats.getKey(), stats.getValue());
+                }
+            }
             getNewStats().put(cts, optList);
             getCurrentStats().put(cts, optList);
+            for (Map.Entry<BaseStat, Integer> stats : BaseStat.getFromCTS(cts, option).entrySet()) {
+                addBaseStat(stats.getKey(), stats.getValue());
+            }
             if (option.tOption > 0) {
                 if (getSchedules().containsKey(cts)) {
                     getSchedules().get(cts).cancel(false);
@@ -100,11 +112,20 @@ public class TemporaryStatManager {
                 optList = new ArrayList<>();
             }
             if(optList.contains(option)) {
-                optList.remove(getOptByCTSAndSkill(cts, option.nReason));
+                // remove old option of the same skill
+                Option oldOption = getOptByCTSAndSkill(cts, option.nReason);
+                for (Map.Entry<BaseStat, Integer> stats : BaseStat.getFromCTS(cts, oldOption).entrySet()) {
+                    removeBaseStat(stats.getKey(), stats.getValue());
+                }
+                optList.remove(oldOption);
             }
             optList.add(option);
             getNewStats().put(cts, optList);
             getCurrentStats().put(cts, optList);
+            // Add stats to basestat
+            for (Map.Entry<BaseStat, Integer> stats : BaseStat.getFromCTS(cts, option).entrySet()) {
+                removeBaseStat(stats.getKey(), stats.getValue());
+            }
             if (option.tTerm > 0) {
                 Tuple tuple = new Tuple(cts, option);
                 if (getIndieSchedules().containsKey(tuple)) {
@@ -133,6 +154,10 @@ public class TemporaryStatManager {
         if(cts == CombatOrders) {
             chr.setCombatOrders(0);
         }
+        Option opt = getOption(cts);
+        for (Map.Entry<BaseStat, Integer> stats : BaseStat.getFromCTS(cts, opt).entrySet()) {
+            removeBaseStat(stats.getKey(), stats.getValue());
+        }
         getRemovedStats().put(cts, getCurrentStats().get(cts));
         getCurrentStats().remove(cts);
         getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
@@ -150,6 +175,9 @@ public class TemporaryStatManager {
         List<Option> optList = new ArrayList<>();
         optList.add(option);
         getRemovedStats().put(cts, optList);
+        for (Map.Entry<BaseStat, Integer> stats : BaseStat.getFromCTS(cts, option).entrySet()) {
+            removeBaseStat(stats.getKey(), stats.getValue());
+        }
         if(getCurrentStats().containsKey(cts)) {
             getCurrentStats().get(cts).remove(option);
             if(getCurrentStats().get(cts).size() == 0) {
@@ -2787,5 +2815,17 @@ public class TemporaryStatManager {
         currentStats.addAll(getNewStats().keySet());
         currentStats.addAll(getCurrentStats().keySet());
         currentStats.forEach(stat -> removeStat(stat, false));
+    }
+
+    public Map<BaseStat, Integer> getBaseStats() {
+        return baseStats;
+    }
+
+    public void addBaseStat(BaseStat bs, int value) {
+        getBaseStats().put(bs, getBaseStats().getOrDefault(bs, 0) + value);
+    }
+
+    public void removeBaseStat(BaseStat bs, int value) {
+        addBaseStat(bs, value);
     }
 }

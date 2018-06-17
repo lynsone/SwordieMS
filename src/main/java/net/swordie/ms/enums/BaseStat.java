@@ -1,5 +1,6 @@
 package net.swordie.ms.enums;
 
+import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public enum BaseStat {
     cr, // Crit rate
     minCd, // Min crit damage
     maxCd, // Max crit damage
-    fd, // Final damage
+    fd, // Final damage (total damage)
     bd, // Boss damage
     ied, // Ignore enemy defense
     asr, // All status resistance
@@ -48,12 +49,15 @@ public enum BaseStat {
     speed,
     expR,
     dropR,
+    mesoR,
     booster,
     stance,
-    mastery
+    mastery,
+    damageOver, // max damage
+    allStat,
+    allStatR
     ;
 
-    private static Map<CharacterTemporaryStat, Set<BaseStat>> ctsToBaseStat = new HashMap<>();
 
     public static BaseStat getFromStat(Stat s) {
         switch (s) {
@@ -74,151 +78,279 @@ public enum BaseStat {
         }
     }
 
-    public static Set<BaseStat> getFromCTS(CharacterTemporaryStat ctsArg) {
-        if (ctsToBaseStat.size() == 0) {
-            // init
-            for (CharacterTemporaryStat cts : CharacterTemporaryStat.values()) {
-                Set<BaseStat> stats = new HashSet<>();
-                // TODO: Left at "Holy Symbol" in CTS
-                switch (cts) {
-                    case IndiePAD:
-                    case PAD:
-                        stats.add(pad);
-                        break;
-                    case IndieMAD:
-                    case MAD:
-                        stats.add(mad);
-                        break;
-                    case IndiePDD:
-                    case PDD:
-                        stats.add(pdd);
-                        break;
-                    case IndieMDD:
-                    case MDD:
-                        stats.add(mdd);
-                        break;
-                    case IndiePADR:
-                        stats.add(padR);
-                        break;
-                    case IndieMADR:
-                        stats.add(madR);
-                        break;
-                    case IndiePDDR:
-                        stats.add(pddR);
-                        break;
-                    case IndieMDDR:
-                        stats.add(mddR);
-                        break;
-                    case IndieMHP:
-                        stats.add(mhp);
-                        break;
-                    case IndieMHPR:
-                    case MaxHP:
-                    case IncMaxHP:
-                        stats.add(mhpR);
-                        break;
-                    case IndieMMP:
-                    case MaxMP:
-                    case IncMaxMP:
-                        stats.add(mmp);
-                        break;
-                    case IndieMMPR:
-                        stats.add(mmpR);
-                        break;
-                    case IndieACC:
-                    case ACC:
-                        stats.add(acc);
-                        break;
-                    case ACCR:
-                        stats.add(accR);
-                        break;
-                    case IndieEVA:
-                    case EVA:
-                        stats.add(eva);
-                        break;
-                    case IndieEVAR:
-                    case EVAR:
-                        stats.add(evaR);
-                        break;
-                    case Speed:
-                    case IndieSpeed:
-                        stats.add(speed);
-                        break;
-                    case IndieJump:
-                    case Jump:
-                        stats.add(jump);
-                        break;
-                    case IndieAllStat:
-                        stats.add(str);
-                        stats.add(dex);
-                        stats.add(inte);
-                        stats.add(luk);
-                        break;
-                    case IndieDodgeCriticalTime:
-                    case IndieCr:
-                        stats.add(cr);
-                        break;
-                    case IndieCrMax:
-                    case IndieCrMaxR:
-                        stats.add(maxCd);
-                        break;
-                    case IndieEXP:
-                    case IndieRelaxEXP:
-                    case HolySymbol:
-                        stats.add(expR);
-                        break;
-                    case IndieBooster:
-                    case Booster:
-                    case PartyBooster:
-                    case HayatoBooster:
-                        stats.add(booster);
-                        break;
-                    case STR:
-                    case ZeroAuraStr:
-                    case IndieSTR:
-                        stats.add(str);
-                        break;
-                    case IndieDEX:
-                        stats.add(dex);
-                        break;
-                    case IndieINT:
-                        stats.add(inte);
-                        break;
-                    case IndieLUK:
-                        stats.add(luk);
-                        break;
-                    case IndieStatR:
-                        stats.add(strR);
-                        stats.add(dexR);
-                        stats.add(intR);
-                        stats.add(lukR);
-                        break;
-                    case IndieDamR:
-                    case DamR:
-                        stats.add(fd);
-                        break;
-                    case IndieAsrR:
-                        stats.add(asr);
-                        break;
-                    case IndieTerR:
-                        stats.add(ter);
-                        break;
-                    case IndieBDR:
-                        stats.add(bd);
-                        break;
-                    case IndieStance:
-                        stats.add(stance);
-                        break;
-                    case IndieIgnoreMobpdpR:
-                        stats.add(ied);
-                        break;
-                    default:
-                        stats.add(unk);
-                }
-                ctsToBaseStat.put(cts, stats);
-            }
+    public BaseStat getRateVar() {
+        switch (this) {
+            case str:
+                return strR;
+            case dex:
+                return dexR;
+            case inte:
+                return intR;
+            case luk:
+                return lukR;
+            case pad:
+                return padR;
+            case mad:
+                return madR;
+            case pdd:
+                return pddR;
+            case mdd:
+                return mddR;
+            case mhp:
+                return mhpR;
+            case mmp:
+                return mmpR;
+            case acc:
+                return accR;
+            case eva:
+                return evaR;
+            default:
+                return null;
         }
-        return ctsToBaseStat.getOrDefault(ctsArg, new HashSet<>());
+
+    }
+
+    public static Map<BaseStat, Integer> getFromCTS(CharacterTemporaryStat ctsArg, Option o) {
+        Map<BaseStat, Integer> stats = new HashMap<>();
+        // TODO: Left at "Albatross" in CTS
+        switch (ctsArg) {
+            case IndiePAD:
+                stats.put(pad, o.nValue);
+                break;
+            case EPAD:
+            case PAD:
+                stats.put(pad, o.nOption);
+                break;
+            case IndieMAD:
+                stats.put(mad, o.nValue);
+                break;
+            case MAD:
+            case EMAD:
+                stats.put(mad, o.nOption);
+                break;
+            case IndiePDD:
+                stats.put(pdd, o.nValue);
+                break;
+            case PDD:
+            case EPDD:
+                stats.put(pdd, o.nOption);
+                break;
+            case IndieMDD:
+                stats.put(mdd, o.nValue);
+            case MDD:
+            case EMDD:
+                stats.put(mdd, o.nOption);
+                break;
+            case IndiePADR:
+                stats.put(padR, o.nValue);
+                break;
+            case IndieMADR:
+                stats.put(madR, o.nValue);
+                break;
+            case IndiePDDR:
+                stats.put(pddR, o.nValue);
+                break;
+            case IndieMDDR:
+                stats.put(mddR, o.nValue);
+                break;
+            case IndieMHP:
+                stats.put(mhp, o.nValue);
+                break;
+            case IndieMHPR:
+                stats.put(mhpR, o.nValue);
+                break;
+            case MaxHP:
+            case IncMaxHP:
+                stats.put(mhpR, o.nOption);
+                break;
+            case IndieMMP:
+                stats.put(mmp, o.nValue);
+                break;
+            case MaxMP:
+            case IncMaxMP:
+                stats.put(mmp, o.nOption);
+                break;
+            case IndieMMPR:
+                stats.put(mmpR, o.nValue);
+                break;
+            case IndieACC:
+                stats.put(acc, o.nValue);
+                break;
+            case ACC:
+                stats.put(acc, o.nOption);
+                break;
+            case ACCR:
+                stats.put(accR, o.nOption);
+                break;
+            case IndieEVA:
+                stats.put(eva, o.nValue);
+                break;
+            case EVA:
+            case ItemEvade:
+                stats.put(eva, o.nOption);
+                break;
+            case IndieEVAR:
+                stats.put(evaR, o.nValue);
+                break;
+            case EVAR:
+            case RWMovingEvar:
+                stats.put(evaR, o.nOption);
+                break;
+            case Speed:
+                stats.put(speed, o.nOption);
+                break;
+            case IndieSpeed:
+                stats.put(speed, o.nValue);
+                break;
+            case IndieJump:
+                stats.put(jump, o.nValue);
+                break;
+            case Jump:
+                stats.put(jump, o.nOption);
+                break;
+            case IndieAllStat:
+                stats.put(str, o.nValue);
+                stats.put(dex, o.nValue);
+                stats.put(inte, o.nValue);
+                stats.put(luk, o.nValue);
+                break;
+            case IndieDodgeCriticalTime:
+            case IndieCr:
+                stats.put(cr, o.nValue);
+                break;
+            case EnrageCr:
+                stats.put(cr, o.nOption);
+                break;
+            case EnrageCrDamMin:
+                stats.put(minCd, o.nOption);
+                break;
+            case IndieCrMax:
+            case IndieCrMaxR:
+                stats.put(maxCd, o.nValue);
+                break;
+            case IndieEXP:
+            case IndieRelaxEXP:
+                stats.put(expR, o.nValue);
+                break;
+            case HolySymbol:
+            case ExpBuffRate:
+            case CarnivalExp:
+            case PlusExpRate:
+                stats.put(expR, o.nOption);
+                break;
+            case IndieBooster:
+                stats.put(booster, o.nValue);
+                break;
+            case Booster:
+            case PartyBooster:
+            case HayatoBooster:
+                stats.put(booster, o.nOption);
+                break;
+            case STR:
+            case ZeroAuraStr:
+                stats.put(str, o.nOption);
+                break;
+            case IndieSTR:
+                stats.put(str, o.nValue);
+                break;
+            case IndieDEX:
+                stats.put(dex, o.nValue);
+                break;
+            case IndieINT:
+                stats.put(inte, o.nValue);
+                break;
+            case IndieLUK:
+                stats.put(luk, o.nValue);
+                break;
+            case IndieStatR:
+                stats.put(strR, o.nValue);
+                stats.put(dexR, o.nValue);
+                stats.put(intR, o.nValue);
+                stats.put(lukR, o.nValue);
+                break;
+            case IndieDamR:
+                stats.put(fd, o.nValue);
+                break;
+            case DamR:
+            case BeastFormDamageUp:
+                stats.put(fd, o.nOption);
+                break;
+            case IndieAsrR:
+                stats.put(asr, o.nValue);
+                break;
+            case AsrR:
+            case AsrRByItem:
+            case IncAsrR:
+                stats.put(asr, o.nOption);
+                break;
+            case IndieTerR:
+                stats.put(ter, o.nValue);
+                break;
+            case TerR:
+            case IncTerR:
+                stats.put(ter, o.nOption);
+                break;
+            case IndieBDR:
+                stats.put(bd, o.nValue);
+                break;
+            case BdR:
+                stats.put(bd, o.nOption);
+                break;
+            case IndieStance:
+                stats.put(stance, o.nValue);
+                break;
+            case IndieIgnoreMobpdpR:
+                stats.put(ied, o.nValue);
+                break;
+            case MesoUp:
+            case MesoUpByItem:
+                stats.put(mesoR, o.nOption);
+            case BasicStatUp:
+                // TODO what exactly does this give?
+                break;
+            case Stance:
+                stats.put(stance, o.nOption);
+                break;
+            case SharpEyes:
+            case CriticalBuff:
+            case ItemCritical:
+                stats.put(cr, o.nOption);
+                break;
+            case AdvancedBless:
+                // TODO
+                break;
+            case IllusionStep:
+                // TODO
+                break;
+            case Concentration:
+                // TODO
+                break;
+            case ItemUpByItem:
+                stats.put(dropR, o.nOption);
+                break;
+            case EventRate:
+                // TODO
+                break;
+            case FinalCut:
+                // TODO
+                break;
+            case EMHP:
+            case BeastFormMaxHP:
+                stats.put(mhp, o.nOption);
+                break;
+            case EMMP:
+                stats.put(mmp, o.nOption);
+                break;
+            case Bless:
+                // TODO
+                break;
+            case BlessOfDarkness:
+                // TODO
+                break;
+            default:
+                stats.put(unk, o.nOption);
+        }
+        return stats;
     }
 
     public Stat toStat() {

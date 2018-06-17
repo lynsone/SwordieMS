@@ -950,4 +950,8 @@ public class SkillConstants {
                 return false;
         }
     }
+
+    public static boolean isPassiveSkill(int skillId) {
+        return (skillId % 10000) / 1000 == 1;
+    }
 }
