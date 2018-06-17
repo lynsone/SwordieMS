@@ -3,6 +3,7 @@ package net.swordie.ms.world;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.ExtendSP;
 import net.swordie.ms.client.character.Macro;
@@ -1732,11 +1733,52 @@ public class WorldHandler {
                 equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
                 equip.updateToChar(chr);
                 break;
+            case 5072000: // Super Megaphone
+                String text = inPacket.decodeString();
+                boolean whisperIcon = inPacket.decodeByte() != 0;
+                World world = chr.getClient().getWorld();
+                BroadcastMsg smega = BroadcastMsg.megaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
+                world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                chr.consumeItem(item);
+                break;
+            case 5076000: // Item Megaphone
+                text = inPacket.decodeString();
+                whisperIcon = inPacket.decodeByte() != 0;
+                boolean eqpSelected = inPacket.decodeByte() != 0;
+                invType = EQUIP;
+                int itemPosition = 0;
+                if(eqpSelected) {
+                    invType = InvType.getInvTypeByVal(inPacket.decodeInt());
+                    itemPosition = inPacket.decodeInt();
+                    if(invType == EQUIP && itemPosition < 0) {
+                        invType = EQUIPPED;
+                    }
+                }
+                Item broadcastedItem = chr.getInventoryByType(invType).getItemBySlot((short) itemPosition);
+
+                world = chr.getClient().getWorld();
+                smega = BroadcastMsg.itemMegaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon, eqpSelected, broadcastedItem);
+                world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                chr.consumeItem(item);
+                break;
+            case 5077000: // Triple Megaphone
+                byte stringListSize = inPacket.decodeByte();
+                List<String> stringList = new ArrayList<>();
+                for(int i = 0; i < stringListSize; i++) {
+                    stringList.add(inPacket.decodeString());
+                }
+                whisperIcon = inPacket.decodeByte() != 0;
+
+                world = chr.getClient().getWorld();
+                smega = BroadcastMsg.tripleMegaphone(stringList, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
+                world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                chr.consumeItem(item);
+                break;
             default:
                 chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
-                chr.dispose();
                 break;
         }
+        chr.dispose();
     }
 
     public static void handleUserFinalAttackRequest(Client c, InPacket inPacket) {

@@ -15,17 +15,18 @@ import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
 import net.swordie.ms.client.guild.result.GuildResultInfo;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.life.movement.*;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.result.PartyResultInfo;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
-import org.apache.log4j.LogManager;
+import net.swordie.ms.life.movement.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
+import org.apache.log4j.LogManager;
 
 import java.util.*;
 
@@ -854,6 +855,14 @@ public class WvsContext {
         outPacket.encodeLong(equip.getSerialNumber());
         mci.encode(outPacket);
         outPacket.encodeInt(equip.getBagIndex());
+
+        return outPacket;
+    }
+
+    public static OutPacket broadcastMsg(BroadcastMsg broadcastMsg) {
+        OutPacket outPacket = new OutPacket(OutHeader.BROADCAST_MSG);
+
+        broadcastMsg.encode(outPacket);
 
         return outPacket;
     }

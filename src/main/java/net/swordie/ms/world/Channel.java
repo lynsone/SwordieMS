@@ -1,14 +1,18 @@
 package net.swordie.ms.world;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.ServerConstants;
+import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.loaders.FieldData;
 import net.swordie.ms.util.container.Tuple;
+import net.swordie.ms.world.field.Field;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created on 11/2/2017.
@@ -149,5 +153,11 @@ public class Channel {
             }
         }
         return null;
+    }
+
+    public void broadcastPacket(OutPacket outPacket) {
+        for(Char chr : getChars().values()) {
+            chr.write(outPacket);
+        }
     }
 }
