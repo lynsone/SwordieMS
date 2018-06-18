@@ -1544,6 +1544,14 @@ public class Char {
 	 */
 	public void initBaseStats() {
 		getBaseStats().clear();
+		Map<BaseStat, Long> stats = getBaseStats();
+		stats.put(BaseStat.cr, 5L);
+		stats.put(BaseStat.minCd, 20L);
+		stats.put(BaseStat.maxCd, 50L);
+		stats.put(BaseStat.pdd, 9L);
+		stats.put(BaseStat.mdd, 9L);
+		stats.put(BaseStat.acc, 11L);
+		stats.put(BaseStat.eva, 8L);
 		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill(skill.getSkillId())).
 				forEach(this::addToBaseStatCache);
 	}

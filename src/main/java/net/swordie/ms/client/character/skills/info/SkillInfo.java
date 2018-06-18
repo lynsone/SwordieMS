@@ -11,10 +11,7 @@ import net.swordie.ms.util.container.Tuple;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created on 12/20/2017.
@@ -31,6 +28,7 @@ public class SkillInfo {
     private List<Rect> rects = new ArrayList<>();
     private boolean massSpell;
     private int type;
+    private Set<Integer> psdSkills = new HashSet<>();
 
     public int getSkillId() {
         return skillId;
@@ -210,5 +208,21 @@ public class SkillInfo {
 
     public int getType() {
         return type;
+    }
+
+    public void setRects(List<Rect> rects) {
+        this.rects = rects;
+    }
+
+    public void addPsdSkill(int skillID) {
+        getPsdSkills().add(skillID);
+    }
+
+    public Set<Integer> getPsdSkills() {
+        return psdSkills;
+    }
+
+    public void setPsdSkills(Set<Integer> psdSkills) {
+        this.psdSkills = psdSkills;
     }
 }

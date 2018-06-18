@@ -1042,10 +1042,13 @@ public class SkillConstants {
 
     public static boolean isPassiveSkill(int skillId) {
         SkillInfo si = SkillData.getSkillInfoById(skillId);
-        return si != null && (si.getType() == SkillType.SKILL_TYPE_PASSIVE.getVal()
+        return si != null && si.getPsdSkills().size()  == 0
+                && !isActiveSkillWithPassiveType(skillId)
+                && (si.getType() == SkillType.SKILL_TYPE_PASSIVE.getVal()
                 || si.getType() == SkillType.SKILL_TYPE_PASSIVE_EX.getVal()
                 || si.getType() == SkillType.SKILL_TYPE_MOVE_JUMP.getVal())
-                || SkillConstants.isPassiveSkillImplementedAsBuff(skillId);
+                || SkillConstants.isPassiveSkillImplementedAsBuff(skillId)
+                ;
     }
 
     private static boolean isPassiveSkillImplementedAsBuff(int skillId) {
@@ -1058,4 +1061,19 @@ public class SkillConstants {
         }
         return false;
     }
+
+    /**
+     * Helper function for a list of skills that have type 50 (passive), but are actually buffs.
+     * @param skillId the skill id to check
+     * @return if the skill is active, while having a passive type
+     */
+    private static boolean isActiveSkillWithPassiveType(int skillId) {
+        switch (skillId) {
+            case 25121131: // Spirit bond max
+                return true;
+        }
+        return false;
+    }
+
+
 }

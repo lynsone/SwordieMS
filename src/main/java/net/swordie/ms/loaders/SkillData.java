@@ -53,6 +53,10 @@ public class SkillData {
                     dataOutputStream.writeInt(r.getRight());
                     dataOutputStream.writeInt(r.getBottom());
                 }
+                dataOutputStream.writeShort(si.getPsdSkills().size());
+                for (int i : si.getPsdSkills()) {
+                    dataOutputStream.writeInt(i);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -89,6 +93,10 @@ public class SkillData {
                         int right = dataInputStream.readInt();
                         int bottom = dataInputStream.readInt();
                         skillInfo.addRect(new Rect(left, top, right, bottom));
+                    }
+                    short psdSize = dataInputStream.readShort();
+                    for (int j = 0; j < psdSize; j++) {
+                        skillInfo.addPsdSkill(dataInputStream.readInt());
                     }
                     getSkillInfos().put(skillInfo.getSkillId(), skillInfo);
                 }
@@ -165,6 +173,12 @@ public class SkillData {
                             type = Integer.parseInt(XMLApi.getAttributes(typeNode).get("value"));
                         }
                         skill.setType(type);
+                        Node topPsdSkillNode = XMLApi.getFirstChildByNameBF(skillNode, "psdSkill");
+                        if(topPsdSkillNode != null) {
+                            for (Node psdSkillNode : XMLApi.getAllChildren(topPsdSkillNode)) {
+                                skill.addPsdSkill(Integer.parseInt(XMLApi.getAttributes(psdSkillNode).get("name")));
+                            }
+                        }
                         // end main level info
                         // start "common" level info
                         Node common = XMLApi.getFirstChildByNameBF(skillNode, "common");
