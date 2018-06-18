@@ -123,7 +123,7 @@ public class TemporaryStatManager {
             getCurrentStats().put(cts, optList);
             // Add stats to basestat
             for (Map.Entry<BaseStat, Integer> stats : BaseStat.getFromCTS(cts, option).entrySet()) {
-                removeBaseStat(stats.getKey(), stats.getValue());
+                addBaseStat(stats.getKey(), stats.getValue());
             }
             if (option.tTerm > 0) {
                 Tuple tuple = new Tuple(cts, option);
@@ -2808,6 +2808,6 @@ public class TemporaryStatManager {
     }
 
     public void removeBaseStat(BaseStat bs, int value) {
-        addBaseStat(bs, value);
+        addBaseStat(bs, -value);
     }
 }

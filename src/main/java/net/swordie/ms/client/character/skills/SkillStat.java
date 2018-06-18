@@ -316,7 +316,6 @@ public enum SkillStat {
             case mhpX:
             case emhp:
             case indieMhp:
-            case hp:
             case hcHp:
             case eva2hp:
                 return BaseStat.mhp;
@@ -431,6 +430,10 @@ public enum SkillStat {
             case mesoR:
             case mesoG:
                 return BaseStat.mesoR;
+            case hp:
+                return BaseStat.hpRecovery;
+            case mp:
+                return BaseStat.mpRecovery;
         }
         return null;
     }

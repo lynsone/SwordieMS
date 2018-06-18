@@ -30,6 +30,7 @@ public class SkillInfo {
     private int fixLevel;
     private List<Rect> rects = new ArrayList<>();
     private boolean massSpell;
+    private int type;
 
     public int getSkillId() {
         return skillId;
@@ -78,9 +79,11 @@ public class SkillInfo {
     public int getValue(SkillStat skillStat, int slv) {
         int result = 0;
         String value = getSkillStatInfo().get(skillStat);
-        if(value == null) {
+        if(value == null || slv == 0) {
             return 0;
         }
+        // Sometimes newlines get taken, just remove those
+        value = value.replace("\n", "").replace("\r", "");
         if(Util.isNumber(value)) {
             result = Integer.parseInt(value);
         } else {
@@ -199,5 +202,13 @@ public class SkillInfo {
                 break;
         }
         return new Tuple<>(bs, value);
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public int getType() {
+        return type;
     }
 }

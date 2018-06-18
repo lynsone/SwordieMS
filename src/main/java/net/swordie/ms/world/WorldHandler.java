@@ -227,7 +227,8 @@ public class WorldHandler {
                 for (BaseStat bs : BaseStat.values()) {
                     sb.append(String.format("%s = %d, ", bs, basicStats.getOrDefault(bs, 0)));
                 }
-                chr.chatMessage(YELLOW, String.format("X=%d, Y=%d", chr.getPosition().getX(), chr.getPosition().getY()));
+                chr.chatMessage(YELLOW, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
+
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
             }
@@ -793,6 +794,10 @@ public class WorldHandler {
         int skillID = inPacket.decodeInt();
         int amount = inPacket.decodeInt();
         Skill skill = chr.getSkill(skillID, true);
+        boolean isPassive = SkillConstants.isPassiveSkill(skillID);
+        if (isPassive) {
+            chr.removeFromBaseStatCache(skill);
+        }
         byte jobLevel = (byte) JobConstants.getJobLevel((short) skill.getRootId());
         if (JobConstants.isZero((short) skill.getRootId())) {
             jobLevel = JobConstants.getJobLevelByZeroSkillID(skillID);
@@ -827,6 +832,9 @@ public class WorldHandler {
             List<Skill> skills = new ArrayList<>();
             skills.add(skill);
             chr.addSkill(skill);
+            if (isPassive) {
+                chr.addToBaseStatCache(skill);
+            }
             c.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
     }

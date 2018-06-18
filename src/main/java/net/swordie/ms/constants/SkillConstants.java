@@ -1,7 +1,10 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Zero;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.enums.SkillType;
+import net.swordie.ms.loaders.SkillData;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
@@ -1038,6 +1041,21 @@ public class SkillConstants {
     }
 
     public static boolean isPassiveSkill(int skillId) {
-        return (skillId % 10000) / 1000 == 1;
+        SkillInfo si = SkillData.getSkillInfoById(skillId);
+        return si != null && (si.getType() == SkillType.SKILL_TYPE_PASSIVE.getVal()
+                || si.getType() == SkillType.SKILL_TYPE_PASSIVE_EX.getVal()
+                || si.getType() == SkillType.SKILL_TYPE_MOVE_JUMP.getVal())
+                || SkillConstants.isPassiveSkillImplementedAsBuff(skillId);
+    }
+
+    private static boolean isPassiveSkillImplementedAsBuff(int skillId) {
+        switch (skillId) {
+            case 1000003: // Iron Body
+            case 1120014: // Power Stance --v
+            case 1220017:
+            case 1320017: // Power Stance --^
+                return true;
+        }
+        return false;
     }
 }

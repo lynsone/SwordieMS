@@ -1520,21 +1520,23 @@ public class Char {
 	public void addSkill(Skill skill) {
 		skill.setCharId(getId());
 		boolean isPassive = SkillConstants.isPassiveSkill(skill.getSkillId());
+		boolean isChanged;
 		if (getSkills().stream().noneMatch(s -> s.getSkillId() == skill.getSkillId())) {
 			getSkills().add(skill);
+			isChanged = true;
 		} else {
 			Skill oldSkill = getSkill(skill.getSkillId());
-			if (isPassive) {
+			isChanged = oldSkill.getCurrentLevel() != skill.getCurrentLevel();
+			if (isPassive && isChanged) {
 				removeFromBaseStatCache(oldSkill);
 			}
 			oldSkill.setCurrentLevel(skill.getCurrentLevel());
 			oldSkill.setMasterLevel(skill.getMasterLevel());
 		}
 		// Change cache accordingly
-		if (isPassive) {
+		if (isPassive && isChanged) {
 			addToBaseStatCache(skill);
 		}
-		addToBaseStatCache(skill);
 	}
 
 	/**
@@ -1550,7 +1552,7 @@ public class Char {
 	 * Adds a Skill's info to the current base stat cache.
 	 * @param skill The skill to add
 	 */
-	private void addToBaseStatCache(Skill skill) {
+	public void addToBaseStatCache(Skill skill) {
 		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
 		stats.forEach(this::addBaseStat);
@@ -1560,7 +1562,7 @@ public class Char {
 	 * Removes a Skill's info from the current base stat cache.
 	 * @param skill The skill to remove
 	 */
-	private void removeFromBaseStatCache(Skill skill) {
+	public void removeFromBaseStatCache(Skill skill) {
 		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
 		stats.forEach(this::removeBaseStat);
@@ -2440,7 +2442,7 @@ public class Char {
 	 */
 	public void heal(int amount) {
 		int curHP = getHP();
-		int maxHP = getMaxHP();
+		int maxHP = getTotalStat(BaseStat.mhp);
 		int newHP = curHP + amount > maxHP ? maxHP : curHP + amount;
 		Map<Stat, Object> stats = new HashMap<>();
 		setStat(Stat.hp, newHP);
@@ -2456,7 +2458,7 @@ public class Char {
 	 */
 	public void healMP(int amount) {
 		int curMP = getMP();
-		int maxMP = getMaxMP();
+		int maxMP = getTotalStat(BaseStat.mmp);
 		int newMP = curMP + amount > maxMP ? maxMP : curMP + amount;
 		Map<Stat, Object> stats = new HashMap<>();
 		setStat(Stat.mp, newMP);
@@ -2855,7 +2857,7 @@ public class Char {
 	}
 
 	public void logout() {
-		System.out.println("Logging out " + getName());
+		log.info("Logging out " + getName());
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);
@@ -3295,10 +3297,7 @@ public class Char {
 	 * @param masterLevel the master level of the skill
 	 */
 	public void addSkill(int skillID, int currentLevel, int masterLevel) {
-		Skill skill = getSkill(skillID);
-		if (skill == null) {
-			skill = SkillData.getSkillDeepCopyById(skillID);
-		}
+		Skill skill = SkillData.getSkillDeepCopyById(skillID);
 		if (skill == null) {
 			log.error("No such skill found.");
 			return;

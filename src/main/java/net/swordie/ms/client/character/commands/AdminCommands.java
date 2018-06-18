@@ -7,6 +7,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.world.field.Field;
@@ -1031,9 +1032,11 @@ public class AdminCommands {
                         chr.chatMessage(YELLOW, "Cannot find skill " + id);
                         return;
                     }
+                    SkillInfo skillInfo = SkillData.getSkillInfoById(id);
                     chr.chatMessage(YELLOW, "Name: " + ssi.getName());
                     chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
                     chr.chatMessage(YELLOW, "h: " + ssi.getH());
+                    chr.chatMessage(YELLOW, "type: " + skillInfo.getType());
                 } else {
                     Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query);
                     if (map.size() == 0) {
@@ -1042,11 +1045,13 @@ public class AdminCommands {
                     for (Map.Entry<Integer, SkillStringInfo> entry : map.entrySet()) {
                         id = entry.getKey();
                         ssi = entry.getValue();
-                        if (SkillData.getSkillInfoById(id) != null) {
+                        SkillInfo si = SkillData.getSkillInfoById(id);
+                        if (si != null) {
                             chr.chatMessage(YELLOW, "Id: " + id);
                             chr.chatMessage(YELLOW, "Name: " + ssi.getName());
                             chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
                             chr.chatMessage(YELLOW, "h: " + ssi.getH());
+                            chr.chatMessage(YELLOW, "type: " + si.getType());
                         }
                     }
                 }

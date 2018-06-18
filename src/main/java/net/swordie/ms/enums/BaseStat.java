@@ -55,7 +55,9 @@ public enum BaseStat {
     mastery,
     damageOver, // max damage
     allStat,
-    allStatR
+    allStatR,
+    hpRecovery,
+    mpRecovery,
     ;
 
 
