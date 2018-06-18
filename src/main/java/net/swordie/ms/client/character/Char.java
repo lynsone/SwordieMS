@@ -2127,7 +2127,7 @@ public class Char {
 	 */
 	public void addExp(long amount, ExpIncreaseInfo eii) {
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
-		amount *= expFromExpR;
+		amount += amount * expFromExpR;
 		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
