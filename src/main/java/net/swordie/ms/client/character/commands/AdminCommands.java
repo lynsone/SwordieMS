@@ -853,8 +853,8 @@ public class AdminCommands {
 
     public static class Heal extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int maxHp = chr.getAvatarData().getCharacterStat().getMaxHp();
-            int maxMp = chr.getAvatarData().getCharacterStat().getMaxMp();
+            int maxHp = chr.getTotalStat(BaseStat.mhp);
+            int maxMp = chr.getTotalStat(BaseStat.mmp);
             chr.getAvatarData().getCharacterStat().setHp(maxHp);
             chr.getAvatarData().getCharacterStat().setMp(maxMp);
             Map<Stat, Object> stats = new HashMap<>();

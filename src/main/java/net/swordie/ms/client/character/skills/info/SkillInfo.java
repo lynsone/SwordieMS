@@ -178,7 +178,7 @@ public class SkillInfo {
             case lv2mmp:
             case lv2pad:
             case lv2str:
-                value = chr.getLevel();
+                value *= chr.getLevel();
                 break;
             case str2dex:
                 value *= chr.getStat(Stat.str);

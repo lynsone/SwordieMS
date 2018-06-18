@@ -2119,7 +2119,15 @@ public class Char {
 		addExp(amount, eii);
 	}
 
+	/**
+	 * Adds exp to this Char. Will calculate the extra exp gained from buffs and the exp rate of the server.
+	 * Also takes an argument to show this info to the client. Will not send anything if this argument (eii) is null.
+	 * @param amount The amount of exp to add
+	 * @param eii The info to send to the client
+	 */
 	public void addExp(long amount, ExpIncreaseInfo eii) {
+		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
+		amount *= expFromExpR;
 		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
@@ -2140,7 +2148,10 @@ public class Char {
 		}
 		cs.setExp(newExp);
 		stats.put(Stat.exp, newExp);
-		write(WvsContext.incExpMessage(eii));
+		if (eii != null) {
+			eii.setIndieBonusExp(expFromExpR);
+			write(WvsContext.incExpMessage(eii));
+		}
 		getClient().write(WvsContext.statChanged(stats));
 	}
 
@@ -2149,31 +2160,11 @@ public class Char {
 	 * Immediately checks for level-up possibility, and sends the updated
 	 * stats to the client. Allows multi-leveling.
 	 *
-	 *
 	 * @param amount
 	 * 		The amount of exp to add.
 	 */
 	public void addExpNoMsg(long amount) {
-		CharacterStat cs = getAvatarData().getCharacterStat();
-		long curExp = cs.getExp();
-		int level = getStat(Stat.level);
-		if (level >= GameConstants.charExp.length - 1) {
-			return;
-		}
-		long newExp = curExp + amount;
-		Map<Stat, Object> stats = new HashMap<>();
-		while (newExp >= GameConstants.charExp[level]) {
-			newExp -= GameConstants.charExp[level];
-			addStat(Stat.level, 1);
-			stats.put(Stat.level, (byte) getStat(Stat.level));
-			getJobHandler().handleLevelUp();
-			level++;
-			heal(getMaxHP());
-			healMP(getMaxMP());
-		}
-		cs.setExp(newExp);
-		stats.put(Stat.exp, newExp);
-		getClient().write(WvsContext.statChanged(stats));
+		addExp(amount, null);
 	}
 
 	/**
