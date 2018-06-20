@@ -1053,10 +1053,24 @@ public class SkillConstants {
 
     private static boolean isPassiveSkillImplementedAsBuff(int skillId) {
         switch (skillId) {
+            //Warrior
             case 1000003: // Iron Body
             case 1120014: // Power Stance --v
             case 1220017:
             case 1320017: // Power Stance --^
+
+
+
+            //Thief
+            case 4110008: // Enveloping Darkness --v
+            case 4330008:
+            case 14110026:
+            case 4210013:
+            case 14110009: // Enveloping Darkness --^
+            case 4120014: // Dark Harmony
+            case 4310005: // Channel Karma
+            case 4200009: // Channel Karma
+            case 4200010: // Shield Mastery (Shad)
                 return true;
         }
         return false;
