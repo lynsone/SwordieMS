@@ -143,8 +143,12 @@ public class World {
     }
 
     public Guild getGuildByID(int id) {
-        Guild g = getGuilds().get(id);
-        return g == null ? loadGuildFromDB(id) : g;
+        Guild guild = getGuilds().get(id);
+        if (guild == null) {
+            guild = loadGuildFromDB(id);
+            getGuilds().put(id, guild);
+        }
+        return guild;
     }
 
     public Guild loadGuildFromDB(int id) {

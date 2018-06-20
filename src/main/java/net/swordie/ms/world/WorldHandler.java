@@ -30,6 +30,7 @@ import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.GuildRequestType;
 import net.swordie.ms.client.guild.result.*;
+import net.swordie.ms.client.guild.updates.GuildUpdate;
 import net.swordie.ms.client.guild.updates.GuildUpdateGradeNames;
 import net.swordie.ms.client.guild.updates.GuildUpdateMark;
 import net.swordie.ms.client.guild.updates.GuildUpdateMemberGrade;
@@ -2635,6 +2636,7 @@ public class WorldHandler {
                     guild.addMember(chr);
                     guild.setWorldID(chr.getClient().getWorldId());
                     DatabaseManager.saveToDB(guild);
+                    chr.setGuild(guild);
                     chr.write(WvsContext.guildResult(new GuildCreate(guild)));
                 } else {
                     chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.GuildNameInUseMsg)));
@@ -2667,7 +2669,8 @@ public class WorldHandler {
                 guild.setMarkBgColor(inPacket.decodeByte());
                 guild.setMark(inPacket.decodeShort());
                 guild.setMarkColor(inPacket.decodeByte());
-                guild.broadcast(WvsContext.guildResult(new GuildUpdateMark(guild)));
+                chr.write(WvsContext.guildResult(new GuildUpdateMark(guild))); // This doesn't actually update the emblem client side
+                guild.broadcast(WvsContext.guildResult(new GuildUpdate(guild)));
                 break;
             case SetGuildGrades:
                 String[] newNames = new String[guild.getGradeNames().size()];

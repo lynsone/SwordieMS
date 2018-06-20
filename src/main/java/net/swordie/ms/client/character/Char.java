@@ -2834,6 +2834,7 @@ public class Char {
 
 	public void setOnline(boolean online) {
 		if (getGuild() != null) {
+			setGuild(getGuild()); // Hack to ensure that all chars have the same instance of a guild
 			Guild g = getGuild();
 			GuildMember gm = g.getMemberByID(getId());
 			gm.setOnline(online);
