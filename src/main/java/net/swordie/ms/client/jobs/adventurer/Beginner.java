@@ -6,7 +6,12 @@ import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.Stat;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created on 12/14/2017.
@@ -47,5 +52,23 @@ public class Beginner extends Job {
     @Override
     public boolean isBuff(int skillID) {
         return false;
+    }
+
+    @Override
+    public void handleLevelUp() {
+        if (chr.getLevel() < 10) {
+            chr.addStat(Stat.mhp, 500);
+            chr.addStat(Stat.mmp, 500);
+            chr.addStat(Stat.str, 5);
+            chr.addSpToJobByCurrentLevel(3);
+            Map<Stat, Object> stats = new HashMap<>();
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+            chr.write(WvsContext.statChanged(stats));
+        } else {
+            super.handleLevelUp();
+        }
     }
 }

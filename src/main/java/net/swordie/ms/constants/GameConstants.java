@@ -83,6 +83,10 @@ public class GameConstants {
     // Familiar
     public static final short FAMILIAR_ORB_VITALITY = 300;
 
+    // Party
+    public static final int MAX_PARTY_MOB_LEVEL_DIFF = 5; // x levels lower than mob level
+    public static final int MAX_PARTY_CHR_LEVEL_DIFF = 5; // x levels lower than mob level
+
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
@@ -333,5 +337,36 @@ public class GameConstants {
             list.add(new Triple<>(2, 70D, 35D));
         }
         return list;
+    }
+
+    public static double getPartyExpRateByAttackersAndLeechers(int attackers, int leechers) {
+        if (leechers == 1) {
+            return 0; // Just 1 attacker
+        }
+        if (attackers >= 3) {
+            switch (leechers) {
+                case 6:
+                    return 1.95;
+                case 5:
+                    return 1.5;
+                case 4:
+                    return 1.1;
+                default:
+                    return 0.75;
+            }
+        } else {
+            switch (leechers) {
+                case 6:
+                    return 1.65 + attackers * 0.1;
+                case 5:
+                    return 1.2 + attackers * 0.1;
+                case 4:
+                    return 0.8 + attackers * 0.1;
+                case 3:
+                    return 0.4 + attackers * 0.1;
+                default:
+                    return 0.15 + attackers * 0.1;
+            }
+        }
     }
 }

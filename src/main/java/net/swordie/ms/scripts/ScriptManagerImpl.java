@@ -783,12 +783,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		setSP(currentSP + amount);
 	}
 
-	public void deductSP(int amount) {
-		int currentSP = chr.getAvatarData().getCharacterStat().getSp();
-		setSP(currentSP - amount);
-	}
-
-	public void setSP(int amount) {
+	private void setSP(int amount) {
 		chr.setSpToCurrentJob(amount);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
@@ -798,11 +793,6 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	public void addAP(int amount) {
 		int currentAP = chr.getAvatarData().getCharacterStat().getAp();
 		setAP(currentAP + amount);
-	}
-
-	public void deductAP(int amount) {
-		int currentAP = chr.getAvatarData().getCharacterStat().getAp();
-		setAP(currentAP - amount);
 	}
 
 	public void setAP(int amount) {

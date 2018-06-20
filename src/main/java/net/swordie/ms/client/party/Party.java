@@ -315,4 +315,15 @@ public class Party {
         }
         updateFull();
     }
+
+    /**
+     * Returns the average party member's level, according to the given Char's field.
+     * @param chr the chr to get the map to
+     * @return the average level of the party in the Char's field
+     */
+    public int getAvgPartyLevel(Char chr) {
+        Field field = chr.getField();
+        return (int) getOnlineMembers().stream().filter(om -> om.getChr().getField() == field)
+                .mapToInt(PartyMember::getLevel).average().orElse(chr.getLevel());
+    }
 }

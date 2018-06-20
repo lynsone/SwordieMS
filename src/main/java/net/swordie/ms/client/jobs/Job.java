@@ -4,6 +4,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.Option;
@@ -23,6 +24,7 @@ import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 
 import java.util.HashMap;
@@ -250,5 +252,11 @@ public abstract class Job {
 		characterStat.setMp(50);
 		characterStat.setMaxMp(50);
 		characterStat.setPosMap(100000000);
+		Item whitePot = ItemData.getItemDeepCopy(2000002);
+		whitePot.setQuantity(100);
+		chr.addItemToInventory(whitePot);
+		Item manaPot = ItemData.getItemDeepCopy(2000006);
+		manaPot.setQuantity(100);
+		chr.addItemToInventory(manaPot);
 	}
 }

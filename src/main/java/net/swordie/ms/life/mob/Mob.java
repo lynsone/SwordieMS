@@ -5,6 +5,8 @@ import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyDamageInfo;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.MobPool;
@@ -1128,7 +1130,7 @@ public class Mob extends Life {
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (newHp <= 0) {
             die();
-            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
+//            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else if (isBoss()) {
             getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {
@@ -1226,6 +1228,7 @@ public class Mob extends Life {
     public void distributeExp() {
         long exp = getForcedMobStat().getExp();
         long totalDamage = getDamageDone().values().stream().mapToLong(l -> l).sum();
+        Map<Party, PartyDamageInfo> damagePercPerParty = new HashMap<>();
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
             long appliedExp = (long) (exp * damagePerc);
@@ -1237,11 +1240,22 @@ public class Mob extends Life {
                 eei.setRestFieldExpRate(getField().getBonusExpByBurningFieldLevel());
                 eei.setLastHit(true);
                 eei.setIncEXP((int) appliedExp);
-                chr.addExp((appliedExp+burningFieldBonusExp), eei);
+                chr.addExp((appliedExp + burningFieldBonusExp), eei);
             } else {
                 chr.addExp(appliedExp);
             }
 
+            Party party = chr.getParty();
+            if (party != null) {
+                if (!damagePercPerParty.containsKey(party)) {
+                    damagePercPerParty.put(party, new PartyDamageInfo(party, this));
+                }
+                damagePercPerParty.get(party).addDamageInfo(chr, damagePerc);
+            }
+        }
+
+        for (PartyDamageInfo pdi : damagePercPerParty.values()) {
+            pdi.distributeExp();
         }
     }
 
