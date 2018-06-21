@@ -1087,5 +1087,69 @@ public class SkillConstants {
         return false;
     }
 
+    public static boolean isHyperstatSkill(int skillID) {
+        return skillID >= 80000400 && skillID <= 80000418;
+    }
 
+    public static int getTotalSpByLevel(short level) {
+        int sp = 0;
+        for (int i = 140; i < level; i++) {
+            sp += 3 + ((i - 140) / 10);
+        }
+        return sp;
+    }
+
+    public static int getNeededSpForHyperStatSkill(int lv) {
+        switch (lv) {
+            case 1:
+                return 1;
+            case 2:
+                return 2;
+            case 3:
+                return 4;
+            case 4:
+                return 8;
+            case 5:
+                return 10;
+            case 6:
+                return 15;
+            case 7:
+                return 20;
+            case 8:
+                return 25;
+            case 9:
+                return 30;
+            case 10:
+                return 35;
+            default:
+                return 0;
+        }
+    }
+
+    public static int getTotalNeededSpForHyperStatSkill(int lv) {
+        switch (lv) {
+            case 1:
+                return 1;
+            case 2:
+                return 3;
+            case 3:
+                return 7;
+            case 4:
+                return 15;
+            case 5:
+                return 25;
+            case 6:
+                return 40;
+            case 7:
+                return 60;
+            case 8:
+                return 85;
+            case 9:
+                return 115;
+            case 10:
+                return 150;
+            default:
+                return 0;
+        }
+    }
 }

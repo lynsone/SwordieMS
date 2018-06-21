@@ -866,4 +866,14 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket receiveHyperStatSkillResetResult(int charID, boolean exclRequest, boolean success) {
+        OutPacket outPacket = new OutPacket(OutHeader.RECEIVE_HYPER_STAT_SKILL_RESET_RESULT);
+
+        outPacket.encodeByte(exclRequest);
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(success);
+
+        return outPacket;
+    }
 }

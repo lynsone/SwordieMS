@@ -4272,4 +4272,43 @@ public class WorldHandler {
         }
         handleAttack(chr.getClient(), ai);
     }
+
+    public static void handleUserHyperSkillUpRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        int skillID = inPacket.decodeInt();
+        Skill skill = chr.getSkill(skillID, true);
+        int totalHyperSp = SkillConstants.getTotalSpByLevel(chr.getLevel());
+        int spentSp = chr.getSpentHyperSp();
+        int availableSp = totalHyperSp - spentSp;
+        int neededSp = SkillConstants.getTotalNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
+        if (skill.getCurrentLevel() >= 10 || !SkillConstants.isHyperstatSkill(skillID) || availableSp < neededSp) {
+            return;
+        }
+        chr.removeFromBaseStatCache(skill);
+        skill.setCurrentLevel(skill.getCurrentLevel() + 1);
+        chr.addToBaseStatCache(skill);
+        List<Skill> skills = new ArrayList<>();
+        skills.add(skill);
+        chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+    }
+
+    public static void handleUserHyperStatSkillResetRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        if (chr.getMoney() < GameConstants.HYPER_STAT_RESET_COST) {
+            chr.chatMessage("Not enough money for this operation.");
+            chr.write(WvsContext.receiveHyperStatSkillResetResult(chr.getId(), true, false));
+        } else {
+            chr.deductMoney(GameConstants.HYPER_STAT_RESET_COST);
+            List<Skill> skills = new ArrayList<>();
+            for (int skillID = 80000400; skillID <= 80000418; skillID++) {
+                Skill skill = chr.getSkill(skillID);
+                if (skill != null) {
+                    skill.setCurrentLevel(0);
+                    skills.add(skill);
+                }
+            }
+            chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+            chr.write(WvsContext.receiveHyperStatSkillResetResult(chr.getId(), true, true));
+        }
+    }
 }

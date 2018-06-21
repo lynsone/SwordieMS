@@ -87,6 +87,9 @@ public class GameConstants {
     public static final int MAX_PARTY_MOB_LEVEL_DIFF = 5; // x levels lower than mob level
     public static final int MAX_PARTY_CHR_LEVEL_DIFF = 5; // x levels lower than mob level
 
+    // Hyper stat
+    public static final long HYPER_STAT_RESET_COST = 10000000;
+
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];

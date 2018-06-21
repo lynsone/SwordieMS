@@ -3465,4 +3465,15 @@ public class Char {
 
 		}
 	}
+
+	public int getSpentHyperSp() {
+		int sp = 0;
+		for (int skillID = 80000400; skillID <= 80000418; skillID++) {
+			Skill skill = getSkill(skillID);
+			if (skill != null) {
+				sp += SkillConstants.getTotalNeededSpForHyperStatSkill(skill.getCurrentLevel());
+			}
+		}
+		return sp;
+	}
 }

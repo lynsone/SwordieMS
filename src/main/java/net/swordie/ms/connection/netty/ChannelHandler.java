@@ -493,6 +493,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_AREA_DOT_ATTACK:
                     WorldHandler.handleUserAreaDotAttack(chr, inPacket);
                     break;
+                case USER_HYPER_STAT_SKILL_UP_REQUEST:
+                    WorldHandler.handleUserHyperSkillUpRequest(chr, inPacket);
+                    break;
+                case USER_HYPER_STAT_SKILL_RESET_REQUEST:
+                    WorldHandler.handleUserHyperStatSkillResetRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;
