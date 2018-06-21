@@ -313,8 +313,8 @@ public class WindArcher extends Job {
                         continue;
                     }
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    int TW2subprop = getSubProp(chr);
-                    int TW1prop = getProp(chr);
+                    int TW2subprop = getTriflingWindSubProp(chr);
+                    int TW1prop = getTriflingWindProp(chr);
                     if (Util.succeedProp(TW1prop)) {
                         if (Util.succeedProp(TW2subprop)) {
                             int mobID = mai.mobId;
@@ -365,7 +365,7 @@ public class WindArcher extends Job {
         }
     }
 
-    private int getProp(Char chr) {
+    private int getTriflingWindProp(Char chr) {
         Skill skill = null;
         if (chr.hasSkill(TRIFLING_WIND_I)) {
             skill = chr.getSkill(TRIFLING_WIND_I);
@@ -374,10 +374,10 @@ public class WindArcher extends Job {
         } else if (chr.hasSkill(TRIFLING_WIND_III)) {
             skill = chr.getSkill(TRIFLING_WIND_III);
         }
-        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
+        return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(prop, skill.getCurrentLevel());
     }
 
-    private int getSubProp(Char chr) {
+    private int getTriflingWindSubProp(Char chr) {
         Skill skill = null;
         if (chr.hasSkill(TRIFLING_WIND_I)) {
             skill = chr.getSkill(TRIFLING_WIND_I);
@@ -388,7 +388,7 @@ public class WindArcher extends Job {
         if (chr.hasSkill(TRIFLING_WIND_III)) {
             skill = chr.getSkill(TRIFLING_WIND_III);
         }
-        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(subProp, skill.getCurrentLevel());
+        return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(subProp, skill.getCurrentLevel());
     }
 
     private int getMaxTriffling(Char chr) {
@@ -402,7 +402,7 @@ public class WindArcher extends Job {
         if (chr.hasSkill(TRIFLING_WIND_III)) {
             skill = chr.getSkill(TRIFLING_WIND_III);
         }
-        return skill != null ? SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel()) : 0;
+        return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
     public boolean isBuff(int skillID) {

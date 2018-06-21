@@ -240,11 +240,11 @@ public class Luminous extends Job {
         SkillInfo crescendoInfo = SkillData.getSkillInfoById(DARK_CRESCENDO);
         Skill skill = chr.getSkill(DARK_CRESCENDO);
         byte slv = (byte) skill.getCurrentLevel();
-        int MaxStack = getMaxStack(chr);
+        int MaxStack = getMaxDarkCrescendoStack(chr);
         int amount = 1;
         if(tsm.hasStat(StackBuff)) {
             amount = tsm.getOption(StackBuff).mOption;
-            if(amount < getMaxStack(chr)) {
+            if(amount < getMaxDarkCrescendoStack(chr)) {
                 amount++;
             }
         }
@@ -265,15 +265,15 @@ public class Luminous extends Job {
         if (chr.hasSkill(DARK_CRESCENDO)) {
             skill = chr.getSkill(DARK_CRESCENDO);
         }
-        return SkillData.getSkillInfoById(DARK_CRESCENDO).getValue(prop, chr.getSkill(27121005).getCurrentLevel());
+        return skill == null ? 0 : SkillData.getSkillInfoById(DARK_CRESCENDO).getValue(prop, chr.getSkill(27121005).getCurrentLevel());
     }
 
-    private int getMaxStack(Char chr) {
+    private int getMaxDarkCrescendoStack(Char chr) {
         Skill skill = null;
         if (chr.hasSkill(DARK_CRESCENDO)) {
             skill = chr.getSkill(DARK_CRESCENDO);
         }
-        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
+        return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
     public static void handleBlackBlessingIncrease(Client c) {
@@ -353,9 +353,9 @@ public class Luminous extends Job {
                 tsm.putCharacterStatValue(Larkness, o);
                 tsm.sendSetStatPacket();
             }
-            //Dark Crescendo
+            // Dark Crescendo
             if (tsm.hasStat(StackBuff)) {
-                if (Util.succeedProp(crescendoProp)) {
+                if (skill != null && Util.succeedProp(crescendoProp)) {
                     handleDarkCrescendo(skill.getSkillId(), tsm, c);
                 }
             }

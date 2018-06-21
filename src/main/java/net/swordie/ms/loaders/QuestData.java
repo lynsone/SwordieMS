@@ -276,6 +276,7 @@ public class QuestData {
                                             break;
                                         case "count":
                                             qpmr.setRequiredCount(Integer.parseInt(questValue));
+                                            break;
                                         case "order":
                                             break;
                                         default:

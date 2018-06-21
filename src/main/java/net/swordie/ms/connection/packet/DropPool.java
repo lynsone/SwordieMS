@@ -95,6 +95,7 @@ public class DropPool {
             case PET_PICKUP:
                 outPacket.encodeInt(pickupID);
                 outPacket.encodeInt(petID);
+                break;
             case DELAYED_PICKUP:
                 outPacket.encodeShort(delay);
                 break;

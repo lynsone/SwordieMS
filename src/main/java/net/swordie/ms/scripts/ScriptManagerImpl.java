@@ -541,7 +541,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public boolean isPartyLeader() {
-		return chr.getParty() != null & chr.getParty().getPartyLeaderID() == chr.getId();
+		return chr.getParty() != null && chr.getParty().getPartyLeaderID() == chr.getId();
 	}
 
 	@Override

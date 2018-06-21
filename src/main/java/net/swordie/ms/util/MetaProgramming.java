@@ -16,8 +16,8 @@ public class MetaProgramming {
 //        Invincible(0x10000000, 2),
         int plus = 5;
         File file = new File("D:/SwordieMS/Swordie/info txts/tempstats.txt");
-        try {
-            Scanner scanner = new Scanner(file);
+        try (Scanner scanner = new Scanner(file)) {
+
             String s = "";
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -60,8 +60,7 @@ public class MetaProgramming {
     public static void makeHeaders() {
 
         File file = new File("D:/SwordieMS/Swordie/src/headerText.txt");
-        try {
-            Scanner scanner = new Scanner(file);
+        try (Scanner scanner = new Scanner(file)) {
             String s = "";
             int num = 0;
             while (scanner.hasNextLine()) {

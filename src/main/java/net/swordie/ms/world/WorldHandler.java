@@ -1971,6 +1971,7 @@ public class WorldHandler {
                 case 0:
                     val = ItemGrade.HIDDEN_EPIC.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
+                    break;
                 case 2049762: // Unique Pot
                 case 2049764:
                 case 2049758:
@@ -3358,7 +3359,7 @@ public class WorldHandler {
                 short fromPos = inPacket.decodeShort();
                 Equip fromEq = (Equip) chr.getEquipInventory().getItemBySlot(fromPos);
                 Equip toEq = (Equip) chr.getEquipInventory().getItemBySlot(toPos);
-                if (fromEq == null || toEq == null || fromEq.getItemId() != fromEq.getItemId() ||
+                if (fromEq == null || toEq == null || fromEq.getItemId() != toEq.getItemId() ||
                         !fromEq.hasSpecialAttribute(EquipSpecialAttribute.TRACE)) {
                     log.error(String.format("Equip transmission failed: from = %s, to = %s", fromEq, toEq));
                     c.write(CField.showUnknownEnchantFailResult((byte) 0));

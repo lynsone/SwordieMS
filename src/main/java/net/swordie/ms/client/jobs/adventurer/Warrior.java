@@ -977,11 +977,13 @@ public class Warrior extends Job {
 
     private int getFinalAttackProc() {
         Skill skill = getFinalAtkSkill(chr);
+        if (skill == null) {
+            return 0;
+        }
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-        int proc = si.getValue(prop, slv);
 
-        return proc;
+        return si.getValue(prop, slv);
     }
 
     private void handleCharges(int skillId, TemporaryStatManager tsm, Client c) {
@@ -1028,10 +1030,10 @@ public class Warrior extends Job {
 
     private void handleFinalAttack(Char chr, AttackInfo attackInfo) {
         Skill skill = getFinalAttackSkill(chr);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         if(skill == null || attackInfo.skillId == skill.getSkillId()) {
             return;
         }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         for(MobAttackInfo mai: attackInfo.mobAttackInfo) {
             if(Util.succeedProp(si.getValue(prop, skill.getCurrentLevel()))) {
                 chr.getClient().write(CField.finalAttackRequest(chr, attackInfo.skillId, skill.getSkillId(), 10000,

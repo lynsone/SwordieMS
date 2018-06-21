@@ -74,8 +74,7 @@ public class LoginHandler {
         byte result;
         Account account = null;
 
-        try {
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM accounts WHERE username = ?");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM accounts WHERE username = ?")){
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -133,9 +132,7 @@ public class LoginHandler {
             code = CharNameResult.INVALID_NAME;
         } else {
             Connection connection = Server.getInstance().getDatabaseConnection();
-            PreparedStatement ps = null;
-            try {
-                ps = connection.prepareStatement("SELECT * FROM characterstats WHERE name = ?");
+            try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM characterstats WHERE name = ?")) {
                 ps.setString(1, name);
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {

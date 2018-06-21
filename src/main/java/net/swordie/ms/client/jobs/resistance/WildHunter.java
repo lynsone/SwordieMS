@@ -520,7 +520,10 @@ public class WildHunter extends Job {
             return 100;
         }
         Skill skill = getFinalAtkSkill(chr);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        if (skill == null) {
+            return 0;
+        }
+         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
         int proc = si.getValue(prop, slv);
 

@@ -139,6 +139,7 @@ public enum BaseStat {
                 break;
             case IndieMDD:
                 stats.put(mdd, o.nValue);
+                break;
             case MDD:
             case EMDD:
                 stats.put(mdd, o.nOption);
@@ -307,6 +308,7 @@ public enum BaseStat {
             case MesoUp:
             case MesoUpByItem:
                 stats.put(mesoR, o.nOption);
+                break;
             case BasicStatUp:
                 // TODO what exactly does this give?
                 break;

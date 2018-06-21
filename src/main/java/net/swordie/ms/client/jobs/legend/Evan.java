@@ -482,6 +482,9 @@ public class Evan extends Job {
         if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
             skill = chr.getSkill(ENHANCED_MAGIC_DEBRIS);
         }
+        if (skill == null) {
+            return 0;
+        }
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) skill.getCurrentLevel();
         return si.getValue(x, slv);

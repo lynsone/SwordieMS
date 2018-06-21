@@ -551,7 +551,7 @@ public class NightWalker extends Job {
         if (chr.hasSkill(14120009)) {
             skill = chr.getSkill(14120009);
         }
-        return SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
+        return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
 

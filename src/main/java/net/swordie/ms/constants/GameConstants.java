@@ -242,8 +242,8 @@ public class GameConstants {
             return BaseStat.dex;
         } else if (JobConstants.isBeastTamer(job) || JobConstants.isBlazeWizard(job) || JobConstants.isCleric(job)
                 || JobConstants.isEvan(job) || JobConstants.isIceLightning(job) || JobConstants.isFirePoison(job)
-                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isBlazeWizard(job)
-                || JobConstants.isKenesis(job) || JobConstants.isLuminous(job)) {
+                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isKenesis(job)
+                || JobConstants.isLuminous(job)) {
             return BaseStat.inte;
         } else if (JobConstants.isAdventurerThief(job) || JobConstants.isNightLord(job) || JobConstants.isShadower(job)
                 || JobConstants.isPhantom(job) || JobConstants.isNightWalker(job) || JobConstants.isDualBlade(job)) {

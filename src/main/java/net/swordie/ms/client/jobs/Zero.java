@@ -350,7 +350,7 @@ public class Zero extends Job {
                         mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
-                //break;
+                break;
             case ADV_EARTH_BREAK_SHOCK_INIT:
                 slv = (byte) chr.getSkill(ADV_EARTH_BREAK).getCurrentLevel();
                 SkillInfo fci = SkillData.getSkillInfoById(ADV_EARTH_BREAK);

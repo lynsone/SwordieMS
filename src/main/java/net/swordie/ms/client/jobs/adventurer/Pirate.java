@@ -556,6 +556,7 @@ public class Pirate extends Job {
             case ALL_ABOARD: //Moves, Attacks
                 tsm.removeStatsBySkill(AHOY_MATEYS);
                 corsairSummons();
+                break;
             case SCURVY_SUMMONS: //Moves, Attacks
                 corsairSummons();
                 break;
@@ -690,6 +691,9 @@ public class Pirate extends Job {
     private void handlePirateRevenge() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = getPirateRevenge();
+        if (skill == null) {
+            return;
+        }
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) skill.getCurrentLevel();
         Option o1 = new Option();
