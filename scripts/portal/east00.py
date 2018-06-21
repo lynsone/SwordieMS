@@ -64,6 +64,9 @@ def init():
 	elif currentMap == 100020200:
 		map = 100040000
 		portal = 3
+	elif currentMap == 211042200:
+		map = 211042300
+		portal = 0
 	else:
 		sm.chat("(Portal - east00) This script has currently not been coded for this map.")
 		map = sm.getChr().getField().getReturnMap()

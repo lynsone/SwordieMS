@@ -1789,6 +1789,11 @@ public class WorldHandler {
                 world.broadcastPacket(WvsContext.broadcastMsg(smega));
                 chr.consumeItem(item);
                 break;
+            case 5530006: // 100 Power Elixirs
+                if (chr.canHold(2000005)) {
+                    chr.addItemToInventory(2000005, 100);
+                }
+                break;
             default:
                 chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
                 break;
@@ -1939,11 +1944,10 @@ public class WorldHandler {
             return;
         }
         int scrollID = scroll.getItemId();
-        boolean success = true;
         Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(scrollID).getScrollStats();
         int chance = vals.getOrDefault(ScrollStat.success, 100);
         int curse = vals.getOrDefault(ScrollStat.cursed, 0);
-        success = Util.succeedProp(chance);
+        boolean success = Util.succeedProp(chance);
         if (success) {
             short val;
             int thirdLineChance = ItemConstants.THIRD_LINE_CHANCE;
@@ -2611,7 +2615,7 @@ public class WorldHandler {
         switch(grt) {
             case AcceptJoinRequest:
                 int guildID = inPacket.decodeInt();
-                guild = (Guild) DatabaseManager.getObjFromDB(Guild.class, guildID);
+                guild = chr.getClient().getWorld().getGuildByID(guildID);
                 if(guild != null && chr.getGuild() == null) {
                     guild.addMember(chr);
                     guild.broadcast(WvsContext.guildResult(

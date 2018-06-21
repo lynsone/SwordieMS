@@ -61,6 +61,7 @@ public class FieldData {
                     dataOutputStream.writeInt(field.getLvForceMove());
                     dataOutputStream.writeInt(field.getConsumeItemCoolTime());
                     dataOutputStream.writeInt(field.getLink());
+                    dataOutputStream.writeInt(field.getBossMobID());
                     dataOutputStream.writeShort(field.getFootholds().size());
                     for (Foothold fh : field.getFootholds()) {
                         dataOutputStream.writeInt(fh.getId());
@@ -213,6 +214,9 @@ public class FieldData {
                     }
                     if (name.equalsIgnoreCase("link")) {
                         field.setLink(Integer.parseInt(value));
+                    }
+                    if (name.equalsIgnoreCase("bossMobID")) {
+                        field.setBossMobID(Integer.parseInt(value));
                     }
                 }
                 Node fhNode = XMLApi.getFirstChildByNameBF(node, "foothold");
@@ -492,6 +496,7 @@ public class FieldData {
             field.setLvForceMove(dataInputStream.readInt());
             field.setConsumeItemCoolTime(dataInputStream.readInt());
             field.setLink(dataInputStream.readInt());
+            field.setBossMobID(dataInputStream.readInt());
             short fhSize = dataInputStream.readShort();
             for (int j = 0; j < fhSize; j++) {
                 Foothold fh = new Foothold(

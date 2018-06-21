@@ -1130,7 +1130,9 @@ public class Mob extends Life {
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (newHp <= 0) {
             die();
-//            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
+            if (isBoss()) {
+                getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
+            }
         } else if (isBoss()) {
             getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {

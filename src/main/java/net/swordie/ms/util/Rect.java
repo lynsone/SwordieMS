@@ -173,4 +173,14 @@ public class Rect {
                 ", bottom=" + bottom +
                 '}';
     }
+
+    /**
+     * Returns a random Position that is inside this Rect.
+     * @return the random Position
+     */
+    public Position getRandomPositionInside() {
+        int randX = Util.getRandom(getLeft(), getRight());
+        int randY = Util.getRandom(getTop(), getBottom());
+        return new Position(randX, randY);
+    }
 }

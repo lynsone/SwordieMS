@@ -476,7 +476,7 @@ public class AdminCommands {
             if (args.length > 2) {
                 count = Integer.parseInt(args[2]);
             }
-            int hp = Integer.MAX_VALUE;
+            int hp = 0;
             if (args.length > 3) {
                 hp = Integer.parseInt(args[3]);
             }
@@ -492,8 +492,10 @@ public class AdminCommands {
                 mob.setPrevPos(pos.deepCopy());
                 mob.setPosition(pos.deepCopy());
                 mob.getForcedMobStat().setMaxMP(Integer.MAX_VALUE);
-                mob.setMaxHp(hp);
-                mob.setHp(hp);
+                if (hp > 0) {
+                    mob.setMaxHp(hp);
+                    mob.setHp(hp);
+                }
                 mob.setNotRespawnable(true);
                 if (mob.getField() == null) {
                     mob.setField(field);

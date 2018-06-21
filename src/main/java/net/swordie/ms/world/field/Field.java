@@ -75,6 +75,7 @@ public class Field {
     private long nextEliteSpawnTime = System.currentTimeMillis();
     private int killedElites;
     private EliteState eliteState;
+    private int bossMobID;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -497,7 +498,7 @@ public class Field {
         for (Reactor reactor : getReactors()) {
             spawnLife(reactor, chr);
         }
-        if (getRuneStone() != null && getMobs().size() > 0) {
+        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0) {
             chr.write(CField.runeStoneAppear(runeStone));
         }
         //if (getMobs().size() > 0 && getBurningFieldLevel() > 0) { //Burning Level shown per map entry is commented out.
@@ -889,7 +890,7 @@ public class Field {
     }
 
     public void spawnRuneStone() {
-        if(getMobs().size() <= 0) {
+        if(getMobs().size() <= 0 || getBossMobID() != 0) {
             return;
         }
         if(getRuneStone() == null) {
@@ -906,7 +907,7 @@ public class Field {
 
         setRuneStone(null);
 
-        EventManager.addEvent(() -> spawnRuneStone(), GameConstants.RUNE_RESPAWN_TIME, TimeUnit.MINUTES);
+        EventManager.addEvent(this::spawnRuneStone, GameConstants.RUNE_RESPAWN_TIME, TimeUnit.MINUTES);
     }
 
     public void runeStoneHordeEffect(int mobRateMultiplier, int duration) {
@@ -1003,5 +1004,13 @@ public class Field {
 
     public List<Foothold> getNonWallFootholds() {
         return getFootholds().stream().filter(fh -> !fh.isWall()).collect(Collectors.toList());
+    }
+
+    public void setBossMobID(int bossMobID) {
+        this.bossMobID = bossMobID;
+    }
+
+    public int getBossMobID() {
+        return bossMobID;
     }
 }

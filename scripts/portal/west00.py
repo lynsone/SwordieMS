@@ -52,9 +52,12 @@ def init():
     elif fieldID == 130030004:
         map = 130030005
         portal = 0
-    elif currentMap == 100040000:
+    elif fieldID == 100040000:
         map = 100020200
         portal = 6
+    elif fieldID == 211042402 or fieldID == 211042400 or fieldID == 211042401:
+        map = 211042300
+        portal = 0
     else:
         sm.chat("(portal) This script (west00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
         map = sm.getChr().getField().getReturnMap()

@@ -385,6 +385,14 @@ public class MobSkill {
                     tsm.sendSetStatPacket();
                 }
                 break;
+            case PHYSICAL_IMMUNE:
+                o.nOption = msi.getSkillStatIntValue(x);
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PImmune, o);
+                break;
+            case MAGIC_IMMUNE:
+                o.nOption = msi.getSkillStatIntValue(x);
+                mts.addMobSkillOptionsAndBroadCast(MobStat.MImmune, o);
+                break;
             case TELEPORT:
                 int xPos = msi.getSkillStatIntValue(x);
                 int yPos = msi.getSkillStatIntValue(y);
@@ -399,8 +407,14 @@ public class MobSkill {
                 mts.addMobSkillOptionsAndBroadCast(MobStat.PCounter, o);
                 break;
             case SUMMON:
+            case SUMMON2:
+                Position spawnPos = mob.getPosition();
+                if (msi.getLt() != null) {
+                    rect = new Rect(msi.getLt(), msi.getRb());
+                    spawnPos = rect.getRandomPositionInside();
+                }
                 for(int i : msi.getInts()) {
-                    Mob m = mob.getField().spawnMob(i, mob.getPosition().getX(), mob.getPosition().getY(), false);
+                    Mob m = mob.getField().spawnMob(i, spawnPos.getX(), spawnPos.getY(), false);
                     if (msi.getSkillStatIntValue(hp) > 0) {
                         m.setMaxHp(msi.getSkillStatIntValue(hp));
                         m.setHp(msi.getSkillStatIntValue(hp));

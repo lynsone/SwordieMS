@@ -2861,6 +2861,7 @@ public class Char {
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);
+		getAccount().setCurrentChr(null);
 		DatabaseManager.saveToDB(this);
 		DatabaseManager.saveToDB(getAccount());
 		getClient().getChannelInstance().removeChar(this);
@@ -3446,5 +3447,22 @@ public class Char {
 	 */
 	public void removeBaseStat(BaseStat bs, int amount) {
 		addBaseStat(bs, -amount);
+	}
+
+	public void addItemToInventory(int id, int quantity) {
+		if (ItemConstants.isEquip(id)) {  //Equip
+			Equip equip = ItemData.getEquipDeepCopyFromID(id, false);
+			addItemToInventory(equip.getInvType(), equip, false);
+			getClient().write(WvsContext.inventoryOperation(true, false,
+					ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
+
+		} else {    //Item
+			Item item = ItemData.getItemDeepCopy(id);
+			item.setQuantity(quantity);
+			addItemToInventory(item);
+			getClient().write(WvsContext.inventoryOperation(true, false,
+					ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+
+		}
 	}
 }

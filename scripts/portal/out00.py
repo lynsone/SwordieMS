@@ -140,7 +140,7 @@ def action(response, answer):
     fieldID = sm.getFieldID()
     if response == 1:
         sm.clearPartyInfo()
-        if fieldID == 271040100 | 271040000:
+        if fieldID == 271040100 or fieldID == 271040000:
             sm.warpPartyOut(271040000)
             sm.dispose()
         elif fieldID == 223030210:

@@ -556,7 +556,7 @@ public class Pirate extends Job {
             case ALL_ABOARD: //Moves, Attacks
                 tsm.removeStatsBySkill(AHOY_MATEYS);
                 corsairSummons();
-                break;
+                // Fallthrough intended
             case SCURVY_SUMMONS: //Moves, Attacks
                 corsairSummons();
                 break;
