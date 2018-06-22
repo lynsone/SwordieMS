@@ -2861,7 +2861,9 @@ public class Char {
 
 	public void logout() {
 		log.info("Logging out " + getName());
-		setFieldID(getField().getForcedReturn());
+		if (getField().getForcedReturn() != GameConstants.NO_MAP_ID) {
+			setFieldID(getField().getForcedReturn());
+		}
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);

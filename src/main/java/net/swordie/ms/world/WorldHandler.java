@@ -893,6 +893,9 @@ public class WorldHandler {
         if (skillID == 25111005) {
             ai.spiritCoreEnhance = inPacket.decodeInt();
         }
+        if (skillID == 80001762) {
+            inPacket.decodeInt(); // Encoded as 0
+        }
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             int mobId = inPacket.decodeInt();

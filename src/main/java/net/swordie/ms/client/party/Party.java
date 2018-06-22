@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.party.result.LeavePartyResult;
 import net.swordie.ms.client.party.result.PartyJoinResult;
 import net.swordie.ms.client.party.updates.UpdatePartyResult;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.world.field.FieldInstanceType;
@@ -282,7 +283,7 @@ public class Party {
         for(Char chr : chrs) {
             chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
             int returnMap = warpToID == 0 ? chr.getField().getForcedReturn() : warpToID;
-            if(returnMap != 999999999) {
+            if(returnMap != GameConstants.NO_MAP_ID) {
                 Field field = chr.getOrCreateFieldByCurrentInstanceType(returnMap);
                 chr.warp(field);
             }

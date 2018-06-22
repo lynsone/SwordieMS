@@ -1446,7 +1446,7 @@ public class AdminCommands {
             o.nValue = on ? 0 : 1950000000;
             tsm.putCharacterStatValue(CharacterTemporaryStat.IndieMaxDamageOver, o);
             tsm.sendSetStatPacket();
-            chr.chatMessage("Damage cap turned " + (on ? "off" : "on"));
+            chr.chatMessage("Damage cap removed: " + (o.nValue != 0));
         }
     }
 }

@@ -23,6 +23,7 @@ public class GameConstants {
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
+    public static final int NO_MAP_ID = 999999999;
 
     //Combo Kill
     public static final int COMBO_KILL_RESET_TIMER = 5; // 5 sec

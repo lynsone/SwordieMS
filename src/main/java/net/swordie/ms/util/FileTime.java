@@ -26,18 +26,26 @@ public class FileTime implements Serializable {
 		return getLowDateTime() + (long) getHighDateTime() << 32;
 	}
 
+	public static void main(String[] args) {
+
+	}
+
 	public enum Type {
 		// Mushy
-		MAX_TIME(150842304000000000L),
-		ZERO_TIME(94354848000000000L),
+		MAX_TIME(35120710, -1157267456),
+		ZERO_TIME(21968699, -35635200),
 		PERMANENT(150841440000000000L),
 		FT_UT_OFFSET(116444592000000000L),
-		QUEST_TIME(27111908);
+		QUEST_TIME(27111903);
 
 		private long val;
 
 		Type(long val) {
 			this.val = val;
+		}
+
+		Type(int lowPart, int highPart) {
+			val = lowPart + ((long) highPart << 32);
 		}
 
 		public long getVal() {
@@ -98,7 +106,7 @@ public class FileTime implements Serializable {
 	 * @return FileTime corresponding to the given time
 	 */
 	public static FileTime fromEpochMillis(long time) {
-		return fromLong((long) (Type.QUEST_TIME.getVal() + (time / 3600000 * 8.38196)));
+		return fromLong((long) (Type.QUEST_TIME.getVal() + (time / 3600000 * 8.38195)));
 	}
 
 	/**
