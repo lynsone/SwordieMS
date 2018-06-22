@@ -6,9 +6,9 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.pet.PetSkill;
 import org.apache.log4j.Logger;
 import net.swordie.ms.util.FileTime;
-import net.swordie.ms.util.Util;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * Created on 4/14/2018.
@@ -47,8 +47,7 @@ public class PetItem extends Item {
         outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getTameness() + 1);
         outPacket.encodeByte(getRepleteness());
-//        outPacket.encodeFT(FileTime.getTimeFromLong(System.currentTimeMillis() + 10000000));
-        outPacket.encodeArr(Util.getByteArrayByString("00 40 E0 FD 3B 37 4F 01"));
+        outPacket.encodeFT(getDateDead());
         outPacket.encodeShort(getPetAttribute());
         outPacket.encodeShort(getPetSkill());
         outPacket.encodeInt(getRemainLife());

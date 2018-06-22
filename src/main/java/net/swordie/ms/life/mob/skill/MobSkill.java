@@ -408,13 +408,16 @@ public class MobSkill {
                 break;
             case SUMMON:
             case SUMMON2:
+                if (afterDead && mob.getHp() > 0) {
+                    break;
+                }
                 Position spawnPos = mob.getPosition();
                 if (msi.getLt() != null) {
                     rect = new Rect(msi.getLt(), msi.getRb());
                     spawnPos = rect.getRandomPositionInside();
                 }
                 for(int i : msi.getInts()) {
-                    Mob m = mob.getField().spawnMob(i, spawnPos.getX(), spawnPos.getY(), false);
+                    Mob m = mob.getField().spawnMob(i, spawnPos.getX(), spawnPos.getY(), false, 0);
                     if (msi.getSkillStatIntValue(hp) > 0) {
                         m.setMaxHp(msi.getSkillStatIntValue(hp));
                         m.setHp(msi.getSkillStatIntValue(hp));

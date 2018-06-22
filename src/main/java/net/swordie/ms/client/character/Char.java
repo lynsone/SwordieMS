@@ -2007,6 +2007,9 @@ public class Char {
 	 * 		Whether or not the character data should be encoded.
 	 */
 	public void warp(Field toField, boolean characterData) {
+		if (toField == null) {
+			toField = getOrCreateFieldByCurrentInstanceType(100000000);
+		}
 		warp(toField, toField.getPortalByName("sp"), characterData);
 	}
 
@@ -2145,7 +2148,7 @@ public class Char {
 		}
 		long newExp = curExp + amount;
 		Map<Stat, Object> stats = new HashMap<>();
-		while (newExp >= GameConstants.charExp[level]) {
+		while (newExp >= GameConstants.charExp[level] && level < GameConstants.charExp.length) {
 			newExp -= GameConstants.charExp[level];
 			addStat(Stat.level, 1);
 			stats.put(Stat.level, (byte) getStat(Stat.level));
@@ -2858,6 +2861,7 @@ public class Char {
 
 	public void logout() {
 		log.info("Logging out " + getName());
+		setFieldID(getField().getForcedReturn());
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);
@@ -2865,6 +2869,7 @@ public class Char {
 		DatabaseManager.saveToDB(this);
 		DatabaseManager.saveToDB(getAccount());
 		getClient().getChannelInstance().removeChar(this);
+//		getClient().setChr(null);
 	}
 
 	public int getSubJob() {

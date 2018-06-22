@@ -122,6 +122,7 @@ public class Mob extends Life {
     private Map<Integer, Long> skillCooldowns = new HashMap<>();
     private long nextPossibleSkillTime = 0;
     private List<Tuple<Integer, Integer>> eliteSkills = new ArrayList<>();
+    private boolean selfDestruction;
 
     public Mob(int templateId, int objectId) {
         super(objectId);
@@ -1142,7 +1143,7 @@ public class Mob extends Life {
 
     private void die() {
         Field field = getField();
-        getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
+        getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH));
         if (!isNotRespawnable()) { // double negative
             EventManager.addEvent(() -> field.respawn(this),
                     (long) (GameConstants.BASE_MOB_RESPAWN_RATE * (1 / field.getMobRate())));
@@ -1338,7 +1339,7 @@ public class Mob extends Life {
 
     public void removeSoulSplitLife(Char chr, Mob origin, Mob copy) {
         chr.getField().removeLife(copy.getObjectId());
-        chr.getField().broadcastPacket(MobPool.mobLeaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH.getVal()));
+        chr.getField().broadcastPacket(MobPool.mobLeaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH));
         origin.setSplit(false);
     }
 
@@ -1489,5 +1490,13 @@ public class Mob extends Life {
         ms.setLevel(skillLevel);
         addSkill(ms);
         getEliteSkills().add(new Tuple<>(skillID, skillID));
+    }
+
+    public void setSelfDestruction(boolean selfDestruction) {
+        this.selfDestruction = selfDestruction;
+    }
+
+    public boolean isSelfDestruction() {
+        return selfDestruction;
     }
 }

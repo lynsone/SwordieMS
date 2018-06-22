@@ -1,13 +1,13 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.damage.DamageCalc;
+import net.swordie.ms.util.FileTime;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.world.field.FieldCustom;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.DBChar;
 import net.swordie.ms.handlers.header.OutHeader;
-import net.swordie.ms.util.Util;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -76,7 +76,7 @@ public class Stage {
         // 41 bytes below
         outPacket.encodeByte(setWhiteFadeInOut);
         outPacket.encodeByte(0); // unsure
-        outPacket.encodeArr(Util.getByteArrayByString("40 64 2B 70 84 7A D3 01")); // TODO: proper ftServer encoding
+        outPacket.encodeFT(FileTime.currentTime());
         outPacket.encodeInt(mobStatAdjustRate);
         boolean hasFieldCustom = fieldCustom != null;
         outPacket.encodeByte(hasFieldCustom);

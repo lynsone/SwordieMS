@@ -9,7 +9,7 @@ if sm.getFieldID() == 863010000:
             elif not sm.isPartyLeader():
                 sm.sendSayOkay("Please have your party leader enter if you wish to face Gollux.")
             elif sm.checkParty():
-                sm.warpParty(863010100)
+                sm.warpPartyIn(863010100)
         sm.dispose()
 
 

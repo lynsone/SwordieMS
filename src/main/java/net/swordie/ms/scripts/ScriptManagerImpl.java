@@ -5,7 +5,6 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
-import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
@@ -47,7 +46,6 @@ import java.util.Observable;
 import java.util.Observer;
 
 import static net.swordie.ms.enums.ChatMsgColour.*;
-import static net.swordie.ms.enums.InventoryOperation.ADD;
 import static net.swordie.ms.life.npc.NpcMessageType.*;
 
 /**
@@ -450,7 +448,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		if (quest == null) {
 			quest = QuestData.createQuestFromId(id);
 		}
-		quest.setCompletedTime(FileTime.getTime());
+		quest.setCompletedTime(FileTime.currentTime());
 		quest.setStatus(QuestStatus.COMPLETE);
 		qm.addQuest(quest);
 		chr.write(WvsContext.questRecordMessage(quest));
@@ -622,7 +620,11 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void spawnMob(int id, int x, int y, boolean respawnable) {
-		chr.getField().spawnMob(id, x, y, respawnable);
+		spawnMob(id, x, y, respawnable, 0);
+	}
+
+	public void spawnMob(int id, int x, int y, boolean respawnable, long hp) {
+		chr.getField().spawnMob(id, x, y, respawnable, hp);
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.quest.progress.QuestProgressItemRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
 import net.swordie.ms.client.character.quest.reward.QuestReward;
@@ -146,7 +145,7 @@ public class QuestManager {
             addQuest(quest);
         }
         quest.setStatus(QuestStatus.COMPLETE);
-        quest.setCompletedTime(FileTime.getTime());
+        quest.setCompletedTime(FileTime.currentTime());
         chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
         chr.write(WvsContext.questRecordMessage(quest));
         for(QuestReward qr : questInfo.getQuestRewards()) {

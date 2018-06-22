@@ -1436,4 +1436,17 @@ public class AdminCommands {
             chr.dispose();
         }
     }
+
+    public static class ToggleDamageCap extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            boolean on = tsm.hasStat(IndieMaxDamageOver) && tsm.getOptByCTSAndSkill(IndieMaxDamageOver, 0).nValue != 0;
+            Option o = new Option();
+            o.nValue = on ? 0 : 1950000000;
+            tsm.putCharacterStatValue(CharacterTemporaryStat.IndieMaxDamageOver, o);
+            tsm.sendSetStatPacket();
+            chr.chatMessage("Damage cap turned " + (on ? "off" : "on"));
+        }
+    }
 }

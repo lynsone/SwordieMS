@@ -875,13 +875,17 @@ public class Field {
         this.fieldScript = fieldScript;
     }
 
-    public Mob spawnMob(int id, int x, int y, boolean respawnable) {
+    public Mob spawnMob(int id, int x, int y, boolean respawnable, long hp) {
         Mob mob = MobData.getMobDeepCopyById(id);
         Position pos = new Position(x, y);
         mob.setPosition(pos.deepCopy());
         mob.setPrevPos(pos.deepCopy());
         mob.setPosition(pos.deepCopy());
         mob.setNotRespawnable(!respawnable);
+        if (hp > 0) {
+            mob.setHp(hp);
+            mob.setMaxHp(hp);
+        }
         if (mob.getField() == null) {
             mob.setField(this);
         }

@@ -38,7 +38,7 @@ public class NonCombatStatDayLimit {
     }
 
     public NonCombatStatDayLimit() {
-        this((short) 0, (short) 0, (byte) 0,(short) 0,(short) 0,(short) 0,(short) 0, FileTime.getFTFromLong(0));
+        this((short) 0, (short) 0, (byte) 0,(short) 0,(short) 0,(short) 0,(short) 0, FileTime.fromLong(0));
     }
 
     public short getCharm() {

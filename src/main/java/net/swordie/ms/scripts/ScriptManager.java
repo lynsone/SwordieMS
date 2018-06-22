@@ -460,6 +460,23 @@ public interface ScriptManager {
 	void spawnMob(int mobID, int x, int y, boolean respawnable);
 
 	/**
+	 * Spawns a defined mob at an x/y location.
+	 * Example: "sm.spawnMob(100100, 0, 0, false, 1000)"
+	 *
+	 * @param mobID
+	 * 		The ID of the mob to spawn.
+	 * @param x
+	 * 		The x coordinate of the mob.
+	 * @param y
+	 * 		The y coordinate of the mob.
+	 * @param respawnable
+	 * 		The true/false defining if the mob is respawnable.
+	 * @param hp
+	 * 		The hp that the mob should start out with
+	 */
+	void spawnMob(int mobID, int x, int y, boolean respawnable, long hp);
+
+	/**
 	 * Shows the {@link Char}'s HP with the pre-defined template.
 	 * Example: "sm.showHP()"
 	 */

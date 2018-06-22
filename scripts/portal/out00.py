@@ -139,31 +139,30 @@ def init():
 def action(response, answer):
     fieldID = sm.getFieldID()
     if response == 1:
-        sm.clearPartyInfo()
         if fieldID == 271040100 or fieldID == 271040000:
-            sm.warpPartyOut(271040000)
+            sm.clearPartyInfo(271040000)
             sm.dispose()
         elif fieldID == 223030210:
-            sm.warpPartyOut(223030200)
+            sm.clearPartyInfo(223030200)
             sm.dispose()
         elif fieldID == 272030400:
-            sm.warpPartyOut(272030300)
+            sm.clearPartyInfo(272030300)
             sm.dispose()
         elif fieldID == 105200310:
-            sm.warpPartyOut(105200000)
+            sm.clearPartyInfo(105200000)
             sm.dispose()
         elif fieldID == 105200210:
-            sm.warpPartyOut(105200000)
+            sm.clearPartyInfo(105200000)
             sm.dispose()
         elif fieldID == 105200110:
-            sm.warpPartyOut(105200000)
+            sm.clearPartyInfo(105200000)
             sm.dispose()
         elif fieldID == 105200410:
-            sm.warpPartyOut(105200000)
+            sm.clearPartyInfo(105200000)
             sm.dispose()
         else:
             sm.chat("(Portal) This script (out00.py) is not coded for the exit of this map. (ID: " + str(fieldID) + ")")
             map = sm.getChr().getField().getReturnMap()
             portal = 0
-            sm.warpParty(map, portal)
+            sm.warpPartyOut(map, portal)
             sm.dispose()

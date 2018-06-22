@@ -39,7 +39,7 @@ public class NpcShopItem {
     private int location;
 
     public NpcShopItem() {
-        sellEnd = FileTime.getFTFromLong(-1);
+        sellEnd = FileTime.fromEpochMillis(-1);
         maxPerSlot = 50;
     }
 

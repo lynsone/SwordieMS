@@ -9,7 +9,7 @@ def action(response, answer):
         elif not sm.isPartyLeader():
             sm.sendSay("Please have your party leader enter if you wish to face Velderoth.")
         elif sm.checkParty():
-            sm.warpParty(401053100)
+            sm.warpPartyIn(401053100)
     elif answer == 1:
         sm.warp(401060000)
     sm.dispose()

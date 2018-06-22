@@ -9,7 +9,7 @@ def action(type):
         global hitCount
         hitCount += 1
         sm.chat(str(hitCount))
-        if hitCount >= 5:
+        if hitCount == 5:
             sm.spawnMob(8920100, 37, 135, False)
             sm.removeReactor()
             sm.dispose()

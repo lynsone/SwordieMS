@@ -1,6 +1,7 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.mob.*;
 import net.swordie.ms.life.mob.skill.BurnedInfo;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
@@ -184,11 +185,11 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobLeaveField(int id, byte deadType){
+    public static OutPacket mobLeaveField(int id, DeathType deadType){
         OutPacket outPacket = new OutPacket(OutHeader.MOB_LEAVE_FIELD);
 
         outPacket.encodeInt(id);
-        outPacket.encodeByte(deadType);
+        outPacket.encodeByte(deadType.getVal());
 
         return outPacket;
     }

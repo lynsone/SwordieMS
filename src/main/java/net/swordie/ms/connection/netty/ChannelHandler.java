@@ -499,6 +499,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_HYPER_STAT_SKILL_RESET_REQUEST:
                     WorldHandler.handleUserHyperStatSkillResetRequest(chr, inPacket);
                     break;
+                case MOB_SELF_DESTRUCT:
+                    WorldHandler.handleMobSelfDestruct(chr, inPacket);
+                    break;
+                case MOB_AREA_ATTACK_DISEASE:
+                    WorldHandler.handleMobAreaAttackDisease(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

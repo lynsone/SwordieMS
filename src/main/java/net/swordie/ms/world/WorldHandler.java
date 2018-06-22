@@ -657,7 +657,10 @@ public class WorldHandler {
                 if (mob == null) {
                     chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
                 } else if (mob.getHp() > 0) {
-                    long totalDamage = Arrays.stream(mai.damages).sum();
+                    long totalDamage = 0;
+                    for (int dmg : mai.damages) {
+                        totalDamage += dmg;
+                    }
                     mob.addDamage(chr, totalDamage);
                     mob.damage(totalDamage);
                     if (mob.getHp() < 0) {
@@ -1793,6 +1796,17 @@ public class WorldHandler {
                 if (chr.canHold(2000005)) {
                     chr.addItemToInventory(2000005, 100);
                 }
+                break;
+            case 5062405: // Fusion anvil
+                int appearancePos = inPacket.decodeInt();
+                int functionPos = inPacket.decodeInt();
+                Inventory inv = chr.getEquipInventory();
+                Equip appearance = (Equip) inv.getItemBySlot((short) appearancePos);
+                Equip function = (Equip) inv.getItemBySlot((short) functionPos);
+                if (appearance != null && function != null && appearance.getItemId() / 10000 == function.getItemId() / 10000) {
+                    function.getOptions().set(6, appearance.getItemId());
+                }
+                function.updateToChar(chr);
                 break;
             default:
                 chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
@@ -4310,5 +4324,22 @@ public class WorldHandler {
             chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
             chr.write(WvsContext.receiveHyperStatSkillResetResult(chr.getId(), true, true));
         }
+    }
+
+    public static void handleMobSelfDestruct(Char chr, InPacket inPacket) {
+        int mobID = inPacket.decodeInt();
+        Field field = chr.getField();
+        Mob mob = (Mob) field.getLifeByObjectID(mobID);
+        if (mob.isSelfDestruction()) {
+            field.removeLife(mobID);
+            field.broadcastPacket(MobPool.mobLeaveField(mobID, DeathType.ANIMATION_DEATH));
+        }
+    }
+
+    public static void handleMobAreaAttackDisease(Char chr, InPacket inPacket) {
+        int mobID = inPacket.decodeInt();
+        int attackIdx = inPacket.decodeInt();
+        Position areaPos = inPacket.decodePositionInt();
+        int nextTickPossible = inPacket.decodeInt();
     }
 }

@@ -17,7 +17,6 @@ import net.swordie.ms.util.FileTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Tim on 2/28/2017.
@@ -187,9 +186,9 @@ public class Login {
         outPacket.encodeByte(0); // bBurningEventBlock
         int reserved = 0;
         outPacket.encodeInt(reserved); //character locations
-        FileTime.getFTFromLong(0).encode(outPacket); //Timestamp
+        FileTime.fromLong(0).encode(outPacket); //Timestamp
         for(int i = 0; i < reserved; i++) {
-            FileTime ft = FileTime.getFTFromLong(0);
+            FileTime ft = FileTime.fromLong(0);
             outPacket.encodeInt(ft.getLowDateTime());
             ft.encode(outPacket);
         }

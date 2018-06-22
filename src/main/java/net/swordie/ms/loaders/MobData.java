@@ -729,6 +729,10 @@ public class MobData {
                             mob.addSkill(mobSkill);
                         }
                         break;
+                    case "selfDestruction":
+                        // TODO Maybe more info?
+                        mob.setSelfDestruction(true);
+                        break;
                     case "speak":
                     case "thumbnail":
                     case "attack":
@@ -737,7 +741,6 @@ public class MobData {
                     case "defaultHP":
                     case "defaultMP":
                     case "passive":
-                    case "selfDestruction":
                     case "firstAttackRange":
                     case "nonLevelCheckEVA":
                     case "nonLevelCheckACC":
