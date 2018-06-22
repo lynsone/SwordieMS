@@ -631,11 +631,14 @@ public class Field {
         }
     }
 
-    public synchronized void removeDrop(Integer dropID, Integer pickupUserID, Boolean fromSchedule) {
+    public synchronized void removeDrop(int dropID, int pickupUserID, boolean fromSchedule, int petID) {
         Life life = getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             if(pickupUserID != 0) {
                 broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
+            } if (petID != 0) {
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.PET_PICKUP, 0, life.getObjectId(),
+                        (short) 0, petID, 0));
             } else {
                 broadcastPacket(DropPool.dropLeaveField(DropLeaveType.FADE, 0, life.getObjectId(),
                         (short) 0, 0, 0));
@@ -700,11 +703,12 @@ public class Field {
      */
     public void drop(Drop drop, Position posFrom, Position posTo) {
         addLife(drop);
+        drop.setPosition(posTo);
         getLifeSchedules().put(drop,
-                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true),
+                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
-
-        if(ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) { // Check for Collision Items such as Exp Orbs from Combo Kills
+        // Check for collision items such as exp orbs from combo kills
+        if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
         } else {
             broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
@@ -724,6 +728,7 @@ public class Field {
         int itemID = dropInfo.getItemID();
         Item item;
         Drop drop = new Drop(-1);
+        drop.setPosition(posTo);
         drop.setOwnerID(ownerID);
         if (itemID != 0) {
             item = ItemData.getItemDeepCopy(itemID, true);
@@ -739,7 +744,7 @@ public class Field {
         }
         addLife(drop);
         getLifeSchedules().put(drop,
-                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true),
+                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
         broadcastWithPredicate(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
                 (Char chr) -> dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq()));

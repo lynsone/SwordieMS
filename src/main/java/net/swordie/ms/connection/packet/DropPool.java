@@ -15,7 +15,7 @@ import net.swordie.ms.util.Position;
 public class DropPool {
 
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID) {
-        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
+        return DropPool.dropEnterField(drop, DropEnterType.NO_ANIMATION, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 0, false);
     }

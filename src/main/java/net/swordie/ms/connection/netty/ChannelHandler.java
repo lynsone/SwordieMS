@@ -505,6 +505,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case MOB_AREA_ATTACK_DISEASE:
                     WorldHandler.handleMobAreaAttackDisease(chr, inPacket);
                     break;
+                case PET_MOVE:
+                    WorldHandler.handlePetMove(chr, inPacket);
+                    break;
+                case PET_DROP_PICK_UP_REQUEST:
+                    WorldHandler.handlePetDropPickUpRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

@@ -117,16 +117,6 @@ public class FileTime implements Serializable {
 	public static FileTime fromDate(LocalDateTime localDateTime) {
 		return fromEpochMillis(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 	}
-
-	/**
-	 * Creates a new FileTime from the current time. Ensures the date is correctly calculated for the client (quests' completion time).
-	 * @return FileTime for quests, corresponding to the current time
-	 */
-	public static FileTime getCurrentTimeForQuest() {
-		// QUEST_TIME == Start unix time. Adding 8.38196 will increase the time by one hour.
-		return fromLong((long) (Type.QUEST_TIME.getVal() + (System.currentTimeMillis() / 3600 * 8.38196)));
-	}
-
 	/**
 	 * Returns the millis since epoch that this FileTime corresponds to.
 	 * @return millis since epoch

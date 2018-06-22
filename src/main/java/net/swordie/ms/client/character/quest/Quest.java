@@ -108,7 +108,7 @@ public class Quest {
 
     public void completeQuest() {
         setStatus(QuestStatus.COMPLETE);
-        setCompletedTime(FileTime.getCurrentTimeForQuest());
+        setCompletedTime(FileTime.currentTime());
     }
 
     public void setCompletedTime(FileTime completedTime) {

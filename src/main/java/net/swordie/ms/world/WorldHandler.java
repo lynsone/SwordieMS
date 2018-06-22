@@ -2200,7 +2200,7 @@ public class WorldHandler {
             Drop drop = (Drop) life;
             boolean success = chr.addDrop(drop);
             if(success) {
-                field.removeDrop(dropID, chr.getId(), false);
+                field.removeDrop(dropID, chr.getId(), false, 0);
             }
         }
 
@@ -4344,5 +4344,41 @@ public class WorldHandler {
         int attackIdx = inPacket.decodeInt();
         Position areaPos = inPacket.decodePositionInt();
         int nextTickPossible = inPacket.decodeInt();
+    }
+
+    public static void handlePetMove(Char chr, InPacket inPacket) {
+        int petID = inPacket.decodeInt();
+        inPacket.decodeByte(); // ?
+        int encodedGatherDuration = inPacket.decodeInt();
+        Position oldPos = inPacket.decodePosition();
+        Position oldVPos = inPacket.decodePosition();
+        List<Movement> movements = WvsContext.parseMovement(inPacket);
+        for (Movement m : movements) {
+            Position pos = m.getPosition();
+            chr.setOldPosition(chr.getPosition());
+            chr.setPosition(pos);
+            chr.setMoveAction(m.getMoveAction());
+            chr.setLeft(m.getMoveAction() % 2 == 1);
+            chr.setFoothold(m.getFh());
+        }
+        chr.getField().broadcastPacket(UserLocal.petMove(chr.getId(), petID, encodedGatherDuration, oldPos, oldVPos, movements), chr);
+    }
+
+    public static void handlePetDropPickUpRequest(Char chr, InPacket inPacket) {
+        int petID = inPacket.decodeInt();
+        byte fieldKey = inPacket.decodeByte();
+        inPacket.decodeInt(); // tick
+        Position pos = inPacket.decodePosition();
+        int dropID = inPacket.decodeInt();
+        inPacket.decodeInt(); // cliCrc
+        Field field = chr.getField();
+        Life life = field.getLifeByObjectID(dropID);
+        if (life instanceof Drop) {
+            Drop drop = (Drop) life;
+            boolean success = chr.addDrop(drop);
+            if(success) {
+                field.removeDrop(dropID, chr.getId(), false, petID);
+            }
+        }
     }
 }

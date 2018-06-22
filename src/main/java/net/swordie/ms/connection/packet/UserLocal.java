@@ -12,10 +12,12 @@ import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -334,6 +336,23 @@ public class UserLocal {
         familiar.encode(outPacket);
         outPacket.encodeByte(showInfoChanged);
         outPacket.encodeByte(adminMob);
+
+        return outPacket;
+    }
+
+    public static OutPacket petMove(int id, int petID, int encodedGatherDuration, Position oldPos, Position oldVPos, List<Movement> movements) {
+        OutPacket outPacket = new OutPacket(OutHeader.PET_MOVE);
+
+        outPacket.encodeInt(id);
+        outPacket.encodeInt(petID);
+        outPacket.encodeInt(encodedGatherDuration);
+        outPacket.encodePosition(oldPos);
+        outPacket.encodePosition(oldVPos);
+        outPacket.encodeByte(movements.size());
+        for(Movement m : movements) {
+            m.encode(outPacket);
+        }
+        outPacket.encodeByte(0);
 
         return outPacket;
     }

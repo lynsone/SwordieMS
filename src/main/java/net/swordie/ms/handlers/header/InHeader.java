@@ -1024,7 +1024,8 @@ public enum InHeader {
                 LOGIN_PASSWORD,
                 AUTH_SECOND_PASSWORD,
                 NPC_MOVE,
-                FAMILIAR_MOVE
+                FAMILIAR_MOVE,
+                PET_MOVE
         );
         return spam.contains(inHeaderByOp);
     }
