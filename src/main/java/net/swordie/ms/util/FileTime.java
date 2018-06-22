@@ -124,7 +124,7 @@ public class FileTime implements Serializable {
 	 */
 	public static FileTime getCurrentTimeForQuest() {
 		// QUEST_TIME == Start unix time. Adding 8.38196 will increase the time by one hour.
-		return fromLong((long) (Type.QUEST_TIME.getVal() + (System.currentTimeMillis() / 3600000 * 8.38196)));
+		return fromLong((long) (Type.QUEST_TIME.getVal() + (System.currentTimeMillis() / 3600 * 8.38196)));
 	}
 
 	/**
