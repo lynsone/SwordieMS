@@ -6510,4 +6510,116 @@
         tokenprice 5;
         id 1332274;
     }
+    absolab_katara{ // goes wrong
+        loc 14;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1342102;
+    }
+    absolab_forked_cane{
+        loc 15;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1362135;
+    }
+    absolab_wand{
+        loc 16;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1372222;
+    }
+    absolab_staff{
+        loc 17;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1382259;
+    }
+    absolab_broad_saber{
+        loc 18;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1402251;
+    }
+    absolab_broad_axe{
+        loc 19;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1412177;
+    }
+    absolab_broad_hammer{
+        loc 20;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1422184;
+    }
+    absolab_piercing_spear{
+        loc 21;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1432214;
+    }
+    absolab_hellslayer{
+        loc 22;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1442268;
+    }
+    absolab_bow{
+        loc 23;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1452252;
+    }
+    absolab_crossbow{
+        loc 24;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1462239;
+    }
+    absolab_revenge_guard{
+        loc 25;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1472261;
+    }
+    absolab_gun{
+        loc 26;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1492231;
+    }
+    absolab_dual_bowgun{
+        loc 27;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1522138;
+    }
+    absolab_blast_cannon{
+        loc 28;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1532144;
+    }
+    absolab_pile_god{
+        loc 29;
+        tabindex 1;
+        tokenitemid 4310199;
+        tokenprice 5;
+        id 1582017;
+    }
 }

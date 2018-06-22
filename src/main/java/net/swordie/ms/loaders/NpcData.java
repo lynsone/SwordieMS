@@ -228,10 +228,9 @@ public class NpcData {
 							break;
 					}
 				}
-				nsd.getItems().sort(Comparator.comparingInt(NpcShopItem::getLocation));
-				nsd.generateProjectiles();
 				nsd.addItem(nsi);
 			}
+			nsd.getItems().sort(Comparator.comparingInt(NpcShopItem::getLocation));
 			if (nsd.getNpcTemplateID() == 0) {
 				nsd.setNpcTemplateID(id);
 			}
@@ -375,7 +374,7 @@ public class NpcData {
 		File file = new File(String.format("%s/shop/%d.dat", ServerConstants.DAT_DIR, id));
 		NpcShopDlg nsd = null;
 		if (file.exists()) {
-			loadNpcShopDlgFromFile(file);
+			return loadNpcShopDlgFromFile(file);
 		}
 		return nsd;
 	}
