@@ -777,7 +777,6 @@ public class Pirate extends Job {
 
             }
         }
-        chr.chatMessage(ChatMsgColour.GAME_NOTICE, "Atk Speed: "+attackInfo.attackSpeed);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();

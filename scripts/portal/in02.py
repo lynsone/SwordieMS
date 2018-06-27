@@ -4,6 +4,8 @@ def init():
 		map = 863010220
 		portal = 1
 	elif currentmap == 310000000:
+		if sm.hasQuest(23023): # 2nd job advancement for BaM
+			sm.giveItem(4032737, 1)
 		map = 310000010
 		portal = 1
 	else:

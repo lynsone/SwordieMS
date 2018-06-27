@@ -423,7 +423,6 @@ public class WindArcher extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        chr.chatMessage(ChatMsgColour.GREY, "Atk Speed: "+attackInfo.attackSpeed);
         if(hasHitMobs) {
             if(attackInfo.skillId != TRIFLING_WIND_ATOM && attackInfo.skillId != 0 && attackInfo.skillId != STORM_BRINGER) {
                 handleStormBringer(skillID, slv, attackInfo);

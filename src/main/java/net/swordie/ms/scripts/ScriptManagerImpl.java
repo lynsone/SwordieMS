@@ -16,6 +16,7 @@ import net.swordie.ms.client.trunk.TrunkOpen;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.enums.Stat;
@@ -149,6 +150,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
 		scriptEngine.put("objectID", objID);
+		scriptEngine.put("chr", chr);
 		if (scriptType == ScriptType.QUEST) {
 			scriptEngine.put("startQuest",
 					scriptName.charAt(scriptName.length() - 1) == QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
@@ -768,7 +770,8 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	public void addSP(int amount) {
-		int currentSP = chr.getAvatarData().getCharacterStat().getSp();
+		byte jobLevel = (byte) JobConstants.getJobLevel(chr.getJob());
+		int currentSP = chr.getAvatarData().getCharacterStat().getExtendSP().getSpByJobLevel(jobLevel);
 		setSP(currentSP + amount);
 	}
 

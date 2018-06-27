@@ -330,7 +330,6 @@ public class BattleMage extends Job {
             handleDrainAuraActive(attackInfo);
             handleDrainAuraPassive(attackInfo);
         }
-        chr.chatMessage(ChatMsgColour.CYAN, "Atk Speed: "+attackInfo.attackSpeed);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -419,6 +418,9 @@ public class BattleMage extends Job {
     private void handleDrainAuraActive(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = chr.getSkill(DRAINING_AURA);
+        if (skill == null) {
+            return;
+        }
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         int duration = 1000* si.getValue(subTime, slv);
@@ -435,6 +437,9 @@ public class BattleMage extends Job {
 
     private void handleDrainAuraPassive(AttackInfo attackInfo) {
         Skill skill = chr.getSkill(DRAINING_AURA);
+        if (skill == null) {
+            return;
+        }
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -471,7 +476,7 @@ public class BattleMage extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
                 }
             }
-        WeaknessAuraTimer = EventManager.addEvent(() -> handleWeakeningAura(), delay, TimeUnit.SECONDS);
+        WeaknessAuraTimer = EventManager.addEvent(this::handleWeakeningAura, delay, TimeUnit.SECONDS);
         }
     }
 
@@ -481,7 +486,7 @@ public class BattleMage extends Job {
         if(chr.hasSkill(32120062)) { //Blue Aura - Dispel Magic
             if (tsm.getOptByCTSAndSkill(BMageAura, skill.getSkillId()) != null) {
                 tsm.removeAllDebuffs();
-                EventManager.addEvent(() -> handleBlueAuraDispel(), 5, TimeUnit.SECONDS);
+                EventManager.addEvent(this::handleBlueAuraDispel, 5, TimeUnit.SECONDS);
             }
         }
     }

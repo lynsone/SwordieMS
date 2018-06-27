@@ -328,8 +328,6 @@ public class DawnWarrior extends Job {
         }
 
         equinox(tsm);
-        chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "Dawn Warrior Pose Type: " +tsm.getOption(PoseType).nOption);
-        chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "Atk Speed: "+attackInfo.attackSpeed);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();

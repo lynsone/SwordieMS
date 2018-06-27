@@ -274,7 +274,6 @@ public class ThunderBreaker extends Job {
                 handleLinkMastery(skill.getSkillId(), tsm, c);
             }
         }
-        chr.chatMessage(ChatMsgColour.GUILD_PURPLE, "Attack Speed: "+attackInfo.attackSpeed);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
