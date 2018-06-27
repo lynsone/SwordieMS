@@ -26,6 +26,7 @@ public class World {
     private Map<Integer, Party> parties = new HashMap<>();
     private Map<Integer, Guild> guilds = new HashMap<>();
     private int partyIDCounter = 1;
+    private boolean charCreateBlock;
 
     public World(int worldId, String name, int worldState, String worldEventDescription, int worldEventEXP_WSE,
                  int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet) {
@@ -181,5 +182,24 @@ public class World {
         for(Channel channel : getChannels()) {
             channel.broadcastPacket(outPacket);
         }
+    }
+
+    public boolean isCharCreateBlock() {
+        return charCreateBlock;
+    }
+
+    public void setCharCreateBlock(boolean charCreateBlock) {
+        this.charCreateBlock = charCreateBlock;
+    }
+
+    public boolean isFull() {
+        boolean full = true;
+        for (Channel channel : getChannels()) {
+            if (channel.getChars().size() < channel.MAX_SIZE) {
+                full = false;
+                break;
+            }
+        }
+        return full;
     }
 }

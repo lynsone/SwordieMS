@@ -866,11 +866,17 @@ public class Char {
 		}
 
 		if (mask.isInMask(DBChar.SkillCooltime)) {
-			short size = 0;
-			outPacket.encodeShort(size);
-			for (int i = 0; i < size; i++) {
-				outPacket.encodeInt(0); // nSkillId
-				outPacket.encodeInt(0); // nSkillCooltime
+			long curTime = System.currentTimeMillis();
+			Map<Integer, Long> cooltimes = new HashMap<>();
+			getSkillCoolTimes().forEach((key, value) -> {
+				if (value - curTime > 0) {
+					cooltimes.put(key, value);
+				}
+			});
+			outPacket.encodeShort(cooltimes.size());
+			for (Map.Entry<Integer, Long> cooltime : cooltimes.entrySet()) {
+				outPacket.encodeInt(cooltime.getKey()); // nSkillId
+				outPacket.encodeInt((int) ((cooltime.getValue() - curTime) / 1000)); // nSkillCooltime
 			}
 		}
 		if (mask.isInMask(DBChar.QuestRecord)) {
@@ -2050,6 +2056,7 @@ public class Char {
 		setField(toField);
 		toField.addChar(this);
 		fixBuggedItems();
+		getAvatarData().getCharacterStat().setPortal(portal.getId());
 		getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
 		if (characterData) {

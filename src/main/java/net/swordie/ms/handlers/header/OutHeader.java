@@ -25,15 +25,21 @@ public enum OutHeader {
     RESERVED_DELETE_CHARACTER_RESULT(13),
     RESERVED_DELETE_CHARACTER_CANCEL_RESULT(14),
     RENAME_CHARACTER_RESULT(15),
+    SET_CHARACTER_ID(16),
     MIGRATE_COMMAND(17),
-    PING(18),
-    HEARTBEAT_RESPONSE(23),
+    ALIVE_REQ(18),
+    PING_CHECK_RESULT(19),
+    AUTHEN_CODE_CHANGED(20),
+    AUTHEN_MESSAGE(21),
+    SECURITY_PACKET(22),
+    PRIVATE_SERVER_PACKET(23),
     CHANGE_SPW_RESULT(24),
     ALBA_RESULT(29),
     SET_AUTO_SELECTED_WORLD(32),
     WORLD_INFO_FOR_SHINING_RESULT(33),
     CLIENT_START(36),
     SERVER_STATUS(38),
+    INIT_OPCODE_ENCRYPTION(40),
     AUTH_SERVER(47),
 
     // CChatSocket::ProcessPacket
@@ -1101,8 +1107,8 @@ public enum OutHeader {
 
     public static boolean isSpamHeader(OutHeader outHeader) {
         List<OutHeader> spam = Arrays.asList(
-                PING,
-                HEARTBEAT_RESPONSE,
+                ALIVE_REQ,
+                PRIVATE_SERVER_PACKET,
                 MOB_CONTROL_ACK,
                 CHAT_MSG,
                 MOB_HP_INDICATOR,

@@ -9,6 +9,8 @@ import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.ServerStatus;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.connection.Packet;
+import net.swordie.ms.util.Position;
+import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.Server;
 import net.swordie.ms.world.World;
@@ -17,6 +19,7 @@ import net.swordie.ms.util.FileTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Tim on 2/28/2017.
@@ -38,8 +41,8 @@ public class Login {
         return oPacket;
     }
 
-    public static OutPacket sendPing() {
-        return new OutPacket(OutHeader.PING.getValue());
+    public static OutPacket sendAliveReq() {
+        return new OutPacket(OutHeader.ALIVE_REQ.getValue());
     }
 
     public static OutPacket sendAuthServer(boolean useAuthServer) {
@@ -94,7 +97,7 @@ public class Login {
         return outPacket;
     }
 
-    public static Packet sendWorldInformation() {
+    public static OutPacket sendWorldInformation(Set<Tuple<Position, String>> stringInfos) {
         // CLogin::OnWorldInformation
         OutPacket outPacket = new OutPacket(OutHeader.WORLD_INFORMATION.getValue());
 
@@ -105,7 +108,7 @@ public class Login {
         outPacket.encodeString(world.getWorldEventDescription());
         outPacket.encodeShort(world.getWorldEventEXP_WSE());
         outPacket.encodeShort(world.getWorldEventDrop_WSE());
-        outPacket.encodeByte(0); // no clue. Is not in kmst, but in 176 idb.
+        outPacket.encodeByte(world.isCharCreateBlock());
         outPacket.encodeByte(world.getChannels().size());
         for(Channel c : world.getChannels()) {
             outPacket.encodeString(c.getName());
@@ -114,16 +117,21 @@ public class Login {
             outPacket.encodeByte(c.getChannelId());
             outPacket.encodeByte(c.isAdultChannel());
         }
-        outPacket.encodeShort(0); //*(result._m_pStr + 311) = CInPacket::Decode2(iPacket_1);
-        // if > 0, write a position (short x/y) and a string. Something with a login balloon with a message, I think?
-        outPacket.encodeInt(0); // packet offset
-        outPacket.encodeByte(false);
-        // write int if true.
-        // Int is used for CUILoginStart::SetViewWorldButtonMakeShining(v54); v52 = decode4, then v54 = *(v39 + 293);
+        if (stringInfos == null) {
+            outPacket.encodeShort(0);
+        } else {
+            outPacket.encodeShort(stringInfos.size());
+            for (Tuple<Position, String> stringInfo : stringInfos) {
+                outPacket.encodePosition(stringInfo.getLeft());
+                outPacket.encodeString(stringInfo.getRight());
+            }
+        }
+        outPacket.encodeInt(0); // some offset
+        outPacket.encodeByte(false); // connect with star planet stuff, not interested
         return outPacket;
     }
 
-    public static Packet sendWorldInformationEnd() {
+    public static OutPacket sendWorldInformationEnd() {
         OutPacket outPacket = new OutPacket(OutHeader.WORLD_INFORMATION);
 
         outPacket.encodeInt(255);
@@ -131,7 +139,7 @@ public class Login {
         return outPacket;
     }
 
-    public static Packet sendAccountInfo(Account account) {
+    public static OutPacket sendAccountInfo(Account account) {
         OutPacket outPacket = new OutPacket(OutHeader.ACCOUNT_INFO_RESULT);
 
         outPacket.encodeByte(0); // succeed
@@ -159,7 +167,6 @@ public class Login {
     }
 
     public static OutPacket sendServerStatus(byte worldId) {
-        // TODO handle server load here
         OutPacket outPacket = new OutPacket(OutHeader.SERVER_STATUS.getValue());
         World world = null;
         for(World w : Server.getInstance().getWorlds()) {
@@ -167,7 +174,7 @@ public class Login {
                 world = w;
             }
         }
-        if(world != null) {
+        if(world != null && !world.isFull()) {
             outPacket.encodeByte(world.getStatus().getValue());
         } else {
             outPacket.encodeByte(ServerStatus.BUSY.getValue());
@@ -177,17 +184,19 @@ public class Login {
         return outPacket;
     }
 
-    public static OutPacket sendCharacterList(Account account, byte worldId, byte channel, byte code) {
+    public static OutPacket selectWorldResult(Account account, byte code, String specialServer,
+                                  boolean burningEventBlock) {
         OutPacket outPacket = new OutPacket(OutHeader.SELECT_WORLD_RESULT);
 
-        outPacket.encodeByte(code); //nDay
-        outPacket.encodeString("normal"); // not sure what this stands for
-        outPacket.encodeInt(1); // refCount
-        outPacket.encodeByte(0); // bBurningEventBlock
+        outPacket.encodeByte(code);
+        outPacket.encodeString(specialServer);
+        outPacket.encodeInt(account.getTrunk().getSlotCount());
+        outPacket.encodeByte(burningEventBlock); // bBurningEventBlock
         int reserved = 0;
-        outPacket.encodeInt(reserved); //character locations
-        FileTime.fromLong(0).encode(outPacket); //Timestamp
+        outPacket.encodeInt(reserved); // Reserved size
+        FileTime.fromLong(0).encode(outPacket); //Reserved timestamp
         for(int i = 0; i < reserved; i++) {
+            // not really interested in this
             FileTime ft = FileTime.fromLong(0);
             outPacket.encodeInt(ft.getLowDateTime());
             ft.encode(outPacket);
@@ -196,9 +205,10 @@ public class Login {
         outPacket.encodeByte(isEdited); //edited characters
         List<Char> chars = new ArrayList<>(account.getCharacters());
         chars.sort(Comparator.comparingInt(Char::getId));
-        int nSecond = chars.size();
-        outPacket.encodeInt(nSecond); // nSecond
+        int orderSize = chars.size();
+        outPacket.encodeInt(orderSize);
         for (Char chr : chars) {
+            // order of chars
             outPacket.encodeInt(chr.getId());
         }
 
@@ -244,7 +254,7 @@ public class Login {
     }
 
     public static OutPacket sendAuthResponse(int response) {
-        OutPacket outPacket = new OutPacket(OutHeader.HEARTBEAT_RESPONSE);
+        OutPacket outPacket = new OutPacket(OutHeader.PRIVATE_SERVER_PACKET);
 
         outPacket.encodeInt(response);
 

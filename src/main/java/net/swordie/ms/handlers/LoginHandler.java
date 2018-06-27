@@ -4,7 +4,6 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
-import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
@@ -39,7 +38,7 @@ public class LoginHandler {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     private static int id;
 
-    public static void handleConnect(Client client, InPacket inPacket) {
+    public static void handlePermissionRequest(Client client, InPacket inPacket) {
         byte locale = inPacket.decodeByte();
         short version = inPacket.decodeShort();
         String minorVersion = inPacket.decodeString(1);
@@ -61,7 +60,7 @@ public class LoginHandler {
 
     }
 
-    public static void handleLoginPassword(Client c, InPacket inPacket) {
+    public static void handleCheckLoginAuthInfo(Client c, InPacket inPacket) {
         Connection connection = Server.getInstance().getDatabaseConnection();
         byte sid = inPacket.decodeByte();
         String password = inPacket.decodeString();
@@ -98,22 +97,22 @@ public class LoginHandler {
         c.write(Login.checkPasswordResult(success, result, account));
     }
 
-    public static void handleWorldRequest(Client c, InPacket packet) {
-        c.write(Login.sendWorldInformation());
+    public static void handleWorldListRequest(Client c, InPacket packet) {
+        c.write(Login.sendWorldInformation(null));
         c.write(Login.sendWorldInformationEnd());
     }
 
     public static void handleServerStatusRequest(Client c, InPacket inPacket) {
-        c.write(Login.sendWorldInformation());
+        c.write(Login.sendWorldInformation(null));
         c.write(Login.sendWorldInformationEnd());
     }
 
-    public static void handleWorldChannelsRequest(Client c, InPacket inPacket) {
+    public static void handleWorldStatusRequest(Client c, InPacket inPacket) {
         byte worldId = inPacket.decodeByte();
         c.write(Login.sendServerStatus(worldId));
     }
 
-    public static void handleCharListRequest(Client c, InPacket inPacket) {
+    public static void handleSelectWorld(Client c, InPacket inPacket) {
         byte somethingThatIsTwo = inPacket.decodeByte();
         byte worldId = inPacket.decodeByte();
         byte channel = (byte) (inPacket.decodeByte() + 1);
@@ -122,10 +121,10 @@ public class LoginHandler {
         c.setWorldId(worldId);
         c.setChannel(channel);
 //        c.write(Login.sendAccountInfo(c.getAccount()));
-        c.write(Login.sendCharacterList(c.getAccount(), worldId, channel, code));
+        c.write(Login.selectWorldResult(c.getAccount(), code, "", false));
     }
 
-    public static void handleCheckCharName(Client c, InPacket inPacket) {
+    public static void handleCheckDuplicatedID(Client c, InPacket inPacket) {
         String name = inPacket.decodeString();
         CharNameResult code = CharNameResult.OK;
         if (name.toLowerCase().contains("virtual") || name.toLowerCase().contains("kernel")) {
@@ -145,7 +144,7 @@ public class LoginHandler {
         c.write(Login.checkDuplicatedIDResult(name, code.getVal()));
     }
 
-    public static void handleCreateChar(Client c, InPacket inPacket) {
+    public static void handleCreateCharacter(Client c, InPacket inPacket) {
         String name = inPacket.decodeString();
         int keySettingType = inPacket.decodeInt();
         int eventNewCharSaleJob = inPacket.decodeInt();
@@ -197,8 +196,8 @@ public class LoginHandler {
         c.write(Login.createNewCharacterResult(LoginType.SUCCESS, chr));
     }
 
-    public static void handleDeleteChar(Client c, InPacket inPacket) {
-        if (handleAuthSecondPassword(c, inPacket)) {
+    public static void handleDeleteCharacter(Client c, InPacket inPacket) {
+        if (handleCheckSpwRequest(c, inPacket)) {
             int charId = inPacket.decodeInt();
             Char chr = Char.getFromDBById(charId);
             Account a = Account.getFromDBById(c.getAccount().getId());
@@ -250,8 +249,8 @@ public class LoginHandler {
         return id;
     }
 
-    public static void handleHeartbeatRequest(Client c, InPacket inPacket) {
-        c.write(Login.sendAuthResponse(((int) OutHeader.HEARTBEAT_RESPONSE.getValue()) ^ inPacket.decodeInt()));
+    public static void handlePrivateServerPacket(Client c, InPacket inPacket) {
+        c.write(Login.sendAuthResponse(((int) OutHeader.PRIVATE_SERVER_PACKET.getValue()) ^ inPacket.decodeInt()));
     }
 
     public static void handleCharSelectNoPic(Client c, InPacket inPacket) {
@@ -281,7 +280,7 @@ public class LoginHandler {
         }
     }
 
-    public static boolean handleAuthSecondPassword(Client c, InPacket inPacket) {
+    public static boolean handleCheckSpwRequest(Client c, InPacket inPacket) {
         boolean success = false;
         String pic = inPacket.decodeString();
 //        int userId = inPacket.decodeInt();

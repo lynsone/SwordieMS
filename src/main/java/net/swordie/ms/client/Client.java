@@ -41,7 +41,7 @@ public class Client extends NettyClient {
 	}
 
 	public void sendPing() {
-		write(Login.sendPing());
+		write(Login.sendAliveReq());
 	}
 
 	public Account getAccount() {

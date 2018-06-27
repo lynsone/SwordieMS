@@ -26,10 +26,10 @@ public class Channel {
     private List<Field> fields;
     private Map<Integer, Tuple<Byte, Client>> transfers;
     private Map<Integer, Char> chars = new HashMap<>();
+    public final int MAX_SIZE = 1000;
 
-    private Channel(String name, int gaugePx, World world, int channelId, boolean adultChannel) {
+    private Channel(String name, World world, int channelId, boolean adultChannel) {
         this.name = name;
-        this.gaugePx = gaugePx;
         this.worldId = world.getWorldId();
         this.channelId = channelId;
         this.adultChannel = adultChannel;
@@ -39,12 +39,11 @@ public class Channel {
     }
 
     public Channel(World world, int channelId) {
-        this(world.getName() + "-" + channelId, 0, world, channelId, false);
+        this(world.getName() + "-" + channelId, world, channelId, false);
     }
 
     public Channel(String worldName, int worldId, int channelId) {
         this.name = worldName + "-" + channelId;
-        this.gaugePx = 0;
         this.worldId = worldId;
         this.channelId = channelId;
         this.adultChannel = false;
@@ -58,11 +57,7 @@ public class Channel {
     }
 
     public int getGaugePx() {
-        return gaugePx;
-    }
-
-    public void setGaugePx(int gaugePx) {
-        this.gaugePx = gaugePx;
+        return Math.max(1, (chars.size() * 64) / MAX_SIZE);
     }
 
     public int getWorldId() {

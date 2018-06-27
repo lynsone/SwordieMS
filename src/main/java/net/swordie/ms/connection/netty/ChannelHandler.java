@@ -71,8 +71,8 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case FRIEND_CHAT:
                     ChatHandler.handleFriendChat(c, inPacket);
                     break;
-                case CONNECT:
-                    LoginHandler.handleConnect(c, inPacket);
+                case PERMISSION_REQUEST:
+                    LoginHandler.handlePermissionRequest(c, inPacket);
                     break;
                 case USE_AUTH_SERVER:
                     LoginHandler.handleAuthServer(c, inPacket);
@@ -153,37 +153,37 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case PONG:
                     LoginHandler.handlePong(c, inPacket);
                     break;
-                case LOGIN_PASSWORD:
-                    LoginHandler.handleLoginPassword(c, inPacket);
+                case CHECK_LOGIN_AUTH_INFO:
+                    LoginHandler.handleCheckLoginAuthInfo(c, inPacket);
                     break;
                 case SERVERSTATUS_REQUEST:
                     LoginHandler.handleServerStatusRequest(c, inPacket);
                     break;
                 case WORLD_STATUS_REQUEST:
-                    LoginHandler.handleWorldChannelsRequest(c, inPacket);
+                    LoginHandler.handleWorldStatusRequest(c, inPacket);
                     break;
                 case WORLD_LIST_REQUEST:
-                case WORLD_LIST_RE_REQUEST:
+                case LOGOUT_WORLD:
                 case WORLD_LIST_REQ:
-                    LoginHandler.handleWorldRequest(c, inPacket);
+                    LoginHandler.handleWorldListRequest(c, inPacket);
                     break;
-                case CHARLIST_REQUEST:
-                    LoginHandler.handleCharListRequest(c, inPacket);
+                case SELECT_WORLD:
+                    LoginHandler.handleSelectWorld(c, inPacket);
                     break;
-                case AUTH_SECOND_PASSWORD:
-                    LoginHandler.handleAuthSecondPassword(c, inPacket);
+                case CHECK_SPW_REQUEST:
+                    LoginHandler.handleCheckSpwRequest(c, inPacket);
                     break;
                 case CHECK_DUPLICATE_ID:
-                    LoginHandler.handleCheckCharName(c, inPacket);
+                    LoginHandler.handleCheckDuplicatedID(c, inPacket);
                     break;
-                case CREATE_CHAR:
-                    LoginHandler.handleCreateChar(c, inPacket);
+                case CREATE_NEW_CHARACTER:
+                    LoginHandler.handleCreateCharacter(c, inPacket);
                     break;
-                case DELETE_CHAR:
-                    LoginHandler.handleDeleteChar(c, inPacket);
+                case DELETE_CHARACTER:
+                    LoginHandler.handleDeleteCharacter(c, inPacket);
                     break;
-                case HEARTBEAT_REQUEST:
-                    LoginHandler.handleHeartbeatRequest(c, inPacket);
+                case PRIVATE_SERVER_PACKET:
+                    LoginHandler.handlePrivateServerPacket(c, inPacket);
                     break;
                 case CLIENT_ERROR:
                     LoginHandler.handleClientError(c, inPacket);
@@ -196,10 +196,11 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case UPDATE_CLIENT_ENVIRONMENT:
                 case WVS_SET_UP_STEP:
-                case LOCALE:
+                case SECURITY_PACKET:
                 case USER_CALC_DAMAGE_STAT_SET_REQUEST:
+                case AUTH_HEARTBEAT:
                     break;
-                case CHAR_LOGIN:
+                case MIGRATE_IN:
                     WorldHandler.handleCharLogin(c, inPacket);
                     break;
                 case USER_HIT:
