@@ -258,5 +258,8 @@ public abstract class Job {
 		Item manaPot = ItemData.getItemDeepCopy(2000006);
 		manaPot.setQuantity(100);
 		chr.addItemToInventory(manaPot);
+		Item hyperTp = ItemData.getItemDeepCopy(5040004);
+		chr.addItemToInventory(hyperTp);
+
 	}
 }

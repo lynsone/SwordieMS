@@ -30,6 +30,7 @@ import org.apache.log4j.LogManager;
 
 import java.util.*;
 
+import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.MessageType.*;
 
 /**
@@ -145,7 +146,7 @@ public class WvsContext {
                                                int bagPos, Item item) {
         // logic like this in packets :(
         InvType invType = item.getInvType();
-        if (oldPos > 0 && newPos < 0 && invType == InvType.EQUIPPED) {
+        if ((oldPos > 0 && newPos < 0 && invType == EQUIPPED) || (invType == EQUIPPED && oldPos < 0)) {
             invType = InvType.EQUIP;
         }
 
@@ -172,6 +173,7 @@ public class WvsContext {
                 }
                 break;
             case REMOVE:
+                outPacket.encodeByte(0);
                 break;
             case ITEM_EXP:
                 outPacket.encodeLong(((Equip) item).getExp());

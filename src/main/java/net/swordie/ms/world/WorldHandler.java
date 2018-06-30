@@ -1719,8 +1719,7 @@ public class WorldHandler {
                     chr.getField().broadcastPacket(User.showItemMemorialEffect(chr.getId(), true, itemID));
                     c.write(WvsContext.blackCubeResult(equip, chr.getMemorialCubeInfo()));
                 }
-                c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
-                        0, equip));
+                equip.updateToChar(chr);
                 chr.consumeItem(item);
                 break;
             case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
@@ -1741,8 +1740,7 @@ public class WorldHandler {
                 equip.releaseOptions(true);
                 c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
                 c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
-                c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
-                        0, equip));
+                equip.updateToChar(chr);
                 chr.consumeItem(item);
                 break;
             case 5750001: // Nebulite Diffuser
@@ -1870,8 +1868,7 @@ public class WorldHandler {
                 break;
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), true, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
-                0, equip));
+        equip.updateToChar(chr);
         chr.consumeItem(scroll);
     }
 
@@ -1945,8 +1942,7 @@ public class WorldHandler {
             }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
-                0, equip));
+        equip.updateToChar(chr);
         chr.consumeItem(scroll);
     }
 
@@ -2009,8 +2005,7 @@ public class WorldHandler {
             }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
-                0, equip));
+        equip.updateToChar(chr);
         chr.consumeItem(scroll);
     }
 
@@ -2066,8 +2061,7 @@ public class WorldHandler {
             chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
-                0, equip));
+        equip.updateToChar(chr);
         chr.consumeItem(scroll);
     }
 
@@ -2096,8 +2090,7 @@ public class WorldHandler {
             chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemReleaseEffect(chr.getId(), ePos, bonus));
-        c.write(WvsContext.inventoryOperation(true, false, ADD, ePos, (short) 0,
-                0, equip));
+        equip.updateToChar(chr);
     }
 
     public static void handleUserActiveNickItem(Client c, InPacket inPacket) {
@@ -3372,8 +3365,7 @@ public class WorldHandler {
                 chr.deductMoney(cost);
                 equip.recalcEnchantmentStats();
                 oldEquip.recalcEnchantmentStats();
-                c.write(WvsContext.inventoryOperation(true, false, ADD,
-                        (short) equip.getBagIndex(), (short) 0, 0, equip));
+                equip.updateToChar(chr);
                 c.write(CField.showUpgradeResult(oldEquip, equip, success, boom, canDegrade));
                 chr.dispose();
                 break;
@@ -3392,8 +3384,7 @@ public class WorldHandler {
                 fromEq.removeSpecialAttribute(EquipSpecialAttribute.TRACE);
                 fromEq.setChuc((short) 0);
                 chr.consumeItem(toEq);
-                c.write(WvsContext.inventoryOperation(true, false, ADD,
-                        (short) fromEq.getBagIndex(), (short) 0, 0, fromEq));
+                fromEq.updateToChar(chr);
                 c.write(CField.showTranmissionResult(fromEq, toEq));
                 break;
             case ScrollUpgradeDisplay:
@@ -3867,8 +3858,7 @@ public class WorldHandler {
             equip.updateToChar(chr);
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flameID, equip.getItemId()));
-        c.write(WvsContext.inventoryOperation(true, false, ADD, eqpPosition, (short) 0,
-                0, equip));
+        equip.updateToChar(chr);
         chr.consumeItem(flame);
         chr.dispose();
     }
@@ -4007,8 +3997,7 @@ public class WorldHandler {
             Equip invEquip = (Equip) equipInv.getItemBySlot((short) equip.getBagIndex());
             equipInv.removeItem(invEquip);
             equipInv.addItem(equip);
-            chr.write(WvsContext.inventoryOperation(true, false, ADD,
-                    (short) equip.getBagIndex(), (short) 0, 0, equip));
+            equip.updateToChar(chr);
         }
         chr.setMemorialCubeInfo(null);
     }

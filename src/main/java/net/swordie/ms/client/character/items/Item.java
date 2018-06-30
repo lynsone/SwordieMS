@@ -11,7 +11,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
+import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
+import static net.swordie.ms.enums.InventoryOperation.REMOVE;
+import static net.swordie.ms.enums.InventoryOperation.UPDATE_ITEM_INFO;
 
 /**
  * GW_ItemSlotBase
@@ -234,8 +237,9 @@ public class Item implements Serializable {
      * @param chr The Char to give the update to
      */
     public void updateToChar(Char chr) {
+        short bagIndex = (short) (getInvType() == EQUIPPED ? - getBagIndex() : getBagIndex());
         chr.write(WvsContext.inventoryOperation(true, false, ADD,
-                (short) getBagIndex(), (short) 0, 0, this));
+                bagIndex, (short) 0, 0, this));
     }
 
 }
