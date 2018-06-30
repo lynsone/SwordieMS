@@ -58,10 +58,14 @@ def init():
     elif fieldID == 211042402 or fieldID == 211042400 or fieldID == 211042401:
         map = 211042300
         portal = 0
+    elif fieldID == 931000310:
+        map = 931000320
+        portal = 0
     else:
         sm.chat("(portal) This script (west00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
         map = sm.getChr().getField().getReturnMap()
         portal = 0
+        warp = False
 
     if warp:
         sm.warp(map, portal)

@@ -67,9 +67,12 @@ def init():
 	elif currentMap == 211042200:
 		map = 211042300
 		portal = 0
+	elif currentMap == 310040200: # Dry Road : Mine Entrance
+		map = 310050000
+		portal = 1
 	else:
 		sm.chat("(Portal - east00) This script has currently not been coded for this map.")
-		map = sm.getChr().getField().getReturnMap()
+		map = sm.getChr().getField()
 		portal = 0
 		warp = False
 

@@ -89,6 +89,15 @@ def init():
 	elif currentMap == 240010102:
 		map = 915020200
 		portal = 1
+	elif currentMap == 310050100: # Verne Mine : Power Plant Lobby
+		sm.chat("Destroy the Energy Conducting Device!")
+		map = 931000200
+		portal = 1
+	elif currentMap == 310060221: # Hidden Street : Leery Corridor
+		if sm.hasQuest(23043):
+			sm.completeQuest(23043)
+		map = 931000300
+		portal = 0
 	elif currentMap == 222020000: # Ludi tower: Helios Tower <Library> (CoK 3rd job portal)
 		if sm.hasQuest(20880): # 3rd job quest
 			map = 922030400

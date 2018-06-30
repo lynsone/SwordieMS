@@ -741,7 +741,7 @@ public class SkillConstants {
         hashMapIncrement.put(TEMPEST_BLADES_THREE, 15);
         hashMapIncrement.put(TEMPEST_BLADES_THREE_FF, 0);
 
-        return hashMapIncrement.get(skillID);
+        return hashMapIncrement.getOrDefault(skillID, 0);
     }
 
     public static boolean isEvanFusionSkill(int skillID) {

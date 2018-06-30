@@ -512,6 +512,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case PET_DROP_PICK_UP_REQUEST:
                     WorldHandler.handlePetDropPickUpRequest(chr, inPacket);
                     break;
+                case USER_CONTENTS_MAP_REQUEST:
+                    WorldHandler.handleUserContentsMapRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

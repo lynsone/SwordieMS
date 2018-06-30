@@ -2,6 +2,7 @@ package net.swordie.ms.client.jobs.nova;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
@@ -23,6 +24,7 @@ import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
@@ -457,7 +459,8 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
+            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c,
+                    (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -490,7 +493,7 @@ public class Kaiser extends Job {
             case WING_BEAT:
                 SkillInfo wbi = SkillData.getSkillInfoById(WING_BEAT);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(wbi.getValue(prop, slv))) {     //TODO creates NPE
+                    if (Util.succeedProp(wbi.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -724,5 +727,19 @@ public class Kaiser extends Job {
             skill = TEMPEST_BLADES_FIVE_FF;
         }
         return skill;
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setLevel(10);
+        cs.setJob(6100);
+        cs.setStr(49);
+        Item secondary = ItemData.getItemDeepCopy(1352500);
+        secondary.setBagIndex(10);
+        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
+        chr.setSpToCurrentJob(5);
+        chr.getEquippedInventory().addItem(secondary);
     }
 }

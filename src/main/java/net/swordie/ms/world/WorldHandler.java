@@ -726,6 +726,9 @@ public class WorldHandler {
                     return;
                 }
                 Portal toPortal = toField.getPortalByName(portal.getTargetPortalName());
+                if (toPortal == null) {
+                    toPortal = toField.getPortalByName("sp");
+                }
                 chr.warp(toField, toPortal);
             }
         } else {
@@ -893,7 +896,7 @@ public class WorldHandler {
         if (skillID == 25111005) {
             ai.spiritCoreEnhance = inPacket.decodeInt();
         }
-        if (skillID == 80001762) {
+        if (skillID == 80001762 || skillID == 61111100) {
             inPacket.decodeInt(); // Encoded as 0
         }
         for (int i = 0; i < ai.mobCount; i++) {
@@ -1989,7 +1992,7 @@ public class WorldHandler {
                     val = ItemGrade.HIDDEN_RARE.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
-                case 0:
+                case 2049700:
                     val = ItemGrade.HIDDEN_EPIC.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
@@ -4380,5 +4383,12 @@ public class WorldHandler {
                 field.removeDrop(dropID, chr.getId(), false, petID);
             }
         }
+    }
+
+    public static void handleUserContentsMapRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeShort();
+        int fieldID = inPacket.decodeInt();
+        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
+        chr.warp(field);
     }
 }

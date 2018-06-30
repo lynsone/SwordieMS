@@ -175,7 +175,6 @@ public class UserRemote {
         outPacket.encodeInt(chr.getId());
         outPacket.encodeByte(mask);
         if((mask & AvatarModifiedMask.AvatarLook.getVal()) != 0) {
-            chr.chatMessage(al.getHairEquips().toString());
             al.encode(outPacket);
         }
         if((mask & AvatarModifiedMask.SubAvatarLook.getVal()) != 0) {

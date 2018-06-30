@@ -237,7 +237,8 @@ public class SkillData {
         Skill skill = new Skill();
         skill.setSkillId(si.getSkillId());
         skill.setRootId(si.getRootId());
-        skill.setMasterLevel(si.getMasterLevel());
+        skill.setMasterLevel(si.getMaxLevel());
+//        skill.setMasterLevel(si.getMasterLevel()); // for now, maybe always?
         skill.setMaxLevel(si.getMaxLevel());
         if(si.getMasterLevel() <= 0) {
             skill.setMasterLevel(skill.getMaxLevel());
