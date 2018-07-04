@@ -115,8 +115,8 @@ public abstract class Job {
 	 * 		The packet to be processed
 	 */
 	public void handleHit(Client c, InPacket inPacket) {
-		inPacket.decodeInt(); // tick
 		int idk1 = inPacket.decodeInt();
+		inPacket.decodeInt(); // tick
 		byte idk2 = inPacket.decodeByte(); // -1?
 		byte idk3 = inPacket.decodeByte();
 		int damage = inPacket.decodeInt();
@@ -126,7 +126,10 @@ public abstract class Job {
 		if (inPacket.getUnreadAmount() >= 8) {
 			templateID = inPacket.decodeInt();
 			mobID = inPacket.decodeInt();
+			boolean left = inPacket.decodeByte() != 0;
+			int skillID = inPacket.decodeInt();
 		}
+
 		HitInfo hitInfo = new HitInfo();
 		hitInfo.HPDamage = damage;
 		hitInfo.templateID = templateID;

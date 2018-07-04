@@ -1517,7 +1517,7 @@ public class Char {
 	}
 
 	/**
-	 * Adds a {@link Skill} to this Char. Overrides the old Skill if the Char already had a Skill
+	 * Adds a {@link Skill} to this Char. Changes the old Skill if the Char already has a Skill
 	 * with the same id.
 	 *
 	 * @param skill

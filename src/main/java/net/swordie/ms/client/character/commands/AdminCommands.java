@@ -1449,4 +1449,12 @@ public class AdminCommands {
             chr.chatMessage("Damage cap removed: " + (o.nValue != 0));
         }
     }
+
+    public static class Shop extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            chr.getScriptManager().openShop(1011100);
+        }
+    }
+
 }

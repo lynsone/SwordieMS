@@ -2787,6 +2787,10 @@ public class WorldHandler {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
                     return;
                 }
+                if (!chr.canHold(itemID)) {
+                    chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.FullInvMsg)));
+                    return;
+                }
                 Item item = ItemData.getItemDeepCopy(itemID);
                 item.setQuantity(quantity);
                 chr.deductMoney(cost);
