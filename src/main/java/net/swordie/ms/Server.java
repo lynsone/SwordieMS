@@ -11,6 +11,7 @@ import net.swordie.ms.connection.netty.ChatAcceptor;
 import net.swordie.ms.connection.netty.LoginAcceptor;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
+import net.swordie.ms.world.shop.cashshop.CashShop;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -38,6 +39,7 @@ public class Server extends Properties {
 
 	private List<World> worldList = new ArrayList<>();
 	private List<Account> accounts = new ArrayList<>();
+	private CashShop cashShop;
 
 	public static Server getInstance() {
 		return server;
@@ -87,6 +89,7 @@ public class Server extends Properties {
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();
 		worldList.add(new World(1, "Je Moeder", 3));
+		initCashShop();
 
 		for (World world : getWorlds()) {
 			for (Channel channel : world.getChannels()) {
@@ -177,5 +180,13 @@ public class Server extends Properties {
 		QuestData.clear();
 		SkillData.clear();
 		ReactorData.clear();
+	}
+
+	private void initCashShop() {
+		cashShop = new CashShop();
+	}
+
+	public CashShop getCashShop() {
+		return this.cashShop;
 	}
 }

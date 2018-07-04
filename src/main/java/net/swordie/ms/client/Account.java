@@ -9,6 +9,7 @@ import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -58,6 +59,9 @@ public class Account {
     private String lastLoggedIn;
     @Transient
     private Char currentChr;
+    private int NXCredit;
+    private int maplePoints;
+    private int NXPrepaid;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
@@ -378,6 +382,30 @@ public class Account {
 
     public void setTrunk(Trunk trunk) {
         this.trunk = trunk;
+    }
+
+    public int getNXCredit() {
+        return NXCredit;
+    }
+
+    public void setNXCredit(int nxCredit) {
+        this.NXCredit = nxCredit;
+    }
+
+    public int getMaplePoints() {
+        return maplePoints;
+    }
+
+    public void setMaplePoints(int maplePoints) {
+        this.maplePoints = maplePoints;
+    }
+
+    public int getNXPrepaid() {
+        return NXPrepaid;
+    }
+
+    public void setNXPrepaid(int nxPrepaid) {
+        this.NXPrepaid = nxPrepaid;
     }
 
     public void addLinkSkill(LinkSkill linkSkill) {

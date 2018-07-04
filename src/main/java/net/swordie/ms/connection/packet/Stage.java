@@ -8,6 +8,7 @@ import net.swordie.ms.world.field.FieldCustom;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.DBChar;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.world.shop.cashshop.CashShop;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -171,5 +172,14 @@ public class Stage {
                 }
             }
         }
+    }
+
+    public static OutPacket setCashShop(Char chr, CashShop cashShop) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_CASH_SHOP);
+
+        chr.encode(outPacket, DBChar.All);
+        cashShop.encode(outPacket);
+
+        return outPacket;
     }
 }

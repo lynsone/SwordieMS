@@ -8,10 +8,13 @@ import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DBChar;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +31,9 @@ public class Trunk {
     private List<Item> items = new ArrayList<>();
     private long money;
     private byte slotCount;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "trunkid")
+    private Set<CashItemInfo> locker = new HashSet<>();
 
     public Trunk(){}
 
@@ -114,5 +120,13 @@ public class Trunk {
 
     public void removeItem(Item getItem) {
         getItems().remove(getItem);
+    }
+
+    public Set<CashItemInfo> getLocker() {
+        return locker;
+    }
+
+    public void setLocker(Set<CashItemInfo> locker) {
+        this.locker = locker;
     }
 }

@@ -13,11 +13,13 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.ServerConstants;
+import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.enums.CharNameResult;
 import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
 import net.swordie.ms.world.Channel;
@@ -242,6 +244,10 @@ public class LoginHandler {
                     }
                 }
             }
+        } else if (opcode == OutHeader.CASH_SHOP_CASH_ITEM_RESULT) {
+            byte cashType = inPacket.decodeByte();
+            CashItemType cit = CashItemType.getResultTypeByVal(cashType);
+            log.error(String.format("[Error %s] CashItemType %s", errortype, cit == null ? "Unknown" : cit.toString()));
         }
     }
 

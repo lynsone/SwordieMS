@@ -15,6 +15,7 @@ public class SWParser {
     private static final String END_VAR = ";";
 
     public SWEntity parse(File file) {
+        // Reinventing the wheel, but it works. Antlr is overrated Kappa
         if(!file.exists()) {
             return null;
         }

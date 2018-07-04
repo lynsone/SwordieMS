@@ -1055,7 +1055,8 @@ public enum InHeader {
                 CHECK_SPW_REQUEST,
                 NPC_MOVE,
                 FAMILIAR_MOVE,
-                PET_MOVE
+                PET_MOVE,
+                AUTH_HEARTBEAT
         );
         return spam.contains(inHeaderByOp);
     }

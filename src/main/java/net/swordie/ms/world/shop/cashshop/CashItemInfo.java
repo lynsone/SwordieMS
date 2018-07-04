@@ -3,10 +3,17 @@ package net.swordie.ms.world.shop.cashshop;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.util.FileTime;
 
+import javax.persistence.*;
+
 /**
  * Created on 4/23/2018.
  */
+@Entity
+@Table(name = "cashiteminfos")
 public class CashItemInfo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private long unsure;
     private int accountID;
     private int characterID;
@@ -24,6 +31,11 @@ public class CashItemInfo {
     private boolean storeBank;
     private long cashItemSN;
     private int grade;
+    private int position;
+    @ElementCollection
+    @CollectionTable(name = "options", joinColumns = @JoinColumn(name = "cashitemid"))
+    @OrderColumn(name = "orderCol")
+    @Column(name = "optionid")
     private int[] options = new int[3];
 
     public void encode(OutPacket outPacket) {
@@ -43,6 +55,7 @@ public class CashItemInfo {
         outPacket.encodeByte(isRefundable());
         outPacket.encodeByte(getSourceFlag());
         outPacket.encodeByte(isStoreBank());
+        // GW_CashItemOption::Decode
         outPacket.encodeLong(getCashItemSN());
         outPacket.encodeFT(getDateExpire());
         outPacket.encodeInt(getGrade());
@@ -193,5 +206,21 @@ public class CashItemInfo {
 
     public void setOptions(int[] options) {
         this.options = options;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 }

@@ -710,6 +710,13 @@ public class WorldHandler {
 
     public static void handleChangeFieldRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if(inPacket.getUnreadAmount() == 0) {
+            // Coming back from the cash shop
+//            chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getFieldID()));
+            c.getChannelInstance().addClientInTransfer(c.getChannel(), chr.getId(), c);
+            c.write(ClientSocket.migrateCommand(true, (short) c.getChannelInstance().getPort()));
+            return;
+        }
         byte fieldKey = inPacket.decodeByte();
         int targetField = inPacket.decodeInt();
         int x = inPacket.decodeShort();
@@ -3668,6 +3675,11 @@ public class WorldHandler {
         }
         chr.dispose();
     }
+
+    public static void handleUserMigrateToCashShopRequest(Client c, InPacket inPacket) {
+        c.write(Stage.setCashShop(c.getChr(), Server.getInstance().getCashShop()));
+    }
+
 
     public static void handleMonsterBookMobInfo(Char chr, InPacket inPacket) {
         inPacket.decodeInt(); // tick

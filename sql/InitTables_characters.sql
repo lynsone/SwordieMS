@@ -48,8 +48,9 @@ drop table if exists guildskill;
 drop table if exists guilds;
 drop table if exists monsterbookcards;
 drop table if exists monsterbookinfos;
-drop table if exists filetimes;
 drop table if exists trunks;
+drop table if exists cashiteminfos;
+drop table if exists filetimes;
 
 create table trunks(
 	id int not null auto_increment,
@@ -63,6 +64,31 @@ create table filetimes (
     lowdatetime int,
     highdatetime int,
     primary key (id)
+);
+
+create table cashiteminfos(
+	id bigint not null auto_increment,
+    unsure long,
+    accountid int,
+    characterid int,
+    itemid int,
+    commodityid int,
+    quantity smallint,
+    buycharacterid varchar(255),
+    dateexpire bigint,
+    paybackrate int,
+    discount double,
+    orderno int,
+    productno int,
+    refundable boolean,
+    sourceflag tinyint,
+    storebank boolean,
+    cashitemsn bigint,
+    grade int,
+    trunkid int,
+    position int,
+    primary key (id),
+    foreign key (dateexpire) references filetimes(id)
 );
 
 create table quests (
@@ -222,10 +248,11 @@ create table equips (
 
 create table options (
 	id int not null auto_increment,
-    equipid bigint,
+    ordercol int,
+    equipid bigint, # either equip or cash item, so no FK
+    cashitemid bigint,
     optionid int,
-    primary key (id),
-    foreign key (equipid) references equips(itemid) on delete cascade
+    primary key (id)
 );
 
 create table sockets (
@@ -481,6 +508,7 @@ create table characters (
     fieldid int,
     questmanager bigint,
     guild int,
+    rewardPoints int,
     monsterbook int,
 	primary key (id),
     foreign key (avatardata) references avatardata(id),
@@ -659,6 +687,9 @@ create table accounts (
 	creationdate long,
     lastloggedin varchar(255),
     trunkid int,
+    nxCredit int default 0,
+    maplePoints int default 0,
+    nxPrepaid int default 0,
 	primary key (id),
     foreign key (trunkid) references trunks(id)
 );

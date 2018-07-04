@@ -90,7 +90,7 @@ public class Char {
 
 	@Transient
 	private Client client;
-
+	private int rewardPoints;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -3489,5 +3489,13 @@ public class Char {
 			}
 		}
 		return sp;
+	}
+
+	public int getRewardPoints() {
+		return rewardPoints;
+	}
+
+	public void setRewardPoints(int rewardPoints) {
+		this.rewardPoints = rewardPoints;
 	}
 }

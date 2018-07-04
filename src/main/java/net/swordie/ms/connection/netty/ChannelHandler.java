@@ -11,6 +11,7 @@ import net.swordie.ms.world.WorldHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import net.swordie.ms.world.shop.cashshop.CashShopHandler;
 import org.apache.log4j.LogManager;
 
 import java.io.IOException;
@@ -198,6 +199,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case WVS_SET_UP_STEP:
                 case SECURITY_PACKET:
                 case USER_CALC_DAMAGE_STAT_SET_REQUEST:
+                    break;
+                case USER_MIGRATE_TO_CASH_SHOP_REQUEST:
+                    WorldHandler.handleUserMigrateToCashShopRequest(c, inPacket);
                 case AUTH_HEARTBEAT:
                     break;
                 case MIGRATE_IN:
@@ -436,6 +440,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_SKILL_LEARN_ITEM_USE_REQUEST:
                     WorldHandler.handleUserLearnItemUseRequest(c, inPacket);
+                    break;
+                case CASH_SHOP_QUERY_CASH_REQUEST:
+                    CashShopHandler.handleCashShopQueryCashRequest(c, inPacket);
+                    break;
+                case CASH_SHOP_CASH_ITEM_REQUEST:
+                    CashShopHandler.handleCashShopCashItemRequest(c, inPacket);
                     break;
                 case USER_REQUEST_FLYING_SWORD_START:
                     WorldHandler.handleUserRequestFlyingSwordStart(c, inPacket);
