@@ -1,14 +1,18 @@
 package net.swordie.ms.util;
 
 import io.netty.buffer.ByteBuf;
+import org.hibernate.mapping.Collection;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 
 /**
  * Created on 2/28/2017.
@@ -291,5 +295,17 @@ public class Util {
             chars[i] = valueChars[j++];
         }
         return new String(chars);
+    }
+
+    /**
+     * Gets a single element from a collection by using a predicate. Returns a random element if there are multiple
+     * elements for which the predicate holds.
+     * @param collection The collection the element should be gathered from
+     * @param pred The predicate that should hold for the element
+     * @param <T> The type of the collection's elements
+     * @return An element for which the predicate holds, or null if there is none
+     */
+    public static <T> T getFromCollectionWithPred(java.util.Collection<T> collection, Predicate<T> pred) {
+        return collection.stream().filter(pred).findAny().orElse(null);
     }
 }

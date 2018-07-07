@@ -12,11 +12,16 @@ import net.swordie.ms.connection.netty.LoginAcceptor;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.shop.cashshop.CashShop;
+import net.swordie.ms.world.shop.cashshop.CashShopCategory;
+import net.swordie.ms.world.shop.cashshop.CashShopItem;
+import org.apache.log4j.Category;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import net.swordie.ms.util.Loader;
 import net.swordie.ms.util.container.Tuple;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,9 +29,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created on 2/18/2017.
@@ -89,7 +92,10 @@ public class Server extends Properties {
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();
 		worldList.add(new World(1, "Je Moeder", 3));
+		startNow = System.currentTimeMillis();
 		initCashShop();
+		log.info("Finished loading Cash Shop in " + (System.currentTimeMillis() - startNow) + "ms");
+
 
 		for (World world : getWorlds()) {
 			for (Channel channel : world.getChannels()) {
@@ -182,8 +188,23 @@ public class Server extends Properties {
 		ReactorData.clear();
 	}
 
-	private void initCashShop() {
+	public void initCashShop() {
 		cashShop = new CashShop();
+		try(Session session = DatabaseManager.getSession()) {
+			Transaction transaction = session.beginTransaction();
+
+			Query query = session.createQuery("FROM CashShopCategory");
+			List<CashShopCategory> categories = query.list();
+			categories.sort(Comparator.comparingInt(CashShopCategory::getIdx));
+			cashShop.setCategories(new ArrayList<>(categories));
+
+			query = session.createQuery("FROM CashShopItem");
+			List<CashShopItem> items = query.list();
+			items.forEach(item -> cashShop.addItem(item));
+
+			transaction.commit();
+		}
+
 	}
 
 	public CashShop getCashShop() {

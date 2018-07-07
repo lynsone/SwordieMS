@@ -29,6 +29,8 @@ import net.swordie.ms.client.guild.GuildSkill;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.world.shop.cashshop.CashItemInfo;
+import net.swordie.ms.world.shop.cashshop.CashShopCategory;
+import net.swordie.ms.world.shop.cashshop.CashShopItem;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -91,7 +93,9 @@ public class DatabaseManager {
                 Familiar.class,
                 StolenSkill.class,
                 ChosenSkill.class,
-                CashItemInfo.class
+                CashItemInfo.class,
+                CashShopItem.class,
+                CashShopCategory.class
 
         };
         for(Class clazz : dbClasses) {

@@ -447,6 +447,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case CASH_SHOP_CASH_ITEM_REQUEST:
                     CashShopHandler.handleCashShopCashItemRequest(c, inPacket);
                     break;
+                case CASH_SHOP_ACTION:
+                    CashShopHandler.handleCashShopAction(chr, inPacket);
+                    break;
                 case USER_REQUEST_FLYING_SWORD_START:
                     WorldHandler.handleUserRequestFlyingSwordStart(c, inPacket);
                     break;

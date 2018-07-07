@@ -1,11 +1,13 @@
 package net.swordie.ms.world.shop.cashshop;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.connection.packet.CCashShop;
+import net.swordie.ms.enums.CashShopActionType;
 import org.apache.log4j.Logger;
 
 /**
@@ -20,7 +22,6 @@ public class CashShopHandler {
 
     public static void handleCashShopCashItemRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        Account account = chr.getAccount();
         byte type = inPacket.decodeByte();
         CashItemType cit = CashItemType.getRequestTypeByVal(type);
         if (cit == null) {
@@ -31,6 +32,30 @@ public class CashShopHandler {
         switch (cit) {
             default:
                 log.error("Unhandled cash shop cash item request " + cit);
+                chr.dispose();
+                break;
+        }
+    }
+
+    public static void handleCashShopAction(Char chr, InPacket inPacket) {
+        CashShop cashShop = Server.getInstance().getCashShop();
+        byte type = inPacket.decodeByte();
+        CashShopActionType csat = CashShopActionType.getByVal(type);
+        if (csat == null) {
+            log.error("Unhandled cash shop cash action request " + type);
+            chr.dispose();
+            return;
+        }
+        switch (csat) {
+            case Req_OpenCategory:
+                int categoryIdx = inPacket.decodeInt();
+                chr.write(CCashShop.openCategoryResult(cashShop, categoryIdx));
+                break;
+            case Req_Favorite:
+                break;
+
+            default:
+                log.error("Unhandled cash shop cash action request " + csat);
                 chr.dispose();
                 break;
         }

@@ -89,6 +89,7 @@ import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
+import net.swordie.ms.world.shop.cashshop.CashShop;
 import net.swordie.ms.world.shop.result.MsgShopResult;
 import net.swordie.ms.world.shop.result.ShopResultType;
 import org.apache.log4j.LogManager;
@@ -3677,7 +3678,17 @@ public class WorldHandler {
     }
 
     public static void handleUserMigrateToCashShopRequest(Client c, InPacket inPacket) {
-        c.write(Stage.setCashShop(c.getChr(), Server.getInstance().getCashShop()));
+        CashShop cs = Server.getInstance().getCashShop();
+        c.write(Stage.setCashShop(c.getChr(), cs));
+        c.write(CCashShop.bannerInfo(cs));
+        c.write(CCashShop.cartInfo(cs));
+        c.write(CCashShop.featuredItemInfo(cs));
+        c.write(CCashShop.specialItemInfo(cs));
+        c.write(CCashShop.specialSaleInfo(cs));
+        c.write(CCashShop.topSellerInfo(cs));
+        c.write(CCashShop.categoryInfo(cs));
+        c.write(CCashShop.bannerMsg(cs, new ArrayList<>(Arrays.asList("Welcome to SwordieMS!", "Enjoy your time here."))));
+        c.write(CCashShop.oneTen(cs));
     }
 
 

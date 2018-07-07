@@ -91,6 +91,9 @@ public class GameConstants {
     // Hyper stat
     public static final long HYPER_STAT_RESET_COST = 10000000;
 
+    // Cash Shop
+    public static final int MAX_CS_ITEMS_PER_PAGE = 12;
+
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];

@@ -1065,7 +1065,8 @@ public enum OutHeader {
     CASH_SHOP_IDK9(1360),
     CASH_SHOP_IDK10(1363),
     CASH_SHOP_IDK11(1364),
-    CASH_SHOP_INFO(1365), // Can't find this one in ida
+    CASH_SHOP_INFO(1365), // In CClientSocket::ProcessPacket
+    CASH_SHOP_ACTION(1366), // In CClientSocket::ProcessPacket
     CASH_SHOP_IDK12(1368),
     CASH_SHOP_IDK13(1370),
     CASH_SHOP_IDK14(1371),

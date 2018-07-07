@@ -1,15 +1,17 @@
 package net.swordie.ms.world.shop.cashshop;
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.util.Util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created on 4/21/2018.
  */
 public class CashShop {
-    private List<CashShopItem> items;
+    private Map<CashShopCategory, List<CashShopItem>> items;
+    private List<CashShopCategory> categories;
     private List<Integer> saleItems;
     private boolean eventOn;
     private boolean lockerTransfer;
@@ -18,9 +20,10 @@ public class CashShop {
     private boolean usingNewOTP;
     private boolean betaTest;
     private CashItemInfo cii = new CashItemInfo();
+    private final String BANNER_URL = "https://i.ytimg.com/vi/aXwf3CvmEC8/hqdefault.jpg";
 
     public CashShop() {
-        items = new ArrayList<>();
+        items = new HashMap<>();
         saleItems = new ArrayList<>();
         cii.setItemID(5160013);
         cii.setAccountID(0);
@@ -29,7 +32,7 @@ public class CashShop {
         cii.setUnsure(1);
     }
 
-    public List<CashShopItem> getItems() {
+    public Map<CashShopCategory, List<CashShopItem>> getItems() {
         return items;
     }
 
@@ -232,5 +235,40 @@ public class CashShop {
 
     public void setBetaTest(boolean betaTest) {
         this.betaTest = betaTest;
+    }
+
+    public String getBannerUrl() {
+        return BANNER_URL;
+    }
+
+    public List<CashShopCategory> getCategories() {
+        return categories;
+    }
+
+    public CashShopCategory getCategoryByIdx(int idx) {
+        return Util.getFromCollectionWithPred(getCategories(), csi -> csi.getIdx() == idx);
+    }
+
+    public void setCategories(List<CashShopCategory> categories) {
+        this.categories = categories;
+    }
+
+    public void addItem(CashShopItem csi) {
+        CashShopCategory csc = Util.getFromCollectionWithPred(getCategories(), cat -> cat.getName().equalsIgnoreCase(csi.getCategory()));
+        csi.setCashShopCategory(csc);
+
+        if (!getItems().containsKey(csc)) {
+            getItems().put(csc, new ArrayList<>());
+        }
+        int newSize = getItems().size() + 1;
+        int page = newSize / GameConstants.MAX_CS_ITEMS_PER_PAGE;
+        csi.setSubCategory(4010000 + 10000 * page);
+        csi.setParent(1000000 + 70000 + page * 100 + newSize % GameConstants.MAX_CS_ITEMS_PER_PAGE);
+        getItems().get(csc).add(csi);
+    }
+
+    public List<CashShopItem> getItemsByCategoryIdx(int categoryIdx) {
+        CashShopCategory csc = getCategoryByIdx(categoryIdx);
+        return getItems().getOrDefault(csc, null);
     }
 }

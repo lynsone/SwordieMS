@@ -10,6 +10,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 public class OutPacket extends Packet {
@@ -283,5 +284,9 @@ public class OutPacket extends Packet {
 
     public void release() {
 
+    }
+
+    public void encodeFT(LocalDateTime localDateTime) {
+        encodeFT(FileTime.fromDate(localDateTime));
     }
 }
