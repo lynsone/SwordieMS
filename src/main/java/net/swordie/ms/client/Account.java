@@ -431,4 +431,28 @@ public class Account {
     public void setLinkSkills(Set<LinkSkill> linkSkills) {
         this.linkSkills = linkSkills;
     }
+
+    public void addNXCredit(int credit) {
+        setNXCredit(getNXCredit() + credit);
+    }
+
+    public void deductNXCredit(int credit) {
+        addNXCredit(-credit);
+    }
+
+    public void addMaplePoints(int points) {
+        setMaplePoints(getMaplePoints() + points);
+    }
+
+    public void deductMaplePoints(int points) {
+        addMaplePoints(-points);
+    }
+
+    public void addNXPrepaid(int prepaid) {
+        addNXPrepaid(getNXPrepaid() + prepaid);
+    }
+
+    public void deductNXPrepaid(int prepaid) {
+        addNXPrepaid(-prepaid);
+    }
 }

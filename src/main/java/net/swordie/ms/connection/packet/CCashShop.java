@@ -3,7 +3,9 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.enums.CashShopActionType;
 import net.swordie.ms.enums.CashShopInfoType;
@@ -54,6 +56,16 @@ public class CCashShop {
         if (hasSomeInt) {
             outPacket.encodeInt(someInt);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket error() {
+        OutPacket outPacket = new OutPacket(OutHeader.CASH_SHOP_CASH_ITEM_RESULT);
+
+        outPacket.encodeByte(CashItemType.Res_Buy_Failed.getVal());
+        outPacket.encodeByte(137);
+        outPacket.encodeShort(0);
 
         return outPacket;
     }
@@ -202,6 +214,53 @@ public class CCashShop {
             outPacket.encodeByte(items.size());
             items.forEach(item -> item.encode(outPacket));
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket resMoveLtoSDone(Item item) {
+        OutPacket outPacket = new OutPacket(OutHeader.CASH_SHOP_CASH_ITEM_RESULT);
+
+        outPacket.encodeByte(CashItemType.Res_MoveLtoS_Done.getVal());
+        outPacket.encodeByte(true); // bExclRequestSent
+        outPacket.encodeShort(item.getBagIndex());
+        item.encode(outPacket);
+        outPacket.encodeInt(0); // List of SNs (longs)
+        outPacket.encodeByte(0); // Bonus cash item (CashItemInfo::Decode)
+
+        return outPacket;
+    }
+
+    public static OutPacket loadLockerDone(Account account) {
+        OutPacket outPacket = new OutPacket(OutHeader.CASH_SHOP_CASH_ITEM_RESULT);
+
+        outPacket.encodeByte(CashItemType.Res_LoadLocker_Done.getVal());
+        Trunk trunk = account.getTrunk();
+        List<CashItemInfo> locker = trunk.getLocker();
+        int lockerSize = locker.size();
+        boolean isOverMaxSlots = lockerSize > GameConstants.MAX_LOCKER_SIZE;
+        outPacket.encodeByte(isOverMaxSlots);
+        if (isOverMaxSlots) {
+            outPacket.encodeInt(lockerSize - GameConstants.MAX_LOCKER_SIZE);
+        }
+        outPacket.encodeShort(lockerSize);
+        locker.forEach(item -> {
+            item.encode(outPacket);
+            outPacket.encodeInt(0); // bonus items' sn size
+        });
+        outPacket.encodeShort(GameConstants.MAX_LOCKER_SIZE);
+        outPacket.encodeShort(account.getCharacterSlots());
+        outPacket.encodeShort(0);
+        outPacket.encodeShort(account.getCharacters().size());
+
+        return outPacket;
+    }
+
+    public static OutPacket fullInventoryMsg() {
+        OutPacket outPacket = new OutPacket(OutHeader.CASH_SHOP_CASH_ITEM_RESULT);
+
+        outPacket.encodeByte(CashItemType.Res_MoveLtoS_Failed.getVal());
+        outPacket.encodeByte(10);
 
         return outPacket;
     }

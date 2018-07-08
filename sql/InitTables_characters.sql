@@ -731,6 +731,6 @@ create table friends (
 );
 
 
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('admin', 'admin', '7', '0', '0', '111111', '40');
+insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '0', '111111', '40', '500000');
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '0', '111111', '40');
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '0', '111111', '40');

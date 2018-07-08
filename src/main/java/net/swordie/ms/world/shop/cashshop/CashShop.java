@@ -23,7 +23,7 @@ public class CashShop {
     private final String BANNER_URL = "https://i.ytimg.com/vi/aXwf3CvmEC8/hqdefault.jpg";
 
     public CashShop() {
-        items = new HashMap<>();
+        items = new TreeMap<>(Comparator.comparingInt(CashShopCategory::getIdx));
         saleItems = new ArrayList<>();
         cii.setItemID(5160013);
         cii.setAccountID(0);
@@ -270,5 +270,17 @@ public class CashShop {
     public List<CashShopItem> getItemsByCategoryIdx(int categoryIdx) {
         CashShopCategory csc = getCategoryByIdx(categoryIdx);
         return getItems().getOrDefault(csc, null);
+    }
+
+    public CashShopItem getItemByPosition(int itemPos) {
+        for (Map.Entry<CashShopCategory, List<CashShopItem>> entry : getItems().entrySet()) {
+            List<CashShopItem> items = entry.getValue();
+            if (items.size() <= itemPos) {
+                itemPos -= items.size();
+            } else {
+                return items.get(itemPos);
+            }
+        }
+        return null;
     }
 }

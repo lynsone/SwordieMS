@@ -1,12 +1,15 @@
 package net.swordie.ms.world.shop.cashshop;
 
 import net.swordie.ms.Server;
+import net.swordie.ms.client.Account;
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Random;
 
 /**
  * Created on 4/21/2018.
@@ -37,18 +40,17 @@ public class CashShopItem {
     private int idk3;
     private int bundleQuantity;
     private int availableDays;
-    private short buyable;
-    private short giftable;
-    private short cartable;
+    private short buyableWithMaplePoints;
+    private short buyableWithCredit;
+    private short buyableWithPrepaid;
     private short likable;
     private short meso;
     private short favoritable;
     private int gender;
     private int likes;
-    private int idk9;
+    private int requiredLevel;
     private String idk10;
     private int idk11;
-    private int idk12;
     private int idk13;
     private int idk14;
     private String category;
@@ -65,9 +67,9 @@ public class CashShopItem {
         idkTime3 = FileTime.currentTime();
         idkTime4 = FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME);
         stock = 100;
-        buyable = 1;
-        giftable = 1;
-        cartable = 1;
+        buyableWithMaplePoints = 1;
+        buyableWithCredit = 1;
+        buyableWithPrepaid = 1;
         likable = 1;
         favoritable = 1;
         gender = 2;
@@ -93,27 +95,27 @@ public class CashShopItem {
         outPacket.encodeFT(getIdkTime4());
 
         outPacket.encodeInt(getNewPrice());
-        outPacket.encodeInt(getIdk3());
+        outPacket.encodeInt(1); //getIdk3());
         outPacket.encodeInt(getBundleQuantity());
         outPacket.encodeInt(getAvailableDays());
 
-        outPacket.encodeShort(getBuyable());
-        outPacket.encodeShort(getGiftable());
-        outPacket.encodeShort(getCartable());
+        outPacket.encodeShort(getBuyableWithMaplePoints()); // with maple point
+        outPacket.encodeShort(getBuyableWithCredit()); // with credit
+        outPacket.encodeShort(getBuyableWithPrepaid()); // with prepaid
         outPacket.encodeShort(getLikable());
         outPacket.encodeShort(getMeso());
         outPacket.encodeShort(getFavoritable());
 
         outPacket.encodeInt(getGender());
         outPacket.encodeInt(getLikes());
-        outPacket.encodeInt(getIdk9());
+        outPacket.encodeInt(getRequiredLevel());
 
         outPacket.encodeString(getIdk10());
 
-        outPacket.encodeInt(getIdk11());
-        outPacket.encodeInt(getIdk12());
-        outPacket.encodeInt(getIdk13());
-        outPacket.encodeInt(getIdk14());
+        outPacket.encodeInt(0); //getIdk11());
+        outPacket.encodeInt(30); //getStock());
+        outPacket.encodeInt(31); //getIdk13());
+        outPacket.encodeInt(41); //getIdk14());
 
         outPacket.encodeByte(false); // has favorited, maybe implement later
         outPacket.encodeByte(false); // has liked, maybe implement later
@@ -324,28 +326,28 @@ public class CashShopItem {
         this.availableDays = availableDays;
     }
 
-    public short getBuyable() {
-        return buyable;
+    public short getBuyableWithMaplePoints() {
+        return buyableWithMaplePoints;
     }
 
-    public void setBuyable(short buyable) {
-        this.buyable = buyable;
+    public void setBuyableWithMaplePoints(short buyableWithMaplePoints) {
+        this.buyableWithMaplePoints = buyableWithMaplePoints;
     }
 
-    public short getGiftable() {
-        return giftable;
+    public short getBuyableWithCredit() {
+        return buyableWithCredit;
     }
 
-    public void setGiftable(short giftable) {
-        this.giftable = giftable;
+    public void setBuyableWithCredit(short buyableWithCredit) {
+        this.buyableWithCredit = buyableWithCredit;
     }
 
-    public short getCartable() {
-        return cartable;
+    public short getBuyableWithPrepaid() {
+        return buyableWithPrepaid;
     }
 
-    public void setCartable(short cartable) {
-        this.cartable = cartable;
+    public void setBuyableWithPrepaid(short buyableWithPrepaid) {
+        this.buyableWithPrepaid = buyableWithPrepaid;
     }
 
     public short getLikable() {
@@ -388,12 +390,12 @@ public class CashShopItem {
         this.likes = likes;
     }
 
-    public int getIdk9() {
-        return idk9;
+    public int getRequiredLevel() {
+        return requiredLevel;
     }
 
-    public void setIdk9(int idk9) {
-        this.idk9 = idk9;
+    public void setRequiredLevel(int requiredLevel) {
+        this.requiredLevel = requiredLevel;
     }
 
     public String getIdk10() {
@@ -410,14 +412,6 @@ public class CashShopItem {
 
     public void setIdk11(int idk11) {
         this.idk11 = idk11;
-    }
-
-    public int getIdk12() {
-        return idk12;
-    }
-
-    public void setIdk12(int idk12) {
-        this.idk12 = idk12;
     }
 
     public int getIdk13() {
@@ -475,6 +469,20 @@ public class CashShopItem {
 
     public CashShopCategory getCashShopCategory() {
         return cashShopCategory;
+    }
+
+    public CashItemInfo toCashItemInfo(Account account, Char chr) {
+        CashItemInfo cii = new CashItemInfo();
+        cii.setAccountID(account.getId());
+        cii.setCashItemSN(new Random().nextLong());
+        cii.setUnsure(1);
+        cii.setCharacterID(chr.getId());
+        cii.setQuantity((short) (getBundleQuantity() == 0 ? 1 : getBundleQuantity()));
+        cii.setItemID(getItemID());
+        if (getAvailableDays() > 0) {
+            cii.setDateExpire(FileTime.fromDate(LocalDateTime.now().plusDays(getAvailableDays())));
+        }
+        return cii;
     }
 
     private enum CashShopItemFlag {

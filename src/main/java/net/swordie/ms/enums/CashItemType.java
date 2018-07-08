@@ -9,10 +9,10 @@ import java.util.*;
 public enum CashItemType {
     Req_WebShopOrderGetList(0),
     Req_LoadLocker(1),
-    Req_LoadWish(2),
-    Req_Buy(3),
-    Req_Gift(4),
-    Req_SetWish(5),
+//    Req_LoadWish(2),
+    Req_Buy(2),
+    Req_Gift(3),
+    Req_SetWish(4),
     Req_IncSlotCount(6),
     Req_IncTrunkCount(7),
     Req_IncCharSlotCount(8),
@@ -89,12 +89,12 @@ public enum CashItemType {
 
     Res_CharacterSaleSuccess(0),
     Res_CharacterSaleFail(1),
-    Res_LimitGoodsCount_Changed(2),
-    Res_WebShopOrderGetList_Done(3),
-    Res_WebShopOrderGetList_Failed(4),
+    Res_LimitGoodsCount_Changed(-1),
+    Res_WebShopOrderGetList_Done(-1),
+    Res_WebShopOrderGetList_Failed(-1),
     Res_WebShopReceive_Done(5),
-    Res_LoadLocker_Done(6),
-    Res_LoadLocker_Failed(7),
+    Res_LoadLocker_Done(2), // correct
+    Res_LoadLocker_Failed(3), // correct
     Res_LoadGift_Done(8),
     Res_LoadGift_Failed(9),
     Res_LoadWish_Done(10),

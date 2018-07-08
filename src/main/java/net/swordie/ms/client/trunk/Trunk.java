@@ -31,9 +31,9 @@ public class Trunk {
     private List<Item> items = new ArrayList<>();
     private long money;
     private byte slotCount;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "trunkid")
-    private Set<CashItemInfo> locker = new HashSet<>();
+    private List<CashItemInfo> locker = new ArrayList<>();
 
     public Trunk(){}
 
@@ -122,11 +122,29 @@ public class Trunk {
         getItems().remove(getItem);
     }
 
-    public Set<CashItemInfo> getLocker() {
+    public List<CashItemInfo> getLocker() {
         return locker;
     }
 
-    public void setLocker(Set<CashItemInfo> locker) {
+    public void setLocker(List<CashItemInfo> locker) {
         this.locker = locker;
+    }
+
+    public void addCashItem(CashItemInfo cii) {
+        getLocker().add(cii);
+    }
+
+    public CashItemInfo getLockerItemBySlot(int slot) {
+        if (slot < getLocker().size()) {
+            return getLocker().get(slot);
+        }
+        return null;
+    }
+
+    public void removeCashItemBySlot(int slot) {
+        if (slot < getLocker().size()) {
+            CashItemInfo cii = getLocker().get(slot);
+            getLocker().remove(cii);
+        }
     }
 }

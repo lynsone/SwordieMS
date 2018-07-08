@@ -1,9 +1,12 @@
 package net.swordie.ms.world.shop.cashshop;
 
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 /**
  * Created on 4/23/2018.
@@ -222,5 +225,28 @@ public class CashItemInfo {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CashItemInfo that = (CashItemInfo) o;
+        return itemID == that.itemID &&
+                cashItemSN == that.cashItemSN;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(itemID, cashItemSN);
+    }
+
+    public Item toItem() {
+        Item res = ItemData.getItemDeepCopy(getItemID());
+        if (getDateExpire() != null) {
+            res.setDateExpire(getDateExpire().deepCopy());
+        }
+        return res;
     }
 }

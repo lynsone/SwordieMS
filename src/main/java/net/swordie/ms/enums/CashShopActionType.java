@@ -10,10 +10,10 @@ import java.util.Arrays;
  */
 public enum CashShopActionType {
     ShowCategory(11),
-    Res_13(13),
+    ShowCategory2(13),
     Res_14(14),
     Res_16(16),
-    Res_18(18),
+    ShowFavorites(18),
     Res_19(19),
     Res_20(20),
     Res_21(21),

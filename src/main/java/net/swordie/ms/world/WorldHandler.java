@@ -3680,6 +3680,8 @@ public class WorldHandler {
     public static void handleUserMigrateToCashShopRequest(Client c, InPacket inPacket) {
         CashShop cs = Server.getInstance().getCashShop();
         c.write(Stage.setCashShop(c.getChr(), cs));
+        c.write(CCashShop.loadLockerDone(c.getChr().getAccount()));
+        c.write(CCashShop.queryCashResult(c.getChr()));
         c.write(CCashShop.bannerInfo(cs));
         c.write(CCashShop.cartInfo(cs));
         c.write(CCashShop.featuredItemInfo(cs));

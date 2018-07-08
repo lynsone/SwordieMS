@@ -93,6 +93,7 @@ public class GameConstants {
 
     // Cash Shop
     public static final int MAX_CS_ITEMS_PER_PAGE = 12;
+    public static final int MAX_LOCKER_SIZE = 9999;
 
 
     public static long[] charExp = new long[251];
