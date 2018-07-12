@@ -961,7 +961,7 @@ public class Equip extends Item {
             outPacket.encodeByte(getStatR()); // as
         }
         if(hasStat(EquipBaseStat.cuttable)) {
-            outPacket.encodeByte(getCuttable()); // soc
+            outPacket.encodeByte(getCuttable()); // sok
         }
         if(hasStat(EquipBaseStat.exGradeOption)) {
             outPacket.encodeLong(getExGradeOption());

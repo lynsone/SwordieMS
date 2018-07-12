@@ -335,6 +335,7 @@ public class WorldHandler {
             }
             c.write(WvsContext.inventoryOperation(true, false, MOVE, oldPos, newPos,
                     0, item));
+            item.updateToChar(chr);
 //            log.debug("Item before: " + itemBefore);
 //            log.debug("Item before: " + item);
         }
