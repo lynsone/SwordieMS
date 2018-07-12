@@ -10,7 +10,7 @@ public enum EquipAttribute {
     UNTRADABLE(0x8),
     UNTRADABLE_AFTER_TRANSACTION(0x10),
     NO_NON_COMBAT_STAT_GAIN(0x20),
-    
+
     CRAFTED(0x80),
     PROTECTION_SCROLL(0x100),
     LUCKY_DAY(0x200),
