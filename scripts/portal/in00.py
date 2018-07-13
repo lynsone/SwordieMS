@@ -3,9 +3,11 @@ def init():
 	warp = True
 	if currentMap == 103030100:
 		sm.chatRed("There seems to be a mysterious presence blocking you from entering.")
-	
+		warp = False
+
 	elif currentMap == 102010100:
 		sm.chatRed("There seems to be a mysterious presence blocking you from entering.")
+		warp = False
 
 	elif currentMap == 240010500:
 		map = 240010501
@@ -89,6 +91,9 @@ def init():
 	elif currentMap == 240010102:
 		map = 915020200
 		portal = 1
+	elif currentMap == 200090510: # Leafre -> ToT  Dragon Flight  2nd Map
+		map = 270000100 # Time Lane : Temple of Time
+		portal = 2
 	elif currentMap == 310050100: # Verne Mine : Power Plant Lobby
 		sm.chat("Destroy the Energy Conducting Device!")
 		map = 931000200

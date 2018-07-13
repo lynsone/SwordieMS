@@ -28,8 +28,11 @@ else:
         elif fieldID == 104020100:
             map = 104020120
             portal = 2
-        elif fieldID == 130020000: # Entrance to Drill Hall
-            if sm.hasQuest(20873): # WA 2nd job quest
+        elif fieldID == 100000200:  # Henesys Park
+            map = 100000202         # Pet-Walking Road
+            portal = 5
+        elif fieldID == 130020000:  # Entrance to Drill Hall
+            if sm.hasQuest(20873):  # WA 2nd job quest
                 map = 913001000
                 portal = 0
             else:

@@ -6,8 +6,12 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.guild.result.GuildMsg;
 import net.swordie.ms.client.guild.result.GuildResultType;
 import net.swordie.ms.client.party.Party;
@@ -439,6 +443,11 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.addMoney(mesos);
 	}
 
+	@Override
+	public void deductMesos(long mesos) {
+		chr.deductMoney(mesos);
+	}
+
 	public void completeQuest(int id) {
 		chr.getQuestManager().completeQuest(id);
 	}
@@ -480,35 +489,87 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
+	public void giveItem(int id) {
+		giveItem(id, 1);
+	}
+
+	@Override
 	public void giveItem(int id, int quantity) {
 		chr.addItemToInventory(id, quantity);
 	}
 
 	@Override
+	public boolean hasItem(int id) {
+		return hasItem(id, 1);
+	}
+
+	@Override
 	public boolean hasItem(int id, int quantity) {
-		int q = 1;
-		if (ItemConstants.isEquip(id)) {  //Equip
+		return getQuantityOfItem(id) >= quantity;
+	}
+
+	@Override
+	public void useItem(int id) {
+		ItemBuffs.giveItemBuffsFromItemID(chr, chr.getTemporaryStatManager(), id);
+	}
+
+	@Override
+	public int getQuantityOfItem(int id) {
+		if (ItemConstants.isEquip(id)) {
 			Item equip = chr.getInventoryByType(InvType.EQUIP).getItemByItemID(id);
 			if (equip == null) {
-				return false;
+				return 0;
 			}
-			q = equip.getQuantity();
+			return equip.getQuantity();
 		} else {
 			Item item2 = ItemData.getItemDeepCopy(id);
 			InvType invType = item2.getInvType();
 			Item item = chr.getInventoryByType(invType).getItemByItemID(id);
 			if (item == null) {
-				return false;
+				return 0;
 			}
-			q = item.getQuantity();
+			return item.getQuantity();
 		}
-
-		return q >= quantity;
 	}
 
 	@Override
 	public boolean canHold(int id) {
 		return chr.canHold(id);
+	}
+
+	@Override
+	public void giveBuff(CharacterTemporaryStat cts, int nOption, int rOption, int time) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		Option o = new Option();
+		o.nOption = nOption;
+		o.rOption = rOption;
+		o.tOption = time;
+		tsm.putCharacterStatValue(cts, o);
+		tsm.sendSetStatPacket();
+	}
+
+	@Override
+	public void removeCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		tsm.removeStat(cts, false);
+	}
+
+	@Override
+	public void removeBuffBySkill(int skillId) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		tsm.removeStatsBySkill(skillId);
+	}
+
+	@Override
+	public boolean hasCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		return tsm.hasStat(cts);
+	}
+
+	@Override
+	public int getnOptionByCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		return hasCTS(cts) ? tsm.getOption(cts).nOption : 0;
 	}
 
 	@Override

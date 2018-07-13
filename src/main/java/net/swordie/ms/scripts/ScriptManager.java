@@ -1,6 +1,7 @@
 package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
@@ -296,13 +297,31 @@ public interface ScriptManager {
 	long getMesos();
 
 	/**
-	 * Changes the linked {@link Char}'s mesos, negative = give, positive = take.
+	 * Changes the linked {@link Char}'s mesos.
 	 * Example: "sm.giveMesos(100000)"
 	 *
 	 * @param mesos
 	 * 		The amount of mesos to change the {@link Char}'s mesos by.
 	 */
 	void giveMesos(long mesos);
+
+	/**
+	 * Changes the linked {@link Char}'s mesos.
+	 * Example: "sm.deductMesos(100000)"
+	 *
+	 * @param mesos
+	 * 		The amount of mesos to change the {@link Char}'s mesos by.
+	 */
+	void deductMesos(long mesos);
+
+	/**
+	 * Gives the linked {@link Char} the defined item.
+	 * Example: "sm.giveItem(100)"
+	 *
+	 * @param itemID
+	 * 		The ID of the item.
+	 */
+	void giveItem(int itemID);
 
 	/**
 	 * Gives the linked {@link Char} the specified quantity of the defined item.
@@ -314,6 +333,17 @@ public interface ScriptManager {
 	 * 		The quantity of the item.
 	 */
 	void giveItem(int itemID, int quantity);
+
+	/**
+	 * Determines if the linked {@link Char} has the specified item.
+	 * Example: "if(sm.hasItem(100)) {}"
+	 *
+	 * @param itemID
+	 * 		The ID of the item.
+	 *
+	 * @return True if the link {@link Char} has the item.
+	 */
+	boolean hasItem(int itemID);
 
 	/**
 	 * Determines if the linked {@link Char} has the specified item with the specified quantity.
@@ -329,6 +359,25 @@ public interface ScriptManager {
 	boolean hasItem(int itemID, int quantity);
 
 	/**
+	 * Gives the CTS to the linked {@link Char} of the specified item id
+	 *
+	 * @param id
+	 * 		The ID of the item
+	 */
+	void useItem(int id);
+
+	/**
+	 * Returns the amount of items the linked {@link Char} has of the specified id.
+	 * Example: "if(getQuantityOfitem(100) > 50) {}"
+	 *
+	 * @param id
+	 * 		The ID of the item.
+	 *
+	 * @return Quantity of specified id in the link {@link Char} inventory.
+	 */
+	int getQuantityOfItem(int id);
+
+	/**
 	 * Determines if the linked {@link Char} can hold a specific item.
 	 * Example: "if(sm.canHold(100)) {}"
 	 *
@@ -338,6 +387,57 @@ public interface ScriptManager {
 	 * @return True if the linked {@link Char} can hold the item.
 	 */
 	boolean canHold(int itemID);
+
+	/**
+	 * Gives a buff to the linked {@link Char} with specified CTS, nOption, rOption, time
+	 *
+	 * @param cts
+	 * 		The CTS of the buff to be given
+	 * @param nOption
+	 * 		The nOption of the buff to be given
+	 * @param rOption
+	 * 		The rOption of the buff to be given
+	 * @param time
+	 * 		The tOption of the buff to be given
+	 */
+	void giveBuff(CharacterTemporaryStat cts, int nOption, int rOption, int time);
+
+	/**
+	 * Removes a CTS from the linked {@link Char} specified by CTS
+	 *
+	 * @param cts
+	 * 		The CTS to be removed
+	 */
+	void removeCTS(CharacterTemporaryStat cts);
+
+	/**
+	 * Removes a whole buff from the linked {@link Char} specified by the Skill ID
+	 * @param skillId
+	 * 		The ID of the Skill
+	 */
+	void removeBuffBySkill(int skillId);
+
+	/**
+	 * Return boolean if the linked {@link Char} has the specified CTS
+	 *
+	 * @param cts
+	 * 		CTS to be checked
+	 *
+	 * @return
+	 * 		return true if the linked {@link Char} has the specified CTS
+	 */
+	boolean hasCTS(CharacterTemporaryStat cts);
+
+	/**
+	 * Return nOption from the linked {@link Char} based on the specified CTS
+	 *
+	 * @param cts
+	 * 		CTS to return the nOption from
+	 *
+	 * @return
+	 * 		return nOption from the CTS specified
+	 */
+	int getnOptionByCTS(CharacterTemporaryStat cts);
 
 	/**
 	 * Shows a window to the linked {@link Char} for creating a guild.

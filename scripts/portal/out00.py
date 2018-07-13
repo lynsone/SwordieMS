@@ -86,6 +86,14 @@ def init():
     elif fieldID == 106030402:
         map = 106030101
         portal = 1
+
+        #ToT -> Leafre START
+    elif fieldID == 270000100: # Time Lane : ToT
+        map = 200090510 # Leafre -> ToT  Dragon Flight  2nd Map
+        portal = 0
+        sm.useItem(2210016)
+
+        #ToT -> Leafre END
     elif fieldID == 271040000:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
