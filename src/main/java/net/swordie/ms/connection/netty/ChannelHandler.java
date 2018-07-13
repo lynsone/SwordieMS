@@ -249,6 +249,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_ITEM_OPTION_UPGRADE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserItemOptionUpgradeItemUseRequest(c, inPacket);
                     break;
+                case USER_ITEM_SLOT_EXTEND_ITEM_USE_REQUEST:
+                    WorldHandler.handleUserItemSlotExtendItemUseRequest(chr, inPacket);
+                    break;
                 case USER_ADDITIONAL_OPT_UPGRADE_ITEM_USE_REQUEST:
                     WorldHandler.handleUserAdditionalOptUpgradeItemUseRequest(c, inPacket);
                     break;

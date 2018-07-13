@@ -1874,6 +1874,8 @@ public class Char {
 		if (equip.isEquipTradeBlock()) {
 			equip.setTradeBlock(true);
 			equip.setEquipTradeBlock(false);
+			equip.setEquippedDate(FileTime.currentTime());
+			equip.addAttribute(EquipAttribute.UNTRADABLE);
 		}
 		AvatarLook al = getAvatarData().getAvatarLook();
 		int itemID = item.getItemId();

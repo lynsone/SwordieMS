@@ -335,6 +335,7 @@ public class WorldHandler {
             }
             c.write(WvsContext.inventoryOperation(true, false, MOVE, oldPos, newPos,
                     0, item));
+            item.updateToChar(chr);
 //            log.debug("Item before: " + itemBefore);
 //            log.debug("Item before: " + item);
         }
@@ -1996,7 +1997,8 @@ public class WorldHandler {
                     val = ItemGrade.HIDDEN_RARE.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
-                case 2049700:
+                case 2049700: // Epic pot
+                case 2049708:
                     val = ItemGrade.HIDDEN_EPIC.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
@@ -2009,12 +2011,45 @@ public class WorldHandler {
 
                 default:
                     chr.chatMessage(YELLOW, "Unhandled scroll " + scrollID);
-                    break;
+                    chr.dispose();
+                    log.error("Unhandled scroll " + scrollID);
+                    return;
             }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
         equip.updateToChar(chr);
         chr.consumeItem(scroll);
+    }
+
+    public static void handleUserItemSlotExtendItemUseRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        short uPos = inPacket.decodeShort();
+        short ePos = inPacket.decodeShort();
+        Item item = chr.getConsumeInventory().getItemBySlot(uPos);
+        Item equipItem = chr.getEquipInventory().getItemBySlot(ePos);
+        if (item == null || equipItem == null) {
+            chr.chatMessage("Could not find either the use item or the equip.");
+            return;
+        }
+        int itemID = item.getItemId();
+        Equip equip = (Equip) equipItem;
+        int successChance = ItemData.getItemInfoByID(itemID).getScrollStats().getOrDefault(ScrollStat.success, 100);
+        boolean success = Util.succeedProp(successChance);
+        if (success) {
+            switch (itemID) {
+                case 2049505: // Gold Potential Stamp
+                case 2049517:
+                    equip.setOption(2, equip.getRandomOption(false), false);
+                    break;
+                default:
+                    log.error("Unhandled slot extend item " + itemID);
+                    chr.chatMessage("Unhandled slot extend item " + itemID);
+                    return;
+            }
+            equip.updateToChar(chr);
+        }
+        chr.consumeItem(item);
+        chr.write(CField.showItemUpgradeEffect(chr.getId(), success, false, itemID, equip.getItemId()));
     }
 
     public static void handleUserAdditionalOptUpgradeItemUseRequest(Client c, InPacket inPacket) {
@@ -2311,6 +2346,9 @@ public class WorldHandler {
         int quant = inPacket.decodeInt();
         Char chr = c.getChr();
         Item item = chr.getConsumeInventory().getItemBySlot(slot);
+        if (item == null || item.getItemId() != itemID) {
+            item = chr.getCashInventory().getItemBySlot(slot);
+        }
         if(item == null || item.getItemId() != itemID) {
             chr.dispose();
             return;

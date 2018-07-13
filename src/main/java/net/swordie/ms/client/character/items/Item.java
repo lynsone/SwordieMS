@@ -176,7 +176,7 @@ public class Item implements Serializable {
         outPacket.encodeByte(getType().getVal());
         // GW_ItemSlotBase
         outPacket.encodeInt(getItemId());
-        boolean hasSN = this instanceof PetItem; //getId() > 0;
+        boolean hasSN = this instanceof PetItem;
         outPacket.encodeByte(hasSN);
         if (hasSN) {
             outPacket.encodeLong(getId());
