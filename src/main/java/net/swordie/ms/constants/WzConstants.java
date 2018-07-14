@@ -6,17 +6,16 @@ package net.swordie.ms.constants;
 public class WzConstants {
 
     //Quest Icons
-    public static final String iconQuestAvailable = "#fUI/UIWindow.img/QuestIcon/0/0#";
-    public static final String iconQuestInProgress = "#fUI/UIWindow.img/QuestIcon/1/0#";
-    public static final String iconQuestFinished = "#fUI/UIWindow.img/QuestIcon/2/0#";
-    public static final String iconSelectYourReward = "#fUI/UIWindow.img/QuestIcon/3/0#";
-    public static final String iconObtained = "#fUI/UIWindow.img/QuestIcon/4/0#";
-    public static final String iconMysteryItem = "#fUI/UIWindow.img/QuestIcon/5/0#";
-    public static final String iconFame = "#fUI/UIWindow.img/QuestIcon/6/0#";
-    public static final String iconMesos = "#fUI/UIWindow.img/QuestIcon/7/0#";
-    public static final String iconExp = "#fUI/UIWindow.img/QuestIcon/8/0#";
-    public static final String iconPetCloseness = "#fUI/UIWindow.img/QuestIcon/9/0#";
-    public static final String iconDragonSP = "#fUI/UIWindow.img/QuestIcon/10/0#";
-    public static final String iconTraits = "#fUI/UIWindow.img/QuestIcon/11/0#";
-
+    public static final String ICON_QUEST_AVAILABLE = "#fUI/UIWindow.img/QuestIcon/0/0#";
+    public static final String ICON_QUEST_IN_PROGRESS = "#fUI/UIWindow.img/QuestIcon/1/0#";
+    public static final String ICON_QUEST_FINISHED = "#fUI/UIWindow.img/QuestIcon/2/0#";
+    public static final String ICON_SELECT_YOUR_REWARD = "#fUI/UIWindow.img/QuestIcon/3/0#";
+    public static final String ICON_OBTAINED = "#fUI/UIWindow.img/QuestIcon/4/0#";
+    public static final String ICON_MYSTERY_ITEM = "#fUI/UIWindow.img/QuestIcon/5/0#";
+    public static final String ICON_FAME = "#fUI/UIWindow.img/QuestIcon/6/0#";
+    public static final String ICON_MESOS = "#fUI/UIWindow.img/QuestIcon/7/0#";
+    public static final String ICON_EXP = "#fUI/UIWindow.img/QuestIcon/8/0#";
+    public static final String ICON_PET_CLOSENESS = "#fUI/UIWindow.img/QuestIcon/9/0#";
+    public static final String ICON_DRAGON_SP = "#fUI/UIWindow.img/QuestIcon/10/0#";
+    public static final String ICON_TRAITS = "#fUI/UIWindow.img/QuestIcon/11/0#";
 }
