@@ -538,7 +538,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
-	public void giveBuff(CharacterTemporaryStat cts, int nOption, int rOption, int time) {
+	public void giveCTS(CharacterTemporaryStat cts, int nOption, int rOption, int time) {
 		TemporaryStatManager tsm = chr.getTemporaryStatManager();
 		Option o = new Option();
 		o.nOption = nOption;

@@ -389,7 +389,7 @@ public interface ScriptManager {
 	boolean canHold(int itemID);
 
 	/**
-	 * Gives a buff to the linked {@link Char} with specified CTS, nOption, rOption, time
+	 * Gives the CTS to the linked {@link Char} with specified CTS, nOption, rOption, time
 	 *
 	 * @param cts
 	 * 		The CTS of the buff to be given
@@ -400,7 +400,7 @@ public interface ScriptManager {
 	 * @param time
 	 * 		The tOption of the buff to be given
 	 */
-	void giveBuff(CharacterTemporaryStat cts, int nOption, int rOption, int time);
+	void giveCTS(CharacterTemporaryStat cts, int nOption, int rOption, int time);
 
 	/**
 	 * Removes a CTS from the linked {@link Char} specified by CTS
