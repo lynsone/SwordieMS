@@ -4,5 +4,5 @@ def init():
 
 def action(response, answer):
     if response == 1:
-        sm.clearPartyInfo(951000000)
+        sm.warpPartyOut(951000000)
     sm.dispose()

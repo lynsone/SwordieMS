@@ -11,6 +11,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.guild.result.GuildMsg;
 import net.swordie.ms.client.guild.result.GuildResultType;
@@ -21,10 +22,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.InvType;
-import net.swordie.ms.enums.QuestStatus;
-import net.swordie.ms.enums.Stat;
-import net.swordie.ms.enums.UIType;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.life.Reactor;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
@@ -48,6 +46,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
 import static net.swordie.ms.enums.ChatMsgColour.*;
 import static net.swordie.ms.life.npc.NpcMessageType.*;
 
@@ -913,5 +912,15 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	public int getRandomIntBelow(int upBound) {
 		return new Random().nextInt(upBound);
+	}
+
+	public void rideVehicle(int mountID) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+
+		tsb.setNOption(mountID);
+		tsb.setROption(0);
+		tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+		tsm.sendSetStatPacket();
 	}
 }
