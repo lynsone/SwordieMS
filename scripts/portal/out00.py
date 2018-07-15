@@ -87,6 +87,10 @@ def init():
         map = 106030101
         portal = 1
 
+
+    elif fieldID == 141010000 or fieldID == 141020000 or fieldID == 141040000 or fieldID == 141050000: # [Riena Strait] Ice Station 1  or [Riena Strait] Ice Station 2  or  [Riena Strait] Barbara's House
+        sm.openNPC(1510006)
+
         #ToT -> Leafre START
     elif fieldID == 270000100: # Time Lane : ToT
         map = 200090510 # Leafre -> ToT  Dragon Flight  2nd Map

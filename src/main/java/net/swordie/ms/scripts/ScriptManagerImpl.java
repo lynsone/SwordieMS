@@ -26,6 +26,7 @@ import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.loaders.FieldData;
@@ -45,10 +46,7 @@ import javax.script.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 import static net.swordie.ms.enums.ChatMsgColour.*;
 import static net.swordie.ms.life.npc.NpcMessageType.*;
@@ -583,6 +581,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
+	public int getPartySize() {return getParty().getMembers().size();}
+
+	@Override
 	public void setPartyField() {
 		chr.setFieldInstanceType(FieldInstanceType.PARTY);
 	}
@@ -884,5 +885,33 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	public int getEmptyInventorySlots(InvType invType) {
 		return chr.getInventoryByType(invType).getEmptySlots();
+	}
+
+	public void showClearStageExpWindow(long expGiven) {
+		chr.write(CField.fieldEffect(FieldEffect.showClearStageExpWindow((int) expGiven)));
+		giveExpNoMsg(expGiven);
+	}
+
+	public void openNPC(int npcID) {
+		Npc npc = NpcData.getNpcDeepCopyById(npcID);
+		String script;
+		if(npc.getScripts().size() > 0) {
+			script = npc.getScripts().get(0);
+		} else {
+			script = String.valueOf(npc.getTemplateId());
+		}
+		chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
+	}
+
+	public void giveExp(long expGiven) {
+		chr.addExp(expGiven);
+	}
+
+	public void giveExpNoMsg(long expGiven) {
+		chr.addExpNoMsg(expGiven);
+	}
+
+	public int getRandomIntBelow(int upBound) {
+		return new Random().nextInt(upBound);
 	}
 }
