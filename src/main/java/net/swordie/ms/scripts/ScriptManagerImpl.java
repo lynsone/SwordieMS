@@ -23,7 +23,10 @@ import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
@@ -32,6 +35,7 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.NpcData;
 import net.swordie.ms.loaders.QuestData;
 import net.swordie.ms.util.FileTime;
+import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
@@ -45,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
 import static net.swordie.ms.enums.ChatMsgColour.*;
@@ -420,6 +425,14 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.warp(field);
 	}
 
+	public void teleportToPortal(int portalId) {
+		Portal portal = chr.getField().getPortalByID(portalId);
+		if (portal != null) {
+			Position position = new Position(portal.getX(), portal.getY());
+			chr.write(CField.teleport(position, chr));
+		}
+	}
+
 	@Override
 	public void chat(String text) {
 		chatRed(text);
@@ -434,6 +447,8 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	public void chatBlue(String text) {
 		chr.chatMessage(GAME_NOTICE, text);
 	}
+
+	public void chatScript(String text) {chr.chatScriptMessage(text);}
 
 	@Override
 	public void giveMesos(long mesos) {
@@ -690,6 +705,27 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.getField().spawnMob(id, x, y, respawnable, hp);
 	}
 
+	public void removeMobByObjId(int id) {
+		chr.getField().removeLife(id);
+		chr.getField().broadcastPacket(MobPool.mobLeaveField(id, DeathType.ANIMATION_DEATH));
+	}
+
+	public void removeMobsByTemplateId(int id) {
+		List<Mob> mobList = chr.getField().getMobs();
+		if (mobList.size() > 0) {
+			for (Mob mob : mobList) {
+				if (mob.getTemplateId() != id) {
+					continue;
+				}
+				removeMobByObjId(mob.getObjectId());
+			}
+		}
+	}
+
+	public void removeMobsAfterTimer(int mobid, int seconds) { //Template id
+		EventManager.addEvent(() -> removeMobsByTemplateId(mobid), seconds, TimeUnit.SECONDS);
+	}
+
 	@Override
 	public void showHP(int templateID) {
 		chr.getField().getMobs().stream()
@@ -700,7 +736,6 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void showHP() {
-
 		chr.getField().getMobs().stream()
 				.filter(m -> m.getHp() > 0)
 				.findFirst()

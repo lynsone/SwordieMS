@@ -1,3 +1,3 @@
 def init():
-    sm.openShop(1001100)
+    sm.openShop(parentID)
     sm.dispose()

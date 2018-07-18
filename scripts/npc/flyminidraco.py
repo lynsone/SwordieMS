@@ -9,7 +9,7 @@ def init():
                 "#L0##bI want to become a dragon.#k#l")
 
 def action(response, answer):
-    if response == 1:
+    if answer == 0:
         sm.warp(200090500)
         sm.useItem(2210016) #Become  Red Flying Draco
     sm.dispose()

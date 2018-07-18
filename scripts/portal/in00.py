@@ -198,9 +198,10 @@ else:
 
 		#Default script
 		else:
-			warp = False
 			sm.chat("(Portal - in00) This script isn't coded for this map.")
+			sm.dispose()
 
+		#Warp
 		if warp:
 			sm.warp(field[currentMap], portal[currentMap])
 			sm.dispose()

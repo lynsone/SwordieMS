@@ -1,151 +1,140 @@
+field = {
+    101050010 : 101050000,
+    106030200 : 106030000,
+    310000010 : 310000000,
+    200000301 : 200000300,
+    106030302 : 106030102,
+    104020120 : 104020100,
+    350060300 : 310070490,
+    271040000 : 271030600,
+    866000220 : 865000000,
+    863010220 : 863010100,
+    863010300 : 863010100,
+    863010310 : 863010300,
+    863010400 : 863010100,
+    863010410 : 863010400,
+    863010230 : 863010220,
+    863010240 : 863010210,
+    863010500 : 863010240,
+    863010600 : 863010700,
+    863010430 : 863010420,
+    863010330 : 863010320,
+    930100500 : 930100000,
+    221023300 : 221023200,
+    223010110 : 223010100,
+    240010102 : 240010101,
+    260010601 : 260010600,
+    106030402 : 106030101,
+    270000100 : 200090510, #ToT : Dragon Flight-2nd Map
+}
+
+portal = {
+    101050010 : 1,
+    106030200 : 1,
+    310000010 : 15,
+    200000301 : 11,
+    106030302 : 1,
+    104020120 : 15,
+    350060300 : 4,
+    271040000 : 0,
+    866000220 : 0,
+    863010220 : 9,
+    863010300 : 7,
+    863010310 : 1,
+    863010400 : 6,
+    863010410 : 1,
+    863010230 : 2,
+    863010240 : 2,
+    863010500 : 0,
+    863010600 : 0,
+    863010430 : 3,
+    863010330 : 3,
+    930100500 : 0,
+    221023300 : 1,
+    223010110 : 3,
+    240010102 : 0,
+    260010601 : 0,
+    106030402 : 1,
+    270000100 : 0,
+}
+
 def init():
     warp = True
     fieldID = sm.getFieldID()
 
-    if fieldID == 101050010:
-        map = 101050000
-        portal = 1
-    elif fieldID == 106030200:
-        map = 106030000
-        portal = 1
-    elif fieldID == 310000010:
-        map = 310000000
-        portal = 15
-    elif fieldID == 200000301:
-        map = 200000300
-        portal = 11
-    elif fieldID == 106030302:
-        map = 106030102
-        portal = 1
-    elif fieldID == 104020120:
-        map = 104020100
-        portal = 15
-    elif fieldID == 350060300:
-        map = 310070490
-        portal = 4
+
+    #Dojo Floors
+    if fieldID / 10000 == 92507:
+        warp = False
+        if sm.mobsPresentInField():
+            sm.chat("Eliminate the boss before continuing")
+        else:
+            sm.teleportToPortal(6)
+        sm.dispose()
+
+    #Cygnus' Chamber
     elif fieldID == 271040100:
         sm.sendAskYesNo("Are you sure you want to leave?")
         warp = False
-    elif fieldID == 271040000:
-        map = 271030600
-        portal = 0
-    elif fieldID == 866000220:
-        map = 865000000
-        portal = 0
-    elif fieldID == 863010220:
-        map = 863010100
-        portal = 9
-    elif fieldID == 863010300:
-        map = 863010100
-        portal = 7
-    elif fieldID == 863010310:
-        map = 863010300
-        portal = 1
-    elif fieldID == 863010400:
-        map = 863010100
-        portal = 6
-    elif fieldID == 863010410:
-        map = 863010400
-        portal = 1
-    elif fieldID == 863010230:
-        map =863010220
-        portal = 2
-    elif fieldID == 863010240:
-        map =863010210
-        portal = 2
-    elif fieldID == 863010500:
-        map = 863010240
-        portal = 0
-    elif fieldID == 863010600:
-        map = 863010700
-        portal = 0
-    elif fieldID == 863010430:
-        map = 863010420
-        portal = 3
-    elif fieldID == 863010330:
-        map = 863010320
-        portal = 3
-    elif fieldID == 930100500:
-        map = 930100000
-        portal = 0
-    elif fieldID == 221023300:
-        map = 221023200
-        portal = 1
-    elif fieldID == 223010110:
-        map = 223010100
-        portal = 3
-    elif fieldID == 240010102:
-        map = 240010101
-        portal = 0
-    elif fieldID == 260010601:
-        map = 260010600
-        portal = 0
-    elif fieldID == 106030200: #castle corridor 1 mid portal does not respond to script
-        map = 106030400
-        portal = 1
-    elif fieldID == 106030402:
-        map = 106030101
-        portal = 1
 
-
+    #Riena Strait Portals
     elif fieldID == 141010000 or fieldID == 141020000 or fieldID == 141040000 or fieldID == 141050000: # [Riena Strait] Ice Station 1  or [Riena Strait] Ice Station 2  or  [Riena Strait] Barbara's House
         sm.openNPC(1510006)
 
-        #ToT -> Leafre START
+    #ToT -> Leafre START
     elif fieldID == 270000100: # Time Lane : ToT
-        map = 200090510 # Leafre -> ToT  Dragon Flight  2nd Map
-        portal = 0
         sm.useItem(2210016)
 
-        #ToT -> Leafre END
-    elif fieldID == 271040000:
-        sm.sendAskYesNo("Would you like to leave?")
-        warp = False
+    #Scarlion & Targa
     elif fieldID == 223030210:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
+
+    #Arkarium
     elif fieldID == 272030400:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #From CQueen
+    #CQueen
     elif fieldID == 105200310:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #From Pierre
+    #Pierre
     elif fieldID == 105200210:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #From VonBon
+    #VonBon
     elif fieldID == 105200110:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #From Vellum
+    #Vellum
     elif fieldID == 105200410:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-
-
-        #fm
+    #FM
     elif fieldID == 910000000:
+        warp = False
         oldFieldID = sm.getReturnField()
         if oldFieldID == 0 or oldFieldID == 910000000:
             sm.chat("(Portal) Cannot find your previous map ID, warping to Henesys.")
             map = 100000000
-            portal = 0
+            portals = 0
         else:
             map = oldFieldID
-            portal = 0
+            portals = 0
+        sm.warp(map, portals)
+        sm.dispose()
+
     else:
         sm.chat("(Portal) This script (out00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
-        map = sm.getChr().getField().getReturnMap()
-        portal = 0
+        sm.dispose()
+
     if warp:
-        sm.warp(map, portal)
+        sm.warp(field[fieldID], portal[fieldID])
         sm.dispose()
 
 def action(response, answer):
