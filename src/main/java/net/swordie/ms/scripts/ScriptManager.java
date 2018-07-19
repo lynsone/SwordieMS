@@ -454,6 +454,13 @@ public interface ScriptManager {
 	Party getParty();
 
 	/**
+	 * Gets the {@link Char} linked's Party size
+	 *
+	 * @return The amount of members in {@link Char} linked's Party
+	 */
+	int getPartySize();
+
+	/**
 	 * Sets the {@link Field} instance type to PARTY, making all maps unique per party.
 	 * Example: "sm.setPartyField()"
 	 */

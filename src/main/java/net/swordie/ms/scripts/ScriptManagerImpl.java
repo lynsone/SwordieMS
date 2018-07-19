@@ -25,6 +25,7 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Reactor;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
@@ -742,6 +743,41 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
 	}
 
+	public void spawnNpc(int npcId, int x, int y) {
+		Npc npc = NpcData.getNpcDeepCopyById(npcId);
+		chr.getField().spawnLife(npc, chr);
+	}
+
+	public void removeNpc(int npcId) { //TODO Fix
+		List<Life> removeLifeSet = new ArrayList<>();
+		List<Life> lifes = chr.getField().getLifes();
+		if(lifes.size() > 0) {
+			for (Life life : lifes) {
+				if (life instanceof Npc) {
+					if (life.getTemplateId() != npcId) {
+						continue;
+					}
+					removeLifeSet.add(life);
+				}
+			}
+		}
+		//TODO
+		if(removeLifeSet.size()>1) {
+			chr.getField().removeLife(removeLifeSet.get(0).getObjectId());
+		}
+	}
+
+	public void openNpc(int npcID) { //TODO Fix
+		Npc npc = NpcData.getNpcDeepCopyById(npcID);
+		String script;
+		if(npc.getScripts().size() > 0) {
+			script = npc.getScripts().get(0);
+		} else {
+			script = String.valueOf(npc.getTemplateId());
+		}
+		chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
+	}
+
 	@Override
 	public void openShop(int shopID) {
 		NpcShopDlg nsd = NpcData.getShopById(shopID);
@@ -924,17 +960,6 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	public void showClearStageExpWindow(long expGiven) {
 		chr.write(CField.fieldEffect(FieldEffect.showClearStageExpWindow((int) expGiven)));
 		giveExpNoMsg(expGiven);
-	}
-
-	public void openNPC(int npcID) {
-		Npc npc = NpcData.getNpcDeepCopyById(npcID);
-		String script;
-		if(npc.getScripts().size() > 0) {
-			script = npc.getScripts().get(0);
-		} else {
-			script = String.valueOf(npc.getTemplateId());
-		}
-		chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
 	}
 
 	public void giveExp(long expGiven) {
