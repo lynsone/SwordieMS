@@ -75,7 +75,8 @@ else:
         222020400 : 300000100,
         104020100 : 104020120,
         100000200 : 100000202, # Henesys Park : Pet-Walking Road
-        130020000 : 913001000
+        130020000 : 913001000,
+        865000000 : 865000002,
     }
 
     portal = {
@@ -84,6 +85,7 @@ else:
         104020100 : 2,
         100000200 : 5,
         130020000 : 0,
+        865000000 : 1,
     }
 
     def init():
@@ -96,10 +98,10 @@ else:
                 warp = False
 
         # Default
-        else:
+        if field[fieldID] is None:
             sm.chat("(Portal) This script (in01.py) is not coded for this map. (ID: " + str(fieldID) + ")")
             warp = False
 
         if warp:
-            sm.warp(map, portal)
+            sm.warp(field[fieldID], portal[fieldID])
         sm.dispose()

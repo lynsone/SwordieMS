@@ -26,6 +26,7 @@ field = {
     260010601 : 260010600,
     106030402 : 106030101,
     270000100 : 200090510, #ToT : Dragon Flight-2nd Map
+    865020051 : 865020300, #Canal Battle Ground 5 : Canal 4
 }
 
 portal = {
@@ -56,6 +57,7 @@ portal = {
     260010601 : 0,
     106030402 : 1,
     270000100 : 0,
+    865020051 : 0,
 }
 
 def init():
@@ -79,7 +81,7 @@ def init():
 
     #Riena Strait Portals
     elif fieldID == 141010000 or fieldID == 141020000 or fieldID == 141040000 or fieldID == 141050000: # [Riena Strait] Ice Station 1  or [Riena Strait] Ice Station 2  or  [Riena Strait] Barbara's House
-        sm.openNPC(1510006)
+        sm.openNpc(1510006)
 
     #ToT -> Leafre START
     elif fieldID == 270000100: # Time Lane : ToT

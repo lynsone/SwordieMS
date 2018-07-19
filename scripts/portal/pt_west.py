@@ -4,7 +4,7 @@ def init():
 
 	if sm.getFieldID() == 141030000:
 		warp = False
-		sm.openNPC(1510006)
+		sm.openNpc(1510006)
 	else:
 		map = 240090801
 		portal = 0

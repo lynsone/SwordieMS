@@ -12,7 +12,7 @@ def init():
 
     if currentmap == 141000000:
         warp = False
-        sm.openNPC(1510006)
+        sm.openNpc(1510006)
 
     if warp:
         sm.warp(field[currentmap], portal[currentmap])
