@@ -2849,8 +2849,9 @@ public class WorldHandler {
                     }
                     chr.deductMoney(cost);
                 }
+                int itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
                 Item item = ItemData.getItemDeepCopy(itemID);
-                item.setQuantity(quantity * nsi.getQuantity());
+                item.setQuantity(quantity * itemQuantity);
                 chr.addItemToInventory(item);
                 chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.Success)));
                 break;
