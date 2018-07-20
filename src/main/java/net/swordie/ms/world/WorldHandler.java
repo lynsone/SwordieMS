@@ -2816,6 +2816,7 @@ public class WorldHandler {
         NpcShopDlg nsd = chr.getShop();
         if(nsd == null) {
             chr.chatMessage("You are currently not in a shop.");
+            return;
         }
         switch(shr) {
             case BUY:
@@ -2848,8 +2849,9 @@ public class WorldHandler {
                     }
                     chr.deductMoney(cost);
                 }
+                int itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
                 Item item = ItemData.getItemDeepCopy(itemID);
-                item.setQuantity(quantity);
+                item.setQuantity(quantity * itemQuantity);
                 chr.addItemToInventory(item);
                 chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.Success)));
                 break;
