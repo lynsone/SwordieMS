@@ -2828,18 +2828,28 @@ public class WorldHandler {
                     log.warn(String.format("Possible hack: expected shop itemID %d, got %d (chr %d)", nsi.getItemID(), itemID, chr.getId()));
                     return;
                 }
-                long cost = nsi.getPrice() * quantity;
-                if(chr.getMoney() < cost) {
-                    chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
-                    return;
-                }
                 if (!chr.canHold(itemID)) {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.FullInvMsg)));
                     return;
                 }
+                if (nsi.getTokenItemID() != 0) {
+                    int cost = nsi.getTokenPrice() * quantity;
+                    if (chr.hasItemCount(nsi.getTokenItemID(), cost)) {
+                        chr.consumeItem(nsi.getTokenItemID(), cost);
+                    } else {
+                        chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
+                        return;
+                    }
+                } else {
+                    long cost = nsi.getPrice() * quantity;
+                    if (chr.getMoney() < cost) {
+                        chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
+                        return;
+                    }
+                    chr.deductMoney(cost);
+                }
                 Item item = ItemData.getItemDeepCopy(itemID);
                 item.setQuantity(quantity);
-                chr.deductMoney(cost);
                 chr.addItemToInventory(item);
                 chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.Success)));
                 break;
@@ -2851,7 +2861,7 @@ public class WorldHandler {
                     return;
                 }
                 ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
-                cost = ii.getSlotMax() - item.getQuantity();
+                long cost = ii.getSlotMax() - item.getQuantity();
                 if(chr.getMoney() < cost) {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
                     return;

@@ -767,6 +767,11 @@ public class CField {
         return outPacket;
     }
 
+    /**
+     * Creates a Clock on a Field.
+     * @param clockPacket the clock to display
+     * @return packet for the client
+     */
     public static OutPacket clock(ClockPacket clockPacket) {
         OutPacket outPacket = new OutPacket(OutHeader.CLOCK);
 
@@ -797,6 +802,15 @@ public class CField {
             outPacket.encodeString(propSpecialEliteEffect);
             outPacket.encodeString(backUOL);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket setQuickMoveInfo(List<QuickMoveInfo> quickMoveInfos) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_QUICK_MOVE_INFO);
+
+        outPacket.encodeByte(quickMoveInfos.size());
+        quickMoveInfos.forEach(qmi -> qmi.encode(outPacket));
 
         return outPacket;
     }
