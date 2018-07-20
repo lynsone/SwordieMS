@@ -44,7 +44,7 @@ public class NpcShopItem {
     public NpcShopItem() {
         sellStart = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
         sellEnd = FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME);
-        maxPerSlot = 50;
+        maxPerSlot = 1000;
     }
 
     public void encode(OutPacket outPacket) {
