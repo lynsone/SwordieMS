@@ -1,4 +1,4 @@
-#Spiegelmann (9071005) | In Monster Park Maps
+# Spiegelmann (9071005) | In Monster Park Maps
 def init():
     sm.sendAskYesNo("Do you want to leave?")
 

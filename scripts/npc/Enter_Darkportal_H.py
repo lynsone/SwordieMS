@@ -1,4 +1,4 @@
-#Demon's Doorway (9201131) | Blue Mushroom Forest 2
+# Demon's Doorway (9201131) | Blue Mushroom Forest 2
 
 quest = 28238       # Treasure, and Amdusias the Demon  Quest
 mapid = 677000002   # Amdusias Strolling Path (Map before Boss Map)

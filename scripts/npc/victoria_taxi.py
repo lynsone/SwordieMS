@@ -5,6 +5,6 @@ def init():
                + "\r\n#L3#Ellinia#l\r\n#L4#Perion#l")
 
 def action(response, answer):
-    #sm.sendSay("Response was " + str(response) + "\r\rAnswer was " + str(answer))
+    # sm.sendSay("Response was " + str(response) + "\r\rAnswer was " + str(answer))
     sm.warp(maps[answer], 0)
     sm.dispose()

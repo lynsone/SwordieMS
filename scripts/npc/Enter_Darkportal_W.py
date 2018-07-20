@@ -1,4 +1,4 @@
-#Demon's Doorway (9201128) | Big Rocky Road
+# Demon's Doorway (9201128) | Big Rocky Road
 
 quest = 28179       # Treasure, and Andras the Demon  Quest
 mapid = 677000004   # Andras Strolling Path (Map before Boss Map)

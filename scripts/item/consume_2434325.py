@@ -1,4 +1,4 @@
-#Scarecrow Summoning Sack (2434325) | Used to spawn a Dojo Dummy on Client's position
+# Scarecrow Summoning Sack (2434325) | Used to spawn a Dojo Dummy on Client's position
 from net.swordie.ms.constants import GameConstants
 
 STRAW_DUMMY_ID = 9305655
@@ -12,7 +12,7 @@ def init():
 
     else:
         sm.spawnMobOnChar(STRAW_DUMMY_ID)
-        sm.removeMobsAfterTimer(STRAW_DUMMY_ID, GameConstants.DOJO_DUMMY_DURATION * 60) #Template ID & Seconds
+        sm.removeMobsAfterTimer(STRAW_DUMMY_ID, GameConstants.DOJO_DUMMY_DURATION * 60) # Template ID & Seconds
         sm.chatBlue("The Training Dummy will be removed after "+ str(GameConstants.DOJO_DUMMY_DURATION) +" minutes.")
         sm.consumeItem(parentID)
     sm.dispose()

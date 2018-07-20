@@ -1,7 +1,7 @@
-#[Commerci Republic] Neinheart's Call
+# [Commerci Republic] Neinheart's Call
 
 status = -1
-sm.setSpeakerID(1064026) #Neinheart
+sm.setSpeakerID(1064026) # Neinheart
 def init():
     sm.sendAskYesNo("Ah good, I've managed to reach you. The Empress has been asking for you. Could you come to Ereve?\r\n"
                     "#b(You will be moved to Ereve if you accept.)")

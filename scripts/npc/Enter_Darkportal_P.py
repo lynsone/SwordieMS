@@ -1,4 +1,4 @@
-#Demon's Doorway (9201132) | Ribbon Pig Beach
+# Demon's Doorway (9201132) | Ribbon Pig Beach
 
 quest = 28256       # Treasure, and Crocell the Demon  Quest
 mapid = 677000006   # Crocell Strolling Path (Map before Boss Map)

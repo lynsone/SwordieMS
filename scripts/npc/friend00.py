@@ -1,4 +1,4 @@
-#Mr. Goldstein | Buddy List Admin
+# Mr. Goldstein | Buddy List Admin
 status = -1
 
 def init():
@@ -18,7 +18,7 @@ def action(response, answer):
             sm.dispose()
     elif status == 2:
         if response == 1:
-            #Check Buddy Capacity //TODO
+            # Check Buddy Capacity //TODO
             if sm.getMesos() < 250000:
                 sm.sendSayOkay("Hey... are you sure you have #b250,000 mesos#k? If so, then check and see if you have extended your buddy list to the max. Even if you pay up, the most you can have on your buddy list is #b100#k.")
             else:

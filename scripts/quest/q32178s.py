@@ -33,7 +33,7 @@ def action(response, answer):
         sm.sendNext("Magic? What is that? Do you eat that?")
 
     if status == 4:
-        sm.setSpeakerID(0) #Needs to be Player Avatar
+        sm.setSpeakerID(0) # Needs to be Player Avatar
         sm.sendNext("There also is a rumor that she is conducting some experiments with the children."
                     ""
                     "\r\n\r\n#r#e[This is meant to be Player Avatar]#k#n")
@@ -61,7 +61,7 @@ def action(response, answer):
                     "After curing a baby, and if it looks like it has recovered enough, "
                     "I would bring him to his people secretly at night.")
 
-    if status == 10: #Needs to be Player Avatar
+    if status == 10: # Needs to be Player Avatar
         sm.setSpeakerID(0)
         sm.sendNext("But why would you do such a thing despite all the misunderstandings?..."
                     ""

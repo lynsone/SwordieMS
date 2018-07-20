@@ -1,4 +1,4 @@
-#Suspicious Man (1061016) | Stairway to the Underground Temple
+# Suspicious Man (1061016) | Stairway to the Underground Temple
 
 items = [
     2040728,

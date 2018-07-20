@@ -1,4 +1,4 @@
-#Kyrin (1090000) | Navigation Room
+# Kyrin (1090000) | Navigation Room
 def init():
     if sm.getChr().getJob() == 0:
         sm.sendSayOkay("Speak to me if you want to become a Pirate.")

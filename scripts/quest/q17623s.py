@@ -1,4 +1,4 @@
-#[Commerci Republic] Another Outsider
+# [Commerci Republic] Another Outsider
 def init():
     sm.completeQuest(parentID)
     sm.dispose()

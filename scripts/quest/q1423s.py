@@ -1,4 +1,4 @@
-#Path of the Bandit
+# Path of the Bandit
 
 darkMarble = 4031013
 job = "Bandit"
@@ -25,7 +25,7 @@ def action(response, answer):
 
     if status == 2:
         if response == 1:
-            sm.warp(910370000, 0) #Thief Test Site
+            sm.warp(910370000, 0) # Thief Test Site
             sm.startQuestNoCheck(parentID)
         else:
             sm.sendSayOkay("You cannot be a Rogue forever. You #bwill#k have to face up to the test.\r\n"

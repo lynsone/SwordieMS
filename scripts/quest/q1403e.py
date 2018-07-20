@@ -6,7 +6,7 @@ def init():
 def action(response, answer):
     if response == 1:
         sm.completeQuestNoRewards(parentID)
-        sm.jobAdvance(300) #Archer
+        sm.jobAdvance(300) # Archer
         sm.sendSayOkay("You are now an #bArcher#k.")
 
         sm.startQuestNoCheck(1418)

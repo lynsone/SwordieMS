@@ -1,8 +1,8 @@
-#[Commerci Republic] Delfino Deleter 2
+# [Commerci Republic] Delfino Deleter 2
 
 status = -1
 def init():
-    sm.setSpeakerID(9390256) #Leon Daniella
+    sm.setSpeakerID(9390256) # Leon Daniella
     sm.sendNext("Is it just me, or am I totally awesome at fish-slaying?")
 
 def action(response, answer):

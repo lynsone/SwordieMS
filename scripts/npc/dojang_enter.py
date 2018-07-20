@@ -1,4 +1,4 @@
-#So Gong (2091011) | Mu Lung Dojo Hall
+# So Gong (2091011) | Mu Lung Dojo Hall
 
 status = -1
 dojoHall = 925020001
@@ -19,24 +19,24 @@ if sm.getFieldID() == dojoHall:
         if status == 0:
             selection = answer
 
-            if selection == 0: #I want to challenge Mu Lung Dojo
+            if selection == 0: # I want to challenge Mu Lung Dojo
                 if sm.getParty() is None or sm.getPartySize() > 1:
                     sm.sendSayOkay("Please be in a party of 1 to enter the Mu Lung Dojo.")
                     sm.dispose()
                 else:
-                    sm.warpPartyIn(925070100) #Dojo Floor 1
+                    sm.warpPartyIn(925070100) # Dojo Floor 1
                     sm.dispose()
 
-            elif selection == 1: #What is Mu Lung Dojo?
+            elif selection == 1: # What is Mu Lung Dojo?
                 sm.sendSayOkay("#r//TODO")
                 sm.dispose()
-            elif selection == 2: #What rewards can I get from Mu Lung Dojo?
+            elif selection == 2: # What rewards can I get from Mu Lung Dojo?
                 sm.sendSayOkay("#r//TODO")
                 sm.dispose()
-            elif selection == 3: #How many attempts do I have left today?
+            elif selection == 3: # How many attempts do I have left today?
                 sm.sendSayOkay("#r//TODO")
                 sm.dispose()
-            elif selection == 4: #I'd like to enter the Unity Training Center.
+            elif selection == 4: # I'd like to enter the Unity Training Center.
                 sm.sendSayOkay("#r//TODO")
                 sm.dispose()
 

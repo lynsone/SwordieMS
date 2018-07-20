@@ -1,4 +1,4 @@
-#Neru (2040033) | Ludibrium Pet Walkway
+# Neru (2040033) | Ludibrium Pet Walkway
 def init():
     if sm.hasItem(4031128):
         sm.sendNext("Eh, that's my brother's letter! "
@@ -15,5 +15,5 @@ def action(response, answer):
     sm.consumeItem(4031128)
     sm.sendSayOkay("What do you think? Don't you think you have gotten much closer with your pet? "
                    "If you have time, train your pet again on this obstacle course...of course, with my brother's permission.")
-    #Pet Closeness Gained
+    # Pet Closeness Gained
     sm.dispose()

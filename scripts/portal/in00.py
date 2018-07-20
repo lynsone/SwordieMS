@@ -1,7 +1,7 @@
 status = -1
 
 if sm.getFieldID() == 951000000:
-	#Monster Park
+	# Monster Park
 
 	minLv = 105
 	maxLv = 115
@@ -141,7 +141,7 @@ else:
 
 		elif currentMap == 310050100: # Verne Mine : Power Plant Lobby
 			sm.chat("Destroy the Energy Conducting Device!")
-			#warp is meant to stay True
+			# warp is meant to stay True
 
 		elif currentMap == 310060221: # Hidden Street : Leery Corridor
 			if sm.hasQuest(23043):
@@ -154,7 +154,7 @@ else:
 				sm.dispose()
 
 
-		#ToT Portals
+		# ToT Portals
 		elif currentMap == 270000000: # Time Lane: Three doors
 			if not sm.hasQuestCompleted(3500): # time lane quest
 				warp = False
@@ -186,7 +186,7 @@ else:
 				sm.dispose()
 
 
-		#Boss Portal
+		# Boss Portal
 		elif currentMap == 223030200:
 			warp = False
 			sm.sendAskYesNo("Would you like to battle scarlion and targa?")
@@ -196,12 +196,12 @@ else:
 			sm.sendAskYesNo("Would you like to battle cygnus?")
 
 
-		#Default script
+		# Default script
 		else:
 			sm.chat("(Portal - in00) This script isn't coded for this map.")
 			sm.dispose()
 
-		#Warp
+		# Warp
 		if warp:
 			sm.warp(field[currentMap], portal[currentMap])
 			sm.dispose()

@@ -1,19 +1,19 @@
-#Casey (1012008) | Henesys Park
+# Casey (1012008) | Henesys Park
 
 items = [
-    4080000,   #Slime & Mushroom Omok Set
-    4080001,   #Slime & Octopus Omok Set
-    4080002,   #Slime & Pig Omok Set
-    4080003,   #Octopus & Mushroom Omok Set
-    4080004,   #Pig & Octopus Omok Set
-    4080005,   #Pig & Mushroom Omok Set
-    4080006,   #Bloctopus & Pink Teddy Omok Set
-    4080007,   #Bloctopus & Trixter Omok Set
-    4080008,   #Pink Teddy & Trixter Omok Set
-    4080009,   #Panda Teddy & Blocktopus Omok Set
-    4080010,   #Panda Teddy & Pink Teddy Omok Set
-    4080011,   #Panda Teddy & Trixter Omok Set
-    4080100,   #A set of Match Cards
+    4080000,   # Slime & Mushroom Omok Set
+    4080001,   # Slime & Octopus Omok Set
+    4080002,   # Slime & Pig Omok Set
+    4080003,   # Octopus & Mushroom Omok Set
+    4080004,   # Pig & Octopus Omok Set
+    4080005,   # Pig & Mushroom Omok Set
+    4080006,   # Bloctopus & Pink Teddy Omok Set
+    4080007,   # Bloctopus & Trixter Omok Set
+    4080008,   # Pink Teddy & Trixter Omok Set
+    4080009,   # Panda Teddy & Blocktopus Omok Set
+    4080010,   # Panda Teddy & Pink Teddy Omok Set
+    4080011,   # Panda Teddy & Trixter Omok Set
+    4080100,   # A set of Match Cards
 ]
 mesocost = 5000
 

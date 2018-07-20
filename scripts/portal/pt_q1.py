@@ -1,7 +1,7 @@
 from net.swordie.ms.client.character.skills.temp import CharacterTemporaryStat
 
 field = {
-    141060000 : 141010400   #Middle of Strait : Nora's Cove
+    141060000 : 141010400   # Middle of Strait : Nora's Cove
 }
 
 portal = {
@@ -17,8 +17,8 @@ def init():
             warp = False
             sm.dispose()
         else:
-            #Ride Vehicle Check
-            if sm.getnOptionByCTS(CharacterTemporaryStat.RideVehicle) == 1932102: #Mini Viking Ship used in Riena Strait
+            # Ride Vehicle Check
+            if sm.getnOptionByCTS(CharacterTemporaryStat.RideVehicle) == 1932102: # Mini Viking Ship used in Riena Strait
                 sm.removeCTS(CharacterTemporaryStat.RideVehicle)
 
 

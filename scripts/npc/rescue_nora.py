@@ -1,4 +1,4 @@
-#Nora the Explorer (1514002) | Nora's Cove
+# Nora the Explorer (1514002) | Nora's Cove
 
 status = -1
 
@@ -48,6 +48,6 @@ def action(response, answer):
         sm.sendNext("Thank you! You will not regret it.\r\n"
                     "(You will be transported to the 1st Observatory.)")
         sm.completeQuestNoRewards(32170) # [Riena Strait] Nerd Rescue
-        sm.giveExp(27718) #Exp Given
-        sm.warp(141010000,0) #Ice Station 1
+        sm.giveExp(27718) # Exp Given
+        sm.warp(141010000,0) # Ice Station 1
         sm.dispose()

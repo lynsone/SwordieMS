@@ -1,8 +1,8 @@
-#[Commerci Republic] Delfinos? More Like dead Fishos
+# [Commerci Republic] Delfinos? More Like dead Fishos
 
 status = -1
 def init():
-    sm.setSpeakerID(9390203) #Gilberto Daniella
+    sm.setSpeakerID(9390203) # Gilberto Daniella
     sm.sendAskYesNo("Are you curious about the Delfino?")
 
 def action(response, answer):
@@ -30,44 +30,44 @@ def action(response, answer):
         sm.sendNext("The Delfinos must be treated with a firm and swift hand. It's the only thing they'll respect.")
 
     elif status == 4:
-        sm.setSpeakerID(0) #Has to be Player Avatar
+        sm.setSpeakerID(0) # Has to be Player Avatar
         sm.sendNext("#b(This is my chance!)#k\r\n"
                     "Excuse me, prime minister, but I'd like to help you against the Delfinos.")
 
     elif status == 5:
-        sm.setSpeakerID(9390203) #Gilberto Daniella
+        sm.setSpeakerID(9390203) # Gilberto Daniella
         sm.sendNext("Why? This isn't your fight. This isn't even your country.")
 
     elif status == 6:
-        sm.setSpeakerID(0) #Has to be Player Avatar
+        sm.setSpeakerID(0) # Has to be Player Avatar
         sm.sendNext("It's part of my responsibility as an envoy from Maple World to aid in the affairs of our #bAlly nations#k.")
 
     elif status == 7:
-        sm.setSpeakerID(9390203) #Gilberto Daniella
+        sm.setSpeakerID(9390203) # Gilberto Daniella
         sm.sendNext("Thank you for the thought, but we can...")
 
     elif status == 8:
-        sm.setSpeakerID(9390256) #Leon Daniella
+        sm.setSpeakerID(9390256) # Leon Daniella
         sm.sendNext("Daddy! I mean, pops! #h0# is really strong! Plus, #h0# is my sidekick!")
 
     elif status == 9:
-        sm.setSpeakerID(9390203) #Gilberto Daniella
+        sm.setSpeakerID(9390203) # Gilberto Daniella
         sm.sendNext("We're not so weak that we have to rely on outside nations for aid.")
 
     elif status == 10:
-        sm.setSpeakerID(9390256) #Leon Daniella
+        sm.setSpeakerID(9390256) # Leon Daniella
         sm.sendNext("That's totally not what I meant, daddy.")
 
     elif status == 11:
-        sm.setSpeakerID(9390203) #Gilberto Daniella
+        sm.setSpeakerID(9390203) # Gilberto Daniella
         sm.sendNext("Just get out there and eliminate those Delfinos...")
 
     elif status == 12:
-        sm.setSpeakerID(9390256) #Leon Daniella
+        sm.setSpeakerID(9390256) # Leon Daniella
         sm.sendNext("Y-yes, daddy")
 
     elif status == 13:
-        sm.setSpeakerID(9390203) #Gilberto Daniella
+        sm.setSpeakerID(9390203) # Gilberto Daniella
         sm.sendNext("#h0#? I appreciate the offer, but I don't want outsiders getting involved with our state affairs. I hope you understand.")
         sm.startQuest(parentID)
         sm.dispose()

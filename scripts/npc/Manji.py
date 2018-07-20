@@ -1,4 +1,4 @@
-#Manji (1022002) | Perion
+# Manji (1022002) | Perion
 def init():
     if sm.getChr().getLevel() < 50:
         sm.sendSayOkay("Leave now.. before you get hurt.")

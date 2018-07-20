@@ -5,7 +5,7 @@ lumber = 4030022
 exp = 17739
 
 def init():
-    sm.setSpeakerID(1510005) #Daichi
+    sm.setSpeakerID(1510005) # Daichi
 
     sm.sendNext("Have you collected all the lumber?\r\n\r\n"
                 "#b#v"+ str(lumber) +"##t"+ str(lumber) +"##k\r\n\r\n"

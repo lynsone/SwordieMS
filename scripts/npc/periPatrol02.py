@@ -1,4 +1,4 @@
-#Perion Warning Post (1022107) | Dusty Wind Hill
+# Perion Warning Post (1022107) | Dusty Wind Hill
 def init():
     if sm.hasQuest(22530):
         if not sm.canHold(1952000):

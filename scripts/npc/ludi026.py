@@ -1,4 +1,4 @@
-#Wisp (2040030) | Eos Tower Entrance
+# Wisp (2040030) | Eos Tower Entrance
 
 status = -1
 

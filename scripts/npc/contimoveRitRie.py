@@ -1,4 +1,4 @@
-#Puro (1200004) | Lith Harbor
+# Puro (1200004) | Lith Harbor
 def init():
     sm.sendAskYesNo("Would you like to go to #b#m"+ str(140000000) +"##k?")
 

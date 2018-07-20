@@ -1,4 +1,4 @@
-#Hotel Receptionist (1061100) | Sleepywood Hotel
+# Hotel Receptionist (1061100) | Sleepywood Hotel
 
 status = -1
 

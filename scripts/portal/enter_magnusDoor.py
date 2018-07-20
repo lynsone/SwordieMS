@@ -2,7 +2,7 @@ def init():
     sm.sendAskYesNo("Would you like to fight magnus?")
 
 def action(response, answer):
-    #sm.sendSay("Response was " + str(response) + "\r\rAnswer was " + str(answer))
+    # sm.sendSay("Response was " + str(response) + "\r\rAnswer was " + str(answer))
     if response == 1:
         if sm.getParty() is None:
             sm.sendSayOkay("Please create a party before going in.")

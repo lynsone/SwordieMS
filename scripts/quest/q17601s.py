@@ -1,7 +1,7 @@
-#[Commerci Republic] In the Name of the Empress
+# [Commerci Republic] In the Name of the Empress
 
 status = -1
-sm.setSpeakerID(1064023) #Cygnus
+sm.setSpeakerID(1064023) # Cygnus
 def init():
     sm.sendNext("Ah #b#h0##k you've come! My apologies for bringing you here on such short notice. Tell me, have you heard of the land of Commerci, by any chance?")
     if not sm.hasQuest(parentID):
@@ -28,7 +28,7 @@ def action(response, answer):
 
     elif status == 3:
         if response == 1:
-            sm.sendNext("I know you own't let me down.")
+            sm.sendNext("I know you won't let me down.")
             sm.completeQuest(parentID)
         else:
             sm.sendSayOkay("Please, let me know when you are willing to accept the mission. but make up your mind soon, time is of the essence.")

@@ -6,7 +6,7 @@ def init():
 def action(response, answer):
     if response == 1:
         sm.completeQuestNoRewards(parentID)
-        sm.jobAdvance(500) #Pirate
+        sm.jobAdvance(500) # Pirate
         sm.sendSayOkay("You are now a #bPirate#k.")
 
         sm.startQuestNoCheck(1424)

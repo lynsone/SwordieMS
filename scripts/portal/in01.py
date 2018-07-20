@@ -1,7 +1,7 @@
 status = -1
 
 if sm.getFieldID() == 863010000:
-    #Gollux
+    # Gollux
     def init():
         sm.sendAskYesNo("Would you like to battle Gollux?")
 
@@ -18,7 +18,7 @@ if sm.getFieldID() == 863010000:
 
 
 elif sm.getFieldID() == 951000000:
-    #Monster Park
+    # Monster Park
 
     minLv = 115
     maxLv = 160

@@ -1,4 +1,4 @@
-#Used to remove the Red Draco Morph Buff In Time Lane : Temple of Time
+# Used to remove the Red Draco Morph Buff In Time Lane : Temple of Time
 from net.swordie.ms.client.character.skills.temp import CharacterTemporaryStat
 
 def init():

@@ -1,4 +1,4 @@
-#Used to remove the Red Draco Morph Buff In Leafre : Station
+# Used to remove the Red Draco Morph Buff In Leafre : Station
 from net.swordie.ms.client.character.skills.temp import CharacterTemporaryStat
 
 def init():

@@ -1,4 +1,4 @@
-#Ms. Tan (1012105) | Henesys Skin-Care
+# Ms. Tan (1012105) | Henesys Skin-Care
 def init():
     sm.sendNext("Well, hello! Welcome to the Henesys Skin-Care! "
                 "Would you like to have a firm, tight, healthy looking skin like mine? "

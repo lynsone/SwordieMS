@@ -1,7 +1,7 @@
-#[Commerci Republic] Neinheart's Request
+# [Commerci Republic] Neinheart's Request
 
 status = -1
-sm.setSpeakerID(1064026) #Neinheart
+sm.setSpeakerID(1064026) # Neinheart
 def init():
     sm.sendNext("According to intelligence reports, the people of Commerci are fiercely independent. "
                 "The Empress means well, but in their eyes, any outreach might be thought an attempt to draw them under our influence. "

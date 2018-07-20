@@ -1,4 +1,4 @@
-#Puro (1200003) | Snow Island : Penguin Port
+# Puro (1200003) | Snow Island : Penguin Port
 
 victoriaIslandPrice = 800
 

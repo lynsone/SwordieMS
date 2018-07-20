@@ -1,7 +1,7 @@
-#Arwen the Fairy (1032100) | Ellinia
+# Arwen the Fairy (1032100) | Ellinia
 
 status = -1
-squishyLiquid = 4000004 #goes for 14meso per item in Shops
+squishyLiquid = 4000004 # goes for 14meso per item in Shops
 squishyLiquidQ = 100
 
 slimeid = 100006

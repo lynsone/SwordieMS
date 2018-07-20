@@ -1,4 +1,4 @@
-#Puro (1511001) | Glacial Observatory
+# Puro (1511001) | Glacial Observatory
 def init():
     sm.sendAskYesNo("You want to head back to Rien?")
 

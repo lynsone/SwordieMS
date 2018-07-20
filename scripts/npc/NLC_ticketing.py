@@ -1,4 +1,4 @@
-#Train trip to/from NLC doesn't display a script#
+# Train trip to/from NLC doesn't display a script#
 map = 600010001
 string = "New Leaf City"
 if sm.getFieldID() == 600010001:

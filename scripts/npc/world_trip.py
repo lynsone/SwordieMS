@@ -1,4 +1,4 @@
-#Spinel | World Tour Guide
+# Spinel | World Tour Guide
 status = -1
 
 def init():

@@ -1,11 +1,11 @@
-#[Commerci Republic] Delfinos? More like dead Fishos
+# [Commerci Republic] Delfinos? More like dead Fishos
 from net.swordie.ms.constants import WzConstants
 
 COMMERCI_SUIT = 1052673
 expGiven = 530255
 status = -1
 def init():
-    sm.setSpeakerID(0) #Has to be Player Avatar
+    sm.setSpeakerID(0) # Has to be Player Avatar
     sm.sendNext("I'm not hinting that you're weak, prime minister. I just want to support you, as a friend of #bLeon#k.")
 
 def action(response, answer):
@@ -13,7 +13,7 @@ def action(response, answer):
     status += 1
 
     if status == 0:
-        sm.setSpeakerID(9390203) #Gilberto Daniella
+        sm.setSpeakerID(9390203) # Gilberto Daniella
         sm.sendNext("That's fine.")
 
     if status == 1:
@@ -24,7 +24,7 @@ def action(response, answer):
                     ""+ str(expGiven) +" exp")
 
     if status == 2:
-        sm.giveExp(expGiven) #Give Exp
-        sm.giveItem(COMMERCI_SUIT) #Give Commerci Suit
+        sm.giveExp(expGiven) # Give Exp
+        sm.giveItem(COMMERCI_SUIT) # Give Commerci Suit
         sm.completeQuest(parentID)
         sm.dispose()

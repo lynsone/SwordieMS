@@ -1,41 +1,41 @@
 #   [Job Advancement] The 5 Paths
 
 selections = [
-    [#Warrior
-        "mighty Warriors",  #String for in text
-        102000003,          #hideout mapID
-        1401                #Quest ID
+    [# Warrior
+        "mighty Warriors",  # String for in text
+        102000003,          # hideout mapID
+        1401                # Quest ID
     ],
 
-    [#Magician
-        "wise Magicians",   #String for in text
-        101000003,          #hideout mapID
-        1402                #Quest ID
+    [# Magician
+        "wise Magicians",   # String for in text
+        101000003,          # hideout mapID
+        1402                # Quest ID
     ],
 
-    [#Archers
-        "accurate Bowmen",  #String for in text
-        100000201,          #hideout mapID
-        1403                #Quest ID
+    [# Archers
+        "accurate Bowmen",  # String for in text
+        100000201,          # hideout mapID
+        1403                # Quest ID
     ],
 
-    [#Thieves
-        "stealthy Thieves", #String for in text
-        103000003,          #hideout mapID
-        1404                #Quest ID
+    [# Thieves
+        "stealthy Thieves", # String for in text
+        103000003,          # hideout mapID
+        1404                # Quest ID
     ],
 
-    [#Pirates
-        "flashy Pirates",   #String for in text
-        120000101,          #hideout mapID
-        1405                #Quest ID
+    [# Pirates
+        "flashy Pirates",   # String for in text
+        120000101,          # hideout mapID
+        1405                # Quest ID
     ]
 ]
 
 status = -1
 
 def init():
-    sm.setSpeakerID(10301) #Mai
+    sm.setSpeakerID(10301) # Mai
     sm.sendNext("I see you have reached level 10!\r\nIt is time for you to select your future.")
 
 def action(response, answer):

@@ -1,4 +1,4 @@
-#Mu Young (1061018) | Balrog Boss Map
+# Mu Young (1061018) | Balrog Boss Map
 def init():
     sm.sendAskYesNo("If you leave now, you'll have to start over.\r\n"
                     "Are you sure you want to leave?")

@@ -25,8 +25,8 @@ field = {
     240010102 : 240010101,
     260010601 : 260010600,
     106030402 : 106030101,
-    270000100 : 200090510, #ToT : Dragon Flight-2nd Map
-    865020051 : 865020300, #Canal Battle Ground 5 : Canal 4
+    270000100 : 200090510, # ToT : Dragon Flight-2nd Map
+    865020051 : 865020300, # Canal Battle Ground 5 : Canal 4
 }
 
 portal = {
@@ -65,7 +65,7 @@ def init():
     fieldID = sm.getFieldID()
 
 
-    #Dojo Floors
+    # Dojo Floors
     if fieldID / 10000 == 92507:
         warp = False
         if sm.mobsPresentInField():
@@ -74,50 +74,50 @@ def init():
             sm.teleportToPortal(6)
         sm.dispose()
 
-    #Cygnus' Chamber
+    # Cygnus' Chamber
     elif fieldID == 271040100:
         sm.sendAskYesNo("Are you sure you want to leave?")
         warp = False
 
-    #Riena Strait Portals
+    # Riena Strait Portals
     elif fieldID == 141010000 or fieldID == 141020000 or fieldID == 141040000 or fieldID == 141050000: # [Riena Strait] Ice Station 1  or [Riena Strait] Ice Station 2  or  [Riena Strait] Barbara's House
         sm.openNpc(1510006)
 
-    #ToT -> Leafre START
+    # ToT -> Leafre START
     elif fieldID == 270000100: # Time Lane : ToT
         sm.useItem(2210016)
 
-    #Scarlion & Targa
+    # Scarlion & Targa
     elif fieldID == 223030210:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #Arkarium
+    # Arkarium
     elif fieldID == 272030400:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #CQueen
+    # CQueen
     elif fieldID == 105200310:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #Pierre
+    # Pierre
     elif fieldID == 105200210:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #VonBon
+    # VonBon
     elif fieldID == 105200110:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #Vellum
+    # Vellum
     elif fieldID == 105200410:
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
-    #FM
+    # FM
     elif fieldID == 910000000:
         warp = False
         oldFieldID = sm.getReturnField()

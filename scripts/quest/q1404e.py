@@ -7,7 +7,7 @@ def init():
 def action(response, answer):
     if response == 1:
         sm.completeQuestNoRewards(parentID)
-        sm.jobAdvance(400) #Thief
+        sm.jobAdvance(400) # Thief
         sm.addAP(40)
         sm.getChr().addStatAndSendPacket(Stat.str, -40)
         sm.sendSayOkay("You are now a #bThief#k.")

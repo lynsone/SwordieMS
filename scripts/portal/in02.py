@@ -1,7 +1,7 @@
 status = -1
 
 if sm.getFieldID() == 951000000:
-	#Monster Park
+	# Monster Park
 
 	minLv = 160
 	maxLv = 250

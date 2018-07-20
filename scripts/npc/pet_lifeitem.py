@@ -1,4 +1,4 @@
-#Trainer Bartos (1012006) | Pet-Walking Road
+# Trainer Bartos (1012006) | Pet-Walking Road
 
 status = -1
 

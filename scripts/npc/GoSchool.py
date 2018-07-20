@@ -1,4 +1,4 @@
-#Schrodinger (9330189) | Perion
+# Schrodinger (9330189) | Perion
 def init():
     sm.sendAskYesNo("Do you wish to visit the #b#m"+ str(744000000) +"##k?")
 

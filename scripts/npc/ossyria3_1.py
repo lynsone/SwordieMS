@@ -1,10 +1,10 @@
 # Orbis Magic Spot (2012014) | Orbis Tower <20th/16th/8th/1st Floor>
 
 maps =  [
-            200080200, #Orbis Tower <20th Floor>
-            200080600, #Orbis Tower <16th Floor>
-            200081400, #Orbis Tower <8th Floor>
-            200082100  #Orbis Tower <1st Floor>
+            200080200, # Orbis Tower <20th Floor>
+            200080600, # Orbis Tower <16th Floor>
+            200081400, # Orbis Tower <8th Floor>
+            200082100  # Orbis Tower <1st Floor>
         ]
 
 def init():

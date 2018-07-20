@@ -5,35 +5,35 @@ def init():
 		map = 930100500
 		portal = 0
 
-	#To Crimson Queen
+	# To Crimson Queen
 	elif fieldID == 105200300:
-		#if sm.mobsPresentInField():
-		#	sm.chat("Elimate all monster before proceeding.")
-		#else:
+		# if sm.mobsPresentInField():
+		# 	sm.chat("Elimate all monster before proceeding.")
+		# else:
 			map = 105200310
 			portal = 0
 
-	#To Pierre
+	# To Pierre
 	elif fieldID == 105200200:
-		#if sm.mobsPresentInField():
-		#	sm.chat("Elimate all monster before proceeding.")
-		#else:
+		# if sm.mobsPresentInField():
+		# 	sm.chat("Elimate all monster before proceeding.")
+		# else:
 		map = 105200210
 		portal = 0
 
-	#To VonBon
+	# To VonBon
 	elif fieldID == 105200100:
-		#if sm.mobsPresentInField():
-		#	sm.chat("Elimate all monster before proceeding.")
-		#else:
+		# if sm.mobsPresentInField():
+		# 	sm.chat("Elimate all monster before proceeding.")
+		# else:
 		map = 105200110
 		portal = 0
 
-	#To VonBon
+	# To VonBon
 	elif fieldID == 105200400:
-		#if sm.mobsPresentInField():
-		#	sm.chat("Elimate all monster before proceeding.")
-		#else:
+		# if sm.mobsPresentInField():
+		# 	sm.chat("Elimate all monster before proceeding.")
+		# else:
 		map = 105200410
 		portal = 0
 

@@ -1,4 +1,4 @@
-#Corba (2082003) | Leafre Station
+# Corba (2082003) | Leafre Station
 def init():
     sm.sendNext("If you had wings, I'm sure you could go there.  "
                 "But, that alone won't be enough.  "
@@ -11,5 +11,5 @@ def init():
 def action(response, answer):
     if answer == 0:
         sm.warp(200090500)
-        sm.useItem(2210016) #Become  Red Flying Draco
+        sm.useItem(2210016) # Become  Red Flying Draco
     sm.dispose()
