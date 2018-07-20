@@ -6,8 +6,13 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.guild.result.GuildMsg;
 import net.swordie.ms.client.guild.result.GuildResultType;
 import net.swordie.ms.client.party.Party;
@@ -17,11 +22,13 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.InvType;
-import net.swordie.ms.enums.QuestStatus;
-import net.swordie.ms.enums.Stat;
-import net.swordie.ms.enums.UIType;
+import net.swordie.ms.enums.*;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.DeathType;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.loaders.FieldData;
@@ -29,6 +36,7 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.NpcData;
 import net.swordie.ms.loaders.QuestData;
 import net.swordie.ms.util.FileTime;
+import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
@@ -41,11 +49,10 @@ import javax.script.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
 import static net.swordie.ms.enums.ChatMsgColour.*;
 import static net.swordie.ms.life.npc.NpcMessageType.*;
 
@@ -419,6 +426,14 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.warp(field);
 	}
 
+	public void teleportToPortal(int portalId) {
+		Portal portal = chr.getField().getPortalByID(portalId);
+		if (portal != null) {
+			Position position = new Position(portal.getX(), portal.getY());
+			chr.write(CField.teleport(position, chr));
+		}
+	}
+
 	@Override
 	public void chat(String text) {
 		chatRed(text);
@@ -434,9 +449,16 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.chatMessage(GAME_NOTICE, text);
 	}
 
+	public void chatScript(String text) {chr.chatScriptMessage(text);}
+
 	@Override
 	public void giveMesos(long mesos) {
 		chr.addMoney(mesos);
+	}
+
+	@Override
+	public void deductMesos(long mesos) {
+		chr.deductMoney(mesos);
 	}
 
 	public void completeQuest(int id) {
@@ -480,35 +502,87 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
+	public void giveItem(int id) {
+		giveItem(id, 1);
+	}
+
+	@Override
 	public void giveItem(int id, int quantity) {
 		chr.addItemToInventory(id, quantity);
 	}
 
 	@Override
+	public boolean hasItem(int id) {
+		return hasItem(id, 1);
+	}
+
+	@Override
 	public boolean hasItem(int id, int quantity) {
-		int q = 1;
-		if (ItemConstants.isEquip(id)) {  //Equip
+		return getQuantityOfItem(id) >= quantity;
+	}
+
+	@Override
+	public void useItem(int id) {
+		ItemBuffs.giveItemBuffsFromItemID(chr, chr.getTemporaryStatManager(), id);
+	}
+
+	@Override
+	public int getQuantityOfItem(int id) {
+		if (ItemConstants.isEquip(id)) {
 			Item equip = chr.getInventoryByType(InvType.EQUIP).getItemByItemID(id);
 			if (equip == null) {
-				return false;
+				return 0;
 			}
-			q = equip.getQuantity();
+			return equip.getQuantity();
 		} else {
 			Item item2 = ItemData.getItemDeepCopy(id);
 			InvType invType = item2.getInvType();
 			Item item = chr.getInventoryByType(invType).getItemByItemID(id);
 			if (item == null) {
-				return false;
+				return 0;
 			}
-			q = item.getQuantity();
+			return item.getQuantity();
 		}
-
-		return q >= quantity;
 	}
 
 	@Override
 	public boolean canHold(int id) {
 		return chr.canHold(id);
+	}
+
+	@Override
+	public void giveCTS(CharacterTemporaryStat cts, int nOption, int rOption, int time) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		Option o = new Option();
+		o.nOption = nOption;
+		o.rOption = rOption;
+		o.tOption = time;
+		tsm.putCharacterStatValue(cts, o);
+		tsm.sendSetStatPacket();
+	}
+
+	@Override
+	public void removeCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		tsm.removeStat(cts, false);
+	}
+
+	@Override
+	public void removeBuffBySkill(int skillId) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		tsm.removeStatsBySkill(skillId);
+	}
+
+	@Override
+	public boolean hasCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		return tsm.hasStat(cts);
+	}
+
+	@Override
+	public int getnOptionByCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		return hasCTS(cts) ? tsm.getOption(cts).nOption : 0;
 	}
 
 	@Override
@@ -520,6 +594,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	public Party getParty() {
 		return chr.getParty();
 	}
+
+	@Override
+	public int getPartySize() {return getParty().getMembers().size();}
 
 	@Override
 	public void setPartyField() {
@@ -629,6 +706,27 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.getField().spawnMob(id, x, y, respawnable, hp);
 	}
 
+	public void removeMobByObjId(int id) {
+		chr.getField().removeLife(id);
+		chr.getField().broadcastPacket(MobPool.mobLeaveField(id, DeathType.ANIMATION_DEATH));
+	}
+
+	public void removeMobsByTemplateId(int id) {
+		List<Mob> mobList = chr.getField().getMobs();
+		if (mobList.size() > 0) {
+			for (Mob mob : mobList) {
+				if (mob.getTemplateId() != id) {
+					continue;
+				}
+				removeMobByObjId(mob.getObjectId());
+			}
+		}
+	}
+
+	public void removeMobsAfterTimer(int mobid, int seconds) { //Template id
+		EventManager.addEvent(() -> removeMobsByTemplateId(mobid), seconds, TimeUnit.SECONDS);
+	}
+
 	@Override
 	public void showHP(int templateID) {
 		chr.getField().getMobs().stream()
@@ -639,11 +737,45 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void showHP() {
-
 		chr.getField().getMobs().stream()
 				.filter(m -> m.getHp() > 0)
 				.findFirst()
 				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
+	}
+
+	public void spawnNpc(int npcId, int x, int y) {
+		Npc npc = NpcData.getNpcDeepCopyById(npcId);
+		chr.getField().spawnLife(npc, chr);
+	}
+
+	public void removeNpc(int npcId) { //TODO Fix
+		List<Life> removeLifeSet = new ArrayList<>();
+		List<Life> lifes = chr.getField().getLifes();
+		if(lifes.size() > 0) {
+			for (Life life : lifes) {
+				if (life instanceof Npc) {
+					if (life.getTemplateId() != npcId) {
+						continue;
+					}
+					removeLifeSet.add(life);
+				}
+			}
+		}
+		//TODO
+		if(removeLifeSet.size()>1) {
+			chr.getField().removeLife(removeLifeSet.get(0).getObjectId());
+		}
+	}
+
+	public void openNpc(int npcID) { //TODO Fix
+		Npc npc = NpcData.getNpcDeepCopyById(npcID);
+		String script;
+		if(npc.getScripts().size() > 0) {
+			script = npc.getScripts().get(0);
+		} else {
+			script = String.valueOf(npc.getTemplateId());
+		}
+		chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
 	}
 
 	@Override
@@ -823,5 +955,32 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	public int getEmptyInventorySlots(InvType invType) {
 		return chr.getInventoryByType(invType).getEmptySlots();
+	}
+
+	public void showClearStageExpWindow(long expGiven) {
+		chr.write(CField.fieldEffect(FieldEffect.showClearStageExpWindow((int) expGiven)));
+		giveExpNoMsg(expGiven);
+	}
+
+	public void giveExp(long expGiven) {
+		chr.addExp(expGiven);
+	}
+
+	public void giveExpNoMsg(long expGiven) {
+		chr.addExpNoMsg(expGiven);
+	}
+
+	public int getRandomIntBelow(int upBound) {
+		return new Random().nextInt(upBound);
+	}
+
+	public void rideVehicle(int mountID) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+
+		tsb.setNOption(mountID);
+		tsb.setROption(0);
+		tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+		tsm.sendSetStatPacket();
 	}
 }

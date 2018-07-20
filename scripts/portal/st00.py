@@ -11,7 +11,7 @@ def init():
         map = 100000000
         portal = 0
     else:
-        #sm.chat("(Portal) This script (st00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
+        # sm.chat("(Portal) This script (st00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
         map = oldFieldID
         portal = 0
     if warp:

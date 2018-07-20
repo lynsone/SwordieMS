@@ -80,6 +80,7 @@ public enum SpecStat {
     senseEXP,
     charmEXP,
     inflation,
+    morph,
     ;
     public static SpecStat getSpecStatByName(String name) {
         if("int".equalsIgnoreCase(name)) {

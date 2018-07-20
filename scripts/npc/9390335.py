@@ -1,2 +1,3 @@
 def init():
-    sm.openTrunk(9390335)
+    sm.openTrunk(parentID)
+    sm.dispose()

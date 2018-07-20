@@ -8,5 +8,5 @@ def action(response, answer):
         elif not sm.isPartyLeader():
             sm.sendSayOkay("Please have your party leader enter if you wish to face Von Bon.")
         elif sm.checkParty():
-            sm.warpPartyIn(105200100) #East Garden
+            sm.warpPartyIn(105200100) # East Garden
     sm.dispose()

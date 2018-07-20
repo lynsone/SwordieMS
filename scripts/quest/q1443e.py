@@ -20,6 +20,6 @@ def action(response, answer):
         sm.consumeItem(blackCharm, 1)
         sm.completeQuestNoRewards(parentID)
         sm.sendSayOkay("You are now a #b"+ job +"#k.")
-        sm.jobAdvance(421) #Chief Bandit
-        sm.startQuestNoCheck(1456) #Thief 4th Job Quest
+        sm.jobAdvance(421) # Chief Bandit
+        sm.startQuestNoCheck(1456) # Thief 4th Job Quest
         sm.dispose()

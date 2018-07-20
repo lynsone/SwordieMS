@@ -1,4 +1,4 @@
-
 def init():
-    sm.sendNext("I don't sell any tickets.")
+    sm.sendNext("I hope you enjoy your stay.")
+    sm.dispose()
 

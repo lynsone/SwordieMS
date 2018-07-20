@@ -95,6 +95,9 @@ public class GameConstants {
     public static final int MAX_CS_ITEMS_PER_PAGE = 12;
     public static final int MAX_LOCKER_SIZE = 9999;
 
+    // Dojo
+    public static final int DOJO_DUMMY_DURATION = 10; // Dummy will stay alive for [] minutes, after which it will be removed.
+    public static final int DOJO_SPAWM_BOSS_DELAY = 3; // Spawn delay, in seconds, per boss on the Dojo Floors
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];

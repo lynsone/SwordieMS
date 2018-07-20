@@ -25,7 +25,7 @@ def action(response, answer):
 
     if status == 2:
         if response == 1:
-            sm.warp(912040000, 0) #Pirate Test Site
+            sm.warp(912040000, 0) # Pirate Test Site
             sm.startQuestNoCheck(parentID)
         else:
             sm.sendSayOkay("You cannot be a Magician forever. You #bwill#k have to face up to the test.\r\n"

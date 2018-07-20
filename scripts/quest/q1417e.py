@@ -20,6 +20,6 @@ def action(response, answer):
         sm.consumeItem(darkMarble, 30)
         sm.completeQuestNoRewards(parentID)
         sm.sendNext("You are now a #b"+ job +"#k.")
-        sm.jobAdvance(230) #Cleric
-        sm.completeQuestNoRewards(1434) #Chiefs of El Nath (Mage)
+        sm.jobAdvance(230) # Cleric
+        sm.completeQuestNoRewards(1434) # Chiefs of El Nath (Mage)
         sm.dispose()

@@ -20,6 +20,6 @@ def action(response, answer):
         sm.consumeItem(blackCharm, 1)
         sm.completeQuestNoRewards(parentID)
         sm.sendSayOkay("You are now a #b"+ job +"#k.")
-        sm.jobAdvance(511) #Marauder
-        sm.startQuestNoCheck(1458) #Pirate 4th Job Quest
+        sm.jobAdvance(511) # Marauder
+        sm.startQuestNoCheck(1458) # Pirate 4th Job Quest
         sm.dispose()

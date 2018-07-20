@@ -1,4 +1,4 @@
-#Thomas | Amoria Ambassador
+# Thomas | Amoria Ambassador
 status = -1
 
 def init():

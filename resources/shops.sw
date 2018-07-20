@@ -6339,7 +6339,7 @@
     }
 }
 1091000{
-	    pistol{
+    pistol{
         loc 0;
         tabindex 1;
         id 1492000;
@@ -6621,5 +6621,12310 @@
         tokenitemid 4310199;
         tokenprice 5;
         id 1582017;
+    }
+}
+2091012{
+    mini_mulung_dojo_chair{
+        loc 1;
+        tabindex 1;
+        id 3015240;
+        price 99000;
+    }
+    mulung_scarecrow_chair{
+        loc 2;
+        tabindex 1;
+        id 3015241;
+        price 99000;
+    }
+    so_gong_gloves{
+        loc 3;
+        tabindex 1;
+        id 1082394;
+        price 75000;
+    }
+    expert_gloves{
+        loc 4;
+        tabindex 1;
+        id 1082660;
+        price 60000;
+    }
+    expert_apprentice_glove{
+        loc 5;
+        tabindex 1;
+        id 1082661;
+        price 40000;
+    }
+    mulung_unidentified_belt_box{
+        loc 6;
+        tabindex 1;
+        id 2434284;
+        price 3000;
+    }
+    mulung_unidentified_glove_box{
+        loc 7;
+        tabindex 1;
+        id 2434285;
+        price 3000;
+    }
+    unidentified_traits_growth_box{
+        loc 8;
+        tabindex 1;
+        id 2434286;
+        price 1500;
+    }
+    special_medal_of_honor{
+        loc 9;
+        tabindex 1;
+        id 2434288;
+        price 6000;
+    }
+    mugong_honor_exp_guarantee{
+        loc 10;
+        tabindex 1;
+        id 2434287;
+        price 5000;
+    }
+    pendant_of_the_spirit{
+        loc 11;
+        tabindex 1;
+        id 1122017;
+        price 3000;
+    }
+    unity_training_center_entrance_charm_30min{
+        loc 12;
+        tabindex 1;
+        id 4001851;
+        price 3000;
+    }
+    unity_training_center_entrance_charm_1hour{
+        loc 13;
+        tabindex 1;
+        id 4001852;
+        price 5500;
+    }
+    unity_training_center_entrance_charm_3hour{
+        loc 14;
+        tabindex 1;
+        id 4001853;
+        price 15000;
+    }
+    unity_training_center_entrance_charm_6hour{
+        loc 15;
+        tabindex 1;
+        id 4001854;
+        price 29000;
+    }
+    epic_potential_scroll_50{
+        loc 16;
+        tabindex 1;
+        id 2049705;
+        price 15000;
+    }
+    bonus_potential_scroll_50{
+        loc 17;
+        tabindex 1;
+        id 2048308;
+        price 25000;
+    }
+    prototype_soul_enchanter{
+        loc 18;
+        tabindex 1;
+        id 2590004;
+        price 1000;
+    }
+    spell_trace{
+        loc 19;
+        tabindex 1;
+        id 4001832;
+        quantity 100;
+        price 800;
+    }
+    mulung_dojo_dmg_skin{
+        loc 20;
+        tabindex 1;
+        id 2434289;
+        price 70000;
+    }
+    scarecrow_summoning_sack{
+        loc 21;
+        tabindex 1;
+        id 2434325;
+        price 3500;
+    }
+}
+2041002{
+    gladius{
+        loc 1;
+        tabindex 1;
+        id 1302008;
+        price 40000;
+    }
+    cutlus{
+        loc 2;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 3;
+        tabindex 1;
+        id 1302009;
+        price 225000;
+    }
+    fireman_axe{
+        loc 4;
+        tabindex 1;
+        id 1312005;
+        price 40000;
+    }
+    dankke{
+        loc 5;
+        tabindex 1;
+        id 1312006;
+        price 100000;
+    }
+    blue_counter{
+        loc 6;
+        tabindex 1;
+        id 1312007;
+        price 175000;
+    }
+    war_hammer{
+        loc 7;
+        tabindex 1;
+        id 1322014;
+        price 40000;
+    }
+    heavy_hammer{
+        loc 8;
+        tabindex 1;
+        id 1322015;
+        price 100000;
+    }
+    jacker{
+        loc 9;
+        tabindex 1;
+        id 1322016;
+        price 175000;
+    }
+    cass{
+        loc 10;
+        tabindex 1;
+        id 1332009;
+        price 42000;
+    }
+    reef_claw{
+        loc 11;
+        tabindex 1;
+        id 1332012;
+        price 40000;
+    }
+    halfmoon_zamadar{
+        loc 12;
+        tabindex 1;
+        id 1332001;
+        price 200000;
+    }
+    gephart{
+        loc 13;
+        tabindex 1;
+        id 1332014;
+        price 355000;
+    }
+    bazlud{
+        loc 14;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    mithril_wand{
+        loc 15;
+        tabindex 1;
+        id 1372003;
+        price 38000;
+    }
+    wizard_wand{
+        loc 16;
+        tabindex 1;
+        id 1372001;
+        price 175000;
+    }
+    fairy_wand{
+        loc 17;
+        tabindex 1;
+        id 1372000;
+        price 400000;
+    }
+    wizard_staff{
+        loc 18;
+        tabindex 1;
+        id 1382002;
+        price 20000;
+    }
+    scimitar{
+        loc 19;
+        tabindex 1;
+        id 1402002;
+        price 150000;
+    }
+    lionheart{
+        loc 20;
+        tabindex 1;
+        id 1402006;
+        price 350000;
+    }
+    zard{
+        loc 21;
+        tabindex 1;
+        id 1402007;
+        price 450000;
+    }
+    blue_axe{
+        loc 22;
+        tabindex 1;
+        id 1412006;
+        price 45000;
+    }
+    niam{
+        loc 23;
+        tabindex 1;
+        id 1412004;
+        price 200000;
+    }
+    sabretooth{
+        loc 24;
+        tabindex 1;
+        id 1412005;
+        price 250000;
+    }
+    mithril_maul{
+        loc 25;
+        tabindex 1;
+        id 1422001;
+        price 45000;
+    }
+    sledgehammer{
+        loc 26;
+        tabindex 1;
+        id 1422008;
+        price 200000;
+    }
+    titan{
+        loc 27;
+        tabindex 1;
+        id 1422007;
+        price 250000;
+    }
+    forked_spear{
+        loc 28;
+        tabindex 1;
+        id 1432002;
+        price 60000;
+    }
+    nakamaki{
+        loc 29;
+        tabindex 1;
+        id 1432003;
+        price 175000;
+    }
+    zeco{
+        loc 30;
+        tabindex 1;
+        id 1432005;
+        price 225000;
+    }
+    mithril_pole_arm{
+        loc 31;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    axe_pole_arm{
+        loc 32;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 33;
+        tabindex 1;
+        id 1442009;
+        price 300000;
+    }
+    ryden{
+        loc 34;
+        tabindex 1;
+        id 1452005;
+        price 150000;
+    }
+    red_viper{
+        loc 35;
+        tabindex 1;
+        id 1452006;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 36;
+        tabindex 1;
+        id 1452007;
+        price 375000;
+    }
+    mountain_crossbow{
+        loc 37;
+        tabindex 1;
+        id 1462000;
+        price 30000;
+    }
+    eagle_crow{
+        loc 38;
+        tabindex 1;
+        id 1462004;
+        price 200000;
+    }
+    heckler{
+        loc 39;
+        tabindex 1;
+        id 1462005;
+        price 250000;
+    }
+    steel_titan{
+        loc 40;
+        tabindex 1;
+        id 1472001;
+        price 20000;
+    }
+    bronze_igor{
+        loc 41;
+        tabindex 1;
+        id 1472004;
+        price 30000;
+    }
+    meba{
+        loc 42;
+        tabindex 1;
+        id 1472007;
+        price 60000;
+    }
+    prime_hands{
+        loc 43;
+        tabindex 1;
+        id 1482004;
+        price 75000;
+    }
+    silver_maiden{
+        loc 44;
+        tabindex 1;
+        id 1482005;
+        price 100000;
+    }
+    neozard{
+        loc 45;
+        tabindex 1;
+        id 1482006;
+        price 150000;
+    }
+    cold_mind{
+        loc 46;
+        tabindex 1;
+        id 1492004;
+        price 75000;
+    }
+    shooting_star{
+        loc 47;
+        tabindex 1;
+        id 1492005;
+        price 100000;
+    }
+    lunar_shooter{
+        loc 48;
+        tabindex 1;
+        id 1492006;
+        price 160000;
+    }
+}
+2041003{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    yellow_jangoon_armor{
+        loc 1;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 2;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 3;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 4;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_crusader_chainmail{
+        loc 5;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 6;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 7;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 8;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    brown_jangoon_pants{
+        loc 9;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    white_jangoon_pants{
+        loc 10;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 11;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 12;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    red_triangular_shield{
+        loc 13;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 14;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+    red_matty{
+        loc 15;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 16;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 17;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 18;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 20;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    white_chaos_robe{
+        loc 21;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 22;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 23;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 24;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 25;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 26;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 27;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 28;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 29;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 30;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    blue_amoria_skirt{
+        loc 31;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_pole-feather_hat{
+        loc 33;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 34;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 35;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_legolier{
+        loc 36;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 37;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 38;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier__{
+        loc 39;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 40;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 41;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 42;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 43;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 44;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 45;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 46;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 47;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    blue_legolier_pants{
+        loc 48;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 49;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 50;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 51;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 52;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 53;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 54;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 55;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 56;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 57;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 58;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_burgler{
+        loc 60;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burglar{
+        loc 61;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 62;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 63;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burglar{
+        loc 64;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    black_knucklevest{
+        loc 65;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest_{
+        loc 66;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 67;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 68;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 69;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 70;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 71;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_avenger{
+        loc 72;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 73;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 74;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    red_knucklevest_pants{
+        loc 75;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 77;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 78;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 81;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+    blue_den_marine{
+        loc 82;
+        tabindex 1;
+        id 1003325;
+        price 75000;
+    }
+    blue_brace_look{
+        loc 83;
+        tabindex 1;
+        id 1052394;
+        price 100000;
+    }
+    red_barbay{
+        loc 84;
+        tabindex 1;
+        id 1052395;
+        price 120000;
+    }
+}
+2041006{
+    red_pill_{
+        loc 0;
+        tabindex 1;
+        id 2001507;
+        price 50;
+    }
+    red_potion{
+        loc 1;
+        tabindex 1;
+        id 2001500;
+        price 47;
+    }
+    orange_pill{
+        loc 2;
+        tabindex 1;
+        id 2001508;
+        price 160;
+    }
+    orange_potion{
+        loc 3;
+        tabindex 1;
+        id 2001501;
+        price 152;
+    }
+    white_pill_{
+        loc 4;
+        tabindex 1;
+        id 2001509;
+        price 320;
+    }
+    white_potion{
+        loc 5;
+        tabindex 1;
+        id 2022174;
+        price 304;
+    }
+    blue_pill{
+        loc 6;
+        tabindex 1;
+        id 2001510;
+        price 200;
+    }
+    blue_potion{
+        loc 7;
+        tabindex 1;
+        id 2001503;
+        price 190;
+    }
+    mana_elixir_pill{
+        loc 8;
+        tabindex 1;
+        id 2001511;
+        price 186;
+    }
+    mana_elixir{
+        loc 9;
+        tabindex 1;
+        id 2022177;
+        price 176;
+    }
+    ice_cream_pop{
+        loc 10;
+        tabindex 1;
+        id 2001513;
+        price 2185;
+    }
+    very_special_sundae{
+        loc 11;
+        tabindex 1;
+        id 2001514;
+        price 3800;
+    }
+    warrior_pill{
+        loc 12;
+        tabindex 1;
+        id 2002006;
+        price 500;
+    }
+    magic_pill_{
+        loc 13;
+        tabindex 1;
+        id 2002007;
+        price 500;
+    }
+    sniper_pill{
+        loc 14;
+        tabindex 1;
+        id 2002008;
+        price 500;
+    }
+    dexterity_pill_{
+        loc 15;
+        tabindex 1;
+        id 2002009;
+        price 500;
+    }
+    speed_pill_{
+        loc 16;
+        tabindex 1;
+        id 2002010;
+        price 500;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    egg{
+        loc 18;
+        tabindex 1;
+        id 2010002;
+        price 47;
+    }
+    fried_chicken{
+        loc 19;
+        tabindex 1;
+        id 2481003;
+        price 209;
+    }
+    cake{
+        loc 20;
+        tabindex 1;
+        id 2481004;
+        price 304;
+    }
+    pizza{
+        loc 21;
+        tabindex 1;
+        id 2481005;
+        price 427;
+    }
+    hamburger{
+        loc 22;
+        tabindex 1;
+        id 2020053;
+        price 427;
+    }
+    hot_dog{
+        loc 23;
+        tabindex 1;
+        id 2020005;
+        price 304;
+    }
+    hot_dog_supreme{
+        loc 24;
+        tabindex 1;
+        id 2020054;
+        price 503;
+    }
+    chocolate{
+        loc 25;
+        tabindex 1;
+        id 2020028;
+        price 2850;
+    }
+    return_scroll_-_nearest_town{
+        loc 26;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 27;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 28;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    bronze_arrow_for_bow{
+        loc 29;
+        tabindex 1;
+        id 2060001;
+        price 10;
+    }
+    bronze_arrow_for_crossbow{
+        loc 30;
+        tabindex 1;
+        id 2061001;
+        price 10;
+    }
+    subi_throwing-stars{
+        loc 31;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 32;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2012004{
+    jousting_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003316;
+        price 120000;
+    }
+    bronze_pride{
+        loc 1;
+        tabindex 1;
+        id 1002064;
+        price 40000;
+    }
+    red_hawkeye{
+        loc 2;
+        tabindex 1;
+        id 1002161;
+        price 30000;
+    }
+    blue_hawkeye{
+        loc 3;
+        tabindex 1;
+        id 1002162;
+        price 30000;
+    }
+    green_hawkeye{
+        loc 4;
+        tabindex 1;
+        id 1003318;
+        price 30000;
+    }
+    brown_hawkeye{
+        loc 5;
+        tabindex 1;
+        id 1002164;
+        price 30000;
+    }
+    dark_hawkeye{
+        loc 6;
+        tabindex 1;
+        id 1002165;
+        price 30000;
+    }
+    red_guise{
+        loc 7;
+        tabindex 1;
+        id 1002171;
+        price 30000;
+    }
+    blue_guise{
+        loc 8;
+        tabindex 1;
+        id 1002172;
+        price 30000;
+    }
+    green_guise{
+        loc 9;
+        tabindex 1;
+        id 1002173;
+        price 30000;
+    }
+    brown_guise{
+        loc 10;
+        tabindex 1;
+        id 1003319;
+        price 30000;
+    }
+    dark_guise{
+        loc 11;
+        tabindex 1;
+        id 1002175;
+        price 30000;
+    }
+    red_hwarang_shirt{
+        loc 12;
+        tabindex 1;
+        id 1040021;
+        price 40000;
+    }
+    green_hwarang_shirt{
+        loc 13;
+        tabindex 1;
+        id 1040026;
+        price 40000;
+    }
+    purple_fairy_top{
+        loc 14;
+        tabindex 1;
+        id 1041041;
+        price 42000;
+    }
+    green_fairy_top{
+        loc 15;
+        tabindex 1;
+        id 1041175;
+        price 42000;
+    }
+    blue_fairy_top{
+        loc 16;
+        tabindex 1;
+        id 1041043;
+        price 42000;
+    }
+    red_hunter's_armor{
+        loc 17;
+        tabindex 1;
+        id 1040069;
+        price 50000;
+    }
+    blue_hunter's_armor_{
+        loc 18;
+        tabindex 1;
+        id 1040070;
+        price 50000;
+    }
+    green_hunter's_armor_{
+        loc 19;
+        tabindex 1;
+        id 1040067;
+        price 50000;
+    }
+    dark_hunter's_armor_{
+        loc 20;
+        tabindex 1;
+        id 1040173;
+        price 50000;
+    }
+    red_huntress_armor{
+        loc 21;
+        tabindex 1;
+        id 1041056;
+        price 50000;
+    }
+    green_huntress_armor{
+        loc 22;
+        tabindex 1;
+        id 1041176;
+        price 50000;
+    }
+    black_huntress_armor{
+        loc 23;
+        tabindex 1;
+        id 1041055;
+        price 50000;
+    }
+    dark_brown_stealer{
+        loc 24;
+        tabindex 1;
+        id 1040174;
+        price 45000;
+    }
+    dark_silver_stealer{
+        loc 25;
+        tabindex 1;
+        id 1040058;
+        price 45000;
+    }
+    red_gold_stealer{
+        loc 26;
+        tabindex 1;
+        id 1040059;
+        price 45000;
+    }
+    silver_black_stealer{
+        loc 27;
+        tabindex 1;
+        id 1040060;
+        price 45000;
+    }
+    red_steal{
+        loc 28;
+        tabindex 1;
+        id 1041047;
+        price 45000;
+    }
+    black_steal{
+        loc 29;
+        tabindex 1;
+        id 1041177;
+        price 45000;
+    }
+    blue_steal{
+        loc 30;
+        tabindex 1;
+        id 1041049;
+        price 45000;
+    }
+    dark_engrit{
+        loc 31;
+        tabindex 1;
+        id 1051241;
+        price 60000;
+    }
+    red_engrit{
+        loc 32;
+        tabindex 1;
+        id 1051011;
+        price 60000;
+    }
+    blue_engrit{
+        loc 33;
+        tabindex 1;
+        id 1051012;
+        price 60000;
+    }
+    yellow_engrit{
+        loc 34;
+        tabindex 1;
+        id 1051013;
+        price 60000;
+    }
+    blue_wizard_robe{
+        loc 35;
+        tabindex 1;
+        id 1050003;
+        price 40000;
+    }
+    white_wizard_robe{
+        loc 36;
+        tabindex 1;
+        id 1050026;
+        price 40000;
+    }
+    black_mage_robe{
+        loc 37;
+        tabindex 1;
+        id 1050027;
+        price 40000;
+    }
+    green_wizard_robe{
+        loc 38;
+        tabindex 1;
+        id 1050028;
+        price 40000;
+    }
+    black_martial_arts_pants{
+        loc 39;
+        tabindex 1;
+        id 1060016;
+        price 38000;
+    }
+    white_martial_arts_pants{
+        loc 40;
+        tabindex 1;
+        id 1060017;
+        price 38000;
+    }
+    red_martial_arts_pants{
+        loc 41;
+        tabindex 1;
+        id 1060018;
+        price 38000;
+    }
+    brown_martial_arts_pants{
+        loc 42;
+        tabindex 1;
+        id 1060019;
+        price 38000;
+    }
+    purple_fairy_skirt{
+        loc 43;
+        tabindex 1;
+        id 1061034;
+        price 40000;
+    }
+    green_fairy_skirt{
+        loc 44;
+        tabindex 1;
+        id 1061184;
+        price 40000;
+    }
+    blue_fairy_skirt__{
+        loc 45;
+        tabindex 1;
+        id 1061036;
+        price 40000;
+    }
+    blue_hunter's_pants{
+        loc 46;
+        tabindex 1;
+        id 1060059;
+        price 44000;
+    }
+    red_hunter's_pants{
+        loc 47;
+        tabindex 1;
+        id 1060058;
+        price 44000;
+    }
+    green_hunter's_pants{
+        loc 48;
+        tabindex 1;
+        id 1060161;
+        price 44000;
+    }
+    dark_hunter's_pants{
+        loc 49;
+        tabindex 1;
+        id 1060057;
+        price 44000;
+    }
+    red_huntress_pants{
+        loc 50;
+        tabindex 1;
+        id 1061052;
+        price 44000;
+    }
+    green_huntress_pants{
+        loc 51;
+        tabindex 1;
+        id 1061185;
+        price 44000;
+    }
+    black_huntress_pants{
+        loc 52;
+        tabindex 1;
+        id 1061051;
+        price 44000;
+    }
+    dark_brown_stealer_pants{
+        loc 53;
+        tabindex 1;
+        id 1060162;
+        price 40000;
+    }
+    dark_silver_stealer_pants{
+        loc 54;
+        tabindex 1;
+        id 1060044;
+        price 40000;
+    }
+    red_/_gold_stealer_pants{
+        loc 55;
+        tabindex 1;
+        id 1060045;
+        price 40000;
+    }
+    silver_/_black_stealer_pants{
+        loc 56;
+        tabindex 1;
+        id 1060046;
+        price 40000;
+    }
+    red_steal_pants{
+        loc 57;
+        tabindex 1;
+        id 1061043;
+        price 40000;
+    }
+    black_steal_pants{
+        loc 58;
+        tabindex 1;
+        id 1061186;
+        price 40000;
+    }
+    blue_steal_pants{
+        loc 59;
+        tabindex 1;
+        id 1061045;
+        price 40000;
+    }
+    purple_steal_pants{
+        loc 60;
+        tabindex 1;
+        id 1061046;
+        price 40000;
+    }
+    mithril_buckler{
+        loc 61;
+        tabindex 1;
+        id 1092097;
+        price 60000;
+    }
+    white_oceania_cap{
+        loc 62;
+        tabindex 1;
+        id 1003320;
+        price 40000;
+    }
+    brown_pollard{
+        loc 63;
+        tabindex 1;
+        id 1052393;
+        price 90000;
+    }
+}
+2012003{
+    gladius{
+        loc 0;
+        tabindex 1;
+        id 1302186;
+        price 40000;
+    }
+    fireman's_axe{
+        loc 1;
+        tabindex 1;
+        id 1312082;
+        price 40000;
+    }
+    war_hammer{
+        loc 2;
+        tabindex 1;
+        id 1322116;
+        price 40000;
+    }
+    cass{
+        loc 3;
+        tabindex 1;
+        id 1332009;
+        price 42000;
+    }
+    reef_claw{
+        loc 4;
+        tabindex 1;
+        id 1332162;
+        price 40000;
+    }
+    mithril_wand{
+        loc 5;
+        tabindex 1;
+        id 1372111;
+        price 38000;
+    }
+    wizard_staff{
+        loc 6;
+        tabindex 1;
+        id 1382135;
+        price 20000;
+    }
+    scimitar{
+        loc 7;
+        tabindex 1;
+        id 1402123;
+        price 150000;
+    }
+    blue_axe{
+        loc 8;
+        tabindex 1;
+        id 1412081;
+        price 45000;
+    }
+    mithril_maul{
+        loc 9;
+        tabindex 1;
+        id 1422083;
+        price 45000;
+    }
+    forked_spear{
+        loc 10;
+        tabindex 1;
+        id 1432110;
+        price 60000;
+    }
+    mithril_pole_arm{
+        loc 11;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    ryden{
+        loc 12;
+        tabindex 1;
+        id 1452141;
+        price 150000;
+    }
+    mountain_crossbow{
+        loc 13;
+        tabindex 1;
+        id 1462129;
+        price 30000;
+    }
+    steel_titans{
+        loc 14;
+        tabindex 1;
+        id 1472150;
+        price 20000;
+    }
+    prime_hands{
+        loc 15;
+        tabindex 1;
+        id 1482114;
+        price 75000;
+    }
+    cold_mind{
+        loc 16;
+        tabindex 1;
+        id 1492113;
+        price 75000;
+    }
+}
+2012005{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    unagi{
+        loc 10;
+        tabindex 1;
+        id 2022003;
+        price 1100;
+    }
+    pure_water{
+        loc 11;
+        tabindex 1;
+        id 2022000;
+        price 1650;
+    }
+    watermelon{
+        loc 12;
+        tabindex 1;
+        id 2001512;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 13;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 14;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 2010000;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 2010002;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 2070013;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 2010004;
+        price 310;
+    }
+    chocolate{
+        loc 20;
+        tabindex 1;
+        id 2020028;
+        price 3000;
+    }
+    antidote{
+        loc 21;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 22;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 23;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    holy_water{
+        loc 24;
+        tabindex 1;
+        id 2050003;
+        price 500;
+    }
+    return_scroll_-_nearest_town{
+        loc 25;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    subi_throwing-stars{
+        loc 28;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 29;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2060004{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    air_bubble{
+        loc 10;
+        tabindex 1;
+        id 2430364;
+        price 300;
+    }
+    fried_shrimp_{
+        loc 11;
+        tabindex 1;
+        id 2022041;
+        price 1600;
+    }
+    watermelon{
+        loc 12;
+        tabindex 1;
+        id 2001512;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 13;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 14;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 2010000;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 2010002;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 2070013;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 2010004;
+        price 310;
+    }
+    melting_cheese{
+        loc 20;
+        tabindex 1;
+        id 2020012;
+        price 4500;
+    }
+    reindeer_milk{
+        loc 21;
+        tabindex 1;
+        id 2020013;
+        price 5600;
+    }
+    sunrise_dew{
+        loc 22;
+        tabindex 1;
+        id 2020045;
+        price 8100;
+    }
+    sunset_dew{
+        loc 23;
+        tabindex 1;
+        id 2020046;
+        price 10200;
+    }
+    unagi{
+        loc 24;
+        tabindex 1;
+        id 2022003;
+        price 1100;
+    }
+    pure_water{
+        loc 25;
+        tabindex 1;
+        id 2022000;
+        price 1650;
+    }
+    return_scroll_-_nearest_town{
+        loc 26;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 27;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 28;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    bronze_arrow_for_bow{
+        loc 29;
+        tabindex 1;
+        id 2060001;
+        price 10;
+    }
+    bronze_arrow_for_crossbow{
+        loc 30;
+        tabindex 1;
+        id 2061001;
+        price 10;
+    }
+    subi_throwing-stars{
+        loc 31;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 32;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2060007{
+    eloon{
+        loc 0;
+        tabindex 1;
+        id 1302185;
+        price 20000;
+    }
+    gladius{
+        loc 1;
+        tabindex 1;
+        id 1302186;
+        price 40000;
+    }
+    cutlass{
+        loc 2;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 3;
+        tabindex 1;
+        id 1302188;
+        price 225000;
+    }
+    mithril_axe{
+        loc 4;
+        tabindex 1;
+        id 1312003;
+        price 20000;
+    }
+    fireman's_axe{
+        loc 5;
+        tabindex 1;
+        id 1312082;
+        price 40000;
+    }
+    dankke{
+        loc 6;
+        tabindex 1;
+        id 1312083;
+        price 100000;
+    }
+    blue_counter{
+        loc 7;
+        tabindex 1;
+        id 1312084;
+        price 175000;
+    }
+    fusion_mace{
+        loc 8;
+        tabindex 1;
+        id 1322115;
+        price 22000;
+    }
+    war_hammer{
+        loc 9;
+        tabindex 1;
+        id 1322116;
+        price 40000;
+    }
+    heavy_hammer{
+        loc 10;
+        tabindex 1;
+        id 1322117;
+        price 100000;
+    }
+    jacker{
+        loc 11;
+        tabindex 1;
+        id 1322118;
+        price 175000;
+    }
+    forked_dagger{
+        loc 12;
+        tabindex 1;
+        id 1332161;
+        price 38000;
+    }
+    reef_claw{
+        loc 13;
+        tabindex 1;
+        id 1332162;
+        price 40000;
+    }
+    gephart{
+        loc 14;
+        tabindex 1;
+        id 1332163;
+        price 375000;
+    }
+    bazlud{
+        loc 15;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    ice_wand{
+        loc 16;
+        tabindex 1;
+        id 1372110;
+        price 18000;
+    }
+    wizard_staff{
+        loc 17;
+        tabindex 1;
+        id 1382135;
+        price 20000;
+    }
+    mithril_wand{
+        loc 18;
+        tabindex 1;
+        id 1372111;
+        price 38000;
+    }
+    wizard_wand{
+        loc 19;
+        tabindex 1;
+        id 1372112;
+        price 175000;
+    }
+    fairy_wand{
+        loc 20;
+        tabindex 1;
+        id 1372113;
+        price 400000;
+    }
+    broadsword{
+        loc 21;
+        tabindex 1;
+        id 1402122;
+        price 22000;
+    }
+    scimitar{
+        loc 22;
+        tabindex 1;
+        id 1402123;
+        price 150000;
+    }
+    lionheart{
+        loc 23;
+        tabindex 1;
+        id 1402124;
+        price 350000;
+    }
+    zard{
+        loc 24;
+        tabindex 1;
+        id 1402125;
+        price 450000;
+    }
+    two-handed_axe{
+        loc 25;
+        tabindex 1;
+        id 1412080;
+        price 22000;
+    }
+    niam{
+        loc 26;
+        tabindex 1;
+        id 1412082;
+        price 200000;
+    }
+    blue_axe{
+        loc 27;
+        tabindex 1;
+        id 1412081;
+        price 45000;
+    }
+    sabretooth{
+        loc 28;
+        tabindex 1;
+        id 1412083;
+        price 250000;
+    }
+    monkey_wrench{
+        loc 29;
+        tabindex 1;
+        id 1422082;
+        price 20000;
+    }
+    mithril_maul{
+        loc 30;
+        tabindex 1;
+        id 1422083;
+        price 45000;
+    }
+    sledgehammer{
+        loc 31;
+        tabindex 1;
+        id 1422084;
+        price 200000;
+    }
+    titan{
+        loc 32;
+        tabindex 1;
+        id 1422085;
+        price 250000;
+    }
+    forked_spear{
+        loc 33;
+        tabindex 1;
+        id 1432110;
+        price 60000;
+    }
+    nakamaki{
+        loc 34;
+        tabindex 1;
+        id 1432111;
+        price 175000;
+    }
+    zeco{
+        loc 35;
+        tabindex 1;
+        id 1432112;
+        price 225000;
+    }
+    janitor's_mop{
+        loc 36;
+        tabindex 1;
+        id 1442147;
+        price 24000;
+    }
+    mithril_pole_arm{
+        loc 37;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    axe_pole_arm{
+        loc 38;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 39;
+        tabindex 1;
+        id 1442150;
+        price 300000;
+    }
+    battle_bow{
+        loc 40;
+        tabindex 1;
+        id 1452140;
+        price 20000;
+    }
+    ryden{
+        loc 41;
+        tabindex 1;
+        id 1452141;
+        price 150000;
+    }
+    red_viper{
+        loc 42;
+        tabindex 1;
+        id 1452142;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 43;
+        tabindex 1;
+        id 1452143;
+        price 375000;
+    }
+    balanche{
+        loc 44;
+        tabindex 1;
+        id 1462128;
+        price 12000;
+    }
+    mountain_crossbow{
+        loc 45;
+        tabindex 1;
+        id 1462129;
+        price 30000;
+    }
+    eagle_crow{
+        loc 46;
+        tabindex 1;
+        id 1462130;
+        price 200000;
+    }
+    heckler{
+        loc 47;
+        tabindex 1;
+        id 1462131;
+        price 250000;
+    }
+    meba{
+        loc 48;
+        tabindex 1;
+        id 1472152;
+        price 60000;
+    }
+    prime_hands{
+        loc 49;
+        tabindex 1;
+        id 1482114;
+        price 75000;
+    }
+    silver_maiden{
+        loc 50;
+        tabindex 1;
+        id 1482115;
+        price 100000;
+    }
+    neozard{
+        loc 51;
+        tabindex 1;
+        id 1482116;
+        price 150000;
+    }
+    cold_mind{
+        loc 52;
+        tabindex 1;
+        id 1492113;
+        price 75000;
+    }
+    shooting_star{
+        loc 53;
+        tabindex 1;
+        id 1702155;
+        price 100000;
+    }
+    lunar_shooter{
+        loc 54;
+        tabindex 1;
+        id 1492115;
+        price 160000;
+    }
+}
+2060003{
+    jousting_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003316;
+        price 120000;
+    }
+    great_blue_helmet{
+        loc 1;
+        tabindex 1;
+        id 1002048;
+        price 160000;
+    }
+    blue_jester{
+        loc 2;
+        tabindex 1;
+        id 1002034;
+        price 60000;
+    }
+    blue_matty{
+        loc 3;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    blue_hawkeye{
+        loc 4;
+        tabindex 1;
+        id 1002162;
+        price 60000;
+    }
+    blue_pole-feather_hat{
+        loc 5;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    blue_guise{
+        loc 6;
+        tabindex 1;
+        id 1002172;
+        price 60000;
+    }
+    blue_burglar{
+        loc 7;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    red_engrit{
+        loc 8;
+        tabindex 1;
+        id 1051011;
+        price 60000;
+    }
+    blue_engrit{
+        loc 9;
+        tabindex 1;
+        id 1051012;
+        price 60000;
+    }
+    yellow_engrit{
+        loc 10;
+        tabindex 1;
+        id 1051013;
+        price 60000;
+    }
+    black_dragon_robe{
+        loc 11;
+        tabindex 1;
+        id 1050196;
+        price 70000;
+    }
+    red_hwarang_shirt{
+        loc 12;
+        tabindex 1;
+        id 1040021;
+        price 40000;
+    }
+    green_hwarang_shirt{
+        loc 13;
+        tabindex 1;
+        id 1040026;
+        price 40000;
+    }
+    black_martial_arts_pants{
+        loc 14;
+        tabindex 1;
+        id 1060016;
+        price 38000;
+    }
+    white_martial_arts_pants{
+        loc 15;
+        tabindex 1;
+        id 1060017;
+        price 38000;
+    }
+    white_crusader_chainmail{
+        loc 16;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 17;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 18;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 19;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    blood_fitted_mail{
+        loc 20;
+        tabindex 1;
+        id 1051242;
+        price 112500;
+    }
+    maroon_jangoon_armor{
+        loc 21;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    blue_jangoon_armor{
+        loc 22;
+        tabindex 1;
+        id 1040086;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 23;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 24;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_jangoon_pants{
+        loc 25;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    brown_jangoon_pants{
+        loc 26;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 27;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 28;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    purple_fairy_top{
+        loc 29;
+        tabindex 1;
+        id 1041041;
+        price 42000;
+    }
+    green_fairy_top{
+        loc 30;
+        tabindex 1;
+        id 1041175;
+        price 42000;
+    }
+    blue_fairy_top{
+        loc 31;
+        tabindex 1;
+        id 1041043;
+        price 42000;
+    }
+    purple_fairy_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061034;
+        price 40000;
+    }
+    green_fairy_skirt{
+        loc 33;
+        tabindex 1;
+        id 1061184;
+        price 40000;
+    }
+    blue_fairy_skirt__{
+        loc 34;
+        tabindex 1;
+        id 1061036;
+        price 40000;
+    }
+    blue_wizard_robe{
+        loc 35;
+        tabindex 1;
+        id 1050003;
+        price 40000;
+    }
+    white_wizard_robe{
+        loc 36;
+        tabindex 1;
+        id 1050026;
+        price 40000;
+    }
+    green_wizard_robe{
+        loc 37;
+        tabindex 1;
+        id 1050028;
+        price 40000;
+    }
+    red_amoria_top{
+        loc 38;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    blue_amoria_top{
+        loc 39;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 40;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_amoria_skirt{
+        loc 41;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    blood_chaos_robe{
+        loc 42;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    blue_chaos_robe{
+        loc 43;
+        tabindex 1;
+        id 1050030;
+        price 300000;
+    }
+    white_chaos_robe{
+        loc 44;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    purple_moonlight{
+        loc 45;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    red_moonlight{
+        loc 46;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 47;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_starlight{
+        loc 48;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 49;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    blue_starlight{
+        loc 50;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    green_huntress_armor{
+        loc 51;
+        tabindex 1;
+        id 1041176;
+        price 50000;
+    }
+    red_huntress_armor{
+        loc 52;
+        tabindex 1;
+        id 1041056;
+        price 50000;
+    }
+    green_huntress_pants{
+        loc 53;
+        tabindex 1;
+        id 1061185;
+        price 44000;
+    }
+    red_huntress_pants{
+        loc 54;
+        tabindex 1;
+        id 1061052;
+        price 44000;
+    }
+    green_hunter's_armor_{
+        loc 55;
+        tabindex 1;
+        id 1040067;
+        price 50000;
+    }
+    red_hunter's_armor{
+        loc 56;
+        tabindex 1;
+        id 1040069;
+        price 50000;
+    }
+    green_hunter's_pants{
+        loc 57;
+        tabindex 1;
+        id 1060161;
+        price 44000;
+    }
+    red_hunter's_pants{
+        loc 58;
+        tabindex 1;
+        id 1060058;
+        price 44000;
+    }
+    red_legolia{
+        loc 59;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    blue_legolia{
+        loc 60;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    green_legolia{
+        loc 61;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    red_legolia_pants{
+        loc 62;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    blue_legolia_pants{
+        loc 63;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 64;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    red_legolier{
+        loc 65;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 66;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 67;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    red_legolier_pants{
+        loc 68;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    blue_legolier_pants{
+        loc 69;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 70;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    brown_piette{
+        loc 71;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    white_piette{
+        loc 72;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette_pants{
+        loc 73;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_piette_pants{
+        loc 74;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    white_piettra{
+        loc 75;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    brown_piettra{
+        loc 76;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra_skirt{
+        loc 77;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    brown_piettra_skirt{
+        loc 78;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    red_steal{
+        loc 79;
+        tabindex 1;
+        id 1041047;
+        price 45000;
+    }
+    blue_steal{
+        loc 80;
+        tabindex 1;
+        id 1041049;
+        price 45000;
+    }
+    purple_steal{
+        loc 81;
+        tabindex 1;
+        id 1041050;
+        price 45000;
+    }
+    red_steal_pants{
+        loc 82;
+        tabindex 1;
+        id 1061043;
+        price 40000;
+    }
+    blue_steal_pants{
+        loc 83;
+        tabindex 1;
+        id 1061045;
+        price 40000;
+    }
+    purple_steal_pants{
+        loc 84;
+        tabindex 1;
+        id 1061046;
+        price 40000;
+    }
+    dark_brown_stealer{
+        loc 85;
+        tabindex 1;
+        id 1040174;
+        price 45000;
+    }
+    red_gold_stealer{
+        loc 86;
+        tabindex 1;
+        id 1040059;
+        price 45000;
+    }
+    dark_brown_stealer_pants{
+        loc 87;
+        tabindex 1;
+        id 1060162;
+        price 45000;
+    }
+    red_/_gold_stealer_pants{
+        loc 88;
+        tabindex 1;
+        id 1060045;
+        price 45000;
+    }
+    green_knucklevest{
+        loc 89;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    red_knucklevest_{
+        loc 90;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    blue_knucklevest_pants{
+        loc 91;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    red_knucklevest_pants{
+        loc 92;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    red_avenger{
+        loc 93;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 94;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 95;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    khaki_shadow{
+        loc 96;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 97;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    khaki_shadow_pants{
+        loc 98;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 99;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    purple_shadow{
+        loc 100;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_shadow{
+        loc 101;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow_pants{
+        loc 102;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 103;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    white_oceania_cap{
+        loc 104;
+        tabindex 1;
+        id 1003320;
+        price 40000;
+    }
+    brown_pollard{
+        loc 105;
+        tabindex 1;
+        id 1052393;
+        price 90000;
+    }
+    blue_brace_look{
+        loc 106;
+        tabindex 1;
+        id 1052394;
+        price 100000;
+    }
+    red_barbay{
+        loc 107;
+        tabindex 1;
+        id 1052395;
+        price 120000;
+    }
+    blue_den_marine{
+        loc 108;
+        tabindex 1;
+        id 1003325;
+        price 75000;
+    }
+}
+2080002{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    yellow_jangoon_armor{
+        loc 1;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 2;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 3;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 4;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_crusader_chainmail{
+        loc 5;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 6;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 7;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 8;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    white_jangoon_pants{
+        loc 9;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    brown_jangoon_pants{
+        loc 10;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 11;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 12;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    red_triangular_shield{
+        loc 13;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 14;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+    red_matty{
+        loc 15;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 16;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 17;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 18;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 20;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    white_chaos_robe{
+        loc 21;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 22;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 23;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 24;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 25;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 26;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 27;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 28;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 29;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 30;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    blue_amoria_skirt{
+        loc 31;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_pole-feather_hat{
+        loc 33;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 34;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    brown_pole-feather_hat{
+        loc 35;
+        tabindex 1;
+        id 1002135;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 36;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_legolier{
+        loc 37;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 38;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 39;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier__{
+        loc 40;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 41;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 42;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 43;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 44;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 45;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 46;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 47;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 48;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    blue_legolier_pants{
+        loc 49;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 50;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 51;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 52;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 53;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 54;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 55;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 56;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 57;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 58;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 60;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_burgler{
+        loc 61;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burglar{
+        loc 62;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 63;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 64;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burglar{
+        loc 65;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    black_knucklevest{
+        loc 66;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest_{
+        loc 67;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 68;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 69;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 70;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 71;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 72;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_avenger{
+        loc 73;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 74;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 75;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    red_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 77;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 78;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 81;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 82;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+    blue_brace_look{
+        loc 83;
+        tabindex 1;
+        id 1052394;
+        price 100000;
+    }
+    red_barbay{
+        loc 84;
+        tabindex 1;
+        id 1052395;
+        price 120000;
+    }
+    blue_den_marine{
+        loc 85;
+        tabindex 1;
+        id 1003325;
+        price 75000;
+    }
+}
+2080001{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    baby_dragon_food{
+        loc 10;
+        tabindex 1;
+        id 2022089;
+        price 3400;
+    }
+    watermelon{
+        loc 11;
+        tabindex 1;
+        id 2001512;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 12;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 13;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 14;
+        tabindex 1;
+        id 2010000;
+        price 30;
+    }
+    egg{
+        loc 15;
+        tabindex 1;
+        id 2010002;
+        price 50;
+    }
+    meat{
+        loc 16;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 17;
+        tabindex 1;
+        id 2070013;
+        price 100;
+    }
+    lemon{
+        loc 18;
+        tabindex 1;
+        id 2010004;
+        price 310;
+    }
+    melting_cheese{
+        loc 19;
+        tabindex 1;
+        id 2020012;
+        price 4500;
+    }
+    reindeer_milk{
+        loc 20;
+        tabindex 1;
+        id 2020013;
+        price 5600;
+    }
+    sunrise_dew{
+        loc 21;
+        tabindex 1;
+        id 2020045;
+        price 8100;
+    }
+    sunset_dew{
+        loc 22;
+        tabindex 1;
+        id 2020046;
+        price 10200;
+    }
+    return_scroll_-_nearest_town{
+        loc 23;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 24;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 25;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    bronze_arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060001;
+        price 10;
+    }
+    bronze_arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061001;
+        price 10;
+    }
+    subi_throwing-stars{
+        loc 28;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 29;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2090002{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    yellow_jangoon_armor{
+        loc 1;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 2;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 3;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 4;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_crusader_chainmail{
+        loc 5;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 6;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 7;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 8;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    white_jangoon_pants{
+        loc 9;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    brown_jangoon_pants{
+        loc 10;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 11;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 12;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    red_triangular_shield{
+        loc 13;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 14;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+    red_matty{
+        loc 15;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 16;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 17;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 18;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 20;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    white_chaos_robe{
+        loc 21;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 22;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 23;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 24;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 25;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 26;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 27;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 28;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 29;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 30;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    blue_amoria_skirt{
+        loc 31;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_pole-feather_hat{
+        loc 33;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 34;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    brown_pole-feather_hat{
+        loc 35;
+        tabindex 1;
+        id 1002135;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 36;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_legolier{
+        loc 37;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 38;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 39;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier{
+        loc 40;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 41;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 42;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 43;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 44;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 45;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 46;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 47;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 48;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    blue_legolier_pants{
+        loc 49;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 50;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 51;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 52;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 53;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 54;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 55;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 56;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 57;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 58;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 60;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_burgler{
+        loc 61;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burgler{
+        loc 62;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 63;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 64;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burgler{
+        loc 65;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    black_knucklevest{
+        loc 66;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest{
+        loc 67;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 68;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 69;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 70;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 71;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 72;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_avenger{
+        loc 73;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 74;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 75;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    red_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 77;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 78;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 81;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 82;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+    blue_brace_look{
+        loc 83;
+        tabindex 1;
+        id 1052394;
+        price 100000;
+    }
+    red_barbay{
+        loc 84;
+        tabindex 1;
+        id 1052395;
+        price 120000;
+    }
+    blue_den_marine{
+        loc 85;
+        tabindex 1;
+        id 1003325;
+        price 75000;
+    }
+}
+2090001{
+    gladius{
+        loc 0;
+        tabindex 1;
+        id 1302186;
+        price 40000;
+    }
+    cutlus{
+        loc 1;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 2;
+        tabindex 1;
+        id 1302188;
+        price 225000;
+    }
+    fireman's_axe{
+        loc 3;
+        tabindex 1;
+        id 1312082;
+        price 40000;
+    }
+    dankke{
+        loc 4;
+        tabindex 1;
+        id 1312083;
+        price 100000;
+    }
+    blue_counter{
+        loc 5;
+        tabindex 1;
+        id 1312084;
+        price 175000;
+    }
+    war_hammer{
+        loc 6;
+        tabindex 1;
+        id 1322116;
+        price 40000;
+    }
+    heavy_hammer{
+        loc 7;
+        tabindex 1;
+        id 1322117;
+        price 100000;
+    }
+    jacker{
+        loc 8;
+        tabindex 1;
+        id 1322118;
+        price 175000;
+    }
+    cass{
+        loc 9;
+        tabindex 1;
+        id 1332009;
+        price 42000;
+    }
+    reef_claw{
+        loc 10;
+        tabindex 1;
+        id 1332162;
+        price 40000;
+    }
+    halfmoon_zamadar{
+        loc 11;
+        tabindex 1;
+        id 1332001;
+        price 200000;
+    }
+    gephart{
+        loc 12;
+        tabindex 1;
+        id 1332163;
+        price 355000;
+    }
+    bazlud{
+        loc 13;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    mithril_wand{
+        loc 14;
+        tabindex 1;
+        id 1372111;
+        price 38000;
+    }
+    wizard_wand{
+        loc 15;
+        tabindex 1;
+        id 1372112;
+        price 175000;
+    }
+    fairy_wand{
+        loc 16;
+        tabindex 1;
+        id 1372113;
+        price 400000;
+    }
+    wizard_staff{
+        loc 17;
+        tabindex 1;
+        id 1382135;
+        price 20000;
+    }
+    scimitar{
+        loc 18;
+        tabindex 1;
+        id 1402123;
+        price 150000;
+    }
+    lionheart{
+        loc 19;
+        tabindex 1;
+        id 1402124;
+        price 350000;
+    }
+    zard{
+        loc 20;
+        tabindex 1;
+        id 1402125;
+        price 450000;
+    }
+    blue_axe{
+        loc 21;
+        tabindex 1;
+        id 1412081;
+        price 45000;
+    }
+    niam{
+        loc 22;
+        tabindex 1;
+        id 1412082;
+        price 200000;
+    }
+    sabretooth{
+        loc 23;
+        tabindex 1;
+        id 1412083;
+        price 250000;
+    }
+    mithril_maul{
+        loc 24;
+        tabindex 1;
+        id 1422083;
+        price 45000;
+    }
+    sledgehammer{
+        loc 25;
+        tabindex 1;
+        id 1422084;
+        price 200000;
+    }
+    titan{
+        loc 26;
+        tabindex 1;
+        id 1422085;
+        price 250000;
+    }
+    forked_spear{
+        loc 27;
+        tabindex 1;
+        id 1432110;
+        price 60000;
+    }
+    nakamaki{
+        loc 28;
+        tabindex 1;
+        id 1432111;
+        price 175000;
+    }
+    zeco{
+        loc 29;
+        tabindex 1;
+        id 1432112;
+        price 225000;
+    }
+    mithril_pole_arm{
+        loc 30;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    axe_pole_arm{
+        loc 31;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 32;
+        tabindex 1;
+        id 1442150;
+        price 300000;
+    }
+    ryden{
+        loc 33;
+        tabindex 1;
+        id 1452141;
+        price 150000;
+    }
+    red_viper{
+        loc 34;
+        tabindex 1;
+        id 1452142;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 35;
+        tabindex 1;
+        id 1452143;
+        price 375000;
+    }
+    mountain_crossbow{
+        loc 36;
+        tabindex 1;
+        id 1462129;
+        price 30000;
+    }
+    eagle_crow{
+        loc 37;
+        tabindex 1;
+        id 1462130;
+        price 200000;
+    }
+    heckler{
+        loc 38;
+        tabindex 1;
+        id 1462131;
+        price 250000;
+    }
+    steel_titans{
+        loc 39;
+        tabindex 1;
+        id 1472150;
+        price 20000;
+    }
+    bronze_igor{
+        loc 40;
+        tabindex 1;
+        id 1472091;
+        price 30000;
+    }
+    meba{
+        loc 41;
+        tabindex 1;
+        id 1472152;
+        price 60000;
+    }
+    silver_maiden{
+        loc 42;
+        tabindex 1;
+        id 1482115;
+        price 100000;
+    }
+    neozard{
+        loc 43;
+        tabindex 1;
+        id 1482116;
+        price 150000;
+    }
+    shooting_star{
+        loc 44;
+        tabindex 1;
+        id 1702155;
+        price 100000;
+    }
+    lunar_shooter{
+        loc 45;
+        tabindex 1;
+        id 1492115;
+        price 160000;
+    }
+}
+2090006{
+    pet_food{
+        loc 0;
+        tabindex 1;
+        id 4034590;
+        price 30;
+    }
+    revitalizer{
+        loc 1;
+        tabindex 1;
+        id 2260000;
+        price 1000;
+    }
+    bartos'_favorite_juice{
+        loc 2;
+        tabindex 1;
+        id 4031993;
+        price 100000;
+    }
+    pet_command_guide_:_blue/red/green/gold_robo{
+        loc 3;
+        tabindex 1;
+        id 4160035;
+        price 1000;
+    }
+    pet_command_guide_:_jr._balrog{
+        loc 4;
+        tabindex 1;
+        id 4160015;
+        price 1000;
+    }
+    pet_command_guide_:_kino{
+        loc 5;
+        tabindex 1;
+        id 4160033;
+        price 1000;
+    }
+    pet_command_guide_:_white_duck{
+        loc 6;
+        tabindex 1;
+        id 4160039;
+        price 1000;
+    }
+    pet_command_guide_:_gorilla_robo{
+        loc 7;
+        tabindex 1;
+        id 4160036;
+        price 1000;
+    }
+    pet_command_guide_:_baby_robo{
+        loc 8;
+        tabindex 1;
+        id 4160034;
+        price 1000;
+    }
+    pet_command_guide_:_crystal_rudolph{
+        loc 9;
+        tabindex 1;
+        id 4160037;
+        price 1000;
+    }
+    pet_command_guide_:_skunk{
+        loc 10;
+        tabindex 1;
+        id 4160032;
+        price 1000;
+    }
+    pet_command_guide_:_snowman{
+        loc 11;
+        tabindex 1;
+        id 4160029;
+        price 1000;
+    }
+    pet_command_guide_:_porcupine{
+        loc 12;
+        tabindex 1;
+        id 4160027;
+        price 1000;
+    }
+    pet_command_guide_:_sun_wu_kong{
+        loc 13;
+        tabindex 1;
+        id 4160019;
+        price 1000;
+    }
+    pet_command_guide_:_golden_pig{
+        loc 14;
+        tabindex 1;
+        id 4160017;
+        price 1000;
+    }
+    pet_command_guide_:_jr._reaper{
+        loc 15;
+        tabindex 1;
+        id 4160028;
+        price 1000;
+    }
+    pet_command_guide_:_mini_yeti{
+        loc 16;
+        tabindex 1;
+        id 4160012;
+        price 1000;
+    }
+    pet_command_guide_:_penguin{
+        loc 17;
+        tabindex 1;
+        id 4160014;
+        price 1000;
+    }
+    pet_command_guide_:_turkey{
+        loc 18;
+        tabindex 1;
+        id 4160020;
+        price 1000;
+    }
+    pet_command_guide_:_mini_kargo{
+        loc 19;
+        tabindex 1;
+        id 4160003;
+        price 1000;
+    }
+    pet_command_guide_:_green/red/blue_dragon{
+        loc 20;
+        tabindex 1;
+        id 4160023;
+        price 1000;
+    }
+    pet_command_guide_:_baby_dragon{
+        loc 21;
+        tabindex 1;
+        id 4160022;
+        price 1000;
+    }
+    pet_command_guide_:_white_tiger{
+        loc 22;
+        tabindex 1;
+        id 4160008;
+        price 1000;
+    }
+    pet_command_guide_:_rudolph{
+        loc 23;
+        tabindex 1;
+        id 4160009;
+        price 1000;
+    }
+    pet_command_guide_:_robot{
+        loc 24;
+        tabindex 1;
+        id 4160013;
+        price 1000;
+    }
+    pet_command_guide_:_puppy{
+        loc 25;
+        tabindex 1;
+        id 4160000;
+        price 1000;
+    }
+    pet_command_guide_:_pig{
+        loc 26;
+        tabindex 1;
+        id 4160005;
+        price 1000;
+    }
+    pet_command_guide_:_panda{
+        loc 27;
+        tabindex 1;
+        id 4160006;
+        price 1000;
+    }
+    pet_command_guide_:_monkey{
+        loc 28;
+        tabindex 1;
+        id 4160010;
+        price 1000;
+    }
+    pet_command_guide_:_kitty{
+        loc 29;
+        tabindex 1;
+        id 4160001;
+        price 1000;
+    }
+    pet_command_guide_:_husky{
+        loc 30;
+        tabindex 1;
+        id 4160004;
+        price 1000;
+    }
+    pet_command_guide_:_dino{
+        loc 31;
+        tabindex 1;
+        id 4160007;
+        price 1000;
+    }
+    pet_command_guide_:_bunny{
+        loc 32;
+        tabindex 1;
+        id 4160002;
+        price 1000;
+    }
+    pet_command_guide_:_black_dragon{
+        loc 33;
+        tabindex 1;
+        id 4160024;
+        price 1000;
+    }
+}
+2093002{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    unagi{
+        loc 10;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 11;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    watermelon{
+        loc 12;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 13;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 14;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    chocolate{
+        loc 20;
+        tabindex 1;
+        id 4033144;
+        price 3000;
+    }
+    antidote{
+        loc 21;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 22;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 23;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    holy_water{
+        loc 24;
+        tabindex 1;
+        id 2050003;
+        price 500;
+    }
+    return_scroll_-_nearest_town{
+        loc 25;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    subi_throwing-stars{
+        loc 28;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 29;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2093000{
+    gladius{
+        loc 0;
+        tabindex 1;
+        id 1302186;
+        price 40000;
+    }
+    fireman's_axe{
+        loc 1;
+        tabindex 1;
+        id 1312082;
+        price 40000;
+    }
+    war_hammer{
+        loc 2;
+        tabindex 1;
+        id 1322116;
+        price 40000;
+    }
+    cass{
+        loc 3;
+        tabindex 1;
+        id 1332009;
+        price 42000;
+    }
+    reef_claw{
+        loc 4;
+        tabindex 1;
+        id 1332162;
+        price 40000;
+    }
+    mithril_wand{
+        loc 5;
+        tabindex 1;
+        id 1372111;
+        price 38000;
+    }
+    wizard_staff{
+        loc 6;
+        tabindex 1;
+        id 1382135;
+        price 20000;
+    }
+    scimitar{
+        loc 7;
+        tabindex 1;
+        id 1402123;
+        price 150000;
+    }
+    blue_axe{
+        loc 8;
+        tabindex 1;
+        id 1412081;
+        price 45000;
+    }
+    mithril_maul{
+        loc 9;
+        tabindex 1;
+        id 1422083;
+        price 45000;
+    }
+    forked_spear{
+        loc 10;
+        tabindex 1;
+        id 1432110;
+        price 60000;
+    }
+    mithril_pole_arm{
+        loc 11;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    ryden{
+        loc 12;
+        tabindex 1;
+        id 1452141;
+        price 150000;
+    }
+    mountain_crossbow{
+        loc 13;
+        tabindex 1;
+        id 1462129;
+        price 30000;
+    }
+    steel_titans{
+        loc 14;
+        tabindex 1;
+        id 1472150;
+        price 20000;
+    }
+    prime_hands{
+        loc 15;
+        tabindex 1;
+        id 1482114;
+        price 75000;
+    }
+    cold_mind{
+        loc 16;
+        tabindex 1;
+        id 1492113;
+        price 75000;
+    }
+}
+2093001{
+    jousting_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003316;
+        price 120000;
+    }
+    red_hwarang_shirt{
+        loc 1;
+        tabindex 1;
+        id 1040021;
+        price 40000;
+    }
+    green_hwarang_shirt{
+        loc 2;
+        tabindex 1;
+        id 1040026;
+        price 40000;
+    }
+    dark_engrit{
+        loc 3;
+        tabindex 1;
+        id 1051241;
+        price 60000;
+    }
+    red_engrit{
+        loc 4;
+        tabindex 1;
+        id 1051011;
+        price 60000;
+    }
+    blue_engrit{
+        loc 5;
+        tabindex 1;
+        id 1051012;
+        price 60000;
+    }
+    yellow_engrit{
+        loc 6;
+        tabindex 1;
+        id 1051013;
+        price 60000;
+    }
+    black_martial_arts_pants{
+        loc 7;
+        tabindex 1;
+        id 1060016;
+        price 38000;
+    }
+    white_martial_arts_pants{
+        loc 8;
+        tabindex 1;
+        id 1060017;
+        price 38000;
+    }
+    red_martial_arts_pants{
+        loc 9;
+        tabindex 1;
+        id 1060018;
+        price 38000;
+    }
+    brown_martial_arts_pants{
+        loc 10;
+        tabindex 1;
+        id 1060019;
+        price 38000;
+    }
+    mithril_buckler{
+        loc 11;
+        tabindex 1;
+        id 1092097;
+        price 60000;
+    }
+    bronze_pride{
+        loc 12;
+        tabindex 1;
+        id 1002064;
+        price 40000;
+    }
+    purple_fairy_top{
+        loc 13;
+        tabindex 1;
+        id 1041041;
+        price 42000;
+    }
+    green_fairy_top{
+        loc 14;
+        tabindex 1;
+        id 1041175;
+        price 42000;
+    }
+    blue_fairy_top{
+        loc 15;
+        tabindex 1;
+        id 1041043;
+        price 42000;
+    }
+    blue_wizard_robe{
+        loc 16;
+        tabindex 1;
+        id 1050003;
+        price 40000;
+    }
+    white_wizard_robe{
+        loc 17;
+        tabindex 1;
+        id 1050026;
+        price 40000;
+    }
+    black_wizard_robe{
+        loc 18;
+        tabindex 1;
+        id 1050027;
+        price 40000;
+    }
+    green_wizard_robe{
+        loc 19;
+        tabindex 1;
+        id 1050028;
+        price 40000;
+    }
+    purple_fairy_skirt{
+        loc 20;
+        tabindex 1;
+        id 1061034;
+        price 40000;
+    }
+    green_fairy_skirt{
+        loc 21;
+        tabindex 1;
+        id 1061184;
+        price 40000;
+    }
+    blue_fairy_skirt{
+        loc 22;
+        tabindex 1;
+        id 1061036;
+        price 40000;
+    }
+    red_hawkeye{
+        loc 23;
+        tabindex 1;
+        id 1002161;
+        price 30000;
+    }
+    blue_hawkeye{
+        loc 24;
+        tabindex 1;
+        id 1002162;
+        price 30000;
+    }
+    green_hawkeye{
+        loc 25;
+        tabindex 1;
+        id 1003318;
+        price 30000;
+    }
+    brown_hawkeye{
+        loc 26;
+        tabindex 1;
+        id 1002164;
+        price 30000;
+    }
+    dark_hawkeye{
+        loc 27;
+        tabindex 1;
+        id 1002165;
+        price 30000;
+    }
+    red_hunter's_armor{
+        loc 28;
+        tabindex 1;
+        id 1040069;
+        price 50000;
+    }
+    blue_hunter's_armor{
+        loc 29;
+        tabindex 1;
+        id 1040070;
+        price 50000;
+    }
+    green_hunter's_armor{
+        loc 30;
+        tabindex 1;
+        id 1040067;
+        price 50000;
+    }
+    dark_hunter's_armor{
+        loc 31;
+        tabindex 1;
+        id 1040173;
+        price 50000;
+    }
+    red_huntress_armor{
+        loc 32;
+        tabindex 1;
+        id 1041056;
+        price 50000;
+    }
+    green_huntress_armor{
+        loc 33;
+        tabindex 1;
+        id 1041176;
+        price 50000;
+    }
+    black_huntress_armor{
+        loc 34;
+        tabindex 1;
+        id 1041055;
+        price 50000;
+    }
+    blue_hunter's_pants{
+        loc 35;
+        tabindex 1;
+        id 1060059;
+        price 44000;
+    }
+    red_hunter's_pants{
+        loc 36;
+        tabindex 1;
+        id 1060058;
+        price 44000;
+    }
+    green_hunter's_pants{
+        loc 37;
+        tabindex 1;
+        id 1060161;
+        price 44000;
+    }
+    dark_hunter's_pants{
+        loc 38;
+        tabindex 1;
+        id 1060057;
+        price 44000;
+    }
+    red_huntress_pants{
+        loc 39;
+        tabindex 1;
+        id 1061052;
+        price 44000;
+    }
+    green_huntress_pants{
+        loc 40;
+        tabindex 1;
+        id 1061185;
+        price 44000;
+    }
+    black_huntress_pants{
+        loc 41;
+        tabindex 1;
+        id 1061051;
+        price 44000;
+    }
+    red_guise{
+        loc 42;
+        tabindex 1;
+        id 1002171;
+        price 30000;
+    }
+    blue_guise{
+        loc 43;
+        tabindex 1;
+        id 1002172;
+        price 30000;
+    }
+    green_guise{
+        loc 44;
+        tabindex 1;
+        id 1002173;
+        price 30000;
+    }
+    brown_guise{
+        loc 45;
+        tabindex 1;
+        id 1003319;
+        price 30000;
+    }
+    dark_guise{
+        loc 46;
+        tabindex 1;
+        id 1002175;
+        price 30000;
+    }
+    dark_brown_stealer{
+        loc 47;
+        tabindex 1;
+        id 1040174;
+        price 45000;
+    }
+    dark_silver_stealer{
+        loc 48;
+        tabindex 1;
+        id 1040058;
+        price 45000;
+    }
+    red_gold_stealer{
+        loc 49;
+        tabindex 1;
+        id 1040059;
+        price 45000;
+    }
+    silver_black_stealer{
+        loc 50;
+        tabindex 1;
+        id 1040060;
+        price 45000;
+    }
+    red_steal{
+        loc 51;
+        tabindex 1;
+        id 1041047;
+        price 45000;
+    }
+    black_steal{
+        loc 52;
+        tabindex 1;
+        id 1041177;
+        price 45000;
+    }
+    blue_steal{
+        loc 53;
+        tabindex 1;
+        id 1041049;
+        price 45000;
+    }
+    purple_steal{
+        loc 54;
+        tabindex 1;
+        id 1041050;
+        price 45000;
+    }
+    dark_brown_stealer_pants{
+        loc 55;
+        tabindex 1;
+        id 1060162;
+        price 40000;
+    }
+    dark_silver_stealer_pants{
+        loc 56;
+        tabindex 1;
+        id 1060044;
+        price 40000;
+    }
+    red_/_gold_stealer_pants{
+        loc 57;
+        tabindex 1;
+        id 1060045;
+        price 40000;
+    }
+    silver_/_black_stealer_pants{
+        loc 58;
+        tabindex 1;
+        id 1060046;
+        price 40000;
+    }
+    red_steal_pants{
+        loc 59;
+        tabindex 1;
+        id 1061043;
+        price 40000;
+    }
+    black_steal_pants{
+        loc 60;
+        tabindex 1;
+        id 1061186;
+        price 40000;
+    }
+    blue_steal_pants{
+        loc 61;
+        tabindex 1;
+        id 1061045;
+        price 40000;
+    }
+    purple_steal_pants{
+        loc 62;
+        tabindex 1;
+        id 1061046;
+        price 40000;
+    }
+    white_oceania_cap{
+        loc 63;
+        tabindex 1;
+        id 1003320;
+        price 40000;
+    }
+    brown_pollard{
+        loc 64;
+        tabindex 1;
+        id 1052393;
+        price 90000;
+    }
+}
+2022001{
+    red-bean_soup{
+        loc 0;
+        tabindex 1;
+        id 2270041;
+        price 400;
+    }
+    soft_white_bun{
+        loc 1;
+        tabindex 1;
+        id 2022186;
+        price 2400;
+    }
+    red_potion{
+        loc 2;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 3;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 4;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 5;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 6;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 7;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 8;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 9;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 10;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 11;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    pure_water{
+        loc 12;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    watermelon{
+        loc 13;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 14;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 15;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 16;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 17;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 18;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 19;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 20;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    unagi{
+        loc 21;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    melting_cheese{
+        loc 22;
+        tabindex 1;
+        id 2020012;
+        price 4500;
+    }
+    reindeer_milk{
+        loc 23;
+        tabindex 1;
+        id 2020013;
+        price 5600;
+    }
+    sunrise_dew{
+        loc 24;
+        tabindex 1;
+        id 2020045;
+        price 8100;
+    }
+    sunset_dew{
+        loc 25;
+        tabindex 1;
+        id 2020046;
+        price 10200;
+    }
+    return_scroll_-_nearest_town{
+        loc 26;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    antidote{
+        loc 27;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 28;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 29;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    arrow_for_bow{
+        loc 30;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 31;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    subi_throwing-stars{
+        loc 32;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 33;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2020001{
+    cutlus{
+        loc 0;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 1;
+        tabindex 1;
+        id 1302188;
+        price 225000;
+    }
+    dankke{
+        loc 2;
+        tabindex 1;
+        id 1312083;
+        price 100000;
+    }
+    blue_counter{
+        loc 3;
+        tabindex 1;
+        id 1312084;
+        price 175000;
+    }
+    heavy_hammer{
+        loc 4;
+        tabindex 1;
+        id 1322117;
+        price 100000;
+    }
+    jacker{
+        loc 5;
+        tabindex 1;
+        id 1322118;
+        price 175000;
+    }
+    halfmoon_zamadar{
+        loc 6;
+        tabindex 1;
+        id 1332001;
+        price 200000;
+    }
+    gephart{
+        loc 7;
+        tabindex 1;
+        id 1332163;
+        price 375000;
+    }
+    bazlud{
+        loc 8;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    wizard_wand{
+        loc 9;
+        tabindex 1;
+        id 1372112;
+        price 175000;
+    }
+    fairy_wand{
+        loc 10;
+        tabindex 1;
+        id 1372113;
+        price 400000;
+    }
+    lionheart{
+        loc 11;
+        tabindex 1;
+        id 1402124;
+        price 350000;
+    }
+    zard{
+        loc 12;
+        tabindex 1;
+        id 1402125;
+        price 450000;
+    }
+    niam{
+        loc 13;
+        tabindex 1;
+        id 1412082;
+        price 200000;
+    }
+    sabretooth{
+        loc 14;
+        tabindex 1;
+        id 1412083;
+        price 250000;
+    }
+    sledgehammer{
+        loc 15;
+        tabindex 1;
+        id 1422084;
+        price 200000;
+    }
+    titan{
+        loc 16;
+        tabindex 1;
+        id 1422085;
+        price 250000;
+    }
+    nakamaki{
+        loc 17;
+        tabindex 1;
+        id 1432111;
+        price 175000;
+    }
+    zeco{
+        loc 18;
+        tabindex 1;
+        id 1432112;
+        price 225000;
+    }
+    axe_pole_arm{
+        loc 19;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 20;
+        tabindex 1;
+        id 1442150;
+        price 300000;
+    }
+    red_viper{
+        loc 21;
+        tabindex 1;
+        id 1452142;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 22;
+        tabindex 1;
+        id 1452143;
+        price 375000;
+    }
+    eagle_crow{
+        loc 23;
+        tabindex 1;
+        id 1462130;
+        price 200000;
+    }
+    heckler{
+        loc 24;
+        tabindex 1;
+        id 1462131;
+        price 250000;
+    }
+    bronze_igor{
+        loc 25;
+        tabindex 1;
+        id 1472091;
+        price 30000;
+    }
+    meba{
+        loc 26;
+        tabindex 1;
+        id 1472152;
+        price 60000;
+    }
+}
+2022000{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    red_matty{
+        loc 1;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 2;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 3;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 4;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_pole-feather_hat{
+        loc 5;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 6;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    brown_pole-feather_hat{
+        loc 7;
+        tabindex 1;
+        id 1002135;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 8;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_burgler{
+        loc 9;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burgler{
+        loc 10;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 11;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 12;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burgler{
+        loc 13;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    yellow_jangoon_armor{
+        loc 14;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 15;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 16;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 17;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    blue_amoria_top{
+        loc 18;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    red_legolier{
+        loc 20;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 21;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 22;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier{
+        loc 23;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 24;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 25;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 26;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 27;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 28;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 29;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 30;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 31;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    black_knucklevest{
+        loc 32;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest{
+        loc 33;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 34;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 35;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 36;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 37;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 38;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    white_crusader_chainmail{
+        loc 39;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 40;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 41;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 42;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    white_chaos_robe{
+        loc 43;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 44;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 45;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 46;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 47;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 48;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 49;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 50;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 51;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 52;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    red_avenger{
+        loc 53;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 54;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 55;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    white_jangoon_pants{
+        loc 56;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    brown_jangoon_pants{
+        loc 57;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 58;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    blue_amoria_skirt{
+        loc 60;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 61;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_legolier_pants{
+        loc 62;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 63;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 64;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 65;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 66;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 67;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 68;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 69;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 70;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 71;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 72;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 73;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_knucklevest_pants{
+        loc 74;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 75;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 77;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 78;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+    red_snowshoes{
+        loc 81;
+        tabindex 1;
+        id 1072168;
+        price 30000;
+    }
+    blue_snowshoes{
+        loc 82;
+        tabindex 1;
+        id 1072169;
+        price 28000;
+    }
+    green_snowshoes{
+        loc 83;
+        tabindex 1;
+        id 1072170;
+        price 29000;
+    }
+    black_snowshoes{
+        loc 84;
+        tabindex 1;
+        id 1072171;
+        price 29000;
+    }
+    purple_snowshoes{
+        loc 85;
+        tabindex 1;
+        id 1072338;
+        price 29000;
+    }
+    red_triangular_shield{
+        loc 86;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 87;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+}
+2020005{
+    holy_water{
+        loc 0;
+        tabindex 1;
+        id 2050003;
+        price 300;
+    }
+    all_cure_potion{
+        loc 1;
+        tabindex 1;
+        id 2050004;
+        price 400;
+    }
+    the_magic_rock{
+        loc 2;
+        tabindex 1;
+        id 4006000;
+        price 5000;
+    }
+    the_summoning_rock{
+        loc 3;
+        tabindex 1;
+        id 4006001;
+        price 5000;
+    }
+}
+2100002{
+    gladius{
+        loc 0;
+        tabindex 1;
+        id 1302186;
+        price 40000;
+    }
+    fireman's_axe{
+        loc 1;
+        tabindex 1;
+        id 1312082;
+        price 40000;
+    }
+    war_hammer{
+        loc 2;
+        tabindex 1;
+        id 1322116;
+        price 40000;
+    }
+    cass{
+        loc 3;
+        tabindex 1;
+        id 1332009;
+        price 42000;
+    }
+    reef_claw{
+        loc 4;
+        tabindex 1;
+        id 1332162;
+        price 40000;
+    }
+    mithril_wand{
+        loc 5;
+        tabindex 1;
+        id 1372111;
+        price 38000;
+    }
+    wizard_staff{
+        loc 6;
+        tabindex 1;
+        id 1382135;
+        price 20000;
+    }
+    scimitar{
+        loc 7;
+        tabindex 1;
+        id 1402123;
+        price 150000;
+    }
+    blue_axe{
+        loc 8;
+        tabindex 1;
+        id 1412081;
+        price 45000;
+    }
+    mithril_maul{
+        loc 9;
+        tabindex 1;
+        id 1422083;
+        price 45000;
+    }
+    forked_spear{
+        loc 10;
+        tabindex 1;
+        id 1432110;
+        price 60000;
+    }
+    mithril_pole_arm{
+        loc 11;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    ryden{
+        loc 12;
+        tabindex 1;
+        id 1452141;
+        price 150000;
+    }
+    mountain_crossbow{
+        loc 13;
+        tabindex 1;
+        id 1462129;
+        price 30000;
+    }
+    steel_titans{
+        loc 14;
+        tabindex 1;
+        id 1472150;
+        price 20000;
+    }
+    prime_hands{
+        loc 15;
+        tabindex 1;
+        id 1482114;
+        price 75000;
+    }
+    cold_mind{
+        loc 16;
+        tabindex 1;
+        id 1492113;
+        price 75000;
+    }
+}
+2100003{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    jousting_helmet{
+        loc 1;
+        tabindex 1;
+        id 1003316;
+        price 120000;
+    }
+    red_hwarang_shirt{
+        loc 2;
+        tabindex 1;
+        id 1040021;
+        price 40000;
+    }
+    green_hwarang_shirt{
+        loc 3;
+        tabindex 1;
+        id 1040026;
+        price 40000;
+    }
+    dark_engrit{
+        loc 4;
+        tabindex 1;
+        id 1051241;
+        price 60000;
+    }
+    red_engrit{
+        loc 5;
+        tabindex 1;
+        id 1051011;
+        price 60000;
+    }
+    blue_engrit{
+        loc 6;
+        tabindex 1;
+        id 1051012;
+        price 60000;
+    }
+    yellow_engrit{
+        loc 7;
+        tabindex 1;
+        id 1051013;
+        price 60000;
+    }
+    black_martial_arts_pants{
+        loc 8;
+        tabindex 1;
+        id 1060016;
+        price 38000;
+    }
+    white_martial_arts_pants{
+        loc 9;
+        tabindex 1;
+        id 1060017;
+        price 38000;
+    }
+    red_martial_arts_pants{
+        loc 10;
+        tabindex 1;
+        id 1060018;
+        price 38000;
+    }
+    brown_martial_arts_pants{
+        loc 11;
+        tabindex 1;
+        id 1060019;
+        price 38000;
+    }
+    mithril_buckler{
+        loc 12;
+        tabindex 1;
+        id 1092097;
+        price 60000;
+    }
+    bronze_pride{
+        loc 13;
+        tabindex 1;
+        id 1002064;
+        price 40000;
+    }
+    purple_fairy_top{
+        loc 14;
+        tabindex 1;
+        id 1041041;
+        price 42000;
+    }
+    green_fairy_top{
+        loc 15;
+        tabindex 1;
+        id 1041175;
+        price 42000;
+    }
+    blue_fairy_top{
+        loc 16;
+        tabindex 1;
+        id 1041043;
+        price 42000;
+    }
+    blue_wizard_robe{
+        loc 17;
+        tabindex 1;
+        id 1050003;
+        price 40000;
+    }
+    white_wizard_robe{
+        loc 18;
+        tabindex 1;
+        id 1050026;
+        price 40000;
+    }
+    black_wizard_robe{
+        loc 19;
+        tabindex 1;
+        id 1050027;
+        price 40000;
+    }
+    green_wizard_robe{
+        loc 20;
+        tabindex 1;
+        id 1050028;
+        price 40000;
+    }
+    purple_fairy_skirt{
+        loc 21;
+        tabindex 1;
+        id 1061034;
+        price 40000;
+    }
+    green_fairy_skirt{
+        loc 22;
+        tabindex 1;
+        id 1061184;
+        price 40000;
+    }
+    blue_fairy_skirt{
+        loc 23;
+        tabindex 1;
+        id 1061036;
+        price 40000;
+    }
+    red_hawkeye{
+        loc 24;
+        tabindex 1;
+        id 1002161;
+        price 30000;
+    }
+    green_hawkeye{
+        loc 25;
+        tabindex 1;
+        id 1003318;
+        price 30000;
+    }
+    brown_hawkeye{
+        loc 26;
+        tabindex 1;
+        id 1002164;
+        price 30000;
+    }
+    dark_hawkeye{
+        loc 27;
+        tabindex 1;
+        id 1002165;
+        price 30000;
+    }
+    red_hunter's_armor{
+        loc 28;
+        tabindex 1;
+        id 1040069;
+        price 50000;
+    }
+    blue_hunter's_armor{
+        loc 29;
+        tabindex 1;
+        id 1040070;
+        price 50000;
+    }
+    green_hunter's_armor{
+        loc 30;
+        tabindex 1;
+        id 1040067;
+        price 50000;
+    }
+    dark_hunter's_armor{
+        loc 31;
+        tabindex 1;
+        id 1040173;
+        price 50000;
+    }
+    red_huntress_armor{
+        loc 32;
+        tabindex 1;
+        id 1041056;
+        price 50000;
+    }
+    green_huntress_armor{
+        loc 33;
+        tabindex 1;
+        id 1041176;
+        price 50000;
+    }
+    black_huntress_armor{
+        loc 34;
+        tabindex 1;
+        id 1041055;
+        price 50000;
+    }
+    blue_hunter's_pants{
+        loc 35;
+        tabindex 1;
+        id 1060059;
+        price 44000;
+    }
+    red_hunter's_pants{
+        loc 36;
+        tabindex 1;
+        id 1060058;
+        price 44000;
+    }
+    green_hunter's_pants{
+        loc 37;
+        tabindex 1;
+        id 1060161;
+        price 44000;
+    }
+    dark_hunter's_pants{
+        loc 38;
+        tabindex 1;
+        id 1060057;
+        price 44000;
+    }
+    red_huntress_pants{
+        loc 39;
+        tabindex 1;
+        id 1061052;
+        price 44000;
+    }
+    green_huntress_pants{
+        loc 40;
+        tabindex 1;
+        id 1061185;
+        price 44000;
+    }
+    black_huntress_pants{
+        loc 41;
+        tabindex 1;
+        id 1061051;
+        price 44000;
+    }
+    red_guise{
+        loc 42;
+        tabindex 1;
+        id 1002171;
+        price 30000;
+    }
+    blue_guise{
+        loc 43;
+        tabindex 1;
+        id 1002172;
+        price 30000;
+    }
+    green_guise{
+        loc 44;
+        tabindex 1;
+        id 1002173;
+        price 30000;
+    }
+    brown_guise{
+        loc 45;
+        tabindex 1;
+        id 1003319;
+        price 30000;
+    }
+    dark_guise{
+        loc 46;
+        tabindex 1;
+        id 1002175;
+        price 30000;
+    }
+    dark_brown_stealer{
+        loc 47;
+        tabindex 1;
+        id 1040174;
+        price 45000;
+    }
+    dark_silver_stealer{
+        loc 48;
+        tabindex 1;
+        id 1040058;
+        price 45000;
+    }
+    red_gold_stealer{
+        loc 49;
+        tabindex 1;
+        id 1040059;
+        price 45000;
+    }
+    silver_black_stealer{
+        loc 50;
+        tabindex 1;
+        id 1040060;
+        price 45000;
+    }
+    red_steal{
+        loc 51;
+        tabindex 1;
+        id 1041047;
+        price 45000;
+    }
+    black_steal{
+        loc 52;
+        tabindex 1;
+        id 1041177;
+        price 45000;
+    }
+    blue_steal{
+        loc 53;
+        tabindex 1;
+        id 1041049;
+        price 45000;
+    }
+    purple_steal{
+        loc 54;
+        tabindex 1;
+        id 1041050;
+        price 45000;
+    }
+    dark_brown_stealer_pants{
+        loc 55;
+        tabindex 1;
+        id 1060162;
+        price 40000;
+    }
+    dark_silver_stealer_pants{
+        loc 56;
+        tabindex 1;
+        id 1060044;
+        price 40000;
+    }
+    red_/_gold_stealer_pants{
+        loc 57;
+        tabindex 1;
+        id 1060045;
+        price 40000;
+    }
+    silver_/_black_stealer_pants{
+        loc 58;
+        tabindex 1;
+        id 1060046;
+        price 40000;
+    }
+    red_steal_pants{
+        loc 59;
+        tabindex 1;
+        id 1061043;
+        price 40000;
+    }
+    black_steal_pants{
+        loc 60;
+        tabindex 1;
+        id 1061186;
+        price 40000;
+    }
+    blue_steal_pants{
+        loc 61;
+        tabindex 1;
+        id 1061045;
+        price 40000;
+    }
+    purple_steal_pants{
+        loc 62;
+        tabindex 1;
+        id 1061046;
+        price 40000;
+    }
+    brown_pollard{
+        loc 63;
+        tabindex 1;
+        id 1052393;
+        price 90000;
+    }
+    white_oceania_cap{
+        loc 64;
+        tabindex 1;
+        id 1003320;
+        price 40000;
+    }
+}
+2100004{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    unagi{
+        loc 10;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 11;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    watermelon{
+        loc 12;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 13;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 14;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    chocolate{
+        loc 20;
+        tabindex 1;
+        id 4033144;
+        price 3000;
+    }
+    antidote{
+        loc 21;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 22;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 23;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    holy_water{
+        loc 24;
+        tabindex 1;
+        id 2050003;
+        price 500;
+    }
+    return_scroll_-_nearest_town{
+        loc 25;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    pet_food{
+        loc 28;
+        tabindex 1;
+        id 4034590;
+        price 25;
+    }
+    subi_throwing-stars{
+        loc 29;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 30;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2070003{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    yellow_jangoon_armor{
+        loc 1;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 2;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 3;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 4;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_crusader_chainmail{
+        loc 5;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 6;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 7;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 8;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    brown_jangoon_pants{
+        loc 9;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    white_jangoon_pants{
+        loc 10;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 11;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 12;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    red_triangular_shield{
+        loc 13;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 14;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+    red_matty{
+        loc 15;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 16;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 17;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 18;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 20;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    white_chaos_robe{
+        loc 21;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 22;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 23;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 24;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 25;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 26;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 27;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 28;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 29;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 30;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    blue_amoria_skirt{
+        loc 31;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_pole-feather_hat{
+        loc 33;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 34;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 35;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_legolier{
+        loc 36;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 37;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 38;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier{
+        loc 39;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 40;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 41;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 42;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 43;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 44;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 45;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 46;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 47;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    blue_legolier_pants{
+        loc 48;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 49;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 50;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 51;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 52;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 53;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 54;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 55;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 56;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 57;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 58;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_burgler{
+        loc 60;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burgler{
+        loc 61;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 62;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 63;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burgler{
+        loc 64;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    black_knucklevest{
+        loc 65;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest{
+        loc 66;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 67;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 68;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 69;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 70;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 71;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_avenger{
+        loc 72;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 73;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 74;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    red_knucklevest_pants{
+        loc 75;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 77;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 78;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 81;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+    brown_pollard{
+        loc 82;
+        tabindex 1;
+        id 1052393;
+        price 90000;
+    }
+    blue_brace_look{
+        loc 83;
+        tabindex 1;
+        id 1052394;
+        price 100000;
+    }
+    red_barbay{
+        loc 84;
+        tabindex 1;
+        id 1052395;
+        price 120000;
+    }
+    blue_den_marine{
+        loc 85;
+        tabindex 1;
+        id 1003325;
+        price 75000;
+    }
+}
+2070002{
+    cutlus{
+        loc 0;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 1;
+        tabindex 1;
+        id 1302188;
+        price 225000;
+    }
+    dankke{
+        loc 2;
+        tabindex 1;
+        id 1312083;
+        price 100000;
+    }
+    blue_counter{
+        loc 3;
+        tabindex 1;
+        id 1312084;
+        price 175000;
+    }
+    heavy_hammer{
+        loc 4;
+        tabindex 1;
+        id 1322117;
+        price 100000;
+    }
+    jacker{
+        loc 5;
+        tabindex 1;
+        id 1322118;
+        price 175000;
+    }
+    halfmoon_zamadar{
+        loc 6;
+        tabindex 1;
+        id 1332001;
+        price 200000;
+    }
+    gephart{
+        loc 7;
+        tabindex 1;
+        id 1332163;
+        price 375000;
+    }
+    bazlud{
+        loc 8;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    wizard_wand{
+        loc 9;
+        tabindex 1;
+        id 1372112;
+        price 175000;
+    }
+    fairy_wand{
+        loc 10;
+        tabindex 1;
+        id 1372113;
+        price 400000;
+    }
+    lionheart{
+        loc 11;
+        tabindex 1;
+        id 1402124;
+        price 350000;
+    }
+    zard{
+        loc 12;
+        tabindex 1;
+        id 1402125;
+        price 450000;
+    }
+    niam{
+        loc 13;
+        tabindex 1;
+        id 1412082;
+        price 200000;
+    }
+    sabretooth{
+        loc 14;
+        tabindex 1;
+        id 1412083;
+        price 250000;
+    }
+    sledgehammer{
+        loc 15;
+        tabindex 1;
+        id 1422084;
+        price 200000;
+    }
+    titan{
+        loc 16;
+        tabindex 1;
+        id 1422085;
+        price 250000;
+    }
+    nakamaki{
+        loc 17;
+        tabindex 1;
+        id 1432111;
+        price 175000;
+    }
+    zeco{
+        loc 18;
+        tabindex 1;
+        id 1432112;
+        price 225000;
+    }
+    axe_pole_arm{
+        loc 19;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 20;
+        tabindex 1;
+        id 1442150;
+        price 300000;
+    }
+    red_viper{
+        loc 21;
+        tabindex 1;
+        id 1452142;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 22;
+        tabindex 1;
+        id 1452143;
+        price 375000;
+    }
+    eagle_crow{
+        loc 23;
+        tabindex 1;
+        id 1462130;
+        price 200000;
+    }
+    heckler{
+        loc 24;
+        tabindex 1;
+        id 1462131;
+        price 250000;
+    }
+    bronze_igor{
+        loc 25;
+        tabindex 1;
+        id 1472091;
+        price 30000;
+    }
+    meba{
+        loc 26;
+        tabindex 1;
+        id 1472152;
+        price 60000;
+    }
+    silver_maiden{
+        loc 27;
+        tabindex 1;
+        id 1482115;
+        price 100000;
+    }
+    neozard{
+        loc 28;
+        tabindex 1;
+        id 1482116;
+        price 150000;
+    }
+    shooting_star{
+        loc 29;
+        tabindex 1;
+        id 1702155;
+        price 100000;
+    }
+    lunar_shooter{
+        loc 30;
+        tabindex 1;
+        id 1492115;
+        price 160000;
+    }
+}
+2070001{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    watermelon{
+        loc 10;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 11;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 12;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 13;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 14;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 15;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 16;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 17;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    melting_cheese{
+        loc 18;
+        tabindex 1;
+        id 2020012;
+        price 4500;
+    }
+    reindeer_milk{
+        loc 19;
+        tabindex 1;
+        id 2020013;
+        price 5600;
+    }
+    sunrise_dew{
+        loc 20;
+        tabindex 1;
+        id 2020045;
+        price 8100;
+    }
+    sunset_dew{
+        loc 21;
+        tabindex 1;
+        id 2020046;
+        price 10200;
+    }
+    unagi{
+        loc 22;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 23;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    return_scroll_-_nearest_town{
+        loc 24;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 25;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 26;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    bronze_arrow_for_bow{
+        loc 27;
+        tabindex 1;
+        id 2060001;
+        price 10;
+    }
+    bronze_arrow_for_crossbow{
+        loc 28;
+        tabindex 1;
+        id 2061001;
+        price 10;
+    }
+    subi_throwing-stars{
+        loc 29;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 30;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+9270065{
+    chicken_kapitan{
+        loc 0;
+        tabindex 1;
+        id 2022476;
+        price 4200;
+    }
+    mee_siam{
+        loc 1;
+        tabindex 1;
+        id 2022477;
+        price 9200;
+    }
+    rojak{
+        loc 2;
+        tabindex 1;
+        id 2022478;
+        price 3200;
+    }
+    kangkung_belacan{
+        loc 3;
+        tabindex 1;
+        id 2022479;
+        price 3800;
+    }
+    kuih{
+        loc 4;
+        tabindex 1;
+        id 2022480;
+        price 12000;
+    }
+    laksa{
+        loc 5;
+        tabindex 1;
+        id 2022203;
+        price 800;
+    }
+    hokkien_mee{
+        loc 6;
+        tabindex 1;
+        id 2022204;
+        price 1200;
+    }
+    carrot_cake{
+        loc 7;
+        tabindex 1;
+        id 2022205;
+        price 1800;
+    }
+    chicken_rice{
+        loc 8;
+        tabindex 1;
+        id 2022206;
+        price 2200;
+    }
+    satay{
+        loc 9;
+        tabindex 1;
+        id 2022207;
+        price 2600;
+    }
+    guava{
+        loc 10;
+        tabindex 1;
+        id 2022208;
+        price 1000;
+    }
+    rambutan{
+        loc 11;
+        tabindex 1;
+        id 2022209;
+        price 1600;
+    }
+    dragon_fruit{
+        loc 12;
+        tabindex 1;
+        id 2022210;
+        price 3200;
+    }
+    durian{
+        loc 13;
+        tabindex 1;
+        id 2022211;
+        price 6400;
+    }
+    pepper_crab{
+        loc 14;
+        tabindex 1;
+        id 2022214;
+        price 3200;
+    }
+    chili_crab{
+        loc 15;
+        tabindex 1;
+        id 2022215;
+        price 6800;
+    }
+    antidote{
+        loc 16;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 17;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 18;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    holy_water{
+        loc 19;
+        tabindex 1;
+        id 2050003;
+        price 500;
+    }
+    return_scroll_-_nearest_town{
+        loc 20;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 21;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 22;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+}
+9270057{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    unagi{
+        loc 10;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 11;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    watermelon{
+        loc 12;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 13;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 14;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    chocolate{
+        loc 20;
+        tabindex 1;
+        id 4033144;
+        price 3000;
+    }
+    antidote{
+        loc 21;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 22;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 23;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    holy_water{
+        loc 24;
+        tabindex 1;
+        id 2050003;
+        price 500;
+    }
+    return_scroll_-_nearest_town{
+        loc 25;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    mushroom_miso_ramen{
+        loc 28;
+        tabindex 1;
+        id 2022015;
+        price 12000;
+    }
+}
+9270055{
+    gladius{
+        loc 0;
+        tabindex 1;
+        id 1302186;
+        price 40000;
+    }
+    cutlus{
+        loc 1;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 2;
+        tabindex 1;
+        id 1302188;
+        price 225000;
+    }
+    fireman's_axe{
+        loc 3;
+        tabindex 1;
+        id 1312082;
+        price 40000;
+    }
+    dankke{
+        loc 4;
+        tabindex 1;
+        id 1312083;
+        price 100000;
+    }
+    blue_counter{
+        loc 5;
+        tabindex 1;
+        id 1312084;
+        price 175000;
+    }
+    war_hammer{
+        loc 6;
+        tabindex 1;
+        id 1322116;
+        price 40000;
+    }
+    heavy_hammer{
+        loc 7;
+        tabindex 1;
+        id 1322117;
+        price 100000;
+    }
+    jacker{
+        loc 8;
+        tabindex 1;
+        id 1322118;
+        price 175000;
+    }
+    cass{
+        loc 9;
+        tabindex 1;
+        id 1332009;
+        price 42000;
+    }
+    reef_claw{
+        loc 10;
+        tabindex 1;
+        id 1332162;
+        price 40000;
+    }
+    halfmoon_zamadar{
+        loc 11;
+        tabindex 1;
+        id 1332001;
+        price 200000;
+    }
+    gephart{
+        loc 12;
+        tabindex 1;
+        id 1332163;
+        price 375000;
+    }
+    bazlud{
+        loc 13;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    mithril_wand{
+        loc 14;
+        tabindex 1;
+        id 1372111;
+        price 38000;
+    }
+    wizard_wand{
+        loc 15;
+        tabindex 1;
+        id 1372112;
+        price 175000;
+    }
+    fairy_wand{
+        loc 16;
+        tabindex 1;
+        id 1372113;
+        price 400000;
+    }
+    wizard_staff{
+        loc 17;
+        tabindex 1;
+        id 1382135;
+        price 20000;
+    }
+    scimitar{
+        loc 18;
+        tabindex 1;
+        id 1402123;
+        price 150000;
+    }
+    lionheart{
+        loc 19;
+        tabindex 1;
+        id 1402124;
+        price 350000;
+    }
+    zard{
+        loc 20;
+        tabindex 1;
+        id 1402125;
+        price 450000;
+    }
+    blue_axe{
+        loc 21;
+        tabindex 1;
+        id 1412081;
+        price 45000;
+    }
+    niam{
+        loc 22;
+        tabindex 1;
+        id 1412082;
+        price 200000;
+    }
+    sabretooth{
+        loc 23;
+        tabindex 1;
+        id 1412083;
+        price 250000;
+    }
+    mithril_maul{
+        loc 24;
+        tabindex 1;
+        id 1422083;
+        price 45000;
+    }
+    sledgehammer{
+        loc 25;
+        tabindex 1;
+        id 1422084;
+        price 200000;
+    }
+    titan{
+        loc 26;
+        tabindex 1;
+        id 1422085;
+        price 250000;
+    }
+    forked_spear{
+        loc 27;
+        tabindex 1;
+        id 1432110;
+        price 60000;
+    }
+    nakamaki{
+        loc 28;
+        tabindex 1;
+        id 1432111;
+        price 175000;
+    }
+    zeco{
+        loc 29;
+        tabindex 1;
+        id 1432112;
+        price 225000;
+    }
+    mithril_pole_arm{
+        loc 30;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    axe_pole_arm{
+        loc 31;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 32;
+        tabindex 1;
+        id 1442150;
+        price 300000;
+    }
+    ryden{
+        loc 33;
+        tabindex 1;
+        id 1452141;
+        price 150000;
+    }
+    red_viper{
+        loc 34;
+        tabindex 1;
+        id 1452142;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 35;
+        tabindex 1;
+        id 1452143;
+        price 375000;
+    }
+    mountain_crossbow{
+        loc 36;
+        tabindex 1;
+        id 1462129;
+        price 30000;
+    }
+    eagle_crow{
+        loc 37;
+        tabindex 1;
+        id 1462130;
+        price 200000;
+    }
+    heckler{
+        loc 38;
+        tabindex 1;
+        id 1462131;
+        price 250000;
+    }
+    steel_titans{
+        loc 39;
+        tabindex 1;
+        id 1472150;
+        price 20000;
+    }
+    bronze_igor{
+        loc 40;
+        tabindex 1;
+        id 1472091;
+        price 30000;
+    }
+    meba{
+        loc 41;
+        tabindex 1;
+        id 1472152;
+        price 60000;
+    }
+    norman_grip{
+        loc 42;
+        tabindex 1;
+        id 1482113;
+        price 20000;
+    }
+    prime_hands{
+        loc 43;
+        tabindex 1;
+        id 1482114;
+        price 75000;
+    }
+    silver_maiden{
+        loc 44;
+        tabindex 1;
+        id 1482115;
+        price 100000;
+    }
+    neozard{
+        loc 45;
+        tabindex 1;
+        id 1482116;
+        price 150000;
+    }
+    golden_hook{
+        loc 46;
+        tabindex 1;
+        id 1492112;
+        price 22000;
+    }
+    cold_mind{
+        loc 47;
+        tabindex 1;
+        id 1492113;
+        price 75000;
+    }
+    shooting_star{
+        loc 48;
+        tabindex 1;
+        id 1702155;
+        price 100000;
+    }
+    lunar_shooter{
+        loc 49;
+        tabindex 1;
+        id 1492115;
+        price 160000;
+    }
+}
+9270056{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    yellow_jangoon_armor{
+        loc 1;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 2;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 3;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 4;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_crusader_chainmail{
+        loc 5;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 6;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 7;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 8;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    brown_jangoon_pants{
+        loc 9;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    white_jangoon_pants{
+        loc 10;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 11;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 12;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    red_triangular_shield{
+        loc 13;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 14;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+    red_matty{
+        loc 15;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 16;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 17;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 18;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 20;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    white_chaos_robe{
+        loc 21;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 22;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 23;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 24;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 25;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 26;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 27;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 28;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 29;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 30;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    blue_amoria_skirt{
+        loc 31;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_pole-feather_hat{
+        loc 33;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 34;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    brown_pole-feather_hat{
+        loc 35;
+        tabindex 1;
+        id 1002135;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 36;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_legolier{
+        loc 37;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 38;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 39;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier{
+        loc 40;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 41;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 42;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 43;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 44;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 45;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 46;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 47;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 48;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    blue_legolier_pants{
+        loc 49;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 50;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 51;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 52;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 53;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 54;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 55;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 56;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 57;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 58;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 60;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_burgler{
+        loc 61;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burgler{
+        loc 62;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 63;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 64;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burgler{
+        loc 65;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    black_knucklevest{
+        loc 66;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest{
+        loc 67;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 68;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 69;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 70;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 71;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 72;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_avenger{
+        loc 73;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 74;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 75;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    red_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 77;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 78;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 81;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 82;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+}
+9110004{
+    dango{
+        loc 0;
+        tabindex 1;
+        id 2022014;
+        price 650;
+    }
+    tri-colored_dango{
+        loc 1;
+        tabindex 1;
+        id 2022023;
+        price 1350;
+    }
+}
+9110005{
+    takoyaki_(octopus_ball){
+        loc 0;
+        tabindex 1;
+        id 2022024;
+        price 2000;
+    }
+    takoyaki_(jumbo){
+        loc 1;
+        tabindex 1;
+        id 2022025;
+        price 4200;
+    }
+}
+9110006{
+    yakisoba{
+        loc 0;
+        tabindex 1;
+        id 2022026;
+        price 1800;
+    }
+    yakisoba_(x2){
+        loc 1;
+        tabindex 1;
+        id 2022027;
+        price 3800;
+    }
+}
+9110003{
+    fish_cake_(skewer){
+        loc 0;
+        tabindex 1;
+        id 2022021;
+        price 550;
+    }
+    fish_cake_(dish){
+        loc 1;
+        tabindex 1;
+        id 2022022;
+        price 1300;
+    }
+}
+9110007{
+    ramen{
+        loc 0;
+        tabindex 1;
+        id 2022017;
+        price 1100;
+    }
+    kinoko_ramen_(roasted_pork){
+        loc 1;
+        tabindex 1;
+        id 2022018;
+        price 1600;
+    }
+    kinoko_ramen_(pig_head){
+        loc 2;
+        tabindex 1;
+        id 2022019;
+        price 850;
+    }
+    kinoko_ramen_(salt){
+        loc 3;
+        tabindex 1;
+        id 2022020;
+        price 550;
+    }
+}
+9201058{
+    jousting_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003316;
+        price 120500;
+    }
+    red_hwarang_shirt{
+        loc 1;
+        tabindex 1;
+        id 1040021;
+        price 40500;
+    }
+    green_hwarang_shirt{
+        loc 2;
+        tabindex 1;
+        id 1040026;
+        price 40500;
+    }
+    dark_engrit{
+        loc 3;
+        tabindex 1;
+        id 1051241;
+        price 60500;
+    }
+    red_engrit{
+        loc 4;
+        tabindex 1;
+        id 1051011;
+        price 60500;
+    }
+    blue_engrit{
+        loc 5;
+        tabindex 1;
+        id 1051012;
+        price 60500;
+    }
+    yellow_engrit{
+        loc 6;
+        tabindex 1;
+        id 1051013;
+        price 60500;
+    }
+    black_martial_arts_pants{
+        loc 7;
+        tabindex 1;
+        id 1060016;
+        price 32500;
+    }
+    white_martial_arts_pants{
+        loc 8;
+        tabindex 1;
+        id 1060017;
+        price 32500;
+    }
+    red_martial_arts_pants{
+        loc 9;
+        tabindex 1;
+        id 1060018;
+        price 32500;
+    }
+    brown_martial_arts_pants{
+        loc 10;
+        tabindex 1;
+        id 1060019;
+        price 32500;
+    }
+    mithril_buckler{
+        loc 11;
+        tabindex 1;
+        id 1092097;
+        price 60500;
+    }
+    bronze_pride{
+        loc 12;
+        tabindex 1;
+        id 1002064;
+        price 40500;
+    }
+    purple_fairy_top{
+        loc 13;
+        tabindex 1;
+        id 1041041;
+        price 42500;
+    }
+    green_fairy_top{
+        loc 14;
+        tabindex 1;
+        id 1041175;
+        price 42500;
+    }
+    blue_fairy_top{
+        loc 15;
+        tabindex 1;
+        id 1041043;
+        price 42500;
+    }
+    blue_wizard_robe{
+        loc 16;
+        tabindex 1;
+        id 1050003;
+        price 40500;
+    }
+    white_wizard_robe{
+        loc 17;
+        tabindex 1;
+        id 1050026;
+        price 40500;
+    }
+    black_wizard_robe{
+        loc 18;
+        tabindex 1;
+        id 1050027;
+        price 40500;
+    }
+    green_wizard_robe{
+        loc 19;
+        tabindex 1;
+        id 1050028;
+        price 40500;
+    }
+    purple_fairy_skirt{
+        loc 20;
+        tabindex 1;
+        id 1061034;
+        price 40500;
+    }
+    green_fairy_skirt{
+        loc 21;
+        tabindex 1;
+        id 1061184;
+        price 40500;
+    }
+    blue_fairy_skirt{
+        loc 22;
+        tabindex 1;
+        id 1061036;
+        price 40500;
+    }
+    red_hawkeye{
+        loc 23;
+        tabindex 1;
+        id 1002161;
+        price 30500;
+    }
+    blue_hawkeye{
+        loc 24;
+        tabindex 1;
+        id 1002162;
+        price 30500;
+    }
+    green_hawkeye{
+        loc 25;
+        tabindex 1;
+        id 1003318;
+        price 30500;
+    }
+    brown_hawkeye{
+        loc 26;
+        tabindex 1;
+        id 1002164;
+        price 30500;
+    }
+    dark_hawkeye{
+        loc 27;
+        tabindex 1;
+        id 1002165;
+        price 30500;
+    }
+    red_hunter's_armor{
+        loc 28;
+        tabindex 1;
+        id 1040069;
+        price 50500;
+    }
+    blue_hunter's_armor{
+        loc 29;
+        tabindex 1;
+        id 1040070;
+        price 50500;
+    }
+    green_hunter's_armor{
+        loc 30;
+        tabindex 1;
+        id 1040067;
+        price 50500;
+    }
+    dark_hunter's_armor{
+        loc 31;
+        tabindex 1;
+        id 1040173;
+        price 50500;
+    }
+    red_huntress_armor{
+        loc 32;
+        tabindex 1;
+        id 1041056;
+        price 50500;
+    }
+    green_huntress_armor{
+        loc 33;
+        tabindex 1;
+        id 1041176;
+        price 50500;
+    }
+    black_huntress_armor{
+        loc 34;
+        tabindex 1;
+        id 1041055;
+        price 50500;
+    }
+    blue_hunter's_pants{
+        loc 35;
+        tabindex 1;
+        id 1060059;
+        price 44500;
+    }
+    red_hunter's_pants{
+        loc 36;
+        tabindex 1;
+        id 1060058;
+        price 44500;
+    }
+    green_hunter's_pants{
+        loc 37;
+        tabindex 1;
+        id 1060161;
+        price 44500;
+    }
+    dark_hunter's_pants{
+        loc 38;
+        tabindex 1;
+        id 1060057;
+        price 44500;
+    }
+    red_huntress_pants{
+        loc 39;
+        tabindex 1;
+        id 1061052;
+        price 44500;
+    }
+    green_huntress_pants{
+        loc 40;
+        tabindex 1;
+        id 1061185;
+        price 44500;
+    }
+    black_huntress_pants{
+        loc 41;
+        tabindex 1;
+        id 1061051;
+        price 44500;
+    }
+    red_guise{
+        loc 42;
+        tabindex 1;
+        id 1002171;
+        price 30500;
+    }
+    blue_guise{
+        loc 43;
+        tabindex 1;
+        id 1002172;
+        price 30500;
+    }
+    green_guise{
+        loc 44;
+        tabindex 1;
+        id 1002173;
+        price 30500;
+    }
+    brown_guise{
+        loc 45;
+        tabindex 1;
+        id 1003319;
+        price 30500;
+    }
+    black_guise{
+        loc 46;
+        tabindex 1;
+        id 1002175;
+        price 30500;
+    }
+    dark_brown_stealer{
+        loc 47;
+        tabindex 1;
+        id 1040174;
+        price 45500;
+    }
+    dark_silver_stealer{
+        loc 48;
+        tabindex 1;
+        id 1040058;
+        price 45500;
+    }
+    red_gold_stealer{
+        loc 49;
+        tabindex 1;
+        id 1040059;
+        price 45500;
+    }
+    silver_black_stealer{
+        loc 50;
+        tabindex 1;
+        id 1040060;
+        price 45500;
+    }
+    red_steal{
+        loc 51;
+        tabindex 1;
+        id 1041047;
+        price 45500;
+    }
+    black_steal{
+        loc 52;
+        tabindex 1;
+        id 1041177;
+        price 45500;
+    }
+    blue_steal{
+        loc 53;
+        tabindex 1;
+        id 1041049;
+        price 45500;
+    }
+    purple_steal{
+        loc 54;
+        tabindex 1;
+        id 1041050;
+        price 45500;
+    }
+    dark_brown_stealer_pants{
+        loc 55;
+        tabindex 1;
+        id 1060162;
+        price 40500;
+    }
+    dark_silver_stealer_pants{
+        loc 56;
+        tabindex 1;
+        id 1060044;
+        price 40500;
+    }
+    red_/_gold_stealer_pants{
+        loc 57;
+        tabindex 1;
+        id 1060045;
+        price 40500;
+    }
+    silver_/_black_stealer_pants{
+        loc 58;
+        tabindex 1;
+        id 1060046;
+        price 40500;
+    }
+    red_steal_pants{
+        loc 59;
+        tabindex 1;
+        id 1061043;
+        price 40500;
+    }
+    black_steal_pants{
+        loc 60;
+        tabindex 1;
+        id 1061186;
+        price 40500;
+    }
+    blue_steal_pants{
+        loc 61;
+        tabindex 1;
+        id 1061045;
+        price 40500;
+    }
+    purple_steal_pants{
+        loc 62;
+        tabindex 1;
+        id 1061046;
+        price 40500;
+    }
+}
+9201060{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    thief_elixir{
+        loc 5;
+        tabindex 1;
+        id 2002016;
+        price 5000;
+    }
+    archer_elixir{
+        loc 6;
+        tabindex 1;
+        id 2002019;
+        price 5000;
+    }
+    warrior_elixir{
+        loc 7;
+        tabindex 1;
+        id 2002017;
+        price 5000;
+    }
+    wizard_elixir{
+        loc 8;
+        tabindex 1;
+        id 2002018;
+        price 5000;
+    }
+    mana_bull{
+        loc 9;
+        tabindex 1;
+        id 2002020;
+        price 2800;
+    }
+    honster{
+        loc 10;
+        tabindex 1;
+        id 2002021;
+        price 2800;
+    }
+    ginseng_root{
+        loc 11;
+        tabindex 1;
+        id 2002022;
+        price 2100;
+    }
+    ginger_ale{
+        loc 12;
+        tabindex 1;
+        id 2002026;
+        price 3800;
+    }
+    sorcerer_elixir{
+        loc 13;
+        tabindex 1;
+        id 2002024;
+        price 1500;
+    }
+    barbarian_elixir{
+        loc 14;
+        tabindex 1;
+        id 2002025;
+        price 1500;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    grilled_cheese{
+        loc 20;
+        tabindex 1;
+        id 2022189;
+        price 1000;
+    }
+    supreme_pizza{
+        loc 21;
+        tabindex 1;
+        id 2022191;
+        price 1000;
+    }
+    waffle{
+        loc 22;
+        tabindex 1;
+        id 2022192;
+        price 600;
+    }
+    unagi{
+        loc 23;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 24;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    watermelon{
+        loc 25;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 26;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 27;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    cherry_pie{
+        loc 28;
+        tabindex 1;
+        id 2022190;
+        price 3000;
+    }
+    melting_cheese{
+        loc 29;
+        tabindex 1;
+        id 2020012;
+        price 4500;
+    }
+    reindeer_milk{
+        loc 30;
+        tabindex 1;
+        id 2020013;
+        price 5600;
+    }
+    sunrise_dew{
+        loc 31;
+        tabindex 1;
+        id 2020045;
+        price 8100;
+    }
+    sunset_dew{
+        loc 32;
+        tabindex 1;
+        id 2020046;
+        price 10200;
+    }
+    mapleade{
+        loc 33;
+        tabindex 1;
+        id 2022195;
+        price 150000;
+    }
+    return_scroll_-_nearest_town{
+        loc 34;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 35;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 36;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+}
+9201059{
+    gladius{
+        loc 0;
+        tabindex 1;
+        id 1302186;
+        price 42500;
+    }
+    onyx_blade{
+        loc 1;
+        tabindex 1;
+        id 1302068;
+        price 352500;
+    }
+    fireman's_axe{
+        loc 2;
+        tabindex 1;
+        id 1312082;
+        price 42500;
+    }
+    war_hammer{
+        loc 3;
+        tabindex 1;
+        id 1322116;
+        price 42500;
+    }
+    cass{
+        loc 4;
+        tabindex 1;
+        id 1332009;
+        price 44500;
+    }
+    reef_claw{
+        loc 5;
+        tabindex 1;
+        id 1332162;
+        price 42500;
+    }
+    mithril_wand{
+        loc 6;
+        tabindex 1;
+        id 1372111;
+        price 40500;
+    }
+    wizard_staff{
+        loc 7;
+        tabindex 1;
+        id 1382135;
+        price 22500;
+    }
+    scimitar{
+        loc 8;
+        tabindex 1;
+        id 1402123;
+        price 152500;
+    }
+    blue_axe{
+        loc 9;
+        tabindex 1;
+        id 1412081;
+        price 47500;
+    }
+    mithril_maul{
+        loc 10;
+        tabindex 1;
+        id 1422083;
+        price 47500;
+    }
+    forked_spear{
+        loc 11;
+        tabindex 1;
+        id 1432110;
+        price 62500;
+    }
+    mithril_pole_arm{
+        loc 12;
+        tabindex 1;
+        id 1442001;
+        price 62500;
+    }
+    ryden{
+        loc 13;
+        tabindex 1;
+        id 1452141;
+        price 152500;
+    }
+    mountain_crossbow{
+        loc 14;
+        tabindex 1;
+        id 1462129;
+        price 32500;
+    }
+    steel_titans{
+        loc 15;
+        tabindex 1;
+        id 1472150;
+        price 22500;
+    }
+}
+2050000{
+    cutlus{
+        loc 0;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 1;
+        tabindex 1;
+        id 1302188;
+        price 225000;
+    }
+    dankke{
+        loc 2;
+        tabindex 1;
+        id 1312083;
+        price 100000;
+    }
+    blue_counter{
+        loc 3;
+        tabindex 1;
+        id 1312084;
+        price 175000;
+    }
+    heavy_hammer{
+        loc 4;
+        tabindex 1;
+        id 1322117;
+        price 100000;
+    }
+    jacker{
+        loc 5;
+        tabindex 1;
+        id 1322118;
+        price 175000;
+    }
+    halfmoon_zamadar{
+        loc 6;
+        tabindex 1;
+        id 1332001;
+        price 200000;
+    }
+    gephart{
+        loc 7;
+        tabindex 1;
+        id 1332163;
+        price 375000;
+    }
+    bazlud{
+        loc 8;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    wizard_wand{
+        loc 9;
+        tabindex 1;
+        id 1372112;
+        price 175000;
+    }
+    fairy_wand{
+        loc 10;
+        tabindex 1;
+        id 1372113;
+        price 400000;
+    }
+    lionheart{
+        loc 11;
+        tabindex 1;
+        id 1402124;
+        price 350000;
+    }
+    zard{
+        loc 12;
+        tabindex 1;
+        id 1402125;
+        price 450000;
+    }
+    niam{
+        loc 13;
+        tabindex 1;
+        id 1412082;
+        price 200000;
+    }
+    sabretooth{
+        loc 14;
+        tabindex 1;
+        id 1412083;
+        price 250000;
+    }
+    sledgehammer{
+        loc 15;
+        tabindex 1;
+        id 1422084;
+        price 200000;
+    }
+    titan{
+        loc 16;
+        tabindex 1;
+        id 1422085;
+        price 250000;
+    }
+    nakamaki{
+        loc 17;
+        tabindex 1;
+        id 1432111;
+        price 175000;
+    }
+    zeco{
+        loc 18;
+        tabindex 1;
+        id 1432112;
+        price 225000;
+    }
+    axe_pole_arm{
+        loc 19;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 20;
+        tabindex 1;
+        id 1442150;
+        price 300000;
+    }
+    red_viper{
+        loc 21;
+        tabindex 1;
+        id 1452142;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 22;
+        tabindex 1;
+        id 1452143;
+        price 375000;
+    }
+    eagle_crow{
+        loc 23;
+        tabindex 1;
+        id 1462130;
+        price 200000;
+    }
+    heckler{
+        loc 24;
+        tabindex 1;
+        id 1462131;
+        price 250000;
+    }
+    bronze_igor{
+        loc 25;
+        tabindex 1;
+        id 1472091;
+        price 30000;
+    }
+    meba{
+        loc 26;
+        tabindex 1;
+        id 1472152;
+        price 60000;
+    }
+    silver_maiden{
+        loc 27;
+        tabindex 1;
+        id 1482115;
+        price 100000;
+    }
+    neozard{
+        loc 28;
+        tabindex 1;
+        id 1482116;
+        price 150000;
+    }
+    shooting_star{
+        loc 29;
+        tabindex 1;
+        id 1702155;
+        price 100000;
+    }
+    lunar_shooter{
+        loc 30;
+        tabindex 1;
+        id 1492115;
+        price 160000;
+    }
+}
+2050003{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    yellow_jangoon_armor{
+        loc 1;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 2;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 3;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 4;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_crusader_chainmail{
+        loc 5;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 6;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 7;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 8;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    brown_jangoon_pants{
+        loc 9;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    white_jangoon_pants{
+        loc 10;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 11;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 12;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    red_triangular_shield{
+        loc 13;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 14;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+    red_matty{
+        loc 15;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 16;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 17;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 18;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 20;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    white_chaos_robe{
+        loc 21;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 22;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 23;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 24;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 25;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 26;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 27;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 28;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 29;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 30;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    blue_amoria_skirt{
+        loc 31;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_pole-feather_hat{
+        loc 33;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 34;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 35;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_legolier{
+        loc 36;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 37;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 38;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier{
+        loc 39;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 40;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 41;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 42;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 43;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 44;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 45;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 46;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 47;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    blue_legolier_pants{
+        loc 48;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 49;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 50;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 51;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 52;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 53;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 54;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 55;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 56;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 57;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 58;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_burgler{
+        loc 60;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burgler{
+        loc 61;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 62;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 63;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burgler{
+        loc 64;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    black_knucklevest{
+        loc 65;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest{
+        loc 66;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 67;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 68;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 69;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 70;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 71;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_avenger{
+        loc 72;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 73;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 74;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    red_knucklevest_pants{
+        loc 75;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 77;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 78;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 81;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+    blue_brace_look{
+        loc 82;
+        tabindex 1;
+        id 1052394;
+        price 100000;
+    }
+    red_barbay{
+        loc 83;
+        tabindex 1;
+        id 1052395;
+        price 120000;
+    }
+    blue_den_marine{
+        loc 84;
+        tabindex 1;
+        id 1003325;
+        price 75000;
+    }
+}
+2051000{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 47;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 152;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 304;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 190;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 589;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 475;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 380;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 475;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 475;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 475;
+    }
+    pain_reliever{
+        loc 10;
+        tabindex 1;
+        id 2002011;
+        price 1200;
+    }
+    watermelon{
+        loc 11;
+        tabindex 1;
+        id 4034409;
+        price 3040;
+    }
+    ice_cream_pop{
+        loc 12;
+        tabindex 1;
+        id 2001513;
+        price 2185;
+    }
+    very_special_sundae{
+        loc 13;
+        tabindex 1;
+        id 2001514;
+        price 3800;
+    }
+    apple{
+        loc 14;
+        tabindex 1;
+        id 4034403;
+        price 28;
+    }
+    egg{
+        loc 15;
+        tabindex 1;
+        id 4220124;
+        price 47;
+    }
+    meat{
+        loc 16;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 17;
+        tabindex 1;
+        id 4034405;
+        price 95;
+    }
+    lemon{
+        loc 18;
+        tabindex 1;
+        id 4034406;
+        price 294;
+    }
+    melting_cheese{
+        loc 19;
+        tabindex 1;
+        id 2020012;
+        price 4680;
+    }
+    reindeer_milk{
+        loc 20;
+        tabindex 1;
+        id 2020013;
+        price 5600;
+    }
+    sunrise_dew{
+        loc 21;
+        tabindex 1;
+        id 2020045;
+        price 7695;
+    }
+    sunset_dew{
+        loc 22;
+        tabindex 1;
+        id 2020046;
+        price 9690;
+    }
+    unagi{
+        loc 23;
+        tabindex 1;
+        id 3994092;
+        price 1045;
+    }
+    pure_water{
+        loc 24;
+        tabindex 1;
+        id 4032352;
+        price 1567;
+    }
+    return_scroll_-_nearest_town{
+        loc 25;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    bronze_arrow_for_bow{
+        loc 28;
+        tabindex 1;
+        id 2060001;
+        price 10;
+    }
+    bronze_arrow_for_crossbow{
+        loc 29;
+        tabindex 1;
+        id 2061001;
+        price 10;
+    }
+    subi_throwing-stars{
+        loc 30;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 31;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
+    }
+}
+2080004{
+    pet_food{
+        loc 0;
+        tabindex 1;
+        id 4034590;
+        price 30;
+    }
+    revitalizer{
+        loc 1;
+        tabindex 1;
+        id 2260000;
+        price 1000;
+    }
+    bartos'_favorite_juice{
+        loc 2;
+        tabindex 1;
+        id 4031993;
+        price 100000;
+    }
+    pet_command_guide_:_blue/red/green/gold_robo{
+        loc 3;
+        tabindex 1;
+        id 4160035;
+        price 1000;
+    }
+    pet_command_guide_:_jr._balrog{
+        loc 4;
+        tabindex 1;
+        id 4160015;
+        price 1000;
+    }
+    pet_command_guide_:_kino{
+        loc 5;
+        tabindex 1;
+        id 4160033;
+        price 1000;
+    }
+    pet_command_guide_:_white_duck{
+        loc 6;
+        tabindex 1;
+        id 4160039;
+        price 1000;
+    }
+    pet_command_guide_:_gorilla_robo{
+        loc 7;
+        tabindex 1;
+        id 4160036;
+        price 1000;
+    }
+    pet_command_guide_:_baby_robo{
+        loc 8;
+        tabindex 1;
+        id 4160034;
+        price 1000;
+    }
+    pet_command_guide_:_crystal_rudolph{
+        loc 9;
+        tabindex 1;
+        id 4160037;
+        price 1000;
+    }
+    pet_command_guide_:_skunk{
+        loc 10;
+        tabindex 1;
+        id 4160032;
+        price 1000;
+    }
+    pet_command_guide_:_porcupine{
+        loc 11;
+        tabindex 1;
+        id 4160027;
+        price 1000;
+    }
+    pet_command_guide_:_snowman{
+        loc 12;
+        tabindex 1;
+        id 4160029;
+        price 1000;
+    }
+    pet_command_guide_:_sun_wu_kong{
+        loc 13;
+        tabindex 1;
+        id 4160019;
+        price 1000;
+    }
+    pet_command_guide_:_golden_pig{
+        loc 14;
+        tabindex 1;
+        id 4160017;
+        price 1000;
+    }
+    pet_command_guide_:_jr._reaper{
+        loc 15;
+        tabindex 1;
+        id 4160028;
+        price 1000;
+    }
+    pet_command_guide_:_mini_yeti{
+        loc 16;
+        tabindex 1;
+        id 4160012;
+        price 1000;
+    }
+    pet_command_guide_:_penguin{
+        loc 17;
+        tabindex 1;
+        id 4160014;
+        price 1000;
+    }
+    pet_command_guide_:_turkey{
+        loc 18;
+        tabindex 1;
+        id 4160020;
+        price 1000;
+    }
+    pet_command_guide_:_mini_kargo{
+        loc 19;
+        tabindex 1;
+        id 4160003;
+        price 1000;
+    }
+    pet_command_guide_:_green/red/blue_dragon{
+        loc 20;
+        tabindex 1;
+        id 4160023;
+        price 1000;
+    }
+    pet_command_guide_:_baby_dragon{
+        loc 21;
+        tabindex 1;
+        id 4160022;
+        price 1000;
+    }
+    pet_command_guide_:_white_tiger{
+        loc 22;
+        tabindex 1;
+        id 4160008;
+        price 1000;
+    }
+    pet_command_guide_:_rudolph{
+        loc 23;
+        tabindex 1;
+        id 4160009;
+        price 1000;
+    }
+    pet_command_guide_:_robot{
+        loc 24;
+        tabindex 1;
+        id 4160013;
+        price 1000;
+    }
+    pet_command_guide_:_puppy{
+        loc 25;
+        tabindex 1;
+        id 4160000;
+        price 1000;
+    }
+    pet_command_guide_:_pig{
+        loc 26;
+        tabindex 1;
+        id 4160005;
+        price 1000;
+    }
+    pet_command_guide_:_panda{
+        loc 27;
+        tabindex 1;
+        id 4160006;
+        price 1000;
+    }
+    pet_command_guide_:_monkey{
+        loc 28;
+        tabindex 1;
+        id 4160010;
+        price 1000;
+    }
+    pet_command_guide_:_kitty{
+        loc 29;
+        tabindex 1;
+        id 4160001;
+        price 1000;
+    }
+    pet_command_guide_:_husky{
+        loc 30;
+        tabindex 1;
+        id 4160004;
+        price 1000;
+    }
+    pet_command_guide_:_dino{
+        loc 31;
+        tabindex 1;
+        id 4160007;
+        price 1000;
+    }
+    pet_command_guide_:_bunny{
+        loc 32;
+        tabindex 1;
+        id 4160002;
+        price 1000;
+    }
+    pet_command_guide_:_black_dragon{
+        loc 33;
+        tabindex 1;
+        id 4160024;
+        price 1000;
+    }
+}
+9120002{
+    orange_potion{
+        loc 0;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 1;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    ice_cream_pop{
+        loc 2;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    melting_cheese{
+        loc 3;
+        tabindex 1;
+        id 2020012;
+        price 4500;
+    }
+    blue_potion{
+        loc 4;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 5;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    very_special_sundae{
+        loc 6;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    cider{
+        loc 7;
+        tabindex 1;
+        id 2022002;
+        price 1000;
+    }
+    sunrise_dew{
+        loc 8;
+        tabindex 1;
+        id 2020045;
+        price 8100;
+    }
+    red_arrow_for_bow{
+        loc 9;
+        tabindex 1;
+        id 2060003;
+        price 40;
+    }
+}
+9120000{
+    mystic_cane{
+        loc 0;
+        tabindex 1;
+        id 1382011;
+        price 2000000;
+    }
+    bushido{
+        loc 1;
+        tabindex 1;
+        id 1332024;
+        price 2000000;
+    }
+    bamboo_sword{
+        loc 2;
+        tabindex 1;
+        id 1302022;
+        price 80000;
+    }
+    pico-pico_hammer{
+        loc 3;
+        tabindex 1;
+        id 1302021;
+        price 1250000;
+    }
+    silver_crow{
+        loc 4;
+        tabindex 1;
+        id 1462132;
+        price 500000;
+    }
+    aluminum_baseball_bat{
+        loc 5;
+        tabindex 1;
+        id 1402010;
+        price 150000;
+    }
+    fish_spear{
+        loc 6;
+        tabindex 1;
+        id 1432109;
+        price 150000;
+    }
+    wooden_baseball_bat{
+        loc 7;
+        tabindex 1;
+        id 1402009;
+        price 30000;
+    }
+    red_brick{
+        loc 8;
+        tabindex 1;
+        id 1322012;
+        price 15000;
+    }
+    green_paint_brush{
+        loc 9;
+        tabindex 1;
+        id 1312013;
+        price 100000;
+    }
+    steel_guards{
+        loc 10;
+        tabindex 1;
+        id 1472153;
+        price 250000;
+    }
+}
+9270022{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    unagi{
+        loc 10;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 11;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    watermelon{
+        loc 12;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 13;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 14;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    chocolate{
+        loc 20;
+        tabindex 1;
+        id 4033144;
+        price 3000;
+    }
+    antidote{
+        loc 21;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 22;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 23;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    holy_water{
+        loc 24;
+        tabindex 1;
+        id 2050003;
+        price 500;
+    }
+    return_scroll_-_nearest_town{
+        loc 25;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+}
+9270021{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 5;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 6;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 7;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 8;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 9;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    unagi{
+        loc 10;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 11;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    watermelon{
+        loc 12;
+        tabindex 1;
+        id 4034409;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 13;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 14;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 15;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 16;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 17;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 18;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 19;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    chocolate{
+        loc 20;
+        tabindex 1;
+        id 4033144;
+        price 3000;
+    }
+    antidote{
+        loc 21;
+        tabindex 1;
+        id 2050000;
+        price 200;
+    }
+    eyedrop{
+        loc 22;
+        tabindex 1;
+        id 2050001;
+        price 200;
+    }
+    tonic{
+        loc 23;
+        tabindex 1;
+        id 2050002;
+        price 300;
+    }
+    holy_water{
+        loc 24;
+        tabindex 1;
+        id 2050003;
+        price 500;
+    }
+    return_scroll_-_nearest_town{
+        loc 25;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    arrow_for_bow{
+        loc 26;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 27;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    mushroom_miso_ramen{
+        loc 28;
+        tabindex 1;
+        id 2022015;
+        price 12000;
+    }
+}
+9270019{
+    gladius{
+        loc 0;
+        tabindex 1;
+        id 1302186;
+        price 40000;
+    }
+    cutlus{
+        loc 1;
+        tabindex 1;
+        id 1302004;
+        price 100000;
+    }
+    traus{
+        loc 2;
+        tabindex 1;
+        id 1302188;
+        price 225000;
+    }
+    fireman's_axe{
+        loc 3;
+        tabindex 1;
+        id 1312082;
+        price 40000;
+    }
+    dankke{
+        loc 4;
+        tabindex 1;
+        id 1312083;
+        price 100000;
+    }
+    blue_counter{
+        loc 5;
+        tabindex 1;
+        id 1312084;
+        price 175000;
+    }
+    war_hammer{
+        loc 6;
+        tabindex 1;
+        id 1322116;
+        price 40000;
+    }
+    heavy_hammer{
+        loc 7;
+        tabindex 1;
+        id 1322117;
+        price 100000;
+    }
+    jacker{
+        loc 8;
+        tabindex 1;
+        id 1322118;
+        price 175000;
+    }
+    cass{
+        loc 9;
+        tabindex 1;
+        id 1332009;
+        price 42000;
+    }
+    reef_claw{
+        loc 10;
+        tabindex 1;
+        id 1332162;
+        price 40000;
+    }
+    halfmoon_zamadar{
+        loc 11;
+        tabindex 1;
+        id 1332001;
+        price 200000;
+    }
+    gephart{
+        loc 12;
+        tabindex 1;
+        id 1332163;
+        price 355000;
+    }
+    bazlud{
+        loc 13;
+        tabindex 1;
+        id 1332011;
+        price 425000;
+    }
+    mithril_wand{
+        loc 14;
+        tabindex 1;
+        id 1372111;
+        price 38000;
+    }
+    wizard_wand{
+        loc 15;
+        tabindex 1;
+        id 1372112;
+        price 175000;
+    }
+    fairy_wand{
+        loc 16;
+        tabindex 1;
+        id 1372113;
+        price 400000;
+    }
+    wizard_staff{
+        loc 17;
+        tabindex 1;
+        id 1382135;
+        price 20000;
+    }
+    scimitar{
+        loc 18;
+        tabindex 1;
+        id 1402123;
+        price 150000;
+    }
+    lionheart{
+        loc 19;
+        tabindex 1;
+        id 1402124;
+        price 350000;
+    }
+    zard{
+        loc 20;
+        tabindex 1;
+        id 1402125;
+        price 450000;
+    }
+    blue_axe{
+        loc 21;
+        tabindex 1;
+        id 1412081;
+        price 45000;
+    }
+    niam{
+        loc 22;
+        tabindex 1;
+        id 1412082;
+        price 200000;
+    }
+    sabretooth{
+        loc 23;
+        tabindex 1;
+        id 1412083;
+        price 250000;
+    }
+    mithril_maul{
+        loc 24;
+        tabindex 1;
+        id 1422083;
+        price 45000;
+    }
+    sledgehammer{
+        loc 25;
+        tabindex 1;
+        id 1422084;
+        price 200000;
+    }
+    titan{
+        loc 26;
+        tabindex 1;
+        id 1422085;
+        price 250000;
+    }
+    forked_spear{
+        loc 27;
+        tabindex 1;
+        id 1432110;
+        price 60000;
+    }
+    nakamaki{
+        loc 28;
+        tabindex 1;
+        id 1432111;
+        price 175000;
+    }
+    zeco{
+        loc 29;
+        tabindex 1;
+        id 1432112;
+        price 225000;
+    }
+    mithril_pole_arm{
+        loc 30;
+        tabindex 1;
+        id 1442001;
+        price 60000;
+    }
+    axe_pole_arm{
+        loc 31;
+        tabindex 1;
+        id 1442003;
+        price 175000;
+    }
+    crescent_polearm{
+        loc 32;
+        tabindex 1;
+        id 1442150;
+        price 300000;
+    }
+    ryden{
+        loc 33;
+        tabindex 1;
+        id 1452141;
+        price 150000;
+    }
+    red_viper{
+        loc 34;
+        tabindex 1;
+        id 1452142;
+        price 250000;
+    }
+    vaulter_2000{
+        loc 35;
+        tabindex 1;
+        id 1452143;
+        price 375000;
+    }
+    mountain_crossbow{
+        loc 36;
+        tabindex 1;
+        id 1462129;
+        price 30000;
+    }
+    eagle_crow{
+        loc 37;
+        tabindex 1;
+        id 1462130;
+        price 200000;
+    }
+    heckler{
+        loc 38;
+        tabindex 1;
+        id 1462131;
+        price 250000;
+    }
+    steel_titans{
+        loc 39;
+        tabindex 1;
+        id 1472150;
+        price 20000;
+    }
+    bronze_igor{
+        loc 40;
+        tabindex 1;
+        id 1472091;
+        price 30000;
+    }
+    meba{
+        loc 41;
+        tabindex 1;
+        id 1472152;
+        price 60000;
+    }
+}
+9270020{
+    great_brown_helmet{
+        loc 0;
+        tabindex 1;
+        id 1003321;
+        price 160000;
+    }
+    yellow_jangoon_armor{
+        loc 1;
+        tabindex 1;
+        id 1040000;
+        price 200000;
+    }
+    maroon_jangoon_armor{
+        loc 2;
+        tabindex 1;
+        id 1040177;
+        price 200000;
+    }
+    red_jangoon_armor{
+        loc 3;
+        tabindex 1;
+        id 1041084;
+        price 200000;
+    }
+    brown_jangoon_armor{
+        loc 4;
+        tabindex 1;
+        id 1041085;
+        price 200000;
+    }
+    white_crusader_chainmail{
+        loc 5;
+        tabindex 1;
+        id 1050198;
+        price 112500;
+    }
+    blue_crusader_chainmail{
+        loc 6;
+        tabindex 1;
+        id 1050021;
+        price 112500;
+    }
+    emerald_fitted_mail{
+        loc 7;
+        tabindex 1;
+        id 1051001;
+        price 112500;
+    }
+    sapphire_fitted_mail{
+        loc 8;
+        tabindex 1;
+        id 1051014;
+        price 112500;
+    }
+    white_jangoon_pants{
+        loc 9;
+        tabindex 1;
+        id 1060074;
+        price 180000;
+    }
+    brown_jangoon_pants{
+        loc 10;
+        tabindex 1;
+        id 1060075;
+        price 180000;
+    }
+    red_jangoon_skirt{
+        loc 11;
+        tabindex 1;
+        id 1061083;
+        price 180000;
+    }
+    brown_jangoon_skirt{
+        loc 12;
+        tabindex 1;
+        id 1061084;
+        price 180000;
+    }
+    red_triangular_shield{
+        loc 13;
+        tabindex 1;
+        id 1092098;
+        price 100000;
+    }
+    red_cross_shield{
+        loc 14;
+        tabindex 1;
+        id 1092099;
+        price 200000;
+    }
+    red_matty{
+        loc 15;
+        tabindex 1;
+        id 1002141;
+        price 96000;
+    }
+    blue_matty{
+        loc 16;
+        tabindex 1;
+        id 1002142;
+        price 96000;
+    }
+    green_matty{
+        loc 17;
+        tabindex 1;
+        id 1003322;
+        price 96000;
+    }
+    brown_matty{
+        loc 18;
+        tabindex 1;
+        id 1002144;
+        price 96000;
+    }
+    blue_amoria_top{
+        loc 19;
+        tabindex 1;
+        id 1041052;
+        price 120000;
+    }
+    red_amoria_top{
+        loc 20;
+        tabindex 1;
+        id 1041178;
+        price 120000;
+    }
+    white_chaos_robe{
+        loc 21;
+        tabindex 1;
+        id 1050031;
+        price 300000;
+    }
+    blood_chaos_robe{
+        loc 22;
+        tabindex 1;
+        id 1050199;
+        price 300000;
+    }
+    brown_starlight{
+        loc 23;
+        tabindex 1;
+        id 1050035;
+        price 450000;
+    }
+    blue_starlight{
+        loc 24;
+        tabindex 1;
+        id 1050038;
+        price 450000;
+    }
+    red_starlight{
+        loc 25;
+        tabindex 1;
+        id 1050036;
+        price 450000;
+    }
+    green_starlight{
+        loc 26;
+        tabindex 1;
+        id 1050037;
+        price 450000;
+    }
+    purple_moonlight{
+        loc 27;
+        tabindex 1;
+        id 1051023;
+        price 450000;
+    }
+    blue_moonlight{
+        loc 28;
+        tabindex 1;
+        id 1051025;
+        price 450000;
+    }
+    red_moonlight{
+        loc 29;
+        tabindex 1;
+        id 1051024;
+        price 450000;
+    }
+    brown_moonlight{
+        loc 30;
+        tabindex 1;
+        id 1051027;
+        price 450000;
+    }
+    blue_amoria_skirt{
+        loc 31;
+        tabindex 1;
+        id 1061048;
+        price 120000;
+    }
+    red_amoria_skirt{
+        loc 32;
+        tabindex 1;
+        id 1061047;
+        price 120000;
+    }
+    blue_pole-feather_hat{
+        loc 33;
+        tabindex 1;
+        id 1002138;
+        price 100000;
+    }
+    red_pole-feather_hat{
+        loc 34;
+        tabindex 1;
+        id 1003323;
+        price 100000;
+    }
+    brown_pole-feather_hat{
+        loc 35;
+        tabindex 1;
+        id 1002135;
+        price 100000;
+    }
+    green_pole-feather_hat{
+        loc 36;
+        tabindex 1;
+        id 1002137;
+        price 100000;
+    }
+    red_legolier{
+        loc 37;
+        tabindex 1;
+        id 1040175;
+        price 114000;
+    }
+    blue_legolier{
+        loc 38;
+        tabindex 1;
+        id 1040073;
+        price 114000;
+    }
+    green_legolier{
+        loc 39;
+        tabindex 1;
+        id 1040074;
+        price 114000;
+    }
+    brown_legolier{
+        loc 40;
+        tabindex 1;
+        id 1040076;
+        price 114000;
+    }
+    white_piette{
+        loc 41;
+        tabindex 1;
+        id 1040081;
+        price 180000;
+    }
+    brown_piette{
+        loc 42;
+        tabindex 1;
+        id 1040178;
+        price 180000;
+    }
+    blue_legolia{
+        loc 43;
+        tabindex 1;
+        id 1041066;
+        price 114000;
+    }
+    brown_legolia{
+        loc 44;
+        tabindex 1;
+        id 1041069;
+        price 114000;
+    }
+    red_legolia{
+        loc 45;
+        tabindex 1;
+        id 1041179;
+        price 114000;
+    }
+    green_legolia{
+        loc 46;
+        tabindex 1;
+        id 1041067;
+        price 114000;
+    }
+    brown_piettra{
+        loc 47;
+        tabindex 1;
+        id 1041082;
+        price 180000;
+    }
+    white_piettra{
+        loc 48;
+        tabindex 1;
+        id 1041081;
+        price 180000;
+    }
+    blue_legolier_pants{
+        loc 49;
+        tabindex 1;
+        id 1060163;
+        price 108000;
+    }
+    brown_legolier_pants{
+        loc 50;
+        tabindex 1;
+        id 1060065;
+        price 108000;
+    }
+    red_legolier_pants{
+        loc 51;
+        tabindex 1;
+        id 1060061;
+        price 108000;
+    }
+    green_legolier_pants{
+        loc 52;
+        tabindex 1;
+        id 1060063;
+        price 108000;
+    }
+    blue_piette_pants{
+        loc 53;
+        tabindex 1;
+        id 1060070;
+        price 160000;
+    }
+    brown_piette_pants{
+        loc 54;
+        tabindex 1;
+        id 1060069;
+        price 160000;
+    }
+    blue_legolia_pants{
+        loc 55;
+        tabindex 1;
+        id 1061188;
+        price 108000;
+    }
+    brown_legolia_pants{
+        loc 56;
+        tabindex 1;
+        id 1061064;
+        price 108000;
+    }
+    red_legolia_pants{
+        loc 57;
+        tabindex 1;
+        id 1061060;
+        price 108000;
+    }
+    green_legolia_pants{
+        loc 58;
+        tabindex 1;
+        id 1061062;
+        price 108000;
+    }
+    brown_piettra_skirt{
+        loc 59;
+        tabindex 1;
+        id 1061081;
+        price 160000;
+    }
+    white_piettra_skirt{
+        loc 60;
+        tabindex 1;
+        id 1061080;
+        price 160000;
+    }
+    red_burgler{
+        loc 61;
+        tabindex 1;
+        id 1002176;
+        price 100000;
+    }
+    blue_burgler{
+        loc 62;
+        tabindex 1;
+        id 1002177;
+        price 100000;
+    }
+    green_burgler{
+        loc 63;
+        tabindex 1;
+        id 1002178;
+        price 100000;
+    }
+    brown_burgler{
+        loc 64;
+        tabindex 1;
+        id 1002179;
+        price 100000;
+    }
+    dark_burgler{
+        loc 65;
+        tabindex 1;
+        id 1002180;
+        price 100000;
+    }
+    black_knucklevest{
+        loc 66;
+        tabindex 1;
+        id 1040063;
+        price 114000;
+    }
+    red_knucklevest{
+        loc 67;
+        tabindex 1;
+        id 1040062;
+        price 114000;
+    }
+    green_knucklevest{
+        loc 68;
+        tabindex 1;
+        id 1040176;
+        price 114000;
+    }
+    khaki_shadow{
+        loc 69;
+        tabindex 1;
+        id 1040082;
+        price 180000;
+    }
+    marine_shadow{
+        loc 70;
+        tabindex 1;
+        id 1040083;
+        price 180000;
+    }
+    red_shadow{
+        loc 71;
+        tabindex 1;
+        id 1041075;
+        price 180000;
+    }
+    purple_shadow{
+        loc 72;
+        tabindex 1;
+        id 1041074;
+        price 180000;
+    }
+    red_avenger{
+        loc 73;
+        tabindex 1;
+        id 1051007;
+        price 111000;
+    }
+    blue_avenger{
+        loc 74;
+        tabindex 1;
+        id 1051008;
+        price 111000;
+    }
+    purple_avenger{
+        loc 75;
+        tabindex 1;
+        id 1051243;
+        price 111000;
+    }
+    red_knucklevest_pants{
+        loc 76;
+        tabindex 1;
+        id 1060051;
+        price 108000;
+    }
+    blue_knucklevest_pants{
+        loc 77;
+        tabindex 1;
+        id 1060050;
+        price 108000;
+    }
+    black_knucklevest_pants{
+        loc 78;
+        tabindex 1;
+        id 1060164;
+        price 108000;
+    }
+    khaki_shadow_pants{
+        loc 79;
+        tabindex 1;
+        id 1060071;
+        price 160000;
+    }
+    marine_shadow_pants{
+        loc 80;
+        tabindex 1;
+        id 1060072;
+        price 160000;
+    }
+    red_shadow_pants{
+        loc 81;
+        tabindex 1;
+        id 1061070;
+        price 160000;
+    }
+    purple_shadow_pants{
+        loc 82;
+        tabindex 1;
+        id 1061069;
+        price 160000;
+    }
+}
+9270027{
+    laksa{
+        loc 0;
+        tabindex 1;
+        id 2022203;
+        price 800;
+    }
+    hokkien_mee{
+        loc 1;
+        tabindex 1;
+        id 2022204;
+        price 1200;
+    }
+    carrot_cake{
+        loc 2;
+        tabindex 1;
+        id 2022205;
+        price 1800;
+    }
+    chicken_rice{
+        loc 3;
+        tabindex 1;
+        id 2022206;
+        price 2200;
+    }
+    satay{
+        loc 4;
+        tabindex 1;
+        id 2022207;
+        price 2600;
+    }
+    guava{
+        loc 5;
+        tabindex 1;
+        id 2022208;
+        price 1000;
+    }
+    rambutan{
+        loc 6;
+        tabindex 1;
+        id 2022209;
+        price 1600;
+    }
+    dragon_fruit{
+        loc 7;
+        tabindex 1;
+        id 2022210;
+        price 3200;
+    }
+    durian{
+        loc 8;
+        tabindex 1;
+        id 2022211;
+        price 6400;
+    }
+    pepper_crab{
+        loc 9;
+        tabindex 1;
+        id 2022214;
+        price 3200;
+    }
+    chili_crab{
+        loc 10;
+        tabindex 1;
+        id 2022215;
+        price 6800;
+    }
+}
+1061002{
+    red_potion{
+        loc 0;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 1;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 2;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 3;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 4;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    apple{
+        loc 5;
+        tabindex 1;
+        id 4034403;
+        price 30;
+    }
+    egg{
+        loc 6;
+        tabindex 1;
+        id 4220124;
+        price 50;
+    }
+    meat{
+        loc 7;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 8;
+        tabindex 1;
+        id 4034405;
+        price 100;
+    }
+    lemon{
+        loc 9;
+        tabindex 1;
+        id 4034406;
+        price 310;
+    }
+    unagi{
+        loc 10;
+        tabindex 1;
+        id 3994092;
+        price 1100;
+    }
+    pure_water{
+        loc 11;
+        tabindex 1;
+        id 4032352;
+        price 1650;
+    }
+    return_scroll_-_nearest_town{
+        loc 12;
+        tabindex 1;
+        id 2030000;
+        price 400;
+    }
+    return_scroll_to_sleepywood{
+        loc 13;
+        tabindex 1;
+        id 2030006;
+        price 600;
+    }
+    arrow_for_bow{
+        loc 14;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 15;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    subi_throwing-stars{
+        loc 16;
+        tabindex 1;
+        id 2070000;
+        price 500;
+        quantity 500;
+    }
+    bullet{
+        loc 17;
+        tabindex 1;
+        id 2330000;
+        price 600;
+        quantity 500;
     }
 }

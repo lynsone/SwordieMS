@@ -203,6 +203,9 @@ public class ItemBuffs {
                 case inflation:
                     tsm.putCharacterStatValue(Inflation, o);
                     break;
+                case morph:
+                    tsm.putCharacterStatValue(Morph, o);
+                    break;
             }
         }
         tsm.sendSetStatPacket();
