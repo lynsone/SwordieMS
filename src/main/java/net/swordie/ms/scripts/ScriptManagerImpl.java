@@ -397,6 +397,8 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		sendGeneralSay(text, AskAvatar);
 	}
 
+
+
 	// Start helper methods for scripts --------------------------------------------------------------------------------
 
 	@Override
@@ -413,6 +415,70 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		stop(scriptType);
 	}
 
+
+
+	// Character Stat-related methods ----------------------------------------------------------------------------------
+
+	@Override
+	public void setJob(short jobID) {
+		chr.setJob(jobID);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.subJob, jobID);
+		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
+				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+	}
+
+	@Override
+	public void addSP(int amount) {
+		byte jobLevel = (byte) JobConstants.getJobLevel(chr.getJob());
+		int currentSP = chr.getAvatarData().getCharacterStat().getExtendSP().getSpByJobLevel(jobLevel);
+		setSP(currentSP + amount);
+	}
+
+	@Override
+	public void setSP(int amount) {
+		chr.setSpToCurrentJob(amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
+				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+	}
+
+	@Override
+	public void addAP(int amount) {
+		int currentAP = chr.getAvatarData().getCharacterStat().getAp();
+		setAP(currentAP + amount);
+	}
+
+	@Override
+	public void setAP(int amount) {
+		chr.setStat(Stat.ap, (short) amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.ap, (short) amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void jobAdvance(short jobID) {
+		setJob(jobID);
+		addAP(5); //Standard added AP upon Job Advancing
+		addSP(3); //Standard added SP upon Job Advancing
+	}
+
+	@Override
+	public void giveExp(long expGiven) {
+		chr.addExp(expGiven);
+	}
+
+	@Override
+	public void giveExpNoMsg(long expGiven) {
+		chr.addExpNoMsg(expGiven);
+	}
+
+
+
+	// Field-related methods -------------------------------------------------------------------------------------------
+
 	@Override
 	public void warp(int mid, int pid) {
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(mid);
@@ -426,6 +492,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.warp(field);
 	}
 
+	@Override
 	public void teleportToPortal(int portalId) {
 		Portal portal = chr.getField().getPortalByID(portalId);
 		if (portal != null) {
@@ -435,160 +502,261 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
-	public void chat(String text) {
-		chatRed(text);
-	}
-
-	@Override
-	public void chatRed(String text) {
-		chr.chatMessage(GAME_MESSAGE, text);
-	}
-
-	@Override
-	public void chatBlue(String text) {
-		chr.chatMessage(GAME_NOTICE, text);
-	}
-
-	public void chatScript(String text) {chr.chatScriptMessage(text);}
-
-	@Override
-	public void giveMesos(long mesos) {
-		chr.addMoney(mesos);
-	}
-
-	@Override
-	public void deductMesos(long mesos) {
-		chr.deductMoney(mesos);
-	}
-
-	public void completeQuest(int id) {
-		chr.getQuestManager().completeQuest(id);
-	}
-
-	@Override
-	public void completeQuestNoRewards(int id) {
-		QuestManager qm = chr.getQuestManager();
-		Quest quest = qm.getQuests().get(id);
-		if (quest == null) {
-			quest = QuestData.createQuestFromId(id);
-		}
-		quest.setCompletedTime(FileTime.currentTime());
-		quest.setStatus(QuestStatus.COMPLETE);
-		qm.addQuest(quest);
-		chr.write(WvsContext.questRecordMessage(quest));
-	}
-
-	@Override
-	public void startQuestNoCheck(int id) {
-		QuestManager qm = chr.getQuestManager();
-		qm.addQuest(QuestData.createQuestFromId(id));
-	}
-
-	public void startQuest(int id) {
-		QuestManager qm = chr.getQuestManager();
-		if (qm.canStartQuest(id)) {
-			qm.addQuest(QuestData.createQuestFromId(id));
-		}
-	}
-
-	@Override
 	public int getFieldID() {
 		return chr.getField().getId();
 	}
 
 	@Override
-	public long getMesos() {
-		return chr.getMoney();
+	public void warpPartyIn(int id) {
+		warpParty(id, true);
 	}
 
 	@Override
-	public void giveItem(int id) {
-		giveItem(id, 1);
+	public void warpPartyOut(int id) {
+		warpParty(id, false);
 	}
 
-	@Override
-	public void giveItem(int id, int quantity) {
-		chr.addItemToInventory(id, quantity);
-	}
-
-	@Override
-	public boolean hasItem(int id) {
-		return hasItem(id, 1);
-	}
-
-	@Override
-	public boolean hasItem(int id, int quantity) {
-		return getQuantityOfItem(id) >= quantity;
-	}
-
-	@Override
-	public void useItem(int id) {
-		ItemBuffs.giveItemBuffsFromItemID(chr, chr.getTemporaryStatManager(), id);
-	}
-
-	@Override
-	public int getQuantityOfItem(int id) {
-		if (ItemConstants.isEquip(id)) {
-			Item equip = chr.getInventoryByType(InvType.EQUIP).getItemByItemID(id);
-			if (equip == null) {
-				return 0;
-			}
-			return equip.getQuantity();
+	public void warpParty(int id, boolean in) {
+		if (chr.getParty() == null) {
+			chr.setFieldInstanceType(in ? FieldInstanceType.PARTY : FieldInstanceType.CHANNEL);
+			Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
+			chr.warp(field);
 		} else {
-			Item item2 = ItemData.getItemDeepCopy(id);
-			InvType invType = item2.getInvType();
-			Item item = chr.getInventoryByType(invType).getItemByItemID(id);
-			if (item == null) {
-				return 0;
+
+			for (PartyMember pm : chr.getParty().getPartyMembers()) {
+				if (pm != null && pm.getChr() != null) {
+					Char partyChr = pm.getChr();
+					partyChr.setFieldInstanceType(in ? FieldInstanceType.PARTY : FieldInstanceType.CHANNEL);
+					Field field = partyChr.getOrCreateFieldByCurrentInstanceType(id);
+					partyChr.warp(field);
+				}
 			}
-			return item.getQuantity();
+		}
+	}
+
+	public void clearPartyInfo() {
+		clearPartyInfo(0);
+	}
+
+	@Override
+	public void clearPartyInfo(int warpToID) {
+		if (chr.getParty() != null) {
+			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+				pm.getChr().setDeathCount(-1);
+			}
+			chr.getParty().clearFieldInstances(warpToID);
 		}
 	}
 
 	@Override
-	public boolean canHold(int id) {
-		return chr.canHold(id);
+	public void warpInstanceIn(int id) {
+		warpInstance(id, true);
 	}
 
 	@Override
-	public void giveCTS(CharacterTemporaryStat cts, int nOption, int rOption, int time) {
-		TemporaryStatManager tsm = chr.getTemporaryStatManager();
-		Option o = new Option();
-		o.nOption = nOption;
-		o.rOption = rOption;
-		o.tOption = time;
-		tsm.putCharacterStatValue(cts, o);
-		tsm.sendSetStatPacket();
+	public void warpInstanceOut(int id) {
+		warpInstance(id, false);
+	}
+
+	public void warpInstance(int id, boolean in) {
+		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
+		chr.warp(field);
 	}
 
 	@Override
-	public void removeCTS(CharacterTemporaryStat cts) {
-		TemporaryStatManager tsm = chr.getTemporaryStatManager();
-		tsm.removeStat(cts, false);
+	public int getReturnField() {
+		return returnField;
 	}
 
 	@Override
-	public void removeBuffBySkill(int skillId) {
-		TemporaryStatManager tsm = chr.getTemporaryStatManager();
-		tsm.removeStatsBySkill(skillId);
+	public void setReturnField(int returnField) {
+		this.returnField = returnField;
 	}
 
 	@Override
-	public boolean hasCTS(CharacterTemporaryStat cts) {
-		TemporaryStatManager tsm = chr.getTemporaryStatManager();
-		return tsm.hasStat(cts);
+	public void setReturnField() {
+		setReturnField(chr.getFieldID());
 	}
 
 	@Override
-	public int getnOptionByCTS(CharacterTemporaryStat cts) {
-		TemporaryStatManager tsm = chr.getTemporaryStatManager();
-		return hasCTS(cts) ? tsm.getOption(cts).nOption : 0;
+	public boolean mobsPresentInField() {
+		return mobsPresentInField(chr.getFieldID());
 	}
 
 	@Override
-	public void showGuildCreateWindow() {
-		chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.InputGuildName)));
+	public boolean mobsPresentInField(int fieldid) {
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldid);
+		return field.getMobs().size() > 0;
 	}
+
+	@Override
+	public int numberMobsInField() {
+		return numberMobsInField(chr.getFieldID());
+	}
+
+	@Override
+	public int numberMobsInField(int fieldid) {
+		Field field = FieldData.getFieldById(fieldid);
+		return field.getMobs().size();
+	}
+
+
+
+	// Life-related methods --------------------------------------------------------------------------------------------
+
+
+	// NPC methods
+	@Override
+	public void spawnNpc(int npcId, int x, int y) {
+		Npc npc = NpcData.getNpcDeepCopyById(npcId);
+		chr.getField().spawnLife(npc, chr);
+	}
+
+	@Override
+	public void removeNpc(int npcId) { //TODO Fix
+		List<Life> removeLifeSet = new ArrayList<>();
+		List<Life> lifes = chr.getField().getLifes();
+		if(lifes.size() > 0) {
+			for (Life life : lifes) {
+				if (life instanceof Npc) {
+					if (life.getTemplateId() != npcId) {
+						continue;
+					}
+					removeLifeSet.add(life);
+				}
+			}
+		}
+		//TODO
+		if(removeLifeSet.size()>1) {
+			chr.getField().removeLife(removeLifeSet.get(0).getObjectId());
+		}
+	}
+
+	@Override
+	public void openNpc(int npcId) { //TODO Fix
+		Npc npc = NpcData.getNpcDeepCopyById(npcId);
+		String script;
+		if(npc.getScripts().size() > 0) {
+			script = npc.getScripts().get(0);
+		} else {
+			script = String.valueOf(npc.getTemplateId());
+		}
+		chr.getScriptManager().startScript(npc.getTemplateId(), npcId, script, ScriptType.NPC);
+	}
+
+	@Override
+	public void openShop(int shopID) {
+		NpcShopDlg nsd = NpcData.getShopById(shopID);
+		if (nsd != null) {
+			chr.setShop(nsd);
+			chr.write(ShopDlg.openShop(0, nsd));
+		} else {
+			chat(String.format("Could not find shop with id %d.", shopID));
+			log.error(String.format("Could not find shop with id %d.", shopID));
+		}
+	}
+
+	@Override
+	public void openTrunk(int npcTemplateID) {
+		chr.write(CField.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
+	}
+
+	@Override
+	public void setSpeakerID(int templateID) {
+		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
+	}
+
+
+
+	// Mob methods
+	@Override
+	public void spawnMob(int id) {
+		spawnMob(id, 0, 0, false);
+	}
+
+	@Override
+	public void spawnMob(int id, boolean respawnable) {
+		spawnMob(id, 0, 0, respawnable);
+	}
+
+	@Override
+	public void spawnMobOnChar(int id) {
+		spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), false);
+	}
+
+	@Override
+	public void spawnMobOnChar(int id, boolean respawnable) {
+		spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), respawnable);
+	}
+
+	@Override
+	public void spawnMob(int id, int x, int y, boolean respawnable) {
+		spawnMob(id, x, y, respawnable, 0);
+	}
+
+	public void spawnMob(int id, int x, int y, boolean respawnable, long hp) {
+		chr.getField().spawnMob(id, x, y, respawnable, hp);
+	}
+
+	@Override
+	public void removeMobByObjId(int id) {
+		chr.getField().removeLife(id);
+		chr.getField().broadcastPacket(MobPool.mobLeaveField(id, DeathType.ANIMATION_DEATH));
+	}
+
+	@Override
+	public void removeMobsByTemplateId(int id) {
+		List<Mob> mobList = chr.getField().getMobs();
+		if (mobList.size() > 0) {
+			for (Mob mob : mobList) {
+				if (mob.getTemplateId() != id) {
+					continue;
+				}
+				removeMobByObjId(mob.getObjectId());
+			}
+		}
+	}
+
+	@Override
+	public void removeMobsAfterTimer(int templateID, int seconds) {
+		EventManager.addEvent(() -> removeMobsByTemplateId(templateID), seconds, TimeUnit.SECONDS);
+	}
+
+	@Override
+	public void showHP(int templateID) {
+		chr.getField().getMobs().stream()
+				.filter(m -> m.getTemplateId() == templateID)
+				.findFirst()
+				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
+	}
+
+	@Override
+	public void showHP() {
+		chr.getField().getMobs().stream()
+				.filter(m -> m.getHp() > 0)
+				.findFirst()
+				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
+	}
+
+
+
+	// Reactor methods
+	@Override
+	public void removeReactor() {
+		Field field = chr.getField();
+		Reactor reactor = field.getReactors().stream()
+				.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
+				.findAny().orElse(null);
+		if (reactor != null) {
+			field.removeReactor(reactor);
+			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
+		}
+	}
+
+
+
+	// Party-related methods -------------------------------------------------------------------------------------------
 
 	@Override
 	public Party getParty() {
@@ -635,159 +803,74 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		return res;
 	}
 
-	@Override
-	public void warpPartyIn(int id) {
-		warpParty(id, true);
-	}
+
+
+	// Guild-related methods -------------------------------------------------------------------------------------------
 
 	@Override
-	public void warpPartyOut(int id) {
-		warpParty(id, false);
+	public void showGuildCreateWindow() {
+		chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.InputGuildName)));
 	}
 
-	public void warpParty(int id, boolean in) {
-		if (chr.getParty() == null) {
-			chr.setFieldInstanceType(in ? FieldInstanceType.PARTY : FieldInstanceType.CHANNEL);
-			Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
-			chr.warp(field);
-		} else {
 
-			for (PartyMember pm : chr.getParty().getPartyMembers()) {
-				if (pm != null && pm.getChr() != null) {
-					Char partyChr = pm.getChr();
-					partyChr.setFieldInstanceType(in ? FieldInstanceType.PARTY : FieldInstanceType.CHANNEL);
-					Field field = partyChr.getOrCreateFieldByCurrentInstanceType(id);
-					partyChr.warp(field);
-				}
-			}
-		}
-	}
 
-	public void clearPartyInfo() {
-		clearPartyInfo(0);
+	// Chat-related methods --------------------------------------------------------------------------------------------
+
+	@Override
+	public void chat(String text) {
+		chatRed(text);
 	}
 
 	@Override
-	public void clearPartyInfo(int warpToID) {
-		if (chr.getParty() != null) {
-			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
-				pm.getChr().setDeathCount(-1);
-			}
-			chr.getParty().clearFieldInstances(warpToID);
-		}
+	public void chatRed(String text) {
+		chr.chatMessage(GAME_MESSAGE, text);
 	}
 
 	@Override
-	public void spawnMob(int id) {
-		spawnMob(id, 0, 0, false);
+	public void chatBlue(String text) {
+		chr.chatMessage(GAME_NOTICE, text);
 	}
 
 	@Override
-	public void spawnMob(int id, boolean respawnable) {
-		spawnMob(id, 0, 0, respawnable);
+	public void chatScript(String text) {chr.chatScriptMessage(text);}
+
+
+
+	// Inventory-related methods ---------------------------------------------------------------------------------------
+
+	@Override
+	public void giveMesos(long mesos) {
+		chr.addMoney(mesos);
 	}
 
 	@Override
-	public void spawnMobOnChar(int id) {
-		spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), false);
+	public void deductMesos(long mesos) {
+		chr.deductMoney(mesos);
 	}
 
 	@Override
-	public void spawnMobOnChar(int id, boolean respawnable) {
-		spawnMob(id, chr.getPosition().getX(), chr.getPosition().getY(), respawnable);
+	public long getMesos() {
+		return chr.getMoney();
 	}
 
 	@Override
-	public void spawnMob(int id, int x, int y, boolean respawnable) {
-		spawnMob(id, x, y, respawnable, 0);
-	}
-
-	public void spawnMob(int id, int x, int y, boolean respawnable, long hp) {
-		chr.getField().spawnMob(id, x, y, respawnable, hp);
-	}
-
-	public void removeMobByObjId(int id) {
-		chr.getField().removeLife(id);
-		chr.getField().broadcastPacket(MobPool.mobLeaveField(id, DeathType.ANIMATION_DEATH));
-	}
-
-	public void removeMobsByTemplateId(int id) {
-		List<Mob> mobList = chr.getField().getMobs();
-		if (mobList.size() > 0) {
-			for (Mob mob : mobList) {
-				if (mob.getTemplateId() != id) {
-					continue;
-				}
-				removeMobByObjId(mob.getObjectId());
-			}
-		}
-	}
-
-	public void removeMobsAfterTimer(int mobid, int seconds) { //Template id
-		EventManager.addEvent(() -> removeMobsByTemplateId(mobid), seconds, TimeUnit.SECONDS);
+	public void giveItem(int id) {
+		giveItem(id, 1);
 	}
 
 	@Override
-	public void showHP(int templateID) {
-		chr.getField().getMobs().stream()
-				.filter(m -> m.getTemplateId() == templateID)
-				.findFirst()
-				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
+	public void giveItem(int id, int quantity) {
+		chr.addItemToInventory(id, quantity);
 	}
 
 	@Override
-	public void showHP() {
-		chr.getField().getMobs().stream()
-				.filter(m -> m.getHp() > 0)
-				.findFirst()
-				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
-	}
-
-	public void spawnNpc(int npcId, int x, int y) {
-		Npc npc = NpcData.getNpcDeepCopyById(npcId);
-		chr.getField().spawnLife(npc, chr);
-	}
-
-	public void removeNpc(int npcId) { //TODO Fix
-		List<Life> removeLifeSet = new ArrayList<>();
-		List<Life> lifes = chr.getField().getLifes();
-		if(lifes.size() > 0) {
-			for (Life life : lifes) {
-				if (life instanceof Npc) {
-					if (life.getTemplateId() != npcId) {
-						continue;
-					}
-					removeLifeSet.add(life);
-				}
-			}
-		}
-		//TODO
-		if(removeLifeSet.size()>1) {
-			chr.getField().removeLife(removeLifeSet.get(0).getObjectId());
-		}
-	}
-
-	public void openNpc(int npcID) { //TODO Fix
-		Npc npc = NpcData.getNpcDeepCopyById(npcID);
-		String script;
-		if(npc.getScripts().size() > 0) {
-			script = npc.getScripts().get(0);
-		} else {
-			script = String.valueOf(npc.getTemplateId());
-		}
-		chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
+	public boolean hasItem(int id) {
+		return hasItem(id, 1);
 	}
 
 	@Override
-	public void openShop(int shopID) {
-		NpcShopDlg nsd = NpcData.getShopById(shopID);
-		if (nsd != null) {
-			chr.setShop(nsd);
-			chr.write(ShopDlg.openShop(0, nsd));
-		} else {
-			chat(String.format("Could not find shop with id %d.", shopID));
-			log.error(String.format("Could not find shop with id %d.", shopID));
-		}
+	public boolean hasItem(int id, int quantity) {
+		return getQuantityOfItem(id) >= quantity;
 	}
 
 	@Override
@@ -799,6 +882,159 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	public void consumeItem(int itemID, int amount) {
 		chr.consumeItem(itemID, amount);
 	}
+
+	@Override
+	public void useItem(int id) {
+		ItemBuffs.giveItemBuffsFromItemID(chr, chr.getTemporaryStatManager(), id);
+	}
+
+	@Override
+	public int getQuantityOfItem(int id) {
+		if (ItemConstants.isEquip(id)) {
+			Item equip = chr.getInventoryByType(InvType.EQUIP).getItemByItemID(id);
+			if (equip == null) {
+				return 0;
+			}
+			return equip.getQuantity();
+		} else {
+			Item item2 = ItemData.getItemDeepCopy(id);
+			InvType invType = item2.getInvType();
+			Item item = chr.getInventoryByType(invType).getItemByItemID(id);
+			if (item == null) {
+				return 0;
+			}
+			return item.getQuantity();
+		}
+	}
+
+	@Override
+	public boolean canHold(int id) {
+		return chr.canHold(id);
+	}
+
+	@Override
+	public int getEmptyInventorySlots(InvType invType) {
+		return chr.getInventoryByType(invType).getEmptySlots();
+	}
+
+
+
+	// Quest-related methods -------------------------------------------------------------------------------------------
+
+	@Override
+	public void completeQuest(int id) {
+		chr.getQuestManager().completeQuest(id);
+	}
+
+	@Override
+	public void completeQuestNoRewards(int id) {
+		QuestManager qm = chr.getQuestManager();
+		Quest quest = qm.getQuests().get(id);
+		if (quest == null) {
+			quest = QuestData.createQuestFromId(id);
+		}
+		quest.setCompletedTime(FileTime.currentTime());
+		quest.setStatus(QuestStatus.COMPLETE);
+		qm.addQuest(quest);
+		chr.write(WvsContext.questRecordMessage(quest));
+	}
+
+	@Override
+	public void startQuestNoCheck(int id) {
+		QuestManager qm = chr.getQuestManager();
+		qm.addQuest(QuestData.createQuestFromId(id));
+	}
+
+	@Override
+	public void startQuest(int id) {
+		QuestManager qm = chr.getQuestManager();
+		if (qm.canStartQuest(id)) {
+			qm.addQuest(QuestData.createQuestFromId(id));
+		}
+	}
+
+	@Override
+	public boolean hasQuest(int id) {
+		return chr.getQuestManager().hasQuestInProgress(id);
+	}
+
+	@Override
+	public boolean hasQuestCompleted(int id) {
+		return chr.getQuestManager().hasQuestCompleted(id);
+	}
+
+
+
+	// Boss-related methods --------------------------------------------------------------------------------------------
+
+	@Override
+	public void setDeathCount(int deathCount) {
+		chr.setDeathCount(deathCount);
+		chr.write(UserLocal.deathCountInfo(deathCount));
+	}
+
+	@Override
+	public void setPartyDeathCount(int deathCount) {
+		if (chr.getParty() != null) {
+			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+				pm.getChr().setDeathCount(deathCount);
+			}
+		}
+	}
+
+
+
+	// Character Temporary Stat-related methods ------------------------------------------------------------------------
+
+	@Override
+	public void giveCTS(CharacterTemporaryStat cts, int nOption, int rOption, int time) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		Option o = new Option();
+		o.nOption = nOption;
+		o.rOption = rOption;
+		o.tOption = time;
+		tsm.putCharacterStatValue(cts, o);
+		tsm.sendSetStatPacket();
+	}
+
+	@Override
+	public void removeCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		tsm.removeStat(cts, false);
+	}
+
+	@Override
+	public void removeBuffBySkill(int skillId) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		tsm.removeStatsBySkill(skillId);
+	}
+
+	@Override
+	public boolean hasCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		return tsm.hasStat(cts);
+	}
+
+	@Override
+	public int getnOptionByCTS(CharacterTemporaryStat cts) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		return hasCTS(cts) ? tsm.getOption(cts).nOption : 0;
+	}
+
+	@Override
+	public void rideVehicle(int mountID) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+
+		tsb.setNOption(mountID);
+		tsb.setROption(0);
+		tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+		tsm.sendSetStatPacket();
+	}
+
+
+
+	// Other methods ---------------------------------------------------------------------------------------------------
 
 	@Override
 	public boolean addDamageSkin(int itemID) {
@@ -831,156 +1067,19 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
-	public void openTrunk(int npcTemplateID) {
-		chr.write(CField.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
-	}
-
-	@Override
 	public void openUI(UIType uiID){
 		int uiIDValue = uiID.getVal();
 		chr.write(CField.openUI(uiIDValue));
 	}
 
 	@Override
-	public int getReturnField() {
-		return returnField;
-	}
-
-	@Override
-	public void setReturnField(int returnField) {
-		this.returnField = returnField;
-	}
-
-	@Override
-	public void setReturnField() {
-		setReturnField(chr.getFieldID());
-	}
-
-	@Override
-	public boolean mobsPresentInField() {
-		return mobsPresentInField(chr.getFieldID());
-	}
-
-	@Override
-	public boolean mobsPresentInField(int fieldid) {
-		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldid);
-		return field.getMobs().size() > 0;
-	}
-
-	@Override
-	public int numberMobsInField() {
-		return numberMobsInField(chr.getFieldID());
-	}
-
-	@Override
-	public int numberMobsInField(int fieldid) {
-		Field field = FieldData.getFieldById(fieldid);
-		return field.getMobs().size();
-	}
-
-	@Override
-	public void removeReactor() {
-		Field field = chr.getField();
-		Reactor reactor = field.getReactors().stream()
-				.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
-				.findAny().orElse(null);
-		if (reactor != null) {
-			field.removeReactor(reactor);
-			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
-		}
-	}
-
-	public void setSpeakerID(int templateID) {
-		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
-	}
-
-	public void setJob(short jobID) {
-		chr.setJob(jobID);
-		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.subJob, jobID);
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
-	}
-
-	public void addSP(int amount) {
-		byte jobLevel = (byte) JobConstants.getJobLevel(chr.getJob());
-		int currentSP = chr.getAvatarData().getCharacterStat().getExtendSP().getSpByJobLevel(jobLevel);
-		setSP(currentSP + amount);
-	}
-
-	private void setSP(int amount) {
-		chr.setSpToCurrentJob(amount);
-		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
-	}
-
-	public void addAP(int amount) {
-		int currentAP = chr.getAvatarData().getCharacterStat().getAp();
-		setAP(currentAP + amount);
-	}
-
-	public void setAP(int amount) {
-		chr.setStat(Stat.ap, (short) amount);
-		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.ap, (short) amount);
-		chr.getClient().write(WvsContext.statChanged(stats));
-	}
-
-	public void jobAdvance(short jobID) {
-		setJob(jobID);
-		addAP(5); //Standard added AP upon Job Advancing
-		addSP(3); //Standard added SP upon Job Advancing
-	}
-
-	public boolean hasQuest(int id) {
-		return chr.getQuestManager().hasQuestInProgress(id);
-	}
-
-	public boolean hasQuestCompleted(int id) {
-		return chr.getQuestManager().hasQuestCompleted(id);
-	}
-
-	public void setDeathCount(int deathCount) {
-		chr.setDeathCount(deathCount);
-		chr.write(UserLocal.deathCountInfo(deathCount));
-	}
-
-	public void setPartyDeathCount(int deathCount) {
-		if (chr.getParty() != null) {
-			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
-				pm.getChr().setDeathCount(deathCount);
-			}
-		}
-	}
-
-	public int getEmptyInventorySlots(InvType invType) {
-		return chr.getInventoryByType(invType).getEmptySlots();
-	}
-
 	public void showClearStageExpWindow(long expGiven) {
 		chr.write(CField.fieldEffect(FieldEffect.showClearStageExpWindow((int) expGiven)));
 		giveExpNoMsg(expGiven);
 	}
 
-	public void giveExp(long expGiven) {
-		chr.addExp(expGiven);
-	}
-
-	public void giveExpNoMsg(long expGiven) {
-		chr.addExpNoMsg(expGiven);
-	}
-
+	@Override
 	public int getRandomIntBelow(int upBound) {
 		return new Random().nextInt(upBound);
-	}
-
-	public void rideVehicle(int mountID) {
-		TemporaryStatManager tsm = chr.getTemporaryStatManager();
-		TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
-
-		tsb.setNOption(mountID);
-		tsb.setROption(0);
-		tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
-		tsm.sendSetStatPacket();
 	}
 }
