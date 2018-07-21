@@ -3,10 +3,7 @@ package net.swordie.ms.world;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
-import net.swordie.ms.client.character.BroadcastMsg;
-import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.ExtendSP;
-import net.swordie.ms.client.character.Macro;
+import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
 import net.swordie.ms.client.character.damage.DamageSkinType;
@@ -164,6 +161,7 @@ public class WorldHandler {
         c.write(WvsContext.friendResult(new LoadFriendResult(chr.getAllFriends())));
         c.write(WvsContext.macroSysDataInit(chr.getMacros()));
         c.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_SendInfo, null, chr));
+        c.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, (byte) 5, chr.getHyperRockFields()));
         if(chr.getQuestManager().hasQuestInProgress(7291)) { // damage skin update
             c.write(WvsContext.questRecordMessage(chr.getQuestManager().getQuests().get(7291)));
         }
@@ -1689,9 +1687,15 @@ public class WorldHandler {
         short pos = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
         Item item = cashInv.getItemBySlot(pos);
+        ItemInfo itemInfo = ItemData.getItemInfoByID(itemID);
         if (item == null || item.getItemId() != itemID) {
             return;
         }
+        if (itemID / 10000 == 553) {
+            // Reward items
+            Item reward = itemInfo.getRandomReward();
+            chr.addItemToInventory(reward);
+        } else {
         switch (itemID) {
             case 5040004: // Hyper Teleport Rock
                 short idk = inPacket.decodeShort();
@@ -1728,7 +1732,6 @@ public class WorldHandler {
                     c.write(WvsContext.blackCubeResult(equip, chr.getMemorialCubeInfo()));
                 }
                 equip.updateToChar(chr);
-                chr.consumeItem(item);
                 break;
             case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
                 ePos = (short) inPacket.decodeInt();
@@ -1749,17 +1752,15 @@ public class WorldHandler {
                 c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
                 c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
                 equip.updateToChar(chr);
-                chr.consumeItem(item);
                 break;
             case 5750001: // Nebulite Diffuser
                 ePos = inPacket.decodeShort();
                 equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-                if(equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
+                if (equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
                     chr.chatMessage("That item currently does not have an active socket.");
                     chr.dispose();
                     return;
                 }
-                chr.consumeItem(item);
                 equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
                 equip.updateToChar(chr);
                 break;
@@ -1769,7 +1770,6 @@ public class WorldHandler {
                 World world = chr.getClient().getWorld();
                 BroadcastMsg smega = BroadcastMsg.megaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
                 world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                chr.consumeItem(item);
                 break;
             case 5076000: // Item Megaphone
                 text = inPacket.decodeString();
@@ -1777,10 +1777,10 @@ public class WorldHandler {
                 boolean eqpSelected = inPacket.decodeByte() != 0;
                 invType = EQUIP;
                 int itemPosition = 0;
-                if(eqpSelected) {
+                if (eqpSelected) {
                     invType = InvType.getInvTypeByVal(inPacket.decodeInt());
                     itemPosition = inPacket.decodeInt();
-                    if(invType == EQUIP && itemPosition < 0) {
+                    if (invType == EQUIP && itemPosition < 0) {
                         invType = EQUIPPED;
                     }
                 }
@@ -1789,12 +1789,11 @@ public class WorldHandler {
                 world = chr.getClient().getWorld();
                 smega = BroadcastMsg.itemMegaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon, eqpSelected, broadcastedItem);
                 world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                chr.consumeItem(item);
                 break;
             case 5077000: // Triple Megaphone
                 byte stringListSize = inPacket.decodeByte();
                 List<String> stringList = new ArrayList<>();
-                for(int i = 0; i < stringListSize; i++) {
+                for (int i = 0; i < stringListSize; i++) {
                     stringList.add(inPacket.decodeString());
                 }
                 whisperIcon = inPacket.decodeByte() != 0;
@@ -1802,12 +1801,6 @@ public class WorldHandler {
                 world = chr.getClient().getWorld();
                 smega = BroadcastMsg.tripleMegaphone(stringList, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
                 world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                chr.consumeItem(item);
-                break;
-            case 5530006: // 100 Power Elixirs
-                if (chr.canHold(2000005)) {
-                    chr.addItemToInventory(2000005, 100);
-                }
                 break;
             case 5062405: // Fusion anvil
                 int appearancePos = inPacket.decodeInt();
@@ -1822,8 +1815,10 @@ public class WorldHandler {
                 break;
             default:
                 chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
-                break;
+                return;
+            }
         }
+        chr.consumeItem(item);
         chr.dispose();
     }
 
@@ -1875,7 +1870,7 @@ public class WorldHandler {
                 equip.addAttribute(EquipAttribute.PROTECTION_SCROLL);
                 break;
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), true, false, scrollID, equip.getItemId()));
+        c.write(CField.showItemUpgradeEffect(chr.getId(), true, false, scrollID, equip.getItemId(), false));
         equip.updateToChar(chr);
         chr.consumeItem(scroll);
     }
@@ -1896,6 +1891,7 @@ public class WorldHandler {
         }
         int scrollID = scroll.getItemId();
         boolean success = true;
+        boolean boom = false;
         Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(scrollID).getScrollStats();
         if (vals.size() > 0) {
             if (equip.getRuc() <= 0) {
@@ -1939,6 +1935,15 @@ public class WorldHandler {
                 equip.addStat(ruc, -1);
                 equip.addStat(cuc, 1);
             } else {
+                if (curse > 0) {
+                    boom = Util.succeedProp(curse);
+                    if (boom && !equip.hasAttribute(EquipAttribute.PROTECTION_SCROLL)) {
+                        chr.consumeItem(equip);
+                    } else {
+                        boom = false;
+                        equip.removeAttribute(EquipAttribute.PROTECTION_SCROLL);
+                    }
+                }
                 if (!equip.hasAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION)) {
                     equip.addStat(ruc, -1);
                 } else {
@@ -1949,8 +1954,10 @@ public class WorldHandler {
                 equip.removeAttribute(EquipAttribute.LUCKY_DAY);
             }
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
-        equip.updateToChar(chr);
+        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), boom));
+        if (!boom) {
+            equip.updateToChar(chr);
+        }
         chr.consumeItem(scroll);
     }
 
@@ -2015,7 +2022,7 @@ public class WorldHandler {
                     return;
             }
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
+        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), false));
         equip.updateToChar(chr);
         chr.consumeItem(scroll);
     }
@@ -2048,7 +2055,7 @@ public class WorldHandler {
             equip.updateToChar(chr);
         }
         chr.consumeItem(item);
-        chr.write(CField.showItemUpgradeEffect(chr.getId(), success, false, itemID, equip.getItemId()));
+        chr.write(CField.showItemUpgradeEffect(chr.getId(), success, false, itemID, equip.getItemId(), false));
     }
 
     public static void handleUserAdditionalOptUpgradeItemUseRequest(Client c, InPacket inPacket) {
@@ -2102,7 +2109,7 @@ public class WorldHandler {
         for (int i = 0; i < 6; i++) {
             chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId()));
+        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), false));
         equip.updateToChar(chr);
         chr.consumeItem(scroll);
     }
@@ -3350,7 +3357,7 @@ public class WorldHandler {
             return;
         }
         int templateID = reactor.getTemplateId();
-        ReactorInfo ri = ReactorData.getReactorByID(templateID);
+        ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
@@ -3374,7 +3381,7 @@ public class WorldHandler {
             return;
         }
         int templateID = reactor.getTemplateId();
-        ReactorInfo ri = ReactorData.getReactorByID(templateID);
+        ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
@@ -3939,7 +3946,7 @@ public class WorldHandler {
             equip.addStat(ebs, randStat);
             equip.updateToChar(chr);
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flameID, equip.getItemId()));
+        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flameID, equip.getItemId(), false));
         equip.updateToChar(chr);
         chr.consumeItem(flame);
         chr.dispose();
@@ -4461,5 +4468,28 @@ public class WorldHandler {
         int fieldID = inPacket.decodeInt();
         Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
         chr.warp(field);
+    }
+
+    public static void handleUserMapTransferRequest(Char chr, InPacket inPacket) {
+        byte mtType = inPacket.decodeByte();
+        byte itemType = inPacket.decodeByte();
+
+
+        MapTransferType mapTransferType = MapTransferType.getByVal(mtType);
+        switch (mapTransferType){
+            case DeleteListRecv: //Delete request that's received
+                int targetFieldID = inPacket.decodeInt();
+                HyperTPRock.removeFieldId(chr, targetFieldID);
+                chr.write(WvsContext.mapTransferResult(MapTransferType.DeleteListSend, itemType, chr.getHyperRockFields()));
+                break;
+
+            case RegisterListRecv: //Register request that's received
+                targetFieldID = chr.getFieldID();
+                HyperTPRock.addFieldId(chr, targetFieldID);
+                chr.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, itemType, chr.getHyperRockFields()));
+                break;
+
+
+        }
     }
 }

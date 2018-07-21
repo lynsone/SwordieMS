@@ -26,10 +26,6 @@ public class FileTime implements Serializable {
 		return getLowDateTime() + (long) getHighDateTime() << 32;
 	}
 
-	public static void main(String[] args) {
-
-	}
-
 	public enum Type {
 		// Mushy
 		MAX_TIME(35120710, -1157267456),
@@ -157,6 +153,32 @@ public class FileTime implements Serializable {
 	 */
 	public long toLong() {
 		return (long) getLowDateTime() + ((long) getHighDateTime() << 32);
+	}
+
+	/**
+	 * Returns true if this FileTime's time is before the current time.
+	 * @return expiredness
+	 */
+	public boolean isExpired() {
+		return toMillis() < System.currentTimeMillis();
+	}
+
+	/**
+	 * Checks if this FileTime is before a given date.
+	 * @param localDateTime the given date
+	 * @return if this FileTime is before the given date
+	 */
+	public boolean isBefore(LocalDateTime localDateTime) {
+		return toLocalDateTime().isBefore(localDateTime);
+	}
+
+	/**
+	 * Checks if this FileTime is before a given FileTime.
+	 * @param fileTime the given date
+	 * @return if this FileTime is before the given FileTime
+	 */
+	public boolean isBefore(FileTime fileTime) {
+		return toLocalDateTime().isBefore(fileTime.toLocalDateTime());
 	}
 
 	public int getId() {

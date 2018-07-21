@@ -4,7 +4,6 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.loaders.ReactorInfo;
 import net.swordie.ms.loaders.ReactorData;
 import net.swordie.ms.connection.packet.ReactorPool;
-import net.swordie.ms.life.Life;
 
 /**
  * Created on 4/21/2018.
@@ -80,7 +79,7 @@ public class Reactor extends Life {
     }
 
     public void init() {
-        ReactorInfo ri = ReactorData.getReactorByID(getTemplateId());
+        ReactorInfo ri = ReactorData.getReactorInfoByID(getTemplateId());
         setState((byte) 0);
         setName(ri.getViewName());
         setPosition(getHomePosition());

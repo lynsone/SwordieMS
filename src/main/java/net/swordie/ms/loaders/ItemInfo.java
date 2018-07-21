@@ -1,13 +1,12 @@
 package net.swordie.ms.loaders;
 
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ScrollStat;
 import net.swordie.ms.enums.SpecStat;
+import net.swordie.ms.util.Util;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created on 1/9/2018.
@@ -42,6 +41,7 @@ public class ItemInfo {
     private int reqSkillLv;
     private Set<Integer> skills = new HashSet<>();
     private int moveTo;
+    private Set<ItemRewardInfo> itemRewardInfos = new HashSet<>();
 
     public void setItemId(int itemId) {
         this.itemId = itemId;
@@ -284,4 +284,29 @@ public class ItemInfo {
     public void setMoveTo(int moveTo) {
         this.moveTo = moveTo;
     }
+
+    public void addItemReward(ItemRewardInfo iri) {
+        getItemRewardInfos().add(iri);
+    }
+
+    public Set<ItemRewardInfo> getItemRewardInfos() {
+        return itemRewardInfos;
+    }
+
+    public Item getRandomReward() {
+        List<ItemRewardInfo> iris = new ArrayList<>(getItemRewardInfos());
+        iris.sort(Comparator.comparingDouble(ItemRewardInfo::getProb));
+        Collections.reverse(iris);
+        double rand = new Random().nextDouble() * 100 + 1;
+        for (ItemRewardInfo iri : iris) {
+            if (rand <= iri.getProb()) {
+                Item item = ItemData.getItemDeepCopy(iri.getItemID());
+                item.setQuantity(iri.getCount());
+                return item;
+            }
+            rand -= iri.getProb();
+        }
+        return null;
+    }
+
 }

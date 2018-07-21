@@ -878,4 +878,18 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket mapTransferResult(MapTransferType mapTransferType, byte itemType, int[] hyperrockfields) {
+        OutPacket outPacket = new OutPacket(OutHeader.MAP_TRANSFER_RESULT);
+
+        outPacket.encodeByte(mapTransferType.getVal()); // Map Transfer Type
+        outPacket.encodeByte(itemType); // Item Type (5 = Cash)
+        if (mapTransferType == MapTransferType.DeleteListSend || mapTransferType == MapTransferType.RegisterListSend) {
+            for (int fieldid : hyperrockfields) {
+                outPacket.encodeInt(fieldid); // Target Field ID
+            }
+        }
+
+        return outPacket;
+    }
 }

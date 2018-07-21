@@ -31,6 +31,14 @@ public class QuestProgressMoneyRequirement extends QuestProgressRequirement {
         return getCurMoney() >= getMoney();
     }
 
+    @Override
+    public QuestProgressRequirement deepCopy() {
+        QuestProgressMoneyRequirement qpmr = new QuestProgressMoneyRequirement();
+        qpmr.setMoney(getMoney());
+        qpmr.setCurMoney(getCurMoney());
+        return qpmr;
+    }
+
     public int getMoney() {
         return money;
     }

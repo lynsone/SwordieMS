@@ -7,6 +7,7 @@ drop table if exists macros;
 drop table if exists familiars;
 drop table if exists stolenskills;
 drop table if exists chosenskills;
+drop table if exists hyperrockfields;
 drop table if exists characterpotentials;
 drop table if exists test;
 drop table if exists skills;
@@ -556,6 +557,15 @@ create table chosenskills (
     charid int,
     skillid int,
     position int,
+    primary key (id),
+    foreign key (charid) references characters(id)
+);
+
+create table hyperrockfields (
+	id bigint not null auto_increment,
+    charid int,
+    ord int,
+    fieldid int,
     primary key (id),
     foreign key (charid) references characters(id)
 );

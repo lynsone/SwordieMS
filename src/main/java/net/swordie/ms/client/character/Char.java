@@ -169,6 +169,12 @@ public class Char {
 	@OneToMany(cascade = CascadeType.ALL)
 	private Set<ChosenSkill> chosenSkills;
 
+	@ElementCollection
+	@CollectionTable(name = "hyperrockfields", joinColumns = @JoinColumn(name = "CharID"))
+	@Column(name = "fieldid")
+	@OrderColumn(name = "ord")
+	private int[] hyperrockfields = new int[13];
+
 	@Transient
 	private CharacterPotentialMan potentialMan;
 
@@ -377,6 +383,25 @@ public class Char {
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
 		familiars = new HashSet<>();
+		hyperrockfields = new int[] {
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+		};
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -2490,8 +2515,12 @@ public class Char {
 		if (item.getQuantity() <= 1 && !ItemConstants.isThrowingItem(item.getItemId())) {
 			item.setQuantity(0);
 			inventory.removeItem(item);
+			short bagIndex = (short) item.getBagIndex();
+			if (item.getInvType() == EQUIPPED) {
+				bagIndex = (short) -bagIndex;
+			}
 			write(WvsContext.inventoryOperation(true, false,
-					REMOVE, (short) item.getBagIndex(), (byte) 0, 0, item));
+					REMOVE, bagIndex, (byte) 0, 0, item));
 		} else {
 			item.setQuantity(item.getQuantity() - 1);
 			write(WvsContext.inventoryOperation(true, false,
@@ -3499,5 +3528,13 @@ public class Char {
 
 	public void setRewardPoints(int rewardPoints) {
 		this.rewardPoints = rewardPoints;
+	}
+
+	public int[] getHyperRockFields() {
+		return hyperrockfields;
+	}
+
+	public void setHyperRockFields(int[] hyperrockfields) {
+		this.hyperrockfields = hyperrockfields;
 	}
 }

@@ -637,7 +637,7 @@ public class QuestData {
             quest.setStatus(QuestStatus.STARTED);
         }
         for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
-            quest.addQuestProgressRequirement(qpr);
+            quest.addQuestProgressRequirement(qpr.deepCopy());
         }
         return quest;
     }

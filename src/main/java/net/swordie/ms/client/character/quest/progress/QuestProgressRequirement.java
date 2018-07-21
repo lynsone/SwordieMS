@@ -30,4 +30,6 @@ public abstract class QuestProgressRequirement implements DatSerializable {
     public void setId(long id) {
         this.id = id;
     }
+
+    public abstract QuestProgressRequirement deepCopy();
 }

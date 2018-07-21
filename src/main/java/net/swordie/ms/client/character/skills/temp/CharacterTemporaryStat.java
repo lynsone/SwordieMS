@@ -717,6 +717,8 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             case TouchMe:
             case IndieForceSpeed:
             case IndieForceJump:
+            case RideVehicle:
+            case RideVehicleExpire:
                 return true;
             default:
                 return false;
