@@ -2381,6 +2381,10 @@ public class WorldHandler {
                         position = inPacket.decodePosition();
                     }
                     break;
+                case QuestReq_ResignQuest: //Qest forfeit
+                    questID = inPacket.decodeInt();
+                    chr.getQuestManager().removeQuest(questID);
+                    break;
                 default:
                     log.error(String.format("Unhandled quest request %s!", qt));
                     break;
