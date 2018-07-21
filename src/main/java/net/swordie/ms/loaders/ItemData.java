@@ -506,6 +506,17 @@ public class ItemData {
             for (int i = 0; i < size; i++) {
                 itemInfo.addSkill(dataInputStream.readInt());
             }
+
+            size = dataInputStream.readShort();
+            for (int i = 0; i < size; i++) {
+                ItemRewardInfo iri = new ItemRewardInfo();
+                iri.setCount(dataInputStream.readInt());
+                iri.setItemID(dataInputStream.readInt());
+                iri.setProb(dataInputStream.readDouble());
+                iri.setPeriod(dataInputStream.readInt());
+                iri.setEffect(dataInputStream.readUTF());
+                itemInfo.addItemReward(iri);
+            }
             itemInfo.setReqSkillLv(dataInputStream.readInt());
             itemInfo.setMasterLv(dataInputStream.readInt());
 
@@ -562,6 +573,14 @@ public class ItemData {
                 dataOutputStream.writeShort(ii.getSkills().size());
                 for (int i : ii.getSkills()) {
                     dataOutputStream.writeInt(i);
+                }
+                dataOutputStream.writeShort(ii.getItemRewardInfos().size());
+                for (ItemRewardInfo iri : ii.getItemRewardInfos()) {
+                    dataOutputStream.writeInt(iri.getCount());
+                    dataOutputStream.writeInt(iri.getItemID());
+                    dataOutputStream.writeDouble(iri.getProb());
+                    dataOutputStream.writeInt(iri.getPeriod());
+                    dataOutputStream.writeUTF(iri.getEffect());
                 }
                 dataOutputStream.writeInt(ii.getReqSkillLv());
                 dataOutputStream.writeInt(ii.getMasterLv());
@@ -1290,6 +1309,39 @@ public class ItemData {
                                         log.error(String.format("Unhandled spec for id %d, name %s, value %s", id, name, value));
                                     }
                             }
+                        }
+                    }
+                    Node reward = XMLApi.getFirstChildByNameBF(mainNode, "reward");
+                    if (reward != null) {
+                        for (Node rewardNode : XMLApi.getAllChildren(reward)) {
+                            ItemRewardInfo iri = new ItemRewardInfo();
+                            for (Node rewardInfoNode : XMLApi.getAllChildren(rewardNode)) {
+                                String name = XMLApi.getNamedAttribute(rewardInfoNode, "name");
+                                String value = XMLApi.getNamedAttribute(rewardInfoNode, "value");
+                                if (value == null) {
+                                    continue;
+                                }
+                                value = value.replace("\\r\\n", "").replace("[R8]", "");
+                                switch (name) {
+                                    case "count":
+                                        iri.setCount(Integer.parseInt(value));
+                                        break;
+                                    case "item":
+                                        iri.setItemID(Integer.parseInt(value));
+                                        break;
+                                    case "prob":
+                                        iri.setProb(Double.parseDouble(value));
+                                        break;
+                                    case "period":
+                                        iri.setPeriod(Integer.parseInt(value));
+                                        break;
+                                    case "effect":
+                                    case "Effect":
+                                        iri.setEffect(value);
+                                        break;
+                                }
+                            }
+                            item.addItemReward(iri);
                         }
                     }
                     getItems().put(item.getItemId(), item);

@@ -2514,8 +2514,12 @@ public class Char {
 		if (item.getQuantity() <= 1 && !ItemConstants.isThrowingItem(item.getItemId())) {
 			item.setQuantity(0);
 			inventory.removeItem(item);
+			short bagIndex = (short) item.getBagIndex();
+			if (item.getInvType() == EQUIPPED) {
+				bagIndex = (short) -bagIndex;
+			}
 			write(WvsContext.inventoryOperation(true, false,
-					REMOVE, (short) item.getBagIndex(), (byte) 0, 0, item));
+					REMOVE, bagIndex, (byte) 0, 0, item));
 		} else {
 			item.setQuantity(item.getQuantity() - 1);
 			write(WvsContext.inventoryOperation(true, false,
