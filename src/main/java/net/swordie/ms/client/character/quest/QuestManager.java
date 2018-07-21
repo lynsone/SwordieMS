@@ -2,8 +2,11 @@ package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.quest.progress.QuestProgressItemRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
+import net.swordie.ms.client.character.quest.reward.QuestItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestReward;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.enums.QuestStatus;
@@ -98,6 +101,12 @@ public class QuestManager {
                 chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
             } else {
                 chr.chatMessage(YELLOW, "[Info] Accepted quest " + quest.getQRKey());
+                QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
+                for (QuestReward qr : qi.getQuestRewards()) {
+                    if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
+                        qr.giveReward(getChr());
+                    }
+                }
             }
         }
     }
@@ -149,7 +158,9 @@ public class QuestManager {
         chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
         chr.write(WvsContext.questRecordMessage(quest));
         for(QuestReward qr : questInfo.getQuestRewards()) {
-            qr.giveReward(chr);
+            if (!(qr instanceof QuestItemReward) || ((QuestItemReward) qr).getStatus() != 0) {
+                qr.giveReward(chr);
+            }
         }
     }
 

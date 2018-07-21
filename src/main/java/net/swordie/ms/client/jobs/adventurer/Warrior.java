@@ -740,7 +740,7 @@ public class Warrior extends Job {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             if(Util.succeedProp(si.getValue(prop, slv))) {
-                                mts.removeEnemyBuffs();
+                                mts.removeBuffs();
                                 o1.nOption = 1;
                                 o1.rOption = skillID;
                                 o1.tOption = si.getValue(time, slv);

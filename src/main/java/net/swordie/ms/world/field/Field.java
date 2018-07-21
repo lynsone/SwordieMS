@@ -609,7 +609,7 @@ public class Field {
         return mobs;
     }
 
-    public synchronized void removeLife(Integer id, Boolean fromSchedule) {
+    public synchronized void removeLife(int id, boolean fromSchedule) {
         Life life = getLifeByObjectID(id);
         if (life == null) {
             return;

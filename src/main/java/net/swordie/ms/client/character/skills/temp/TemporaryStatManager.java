@@ -149,7 +149,7 @@ public class TemporaryStatManager {
         return res;
     }
 
-    public synchronized void removeStat(CharacterTemporaryStat cts, Boolean fromSchedule) {
+    public synchronized void removeStat(CharacterTemporaryStat cts, boolean fromSchedule) {
         if(cts == CombatOrders) {
             chr.setCombatOrders(0);
         }
@@ -170,7 +170,7 @@ public class TemporaryStatManager {
         }
     }
 
-    public synchronized void removeIndieStat(CharacterTemporaryStat cts, Option option, Boolean fromSchedule) {
+    public synchronized void removeIndieStat(CharacterTemporaryStat cts, Option option, boolean fromSchedule) {
         List<Option> optList = new ArrayList<>();
         optList.add(option);
         getRemovedStats().put(cts, optList);

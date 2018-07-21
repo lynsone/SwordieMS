@@ -1122,14 +1122,15 @@ public class Mob extends Life {
      * Damages a mob.
      * @param totalDamage the total damage that should be applied to the mob
      */
-    public void damage(Long totalDamage) {
+    public void damage(Char damageDealer, long totalDamage) {
+        addDamage(damageDealer, totalDamage);
         long maxHP = getMaxHp();
         long oldHp = getHp();
         long newHp = oldHp - totalDamage;
         setHp(newHp);
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
-        if (newHp <= 0) {
+        if (oldHp > 0 && newHp <= 0) {
             die();
             if (isBoss()) {
                 getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
@@ -1144,6 +1145,7 @@ public class Mob extends Life {
     private void die() {
         Field field = getField();
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH));
+        getTemporaryStat().removeEverything();
         if (!isNotRespawnable()) { // double negative
             EventManager.addEvent(() -> field.respawn(this),
                     (long) (GameConstants.BASE_MOB_RESPAWN_RATE * (1 / field.getMobRate())));
@@ -1202,7 +1204,12 @@ public class Mob extends Life {
     }
 
     private void dropDrops() {
-        getField().drop(getDrops(), getField().getFootholdById(getFh()), getPosition(), getMostDamageChar().getId());
+        int ownerID = 0;
+        Char mostDamageChar = getMostDamageChar();
+        if (mostDamageChar != null) {
+            ownerID = mostDamageChar.getId();
+        }
+        getField().drop(getDrops(), getField().getFootholdById(getFh()), getPosition(), ownerID);
     }
 
     public Map<Char, Long> getDamageDone() {

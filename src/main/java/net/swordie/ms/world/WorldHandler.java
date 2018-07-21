@@ -663,8 +663,7 @@ public class WorldHandler {
                     for (int dmg : mai.damages) {
                         totalDamage += dmg;
                     }
-                    mob.addDamage(chr, totalDamage);
-                    mob.damage(totalDamage);
+                    mob.damage(chr, totalDamage);
                     if (mob.getHp() < 0) {
 
                         // Combo Counter per Kill

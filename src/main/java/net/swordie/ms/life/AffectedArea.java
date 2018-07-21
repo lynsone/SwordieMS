@@ -200,7 +200,7 @@ public class AffectedArea extends Life {
                 mts.addStatOptionsAndBroadcast(MobStat.MDR, o);
                 break;
             case Zero.TIME_DISTORTION:
-                mts.removeEnemyBuffs();
+                mts.removeBuffs();
                 o.nOption = 1;
                 o.rOption = skillID;
                 o.tOption = 5;

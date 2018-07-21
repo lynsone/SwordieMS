@@ -19,7 +19,7 @@ import static net.swordie.ms.life.mob.MobStat.*;
 
 
 public class MobTemporaryStat {
-	private List<net.swordie.ms.life.mob.skill.BurnedInfo> burnedInfos = new ArrayList<>();
+	private List<BurnedInfo> burnedInfos = new ArrayList<>();
 	private Map<Integer, ScheduledFuture> burnCancelSchedules = new HashMap<>();
 	private Map<Integer, ScheduledFuture> burnSchedules = new HashMap<>();
 	private String linkTeam;
@@ -378,7 +378,7 @@ public class MobTemporaryStat {
 		return removedStatVals;
 	}
 
-	public void removeMobStat(MobStat mobStat, Boolean fromSchedule) {
+	public void removeMobStat(MobStat mobStat, boolean fromSchedule) {
 		synchronized (currentStatVals) {
 			getRemovedStatVals().put(mobStat, getCurrentStatVals().get(mobStat));
 			getCurrentStatVals().remove(mobStat);
@@ -393,9 +393,9 @@ public class MobTemporaryStat {
 		}
 	}
 
-	public void removeBurnedInfo(Integer charId, Boolean fromSchedule) {
+	public void removeBurnedInfo(int charID, boolean fromSchedule) {
 		synchronized (burnedInfos) {
-			List<BurnedInfo> biList = getBurnedInfos().stream().filter(bi -> bi.getCharacterId() == charId).collect(Collectors.toList());
+			List<BurnedInfo> biList = getBurnedInfos().stream().filter(bi -> bi.getCharacterId() == charID).collect(Collectors.toList());
 			getBurnedInfos().removeAll(biList);
 			getRemovedStatVals().put(BurnedInfo, getCurrentOptionsByMobStat(BurnedInfo));
 			if (getBurnedInfos().size() == 0) {
@@ -403,13 +403,13 @@ public class MobTemporaryStat {
 			}
 			getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false, biList));
 			if (!fromSchedule) {
-				getBurnCancelSchedules().get(charId).cancel(true);
-				getBurnCancelSchedules().remove(charId);
-				getBurnSchedules().get(charId).cancel(true);
-				getBurnSchedules().remove(charId);
+				getBurnCancelSchedules().get(charID).cancel(true);
+				getBurnCancelSchedules().remove(charID);
+				getBurnSchedules().get(charID).cancel(true);
+				getBurnSchedules().remove(charID);
 			} else {
-				getBurnCancelSchedules().remove(charId);
-				getBurnSchedules().remove(charId);
+				getBurnCancelSchedules().remove(charID);
+				getBurnSchedules().remove(charID);
 			}
 		}
 	}
@@ -557,7 +557,7 @@ public class MobTemporaryStat {
 		addStatOptionsAndBroadcast(MobStat.BurnedInfo, o);
 		ScheduledFuture sf = EventManager.addEvent(() -> removeBurnedInfo(charId, true), time);
 		ScheduledFuture burn = EventManager.addFixedRateEvent(
-				() -> getMob().damage((long) bi.getDamage()), 0, bi.getInterval(), bi.getDotCount());
+				() -> getMob().damage(chr, (long) bi.getDamage()), 0, bi.getInterval(), bi.getDotCount());
 		getBurnCancelSchedules().put(charId, sf);
 		getBurnSchedules().put(charId, burn);
 	}
@@ -570,7 +570,7 @@ public class MobTemporaryStat {
 		return burnSchedules;
 	}
 
-	public void removeEnemyBuffs() {
+	public void removeBuffs() {
 		removeMobStat(PowerUp, false);
 		removeMobStat(MagicUp, false);
 		removeMobStat(PGuardUp, false);
@@ -586,5 +586,12 @@ public class MobTemporaryStat {
 			removeMobStat(EVA, false);
 		}
 		getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 0, false));
+	}
+
+	public void removeEverything() {
+		Set<MobStat> mobStats = new HashSet<>(getCurrentStatVals().keySet());
+		mobStats.stream().filter(ms -> ms != BurnedInfo).forEach(ms -> removeMobStat(ms, false));
+		Set<BurnedInfo> burnedInfos = new HashSet<>(getBurnedInfos());
+		burnedInfos.forEach(bi -> removeBurnedInfo(bi.getCharacterId(), false));
 	}
 }

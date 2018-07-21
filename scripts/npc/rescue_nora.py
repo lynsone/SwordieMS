@@ -39,7 +39,7 @@ def action(response, answer):
         sm.sendNext("As for the rising of the sea levels.. Would that be really the work of the witch? Wouldn't there be other reasons behind it?")
 
     elif status == 8:
-        sm.sendNext("I haev a favor to ask. Can I come along as you investigate the area? Please take me as your colleague!")
+        sm.sendNext("I have a favor to ask. Can I come along as you investigate the area? Please take me as your colleague!")
 
     elif status == 9:
         sm.sendNext("#b(The knowledge of this young scholar would be a good help when solving problems.)\r\n\r\n#e#r[This need to be Player Avatar]#k#n")
