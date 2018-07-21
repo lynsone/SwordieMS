@@ -145,6 +145,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	private void startScript(int parentID, int objID, String scriptName, ScriptType scriptType, String initFuncName) {
+		setLastActiveScriptType(scriptType);
 		if (scriptType == ScriptType.NONE) {
 			return;
 		}
@@ -172,7 +173,6 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		} catch (ScriptException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
-		setLastActiveScriptType(scriptType);
 	}
 
 	private Invocable getInvocableFromScriptNameAndType(String name, ScriptType scriptType) {
@@ -634,7 +634,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
-	public void openNpc(int npcId) { //TODO Fix
+	public void openNpc(int npcId) {
 		Npc npc = NpcData.getNpcDeepCopyById(npcId);
 		String script;
 		if(npc.getScripts().size() > 0) {

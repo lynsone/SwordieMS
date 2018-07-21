@@ -80,8 +80,10 @@ def init():
         warp = False
 
     # Riena Strait Portals
-    elif fieldID == 141010000 or fieldID == 141020000 or fieldID == 141040000 or fieldID == 141050000: # [Riena Strait] Ice Station 1  or [Riena Strait] Ice Station 2  or  [Riena Strait] Barbara's House
+    elif fieldID == 141010000 or fieldID == 141020000 or fieldID == 141040000 or fieldID == 141050000:
+        # [Riena Strait] Ice Station 1  or [Riena Strait] Ice Station 2  or  [Riena Strait] Barbara's House
         sm.openNpc(1510006)
+        warp = False
 
     # ToT -> Leafre START
     elif fieldID == 270000100: # Time Lane : ToT

@@ -17,7 +17,7 @@ public class TemporaryStatBase {
         option = new Option();
         option.nOption = 0;
         option.rOption = 0;
-        lastUpdated = new FileTime(System.currentTimeMillis());
+        lastUpdated = FileTime.currentTime();
         this.dynamicTermSet = dynamicTermSet;
     }
 
@@ -82,8 +82,8 @@ public class TemporaryStatBase {
         setLastUpdated(System.currentTimeMillis());
     }
 
-    private void setLastUpdated(long l) {
-        setLastUpdated(new FileTime(l));
+    private void setLastUpdated(long epochMillis) {
+        FileTime.fromEpochMillis(epochMillis);
     }
 
     public void encode(OutPacket outPacket) {
