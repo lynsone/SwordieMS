@@ -61,6 +61,15 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
     }
 
     @Override
+    public QuestProgressRequirement deepCopy() {
+        QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
+        qpmr.setMobID(getMobID());
+        qpmr.setRequiredCount(getRequiredCount());
+        qpmr.setCurrentCount(getCurrentCount());
+        return qpmr;
+    }
+
+    @Override
     public void write(DataOutputStream dos) throws IOException {
         dos.writeInt(getMobID());
         dos.writeInt(getRequiredCount());

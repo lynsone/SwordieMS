@@ -62,6 +62,15 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
     }
 
     @Override
+    public QuestProgressRequirement deepCopy() {
+        QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
+        qpir.setItemID(getItemID());
+        qpir.setRequiredCount(getRequiredCount());
+        qpir.setCurrentCount(getCurrentCount());
+        return qpir;
+    }
+
+    @Override
     public void write(DataOutputStream dos) throws IOException {
         dos.writeInt(getItemID());
         dos.writeInt(getRequiredCount());

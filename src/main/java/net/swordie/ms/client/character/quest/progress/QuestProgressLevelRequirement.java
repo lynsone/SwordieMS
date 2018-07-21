@@ -31,6 +31,14 @@ public class QuestProgressLevelRequirement extends QuestProgressRequirement {
         return getCurLevel() >= getLevel();
     }
 
+    @Override
+    public QuestProgressRequirement deepCopy() {
+        QuestProgressLevelRequirement qplr = new QuestProgressLevelRequirement();
+        qplr.setLevel(getLevel());
+        qplr.setCurLevel(getCurLevel());
+        return qplr;
+    }
+
     public int getLevel() {
         return level;
     }
@@ -56,4 +64,6 @@ public class QuestProgressLevelRequirement extends QuestProgressRequirement {
     public DatSerializable load(DataInputStream dis) throws IOException {
         return new QuestProgressLevelRequirement(dis.readInt());
     }
+
+
 }
