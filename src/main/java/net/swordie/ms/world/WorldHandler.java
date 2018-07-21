@@ -3359,7 +3359,7 @@ public class WorldHandler {
             return;
         }
         int templateID = reactor.getTemplateId();
-        ReactorInfo ri = ReactorData.getReactorByID(templateID);
+        ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
@@ -3383,7 +3383,7 @@ public class WorldHandler {
             return;
         }
         int templateID = reactor.getTemplateId();
-        ReactorInfo ri = ReactorData.getReactorByID(templateID);
+        ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {

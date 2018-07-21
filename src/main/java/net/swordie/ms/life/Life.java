@@ -364,7 +364,7 @@ public class Life {
     }
 
     public Position getHomePosition() {
-        if(homePosition == null) {
+        if(homePosition == null && getPosition() != null) {
             homePosition = getPosition().deepCopy();
         }
         return homePosition;

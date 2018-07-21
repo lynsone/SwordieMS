@@ -1,6 +1,7 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.ServerConstants;
+import net.swordie.ms.life.Reactor;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.Rect;
@@ -181,9 +182,16 @@ public class ReactorData {
         return ri;
     }
 
-    public static ReactorInfo getReactorByID(int id) {
+    public static ReactorInfo getReactorInfoByID(int id) {
         ReactorInfo ri = getReactorInfo().get(id);
         return ri == null ? loadReactorByID(id) : ri;
+    }
+
+    public static Reactor getReactorByID(int id) {
+        Reactor r = new Reactor(-1);
+        r.setTemplateId(id);
+        r.init();
+        return r;
     }
 
     private static ReactorInfo loadReactorByID(int id) {
