@@ -169,6 +169,12 @@ public class Char {
 	@OneToMany(cascade = CascadeType.ALL)
 	private Set<ChosenSkill> chosenSkills;
 
+	@ElementCollection
+	@CollectionTable(name = "hyperrockfields", joinColumns = @JoinColumn(name = "CharID"))
+	@Column(name = "fieldid")
+	@OrderColumn(name = "ord")
+	private int[] hyperrockfields = new int[13];
+
 	@Transient
 	private CharacterPotentialMan potentialMan;
 
@@ -376,7 +382,25 @@ public class Char {
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
-		familiars = new HashSet<>();
+		hyperrockfields = new int[] {
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+				999999999,
+				999999999,
+
+				999999999,
+		};
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -3499,5 +3523,13 @@ public class Char {
 
 	public void setRewardPoints(int rewardPoints) {
 		this.rewardPoints = rewardPoints;
+	}
+
+	public int[] getHyperRockFields() {
+		return hyperrockfields;
+	}
+
+	public void setHyperRockFields(int[] hyperrockfields) {
+		this.hyperrockfields = hyperrockfields;
 	}
 }

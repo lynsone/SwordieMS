@@ -3,10 +3,7 @@ package net.swordie.ms.world;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
-import net.swordie.ms.client.character.BroadcastMsg;
-import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.ExtendSP;
-import net.swordie.ms.client.character.Macro;
+import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
 import net.swordie.ms.client.character.damage.DamageSkinType;
@@ -164,6 +161,7 @@ public class WorldHandler {
         c.write(WvsContext.friendResult(new LoadFriendResult(chr.getAllFriends())));
         c.write(WvsContext.macroSysDataInit(chr.getMacros()));
         c.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_SendInfo, null, chr));
+        c.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, (byte) 5, chr.getHyperRockFields()));
         if(chr.getQuestManager().hasQuestInProgress(7291)) { // damage skin update
             c.write(WvsContext.questRecordMessage(chr.getQuestManager().getQuests().get(7291)));
         }
@@ -4457,5 +4455,28 @@ public class WorldHandler {
         int fieldID = inPacket.decodeInt();
         Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
         chr.warp(field);
+    }
+
+    public static void handleUserMapTransferRequest(Char chr, InPacket inPacket) {
+        byte mtType = inPacket.decodeByte();
+        byte itemType = inPacket.decodeByte();
+
+
+        MapTransferType mapTransferType = MapTransferType.getByVal(mtType);
+        switch (mapTransferType){
+            case DeleteListRecv: //Delete request that's received
+                int targetFieldID = inPacket.decodeInt();
+                HyperTPRock.removeFieldId(chr, targetFieldID);
+                chr.write(WvsContext.mapTransferResult(MapTransferType.DeleteListSend, itemType, chr.getHyperRockFields()));
+                break;
+
+            case RegisterListRecv: //Register request that's received
+                targetFieldID = chr.getFieldID();
+                HyperTPRock.addFieldId(chr, targetFieldID);
+                chr.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, itemType, chr.getHyperRockFields()));
+                break;
+
+
+        }
     }
 }

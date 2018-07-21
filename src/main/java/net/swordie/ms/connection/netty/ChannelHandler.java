@@ -531,6 +531,8 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_CONTENTS_MAP_REQUEST:
                     WorldHandler.handleUserContentsMapRequest(chr, inPacket);
                     break;
+                case USER_MAP_TRANSFER_REQUEST:
+                    WorldHandler.handleUserMapTransferRequest(chr, inPacket);
                 default:
                     handleUnknown(inPacket, op);
                     break;
