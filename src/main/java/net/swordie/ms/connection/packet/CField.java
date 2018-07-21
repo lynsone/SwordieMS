@@ -334,12 +334,12 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket showItemUpgradeEffect(int charID, boolean success, boolean enchantDlg, int uItemID, int eItemID) {
+    public static OutPacket showItemUpgradeEffect(int charID, boolean success, boolean enchantDlg, int uItemID, int eItemID, boolean boom) {
         OutPacket outPacket = new OutPacket(OutHeader.SHOW_ITEM_UPGRADE_EFFECT);
 
         outPacket.encodeInt(charID);
 
-        outPacket.encodeByte(success);
+        outPacket.encodeByte(boom ? 2 : success ? 1 : 0);
         outPacket.encodeByte(enchantDlg);
         outPacket.encodeInt(uItemID);
         outPacket.encodeInt(eItemID);
