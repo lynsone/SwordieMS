@@ -382,6 +382,7 @@ public class Char {
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
+		familiars = new HashSet<>();
 		hyperrockfields = new int[] {
 				999999999,
 				999999999,
