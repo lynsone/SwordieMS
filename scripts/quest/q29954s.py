@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Elven Noble
 
-medal = 1142066
+medal = 1142338
 
 def init():
     if sm.canHold(medal):

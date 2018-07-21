@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Ascendant
 
-medal = 1142066
+medal = 1142488
 
 def init():
     if sm.canHold(medal):

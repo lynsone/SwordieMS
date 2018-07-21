@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Rage Master
 
-medal = 1142066
+medal = 1142556
 
 def init():
     if sm.canHold(medal):

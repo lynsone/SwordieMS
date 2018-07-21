@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Vengeance Incarnate
 
-medal = 1142066
+medal = 1142345
 
 def init():
     if sm.canHold(medal):

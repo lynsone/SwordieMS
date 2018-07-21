@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Kaiser Reborn
 
-medal = 1142066
+medal = 1142484
 
 def init():
     if sm.canHold(medal):

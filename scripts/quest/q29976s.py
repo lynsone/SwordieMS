@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Newborn Light
 
-medal = 1142066
+medal = 1142399
 
 def init():
     if sm.canHold(medal):

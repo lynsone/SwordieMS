@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Chief Knight of Light
 
-medal = 1142066
+medal = 1142402
 
 def init():
     if sm.canHold(medal):

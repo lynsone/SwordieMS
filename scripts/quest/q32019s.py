@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Child of the Goddess
 
-medal = 1142066
+medal = 1142635
 
 def init():
     if sm.canHold(medal):

@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Ruler of Elves
 
-medal = 1142066
+medal = 1142340
 
 def init():
     if sm.canHold(medal):

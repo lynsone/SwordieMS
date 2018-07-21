@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Awakened Kaiser
 
-medal = 1142066
+medal = 1142486
 
 def init():
     if sm.canHold(medal):

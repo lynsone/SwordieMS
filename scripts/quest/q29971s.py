@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Master Thief Phantom
 
-medal = 1142066
+medal = 1142379
 
 def init():
     if sm.canHold(medal):

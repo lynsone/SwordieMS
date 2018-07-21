@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Lord Sniper
 
-medal = 1142066
+medal = 1142011
 
 def init():
     if sm.canHold(medal):

@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Awakened Aran
 
-medal = 1142066
+medal = 1142129
 
 def init():
     if sm.canHold(medal):

@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Last One Home
 
-medal = 1142066
+medal = 1142579
 
 def init():
     if sm.canHold(medal):

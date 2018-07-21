@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Dual Blade Reborn
 
-medal = 1142066
+medal = 1142390
 
 def init():
     if sm.canHold(medal):

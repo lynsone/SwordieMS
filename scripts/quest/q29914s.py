@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# King Pirate
 
-medal = 1142066
+medal = 1142013
 
 def init():
     if sm.canHold(medal):

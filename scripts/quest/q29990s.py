@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Kaiser's Successor
 
-medal = 1142066
+medal = 1142487
 
 def init():
     if sm.canHold(medal):
