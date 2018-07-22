@@ -464,7 +464,7 @@ public class WildHunter extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
             // Dodged
             if(chr.hasSkill(FLURRY)) {
                 Skill skill = chr.getSkill(FLURRY);

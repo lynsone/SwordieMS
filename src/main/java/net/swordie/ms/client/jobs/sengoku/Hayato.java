@@ -347,7 +347,7 @@ public class Hayato extends Job {
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
         //Dodge
-        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
             handleJinsoku();
             handleWillowDodge();
         }

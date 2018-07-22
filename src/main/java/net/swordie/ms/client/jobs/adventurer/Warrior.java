@@ -808,7 +808,7 @@ public class Warrior extends Job {
 
         //Paladin - Shield Mastery
         if(chr.hasSkill(1210001)) { //If Wearing a Shield
-            if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+            if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
                 // Guarded
                 int mobID = hitInfo.mobID;
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mobID);

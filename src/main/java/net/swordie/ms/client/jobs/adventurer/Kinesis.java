@@ -319,7 +319,7 @@ public class Kinesis extends Job {
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(KinesisPsychicShield)) {
-            hitInfo.HPDamage = (int) (hitInfo.HPDamage * (tsm.getOption(KinesisPsychicEnergeShield).nOption / 100D));
+            hitInfo.hpDamage = (int) (hitInfo.hpDamage * (tsm.getOption(KinesisPsychicEnergeShield).nOption / 100D));
             substractPP(1);
         }
         if(getPp() <= 0) {

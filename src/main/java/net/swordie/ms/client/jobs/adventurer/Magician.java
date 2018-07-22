@@ -620,11 +620,11 @@ public class Magician extends Job {
             Skill skill = chr.getSkill(MAGIC_GUARD);
             SkillInfo si = SkillData.getSkillInfoById(MAGIC_GUARD);
             int dmgPerc = si.getValue(x, skill.getCurrentLevel());
-            int dmg = hitInfo.HPDamage;
+            int dmg = hitInfo.hpDamage;
             int mpDmg = (int) (dmg * (dmgPerc / 100D));
             mpDmg = chr.getStat(Stat.mp) - mpDmg < 0 ? chr.getStat(Stat.mp) : mpDmg;
-            hitInfo.HPDamage = dmg - mpDmg;
-            hitInfo.MPDamage = mpDmg;
+            hitInfo.hpDamage = dmg - mpDmg;
+            hitInfo.mpDamage = mpDmg;
         }
 
         if(tsm.getOptByCTSAndSkill(AntiMagicShell, ELEMENTAL_ADAPTATION_FP) != null) {

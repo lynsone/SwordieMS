@@ -476,7 +476,7 @@ public class WindArcher extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         if(chr.hasSkill(SECOND_WIND)) {
-            if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+            if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
                 Skill skill = chr.getSkill(SECOND_WIND);
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 byte slv = (byte) skill.getCurrentLevel();

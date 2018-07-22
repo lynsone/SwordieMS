@@ -8,7 +8,6 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.Option;
-import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
@@ -133,7 +132,7 @@ public abstract class Job {
 		}
 
 		HitInfo hitInfo = new HitInfo();
-		hitInfo.HPDamage = damage;
+		hitInfo.hpDamage = damage;
 		hitInfo.templateID = templateID;
 		hitInfo.mobID = mobID;
 		handleHit(c, inPacket, hitInfo);
@@ -151,9 +150,9 @@ public abstract class Job {
 	 */
 	public void handleHit(Client c, HitInfo hitInfo) {
 		Char chr = c.getChr();
-		hitInfo.HPDamage = Math.max(0, hitInfo.HPDamage); // to prevent -1 (dodges) healing the player.
+		hitInfo.hpDamage = Math.max(0, hitInfo.hpDamage); // to prevent -1 (dodges) healing the player.
 		int curHP = chr.getStat(Stat.hp);
-		int newHP = curHP - hitInfo.HPDamage;
+		int newHP = curHP - hitInfo.hpDamage;
 		if (newHP <= 0) {
 			curHP = 0;
 		} else {
@@ -164,7 +163,7 @@ public abstract class Job {
 		stats.put(Stat.hp, curHP);
 
 		int curMP = chr.getStat(Stat.mp);
-		int newMP = curMP - hitInfo.MPDamage;
+		int newMP = curMP - hitInfo.mpDamage;
 		if (newMP < 0) {
 			// should not happen
 			curMP = 0;

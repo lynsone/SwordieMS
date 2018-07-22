@@ -25,7 +25,6 @@ import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
@@ -427,9 +426,9 @@ public class Zero extends Job {
         if(tsm.hasStat(ImmuneBarrier)) {
             Option o = tsm.getOption(ImmuneBarrier);
             int maxSoakDamage = o.nOption;
-            int newDamage = hitInfo.HPDamage - maxSoakDamage < 0 ? 0 : hitInfo.HPDamage - maxSoakDamage;
-            o.nOption = maxSoakDamage - (hitInfo.HPDamage - newDamage); // update soak value
-            hitInfo.HPDamage = newDamage;
+            int newDamage = hitInfo.hpDamage - maxSoakDamage < 0 ? 0 : hitInfo.hpDamage - maxSoakDamage;
+            o.nOption = maxSoakDamage - (hitInfo.hpDamage - newDamage); // update soak value
+            hitInfo.hpDamage = newDamage;
             o.tOption = si.getValue(time, slv); //added duration
             tsm.putCharacterStatValue(ImmuneBarrier, o);
             tsm.sendSetStatPacket();

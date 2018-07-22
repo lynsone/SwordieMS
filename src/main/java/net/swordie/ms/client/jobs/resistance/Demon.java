@@ -641,7 +641,7 @@ public class Demon extends Job {
 
         //Vengeance
         if(tsm.getOptByCTSAndSkill(PowerGuard, VENGEANCE) != null) {
-            if(hitInfo.HPDamage != 0) {
+            if(hitInfo.hpDamage != 0) {
                 Skill skill = chr.getSkill(VENGEANCE);
                 byte slv = (byte) skill.getCurrentLevel();
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
@@ -659,7 +659,7 @@ public class Demon extends Job {
         }
 
         //Possessed Aegis
-        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
             // Guarded
             if(chr.hasSkill(POSSESSED_AEGIS)) {
                 Skill skill = chr.getSkill(POSSESSED_AEGIS);

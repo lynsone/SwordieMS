@@ -430,7 +430,7 @@ public class Thief extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
             // Dodged
             if(chr.hasSkill(SHADOW_MELD)) {
                 if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {

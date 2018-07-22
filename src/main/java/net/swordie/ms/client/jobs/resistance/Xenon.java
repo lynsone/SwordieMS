@@ -396,7 +396,7 @@ public class Xenon extends Job {
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 
             if (tsm.getOptByCTSAndSkill(StackBuff, HYBRID_DEFENSES) != null) {
-                if (hitInfo.HPDamage > 0) {
+                if (hitInfo.hpDamage > 0) {
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
                     o1.mOption = hybridDefenseCount;

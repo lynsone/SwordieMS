@@ -444,8 +444,8 @@ public class Phantom extends Job {
             Skill skill = chr.getSkill(VOL_DAME);
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int dmgPerc = si.getValue(x, skill.getCurrentLevel());
-            int dmg = hitInfo.HPDamage;
-            hitInfo.HPDamage = dmg - (dmg * (dmgPerc / 100));
+            int dmg = hitInfo.hpDamage;
+            hitInfo.hpDamage = dmg - (dmg * (dmgPerc / 100));
         }
 
         super.handleHit(c, inPacket, hitInfo);

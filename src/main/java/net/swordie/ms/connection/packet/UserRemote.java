@@ -251,9 +251,9 @@ public class UserRemote {
         outPacket.encodeInt(chr.getId());
 
         outPacket.encodeByte(hitInfo.type);
-        outPacket.encodeInt(hitInfo.HPDamage);
+        outPacket.encodeInt(hitInfo.hpDamage);
         outPacket.encodeByte(hitInfo.isCrit);
-        outPacket.encodeByte(hitInfo.HPDamage == 0);
+        outPacket.encodeByte(hitInfo.hpDamage == 0);
         if (hitInfo.type == -8) {
             outPacket.encodeInt(hitInfo.skillID);
             outPacket.encodeInt(0); // ignored
@@ -262,12 +262,14 @@ public class UserRemote {
             outPacket.encodeInt(hitInfo.templateID);
             outPacket.encodeByte(hitInfo.action);
             outPacket.encodeInt(hitInfo.mobID);
+
             outPacket.encodeInt(0); // ignored
-            outPacket.encodeInt(hitInfo.HPDamage);
-            outPacket.encodeByte(hitInfo.HPDamage == 0);
-            if (hitInfo.HPDamage > 0) {
-                outPacket.encodeByte(hitInfo.isPowerGuard);
+            outPacket.encodeInt(hitInfo.reflectDamage);
+            outPacket.encodeByte(hitInfo.hpDamage == 0); // bGuard
+            if (hitInfo.reflectDamage > 0) {
+                outPacket.encodeByte(hitInfo.isGuard);
                 outPacket.encodeInt(hitInfo.mobID);
+
                 outPacket.encodeByte(hitInfo.hitAction);
                 outPacket.encodePosition(chr.getPosition());
             }
@@ -275,6 +277,10 @@ public class UserRemote {
             if ((hitInfo.specialEffectSkill & 1) != 0) {
                 outPacket.encodeInt(hitInfo.curStanceSkill);
             }
+        }
+        outPacket.encodeInt(hitInfo.hpDamage);
+        if (hitInfo.hpDamage == -1) {
+           outPacket.encodeInt(hitInfo.userSkillID);
         }
 
         return outPacket;
