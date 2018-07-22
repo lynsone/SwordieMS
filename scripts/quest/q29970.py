@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# The Once Beloved Ruler
 
-medal = 1142066
+medal = 1142378
 
 def init():
     if sm.canHold(medal):

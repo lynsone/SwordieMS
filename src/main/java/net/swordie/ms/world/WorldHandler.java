@@ -1819,7 +1819,9 @@ public class WorldHandler {
                 return;
             }
         }
-        chr.consumeItem(item);
+        if (itemID != 5040004) {
+            chr.consumeItem(item);
+        }
         chr.dispose();
     }
 

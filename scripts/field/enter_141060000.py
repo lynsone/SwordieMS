@@ -1,10 +1,10 @@
 # Middle of the Strait | 141060000
 from net.swordie.ms.client.character.skills.temp import CharacterTemporaryStat
 mount = CharacterTemporaryStat.RideVehicle
-shipMount = 1932102
+rienaSkiff = 1930000
 
 def init():
-    if sm.hasCTS(mount) and sm.getnOptionByCTS(mount) != shipMount:
+    if sm.hasCTS(mount) and sm.getnOptionByCTS(mount) != rienaSkiff:
         sm.removeCTS(mount)
-    # sm.rideVehicle(shipMount)  TODO Uncomment once RideVehicle doesn't 38
+    sm.rideVehicle(rienaSkiff)
     sm.dispose()

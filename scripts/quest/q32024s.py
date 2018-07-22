@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Forgotten Hero
 
-medal = 1142066
+medal = 1142672
 
 def init():
     if sm.canHold(medal):

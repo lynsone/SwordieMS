@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Pretty Angel Power
 
-medal = 1142066
+medal = 1142495
 
 def init():
     if sm.canHold(medal):

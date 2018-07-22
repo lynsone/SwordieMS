@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Border Patrol
 
-medal = 1142066
+medal = 1142578
 
 def init():
     if sm.canHold(medal):

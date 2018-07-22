@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Radiant Shadow
 
-medal = 1142066
+medal = 1142393
 
 def init():
     if sm.canHold(medal):

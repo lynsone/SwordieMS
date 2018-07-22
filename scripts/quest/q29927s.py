@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Aran in Hope
 
-medal = 1142066
+medal = 1142132
 
 def init():
     if sm.canHold(medal):

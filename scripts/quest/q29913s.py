@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Legendary Thief
 
-medal = 1142066
+medal = 1142012
 
 def init():
     if sm.canHold(medal):

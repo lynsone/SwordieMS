@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Demon Reborn
 
-medal = 1142066
+medal = 1142341
 
 def init():
     if sm.canHold(medal):

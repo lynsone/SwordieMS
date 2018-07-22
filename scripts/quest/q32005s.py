@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Memory Seeker
 
-medal = 1142066
+medal = 1142575
 
 def init():
     if sm.canHold(medal):

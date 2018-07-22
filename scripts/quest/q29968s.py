@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Without a Trace
 
-medal = 1142066
+medal = 1142376
 
 def init():
     if sm.canHold(medal):

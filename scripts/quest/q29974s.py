@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Wind Cleaver
 
-medal = 1142066
+medal = 1142392
 
 def init():
     if sm.canHold(medal):

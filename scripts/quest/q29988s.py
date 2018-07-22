@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Kaiser's Fated Path
 
-medal = 1142066
+medal = 1142485
 
 def init():
     if sm.canHold(medal):

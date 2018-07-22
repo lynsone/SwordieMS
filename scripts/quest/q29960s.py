@@ -1,6 +1,6 @@
-# (Lv. 10) Knight-in-Training
+# Awakened Demon
 
-medal = 1142066
+medal = 1142343
 
 def init():
     if sm.canHold(medal):
