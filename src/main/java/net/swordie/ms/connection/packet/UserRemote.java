@@ -277,6 +277,14 @@ public class UserRemote {
             }
         }
 
+        return outPacket;
+    }
+
+    public static OutPacket effect(int id, Effect effect) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_EFFECT);
+
+        outPacket.encodeInt(id);
+        effect.encode(outPacket);
 
         return outPacket;
     }

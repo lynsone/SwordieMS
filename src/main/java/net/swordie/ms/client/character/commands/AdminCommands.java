@@ -866,6 +866,7 @@ public class AdminCommands {
                 stats.put(Stat.exp, (long) 0);
                 chr.getClient().write(WvsContext.statChanged(stats));
                 chr.getJobHandler().handleLevelUp();
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
             }
         }
     }
@@ -1194,7 +1195,7 @@ public class AdminCommands {
 
             if (gotomaps.containsKey(args[1])) {
                 Field toField = chr.getClient().getChannelInstance().getField(gotomaps.get(args[1]));
-                Portal portal = chr.getField().getPortalByID(0);
+                Portal portal = chr.getField().getDefaultPortal();
                 chr.warp(toField, portal);
             } else if (args[1].equals("locations")) {
                 chr.chatMessage(GAME_NOTICE, "Use !goto <location>");
@@ -1237,7 +1238,7 @@ public class AdminCommands {
                     return;
                 }
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType((quickmaps.get(key)));
-                Portal portal = chr.getField().getPortalByID(0);
+                Portal portal = chr.getField().getDefaultPortal();
                 chr.warp(toField, portal);
             } else if (args[1].equalsIgnoreCase("list")) {
                 Set keys = quickmaps.keySet();

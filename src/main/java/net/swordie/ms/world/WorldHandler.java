@@ -797,7 +797,7 @@ public class WorldHandler {
         } else {
             toField = chr.getOrCreateFieldByCurrentInstanceType(field.getReturnMap());
         }
-        Portal portal = toField.getPortalByID(0);
+        Portal portal = toField.getDefaultPortal();
         chr.warp(toField, portal);
         chr.consumeItem(itemID, 1);
     }
@@ -2797,6 +2797,7 @@ public class WorldHandler {
         int skillID = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
         if (chr.checkAndSetSkillCooltime(skillID)) {
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skillID, slv, 0)));
             log.debug("SkillID: " + skillID);
             c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
             Job sourceJobHandler = c.getChr().getJobHandler();
@@ -2809,6 +2810,12 @@ public class WorldHandler {
                         if (pm.getChr() != null
                                 && pm.getFieldID() == chr.getFieldID()
                                 && rectAround.hasPositionInside(pm.getChr().getPosition())) {
+                            Char ptChr = pm.getChr();
+                            Effect effect = Effect.skillAffected(skillID, slv, 0);
+                            chr.getField().broadcastPacket(
+                                    UserRemote.effect(ptChr.getId(), effect)
+                                    , ptChr);
+                            ptChr.write(User.effect(effect));
                             sourceJobHandler.handleSkill(pm.getChr().getClient(), skillID, slv, inPacket);
                         }
                     }

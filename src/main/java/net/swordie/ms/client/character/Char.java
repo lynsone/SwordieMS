@@ -2188,6 +2188,7 @@ public class Char {
 			stats.put(Stat.level, (byte) getStat(Stat.level));
 			getJobHandler().handleLevelUp();
 			level++;
+			getField().broadcastPacket(UserRemote.effect(getId(), Effect.levelUpEffect()));
 			heal(getMaxHP());
 			healMP(getMaxMP());
 		}

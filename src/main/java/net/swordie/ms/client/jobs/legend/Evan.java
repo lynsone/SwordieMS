@@ -60,6 +60,7 @@ public class Evan extends Job {
     public static final int HEROIC_MEMORIES_EVAN = 22171082;
     public static final int ENHANCED_MAGIC_DEBRIS = 22170070;
     public static final int HEROS_WILL_EVAN = 22171004;
+    public static final int DRAGON_FURY = 22170074;
 
     //Returns
     public static final int RETURN_FLASH = 22110013; //Return after Wind Skills (Mob Debuff)

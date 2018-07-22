@@ -1022,4 +1022,9 @@ public class Field {
     public int getBossMobID() {
         return bossMobID;
     }
+
+    public Portal getDefaultPortal() {
+        Portal p = getPortalByName("sp");
+        return p == null ? getPortalByID(0) : p;
+    }
 }

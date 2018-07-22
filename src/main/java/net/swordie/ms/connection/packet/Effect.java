@@ -1,7 +1,17 @@
 package net.swordie.ms.connection.packet;
 
 
+import net.swordie.ms.client.jobs.adventurer.Thief;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.legend.Evan;
+import net.swordie.ms.client.jobs.legend.Luminous;
+import net.swordie.ms.client.jobs.legend.Shade;
+import net.swordie.ms.client.jobs.nova.AngelicBuster;
+import net.swordie.ms.client.jobs.nova.Kaiser;
+import net.swordie.ms.client.jobs.resistance.Demon;
+import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.enums.UserEffectType;
 import net.swordie.ms.util.Position;
@@ -29,6 +39,18 @@ public class Effect {
         outPacket.encodeByte(getUserEffectType().getVal());
 
         switch (getUserEffectType()) {
+            case SkillUse:
+            case SkillUseBySummoned:
+                encodeSkillUse(outPacket); // too long to put here
+                break;
+            case SkillAffected:
+                int skillID = getArg1();
+                outPacket.encodeInt(getArg1()); // skill id
+                outPacket.encodeByte(getArg2()); // slv
+                if (skillID == Demon.RAVEN_STORM || skillID == Shade.DEATH_MARK) {
+                    outPacket.encodeInt(getArg3()); // nDelta
+                }
+                break;
             case TextEffect:
                 outPacket.encodeString(getString());
                 outPacket.encodeInt(getArg1()); // letter delay
@@ -86,6 +108,51 @@ public class Effect {
                 break;
             case IncDecHPEffect:
                 outPacket.encodeByte(getArg1()); // amount being healed     0 = Miss
+                break;
+
+        }
+    }
+
+    private void encodeSkillUse(OutPacket outPacket) {
+        int skillID = getArg1();
+        if (getUserEffectType() == SkillUseBySummoned) {
+            outPacket.encodeInt(getArg4()); // Summon ID
+        }
+        outPacket.encodeInt(skillID); // Skill id
+        outPacket.encodeByte(getArg2()); // slv ?
+        outPacket.encodeByte(getArg3()); // slv ?
+        if (skillID == Evan.DRAGON_FURY) { // Dragon Fury
+            outPacket.encodeByte(getArg5()); // bCreate
+        } else if (skillID == Warrior.FINAL_PACT) {
+            outPacket.encodeByte(getArg5()); // bLoadReincarnationEffect
+        } else if (skillID == Thief.CHAINS_OF_HELL) {
+            outPacket.encodeByte(getArg5()); // bLeft
+            outPacket.encodeInt(getArg6()); // dwMobID
+        } else if (skillID == 3211010 || skillID == 3111010 || skillID == 1100012) { // Hooks (Warrior combo fury/archer skills)
+            outPacket.encodeByte(getArg5()); // bLeft
+            outPacket.encodeInt(getArg6()); // dwMobID
+            outPacket.encodeInt(getArg7()); // nMobPosX
+            outPacket.encodeInt(getArg8()); // nMobPosY
+        } else if (skillID == WildHunter.CALL_OF_THE_HUNTER) {
+            outPacket.encodeByte(getArg5()); // bLeft
+            outPacket.encodeShort(getArg6()); // nPosX
+            outPacket.encodeShort(getArg7()); // nPosY
+        } else if (skillID == WildHunter.CAPTURE) {
+            outPacket.encodeByte(getArg5()); // nType: 0 = Success, 1 = mob hp too high, 2 = mob cannot be captured
+        } else if (skillID == Kaiser.VERTICAL_GRAPPLE || skillID == AngelicBuster.GRAPPLING_HEART) {
+            outPacket.encodeInt(getArg5()); // nStartPosY
+            outPacket.encodeInt(getArg6()); // ptRopeConnectDest.x
+            outPacket.encodeInt(getArg7()); // ptRopeConnectDest.y
+        } else if (skillID == Luminous.FLASH_BLINK || skillID == 15001021 || skillID == Shade.FOX_TROT) { // Flash
+            outPacket.encodeInt(getArg5()); // ptBlinkLightOrigin.x
+            outPacket.encodeInt(getArg6()); // ptBlinkLightOrigin.y
+            outPacket.encodeInt(getArg7()); // ptBlinkLightDest.x
+            outPacket.encodeInt(getArg8()); // ptBlinkLightDest.y
+        } else if (SkillConstants.isSuperNovaSkill(skillID)) {
+            outPacket.encodeInt(getArg5()); // ptStartX
+            outPacket.encodeInt(getArg6()); // ptStartY
+        } else if (SkillConstants.isUnregisteredSkill(skillID)) {
+            outPacket.encodeByte(getArg5()); // bLeft
         }
     }
 
@@ -267,7 +334,28 @@ public class Effect {
         return effect;
     }
 
+    public static Effect skillUse(int skillID, byte slv, int bySummonedID) {
+        Effect effect = new Effect();
 
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+
+        return effect;
+    }
+
+    public static Effect skillAffected(int skillID, byte slv, int hpGain) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillAffected);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(hpGain);
+
+        return effect;
+    }
 
 
 

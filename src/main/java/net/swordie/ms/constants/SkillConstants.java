@@ -1152,4 +1152,12 @@ public class SkillConstants {
                 return 0;
         }
     }
+
+    public static boolean isUnregisteredSkill(int skillID) {
+        int prefix = skillID / 10000;
+        if (prefix == 8000) {
+            prefix = skillID / 100;
+        }
+        return prefix != 9500 && skillID / 10000000 == 9;
+    }
 }
