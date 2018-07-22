@@ -12,6 +12,10 @@ public class UpdateMemberLoggedIn implements PartyResultInfo {
 
     public Char updatedChar;
 
+    public UpdateMemberLoggedIn(Char chr) {
+        this.updatedChar = chr;
+    }
+
     @Override
     public PartyResultType getType() {
         return PartyResultType.UpdateMemberLoggedIn;

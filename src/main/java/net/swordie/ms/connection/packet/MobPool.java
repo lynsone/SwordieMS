@@ -345,4 +345,15 @@ public class MobPool {
 
         return outPacket;
     }
+
+    public static OutPacket castingBarSkillStart(int gaugeType, int castingTime, boolean reverseGauge, boolean notShowUI) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_CASTING_BAR_SKILL);
+
+        outPacket.encodeInt(gaugeType);
+        outPacket.encodeInt(castingTime);
+        outPacket.encodeByte(reverseGauge);
+        outPacket.encodeByte(notShowUI);
+
+        return outPacket;
+    }
 }

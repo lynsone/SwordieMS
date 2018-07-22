@@ -41,8 +41,8 @@ public enum PartyResultType {
 
     PartyReward(62), // unsure
     RewardFail(63),
-    ReceiveReward(63),
-    FailToRequestReward(63),
+    ReceiveReward(64),
+    FailToRequestReward(65),
     CannotBeDoneInCurrentMapMsg(66),
     YouRequestToJoinPartyMsg(67),
     PossiblePartyMatch(75),

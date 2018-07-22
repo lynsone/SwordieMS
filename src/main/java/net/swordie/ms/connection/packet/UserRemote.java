@@ -2,6 +2,7 @@ package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -230,6 +231,52 @@ public class UserRemote {
 
         outPacket.encodeInt(charID);
         outPacket.encodeInt(grenadeID);
+
+        return outPacket;
+    }
+
+    public static OutPacket receiveHP(int charID, int curHP, int maxHP) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_RECEIVE_HP);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(curHP);
+        outPacket.encodeInt(maxHP);
+
+        return outPacket;
+    }
+
+    public static OutPacket hit(Char chr, HitInfo hitInfo) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_HIT);
+
+        outPacket.encodeInt(chr.getId());
+
+        outPacket.encodeByte(hitInfo.type);
+        outPacket.encodeInt(hitInfo.HPDamage);
+        outPacket.encodeByte(hitInfo.isCrit);
+        outPacket.encodeByte(hitInfo.HPDamage == 0);
+        if (hitInfo.type == -8) {
+            outPacket.encodeInt(hitInfo.skillID);
+            outPacket.encodeInt(0); // ignored
+            outPacket.encodeInt(hitInfo.otherUserID);
+        } else {
+            outPacket.encodeInt(hitInfo.templateID);
+            outPacket.encodeByte(hitInfo.action);
+            outPacket.encodeInt(hitInfo.mobID);
+            outPacket.encodeInt(0); // ignored
+            outPacket.encodeInt(hitInfo.HPDamage);
+            outPacket.encodeByte(hitInfo.HPDamage == 0);
+            if (hitInfo.HPDamage > 0) {
+                outPacket.encodeByte(hitInfo.isPowerGuard);
+                outPacket.encodeInt(hitInfo.mobID);
+                outPacket.encodeByte(hitInfo.hitAction);
+                outPacket.encodePosition(chr.getPosition());
+            }
+            outPacket.encodeByte(hitInfo.specialEffectSkill);
+            if ((hitInfo.specialEffectSkill & 1) != 0) {
+                outPacket.encodeInt(hitInfo.curStanceSkill);
+            }
+        }
+
 
         return outPacket;
     }

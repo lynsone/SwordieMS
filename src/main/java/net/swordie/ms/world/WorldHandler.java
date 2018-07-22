@@ -49,6 +49,7 @@ import net.swordie.ms.client.party.request.PartyApplyRequest;
 import net.swordie.ms.client.party.request.PartyJoinRequestBlue;
 import net.swordie.ms.client.party.request.PartyRequestType;
 import net.swordie.ms.client.party.result.*;
+import net.swordie.ms.client.party.updates.UpdateMemberLoggedIn;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.client.trunk.TrunkMsg;
 import net.swordie.ms.client.trunk.TrunkType;
@@ -2146,7 +2147,7 @@ public class WorldHandler {
         Char chr = c.getChr();
         int nickItem = inPacket.decodeInt();
         chr.setNickItem(nickItem);
-        chr.getField().broadcastPacket(UserRemote.setActiveNickItem(chr));
+        chr.getField().broadcastPacket(UserRemote.setActiveNickItem(chr), chr);
     }
 
 
@@ -2485,6 +2486,7 @@ public class WorldHandler {
                 CreatePartyResult cpr = new CreatePartyResult();
                 cpr.party = party;
                 chr.write(WvsContext.partyResult(cpr));
+                party.broadcast(WvsContext.partyResult(new UpdateMemberLoggedIn(chr)));
                 break;
             case Leave:
                 if(party.hasCharAsLeader(chr)) {
@@ -4491,5 +4493,19 @@ public class WorldHandler {
 
 
         }
+    }
+
+    public static void handleMonsterCollectionExploreReq(Char chr, InPacket inPacket) {
+        int region = inPacket.decodeInt();
+        int session = inPacket.decodeInt();
+        int group = inPacket.decodeInt();
+    }
+
+    public static void handleMonsterCollectionCompleteRewardReq(Char chr, InPacket inPacket) {
+        int reqType = inPacket.decodeInt();
+        int region = inPacket.decodeInt();
+        int session = inPacket.decodeInt();
+        int group = inPacket.decodeInt();
+        int exploreIndex = inPacket.decodeInt();
     }
 }

@@ -17,8 +17,10 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.ReviveType;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
@@ -107,7 +109,7 @@ public abstract class Job {
 	public abstract void handleSkill(Client c, int skillID, byte slv, InPacket inPacket);
 
 	/**
-	 * Handles the initial part of a hit, the initial connection.packet processing.
+	 * Handles the initial part of a hit, the initial packet processing.
 	 *
 	 * @param c
 	 * 		The client
@@ -123,7 +125,7 @@ public abstract class Job {
 		short idk4 = inPacket.decodeShort();
 		int templateID = 0;
 		int mobID = 0;
-		if (inPacket.getUnreadAmount() >= 8) {
+		if (inPacket.getUnreadAmount() >= 13) {
 			templateID = inPacket.decodeInt();
 			mobID = inPacket.decodeInt();
 			boolean left = inPacket.decodeByte() != 0;
@@ -172,6 +174,10 @@ public abstract class Job {
 		chr.setStat(Stat.mp, curMP);
 		stats.put(Stat.mp, curMP);
 		c.write(WvsContext.statChanged(stats));
+		chr.getField().broadcastPacket(UserRemote.hit(chr, hitInfo));
+		if (chr.getParty() != null) {
+			chr.getParty().broadcast(UserRemote.receiveHP(chr.getId(), chr.getHP(), chr.getTotalStat(BaseStat.mhp)), chr);
+		}
 		if (curHP <= 0) {
 			// TODO Add more items for protecting exp and whatnot
 			c.write(UserLocal.openUIOnDead(true, chr.getBuffProtectorItem() != null,

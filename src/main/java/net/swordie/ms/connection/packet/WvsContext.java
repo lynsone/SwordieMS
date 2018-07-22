@@ -892,4 +892,18 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket monsterCollectionResult(MonsterCollectionResultType mcrt, InvType invType, int fullSlots) {
+        OutPacket outPacket = new OutPacket(OutHeader.MONSTER_COLLECTION_RESULT);
+
+        outPacket.encodeInt(mcrt.ordinal());
+        if (invType != null) {
+            outPacket.encodeInt(invType.getVal());
+        } else {
+            outPacket.encodeInt(0);
+        }
+        outPacket.encodeInt(fullSlots);
+
+        return outPacket;
+    }
 }

@@ -814,4 +814,15 @@ public class CField {
 
         return outPacket;
     }
+
+    public static OutPacket groupMessage(GroupMessageType gmt, String from, String msg) {
+
+        OutPacket outPacket = new OutPacket(OutHeader.GROUP_MESSAGE.getValue());
+
+        outPacket.encodeByte(gmt.ordinal());
+        outPacket.encodeString(from);
+        outPacket.encodeString(msg);
+
+        return outPacket;
+    }
 }

@@ -2484,6 +2484,9 @@ public class Char {
 		setStat(Stat.hp, newHP);
 		stats.put(Stat.hp, newHP);
 		write(WvsContext.statChanged(stats));
+		if (getParty() != null) {
+			getParty().broadcast(UserRemote.receiveHP(getId(), getHP(), getTotalStat(BaseStat.mhp)), this);
+		}
 	}
 
 	/**

@@ -5,4 +5,8 @@ package net.swordie.ms.enums;
  * Created on 7/21/2018.
  */
 public enum MobCastingBarSkillType {
+    Start,
+    End,
+    During,
+    Reduce
 }

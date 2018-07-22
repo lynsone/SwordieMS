@@ -72,6 +72,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case FRIEND_CHAT:
                     ChatHandler.handleFriendChat(c, inPacket);
                     break;
+                case GUILD_CHAT:
+                    ChatHandler.handleGuildChat(c, inPacket);
+                    break;
                 case PERMISSION_REQUEST:
                     LoginHandler.handlePermissionRequest(c, inPacket);
                     break;
@@ -533,6 +536,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_MAP_TRANSFER_REQUEST:
                     WorldHandler.handleUserMapTransferRequest(chr, inPacket);
+                    break;
+                case MONSTER_COLLECTION_EXPLORE_REQ:
+                    WorldHandler.handleMonsterCollectionExploreReq(chr, inPacket);
+                    break;
+                case MONSTER_COLLECTION_COMPLETE_REWARD_REQ:
+                    WorldHandler.handleMonsterCollectionCompleteRewardReq(chr, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

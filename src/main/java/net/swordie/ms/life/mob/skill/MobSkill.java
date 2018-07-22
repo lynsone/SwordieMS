@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.MobPool;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.life.mob.Mob;
@@ -12,6 +13,7 @@ import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.world.field.Field;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import net.swordie.ms.util.Position;
@@ -268,6 +270,7 @@ public class MobSkill {
         short level = (short) getLevel();
         MobSkillInfo msi = SkillData.getMobSkillInfoByIdAndLevel(skill, level);
         MobSkillID msID = MobSkillID.getMobSkillIDByVal(skill);
+        Field field = mob.getField();
         Option o = new Option(skill);
         o.slv = level;
         o.tOption = msi.getSkillStatIntValue(time);
@@ -423,6 +426,10 @@ public class MobSkill {
                         m.setHp(msi.getSkillStatIntValue(hp));
                     }
                 }
+                break;
+            case CASTINGBAR:
+                field.broadcastPacket(MobPool.castingBarSkillStart(1,
+                        msi.getSkillStatIntValue(MobSkillStat.castingTime), false, false));
                 break;
             case UNK:
                 log.warn(String.format("Unknown mob skill %d, slv = %d", skill, level));

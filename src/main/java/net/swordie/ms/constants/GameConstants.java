@@ -102,9 +102,17 @@ public class GameConstants {
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
 
+    // Monster Collection
+    private static List<MonsterCollectionRegion> monsterCollectionInfo;
+
     static {
         initCharExp();
         initEnchantRates();
+        initMonsterCollectionInfo();
+    }
+
+    private static void initMonsterCollectionInfo() {
+        // TODO fill sql
     }
 
     private static void initCharExp() {
