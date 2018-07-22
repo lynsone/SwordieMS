@@ -25,7 +25,8 @@ public class DataClasses {
                 NpcData.class,
                 QuestData.class,
                 DropData.class,
-                ReactorData.class
+                ReactorData.class,
+                StringData.class
                 )
         );
     }
