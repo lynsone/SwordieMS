@@ -7,7 +7,7 @@ import net.swordie.ms.connection.OutPacket;
  */
 public interface GuildResultInfo {
 
-    GuildResultType getType();
+    GuildType getType();
 
     void encode(OutPacket outPacket);
 }

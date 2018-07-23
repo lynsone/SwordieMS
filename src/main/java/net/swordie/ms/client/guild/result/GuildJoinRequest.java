@@ -15,8 +15,8 @@ public class GuildJoinRequest implements GuildResultInfo {
     }
 
     @Override
-    public GuildResultType getType() {
-        return GuildResultType.JoinRequest;
+    public GuildType getType() {
+        return GuildType.Req_InviteGuild;
     }
 
     @Override

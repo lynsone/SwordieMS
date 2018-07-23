@@ -17,8 +17,8 @@ public class GuildJoinMsg implements GuildResultInfo {
     }
 
     @Override
-    public GuildResultType getType() {
-        return GuildResultType.JoinMsg;
+    public GuildType getType() {
+        return GuildType.Res_JoinGuild_Done;
     }
 
     @Override

@@ -7,17 +7,17 @@ import net.swordie.ms.connection.OutPacket;
  */
 public class GuildMsg implements GuildResultInfo {
 
-    public GuildResultType type;
+    public GuildType type;
 
     public GuildMsg() {
     }
 
-    public GuildMsg(GuildResultType type) {
+    public GuildMsg(GuildType type) {
         this.type = type;
     }
 
     @Override
-    public GuildResultType getType() {
+    public GuildType getType() {
         return type;
     }
 

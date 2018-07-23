@@ -20,8 +20,8 @@ public class GuildLeaveResult implements GuildResultInfo {
     }
 
     @Override
-    public GuildResultType getType() {
-        return expel ? GuildResultType.Expel : GuildResultType.Quit;
+    public GuildType getType() {
+        return expel ? GuildType.Res_KickGuild_Done : GuildType.Res_WithdrawGuild_Done;
     }
 
     @Override

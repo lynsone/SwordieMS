@@ -228,7 +228,8 @@ public class Guild {
     }
 
     public void broadcast(OutPacket outPacket, Char exceptChr) {
-        getOnlineMembers().stream().filter(gm -> !gm.getChr().equals(exceptChr)).forEach(gm -> gm.getChr().write(outPacket));
+        getOnlineMembers().stream().filter(gm -> gm.getChr() != null && !gm.getChr().equals(exceptChr))
+                .forEach(gm -> gm.getChr().write(outPacket));
     }
 
     public List<GuildRequestor> getRequestors() {

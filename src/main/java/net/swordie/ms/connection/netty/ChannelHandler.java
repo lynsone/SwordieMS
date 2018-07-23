@@ -41,6 +41,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
         if(c != null && c.getChr() != null) {
             c.getChr().logout();
+            c.getChr().setChangingChannel(false);
         } else {
             log.warn("[ChannelHandler] | Was not able to save character, data inconsistency may have occurred.");
         }
@@ -86,6 +87,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case WVS_CRASH_CALLBACK:
                     if(c != null && c.getAccount() != null) {
+                        c.getChr().setChangingChannel(false);
                         c.getChr().logout();
                     }
                     break;
@@ -542,6 +544,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case MONSTER_COLLECTION_COMPLETE_REWARD_REQ:
                     WorldHandler.handleMonsterCollectionCompleteRewardReq(chr, inPacket);
+                    break;
+                case GROUP_MESSAGE:
+                    WorldHandler.handleGroupMessage(chr, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);

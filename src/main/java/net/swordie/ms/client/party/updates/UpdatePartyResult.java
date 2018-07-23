@@ -12,6 +12,13 @@ public class UpdatePartyResult implements PartyResultInfo {
 
     public Party party;
 
+    public UpdatePartyResult() {
+    }
+
+    public UpdatePartyResult(Party party) {
+        this.party = party;
+    }
+
     @Override
     public PartyResultType getType() {
         return PartyResultType.UserUpdate;

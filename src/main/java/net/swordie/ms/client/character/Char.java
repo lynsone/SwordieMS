@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.LinkSkill;
@@ -37,6 +38,7 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
@@ -174,6 +176,8 @@ public class Char {
 	@Column(name = "fieldid")
 	@OrderColumn(name = "ord")
 	private int[] hyperrockfields = new int[13];
+
+	private int partyID = 0; // Just for DB purposes
 
 	@Transient
 	private CharacterPotentialMan potentialMan;
@@ -331,6 +335,8 @@ public class Char {
 	// TODO Move this to CharacterStat?
 	@Transient
 	private Map<BaseStat, Long> baseStats = new HashMap<>();
+	@Transient
+	private boolean changingChannel;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -2120,6 +2126,16 @@ public class Char {
 		if (getActiveFamiliar() != null) {
 			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
 		}
+		if (getParty() != null) {
+			Party party = getParty();
+			for (PartyMember pm : party.getOnlineMembers()) {
+				if (pm != null && pm.getChr() != null && pm.getChr().getField() == getField()) {
+					Char otherChar = pm.getChr();
+					otherChar.write(UserRemote.receiveHP(this));
+					write(UserRemote.receiveHP(otherChar));
+				}
+			}
+		}
 	}
 
 	/**
@@ -2486,7 +2502,7 @@ public class Char {
 		stats.put(Stat.hp, newHP);
 		write(WvsContext.statChanged(stats));
 		if (getParty() != null) {
-			getParty().broadcast(UserRemote.receiveHP(getId(), getHP(), getTotalStat(BaseStat.mhp)), this);
+			getParty().broadcast(UserRemote.receiveHP(this), this);
 		}
 	}
 
@@ -2894,6 +2910,12 @@ public class Char {
 	}
 
 	public void setParty(Party party) {
+		if (party != null) {
+			setPartyID(party.getId());
+		} else {
+			setPartyID(0);
+		}
+		setPartyID(party.getId());
 		this.party = party;
 	}
 
@@ -2912,7 +2934,9 @@ public class Char {
 		getAccount().setCurrentChr(null);
 		DatabaseManager.saveToDB(this);
 		DatabaseManager.saveToDB(getAccount());
-		getClient().getChannelInstance().removeChar(this);
+		if (!isChangingChannel()) {
+			getClient().getChannelInstance().removeChar(this);
+		}
 //		getClient().setChr(null);
 	}
 
@@ -3540,5 +3564,21 @@ public class Char {
 
 	public void setHyperRockFields(int[] hyperrockfields) {
 		this.hyperrockfields = hyperrockfields;
+	}
+
+	public boolean isChangingChannel() {
+		return changingChannel;
+	}
+
+	public void setChangingChannel(boolean changingChannel) {
+		this.changingChannel = changingChannel;
+	}
+
+	public int getPartyID() {
+		return partyID;
+	}
+
+	public void setPartyID(int partyID) {
+		this.partyID = partyID;
 	}
 }

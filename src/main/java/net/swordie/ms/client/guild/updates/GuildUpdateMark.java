@@ -3,7 +3,7 @@ package net.swordie.ms.client.guild.updates;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.result.GuildResultInfo;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.client.guild.result.GuildResultType;
+import net.swordie.ms.client.guild.result.GuildType;
 
 /**
  * Created on 3/22/2018.
@@ -17,8 +17,8 @@ public class GuildUpdateMark implements GuildResultInfo {
     }
 
     @Override
-    public GuildResultType getType() {
-        return GuildResultType.UpdateGuildMark;
+    public GuildType getType() {
+        return GuildType.Res_SetMark_Done;
     }
 
     @Override

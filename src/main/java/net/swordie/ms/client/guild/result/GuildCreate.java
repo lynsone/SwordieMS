@@ -18,8 +18,8 @@ public class GuildCreate implements GuildResultInfo {
     }
 
     @Override
-    public GuildResultType getType() {
-        return GuildResultType.Create;
+    public GuildType getType() {
+        return GuildType.Res_CreateNewGuild_Done;
     }
 
     @Override

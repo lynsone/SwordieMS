@@ -175,7 +175,7 @@ public abstract class Job {
 		c.write(WvsContext.statChanged(stats));
 		chr.getField().broadcastPacket(UserRemote.hit(chr, hitInfo));
 		if (chr.getParty() != null) {
-			chr.getParty().broadcast(UserRemote.receiveHP(chr.getId(), chr.getHP(), chr.getTotalStat(BaseStat.mhp)), chr);
+			chr.getParty().broadcast(UserRemote.receiveHP(chr));
 		}
 		if (curHP <= 0) {
 			// TODO Add more items for protecting exp and whatnot

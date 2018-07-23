@@ -25,7 +25,6 @@ import net.swordie.ms.client.friend.FriendType;
 import net.swordie.ms.client.friend.result.*;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.GuildRequestType;
 import net.swordie.ms.client.guild.result.*;
 import net.swordie.ms.client.guild.updates.GuildUpdate;
 import net.swordie.ms.client.guild.updates.GuildUpdateGradeNames;
@@ -50,6 +49,7 @@ import net.swordie.ms.client.party.request.PartyJoinRequestBlue;
 import net.swordie.ms.client.party.request.PartyRequestType;
 import net.swordie.ms.client.party.result.*;
 import net.swordie.ms.client.party.updates.UpdateMemberLoggedIn;
+import net.swordie.ms.client.party.updates.UpdatePartyResult;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.client.trunk.TrunkMsg;
 import net.swordie.ms.client.trunk.TrunkType;
@@ -128,7 +128,6 @@ public class WorldHandler {
         c.setChannel(channel);
         c.setWorldId((byte) worldId);
         c.setChannelInstance(Server.getInstance().getWorldById(worldId).getChannelById(channel));
-//        Char chr = Char.getFromDBById(charId);
         Char chr = info.getRight().getChr();
         if (chr == null || chr.getId() != charId) {
             chr = Char.getFromDBById(charId);
@@ -165,6 +164,11 @@ public class WorldHandler {
         c.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, (byte) 5, chr.getHyperRockFields()));
         if(chr.getQuestManager().hasQuestInProgress(7291)) { // damage skin update
             c.write(WvsContext.questRecordMessage(chr.getQuestManager().getQuests().get(7291)));
+        }
+        if (chr.getPartyID() != 0) {
+            Party party = c.getWorld().getPartybyId(chr.getPartyID());
+            chr.setParty(party);
+            chr.write(WvsContext.partyResult(new UpdatePartyResult(party)));
         }
     }
 
@@ -1477,8 +1481,9 @@ public class WorldHandler {
 
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        chr.logout();
+        chr.setChangingChannel(true);
         if (c.getAccount() != null) {
-            c.getChr().logout();
             DatabaseManager.saveToDB(c.getAccount());
         }
         DatabaseManager.saveToDB(chr);
@@ -2587,7 +2592,9 @@ public class WorldHandler {
                     pjr.joinerName = chr.getName();
                     for(Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
                         onChar.write(WvsContext.partyResult(pjr));
+                        chr.write(UserRemote.receiveHP(onChar));
                     }
+                    party.broadcast(UserRemote.receiveHP(chr));
                 } else {
                     chr.write(WvsContext.partyResult(new PartyMessageResult(PartyResultType.FullPartyMsg)));
                 }
@@ -2679,14 +2686,14 @@ public class WorldHandler {
     public static void handleGuildRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
-        GuildRequestType grt = GuildRequestType.getTypeByVal(type);
+        GuildType grt = GuildType.getTypeByVal(type);
         if(grt == null) {
             log.error(String.format("Unknown guild request %d", type));
             return;
         }
         Guild guild = chr.getGuild();
         switch(grt) {
-            case AcceptJoinRequest:
+            case Req_FindGuildByCid: //AcceptJoinRequest:
                 int guildID = inPacket.decodeInt();
                 guild = chr.getClient().getWorld().getGuildByID(guildID);
                 if(guild != null && chr.getGuild() == null) {
@@ -2694,10 +2701,10 @@ public class WorldHandler {
                     guild.broadcast(WvsContext.guildResult(
                             new GuildJoinMsg(guild.getId(), guild.getMemberByID(chr.getId()))));
                 } else {
-                    chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.AlreadyJoinedGuildMsg)));
+                    chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Res_CreateNewGuild_AlreadyJoined)));
                 }
                 break;
-            case Create:
+            case Req_CheckGuildName:
                 String name = inPacket.decodeString();
                 List<Guild> guilds;
                 try(Session s = Server.getInstance().getNewDatabaseSession()) {
@@ -2717,18 +2724,24 @@ public class WorldHandler {
                     chr.setGuild(guild);
                     chr.write(WvsContext.guildResult(new GuildCreate(guild)));
                 } else {
-                    chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.GuildNameInUseMsg)));
+                    chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Res_CheckGuildName_AlreadyUsed)));
                 }
                 break;
-            case JoinRequest:
+            case Req_InviteGuild:
                 Char invited = chr.getClient().getChannelInstance().getCharByName(inPacket.decodeString());
                 if(invited == null) {
-                    chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.CharacterCannotBeFoundInChannelMsg)));
+                    chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Res_JoinGuild_UnknownUser)));
                 } else {
                     invited.write(WvsContext.guildResult(new GuildJoinRequest(chr)));
                 }
                 break;
-            case Expel:
+            case Req_WithdrawGuild:
+                name = chr.getName();
+                guild.broadcast(WvsContext.guildResult(new GuildLeaveResult(guild.getId(), chr.getId(), name, false)));
+                guild.removeMember(chr);
+                chr.setGuild(null);
+                break;
+            case Req_KickGuild:
                 int expelledID = inPacket.decodeInt();
                 String expelledName = inPacket.decodeString();
                 GuildMember gm = guild.getMemberByID(expelledID);
@@ -2742,7 +2755,7 @@ public class WorldHandler {
                     guild.removeMember(gm);
                 }
                 break;
-            case SetMark:
+            case Req_SetMark:
                 guild.setMarkBg(inPacket.decodeShort());
                 guild.setMarkBgColor(inPacket.decodeByte());
                 guild.setMark(inPacket.decodeShort());
@@ -2750,7 +2763,7 @@ public class WorldHandler {
                 chr.write(WvsContext.guildResult(new GuildUpdateMark(guild))); // This doesn't actually update the emblem client side
                 guild.broadcast(WvsContext.guildResult(new GuildUpdate(guild)));
                 break;
-            case SetGuildGrades:
+            case Req_SetGradeName:
                 String[] newNames = new String[guild.getGradeNames().size()];
                 for (int i = 0; i < newNames.length; i++) {
                     newNames[i] = inPacket.decodeString();
@@ -2758,7 +2771,7 @@ public class WorldHandler {
                 guild.setGradeNames(newNames);
                 guild.broadcast(WvsContext.guildResult(new GuildUpdateGradeNames(guild.getId(), newNames)));
                 break;
-            case SetMemberGrade:
+            case Req_SetMemberGrade:
                 int id = inPacket.decodeInt();
                 byte grade = inPacket.decodeByte();
                 gm = guild.getMemberByID(id);
@@ -2772,6 +2785,15 @@ public class WorldHandler {
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
         }
+    }
+
+    public static void handleGuildBbs(Char chr, InPacket inPacket) {
+        byte idk1 = inPacket.decodeByte();
+        byte idk2 = inPacket.decodeByte();
+        byte idk3 = inPacket.decodeByte();
+        String subject = inPacket.decodeString();
+        String content = inPacket.decodeString();
+        int icon = inPacket.decodeInt();
     }
 
     public static void handleUserCreateAuraByGrenade(Client c, InPacket inPacket) {
@@ -4516,5 +4538,15 @@ public class WorldHandler {
         int session = inPacket.decodeInt();
         int group = inPacket.decodeInt();
         int exploreIndex = inPacket.decodeInt();
+    }
+
+    public static void handleGroupMessage(Char chr, InPacket inPacket) {
+        byte idk1 = inPacket.decodeByte(); // one of these is type (party, guild, etc...)
+        byte idk2 = inPacket.decodeByte();
+        int idk3 = inPacket.decodeInt(); // party id?
+        String msg = inPacket.decodeString();
+        if (chr.getParty() != null) {
+            chr.getParty().broadcast(CField.groupMessage(GroupMessageType.Party, chr.getName(), msg), chr);
+        }
     }
 }
