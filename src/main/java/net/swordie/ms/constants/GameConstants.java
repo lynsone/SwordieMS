@@ -99,20 +99,16 @@ public class GameConstants {
     public static final int DOJO_DUMMY_DURATION = 10; // Dummy will stay alive for [] minutes, after which it will be removed.
     public static final int DOJO_SPAWM_BOSS_DELAY = 3; // Spawn delay, in seconds, per boss on the Dojo Floors
 
+    // Monster Collection
+    public static final int MOBS_PER_PAGE = 25;
+    public static final int MOBS_PER_GROUP = 5;
+
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
-
-    // Monster Collection
-    private static List<MonsterCollectionRegion> monsterCollectionInfo;
 
     static {
         initCharExp();
         initEnchantRates();
-        initMonsterCollectionInfo();
-    }
-
-    private static void initMonsterCollectionInfo() {
-        // TODO fill sql
     }
 
     private static void initCharExp() {

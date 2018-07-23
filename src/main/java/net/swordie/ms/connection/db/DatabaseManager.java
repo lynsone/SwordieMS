@@ -28,6 +28,10 @@ import net.swordie.ms.client.guild.GuildRequestor;
 import net.swordie.ms.client.guild.GuildSkill;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.life.Familiar;
+import net.swordie.ms.loaders.MonsterCollectionData;
+import net.swordie.ms.loaders.containerclasses.MonsterCollectionGroupRewardInfo;
+import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
+import net.swordie.ms.loaders.containerclasses.MonsterCollectionSessionRewardInfo;
 import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 import net.swordie.ms.world.shop.cashshop.CashShopCategory;
 import net.swordie.ms.world.shop.cashshop.CashShopItem;
@@ -95,7 +99,12 @@ public class DatabaseManager {
                 ChosenSkill.class,
                 CashItemInfo.class,
                 CashShopItem.class,
-                CashShopCategory.class
+                CashShopCategory.class,
+                MonsterCollectionSessionRewardInfo.class,
+                MonsterCollectionGroupRewardInfo.class,
+                MonsterCollectionMobInfo.class,
+                MonsterCollection.class,
+                MonsterCollectionReward.class,
 
         };
         for(Class clazz : dbClasses) {

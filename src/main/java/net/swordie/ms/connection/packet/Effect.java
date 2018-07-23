@@ -90,6 +90,15 @@ public class Effect {
             case Resist:
             case LevelUp:
                 break;
+            case EffectUOL:
+                outPacket.encodeString(getString());
+                outPacket.encodeByte(getArg1());
+                outPacket.encodeInt(getArg2());
+                outPacket.encodeInt(getArg3());
+                if (getArg3() == 2) { // item
+                    outPacket.encodeInt(getArg4());
+                }
+                break;
             case LeftMonsterNumber:
                 outPacket.encodeInt(getArg1()); // Number on Arrow
                 break;
@@ -357,7 +366,20 @@ public class Effect {
         return effect;
     }
 
+    public static Effect effectFromWZ(String effectPath, boolean flip, int delay, int type, int itemID) {
+        Effect effect = new Effect();
 
+        effect.setUserEffectType(EffectUOL);
+        effect.setString(effectPath);
+        effect.setArg1(flip ? 1 : 0);
+        effect.setArg2(delay);
+        effect.setArg3(type);
+        if (type == 2) {
+            effect.setArg4(itemID);
+        }
+
+        return effect;
+    }
 
     public void setUserEffectType(UserEffectType userEffectType) {
         this.userEffectType = userEffectType;

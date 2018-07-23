@@ -10,6 +10,11 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.guild.Guild;
+import net.swordie.ms.client.guild.GuildMember;
+import net.swordie.ms.client.guild.result.GuildJoinMsg;
+import net.swordie.ms.client.guild.updates.GuildUpdate;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.client.jobs.nova.Kaiser;
@@ -27,6 +32,9 @@ import net.swordie.ms.Server;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -45,32 +53,26 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            OutPacket outPacket = new OutPacket(OutHeader.SET_CASH_SHOP.getValue());
+            OutPacket outPacket = new OutPacket(OutHeader.MESSAGE.getValue());
 
-            chr.encode(outPacket, DBChar.All);
-            log.debug(outPacket);
-            outPacket.encodeByte(1);
-            outPacket.encodeInt(0);
-            outPacket.encodeShort(0);
-            outPacket.encodeInt(0);
+            outPacket.encodeByte(UserEffectType.SkillUse.getVal());
 
-            //
-            outPacket.encodeArr(new byte[1080]); // --v
+            outPacket.encodeInt(100402);
 
-//  outPacket.encodeArr(Util.getByteArrayByString("73 00 69 00 73 00 2E 00 20 00 54 00 68 00 65 00 20 00 66 00 6F 00 6C 00 6C 00 6F 00 77 00 69 00 6E 00 67 00 20 00 61 00 63 00 74 00 69 00 6F 00 6E 00 73 00 20 00 63 00 61 00 6E 00 20 00 62 00 65 00 20 00 64 00 6F 00 6E 00 65 00 20 00 77 00 68 00 69 00 6C 00 65 00 20 00 68 00 6F 00 6C 00 64 00 69 00 6E 00 67 00 2E 00 23 00 63 00 5C 00 6E 00 5C 00 63 00 5C 00 6E 00 5C 00 63 00 5B 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 53 00 6D 00 61 00 73 00 68 00 5D 00 3A 00 23 00 20 00 55 00 73 00 69 00 6E 00 67 00 20 00 5B 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 47 00 72 00 61 00 62 00 5D 00 20 00 77 00 69 00 74 00 68 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 6C 00 69 00 66 00 74 00 65 00 64 00 20 00 77 00 69 00 6C 00 6C 00 20 00 74 00 68 00 72 00 6F 00 77 00 20 00 74 00 68 00 61 00 74 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 61 00 74 00 20 00 65 00 6E 00 65 00 6D 00 69 00 65 00 73 00 20 00 69 00 6E 00 20 00 66 00 72 00 6F 00 6E 00 74 00 20 00 6F 00 66 00 20 00 79 00 6F 00 75 00 2C 00 20 00 64 00 65 00 61 00 6C 00 69 00 6E 00 67 00 20 00 64 00 61 00 6D 00 61 00 67 00 65 00 2E 00 5C 00 6E 00 5C 00 63 00 5C 00 6E 00 5C 00 63 00 23 00 63 00 5B 00 55 00 6C 00 74 00 69 00 6D 00 61 00 74 00 65 00 20 00 2D 00 20 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 53 00 68 00 6F 00 74 00 5D 00 3A 00 23 00 20 00 20 00 50 00 72 00 65 00 73 00 73 00 69 00 6E 00 67 00 20 00 74 00 68 00 65 00 20 00 75 00 70 00 20 00 6B 00 65 00 79 00 20 00 61 00 6E 00 64 00 20 00 5B 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 47 00 72 00 61 00 62 00 5D 00 20 00 77 00 69 00 74 00 68 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 6C 00 69 00 66 00 74 00 65 00 64 00 20 00 77 00 69 00 6C 00 6C 00 20 00 74 00 68 00 72 00 6F 00 77 00 20 00 74 00 68 00 65 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 69 00 6E 00 20 00 74 00 68 00 65 00 20 00 64 00 69 00 72 00 65 00 63 00 74 00 69 00 6F 00 6E 00 20 00 69 00 74 00 20 00 69 00 73 00 20 00 66 00 61 00 63 00 69 00 6E 00 67 00 2E 00 00 00 70 00 4A 00 01 4B 18 48 9C 10 3A 02 00 00 45 00 6E 00 65 00 6D 00 69 00 65 00 73 00 20 00 48 00 69 00 74 00 3A 00 20 00 23 00 6D 00 6F 00 62 00 43 00 6F 00 75 00 6E 00 74 00 2C 00 20 00 44 00 61 00 6D 00 61 00 67 00 65 00 3A 00 20 00 23 00 64 00 61 00 6D 00 61 00 67 00 65 00 25 00 2C 00 20 00 4E 00 75 00 6D 00 62 00 65 00 72 00 20 00 6F 00 66 00 20 00 41 00 74 00 74 00 61 00 63 00 6B 00 73 00 3A 00 20 00 23 00 61 00 74 00 74 00 61 00 63 00 6B 00 43 00 6F 00 75 00 6E 00 74 00 2C 00 20 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 50 00 6F 00 69 00 6E 00 74 00 20 00 43 00 6F 00 73 00 74 00 20 00 6F 00 6E 00 20 00 46 00 69 00 72 00 73 00 74 00 20 00 55 00 73 00 65 00 3A 00 20 00 23 00 77 00 2E 00 20 00 23 00 63 00 4F 00 6E 00 2F 00 4F 00 66 00 66 00 20 00 73 00 6B 00 69 00 6C 00 6C 00 23 00 23 00 5C 00 6E 00 43 00 6F 00 6F 00 6C 00 64 00 6F 00 77 00 6E 00 3A 00 20 00 23 00 63 00 6F 00 6F 00 6C 00 74 00 69 00 6D 00 65 00 20 00 73 00 65 00 63 00 23 00 5C 00 6E 00 5C 00 63 00 23 00 63 00 5B 00 55 00 6C 00 74 00 69 00 6D 00 61 00 74 00 65 00 20 00 2D 00 20 00 4D 00 65 00 74 00 61 00 6C 00 20 00 50 00 72 00 65 00 73 00 73 00 5D 00 20 00 44 00 61 00 6D 00 61 00 67 00 65 00 3A 00"));
-            outPacket.encodeLong(0);
-            outPacket.encodeByte(1);
-            outPacket.encodeInt(0); // 0x96
-            outPacket.encodeByte(1);
-            outPacket.encodeByte(0);
-            outPacket.encodeByte(0);
-//            outPacket.encodeArr(Util.getByteArrayByString("40 64 2B 70 84 7A D3 01"));
-            outPacket.encodeLong(0);
-            outPacket.encodeShort(0);
-            outPacket.encodeInt(0); // 0x1e
-            outPacket.encodeShort(0);
+//            outPacket.encodeInt(100000);
+            // eX = enabled
+            // 1 mob = 0e0?
+            // an octet per mob. Probably 3 different properties, but can't figure those out atm
+            // <sessionid>=aaab bbcc cddd <repeat>
+//          // example: "0=892892892892892892889289289289289289289289289289";
+             outPacket.encodeString("2=8928928928928928928fffffffffffffffffffffffffffff");
+//             outPacket.encodeString("0=e00000000000000038000000000000000000000000000000");
+//             outPacket.encodeString("2=89289289 28928928 928fffff ffffffff ffffffff ffffffff");
+//             outPacket.encodeString("2=8928928928928920");
+//            chr.write(outPacket);
 
-            chr.write(outPacket);
+
+            chr.write(User.effect(Effect.effectFromWZ("Effect/BasicEff.img/monsterCollectionGet", true, 0, 4, 0)));
         }
     }
 

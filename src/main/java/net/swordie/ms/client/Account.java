@@ -1,6 +1,7 @@
 package net.swordie.ms.client;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
@@ -45,9 +46,12 @@ public class Account {
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
+    @JoinColumn(name = "monsterCollectionID")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private MonsterCollection monsterCollection;
     // no eager -> sometimes get a "resultset closed" when fetching friends/damage skins
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "ownerAccID")
+    @JoinColumn(name = "owneraccid")
     private Set<Friend> friends;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
@@ -86,8 +90,9 @@ public class Account {
         this.censoredNxLoginID = censoredNxLoginID;
         this.characterSlots = characterSlots;
         this.creationDate = creationDate;
-        friends = new HashSet<>();
-        trunk = new Trunk((byte) 20);
+        this.monsterCollection = new MonsterCollection();
+        this.friends = new HashSet<>();
+        this.trunk = new Trunk((byte) 20);
         setManager();
     }
 
@@ -454,5 +459,16 @@ public class Account {
 
     public void deductNXPrepaid(int prepaid) {
         addNXPrepaid(-prepaid);
+    }
+
+    public MonsterCollection getMonsterCollection() {
+        if (monsterCollection == null) {
+            monsterCollection = new MonsterCollection();
+        }
+        return monsterCollection;
+    }
+
+    public void setMonsterCollection(MonsterCollection monsterCollection) {
+        this.monsterCollection = monsterCollection;
     }
 }

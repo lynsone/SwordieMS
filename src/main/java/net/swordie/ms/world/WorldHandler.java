@@ -170,6 +170,7 @@ public class WorldHandler {
             chr.setParty(party);
             chr.write(WvsContext.partyResult(new UpdatePartyResult(party)));
         }
+        chr.getAccount().getMonsterCollection().init(chr);
     }
 
     public static void handleMove(Client c, InPacket inPacket) {

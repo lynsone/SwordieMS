@@ -96,6 +96,7 @@ public class Server extends Properties {
 		initCashShop();
 		log.info("Finished loading Cash Shop in " + (System.currentTimeMillis() - startNow) + "ms");
 
+		MonsterCollectionData.loadFromSQL();
 
 		for (World world : getWorlds()) {
 			for (Channel channel : world.getChannels()) {

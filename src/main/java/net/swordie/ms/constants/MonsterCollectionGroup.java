@@ -1,36 +1,31 @@
 package net.swordie.ms.constants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Sjonnie
  * Created on 7/22/2018.
  */
 public class MonsterCollectionGroup {
-    private List<Integer> mobs = new ArrayList<>();
-    private int reward;
+    private Map<Integer, Integer> mobs = new HashMap<>();
     private boolean rewardClaimed;
+    private int reward;
+    private int rewardQuantity;
 
 
     public MonsterCollectionGroup() {
     }
 
-    public MonsterCollectionGroup(Integer... mobs) {
-        this.mobs.addAll(Arrays.asList(mobs));
-    }
-
-    public List<Integer> getMobs() {
+    public Map<Integer, Integer> getMobs() {
         return mobs;
     }
 
-    public void setMobs(List<Integer> mobs) {
+    public void setMobs(Map<Integer, Integer> mobs) {
         this.mobs = mobs;
     }
 
-    public void addMob(int mob) {
-        getMobs().add(mob);
+    public void addMob(int pos, int mob) {
+        getMobs().put(pos, mob);
     }
 
     public int getReward() {
@@ -47,5 +42,21 @@ public class MonsterCollectionGroup {
 
     public void setRewardClaimed(boolean rewardClaimed) {
         this.rewardClaimed = rewardClaimed;
+    }
+
+    public void setRewardQuantity(int rewardQuantity) {
+        this.rewardQuantity = rewardQuantity;
+    }
+
+    public int getRewardQuantity() {
+        return rewardQuantity;
+    }
+
+    public boolean hasMob(int templateID) {
+        return getMobs().values().contains(templateID);
+    }
+
+    public boolean hasMobAtPosition(int pos) {
+        return getMobs().containsKey(pos);
     }
 }

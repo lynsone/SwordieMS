@@ -1162,6 +1162,7 @@ public class Mob extends Life {
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
+            chr.getAccount().getMonsterCollection().addMobAndUpdateClient(getTemplateId(), chr);
         }
         getDamageDone().clear();
         if (field.canSpawnElite() && getEliteType() == 0 && !isNotRespawnable() &&

@@ -2915,7 +2915,6 @@ public class Char {
 		} else {
 			setPartyID(0);
 		}
-		setPartyID(party.getId());
 		this.party = party;
 	}
 

@@ -2,6 +2,9 @@ drop table if exists damageskinsavedatas;
 drop table if exists friends;
 drop table if exists linkskills;
 drop table if exists accounts;
+drop table if exists monster_collection_rewards;
+drop table if exists monster_collection_mobs;
+drop table if exists monster_collections;
 drop table if exists macroskills;
 drop table if exists macros;
 drop table if exists familiars;
@@ -675,6 +678,26 @@ create table macroskills (
     foreign key (macroid) references macros(id) on delete cascade
 );
 
+create table monster_collections (
+	id int not null auto_increment,
+    primary key (id)
+);
+
+create table monster_collection_mobs (
+	id int not null auto_increment,
+    collectionid int,
+    mobid int,
+    primary key (id)
+);
+
+create table monster_collection_rewards (
+	region int,
+    session int,
+    groupid int,
+    collectionid int,
+    primary key (region, session, groupid)
+);
+
 create table accounts (
 	id int not null auto_increment,
 	username varchar(255),
@@ -701,9 +724,12 @@ create table accounts (
     nxCredit int default 0,
     maplePoints int default 0,
     nxPrepaid int default 0,
+    monstercollectionid int,
 	primary key (id),
-    foreign key (trunkid) references trunks(id)
+    foreign key (trunkid) references trunks(id),
+    foreign key (monstercollectionid) references monster_collections(id)
 );
+
 
 create table linkskills (
 	id bigint not null auto_increment,
