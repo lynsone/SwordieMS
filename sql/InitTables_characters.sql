@@ -511,6 +511,7 @@ create table characters (
     guild int,
     rewardPoints int,
     monsterbook int,
+    partyid int,
 	primary key (id),
     foreign key (avatardata) references avatardata(id),
     foreign key (equippedinventory) references inventories(id),
@@ -742,5 +743,6 @@ create table friends (
 
 
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '0', '111111', '40', '500000');
+insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '0', '111111', '40', '500000');
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '0', '111111', '40');
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '0', '111111', '40');
