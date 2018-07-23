@@ -5,10 +5,16 @@ def init():
 		map = 930100500
 		portal = 0
 
+
+	# Monster Park
+	elif fieldID / 1000000 == 952 or fieldID / 1000000 == 953 or fieldID / 1000000 == 954:
+		map = fieldID+100
+		portal = 0
+
 	# To Crimson Queen
 	elif fieldID == 105200300:
 		# if sm.mobsPresentInField():
-		# 	sm.chat("Elimate all monster before proceeding.")
+		# 	sm.chat("Eliminate all monster before proceeding.")
 		# else:
 			map = 105200310
 			portal = 0
@@ -16,7 +22,7 @@ def init():
 	# To Pierre
 	elif fieldID == 105200200:
 		# if sm.mobsPresentInField():
-		# 	sm.chat("Elimate all monster before proceeding.")
+		# 	sm.chat("Eliminate all monster before proceeding.")
 		# else:
 		map = 105200210
 		portal = 0
@@ -24,7 +30,7 @@ def init():
 	# To VonBon
 	elif fieldID == 105200100:
 		# if sm.mobsPresentInField():
-		# 	sm.chat("Elimate all monster before proceeding.")
+		# 	sm.chat("Eliminate all monster before proceeding.")
 		# else:
 		map = 105200110
 		portal = 0
@@ -32,7 +38,7 @@ def init():
 	# To VonBon
 	elif fieldID == 105200400:
 		# if sm.mobsPresentInField():
-		# 	sm.chat("Elimate all monster before proceeding.")
+		# 	sm.chat("Eliminate all monster before proceeding.")
 		# else:
 		map = 105200410
 		portal = 0
@@ -41,7 +47,7 @@ def init():
 		sm.chat("(Portal) This script (next00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
 		map = sm.getChr().getField().getReturnMap()
 		portal = 0
+
 	if warp:
 		sm.warp(map, portal)
 		sm.dispose()
-

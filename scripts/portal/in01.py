@@ -35,8 +35,8 @@ elif sm.getFieldID() == 951000000:
     sm.setSpeakerID(9071004)
 
     def init():
-        if sm.getParty() is None or sm.getPartySize() > 1:
-            sm.sendSayOkay("You must be in a party of 1 to enter Monster Park.")
+        if not sm.getParty() is None:
+            sm.sendSayOkay("Please leave your party to enter Monster Park.")
             sm.dispose()
         else:
             if sm.getChr().getLevel() < minLv or sm.getChr().getLevel() > maxLv:
@@ -58,12 +58,12 @@ elif sm.getFieldID() == 951000000:
             selection = answer
             sm.sendAskYesNo("#eToday is #b[Day]#k.\r\n\r\n"
                             "Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
-                            "Clearing the dungeion will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
+                            "Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
                             "Would you like to enter the dungeon?")
 
         elif status == 1:
             if response == 1:
-                sm.warpPartyIn(maps[selection][1])
+                sm.warpInstanceIn(maps[selection][1])
             sm.dispose()
 
 
