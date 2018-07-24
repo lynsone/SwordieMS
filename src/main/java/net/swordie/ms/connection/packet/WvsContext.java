@@ -906,4 +906,15 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket weatherEffectNotice(WeatherEffNoticeType type, String text, int duration) {
+        OutPacket outPacket = new OutPacket(OutHeader.WEATHER_EFFECT_NOTICE);
+
+        outPacket.encodeString(text); // Text
+        outPacket.encodeInt(type.getVal()); // Weather Notice Type
+        outPacket.encodeInt(duration); // Duration in ms
+        outPacket.encodeByte(1); // Forced Notice
+
+        return outPacket;
+    }
 }

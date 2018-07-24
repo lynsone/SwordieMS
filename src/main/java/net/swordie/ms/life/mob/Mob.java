@@ -8,12 +8,11 @@ import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyDamageInfo;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.MobPool;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.EliteState;
-import net.swordie.ms.enums.TextEffectType;
+import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
@@ -1192,9 +1191,7 @@ public class Mob extends Life {
             } else {
                 msg = "The dark energy is still here. It's making the place quite grim.";
             }
-            Effect effect = Effect.createFieldTextEffect(msg, 75, 2000, 4,
-                    new Position(0, -200), 1, 4, TextEffectType.BlackFadedBrush, 0, 0);
-            getField().broadcastPacket(User.effect(effect));
+            getField().broadcastPacket(WvsContext.weatherEffectNotice(WeatherEffNoticeType.EliteBoss, msg, 8000)); // 8 seconds
         } else if (getEliteType() == 3) {
             field.broadcastPacket(CField.eliteState(EliteState.NORMAL, true, null, null, null));
             field.setEliteState(EliteState.NORMAL);
