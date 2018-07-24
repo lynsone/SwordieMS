@@ -5,6 +5,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
@@ -46,6 +47,9 @@ public class Item implements Serializable {
     protected int quantity;
     private String owner = "";
 
+    public boolean isTradable() {
+        return !ItemData.getItemInfoByID(getItemId()).isTradeBlock();
+    }
 
     public enum Type {
         EQUIP(1),

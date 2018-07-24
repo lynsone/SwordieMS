@@ -2,6 +2,8 @@ package net.swordie.ms.world.field;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.items.Equip;
+import net.swordie.ms.client.character.items.EquipAttribute;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.SkillStat;
@@ -11,10 +13,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.enums.DropLeaveType;
-import net.swordie.ms.enums.EliteState;
-import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.TextEffectType;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Life;
@@ -702,13 +701,21 @@ public class Field {
      * @param posTo   The Position where the drop lands.
      */
     public void drop(Drop drop, Position posFrom, Position posTo) {
-        addLife(drop);
+        Item item = drop.getItem();
+        boolean isTradable = item != null && item.isTradable();
         drop.setPosition(posTo);
-        getLifeSchedules().put(drop,
-                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
-                        GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
+        if (isTradable) {
+            addLife(drop);
+            getLifeSchedules().put(drop,
+                    EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
+                            GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
+        } else {
+            drop.setObjectId(getNewObjectID()); // just so the client sees the drop
+        }
         // Check for collision items such as exp orbs from combo kills
-        if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
+        if (!isTradable) {
+            broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FADE_AWAY));
+        } else if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
         } else {
             broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));

@@ -1,5 +1,11 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.MonsterCollection;
+import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.MonsterCollectionData;
+
 import java.util.*;
 
 /**

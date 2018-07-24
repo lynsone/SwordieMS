@@ -3,7 +3,9 @@ package net.swordie.ms.client.character;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.constants.MonsterCollectionGroup;
 import net.swordie.ms.constants.MonsterCollectionRegion;
+import net.swordie.ms.constants.MonsterCollectionSession;
 import net.swordie.ms.loaders.MonsterCollectionData;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
 
@@ -110,5 +112,35 @@ public class MonsterCollection {
 
     public void setMonsterCollectionRewards(Set<MonsterCollectionReward> monsterCollectionRewards) {
         this.monsterCollectionRewards = monsterCollectionRewards;
+    }
+
+    public MonsterCollectionRegion getRegion(int region) {
+        return collection.getOrDefault(region, null);
+    }
+
+    public MonsterCollectionSession getSession(int region, int session) {
+        if (getRegion(region) != null) {
+            return getRegion(region).getMonsterCollectionSessions().getOrDefault(session, null);
+        }
+        return null;
+    }
+
+    public MonsterCollectionGroup getGroup(int region, int session, int group) {
+        if (getSession(region, session) != null) {
+            return getSession(session, region).getMonsterCollectionGroups().getOrDefault(group, null);
+        }
+        return null;
+    }
+
+    public boolean isComplete(int region, int session, int groupID) {
+        MonsterCollectionGroup group = getGroup(region, session, groupID);
+        if (groupID == -1) {
+            boolean complete = true;
+            for (Map.Entry<Integer, MonsterCollectionGroup> entry : getSession(region, session).getMonsterCollectionGroups().entrySet()) {
+                complete &= isComplete(region, session, entry.getKey());
+            }
+            return complete;
+        }
+        return group != null && group.getMobs().size() >= MonsterCollectionData.getRequiredMobs(region, session, groupID);
     }
 }

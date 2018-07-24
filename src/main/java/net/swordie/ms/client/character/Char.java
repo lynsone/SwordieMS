@@ -2400,6 +2400,13 @@ public class Char {
 				dispose();
 				return true;
 			} else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
+				if (item instanceof Equip) {
+					Equip equip = (Equip) item;
+					if (equip.hasAttribute(EquipAttribute.UNTRADABLE_AFTER_TRANSACTION)) {
+						equip.removeAttribute(EquipAttribute.UNTRADABLE_AFTER_TRANSACTION);
+						equip.addAttribute(EquipAttribute.UNTRADABLE);
+					}
+				}
 				addItemToInventory(item);
 				write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
 				return true;

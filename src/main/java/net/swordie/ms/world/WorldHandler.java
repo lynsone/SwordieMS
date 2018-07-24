@@ -58,10 +58,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.PsychicLock;
@@ -4534,11 +4531,27 @@ public class WorldHandler {
     }
 
     public static void handleMonsterCollectionCompleteRewardReq(Char chr, InPacket inPacket) {
-        int reqType = inPacket.decodeInt();
+        int reqType = inPacket.decodeInt(); // 0 = group
         int region = inPacket.decodeInt();
         int session = inPacket.decodeInt();
         int group = inPacket.decodeInt();
         int exploreIndex = inPacket.decodeInt();
+        MonsterCollection mc = chr.getAccount().getMonsterCollection();
+        if (reqType == 0) { // group
+            MonsterCollectionGroup mcs = mc.getGroup(region, session, group);
+            if (!mcs.isRewardClaimed() && mc.isComplete(region, session, group)) {
+                Tuple<Integer, Integer> rewardInfo = MonsterCollectionData.getReward(region, session, group);
+                Item item = ItemData.getItemDeepCopy(rewardInfo.getLeft());
+                item.setQuantity(rewardInfo.getRight());
+                chr.addItemToInventory(item);
+                mcs.setRewardClaimed(true);
+                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
+            } else if (mcs.isRewardClaimed()){
+                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.AlreadyClaimedReward, null, 0));
+            } else {
+                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CompleteCollectionBeforeClaim, null, 0));
+            }
+        }
     }
 
     public static void handleGroupMessage(Char chr, InPacket inPacket) {

@@ -77,7 +77,7 @@ public class Server extends Properties {
 
 		long startNow = System.currentTimeMillis();
 		DatabaseManager.init();
-		log.info("Finished loading Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
+		log.info("Loaded Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
 
 		try {
 			checkAndCreateDat();
@@ -94,7 +94,7 @@ public class Server extends Properties {
 		worldList.add(new World(1, "Je Moeder", 3));
 		startNow = System.currentTimeMillis();
 		initCashShop();
-		log.info("Finished loading Cash Shop in " + (System.currentTimeMillis() - startNow) + "ms");
+		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startNow) + "ms");
 
 		MonsterCollectionData.loadFromSQL();
 

@@ -7,7 +7,7 @@ public enum DropEnterType {
     DEFAULT(0),
     FLOATING(1),
     NO_ANIMATION(2), // ?
-    UNK(3),
+    FADE_AWAY(3),
     ;
 
     private byte val;

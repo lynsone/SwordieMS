@@ -1,11 +1,15 @@
 package net.swordie.ms.loaders;
 
+import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.constants.MonsterCollectionGroup;
 import net.swordie.ms.constants.MonsterCollectionRegion;
+import net.swordie.ms.constants.MonsterCollectionSession;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionGroupRewardInfo;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionSessionRewardInfo;
 import net.swordie.ms.util.container.Triple;
+import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -43,7 +47,7 @@ public class MonsterCollectionData {
             monsterCollectionInfo.get(mcsri.getRegion()).getMonsterCollectionSessions().get(mcsri.getSession())
                     .setReward(mcsri.getRewardID());
             monsterCollectionInfo.get(mcsri.getRegion()).getMonsterCollectionSessions().get(mcsri.getSession())
-                    .setRewardQuantity(mcsri.getRewardID());
+                    .setRewardQuantity(mcsri.getQuantity());
         }
         for (MonsterCollectionGroupRewardInfo mcgri : groupRewardInfos) {
             monsterCollectionInfo.get(mcgri.getRegion()).getMonsterCollectionSessions().get(mcgri.getSession())
@@ -51,7 +55,7 @@ public class MonsterCollectionData {
                     .setReward(mcgri.getRewardID());
             monsterCollectionInfo.get(mcgri.getRegion()).getMonsterCollectionSessions().get(mcgri.getSession())
                     .getMonsterCollectionGroups().get(mcgri.getGroupID())
-                    .setRewardQuantity(mcgri.getRewardID());
+                    .setRewardQuantity(mcgri.getQuantity());
         }
         log.info("Loaded MonsterCollectionData in " + (System.currentTimeMillis() - start) + "ms.");
     }
@@ -70,5 +74,27 @@ public class MonsterCollectionData {
             return null;
         }
         return new MonsterCollectionMobInfo(templateID, info.getLeft(), info.getMiddle(), info.getRight());
+    }
+
+    public static int getRequiredMobs(int region, int session, int group) {
+        return monsterCollectionInfo.get(region).getMonsterCollectionSessions().get(session)
+                .getMonsterCollectionGroups().get(group).getMobs().size();
+    }
+
+    private static MonsterCollectionSession getSession(int region, int session) {
+        return monsterCollectionInfo.get(region).getMonsterCollectionSessions().get(session);
+    }
+
+    private static MonsterCollectionGroup getGroup(int region, int session, int group) {
+        return getSession(region, session).getMonsterCollectionGroups().get(group);
+    }
+
+    public static Tuple<Integer, Integer> getReward(int region, int session, int group) {
+        if (group == -1) {
+            MonsterCollectionSession mcs = getSession(region, session);
+            return new Tuple<>(mcs.getReward(), mcs.getRewardQuantity());
+        }
+        MonsterCollectionGroup mcg = getGroup(region, session, group);
+        return new Tuple<>(mcg.getReward(), mcg.getRewardQuantity());
     }
 }
