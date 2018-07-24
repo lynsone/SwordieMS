@@ -19188,3 +19188,193 @@
         tokenprice 50;
     }
 }
+9031007{
+    heart_s_series{
+        loc 0;
+        tabindex 1;
+        id 1672034;
+        price 1000000;
+    }
+    heart_i_series{
+        loc 1;
+        tabindex 1;
+        id 1672035;
+        price 1000000;
+    }
+    heart_d_series{
+        loc 2;
+        tabindex 1;
+        id 1672036;
+        price 1000000;
+    }
+    heart_l_series{
+        loc 3;
+        tabindex 1;
+        id 1672037;
+        price 1000000;
+    }
+    heart_g_series{
+        loc 4;
+        tabindex 1;
+        id 1672038;
+        price 1000000;
+    }
+    imp_disease_cure{
+        loc 5;
+        tabindex 1;
+        id 4340000;
+        price 1000;
+    }
+    basic_mold{
+        loc 6;
+        tabindex 1;
+        id 4024004;
+        price 100;
+    }
+    int_mold{
+        loc 7;
+        tabindex 1;
+        id 4024005;
+        price 300;
+    }
+    adv_mold{
+        loc 8;
+        tabindex 1;
+        id 4024006;
+        price 500;
+    }
+    sup_mold{
+        loc 9;
+        tabindex 1;
+        id 4024007;
+        price 1000;
+    }
+    basic_abrasive{
+        loc 10;
+        tabindex 1;
+        id 4025000;
+        price 1000;
+    }
+    int_abrasive{
+        loc 11;
+        tabindex 1;
+        id 4025001;
+        price 5000;
+    }
+    adv_abrasive{
+        loc 12;
+        tabindex 1;
+        id 4025002;
+        price 10000;
+    }
+    sup_abrasive{
+        loc 13;
+        tabindex 1;
+        id 4025003;
+        price 50000;
+    }
+    basic_herb_oil_bottle{
+        loc 14;
+        tabindex 1;
+        id 4024000;
+        price 100;
+    }
+    int_herb_oil_bottle{
+        loc 15;
+        tabindex 1;
+        id 4024001;
+        price 300;
+    }
+    adv_herb_oil_bottle{
+        loc 16;
+        tabindex 1;
+        id 4024002;
+        price 500;
+    }
+    sup_herb_oil_bottle{
+        loc 17;
+        tabindex 1;
+        id 4024003;
+        price 1000;
+    }
+    basic_empty_bottle{
+        loc 18;
+        tabindex 1;
+        id 4025004;
+        price 100;
+    }
+    int_empty_bottle{
+        loc 19;
+        tabindex 1;
+        id 4025005;
+        price 200;
+    }
+    adv_empty_bottle{
+        loc 20;
+        tabindex 1;
+        id 4025006;
+        price 400;
+    }
+    sup_empty_bottle{
+        loc 21;
+        tabindex 1;
+        id 4025007;
+        price 800;
+    }
+    basic_potion_coagulant{
+        loc 22;
+        tabindex 1;
+        id 4025008;
+        price 50;
+    }
+    int_potion_coagulant{
+        loc 23;
+        tabindex 1;
+        id 4025009;
+        price 100;
+    }
+    adv_potion_coagulant{
+        loc 24;
+        tabindex 1;
+        id 4025010;
+        price 200;
+    }
+    sup_potion_coagulant{
+        loc 25;
+        tabindex 1;
+        id 4025011;
+        price 400;
+    }
+    alchemist_stone{
+        loc 26;
+        tabindex 1;
+        id 4021017;
+        price 5000;
+    }
+    arrow_for_bow{
+        loc 27;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_xbow{
+        loc 28;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    arrow_for_bow_bundle{
+        loc 29;
+        tabindex 1;
+        quantity 2000;
+        id 2060000;
+        price 1400;
+    }
+    arrow_for_xbow_bundle{
+        loc 30;
+        tabindex 1;
+        quantity 2000;
+        id 2061000;
+        price 1400;
+    }
+}

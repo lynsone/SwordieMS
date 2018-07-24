@@ -1194,6 +1194,7 @@ public class AdminCommands {
             gotomaps.put("cygnus", 271040000);
             gotomaps.put("ra", 105200000);
             gotomaps.put("goldenbeach", 914200000);
+            gotomaps.put("ardentmill", 910001000);
 
             if (gotomaps.containsKey(args[1])) {
                 Field toField = chr.getClient().getChannelInstance().getField(gotomaps.get(args[1]));
