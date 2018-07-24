@@ -4539,14 +4539,14 @@ public class WorldHandler {
         MonsterCollection mc = chr.getAccount().getMonsterCollection();
         if (reqType == 0) { // group
             MonsterCollectionGroup mcs = mc.getGroup(region, session, group);
-            if (!mcs.isRewardClaimed() && mc.isComplete(region, session, group)) {
+            if (mcs != null && !mcs.isRewardClaimed() && mc.isComplete(region, session, group)) {
                 Tuple<Integer, Integer> rewardInfo = MonsterCollectionData.getReward(region, session, group);
                 Item item = ItemData.getItemDeepCopy(rewardInfo.getLeft());
                 item.setQuantity(rewardInfo.getRight());
                 chr.addItemToInventory(item);
                 mcs.setRewardClaimed(true);
                 chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
-            } else if (mcs.isRewardClaimed()){
+            } else if (mcs != null && mcs.isRewardClaimed()){
                 chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.AlreadyClaimedReward, null, 0));
             } else {
                 chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CompleteCollectionBeforeClaim, null, 0));
@@ -4561,6 +4561,14 @@ public class WorldHandler {
         String msg = inPacket.decodeString();
         if (chr.getParty() != null) {
             chr.getParty().broadcast(CField.groupMessage(GroupMessageType.Party, chr.getName(), msg), chr);
+        }
+    }
+
+    public static void handleUserFieldTransferRequest(Char chr, InPacket inPacket) {
+        int fieldID = inPacket.decodeInt();
+        if (fieldID == 7860) {
+            Field field = chr.getOrCreateFieldByCurrentInstanceType(910001000);
+            chr.warp(field);
         }
     }
 }

@@ -284,6 +284,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case LOAD_ACCOUNT_ID_OF_CHARACTER_FRIEND_REQUEST:
                     WorldHandler.handleLoadAccountIDOfCharacterFriendRequest(c, inPacket);
                     break;
+                case USER_FIELD_TRANSFER_REQUEST:
+                    WorldHandler.handleUserFieldTransferRequest(chr, inPacket);
+                    break;
                 case FUNC_KEY_MAPPED_MODIFIED:
                     WorldHandler.handleKeymapUpdateRequest(c, inPacket);
                     break;

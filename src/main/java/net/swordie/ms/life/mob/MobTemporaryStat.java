@@ -5,10 +5,12 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.BattleRecordMan;
 import net.swordie.ms.life.mob.skill.BurnedInfo;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.MobPool;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.util.Util;
 
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
@@ -393,8 +395,9 @@ public class MobTemporaryStat {
 		}
 	}
 
-	public void removeBurnedInfo(int charID, boolean fromSchedule) {
+	public void removeBurnedInfo(Char chr, boolean fromSchedule) {
 		synchronized (burnedInfos) {
+			int charID = chr.getId();
 			List<BurnedInfo> biList = getBurnedInfos().stream().filter(bi -> bi.getCharacterId() == charID).collect(Collectors.toList());
 			getBurnedInfos().removeAll(biList);
 			getRemovedStatVals().put(BurnedInfo, getCurrentOptionsByMobStat(BurnedInfo));
@@ -402,6 +405,10 @@ public class MobTemporaryStat {
 				getCurrentStatVals().remove(BurnedInfo);
 			}
 			getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false, biList));
+			for (net.swordie.ms.life.mob.skill.BurnedInfo bi : biList) {
+				int count = Math.min(bi.getDotCount(), (Util.getCurrentTime() - bi.getStartTime()) / bi.getInterval());
+				chr.write(BattleRecordMan.dotDamageInfo(bi, count));
+			}
 			if (!fromSchedule) {
 				getBurnCancelSchedules().get(charID).cancel(true);
 				getBurnCancelSchedules().remove(charID);
@@ -534,6 +541,7 @@ public class MobTemporaryStat {
 		int slv = skill.getCurrentLevel();
 		BurnedInfo bi = new BurnedInfo();
 		bi.setCharacterId(charId);
+		bi.setChr(chr);
 		bi.setSkillId(skill.getSkillId());
 		bi.setDamage((int) chr.getDamageCalc().calcPDamageForPvM(skill.getSkillId(), (byte) skill.getCurrentLevel()));
 		bi.setInterval(si.getValue(dotInterval, slv) * 1000);
@@ -545,17 +553,17 @@ public class MobTemporaryStat {
 		bi.setDotTickIdx(0);
 		bi.setDotTickDamR(si.getValue(dot, slv));
 		bi.setDotAnimation(bi.getAttackDelay() + bi.getInterval() + time);
-		bi.setStartTime((int) System.currentTimeMillis());
-		bi.setLastUpdate((int) System.currentTimeMillis());
+		bi.setStartTime(Util.getCurrentTime());
+		bi.setLastUpdate(Util.getCurrentTime());
 		if (bu != null) {
-			removeBurnedInfo(charId, false);
+			removeBurnedInfo(chr, false);
 		}
 		getBurnedInfos().add(bi);
 		Option o = new Option();
 		o.nOption = 0;
 		o.rOption = skill.getSkillId();
 		addStatOptionsAndBroadcast(MobStat.BurnedInfo, o);
-		ScheduledFuture sf = EventManager.addEvent(() -> removeBurnedInfo(charId, true), time);
+		ScheduledFuture sf = EventManager.addEvent(() -> removeBurnedInfo(chr, true), time);
 		ScheduledFuture burn = EventManager.addFixedRateEvent(
 				() -> getMob().damage(chr, (long) bi.getDamage()), 0, bi.getInterval(), bi.getDotCount());
 		getBurnCancelSchedules().put(charId, sf);
@@ -592,6 +600,6 @@ public class MobTemporaryStat {
 		Set<MobStat> mobStats = new HashSet<>(getCurrentStatVals().keySet());
 		mobStats.stream().filter(ms -> ms != BurnedInfo).forEach(ms -> removeMobStat(ms, false));
 		Set<BurnedInfo> burnedInfos = new HashSet<>(getBurnedInfos());
-		burnedInfos.forEach(bi -> removeBurnedInfo(bi.getCharacterId(), false));
+		burnedInfos.forEach(bi -> removeBurnedInfo(bi.getChr(), false));
 	}
 }

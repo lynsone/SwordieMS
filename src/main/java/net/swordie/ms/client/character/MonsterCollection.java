@@ -93,6 +93,9 @@ public class MonsterCollection {
     public void addMobAndUpdateClient(int templateID, Char chr) {
         addMob(templateID);
         MonsterCollectionMobInfo mcmi = MonsterCollectionData.getMobInfoByID(templateID);
+        if (mcmi == null) {
+            return;
+        }
         collection.get(mcmi.getRegion()).getMonsterCollectionSessions().get(mcmi.getSession()).sendCompletionInfo(chr,
                 100000 + mcmi.getRegion() * 100 + mcmi.getSession());
         chr.write(User.effect(Effect.effectFromWZ("Effect/BasicEff.img/monsterCollectionGet", false, 0, 4, 0)));
