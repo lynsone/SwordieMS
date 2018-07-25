@@ -152,71 +152,73 @@ public class FieldData {
                     Map<String, String> attr = XMLApi.getAttributes(n);
                     String name = attr.get("name");
                     String value = attr.get("value");
-                    if (name.equalsIgnoreCase("town")) {
-                        field.setTown(Integer.parseInt(value) != 0);
-                    }
-                    if (name.equalsIgnoreCase("swim")) {
-                        field.setSwim(Integer.parseInt(value) != 0);
-                    }
-                    if (name.equalsIgnoreCase("returnMap")) {
-                        field.setReturnMap(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("forcedReturn")) {
-                        field.setForcedReturn(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("mobRate")) {
-                        field.setMobRate(Double.parseDouble(value));
-                    }
-                    if (name.equalsIgnoreCase("fly")) {
-                        field.setFly(Integer.parseInt(value) != 0);
-                    }
-                    if (name.equalsIgnoreCase("onFirstUserEnter")) {
-                        field.setOnFirstUserEnter(value);
-                    }
-                    if (name.equalsIgnoreCase("onUserEnter")) {
-                        field.setOnUserEnter(value);
-                    }
-                    if (name.equalsIgnoreCase("fieldScript")) {
-                        field.setFieldScript(value);
-                    }
-                    if (name.equalsIgnoreCase("reactorShuffle")) {
-                        field.setReactorShuffle(Integer.parseInt(value) != 0);
-                    }
-                    if (name.equalsIgnoreCase("expeditionOnly")) {
-                        field.setExpeditionOnly(Integer.parseInt(value) != 0);
-                    }
-                    if (name.equalsIgnoreCase("partyOnly")) {
-                        field.setPartyOnly(Integer.parseInt(value) != 0);
-                    }
-                    if (name.equalsIgnoreCase("isNeedSkillForFly")) {
-                        field.setNeedSkillForFly(Integer.parseInt(value) != 0);
-                    }
-                    if (name.equalsIgnoreCase("fixedMobCapacity")) {
-                        field.setFixedMobCapacity(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("createMobInterval")) {
-                        field.setCreateMobInterval(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("timeOut")) {
-                        field.setTimeOut(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("timeLimit")) {
-                        field.setTimeLimit(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("lvLimit")) {
-                        field.setLvLimit(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("lvForceMove")) {
-                        field.setLvForceMove(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("consumeItemCoolTime")) {
-                        field.setConsumeItemCoolTime(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("link")) {
-                        field.setLink(Integer.parseInt(value));
-                    }
-                    if (name.equalsIgnoreCase("bossMobID")) {
-                        field.setBossMobID(Integer.parseInt(value));
+                    switch (name) {
+                        case "town":
+                            field.setTown(Integer.parseInt(value) != 0);
+                            break;
+                        case "swim":
+                            field.setSwim(Integer.parseInt(value) != 0);
+                            break;
+                        case "returnMap":
+                            field.setReturnMap(Integer.parseInt(value));
+                            break;
+                        case "forcedReturn":
+                            field.setForcedReturn(Integer.parseInt(value));
+                            break;
+                        case "mobRate":
+                            field.setMobRate(Double.parseDouble(value));
+                            break;
+                        case "fly":
+                            field.setFly(Integer.parseInt(value) != 0);
+                            break;
+                        case "onFirstUserEnter":
+                            field.setOnFirstUserEnter(value);
+                            break;
+                        case "onUserEnter":
+                            field.setOnUserEnter(value);
+                            break;
+                        case "fieldScript":
+                            field.setFieldScript(value);
+                            break;
+                        case "reactorShuffle":
+                            field.setReactorShuffle(Integer.parseInt(value) != 0);
+                            break;
+                        case "expeditionOnly":
+                            field.setExpeditionOnly(Integer.parseInt(value) != 0);
+                            break;
+                        case "partyOnly":
+                            field.setPartyOnly(Integer.parseInt(value) != 0);
+                            break;
+                        case "isNeedSkillForFly":
+                            field.setNeedSkillForFly(Integer.parseInt(value) != 0);
+                            break;
+                        case "fixedMobCapacity":
+                            field.setFixedMobCapacity(Integer.parseInt(value));
+                            break;
+                        case "createMobInterval":
+                            field.setCreateMobInterval(Integer.parseInt(value));
+                            break;
+                        case "timeOut":
+                            field.setTimeOut(Integer.parseInt(value));
+                            break;
+                        case "timeLimit":
+                            field.setTimeLimit(Integer.parseInt(value));
+                            break;
+                        case "lvLimit":
+                            field.setLvLimit(Integer.parseInt(value));
+                            break;
+                        case "lvForceMove":
+                            field.setLvForceMove(Integer.parseInt(value));
+                            break;
+                        case "consumeItemCoolTime":
+                            field.setConsumeItemCoolTime(Integer.parseInt(value));
+                            break;
+                        case "link":
+                            field.setLink(Integer.parseInt(value));
+                            break;
+                        case "bossMobID":
+                            field.setBossMobID(Integer.parseInt(value));
+                            break;
                     }
                 }
                 Node fhNode = XMLApi.getFirstChildByNameBF(node, "foothold");
@@ -231,29 +233,31 @@ public class FieldData {
                                 for (Node n : XMLApi.getAllChildren(idNode)) {
                                     String name = XMLApi.getNamedAttribute(n, "name");
                                     String value = XMLApi.getNamedAttribute(n, "value");
-                                    if (name.equalsIgnoreCase("x1")) {
-                                        fh.setX1(Integer.parseInt(value));
-                                    }
-                                    if (name.equalsIgnoreCase("y1")) {
-                                        fh.setY1(Integer.parseInt(value));
-                                    }
-                                    if (name.equalsIgnoreCase("x2")) {
-                                        fh.setX2(Integer.parseInt(value));
-                                    }
-                                    if (name.equalsIgnoreCase("y2")) {
-                                        fh.setY2(Integer.parseInt(value));
-                                    }
-                                    if (name.equalsIgnoreCase("next")) {
-                                        fh.setNext(Integer.parseInt(value));
-                                    }
-                                    if (name.equalsIgnoreCase("prev")) {
-                                        fh.setPrev(Integer.parseInt(value));
-                                    }
-                                    if (name.equalsIgnoreCase("force")) {
-                                        fh.setForce(Integer.parseInt(value));
-                                    }
-                                    if (name.equalsIgnoreCase("forbidFallDown")) {
-                                        fh.setForbidFallDown(Integer.parseInt(value) != 0);
+                                    switch (name) {
+                                        case "x1":
+                                            fh.setX1(Integer.parseInt(value));
+                                            break;
+                                        case "y1":
+                                            fh.setY1(Integer.parseInt(value));
+                                            break;
+                                        case "x2":
+                                            fh.setX2(Integer.parseInt(value));
+                                            break;
+                                        case "y2":
+                                            fh.setY2(Integer.parseInt(value));
+                                            break;
+                                        case "next":
+                                            fh.setNext(Integer.parseInt(value));
+                                            break;
+                                        case "prev":
+                                            fh.setPrev(Integer.parseInt(value));
+                                            break;
+                                        case "force":
+                                            fh.setForce(Integer.parseInt(value));
+                                            break;
+                                        case "forbidFallDown":
+                                            fh.setForbidFallDown(Integer.parseInt(value) != 0);
+                                            break;
                                     }
                                 }
                                 field.addFoothold(fh);
@@ -269,38 +273,40 @@ public class FieldData {
                         for (Node n : XMLApi.getAllChildren(idNode)) {
                             String name = XMLApi.getNamedAttribute(n, "name");
                             String value = XMLApi.getNamedAttribute(n, "value");
-                            if (name.equalsIgnoreCase("pt")) {
-                                portal.setType(PortalType.getTypeByInt(Integer.parseInt(value)));
-                            }
-                            if (name.equalsIgnoreCase("pn")) {
-                                portal.setName(value);
-                            }
-                            if (name.equalsIgnoreCase("tm")) {
-                                portal.setTargetMapId(Integer.parseInt(value));
-                            }
-                            if (name.equalsIgnoreCase("tn")) {
-                                portal.setTargetPortalName(value);
-                            }
-                            if (name.equalsIgnoreCase("x")) {
-                                portal.setX(Integer.parseInt(value));
-                            }
-                            if (name.equalsIgnoreCase("y")) {
-                                portal.setY(Integer.parseInt(value));
-                            }
-                            if (name.equalsIgnoreCase("horizontalImpact")) {
-                                portal.setHorizontalImpact(Integer.parseInt(value));
-                            }
-                            if (name.equalsIgnoreCase("verticalImpact")) {
-                                portal.setVerticalImpact(Integer.parseInt(value));
-                            }
-                            if (name.equalsIgnoreCase("script")) {
-                                portal.setScript(value);
-                            }
-                            if (name.equalsIgnoreCase("onlyOnce")) {
-                                portal.setOnlyOnce(Integer.parseInt(value) != 0);
-                            }
-                            if (name.equalsIgnoreCase("delay")) {
-                                portal.setDelay(Integer.parseInt(value));
+                            switch (name) {
+                                case "pt":
+                                    portal.setType(PortalType.getTypeByInt(Integer.parseInt(value)));
+                                    break;
+                                case "pn":
+                                    portal.setName(value);
+                                    break;
+                                case "tm":
+                                    portal.setTargetMapId(Integer.parseInt(value));
+                                    break;
+                                case "tn":
+                                    portal.setTargetPortalName(value);
+                                    break;
+                                case "x":
+                                    portal.setX(Integer.parseInt(value));
+                                    break;
+                                case "y":
+                                    portal.setY(Integer.parseInt(value));
+                                    break;
+                                case "horizontalImpact":
+                                    portal.setHorizontalImpact(Integer.parseInt(value));
+                                    break;
+                                case "verticalImpact":
+                                    portal.setVerticalImpact(Integer.parseInt(value));
+                                    break;
+                                case "script":
+                                    portal.setScript(value);
+                                    break;
+                                case "onlyOnce":
+                                    portal.setOnlyOnce(Integer.parseInt(value) != 0);
+                                    break;
+                                case "delay":
+                                    portal.setDelay(Integer.parseInt(value));
+                                    break;
                             }
                         }
                         field.addPortal(portal);
