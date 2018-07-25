@@ -1,6 +1,5 @@
 package net.swordie.ms.client.character;
 
-import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.LinkSkill;
@@ -2196,6 +2195,9 @@ public class Char {
 	 * @param eii The info to send to the client
 	 */
 	public void addExp(long amount, ExpIncreaseInfo eii) {
+		if(amount <= 0) {
+			return;
+		}
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
 		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;

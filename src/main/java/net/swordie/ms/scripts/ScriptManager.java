@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.UIType;
+import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
 
@@ -1047,4 +1048,28 @@ public interface ScriptManager extends Observer {
 	 * 		Returns a random integer below the number specified.
 	 */
 	int getRandomIntBelow(int upBound);
+
+	/**
+	 * Grabs an effect from the WzFiles and displays it.
+	 *
+	 * @param dir
+	 * 		The Directory to the Effect.
+	 *
+	 * @param delay
+	 * 		The delay in ms before the effect shows
+	 */
+	void getEffect(String dir, int delay);
+
+	/**
+	 * Gives the user a weather notice with specified variables
+	 *
+	 *
+	 * @param text
+	 * 		Text in the weather notice
+	 * @param type
+	 * 		Type of weather notice
+	 * @param duration
+	 * 		Duration the weather notice stays on the screen
+	 */
+	void weatherNotice(String text, WeatherEffNoticeType type, int duration);
 }

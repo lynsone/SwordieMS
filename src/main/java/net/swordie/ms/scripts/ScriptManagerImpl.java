@@ -615,6 +615,28 @@ public class ScriptManagerImpl implements ScriptManager {
 		return field.getMobs().size();
 	}
 
+	public void fieldWeatherNotice(String text, WeatherEffNoticeType type) {
+		fieldWeatherNotice(text, type, chr.getFieldID());
+	}
+
+	public void fieldWeatherNotice(String text, WeatherEffNoticeType type, int fieldId) {
+		Field field = FieldData.getFieldById(fieldId);
+		for (Char chr : field.getChars()) {
+			chr.write(WvsContext.weatherEffectNotice(type, text, 7000)); // 7 seconds
+		}
+	}
+
+	public void fieldGetEffect(String dir) {
+		fieldGetEffect(dir, 0);
+	}
+
+	public void fieldGetEffect(String dir, int delay) {
+		Field field = FieldData.getFieldById(chr.getFieldID());
+		for (Char chr : field.getChars()) {
+			chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
+		}
+	}
+
 
 
 	// Life-related methods --------------------------------------------------------------------------------------------
@@ -848,6 +870,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void chatScript(String text) {chr.chatScriptMessage(text);}
 
+	public void weatherNotice(String text, WeatherEffNoticeType type) {
+		weatherNotice(text, type, 7000); // 7 seconds
+	}
+
+	@Override
+	public void weatherNotice(String text, WeatherEffNoticeType type, int duration) {
+		chr.write(WvsContext.weatherEffectNotice(type, text, duration));
+	}
 
 
 	// Inventory-related methods ---------------------------------------------------------------------------------------
@@ -1095,5 +1125,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public int getRandomIntBelow(int upBound) {
 		return new Random().nextInt(upBound);
+	}
+
+	public void getEffect(String dir) {
+		getEffect(dir, 0);
+	}
+
+	@Override
+	public void getEffect(String dir, int delay) {
+		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
 	}
 }
