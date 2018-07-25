@@ -3415,6 +3415,9 @@ public class WorldHandler {
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
+        if (action.equals("")) {
+            action = templateID + "action";
+        }
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
             try {
