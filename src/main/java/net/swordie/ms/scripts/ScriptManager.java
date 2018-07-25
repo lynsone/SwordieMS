@@ -437,6 +437,18 @@ public interface ScriptManager extends Observer {
 	 */
 	int numberMobsInField(int fieldID);
 
+	/**
+	 * Drops the specified Item on the field at the given position (x, y).
+	 *
+	 * @param itemId
+	 * 		The Id of the Item to be spawned.
+	 * @param x
+	 * 		The X-coordinate of the Position.
+	 * @param y
+	 * 		The Y-Coordinate of the Position.
+	 */
+	void dropItem(int itemId, int x, int y);
+
 
 
 	// Life-related methods --------------------------------------------------------------------------------------------
@@ -627,6 +639,18 @@ public interface ScriptManager extends Observer {
 	 * Example: "sm.removeReactor()"
 	 */
 	void removeReactor();
+
+	/**
+	 * Spawns a reactor in {@link Char} field.
+	 *
+	 * @param reactorId
+	 * 		The Id of the Reactor spawned.
+	 * @param x
+	 * 		The X-coordinate of the Position.
+	 * @param y
+	 * 		The Y-coordinate of the Position.
+	 */
+	void spawnReactor(int reactorId, int x, int y);
 
 
 
