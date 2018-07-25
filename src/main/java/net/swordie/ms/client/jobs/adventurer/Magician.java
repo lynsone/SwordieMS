@@ -482,6 +482,10 @@ public class Magician extends Job {
     }
 
     private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm) {  //TODO  Fire Attribute Spells only
+        SkillInfo si = SkillData.getSkillInfoById(attackInfo.skillId);
+        if (si == null || !si.getElemAttr().contains("f") || attackInfo.skillId == IGNITE || attackInfo.skillId == IGNITE_AA) {
+            return;
+        }
         if (tsm.hasStat(WizardIgnite)) {
             SkillInfo igniteInfo = SkillData.getSkillInfoById(IGNITE);
             Skill skill = chr.getSkill(IGNITE);

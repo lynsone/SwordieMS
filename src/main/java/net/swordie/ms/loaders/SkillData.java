@@ -37,6 +37,7 @@ public class SkillData {
                 dataOutputStream.writeBoolean(si.isInvisible());
                 dataOutputStream.writeBoolean(si.isMassSpell());
                 dataOutputStream.writeInt(si.getType());
+                dataOutputStream.writeUTF(si.getElemAttr());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -81,6 +82,7 @@ public class SkillData {
                     skillInfo.setInvisible(dataInputStream.readBoolean());
                     skillInfo.setMassSpell(dataInputStream.readBoolean());
                     skillInfo.setType(dataInputStream.readInt());
+                    skillInfo.setElemAttr(dataInputStream.readUTF());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -178,6 +180,12 @@ public class SkillData {
                             for (Node psdSkillNode : XMLApi.getAllChildren(topPsdSkillNode)) {
                                 skill.addPsdSkill(Integer.parseInt(XMLApi.getAttributes(psdSkillNode).get("name")));
                             }
+                        }
+                        Node elemAttrNode = XMLApi.getFirstChildByNameBF(skillNode, "elemAttr");
+                        if(elemAttrNode != null) {
+                            skill.setElemAttr(XMLApi.getNamedAttribute(elemAttrNode, "value"));
+                        } else {
+                            skill.setElemAttr("");
                         }
                         // end main level info
                         // start "common" level info

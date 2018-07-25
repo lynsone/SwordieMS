@@ -8,6 +8,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
 
+import javax.naming.directory.Attribute;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -29,6 +30,7 @@ public class SkillInfo {
     private boolean massSpell;
     private int type;
     private Set<Integer> psdSkills = new HashSet<>();
+    private String elemAttr;
 
     public int getSkillId() {
         return skillId;
@@ -224,5 +226,13 @@ public class SkillInfo {
 
     public void setPsdSkills(Set<Integer> psdSkills) {
         this.psdSkills = psdSkills;
+    }
+
+    public String getElemAttr() {
+        return elemAttr;
+    }
+
+    public void setElemAttr(String elemAttr) {
+        this.elemAttr = elemAttr;
     }
 }
