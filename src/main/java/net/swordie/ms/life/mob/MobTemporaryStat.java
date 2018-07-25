@@ -565,7 +565,7 @@ public class MobTemporaryStat {
 		addStatOptionsAndBroadcast(MobStat.BurnedInfo, o);
 		ScheduledFuture sf = EventManager.addEvent(() -> removeBurnedInfo(chr, true), time);
 		ScheduledFuture burn = EventManager.addFixedRateEvent(
-				() -> getMob().damage(chr, (long) bi.getDamage()), 0, bi.getInterval(), bi.getDotCount());
+				() -> getMob().damage(chr, (long) bi.getDamage()), bi.getAttackDelay() + bi.getInterval(), bi.getInterval(), bi.getDotCount());
 		getBurnCancelSchedules().put(charId, sf);
 		getBurnSchedules().put(charId, burn);
 	}

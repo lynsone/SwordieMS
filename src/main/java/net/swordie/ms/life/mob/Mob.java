@@ -1,5 +1,6 @@
 package net.swordie.ms.life.mob;
 
+import javafx.beans.Observable;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.skills.Option;
@@ -22,6 +23,8 @@ import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.scripts.ScriptManagerImpl;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Triple;
@@ -30,6 +33,7 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 
+import javax.script.ScriptException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -1199,7 +1203,8 @@ public class Mob extends Life {
             field.broadcastPacket(CField.eliteState(EliteState.NORMAL, true, null, null, null));
             field.setEliteState(EliteState.NORMAL);
         }
-
+        setChanged();
+        notifyObservers();
         //TEST
         reviveMob();
     }

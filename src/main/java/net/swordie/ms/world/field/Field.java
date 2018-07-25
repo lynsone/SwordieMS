@@ -25,6 +25,7 @@ import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.scripts.ScriptManager;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.Position;
@@ -70,7 +71,6 @@ public class Field {
     private RuneStone runeStone;
     private ScheduledFuture runeStoneHordesTimer;
     private int burningFieldLevel;
-    private ScheduledFuture burningFieldCheckTimer;
     private long nextEliteSpawnTime = System.currentTimeMillis();
     private int killedElites;
     private EliteState eliteState;
@@ -369,6 +369,14 @@ public class Field {
         if (!getLifes().contains(life)) {
             getLifes().add(life);
             life.setField(this);
+            if (life instanceof Mob) {
+                if (getScriptManager() != null) {
+                    life.addObserver(getScriptManager());
+                }
+                for (Char chr : getChars()) {
+                    life.addObserver(chr.getScriptManager());
+                }
+            }
         }
     }
 
@@ -961,7 +969,7 @@ public class Field {
         if(getMobs().size() > 0 &&
                 getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
             setBurningFieldLevel(GameConstants.BURNING_FIELD_LEVEL_ON_START);
-            burningFieldCheckTimer = EventManager.addFixedRateEvent(() -> changeBurningLevel(), 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
+            EventManager.addFixedRateEvent(this::changeBurningLevel, 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
         }
     }
 
@@ -1033,5 +1041,9 @@ public class Field {
     public Portal getDefaultPortal() {
         Portal p = getPortalByName("sp");
         return p == null ? getPortalByID(0) : p;
+    }
+
+    private ScriptManager getScriptManager() {
+        return scriptManagerImpl;
     }
 }

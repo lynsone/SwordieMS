@@ -2698,6 +2698,7 @@ public class WorldHandler {
                     guild.addMember(chr);
                     guild.broadcast(WvsContext.guildResult(
                             new GuildJoinMsg(guild.getId(), guild.getMemberByID(chr.getId()))));
+                    chr.write(WvsContext.guildResult(new GuildUpdate(guild)));
                 } else {
                     chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Res_CreateNewGuild_AlreadyJoined)));
                 }

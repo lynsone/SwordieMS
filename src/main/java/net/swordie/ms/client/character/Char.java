@@ -52,9 +52,12 @@ import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.scripts.ScriptManager;
 import net.swordie.ms.scripts.ScriptManagerImpl;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -2079,6 +2082,9 @@ public class Char {
 		if (toField == null) {
 			return;
 		}
+		if (getScriptManager().isActive(ScriptType.FIELD)) {
+			getScriptManager().stop(ScriptType.FIELD);
+		}
 		TemporaryStatManager tsm = getTemporaryStatManager();
 		for (AffectedArea aa : tsm.getAffectedAreas()) {
 			tsm.removeStatsBySkill(aa.getSkillID());
@@ -2135,6 +2141,9 @@ public class Char {
 					write(UserRemote.receiveHP(otherChar));
 				}
 			}
+		}
+		for (Mob mob : toField.getMobs()) {
+			mob.addObserver(getScriptManager());
 		}
 	}
 

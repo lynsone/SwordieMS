@@ -9,7 +9,9 @@ import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.life.mob.Mob;
 
-public class Life {
+import java.util.Observable;
+
+public class Life extends Observable {
     private Position position;
     private int objectId;
     protected int cy, f, fh, templateId, mobTime, rx0, rx1, type, x, y;

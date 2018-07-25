@@ -61,7 +61,7 @@ import static net.swordie.ms.life.npc.NpcMessageType.*;
  *
  * @see ScriptManager
  */
-public class ScriptManagerImpl implements ScriptManager, Observer {
+public class ScriptManagerImpl implements ScriptManager {
 
 	public static final String SCRIPT_ENGINE_NAME = "python";
 	public static final String SCRIPT_ENGINE_EXTENSION = ".py";
@@ -175,6 +175,18 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		}
 	}
 
+	public void notifyMobDeath() {
+		if (isActive(ScriptType.FIELD)) {
+			try {
+				getInvocableByType(ScriptType.FIELD).invokeFunction("onMobDeath");
+			} catch (ScriptException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// Intended: no method is no problem
+			}
+		}
+	}
+
 	private Invocable getInvocableFromScriptNameAndType(String name, ScriptType scriptType) {
 		String dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
 				scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
@@ -216,7 +228,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		// TODO listening for updates if needed
+		if (o instanceof Mob) {
+			notifyMobDeath();
+		}
 	}
 
 	public void handleAction(byte lastType, byte response, int answer) {

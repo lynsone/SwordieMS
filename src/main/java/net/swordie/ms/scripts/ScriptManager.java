@@ -7,12 +7,14 @@ import net.swordie.ms.enums.UIType;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
 
+import java.util.Observer;
+
 /**
  * Script manager {@code interface} used in all scripts.
  *
  * @author NullByte
  */
-public interface ScriptManager {
+public interface ScriptManager extends Observer {
 
 	/**
 	 * The character instance, can be null if none is implied.<br>
