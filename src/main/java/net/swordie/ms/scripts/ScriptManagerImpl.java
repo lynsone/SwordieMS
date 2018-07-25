@@ -27,14 +27,12 @@ import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
-import net.swordie.ms.loaders.FieldData;
-import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.NpcData;
-import net.swordie.ms.loaders.QuestData;
+import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
@@ -602,13 +600,13 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	public void fieldWeatherNotice(String text, WeatherEffNoticeType type) {
-		fieldWeatherNotice(text, type, chr.getFieldID());
+		fieldWeatherNotice(text, type, 7000); // 7 seconds
 	}
 
-	public void fieldWeatherNotice(String text, WeatherEffNoticeType type, int fieldId) {
-		Field field = FieldData.getFieldById(fieldId);
+	public void fieldWeatherNotice(String text, WeatherEffNoticeType type, int duration) {
+		Field field = chr.getField();
 		for (Char chr : field.getChars()) {
-			chr.write(WvsContext.weatherEffectNotice(type, text, 7000)); // 7 seconds
+			chr.write(WvsContext.weatherEffectNotice(type, text, duration));
 		}
 	}
 
@@ -617,10 +615,20 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	public void fieldGetEffect(String dir, int delay) {
-		Field field = FieldData.getFieldById(chr.getFieldID());
+		Field field = chr.getField();
 		for (Char chr : field.getChars()) {
 			chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
 		}
+	}
+
+	@Override
+	public void dropItem(int itemId, int x, int y) {
+		Field field = chr.getField();
+		Drop drop = new Drop(field.getNewObjectID());
+		drop.setItem(ItemData.getItemDeepCopy(itemId));
+		Position position = new Position(x, y);
+		drop.setPosition(position);
+		field.drop(drop, position);
 	}
 
 
@@ -774,6 +782,15 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 			field.removeReactor(reactor);
 			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
 		}
+	}
+
+	@Override
+	public void spawnReactor(int reactorId, int x, int y) {
+		Field field = chr.getField();
+		Reactor reactor = ReactorData.getReactorByID(reactorId);
+		Position position = new Position(x, y);
+		reactor.setPosition(position);
+		field.addReactor(reactor);
 	}
 
 
