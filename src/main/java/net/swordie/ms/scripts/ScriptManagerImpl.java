@@ -807,6 +807,18 @@ public class ScriptManagerImpl implements ScriptManager {
 		field.addReactor(reactor);
 	}
 
+	@Override
+	public boolean hasReactors() {
+		Field field = chr.getField();
+		return field.getReactors().size() > 0;
+	}
+
+	@Override
+	public int getReactorQuantity() {
+		Field field = chr.getField();
+		return field.getReactors().size();
+	}
+
 
 
 	// Party-related methods -------------------------------------------------------------------------------------------

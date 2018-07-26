@@ -652,6 +652,22 @@ public interface ScriptManager extends Observer {
 	 */
 	void spawnReactor(int reactorId, int x, int y);
 
+	/**
+	 * Returns whether or not there is a Reactor on the {@link Char} field.
+	 *
+	 * @return
+	 * 		Returns a boolean, true if there is 1 or more reactor(s) on the field.
+	 */
+	boolean hasReactors();
+
+	/**
+	 * Returns the quantity of Reactors in {@link Char} field.
+	 *
+	 * @return
+	 * 		Returns the quantity of reactors in the field.
+	 */
+	int getReactorQuantity();
+
 
 
 	// Party-related methods -------------------------------------------------------------------------------------------

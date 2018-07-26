@@ -265,8 +265,8 @@ public class QuestData {
                             }
                             break;
                         case "mob":
-                            QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
+                                QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -284,8 +284,8 @@ public class QuestData {
                                             break;
                                     }
                                 }
+                                quest.addProgressRequirement(qpmr);
                             }
-                            quest.addProgressRequirement(qpmr);
                             break;
                         case "skill":
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {

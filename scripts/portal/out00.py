@@ -27,7 +27,6 @@ field = {
     260010601 : 260010600,
     106030402 : 106030101,
     270000100 : 200090510, # ToT : Dragon Flight-2nd Map
-    865020051 : 865020300, # Canal Battle Ground 5 : Canal 4
 }
 
 portal = {
@@ -59,7 +58,6 @@ portal = {
     260010601 : 0,
     106030402 : 1,
     270000100 : 0,
-    865020051 : 0,
 }
 
 def init():
@@ -75,6 +73,10 @@ def init():
         else:
             sm.teleportToPortal(6)
         sm.dispose()
+
+    elif fieldID == 865020051: # Canal Battle Ground 5
+        warp = False
+        sm.warpInstanceOut(865020300) # Canal 4
 
     # Cygnus' Chamber
     elif fieldID == 271040100:

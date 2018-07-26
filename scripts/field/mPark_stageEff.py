@@ -1,5 +1,6 @@
 # Monster Park Maps
 
+from net.swordie.ms.enums import WeatherEffNoticeType
 from net.swordie.ms.constants import WzConstants
 
 def init():
@@ -9,4 +10,8 @@ def init():
     else:
         sm.getEffect(""+ WzConstants.EFFECT_STAGE_NUMBER +""+ str(stage))
         sm.getEffect(WzConstants.EFFECT_STAGE)
+    sm.chatScript("All monsters in the field must be eliminated before you can move to the next stage")
     sm.dispose()
+
+def onMobDeath():
+    sm.fieldWeatherNotice("EXP reward "+ str(5) +" earned!", WeatherEffNoticeType.MonsterPark_ExpMsg)

@@ -20,11 +20,11 @@ if sm.getFieldID() == dojoHall:
             selection = answer
 
             if selection == 0: # I want to challenge Mu Lung Dojo
-                if sm.getParty() is None or sm.getPartySize() > 1:
-                    sm.sendSayOkay("Please be in a party of 1 to enter the Mu Lung Dojo.")
+                if not sm.getParty() is None:
+                    sm.sendSayOkay("Please leave your party before attempting the Mu Lung Dojo")
                     sm.dispose()
                 else:
-                    sm.warpPartyIn(925070100) # Dojo Floor 1
+                    sm.warpInstanceIn(925070100) # Dojo Floor 1
                     sm.dispose()
 
             elif selection == 1: # What is Mu Lung Dojo?
@@ -46,5 +46,5 @@ else:
 
     def action(response, answer):
         if response == 1:
-            sm.warpPartyOut(dojoHall)
+            sm.warpInstanceOut(dojoHall)
         sm.dispose()
