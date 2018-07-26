@@ -1,15 +1,11 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.runestones.RuneStone;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.*;
 import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.Reactor;
 import net.swordie.ms.ServerConstants;
-import net.swordie.ms.world.field.PortalType;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -325,7 +321,7 @@ public class FieldData {
                         idNodes = XMLApi.getAllChildren(lifeNode);
                     }
                     for (Node idNode : idNodes) {
-                        Life life = new Life(-1);
+                        Life life = new Life(0);
                         for (Node n : XMLApi.getAllChildren(idNode)) {
                             String name = XMLApi.getNamedAttribute(n, "name");
                             String value = XMLApi.getNamedAttribute(n, "value");
@@ -404,7 +400,7 @@ public class FieldData {
                 Node reactorNode = XMLApi.getFirstChildByNameBF(node, "reactor");
                 if (reactorNode != null) {
                     for (Node reactorIdNode : XMLApi.getAllChildren(reactorNode)) {
-                        Reactor reactor = new Reactor(-1);
+                        Reactor reactor = new Reactor(0);
                         for (Node valNode : XMLApi.getAllChildren(reactorIdNode)) {
                             String name = XMLApi.getNamedAttribute(valNode, "name");
                             String value = XMLApi.getNamedAttribute(valNode, "value");
@@ -536,7 +532,7 @@ public class FieldData {
             }
             short lifeSize = dataInputStream.readShort();
             for (int j = 0; j < lifeSize; j++) {
-                Life l = new Life(-1);
+                Life l = new Life(0);
                 l.setLifeType(dataInputStream.readUTF());
                 l.setTemplateId(dataInputStream.readInt());
                 l.setX(dataInputStream.readInt());
@@ -560,8 +556,8 @@ public class FieldData {
                 l.setRegenStart(dataInputStream.readInt());
                 l.setMobAliveReq(dataInputStream.readInt());
                 if ("m".equalsIgnoreCase(l.getLifeType())) {
-                    Mob mob = l.createMobFromLife();
-                    field.addLife(mob);
+                    MobGen mobGen = l.createMobGenFromLife();
+                    field.addLife(mobGen);
                 } else if ("n".equalsIgnoreCase(l.getLifeType())) {
                     Npc npc = l.createNpcFromLife();
                     field.addLife(npc);
@@ -571,8 +567,7 @@ public class FieldData {
             }
             short reactSize = dataInputStream.readShort();
             for (int i = 0; i < reactSize; i++) {
-                Reactor r = new Reactor(-1);
-                r.setTemplateId(dataInputStream.readInt());
+                Reactor r = new Reactor(dataInputStream.readInt());
                 r.setHomePosition(new Position(dataInputStream.readShort(), dataInputStream.readShort()));
                 r.setReactorTime(dataInputStream.readInt());
                 r.setF(dataInputStream.readInt());
@@ -611,7 +606,9 @@ public class FieldData {
         copy.setExpeditionOnly(field.isExpeditionOnly());
         copy.setPartyOnly(field.isPartyOnly());
         copy.setNeedSkillForFly(field.isNeedSkillForFly());
-        copy.setFixedMobCapacity(field.getFixedMobCapacity());
+        if (field.getFixedMobCapacity() != 0) {
+            copy.setFixedMobCapacity(field.getFixedMobCapacity());
+        }
         copy.setCreateMobInterval(field.getCreateMobInterval());
         copy.setTimeOut(field.getTimeOut());
         copy.setTimeLimit(field.getTimeLimit());
@@ -634,6 +631,7 @@ public class FieldData {
         copy.setObjectIDCounter(field.getNewObjectID());
         copy.setRuneStone(new RuneStone().getRandomRuneStone(copy));
         copy.startBurningFieldTimer();
+        copy.generateMobs();
         return copy;
     }
 

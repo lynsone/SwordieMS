@@ -42,8 +42,8 @@ public class Summon extends Life {
     private int maxHP;
     private int hp;
 
-    public Summon(int objectId) {
-        super(objectId);
+    public Summon(int templateId) {
+        super(templateId);
     }
 
     public int getCharID() {

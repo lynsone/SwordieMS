@@ -188,8 +188,7 @@ public class ReactorData {
     }
 
     public static Reactor getReactorByID(int id) {
-        Reactor r = new Reactor(-1);
-        r.setTemplateId(id);
+        Reactor r = new Reactor(id);
         r.init();
         return r;
     }

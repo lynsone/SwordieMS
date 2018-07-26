@@ -194,7 +194,7 @@ public class MobData {
         }
         Mob mob = null;
         try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
-            mob = new Mob(dataInputStream.readInt(), -1);
+            mob = new Mob(dataInputStream.readInt());
             ForcedMobStat fms = mob.getForcedMobStat();
             fms.setLevel(dataInputStream.readInt());
             mob.setFirstAttack(dataInputStream.readInt());
@@ -360,7 +360,7 @@ public class MobData {
             }
             int id = Integer.parseInt(XMLApi.getNamedAttribute(node, "name").replace(".img", ""));
             Node infoNode = XMLApi.getFirstChildByNameBF(node, "info");
-            Mob mob = new Mob(id, -1);
+            Mob mob = new Mob(id);
             ForcedMobStat fms = mob.getForcedMobStat();
             MobTemporaryStat mts = mob.getTemporaryStat();
             for (Node n : XMLApi.getAllChildren(infoNode)) {

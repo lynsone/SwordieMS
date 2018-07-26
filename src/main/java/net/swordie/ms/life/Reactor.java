@@ -18,8 +18,8 @@ public class Reactor extends Life {
     private int reactorTime;
     private boolean phantomForest;
 
-    public Reactor(int objectId) {
-        super(objectId);
+    public Reactor(int templateId) {
+        super(templateId);
     }
 
     public byte getState() {

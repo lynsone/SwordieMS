@@ -149,6 +149,7 @@ public class Kanna extends Job {
             case KISHIN_SHOUKAN: //TODO
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
+                field.setKishin(true);
                 summon.setFlyMob(true);
 
                 Position leftKishin = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());

@@ -3,6 +3,7 @@ package net.swordie.ms.constants;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
 
 import java.util.ArrayList;
@@ -14,27 +15,35 @@ import java.util.List;
 public class GameConstants {
     public static final int EXP_RATE = 10;
     public static final long MAX_MONEY = 10_000_000_000L;
+    public static final short DAMAGE_SKIN_MAX_SIZE = 100;
+    public static final int MAX_PET_AMOUNT = 3;
+
+    // Field
+    public static final int NO_MAP_ID = 999999999;
+    public static final int DEFAULT_FIELD_MOB_CAPACITY = 25;
+    public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
+    public static final double KISHIN_MOB_MULTIPLIER = 1.7;
+    public static final double KISHIN_MOB_RATE_MULTIPLIER = 1.7;
+    public static final Rect MOB_CHECK_RECT = new Rect(-100, -100, 100, 100);
+
+    // Drop
     public static final int DROP_HEIGHT = 100; // was 20
     public static final int DROP_DIFF = 25;
     public static final int DROP_REMAIN_ON_GROUND_TIME = 120; // 2 minutes
     public static final int DROP_REMOVE_OWNERSHIP_TIME = 30; // 30 sec
-    public static final short DAMAGE_SKIN_MAX_SIZE = 100;
-    public static final int MAX_PET_AMOUNT = 3;
-    public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
-    public static final int NO_MAP_ID = 999999999;
 
-    //Combo Kill
+    // Combo Kill
     public static final int COMBO_KILL_RESET_TIMER = 5; // 5 sec
     public static final int COMBO_KILL_REWARD_BLUE = 50; // Combo kills
     public static final int COMBO_KILL_REWARD_PURPLE = 350; // Combo kills
     public static final int COMBO_KILL_REWARD_RED = 750; // Combo kills
 
-    //Multi Kill
+    // Multi Kill
     public static final float MULTI_KILL_BONUS_EXP_MULTIPLIER = 0.01f; // Multi Kill Bonus Exp given  =  mobEXP * (( multi Kill Amount - 2 ) * 5) * BONUS_EXP_FOR_MULTI_KILL
 
-    //Inner Ability
+    // Inner Ability
     public static final int CHAR_POT_BASE_ID = 70000000;
     public static final int CHAR_POT_END_ID = 70000062;
     public static final int BASE_CHAR_POT_UP_RATE = 10; // 10%
@@ -44,25 +53,25 @@ public class GameConstants {
     public static final int CHAR_POT_LOCK_1_COST = 3000;
     public static final int CHAR_POT_LOCK_2_COST = 5000;
 
-    //Potential Chance on Drop Equips
+    // Potential Chance on Drop Equips
     public static final int RANDOM_EQUIP_UNIQUE_CHANCE = 1; // out of a 100
     public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
 
-    //Rune
+    // Rune
     public static final int RUNE_RESPAWN_TIME = 5; // minutes
     public static final int RUNE_COOLDOWN_TIME = 4; // minutes
     public static final int THUNDER_RUNE_ATTACK_DELAY = 4; // seconds
     public static final int DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED = 3; // number of elites spawned when activating Rune of Darkness
 
-    //BurningField
+    // BurningField
     public static final int BURNING_FIELD_MAX_LEVEL = 10; //Maximum Burning Field Level
     public static final int BURNING_FIELD_LEVEL_ON_START = BURNING_FIELD_MAX_LEVEL; //Starts Burning Maps at BurningLevel 10
     public static final int BURNING_FIELD_TIMER = 10; // minutes
     public static final int BURNING_FIELD_MIN_MOB_LEVEL = 0; //Minimum Mob Level for the Field to become a Burning Field
     public static final int BURNING_FIELD_BONUS_EXP_MULTIPLIER_PER_LEVEL = 10; // multiplied by the BurningField Level  =  Bonus Exp% given
 
-    //Exp Orb
+    // Exp Orb
     public static final int BLUE_EXP_ORB_ID = 2023484;
     public static final double BLUE_EXP_ORB_MULT = 2;
     public static final int PURPLE_EXP_ORB_ID = 2023494;

@@ -1,6 +1,5 @@
 package net.swordie.ms.life.mob;
 
-import javafx.beans.Observable;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.skills.Option;
@@ -22,8 +21,6 @@ import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.scripts.ScriptManagerImpl;
-import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Triple;
@@ -32,7 +29,6 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 
-import javax.script.ScriptException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -127,9 +123,8 @@ public class Mob extends Life {
     private List<Tuple<Integer, Integer>> eliteSkills = new ArrayList<>();
     private boolean selfDestruction;
 
-    public Mob(int templateId, int objectId) {
-        super(objectId);
-        super.templateId = templateId;
+    public Mob(int templateId) {
+        super(templateId);
         forcedMobStat = new ForcedMobStat();
         temporaryStat = new MobTemporaryStat(this);
         scale = 100;
@@ -137,8 +132,9 @@ public class Mob extends Life {
     }
 
     public Mob deepCopy() {
-        Mob copy = new Mob(getTemplateId(), getObjectId());
+        Mob copy = new Mob(getTemplateId());
         // start life
+        copy.setObjectId(getObjectId());
         copy.setLifeType(getLifeType());
         copy.setTemplateId(getTemplateId());
         copy.setX(getX());
@@ -1148,24 +1144,18 @@ public class Mob extends Life {
     private void die() {
         Field field = getField();
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH));
-        getTemporaryStat().removeEverything();
-        if (!isNotRespawnable()) { // double negative
-            EventManager.addEvent(() -> field.respawn(this),
-                    (long) (GameConstants.BASE_MOB_RESPAWN_RATE * (1 / field.getMobRate())));
-            field.putLifeController(this, null);
-        } else {
-            getField().removeLife(getObjectId());
-        }
+        getField().removeLife(getObjectId());
         if(isSplit()) {
             return;
         }
         distributeExp();
         dropDrops(); // xd
-        setPosition(getHomePosition());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
-            chr.getAccount().getMonsterCollection().addMobAndUpdateClient(getTemplateId(), chr);
+            if (!chr.getAccount().getMonsterCollection().hasMob(getTemplateId())) {
+                chr.getAccount().getMonsterCollection().addMobAndUpdateClient(getTemplateId(), chr);
+            }
         }
         getDamageDone().clear();
         if (field.canSpawnElite() && getEliteType() == 0 && !isNotRespawnable() &&

@@ -29,15 +29,15 @@ public class Familiar extends Life {
     private short vitality;
 
     public Familiar() {
-        super(-1);
+        super(0);
     }
 
-    public Familiar(int objectId) {
-        super(objectId);
+    public Familiar(int templateId) {
+        super(templateId);
     }
 
     public Familiar(long id, int familiarID, String name, FileTime expiration, short vitality) {
-        super(-1);
+        super(0);
         this.id = id;
         this.familiarID = familiarID;
         this.name = name;

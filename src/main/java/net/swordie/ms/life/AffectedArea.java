@@ -41,8 +41,8 @@ public class AffectedArea extends Life {
     private boolean flip;
     private int duration;
 
-    public AffectedArea(int objectId) {
-        super(objectId);
+    public AffectedArea(int templateId) {
+        super(templateId);
     }
 
     public Rect getRect() {

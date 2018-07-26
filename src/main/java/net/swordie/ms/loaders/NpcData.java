@@ -34,7 +34,7 @@ public class NpcData {
 	private static void loadNpcsFromWz() {
 		String wzDir = String.format("%s/Npc.wz", ServerConstants.WZ_DIR);
 		for (File file : new File(wzDir).listFiles()) {
-			Npc npc = new Npc(-1);
+			Npc npc = new Npc(0);
 			Node node = XMLApi.getRoot(file);
 			Node mainNode = XMLApi.getAllChildren(node).get(0);
 			int id = Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name")
@@ -100,8 +100,7 @@ public class NpcData {
 
 	private static Npc loadNpcFromDat(File file) {
 		try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
-			Npc npc = new Npc(-1);
-			npc.setTemplateId(dis.readInt());
+			Npc npc = new Npc(dis.readInt());
 			npc.setMove(dis.readBoolean());
 			short size = dis.readShort();
 			for (int i = 0; i < size; i++) {

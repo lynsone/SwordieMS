@@ -26,8 +26,8 @@ public class Npc extends Life {
     private boolean move;
 
 
-    public Npc(int objectId) {
-        super(objectId);
+    public Npc(int templateId) {
+        super(templateId);
     }
 
     public void encode(OutPacket outPacket) {
@@ -130,9 +130,8 @@ public class Npc extends Life {
 
     @Override
     public Npc deepCopy() {
-        Npc copy = new Npc(getObjectId());
+        Npc copy = new Npc(getTemplateId());
         copy.setLifeType(getLifeType());
-        copy.setTemplateId(getTemplateId());
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());

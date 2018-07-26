@@ -8,12 +8,13 @@ import net.swordie.ms.loaders.NpcData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.world.field.MobGen;
 
 import java.util.Observable;
 
 public class Life extends Observable {
     private Position position;
-    private int objectId;
+    private int objectId = -1;
     protected int cy, f, fh, templateId, mobTime, rx0, rx1, type, x, y;
     private String lifeType = "";
     private boolean hide;
@@ -33,8 +34,8 @@ public class Life extends Observable {
     private Position homePosition;
     private Position vPosition;
 
-    public Life(int objectId) {
-        this.objectId = objectId;
+    public Life(int templateId) {
+        this.templateId = templateId;
         this.position = new Position(0, 0);
     }
 
@@ -243,9 +244,9 @@ public class Life extends Observable {
     }
 
     public Life deepCopy() {
-        Life copy = new Life(getObjectId());
+        Life copy = new Life(getTemplateId());
+        copy.setObjectId(getObjectId());
         copy.setLifeType(getLifeType());
-        copy.setTemplateId(getTemplateId());
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
@@ -268,10 +269,12 @@ public class Life extends Observable {
         return copy;
     }
 
-    public Mob createMobFromLife() {
-        Mob mob = null;
+    public MobGen createMobGenFromLife() {
+        MobGen mobGen = null;
         if (getLifeType().equalsIgnoreCase("m")) {
-            mob = MobData.getMobDeepCopyById(getTemplateId());
+            mobGen = new MobGen(0);
+            mobGen.setPosition(getHomePosition().deepCopy());
+            Mob mob = MobData.getMobDeepCopyById(getTemplateId());
             mob.setObjectId(getObjectId());
             mob.setLifeType(getLifeType());
             mob.setTemplateId(getTemplateId());
@@ -296,8 +299,9 @@ public class Life extends Observable {
             mob.setMobTimeOnDie(isMobTimeOnDie());
             mob.setRegenStart(getRegenStart());
             mob.setMobAliveReq(getMobAliveReq());
+            mobGen.setMob(mob);
         }
-        return mob;
+        return mobGen;
     }
 
     @Override

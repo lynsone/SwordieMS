@@ -2,13 +2,11 @@ package net.swordie.ms.world.field;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.items.Equip;
-import net.swordie.ms.client.character.items.EquipAttribute;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
-import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
@@ -40,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static net.swordie.ms.client.character.skills.SkillStat.subTime;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**
@@ -75,6 +72,7 @@ public class Field {
     private int killedElites;
     private EliteState eliteState;
     private int bossMobID;
+    private boolean kishin;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -87,6 +85,7 @@ public class Field {
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
         this.reactors = new HashSet<>();
+        this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
         startFieldScript();
     }
 
@@ -625,6 +624,9 @@ public class Field {
         removeSchedule(life, fromSchedule);
         if (life instanceof Summon) {
             Summon summon = (Summon) life;
+            if (summon.getSkillID() == Kanna.KISHIN_SHOUKAN) {
+                setKishin(false);
+            }
             broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
         } else if (life instanceof AffectedArea) {
             AffectedArea aa = (AffectedArea) life;
@@ -1045,5 +1047,38 @@ public class Field {
 
     private ScriptManager getScriptManager() {
         return scriptManagerImpl;
+    }
+
+    public void generateMobs() {
+        int currentMobs = getMobs().size();
+        for (MobGen mg : getLifes().stream()
+                .filter(l -> l instanceof MobGen)
+                .map(l -> ((MobGen) l))
+                .collect(Collectors.toSet())) {
+            if (currentMobs < getMobCapacity() &&
+                    (hasKishin() || getMobsInRect(mg.getPosition().getRectAround(GameConstants.MOB_CHECK_RECT)).size() == 0)) {
+                mg.spawnMob(this);
+                currentMobs++;
+                if (currentMobs > getFixedMobCapacity()) {
+                    break;
+                }
+            }
+        }
+        // No fixed rate to ensure kishin-ness keeps being checked
+        double kishinMultiplier = hasKishin() ? GameConstants.KISHIN_MOB_RATE_MULTIPLIER : 1;
+        EventManager.addEvent(this::generateMobs,
+                (long) (GameConstants.BASE_MOB_RESPAWN_RATE / (getMobRate() * kishinMultiplier)));
+    }
+
+    private int getMobCapacity() {
+        return (int) (getFixedMobCapacity() * (hasKishin() ? GameConstants.KISHIN_MOB_MULTIPLIER : 1));
+    }
+
+    public boolean hasKishin() {
+        return kishin;
+    }
+
+    public void setKishin(boolean kishin) {
+        this.kishin = kishin;
     }
 }

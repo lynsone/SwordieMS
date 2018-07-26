@@ -229,8 +229,6 @@ public class Magician extends Job {
         handleIgnite(attackInfo, chr, tsm);
         if (JobConstants.isFirePoison(chr.getJob())) {
             if(hasHitMobs) {
-
-
                 //Megiddo Flame Recreation
                 if(attackInfo.skillId == MEGIDDO_FLAME_ATOM) {
                     handleMegiddoFlameReCreation(skillID, slv, attackInfo);
@@ -238,21 +236,17 @@ public class Magician extends Job {
             }
             chr.chatMessage(ChatMsgColour.WHISPER_GREEN, "Elemental Drain Stack: " + getFerventDrainStack());
         }
-
         if (JobConstants.isIceLightning(chr.getJob())) {
             if(hasHitMobs) {
                 //Freezing Crush / Frozen Clutch
                 handleFreezingCrush(attackInfo, skillID, slv);
-
             }
         }
-
         if (JobConstants.isCleric(chr.getJob())) {
             if(hasHitMobs) {
 
             }
         }
-
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();

@@ -18,8 +18,8 @@ public class Pet extends Life {
     private boolean reinforced;
     private PetItem item;
 
-    public Pet(int objectId) {
-        super(objectId);
+    public Pet(int templateId) {
+        super(templateId);
     }
 
     public int getActiveSkillCoolTime() {
