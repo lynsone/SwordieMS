@@ -60,7 +60,7 @@ public class MonsterCollection {
 
     public boolean hasMob(int templateID) {
         MonsterCollectionMobInfo mcmi = MonsterCollectionData.getMobInfoByID(templateID);
-        return collection.containsKey(mcmi.getRegion()) &&
+        return mcmi != null && collection.containsKey(mcmi.getRegion()) &&
                 collection.get(mcmi.getRegion()).hasMob(templateID, mcmi);
     }
 
