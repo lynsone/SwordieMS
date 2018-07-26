@@ -141,11 +141,7 @@ public class DropData {
                 drops = getCachedDropInfoById(mobID);
             } else {
                 // just take global drops otherwise
-                file = new File(String.format("%s/mobDrops/%d.dat", ServerConstants.DAT_DIR, -1));
-                if (file.exists()) {
-                    loadDropsFromFile(file);
-                    drops = getCachedDropInfoById(-1);
-                }
+                drops = getDropInfoByID(-1);
             }
         }
         return drops;
