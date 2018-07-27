@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
@@ -73,6 +74,7 @@ public class Field {
     private EliteState eliteState;
     private int bossMobID;
     private boolean kishin;
+    private List<OpenGate> openGateList = new ArrayList<>();
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -506,6 +508,11 @@ public class Field {
         }
         if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0) {
             chr.write(CField.runeStoneAppear(runeStone));
+        }
+        if (getOpenGates() != null && getOpenGates().size() > 0) {
+            for (OpenGate openGate : getOpenGates()) {
+                openGate.showOpenGate(this);
+            }
         }
         //if (getMobs().size() > 0 && getBurningFieldLevel() > 0) { //Burning Level shown per map entry is commented out.
         //    showBurningLevel();
@@ -1080,5 +1087,23 @@ public class Field {
 
     public void setKishin(boolean kishin) {
         this.kishin = kishin;
+    }
+
+    public List<OpenGate> getOpenGates() {
+        return openGateList;
+    }
+
+    public void setOpenGates(List<OpenGate> openGateList) {
+        this.openGateList = openGateList;
+    }
+
+    public void addOpenGate(OpenGate openGate) {
+        getOpenGates().add(openGate);
+    }
+
+    public void removeOpenGate(OpenGate openGate) {
+        if (getOpenGates().contains(openGate)) {
+            getOpenGates().remove(openGate);
+        }
     }
 }

@@ -51,7 +51,7 @@ public class Mechanic extends Job {
 
     public static final int MECHANIC_RAGE = 35101006; //Buff
     public static final int PERFECT_ARMOR = 35101007; //Buff (ON/OFF)
-    public static final int OPEN_PORTAL_GX9 = 35101005; //Special Skill (Summon/Portal)
+    public static final int OPEN_PORTAL_GX9 = 35101005; //Special Skill
     public static final int ROBO_LAUNCHER_RM7 = 35101012; //Summon
     public static final int HOMING_BEACON = 35101002;
 
@@ -84,7 +84,6 @@ public class Mechanic extends Job {
             ROLL_OF_THE_DICE,
             MAPLE_WARRIOR_MECH,
 
-            OPEN_PORTAL_GX9, //Summon
             SUPPORT_UNIT_HEX, //Summon
             ROBO_LAUNCHER_RM7, //Summon
             ROCK_N_SHOCK, //Summon
@@ -95,6 +94,7 @@ public class Mechanic extends Job {
 
 
     private Summon botsNtotsSummons;
+    private byte gateId = 0;
 
     public Mechanic(Char chr) {
         super(chr);
@@ -170,16 +170,6 @@ public class Mechanic extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
-                break;
-
-            case OPEN_PORTAL_GX9:   //TODO WVS_CRAHS_CALLBACK           Special Summon (Creates Portal)
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
-                summon.setAssistType((byte) 0);
-                summon.setAttackActive(false);
-                //field.spawnSummon(summon);
                 break;
             case SUPPORT_UNIT_HEX:
             case ENHANCED_SUPPORT_UNIT:
@@ -298,6 +288,17 @@ public class Mechanic extends Job {
                     o1.nValue = si.getValue(x, slv);
                     Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
                     chr.warp(toField);
+                    break;
+                case OPEN_PORTAL_GX9:
+                    Field field = chr.getField();
+                    int duration = si.getValue(time, slv);
+                    OpenGate openGate = new OpenGate(chr, chr.getPosition(), chr.getParty(), gateId, duration);
+                    if (gateId == 0) {
+                        gateId = 1;
+                    } else if (gateId == 1) {
+                        gateId = 0;
+                    }
+                    openGate.spawnOpenGate(field);
                     break;
                 case HOMING_BEACON:
                     for(int i=0; i<4; i++) {

@@ -4576,6 +4576,16 @@ public class WorldHandler {
         }
     }
 
+    public static void handleEnterOpenGateRequest(Char chr, InPacket inPacket) {
+        int chrId = inPacket.decodeInt();
+        Position position = inPacket.decodePosition();
+        byte gateId = inPacket.decodeByte();
+
+        // Probably needs remote player position handling
+
+        chr.dispose(); // Necessary as going through the portal will stuck you
+    }
+
     public static void handleUserRequestInstanceTable(Char chr, InPacket inPacket) {
 
     }

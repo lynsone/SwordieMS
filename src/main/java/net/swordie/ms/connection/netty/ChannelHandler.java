@@ -1,16 +1,16 @@
 package net.swordie.ms.connection.netty;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.Packet;
-import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
+import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.world.WorldHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
 import net.swordie.ms.world.shop.cashshop.CashShopHandler;
 import org.apache.log4j.LogManager;
 
@@ -556,6 +556,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case GROUP_MESSAGE:
                     WorldHandler.handleGroupMessage(chr, inPacket);
+                    break;
+                case ENTER_OPEN_GATE_REQUEST:
+                    WorldHandler.handleEnterOpenGateRequest(chr, inPacket);
                     break;
                 default:
                     handleUnknown(inPacket, op);
