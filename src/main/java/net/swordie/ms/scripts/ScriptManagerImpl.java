@@ -530,7 +530,9 @@ public class ScriptManagerImpl implements ScriptManager {
 			Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
 			chr.warp(field);
 		} else {
-
+			if (!in) {
+				clearPartyInfo(GameConstants.NO_MAP_ID);
+			}
 			for (PartyMember pm : chr.getParty().getPartyMembers()) {
 				if (pm != null && pm.getChr() != null) {
 					Char partyChr = pm.getChr();
