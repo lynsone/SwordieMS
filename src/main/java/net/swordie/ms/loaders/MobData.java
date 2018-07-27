@@ -24,14 +24,14 @@ import static net.swordie.ms.life.mob.MobStat.*;
 public class MobData {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
-    private static Set<Mob> mobs = new HashSet<>();
+    private static Map<Integer, Mob> mobs = new HashMap<>();
 
-    public static Set<Mob> getMobs() {
+    public static Map<Integer, Mob> getMobs() {
         return mobs;
     }
 
     public static void addMob(Mob mob) {
-        getMobs().add(mob);
+        getMobs().put(mob.getTemplateId(), mob);
     }
 
     public static void generateDatFiles() {
@@ -41,13 +41,7 @@ public class MobData {
     }
 
     public static Mob getMobById(int id) {
-        for (Mob mob : getMobs()) {
-            if (mob.getTemplateId() == id) {
-                return mob;
-            }
-        }
-        return loadMobFromFile(id);
-//        return getMobs().stream().filter(mob -> mob.getTemplateId() == id).findFirst().orElse(loadMobFromFile(id));
+        return getMobs().getOrDefault(id, loadMobFromFile(id));
     }
 
     public static Mob getMobDeepCopyById(int id) {
@@ -61,7 +55,7 @@ public class MobData {
 
     private static void saveToFile(String dir) {
         Util.makeDirIfAbsent(dir);
-        for (Mob mob : getMobs()) {
+        for (Mob mob : getMobs().values()) {
             File file = new File(dir + "/" + mob.getTemplateId() + ".dat");
             try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
                 ForcedMobStat fms = mob.getForcedMobStat();
@@ -859,7 +853,7 @@ public class MobData {
                     default:
                         log.warn(String.format("Unkown property %s with value %s.", name, value));
                 }
-                getMobs().add(mob);
+                getMobs().put(mob.getTemplateId(), mob);
             }
         }
     }

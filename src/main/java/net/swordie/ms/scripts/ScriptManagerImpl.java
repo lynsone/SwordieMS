@@ -173,10 +173,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-	public void notifyMobDeath() {
+	public void notifyMobDeath(Mob mob) {
 		if (isActive(ScriptType.FIELD)) {
 			try {
-				getInvocableByType(ScriptType.FIELD).invokeFunction("onMobDeath");
+				getInvocableByType(ScriptType.FIELD).invokeFunction("onMobDeath", mob);
 			} catch (ScriptException e) {
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
@@ -227,7 +227,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof Mob) {
-			notifyMobDeath();
+			notifyMobDeath((Mob) o);
 		}
 	}
 
