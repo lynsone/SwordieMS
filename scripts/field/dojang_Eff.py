@@ -96,7 +96,7 @@ def init():
     sm.spawnMob(bossPerFloor[sm.getFieldID()], 0, 7, False) # Spawns mob based on Field ID
     sm.dispose()
 
-def onMobDeath(mobObjId):
-    if mobObjId.getTemplateId() == bossPerFloor[sm.getFieldID()]:
+def onMobDeath(mob):
+    if mob.getTemplateId() == bossPerFloor[sm.getFieldID()]:
         sm.fieldGetEffect(WzConstants.EFFECT_DOJO_CLEAR)
     sm.dispose()

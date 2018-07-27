@@ -16,8 +16,8 @@ def init():
     sm.chatScript("All monsters in the field must be eliminated before you can move to the next stage")
     sm.dispose()
 
-def onMobDeath(mobObjId):
-    exp = sm.getMPExpByMobId(mobObjId.getTemplateId())
+def onMobDeath(mob):
+    exp = sm.getMPExpByMobId(mob.getTemplateId())
 
     qm = sm.getChr().getQuestManager()
     quest = qm.getQuests().get(GameConstants.MONSTER_PARK_EXP_QUEST)
