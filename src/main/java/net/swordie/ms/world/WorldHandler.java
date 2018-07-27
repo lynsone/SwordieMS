@@ -4575,4 +4575,8 @@ public class WorldHandler {
             chr.warp(field);
         }
     }
+
+    public static void handleUserRequestInstanceTable(Char chr, InPacket inPacket) {
+
+    }
 }

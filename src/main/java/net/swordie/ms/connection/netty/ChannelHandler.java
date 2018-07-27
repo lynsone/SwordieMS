@@ -302,6 +302,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case SUMMONED_HIT:
                     WorldHandler.handleSummonedHit(c, inPacket);
                     break;
+                case USER_REQUEST_INSTANCE_TABLE:
+                    WorldHandler.handleUserRequestInstanceTable(chr, inPacket);
+                    break;
                 case USER_ABILITY_UP_REQUEST:
                     WorldHandler.handleUserAbilityUpRequest(c, inPacket);
                     break;
@@ -313,6 +316,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case USER_SKILL_UP_REQUEST:
                     WorldHandler.handleUserSkillUpRequest(c, inPacket);
+                    break;
+                case USER_HYPER_SKILL_UP_REQUEST:
+                    WorldHandler.handleUserHyperSkillUpRequest(chr, inPacket);
                     break;
                 case USER_MELEE_ATTACK:
                     WorldHandler.handleMeleeAttack(c, inPacket);
