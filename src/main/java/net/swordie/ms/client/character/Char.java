@@ -54,7 +54,6 @@ import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
-import net.swordie.ms.scripts.ScriptManager;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
@@ -178,6 +177,9 @@ public class Char {
 	@Column(name = "fieldid")
 	@OrderColumn(name = "ord")
 	private int[] hyperrockfields = new int[13];
+
+	@Column(name = "monsterparkcount")
+	private byte monsterParkCount;
 
 	private int partyID = 0; // Just for DB purposes
 
@@ -410,6 +412,7 @@ public class Char {
 
 				999999999,
 		};
+		monsterParkCount = 0;
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -3598,4 +3601,13 @@ public class Char {
 	public void setPartyID(int partyID) {
 		this.partyID = partyID;
 	}
+
+	public byte getMonsterParkCount() {
+		return monsterParkCount;
+	}
+
+	public void setMonsterParkCount(byte monsterParkCount) {
+		this.monsterParkCount = monsterParkCount;
+	}
+
 }

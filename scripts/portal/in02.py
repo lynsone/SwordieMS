@@ -1,10 +1,14 @@
 status = -1
 
+from net.swordie.ms.constants import GameConstants
+from net.swordie.ms.enums import QuestStatus
+from net.swordie.ms.client.character.quest import Quest
+
 if sm.getFieldID() == 951000000:
 	# Monster Park
 
 	minLv = 160
-	maxLv = 250
+	maxLv = 251
 
 	maps = [
 		["Ruined City (Lv.160-169", 954000000],
@@ -26,7 +30,11 @@ if sm.getFieldID() == 951000000:
 				sm.sendSayOkay("You need to be between Level "+ str(minLv) +" and "+ str(maxLv) +" to enter.")
 				sm.dispose()
 			else:
-				string = "#eToday is #b[Day]#k.\r\nToday's Clear Count #b"+ str(0) +"/7#k (Per Maple account)\r\n\r\nYou have #b"+ str(2) +"#k free clears left for today.\r\n\r\n#n#b"
+				if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
+					colour = "#r"
+				else:
+					colour = "#b"
+				string = "#eToday is #b"+ sm.getDay() +"#k.\r\nToday's Clear Count "+ colour +""+ str(sm.getMonsterParkCount()) +"/"+ str(GameConstants.MAX_MONSTER_PARK_RUNS) +"#k (per Maple Character)\r\n\r\nYou have #b"+ str(2) +"#k free clears left for today.\r\n\r\n#n#b"
 				i = 0
 				while i < len(maps):
 					string += "#L"+ str(i) +"#"+ maps[i][0] +"#l\r\n"
@@ -38,15 +46,29 @@ if sm.getFieldID() == 951000000:
 		status += 1
 
 		if status == 0:
-			selection = answer
-			sm.sendAskYesNo("#eToday is #b[Day]#k.\r\n\r\n"
-							"Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
-							"Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
-							"Would you like to enter the dungeon?")
+			if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
+				sm.sendSayOkay("I'm sorry, but you've used up all your clears for today.")
+				sm.dispose()
+			else:
+				selection = answer
+				sm.sendAskYesNo("#eToday is #b"+ sm.getDay() +"#k.\r\n\r\n"
+								"Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
+								"Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
+								"Would you like to enter the dungeon?")
 
 		elif status == 1:
 			if response == 1:
 				sm.warpInstanceIn(maps[selection][1])
+				sm.incrementMonsterParkCount()
+
+				qm = sm.getChr().getQuestManager()
+				quest = qm.getQuests().get(GameConstants.MONSTER_PARK_EXP_QUEST)
+				if quest is None:
+					quest = Quest(GameConstants.MONSTER_PARK_EXP_QUEST, QuestStatus.STARTED)
+					quest.setQrValue("0")
+					qm.addQuest(quest)
+				quest.setQrValue(str(0))
+
 			sm.dispose()
 
 else:

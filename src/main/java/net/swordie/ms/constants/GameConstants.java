@@ -108,6 +108,10 @@ public class GameConstants {
     public static final int DOJO_DUMMY_DURATION = 10; // Dummy will stay alive for [] minutes, after which it will be removed.
     public static final int DOJO_SPAWM_BOSS_DELAY = 3; // Spawn delay, in seconds, per boss on the Dojo Floors
 
+    // Monster Park
+    public static final byte MAX_MONSTER_PARK_RUNS = 7; // Max Monster Park runs per character
+    public static final int MONSTER_PARK_EXP_QUEST = 99999; // Quest where the Exp for MP runs gets stored.
+
     // Monster Collection
     public static final int MOBS_PER_PAGE = 25;
     public static final int MOBS_PER_GROUP = 5;

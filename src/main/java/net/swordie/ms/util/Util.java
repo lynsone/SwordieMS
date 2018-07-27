@@ -1,16 +1,15 @@
 package net.swordie.ms.util;
 
 import io.netty.buffer.ByteBuf;
-import org.hibernate.mapping.Collection;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.function.Predicate;
 
@@ -307,5 +306,15 @@ public class Util {
      */
     public static <T> T getFromCollectionWithPred(java.util.Collection<T> collection, Predicate<T> pred) {
         return collection.stream().filter(pred).findAny().orElse(null);
+    }
+
+    /**
+     * Returns a formatted number, using English locale.
+     *
+     * @param number The number to be formatted
+     * @return The formatted number
+     */
+    public static String formatNumber(String number) {
+        return NumberFormat.getInstance(Locale.ENGLISH).format(Long.parseLong(number));
     }
 }

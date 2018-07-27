@@ -3,6 +3,7 @@ package net.swordie.ms.scripts;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.MonsterPark;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.Item;
@@ -47,6 +48,7 @@ import javax.script.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -570,6 +572,9 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void warpInstance(int id, boolean in) {
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
+		if (!in) {
+			chr.getFields().clear();
+		}
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
 		chr.warp(field);
 	}
@@ -1036,6 +1041,29 @@ public class ScriptManagerImpl implements ScriptManager {
 
 
 
+	// Party Quest-related methods -------------------------------------------------------------------------------------
+
+	public void incrementMonsterParkCount() {
+		chr.setMonsterParkCount( (byte) (chr.getMonsterParkCount() + 1));
+	}
+
+	public byte getMonsterParkCount() {
+		return chr.getMonsterParkCount();
+	}
+
+	public String getDay() {
+		return new SimpleDateFormat("EEEE", Locale.ENGLISH).format(System.currentTimeMillis());
+	}
+
+	public int getMPExpByMobId(int templateId) {
+		return MonsterPark.getExpByMobId(templateId);
+	}
+
+	public int getMPReward() {
+		return MonsterPark.getRewardByDay();
+	}
+
+
 	// Boss-related methods --------------------------------------------------------------------------------------------
 
 	@Override
@@ -1161,5 +1189,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void getEffect(String dir, int delay) {
 		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
+	}
+
+	public String formatNumber(String number) {
+		return Util.formatNumber(number);
 	}
 }
