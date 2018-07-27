@@ -6,7 +6,7 @@ import java.util.concurrent.*;
  */
 public class EventManager {
 
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+    private static final ScheduledExecutorService scheduler = new CathingScheduledThreadPoolExecutor(10);
 
     /**
      * Adds and returns an event that executes after a given delay.

@@ -166,11 +166,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		getScripts().put(scriptType, scriptInfo);
 		Invocable inv = getInvocableFromScriptNameAndType(scriptName, scriptType);
 		getScripts().get(scriptType).setInvocable(inv);
-		try {
-			getInvocableByType(scriptType).invokeFunction(initFuncName);
-		} catch (ScriptException | NoSuchMethodException e) {
-			e.printStackTrace();
-		}
+		EventManager.addEvent(() -> getInvocableByType(scriptType).invokeFunction(initFuncName), 0);
 	}
 
 	public void notifyMobDeath(Mob mob) {
