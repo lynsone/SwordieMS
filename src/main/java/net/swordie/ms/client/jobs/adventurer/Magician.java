@@ -502,13 +502,12 @@ public class Magician extends Job {
         }
     }
 
-    private void handleChillingStep() {
+    private void handleChillingStep(short slv) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(ChillingStep)) {
-            for (int i = 0; i < 168; i += 56) {
-                SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
+        SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
+        if (tsm.hasStat(ChillingStep) && Util.succeedProp(chillingStepInfo.getValue(prop, slv))) {
+           for (int i = 0; i < 168; i += 56) {
                 Skill skill = chr.getSkill(CHILLING_STEP);
-                int slv = skill.getCurrentLevel();
                 AffectedArea aa = AffectedArea.getPassiveAA(chr, CHILLING_STEP, (byte) slv);
                 aa.setMobOrigin((byte) 0);
                 int x = chr.isLeft() ? chr.getPosition().getX() - i : chr.getPosition().getX() + i;
@@ -517,6 +516,8 @@ public class Magician extends Job {
                 aa.setRect(aa.getPosition().getRectAround(chillingStepInfo.getRects().get(0)));
                 aa.setCurFoothold();
                 aa.setDelay((short) 4);
+                aa.setSkillID(CHILLING_STEP);
+                aa.setRemoveSkill(false);
                 chr.getField().spawnAffectedArea(aa);
             }
         }
@@ -584,7 +585,7 @@ public class Magician extends Job {
                     chr.getField().spawnAffectedArea(aa);
                     break;
                 case TELEPORT:
-                    handleChillingStep();
+                    handleChillingStep(slv);
                     break;
                 case HEAL:
                     chr.heal(handleBishopHealingSkills(HEAL));
@@ -825,9 +826,13 @@ public class Magician extends Job {
                 field.spawnSummon(summon);
                 break;
             case CHILLING_STEP:
-                o1.nOption = 5;
-                o1.rOption = skillID;
-                tsm.putCharacterStatValue(ChillingStep, o1);
+                if (tsm.hasStat(ChillingStep)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.rOption = skillID;
+                    tsm.putCharacterStatValue(ChillingStep, o1);
+                }
                 break;
             case EPIC_ADVENTURE_FP:
             case EPIC_ADVENTURE_IL:
