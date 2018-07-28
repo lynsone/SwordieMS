@@ -18,9 +18,9 @@ def action(type):
         if hitCount >= 1:
             i = 0
             while i < 10:
-                sm.spawnMob(PRISON_GUARD_BOAR, 3134 + (i*2), -139, False)
-                sm.spawnMob(PRISON_GUARD_RHINO, 3131 + (i*2), -139, False)
+                sm.spawnMob(PRISON_GUARD_BOAR, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY(), False)
+                sm.spawnMob(PRISON_GUARD_RHINO, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY(), False)
                 i += 1
-            sm.dropItem(PRISON_KEY, sm.getChr().getPosition().getX(), sm.getChr().getPosition().getY())
-            sm.removeReactor()
+            sm.dropItem(PRISON_KEY, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY())
+            #sm.removeReactor()
             sm.dispose()
