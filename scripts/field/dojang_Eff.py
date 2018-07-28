@@ -1,6 +1,8 @@
 # Mu Lung Dojo Floors (except 1st Floor) | Used to spawn the Bosses & Display "Floor Effect & Dojo Clock"
 
 from net.swordie.ms.constants import WzConstants
+from net.swordie.ms.constants import GameConstants
+from time import sleep
 
 MuLungDojoF1 = 925070100
 MuLungDojoF2 = 925070200
@@ -93,6 +95,7 @@ def init():
     sm.fieldGetEffect(""+ WzConstants.EFFECT_DOJO_STAGE_NUMBER +""+ str(stage))
     sm.fieldGetEffect(WzConstants.EFFECT_DOJO_STAGE)
 
+    sleep(GameConstants.DOJO_SPAWM_BOSS_DELAY)
     sm.spawnMob(bossPerFloor[sm.getFieldID()], 0, 7, False) # Spawns mob based on Field ID
     sm.dispose()
 
