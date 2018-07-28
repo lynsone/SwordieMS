@@ -1196,7 +1196,9 @@ public class AdminCommands {
             gotomaps.put("goldenbeach", 914200000);
             gotomaps.put("ardentmill", 910001000);
 
-            if (gotomaps.containsKey(args[1])) {
+            if (args.length == 1) {
+                chr.chatMessage(GAME_NOTICE, "List of locations: " + gotomaps.keySet());
+            } else if (gotomaps.containsKey(args[1])) {
                 Field toField = chr.getClient().getChannelInstance().getField(gotomaps.get(args[1]));
                 Portal portal = chr.getField().getDefaultPortal();
                 chr.warp(toField, portal);

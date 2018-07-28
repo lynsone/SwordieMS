@@ -29,6 +29,7 @@ public class ItemConstants {
     public static final int FAMILIAR_PREFIX = 996;
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
     public static final int THIRD_LINE_CHANCE = 50;
+    public static final int PRIME_LINE_CHANCE = 15;
     public static final int RED_CUBE = 5062009;
     public static final int BONUS_POT_CUBE = 5062500;
     public static final int BLACK_CUBE = 5062010;
@@ -333,80 +334,87 @@ public class ItemConstants {
         return !isAccessory(itemID) && !isWeapon(itemID);
     }
 
-    public static List<ItemOption> getOptionsByEquip(Equip equip, boolean bonus) {
+    /**
+     * Gets potential tier for a line.
+     * Accounts prime lines too.
+     * @param line Potential line.
+     * @param grade Our current potential grade.
+     */
+    public static ItemGrade getLineTier(int line, ItemGrade grade) {
+        if (line == 0 || Util.succeedProp(PRIME_LINE_CHANCE)) {
+            return grade;
+        }
+
+        return ItemGrade.getOneTierLower(grade.getVal());
+    }
+
+    public static List<ItemOption> getOptionsByEquip(Equip equip, boolean bonus, int line) {
         int id = equip.getItemId();
         List<ItemOption> data = ItemData.getItemOptions();
-        for(ItemOption io : data) {
-            // TODO: Debug data, remove once prime line logic is completed (chance for prime/lower tier pot)
-            ItemGrade ioGrade = ItemGrade.getGradeByOption(io.getId());
-            ItemGrade itemGrade = ItemGrade.getGradeByVal(equip.getBaseGrade());
-            boolean jwz = io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade());
-            boolean zwj = io.isBonus() == bonus;
-            int i = 0;
-            i += 3;
-        }
+        ItemGrade grade = getLineTier(line, ItemGrade.getGradeByVal(bonus ? equip.getBonusGrade() : equip.getBaseGrade()));
+
         List<ItemOption> res = data.stream().filter(
                 io -> io.getOptionType() == 0 &&
-                io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                 .collect(Collectors.toList());
         if (isWeapon(id)) {
             res.addAll(data.stream().filter(
                     io -> io.getOptionType() == 10
-                    &&  io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus
+                    &&  io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus
             ).collect(Collectors.toList()));
         } else {
             res.addAll(data.stream().filter(
                     io -> io.getOptionType() == 11
-                    && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                    && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                     .collect(Collectors.toList()));
             if (isAccessory(id)) {
                 res.addAll(data.stream().filter(
                         io -> io.getOptionType() == 40
-                        && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                        && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                         .collect(Collectors.toList()));
             } else {
                 res.addAll(data.stream().filter(
                         io -> io.getOptionType() == 20
-                        && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                        && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                         .collect(Collectors.toList()));
                 if (isHat(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 51
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isTop(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 52
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isBottom(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 53
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isOverall(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 52
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 53
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isGlove(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 54
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isShoe(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 55
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
             }
@@ -414,9 +422,9 @@ public class ItemConstants {
         return res.stream().filter(io -> io.getReqLevel() <= equip.getrLevel()).collect(Collectors.toList());
     }
 
-    public static List<Integer> getWeightedOptionsByEquip(Equip equip, boolean bonus) {
+    public static List<Integer> getWeightedOptionsByEquip(Equip equip, boolean bonus, int line) {
         List<Integer> res = new ArrayList<>();
-        List<ItemOption> data = getOptionsByEquip(equip, bonus);
+        List<ItemOption> data = getOptionsByEquip(equip, bonus, line);
         for(ItemOption io : data) {
             for (int i = 0; i < io.getWeight(); i++) {
                 res.add(io.getId());
@@ -425,8 +433,8 @@ public class ItemConstants {
         return res;
     }
 
-    public static int getRandomOption(Equip equip, boolean bonus) {
-        List<Integer> data = getWeightedOptionsByEquip(equip, bonus);
+    public static int getRandomOption(Equip equip, boolean bonus, int line) {
+        List<Integer> data = getWeightedOptionsByEquip(equip, bonus, line);
         return data.get(Util.getRandom(data.size()));
     }
 

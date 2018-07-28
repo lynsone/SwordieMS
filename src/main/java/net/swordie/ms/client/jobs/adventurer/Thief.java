@@ -489,10 +489,15 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(DarkSight, o1);
                 break;
             case ASSASSINS_MARK:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(NightLordMark, o1);
+                if (tsm.hasStat(NightLordMark)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(NightLordMark, o1);
+                }
                 break;
             case CLAW_BOOSTER:
             case DAGGER_BOOSTER:
@@ -520,7 +525,7 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
             case SHADOW_STARS:
-                o1.nOption = si.getValue(x, slv);
+                o1.nOption = 0;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NoBulletConsume, o1);

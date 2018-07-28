@@ -2731,6 +2731,15 @@ public class TemporaryStatManager {
         return getAffectedAreas().contains(affectedArea);
     }
 
+    public boolean hasStatBySkillId(int skillId) {
+        for (CharacterTemporaryStat cts : getCurrentStats().keySet()) {
+            if (getOption(cts).rOption == skillId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void removeStatsBySkill(int skillId) {
         Map<CharacterTemporaryStat, Option> removedMap = new HashMap<>();
         for (CharacterTemporaryStat cts : getCurrentStats().keySet()) {

@@ -176,9 +176,14 @@ public class Xenon extends Job {
                 tsm.putCharacterStatValue(StackBuff, o1);
                 break;
             case AEGIS_SYSTEM:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                tsm.putCharacterStatValue(XenonAegisSystem, o1);
+                if (tsm.hasStat(XenonAegisSystem)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    tsm.putCharacterStatValue(XenonAegisSystem, o1);
+                }
                 break;
             case MANIFEST_PROJECTOR:
                 o1.nOption = si.getValue(y, slv);

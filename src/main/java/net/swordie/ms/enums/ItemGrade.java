@@ -98,4 +98,32 @@ public enum ItemGrade {
         }
         return ig;
     }
+
+    public static ItemGrade getOneTierLower(short val) {
+        ItemGrade ig = NONE;
+        ItemGrade arg = getGradeByVal(val);
+        switch(arg) {
+            case RARE:
+            case EPIC:
+                ig = RARE;
+                break;
+            case HIDDEN_RARE:
+            case HIDDEN_EPIC:
+                ig = HIDDEN_RARE;
+                break;
+            case UNIQUE:
+                ig = EPIC;
+                break;
+            case HIDDEN_UNIQUE:
+                ig = HIDDEN_EPIC;
+                break;
+            case LEGENDARY:
+                ig = UNIQUE;
+                break;
+            case HIDDEN_LEGENDARY:
+                ig = HIDDEN_UNIQUE;
+                break;
+        }
+        return ig;
+    }
 }

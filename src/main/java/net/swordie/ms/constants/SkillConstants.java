@@ -295,7 +295,6 @@ public class SkillConstants {
             case 61001101:
             case 51121008:
             case 51111007:
-            case 36121001:
             case 51001004:
             case 36111010:
             case 36101009:
