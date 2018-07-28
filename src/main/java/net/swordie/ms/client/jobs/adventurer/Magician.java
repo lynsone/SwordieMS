@@ -718,7 +718,7 @@ public class Magician extends Job {
                     tsm.removeStatsBySkill(skillID);
                     tsm.sendResetStatPacket();
                 } else {
-                    o1.nOption = 1;
+                    o1.nOption = si.getValue(x, slv);
                     o1.rOption = skillID;
                     o1.tOption = 0;
                     tsm.putCharacterStatValue(masteryStat, o1);
