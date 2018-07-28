@@ -1296,8 +1296,8 @@ public class Equip extends Item {
         }
     }
 
-    public int getRandomOption(boolean bonus) {
-        List<Integer> data = ItemConstants.getWeightedOptionsByEquip(this, bonus);
+    public int getRandomOption(boolean bonus, int line) {
+        List<Integer> data = ItemConstants.getWeightedOptionsByEquip(this, bonus, line);
         return data.get(Util.getRandom(data.size() - 1));
     }
 
@@ -1336,7 +1336,7 @@ public class Equip extends Item {
     public void releaseOptions(boolean bonus) {
         for (int i = 0; i < 3; i++) {
             if(getOption(i, bonus) < 0) {
-                setOption(i, getRandomOption(bonus), bonus);
+                setOption(i, getRandomOption(bonus, i), bonus);
             }
         }
     }
