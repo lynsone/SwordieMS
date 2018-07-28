@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
@@ -94,6 +95,7 @@ public class Magician extends Job {
     public static final int GLACIER_CHAIN = 2211010;
     public static final int THUNDER_STORM = 2211011;
     public static final int TELEPORT_MASTERY_IL = 2211007;
+    public static final int TELEPORT_MASTERY_RANGE_IL = 2221045;
     public static final int ELEMENTAL_DECREASE_IL = 2211008;
     public static final int ELEMENTAL_ADAPTATION_IL = 2211012;
     public static final int CHAIN_LIGHTNING = 2221006;
@@ -160,6 +162,7 @@ public class Magician extends Job {
             MEDITATION_IL,
             THUNDER_STORM,
             TELEPORT_MASTERY_IL,
+            TELEPORT_MASTERY_RANGE_IL,
             ELEMENTAL_DECREASE_IL,
             ELEMENTAL_ADAPTATION_IL,
             INFINITY_IL,
@@ -528,7 +531,6 @@ public class Magician extends Job {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -674,10 +676,15 @@ public class Magician extends Job {
                 tsm.putCharacterStatValue(IndieMAD, o1);
                 break;
             case IGNITE:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(WizardIgnite, o1);
+                if (tsm.hasStat(WizardIgnite)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(WizardIgnite, o1);
+                }
                 break;
             case ELEMENTAL_DECREASE_FP:
             case ELEMENTAL_DECREASE_IL:
@@ -704,11 +711,18 @@ public class Magician extends Job {
                 break;
             case TELEPORT_MASTERY_FP:
             case TELEPORT_MASTERY_IL:
+            case TELEPORT_MASTERY_RANGE_IL:
             case TELEPORT_MASTERY_BISH:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(TeleportMasteryOn, o1);
+                CharacterTemporaryStat masteryStat = skillID == TELEPORT_MASTERY_RANGE_IL ? TeleportMasteryRange : TeleportMasteryOn;
+                if (tsm.hasStat(masteryStat)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(masteryStat, o1);
+                }
                 break;
             case INFINITY_FP:
             case INFINITY_IL:

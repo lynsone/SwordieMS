@@ -579,20 +579,25 @@ public class Archer extends Job {
 
                 break;
             case RECKLESS_HUNT_BOW:
-                o1.nValue = -si.getValue(x, slv);
-                o1.nReason = skillID;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = 0;
-                tsm.putCharacterStatValue(IndiePADR, o1);
-                tsm.putCharacterStatValue(IndieMADR, o1);
-                o2.nValue = si.getValue(indieDamR, slv);
-                o2.nReason = skillID;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = 0;
-                tsm.putCharacterStatValue(IndieDamR, o2);
-                o3.nOption = si.getValue(padX, slv);
-                o3.rOption = skillID;
-                tsm.putCharacterStatValue(PAD, o3);
+                if (tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nValue = -si.getValue(x, slv);
+                    o1.nReason = skillID;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = 0;
+                    tsm.putCharacterStatValue(IndiePADR, o1);
+                    tsm.putCharacterStatValue(IndieMADR, o1);
+                    o2.nValue = si.getValue(indieDamR, slv);
+                    o2.nReason = skillID;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = 0;
+                    tsm.putCharacterStatValue(IndieDamR, o2);
+                    o3.nOption = si.getValue(padX, slv);
+                    o3.rOption = skillID;
+                    tsm.putCharacterStatValue(PAD, o3);
+                }
                 break;
             case PAIN_KILLER:
                 o1.nOption = 100;
@@ -601,18 +606,23 @@ public class Archer extends Job {
                 tsm.putCharacterStatValue(AsrR, o1);
                 break;
             case RECKLESS_HUNT_XBOW:
-                o1.nOption = -si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(EVAR, o1);
-                o2.nOption = si.getValue(y, slv);
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IncCriticalDamMax, o2);
-                o3.nOption = si.getValue(z, slv);
-                o3.rOption = skillID;
-                o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IncCriticalDamMin, o3);
+                if (tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = -si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(EVAR, o1);
+                    o2.nOption = si.getValue(y, slv);
+                    o2.rOption = skillID;
+                    o2.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IncCriticalDamMax, o2);
+                    o3.nOption = si.getValue(z, slv);
+                    o3.rOption = skillID;
+                    o3.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IncCriticalDamMin, o3);
+                }
                 break;
             case SHARP_EYES_BOW:
             case SHARP_EYES_XBOW:

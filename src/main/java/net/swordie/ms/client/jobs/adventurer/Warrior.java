@@ -218,24 +218,29 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(CombatOrders, o1);
                 break;
             case PARASHOCK_GUARD:
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(indiePad, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndiePAD, o1);
-                o2.nReason = skillID;
-                o2.nValue = si.getValue(indiePddR, slv);
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndiePDDR, o1);
-                o3.nOption = si.getValue(z, slv);
-                o3.rOption = skillID;
-                o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Guard, o3);
-                o4.nOption = 1;
-                o4.rOption = skillID;
-                o4.tOption = 0;
-                tsm.putCharacterStatValue(KnightsAura, o4);
+                if (tsm.hasStat(KnightsAura)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nReason = skillID;
+                    o1.nValue = si.getValue(indiePad, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndiePAD, o1);
+                    o2.nReason = skillID;
+                    o2.nValue = si.getValue(indiePddR, slv);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndiePDDR, o1);
+                    o3.nOption = si.getValue(z, slv);
+                    o3.rOption = skillID;
+                    o3.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(Guard, o3);
+                    o4.nOption = 1;
+                    o4.rOption = skillID;
+                    o4.tOption = 0;
+                    tsm.putCharacterStatValue(KnightsAura, o4);
+                }
                 break;
             case ELEMENTAL_FORCE:
                 o1.nReason = skillID;

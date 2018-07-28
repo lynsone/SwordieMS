@@ -2051,7 +2051,7 @@ public class WorldHandler {
             switch (itemID) {
                 case 2049505: // Gold Potential Stamp
                 case 2049517:
-                    equip.setOption(2, equip.getRandomOption(false), false);
+                    equip.setOption(2, equip.getRandomOption(false, 2), false);
                     break;
                 default:
                     log.error("Unhandled slot extend item " + itemID);
