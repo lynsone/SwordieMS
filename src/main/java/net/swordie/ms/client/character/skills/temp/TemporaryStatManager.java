@@ -2724,7 +2724,10 @@ public class TemporaryStatManager {
 
     public void removeAffectedArea(AffectedArea aa) {
         getAffectedAreas().remove(aa);
-        removeStatsBySkill(aa.getSkillID());
+
+        if (aa.getRemoveSkill()) {
+            removeStatsBySkill(aa.getSkillID());
+        }
     }
 
     public boolean hasAffectedArea(AffectedArea affectedArea) {

@@ -40,6 +40,7 @@ public class AffectedArea extends Life {
     private short delay;
     private boolean flip;
     private int duration;
+    private boolean removeSkill;
 
     public AffectedArea(int templateId) {
         super(templateId);
@@ -137,6 +138,14 @@ public class AffectedArea extends Life {
         this.flip = flip;
     }
 
+    public boolean getRemoveSkill() {
+        return removeSkill;
+    }
+
+    public void setRemoveSkill(boolean removeSkill) {
+        this.removeSkill = removeSkill;
+    }
+
     public static AffectedArea getAffectedArea(Char chr, AttackInfo attackInfo) {
         AffectedArea aa = new AffectedArea(-1);
         aa.setSkillID(attackInfo.skillId);
@@ -153,6 +162,7 @@ public class AffectedArea extends Life {
         aa.setOwner(chr);
         aa.setSkillID(skillID);
         aa.setSlv(slv);
+        aa.setRemoveSkill(true);
 
         return aa;
     }
