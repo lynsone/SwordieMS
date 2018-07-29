@@ -68,6 +68,7 @@ public class BlazeWizard extends Job {
     public static final int PHOENIX_RUN = 12111023; //Special Buff //TODO
 
     public static final int BURNING_CONDUIT = 12121005;
+    public static final int FIRES_OF_CREATION = 12121004; //only used for visual cooldown
     public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff
     public static final int FIRES_OF_CREATION_LION = 12120013; //Buff
     public static final int FLAME_BARRIER = 12121003; //Buff //TODO gives Kanna's Flame Barrier
@@ -160,7 +161,14 @@ public class BlazeWizard extends Job {
                 break;
             case FIRES_OF_CREATION_FOX:
             case FIRES_OF_CREATION_LION:
-                // TODO: remove other summon. i.e. spawn fox -> spawn lion, fox will still be in the map
+                if (chr.hasSkillOnCooldown(FIRES_OF_CREATION_FOX) || chr.hasSkillOnCooldown(FIRES_OF_CREATION_LION)) {
+                    break;
+                }
+
+                chr.setSkillCooldown(FIRES_OF_CREATION, slv); // to display cooldown in quickslot
+                chr.setSkillCooldown(FIRES_OF_CREATION_FOX, slv);
+                chr.setSkillCooldown(FIRES_OF_CREATION_LION, slv);
+
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
