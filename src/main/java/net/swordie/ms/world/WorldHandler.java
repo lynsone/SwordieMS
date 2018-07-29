@@ -4253,9 +4253,20 @@ public class WorldHandler {
         int slv = skill == null ? 0 : skill.getCurrentLevel();
         if (slv == 0) {
             log.error(String.format("Character %d tried to make a grenade with a skill they do not possess (id %d)", chr.getId(), skillID));
+        } else {
+            boolean success = true;
+            if (SkillData.getSkillInfoById(skillID).hasCooltime()) {
+                if (chr.hasSkillOnCooldown(skillID)) {
+                    success = false;
+                } else {
+                    chr.setSkillCooldown(skillID, (byte) slv);
+                }
+            }
+            if (success) {
+                chr.getField().broadcastPacket(UserRemote.throwGrenade(chr.getId(), grenadeID, pos, keyDown, skillID,
+                        bySummonedID, slv, left, attackSpeed), chr);
+            }
         }
-        chr.getField().broadcastPacket(UserRemote.throwGrenade(chr.getId(), grenadeID, pos, keyDown, skillID,
-                bySummonedID, slv, left, attackSpeed), chr);
 
     }
 
