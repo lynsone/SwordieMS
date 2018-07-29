@@ -2,22 +2,23 @@ package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.quest.progress.QuestProgressItemRequirement;
-import net.swordie.ms.client.character.quest.progress.QuestProgressRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
 import net.swordie.ms.client.character.quest.reward.QuestItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestReward;
-import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.QuestStatus;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.QuestData;
 import net.swordie.ms.loaders.QuestInfo;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.enums.ChatMsgColour.YELLOW;
@@ -88,12 +89,21 @@ public class QuestManager {
         return quest != null && quest.getStatus() == COMPLETE;
     }
 
+    public void addQuest(Quest quest) {
+        addQuest(quest, true);
+    }
+
+    public void addCustomQuest(Quest quest) {
+        addQuest(quest, false);
+    }
+
     /**
      * Adds a new {@link Quest} to this QuestManager's quests. If it already exists, doesn't do anything.
      * Use {@link #replaceQuest(Quest)} if a given quest should be overridden.
      * @param quest The Quest to add.
+     * @param addRewardsFromWz Whether or not to addRewards from the WzFiles
      */
-    public void addQuest(Quest quest) {
+    private void addQuest(Quest quest, boolean addRewardsFromWz) {
         if(!getQuests().containsKey(quest.getQRKey())) {
             getQuests().put(quest.getQRKey(), quest);
             chr.write(WvsContext.questRecordMessage(quest));
@@ -101,10 +111,12 @@ public class QuestManager {
                 chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
             } else {
                 chr.chatMessage(YELLOW, "[Info] Accepted quest " + quest.getQRKey());
-                QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
-                for (QuestReward qr : qi.getQuestRewards()) {
-                    if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
-                        qr.giveReward(getChr());
+                if(addRewardsFromWz) {
+                    QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
+                    for (QuestReward qr : qi.getQuestRewards()) {
+                        if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
+                            qr.giveReward(getChr());
+                        }
                     }
                 }
             }

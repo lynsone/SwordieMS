@@ -81,7 +81,7 @@ elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
             sm.setQRValue(partyMembers.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
 
             # Gives all party members Exp
-            sm.getPQExp(partyMembers.getChr())
+            sm.giveExp(sm.getPQExp(partyMembers.getChr()))
 
             # Checks & deletes all items in the  array: pqItems
             for item in pqItems:
