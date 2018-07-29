@@ -220,6 +220,18 @@ public abstract class Job {
 
 	public abstract int getFinalAttackSkill();
 
+	/**
+	 * Called when a player is right-clicking a buff, requesting for it to be disabled.
+	 *
+	 * @param c
+	 * 		The client
+	 * @param skillID
+	 * 		The skill that the player right-clicked
+	 */
+	public void handleSkillRemove(Client c, int skillID) {
+		// nothing here yet, @Override to make use of it
+	}
+
 	public void handleLevelUp() {
 		short level = chr.getLevel();
 		chr.addStat(Stat.mhp, 500);

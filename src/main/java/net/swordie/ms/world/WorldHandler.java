@@ -1265,6 +1265,7 @@ public class WorldHandler {
         int skillId = inPacket.decodeInt();
         tsm.removeStatsBySkill(skillId);
         tsm.sendResetStatPacket();
+        chr.getJobHandler().handleSkillRemove(c, skillId);
     }
 
     public static void handleUserStatChangeItemCancelRequest(Char chr, InPacket inPacket) {
@@ -1667,20 +1668,34 @@ public class WorldHandler {
                 skillID = BlazeWizard.ORBITAL_FLAME_ATOM;
                 break;
         }
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStatBySkillId(BlazeWizard.ORBITAL_FLAME_RANGE)) {
+            range = tsm.getOptByCTSAndSkill(AddRangeOnOff, BlazeWizard.ORBITAL_FLAME_RANGE).nOption;
+        }
+
         int curTime = Util.getCurrentTime();
-        int angle = 0;
+        int angle = 0; // left
+        int firstImpact = 5;
+        int secondImpact = 21;
         switch (dir) {
-            case 1:
+            case 1: // right
                 angle = 180;
                 break;
-            case 2:
+            case 2: // up
                 angle = 270;
+                firstImpact = 11;
+                secondImpact = 13;
+                range /= 1.5;
                 break;
-            case 3:
+            case 3: // down
                 angle = 90;
+                firstImpact = 11;
+                secondImpact = 13;
+                range /= 1.5;
                 break;
         }
-        ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), 11, 13,
+        ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), firstImpact, secondImpact,
                 angle, 0, curTime, si.getValue(SkillStat.mobCount, slv), skillID, new Position(0, 0));
         List<ForceAtomInfo> faiList = new ArrayList<>();
         faiList.add(fai);
@@ -4243,9 +4258,20 @@ public class WorldHandler {
         int slv = skill == null ? 0 : skill.getCurrentLevel();
         if (slv == 0) {
             log.error(String.format("Character %d tried to make a grenade with a skill they do not possess (id %d)", chr.getId(), skillID));
+        } else {
+            boolean success = true;
+            if (SkillData.getSkillInfoById(skillID).hasCooltime()) {
+                if (chr.hasSkillOnCooldown(skillID)) {
+                    success = false;
+                } else {
+                    chr.setSkillCooldown(skillID, (byte) slv);
+                }
+            }
+            if (success) {
+                chr.getField().broadcastPacket(UserRemote.throwGrenade(chr.getId(), grenadeID, pos, keyDown, skillID,
+                        bySummonedID, slv, left, attackSpeed), chr);
+            }
         }
-        chr.getField().broadcastPacket(UserRemote.throwGrenade(chr.getId(), grenadeID, pos, keyDown, skillID,
-                bySummonedID, slv, left, attackSpeed), chr);
 
     }
 

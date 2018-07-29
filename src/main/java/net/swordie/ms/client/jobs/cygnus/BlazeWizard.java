@@ -8,6 +8,8 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.AffectedArea;
@@ -68,10 +70,12 @@ public class BlazeWizard extends Job {
     public static final int PHOENIX_RUN = 12111023; //Special Buff //TODO
 
     public static final int BURNING_CONDUIT = 12121005;
-    public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff //TODO give a buff
-    public static final int FIRES_OF_CREATION_LION = 12120013; //Buff //TODO give a buff
+    public static final int FIRES_OF_CREATION = 12121004; //only used for visual cooldown
+    public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff
+    public static final int FIRES_OF_CREATION_LION = 12120013; //Buff
     public static final int FLAME_BARRIER = 12121003; //Buff //TODO gives Kanna's Flame Barrier
     public static final int CALL_OF_CYGNUS_BW = 12121000; //Buff
+    public static final int ORBITAL_FLAME_RANGE = 12121043; // Buff - toggle
 
     public static final int GLORY_OF_THE_GUARDIANS_BW = 12121053;
 
@@ -100,6 +104,7 @@ public class BlazeWizard extends Job {
             FLAME_BARRIER,
             CALL_OF_CYGNUS_BW,
             GLORY_OF_THE_GUARDIANS_BW,
+            ORBITAL_FLAME_RANGE,
     };
 
     boolean used;
@@ -107,6 +112,8 @@ public class BlazeWizard extends Job {
     int prevmap;
     private HashMap<Mob,ScheduledFuture> hashMap = new HashMap<>();
     private ScheduledFuture schFuture;
+    private Summon summonFox;
+    private Summon summonLion;
 
     public BlazeWizard(Char chr) {
         super(chr);
@@ -129,7 +136,6 @@ public class BlazeWizard extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         Summon summon;
-        Field field;
         switch (skillID) {
             case WORD_OF_FIRE:
                 o1.nOption = si.getValue(x, slv);
@@ -153,21 +159,56 @@ public class BlazeWizard extends Job {
             case IGNITION:
                 o1.nOption = 1;
                 o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(WizardIgnite, o1);
                 break;
             case FIRES_OF_CREATION_FOX:
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
-                field.spawnSummon(summon);
-                break;
             case FIRES_OF_CREATION_LION:
+                if (chr.hasSkillOnCooldown(FIRES_OF_CREATION_FOX) || chr.hasSkillOnCooldown(FIRES_OF_CREATION_LION)) {
+                    break;
+                }
+
+                tsm.removeStatsBySkill(skillID == FIRES_OF_CREATION_FOX ? FIRES_OF_CREATION_LION : FIRES_OF_CREATION_LION);
+                Field field = c.getChr().getField();
+
+                if (summonFox != null)
+                {
+                    field.broadcastPacket(Summoned.summonedRemoved(summonFox, LeaveType.ANIMATION));
+                }
+
+                if (summonLion != null)
+                {
+                    field.broadcastPacket(Summoned.summonedRemoved(summonLion, LeaveType.ANIMATION));
+                }
+
+                tsm.sendResetStatPacket();
+
+                chr.setSkillCooldown(FIRES_OF_CREATION, slv); // to display cooldown in quickslot
+                chr.setSkillCooldown(FIRES_OF_CREATION_FOX, slv);
+                chr.setSkillCooldown(FIRES_OF_CREATION_LION, slv);
+
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(false);
+                summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                // i have to specify the summon term as the _FOX/LION skills have the time set to 0, making the summon last forever!
+                summon.setSummonTerm(SkillData.getSkillInfoById(FIRES_OF_CREATION).getValue(time, slv));
                 field.spawnSummon(summon);
+
+                if (skillID == FIRES_OF_CREATION_FOX) {
+                    summonFox = summon;
+                } else {
+                    summonLion = summon;
+                }
+
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(y, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o1);
+                o2.nOption = si.getValue(z, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ElementalReset, o2);
                 break;
 
             case CINDER_MAELSTROM:  //Special Summon    //TODO
@@ -189,6 +230,18 @@ public class BlazeWizard extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case ORBITAL_FLAME_RANGE:
+                if (tsm.hasStat(AddRangeOnOff)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = si.getValue(range, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(AddRangeOnOff, o1);
+                }
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
@@ -228,6 +281,26 @@ public class BlazeWizard extends Job {
         }
 
         super.handleAttack(c, attackInfo);
+    }
+
+    @Override
+    public void handleSkillRemove(Client c, int skillID) {
+        switch (skillID) {
+            case FIRES_OF_CREATION_FOX:
+            case FIRES_OF_CREATION_LION:
+                removeFiresOfCreationSummon(c, skillID);
+                break;
+        }
+    }
+
+    private void removeFiresOfCreationSummon(Client c, int skillID) {
+        Summon summon = skillID == FIRES_OF_CREATION_FOX ? summonFox : summonLion;
+
+        if (summon != null)
+        {
+            Field field = c.getChr().getField();
+            field.broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
+        }
     }
 
     private void handleIgnite(AttackInfo attackInfo) {  //TODO only registers Explosion attack if >1 mob is hit

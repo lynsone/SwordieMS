@@ -2724,7 +2724,10 @@ public class TemporaryStatManager {
 
     public void removeAffectedArea(AffectedArea aa) {
         getAffectedAreas().remove(aa);
-        removeStatsBySkill(aa.getSkillID());
+
+        if (aa.getRemoveSkill()) {
+            removeStatsBySkill(aa.getSkillID());
+        }
     }
 
     public boolean hasAffectedArea(AffectedArea affectedArea) {
@@ -2733,7 +2736,7 @@ public class TemporaryStatManager {
 
     public boolean hasStatBySkillId(int skillId) {
         for (CharacterTemporaryStat cts : getCurrentStats().keySet()) {
-            if (getOption(cts).rOption == skillId) {
+            if (getOption(cts).rOption == skillId || getOption(cts).nReason == skillId) {
                 return true;
             }
         }
