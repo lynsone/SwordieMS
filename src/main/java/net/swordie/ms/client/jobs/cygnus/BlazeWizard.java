@@ -153,6 +153,7 @@ public class BlazeWizard extends Job {
             case IGNITION:
                 o1.nOption = 1;
                 o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(WizardIgnite, o1);
                 break;
             case FIRES_OF_CREATION_FOX:
