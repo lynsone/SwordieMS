@@ -168,6 +168,21 @@ public class BlazeWizard extends Job {
                     break;
                 }
 
+                tsm.removeStatsBySkill(skillID == FIRES_OF_CREATION_FOX ? FIRES_OF_CREATION_LION : FIRES_OF_CREATION_LION);
+                Field field = c.getChr().getField();
+
+                if (summonFox != null)
+                {
+                    field.broadcastPacket(Summoned.summonedRemoved(summonFox, LeaveType.ANIMATION));
+                }
+
+                if (summonLion != null)
+                {
+                    field.broadcastPacket(Summoned.summonedRemoved(summonLion, LeaveType.ANIMATION));
+                }
+
+                tsm.sendResetStatPacket();
+
                 chr.setSkillCooldown(FIRES_OF_CREATION, slv); // to display cooldown in quickslot
                 chr.setSkillCooldown(FIRES_OF_CREATION_FOX, slv);
                 chr.setSkillCooldown(FIRES_OF_CREATION_LION, slv);
@@ -175,25 +190,12 @@ public class BlazeWizard extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
-                Field field = c.getChr().getField();
                 field.spawnSummon(summon);
 
-                int skill;
-
                 if (skillID == FIRES_OF_CREATION_FOX) {
-                    skill = FIRES_OF_CREATION_LION;
                     summonFox = summon;
                 } else {
-                    skill = FIRES_OF_CREATION_FOX;
                     summonLion = summon;
-                }
-
-                // removes previous buff to prevent stacking
-                if (summonLion != null || summonFox != null)
-                {
-                    tsm.removeStatsBySkill(skill);
-                    field.broadcastPacket(Summoned.summonedRemoved(skillID == FIRES_OF_CREATION_FOX ? summonLion : summonFox, LeaveType.ANIMATION));
-                    tsm.sendResetStatPacket();
                 }
 
                 o1.nReason = skillID;
@@ -277,6 +279,26 @@ public class BlazeWizard extends Job {
         }
 
         super.handleAttack(c, attackInfo);
+    }
+
+    @Override
+    public void handleSkillRemove(Client c, int skillID) {
+        switch (skillID) {
+            case FIRES_OF_CREATION_FOX:
+            case FIRES_OF_CREATION_LION:
+                removeFiresOfCreationSummon(c, skillID);
+                break;
+        }
+    }
+
+    private void removeFiresOfCreationSummon(Client c, int skillID) {
+        Summon summon = skillID == FIRES_OF_CREATION_FOX ? summonFox : summonLion;
+
+        if (summon != null)
+        {
+            Field field = c.getChr().getField();
+            field.broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
+        }
     }
 
     private void handleIgnite(AttackInfo attackInfo) {  //TODO only registers Explosion attack if >1 mob is hit
