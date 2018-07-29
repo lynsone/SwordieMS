@@ -1670,19 +1670,27 @@ public class WorldHandler {
         }
 
         int curTime = Util.getCurrentTime();
-        int angle = 0;
+        int angle = 0; // left
+        int firstImpact = 5;
+        int secondImpact = 21;
         switch (dir) {
-            case 1:
+            case 1: // right
                 angle = 180;
                 break;
-            case 2:
+            case 2: // up
                 angle = 270;
+                firstImpact = 11;
+                secondImpact = 13;
+                range /= 1.5;
                 break;
-            case 3:
+            case 3: // down
                 angle = 90;
+                firstImpact = 11;
+                secondImpact = 13;
+                range /= 1.5;
                 break;
         }
-        ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), 11, 13,
+        ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), firstImpact, secondImpact,
                 angle, 0, curTime, si.getValue(SkillStat.mobCount, slv), skillID, new Position(0, 0));
         List<ForceAtomInfo> faiList = new ArrayList<>();
         faiList.add(fai);
