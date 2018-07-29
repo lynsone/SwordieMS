@@ -502,12 +502,12 @@ public class Magician extends Job {
         }
     }
 
-    private void handleChillingStep(short slv) {
+    private void handleChillingStep() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
+        int slv = chr.getSkill(CHILLING_STEP).getCurrentLevel();
         if (tsm.hasStat(ChillingStep) && Util.succeedProp(chillingStepInfo.getValue(prop, slv))) {
            for (int i = 0; i < 168; i += 56) {
-                Skill skill = chr.getSkill(CHILLING_STEP);
                 AffectedArea aa = AffectedArea.getPassiveAA(chr, CHILLING_STEP, (byte) slv);
                 aa.setMobOrigin((byte) 0);
                 int x = chr.isLeft() ? chr.getPosition().getX() - i : chr.getPosition().getX() + i;
@@ -585,7 +585,9 @@ public class Magician extends Job {
                     chr.getField().spawnAffectedArea(aa);
                     break;
                 case TELEPORT:
-                    handleChillingStep(slv);
+                    if (chr.hasSkill(CHILLING_STEP)) {
+                        handleChillingStep();
+                    }
                     break;
                 case HEAL:
                     chr.heal(handleBishopHealingSkills(HEAL));
