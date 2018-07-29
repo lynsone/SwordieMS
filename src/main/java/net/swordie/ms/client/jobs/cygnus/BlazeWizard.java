@@ -68,8 +68,8 @@ public class BlazeWizard extends Job {
     public static final int PHOENIX_RUN = 12111023; //Special Buff //TODO
 
     public static final int BURNING_CONDUIT = 12121005;
-    public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff //TODO give a buff
-    public static final int FIRES_OF_CREATION_LION = 12120013; //Buff //TODO give a buff
+    public static final int FIRES_OF_CREATION_FOX = 12120014; //Buff
+    public static final int FIRES_OF_CREATION_LION = 12120013; //Buff
     public static final int FLAME_BARRIER = 12121003; //Buff //TODO gives Kanna's Flame Barrier
     public static final int CALL_OF_CYGNUS_BW = 12121000; //Buff
     public static final int ORBITAL_FLAME_RANGE = 12121043; // Buff - toggle
@@ -159,18 +159,25 @@ public class BlazeWizard extends Job {
                 tsm.putCharacterStatValue(WizardIgnite, o1);
                 break;
             case FIRES_OF_CREATION_FOX:
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
-                field.spawnSummon(summon);
-                break;
             case FIRES_OF_CREATION_LION:
+                // TODO: remove other summon. i.e. spawn fox -> spawn lion, fox will still be in the map
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(false);
+                summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
-                field.spawnSummon(summon);
+                c.getChr().getField().spawnSummon(summon);
+
+                // removes previous buff to prevent stacking
+                tsm.removeStatsBySkill(skillID == FIRES_OF_CREATION_FOX ? FIRES_OF_CREATION_LION : FIRES_OF_CREATION_FOX);
+
+                o1.nReason = skillID;
+                o1.nValue = si.getValue(y, slv);
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o1);
+                o2.nOption = si.getValue(z, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ElementalReset, o2);
                 break;
 
             case CINDER_MAELSTROM:  //Special Summon    //TODO
