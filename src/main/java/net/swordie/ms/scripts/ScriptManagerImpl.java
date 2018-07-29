@@ -1043,17 +1043,17 @@ public class ScriptManagerImpl implements ScriptManager {
 		return chr.getQuestManager().hasQuestCompleted(id);
 	}
 
-	public void createQuestwithQRValue(int questId, String qrValue) {
-		createQuestwithQRValue(chr, questId, qrValue);
+	public void createQuestWithQRValue(int questId, String qrValue) {
+		createQuestWithQRValue(chr, questId, qrValue);
 	}
 
-	public void createQuestwithQRValue(Char character, int questId, String qrValue) {
+	public void createQuestWithQRValue(Char character, int questId, String qrValue) {
 		QuestManager qm = character.getQuestManager();
 		Quest quest = qm.getQuests().get(questId);
 		if (quest == null) {
 			quest = new Quest(questId, QuestStatus.STARTED);
 			quest.setQrValue(qrValue);
-			qm.addQuest(quest);
+			qm.addCustomQuest(quest);
 		}
 		quest.setQrValue(qrValue);
 	}

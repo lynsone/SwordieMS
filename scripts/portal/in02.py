@@ -60,15 +60,7 @@ if sm.getFieldID() == 951000000:
 			if response == 1:
 				sm.warpInstanceIn(maps[selection][1])
 				sm.incrementMonsterParkCount()
-
-				qm = sm.getChr().getQuestManager()
-				quest = qm.getQuests().get(GameConstants.MONSTER_PARK_EXP_QUEST)
-				if quest is None:
-					quest = Quest(GameConstants.MONSTER_PARK_EXP_QUEST, QuestStatus.STARTED)
-					quest.setQrValue("0")
-					qm.addQuest(quest)
-				quest.setQrValue(str(0))
-
+				sm.createQuestWithQRValue(GameConstants.MONSTER_PARK_EXP_QUEST, "0")
 			sm.dispose()
 
 else:

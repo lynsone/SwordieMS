@@ -1,6 +1,5 @@
 # Guon (2094000) | Spiegelmann's Guest House
 
-from net.swordie.ms.client.party import Party
 from net.swordie.ms.constants import GameConstants
 
 pqItems = [
@@ -31,7 +30,7 @@ def action(response, answer):
 
         # for each party member, create a LORD_PIRATE_QUEST with qrValue = "0"
         for partyMember in sm.getParty().getMembers():
-            sm.createQuestwithQRValue(partyMember.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
+            sm.createQuestWithQRValue(partyMember.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
 
         sm.warpPartyIn(925100000)
     sm.dispose()
