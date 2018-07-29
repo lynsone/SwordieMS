@@ -1265,6 +1265,7 @@ public class WorldHandler {
         int skillId = inPacket.decodeInt();
         tsm.removeStatsBySkill(skillId);
         tsm.sendResetStatPacket();
+        chr.getJobHandler().handleSkillRemove(c, skillId);
     }
 
     public static void handleUserStatChangeItemCancelRequest(Char chr, InPacket inPacket) {
