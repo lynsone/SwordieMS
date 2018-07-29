@@ -72,6 +72,7 @@ public class BlazeWizard extends Job {
     public static final int FIRES_OF_CREATION_LION = 12120013; //Buff //TODO give a buff
     public static final int FLAME_BARRIER = 12121003; //Buff //TODO gives Kanna's Flame Barrier
     public static final int CALL_OF_CYGNUS_BW = 12121000; //Buff
+    public static final int ORBITAL_FLAME_RANGE = 12121043; // Buff - toggle
 
     public static final int GLORY_OF_THE_GUARDIANS_BW = 12121053;
 
@@ -100,6 +101,7 @@ public class BlazeWizard extends Job {
             FLAME_BARRIER,
             CALL_OF_CYGNUS_BW,
             GLORY_OF_THE_GUARDIANS_BW,
+            ORBITAL_FLAME_RANGE,
     };
 
     boolean used;
@@ -190,6 +192,18 @@ public class BlazeWizard extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
+                break;
+
+            case ORBITAL_FLAME_RANGE:
+                if (tsm.hasStat(AddRangeOnOff)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = si.getValue(range, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(AddRangeOnOff, o1);
+                }
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));

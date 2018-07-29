@@ -1663,6 +1663,12 @@ public class WorldHandler {
                 skillID = BlazeWizard.ORBITAL_FLAME_ATOM;
                 break;
         }
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStatBySkillId(BlazeWizard.ORBITAL_FLAME_RANGE)) {
+            range = tsm.getOptByCTSAndSkill(AddRangeOnOff, BlazeWizard.ORBITAL_FLAME_RANGE).nOption;
+        }
+
         int curTime = Util.getCurrentTime();
         int angle = 0;
         switch (dir) {
