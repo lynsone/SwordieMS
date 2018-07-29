@@ -190,6 +190,8 @@ public class BlazeWizard extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                // i have to specify the summon term as the _FOX/LION skills have the time set to 0, making the summon last forever!
+                summon.setSummonTerm(SkillData.getSkillInfoById(FIRES_OF_CREATION).getValue(time, slv));
                 field.spawnSummon(summon);
 
                 if (skillID == FIRES_OF_CREATION_FOX) {
