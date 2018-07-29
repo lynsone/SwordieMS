@@ -256,12 +256,12 @@ public class AvatarLook {
             outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender()));
             outPacket.encodeInt(itemId);
         }
-        outPacket.encodeByte(-1); //original, testing stuff
+        outPacket.encodeByte(-1);
         outPacket.encodeInt(getWeaponStickerId());
         outPacket.encodeInt(getWeaponId());
         outPacket.encodeInt(getSubWeaponId());
         outPacket.encodeByte(isDrawElfEar());
-        // outPacket.encodeByte(-1); //smth to do with a new class
+
         for (int i = 0; i < 3; i++) {
             if (getPetIDs().size() > i) {
                 outPacket.encodeInt(getPetIDs().get(i)); // always 3

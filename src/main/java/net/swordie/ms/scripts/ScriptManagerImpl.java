@@ -425,6 +425,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		stop(scriptType);
 	}
 
+	public Position getPosition(int objId) {
+		return chr.getField().getLifeByObjectID(objId).getPosition();
+	}
+
 
 
 	// Character Stat-related methods ----------------------------------------------------------------------------------
@@ -1039,6 +1043,55 @@ public class ScriptManagerImpl implements ScriptManager {
 		return chr.getQuestManager().hasQuestCompleted(id);
 	}
 
+	public void createQuestwithQRValue(int questId, String qrValue) {
+		createQuestwithQRValue(chr, questId, qrValue);
+	}
+
+	public void createQuestwithQRValue(Char character, int questId, String qrValue) {
+		QuestManager qm = character.getQuestManager();
+		Quest quest = qm.getQuests().get(questId);
+		if (quest == null) {
+			quest = new Quest(questId, QuestStatus.STARTED);
+			quest.setQrValue(qrValue);
+			qm.addQuest(quest);
+		}
+		quest.setQrValue(qrValue);
+	}
+
+	public void deleteQuest(int questId) {
+		deleteQuest(chr, questId);
+	}
+
+	public void deleteQuest(Char character, int questId) {
+		QuestManager qm = chr.getQuestManager();
+		Quest quest = qm.getQuests().get(questId);
+		if(quest == null) {
+			return;
+		}
+		qm.removeQuest(quest.getQRKey());
+	}
+
+	public String getQRValue(int questId) {
+		return getQRValue(chr, questId);
+	}
+
+	public String getQRValue(Char character, int questId) {
+		Quest quest = chr.getQuestManager().getQuests().get(questId);
+		if (quest == null) {
+			return "Quest is Null";
+		}
+		return quest.getQRValue();
+	}
+
+	public void setQRValue(int questId, String qrValue) {
+		setQRValue(chr, questId, qrValue);
+	}
+
+	public void setQRValue(Char character, int questId, String qrValue) {
+		Quest quest = chr.getQuestManager().getQuests().get(questId);
+		quest.setQrValue(qrValue);
+	}
+
 
 
 	// Party Quest-related methods -------------------------------------------------------------------------------------
@@ -1061,6 +1114,14 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public int getMPReward() {
 		return MonsterPark.getRewardByDay();
+	}
+
+	public long getPQExp() {
+		return getPQExp(chr);
+	}
+
+	public long getPQExp(Char chr) {
+		return GameConstants.PARTY_QUEST_EXP_FORMULA(chr);
 	}
 
 

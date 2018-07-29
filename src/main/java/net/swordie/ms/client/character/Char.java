@@ -2206,7 +2206,7 @@ public class Char {
 		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
-		int level = getStat(Stat.level);
+		int level = getLevel();
 		if (level >= GameConstants.charExp.length - 1) {
 			return;
 		}
@@ -2926,6 +2926,8 @@ public class Char {
 		}
 		this.online = online;
 		if (getParty() != null) {
+			PartyMember pm = getParty().getPartyMemberByID(getId());
+			pm.setChr(online ? this : null);
 			party.updatePartyMemberInfoByChr(this);
 		}
 	}

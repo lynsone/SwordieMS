@@ -4,10 +4,9 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.util.Util;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,14 +42,19 @@ public class PartyDamageInfo {
     public void distributeExp() {
         long totalExp = mob.getForcedMobStat().getExp();
         int attackers = damageDone.size();
-        Set<Char> eligibleMembers = damageDone.keySet().stream().filter(this::isEligible).collect(Collectors.toSet());
+        Set<Char> possibleMembers = new HashSet<>(party.getOnlineChars());
+        Set<Char> eligibleMembers = possibleMembers.stream().filter(this::isEligible).collect(Collectors.toSet());
         double expRate = GameConstants.getPartyExpRateByAttackersAndLeechers(attackers, eligibleMembers.size());
         for (Char chr : eligibleMembers) {
             long exp = (long) (totalExp * (0.2 * damageDone.getOrDefault(chr, 0D)
                                 + 0.8 * chr.getLevel() / chr.getParty().getAvgPartyLevel(chr)));
             exp *= expRate;
             ExpIncreaseInfo eii = new ExpIncreaseInfo();
-            eii.setPartyBonusExp((int) Math.min(Integer.MAX_VALUE, exp));
+            if (!damageDone.containsKey(chr)) {
+                eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, exp));
+            } else {
+                eii.setPartyBonusExp((int) Math.min(Integer.MAX_VALUE, exp));
+            }
             if (exp > 0) {
                 chr.addExp(exp, eii);
             }
@@ -58,7 +62,7 @@ public class PartyDamageInfo {
     }
 
     private boolean isEligible(Char chr) {
-        boolean eligible = damageDone.keySet().contains(chr) && isWithinMobLevel(chr);
+        boolean eligible = damageDone.keySet().contains(chr) || isWithinMobLevel(chr);
         if (!eligible) {
             for (Char attacker : damageDone.keySet()) {
                 eligible |= isWithinMobLevel(chr) || (isWithinMobLevel(attacker) && isWithinAttackerLvl(attacker, chr))

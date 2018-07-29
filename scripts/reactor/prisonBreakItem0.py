@@ -13,6 +13,6 @@ def action(type):
         hitCount += 1
         sm.chat(str(hitCount))
         if hitCount >= 1:
-            sm.dropItem(PRISON_KEY, sm.getChr().getPosition().getX(), sm.getChr().getPosition().getY())
+            sm.dropItem(PRISON_KEY, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY())
             sm.removeReactor()
             sm.dispose()

@@ -8,6 +8,7 @@ import net.swordie.ms.constants.MonsterCollectionRegion;
 import net.swordie.ms.constants.MonsterCollectionSession;
 import net.swordie.ms.loaders.MonsterCollectionData;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
+import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class MonsterCollection {
     @Transient
     private Map<Integer, MonsterCollectionRegion> collection = new HashMap<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "monster_collection_mobs", joinColumns = @JoinColumn(name = "collectionid"))
     @Column(name = "mobid")
     private Set<Integer> mobs = new HashSet<>();

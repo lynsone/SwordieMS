@@ -37,7 +37,11 @@ public class PartyMember {
     }
 
     public boolean isOnline() {
-        return chr.isOnline();
+        return chr != null && chr.isOnline();
+    }
+
+    public void setChr(Char chr) {
+        this.chr = chr;
     }
 
     public Char getChr() {

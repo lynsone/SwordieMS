@@ -1,3 +1,6 @@
+
+from net.swordie.ms.constants import GameConstants
+
 def init():
 	warp = True
 	fieldID = sm.getFieldID()
@@ -5,12 +8,59 @@ def init():
 		map = 930100500
 		portal = 0
 
-	# Party Quest - Escape
+	# Party Quest - Lord Pirate PQ
+	elif fieldID / 10000 == 92510:
+
+		#First Map  of the Lord Pirate PQ
+		if fieldID == 925100000:
+			warp = False
+			if sm.getReactorQuantity() > 7: # TODO Add Mob Check
+				sm.chat("The portal is not opened.")
+				sm.dispose()
+			else:
+				warp = True
+
+		#Second Map  of the Lord Pirate PQ
+		elif fieldID == 925100100:
+			warp = False
+
+			if int(sm.getQRValue(GameConstants.LORD_PIRATE_QUEST)) < 3:
+				sm.chat("The portal is not opened.")
+				sm.dispose()
+			else:
+				warp = True
+
+		#Third Map & Fourth Map  of the Lord Pirate PQ
+		elif fieldID == 925100200 or fieldID == 925100300:
+			warp = False
+			if sm.getReactorQuantity() > 8 or sm.mobsPresentInField():
+				sm.chat("The portal is not opened.")
+				sm.dispose()
+			else:
+				warp = True
+
+		#Fifth Map  of the Lord Pirate PQ
+		elif fieldID == 925100400:
+			warp = False
+			if sm.getReactorQuantity() > 1:
+				sm.chat("The portal is not opened.")
+			else:
+				sm.warpPartyIn(925100500) #Boss Map of Lord Pirate PQ
+			sm.dispose()
+
+
+		map = fieldID + 100
+		portal = 0
+
+
+
+	# Party Quest - Escape PQ
 	elif fieldID / 10000 == 92116:
 		if fieldID == 921160600:
 			warp = False
-			if sm.getReactorQuantity() > 1:
+			if sm.getReactorQuantity() > 1: # due to invisible reactor hidden on the map
 				sm.chat("Unlock all the prison doors.")
+				sm.dispose()
 			else:
 				warp = True
 

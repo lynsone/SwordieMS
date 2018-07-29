@@ -1,5 +1,6 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
@@ -104,6 +105,13 @@ public class GameConstants {
     public static final int MAX_CS_ITEMS_PER_PAGE = 12;
     public static final int MAX_LOCKER_SIZE = 9999;
 
+
+    //     START OF Party Quests
+    public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
+    public static final long PARTY_QUEST_EXP_FORMULA(Char chr) {
+        return PARTY_QUEST_GLOBAL_EXP * (1+(chr.getParty().getPartyMembers().length*100 / chr.getParty().getAvgLevel()));
+    } // Exp formula for giving Exp from Party Quests
+
     // Dojo
     public static final int DOJO_DUMMY_DURATION = 10; // Dummy will stay alive for [] minutes, after which it will be removed.
     public static final int DOJO_SPAWM_BOSS_DELAY = 3; // Spawn delay, in seconds, per boss on the Dojo Floors
@@ -111,6 +119,12 @@ public class GameConstants {
     // Monster Park
     public static final byte MAX_MONSTER_PARK_RUNS = 7; // Max Monster Park runs per character
     public static final int MONSTER_PARK_EXP_QUEST = 99999; // Quest where the Exp for MP runs gets stored.
+
+    // Lord Pirate Party Quest
+    public static final int LORD_PIRATE_QUEST = 99998; // Quest where the NPC state is stored, to close/open portals
+
+    //     END OF Party Quests
+
 
     // Monster Collection
     public static final int MOBS_PER_PAGE = 25;
