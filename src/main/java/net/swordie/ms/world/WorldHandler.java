@@ -164,8 +164,12 @@ public class WorldHandler {
         }
         if (chr.getPartyID() != 0) {
             Party party = c.getWorld().getPartybyId(chr.getPartyID());
-            chr.setParty(party);
-            chr.write(WvsContext.partyResult(new UpdatePartyResult(party)));
+            if (party == null) {
+                chr.setPartyID(0);
+            } else {
+                chr.setParty(party);
+                chr.write(WvsContext.partyResult(new UpdatePartyResult(party)));
+            }
         }
         chr.getAccount().getMonsterCollection().init(chr);
     }

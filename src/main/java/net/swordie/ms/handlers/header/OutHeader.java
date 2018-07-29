@@ -1123,7 +1123,9 @@ public enum OutHeader {
                 NPC_MOVE,
                 DROP_LEAVE_FIELD,
                 TEMPORARY_STAT_RESET,
-                PET_MOVE
+                PET_MOVE,
+                NPC_ENTER_FIELD,
+                NPC_CHANGE_CONTROLLER
 
                 );
         return spam.contains(outHeader);

@@ -174,6 +174,10 @@ public class Party {
         setWorld(null);
     }
 
+    public List<Char> getOnlineChars() {
+        return getOnlineMembers().stream().filter(pm -> pm.getChr() != null).map(PartyMember::getChr).collect(Collectors.toList());
+    }
+
     public List<PartyMember> getOnlineMembers() {
         return Arrays.stream(getPartyMembers()).filter(pm -> pm != null && pm.isOnline()).collect(Collectors.toList());
     }
@@ -326,5 +330,12 @@ public class Party {
         Field field = chr.getField();
         return (int) getOnlineMembers().stream().filter(om -> om.getChr().getField() == field)
                 .mapToInt(PartyMember::getLevel).average().orElse(chr.getLevel());
+    }
+
+    public Set<Char> getPartyMembersInSameField(Char chr) {
+        return getOnlineMembers().stream()
+                .filter(pm -> pm.getChr() != null && pm.getChr() != chr && pm.getChr().getField() == chr.getField())
+                .map(PartyMember::getChr)
+                .collect(Collectors.toSet());
     }
 }
