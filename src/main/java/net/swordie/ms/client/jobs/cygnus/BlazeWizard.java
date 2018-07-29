@@ -8,6 +8,8 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.AffectedArea;
@@ -110,6 +112,8 @@ public class BlazeWizard extends Job {
     int prevmap;
     private HashMap<Mob,ScheduledFuture> hashMap = new HashMap<>();
     private ScheduledFuture schFuture;
+    private Summon summonFox;
+    private Summon summonLion;
 
     public BlazeWizard(Char chr) {
         super(chr);
@@ -132,7 +136,6 @@ public class BlazeWizard extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         Summon summon;
-        Field field;
         switch (skillID) {
             case WORD_OF_FIRE:
                 o1.nOption = si.getValue(x, slv);
@@ -172,10 +175,26 @@ public class BlazeWizard extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
-                c.getChr().getField().spawnSummon(summon);
+                Field field = c.getChr().getField();
+                field.spawnSummon(summon);
+
+                int skill;
+
+                if (skillID == FIRES_OF_CREATION_FOX) {
+                    skill = FIRES_OF_CREATION_LION;
+                    summonFox = summon;
+                } else {
+                    skill = FIRES_OF_CREATION_FOX;
+                    summonLion = summon;
+                }
 
                 // removes previous buff to prevent stacking
-                tsm.removeStatsBySkill(skillID == FIRES_OF_CREATION_FOX ? FIRES_OF_CREATION_LION : FIRES_OF_CREATION_FOX);
+                if (summonLion != null || summonFox != null)
+                {
+                    tsm.removeStatsBySkill(skill);
+                    field.broadcastPacket(Summoned.summonedRemoved(skillID == FIRES_OF_CREATION_FOX ? summonLion : summonFox, LeaveType.ANIMATION));
+                    tsm.sendResetStatPacket();
+                }
 
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(y, slv);
