@@ -872,6 +872,22 @@ public class AdminCommands {
             }
         }
     }
+    public static class LevelUntil extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int num = Integer.parseInt(args[1]);
+            short level = chr.getLevel();
+            while (level < num) {
+                level++;
+                chr.setStat(Stat.level, level);
+                Map<Stat, Object> stats = new HashMap<>();
+                stats.put(Stat.level, (byte) level);
+                stats.put(Stat.exp, (long) 0);
+                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.getJobHandler().handleLevelUp();
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
+            }
+        }
+    }
 
     public static class Heal extends AdminCommand {
         public static void execute(Char chr, String[] args) {

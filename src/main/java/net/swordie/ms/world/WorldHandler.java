@@ -4439,13 +4439,29 @@ public class WorldHandler {
     public static void handleUserHyperSkillUpRequest(Char chr, InPacket inPacket) {
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
-        Skill skill = chr.getSkill(skillID, true);
-        int totalHyperSp = SkillConstants.getTotalSpByLevel(chr.getLevel());
-        int spentSp = chr.getSpentHyperSp();
-        int availableSp = totalHyperSp - spentSp;
-        int neededSp = SkillConstants.getTotalNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
-        if (skill.getCurrentLevel() >= 10 || !SkillConstants.isHyperstatSkill(skillID) || availableSp < neededSp) {
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        if (si == null) {
             return;
+        }
+        int hyper = si.getHyper();
+        Skill skill = chr.getSkill(skillID, true);
+        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        if (hyper != 0) { // Passive hyper
+            SPSet spSet = hyper == 1 ? esp.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1) :
+                    esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
+            int curSp = spSet.getSp();
+            if (curSp <= 0 || skill.getCurrentLevel() != 0) {
+                return;
+            }
+            spSet.addSp(-1);
+        } else if (SkillConstants.isHyperstatSkill(skillID)) {
+            int totalHyperSp = SkillConstants.getTotalHyperStatSpByLevel(chr.getLevel());
+            int spentSp = chr.getSpentHyperSp();
+            int availableSp = totalHyperSp - spentSp;
+            int neededSp = SkillConstants.getTotalNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
+            if (skill.getCurrentLevel() >= 10 || availableSp < neededSp) {
+                return;
+            }
         }
         chr.removeFromBaseStatCache(skill);
         skill.setCurrentLevel(skill.getCurrentLevel() + 1);
@@ -4617,6 +4633,40 @@ public class WorldHandler {
     }
 
     public static void handleUserRequestInstanceTable(Char chr, InPacket inPacket) {
+        String requestStr = inPacket.decodeString();
+        int type = inPacket.decodeInt();
+        int subType = inPacket.decodeInt();
 
+        InstanceTableType itt = InstanceTableType.getByStr(requestStr);
+        if (itt == null) {
+            log.error(String.format("Unknown instance table type request %s, type %d, subType %d", requestStr, type, subType));
+            return;
+        }
+        int value;
+        switch (itt) {
+            case HyperActiveSkill:
+            case HyperPassiveSkill:
+                log.error(String.format("type %d, subType %d", type, subType));
+                ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+                if (subType == InstanceTableType.HyperPassiveSkill.getSubType()) {
+                    value = esp.getSpByJobLevel(SkillConstants.PASSIVE_HYPER_JOB_LEVEL);
+                } else {
+                    value = esp.getSpByJobLevel(SkillConstants.ACTIVE_HYPER_JOB_LEVEL);
+                }
+                break;
+            case HyperStatIncAmount:
+                // type == level
+                value = SkillConstants.getHyperStatSpByLv((short) type);
+                break;
+            case NeedHyperStatLv:
+                // type == skill lv
+                value = SkillConstants.getNeededSpForHyperStatSkill(type);
+                break;
+            default:
+                log.error(String.format("Unhandled instance table type request %s, type %d, subType %d", itt, type, subType));
+                return;
+        }
+
+        chr.write(WvsContext.resultInstanceTable(requestStr, type, subType, true, value));
     }
 }

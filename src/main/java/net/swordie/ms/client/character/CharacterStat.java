@@ -91,7 +91,7 @@ public class CharacterStat {
     private int honorExp;
 
     public CharacterStat() {
-        extendSP = new ExtendSP(5);
+        extendSP = new ExtendSP(7);
         nonCombatStatDayLimit = new NonCombatStatDayLimit();
         albaStartTime = new FileTime(0);
         lastLogout = new FileTime(0);

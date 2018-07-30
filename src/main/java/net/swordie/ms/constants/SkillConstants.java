@@ -7,7 +7,9 @@ import net.swordie.ms.enums.SkillType;
 import net.swordie.ms.loaders.SkillData;
 import org.apache.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import static net.swordie.ms.client.jobs.legend.Aran.*;
 import static net.swordie.ms.client.jobs.legend.Mercedes.*;
@@ -20,11 +22,17 @@ import static net.swordie.ms.client.jobs.resistance.Blaster.*;
  */
 public class SkillConstants {
 
+    public static final short PASSIVE_HYPER_MIN_LEVEL = 140;
+    public static final List<Short> ACTIVE_HYPER_LEVELS = Arrays.asList((short) 150, (short) 170, (short) 200);
+
     private static final Logger log = Logger.getLogger(SkillConstants.class);
 
     public static final short LINK_SKILL_1_LEVEL = 70;
     public static final short LINK_SKILL_2_LEVEL = 120;
     public static final short LINK_SKILL_3_LEVEL = 210;
+
+    public static final byte PASSIVE_HYPER_JOB_LEVEL = 6;
+    public static final byte ACTIVE_HYPER_JOB_LEVEL = 7;
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
@@ -1090,12 +1098,16 @@ public class SkillConstants {
         return skillID >= 80000400 && skillID <= 80000418;
     }
 
-    public static int getTotalSpByLevel(short level) {
+    public static int getTotalHyperStatSpByLevel(short level) {
         int sp = 0;
         for (int i = 140; i < level; i++) {
-            sp += 3 + ((i - 140) / 10);
+            sp += getHyperStatSpByLv(level);
         }
         return sp;
+    }
+
+    public static int getHyperStatSpByLv(short level) {
+        return 3 + ((level - 140) / 10);
     }
 
     public static int getNeededSpForHyperStatSkill(int lv) {
@@ -1158,5 +1170,21 @@ public class SkillConstants {
             prefix = skillID / 100;
         }
         return prefix != 9500 && skillID / 10000000 == 9;
+    }
+
+    public static int getBaseSpByLevel(short level) {
+        return level > 140 ? 0
+                : level > 130 ? 6
+                : level > 120 ? 5
+                : level > 110 ? 4
+                : 3;
+    }
+
+    public static int getTotalPassiveHyperSpByLevel(short level) {
+        return level < 140 ? 0 : (level - 130) / 10;
+    }
+
+    public static int getTotalActiveHyperSpByLevel(short level) {
+        return level < 140 ? 0 : level < 170 ? 1 : level < 200 ? 2 : 3;
     }
 }

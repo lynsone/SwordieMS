@@ -3,6 +3,8 @@ package net.swordie.ms.client.jobs;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Skill;
@@ -17,9 +19,11 @@ import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.BaseStat;
+import net.swordie.ms.enums.InstanceTableType;
 import net.swordie.ms.enums.ReviveType;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
@@ -27,6 +31,7 @@ import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -237,9 +242,20 @@ public abstract class Job {
 		chr.addStat(Stat.mhp, 500);
 		chr.addStat(Stat.mmp, 500);
 		chr.addStat(Stat.ap, 5);
-		int sp = 3;
-		if (level > 100 && (level % 10) % 3 == 0) {
-			sp = 6; // double sp on levels ending in 3/6/9
+		int sp = SkillConstants.getBaseSpByLevel(level);
+		if ((level % 10) % 3 == 0 && level != 100) {
+			sp *= 2; // double sp on levels ending in 3/6/9
+		}
+		ExtendSP extendSP = chr.getAvatarData().getCharacterStat().getExtendSP();
+		if (level >= SkillConstants.PASSIVE_HYPER_MIN_LEVEL) {
+			SPSet spSet = extendSP.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1);
+			spSet.addSp(1);
+			chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperPassiveSkill, true, spSet.getSp()));
+		}
+		if (SkillConstants.ACTIVE_HYPER_LEVELS.contains(level)) {
+			SPSet spSet = extendSP.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
+			chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperActiveSkill, true, spSet.getSp()));
+			spSet.addSp(1);
 		}
 		chr.addSpToJobByCurrentLevel(sp);
 		Map<Stat, Object> stats = new HashMap<>();

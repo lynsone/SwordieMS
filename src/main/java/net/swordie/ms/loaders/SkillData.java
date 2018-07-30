@@ -38,6 +38,7 @@ public class SkillData {
                 dataOutputStream.writeBoolean(si.isMassSpell());
                 dataOutputStream.writeInt(si.getType());
                 dataOutputStream.writeUTF(si.getElemAttr());
+                dataOutputStream.writeInt(si.getHyper());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -83,6 +84,7 @@ public class SkillData {
                     skillInfo.setMassSpell(dataInputStream.readBoolean());
                     skillInfo.setType(dataInputStream.readInt());
                     skillInfo.setElemAttr(dataInputStream.readUTF());
+                    skillInfo.setHyper(dataInputStream.readInt());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -186,6 +188,10 @@ public class SkillData {
                             skill.setElemAttr(XMLApi.getNamedAttribute(elemAttrNode, "value"));
                         } else {
                             skill.setElemAttr("");
+                        }
+                        Node hyperNode = XMLApi.getFirstChildByNameBF(skillNode, "hyper");
+                        if(hyperNode != null) {
+                            skill.setHyper(Integer.parseInt(XMLApi.getNamedAttribute(hyperNode, "value")));
                         }
                         // end main level info
                         // start "common" level info

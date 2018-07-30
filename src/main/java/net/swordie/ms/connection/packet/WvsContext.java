@@ -917,4 +917,20 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket resultInstanceTable(String name, int type, int subType, boolean rightResult, int value) {
+        OutPacket outPacket = new OutPacket(OutHeader.RESULT_INSTANCE_TABLE.getValue());
+
+        outPacket.encodeString(name);
+        outPacket.encodeInt(type); // nCount
+        outPacket.encodeInt(subType);
+        outPacket.encodeByte(rightResult);
+        outPacket.encodeInt(value);
+
+        return outPacket;
+    }
+
+    public static OutPacket resultInstanceTable(InstanceTableType ritt, boolean rightResult, int value) {
+        return resultInstanceTable(ritt.getTableName(), ritt.getType(), ritt.getSubType(), rightResult, value);
+    }
 }

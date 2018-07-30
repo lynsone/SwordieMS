@@ -31,6 +31,7 @@ public class SkillInfo {
     private int type;
     private Set<Integer> psdSkills = new HashSet<>();
     private String elemAttr;
+    private int hyper;
 
     public int getSkillId() {
         return skillId;
@@ -234,5 +235,13 @@ public class SkillInfo {
 
     public void setElemAttr(String elemAttr) {
         this.elemAttr = elemAttr;
+    }
+
+    public void setHyper(int hyper) {
+        this.hyper = hyper;
+    }
+
+    public int getHyper() {
+        return hyper;
     }
 }
