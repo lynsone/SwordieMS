@@ -44,7 +44,7 @@ if sm.getFieldID() == 925100100: # Hidden Street: Through the Head of the Ship!
                 if sm.hasItem(item, count):
                     if stage == 2:
                         sm.sendNext("Great you may now continue to the next stage!")
-                        sm.fieldGetEffect(WzConstants.EFFECT_CLEAR)
+                        sm.showEffectToField(WzConstants.EFFECT_CLEAR)
 
                     else:
                         sm.sendNext("Alright, next up I need "+ str(count) +" #v"+ str(nextItem) +"##b#t"+ str(nextItem) +"##k.")

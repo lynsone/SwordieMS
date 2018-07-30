@@ -55,7 +55,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
@@ -626,26 +625,32 @@ public class ScriptManagerImpl implements ScriptManager {
 		return field.getMobs().size();
 	}
 
-	public void fieldWeatherNotice(String text, WeatherEffNoticeType type) {
-		fieldWeatherNotice(text, type, 7000); // 7 seconds
+	public void showWeatherNoticeToField(String text, WeatherEffNoticeType type) {
+		showWeatherNoticeToField(text, type, 7000); // 7 seconds
 	}
 
-	public void fieldWeatherNotice(String text, WeatherEffNoticeType type, int duration) {
+	public void showWeatherNoticeToField(String text, WeatherEffNoticeType type, int duration) {
 		Field field = chr.getField();
-		for (Char chr : field.getChars()) {
-			chr.write(WvsContext.weatherEffectNotice(type, text, duration));
-		}
+		field.broadcastPacket(WvsContext.weatherEffectNotice(type, text, duration));
 	}
 
-	public void fieldGetEffect(String dir) {
-		fieldGetEffect(dir, 0);
+	public void showEffectToField(String dir) {
+		showEffectToField(dir, 0);
 	}
 
-	public void fieldGetEffect(String dir, int delay) {
+	public void showEffectToField(String dir, int delay) {
 		Field field = chr.getField();
-		for (Char chr : field.getChars()) {
-			chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
-		}
+		field.broadcastPacket(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
+	}
+
+	public void showFieldEffect(String dir) {
+		showFieldEffect(dir, 0);
+	}
+
+	@Override
+	public void showFieldEffect(String dir, int delay) {
+		Field field = chr.getField();
+		field.broadcastPacket(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
 	}
 
 	@Override
@@ -912,12 +917,12 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void chatScript(String text) {chr.chatScriptMessage(text);}
 
-	public void weatherNotice(String text, WeatherEffNoticeType type) {
-		weatherNotice(text, type, 7000); // 7 seconds
+	public void showWeatherNotice(String text, WeatherEffNoticeType type) {
+		showWeatherNotice(text, type, 7000); // 7 seconds
 	}
 
 	@Override
-	public void weatherNotice(String text, WeatherEffNoticeType type, int duration) {
+	public void showWeatherNotice(String text, WeatherEffNoticeType type, int duration) {
 		chr.write(WvsContext.weatherEffectNotice(type, text, duration));
 	}
 
@@ -1249,12 +1254,12 @@ public class ScriptManagerImpl implements ScriptManager {
 		return new Random().nextInt(upBound);
 	}
 
-	public void getEffect(String dir) {
-		getEffect(dir, 0);
+	public void showEffect(String dir) {
+		showEffect(dir, 0);
 	}
 
 	@Override
-	public void getEffect(String dir, int delay) {
+	public void showEffect(String dir, int delay) {
 		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
 	}
 

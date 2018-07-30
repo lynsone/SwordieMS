@@ -5,7 +5,7 @@ package net.swordie.ms.constants;
  */
 public class WzConstants {
 
-    //Quest Icons
+    // Quest Icons
     public static final String ICON_QUEST_AVAILABLE = "#fUI/UIWindow.img/QuestIcon/0/0#";
     public static final String ICON_QUEST_IN_PROGRESS = "#fUI/UIWindow.img/QuestIcon/1/0#";
     public static final String ICON_QUEST_FINISHED = "#fUI/UIWindow.img/QuestIcon/2/0#";
@@ -19,7 +19,7 @@ public class WzConstants {
     public static final String ICON_DRAGON_SP = "#fUI/UIWindow.img/QuestIcon/10/0#";
     public static final String ICON_TRAITS = "#fUI/UIWindow.img/QuestIcon/11/0#";
 
-    //Effects
+    // Effects
     public static final String EFFECT_MONSTER_PARK_CLEAR = "Map/Effect.img/monsterPark/clear";
     public static final String EFFECT_MONSTER_PARK_FINAL_STAGE = "Map/Effect.img/monsterPark/stageEff/final";
     public static final String EFFECT_MONSTER_PARK_STAGE_NUMBER = "Map/Effect.img/monsterPark/stageEff/number/"; // Requires a number (between 1~5) to be added afterwards
@@ -30,5 +30,6 @@ public class WzConstants {
 
     public static final String EFFECT_FAIL = "Map/Effect.img/hillah/fail";
     public static final String EFFECT_FINISH = "Map/Effect.img/killing/first/finish";
-    public static final String EFFECT_CLEAR = "Map/Effect.img/Gstar/clearN";
+    public static final String EFFECT_CLEAR = "Map/EffectTW.img/arisan/clear";
+    public static final String EFECT_START = "Map/EffectTW.img/arisan/start";
 }

@@ -43,6 +43,10 @@ public class FieldEffect {
             case TopScreen:
                 outPacket.encodeString(getString());
                 break;
+            case TopScreenEffect:
+                outPacket.encodeString(getString());// Directory to the Effect
+                outPacket.encodeInt(getArg1());     // Delay in ms
+                break;
             case SetGrey:
                 outPacket.encodeShort(getArg1());   // GreyField Type
                 outPacket.encodeByte(getArg2());    // boolean: ON/OFF
@@ -73,6 +77,16 @@ public class FieldEffect {
         fieldEffect.setArg3(maxHP);
         fieldEffect.setArg4(mob.getHpTagColor());
         fieldEffect.setArg5(mob.getHpTagBgcolor());
+
+        return fieldEffect;
+    }
+
+    public static FieldEffect getFieldEffectFromWz(String dir, int delay) {
+        FieldEffect fieldEffect = new FieldEffect();
+        fieldEffect.setFieldEffectType(FieldEffectType.TopScreenEffect);
+
+        fieldEffect.setString(dir);
+        fieldEffect.setArg1(delay);
 
         return fieldEffect;
     }

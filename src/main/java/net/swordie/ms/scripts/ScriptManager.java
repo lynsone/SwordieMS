@@ -439,6 +439,16 @@ public interface ScriptManager extends Observer {
 	int numberMobsInField(int fieldID);
 
 	/**
+	 * Shows an Effect from the directory specified.
+	 *
+	 * @param dir
+	 * 		directory towards the effect
+	 * @param delay
+	 * 		delay (ms) till the effect gets displayed
+	 */
+	void showFieldEffect(String dir, int delay);
+
+	/**
 	 * Drops the specified Item on the field at the given position (x, y).
 	 *
 	 * @param itemId
@@ -1099,7 +1109,7 @@ public interface ScriptManager extends Observer {
 	 * @param delay
 	 * 		The delay in ms before the effect shows
 	 */
-	void getEffect(String dir, int delay);
+	void showEffect(String dir, int delay);
 
 	/**
 	 * Gives the user a weather notice with specified variables
@@ -1112,7 +1122,7 @@ public interface ScriptManager extends Observer {
 	 * @param duration
 	 * 		Duration the weather notice stays on the screen
 	 */
-	void weatherNotice(String text, WeatherEffNoticeType type, int duration);
+	void showWeatherNotice(String text, WeatherEffNoticeType type, int duration);
 
 	/**
 	 * Calls a given method for the entire party. If a party member is offline, gets it from the database, and applies

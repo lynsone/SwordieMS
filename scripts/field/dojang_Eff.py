@@ -92,8 +92,8 @@ bossPerFloor = {
 
 def init():
     stage = ((sm.getFieldID() % 10000) / 100)
-    sm.fieldGetEffect(""+ WzConstants.EFFECT_DOJO_STAGE_NUMBER +""+ str(stage))
-    sm.fieldGetEffect(WzConstants.EFFECT_DOJO_STAGE)
+    sm.showEffectToField(""+ WzConstants.EFFECT_DOJO_STAGE_NUMBER +""+ str(stage))
+    sm.showEffectToField(WzConstants.EFFECT_DOJO_STAGE)
 
     sleep(GameConstants.DOJO_SPAWM_BOSS_DELAY)
     sm.spawnMob(bossPerFloor[sm.getFieldID()], 0, 7, False) # Spawns mob based on Field ID
@@ -101,5 +101,5 @@ def init():
 
 def onMobDeath(mob):
     if mob.getTemplateId() == bossPerFloor[sm.getFieldID()]:
-        sm.fieldGetEffect(WzConstants.EFFECT_DOJO_CLEAR)
+        sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)
     sm.dispose()
