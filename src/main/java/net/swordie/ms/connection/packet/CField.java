@@ -685,6 +685,7 @@ public class CField {
             ori.encode(outPacket);
         }
         for(ObtacleAtomInfo atomInfo : atomInfos) {
+            outPacket.encodeByte(true); // false -> no encode
             atomInfo.encode(outPacket);
             if (oact == ObtacleAtomCreateType.DIAGONAL) {
                 atomInfo.getObtacleDiagonalInfo().encode(outPacket);
