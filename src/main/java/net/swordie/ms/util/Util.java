@@ -8,15 +8,26 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
  * Created on 2/28/2017.
  */
 public class Util {
+
+    private static Map<Class, Class> boxedToPrimClasses = new HashMap<>();
+
+    static {
+        boxedToPrimClasses.put(Boolean.class, boolean.class);
+        boxedToPrimClasses.put(Byte.class, byte.class);
+        boxedToPrimClasses.put(Short.class, short.class);
+        boxedToPrimClasses.put(Character.class, char.class);
+        boxedToPrimClasses.put(Integer.class, int.class);
+        boxedToPrimClasses.put(Long.class, long.class);
+        boxedToPrimClasses.put(Float.class, float.class);
+        boxedToPrimClasses.put(Double.class, double.class);
+    }
 
     /**
      * Gets a random element from a given List. This is done by utilizing {@link #getRandom(int)}.
@@ -316,5 +327,9 @@ public class Util {
      */
     public static String formatNumber(String number) {
         return NumberFormat.getInstance(Locale.ENGLISH).format(Long.parseLong(number));
+    }
+
+    public static Class<?> convertBoxedToPrimitiveClass(Class<?> clazz) {
+        return boxedToPrimClasses.getOrDefault(clazz, clazz);
     }
 }

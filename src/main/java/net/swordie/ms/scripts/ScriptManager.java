@@ -9,6 +9,7 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
 
 import java.util.Observer;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * Script manager {@code interface} used in all scripts.
@@ -1112,4 +1113,50 @@ public interface ScriptManager extends Observer {
 	 * 		Duration the weather notice stays on the screen
 	 */
 	void weatherNotice(String text, WeatherEffNoticeType type, int duration);
+
+	/**
+	 * Calls a given method for the entire party. If a party member is offline, gets it from the database, and applies
+	 * the method on it, and saves it back to the database.
+	 * Note: the arguments of the
+	 *
+	 * @param methodName
+	 * 		The name of the method that should be invoked
+	 * @param args
+	 * 		The arguments of the method
+	 */
+	void invokeForParty(String methodName, Object... args);
+
+	/**
+	 * Invokes a method after a given delay.
+	 *
+	 * @param delay
+	 * 		The delay (in ms) after which the method should be invoked.
+	 * @param methodName
+	 * 		The name of the method that should be invoked
+	 * @param args
+	 * 		The arguments that the method should have
+	 * @return the resulting ScheduledFuture
+	 */
+	ScheduledFuture invokeAfterDelay(long delay, String methodName, Object...args);
+
+	/**
+	 * Invokes the method after a given delay, after which it will keep invoking the method each
+	 * <code>delayBetweenExecutions</code> milliseconds, until it has been invoked <code>executes</code> times.
+	 * If <code>executes</code> is 0, will continue until the end of the main process.
+	 *
+	 * @param initialDelay
+	 * 		The initial delay (in ms) after which the method should be invoked.
+	 * @param delayBetweenExecutions
+	 * 		The amount of time (in ms) between two invokes
+	 * @param executes
+	 * 		The amount of times that the method should be invoked (0 if no limit)
+	 * @param methodName
+	 * 		The name of the method that should be invoked*
+	 * @param args
+	 * 		The arguments that the method should have
+	 * @return
+	 * 		the resulting ScheduledFuture
+	 */
+	ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
+									  int executes, String methodName, Object...args);
 }

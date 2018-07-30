@@ -19,6 +19,7 @@ import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.trunk.TrunkOpen;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
@@ -47,10 +48,15 @@ import org.apache.log4j.LogManager;
 import javax.script.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
 import static net.swordie.ms.enums.ChatMsgColour.*;
@@ -1254,5 +1260,47 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public String formatNumber(String number) {
 		return Util.formatNumber(number);
+	}
+
+	private Object invoke(Object invokeOn, String methodName, Object... args) {
+		List<Class<?>> classList = Arrays.stream(args).map(Object::getClass).collect(Collectors.toList());
+		Class<?>[] classes = classList.stream().map(Util::convertBoxedToPrimitiveClass).toArray(Class<?>[]::new);
+		Method func;
+		try {
+			func = getClass().getMethod(methodName, classes);
+			return func.invoke(chr.getScriptManager(), args);
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void invokeForParty(String methodName, Object... args) {
+		for (PartyMember pm : chr.getParty().getMembers()) {
+			boolean fromDB = false;
+			Char chr = pm.getChr();
+			if (chr == null) {
+				chr = Char.getFromDBById(pm.getCharID());
+				fromDB = true;
+			}
+			invoke(chr.getScriptManager(), methodName, args);
+			if (fromDB) {
+				DatabaseManager.saveToDB(chr);
+			}
+		}
+	}
+
+	public ScheduledFuture invokeAfterDelay(long delay, String methodName, Object...args) {
+		return EventManager.addEvent(() -> invoke(this, methodName, args), delay);
+	}
+
+	public ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
+											 int executes, String methodName, Object...args) {
+		if (executes == 0) {
+			return EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
+					delayBetweenExecutions);
+		}
+		return EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
+				delayBetweenExecutions, executes);
 	}
 }
