@@ -1268,7 +1268,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		Method func;
 		try {
 			func = getClass().getMethod(methodName, classes);
-			return func.invoke(chr.getScriptManager(), args);
+			return func.invoke(invokeOn, args);
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
