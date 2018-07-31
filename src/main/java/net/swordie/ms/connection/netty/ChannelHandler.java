@@ -404,6 +404,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case NEBULITE_INSERT_REQUEST:
                     WorldHandler.handleNebuliteInsertRequest(c, inPacket);
                     break;
+                case GOLD_HAMMER_REQUEST:
+                    WorldHandler.handleGoldHammerRequest(chr, inPacket);
+                    break;
                 case DROP_PICK_UP_REQUEST:
                     WorldHandler.handleDropPickUpRequest(c, inPacket);
                     break;
@@ -564,7 +567,7 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                     handleUnknown(inPacket, op);
                     break;
             }
-        }finally {
+        } finally {
             ReferenceCountUtil.release(msg);
             if (msg instanceof Packet) {
                 ((Packet) msg).release();

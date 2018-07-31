@@ -61,6 +61,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ClientSocket;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.*;
@@ -102,6 +103,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 import static net.swordie.ms.enums.ChatMsgColour.*;
 import static net.swordie.ms.enums.EquipBaseStat.cuc;
 import static net.swordie.ms.enums.EquipBaseStat.ruc;
+import static net.swordie.ms.enums.InvType.CONSUME;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
@@ -4650,6 +4652,53 @@ public class WorldHandler {
         // Probably needs remote player position handling
 
         chr.dispose(); // Necessary as going through the portal will stuck you
+    }
+
+    public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt(); // tick
+        int iPos = inPacket.decodeInt(); // hammer slot
+        inPacket.decodeInt(); // hammer item id
+        inPacket.decodeInt(); // use hammer? useless though
+        int ePos = inPacket.decodeInt(); // equip slot
+
+        // 2.5 sec delay to match golden hammer's animation
+        EventManager.addEvent(() -> {
+            Equip equip = (Equip)chr.getInventoryByType(EQUIP).getItemBySlot((short)ePos);
+            Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short)iPos);
+
+            if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
+                    hammer == null || !ItemConstants.isGoldHammer(hammer)) {
+                log.error(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
+                        chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
+                chr.dispose(); // TODO: hammer complete packet, success = false
+                return;
+            }
+
+            Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(hammer.getItemId()).getScrollStats();
+
+            if (vals.size() > 0) {
+                if (equip.getRuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
+                    log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
+                            chr.getId(), equip.getRuc(), equip.getIuc()));
+                    chr.dispose(); // TODO: hammer complete packet, success = false
+                    return;
+                }
+
+                boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
+
+                if (success) {
+                    equip.setIuc((short)(equip.getIuc() + 1)); // +1 hammer used
+                    equip.setRuc((short)(equip.getRuc() + 1)); // +1 upgrades available
+                    equip.updateToChar(chr);
+                    chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
+                } else {
+                    chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
+                }
+
+                chr.consumeItem(hammer.getItemId(), 1);
+                chr.dispose(); // TODO: hammer complete packet, success = success
+            }
+        }, 2500);
     }
 
     public static void handleUserRequestInstanceTable(Char chr, InPacket inPacket) {
