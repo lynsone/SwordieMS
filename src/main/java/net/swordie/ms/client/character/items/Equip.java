@@ -1320,6 +1320,10 @@ public class Equip extends Item {
      * @param thirdLineChance The chance of a third line being added.
      */
     public void setHiddenOptionBase(short val, int thirdLineChance) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         int max = 3;
         if(getOptionBase(3) == 0) {
             // If this equip did not have a 3rd line already, thirdLineChance to get it
@@ -1333,6 +1337,10 @@ public class Equip extends Item {
     }
 
     public void setHiddenOptionBonus(short val, int thirdLineChance) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         int max = 3;
         if(getOptionBonus(3) == 0) {
             // If this equip did not have a 3rd line already, thirdLineChance to get it
@@ -1346,6 +1354,10 @@ public class Equip extends Item {
     }
 
     public void releaseOptions(boolean bonus) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         for (int i = 0; i < 3; i++) {
             if(getOption(i, bonus) < 0) {
                 setOption(i, getRandomOption(bonus, i), bonus);
