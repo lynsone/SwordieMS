@@ -452,8 +452,8 @@ public class ItemConstants {
     public static boolean canEquipGoldHammer(Equip equip) {
         return !(equip.getItemId() == HORNTAIL_NECKLACE || // Horntail Necklace and the Chaos version are the only exceptions that Golden Hammer has.
                 equip.getItemId() == CHAOS_HORNTAIL_NECKLACE ||
-                ItemData.equips.getOrDefault(equip.getItemId(), null).getRuc() <= 0 || // No slots on equip?
-                equip.getIuc() >= MAX_HAMMER_SLOTS);
+                equip.getIuc() >= MAX_HAMMER_SLOTS ||
+                ItemData.getEquipById(equip.getItemId()).getRuc() <= 0); // No upgrade slots by default
     }
 
     public static boolean isGoldHammer(Item item) {

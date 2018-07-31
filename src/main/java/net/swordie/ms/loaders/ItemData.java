@@ -63,7 +63,7 @@ public class ItemData {
         return ret;
     }
 
-    private static Equip getEquipById(int itemId) {
+    public static Equip getEquipById(int itemId) {
         return getEquips().getOrDefault(itemId, getEquipFromFile(itemId));
     }
 
