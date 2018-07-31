@@ -933,4 +933,38 @@ public class WvsContext {
     public static OutPacket resultInstanceTable(InstanceTableType ritt, boolean rightResult, int value) {
         return resultInstanceTable(ritt.getTableName(), ritt.getType(), ritt.getSubType(), rightResult, value);
     }
+
+    /**
+     * Creates a packet to indicate the golden hammer is finished.
+     *
+     * @param returnResult See below
+     * @param msg
+     *  when returnResult is:
+     *    0 or 1:
+     *      Anything: Golden hammer refinement applied
+     *    2:
+     *      0: Increased available upgrade by 1
+     *      1: Refining using golden hammer failed
+     *    3:
+     *      1: Item is not upgradable
+     *      2: 2 upgrade increases have been used already
+     *      3: You can't vicious hammer non-horntail necklace
+     * @param upgradesLeft amount of upgrades left. NOTE: ((v9 >> 8) & 0xFF) - v9 + 2) (where v9 = upgradesLeft)
+     * @return the created packet
+     */
+    public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, int upgradesLeft) {
+        // Could create an enum for returnResult/msg, but it's not used often enough to warrant this
+        OutPacket outPacket = new OutPacket(OutHeader.GOLD_HAMMER_ITEM_UPGRADE_RESULT);
+
+        outPacket.encodeByte(returnResult);
+        if (returnResult == 2 || returnResult == 3) {
+            outPacket.encodeInt(msg);
+        }
+        if (returnResult == 0) {
+            outPacket.encodeInt(msg);
+        }
+        outPacket.encodeInt(upgradesLeft);
+
+        return outPacket;
+    }
 }
