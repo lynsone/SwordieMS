@@ -1077,6 +1077,9 @@ public enum OutHeader {
     PET_CONSUME_ITEM_INIT(1426),
     PET_CONSUME_MP_ITEM(1427),
 
+    // CUIGoldHammer::OnPacket
+    GOLD_HAMMER_ITEM_UPGRADE_RESULT(1445),
+
     // CBattleRecordMan::OnPacket
     DOT_DAMAGE_INFO(1472),
     KILL_DAMAGE_INFO(1473),
