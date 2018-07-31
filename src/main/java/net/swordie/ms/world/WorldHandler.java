@@ -4443,18 +4443,21 @@ public class WorldHandler {
         if (si == null) {
             return;
         }
-        int hyper = si.getHyper();
+        if (si.getHyper() == 0 && si.getHyperStat() == 0) {
+            log.error(String.format("Character %d attempted assigning hyper stat SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            return;
+        }
         Skill skill = chr.getSkill(skillID, true);
-        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
-        if (hyper != 0) { // Passive hyper
-            SPSet spSet = hyper == 1 ? esp.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1) :
+        if (si.getHyper() != 0) { // Passive hyper
+            ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+            SPSet spSet = si.getHyper() == 1 ? esp.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1) :
                     esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
             int curSp = spSet.getSp();
             if (curSp <= 0 || skill.getCurrentLevel() != 0) {
                 return;
             }
             spSet.addSp(-1);
-        } else if (SkillConstants.isHyperstatSkill(skillID)) {
+        } else if (si.getHyperStat() != 0) {
             int totalHyperSp = SkillConstants.getTotalHyperStatSpByLevel(chr.getLevel());
             int spentSp = chr.getSpentHyperSp();
             int availableSp = totalHyperSp - spentSp;
@@ -4462,6 +4465,8 @@ public class WorldHandler {
             if (skill.getCurrentLevel() >= 10 || availableSp < neededSp) {
                 return;
             }
+        } else { // not hyper stat and not hyper skill
+            return;
         }
         chr.removeFromBaseStatCache(skill);
         skill.setCurrentLevel(skill.getCurrentLevel() + 1);
