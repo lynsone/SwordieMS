@@ -1733,6 +1733,11 @@ public class WorldHandler {
                 Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
                 if (equip == null) {
                     chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                    chr.dispose();
+                    return;
+                } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
+                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                    chr.dispose();
                     return;
                 }
                 Equip oldEquip = equip.deepCopy();
@@ -1762,6 +1767,10 @@ public class WorldHandler {
                 equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
                 if (equip == null) {
                     chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                    return;
+                } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
+                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                    chr.dispose();
                     return;
                 }
                 tierUpChance = ItemConstants.getTierUpChance(itemID);
