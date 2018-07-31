@@ -3705,12 +3705,12 @@ public class WorldHandler {
             return;
         }
         boolean success = true;
-        if(equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET) {
+        if(equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
+            chr.consumeItem(item);
             equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
         } else {
             success = false;
         }
-        chr.consumeItem(item);
         c.write(CField.socketCreateResult(success));
         equip.updateToChar(chr);
     }
@@ -3729,11 +3729,12 @@ public class WorldHandler {
             return;
         }
         if(equip.getSockets()[0] != ItemConstants.EMPTY_SOCKET_ID) {
-            log.error("Tried to socket an item without an empty socket.");
-            chr.chatMessage("You can only socket an item that has an empty socket slot.");
+            log.error("Tried to Nebulite an item without an empty socket.");
+            chr.chatMessage("You can only insert a Nebulite into empty socket slots.");
             chr.dispose();
             return;
         }
+        // TODO: verify that the nebulite can be mounted on this equip. i.e. -cd on hats, DSE on gloves, boss% on weapon/secondary/shield
         chr.consumeItem(item);
         equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
         equip.updateToChar(chr);
