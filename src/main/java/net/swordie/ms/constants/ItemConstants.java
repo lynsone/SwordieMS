@@ -450,9 +450,10 @@ public class ItemConstants {
     }
 
     public static boolean canEquipGoldHammer(Equip equip) {
-        return !(equip.getItemId() == HORNTAIL_NECKLACE ||
+        return !(equip.getItemId() == HORNTAIL_NECKLACE || // Horntail Necklace and the Chaos version are the only exceptions that Golden Hammer has.
                 equip.getItemId() == CHAOS_HORNTAIL_NECKLACE ||
-                equip.getRuc() <= 0);
+                ItemData.equips.getOrDefault(equip.getItemId(), null).getRuc() <= 0 || // No slots on equip?
+                equip.getIuc() >= MAX_HAMMER_SLOTS);
     }
 
     public static boolean isGoldHammer(Item item) {
