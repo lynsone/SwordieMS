@@ -305,9 +305,25 @@ public class ItemConstants {
         return itemID / 10000 == 135;
     }
 
+    private static boolean isShield(int itemID) {
+        return itemID / 10000 == 109;
+    }
+
     public static boolean isAccessory(int itemID) {
         return (itemID >= 1010000 && itemID < 1040000) || (itemID >= 1122000 && itemID < 1153000) ||
                 (itemID >= 1112000 && itemID < 1113000) || (itemID >= 1670000 && itemID < 1680000);
+    }
+
+    public static boolean isFaceAccessory(int itemID) {
+        return itemID / 10000 == 101;
+    }
+
+    public static boolean isEyeAccessory(int itemID) {
+        return itemID / 10000 == 102;
+    }
+
+    public static boolean isEarrings(int itemID) {
+        return itemID / 10000 == 103;
     }
 
     public static boolean isTop(int itemID) {
@@ -330,8 +346,93 @@ public class ItemConstants {
         return itemID / 10000 == 108;
     }
 
+    public static boolean isCape(int itemID) {
+        return itemID / 10000 == 110;
+    }
+
     public static boolean isArmor(int itemID) {
         return !isAccessory(itemID) && !isWeapon(itemID);
+    }
+
+    public static boolean isRing(int itemID) {
+        return itemID >= 1112000 && itemID < 1113000;
+    }
+
+    public static boolean isPendant(int itemID) {
+        return itemID / 10000 == 112;
+    }
+
+    public static boolean isBelt(int itemID) {
+        return itemID / 10000 == 113;
+    }
+
+    public static boolean isMedal(int itemID) {
+        return itemID / 10000 == 114;
+    }
+
+    public static boolean isShoulder(int itemID) {
+        return itemID / 10000 == 115;
+    }
+
+    public static boolean isPocketItem(int itemID) {
+        return itemID / 10000 == 116;
+    }
+
+    public static boolean isCrusaderCodex(int itemID) {
+        return itemID / 10000 == 117;
+    }
+
+    public static boolean isBadge(int itemID) {
+        return itemID / 10000 == 118;
+    }
+
+    public static boolean isEmblem(int itemID) {
+        return itemID / 10000 == 119;
+    }
+
+    public static boolean isTotem(int itemID) {
+        return itemID / 10000 == 120;
+    }
+
+    public static boolean isAndroid(int itemID) {
+        return itemID / 10000 == 166;
+    }
+
+    public static boolean isMechanicalHeart(int itemID) {
+        return itemID / 10000 == 167;
+    }
+
+    public static boolean canEquipTypeHavePotential(int itemid) {
+        return isRing(itemid) ||
+                isPendant(itemid) ||
+                isWeapon(itemid) ||
+                isBelt(itemid) ||
+                isHat(itemid) ||
+                isFaceAccessory(itemid) ||
+                isEyeAccessory(itemid) ||
+                isOverall(itemid) ||
+                isTop(itemid) ||
+                isBottom(itemid) ||
+                isShoe(itemid) ||
+                isEarrings(itemid) ||
+                isShoulder(itemid) ||
+                isGlove(itemid) ||
+                isEmblem(itemid) ||
+                isBadge(itemid) ||
+                isShield(itemid) ||
+                isCape(itemid) ||
+                isMechanicalHeart(itemid);
+    }
+
+    public static boolean canEquipHavePotential(Equip equip) {
+        if (equip.isCash() ||
+                !canEquipTypeHavePotential(equip.getItemId()) ||
+                equip.isNoPotential() ||
+                equip.getRuc() <= 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

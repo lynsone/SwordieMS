@@ -649,7 +649,7 @@ public class AdminCommands {
                 }
                 for (Map.Entry<Integer, String> entry : map.entrySet()) {
                     int id = entry.getKey();
-                    Item item = ItemData.getEquipDeepCopyFromID(id, false);
+                    Item item = ItemData.getEquipDeepCopyFromID(id, true);
                     if (item != null) {
                         Equip equip = (Equip) item;
                         if (equip.getItemId() < 1000000) {

@@ -1997,6 +1997,11 @@ public class WorldHandler {
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
             chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.dispose();
+            return;
+        } else if (!ItemConstants.canEquipHavePotential(equip)) {
+            log.error(String.format("Character %d tried to add potential an eligible item (id %d)", chr.getId(), equip.getItemId()));
+            chr.dispose();
             return;
         }
         int scrollID = scroll.getItemId();
