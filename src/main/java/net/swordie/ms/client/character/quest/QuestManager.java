@@ -84,9 +84,25 @@ public class QuestManager {
         return quest != null && quest.getStatus() == STARTED;
     }
 
+    /**
+     * Checks if a quest has been completed, i.e. the status is COMPLETE.
+     * @param questID the quest's id to check
+     * @return quest completeness
+     */
     public boolean hasQuestCompleted(int questID) {
         Quest quest = getQuests().get(questID);
         return quest != null && quest.getStatus() == COMPLETE;
+    }
+
+    /**
+     * Checks if a quest is complete. This means that a quest's status is STARTED, and that all the requirements to
+     * complete it have been met.
+     * @param questID the quest's id to check
+     * @return completeness
+     */
+    public boolean isComplete(int questID) {
+        Quest quest = getQuests().get(questID);
+        return hasQuestInProgress(questID) && quest.isComplete();
     }
 
     public void addQuest(Quest quest) {
