@@ -442,7 +442,7 @@ public class ItemConstants {
         if (equip.isCash() ||
                 !canEquipTypeHavePotential(equip.getItemId()) ||
                 equip.isNoPotential() ||
-                equip.getRuc() <= 0) {
+                ItemData.getEquipById(equip.getItemId()).getRuc() <= 0) {
             return false;
         }
 
