@@ -7,10 +7,10 @@ import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -69,6 +69,8 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
+    @Enumerated(EnumType.ORDINAL)
+    private LoginState loginState = LoginState.Out;
 
     public Account(String username, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
@@ -470,5 +472,13 @@ public class Account {
 
     public void setMonsterCollection(MonsterCollection monsterCollection) {
         this.monsterCollection = monsterCollection;
+    }
+
+    public LoginState getLoginState() {
+        return loginState;
+    }
+
+    public void setLoginState(LoginState loginState) {
+        this.loginState = loginState;
     }
 }

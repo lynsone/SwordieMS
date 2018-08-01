@@ -59,7 +59,7 @@ public class Login {
         return outPacket;
     }
 
-    public static OutPacket checkPasswordResult(boolean success, byte error, Account account) {
+    public static OutPacket checkPasswordResult(boolean success, LoginType msg, Account account) {
         OutPacket outPacket = new OutPacket(OutHeader.CHECK_PASSWORD_RESULT.getValue());
 
         if(success) {
@@ -89,7 +89,7 @@ public class Login {
             outPacket.encodeByte(0); // ^
             outPacket.encodeLong(account.getCreationDate()); // account creation date
         } else{
-            outPacket.encodeByte(error);
+            outPacket.encodeByte(msg.getValue());
             outPacket.encodeByte(0); // these two aren't in ida, wtf
             outPacket.encodeInt(0);
         }

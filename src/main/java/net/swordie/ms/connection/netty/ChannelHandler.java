@@ -7,6 +7,8 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.Packet;
+import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
 import net.swordie.ms.handlers.header.InHeader;
@@ -42,6 +44,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
         if(c != null && c.getChr() != null) {
             c.getChr().logout();
             c.getChr().setChangingChannel(false);
+        } else if (c!= null && c.getAccount() != null) {
+            c.getAccount().setLoginState(LoginState.Out);
+            DatabaseManager.saveToDB(c.getAccount());
         } else {
             log.warn("[ChannelHandler] | Was not able to save character, data inconsistency may have occurred.");
         }

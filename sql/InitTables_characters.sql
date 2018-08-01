@@ -726,6 +726,7 @@ create table accounts (
     maplePoints int default 0,
     nxPrepaid int default 0,
     monstercollectionid int,
+    loginState int,
 	primary key (id),
     foreign key (trunkid) references trunks(id),
     foreign key (monstercollectionid) references monster_collections(id)

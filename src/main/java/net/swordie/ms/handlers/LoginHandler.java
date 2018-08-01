@@ -15,11 +15,11 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.enums.CharNameResult;
+import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
 import net.swordie.ms.world.Channel;
@@ -72,7 +72,7 @@ public class LoginHandler {
         byte idk = inPacket.decodeByte();
         int channel = inPacket.decodeInt();
         boolean success = true;
-        byte result;
+        LoginType result;
         Account account = null;
 
         try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM accounts WHERE username = ?")){
@@ -81,18 +81,25 @@ public class LoginHandler {
             if (rs.next()) {
                 success = password.equals(rs.getString("password"));
                 int id = rs.getInt("id");
-                result = success ? LoginType.SUCCESS.getValue() : LoginType.INVALID_PASSWORD.getValue();
+                result = success ? LoginType.SUCCESS : LoginType.INVALID_PASSWORD;
                 if (success) {
                     account = Account.getFromDBById(id);
-                    Server.getInstance().getAccounts().add(account);
-                    c.setAccount(account);
+                    if (account.getLoginState() != null && account.getLoginState() != LoginState.Out) {
+                        success = false;
+                        result = LoginType.HAVING_TROUBLE_LOGGIN_IN;
+                    } else {
+                        Server.getInstance().getAccounts().add(account);
+                        c.setAccount(account);
+                        account.setLoginState(LoginState.Login);
+                        DatabaseManager.saveToDB(account);
+                    }
                 }
             } else {
-                result = LoginType.NOT_A_REGISTERED_ID.getValue();
+                result = LoginType.NOT_A_REGISTERED_ID;
                 success = false;
             }
         } catch (SQLException e) {
-            result = LoginType.HAVING_TROUBLE.getValue();
+            result = LoginType.HAVING_TROUBLE_LOGGIN_IN;
             e.printStackTrace();
         }
 
