@@ -1,6 +1,7 @@
 package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.items.Equip;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.ItemOption;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ItemGrade;
@@ -27,13 +28,26 @@ public class ItemConstants {
     public static final int MOB_DEATH_SOUL_MP_COUNT = 150;
     public static final int MOB_CARD_BASE_ID = 2380000;
     public static final int FAMILIAR_PREFIX = 996;
+
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+
     public static final int THIRD_LINE_CHANCE = 50;
     public static final int PRIME_LINE_CHANCE = 15;
+
     public static final int RED_CUBE = 5062009;
     public static final int BONUS_POT_CUBE = 5062500;
     public static final int BLACK_CUBE = 5062010;
-    public static int NEBILITE_BASE_ID = 3060000;
+
+    public static final int NEBILITE_BASE_ID = 3060000;
+
+    public static final int HORNTAIL_NECKLACE = 1122000;
+    public static final int CHAOS_HORNTAIL_NECKLACE = 1122076;
+
+    public static final int MAX_HAMMER_SLOTS = 2;
+    public static final int GOLDEN_HAMMER_20 = 2470004;
+    public static final int GOLDEN_HAMMER_50 = 2470001;
+    public static final int GOLDEN_HAMMER_100 = 2470007;
+
     private static final Integer[] soulPotList = new Integer[]{32001, 32002, 32003, 32004, 32005, 32006, 32011, 32012, // flat
             32041, 32042, 32043, 32044, 32045, 32046, 32051, 32052}; // rate
 
@@ -305,9 +319,25 @@ public class ItemConstants {
         return itemID / 10000 == 135;
     }
 
+    private static boolean isShield(int itemID) {
+        return itemID / 10000 == 109;
+    }
+
     public static boolean isAccessory(int itemID) {
         return (itemID >= 1010000 && itemID < 1040000) || (itemID >= 1122000 && itemID < 1153000) ||
                 (itemID >= 1112000 && itemID < 1113000) || (itemID >= 1670000 && itemID < 1680000);
+    }
+
+    public static boolean isFaceAccessory(int itemID) {
+        return itemID / 10000 == 101;
+    }
+
+    public static boolean isEyeAccessory(int itemID) {
+        return itemID / 10000 == 102;
+    }
+
+    public static boolean isEarrings(int itemID) {
+        return itemID / 10000 == 103;
     }
 
     public static boolean isTop(int itemID) {
@@ -330,8 +360,102 @@ public class ItemConstants {
         return itemID / 10000 == 108;
     }
 
+    public static boolean isCape(int itemID) {
+        return itemID / 10000 == 110;
+    }
+
     public static boolean isArmor(int itemID) {
         return !isAccessory(itemID) && !isWeapon(itemID);
+    }
+
+    public static boolean isRing(int itemID) {
+        return itemID >= 1112000 && itemID < 1113000;
+    }
+
+    public static boolean isPendant(int itemID) {
+        return itemID / 10000 == 112;
+    }
+
+    public static boolean isBelt(int itemID) {
+        return itemID / 10000 == 113;
+    }
+
+    public static boolean isMedal(int itemID) {
+        return itemID / 10000 == 114;
+    }
+
+    public static boolean isShoulder(int itemID) {
+        return itemID / 10000 == 115;
+    }
+
+    public static boolean isPocketItem(int itemID) {
+        return itemID / 10000 == 116;
+    }
+
+    public static boolean isCrusaderCodex(int itemID) {
+        return itemID / 10000 == 117;
+    }
+
+    public static boolean isBadge(int itemID) {
+        return itemID / 10000 == 118;
+    }
+
+    public static boolean isEmblem(int itemID) {
+        return itemID / 10000 == 119;
+    }
+
+    public static boolean isTotem(int itemID) {
+        return itemID / 10000 == 120;
+    }
+
+    public static boolean isAndroid(int itemID) {
+        return itemID / 10000 == 166;
+    }
+
+    public static boolean isMechanicalHeart(int itemID) {
+        return itemID / 10000 == 167;
+    }
+
+    public static boolean canEquipTypeHavePotential(int itemid) {
+        return isRing(itemid) ||
+                isPendant(itemid) ||
+                isWeapon(itemid) ||
+                isBelt(itemid) ||
+                isHat(itemid) ||
+                isFaceAccessory(itemid) ||
+                isEyeAccessory(itemid) ||
+                isOverall(itemid) ||
+                isTop(itemid) ||
+                isBottom(itemid) ||
+                isShoe(itemid) ||
+                isEarrings(itemid) ||
+                isShoulder(itemid) ||
+                isGlove(itemid) ||
+                isEmblem(itemid) ||
+                isBadge(itemid) ||
+                isShield(itemid) ||
+                isCape(itemid) ||
+                isMechanicalHeart(itemid);
+    }
+
+    public static boolean canEquipHavePotential(Equip equip) {
+        return !equip.isCash() ||
+                canEquipTypeHavePotential(equip.getItemId()) &&
+                !equip.isNoPotential() &&
+                ItemData.getEquipById(equip.getItemId()).getRuc() >= 1;
+    }
+
+    public static boolean canEquipGoldHammer(Equip equip) {
+        return !(equip.getItemId() == HORNTAIL_NECKLACE || // Horntail Necklace and the Chaos version are the only exceptions that Golden Hammer has.
+                equip.getItemId() == CHAOS_HORNTAIL_NECKLACE ||
+                equip.getIuc() >= MAX_HAMMER_SLOTS ||
+                ItemData.getEquipById(equip.getItemId()).getRuc() <= 0); // No upgrade slots by default
+    }
+
+    public static boolean isGoldHammer(Item item) {
+        return item.getItemId() == GOLDEN_HAMMER_20 ||
+                item.getItemId() == GOLDEN_HAMMER_50 ||
+                item.getItemId() == GOLDEN_HAMMER_100;
     }
 
     /**

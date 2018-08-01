@@ -245,6 +245,7 @@ create table equips (
     islot varchar(255),
     vslot varchar(255),
     fixedgrade int,
+    nopotential tinyint,
     primary key (itemid),
     foreign key (itemid) references items(id) on delete cascade,
     foreign key (equippeddate) references filetimes(id)

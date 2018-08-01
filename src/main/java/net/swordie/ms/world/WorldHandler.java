@@ -61,6 +61,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ClientSocket;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.*;
@@ -102,6 +103,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 import static net.swordie.ms.enums.ChatMsgColour.*;
 import static net.swordie.ms.enums.EquipBaseStat.cuc;
 import static net.swordie.ms.enums.EquipBaseStat.ruc;
+import static net.swordie.ms.enums.InvType.CONSUME;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
@@ -1735,6 +1737,11 @@ public class WorldHandler {
                 Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
                 if (equip == null) {
                     chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                    chr.dispose();
+                    return;
+                } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
+                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                    chr.dispose();
                     return;
                 }
                 Equip oldEquip = equip.deepCopy();
@@ -1764,6 +1771,10 @@ public class WorldHandler {
                 equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
                 if (equip == null) {
                     chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                    return;
+                } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
+                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                    chr.dispose();
                     return;
                 }
                 tierUpChance = ItemConstants.getTierUpChance(itemID);
@@ -1999,6 +2010,11 @@ public class WorldHandler {
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
             chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.dispose();
+            return;
+        } else if (!ItemConstants.canEquipHavePotential(equip)) {
+            log.error(String.format("Character %d tried to add potential an eligible item (id %d)", chr.getId(), equip.getItemId()));
+            chr.dispose();
             return;
         }
         int scrollID = scroll.getItemId();
@@ -3693,12 +3709,12 @@ public class WorldHandler {
             return;
         }
         boolean success = true;
-        if(equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET) {
+        if(equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
+            chr.consumeItem(item);
             equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
         } else {
             success = false;
         }
-        chr.consumeItem(item);
         c.write(CField.socketCreateResult(success));
         equip.updateToChar(chr);
     }
@@ -3717,11 +3733,12 @@ public class WorldHandler {
             return;
         }
         if(equip.getSockets()[0] != ItemConstants.EMPTY_SOCKET_ID) {
-            log.error("Tried to socket an item without an empty socket.");
-            chr.chatMessage("You can only socket an item that has an empty socket slot.");
+            log.error("Tried to Nebulite an item without an empty socket.");
+            chr.chatMessage("You can only insert a Nebulite into empty socket slots.");
             chr.dispose();
             return;
         }
+        // TODO: verify that the nebulite can be mounted on this equip. i.e. -cd on hats, DSE on gloves, boss% on weapon/secondary/shield
         chr.consumeItem(item);
         equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
         equip.updateToChar(chr);
@@ -4445,18 +4462,21 @@ public class WorldHandler {
         if (si == null) {
             return;
         }
-        int hyper = si.getHyper();
+        if (si.getHyper() == 0 && si.getHyperStat() == 0) {
+            log.error(String.format("Character %d attempted assigning hyper stat SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            return;
+        }
         Skill skill = chr.getSkill(skillID, true);
-        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
-        if (hyper != 0) { // Passive hyper
-            SPSet spSet = hyper == 1 ? esp.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1) :
+        if (si.getHyper() != 0) { // Passive hyper
+            ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+            SPSet spSet = si.getHyper() == 1 ? esp.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1) :
                     esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
             int curSp = spSet.getSp();
             if (curSp <= 0 || skill.getCurrentLevel() != 0) {
                 return;
             }
             spSet.addSp(-1);
-        } else if (SkillConstants.isHyperstatSkill(skillID)) {
+        } else if (si.getHyperStat() != 0) {
             int totalHyperSp = SkillConstants.getTotalHyperStatSpByLevel(chr.getLevel());
             int spentSp = chr.getSpentHyperSp();
             int availableSp = totalHyperSp - spentSp;
@@ -4464,6 +4484,8 @@ public class WorldHandler {
             if (skill.getCurrentLevel() >= 10 || availableSp < neededSp) {
                 return;
             }
+        } else { // not hyper stat and not hyper skill
+            return;
         }
         chr.removeFromBaseStatCache(skill);
         skill.setCurrentLevel(skill.getCurrentLevel() + 1);
@@ -4632,6 +4654,59 @@ public class WorldHandler {
         // Probably needs remote player position handling
 
         chr.dispose(); // Necessary as going through the portal will stuck you
+    }
+
+    public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
+        final int delay = 2700; // 2.7 sec delay to match golden hammer's animation
+
+        inPacket.decodeInt(); // tick
+        int iPos = inPacket.decodeInt(); // hammer slot
+        inPacket.decodeInt(); // hammer item id
+        inPacket.decodeInt(); // use hammer? useless though
+        int ePos = inPacket.decodeInt(); // equip slot
+
+        EventManager.addEvent(() -> {
+            Equip equip = (Equip)chr.getInventoryByType(EQUIP).getItemBySlot((short)ePos);
+            Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short)iPos);
+
+            if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
+                    hammer == null || !ItemConstants.isGoldHammer(hammer)) {
+                log.error(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
+                        chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
+                chr.write(WvsContext.goldHammerItemUpgradeResult((byte)3, 1, equip));
+                return;
+            }
+
+            Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(hammer.getItemId()).getScrollStats();
+
+            if (vals.size() > 0) {
+                if (equip.getRuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
+                    log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
+                            chr.getId(), equip.getRuc(), equip.getIuc()));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)3, 2, equip));
+                    return;
+                }
+
+                boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
+
+                if (success) {
+                    equip.setIuc((short)(equip.getIuc() + 1)); // +1 hammer used
+                    equip.setRuc((short)(equip.getRuc() + 1)); // +1 upgrades available
+                    equip.updateToChar(chr);
+                    chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)2, 0, equip));
+                } else {
+                    chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)2, 1, equip));
+                }
+
+                chr.consumeItem(hammer.getItemId(), 1);
+            }
+        }, delay);
+    }
+
+    public static void handleGoldHammerComplete(Char chr, InPacket inPacket) {
+        chr.dispose();
     }
 
     public static void handleUserRequestInstanceTable(Char chr, InPacket inPacket) {
