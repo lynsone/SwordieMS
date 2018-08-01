@@ -1488,6 +1488,7 @@ public class WorldHandler {
         chr.logout();
         chr.setChangingChannel(true);
         if (c.getAccount() != null) {
+            chr.getAccount().setLoginState(LoginState.Loading);
             DatabaseManager.saveToDB(c.getAccount());
         }
         DatabaseManager.saveToDB(chr);

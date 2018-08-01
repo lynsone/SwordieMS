@@ -290,6 +290,8 @@ public class LoginHandler {
         if (c.isAuthorized()) {
             Server.getInstance().getWorldById(worldId).getChannelById(channelId).addClientInTransfer(channelId, characterId, c);
             c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
+            c.getAccount().setLoginState(LoginState.Loading);
+            DatabaseManager.saveToDB(c.getAccount());
         }
     }
 

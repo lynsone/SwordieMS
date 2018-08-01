@@ -7,5 +7,7 @@ package net.swordie.ms.enums;
 public enum LoginState {
     Out,
     Login,
+    Loading,
     Game,
+    ;
 }
