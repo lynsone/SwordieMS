@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * Created on 2/28/2017.
@@ -17,6 +18,7 @@ import java.util.function.Predicate;
 public class Util {
 
     private static Map<Class, Class> boxedToPrimClasses = new HashMap<>();
+    private static Pattern regexPattern = Pattern.compile("^\\$2[a-z]\\$.{56}$");
 
     static {
         boxedToPrimClasses.put(Boolean.class, boolean.class);
@@ -331,5 +333,15 @@ public class Util {
 
     public static Class<?> convertBoxedToPrimitiveClass(Class<?> clazz) {
         return boxedToPrimClasses.getOrDefault(clazz, clazz);
+    }
+
+    /**
+     * Tells us if a string is a BCrypt hash.
+     *
+     * @param password Password to check
+     * @return Boolean value
+     */
+    public static boolean isStringBCrypt(String password) {
+        return regexPattern.matcher(password).matches();
     }
 }
