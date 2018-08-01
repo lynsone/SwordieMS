@@ -142,6 +142,7 @@ public class WorldHandler {
         if(chr.getAccount() != null) {
             chr.setAccount(Account.getFromDBById(chr.getAccId()));
         }
+        chr.getAccount().setLoginState(LoginState.Game);
         chr.getAccount().setLastLoggedIn(chr.getName());
         chr.getAccount().setCurrentChr(chr);
         DatabaseManager.saveToDB(chr.getAccount());
@@ -1489,6 +1490,7 @@ public class WorldHandler {
         chr.logout();
         chr.setChangingChannel(true);
         if (c.getAccount() != null) {
+            chr.getAccount().setLoginState(LoginState.Loading);
             DatabaseManager.saveToDB(c.getAccount());
         }
         DatabaseManager.saveToDB(chr);
@@ -4721,7 +4723,6 @@ public class WorldHandler {
         switch (itt) {
             case HyperActiveSkill:
             case HyperPassiveSkill:
-                log.error(String.format("type %d, subType %d", type, subType));
                 ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
                 if (subType == InstanceTableType.HyperPassiveSkill.getSubType()) {
                     value = esp.getSpByJobLevel(SkillConstants.PASSIVE_HYPER_JOB_LEVEL);

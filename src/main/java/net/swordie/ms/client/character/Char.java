@@ -2955,10 +2955,11 @@ public class Char {
 		getField().removeChar(this);
 		getAccount().setCurrentChr(null);
 		DatabaseManager.saveToDB(this);
-		DatabaseManager.saveToDB(getAccount());
 		if (!isChangingChannel()) {
 			getClient().getChannelInstance().removeChar(this);
+			getAccount().setLoginState(LoginState.Out);
 		}
+		DatabaseManager.saveToDB(getAccount());
 //		getClient().setChr(null);
 	}
 

@@ -1014,7 +1014,9 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void completeQuest(int id) {
-		chr.getQuestManager().completeQuest(id);
+		if (hasQuest(id) && isComplete(id)) {
+			chr.getQuestManager().completeQuest(id);
+		}
 	}
 
 	@Override
@@ -1103,7 +1105,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		quest.setQrValue(qrValue);
 	}
 
-
+	public boolean isComplete(int questID) {
+		return chr.getQuestManager().isComplete(questID);
+	}
+	
 
 	// Party Quest-related methods -------------------------------------------------------------------------------------
 
