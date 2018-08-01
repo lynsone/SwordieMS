@@ -407,6 +407,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case GOLD_HAMMER_REQUEST:
                     WorldHandler.handleGoldHammerRequest(chr, inPacket);
                     break;
+                case GOLD_HAMMER_COMPLETE:
+                    WorldHandler.handleGoldHammerComplete(chr, inPacket);
+                    break;
                 case DROP_PICK_UP_REQUEST:
                     WorldHandler.handleDropPickUpRequest(c, inPacket);
                     break;

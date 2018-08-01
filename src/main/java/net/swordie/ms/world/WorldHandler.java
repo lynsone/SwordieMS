@@ -4655,13 +4655,14 @@ public class WorldHandler {
     }
 
     public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
+        final int delay = 2700; // 2.7 sec delay to match golden hammer's animation
+
         inPacket.decodeInt(); // tick
         int iPos = inPacket.decodeInt(); // hammer slot
         inPacket.decodeInt(); // hammer item id
         inPacket.decodeInt(); // use hammer? useless though
         int ePos = inPacket.decodeInt(); // equip slot
 
-        // 2.5 sec delay to match golden hammer's animation
         EventManager.addEvent(() -> {
             Equip equip = (Equip)chr.getInventoryByType(EQUIP).getItemBySlot((short)ePos);
             Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short)iPos);
@@ -4670,7 +4671,7 @@ public class WorldHandler {
                     hammer == null || !ItemConstants.isGoldHammer(hammer)) {
                 log.error(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
                         chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
-                chr.dispose(); // TODO: hammer complete packet, success = false
+                chr.write(WvsContext.goldHammerItemUpgradeResult((byte)3, 1, equip));
                 return;
             }
 
@@ -4680,7 +4681,7 @@ public class WorldHandler {
                 if (equip.getRuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
                     log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
                             chr.getId(), equip.getRuc(), equip.getIuc()));
-                    chr.dispose(); // TODO: hammer complete packet, success = false
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)3, 2, equip));
                     return;
                 }
 
@@ -4691,14 +4692,19 @@ public class WorldHandler {
                     equip.setRuc((short)(equip.getRuc() + 1)); // +1 upgrades available
                     equip.updateToChar(chr);
                     chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)2, 0, equip));
                 } else {
                     chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)2, 1, equip));
                 }
 
                 chr.consumeItem(hammer.getItemId(), 1);
-                chr.dispose(); // TODO: hammer complete packet, success = success
             }
-        }, 2500);
+        }, delay);
+    }
+
+    public static void handleGoldHammerComplete(Char chr, InPacket inPacket) {
+        chr.dispose();
     }
 
     public static void handleUserRequestInstanceTable(Char chr, InPacket inPacket) {

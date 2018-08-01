@@ -439,14 +439,10 @@ public class ItemConstants {
     }
 
     public static boolean canEquipHavePotential(Equip equip) {
-        if (equip.isCash() ||
-                !canEquipTypeHavePotential(equip.getItemId()) ||
-                equip.isNoPotential() ||
-                ItemData.getEquipById(equip.getItemId()).getRuc() <= 0) {
-            return false;
-        }
-
-        return true;
+        return !equip.isCash() ||
+                canEquipTypeHavePotential(equip.getItemId()) &&
+                !equip.isNoPotential() &&
+                ItemData.getEquipById(equip.getItemId()).getRuc() >= 1;
     }
 
     public static boolean canEquipGoldHammer(Equip equip) {
