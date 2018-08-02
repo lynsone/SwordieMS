@@ -22,6 +22,7 @@ import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.scripts.ScriptManager;
@@ -747,7 +748,8 @@ public class Field {
      */
     public void drop(Drop drop, Position posFrom, Position posTo) {
         Item item = drop.getItem();
-        boolean isTradable = item != null && item.isTradable();
+        ItemInfo itemInfo = ItemData.getItemInfoByID(item.getItemId());
+        boolean isTradable = item != null && item.isTradable() && itemInfo != null && !itemInfo.isQuest();
         drop.setPosition(posTo);
         if (isTradable) {
             addLife(drop);

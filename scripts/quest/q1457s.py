@@ -5,6 +5,7 @@ heroicStar = 4031518
 status = -1
 
 def init():
+    sm.setSpeakerID(2081400) # Hellin
     if sm.getChr().getLevel() >= 100:
         sm.sendNext("You have accomplished the pinnacle of Strength, however there is one more obstacle in your way.\r\n"
                     "I will test you before I grant you the 4th job powers.")
