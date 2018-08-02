@@ -779,8 +779,11 @@ public class SkillData {
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating mob skill data.");
+        long start = System.currentTimeMillis();
         loadMobSkillsFromWz();
         saveMobSkillsToDat(ServerConstants.DAT_DIR + "/mobSkills");
+        log.info(String.format("Completed generating mob skill data in %dms.", System.currentTimeMillis() - start));
     }
 
     public static void main(String[] args) {

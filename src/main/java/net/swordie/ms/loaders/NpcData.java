@@ -7,6 +7,7 @@ import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.util.dsl.SWEntity;
 import net.swordie.ms.util.dsl.SWParser;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
@@ -19,6 +20,7 @@ import java.util.*;
  * Created on 2/19/2018.
  */
 public class NpcData {
+	private static final Logger log = Logger.getLogger(NpcData.class);
 
 	private static Set<Npc> npcs = new HashSet<>();
 	private static Map<Integer, NpcShopDlg> shops = new HashMap<>();
@@ -379,10 +381,13 @@ public class NpcData {
 	}
 
 	public static void generateDatFiles() {
+		log.info("Started generating npc data.");
+		long start = System.currentTimeMillis();
 		loadNpcsFromWz();
 		saveNpcsToDat(ServerConstants.DAT_DIR + "/npc");
 		loadShopsFromSw();
 		saveShopsToDat(ServerConstants.DAT_DIR + "/shop");
+		log.info(String.format("Completed generating npc data in %dms.", System.currentTimeMillis() - start));
 	}
 
 	public static Set<Npc> getBaseNpcs() {

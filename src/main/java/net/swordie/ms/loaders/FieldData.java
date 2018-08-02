@@ -583,8 +583,11 @@ public class FieldData {
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating field data.");
+        long start = System.currentTimeMillis();
         loadFieldInfoFromWz();
         saveFields(ServerConstants.DAT_DIR + "/fields");
+        log.info(String.format("Completed generating field data in %dms.", System.currentTimeMillis() - start));
     }
 
     public static Field getFieldCopyById(int id) {

@@ -109,10 +109,13 @@ public class StringData {
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating string data.");
+        long start = System.currentTimeMillis();
         loadStringsFromWz();
         loadItemStringsFromWz();
         saveSkillStrings(ServerConstants.DAT_DIR + "/strings");
         saveItemStrings(ServerConstants.DAT_DIR + "/strings");
+        log.info(String.format("Completed generating string data in %dms.", System.currentTimeMillis() - start));
     }
 
     private static void saveSkillStrings(String dir) {
