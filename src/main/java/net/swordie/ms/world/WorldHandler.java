@@ -4178,7 +4178,7 @@ public class WorldHandler {
         Familiar familiar = chr.getFamiliarByID(familiarID);
         boolean showInfo = true;
         if (familiar == null) {
-            familiar = new Familiar(0, familiarID, "Familiar", FileTime.getFileTimeFromType(FileTime.Type.PERMANENT), (short) 1);
+            familiar = new Familiar(0, familiarID, "Familiar", FileTime.fromType(FileTime.Type.PERMANENT), (short) 1);
             showInfo = false;
             chr.addFamiliar(familiar);
         } else {
@@ -4744,5 +4744,16 @@ public class WorldHandler {
         }
 
         chr.write(WvsContext.resultInstanceTable(requestStr, type, subType, true, value));
+    }
+
+    public static void handleMakeEnterFieldPacketForQuickMove(Char chr, InPacket inPacket) {
+        int templateID = inPacket.decodeInt();
+        Npc npc = NpcData.getNpcDeepCopyById(templateID);
+        String script = npc.getScripts().get(0);
+        if (script == null) {
+            script = String.valueOf(npc.getTemplateId());
+        }
+        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.NPC);
+
     }
 }

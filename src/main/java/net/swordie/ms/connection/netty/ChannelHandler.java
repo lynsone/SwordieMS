@@ -310,6 +310,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_REQUEST_INSTANCE_TABLE:
                     WorldHandler.handleUserRequestInstanceTable(chr, inPacket);
                     break;
+                case MAKE_ENTER_FIELD_PACKET_FOR_QUICK_MOVE:
+                    WorldHandler.handleMakeEnterFieldPacketForQuickMove(chr, inPacket);
+                    break;
                 case USER_ABILITY_UP_REQUEST:
                     WorldHandler.handleUserAbilityUpRequest(c, inPacket);
                     break;

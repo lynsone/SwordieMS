@@ -8,7 +8,6 @@ import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.ServerStatus;
 import net.swordie.ms.handlers.header.OutHeader;
-import net.swordie.ms.connection.Packet;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.Channel;
@@ -212,10 +211,10 @@ public class Login {
         outPacket.encodeByte(burningEventBlock); // bBurningEventBlock
         int reserved = 0;
         outPacket.encodeInt(reserved); // Reserved size
-        outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME)); //Reserved timestamp
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.ZERO_TIME)); //Reserved timestamp
         for(int i = 0; i < reserved; i++) {
             // not really interested in this
-            FileTime ft = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
+            FileTime ft = FileTime.fromType(FileTime.Type.ZERO_TIME);
             outPacket.encodeInt(ft.getLowDateTime());
             ft.encode(outPacket);
         }
@@ -245,7 +244,7 @@ public class Login {
         outPacket.encodeInt(account.getCharacterSlots());
         outPacket.encodeInt(0); // buying char slots
         outPacket.encodeInt(-1); // nEventNewCharJob
-        outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME));
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.ZERO_TIME));
         outPacket.encodeByte(0); // nRenameCount
         outPacket.encodeByte(0);
 

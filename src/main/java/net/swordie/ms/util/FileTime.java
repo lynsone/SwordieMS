@@ -83,7 +83,7 @@ public class FileTime implements Serializable {
 		return new FileTime(getLowDateTime(), getHighDateTime());
 	}
 
-	public static FileTime getFileTimeFromType(Type type) {
+	public static FileTime fromType(Type type) {
 		return new FileTime(type.getVal(), true);
 	}
 

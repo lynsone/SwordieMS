@@ -20,7 +20,6 @@ import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.result.PartyResultInfo;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -226,7 +225,7 @@ public class WvsContext {
             outPacket.encodeInt(skill.getSkillId());
             outPacket.encodeInt(skill.getCurrentLevel());
             outPacket.encodeInt(skill.getMasterLevel());
-            outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PLAIN_ZERO));
+            outPacket.encodeFT(FileTime.fromType(FileTime.Type.PLAIN_ZERO));
         }
         outPacket.encodeByte(sn);
 

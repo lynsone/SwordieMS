@@ -40,7 +40,6 @@ import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
@@ -863,7 +862,7 @@ public class Char {
 				for (Skill skill : getSkills()) {
 					outPacket.encodeInt(skill.getSkillId());
 					outPacket.encodeInt(skill.getCurrentLevel());
-					outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+					outPacket.encodeFT(FileTime.fromType(FileTime.Type.PERMANENT));
 					if (SkillConstants.isSkillNeedMasterLevel(skill.getSkillId())) {
 						outPacket.encodeInt(skill.getMasterLevel());
 					}
@@ -871,7 +870,7 @@ public class Char {
 				for (LinkSkill linkSkill : linkSkills) {
 					outPacket.encodeInt(linkSkill.getLinkSkillID());
 					outPacket.encodeInt(linkSkill.getOwnerID());
-					outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+					outPacket.encodeFT(FileTime.fromType(FileTime.Type.PERMANENT));
 					if (SkillConstants.isSkillNeedMasterLevel(linkSkill.getLinkSkillID())) {
 						outPacket.encodeInt(3); // whatevs
 					}
@@ -1295,7 +1294,7 @@ public class Char {
 			outPacket.encodeInt(1);
 			outPacket.encodeInt(0);
 			outPacket.encodeInt(100);
-			outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME));
+			outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
 			outPacket.encodeShort(0);
 			outPacket.encodeShort(0);
 		}
@@ -2165,6 +2164,9 @@ public class Char {
 		}
 		for (Mob mob : toField.getMobs()) {
 			mob.addObserver(getScriptManager());
+		}
+		if (getFieldInstanceType() == FieldInstanceType.CHANNEL) {
+			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos()));
 		}
 	}
 

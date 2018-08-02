@@ -25,7 +25,7 @@ public class Familiar extends Life {
     private long idk5;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "expiredate")
-    private FileTime expiration = FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME);
+    private FileTime expiration = FileTime.fromType(FileTime.Type.MAX_TIME);
     private short vitality;
 
     public Familiar() {

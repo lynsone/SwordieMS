@@ -67,7 +67,7 @@ public class DropPool {
         if(!drop.isMoney()) {
             FileTime expireTime = drop.getExpireTime();
             if(expireTime == null) {
-                expireTime = FileTime.getFileTimeFromType(FileTime.Type.PERMANENT);
+                expireTime = FileTime.fromType(FileTime.Type.PERMANENT);
             }
             outPacket.encodeFT(expireTime);
         }

@@ -14,8 +14,6 @@ import java.util.*;
 
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
-import static net.swordie.ms.enums.InventoryOperation.REMOVE;
-import static net.swordie.ms.enums.InventoryOperation.UPDATE_ITEM_INFO;
 
 /**
  * GW_ItemSlotBase
@@ -36,7 +34,7 @@ public class Item implements Serializable {
     protected long cashItemSerialNumber;
     @JoinColumn(name = "dateExpire")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    protected FileTime dateExpire = FileTime.getFileTimeFromType(FileTime.Type.PERMANENT);
+    protected FileTime dateExpire = FileTime.fromType(FileTime.Type.PERMANENT);
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "invType")
     protected InvType invType;

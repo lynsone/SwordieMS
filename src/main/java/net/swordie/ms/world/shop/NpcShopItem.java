@@ -4,9 +4,6 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.ItemGrade;
 import net.swordie.ms.util.FileTime;
-import net.swordie.ms.util.Util;
-
-import java.time.LocalDateTime;
 
 /**
  * Created on 3/27/2018.
@@ -42,8 +39,8 @@ public class NpcShopItem {
     private int location;
 
     public NpcShopItem() {
-        sellStart = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
-        sellEnd = FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME);
+        sellStart = FileTime.fromType(FileTime.Type.ZERO_TIME);
+        sellEnd = FileTime.fromType(FileTime.Type.MAX_TIME);
         maxPerSlot = 1000;
     }
 

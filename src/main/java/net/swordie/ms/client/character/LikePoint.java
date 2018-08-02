@@ -8,7 +8,7 @@ import net.swordie.ms.util.FileTime;
  */
 public class LikePoint {
     private int point;
-    private FileTime incTime = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
+    private FileTime incTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     private int season;
 
     public void encode(OutPacket outPacket) {

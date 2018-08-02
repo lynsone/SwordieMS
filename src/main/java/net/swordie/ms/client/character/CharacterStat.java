@@ -93,8 +93,8 @@ public class CharacterStat {
     public CharacterStat() {
         extendSP = new ExtendSP(7);
         nonCombatStatDayLimit = new NonCombatStatDayLimit();
-        albaStartTime = FileTime.getFileTimeFromType(FileTime.Type.PLAIN_ZERO);
-        lastLogout = FileTime.getFileTimeFromType(FileTime.Type.PLAIN_ZERO);
+        albaStartTime = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
+        lastLogout = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
         characterCard = new CharacterCard(0, 0, (byte) 0);
         accountLastLogout = new SystemTime(1970, 1);
         // TODO fill in default vals

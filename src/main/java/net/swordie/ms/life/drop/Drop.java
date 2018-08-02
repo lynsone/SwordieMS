@@ -42,14 +42,14 @@ public class Drop extends Life {
         super(templateId);
         this.item = item;
         dropType = DropType.ITEM;
-        expireTime = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
+        expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
     public Drop(int templateId, int money) {
         super(templateId);
         this.money = money;
         dropType = DropType.MONEY;
-        expireTime = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
+        expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
     public Item getItem() {

@@ -1,9 +1,12 @@
 package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
+import net.swordie.ms.enums.QuickMoveType;
+import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
 
@@ -133,9 +136,27 @@ public class GameConstants {
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
 
+    private static List<QuickMoveInfo> quickMoveInfos;
+
     static {
         initCharExp();
         initEnchantRates();
+        initQuickMove();
+    }
+
+    private static void initQuickMove() {
+        quickMoveInfos = new ArrayList<>();
+        quickMoveInfos.add(new QuickMoveInfo(0, 9072302, QuickMoveType.Boat, 1, "Warping",
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+        quickMoveInfos.add(new QuickMoveInfo(0, 9010022, QuickMoveType.DimensionalPortal, 1, "Dimensional Portal",
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+        quickMoveInfos.add(new QuickMoveInfo(0, 9071003, QuickMoveType.MonsterPark, 1, "Monster Park",
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+
+    }
+
+    public static List<QuickMoveInfo> getQuickMoveInfos() {
+        return quickMoveInfos;
     }
 
     private static void initCharExp() {
