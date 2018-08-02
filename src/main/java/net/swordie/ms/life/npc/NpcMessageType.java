@@ -23,7 +23,7 @@ public enum NpcMessageType {
     AskActionPetEvolution(13),
     AskAccept(15),
     AskBoxtext(16),
-    AskSlideMenu(17),
+    AskSlideMenu(18),
     AskSelectMenu(21),
     AskAngelicBuster(22),
     SayIllustration(23),

@@ -412,7 +412,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		sendGeneralSay(text, AskAvatar);
 	}
 
-
+	public void sendAskSlideMenu(int dlgType) {
+		getNpcScriptInfo().setDlgType(dlgType);
+		chr.write(ScriptMan.scriptMessage(this, AskSlideMenu));
+	}
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
 

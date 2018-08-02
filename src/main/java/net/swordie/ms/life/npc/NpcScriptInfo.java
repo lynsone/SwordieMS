@@ -1,5 +1,10 @@
 package net.swordie.ms.life.npc;
 
+import net.swordie.ms.connection.packet.SlideMenuItem;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created on 2/19/2018.
  */
@@ -26,6 +31,7 @@ public class NpcScriptInfo {
 	private int remaining;
 	private boolean angelicBuster;
 	private boolean zeroBeta;
+	private int dlgType;
 
 	public byte getSpeakerType() {
 		return speakerType;
@@ -202,4 +208,12 @@ public class NpcScriptInfo {
 	public void setZeroBeta(boolean zeroBeta) {
 		this.zeroBeta = zeroBeta;
 	}
+
+    public int getDlgType() {
+        return dlgType;
+    }
+
+    public void setDlgType(int dlgType) {
+        this.dlgType = dlgType;
+    }
 }
