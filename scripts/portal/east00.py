@@ -70,6 +70,12 @@ def init():
 	elif currentMap == 310040200: # Dry Road : Mine Entrance
 		map = 310050000
 		portal = 1
+
+	elif currentMap == 350060160: # Black Heaven Core (Lotus Stage 1)
+		warp = False
+		sm.teleportInField(3) #portal Id
+		sm.dispose()
+
 	else:
 		sm.chat("(Portal - east00) This script has currently not been coded for this map.")
 		map = sm.getChr().getField()

@@ -64,9 +64,22 @@ def init():
     warp = True
     fieldID = sm.getFieldID()
 
+    # Party Quest
+
+    # Escape! - PQ
+    if fieldID == 921160700: # Prison Guard Ani's Room (Escape! Boss Room)
+        warp = False
+        if sm.mobsPresentInField():
+            sm.chat("The portal is not opened.")
+
+        else:
+            sm.warpPartyOut(910002000) # Party Quest Map
+            sm.giveExp(sm.getPQExp()) #Gives player PQ exp
+        sm.dispose()
+
 
     # Dojo Floors
-    if fieldID / 10000 == 92507:
+    elif fieldID / 10000 == 92507:
         warp = False
         if sm.mobsPresentInField():
             sm.chat("Eliminate the boss before continuing")
@@ -106,6 +119,23 @@ def init():
     # CQueen
     elif fieldID == 105200310:
         sm.sendAskYesNo("Would you like to leave?")
+        warp = False
+
+    # Lotus
+    elif fieldID == 350060200:
+        if sm.getParty() is None:
+            sm.warpInstanceOut(350060000) # Entrance Core
+        else:
+            sm.warpPartyOut(350060000) # Entrace Core
+        sm.dispose()
+        warp = False
+
+    elif fieldID == 350060160:
+        if sm.getParty() is None:
+            sm.warpInstanceOut(350060000) # Entrance Core
+        else:
+            sm.warpPartyOut(350060000) # Entrace Core
+        sm.dispose()
         warp = False
 
     # Pierre

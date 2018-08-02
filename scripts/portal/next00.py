@@ -33,7 +33,7 @@ def init():
 		#Third Map & Fourth Map  of the Lord Pirate PQ
 		elif fieldID == 925100200 or fieldID == 925100300:
 			warp = False
-			if sm.getReactorQuantity() > 8 or sm.mobsPresentInField():
+			if sm.getReactorQuantity() > 8 or sm.mobsPresentInField(): # due to invisible reactor hidden on the map
 				sm.chat("The portal is not opened.")
 				sm.dispose()
 			else:
@@ -54,9 +54,38 @@ def init():
 
 
 
-	# Party Quest - Escape PQ
+	# Party Quest - Escape! PQ
 	elif fieldID / 10000 == 92116:
-		if fieldID == 921160600:
+
+		# Hidden Street : Path to the Aerial Prison
+		if fieldID == 921160200:
+#			warp = False  TODO uncomment
+#			if sm.mobsPresentInField():
+#				sm.chat("The portal is not opened.")
+#				sm.dispose()
+#			else:
+				warp = True
+
+		# Dark Tower 1
+		elif fieldID == 921160300:
+#			warp = False  TODO uncomment
+#			if sm.mobsPresentInField():
+#				sm.chat("The portal is not opened.")
+#				sm.dispose()
+#			else:
+				warp = True
+
+		# Hidden Street : A Secret Door to the Aerial Prison
+		elif fieldID == 921160400:
+#			warp = False  TODO uncomment
+#			if sm.mobsPresentInField():
+#				sm.chat("The portal is not opened.")
+#				sm.dispose()
+#			else:
+				warp = True
+
+		# Hidden Street : Aerial Prison
+		elif fieldID == 921160600:
 			warp = False
 			if sm.getReactorQuantity() > 1: # due to invisible reactor hidden on the map
 				sm.chat("Unlock all the prison doors.")
@@ -66,6 +95,8 @@ def init():
 
 		map = fieldID + 100
 		portal = 0
+
+
 
 	# Monster Park
 	elif fieldID / 1000000 == 952 or fieldID / 1000000 == 953 or fieldID / 1000000 == 954:
