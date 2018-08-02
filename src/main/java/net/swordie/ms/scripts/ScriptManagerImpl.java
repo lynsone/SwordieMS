@@ -230,11 +230,6 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (getLastActiveScriptType() == scriptType) {
 			setLastActiveScriptType(ScriptType.NONE);
 		}
-		Set<ScheduledFuture> events = eventsByScriptType.get(scriptType);
-		if (events != null) {
-			events.forEach(st -> st.cancel(true));
-			events.clear();
-		}
 		WvsContext.dispose(chr);
 	}
 
@@ -1206,6 +1201,14 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 
 		field.broadcastPacket(CField.createObtacle(ObtacleAtomCreateType.NORMAL, obtacleInRowInfo, obtacleRadianInfo, obtacleAtomInfosSet));
+	}
+
+	public void stopEventsByScriptType(ScriptType scriptType) {
+		Set<ScheduledFuture> events = eventsByScriptType.get(scriptType);
+		if (events != null) {
+			events.forEach(st -> st.cancel(true));
+			events.clear();
+		}
 	}
 
 

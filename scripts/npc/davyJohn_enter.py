@@ -32,5 +32,5 @@ def action(response, answer):
         for partyMember in sm.getParty().getMembers():
             sm.createQuestWithQRValue(partyMember.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
 
-        sm.warpPartyIn(925100000)
+        sm.warpPartyIn(925100000) # Lord Pirate PQ  First Map
     sm.dispose()

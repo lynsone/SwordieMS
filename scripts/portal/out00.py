@@ -1,3 +1,6 @@
+
+from net.swordie.ms.scripts import ScriptType
+
 field = {
     101050010 : 101050000,
     106030200 : 106030000,
@@ -61,6 +64,7 @@ portal = {
 }
 
 def init():
+    sm.stopEventsByScriptType(ScriptType.FIELD) #Stops the FixedRate Event from the Field Script
     warp = True
     fieldID = sm.getFieldID()
 
@@ -122,7 +126,7 @@ def init():
         warp = False
 
     # Lotus
-    elif fieldID == 350060200:
+    elif fieldID == 350060200: # Lotus Stage 1
         if sm.getParty() is None:
             sm.warpInstanceOut(350060000) # Entrance Core
         else:
@@ -130,7 +134,16 @@ def init():
         sm.dispose()
         warp = False
 
-    elif fieldID == 350060160:
+    elif fieldID == 350060180: # Lotus Stage 2
+        if sm.getParty() is None:
+            sm.warpInstanceOut(350060000) # Entrance Core
+        else:
+            sm.warpPartyOut(350060000) # Entrace Core
+        sm.dispose()
+        warp = False
+
+    elif fieldID == 350060160: # Lotus Stage 3
+        sm.stopEventsByScriptType(ScriptType.FIELD) #Stops the FixedRate Event from the Field Script
         if sm.getParty() is None:
             sm.warpInstanceOut(350060000) # Entrance Core
         else:
