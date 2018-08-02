@@ -43,35 +43,27 @@ public class ItemData {
             ret.setCuttable((short) -1);
             ret.setItemState((short) ItemState.ENHANCABLE.getVal());
             if (randomizeStats) {
-                EquipBaseStat[] ebsStat = new EquipBaseStat[]{EquipBaseStat.iStr, EquipBaseStat.iInt, EquipBaseStat.iDex,
-                        EquipBaseStat.iLuk, EquipBaseStat.iPAD, EquipBaseStat.iMAD, EquipBaseStat.iMaxHP, EquipBaseStat.iMaxMP,
-                        EquipBaseStat.iPAD, EquipBaseStat.iMAD};
-                for (EquipBaseStat ebs : ebsStat) {
-                    int max = ebs == EquipBaseStat.iPAD || ebs == EquipBaseStat.iMAD ? 5 : 3; // Att +-5, the rest +-3
-                    if (ret.getBaseStat(ebs) > 0) {
-                        int rand = Util.getRandom(max);
-                        rand = new Random().nextBoolean() ? rand : -rand;
-                        int newStat = (int) Math.max(0, ret.getBaseStat(ebs) + rand);
-                        ret.setBaseStat(ebs, newStat);
+                // TODO: flame stats
+
+                if (ItemConstants.canEquipHavePotential(e)) {
+                    ItemGrade grade = ItemGrade.NONE;
+                    if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
+                        grade = ItemGrade.HIDDEN_UNIQUE;
+                    } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
+                        grade = ItemGrade.HIDDEN_EPIC;
+                    } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
+                        grade = ItemGrade.HIDDEN_RARE;
                     }
-                }
-                ItemGrade grade = ItemGrade.NONE;
-                if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
-                    grade = ItemGrade.HIDDEN_UNIQUE;
-                } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
-                    grade = ItemGrade.HIDDEN_EPIC;
-                } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
-                    grade = ItemGrade.HIDDEN_RARE;
-                }
-                if (grade != ItemGrade.NONE) {
-                    ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
+                    if (grade != ItemGrade.NONE) {
+                        ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
+                    }
                 }
             }
         }
         return ret;
     }
 
-    private static Equip getEquipById(int itemId) {
+    public static Equip getEquipById(int itemId) {
         return getEquips().getOrDefault(itemId, getEquipFromFile(itemId));
     }
 
@@ -128,6 +120,7 @@ public class ItemData {
             boolean tradeBlock = dataInputStream.readBoolean();
             boolean equipTradeBlock = dataInputStream.readBoolean();
             boolean fixedPotential = dataInputStream.readBoolean();
+            boolean noPotential = dataInputStream.readBoolean();
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -138,15 +131,15 @@ public class ItemData {
             }
             int fixedGrade = dataInputStream.readInt();
             int specialGrade = dataInputStream.readInt();
-            equip = new Equip(itemId, -1, -1, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME),
-                    -1, null, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME),
-                    0, ruc, (short) 0, iStr, iDex, iInt, iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD,
-                    iAcc, iEva, iCraft, iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
-                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
-                    damR, statR, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex,
-                    rInt, rLuk, rLevel, rJob, rPop, cash, islot, vslot, fixedGrade, options, specialGrade, fixedPotential,
-                    tradeBlock, only, notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem,
-                    equipTradeBlock, "");
+            equip = new Equip(itemId, -1, -1, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME), -1,
+                    null, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME), 0, ruc, (short) 0, iStr, iDex, iInt,
+                    iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
+                    iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
+                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
+                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
+                    rLuk, rLevel, rJob, rPop, cash,
+                    islot, vslot, fixedGrade, options, specialGrade, fixedPotential, noPotential, tradeBlock, only,
+                    notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
             equips.put(equip.getItemId(), equip);
         } catch (IOException e) {
             e.printStackTrace();
@@ -199,6 +192,7 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isTradeBlock());
                 dataOutputStream.writeBoolean(equip.isEquipTradeBlock());
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
+                dataOutputStream.writeBoolean(equip.isNoPotential());
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
@@ -266,6 +260,7 @@ public class ItemData {
                         boolean only = false;
                         boolean tradeBlock = false;
                         boolean fixedPotential = false;
+                        boolean noPotential = false;
                         boolean exItem = false;
                         boolean equipTradeBlock = false;
                         List<Integer> options = new ArrayList<>(7);
@@ -421,6 +416,10 @@ public class ItemData {
                             if (hasfixedPotential) {
                                 fixedPotential = Integer.parseInt(attributes.get("value")) == 1;
                             }
+                            boolean hasNoPotential = attributes.get("name").equalsIgnoreCase("noPotential");
+                            if (hasNoPotential) {
+                                noPotential = Integer.parseInt(attributes.get("value")) == 1;
+                            }
                             boolean hasOptions = attributes.get("name").equalsIgnoreCase("option");
                             if (hasOptions) {
                                 for (Node whichOptionNode : XMLApi.getAllChildren(n)) {
@@ -444,14 +443,14 @@ public class ItemData {
                                 specialGrade = Integer.parseInt(attributes.get("value"));
                             }
                         }
-                        Equip equip = new Equip(itemId, -1, -1,FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME), -1,
+                        Equip equip = new Equip(itemId, -1, -1, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME), -1,
                                 null, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME), 0, (short) ruc, (short) 0, (short) incStr, (short) incDex, (short) incInt,
                                 (short) incLuk, (short) incMHP, (short) incMMP, (short) incPAD, (short) incMAD, (short) incPDD, (short) incMDD, (short) incACC, (short) incEVA, (short) incCraft,
                                 (short) incSpeed, (short) incJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
                                 (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) damR, (short) statR, (short) 0, (short) 0,
                                 (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) reqStr, (short) reqDex, (short) reqInt,
                                 (short) reqLuk, (short) reqLevel, (short) reqJob, (short) reqPop, cash,
-                                islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
+                                islot, vslot, fixedGrade, options, specialGrade, fixedPotential, noPotential, tradeBlock, only,
                                 notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
                         equips.put(equip.getItemId(), equip);
                     }

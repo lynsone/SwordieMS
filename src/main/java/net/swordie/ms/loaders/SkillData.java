@@ -39,6 +39,7 @@ public class SkillData {
                 dataOutputStream.writeInt(si.getType());
                 dataOutputStream.writeUTF(si.getElemAttr());
                 dataOutputStream.writeInt(si.getHyper());
+                dataOutputStream.writeInt(si.getHyperStat());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -85,6 +86,7 @@ public class SkillData {
                     skillInfo.setType(dataInputStream.readInt());
                     skillInfo.setElemAttr(dataInputStream.readUTF());
                     skillInfo.setHyper(dataInputStream.readInt());
+                    skillInfo.setHyperStat(dataInputStream.readInt());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -192,6 +194,10 @@ public class SkillData {
                         Node hyperNode = XMLApi.getFirstChildByNameBF(skillNode, "hyper");
                         if(hyperNode != null) {
                             skill.setHyper(Integer.parseInt(XMLApi.getNamedAttribute(hyperNode, "value")));
+                        }
+                        Node hyperStatNode = XMLApi.getFirstChildByNameBF(skillNode, "hyperStat");
+                        if(hyperStatNode != null) {
+                            skill.setHyperStat(Integer.parseInt(XMLApi.getNamedAttribute(hyperStatNode, "value")));
                         }
                         // end main level info
                         // start "common" level info

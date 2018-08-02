@@ -20,6 +20,7 @@ import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.result.PartyResultInfo;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -952,18 +953,15 @@ public class WvsContext {
      * @param upgradesLeft amount of upgrades left. NOTE: ((v9 >> 8) & 0xFF) - v9 + 2) (where v9 = upgradesLeft)
      * @return the created packet
      */
-    public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, int upgradesLeft) {
+    public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, Equip equip) {
         // Could create an enum for returnResult/msg, but it's not used often enough to warrant this
         OutPacket outPacket = new OutPacket(OutHeader.GOLD_HAMMER_ITEM_UPGRADE_RESULT);
 
         outPacket.encodeByte(returnResult);
-        if (returnResult == 2 || returnResult == 3) {
+        if (returnResult != 1) {
             outPacket.encodeInt(msg);
         }
-        if (returnResult == 0) {
-            outPacket.encodeInt(msg);
-        }
-        outPacket.encodeInt(upgradesLeft);
+        outPacket.encodeInt(equip == null ? 0 : equip.getRuc());
 
         return outPacket;
     }

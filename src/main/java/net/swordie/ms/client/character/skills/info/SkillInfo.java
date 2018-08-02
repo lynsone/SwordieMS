@@ -32,6 +32,7 @@ public class SkillInfo {
     private Set<Integer> psdSkills = new HashSet<>();
     private String elemAttr;
     private int hyper;
+    private int hyperstat;
 
     public int getSkillId() {
         return skillId;
@@ -243,5 +244,13 @@ public class SkillInfo {
 
     public int getHyper() {
         return hyper;
+    }
+
+    public void setHyperStat(int hyperstat) {
+        this.hyperstat = hyperstat;
+    }
+
+    public int getHyperStat() {
+        return hyperstat;
     }
 }

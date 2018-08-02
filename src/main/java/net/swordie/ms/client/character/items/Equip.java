@@ -77,6 +77,7 @@ public class Equip extends Item {
     private List<Integer> options = new ArrayList<>(); // base + add pot + anvil
     private int specialGrade;
     private boolean fixedPotential;
+    private boolean noPotential;
     private boolean tradeBlock;
     @Column(name = "isOnly")
     private boolean only;
@@ -113,7 +114,7 @@ public class Equip extends Item {
                  short itemState, short chuc, short soulOptionId, short soulSocketId, short soulOption,
                  short rStr, short rDex, short rInt, short rLuk, short rLevel, short rJob, short rPop, boolean isCash,
                  String iSlot, String vSlot, int fixedGrade, List<Integer> options, int specialGrade, boolean fixedPotential,
-                 boolean tradeBlock, boolean only, boolean notSale, int attackSpeed, int price, int charmEXP,
+                 boolean noPotential, boolean tradeBlock, boolean only, boolean notSale, int attackSpeed, int price, int charmEXP,
                  boolean expireOnLogout, int setItemID, boolean exItem, boolean hasEquipTradeBlock, String owner) {
         super(itemId, bagIndex, cashItemSerialNumber, dateExpire, InvType.EQUIP, isCash, Type.EQUIP);
         this.serialNumber = serialNumber;
@@ -174,6 +175,7 @@ public class Equip extends Item {
         this.options = options;
         this.specialGrade = specialGrade;
         this.fixedPotential = fixedPotential;
+        this.noPotential = noPotential;
         this.tradeBlock = tradeBlock;
         this.only = only;
         this.notSale = notSale;
@@ -250,6 +252,7 @@ public class Equip extends Item {
         ret.options.addAll(options);
         ret.specialGrade = specialGrade;
         ret.fixedPotential = fixedPotential;
+        ret.noPotential = noPotential;
         ret.tradeBlock = tradeBlock;
         ret.only = only;
         ret.notSale = notSale;
@@ -291,6 +294,7 @@ public class Equip extends Item {
         return prevBonusExpRate;
     }
 
+    // scroll slots
     public short getRuc() {
         return ruc;
     }
@@ -737,6 +741,10 @@ public class Equip extends Item {
         return fixedPotential;
     }
 
+    public boolean isNoPotential() {
+        return noPotential;
+    }
+
     public boolean isTradeBlock() {
         return tradeBlock;
     }
@@ -803,6 +811,10 @@ public class Equip extends Item {
 
     public void setFixedPotential(boolean fixedPotential) {
         this.fixedPotential = fixedPotential;
+    }
+
+    public void setNoPotential(boolean noPotential) {
+        this.noPotential = noPotential;
     }
 
     public void setTradeBlock(boolean tradeBlock) {
@@ -1308,6 +1320,10 @@ public class Equip extends Item {
      * @param thirdLineChance The chance of a third line being added.
      */
     public void setHiddenOptionBase(short val, int thirdLineChance) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         int max = 3;
         if(getOptionBase(3) == 0) {
             // If this equip did not have a 3rd line already, thirdLineChance to get it
@@ -1321,6 +1337,10 @@ public class Equip extends Item {
     }
 
     public void setHiddenOptionBonus(short val, int thirdLineChance) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         int max = 3;
         if(getOptionBonus(3) == 0) {
             // If this equip did not have a 3rd line already, thirdLineChance to get it
@@ -1334,6 +1354,10 @@ public class Equip extends Item {
     }
 
     public void releaseOptions(boolean bonus) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         for (int i = 0; i < 3; i++) {
             if(getOption(i, bonus) < 0) {
                 setOption(i, getRandomOption(bonus, i), bonus);
