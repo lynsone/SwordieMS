@@ -28,6 +28,7 @@ public class Account {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
+    private String password;
     @Column(name = "accountTypeMask")
     private int accountType;
     private int age;
@@ -77,10 +78,11 @@ public class Account {
     private FileTime banExpireDate;
     private String banReason;
 
-    public Account(String username, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
+    public Account(String username, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
                    byte gradeCode, String censoredNxLoginID, int characterSlots, long creationDate) {
         this.username = username;
+        this.password = password;
         this.id = accountId;
         this.pic = pic;
         this.accountType = accountType;
@@ -104,7 +106,7 @@ public class Account {
     }
 
     public Account(String id, int accountId) {
-        this(id, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
+        this(id, null, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
                 0, false, (byte) 0, "", 16,
                 System.currentTimeMillis());
     }
@@ -114,6 +116,10 @@ public class Account {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public int getId() {
@@ -190,6 +196,10 @@ public class Account {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public int getnBlockReason() {

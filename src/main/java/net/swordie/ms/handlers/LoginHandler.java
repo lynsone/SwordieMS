@@ -22,10 +22,12 @@ import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.util.Util;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.Server;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -78,19 +80,26 @@ public class LoginHandler {
         LoginType result;
         Account account = null;
 
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM accounts WHERE username = ?")){
+        try (PreparedStatement ps = connection.prepareStatement("SELECT id, password FROM accounts WHERE username = ?")){
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                success = password.equals(rs.getString("password"));
                 int id = rs.getInt("id");
+                String dbPassword = rs.getString("password");
+                boolean hashed = Util.isStringBCrypt(dbPassword);
+                if (hashed) {
+                    try {
+                        success = BCrypt.checkpw(password, dbPassword);
+                    } catch (IllegalArgumentException e) { // if password hashing went wrong
+                        log.error(String.format("bcrypt check in login has failed! dbPassword: %s; stack trace: %s", dbPassword, e.getStackTrace().toString()));
+                        success = false;
+                    }
+                } else {
+                    success = password.equals(dbPassword);
+                }
                 result = success ? LoginType.Success : LoginType.IncorrectPassword;
                 if (success) {
                     account = Account.getFromDBById(id);
-                    if (account.getBanExpireDate() != null) {
-                        System.out.println("Banexpire = " + account.getBanExpireDate().toMillis() + " (" + account.getBanExpireDate().toLocalDateTime() + ")");
-                        System.out.println("CurTime   = " + System.currentTimeMillis() + " (" + LocalDateTime.now() + ")");
-                    }
                     if (account.getLoginState() != null && account.getLoginState() != LoginState.Out) {
                         success = false;
                         result = LoginType.AlreadyConnected;
@@ -101,9 +110,16 @@ public class LoginHandler {
                                 account.getBanReason(), account.getBanExpireDate().toLocalDateTime());
                         c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage(banMsg)));
                     } else {
+                        if (!hashed) {
+                            account.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
+                            // if a user has an assigned pic, hash it
+                            if (account.getPic() != null && account.getPic().length() >= 6 && !Util.isStringBCrypt(account.getPic())) {
+                                account.setPic(BCrypt.hashpw(account.getPic(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
+                            }
+                        }
                         Server.getInstance().getAccounts().add(account);
                         c.setAccount(account);
-                        account.setLoginState(LoginState.Login); // 1533164192103 1533167158947
+                        account.setLoginState(LoginState.Login);
                         DatabaseManager.saveToDB(account);
                     }
                 }
@@ -284,7 +300,7 @@ public class LoginHandler {
         int characterId = inPacket.decodeInt();
         String mac = inPacket.decodeString();
         String somethingElse = inPacket.decodeString();
-        String pic = inPacket.decodeString();
+        String pic = BCrypt.hashpw(inPacket.decodeString(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS));
         c.getAccount().setPic(pic);
         // Update in DB
         DatabaseManager.saveToDB(c.getAccount());
@@ -313,7 +329,7 @@ public class LoginHandler {
         String pic = inPacket.decodeString();
 //        int userId = inPacket.decodeInt();
         // after this: 2 strings indicating pc info. Not interested in that rn
-        if (c.getAccount().getPic().equals(pic)) {
+        if (BCrypt.checkpw(pic, c.getAccount().getPic())) {
             success = true;
         } else {
             c.write(Login.selectCharacterResult(LoginType.IncorrectSPW, (byte) 0, 0, 0));
