@@ -27,6 +27,7 @@ field = {
     260010601 : 260010600,
     106030402 : 106030101,
     270000100 : 200090510, # ToT : Dragon Flight-2nd Map
+    211040401: 211040300, # Hidden Street : Holy Ground at the Snowfield
 }
 
 portal = {
@@ -58,7 +59,12 @@ portal = {
     260010601 : 0,
     106030402 : 1,
     270000100 : 0,
+    211040401 : 0,
 }
+
+soloInstances = [
+
+]
 
 def init():
     warp = True
@@ -167,12 +173,17 @@ def init():
         sm.warp(map, portals)
         sm.dispose()
 
-    else:
+    elif not fieldID in field:
         sm.chat("(Portal) This script (out00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
+        warp = False
         sm.dispose()
 
+
     if warp:
-        sm.warp(field[fieldID], portal[fieldID])
+        if fieldID in soloInstances:
+            sm.warpInstanceOut(field[fieldID])
+        else:
+            sm.warp(field[fieldID], portal[fieldID])
         sm.dispose()
 
 def action(response, answer):

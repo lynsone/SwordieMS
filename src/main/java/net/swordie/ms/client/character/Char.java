@@ -2037,9 +2037,11 @@ public class Char {
 					addField(field);
 					res = field;
 				}
+				res.setRuneStone(null);
 				break;
 			case PARTY:
 				res = getParty() != null ? getParty().getOrCreateFieldById(fieldID) : null;
+				res.setRuneStone(null);
 				break;
 			// TODO expedition
 			default:

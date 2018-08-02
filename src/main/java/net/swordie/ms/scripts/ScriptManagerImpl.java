@@ -583,23 +583,32 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
+	public void warpInstanceIn(int id, int portal) {
+		warpInstance(id, true, portal);
+	}
+
+	public void warpInstanceOut(int id, int portal) {
+		warpInstance(id, false, portal);
+	}
+
 	@Override
 	public void warpInstanceIn(int id) {
-		warpInstance(id, true);
+		warpInstance(id, true, 0);
 	}
 
 	@Override
 	public void warpInstanceOut(int id) {
-		warpInstance(id, false);
+		warpInstance(id, false, 0);
 	}
 
-	public void warpInstance(int id, boolean in) {
+	public void warpInstance(int id, boolean in, int portalID) {
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
 		if (!in) {
 			chr.getFields().clear();
 		}
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
-		chr.warp(field);
+		Portal portal = field.getPortalByID(portalID);
+		chr.warp(field, portal);
 	}
 
 	@Override

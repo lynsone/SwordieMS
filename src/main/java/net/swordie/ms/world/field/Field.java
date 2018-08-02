@@ -74,6 +74,7 @@ public class Field {
     private int bossMobID;
     private boolean kishin;
     private List<OpenGate> openGateList = new ArrayList<>();
+    private boolean canSpawnRunestone;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -533,7 +534,7 @@ public class Field {
         for (Reactor reactor : getReactors()) {
             spawnLife(reactor, chr);
         }
-        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0) {
+        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && canSpawnRunestone()) {
             chr.write(CField.runeStoneAppear(runeStone));
         }
         if (getOpenGates() != null && getOpenGates().size() > 0) {
@@ -950,7 +951,7 @@ public class Field {
     }
 
     public void spawnRuneStone() {
-        if(getMobs().size() <= 0 || getBossMobID() != 0) {
+        if(getMobs().size() <= 0 || getBossMobID() != 0 || !canSpawnRunestone()) {
             return;
         }
         if(getRuneStone() == null) {
@@ -1089,8 +1090,7 @@ public class Field {
                 .filter(l -> l instanceof MobGen)
                 .map(l -> ((MobGen) l))
                 .collect(Collectors.toSet())) {
-            if (currentMobs < getMobCapacity() &&
-                    (hasKishin() || getMobsInRect(mg.getPosition().getRectAround(GameConstants.MOB_CHECK_RECT)).size() == 0)) {
+            if (mg.canSpawnOnField(this)) {
                 mg.spawnMob(this);
                 currentMobs++;
                 if (currentMobs > getFixedMobCapacity()) {
@@ -1104,7 +1104,7 @@ public class Field {
                 (long) (GameConstants.BASE_MOB_RESPAWN_RATE / (getMobRate() * kishinMultiplier)));
     }
 
-    private int getMobCapacity() {
+    public int getMobCapacity() {
         return (int) (getFixedMobCapacity() * (hasKishin() ? GameConstants.KISHIN_MOB_MULTIPLIER : 1));
     }
 
@@ -1132,5 +1132,13 @@ public class Field {
         if (getOpenGates().contains(openGate)) {
             getOpenGates().remove(openGate);
         }
+    }
+
+    public boolean canSpawnRunestone() {
+        return canSpawnRunestone;
+    }
+
+    public void setCanSpawnRunestone(boolean canSpawnRunestone) {
+        this.canSpawnRunestone = canSpawnRunestone;
     }
 }

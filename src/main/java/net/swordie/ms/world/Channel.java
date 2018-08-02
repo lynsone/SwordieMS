@@ -101,6 +101,7 @@ public class Channel {
     private Field createAndReturnNewField(int id) {
         Field newField = FieldData.getFieldCopyById(id);
         if (newField != null) {
+            newField.setCanSpawnRunestone(true);
             getFields().add(newField);
         }
         return newField;
