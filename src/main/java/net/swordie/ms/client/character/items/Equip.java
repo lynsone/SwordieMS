@@ -21,7 +21,7 @@ public class Equip extends Item {
     private String title;
     @JoinColumn(name = "equippedDate")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private FileTime equippedDate = new FileTime();
+    private FileTime equippedDate = FileTime.getFileTimeFromType(FileTime.Type.PLAIN_ZERO);
     private int prevBonusExpRate;
     private short ruc;
     private short cuc;
@@ -996,7 +996,7 @@ public class Equip extends Item {
         outPacket.encodeInt(-1); // ?
         // GW_CashItemOption
         outPacket.encodeLong(getCashItemSerialNumber());
-        getDateExpire().encode(outPacket);
+        outPacket.encodeFT(getDateExpire());
         outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
         for (int i = 0; i < 2; i++) {
             outPacket.encodeLong(0);

@@ -119,6 +119,15 @@ public class BroadcastMsg {
         return broadcastMsg;
     }
 
+    public static BroadcastMsg popUpMessage(String string) {
+        BroadcastMsg broadcastMsg = new BroadcastMsg();
+        broadcastMsg.setBroadcastMsgType(BroadcastMsgType.PopUpMessage);
+
+        broadcastMsg.setString(string);
+
+        return broadcastMsg;
+    }
+
 
     public BroadcastMsgType getBroadcastMsgType() {
         return broadcastMsgType;

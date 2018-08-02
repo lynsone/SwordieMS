@@ -727,6 +727,8 @@ create table accounts (
     nxPrepaid int default 0,
     monstercollectionid int,
     loginState int,
+    banExpireDate bigint,
+    banReason varchar(255),
 	primary key (id),
     foreign key (trunkid) references trunks(id),
     foreign key (monstercollectionid) references monster_collections(id)

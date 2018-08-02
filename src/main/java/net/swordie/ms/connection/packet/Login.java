@@ -63,7 +63,7 @@ public class Login {
         OutPacket outPacket = new OutPacket(OutHeader.CHECK_PASSWORD_RESULT.getValue());
 
         if(success) {
-            outPacket.encodeByte(LoginType.SUCCESS.getValue());
+            outPacket.encodeByte(LoginType.Success.getValue());
             outPacket.encodeByte(0);
             outPacket.encodeInt(0);
             outPacket.encodeString(account.getUsername());
@@ -88,11 +88,29 @@ public class Login {
             outPacket.encodeByte(0); // idk
             outPacket.encodeByte(0); // ^
             outPacket.encodeLong(account.getCreationDate()); // account creation date
+        } else if (msg == LoginType.Blocked) {
+            outPacket.encodeByte(msg.getValue());
+            outPacket.encodeByte(0);
+            outPacket.encodeInt(0);
+            outPacket.encodeByte(0); // nReason
+            outPacket.encodeFT(account.getBanExpireDate());
         } else{
             outPacket.encodeByte(msg.getValue());
             outPacket.encodeByte(0); // these two aren't in ida, wtf
             outPacket.encodeInt(0);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket checkPasswordResultForBan(Account account) {
+        OutPacket outPacket = new OutPacket(OutHeader.CHECK_PASSWORD_RESULT);
+
+        outPacket.encodeByte(LoginType.BlockedNexonID.getValue());
+        outPacket.encodeByte(0);
+        outPacket.encodeInt(0);
+        outPacket.encodeByte(0);
+        outPacket.encodeFT(account.getBanExpireDate());
 
         return outPacket;
     }
@@ -194,15 +212,15 @@ public class Login {
         outPacket.encodeByte(burningEventBlock); // bBurningEventBlock
         int reserved = 0;
         outPacket.encodeInt(reserved); // Reserved size
-        FileTime.fromLong(0).encode(outPacket); //Reserved timestamp
+        outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME)); //Reserved timestamp
         for(int i = 0; i < reserved; i++) {
             // not really interested in this
-            FileTime ft = FileTime.fromLong(0);
+            FileTime ft = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
             outPacket.encodeInt(ft.getLowDateTime());
             ft.encode(outPacket);
         }
         boolean isEdited = false;
-        outPacket.encodeByte(isEdited); //edited characters
+        outPacket.encodeByte(isEdited); // edited characters
         List<Char> chars = new ArrayList<>(account.getCharacters());
         chars.sort(Comparator.comparingInt(Char::getId));
         int orderSize = chars.size();
@@ -227,9 +245,10 @@ public class Login {
         outPacket.encodeInt(account.getCharacterSlots());
         outPacket.encodeInt(0); // buying char slots
         outPacket.encodeInt(-1); // nEventNewCharJob
-        outPacket.encodeFT(new FileTime(System.currentTimeMillis()));
+        outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME));
         outPacket.encodeByte(0); // nRenameCount
         outPacket.encodeByte(0);
+
         return outPacket;
     }
 
@@ -246,7 +265,7 @@ public class Login {
         OutPacket outPacket = new OutPacket(OutHeader.CREATE_NEW_CHARACTER_RESULT);
 
         outPacket.encodeByte(type.getValue());
-        if(type == LoginType.SUCCESS) {
+        if(type == LoginType.Success) {
             c.getAvatarData().encode(outPacket);
         }
 
@@ -267,7 +286,7 @@ public class Login {
         outPacket.encodeByte(loginType.getValue());
         outPacket.encodeByte(errorCode);
 
-        if(loginType == LoginType.SUCCESS) {
+        if(loginType == LoginType.Success) {
             byte[] server = new byte[]{8, 31, 99, ((byte) 141)};
             outPacket.encodeArr(server);
             outPacket.encodeShort(port);

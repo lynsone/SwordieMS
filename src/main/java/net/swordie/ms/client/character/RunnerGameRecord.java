@@ -7,7 +7,7 @@ import net.swordie.ms.util.FileTime;
  * Created on 12/20/2017.
  */
 public class RunnerGameRecord {
-    private FileTime lastPlayed = new FileTime();
+    private FileTime lastPlayed = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
     private int characterID;
     private int lastScore;
     private int highScore;

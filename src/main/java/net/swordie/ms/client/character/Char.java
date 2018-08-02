@@ -40,6 +40,7 @@ import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
@@ -64,6 +65,8 @@ import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.persistence.*;
 import java.util.*;
@@ -421,6 +424,22 @@ public class Char {
 
 	public static Char getFromDBById(int userId) {
 		return (Char) DatabaseManager.getObjFromDB(Char.class, userId);
+	}
+
+	public static Char getFromDBByName(String name) {
+		// DAO?
+		Session session = DatabaseManager.getSession();
+		Transaction transaction = session.beginTransaction();
+		Query query = session.createQuery("FROM Char chr WHERE chr.avatarData.characterStat.name = :name");
+		query.setParameter("name", name);
+		List l = ((org.hibernate.query.Query) query).list();
+		Char chr = null;
+		if (l != null && l.size() > 0) {
+			chr = (Char) l.get(0);
+		}
+		transaction.commit();
+		session.close();
+		return chr;
 	}
 
 	public AvatarData getAvatarData() {

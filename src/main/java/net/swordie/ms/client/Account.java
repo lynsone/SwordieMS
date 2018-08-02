@@ -5,12 +5,14 @@ import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -71,6 +73,9 @@ public class Account {
     private Set<LinkSkill> linkSkills = new HashSet<>();
     @Enumerated(EnumType.ORDINAL)
     private LoginState loginState = LoginState.Out;
+    @Convert(converter = FileTimeConverter.class)
+    private FileTime banExpireDate;
+    private String banReason;
 
     public Account(String username, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
@@ -480,5 +485,21 @@ public class Account {
 
     public void setLoginState(LoginState loginState) {
         this.loginState = loginState;
+    }
+
+    public FileTime getBanExpireDate() {
+        return banExpireDate;
+    }
+
+    public void setBanExpireDate(FileTime banExpireDate) {
+        this.banExpireDate = banExpireDate;
+    }
+
+    public String getBanReason() {
+        return banReason;
+    }
+
+    public void setBanReason(String banReason) {
+        this.banReason = banReason;
     }
 }

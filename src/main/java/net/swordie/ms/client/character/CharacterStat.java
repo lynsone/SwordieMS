@@ -93,8 +93,8 @@ public class CharacterStat {
     public CharacterStat() {
         extendSP = new ExtendSP(7);
         nonCombatStatDayLimit = new NonCombatStatDayLimit();
-        albaStartTime = new FileTime(0);
-        lastLogout = new FileTime(0);
+        albaStartTime = FileTime.getFileTimeFromType(FileTime.Type.PLAIN_ZERO);
+        lastLogout = FileTime.getFileTimeFromType(FileTime.Type.PLAIN_ZERO);
         characterCard = new CharacterCard(0, 0, (byte) 0);
         accountLastLogout = new SystemTime(1970, 1);
         // TODO fill in default vals
@@ -377,11 +377,11 @@ public class CharacterStat {
         outPacket.encodeByte(getPvpModeType());
         outPacket.encodeInt(getEventPoint());
         outPacket.encodeByte(getAlbaActivityID()); // part time job
-        getAlbaStartTime().encode(outPacket);
+        outPacket.encodeFT(getAlbaStartTime());
         outPacket.encodeInt(getAlbaDuration());
         outPacket.encodeByte(getAlbaSpecialReward());
         getCharacterCard().encode(outPacket);
-        getLastLogout().encode(outPacket);
+        outPacket.encodeFT(getLastLogout());
         outPacket.encodeByte(isBurning()); // bBurning
     }
 

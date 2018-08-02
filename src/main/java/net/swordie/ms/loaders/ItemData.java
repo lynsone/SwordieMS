@@ -138,15 +138,15 @@ public class ItemData {
             }
             int fixedGrade = dataInputStream.readInt();
             int specialGrade = dataInputStream.readInt();
-            equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                    null, new FileTime(-1), 0, ruc, (short) 0, iStr, iDex, iInt,
-                    iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
-                    iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
-                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
-                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
-                    rLuk, rLevel, rJob, rPop, cash,
-                    islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
-                    notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
+            equip = new Equip(itemId, -1, -1, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME),
+                    -1, null, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME),
+                    0, ruc, (short) 0, iStr, iDex, iInt, iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD,
+                    iAcc, iEva, iCraft, iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
+                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
+                    damR, statR, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex,
+                    rInt, rLuk, rLevel, rJob, rPop, cash, islot, vslot, fixedGrade, options, specialGrade, fixedPotential,
+                    tradeBlock, only, notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem,
+                    equipTradeBlock, "");
             equips.put(equip.getItemId(), equip);
         } catch (IOException e) {
             e.printStackTrace();
@@ -444,8 +444,8 @@ public class ItemData {
                                 specialGrade = Integer.parseInt(attributes.get("value"));
                             }
                         }
-                        Equip equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                                null, new FileTime(-1), 0, (short) ruc, (short) 0, (short) incStr, (short) incDex, (short) incInt,
+                        Equip equip = new Equip(itemId, -1, -1,FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME), -1,
+                                null, FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME), 0, (short) ruc, (short) 0, (short) incStr, (short) incDex, (short) incInt,
                                 (short) incLuk, (short) incMHP, (short) incMMP, (short) incPAD, (short) incMAD, (short) incPDD, (short) incMDD, (short) incACC, (short) incEVA, (short) incCraft,
                                 (short) incSpeed, (short) incJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
                                 (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) damR, (short) statR, (short) 0, (short) 0,

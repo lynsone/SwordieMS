@@ -225,7 +225,7 @@ public class WvsContext {
             outPacket.encodeInt(skill.getSkillId());
             outPacket.encodeInt(skill.getCurrentLevel());
             outPacket.encodeInt(skill.getMasterLevel());
-            outPacket.encodeFT(new FileTime(0));
+            outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PLAIN_ZERO));
         }
         outPacket.encodeByte(sn);
 
@@ -966,5 +966,13 @@ public class WvsContext {
         outPacket.encodeInt(upgradesLeft);
 
         return outPacket;
+    }
+
+    public static OutPacket returnToCharacterSelect() {
+        return new OutPacket(OutHeader.RETURN_TO_CHARACTER_SELECT);
+    }
+
+    public static OutPacket returnToTitle() {
+        return new OutPacket(OutHeader.RETURN_TO_TITLE);
     }
 }

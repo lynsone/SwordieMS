@@ -185,7 +185,7 @@ public class Item implements Serializable {
         if (hasSN) {
             outPacket.encodeLong(getId());
         }
-        getDateExpire().encode(outPacket);
+        outPacket.encodeFT(getDateExpire());
         outPacket.encodeInt(getBagIndex());
         if (getType() == Type.ITEM) {
             outPacket.encodeShort(getQuantity()); // nQuantity

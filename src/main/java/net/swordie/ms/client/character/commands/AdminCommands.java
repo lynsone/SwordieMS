@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.commands;
 
+import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
@@ -15,6 +16,7 @@ import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.result.GuildJoinMsg;
 import net.swordie.ms.client.guild.updates.GuildUpdate;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.util.FileTime;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.client.jobs.nova.Kaiser;
@@ -38,6 +40,7 @@ import org.hibernate.query.Query;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -1500,6 +1503,71 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
             Server.getInstance().initCashShop();
+        }
+    }
+
+    public static class Ban extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 5) {
+                chr.chatMessage(GM_BLUE_CHAT, "Not enough args! Use !ban <name> <amount> <min/hour/day/year> <reason>");
+            }
+            String name = args[1];
+            int amount = Integer.parseInt(args[2]);
+            String amountType = args[3].toLowerCase();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 4; i < args.length; i++) {
+                builder.append(args[i] + " ");
+            }
+            String reason = builder.toString();
+            reason = reason.substring(0, reason.length() - 1); // gets rid of the last space
+            if (reason.length() > 255) {
+                chr.chatMessage(GM_BLUE_CHAT, "That ban reason is too long.");
+                return;
+            }
+            Char banChr = Server.getInstance().getWorldById(chr.getClient().getWorldId()).getCharByName(name);
+            boolean online = true;
+            if (banChr == null) {
+                online = false;
+                banChr = Char.getFromDBByName(name);
+                if (banChr == null) {
+                    chr.chatMessage(GM_BLUE_CHAT, "Could not find that character.");
+                    return;
+                }
+            }
+            Account banAccount = banChr.getAccount();
+            LocalDateTime banDate = LocalDateTime.now();
+            switch (amountType) {
+                case "m":
+                case "min":
+                case "mins":
+                    banDate = banDate.plusMinutes(amount);
+                    break;
+                case "h":
+                case "hour":
+                case "hours":
+                    banDate = banDate.plusHours(amount);
+                    break;
+                case "d":
+                case "day":
+                case "days":
+                    banDate = banDate.plusDays(amount);
+                    break;
+                case "y":
+                case "year":
+                case "years":
+                    banDate = banDate.plusYears(amount);
+                    break;
+                default:
+                    chr.chatMessage(GM_BLUE_CHAT, String.format("Unknown date type %s", amountType));
+                    break;
+            }
+            banAccount.setBanExpireDate(FileTime.fromDate(banDate));
+            banAccount.setBanReason(reason);
+            chr.chatMessage(GM_BLUE_CHAT, String.format("Character %s has been banned. Expire date: %s", name, banDate));
+            if (online) {
+                banChr.write(WvsContext.returnToTitle());
+            }
         }
     }
 

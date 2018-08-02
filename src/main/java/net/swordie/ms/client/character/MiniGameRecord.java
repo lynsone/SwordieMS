@@ -7,7 +7,7 @@ import net.swordie.ms.util.FileTime;
  * Created on 12/19/2017.
  */
 public class MiniGameRecord {
-    FileTime fileTime = new FileTime(0);
+    private FileTime fileTime = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
     private int sOwnerName; // string, yet 4 bytes?
     private int rewardGradeQ;
     private int rewardGradeQHead;

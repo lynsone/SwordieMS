@@ -2,6 +2,7 @@ package net.swordie.ms.handlers;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
@@ -10,6 +11,7 @@ import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.ServerConstants;
@@ -29,6 +31,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 
@@ -81,25 +84,35 @@ public class LoginHandler {
             if (rs.next()) {
                 success = password.equals(rs.getString("password"));
                 int id = rs.getInt("id");
-                result = success ? LoginType.SUCCESS : LoginType.INVALID_PASSWORD;
+                result = success ? LoginType.Success : LoginType.IncorrectPassword;
                 if (success) {
                     account = Account.getFromDBById(id);
+                    if (account.getBanExpireDate() != null) {
+                        System.out.println("Banexpire = " + account.getBanExpireDate().toMillis() + " (" + account.getBanExpireDate().toLocalDateTime() + ")");
+                        System.out.println("CurTime   = " + System.currentTimeMillis() + " (" + LocalDateTime.now() + ")");
+                    }
                     if (account.getLoginState() != null && account.getLoginState() != LoginState.Out) {
                         success = false;
-                        result = LoginType.HAVING_TROUBLE_LOGGIN_IN;
+                        result = LoginType.AlreadyConnected;
+                    } else if (account.getBanExpireDate() != null && !account.getBanExpireDate().isExpired()) {
+                        success = false;
+                        result = LoginType.Blocked;
+                        String banMsg = String.format("You have been banned. \nReason: %s. \nExpire date: %s",
+                                account.getBanReason(), account.getBanExpireDate().toLocalDateTime());
+                        c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage(banMsg)));
                     } else {
                         Server.getInstance().getAccounts().add(account);
                         c.setAccount(account);
-                        account.setLoginState(LoginState.Login);
+                        account.setLoginState(LoginState.Login); // 1533164192103 1533167158947
                         DatabaseManager.saveToDB(account);
                     }
                 }
             } else {
-                result = LoginType.NOT_A_REGISTERED_ID;
+                result = LoginType.NotRegistered;
                 success = false;
             }
         } catch (SQLException e) {
-            result = LoginType.HAVING_TROUBLE_LOGGIN_IN;
+            result = LoginType.DBFail;
             e.printStackTrace();
         }
 
@@ -202,7 +215,7 @@ public class LoginHandler {
             chr.addItemToInventory(EQUIPPED, equip, true);
         }
         DatabaseManager.saveToDB(chr);
-        c.write(Login.createNewCharacterResult(LoginType.SUCCESS, chr));
+        c.write(Login.createNewCharacterResult(LoginType.Success, chr));
     }
 
     public static void handleDeleteCharacter(Client c, InPacket inPacket) {
@@ -214,7 +227,7 @@ public class LoginHandler {
             a.getCharacters().remove(chr);
             DatabaseManager.saveToDB(a);
             DatabaseManager.deleteFromDB(chr);
-            c.write(Login.sendDeleteCharacterResult(charId, LoginType.SUCCESS));
+            c.write(Login.sendDeleteCharacterResult(charId, LoginType.Success));
         }
     }
 
@@ -278,7 +291,7 @@ public class LoginHandler {
         byte worldId = c.getWorldId();
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
-        c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
+        c.write(Login.selectCharacterResult(LoginType.Success, (byte) 0, channel.getPort(), characterId));
     }
 
     public static void handleCharSelect(Client c, InPacket inPacket) {
@@ -289,7 +302,7 @@ public class LoginHandler {
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
         if (c.isAuthorized()) {
             Server.getInstance().getWorldById(worldId).getChannelById(channelId).addClientInTransfer(channelId, characterId, c);
-            c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
+            c.write(Login.selectCharacterResult(LoginType.Success, (byte) 0, channel.getPort(), characterId));
             c.getAccount().setLoginState(LoginState.Loading);
             DatabaseManager.saveToDB(c.getAccount());
         }
@@ -303,7 +316,7 @@ public class LoginHandler {
         if (c.getAccount().getPic().equals(pic)) {
             success = true;
         } else {
-            c.write(Login.selectCharacterResult(LoginType.INVALID_PASSWORD, (byte) 0, 0, 0));
+            c.write(Login.selectCharacterResult(LoginType.IncorrectSPW, (byte) 0, 0, 0));
         }
         c.setAuthorized(success);
         return success;
