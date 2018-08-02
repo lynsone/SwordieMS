@@ -61,6 +61,12 @@ def init():
     elif fieldID == 931000310:
         map = 931000320
         portal = 0
+
+    elif fieldID == 350060160: # Black Heaven Core (Lotus Stage 1)
+        warp = False
+        sm.teleportInField(2) #portal Id
+        sm.dispose()
+
     else:
         sm.chat("(portal) This script (west00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
         map = sm.getChr().getField().getReturnMap()
