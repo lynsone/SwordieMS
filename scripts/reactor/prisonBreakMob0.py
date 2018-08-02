@@ -22,5 +22,5 @@ def action(type):
                 sm.spawnMob(PRISON_GUARD_RHINO, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY(), False)
                 i += 1
             sm.dropItem(PRISON_KEY, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY())
-            #sm.removeReactor()
+            sm.removeReactor()
             sm.dispose()

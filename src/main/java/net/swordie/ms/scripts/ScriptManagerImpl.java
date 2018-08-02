@@ -40,8 +40,12 @@ import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
+import net.swordie.ms.world.field.obtacleatom.ObtacleAtomInfo;
+import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
+import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.LogManager;
 
@@ -82,6 +86,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	private Map<ScriptType, ScriptInfo> scripts;
 	private int returnField = 0;
 	private ScriptType lastActiveScriptType;
+	private Map<ScriptType, Set<ScheduledFuture>> eventsByScriptType = new HashMap<>();
+	private Set<ScheduledFuture> scheduledFutureSet;
 
 	private ScriptManagerImpl(Char chr, Field field) {
 		this.chr = chr;
@@ -418,6 +424,14 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void dispose() {
+		for(ScriptType scriptType : eventsByScriptType.keySet()) {
+			Set<ScheduledFuture> events = eventsByScriptType.get(scriptType);
+			if (events != null) {
+				events.forEach(st -> st.cancel(true));
+				events.clear();
+			}
+		}
+
 		stop(ScriptType.NPC);
 		stop(ScriptType.PORTAL);
 		stop(ScriptType.ITEM);
@@ -661,6 +675,15 @@ public class ScriptManagerImpl implements ScriptManager {
 		Position position = new Position(x, y);
 		drop.setPosition(position);
 		field.drop(drop, position);
+	}
+
+	@Override
+	public void teleportInField(int portalId) {
+		Field field = chr.getField();
+		Portal portal = field.getPortalByID(portalId);
+		if (portal != null) {
+			chr.write(CField.teleport(new Position(portal.getX(), portal.getY()), chr));
+		}
 	}
 
 
@@ -1014,7 +1037,9 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void completeQuest(int id) {
-		chr.getQuestManager().completeQuest(id);
+		if (chr.getQuestManager().hasQuestInProgress(id)) {
+			chr.getQuestManager().completeQuest(id);
+		}
 	}
 
 	@Override
@@ -1151,6 +1176,33 @@ public class ScriptManagerImpl implements ScriptManager {
 				pm.getChr().setDeathCount(deathCount);
 			}
 		}
+	}
+
+	@Override
+	public void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity,int amount, int proc) {
+		Field field = chr.getField();
+		int xLeft = field.getVrLeft();
+		int yTop = field.getVrTop();
+
+		ObtacleInRowInfo obtacleInRowInfo = new ObtacleInRowInfo(4, false, 5000, 0, 0, 0);
+		ObtacleRadianInfo obtacleRadianInfo = new ObtacleRadianInfo(4, 0, 0, 0, 0);
+		Set<ObtacleAtomInfo> obtacleAtomInfosSet = new HashSet<>();
+
+		for(int i = 0; i < amount; i++) {
+			if(Util.succeedProp(proc)) {
+				int randomX = new Random().nextInt(field.getWidth()) + xLeft;
+				Position position = new Position(randomX, yTop);
+				Foothold foothold = field.findFootHoldBelow(position);
+				int footholdY = foothold.getYFromX(position.getX());
+				int height = position.getY() - footholdY;
+				height = height < 0 ? -height : height;
+
+				obtacleAtomInfosSet.add(new ObtacleAtomInfo(oae.getType(), key, position, new Position(), oae.getHitBox(),
+						damage, 0, 0, height, 0, velocity, height, 0));
+			}
+		}
+
+		field.broadcastPacket(CField.createObtacle(ObtacleAtomCreateType.NORMAL, obtacleInRowInfo, obtacleRadianInfo, obtacleAtomInfosSet));
 	}
 
 
@@ -1301,11 +1353,19 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
 											 int executes, String methodName, Object...args) {
+		ScheduledFuture scheduledFuture;
 		if (executes == 0) {
-			return EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
+			scheduledFuture =  EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
 					delayBetweenExecutions);
+		} else {
+			scheduledFuture = EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
+					delayBetweenExecutions, executes);
 		}
-		return EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
-				delayBetweenExecutions, executes);
+		if (scheduledFutureSet == null) {
+			scheduledFutureSet = new HashSet<>();
+		}
+		scheduledFutureSet.add(scheduledFuture);
+		eventsByScriptType.put(getLastActiveScriptType(), scheduledFutureSet);
+		return scheduledFuture;
 	}
 }

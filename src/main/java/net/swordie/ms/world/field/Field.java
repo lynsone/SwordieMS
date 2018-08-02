@@ -31,9 +31,7 @@ import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import org.apache.log4j.Logger;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -46,7 +44,8 @@ import static net.swordie.ms.client.character.skills.SkillStat.time;
  */
 public class Field {
     private static final Logger log = Logger.getLogger(Field.class);
-    private Rectangle rect;
+    private Rect rect;
+    private int vrTop, vrLeft, vrBottom, vrRight;
     private double mobRate;
     private int id;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
@@ -79,7 +78,7 @@ public class Field {
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
         this.uniqueId = uniqueId;
-        this.rect = new Rectangle(800, 600);
+        this.rect = new Rect();
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
         this.lifes = Collections.synchronizedList(new ArrayList<>());
@@ -100,21 +99,49 @@ public class Field {
         }
     }
 
-    public Rectangle getRect() {
+    public Rect getRect() {
         return rect;
     }
 
-    public void setRect(Rectangle rect) {
+    public void setRect(Rect rect) {
         this.rect = rect;
     }
 
-    public int getWidth() {
-        return (int) getRect().getWidth();
+    public int getVrTop() {
+        return vrTop;
     }
 
-    public int getHeight() {
-        return (int) getRect().getHeight();
+    public void setVrTop(int vrTop) {
+        this.vrTop = vrTop;
     }
+
+    public int getVrLeft() {
+        return vrLeft;
+    }
+
+    public void setVrLeft(int vrLeft) {
+        this.vrLeft = vrLeft;
+    }
+
+    public int getVrBottom() {
+        return vrBottom;
+    }
+
+    public void setVrBottom(int vrBottom) {
+        this.vrBottom = vrBottom;
+    }
+
+    public int getVrRight() {
+        return vrRight;
+    }
+
+    public void setVrRight(int vrRight) {
+        this.vrRight = vrRight;
+    }
+
+    public int getHeight() {return getVrTop() - getVrBottom();}
+
+    public int getWidth() {return getVrRight() - getVrLeft();}
 
     public int getId() {
         return id;

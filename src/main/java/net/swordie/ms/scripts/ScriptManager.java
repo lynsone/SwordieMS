@@ -3,6 +3,7 @@ package net.swordie.ms.scripts;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.world.field.Field;
@@ -459,6 +460,15 @@ public interface ScriptManager extends Observer {
 	 * 		The Y-Coordinate of the Position.
 	 */
 	void dropItem(int itemId, int x, int y);
+
+
+	/**
+	 * Teleport the player to the specified portal Id's position.
+	 *
+	 * @param portalId
+	 * 		The id of the portal to be teleported to.
+	 */
+	void teleportInField(int portalId);
 
 
 
@@ -991,6 +1001,24 @@ public interface ScriptManager extends Observer {
 	 * 		The Death Count set
 	 */
 	void setPartyDeathCount(int deathCount);
+
+	/**
+	 * Creates Obstacle Atoms randomly within the map from the top position, it dies when hitting a platform.
+	 *
+	 * @param oae
+	 * 		The Obstacle Atom, from this we grab the Atom Type and the Atom HitBox.
+	 * @param key
+	 * 		The Key is given when the Obstacle Atom Collides with something. as to allow a way to differentiate Atoms.
+	 * @param damage
+	 * 		The amount of damage done to the player in HP%.
+	 * @param velocity
+	 * 		The speed at which the Atom falls down.
+	 * @param amount
+	 * 		The amount of atoms spawned in 1 method.
+	 * @param proc
+	 * 		The chance (out of 100) of creating an atom. As to randomise the creation.
+	 */
+	void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int amount, int proc);
 
 
 

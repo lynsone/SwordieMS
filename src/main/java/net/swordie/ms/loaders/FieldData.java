@@ -58,6 +58,10 @@ public class FieldData {
                     dataOutputStream.writeInt(field.getConsumeItemCoolTime());
                     dataOutputStream.writeInt(field.getLink());
                     dataOutputStream.writeInt(field.getBossMobID());
+                    dataOutputStream.writeInt(field.getVrTop());
+                    dataOutputStream.writeInt(field.getVrLeft());
+                    dataOutputStream.writeInt(field.getVrBottom());
+                    dataOutputStream.writeInt(field.getVrRight());
                     dataOutputStream.writeShort(field.getFootholds().size());
                     for (Foothold fh : field.getFootholds()) {
                         dataOutputStream.writeInt(fh.getId());
@@ -214,6 +218,18 @@ public class FieldData {
                             break;
                         case "bossMobID":
                             field.setBossMobID(Integer.parseInt(value));
+                            break;
+                        case "VRTop":
+                            field.setVrTop(Integer.parseInt(value));
+                            break;
+                        case "VRLeft":
+                            field.setVrLeft(Integer.parseInt(value));
+                            break;
+                        case "VRBottom":
+                            field.setVrBottom(Integer.parseInt(value));
+                            break;
+                        case "VRRight":
+                            field.setVrRight(Integer.parseInt(value));
                             break;
                     }
                 }
@@ -499,6 +515,10 @@ public class FieldData {
             field.setConsumeItemCoolTime(dataInputStream.readInt());
             field.setLink(dataInputStream.readInt());
             field.setBossMobID(dataInputStream.readInt());
+            field.setVrTop(dataInputStream.readInt());
+            field.setVrLeft(dataInputStream.readInt());
+            field.setVrBottom(dataInputStream.readInt());
+            field.setVrRight(dataInputStream.readInt());
             short fhSize = dataInputStream.readShort();
             for (int j = 0; j < fhSize; j++) {
                 Foothold fh = new Foothold(
@@ -630,6 +650,10 @@ public class FieldData {
         }
         copy.setObjectIDCounter(field.getNewObjectID());
         copy.setRuneStone(new RuneStone().getRandomRuneStone(copy));
+        copy.setVrTop(field.getVrTop());
+        copy.setVrLeft(field.getVrLeft());
+        copy.setVrBottom(field.getVrBottom());
+        copy.setVrRight(field.getVrRight());
         copy.startBurningFieldTimer();
         copy.generateMobs();
         return copy;
