@@ -87,6 +87,10 @@ public class DropPool {
         return dropLeaveField(DropLeaveType.CHAR_PICKUP_1, charID, dropID, (short) 0, 0, 0);
     }
 
+    public static OutPacket dropExplodeField(int dropID) {
+        return dropLeaveField(DropLeaveType.DELAYED_PICKUP, 0, dropID, (short) 0, 0, 0);
+    }
+
     public static OutPacket dropLeaveField(DropLeaveType dropLeaveType, int pickupID, int dropID, short delay, int petID, int key) {
         OutPacket outPacket = new OutPacket(OutHeader.DROP_LEAVE_FIELD);
 

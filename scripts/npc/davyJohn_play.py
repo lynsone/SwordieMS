@@ -44,13 +44,12 @@ if sm.getFieldID() == 925100100: # Hidden Street: Through the Head of the Ship!
                 if sm.hasItem(item, count):
                     if stage == 2:
                         sm.sendNext("Great you may now continue to the next stage!")
-                        sm.showEffectToField(WzConstants.EFFECT_CLEAR)
+                        sm.invokeForParty("showEffectToField", WzConstants.EFFECT_CLEAR)
 
                     else:
                         sm.sendNext("Alright, next up I need "+ str(count) +" #v"+ str(nextItem) +"##b#t"+ str(nextItem) +"##k.")
                     sm.consumeItem(item, count)
-                    for partyMembers in sm.getParty().getMembers():
-                        sm.setQRValue(partyMembers.getChr(), GameConstants.LORD_PIRATE_QUEST, str(int(sm.getQRValue(GameConstants.LORD_PIRATE_QUEST)) + 1))
+                    sm.invokeForParty("setQRValue", GameConstants.LORD_PIRATE_QUEST, str(int(sm.getQRValue(GameConstants.LORD_PIRATE_QUEST)) + 1))
 
                 else:
                     sm.sendNext("Please bring me "+ str(count) +" #v"+ str(item) +"##b#t"+ str(item) +"##k.")

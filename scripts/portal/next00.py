@@ -14,11 +14,11 @@ def init():
 		#First Map  of the Lord Pirate PQ
 		if fieldID == 925100000:
 			warp = False
-			if sm.getReactorQuantity() > 7: # TODO Add Mob Check
+			if sm.getReactorQuantity() > 7 and sm.mobsPresentInField():
 				sm.chat("The portal is not opened.")
 				sm.dispose()
 			else:
-				warp = True
+				sm.warpPartyIn(sm.getFieldID() + 100)
 
 		#Second Map  of the Lord Pirate PQ
 		elif fieldID == 925100100:
@@ -28,7 +28,7 @@ def init():
 				sm.chat("The portal is not opened.")
 				sm.dispose()
 			else:
-				warp = True
+				sm.warpPartyIn(sm.getFieldID() + 100)
 
 		#Third Map & Fourth Map  of the Lord Pirate PQ
 		elif fieldID == 925100200 or fieldID == 925100300:
@@ -37,7 +37,7 @@ def init():
 				sm.chat("The portal is not opened.")
 				sm.dispose()
 			else:
-				warp = True
+				sm.warpPartyIn(sm.getFieldID() + 100)
 
 		#Fifth Map  of the Lord Pirate PQ
 		elif fieldID == 925100400:
@@ -45,7 +45,7 @@ def init():
 			if sm.getReactorQuantity() > 1:
 				sm.chat("The portal is not opened.")
 			else:
-				sm.warpPartyIn(925100500) #Boss Map of Lord Pirate PQ
+				sm.warpPartyIn(sm.getFieldID() + 100) #Boss Map of Lord Pirate PQ
 			sm.dispose()
 
 
@@ -59,29 +59,29 @@ def init():
 
 		# Hidden Street : Path to the Aerial Prison
 		if fieldID == 921160200:
-#			warp = False  TODO uncomment
-#			if sm.mobsPresentInField():
-#				sm.chat("The portal is not opened.")
-#				sm.dispose()
-#			else:
+			warp = False
+			if sm.mobsPresentInField():
+				sm.chat("The portal is not opened.")
+				sm.dispose()
+			else:
 				warp = True
 
 		# Dark Tower 1
 		elif fieldID == 921160300:
-#			warp = False  TODO uncomment
-#			if sm.mobsPresentInField():
-#				sm.chat("The portal is not opened.")
-#				sm.dispose()
-#			else:
+			warp = False
+			if sm.mobsPresentInField():
+				sm.chat("The portal is not opened.")
+				sm.dispose()
+			else:
 				warp = True
 
 		# Hidden Street : A Secret Door to the Aerial Prison
 		elif fieldID == 921160400:
-#			warp = False  TODO uncomment
-#			if sm.mobsPresentInField():
-#				sm.chat("The portal is not opened.")
-#				sm.dispose()
-#			else:
+			warp = False
+			if sm.mobsPresentInField():
+				sm.chat("The portal is not opened.")
+				sm.dispose()
+			else:
 				warp = True
 
 		# Hidden Street : Aerial Prison
@@ -105,33 +105,33 @@ def init():
 
 	# To Crimson Queen
 	elif fieldID == 105200300:
-		# if sm.mobsPresentInField():
-		# 	sm.chat("Eliminate all monster before proceeding.")
-		# else:
+		if sm.mobsPresentInField():
+			sm.chat("Eliminate all monster before proceeding.")
+		else:
 			map = 105200310
 			portal = 0
 
 	# To Pierre
 	elif fieldID == 105200200:
-		# if sm.mobsPresentInField():
-		# 	sm.chat("Eliminate all monster before proceeding.")
-		# else:
+		if sm.mobsPresentInField():
+			sm.chat("Eliminate all monster before proceeding.")
+		else:
 			map = 105200210
 			portal = 0
 
 	# To VonBon
 	elif fieldID == 105200100:
-		# if sm.mobsPresentInField():
-		# 	sm.chat("Eliminate all monster before proceeding.")
-		# else:
+		if sm.mobsPresentInField():
+			sm.chat("Eliminate all monster before proceeding.")
+		else:
 			map = 105200110
 			portal = 0
 
 	# To VonBon
 	elif fieldID == 105200400:
-		# if sm.mobsPresentInField():
-		# 	sm.chat("Eliminate all monster before proceeding.")
-		# else:
+		if sm.mobsPresentInField():
+			sm.chat("Eliminate all monster before proceeding.")
+		else:
 			map = 105200410
 			portal = 0
 
