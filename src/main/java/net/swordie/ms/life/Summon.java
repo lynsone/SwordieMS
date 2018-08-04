@@ -1,20 +1,22 @@
 package net.swordie.ms.life;
 
-import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.world.field.Field;
+import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
-import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.world.field.Field;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 /**
  * Created on 1/6/2018.
@@ -200,6 +202,48 @@ public class Summon extends Life {
         summon.setTemplateId(skillID);
         summon.setAttackActive(true);
         return summon;
+    }
+
+    public static void summonKishin(Char chr, byte slv) {
+        Field field = chr.getField();
+
+        // Remove both Old Kishins
+        List<Life> oldKishins = field.getLifes().stream()
+                .filter(s -> s instanceof Summon &&
+                        ((Summon) s).getCharID() == chr.getId() &&
+                        ((Summon) s).getSkillID() == Kanna.KISHIN_SHOUKAN)
+                .collect(Collectors.toList());
+        for(Life life : oldKishins) {
+            field.removeLife(life.getObjectId(), false);
+        }
+
+        // Summon Left Kishin
+        Summon kishinLeft = getSummonBy(chr, Kanna.KISHIN_SHOUKAN, slv);
+        kishinLeft.setFlyMob(true);
+        Position kishLeftPos = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
+        kishinLeft.setPosition(kishLeftPos);
+        kishinLeft.setCurFoothold((short) field.findFootHoldBelow(kishLeftPos).getId());
+        kishinLeft.setMoveAbility(MoveAbility.STATIC.getVal());
+        kishinLeft.setMoveAction((byte) 0);
+        kishinLeft.setKishinPositions(new Position[] {
+            new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
+            new Position(chr.getPosition().getX() - 250, chr.getPosition().getY())
+        });
+        field.spawnAddSummon(kishinLeft);
+
+        // Summon Right Kishin
+        Summon kishinRight = getSummonBy(chr, Kanna.KISHIN_SHOUKAN, slv);
+        kishinRight.setFlyMob(true);
+        Position kishRightPos = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
+        kishinRight.setPosition(kishRightPos);
+        kishinRight.setCurFoothold((short) field.findFootHoldBelow(kishRightPos).getId());
+        kishinRight.setMoveAbility(MoveAbility.STATIC.getVal());
+        kishinRight.setMoveAction((byte) 5);
+        kishinLeft.setKishinPositions(new Position[] {
+                new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
+                new Position(chr.getPosition().getX() - 250, chr.getPosition().getY())
+        });
+        field.spawnAddSummon(kishinRight);
     }
 
     public Position[] getKishinPositions() {

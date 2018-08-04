@@ -15,14 +15,12 @@ import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
@@ -147,23 +145,9 @@ public class Kanna extends Job {
                 getHakuFollow();
                 break;
             case KISHIN_SHOUKAN: //TODO
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                field.setKishin(true);
-                summon.setFlyMob(true);
+                chr.getField().setKishin(true);
 
-                Position leftKishin = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
-                Position rightKishin = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
-
-                summon.setKishinPositions(new Position[]{
-                        leftKishin,
-                        rightKishin
-                });
-
-                summon.setCurFoothold((short) chr.getField().findFootHoldBelow(leftKishin).getId());
-                summon.setPosition(leftKishin);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
-                field.spawnAddSummon(summon);
+                Summon.summonKishin(chr, slv);
                 break;
             case AKATUSKI_HERO_KANNA:
                 o1.nReason = skillID;

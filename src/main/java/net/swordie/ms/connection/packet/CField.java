@@ -849,4 +849,18 @@ public class CField {
 
         return outPacket;
     }
+
+    public static OutPacket createMirrorImage(Position position, int alpha, int red, int green, int blue, boolean left) {
+        OutPacket outPacket = new OutPacket(OutHeader.CREATE_MIRROR_IMAGE);
+
+        outPacket.encodePositionInt(position);
+        outPacket.encodeInt(alpha); // nAlpha   out of 1,000 (?)
+        outPacket.encodeInt(red); // R  out of 100,000 (?)
+
+        outPacket.encodeInt(green); // G  out of 100,000 (?)
+        outPacket.encodeInt(blue); // B  out of 100,000 (?)
+        outPacket.encodeInt(left ? 1 : 0); // bLeft
+
+        return outPacket;
+    }
 }
