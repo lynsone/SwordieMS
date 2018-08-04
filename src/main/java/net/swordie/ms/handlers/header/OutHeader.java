@@ -1130,7 +1130,8 @@ public enum OutHeader {
                 NPC_ENTER_FIELD,
                 NPC_CHANGE_CONTROLLER,
                 MOB_ENTER_FIELD,
-                RESULT_INSTANCE_TABLE
+                RESULT_INSTANCE_TABLE,
+                CREATE_OBTACLE
                 );
         return spam.contains(outHeader);
     }

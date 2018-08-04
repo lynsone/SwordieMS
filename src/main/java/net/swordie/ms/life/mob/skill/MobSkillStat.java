@@ -50,5 +50,13 @@ public enum MobSkillStat {
     castingTime,
     subTime,
     reduceCasting,
-    additionalTime
+    additionalTime,
+    notDestroyByCollide,
+    noGravity,
+    rangeGap,
+    sideAttack,
+    forcex,
+    targetType,
+    force,
+    count
 }

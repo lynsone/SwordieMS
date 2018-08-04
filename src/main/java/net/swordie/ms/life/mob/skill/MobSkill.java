@@ -399,9 +399,15 @@ public class MobSkill {
             case TELEPORT:
                 int xPos = msi.getSkillStatIntValue(x);
                 int yPos = msi.getSkillStatIntValue(y);
-                Rect possibleRect = mob.getPosition().getRectAround(new Rect(-xPos, -yPos, xPos, yPos));
-                mob.setPosition(new Position(Util.getRandom(possibleRect.getLeft(), possibleRect.getRight()),
-                        Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
+                // probably not the right logic
+                if (xPos != 0 && yPos != 0) {
+                    Rect possibleRect = mob.getPosition().getRectAround(new Rect(-xPos, -yPos, xPos, yPos));
+                    mob.setPosition(new Position(Util.getRandom(possibleRect.getLeft(), possibleRect.getRight()),
+                            Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
+                } else {
+                    // xPos == skillAfter (both x)
+                    mob.getField().getLifeToControllers().get(mob).write(MobPool.mobTeleportRequest(xPos));
+                }
                 break;
             case PM_COUNTER:
                 o.nOption = msi.getSkillStatIntValue(x);
@@ -430,6 +436,20 @@ public class MobSkill {
             case CASTINGBAR:
                 field.broadcastPacket(MobPool.castingBarSkillStart(1,
                         msi.getSkillStatIntValue(MobSkillStat.castingTime), false, false));
+                break;
+            case BOUNCE_ATTACK:
+                mob.getField().broadcastPacket(MobPool.createBounceAttackSkill(mob, msi, false));
+                break;
+            case LASER_ATTACK:
+                if (!mts.hasCurrentMobStat(MobStat.Laser)) {
+                    o.nOption = 1;
+                    o.wOption = msi.getSkillStatIntValue(MobSkillStat.w);
+                    o.uOption = msi.getSkillStatIntValue(MobSkillStat.z);
+                    mts.addMobSkillOptionsAndBroadCast(MobStat.Laser, o);
+                }
+                break;
+            case LASER_CONTROL:
+                // Not needed? Automatically handled well by the controller
                 break;
             case UNK:
                 log.warn(String.format("Unknown mob skill %d, slv = %d", skill, level));

@@ -795,6 +795,9 @@ public class SkillConstants {
             case 23121052: // Wrath of Enlil
             case 23120013: // Staggering Strikes
             case 13101020: // Fairy Spiral
+
+            case 60011216: // AB Auto attack
+            case 65001100: // Star Bubble
                 return true;
             default:
                 return false;

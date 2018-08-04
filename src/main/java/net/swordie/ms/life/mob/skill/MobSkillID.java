@@ -125,7 +125,7 @@ public enum MobSkillID {
     }
 
     public static MobSkillID getMobSkillIDByVal(int val) {
-        return Arrays.stream(values()).filter(m -> m.getVal() == val).findFirst().orElse(UNK);
+        return Arrays.stream(values()).filter(m -> m.getVal() == val).findAny().orElse(UNK);
     }
 
     public static void main(String[] args) {

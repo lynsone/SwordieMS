@@ -243,7 +243,7 @@ public abstract class Job {
 		chr.addStat(Stat.mmp, 500);
 		chr.addStat(Stat.ap, 5);
 		int sp = SkillConstants.getBaseSpByLevel(level);
-		if ((level % 10) % 3 == 0 && level != 100) {
+		if ((level % 10) % 3 == 0 && level > 100) {
 			sp *= 2; // double sp on levels ending in 3/6/9
 		}
 		ExtendSP extendSP = chr.getAvatarData().getCharacterStat().getExtendSP();

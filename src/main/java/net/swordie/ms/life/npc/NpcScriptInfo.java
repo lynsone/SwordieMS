@@ -1,14 +1,31 @@
 package net.swordie.ms.life.npc;
 
-import net.swordie.ms.connection.packet.SlideMenuItem;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created on 2/19/2018.
  */
 public class NpcScriptInfo {
+	public enum Param {
+		NotCancellable(0x1),
+		PlayerAsSpeaker(0x2),
+		OverrideSpeakerID(0x4),
+		FlipSpeaker(0x8),
+		PlayerAsSpeakerFlip(0x10),
+		FancyChat(0x20),
+
+
+		;
+
+		private int val;
+
+		Param(int val) {
+			this.val = val;
+		}
+
+		public int getVal() {
+			return val;
+		}
+	}
+
 	private byte speakerType = 4; // ?
 	private int overrideSpeakerTemplateID;
 	private byte param;
@@ -216,4 +233,18 @@ public class NpcScriptInfo {
     public void setDlgType(int dlgType) {
         this.dlgType = dlgType;
     }
+
+    public void addParam(Param param) {
+		setParam((byte) (getParam() | param.getVal()));
+	}
+
+	public void removeParam(Param param) {
+		if ((getParam() & param.getVal()) != 0) {
+			setParam((byte) (getParam() ^ param.getVal()));
+		}
+	}
+
+	public void resetParam() {
+		setParam((byte) 0);
+	}
 }

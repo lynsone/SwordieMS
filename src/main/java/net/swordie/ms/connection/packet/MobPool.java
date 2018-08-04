@@ -4,11 +4,14 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.mob.*;
 import net.swordie.ms.life.mob.skill.BurnedInfo;
+import net.swordie.ms.life.mob.skill.MobSkillID;
+import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
 import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.container.Tuple;
 
@@ -353,6 +356,84 @@ public class MobPool {
         outPacket.encodeInt(castingTime);
         outPacket.encodeByte(reverseGauge);
         outPacket.encodeByte(notShowUI);
+
+        return outPacket;
+    }
+
+    public static OutPacket createBounceAttackSkill(Mob mob, MobSkillInfo msi, boolean afterConvexSkill) {
+        // 0s are the ones where the wz property to take is unknown
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_BOUNCE_ATTACK_SKILL);
+
+        outPacket.encodeInt(mob.getObjectId());
+        outPacket.encodeInt(msi.getId());
+        outPacket.encodeInt(msi.getLevel());
+        outPacket.encodeByte(afterConvexSkill);
+        if (afterConvexSkill) { // save for when an afterConvexSkill is found
+            int count = 0;
+            outPacket.encodeInt(count); // nCount
+            outPacket.encodeByte(false); // bDelayedSkill
+            outPacket.encodeInt(0); // nCreateY
+            outPacket.encodeInt(0); // nDensity
+            outPacket.encodeInt(0); // nFriction
+            outPacket.encodeInt(0); // nRestitution
+            outPacket.encodeInt(0); // tDestroyDelay
+            for (int i = 0; i < count; i++) {
+                outPacket.encodeInt(mob.getObjectId() + i + 1);
+            }
+
+        } else {
+            Position pos = mob.getPosition();
+            outPacket.encodeInt(pos.getX() + msi.getSkillStatIntValue(MobSkillStat.x));
+            outPacket.encodeInt(pos.getY() + msi.getSkillStatIntValue(MobSkillStat.y));
+            int count = msi.getSkillStatIntValue(MobSkillStat.count);
+            outPacket.encodeInt(count);
+            for (int i = 0; i < count; i++) {
+                outPacket.encodeInt(mob.getObjectId() + i + 1); // nObjectSN
+                outPacket.encodePositionInt(msi.getLt());
+            }
+            outPacket.encodeInt(0); // nFriction
+            outPacket.encodeInt(0); // nRestitution
+            outPacket.encodeInt(0); // tDestroyDelay
+            outPacket.encodeInt(msi.getSkillStatIntValue(MobSkillStat.delay)); // tStartDelay
+            outPacket.encodeByte(msi.getSkillStatIntValue(MobSkillStat.noGravity)); // bNoGravity
+            boolean notDestroyByCollide = msi.getSkillStatIntValue(MobSkillStat.notDestroyByCollide) != 0;
+            outPacket.encodeByte(notDestroyByCollide); // bNotDestroyByCollide
+            if (msi.getId() == MobSkillID.BOUNCE_ATTACK.getVal() && (msi.getLevel() == 3 || msi.getLevel() == 4)) {
+                outPacket.encodePositionInt(msi.getRb2());
+            }
+            if (notDestroyByCollide) {
+                outPacket.encodeInt(1); // nIncScale
+                outPacket.encodeInt(100); // nMaxScale
+                outPacket.encodeInt(100); // nDecRadius
+                outPacket.encodeInt(100); // fAngle
+            }
+        }
+
+
+        return outPacket;
+    }
+
+    public static OutPacket mobTeleportRequest(int skillAfter) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_TELEPORT_REQUEST);
+
+        outPacket.encodeByte(skillAfter == 0);
+        if (skillAfter != 0) {
+            outPacket.encodeInt(skillAfter);
+            switch (skillAfter) {
+                case 3:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                    outPacket.encodePositionInt(new Position(0, 0)); // possible position?
+                    break;
+                case 4:
+                    outPacket.encodeInt(0); // possible x?
+                    break;
+            }
+        }
 
         return outPacket;
     }

@@ -2950,8 +2950,8 @@ public class Char {
 		this.online = online;
 		if (getParty() != null) {
 			PartyMember pm = getParty().getPartyMemberByID(getId());
-			pm.setChr(online ? this : null);
 			party.updatePartyMemberInfoByChr(this);
+			pm.setChr(online ? this : null);
 		}
 	}
 

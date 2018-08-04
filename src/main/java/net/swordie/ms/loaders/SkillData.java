@@ -445,7 +445,7 @@ public class SkillData {
                             msi.putMobSkillStat(MobSkillStat.ignoreResist, value);
                             break;
                         case "count":
-                            msi.putMobSkillStat(MobSkillStat.time, value);
+                            msi.putMobSkillStat(MobSkillStat.count, value);
                             break;
                         case "time":
                             msi.putMobSkillStat(MobSkillStat.time, value);
@@ -546,6 +546,28 @@ public class SkillData {
                         case "additionalTime":
                             msi.putMobSkillStat(MobSkillStat.additionalTime, value);
                             break;
+                        case "force":
+                            msi.putMobSkillStat(MobSkillStat.force, value);
+                            break;
+                        case "targetType":
+                            msi.putMobSkillStat(MobSkillStat.targetType, value);
+                            break;
+                        case "forcex":
+                            msi.putMobSkillStat(MobSkillStat.forcex, value);
+                            break;
+                        case "sideAttack":
+                            msi.putMobSkillStat(MobSkillStat.sideAttack, value);
+                            break;
+                        case "afterEffect":
+                        case "rangeGap":
+                            msi.putMobSkillStat(MobSkillStat.rangeGap, value);
+                            break;
+                        case "noGravity":
+                            msi.putMobSkillStat(MobSkillStat.noGravity, value);
+                            break;
+                        case "notDestroyByCollide":
+                            msi.putMobSkillStat(MobSkillStat.notDestroyByCollide, value);
+                            break;
                         case "effect":
                         case "mob":
                         case "mob0":
@@ -588,12 +610,6 @@ public class SkillData {
                         case "addDam":
                         case "special":
                         case "target":
-                        case "force":
-                        case "targetType":
-                        case "forcex":
-                        case "sideAttack":
-                        case "afterEffect":
-                        case "rangeGap":
                         case "fixedPos":
                         case "fixedDir":
                         case "i52":
@@ -609,8 +625,6 @@ public class SkillData {
                         case "bounceBall":
                         case "info2":
                         case "regen":
-                        case "noGravity":
-                        case "notDestroyByCollide":
                         case "kockBackD":
                         case "areaSequenceDelay":
                         case "areaSequenceRandomSplit":

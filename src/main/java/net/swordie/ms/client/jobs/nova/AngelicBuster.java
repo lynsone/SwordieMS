@@ -3,6 +3,7 @@ package net.swordie.ms.client.jobs.nova;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
@@ -10,6 +11,8 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.Life;
@@ -460,6 +463,9 @@ public class AngelicBuster extends Job {
 
     private int getRechargeProc(AttackInfo attackInfo) {
         Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(attackInfo.skillId));
+        if (skill == null) {
+            return 0;
+        }
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo rechargeInfo = SkillData.getSkillInfoById(skill.getSkillId());
         int rechargeproc = rechargeInfo.getValue(onActive, slv);
@@ -476,6 +482,9 @@ public class AngelicBuster extends Job {
     }
 
     private void affinityHeartII(AttackInfo attackInfo) {
+        if (!chr.hasSkill(AFFINITY_HEART_II)) {
+            return;
+        }
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
             if(affinityHeartIIcounter >= 10) {
@@ -536,5 +545,19 @@ public class AngelicBuster extends Job {
         Effect effect = Effect.createABRechargeEffect();
         chr.write(User.effect(effect));
         chr.write(UserLocal.resetStateForOffSkill());
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.setStat(Stat.level, 10);
+        chr.setStat(Stat.dex, 49);
+        chr.getAvatarData().getCharacterStat().setPosMap(400000000);
+        chr.getAvatarData().getCharacterStat().setJob(JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId());
+        Item secondary = ItemData.getItemDeepCopy(1352601);
+        secondary.setBagIndex(10);
+        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
+        chr.setSpToCurrentJob(5);
+        chr.getEquippedInventory().addItem(secondary);
     }
 }

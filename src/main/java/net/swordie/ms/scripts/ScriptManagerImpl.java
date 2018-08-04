@@ -423,6 +423,16 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(ScriptMan.scriptMessage(this, AskSlideMenu));
 	}
 
+	// Start of param methods ------------------------------------------------------------------------------------------
+
+	public void setPlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
+	}
+
+	public void resetParam() {
+		getNpcScriptInfo().resetParam();
+	}
+
 	// Start helper methods for scripts --------------------------------------------------------------------------------
 
 	@Override
@@ -753,6 +763,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void setSpeakerID(int templateID) {
+		getNpcScriptInfo().resetParam();
 		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
 	}
 
@@ -1200,12 +1211,14 @@ public class ScriptManagerImpl implements ScriptManager {
 				int randomX = new Random().nextInt(field.getWidth()) + xLeft;
 				Position position = new Position(randomX, yTop);
 				Foothold foothold = field.findFootHoldBelow(position);
-				int footholdY = foothold.getYFromX(position.getX());
-				int height = position.getY() - footholdY;
-				height = height < 0 ? -height : height;
+				if (foothold != null) {
+					int footholdY = foothold.getYFromX(position.getX());
+					int height = position.getY() - footholdY;
+					height = height < 0 ? -height : height;
 
-				obtacleAtomInfosSet.add(new ObtacleAtomInfo(oae.getType(), key, position, new Position(), oae.getHitBox(),
-						damage, 0, 0, height, 0, velocity, height, 0));
+					obtacleAtomInfosSet.add(new ObtacleAtomInfo(oae.getType(), key, position, new Position(), oae.getHitBox(),
+							damage, 0, 0, height, 0, velocity, height, 0));
+				}
 			}
 		}
 

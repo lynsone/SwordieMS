@@ -574,6 +574,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case ENTER_OPEN_GATE_REQUEST:
                     WorldHandler.handleEnterOpenGateRequest(chr, inPacket);
                     break;
+                case OBTACLE_ATOM_COLLISION:
+                    // Ignored for now
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;
