@@ -195,7 +195,7 @@ public class Party {
     }
 
     public PartyMember getPartyMemberByID(int charID) {
-        return Arrays.stream(getPartyMembers()).filter(p -> p != null && p.getCharID() == charID).findFirst().orElse(null);
+        return Arrays.stream(getPartyMembers()).filter(p -> p != null && p.getChr() != null && p.getCharID() == charID).findFirst().orElse(null);
     }
 
     public void broadcast(OutPacket outPacket) {
