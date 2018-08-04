@@ -179,6 +179,7 @@ public class Luminous extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     private void handleLarkness(int skillId) {
@@ -325,7 +326,7 @@ public class Luminous extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override

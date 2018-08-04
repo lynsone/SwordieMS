@@ -364,6 +364,7 @@ public class Kaiser extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
@@ -440,7 +441,7 @@ public class Kaiser extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override

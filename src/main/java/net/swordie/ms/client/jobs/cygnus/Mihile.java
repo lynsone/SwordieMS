@@ -206,6 +206,7 @@ public class Mihile extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     private void handleRoyalGuard(TemporaryStatManager tsm, Client c) { //TempStat  Shield Attack is Effect
@@ -278,7 +279,7 @@ public class Mihile extends Job {
 
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override

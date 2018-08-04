@@ -476,7 +476,7 @@ public class Thief extends Job {
         super.handleHit(c, inPacket, hitInfo);
     }
 
-    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+    public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -636,6 +636,7 @@ public class Thief extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     private void createMesoExplosionAtoms(Drop drop) {
@@ -776,7 +777,7 @@ public class Thief extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override

@@ -199,7 +199,7 @@ public class Kinesis extends Job {
         substractPP(ppCons);
     }
 
-    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+    public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -282,6 +282,7 @@ public class Kinesis extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     @Override
@@ -312,7 +313,7 @@ public class Kinesis extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
 
