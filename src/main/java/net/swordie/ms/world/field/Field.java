@@ -585,6 +585,10 @@ public class Field {
         return getLifes().stream().filter(life -> life instanceof Mob).map(l -> (Mob) l).collect(Collectors.toList());
     }
 
+    public List<Drop> getDrops() {
+        return getLifes().stream().filter(life -> life instanceof Drop).map(l -> (Drop) l).collect(Collectors.toList());
+    }
+
     public void setObjectIDCounter(int idCounter) {
         objectIDCounter = idCounter;
     }
@@ -649,6 +653,20 @@ public class Field {
             }
         }
         return mobs;
+    }
+
+    public List<Drop> getDropsInRect(Rect rect) {
+        List<Drop> drops = new ArrayList<>();
+        for (Drop drop : getDrops()) {
+            Position position = drop.getPosition();
+            int x = position.getX();
+            int y = position.getY();
+            if (x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                drops.add(drop);
+            }
+        }
+        return drops;
     }
 
     public synchronized void removeLife(int id, boolean fromSchedule) {
