@@ -9,7 +9,7 @@ def action(response, answer):
     status += 1
 
     if status == 0:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Do you have to leave right this second? I wanted to ask my new best pal some questions.")
 
     elif status == 1:
@@ -17,7 +17,7 @@ def action(response, answer):
         sm.sendNext("Oh, shoot! I have to catch a ship. Shoot! Hey! Why don't you come to #bSan Commerci#k? You can meet my dad! He's really cool.")
 
     elif status == 2:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Berry did suggest I visit.")
 
     elif status == 3:

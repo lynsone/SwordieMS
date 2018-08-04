@@ -1,8 +1,6 @@
 status = -1
 
 from net.swordie.ms.constants import GameConstants
-from net.swordie.ms.enums import QuestStatus
-from net.swordie.ms.client.character.quest import Quest
 
 if sm.getFieldID() == 951000000:
 	# Monster Park

@@ -2,7 +2,7 @@
 
 status = -1
 def init():
-    sm.setSpeakerID(0) # Has to be Player Avatar
+    sm.setPlayerAsSpeaker() # Has to be Player Avatar
     sm.sendNext("Hi Gilberto!")
 
 def action(response, answer):
@@ -14,7 +14,7 @@ def action(response, answer):
         sm.sendNext("Er, Yes. I am Gilberto Daniella. Do I know you?")
 
     elif status == 1:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("You sure don't! But my name is...")
 
     elif status == 2:

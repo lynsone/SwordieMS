@@ -27,7 +27,7 @@ def action(response, answer):
         sm.removeNpc(9390225) # Remove Tepes
 
     elif status == 3:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("#b(Tepes is a pretty convincing liar.)")
 
     elif status == 4:
@@ -35,7 +35,7 @@ def action(response, answer):
         sm.sendNext("Ah, well, in that case, I thank you for your help, young Explorer.")
 
     elif status == 5:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Aw, shucks. Tepes is exaggerating.. a lot.")
 
     elif status == 6:
@@ -44,7 +44,7 @@ def action(response, answer):
                     "prime minister of the Commerci Republic and owner of the Daniella Merchant Union")
 
     elif status == 7:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("The pleasure is mine. I'm #h0#. I'm, um, just a traveler, "
                     "traveling through Dawnveil. You know, just traveling.")
 
@@ -53,7 +53,7 @@ def action(response, answer):
         sm.sendNext("Ah, to be young and free again! But why did you want to see me?")
 
     elif status == 9:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("um... Well... #b(Okay, I'm going to have to word this carefully, so he doesn't think I'm a devil.)")
 
     elif status == 10:
@@ -96,7 +96,7 @@ def action(response, answer):
         sm.sendNext("#h0# is... what?")
 
     elif status == 19:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("(Yikes!) Er, yeah, I TRAVELED here from a place called Maple World, which just so happens to be beyond the barrier...")
 
     elif status == 20:
@@ -104,7 +104,7 @@ def action(response, answer):
         sm.sendNext("Just a moment ago, you clearly said you were a DAWNVEIL traveler...")
 
     elif status == 21:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Here's the truth, prime minister. The barrier between our worlds is growing weaker by the day, which made is possible for me to pass through it.")
 
     elif status == 22:
@@ -112,7 +112,7 @@ def action(response, answer):
         sm.sendNext("And why are you here?")
 
     elif status == 23:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Like Leon said, I'm an ambassador of peace, here on behalf of Empress Cygnus.")
 
     elif status == 24:
@@ -120,7 +120,7 @@ def action(response, answer):
         sm.sendNext("An embassador of peace, you say?")
 
     elif status == 25:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Yes. When the barrier inetivably collapses, I hope the people of Commerci and Maple World can get along amicably")
 
     elif status == 26:
