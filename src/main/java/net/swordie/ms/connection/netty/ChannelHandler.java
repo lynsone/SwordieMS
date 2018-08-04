@@ -144,6 +144,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_ACTIVATE_EFFECT_ITEM:
                     WorldHandler.handleUserActivateEffectItem(c, inPacket);
                     break;
+                case USER_DEFAULT_WING_ITEM:
+                    WorldHandler.handleUserDefaultWingItem(chr, inPacket);
+                    break;
+                case USER_SET_DRESS_CHANGED_REQUEST:
+                    WorldHandler.handleUserSetDressChangedRequest(chr, inPacket);
+                    break;
                 case EVENT_UI_REQ:
                     WorldHandler.handleEventUiReq(c, inPacket);
                     break;

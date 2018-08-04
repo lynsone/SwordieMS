@@ -5,7 +5,7 @@ from net.swordie.ms.constants import BossConstants
 BLACK_HEAVEN_CORE = 8240103 # Stage 1
 
 def init():
-    sm.spawnMob(BLACK_HEAVEN_CORE, 16, -16, False)
+    sm.spawnMob(BLACK_HEAVEN_CORE, 0, -16, False, 400000000000) # 400b hp
 
 
     sm.invokeAtFixedRate(0, BossConstants.LOTUS_BLUE_ATOM_EXECUTION_DELAY, 0,

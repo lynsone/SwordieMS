@@ -7,6 +7,7 @@ import net.swordie.ms.enums.Stat;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
+import org.apache.log4j.Logger;
 
 import javax.naming.directory.Attribute;
 import javax.script.ScriptEngine;
@@ -18,6 +19,8 @@ import java.util.*;
  * Created on 12/20/2017.
  */
 public class SkillInfo {
+    private static final Logger log = Logger.getLogger(SkillInfo.class);
+
     private int skillId;
     private int rootId;
     private int maxLevel;
@@ -86,6 +89,7 @@ public class SkillInfo {
         }
         // Sometimes newlines get taken, just remove those
         value = value.replace("\n", "").replace("\r", "");
+        String original = value;
         if(Util.isNumber(value)) {
             result = Integer.parseInt(value);
         } else {
@@ -93,13 +97,16 @@ public class SkillInfo {
             try {
                 value = value.replace("u", "Math.ceil");
                 value = value.replace("d", "Math.floor");
-                Object res = engine.eval(value.replace("x", slv + ""));
+                String toReplace = value.contains("y") ? "y" : "x";
+                Object res = engine.eval(value.replace(toReplace, slv + ""));
                 if(res instanceof Integer) {
                     result = (Integer) res;
                 } else if(res instanceof Double) {
                     result = ((Double) res).intValue();
                 }
             } catch (ScriptException e) {
+                log.error(String.format("Error when parsing: skill %d, level %d, skill stat %s, tried to eval %s.",
+                        getSkillId(), slv, skillStat, original));
                 e.printStackTrace();
             }
         }

@@ -89,6 +89,8 @@ public class CharacterStat {
     private FileTime lastLogout;
     private int gachExp;
     private int honorExp;
+    @Transient
+    private int wingItem;
 
     public CharacterStat() {
         extendSP = new ExtendSP(7);
@@ -635,6 +637,14 @@ public class CharacterStat {
 
     public void setHonorExp(int honorExp) {
         this.honorExp = honorExp;
+    }
+
+    public void setWingItem(int wingItem) {
+        this.wingItem = wingItem;
+    }
+
+    public int getWingItem() {
+        return wingItem;
     }
 }
 

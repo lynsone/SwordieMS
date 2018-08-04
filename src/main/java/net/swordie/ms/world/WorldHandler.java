@@ -4756,4 +4756,17 @@ public class WorldHandler {
         chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.NPC);
 
     }
+
+    public static void handleUserDefaultWingItem(Char chr, InPacket inPacket) {
+        int wingItem = inPacket.decodeInt();
+        if (wingItem == 5010093) { // AB
+            chr.getAvatarData().getCharacterStat().setWingItem(wingItem);
+            chr.getField().broadcastPacket(UserRemote.setDefaultWingItem(chr));
+        }
+    }
+
+    public static void handleUserSetDressChangedRequest(Char chr, InPacket inPacket) {
+        boolean on = inPacket.decodeByte() != 0;
+//        chr.write(UserLocal.setDressChanged(on, true)); // causes client to send this packet again
+    }
 }

@@ -299,4 +299,13 @@ public class UserRemote {
 
         return outPacket;
     }
+
+    public static OutPacket setDefaultWingItem(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_DEFAULT_WING_ITEM);
+
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodeInt(chr.getAvatarData().getCharacterStat().getWingItem());
+
+        return outPacket;
+    }
 }

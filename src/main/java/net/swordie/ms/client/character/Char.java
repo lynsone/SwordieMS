@@ -2170,6 +2170,9 @@ public class Char {
 		if (getFieldInstanceType() == FieldInstanceType.CHANNEL) {
 			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos()));
 		}
+		if (JobConstants.isAngelicBuster(getJob())) {
+            write(UserLocal.setDressChanged(false, true));
+        }
 	}
 
 	/**

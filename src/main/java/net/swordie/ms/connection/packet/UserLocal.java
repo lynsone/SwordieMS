@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.MessageType;
@@ -363,6 +364,15 @@ public class UserLocal {
             m.encode(outPacket);
         }
         outPacket.encodeByte(0);
+
+        return outPacket;
+    }
+
+    public static OutPacket setDressChanged(boolean on, boolean dressInfinity) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_DRESS_CHANGED);
+
+        outPacket.encodeByte(on);
+        outPacket.encodeByte(dressInfinity);
 
         return outPacket;
     }
