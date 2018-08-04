@@ -1196,8 +1196,12 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
+	public void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int amount, int proc) {
+		createObstacleAtom(oae, key, damage, velocity, 0, amount, proc);
+	}
+
 	@Override
-	public void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity,int amount, int proc) {
+	public void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int angle, int amount, int proc) {
 		Field field = chr.getField();
 		int xLeft = field.getVrLeft();
 		int yTop = field.getVrTop();
@@ -1217,7 +1221,7 @@ public class ScriptManagerImpl implements ScriptManager {
 					height = height < 0 ? -height : height;
 
 					obtacleAtomInfosSet.add(new ObtacleAtomInfo(oae.getType(), key, position, new Position(), oae.getHitBox(),
-							damage, 0, 0, height, 0, velocity, height, 0));
+							damage, 0, 0, height, 0, velocity, height, angle));
 				}
 			}
 		}

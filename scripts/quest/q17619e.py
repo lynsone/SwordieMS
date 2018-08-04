@@ -10,7 +10,7 @@ def action(response, answer):
     status += 1
 
     if status == 0:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Hey Tepes!")
 
     elif status == 1:
@@ -18,11 +18,11 @@ def action(response, answer):
         sm.sendNext("And the white carnation buttons I was going to sew on my vest were in there too... I can't believe they're all gone.")
 
     elif status == 2:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("#b(Aww, he looks seriously depressed.)")
 
     elif status == 3:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Hellooooo I got your items back. See?")
 
     elif status == 4:
@@ -30,7 +30,7 @@ def action(response, answer):
         sm.sendNext("And the silver ribbons I ordered to tie my-- Wait, what? You got my items! Oh, happy day! How'd you do it?")
 
     elif status == 5:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("It was easy. I tracked down the thief.")
 
     elif status == 6:
@@ -38,7 +38,7 @@ def action(response, answer):
         sm.sendNext("Incredible. That'll teach me to judge people based on their clothing.")
 
     elif status == 7:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("#b(Hey! What did he mean by that?!)")
 
     elif status == 8:
@@ -46,7 +46,7 @@ def action(response, answer):
         sm.sendNext("Anyway. I owe you one, my friend. Anything you need, I'll make it happen. I swear it.")
 
     elif status == 9:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Are you serious?")
 
     elif status == 10:

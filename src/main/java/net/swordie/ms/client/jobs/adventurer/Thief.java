@@ -3,44 +3,42 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.DropPool;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
-
-//TODO DB - Mirror Image
-
-//nFlipTheCoin = stack icon
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -416,7 +414,25 @@ public class Thief extends Job {
                     chr.getField().spawnAffectedArea(aa2);
                     break;
                 case MESO_EXPLOSION:
-                    handleMesoExplosion();
+                    int i = 0;
+                    Field field = chr.getField();
+                    int rectRange = si.getValue(range, slv);
+                    Rect rect = new Rect(
+                            new Position(
+                                    chr.getPosition().getX() - rectRange,
+                                    chr.getPosition().getY() - rectRange),
+                            new Position(
+                                    chr.getPosition().getX() + rectRange,
+                                    chr.getPosition().getY() + rectRange)
+                    );
+                    List<Drop> dropList = field.getDropsInRect(rect);
+                    for(Drop drop : dropList) {
+                        if(drop.isMoney() && (drop.getOwnerID() == chr.getId()) && i < si.getValue(bulletCount, slv)) {
+                            createMesoExplosionAtoms(drop);
+                            field.broadcastPacket(DropPool.dropExplodeField(drop.getObjectId()));
+                            i++;
+                        }
+                    }
                     break;
                 case HEROS_WILL_NL:
                 case HEROS_WILL_SHAD:
@@ -610,7 +626,6 @@ public class Thief extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamR, o2);
-                //TODO Final Attack Proc%
                 break;
             case ASURAS_ANGER:
                 o1.nOption = 1;
@@ -622,24 +637,28 @@ public class Thief extends Job {
         c.write(WvsContext.temporaryStatSet(tsm));
     }
 
-    private void handleMesoExplosion() { //TODO
+    private void createMesoExplosionAtoms(Drop drop) {
         Field field = chr.getField();
-        SkillInfo si = SkillData.getSkillInfoById(MESO_EXPLOSION);
-        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        List<Life> lifes = field.getLifesInRect(rect);
-        for(Life life : lifes) {
-            if(life instanceof Mob) {
-                int mobID = ((Mob) life).getRefImgMobID(); //
-                int inc = ForceAtomEnum.FLYING_MESO.getInc();
-                int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 0, (int) System.currentTimeMillis(), 1, 0,
-                        new Position());
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, MESO_EXPLOSION, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), MESO_EXPLOSION, life.getPosition()));
-            }
-        }
+        Rect rect = new Rect(
+                new Position(
+                        chr.getPosition().getX() - 4000,
+                        chr.getPosition().getY() - 4000),
+                new Position(
+                        chr.getPosition().getX() + 4000,
+                        chr.getPosition().getY() + 4000)
+        );
+        List<Mob> mobs = field.getMobsInRect(rect);
+        Mob mob = Util.getRandomFromList(mobs);
+        int inc = ForceAtomEnum.FLYING_MESO.getInc();
+        int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
+        int mobId = mob.getObjectId();
+
+        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 5,
+                0, 0, (int) System.currentTimeMillis(), 1, 0,
+                drop.getPosition());
+        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                true, mobId, MESO_EXPLOSION_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                mob.getPosition(), MESO_EXPLOSION_ATOM, mob.getPosition()));
     }
 
     private void handleFlipTheCoinStacking(TemporaryStatManager tsm, Client c) {

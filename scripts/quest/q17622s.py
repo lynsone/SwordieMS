@@ -2,7 +2,7 @@
 
 status = -1
 def init():
-    sm.setSpeakerID(0) # Has to be Player Avatar
+    sm.setPlayerAsSpeaker() # Has to be Player Avatar
     sm.sendNext("Did your dad look upset to you? I don't think he trusts me...")
     sm.startQuestNoCheck(parentID)
 
@@ -16,7 +16,7 @@ def action(response, answer):
                     "So, how long are you staying in town for?")
 
     elif status == 1:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("A while, it seems. I have a feeling this won't be easy.\r\n"
                     "#b(No thanks to you, Leon.)")
 

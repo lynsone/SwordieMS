@@ -1013,12 +1013,14 @@ public interface ScriptManager extends Observer {
 	 * 		The amount of damage done to the player in HP%.
 	 * @param velocity
 	 * 		The speed at which the Atom falls down.
+	 * @param angle
+	 * 		The angle at the Atom will travel
 	 * @param amount
 	 * 		The amount of atoms spawned in 1 method.
 	 * @param proc
 	 * 		The chance (out of 100) of creating an atom. As to randomise the creation.
 	 */
-	void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int amount, int proc);
+	void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int angle, int amount, int proc);
 
 
 

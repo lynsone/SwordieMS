@@ -5,7 +5,7 @@ COMMERCI_SUIT = 1052673
 expGiven = 530255
 status = -1
 def init():
-    sm.setSpeakerID(0) # Has to be Player Avatar
+    sm.setPlayerAsSpeaker() # Has to be Player Avatar
     sm.sendNext("I'm not hinting that you're weak, prime minister. I just want to support you, as a friend of #bLeon#k.")
 
 def action(response, answer):

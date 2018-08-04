@@ -11,7 +11,7 @@ def action(response, answer):
 
     if status == 0:
         if response == 1:
-            sm.setSpeakerID(0) # Has to be Player Avatar
+            sm.setPlayerAsSpeaker() # Has to be Player Avatar
             sm.sendNext("#b(I have a bad feeling about this whole thing...)")
             sm.startQuestNoCheck(parentID)
         else:

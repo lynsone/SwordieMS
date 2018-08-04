@@ -3,7 +3,7 @@
 status = -1
 sm.setSpeakerID(9390200) # Parbell
 def init():
-    sm.setSpeakerID(0) # Has to be Player Avatar
+    sm.setPlayerAsSpeaker() # Has to be Player Avatar
     sm.sendNext("Excuse me, are you Parbell the Explorer?")
 
 def action(response, answer):
@@ -17,7 +17,7 @@ def action(response, answer):
                     "Sheesh, young'uns these days!")
 
     elif status == 1:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("(He seems a little upset.)")
 
     elif status == 2:
@@ -25,7 +25,7 @@ def action(response, answer):
         sm.sendNext("So, I hears yuhs seeking' passage to the good ol' 'Public o' Commerci...\r\nThat about right?")
 
     elif status == 3:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Y-Yessir, I's am... I mean, that's right. Why do you ask?")
 
     elif status == 4:
@@ -33,7 +33,7 @@ def action(response, answer):
         sm.sendNext("Hows yuh plannin' to get there?")
 
     elif status == 5:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("E-Excuse me...? I was... Neinheart, said you would have a ship ready for me, uh, Mr. Great Explorer, sir...")
 
     elif status == 6:
@@ -42,7 +42,7 @@ def action(response, answer):
                     "Question is, how yuhs plan on getting on that ship?")
 
     elif status == 7:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("I... uh.. By walking? With my feet?")
 
     elif status == 8:
@@ -53,7 +53,7 @@ def action(response, answer):
                     "#eTraditionally at this point some form o' currency get s'changed#n.")
 
     elif status == 9:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("(Are you kidding me? Neinheart expects me to pay for the trip myself? He's in for a stern talking-to...)")
 
     elif status == 10:

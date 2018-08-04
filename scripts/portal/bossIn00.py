@@ -8,10 +8,6 @@ def init():
 
 def action(response, answer):
     if response == 1:
-        if sm.getParty() is None:
-            sm.warpInstanceIn(FirstBossMap)
-        else:
-            if sm.checkParty():
-                sm.warpPartyIn(FirstBossMap)
-    else:
-        sm.dispose()
+        if sm.checkParty():
+            sm.warpPartyIn(FirstBossMap)
+    sm.dispose()
