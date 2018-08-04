@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.OutPacket;
@@ -678,7 +679,7 @@ public class Field {
         removeSchedule(life, fromSchedule);
         if (life instanceof Summon) {
             Summon summon = (Summon) life;
-            if (summon.getSkillID() == Kanna.KISHIN_SHOUKAN) {
+            if (summon.getSkillID() == Kanna.KISHIN_SHOUKAN || summon.getSkillID() == Job.MONOLITH) {
                 setKishin(false);
             }
             broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));

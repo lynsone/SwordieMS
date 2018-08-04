@@ -313,6 +313,7 @@ public class Evan extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         if(chr.getField() != oldField) {
             debrisCount = 0;
             c.write(CField.delWreckage(chr));

@@ -327,6 +327,7 @@ public class Phantom extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         for(Job jobHandler : stealJobHandlers) {
             jobHandler.handleSkill(c, skillID, slv, inPacket);
         }

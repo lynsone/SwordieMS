@@ -382,6 +382,7 @@ public class Luminous extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;

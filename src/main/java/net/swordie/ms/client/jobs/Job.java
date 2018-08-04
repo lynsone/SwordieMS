@@ -22,17 +22,17 @@ import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.connection.packet.WvsContext;
-import net.swordie.ms.enums.BaseStat;
-import net.swordie.ms.enums.InstanceTableType;
-import net.swordie.ms.enums.ReviveType;
-import net.swordie.ms.enums.Stat;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +46,11 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 public abstract class Job {
 	protected Char chr;
 	protected Client c;
+
+	public static final int MONOLITH = 80011261;
+
+	private int[] buffs = new int[]{
+	};
 
 	public Job(Char chr) {
 		this.chr = chr;
@@ -110,7 +115,49 @@ public abstract class Job {
 		}
 	}
 
-	public abstract void handleSkill(Client c, int skillID, byte slv, InPacket inPacket);
+	public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+		Char chr = c.getChr();
+		Skill skill = chr.getSkill(skillID);
+		SkillInfo si = null;
+		if(skill != null) {
+			si = SkillData.getSkillInfoById(skillID);
+		}
+		chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+		Summon summon;
+		Field field;
+		if (isBuff(skillID)) {
+			handleBuff(c, inPacket, skillID, slv);
+		} else {
+			switch (skillID) {
+				case MONOLITH:
+					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+					field = c.getChr().getField();
+					summon.setMoveAbility(MoveAbility.STATIC.getVal());
+					field.spawnSummon(summon);
+					field.setKishin(true);
+					break;
+			}
+		}
+
+	}
+
+	private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+		Char chr = c.getChr();
+		SkillInfo si = SkillData.getSkillInfoById(skillID);
+		TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
+		Option o1 = new Option();
+		Option o2 = new Option();
+		Option o3 = new Option();
+		Option o4 = new Option();
+		Option o5 = new Option();
+		Summon summon;
+		Field field;
+		int curTime = (int) System.currentTimeMillis();
+		switch (skillID) {
+
+		}
+	}
 
 	/**
 	 * Handles the initial part of a hit, the initial packet processing.
@@ -274,7 +321,9 @@ public abstract class Job {
 		}
 	}
 
-	public abstract boolean isBuff(int skillID);
+	public boolean isBuff(int skillID) {
+		return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+	}
 
 	public void setCharCreationStats(Char chr) {
 		CharacterStat characterStat = chr.getAvatarData().getCharacterStat();
