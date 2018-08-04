@@ -3,7 +3,9 @@ package net.swordie.ms.scripts;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.MonsterPark;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.Item;
@@ -48,6 +50,7 @@ import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.LogManager;
+import org.w3c.dom.CharacterData;
 
 import javax.script.*;
 import java.io.File;
@@ -412,9 +415,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta) {
+	public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options) {
 		getNpcScriptInfo().setAngelicBuster(angelicBuster);
 		getNpcScriptInfo().setZeroBeta(zeroBeta);
+		getNpcScriptInfo().setOptions(options);
 		sendGeneralSay(text, AskAvatar);
 	}
 
@@ -513,7 +517,22 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.addExpNoMsg(expGiven);
 	}
 
-
+	@Override
+	public void changeCharacterLook(int look) {
+		AvatarLook al = chr.getAvatarData().getAvatarLook();
+		if (look < 100) { // skin
+			al.setSkin(look);
+			chr.setStatAndSendPacket(Stat.skin, look);
+		} else if (look < 30000) {
+			al.setFace(look);
+			chr.setStatAndSendPacket(Stat.face, look);
+		} else if (look < 1000000) {
+			al.setHair(look);
+			chr.setStatAndSendPacket(Stat.hair, look);
+		} else {
+			log.error(String.format("Tried changing a look with invalid id (%d)", look));
+		}
+	}
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 

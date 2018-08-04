@@ -192,8 +192,8 @@ public interface ScriptManager extends Observer {
 	void sendICQuiz(byte type, String text, String hintText, int time);
 
 	/**
-	 * Sends a chat window with the user's avatar as speaker.
-	 * Example: "sm.sendAskAvatar("What's up buddy boi", false, false)"
+	 * Sends a chat window with Avatar options (different hairstyles, eyestyles, things like that)
+	 * Example: "sm.sendAskAvatar("Choose your hair here!", false, false)"
 	 *
 	 * @param text
 	 * 		The text to display.
@@ -201,8 +201,10 @@ public interface ScriptManager extends Observer {
 	 * 		Whether or not the avatar should be in its dress up form.
 	 * @param zeroBeta
 	 * 		Whether or not the avatar should be in its beta form.
+	 * @param options
+	 * 		A list of hair/eye options available to choose
 	 */
-	void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta);
+	void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options);
 
 
 
@@ -290,6 +292,13 @@ public interface ScriptManager extends Observer {
 	 * 		The amount of Exp given
 	 */
 	void giveExpNoMsg(long expGiven);
+
+
+	/**
+	 * Changes a part of the characterlook of a Char.
+	 * @param look the id of the look (skin/eyes/hair) to change
+	 */
+	void changeCharacterLook(int look);
 
 
 

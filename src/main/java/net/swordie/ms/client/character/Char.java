@@ -1791,10 +1791,20 @@ public class Char {
 	 * @param amount the amount of Stat to add
 	 */
 	public void addStatAndSendPacket(Stat charStat, int amount) {
-		addStat(charStat, amount);
+		setStatAndSendPacket(charStat, getStat(charStat) + amount);
+	}
+
+	/**
+	 * Adds a Stat to this Char, and immediately sends the packet to the client notifying the change.
+	 * @param charStat which Stat to change
+	 * @param value the value of Stat to set
+	 */
+	public void setStatAndSendPacket(Stat charStat, int value) {
+		setStat(charStat, value);
 		Map<Stat, Object> stats = new HashMap<>();
 		switch(charStat) {
 			case level:
+			case skin:
 				stats.put(charStat, (byte) getStat(charStat));
 				break;
 			case str:
@@ -1808,6 +1818,8 @@ public class Char {
 			case mhp:
 			case mp:
 			case mmp:
+			case face:
+			case hair:
 				stats.put(charStat, getStat(charStat));
 				break;
 		}

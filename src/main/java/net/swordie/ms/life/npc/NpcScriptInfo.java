@@ -4,28 +4,7 @@ package net.swordie.ms.life.npc;
  * Created on 2/19/2018.
  */
 public class NpcScriptInfo {
-	public enum Param {
-		NotCancellable(0x1),
-		PlayerAsSpeaker(0x2),
-		OverrideSpeakerID(0x4),
-		FlipSpeaker(0x8),
-		PlayerAsSpeakerFlip(0x10),
-		FancyChat(0x20),
-
-
-		;
-
-		private int val;
-
-		Param(int val) {
-			this.val = val;
-		}
-
-		public int getVal() {
-			return val;
-		}
-	}
-
+	private int[] options;
 	private byte speakerType = 4; // ?
 	private int overrideSpeakerTemplateID;
 	private byte param;
@@ -244,7 +223,37 @@ public class NpcScriptInfo {
 		}
 	}
 
+	public void setOptions(int[] options) {
+		this.options = options;
+	}
+
+	public int[] getOptions() {
+		return options;
+	}
+
 	public void resetParam() {
 		setParam((byte) 0);
+	}
+
+	public enum Param {
+		NotCancellable(0x1),
+		PlayerAsSpeaker(0x2),
+		OverrideSpeakerID(0x4),
+		FlipSpeaker(0x8),
+		PlayerAsSpeakerFlip(0x10),
+		FancyChat(0x20),
+
+
+		;
+
+		private int val;
+
+		Param(int val) {
+			this.val = val;
+		}
+
+		public int getVal() {
+			return val;
+		}
 	}
 }

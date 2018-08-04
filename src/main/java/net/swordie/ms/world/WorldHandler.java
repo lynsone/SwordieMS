@@ -2267,7 +2267,13 @@ public class WorldHandler {
             answer = inPacket.decodeInt();
             hasAnswer = true;
         }
-        if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu) || hasAnswer) {
+        if (nmt == NpcMessageType.AskAvatar || nmt == NpcMessageType.AskAvatarZero) {
+            inPacket.decodeByte();
+            hasAnswer = inPacket.decodeByte() != 0;
+            answer = inPacket.decodeByte();
+        }
+        if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
+                nmt == NpcMessageType.AskAvatar && nmt == NpcMessageType.AskAvatarZero) || hasAnswer) {
             // else -> User pressed escape in a selection (choice) screen
             chr.getScriptManager().handleAction(lastType, action, answer);
         } else {

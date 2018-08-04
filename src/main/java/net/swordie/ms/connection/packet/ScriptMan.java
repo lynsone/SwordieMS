@@ -102,10 +102,14 @@ public class ScriptMan {
                 }
                 break;
             case AskAvatar:
+                int[] options = nsi.getOptions();
                 outPacket.encodeByte(nsi.isAngelicBuster());
                 outPacket.encodeByte(nsi.isZeroBeta());
                 outPacket.encodeString(nsi.getText());
-                outPacket.encodeByte(0); // Some int array, no clue what it stands for
+                outPacket.encodeByte(options.length);
+                for (int i = 0; i < options.length; i++) {
+                    outPacket.encodeInt(options[i]);
+                }
                 break;
             case AskSlideMenu:
                 outPacket.encodeInt(nsi.getDlgType());
