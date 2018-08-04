@@ -68,6 +68,7 @@ import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.skill.MobSkill;
+import net.swordie.ms.life.mob.skill.MobSkillID;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.life.npc.Npc;
@@ -1172,7 +1173,7 @@ public class WorldHandler {
         int skillID = 0;
         int slv = 0;
         msai.targetInfo = inPacket.decodeInt();
-        if (usedSkill && actionAndDir != -1 && mob.hasSkillDelayExpired()) {
+        if (usedSkill && /*actionAndDir != -1 && */mob.hasSkillDelayExpired()) {
             MobSkill mobSkill = null;
             List<MobSkill> skillList = mob.getSkills();
             if (skillList.size() > 0) {
@@ -1199,7 +1200,8 @@ public class WorldHandler {
                     long interval = msi.getSkillStatIntValue(MobSkillStat.interval) * 1000;
                     long nextUseableTime = curTime + interval;
                     mob.putSkillCooldown(skillID, slv, nextUseableTime);
-                    c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID %d, level = %d", mobSkill.getSkill(), mobSkill.getLevel()));
+                    c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID %d (%s), level = %d",
+                            mobSkill.getSkill(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkill()), mobSkill.getLevel()));
                     mobSkill.handleEffect(mob);
                 }
             }
@@ -4519,7 +4521,7 @@ public class WorldHandler {
         int mobID = inPacket.decodeInt();
         Field field = chr.getField();
         Mob mob = (Mob) field.getLifeByObjectID(mobID);
-        if (mob.isSelfDestruction()) {
+        if (mob != null && mob.isSelfDestruction()) {
             field.removeLife(mobID);
             field.broadcastPacket(MobPool.mobLeaveField(mobID, DeathType.ANIMATION_DEATH));
         }
