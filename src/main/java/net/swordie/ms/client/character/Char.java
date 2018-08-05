@@ -1729,6 +1729,15 @@ public class Char {
 				getAvatarData().getCharacterStat().setLevel(amount);
 				notifyChanges();
 				break;
+			case skin:
+				getAvatarData().getCharacterStat().setSkin(amount);
+				break;
+			case face:
+				getAvatarData().getCharacterStat().setFace(amount);
+				break;
+			case hair:
+				getAvatarData().getCharacterStat().setHair(amount);
+				break;
 		}
 	}
 
@@ -1772,6 +1781,12 @@ public class Char {
 				return cs.getAp();
 			case level:
 				return cs.getLevel();
+			case skin:
+				return cs.getSkin();
+			case face:
+				return cs.getFace();
+			case hair:
+				return cs.getHair();
 		}
 		return -1;
 	}
