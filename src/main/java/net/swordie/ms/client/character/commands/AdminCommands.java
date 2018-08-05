@@ -1053,21 +1053,22 @@ public class AdminCommands {
     public static class Lookup extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 3) {
-                chr.chatMessage(GAME_NOTICE, "Needs more args! <what to lookup> <id>");
+                chr.chatMessage(GAME_NOTICE, "Needs more args! <what to lookup> <id/(part of) name>");
+                chr.chatMessage(GAME_NOTICE, "Possible lookup types are: item, skill, mob, npc, map");
                 return;
             }
-            String query = "";
+            StringBuilder query = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
-                query += args[i].toLowerCase() + " ";
+                query.append(args[i].toLowerCase()).append(" ");
             }
-            query = query.substring(0, query.length() - 1);
+            query = new StringBuilder(query.substring(0, query.length() - 1));
             chr.chatMessage("Query: " + query);
-            boolean isNumber = Util.isNumber(query);
+            boolean isNumber = Util.isNumber(query.toString());
             if ("skill".equalsIgnoreCase(args[1])) {
                 SkillStringInfo ssi;
                 int id;
                 if (isNumber) {
-                    id = Integer.parseInt(query);
+                    id = Integer.parseInt(query.toString());
                     ssi = StringData.getSkillStringById(id);
                     if (ssi == null) {
                         chr.chatMessage(YELLOW, "Cannot find skill " + id);
@@ -1079,7 +1080,7 @@ public class AdminCommands {
                     chr.chatMessage(YELLOW, "h: " + ssi.getH());
                     chr.chatMessage(YELLOW, "type: " + skillInfo.getType());
                 } else {
-                    Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query);
+                    Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query.toString());
                     if (map.size() == 0) {
                         chr.chatMessage(YELLOW, "No skills found for query " + query);
                     }
@@ -1101,7 +1102,7 @@ public class AdminCommands {
                 int id;
                 String name;
                 if (isNumber) {
-                    id = Integer.parseInt(query);
+                    id = Integer.parseInt(query.toString());
                     switch (queryType) {
                         case "item":
                             name = StringData.getItemStringById(id);
@@ -1128,16 +1129,16 @@ public class AdminCommands {
                     Map<Integer, String> map;
                     switch (queryType) {
                         case "item":
-                            map = StringData.getItemStringByName(query);
+                            map = StringData.getItemStringByName(query.toString());
                             break;
                         case "mob":
-                            map = StringData.getMobStringByName(query);
+                            map = StringData.getMobStringByName(query.toString());
                             break;
                         case "npc":
-                            map = StringData.getNpcStringByName(query);
+                            map = StringData.getNpcStringByName(query.toString());
                             break;
                         case "map":
-                            map = StringData.getMapStringByName(query);
+                            map = StringData.getMapStringByName(query.toString());
                             break;
                         default:
                             chr.chatMessage("Unknown query type " + queryType);
