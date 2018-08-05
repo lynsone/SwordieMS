@@ -13,9 +13,7 @@ def init():
 		sm.setSpeakerID(9071006)
 		sm.sendSayOkay("Monster Park Extreme is off limits at the moment.")
 		sm.dispose()
-	elif fieldID == 310000000: # Edelstein
-		map = 310000003 # Edelstein Hair Salon
-		portal = 1
+
 	else:
 		sm.chat("(Portal) This script (in03.py) is not coded for this map. (ID: " + str(fieldID) + ")")
 		map = sm.getChr().getField().getReturnMap()
