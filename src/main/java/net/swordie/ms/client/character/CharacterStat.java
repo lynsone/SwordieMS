@@ -2,6 +2,7 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.client.character.cards.CharacterCard;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.util.SystemTime;
 
@@ -476,19 +477,19 @@ public class CharacterStat {
     }
 
     public void setHp(int hp) {
-        this.hp = hp;
+        this.hp = Math.min(hp, GameConstants.MAX_HP_MP);
     }
 
     public void setMaxHp(int maxHp) {
-        this.maxHp = maxHp;
+        this.maxHp = Math.min(maxHp, GameConstants.MAX_HP_MP);
     }
 
     public void setMp(int mp) {
-        this.mp = mp;
+        this.mp = Math.min(mp, GameConstants.MAX_HP_MP);
     }
 
     public void setMaxMp(int maxMp) {
-        this.maxMp = maxMp;
+        this.maxMp = Math.min(maxMp, GameConstants.MAX_HP_MP);
     }
 
     public void setAp(int ap) {

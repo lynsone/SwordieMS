@@ -1096,31 +1096,67 @@ public class AdminCommands {
                         }
                     }
                 }
-            } else if ("item".equalsIgnoreCase(args[1])) {
+            } else {
+                String queryType = args[1].toLowerCase();
                 int id;
                 String name;
                 if (isNumber) {
                     id = Integer.parseInt(query);
-                    name = StringData.getItemStringById(id);
+                    switch (queryType) {
+                        case "item":
+                            name = StringData.getItemStringById(id);
+                            break;
+                        case "mob":
+                            name = StringData.getMobStringById(id);
+                            break;
+                        case "npc":
+                            name = StringData.getNpcStringById(id);
+                            break;
+                        case "map":
+                            name = StringData.getMapStringById(id);
+                            break;
+                        default:
+                            chr.chatMessage("Unknown query type " + queryType);
+                            return;
+                    }
                     if (name == null) {
-                        chr.chatMessage(YELLOW, "Cannot find item " + id);
+                        chr.chatMessage(YELLOW, "Cannot find " + queryType + " " + id);
                         return;
                     }
                     chr.chatMessage(YELLOW, "Name: " + name);
                 } else {
-                    Map<Integer, String> map = StringData.getItemStringByName(query);
+                    Map<Integer, String> map;
+                    switch (queryType) {
+                        case "item":
+                            map = StringData.getItemStringByName(query);
+                            break;
+                        case "mob":
+                            map = StringData.getMobStringByName(query);
+                            break;
+                        case "npc":
+                            map = StringData.getNpcStringByName(query);
+                            break;
+                        case "map":
+                            map = StringData.getMapStringByName(query);
+                            break;
+                        default:
+                            chr.chatMessage("Unknown query type " + queryType);
+                            return;
+                    }
                     if (map.size() == 0) {
-                        chr.chatMessage(YELLOW, "No items found for query " + query);
+                        chr.chatMessage(YELLOW, "No " + queryType + "s found for query " + query);
                     }
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
-                        Item item = ItemData.getEquipDeepCopyFromID(id, false);
-                        if (item == null) {
-                            item = ItemData.getItemDeepCopy(id);
-                        }
-                        if (item == null) {
-                            continue;
+                        if (queryType.equalsIgnoreCase("item")) {
+                            Item item = ItemData.getEquipDeepCopyFromID(id, false);
+                            if (item == null) {
+                                item = ItemData.getItemDeepCopy(id);
+                            }
+                            if (item == null) {
+                                continue;
+                            }
                         }
                         chr.chatMessage(YELLOW, "Id: " + id);
                         chr.chatMessage(YELLOW, "Name: " + name);

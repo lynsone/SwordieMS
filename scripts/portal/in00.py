@@ -210,8 +210,9 @@ else:
 
 
 		# Default script
-		else:
+		elif currentMap not in field:
 			sm.chat("(Portal - in00) This script isn't coded for this map.")
+			warp = False
 			sm.dispose()
 
 		# Warp
