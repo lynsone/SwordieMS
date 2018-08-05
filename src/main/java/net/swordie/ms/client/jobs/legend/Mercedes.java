@@ -202,6 +202,7 @@ public class Mercedes extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     private void handleIgnisRoar(int skillID, TemporaryStatManager tsm, Client c, AttackInfo attackInfo) {
@@ -247,7 +248,7 @@ public class Mercedes extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override

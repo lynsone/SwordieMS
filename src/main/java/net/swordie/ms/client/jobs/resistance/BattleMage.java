@@ -250,6 +250,7 @@ public class BattleMage extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     public void spawnDeath(int skillID, byte slv) {
@@ -308,7 +309,7 @@ public class BattleMage extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override

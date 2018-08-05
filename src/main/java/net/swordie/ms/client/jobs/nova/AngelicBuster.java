@@ -208,6 +208,7 @@ public class AngelicBuster extends Job {
                 break;
         }
         c.write(WvsContext.temporaryStatSet(tsm));
+        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     private void soulSeekerExpert(int skillID, byte slv, AttackInfo attackInfo) {
@@ -293,7 +294,7 @@ public class AngelicBuster extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override

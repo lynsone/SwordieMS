@@ -7,9 +7,9 @@ import net.swordie.ms.client.character.ExtendSP;
 import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
@@ -19,9 +19,8 @@ import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.UserRemote;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
@@ -29,7 +28,6 @@ import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
@@ -48,8 +46,44 @@ public abstract class Job {
 	protected Client c;
 
 	public static final int MONOLITH = 80011261;
+	public static final int LIGHTNING_GOD = 80011178;
+	public static final int ELEMENTAL_SYLPH = 80001518;
+	public static final int FLAME_SYLPH = 80001519;
+	public static final int THUNDER_SYLPH = 80001520;
+	public static final int ICE_SYLPH = 80001521;
+	public static final int EARTH_SYLPH = 80001522;
+	public static final int DARK_SYLPH = 80001523;
+	public static final int HOLY_SYLPH = 80001524;
+	public static final int SALAMANDER_SYLPH = 80001525;
+	public static final int ELECTRON_SYLPH = 80001526;
+	public static final int UNDINE_SYLPH = 80001527;
+	public static final int GNOME_SYLPH = 80001528;
+	public static final int DEVIL_SYLPH = 80001529;
+	public static final int ANGEL_SYLPH = 80001530;
+
+	public static final int ELEMENTAL_SYLPH_2 = 80001715;
+	public static final int FLAME_SYLPH_2 = 80001716;
+	public static final int THUNDER_SYLPH_2 = 80001717;
+	public static final int ICE_SYLPH_2 = 80001718;
+	public static final int EARTH_SYLPH_2 = 80001719;
+	public static final int DARK_SYLPH_2 = 80001720;
+	public static final int HOLY_SYLPH_2 = 80001721;
+	public static final int SALAMANDER_SYLPH_2 = 80001722;
+	public static final int ELECTRON_SYLPH_2 = 80001723;
+	public static final int UNDINE_SYLPH_2 = 80001724;
+	public static final int GNOME_SYLPH_2 = 80001725;
+	public static final int DEVIL_SYLPH_2 = 80001726;
+	public static final int ANGEL_SYLPH_2 = 80001727;
+
+	public static final int WHITE_ANGEL = 40011179;
+	public static final int DARK_ANGEL = 40011087;
+	public static final int ARCHANGEL = 40011085;
 
 	private int[] buffs = new int[]{
+			LIGHTNING_GOD,
+			WHITE_ANGEL,
+			DARK_ANGEL,
+			ARCHANGEL
 	};
 
 	public Job(Char chr) {
@@ -137,12 +171,43 @@ public abstract class Job {
 					field.spawnSummon(summon);
 					field.setKishin(true);
 					break;
+				case ELEMENTAL_SYLPH:
+				case FLAME_SYLPH:
+				case THUNDER_SYLPH:
+				case ICE_SYLPH:
+				case EARTH_SYLPH:
+				case DARK_SYLPH:
+				case HOLY_SYLPH:
+				case SALAMANDER_SYLPH:
+				case ELECTRON_SYLPH:
+				case UNDINE_SYLPH:
+				case GNOME_SYLPH:
+				case DEVIL_SYLPH:
+				case ANGEL_SYLPH:
+
+				case ELEMENTAL_SYLPH_2:
+				case FLAME_SYLPH_2:
+				case THUNDER_SYLPH_2:
+				case ICE_SYLPH_2:
+				case EARTH_SYLPH_2:
+				case DARK_SYLPH_2:
+				case HOLY_SYLPH_2:
+				case SALAMANDER_SYLPH_2:
+				case ELECTRON_SYLPH_2:
+				case UNDINE_SYLPH_2:
+				case GNOME_SYLPH_2:
+				case DEVIL_SYLPH_2:
+				case ANGEL_SYLPH_2:
+					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+					field = c.getChr().getField();
+					field.spawnSummon(summon);
+					break;
 			}
 		}
 
 	}
 
-	private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+	public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
 		Char chr = c.getChr();
 		SkillInfo si = SkillData.getSkillInfoById(skillID);
 		TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -155,8 +220,76 @@ public abstract class Job {
 		Field field;
 		int curTime = (int) System.currentTimeMillis();
 		switch (skillID) {
+			case LIGHTNING_GOD:
+				si = SkillData.getSkillInfoById(80010065); // Lightning God Buff (16 w/m att)
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieMad, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieMAD, o1);
+				o2.nReason = skillID;
+				o2.nValue = si.getValue(indiePad, slv);
+				o2.tStart = curTime;
+				o2.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndiePAD, o2);
 
+				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+				field = c.getChr().getField();
+				field.spawnSummon(summon);
+				break;
+			case WHITE_ANGEL:
+				si = SkillData.getSkillInfoById(40020180); // White Angelic Blessing Buff (12 w/m att)
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieMad, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieMAD, o1);
+				o2.nReason = skillID;
+				o2.nValue = si.getValue(indiePad, slv);
+				o2.tStart = curTime;
+				o2.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndiePAD, o2);
+
+				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+				field = c.getChr().getField();
+				field.spawnSummon(summon);
+				break;
+			case DARK_ANGEL:
+				si = SkillData.getSkillInfoById(50000088); // Dark Angelic Blessing Buff (10 w/m att)
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieMad, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieMAD, o1);
+				o2.nReason = skillID;
+				o2.nValue = si.getValue(indiePad, slv);
+				o2.tStart = curTime;
+				o2.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndiePAD, o2);
+
+				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+				field = c.getChr().getField();
+				field.spawnSummon(summon);
+				break;
+			case ARCHANGEL:
+				si = SkillData.getSkillInfoById(50000086); // Angelic Blessing Buff (5 w/m att)
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieMad, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieMAD, o1);
+				o2.nReason = skillID;
+				o2.nValue = si.getValue(indiePad, slv);
+				o2.tStart = curTime;
+				o2.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndiePAD, o2);
+
+				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+				field = c.getChr().getField();
+				field.spawnSummon(summon);
+				break;
 		}
+		c.write(WvsContext.temporaryStatSet(tsm));
 	}
 
 	/**
