@@ -390,13 +390,8 @@ public class StringData {
     }
 
     public static void main(String[] args) {
-//        generateDatFiles();
-//        loadSkillStrings();
-//        loadItemStrings();
-//        loadMobStrings();
-//        loadNpcStrings();
-//        loadMapStrings();
-        generateTextFiles();
+        generateDatFiles();
+//        generateTextFiles();
     }
 
 
