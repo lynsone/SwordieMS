@@ -40,6 +40,7 @@ public class SkillData {
                 dataOutputStream.writeUTF(si.getElemAttr());
                 dataOutputStream.writeInt(si.getHyper());
                 dataOutputStream.writeInt(si.getHyperStat());
+                dataOutputStream.writeInt(si.getVehicleId());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -87,6 +88,7 @@ public class SkillData {
                     skillInfo.setElemAttr(dataInputStream.readUTF());
                     skillInfo.setHyper(dataInputStream.readInt());
                     skillInfo.setHyperStat(dataInputStream.readInt());
+                    skillInfo.setVehicleId(dataInputStream.readInt());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -199,6 +201,13 @@ public class SkillData {
                         if(hyperStatNode != null) {
                             skill.setHyperStat(Integer.parseInt(XMLApi.getNamedAttribute(hyperStatNode, "value")));
                         }
+                        Node vehicle = XMLApi.getFirstChildByNameBF(skillNode, "vehicleID");
+                        int vehicleId = 0;
+                        if(vehicle != null) {
+                            vehicleId = Integer.parseInt(XMLApi.getAttributes(vehicle).get("value"));
+                        }
+                        skill.setVehicleId(vehicleId);
+
                         // end main level info
                         // start "common" level info
                         Node common = XMLApi.getFirstChildByNameBF(skillNode, "common");

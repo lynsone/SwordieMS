@@ -9,7 +9,6 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.Logger;
 
-import javax.naming.directory.Attribute;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -36,6 +35,7 @@ public class SkillInfo {
     private String elemAttr;
     private int hyper;
     private int hyperstat;
+    private int vehicleId;
 
     public int getSkillId() {
         return skillId;
@@ -259,5 +259,13 @@ public class SkillInfo {
 
     public int getHyperStat() {
         return hyperstat;
+    }
+
+    public int getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(int vehicleId) {
+        this.vehicleId = vehicleId;
     }
 }

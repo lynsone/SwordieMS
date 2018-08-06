@@ -3,7 +3,6 @@ package net.swordie.ms.scripts;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.MonsterPark;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
@@ -50,7 +49,6 @@ import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.LogManager;
-import org.w3c.dom.CharacterData;
 
 import javax.script.*;
 import java.io.File;
@@ -533,6 +531,29 @@ public class ScriptManagerImpl implements ScriptManager {
 			log.error(String.format("Tried changing a look with invalid id (%d)", look));
 		}
 	}
+
+	public void giveSkill(int skillId) {
+		giveSkill(skillId, 1);
+	}
+
+	@Override
+	public void giveSkill(int skillId, int slv) {
+		chr.addSkill(skillId, slv, slv);
+	}
+
+	public int getSkillByItem() {
+		return getSkillByItem(getParentID());
+	}
+
+	public int getSkillByItem(int itemId) {
+		ItemInfo itemInfo = ItemData.getItemInfoByID(itemId);
+		return itemInfo.getSkillId();
+	}
+
+	public boolean hasSkill(int skillId) {
+		return chr.hasSkill(skillId);
+	}
+
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 
@@ -1019,6 +1040,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public boolean hasItem(int id, int quantity) {
 		return getQuantityOfItem(id) >= quantity;
+	}
+
+	public void consumeItem() {
+		consumeItem(getParentID());
 	}
 
 	@Override

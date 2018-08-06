@@ -1,14 +1,17 @@
 package net.swordie.ms.loaders;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.ServerConstants;
-import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.ItemGrade;
+import net.swordie.ms.enums.ScrollStat;
+import net.swordie.ms.enums.SpecStat;
+import net.swordie.ms.util.*;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import net.swordie.ms.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -24,6 +27,7 @@ public class ItemData {
     public static Map<Integer, ItemInfo> items = new HashMap<>();
     public static Map<Integer, PetInfo> pets = new HashMap<>();
     public static List<ItemOption> itemOptions = new ArrayList<>();
+    public static Map<Integer, Integer> skillIdByItemId = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
 
@@ -520,6 +524,7 @@ public class ItemData {
             itemInfo.setMasterLv(dataInputStream.readInt());
 
             itemInfo.setMoveTo(dataInputStream.readInt());
+            itemInfo.setSkillId(dataInputStream.readInt());
             getItems().put(itemInfo.getItemId(), itemInfo);
 
         } catch (IOException e) {
@@ -585,6 +590,7 @@ public class ItemData {
                 dataOutputStream.writeInt(ii.getMasterLv());
 
                 dataOutputStream.writeInt(ii.getMoveTo());
+                dataOutputStream.writeInt(ii.getSkillId());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1343,10 +1349,30 @@ public class ItemData {
                             item.addItemReward(iri);
                         }
                     }
+                    item.setSkillId(getSkillIdByItemId(id));
                     getItems().put(item.getItemId(), item);
                 }
             }
         }
+    }
+
+    public static void loadMountItemsFromFile() {
+        File file = new File(String.format("%s/mountsFromItem.txt", ServerConstants.RESOURCES_DIR));
+        try (Scanner scanner = new Scanner(new FileInputStream(file))) {
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] lineSplit = line.split(" ");
+                int itemId = Integer.parseInt(lineSplit[0]);
+                int skillId = Integer.parseInt(lineSplit[1]);
+                skillIdByItemId.put(itemId, skillId);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int getSkillIdByItemId(int itemId) {
+        return skillIdByItemId.getOrDefault(itemId, 0);
     }
 
     public static Item getDeepCopyByItemInfo(ItemInfo itemInfo) {
@@ -1476,6 +1502,7 @@ public class ItemData {
     public static void generateDatFiles() {
         log.info("Started generating item data.");
         long start = System.currentTimeMillis();
+        loadMountItemsFromFile();
         loadEquipsFromWz();
         loadItemsFromWZ();
         loadPetsFromWZ();

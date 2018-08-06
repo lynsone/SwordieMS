@@ -14,6 +14,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.InPacket;
@@ -152,7 +153,7 @@ public abstract class Job {
 	public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
 		TemporaryStatManager tsm = chr.getTemporaryStatManager();
 		Char chr = c.getChr();
-		Skill skill = chr.getSkill(skillID);
+		Skill skill = SkillData.getSkillDeepCopyById(skillID);
 		SkillInfo si = null;
 		if(skill != null) {
 			si = SkillData.getSkillInfoById(skillID);
@@ -163,45 +164,57 @@ public abstract class Job {
 		if (isBuff(skillID)) {
 			handleBuff(c, inPacket, skillID, slv);
 		} else {
-			switch (skillID) {
-				case MONOLITH:
-					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-					field = c.getChr().getField();
-					summon.setMoveAbility(MoveAbility.STATIC.getVal());
-					field.spawnSummon(summon);
-					field.setKishin(true);
-					break;
-				case ELEMENTAL_SYLPH:
-				case FLAME_SYLPH:
-				case THUNDER_SYLPH:
-				case ICE_SYLPH:
-				case EARTH_SYLPH:
-				case DARK_SYLPH:
-				case HOLY_SYLPH:
-				case SALAMANDER_SYLPH:
-				case ELECTRON_SYLPH:
-				case UNDINE_SYLPH:
-				case GNOME_SYLPH:
-				case DEVIL_SYLPH:
-				case ANGEL_SYLPH:
 
-				case ELEMENTAL_SYLPH_2:
-				case FLAME_SYLPH_2:
-				case THUNDER_SYLPH_2:
-				case ICE_SYLPH_2:
-				case EARTH_SYLPH_2:
-				case DARK_SYLPH_2:
-				case HOLY_SYLPH_2:
-				case SALAMANDER_SYLPH_2:
-				case ELECTRON_SYLPH_2:
-				case UNDINE_SYLPH_2:
-				case GNOME_SYLPH_2:
-				case DEVIL_SYLPH_2:
-				case ANGEL_SYLPH_2:
-					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-					field = c.getChr().getField();
-					field.spawnSummon(summon);
-					break;
+			if(si.getVehicleId() > 0) {
+				TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+				if(tsm.hasStat(RideVehicle)) {
+					tsm.removeStat(RideVehicle, false);
+				}
+				tsb.setNOption(si.getVehicleId());
+				tsb.setROption(skillID);
+				tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+				tsm.sendSetStatPacket();
+			} else {
+				switch (skillID) {
+					case MONOLITH:
+						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+						field = c.getChr().getField();
+						summon.setMoveAbility(MoveAbility.STATIC.getVal());
+						field.spawnSummon(summon);
+						field.setKishin(true);
+						break;
+					case ELEMENTAL_SYLPH:
+					case FLAME_SYLPH:
+					case THUNDER_SYLPH:
+					case ICE_SYLPH:
+					case EARTH_SYLPH:
+					case DARK_SYLPH:
+					case HOLY_SYLPH:
+					case SALAMANDER_SYLPH:
+					case ELECTRON_SYLPH:
+					case UNDINE_SYLPH:
+					case GNOME_SYLPH:
+					case DEVIL_SYLPH:
+					case ANGEL_SYLPH:
+
+					case ELEMENTAL_SYLPH_2:
+					case FLAME_SYLPH_2:
+					case THUNDER_SYLPH_2:
+					case ICE_SYLPH_2:
+					case EARTH_SYLPH_2:
+					case DARK_SYLPH_2:
+					case HOLY_SYLPH_2:
+					case SALAMANDER_SYLPH_2:
+					case ELECTRON_SYLPH_2:
+					case UNDINE_SYLPH_2:
+					case GNOME_SYLPH_2:
+					case DEVIL_SYLPH_2:
+					case ANGEL_SYLPH_2:
+						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+						field = c.getChr().getField();
+						field.spawnSummon(summon);
+						break;
+				}
 			}
 		}
 

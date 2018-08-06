@@ -300,6 +300,16 @@ public interface ScriptManager extends Observer {
 	 */
 	void changeCharacterLook(int look);
 
+	/**
+	 * Adds the specified skill to the Char.
+	 *
+	 * @param skillId
+	 * 		The id of the skill
+	 * @param slv
+	 * 		The skill level of the skill
+	 */
+	void giveSkill(int skillId, int slv);
+
 
 
 	// Field-related methods -------------------------------------------------------------------------------------------
