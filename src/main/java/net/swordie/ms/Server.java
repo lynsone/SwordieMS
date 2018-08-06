@@ -85,8 +85,7 @@ public class Server extends Properties {
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
-		StringData.loadItemStrings();
-		StringData.loadSkillStrings();
+		StringData.load();
 
 		MapleCrypto.initialize(ServerConstants.VERSION);
 		new Thread(new LoginAcceptor()).start();

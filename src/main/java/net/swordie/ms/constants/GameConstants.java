@@ -21,6 +21,7 @@ public class GameConstants {
     public static final long MAX_MONEY = 10_000_000_000L;
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
+    public static final int MAX_HP_MP = 500000;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
@@ -111,6 +112,7 @@ public class GameConstants {
 
     //     START OF Party Quests
     public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
+
     public static final long PARTY_QUEST_EXP_FORMULA(Char chr) {
         return PARTY_QUEST_GLOBAL_EXP * (1+(chr.getParty().getPartyMembers().length*100 / chr.getParty().getAvgLevel()));
     } // Exp formula for giving Exp from Party Quests

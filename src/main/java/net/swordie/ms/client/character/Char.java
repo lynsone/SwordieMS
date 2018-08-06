@@ -1697,37 +1697,71 @@ public class Char {
 	}
 
 	public void setStat(Stat charStat, int amount) {
+		CharacterStat cs = getAvatarData().getCharacterStat();
 		switch (charStat) {
 			case str:
-				getAvatarData().getCharacterStat().setStr(amount);
+				cs.setStr(amount);
 				break;
 			case dex:
-				getAvatarData().getCharacterStat().setDex(amount);
+				cs.setDex(amount);
 				break;
 			case inte:
-				getAvatarData().getCharacterStat().setInt(amount);
+				cs.setInt(amount);
 				break;
 			case luk:
-				getAvatarData().getCharacterStat().setLuk(amount);
+				cs.setLuk(amount);
 				break;
 			case hp:
-				getAvatarData().getCharacterStat().setHp(amount);
+				cs.setHp(amount);
 				break;
 			case mhp:
-				getAvatarData().getCharacterStat().setMaxHp(amount);
+				cs.setMaxHp(amount);
 				break;
 			case mp:
-				getAvatarData().getCharacterStat().setMp(amount);
+				cs.setMp(amount);
 				break;
 			case mmp:
-				getAvatarData().getCharacterStat().setMaxMp(amount);
+				cs.setMaxMp(amount);
 				break;
 			case ap:
-				getAvatarData().getCharacterStat().setAp(amount);
+				cs.setAp(amount);
 				break;
 			case level:
-				getAvatarData().getCharacterStat().setLevel(amount);
+				cs.setLevel(amount);
 				notifyChanges();
+				break;
+			case skin:
+				cs.setSkin(amount);
+				break;
+			case face:
+				cs.setFace(amount);
+				break;
+			case hair:
+				cs.setHair(amount);
+				break;
+			case pop:
+				cs.setPop(amount);
+				break;
+			case charismaEXP:
+				cs.setCharismaExp(amount);
+				break;
+			case charmEXP:
+				cs.setCharmExp(amount);
+				break;
+			case craftEXP:
+				cs.setCraftExp(amount);
+				break;
+			case insightEXP:
+				cs.setInsightExp(amount);
+				break;
+			case senseEXP:
+				cs.setSenseExp(amount);
+				break;
+			case willEXP:
+				cs.setWillExp(amount);
+				break;
+			case fatigue:
+				cs.setFatigue(amount);
 				break;
 		}
 	}
@@ -1772,6 +1806,28 @@ public class Char {
 				return cs.getAp();
 			case level:
 				return cs.getLevel();
+			case skin:
+				return cs.getSkin();
+			case face:
+				return cs.getFace();
+			case hair:
+				return cs.getHair();
+			case pop:
+				return cs.getPop();
+			case charismaEXP:
+				return cs.getCharismaExp();
+			case charmEXP:
+				return cs.getCharmExp();
+			case craftEXP:
+				return cs.getCraftExp();
+			case insightEXP:
+				return cs.getInsightExp();
+			case senseEXP:
+				return cs.getSenseExp();
+			case willEXP:
+				return cs.getWillExp();
+			case fatigue:
+				return cs.getFatigue();
 		}
 		return -1;
 	}
