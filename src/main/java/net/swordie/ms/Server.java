@@ -4,7 +4,6 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.connection.crypto.MapleCrypto;
-import net.swordie.ms.connection.db.DatabaseConnection;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.netty.ChannelAcceptor;
 import net.swordie.ms.connection.netty.ChatAcceptor;
@@ -14,7 +13,6 @@ import net.swordie.ms.world.World;
 import net.swordie.ms.world.shop.cashshop.CashShop;
 import net.swordie.ms.world.shop.cashshop.CashShopCategory;
 import net.swordie.ms.world.shop.cashshop.CashShopItem;
-import org.apache.log4j.Category;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -24,11 +22,8 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -59,21 +54,6 @@ public class Server extends Properties {
 	private void init(String[] args) {
 		log.info("Starting server.");
 		long start = System.currentTimeMillis();
-		Properties properties = new Properties();
-		try {
-			properties.load(new FileInputStream("config.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		for (String s : properties.stringPropertyNames()) {
-			System.setProperty(s, properties.getProperty(s));
-		}
-
-		ServerConfig.SQL_SCHEMA = properties.getProperty("SQL_SCHEMA");
-		ServerConfig.SQL_PORT = properties.getProperty("SQL_PORT");
-		ServerConfig.SQL_USERNAME = properties.getProperty("SQL_USERNAME");
-		ServerConfig.SQL_PASSWORD = properties.getProperty("SQL_PASSWORD");
-
 
 		long startNow = System.currentTimeMillis();
 		DatabaseManager.init();
@@ -149,10 +129,6 @@ public class Server extends Properties {
 
 	public static void main(String[] args) {
 		getInstance().init(args);
-	}
-
-	public Connection getDatabaseConnection() {
-		return DatabaseConnection.getConnection();
 	}
 
 	public Session getNewDatabaseSession() {

@@ -516,7 +516,7 @@ create table characters (
     rewardPoints int,
     monsterbook int,
     partyid int,
-    monsterparkcount tinyint,
+    monsterparkcount tinyint default 0,
 	primary key (id),
     foreign key (avatardata) references avatardata(id),
     foreign key (equippedinventory) references inventories(id),

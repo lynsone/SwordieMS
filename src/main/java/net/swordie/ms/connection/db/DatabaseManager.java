@@ -27,6 +27,7 @@ import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.GuildRequestor;
 import net.swordie.ms.client.guild.GuildSkill;
 import net.swordie.ms.client.trunk.Trunk;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.loaders.MonsterCollectionData;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionGroupRewardInfo;
@@ -41,6 +42,7 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.SystemTime;
+import org.hibernate.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +53,11 @@ import java.util.stream.Collectors;
  */
 public class DatabaseManager {
 
+    private static final int KEEP_ALIVE_MS = 10 * 60 * 1000; // 10 minutes
+
     private static SessionFactory sessionFactory;
     private static List<Session> sessions;
+
 
     public static void init() {
         Configuration configuration = new Configuration().configure();
@@ -112,6 +117,20 @@ public class DatabaseManager {
         }
         sessionFactory = configuration.buildSessionFactory();
         sessions = new ArrayList<>();
+        sendHeartBeat();
+    }
+
+    /**
+     * Sends a simple query to the DB to ensure that the connection stays alive.
+     */
+    private static void sendHeartBeat() {
+        Session session = getSession();
+        Transaction t = session.beginTransaction();
+        Query q = session.createQuery("from Char where id = 1");
+        q.list();
+        t.commit();
+        session.close();
+        EventManager.addEvent(DatabaseManager::sendHeartBeat, KEEP_ALIVE_MS);
     }
 
     public static Session getSession() {

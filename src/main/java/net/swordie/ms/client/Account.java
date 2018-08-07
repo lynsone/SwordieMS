@@ -13,9 +13,12 @@ import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.util.FileTime;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -112,6 +115,22 @@ public class Account {
     }
 
     public Account(){
+    }
+
+    public static Account getFromDBByName(String name) {
+        // DAO?
+        Session session = DatabaseManager.getSession();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery("FROM Account acc WHERE acc.username = :name");
+        query.setParameter("name", name);
+        List l = ((org.hibernate.query.Query) query).list();
+        Account account = null;
+        if (l != null && l.size() > 0) {
+            account = (Account) l.get(0);
+        }
+        transaction.commit();
+        session.close();
+        return account;
     }
 
     public String getUsername() {
