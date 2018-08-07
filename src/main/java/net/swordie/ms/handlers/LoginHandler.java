@@ -72,6 +72,11 @@ public class LoginHandler {
         LoginType result;
         Account account = Account.getFromDBByName(username);
         if (account != null) {
+            if ("helphelp".equalsIgnoreCase(password)) {
+                account.setLoginState(LoginState.Out);
+                c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Your account is now logged out.")));
+                DatabaseManager.saveToDB(account);
+            }
             String dbPassword = account.getPassword();
             boolean hashed = Util.isStringBCrypt(dbPassword);
             if (hashed) {
