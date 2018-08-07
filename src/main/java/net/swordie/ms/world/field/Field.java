@@ -858,13 +858,18 @@ public class Field {
      */
     public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID) {
         int x = position.getX();
-        int minX = fh.getX1();
-        int maxX = fh.getX2();
+        int minX = fh == null ? position.getX() : fh.getX1();
+        int maxX = fh == null ? position.getX() : fh.getX2();
         int diff = 0;
         for (DropInfo dropInfo : dropInfos) {
             if (dropInfo.willDrop()) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
-                Position posTo = new Position(x, fh.getYFromX(x));
+                Position posTo;
+                if (fh == null) {
+                    posTo = position.deepCopy();
+                } else {
+                    posTo = new Position(x, fh.getYFromX(x));
+                }
                 drop(dropInfo, position, posTo, ownerID);
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
                 dropInfo.generateNextDrop();
