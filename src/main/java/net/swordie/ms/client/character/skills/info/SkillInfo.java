@@ -89,6 +89,7 @@ public class SkillInfo {
         }
         // Sometimes newlines get taken, just remove those
         value = value.replace("\n", "").replace("\r", "");
+        value = value.replace("\\n", "").replace("\\r", ""); // unluko
         String original = value;
         if(Util.isNumber(value)) {
             result = Integer.parseInt(value);
