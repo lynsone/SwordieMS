@@ -60,7 +60,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onRoyalGuardAttack(boolean attack) {
+    public static OutPacket royalGuardAttack(boolean attack) {
         OutPacket outPacket = new OutPacket(OutHeader.ROYAL_GUARD_ATTACK);
 
         outPacket.encodeByte(attack);
@@ -68,7 +68,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onRWMultiChargeCancelRequest(byte unk, int skillID) {
+    public static OutPacket rwMultiChargeCancelRequest(byte unk, int skillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SKILL_USE_RESULT);
 
         outPacket.encodeByte(unk);
@@ -77,7 +77,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onSetOffStateForOffSkill(int skillID) {
+    public static OutPacket setOffStateForOffSkill(int skillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SET_OFF_STATE_FOR_OFF_SKILL);
 
         outPacket.encodeInt(skillID);

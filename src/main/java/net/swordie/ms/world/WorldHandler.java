@@ -2489,7 +2489,7 @@ public class WorldHandler {
         byte unk = inPacket.decodeByte();
         int skillid = inPacket.decodeInt();
 
-        c.write(UserLocal.onRWMultiChargeCancelRequest(unk, skillid));
+        c.write(UserLocal.rwMultiChargeCancelRequest(unk, skillid));
     }
 
     public static void handleFoxManActionSetUseRequest(Client c, InPacket inPacket) {

@@ -567,6 +567,10 @@ public class Field {
         }
     }
 
+    private void broadcast(OutPacket outPacket, Predicate<? super Char> predicate) {
+        getChars().stream().filter(predicate).forEach(chr -> chr.write(outPacket));
+    }
+
     public void spawnAffectedArea(AffectedArea aa) {
         addLife(aa);
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
@@ -753,10 +757,6 @@ public class Field {
         }
     }
 
-    private void broadcastWithPredicate(OutPacket outPacket, Predicate<? super Char> predicate) {
-        getChars().stream().filter(predicate).forEach(chr -> chr.write(outPacket));
-    }
-
     /**
      * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
      * Immediately broadcasts the drop packet.
@@ -819,7 +819,7 @@ public class Field {
         getLifeSchedules().put(drop,
                 EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
-        broadcastWithPredicate(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
+        broadcast(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
                 (Char chr) -> dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq()));
     }
 

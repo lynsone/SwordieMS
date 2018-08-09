@@ -239,20 +239,20 @@ public class AvatarLook {
         outPacket.encodeByte(isZeroBetaLook()); // ?
         outPacket.encodeInt(getHair());
 
-        for (int i = 1; i < getHairEquips().size(); i++) {
-            int itemId = getHairEquips().get(i);
-            outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
-            outPacket.encodeInt(itemId); // item id
+        for (int itemId : getHairEquips()) {
+            int bodyPart = ItemConstants.getBodyPartFromItem(itemId, getGender());
+            if (bodyPart != 0) {
+                outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
+                outPacket.encodeInt(itemId); // item id
+            }
         }
         outPacket.encodeByte(-1);
-        for (int i = 0; i < getUnseenEquips().size(); i++) {
-            int itemId = getUnseenEquips().get(i);
+        for (int itemId : getUnseenEquips()) {
             outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
             outPacket.encodeInt(itemId);
         }
         outPacket.encodeByte(-1);
-        for (int i = 0; i < getTotems().size(); i++) {
-            int itemId = getTotems().get(i);
+        for (int itemId : getTotems()) {
             outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender()));
             outPacket.encodeInt(itemId);
         }

@@ -177,7 +177,7 @@ public class Blaster extends Job {
                     if(getGauge() < 6) {
                         addGauge();
                     }
-                    //c.write(UserLocal.onRWMultiChargeCancelRequest((byte)1, skillID));
+                    //c.write(UserLocal.rwMultiChargeCancelRequest((byte)1, skillID));
                     break;
                 case VITALITY_SHIELD:
                     resetBlastShield();

@@ -819,17 +819,19 @@ public class Warrior extends Job {
                 // Guarded
                 int mobID = hitInfo.mobID;
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mobID);
-                Option o = new Option();
-                Skill skill = chr.getSkill(1210001);
-                byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                int proc = si.getValue(subProp, slv);
-                if(Util.succeedProp(proc)) {
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o.nOption = 1;
-                    o.rOption = skill.getSkillId();
-                    o.tOption = 3;  // Value isn't given
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                if (mob != null) {
+                    Option o = new Option();
+                    Skill skill = chr.getSkill(1210001);
+                    byte slv = (byte) skill.getCurrentLevel();
+                    SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                    int proc = si.getValue(subProp, slv);
+                    if (Util.succeedProp(proc)) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o.nOption = 1;
+                        o.rOption = skill.getSkillId();
+                        o.tOption = 3;  // Value isn't given
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                    }
                 }
             }
         }

@@ -274,7 +274,7 @@ public class Mihile extends Job {
     }
 
     private void handleRoyalGuardAttack() {
-        c.write(UserLocal.onRoyalGuardAttack(true));
+        c.write(UserLocal.royalGuardAttack(true));
     }
 
 
