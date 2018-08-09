@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -26,6 +27,7 @@ import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.FieldData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -174,7 +176,6 @@ public class Magician extends Job {
             HOLY_MAGIC_SHELL,
             TELEPORT_MASTERY_BISH,
             DIVINE_PROTECTION,
-            MYSTIC_DOOR,
             HOLY_SYMBOL,
             ADV_BLESSING,
             MAPLE_WARRIOR_BISH,
@@ -607,6 +608,20 @@ public class Magician extends Job {
                     break;
                 case DISPEL:
                     tsm.removeAllDebuffs();
+                    break;
+                case MYSTIC_DOOR:
+                    Field townField = FieldData.getFieldById(chr.getField().getReturnMap());
+                    int x = townField.getPortalByName("tp").getX();
+                    int y = townField.getPortalByName("tp").getY();
+                    Position townPosition = new Position(x, y); // Grabs the Portal Co-ordinates for the TownPortalPoint
+                    int duration = si.getValue(time, slv);
+                    if(chr.getTownPortal() != null) {
+                        TownPortal townPortal = chr.getTownPortal();
+                        townPortal.despawnTownPortal();
+                    }
+                    TownPortal townPortal = new TownPortal(chr, townPosition, chr.getPosition(), chr.getField().getReturnMap(), chr.getFieldID(), skillID, duration);
+                    townPortal.spawnTownPortal();
+                    chr.dispose();
                     break;
                 case HEROS_WILL_FP:
                 case HEROS_WILL_IL:

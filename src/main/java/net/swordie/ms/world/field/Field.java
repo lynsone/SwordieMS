@@ -4,6 +4,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
@@ -76,6 +77,7 @@ public class Field {
     private int bossMobID;
     private boolean kishin;
     private List<OpenGate> openGateList = new ArrayList<>();
+    private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean canSpawnRunestone;
 
     public Field(int fieldID, long uniqueId) {
@@ -544,9 +546,11 @@ public class Field {
                 openGate.showOpenGate(this);
             }
         }
-        //if (getMobs().size() > 0 && getBurningFieldLevel() > 0) { //Burning Level shown per map entry is commented out.
-        //    showBurningLevel();
-        //}
+        if (getTownPortalList() != null && getTownPortalList().size() > 0) {
+            for (TownPortal townPortal : getTownPortalList()) {
+                townPortal.showTownPortal(this);
+            }
+        }
     }
 
     @Override
@@ -1161,5 +1165,27 @@ public class Field {
 
     public void setCanSpawnRunestone(boolean canSpawnRunestone) {
         this.canSpawnRunestone = canSpawnRunestone;
+    }
+
+    public List<TownPortal> getTownPortalList() {
+        return townPortalList;
+    }
+
+    public void setTownPortalList(List<TownPortal> townPortalList) {
+        this.townPortalList = townPortalList;
+    }
+
+    public void addTownPortal(TownPortal townPortal) {
+        getTownPortalList().add(townPortal);
+    }
+
+    public void removeTownPortal(TownPortal townPortal) {
+        if (getTownPortalList().contains(townPortal)) {
+            getTownPortalList().remove(townPortal);
+        }
+    }
+
+    public TownPortal getTownPortalByChrId(int chrId) {
+        return getTownPortalList().stream().filter(tp -> tp.getChr().getId() == chrId).findAny().orElse(null);
     }
 }

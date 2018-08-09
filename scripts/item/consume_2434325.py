@@ -4,7 +4,7 @@ from net.swordie.ms.constants import GameConstants
 STRAW_DUMMY_ID = 9305655
 
 def init():
-    if not sm.getChr().getField().getReturnMap() == sm.getFieldID():
+    if not sm.getChr().getField().isTown():
         sm.chat("You can only spawn a dummy in a Town Map")
 
     elif sm.mobsPresentInField():

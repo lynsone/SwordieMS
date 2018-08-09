@@ -79,10 +79,7 @@ import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.*;
 import net.swordie.ms.util.container.Tuple;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.FieldInstanceType;
-import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.*;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
@@ -4776,5 +4773,35 @@ public class WorldHandler {
     public static void handleUserSetDressChangedRequest(Char chr, InPacket inPacket) {
         boolean on = inPacket.decodeByte() != 0;
 //        chr.write(UserLocal.setDressChanged(on, true)); // causes client to send this packet again
+    }
+
+    public static void handleEnterTownPortalRequest(Char chr, InPacket inPacket) {
+        int chrId = inPacket.decodeInt(); // Char id
+        boolean town = inPacket.decodeByte() != 0;
+
+        Field field = chr.getField();
+        TownPortal townPortal = field.getTownPortalByChrId(chrId);
+        if (townPortal != null) {       // TODO Using teleports, as grabbing the TownPortalPoint portal id is not working
+            if (town) {
+                // townField -> fieldField
+                Field fieldField = townPortal.getChannel().getField(townPortal.getFieldFieldId());
+
+                chr.warp(fieldField); // Back to the original Door
+                chr.write(CField.teleport(townPortal.getFieldPosition(), chr)); // Teleports player to the position of the TownPortal
+            } else {
+                // fieldField -> townField
+                Field returnField = townPortal.getChannel().getField(townPortal.getTownFieldId()); // Initialise the Town Map,
+
+                chr.warp(returnField); // warp Char
+                chr.write(CField.teleport(townPortal.getTownPosition(), chr));
+                if(returnField.getTownPortalByChrId(chrId) == null) { // So that every re-enter into the TownField doesn't spawn another TownPortal
+                    returnField.broadcastPacket(WvsContext.townPortal(townPortal)); // create the TownPortal
+                    returnField.addTownPortal(townPortal);
+                }
+            }
+        } else {
+            chr.dispose();
+            log.warn(chrId +" tried entering a Town Portal in field: "+ field.getId() +", which does not exist."); // Potential Hacking Log
+        }
     }
 }

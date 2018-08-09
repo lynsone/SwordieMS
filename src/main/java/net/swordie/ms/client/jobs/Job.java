@@ -165,7 +165,7 @@ public abstract class Job {
 			handleBuff(c, inPacket, skillID, slv);
 		} else {
 
-			if(si.getVehicleId() > 0) {
+			if(chr.hasSkill(skillID) && si.getVehicleId() > 0) {
 				TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
 				if(tsm.hasStat(RideVehicle)) {
 					tsm.removeStat(RideVehicle, false);
