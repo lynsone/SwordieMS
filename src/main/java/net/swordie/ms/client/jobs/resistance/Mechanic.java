@@ -228,7 +228,7 @@ public class Mechanic extends Job {
                 field.spawnSummon(summon);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 

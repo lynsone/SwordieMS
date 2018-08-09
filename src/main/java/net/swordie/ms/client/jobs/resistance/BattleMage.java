@@ -249,7 +249,7 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(AttackCountX, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -287,7 +287,7 @@ public class BattleMage extends Job {
             o.rOption = CONDEMNATION_II;
             o.tOption = 0;
             tsm.putCharacterStatValue(BMageDeath, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 

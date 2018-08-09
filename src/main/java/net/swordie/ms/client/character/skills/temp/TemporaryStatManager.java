@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.connection.OutPacket;
@@ -159,7 +160,7 @@ public class TemporaryStatManager {
         }
         getRemovedStats().put(cts, getCurrentStats().get(cts));
         getCurrentStats().remove(cts);
-        getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
+        sendResetStatPacket();
         if (TSIndex.isTwoStat(cts)) {
             getTSBByTSIndex(TSIndex.getTSEFromCTS(cts)).reset();
         }
@@ -183,7 +184,7 @@ public class TemporaryStatManager {
                 getCurrentStats().remove(cts);
             }
         }
-        getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
+        sendResetStatPacket();
         Tuple tuple = new Tuple(cts, option);
         if(!fromSchedule && getIndieSchedules().containsKey(tuple)) {
             getIndieSchedules().get(tuple).cancel(false);
@@ -486,6 +487,107 @@ public class TemporaryStatManager {
         getNewStats().clear();
     }
 
+
+
+    public void encodeForRemote(OutPacket outPacket, Map<CharacterTemporaryStat, List<Option>> collection) {
+        int[] mask = getMaskByCollection(collection);
+        for (int maskElem : mask) {
+            outPacket.encodeInt(maskElem);
+        }
+        List<CharacterTemporaryStat> orderedAndFilteredCtsList = new ArrayList<>(collection.keySet()).stream()
+                .filter(cts -> cts.getOrder() != -1)
+                .sorted(Comparator.comparingInt(CharacterTemporaryStat::getOrder))
+                .collect(Collectors.toList());
+        for (CharacterTemporaryStat cts : orderedAndFilteredCtsList) {
+            if (cts.getRemoteOrder() != -1) {
+                Option o = getOption(cts);
+                switch (cts) {
+                    case Poison: // Why does this get encoded, then immediately overwritten?
+                        outPacket.encodeShort(o.nOption);
+                        break;
+                }
+                if (!cts.isNotEncodeAnything()) {
+                    if (cts.isRemoteEncode1()) {
+                        outPacket.encodeByte(o.nOption);
+                    } else if (cts.isRemoteEncode4()) {
+                        outPacket.encodeInt(o.nOption);
+                    } else {
+                        outPacket.encodeShort(o.nOption);
+                    }
+                    if (!cts.isNotEncodeReason()) {
+                        outPacket.encodeInt(o.rOption);
+                    }
+                }
+                switch (cts) {
+                    case Contagion:
+                        outPacket.encodeInt(o.tOption);
+                        break;
+                    case BladeStance:
+                    case ImmuneBarrier:
+                    case Unk5:
+                        outPacket.encodeInt(o.xOption);
+                        break;
+                    case FullSoulMP:
+                        outPacket.encodeInt(o.rOption);
+                        outPacket.encodeInt(o.xOption);
+                        break;
+                    case AntiMagicShellBool:
+                    case PoseTypeBool:
+                        outPacket.encodeByte(o.bOption);
+                        break;
+                }
+            }
+        }
+        outPacket.encodeByte(getDefenseAtt());
+        outPacket.encodeByte(getDefenseState());
+        outPacket.encodeByte(getPvpDamage());
+        Set<CharacterTemporaryStat> ctsSet = collection.keySet();
+        if (ctsSet.contains(ZeroAuraStr)) {
+            outPacket.encodeByte(collection.get(ZeroAuraStr).get(0).bOption);
+        }
+        if (ctsSet.contains(ZeroAuraSpd)) {
+            outPacket.encodeByte(collection.get(ZeroAuraSpd).get(0).bOption);
+        }
+        if (ctsSet.contains(BMageAura)) {
+            outPacket.encodeByte(collection.get(BMageAura).get(0).bOption);
+        }
+        if (ctsSet.contains(BattlePvPHelenaMark)) {
+            outPacket.encodeInt(collection.get(BattlePvPHelenaMark).get(0).nOption);
+            outPacket.encodeInt(collection.get(BattlePvPHelenaMark).get(0).rOption);
+            outPacket.encodeInt(collection.get(BattlePvPHelenaMark).get(0).cOption);
+        }
+        if (ctsSet.contains(BattlePvPLangEProtection)) {
+            outPacket.encodeInt(collection.get(BattlePvPLangEProtection).get(0).nOption);
+            outPacket.encodeInt(collection.get(BattlePvPLangEProtection).get(0).rOption);
+        }
+        if (ctsSet.contains(MichaelSoulLink)) {
+            outPacket.encodeInt(collection.get(MichaelSoulLink).get(0).xOption);
+            outPacket.encodeByte(collection.get(MichaelSoulLink).get(0).bOption);
+            outPacket.encodeInt(collection.get(MichaelSoulLink).get(0).cOption);
+            outPacket.encodeInt(collection.get(MichaelSoulLink).get(0).yOption);
+        }
+        if (ctsSet.contains(AdrenalinBoost)) {
+            outPacket.encodeByte(collection.get(AdrenalinBoost).get(0).cOption);
+        }
+        if (ctsSet.contains(Stigma)) {
+            outPacket.encodeInt(collection.get(Stigma).get(0).bOption);
+        }
+        if (getStopForceAtom() != null) {
+            getStopForceAtom().encode(outPacket);
+        } else {
+            new StopForceAtom().encode(outPacket);
+        }
+        outPacket.encodeInt(getViperEnergyCharge());
+        for (int i = 0; i < 7; i++) {
+            if(hasNewStat(TSIndex.getCTSFromTwoStatIndex(i))) {
+                getTwoStates().get(i).encode(outPacket);
+            }
+        }
+        if (ctsSet.contains(NewFlying)) {
+            outPacket.encodeInt(collection.get(NewFlying).get(0).xOption);
+        }
+    }
+
     private void encodeIndieTempStat(OutPacket outPacket) {
         Map<CharacterTemporaryStat, List<Option>> stats = getCurrentStats().entrySet().stream()
                 .filter(stat -> stat.getKey().isIndie() && getNewStats().containsKey(stat.getKey()))
@@ -676,7 +778,13 @@ public class TemporaryStatManager {
     }
 
     public void sendSetStatPacket() {
+        getChr().getField().broadcastPacket(UserRemote.setTemporaryStat(getChr(), (short) 0), getChr());
         getChr().getClient().write(WvsContext.temporaryStatSet(this));
+    }
+
+    public void sendResetStatPacket() {
+        getChr().getField().broadcastPacket(UserRemote.resetTepmoraryStat(getChr()), getChr());
+        getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
     }
 
     public void removeAllDebuffs() {
@@ -690,10 +798,6 @@ public class TemporaryStatManager {
         removeStat(CharacterTemporaryStat.Slow, false);
         removeStat(CharacterTemporaryStat.Blind, false);
         sendResetStatPacket();
-    }
-
-    public void sendResetStatPacket() {
-        getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
     }
 
     public void setLarknessManager(LarknessManager larknessManager) {
@@ -752,17 +856,6 @@ public class TemporaryStatManager {
                 removeStat(cts, false);
             }
         });
-    }
-
-    public void encodeForRemote(OutPacket outPacket) {
-        for (int i = 0; i < 17; i++) {
-            outPacket.encodeInt(0);
-        }
-        outPacket.encodeByte(0);
-        outPacket.encodeByte(0);
-        outPacket.encodeByte(0);
-        new StopForceAtom().encode(outPacket);
-        outPacket.encodeInt(0); // viperEnergy
     }
 
     public void addSoulMPFromMobDeath() {

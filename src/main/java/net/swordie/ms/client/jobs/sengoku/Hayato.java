@@ -225,7 +225,7 @@ public class Hayato extends Job {
                 tsm.putCharacterStatValue(TerR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -300,7 +300,7 @@ public class Hayato extends Job {
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = 120;
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     swordEnergy = 0;
                     c.write(UserLocal.modHayatoCombo(swordEnergy));
                 }
@@ -312,7 +312,7 @@ public class Hayato extends Job {
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieCr, o1);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                 }
                 break;
         }
@@ -403,7 +403,7 @@ public class Hayato extends Job {
         o.nOption = 1;
         o.rOption = tsm.getOption(HayatoStance).nOption == 0 ? NORMAL_STANCE_BONUS : QUICK_DRAW_STANCE_BONUS;
         tsm.putCharacterStatValue(HayatoStanceBonus, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleQuickDrawStanceBonus() {
@@ -531,13 +531,13 @@ public class Hayato extends Job {
     public void resetNormalStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStatsBySkill(NORMAL_STANCE_BONUS);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     public void resetQuickDrawStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStatsBySkill(QUICK_DRAW_STANCE_BONUS);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
 
@@ -570,7 +570,7 @@ public class Hayato extends Job {
 
 
 
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public void handleJinsoku() {
@@ -586,7 +586,7 @@ public class Hayato extends Job {
                 o.rOption = skill.getSkillId();
                 o.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
             }
         }
     }

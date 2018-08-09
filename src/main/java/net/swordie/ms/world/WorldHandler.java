@@ -3701,7 +3701,7 @@ public class WorldHandler {
         }
 
         tsm.removeStat(StopForceAtomInfo, false);
-        c.write(WvsContext.temporaryStatReset(tsm, true));
+        tsm.sendResetStatPacket();
     }
 
     public static void handleSocketCreateRequest(Client c, InPacket inPacket) {

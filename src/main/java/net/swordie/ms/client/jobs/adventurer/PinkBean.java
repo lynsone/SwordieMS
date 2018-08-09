@@ -193,7 +193,7 @@ public class PinkBean extends Job {
                 tsm.putCharacterStatValue(IndieMADR, o5);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 

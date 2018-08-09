@@ -264,7 +264,7 @@ public class NightWalker extends Job {
                 field.spawnSummon(summon);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -401,7 +401,7 @@ public class NightWalker extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time ,slv);
                 tsm.putCharacterStatValue(Stance, o3);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
         }
 
@@ -544,7 +544,7 @@ public class NightWalker extends Job {
             o1.rOption = VITALITY_SIPHON;
             o1.tOption = siphonInfo.getValue(time, slv);
             tsm.putCharacterStatValue(MaxHP, o1);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 

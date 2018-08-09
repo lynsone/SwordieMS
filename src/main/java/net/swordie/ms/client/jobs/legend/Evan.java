@@ -235,7 +235,7 @@ public class Evan extends Job {
             case DRAGON_MASTER_2:
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -308,7 +308,7 @@ public class Evan extends Job {
             o1.rOption = PARTNERS;
             o1.tOption = 3;
             tsm.putCharacterStatValue(Stance, o1);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 

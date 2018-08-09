@@ -300,7 +300,7 @@ public class Archer extends Job {
         o.rOption = AGGRESSIVE_RESISTANCE;
         o.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(PowerTransferGauge, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleMortalBlow() {
@@ -318,10 +318,10 @@ public class Archer extends Job {
                     amount = 1;
                 }
             }
-        o.nOption = amount;
-        o.rOption = MORTAL_BLOW_BOW;
-        tsm.putCharacterStatValue(BowMasterMortalBlow, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+            o.nOption = amount;
+            o.rOption = MORTAL_BLOW_BOW;
+            tsm.putCharacterStatValue(BowMasterMortalBlow, o);
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -345,7 +345,7 @@ public class Archer extends Job {
         o2.rOption = FOCUSED_FURY;
         o2.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(BowMasterConcentration, o2);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleQuiverCartridge(Client c, TemporaryStatManager tsm, AttackInfo attackInfo, int slv) {
@@ -389,7 +389,7 @@ public class Archer extends Job {
             }
         }
         tsm.putCharacterStatValue(QuiverCatridge, quiverCartridge.getOption());
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public enum QCType {
@@ -519,7 +519,7 @@ public class Archer extends Job {
                 o.rOption = skill.getSkillId();
                 o.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(CriticalBuff, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
             }
         }
         super.handleHit(c, inPacket, hitInfo);

@@ -154,7 +154,7 @@ public class Kinesis extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePMdR, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case MENTAL_SHOCK:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -281,7 +281,7 @@ public class Kinesis extends Job {
                 tsm.putCharacterStatValue(NewFlying, o1); //38s
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -373,6 +373,6 @@ public class Kinesis extends Job {
         o.nOption = pp;
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.putCharacterStatValue(KinesisPsychicPoint, o);
-        chr.getClient().write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 }

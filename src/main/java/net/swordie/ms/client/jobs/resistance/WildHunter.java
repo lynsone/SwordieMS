@@ -298,7 +298,7 @@ public class WildHunter extends Job {
                 field.spawnSummon(summon);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -478,7 +478,7 @@ public class WildHunter extends Job {
                 o.rOption = skill.getSkillId();
                 o.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(CriticalBuff, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
             }
         }
         super.handleHit(c, inPacket, hitInfo);

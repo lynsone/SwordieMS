@@ -178,7 +178,7 @@ public class Luminous extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -231,7 +231,7 @@ public class Luminous extends Job {
                 o2.tOption = 0;
                 tsm.putCharacterStatValue(DamR, o2);
             }
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -258,7 +258,7 @@ public class Luminous extends Job {
         o1.rOption = DARK_CRESCENDO;
         o1.tOption = crescendoInfo.getValue(time, slv);
         tsm.putCharacterStatValue(DamR, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private int getCrescendoProp(Char chr) {
@@ -314,7 +314,7 @@ public class Luminous extends Job {
         o2.rOption = BLACK_BLESSING;
         o2.tOption = 0;
         tsm.putCharacterStatValue(MAD, o2);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public void resetBlackBlessing() {
@@ -322,7 +322,7 @@ public class Luminous extends Job {
         tsm.removeStat(MAD, false);
         tsm.removeStat(BlessOfDarkness, false);
         tsm.removeStat(IgnoreMobDamR, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     public boolean isBuff(int skillID) {

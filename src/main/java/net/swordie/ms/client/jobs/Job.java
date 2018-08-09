@@ -302,7 +302,7 @@ public abstract class Job {
 				field.spawnSummon(summon);
 				break;
 		}
-		c.write(WvsContext.temporaryStatSet(tsm));
+		tsm.sendSetStatPacket();
 	}
 
 	/**

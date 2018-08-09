@@ -207,7 +207,7 @@ public class AngelicBuster extends Job {
                 tsm.putCharacterStatValue(Stance, o3);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 

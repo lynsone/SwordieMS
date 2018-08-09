@@ -940,7 +940,7 @@ public class AdminCommands {
             } else {
                 o1.nOption = 3;
                 tsm.putCharacterStatValue(NotDamaged, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 chr.chatMessage(GAME_NOTICE, "You are invincible.");
             }
         }
@@ -958,7 +958,7 @@ public class AdminCommands {
             o1.nOption = morphID;
             o1.rOption = Kaiser.FINAL_TRANCE;
             tsm.putCharacterStatValue(Morph, o1);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 

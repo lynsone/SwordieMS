@@ -572,7 +572,7 @@ public class Pirate extends Job {
                 field.spawnSummon(summon);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -590,7 +590,7 @@ public class Pirate extends Job {
                 o.nOption = 1;
                 o.rOption = QUICKDRAW;
                 tsm.putCharacterStatValue(QuickDraw, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
             }
         }
     }
@@ -710,7 +710,7 @@ public class Pirate extends Job {
             o2.tStart = (int) System.currentTimeMillis();
             o2.tTerm = si.getValue(time, slv);
             tsm.putCharacterStatValue(IndieDamR, o2);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -894,7 +894,7 @@ public class Pirate extends Job {
                 o.rOption = 0;
                 o.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IncCriticalDamMin, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case 3: // Slow Debuff
                 //Handled, See Attack Handler
@@ -991,7 +991,7 @@ public class Pirate extends Job {
                     tsm.putCharacterStatValue(DamageReduce, o1);
                     break;
             }
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -1015,7 +1015,7 @@ public class Pirate extends Job {
         o1.rOption = skill.getSkillId();
         o1.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(UnityOfPower, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleStimulatingConversation() {

@@ -332,7 +332,7 @@ public class Demon extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowPartner, o1);
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -593,14 +593,14 @@ public class Demon extends Job {
         o.rOption = 30010230;
         o.tOption = 0;
         tsm.putCharacterStatValue(OverloadCount, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void resetExceed(Client c, TemporaryStatManager tsm) {
         tsm.getOption(OverloadCount).nOption = 1;
         tsm.removeStat(OverloadCount, false);
         //tsm.removeStat(IndiePMdR, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     private int getMaxExceed(Char chr) {

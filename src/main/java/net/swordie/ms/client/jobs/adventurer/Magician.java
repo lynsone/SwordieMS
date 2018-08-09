@@ -374,7 +374,7 @@ public class Magician extends Job {
                 o1.rOption = HEAVENS_DOOR;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(ReviveOnce, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case ANGEL_RAY:
                 chr.heal(handleBishopHealingSkills(ANGEL_RAY));
@@ -475,7 +475,7 @@ public class Magician extends Job {
         o2.rOption = 2320011;
         o2.tOption = 5; // No Time Variable
         tsm.putCharacterStatValue(DamR, o2);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm) {  //TODO  Fire Attribute Spells only
@@ -572,7 +572,7 @@ public class Magician extends Job {
                     o1.rOption = skillID;
                     o1.tOption = 1;
                     tsm.putCharacterStatValue(NotDamaged, o1);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     break;
                 case MEGIDDO_FLAME:
                     handleMegiddoFlame();
@@ -912,7 +912,7 @@ public class Magician extends Job {
                 break;
 
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 

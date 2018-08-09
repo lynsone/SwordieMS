@@ -244,7 +244,7 @@ public class BlazeWizard extends Job {
                 }
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -438,7 +438,7 @@ public class BlazeWizard extends Job {
             o1.rOption = getFlameElement();
             o1.tOption = si.getValue(time, slv);
             tsm.putCharacterStatValue(MAD, o1);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 

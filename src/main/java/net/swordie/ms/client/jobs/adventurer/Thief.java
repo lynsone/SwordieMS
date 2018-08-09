@@ -345,7 +345,7 @@ public class Thief extends Job {
                 o2.nOption = 1;
                 o2.tOption = 3;
                 tsm.putCharacterStatValue(NotDamaged, o2);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case FINAL_CUT:
                 o1.nOption = 1;
@@ -360,7 +360,7 @@ public class Thief extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamR, o3);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
         }
 
@@ -467,7 +467,7 @@ public class Thief extends Job {
                         o2.tStart = (int) System.currentTimeMillis();
                         o2.tTerm = si.getValue(time, slv);
                         tsm.putCharacterStatValue(IndiePAD, o2); //Indie
-                        c.write(WvsContext.temporaryStatSet(tsm));
+                        tsm.sendSetStatPacket();
                     }
                 }
             }
@@ -635,7 +635,7 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(Asura, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -696,7 +696,7 @@ public class Thief extends Job {
         o3.tStart = (int) System.currentTimeMillis();
         o3.tTerm = FlipTheCoinInfo.getValue(time, 1);
         tsm.putCharacterStatValue(IndieMaxDamageOver, o3);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void handleFlipTheCoinActivation(TemporaryStatManager tsm) {    //TODO  Change to proc on Critical Hits
@@ -773,7 +773,7 @@ public class Thief extends Job {
         o1.rOption = SHADOWER_INSTINCT;
         o1.tOption = InstinctInfo.getValue(time, slv);
         tsm.putCharacterStatValue(PAD, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public boolean isBuff(int skillID) {

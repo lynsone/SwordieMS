@@ -205,7 +205,7 @@ public class Mihile extends Job {
                 tsm.putCharacterStatValue(DamAbsorbShield, o4);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -236,7 +236,7 @@ public class Mihile extends Job {
         o1.rOption = ROYAL_GUARD;
         o1.tOption = 12;
         tsm.putCharacterStatValue(PAD, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private int royalGuardMaxCounter() {
@@ -364,7 +364,7 @@ public class Mihile extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
         }
 

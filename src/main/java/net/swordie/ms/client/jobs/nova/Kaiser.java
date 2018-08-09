@@ -363,7 +363,7 @@ public class Kaiser extends Job {
                 field.spawnSummon(summon);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -413,12 +413,12 @@ public class Kaiser extends Job {
         o4.tStart = (int) System.currentTimeMillis();
         o4.tTerm = 0;
         tsm.putCharacterStatValue(IndieBooster, o4); //Indie
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void resetGauge(Client c, TemporaryStatManager tsm) {
         tsm.removeStat(SmashStack, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     private int getKaiserGauge(Char chr) {

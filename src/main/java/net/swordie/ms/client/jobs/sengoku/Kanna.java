@@ -175,7 +175,7 @@ public class Kanna extends Job {
                 tsm.putCharacterStatValue(BlackHeartedCurse, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -216,7 +216,7 @@ public class Kanna extends Job {
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     break;
                 case BLOSSOMING_DAWN:
                     tsm.removeAllDebuffs();
@@ -261,7 +261,7 @@ public class Kanna extends Job {
     public void resetFireBarrier() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStat(FireBarrier, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     @Override
@@ -284,7 +284,7 @@ public class Kanna extends Job {
         o1.rOption = FOXFIRE;
         o1.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(FireBarrier, o1);
-        chr.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public static void hakuHakuBlessing(Char chr) {
@@ -298,7 +298,7 @@ public class Kanna extends Job {
         o1.tStart = (int) System.currentTimeMillis();
         o1.tTerm = si.getValue(time, slv);
         tsm.putCharacterStatValue(IndiePDD, o1);
-        chr.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public static void hakuBreathUnseen(Char chr) {
@@ -316,6 +316,6 @@ public class Kanna extends Job {
         o2.rOption = BREATH_UNSEEN;
         o2.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
-        chr.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 }

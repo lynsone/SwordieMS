@@ -308,4 +308,35 @@ public class UserRemote {
 
         return outPacket;
     }
+
+    public static OutPacket setTemporaryStat(Char chr, short delay) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_TEMPORARY_STAT);
+
+        outPacket.encodeInt(chr.getId());
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.encodeForRemote(outPacket, tsm.getNewStats());
+        outPacket.encodeShort(delay);
+
+        return outPacket;
+    }
+
+    public static OutPacket resetTepmoraryStat(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_RESET_TEMPORARY_STAT);
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+        outPacket.encodeInt(chr.getId());
+        int[] mask = tsm.getMaskByCollection(tsm.getRemovedStats());
+        for (int maskElem : mask) {
+            outPacket.encodeInt(maskElem);
+        }
+        int poseType = 0;
+        if (tsm.hasStat(CharacterTemporaryStat.PoseType)) {
+            poseType = tsm.getOption(CharacterTemporaryStat.PoseType).bOption;
+        }
+        outPacket.encodeByte(poseType);
+        outPacket.encodeByte(false); // if true, show a ride vehicle effect. Why should this be called on reset tho?
+
+        return outPacket;
+    }
 }

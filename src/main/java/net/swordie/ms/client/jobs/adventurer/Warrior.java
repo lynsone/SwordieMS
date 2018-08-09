@@ -392,7 +392,7 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(IndiePAD, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -613,7 +613,7 @@ public class Warrior extends Job {
                     o3.rOption = skillID;
                     o3.tOption = t;
                     tsm.putCharacterStatValue(DamR, o3);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     }
                 }
                 break;
@@ -678,10 +678,9 @@ public class Warrior extends Job {
     }
 
     public void removeEvilEye(TemporaryStatManager tsm, Client c) {
-
         tsm.removeStatsBySkill(EVIL_EYE);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
-        c.write(Summoned.summonedRemoved(evilEye, LeaveType.ANIMATION));
+        tsm.sendResetStatPacket();
+        c.getChr().getField().broadcastPacket(Summoned.summonedRemoved(evilEye, LeaveType.ANIMATION));
     }
 
     @Override
@@ -796,7 +795,7 @@ public class Warrior extends Job {
                         o2.rOption = DIVINE_SHIELD;
                         o2.tOption = si.getValue(time, slv);
                         tsm.putCharacterStatValue(PAD, o2);
-                        c.write(WvsContext.temporaryStatSet(tsm));
+                        tsm.sendSetStatPacket();
                         divShieldAmount = 0;
                     }
                 }
@@ -861,10 +860,11 @@ public class Warrior extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStat(BlessingArmor, false);
         tsm.removeStat(PAD, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     private void addCombo(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int currentCount = getComboCount(chr);
         if (currentCount < 0) {
             return;
@@ -873,12 +873,13 @@ public class Warrior extends Job {
             Option o = new Option();
             o.nOption = currentCount + 1;
             o.rOption = COMBO_ATTACK;
-            chr.getTemporaryStatManager().putCharacterStatValue(ComboCounter, o);
-            chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
+            tsm.putCharacterStatValue(ComboCounter, o);
+            tsm.sendSetStatPacket();
         }
     }
 
     private void removeCombo(Char chr, int count) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int currentCount = getComboCount(chr);
         Option o = new Option();
         if (currentCount > count + 1) {
@@ -887,8 +888,8 @@ public class Warrior extends Job {
             o.nOption = 0;
         }
         o.rOption = COMBO_ATTACK;
-        chr.getTemporaryStatManager().putCharacterStatValue(ComboCounter, o);
-        chr.getClient().write(WvsContext.temporaryStatSet(chr.getTemporaryStatManager()));
+        tsm.putCharacterStatValue(ComboCounter, o);
+        tsm.sendSetStatPacket();
     }
 
     private int getComboProp(Char chr) {
@@ -1017,12 +1018,12 @@ public class Warrior extends Job {
         o.uOption = amount * chargeInfo.getValue(u, 1);
         o.zOption = amount * chargeInfo.getValue(z, 1);
         tsm.putCharacterStatValue(ElementalCharge, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void resetCharges(Client c, TemporaryStatManager tsm) {
         tsm.removeStat(ElementalCharge, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     private Skill getFinalAttackSkill(Char chr) {
@@ -1104,7 +1105,7 @@ public class Warrior extends Job {
             o4.tOption = si.getValue(time, slv);
             tsm.putCharacterStatValue(ACC, o4);
             tsm.putCharacterStatValue(EVA, o4);
-            chr.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -1131,7 +1132,7 @@ public class Warrior extends Job {
             int heal = (recovery + 10) - amount > 10 ? (recovery +10) - amount : 10;
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / heal)));
             tsm.putCharacterStatValue(Restoration, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 

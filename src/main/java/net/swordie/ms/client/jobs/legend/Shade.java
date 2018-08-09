@@ -165,7 +165,7 @@ public class Shade extends Job {
                 tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o5);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -417,7 +417,7 @@ public class Shade extends Job {
     public void resetSpiritGuard() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStat(SpiritGuard, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     @Override

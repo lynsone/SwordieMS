@@ -208,7 +208,7 @@ public class Aran extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -244,7 +244,7 @@ public class Aran extends Job {
             o.tOption = adrenalinInfo.getValue(time, adrenalinInfo.getCurrentLevel());
             o.cOption = 1;
             tsm.putCharacterStatValue(AdrenalinBoost, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -255,7 +255,7 @@ public class Aran extends Job {
             o.rOption = 21100015;
             o.tOption = 5;
             tsm.putCharacterStatValue(NextAttackEnhance, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -289,7 +289,7 @@ public class Aran extends Job {
                    if(chr.hasSkill(ADRENALINE_RUSH)) {
                        tsm.getOption(ComboAbilityBuff).nOption = 1000;
                        handleAdrenalinRush(skillID, tsm, c);
-                       c.write(WvsContext.temporaryStatSet(tsm));
+                       tsm.sendSetStatPacket();
                        comboAfterAdrenalin();
                    }
                }
@@ -308,7 +308,7 @@ public class Aran extends Job {
                 o1.rOption = skillID;
                 o1.tOption = t;
                 tsm.putCharacterStatValue(AranBoostEndHunt, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case FINAL_CHARGE_COMBO: //TODO  Leaves an ice trail behind that freezes enemies
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -449,7 +449,7 @@ public class Aran extends Job {
                 case ADRENALINE_BURST:
                     tsm.getOption(ComboAbilityBuff).nOption = 1000;
                     handleAdrenalinRush(skillID, tsm, c);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     break;
                 case RETURN_TO_RIEN:
                     o1.nValue = si.getValue(x, slv);

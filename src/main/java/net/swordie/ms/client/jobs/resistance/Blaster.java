@@ -200,7 +200,7 @@ public class Blaster extends Job {
             o.rOption = BLAST_SHIELD;
             o.tOption = 3;
             tsm.putCharacterStatValue(RWBarrier, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -208,7 +208,7 @@ public class Blaster extends Job {
     public void resetBlastShield() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStat(RWBarrier, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     public boolean isBuff(int skillID) {
@@ -255,7 +255,7 @@ public class Blaster extends Job {
                 tsm.putCharacterStatValue(RWMaximizeCannon, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -287,7 +287,7 @@ public class Blaster extends Job {
         o.rOption = COMBO_TRAINING;
         o.tOption = 10;
         tsm.putCharacterStatValue(RWCombination, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public int getGauge() {
@@ -385,6 +385,6 @@ public class Blaster extends Job {
         o.bOption = getMaxAmmo(); //ammo
         o.cOption = getGauge(); //gauge
         tsm.putCharacterStatValue(RWCylinder, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 }

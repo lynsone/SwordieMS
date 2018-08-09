@@ -296,7 +296,7 @@ public class Zero extends Job {
                 break;
 
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -542,7 +542,7 @@ public class Zero extends Job {
             o.rOption = DOUBLE_TIME_ALPHA;
             o.tOption = 20;
             tsm.putCharacterStatValue(TimeFastABuff, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -567,7 +567,7 @@ public class Zero extends Job {
             o.rOption = DOUBLE_TIME_BETA;
             o.tOption = 20;
             tsm.putCharacterStatValue(TimeFastBBuff, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 

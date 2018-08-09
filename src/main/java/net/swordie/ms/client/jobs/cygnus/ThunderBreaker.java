@@ -166,7 +166,7 @@ public class ThunderBreaker extends Job {
                 break;
 
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -181,7 +181,7 @@ public class ThunderBreaker extends Job {
             o.rOption = 15110025;
             o.tOption = 10;
             tsm.putCharacterStatValue(DamR, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -203,7 +203,7 @@ public class ThunderBreaker extends Job {
         o.rOption = LIGHTNING_ELEMENTAL;
         o.tOption = leInfo.getValue(y, leInfo.getCurrentLevel());
         tsm.putCharacterStatValue(IgnoreTargetDEF, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private int getChargeProp() {
@@ -288,7 +288,7 @@ public class ThunderBreaker extends Job {
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                 }
                 break;
         }

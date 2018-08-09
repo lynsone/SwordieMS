@@ -201,7 +201,7 @@ public class Mercedes extends Job {
                 summonEleKnights();
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
@@ -243,7 +243,7 @@ public class Mercedes extends Job {
                 o1.tOption = ignisRoarInfo.getValue(subTime, slv);
                 tsm.putCharacterStatValue(DamR, o1);
             }
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
