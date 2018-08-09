@@ -10,6 +10,7 @@ import net.swordie.ms.client.character.items.MemorialCubeInfo;
 import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
@@ -971,5 +972,16 @@ public class WvsContext {
 
     public static OutPacket returnToTitle() {
         return new OutPacket(OutHeader.RETURN_TO_TITLE);
+    }
+
+    public static OutPacket townPortal(TownPortal townPortal) {
+        OutPacket outPacket = new OutPacket(OutHeader.TOWN_PORTAL); // As a response to Enter_TP_Request, creates the Door in the TownField
+
+        outPacket.encodeInt(townPortal.getTownFieldId()); // townFieldId
+        outPacket.encodeInt(townPortal.getFieldFieldId()); // field FieldId
+        outPacket.encodeInt(townPortal.getSkillid()); // Skill Id
+        outPacket.encodePosition(new Position()); // fieldField TownPortal Position
+
+        return outPacket;
     }
 }
