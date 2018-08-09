@@ -21,7 +21,6 @@ import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -169,7 +168,7 @@ public class Shade extends Job {
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
-    private void handleFoxSpirits(int skillID) {    //
+    private void createFoxSpiritForceAtom(int skillID) {    //
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(HiddenPossession)) {
             SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
@@ -208,7 +207,7 @@ public class Shade extends Job {
         }
     }
 
-    private void handleFoxSpiritsReCreation(int skillID, byte slv, AttackInfo attackInfo) {
+    private void recreateFoxSpiritForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
         int anglenum = new Random().nextInt(360);
@@ -240,7 +239,7 @@ public class Shade extends Job {
         }
     }
 
-    public void handleWeaken(AttackInfo attackInfo, byte slv) {
+    public void applyWeakenOnMob(AttackInfo attackInfo, byte slv) {
         if(chr.hasSkill(WEAKEN)) {
             Option o1 = new Option();
             Option o2 = new Option();
@@ -284,10 +283,10 @@ public class Shade extends Job {
         }
         if(hasHitMobs) {
             if(attackInfo.skillId == FOX_SPIRITS_ATOM || attackInfo.skillId == FOX_SPIRITS_ATOM_2) {
-                handleFoxSpiritsReCreation(skillID, slv, attackInfo);
+                recreateFoxSpiritForceAtom(skillID, slv, attackInfo);
             }
-            handleWeaken(attackInfo, slv);
-            handleDeathMarkDoTHeal(attackInfo);
+            applyWeakenOnMob(attackInfo, slv);
+            deathMarkDoTHeal(attackInfo);
         }
 
         Option o1 = new Option();
@@ -381,7 +380,7 @@ public class Shade extends Job {
                     break;
                 case FIRE_FOX_SPIRIT_MASTERY:
                 case FOX_SPIRITS_INIT:
-                    handleFoxSpirits(skillID);
+                    createFoxSpiritForceAtom(skillID);
                     break;
                 case HEROS_WILL_SH:
                     tsm.removeAllDebuffs();
@@ -430,7 +429,7 @@ public class Shade extends Job {
         return 0;
     }
 
-    public void handleDeathMarkDoTHeal(AttackInfo attackInfo) {
+    public void deathMarkDoTHeal(AttackInfo attackInfo) {
         Skill skill = chr.getSkill(DEATH_MARK);
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());

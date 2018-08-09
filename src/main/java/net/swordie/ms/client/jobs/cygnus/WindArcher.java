@@ -21,7 +21,6 @@ import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -295,7 +294,7 @@ public class WindArcher extends Job {
         super.handleBuff(c, inPacket, skillID, slv);
     }
 
-    private void handleTriflingWind(int skillID, byte slv, AttackInfo attackInfo) {
+    private void createTriflingWindForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             if (tsm.hasStat(TriflingWhimOnOff)) {
                 SkillInfo si = SkillData.getSkillInfoById(TRIFLING_WIND_I);
@@ -343,7 +342,7 @@ public class WindArcher extends Job {
             }
     }
 
-    private void handleStormBringer(int skillID, byte slv, AttackInfo attackInfo) {
+    private void createStormBringerForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(StormBringer)) {
             SkillInfo si = SkillData.getSkillInfoById(STORM_BRINGER);
@@ -426,11 +425,11 @@ public class WindArcher extends Job {
         }
         if(hasHitMobs) {
             if(attackInfo.skillId != TRIFLING_WIND_ATOM && attackInfo.skillId != 0 && attackInfo.skillId != STORM_BRINGER) {
-                handleStormBringer(skillID, slv, attackInfo);
+                createStormBringerForceAtom(skillID, slv, attackInfo);
 
                 int maxtrif = getMaxTriffling(chr);
                 for (int i = 0; i < maxtrif; i++) {
-                    handleTriflingWind(skillID, slv, attackInfo);
+                    createTriflingWindForceAtom(skillID, slv, attackInfo);
 
                 }
             }
