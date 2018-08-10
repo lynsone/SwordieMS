@@ -140,7 +140,7 @@ public class WorldHandler {
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
         chr.setOnline(true);
         chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
-        if(chr.getAccount() != null) {
+        if(chr.getAccount() == null) {
             chr.setAccount(Account.getFromDBById(chr.getAccId()));
         }
         chr.getAccount().setLoginState(LoginState.Game);

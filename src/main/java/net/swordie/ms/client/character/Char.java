@@ -3167,9 +3167,6 @@ public class Char {
 	}
 
 	public Account getAccount() {
-		if (account == null) {
-			setAccount(Account.getFromDBById(getAccId()));
-		}
 		return account;
 	}
 
