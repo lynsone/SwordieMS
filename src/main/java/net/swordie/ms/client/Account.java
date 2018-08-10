@@ -13,10 +13,12 @@ import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.util.FileTime;
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,9 @@ import java.util.Set;
 @Entity
 @Table(name = "accounts")
 public class Account {
+
+    @Transient
+    private static final Logger log = Logger.getLogger(Account.class);
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -118,6 +123,7 @@ public class Account {
     }
 
     public static Account getFromDBByName(String name) {
+        log.info(String.format("%s: Trying to get Account by name (%s).", LocalDateTime.now(), name));
         // DAO?
         Session session = DatabaseManager.getSession();
         Transaction transaction = session.beginTransaction();

@@ -69,6 +69,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -429,6 +430,7 @@ public class Char {
 	}
 
 	public static Char getFromDBByName(String name) {
+		log.info(String.format("%s: Trying to get Char by name (%s).", LocalDateTime.now(), name));
 		// DAO?
 		Session session = DatabaseManager.getSession();
 		Transaction transaction = session.beginTransaction();

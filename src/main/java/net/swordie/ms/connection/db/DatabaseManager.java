@@ -36,6 +36,7 @@ import net.swordie.ms.loaders.containerclasses.MonsterCollectionSessionRewardInf
 import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 import net.swordie.ms.world.shop.cashshop.CashShopCategory;
 import net.swordie.ms.world.shop.cashshop.CashShopItem;
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -44,6 +45,7 @@ import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.SystemTime;
 import org.hibernate.query.Query;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +54,7 @@ import java.util.stream.Collectors;
  * Created on 12/12/2017.
  */
 public class DatabaseManager {
-
+    private static final Logger log = Logger.getLogger(DatabaseManager.class);
     private static final int KEEP_ALIVE_MS = 10 * 60 * 1000; // 10 minutes
 
     private static SessionFactory sessionFactory;
@@ -144,6 +146,7 @@ public class DatabaseManager {
     }
 
     public static void saveToDB(Object obj) {
+        log.info(String.format("%s: Trying to save obj %s.", LocalDateTime.now(), obj));
         synchronized (obj) {
             try (Session session = getSession()) {
                 Transaction t = session.beginTransaction();
@@ -155,6 +158,7 @@ public class DatabaseManager {
     }
 
     public static void deleteFromDB(Object obj) {
+        log.info(String.format("%s: Trying to delete obj %s.", LocalDateTime.now(), obj));
         synchronized (obj) {
             try (Session session = getSession()) {
                 Transaction t = session.beginTransaction();
@@ -166,6 +170,7 @@ public class DatabaseManager {
     }
 
     public static Object getObjFromDB(Class clazz, int id) {
+        log.info(String.format("%s: Trying to get obj %s with id %d.", LocalDateTime.now(), clazz, id));
         Object o;
         try(Session session = getSession()) {
             Transaction t = session.beginTransaction();
