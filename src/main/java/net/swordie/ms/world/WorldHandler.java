@@ -4863,6 +4863,7 @@ public class WorldHandler {
                     return;
                 }
                 chr.deductMoney(money);
+                chr.addMoney(tradeRoom.getMoney(chr));
                 tradeRoom.putMoney(chr, money);
                 other = tradeRoom.getOtherChar(chr);
                 chr.write(MiniroomPacket.putMoney(0, money));
