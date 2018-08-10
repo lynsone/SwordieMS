@@ -4838,7 +4838,9 @@ public class WorldHandler {
                 Item offer = ItemData.getItemDeepCopy(item.getItemId());
                 offer.setQuantity(quantity);
                 if (tradeRoom.canAddItem(chr)) {
-                    chr.consumeItem(offer.getItemId(), quantity);
+                    int consumed = quantity > item.getQuantity() ? 0 : item.getQuantity() - quantity;
+                    item.setQuantity(consumed + 1); // +1 because 1 gets consumed by consumeItem(item)
+                    chr.consumeItem(item);
                     tradeRoom.addItem(chr, tradeSlot, offer);
                 }
                 Char other = tradeRoom.getOtherChar(chr);
