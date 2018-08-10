@@ -59,6 +59,7 @@ import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
@@ -345,6 +346,8 @@ public class Char {
 	private boolean changingChannel;
 	@Transient
 	private TownPortal townPortal;
+	@Transient
+	private TradeRoom tradeRoom;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -363,7 +366,7 @@ public class Char {
 		List<Integer> hairEquips = new ArrayList<>();
 		for (int itemId : items) {
 			Equip equip = ItemData.getEquipDeepCopyFromID(itemId, false);
-			if (equip != null) {
+			if (equip != null && ItemConstants.isEquip(itemId)) {
 				hairEquips.add(itemId);
 				if ("Wp".equals(equip.getiSlot())) {
 					if (!equip.isCash()) {
@@ -372,8 +375,6 @@ public class Char {
 						avatarLook.setWeaponStickerId(itemId);
 					}
 				}
-//                equip.setBagIndex(-ItemConstants.getBodyPartFromItem(equip.getItemId(), getAvatarData().getAvatarLook().getGender()));
-//                addItemToInventory(InvType.EQUIPPED, equip);
 			}
 		}
 		avatarLook.setHairEquips(hairEquips);
@@ -3046,6 +3047,11 @@ public class Char {
 		if (getField().getForcedReturn() != GameConstants.NO_MAP_ID) {
 			setFieldID(getField().getForcedReturn());
 		}
+		if (getTradeRoom() != null) {
+			Char other = getTradeRoom().getOther();
+			getTradeRoom().cancelTrade();
+			other.chatMessage("Your trade partner disconnected.");
+		}
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);
@@ -3127,6 +3133,11 @@ public class Char {
 		return shop;
 	}
 
+	/**
+	 * Checks if this Char can hold an Item in their inventory, assuming that its quantity is 1.
+	 * @param id the item's itemID
+	 * @return whether or not this Char can hold an item in their inventory
+	 */
 	public boolean canHold(int id) {
 		boolean canHold;
 		if (ItemConstants.isEquip(id)) {  //Equip
@@ -3138,6 +3149,43 @@ public class Char {
 			canHold = (curItem != null && curItem.getQuantity() + 1 < ii.getSlotMax()) || inv.getSlots() > inv.getItems().size();
 		}
 		return canHold;
+	}
+
+	/**
+	 * Recursive function that checks if this Char can hold a list of items in their inventory.
+	 * @param items the list of items this char should be able to hold
+	 * @return whether or not this Char can hold the list of items
+	 */
+	public boolean canHold(List<Item> items) {
+		return canHold(items, deepCopyForInvCheck());
+	}
+
+	private boolean canHold(List<Item> items, Char deepCopiedChar) {
+		// explicitly use a Char param to avoid accidentally adding items
+		if (items.size() == 0) {
+			return true;
+		}
+		Item item = items.get(0);
+		if (canHold(item.getItemId())) {
+			Inventory inv = deepCopiedChar.getInventoryByType(item.getInvType());
+			inv.addItem(item);
+			items.remove(item);
+			return deepCopiedChar.canHold(items, deepCopiedChar);
+		} else {
+			return false;
+		}
+
+	}
+
+	private Char deepCopyForInvCheck() {
+		Char chr = new Char();
+		chr.setEquippedInventory(getEquippedInventory().deepCopy());
+		chr.setEquipInventory(getEquipInventory().deepCopy());
+		chr.setConsumeInventory(getConsumeInventory().deepCopy());
+		chr.setEtcInventory(getEtcInventory().deepCopy());
+		chr.setInstallInventory(getInstallInventory().deepCopy());
+		chr.setCashInventory(getCashInventory().deepCopy());
+		return chr;
 	}
 
 	/**
@@ -3712,5 +3760,23 @@ public class Char {
 
 	public void setTownPortal(TownPortal townPortal) {
 		this.townPortal = townPortal;
+	}
+
+	public TradeRoom getTradeRoom() {
+		return tradeRoom;
+	}
+
+	public void setTradeRoom(TradeRoom tradeRoom) {
+		this.tradeRoom = tradeRoom;
+	}
+
+	@Override
+	public String toString() {
+		return "Char{" +
+				"(" + super.toString() +
+				")id=" + id +
+				", accId=" + accId +
+				", name=" + getName() +
+				'}';
 	}
 }

@@ -4804,10 +4804,15 @@ public class WorldHandler {
     }
 
     public static void handleMiniRoom(Char chr, InPacket inPacket) {
+        chr.dispose();
         byte type = inPacket.decodeByte(); // MiniRoom Type value
         MiniRoomType mrt = MiniRoomType.getByVal(type);
+        if (mrt == null) {
+            log.error(String.format("Unknown miniroom type %d", type));
+            return;
+        }
+        TradeRoom tradeRoom = chr.getTradeRoom();
         switch (mrt) {
-            // Different Miniroom types for the same handler
             case PlaceItem:
             case PlaceItem_2:
             case PlaceItem_3:
@@ -4815,34 +4820,130 @@ public class WorldHandler {
                 byte invType = inPacket.decodeByte();
                 short bagIndex = inPacket.decodeShort();
                 short quantity = inPacket.decodeShort();
-                byte inTradeSlot = inPacket.decodeByte(); // trade window slot number
+                byte tradeSlot = inPacket.decodeByte(); // trade window slot number
 
-
-                Item item = chr.getInventoryByType(InvType.getInvTypeByVal(invType)).getItemBySlot(bagIndex); // Separate Check for Equips?, to encodeEquips
-
-                // Potential Hacking Log
-                if(item.getQuantity() < quantity) {
-                    log.warn("Character {"+ chr.getId() +"} tried to trade an item {"+ item.getItemId() +"} with a higher quantity {"+ quantity +"} than the item has {"+ item.getQuantity() +"}.");
+                Item item = chr.getInventoryByType(InvType.getInvTypeByVal(invType)).getItemBySlot(bagIndex);
+                if (item.getQuantity() < quantity) {
+                    log.warn(String.format("Character {%d} tried to trade an item {%d} with a higher quantity {%s} than the item has {%d}.", chr.getId(), item.getItemId(), quantity, item.getQuantity()));
+                    return;
                 }
-                if(!item.isTradable()) {
-                    log.warn("Character {"+ chr.getId() +"} tried to trade an item {"+ item.getItemId() +"} whilst it was trade blocked.");
+                if (!item.isTradable()) {
+                    log.warn(String.format("Character {%d} tried to trade an item {%d} whilst it was trade blocked.", chr.getId(), item.getItemId()));
+                    return;
                 }
+                if (chr.getTradeRoom() == null) {
+                    chr.chatMessage("You are currently not trading.");
+                    return;
+                }
+                Item offer = ItemData.getItemDeepCopy(item.getItemId());
+                offer.setQuantity(quantity);
+                if (tradeRoom.canAddItem(chr)) {
+                    chr.consumeItem(offer.getItemId(), quantity);
+                    tradeRoom.addItem(chr, tradeSlot, offer);
+                }
+                Char other = tradeRoom.getOtherChar(chr);
+                chr.write(MiniroomPacket.putItem(0, tradeSlot, offer));
+                other.write(MiniroomPacket.putItem(1, tradeSlot, offer));
 
                 break;
-
-            // Different Miniroom types for the same handler
             case SetMesos:
             case SetMesos_2:
             case SetMesos_3:
             case SetMesos_4:
-                long mesos = inPacket.decodeLong(); // mesos input
-
+                long money = inPacket.decodeLong();
+                if (tradeRoom == null) {
+                    chr.chatMessage("You are currently not trading.");
+                    return;
+                }
+                if (money < 0 || money > chr.getMoney()) {
+                    log.error(String.format("Character %d tried to add an invalid amount of mesos(%d, own money: %d)",
+                            chr.getId(), money, chr.getMoney()));
+                    return;
+                }
+                chr.deductMoney(money);
+                tradeRoom.putMoney(chr, money);
+                other = tradeRoom.getOtherChar(chr);
+                chr.write(MiniroomPacket.putMoney(0, money));
+                other.write(MiniroomPacket.putMoney(1, money));
                 break;
-
-            // Exit trade window
-            case CancelTrade:
+            case Trade:
+            case TradeConfirm:
+            case TradeConfirm2:
+            case TradeConfirm3:
+                other = tradeRoom.getOtherChar(chr);
+                other.write(MiniroomPacket.tradeConfirm());
+                if (tradeRoom.hasConfirmed(other)) {
+                    boolean success = tradeRoom.completeTrade();
+                    if (success) {
+                        chr.write(MiniroomPacket.tradeComplete());
+                        other.write(MiniroomPacket.tradeComplete());
+                    } else {
+                        tradeRoom.cancelTrade();
+                        tradeRoom.getChr().write(MiniroomPacket.cancelTrade());
+                        tradeRoom.getOther().write(MiniroomPacket.cancelTrade());
+                    }
+                    chr.setTradeRoom(null);
+                    other.setTradeRoom(null);
+                } else {
+                    tradeRoom.addConfirmedPlayer(chr);
+                }
                 break;
+            case Chat:
+                inPacket.decodeInt(); // tick
+                String msg = inPacket.decodeString();
+                if (tradeRoom == null) {
+                    chr.chatMessage("You are currently not in a room.");
+                    return;
+                }
+                // this is kinda weird atm, so no different colours
+                String msgWithName = String.format("%s: %s", chr.getName(), msg);
+                tradeRoom.getChr().write(MiniroomPacket.chat(1, msgWithName));
+                tradeRoom.getOther().write(MiniroomPacket.chat(1, msgWithName));
+                break;
+            case Accept:
+                if (tradeRoom == null) {
+                    chr.chatMessage("Your trade partner cancelled the trade.");
+                    return;
+                }
+                chr.write(MiniroomPacket.enterTrade(tradeRoom, chr));
+                other = tradeRoom.getOtherChar(chr); // initiator
+                other.write(MiniroomPacket.enterTrade(tradeRoom, other));
+                break;
+            case TradeInviteRequest:
+                int charID = inPacket.decodeInt();
+                other = chr.getField().getCharByID(charID);
+                if (other == null) {
+                    chr.chatMessage("Could not find that player.");
+                    return;
+                }
+                if (other.getTradeRoom() != null) {
+                    chr.chatMessage("That player is already trading.");
+                    return;
+                }
+                other.write(MiniroomPacket.tradeInvite(chr));
+                tradeRoom = new TradeRoom(chr, other);
+                chr.setTradeRoom(tradeRoom);
+                other.setTradeRoom(tradeRoom);
+                break;
+            case InviteResultStatic: // always decline?
+                if (tradeRoom != null) {
+                    other = tradeRoom.getOtherChar(chr);
+                    other.chatMessage(String.format("%s has declined your trade invite.", chr.getName()));
+                    other.setTradeRoom(null);
+                }
+                chr.setTradeRoom(null);
+                break;
+            case ExitTrade:
+                if (tradeRoom != null) {
+                    tradeRoom.cancelTrade();
+                    tradeRoom.getOtherChar(chr).write(MiniroomPacket.cancelTrade());
+                }
+                break;
+            case TradeConfirmRemoteResponse:
+                // just an ack by the client?
+                break;
+            default:
+                log.error(String.format("Unhandled miniroom type %s", mrt));
         }
-        chr.dispose();
     }
 }

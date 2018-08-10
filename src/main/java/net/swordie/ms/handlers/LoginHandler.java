@@ -177,9 +177,7 @@ public class LoginHandler {
 
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
-        // Start job specific handling ----------------------------------------------------------------
         JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
-        // End job specific handling ------------------------------------------------------------------
 
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
         c.getAccount().addCharacter(chr);

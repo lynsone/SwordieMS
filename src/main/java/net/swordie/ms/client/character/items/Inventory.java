@@ -37,6 +37,12 @@ public class Inventory {
         this.slots = (byte) slots;
     }
 
+    public Inventory deepCopy() {
+        Inventory inventory = new Inventory(getType(), getSlots());
+        inventory.setItems(new ArrayList<>(getItems()));
+        return inventory;
+    }
+
     public int getId() {
         return id;
     }
@@ -54,7 +60,7 @@ public class Inventory {
     }
 
     public void addItem(Item item) {
-        if(getItems().size() <= getSlots()) {
+        if(getItems().size() < getSlots()) {
             getItems().add(item);
             item.setInvType(getType());
             sortItemsByIndex();

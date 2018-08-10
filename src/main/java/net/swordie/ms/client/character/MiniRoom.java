@@ -1,6 +1,8 @@
 package net.swordie.ms.client.character;
 
-import net.swordie.ms.connection.OutPacket; /**
+import net.swordie.ms.connection.OutPacket;
+
+/**
  * Created on 3/18/2018.
  */
 public class MiniRoom {

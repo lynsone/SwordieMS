@@ -110,7 +110,7 @@ public class GameConstants {
     public static final int MAX_LOCKER_SIZE = 9999;
 
 
-    //     START OF Party Quests
+    // START OF Party Quests
     public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
 
     public static final long PARTY_QUEST_EXP_FORMULA(Char chr) {
@@ -128,7 +128,10 @@ public class GameConstants {
     // Lord Pirate Party Quest
     public static final int LORD_PIRATE_QUEST = 99998; // Quest where the NPC state is stored, to close/open portals
 
-    //     END OF Party Quests
+    // END OF Party Quests
+
+    // Trading
+    public static final int MAX_TRADE_ITEMS = 9;
 
 
     // Monster Collection
@@ -433,5 +436,23 @@ public class GameConstants {
                     return 0.15 + attackers * 0.1;
             }
         }
+    }
+
+    public static long applyTax(long money) {
+        // https://gamefaqs.gamespot.com/pc/924697-maplestory/answers/56187-how-many-is-the-tax-on-meso-when-trading
+        if (money >= 100_000_000) {
+            return (long) (money - (money * 0.06));
+        } else if (money >= 25_000_000) {
+            return (long) (money - (money * 0.05));
+        } else if (money >= 10_000_000) {
+            return (long) (money - (money * 0.04));
+        } else if (money >= 5_000_000) {
+            return (long) (money - (money * 0.03));
+        } else if (money >= 1_000_000) {
+            return (long) (money - (money * 0.018));
+        } else if (money >= 100_000) {
+            return (long) (money - (money * 0.008));
+        }
+        return money;
     }
 }

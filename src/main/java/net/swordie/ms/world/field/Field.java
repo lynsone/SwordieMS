@@ -770,9 +770,14 @@ public class Field {
      * @param posTo   The Position where the drop lands.
      */
     public void drop(Drop drop, Position posFrom, Position posTo) {
+        boolean isTradable = true;
         Item item = drop.getItem();
-        ItemInfo itemInfo = ItemData.getItemInfoByID(item.getItemId());
-        boolean isTradable = item != null && item.isTradable() && itemInfo != null && !itemInfo.isQuest();
+        if (item != null) {
+            ItemInfo itemInfo = ItemData.getItemInfoByID(item.getItemId());
+            // must be tradable, and if not an equip, not a quest item
+            isTradable = item != null && item.isTradable() && (ItemConstants.isEquip(item.getItemId()) ||
+                    (itemInfo != null && !itemInfo.isQuest()));
+        }
         drop.setPosition(posTo);
         if (isTradable) {
             addLife(drop);
@@ -881,7 +886,7 @@ public class Field {
         }
     }
 
-    public List<Portal> getclosestPortal(Rect rect) {
+    public List<Portal> getClosestPortal(Rect rect) {
         List<Portal> portals = new ArrayList<>();
         for (Portal portals2 : getPortals()) {
             int x = portals2.getX();

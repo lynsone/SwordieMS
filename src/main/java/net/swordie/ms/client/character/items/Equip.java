@@ -1474,6 +1474,6 @@ public class Equip extends Item {
 
     @Override
     public boolean isTradable() {
-        return hasAttribute(EquipAttribute.UNTRADABLE);
+        return !hasAttribute(EquipAttribute.UNTRADABLE);
     }
 }
