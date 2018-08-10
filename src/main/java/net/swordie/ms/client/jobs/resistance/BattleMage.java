@@ -12,7 +12,6 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatMsgColour;
@@ -176,7 +175,7 @@ public class BattleMage extends Job {
                 o3.rOption = skillID;
                 o3.tOption = 0;
                 tsm.putCharacterStatValue(BMageAura, o3);
-                handleBlueAuraDispel(); //Hyper
+                applyBlueAuraDispel(); //Hyper
                 break;
             case DARK_AURA:
                 o1.nReason = skillID;
@@ -197,7 +196,7 @@ public class BattleMage extends Job {
                 if(WeaknessAuraTimer != null && !WeaknessAuraTimer.isDone()) {
                     WeaknessAuraTimer.cancel(true);
                 }
-                handleWeakeningAura();
+                applyWeakenAuraOnMob();
                 break;
             case DARK_SHOCK:
                 o1.nOption = 1;
@@ -266,7 +265,7 @@ public class BattleMage extends Job {
         field.spawnSummon(death);
     }
 
-    private void handleCondemnation(AttackInfo attackInfo) {
+    private void incrementCondemnation(AttackInfo attackInfo) {
         Field field = chr.getField();
         Skill skill = chr.getSkill(getIcon());
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
@@ -326,10 +325,10 @@ public class BattleMage extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleCondemnation(attackInfo);
+        incrementCondemnation(attackInfo);
         if(hasHitMobs) {
-            handleDrainAuraActive(attackInfo);
-            handleDrainAuraPassive(attackInfo);
+            drainAuraActiveHPRecovery(attackInfo);
+            drainAuraPassiveHPRecovery(attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -417,7 +416,7 @@ public class BattleMage extends Job {
         return 0;
     }
 
-    private void handleDrainAuraActive(AttackInfo attackInfo) {
+    private void drainAuraActiveHPRecovery(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = chr.getSkill(DRAINING_AURA);
         if (skill == null) {
@@ -437,7 +436,7 @@ public class BattleMage extends Job {
         }
     }
 
-    private void handleDrainAuraPassive(AttackInfo attackInfo) {
+    private void drainAuraPassiveHPRecovery(AttackInfo attackInfo) {
         Skill skill = chr.getSkill(DRAINING_AURA);
         if (skill == null) {
             return;
@@ -456,7 +455,7 @@ public class BattleMage extends Job {
         }
     }
 
-    public void handleWeakeningAura() {
+    public void applyWeakenAuraOnMob() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = chr.getSkill(WEAKENING_AURA);
         byte slv = (byte) skill.getCurrentLevel();
@@ -478,17 +477,17 @@ public class BattleMage extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
                 }
             }
-        WeaknessAuraTimer = EventManager.addEvent(this::handleWeakeningAura, delay, TimeUnit.SECONDS);
+        WeaknessAuraTimer = EventManager.addEvent(this::applyWeakenAuraOnMob, delay, TimeUnit.SECONDS);
         }
     }
 
-    public void handleBlueAuraDispel() {
+    public void applyBlueAuraDispel() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = chr.getSkill(BLUE_AURA);
         if(chr.hasSkill(32120062)) { //Blue Aura - Dispel Magic
             if (tsm.getOptByCTSAndSkill(BMageAura, skill.getSkillId()) != null) {
                 tsm.removeAllDebuffs();
-                EventManager.addEvent(this::handleBlueAuraDispel, 5, TimeUnit.SECONDS);
+                EventManager.addEvent(this::applyBlueAuraDispel, 5, TimeUnit.SECONDS);
             }
         }
     }

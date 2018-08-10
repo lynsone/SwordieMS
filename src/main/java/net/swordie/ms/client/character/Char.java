@@ -343,6 +343,8 @@ public class Char {
 	private Map<BaseStat, Long> baseStats = new HashMap<>();
 	@Transient
 	private boolean changingChannel;
+	@Transient
+	private TownPortal townPortal;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -3704,4 +3706,11 @@ public class Char {
 		this.monsterParkCount = monsterParkCount;
 	}
 
+	public TownPortal getTownPortal() {
+		return townPortal;
+	}
+
+	public void setTownPortal(TownPortal townPortal) {
+		this.townPortal = townPortal;
+	}
 }

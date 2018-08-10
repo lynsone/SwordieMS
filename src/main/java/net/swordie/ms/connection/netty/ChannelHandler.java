@@ -583,6 +583,12 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case OBTACLE_ATOM_COLLISION:
                     // Ignored for now
                     break;
+                case ENTER_TOWN_PORTAL_REQUEST:
+                    WorldHandler.handleEnterTownPortalRequest(chr, inPacket);
+                    break;
+                case MINI_ROOM:
+                    WorldHandler.handleMiniRoom(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

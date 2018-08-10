@@ -22,7 +22,6 @@ import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -294,7 +293,7 @@ public class Demon extends Job {
                 if(diabolicRecoveryTimer != null && !diabolicRecoveryTimer.isDone()) {
                     diabolicRecoveryTimer.cancel(true);
                 }
-                handleDiabolicRecovery();
+                diabolicRecoveryHPRecovery();
                 break;
             case MAPLE_WARRIOR_DA:
             case MAPLE_WARRIOR_DS:
@@ -357,7 +356,7 @@ public class Demon extends Job {
         if(JobConstants.isDemonSlayer(chr.getJob())) {
             if(hasHitMobs) {
                 //Demon Slayer Fury Atoms
-                handleFuryForceAtom(attackInfo);
+                createDemonFuryForceAtom(attackInfo);
 
                 //Max Fury
                 if(chr.hasSkill(MAX_FURY)) {
@@ -367,13 +366,13 @@ public class Demon extends Job {
                         byte skillLevel = (byte) maxfuryskill.getCurrentLevel();
                         int propz = mfsi.getValue(prop, skillLevel);
                         if (Util.succeedProp(propz)) {
-                            handleFuryForceAtom(attackInfo);
+                            createDemonFuryForceAtom(attackInfo);
                         }
                     }
                 }
 
                 //Leech Aura
-                handleLeechAura(attackInfo);
+                leechAuraHealing(attackInfo);
             }
         }
 
@@ -385,11 +384,11 @@ public class Demon extends Job {
             if(hasHitMobs) {
                 //Nether Shield Recreation
                 if (attackInfo.skillId == NETHER_SHIELD_ATOM) {
-                    handleNetherShieldReCreation(attackInfo);
+                    recreateNetherShield(attackInfo);
                 }
 
                 //Life Sap & Advanced Life Sap
-                handleLifeSap();
+                lifeSapHealing();
             }
         }
         Option o1 = new Option();
@@ -489,7 +488,7 @@ public class Demon extends Job {
                 break;
             case THOUSAND_SWORDS:
                 for(int i = 0; i<5; i++) {
-                    handleOverloadCount(attackInfo, skillID, tsm, c);
+                    incrementOverloadCount(attackInfo, skillID, tsm, c);
                 }
                 break;
             case CERBERUS_CHOMP:
@@ -529,14 +528,14 @@ public class Demon extends Job {
             case EXCEED_EXECUTION_3:
             case EXCEED_EXECUTION_4:
             case EXCEED_EXECUTION_PURPLE:
-                handleOverloadCount(attackInfo, skillID, tsm, c);
+                incrementOverloadCount(attackInfo, skillID, tsm, c);
                 break;
         }
 
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleNetherShield() {
+    private void createNetherShield() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(NETHER_SHIELD);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -558,7 +557,7 @@ public class Demon extends Job {
         }
     }
 
-    private void handleNetherShieldReCreation(AttackInfo attackInfo) {
+    private void recreateNetherShield(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(NETHER_SHIELD);
         int anglenum = new Random().nextInt(360);
@@ -580,7 +579,7 @@ public class Demon extends Job {
         }
     }
 
-    public void handleOverloadCount(AttackInfo attackInfo, int skillid, TemporaryStatManager tsm, Client c) {
+    public void incrementOverloadCount(AttackInfo attackInfo, int skillid, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         int amount = 1;
         if (tsm.hasStat(OverloadCount)) {
@@ -629,8 +628,8 @@ public class Demon extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case NETHER_SHIELD:
-                    handleNetherShield();
-                    handleNetherShield();
+                    createNetherShield();
+                    createNetherShield();
                     break;
             }
         }
@@ -670,7 +669,7 @@ public class Demon extends Job {
                 int propz = si.getValue(x, slv);
                 if(Util.succeedProp(propz)) {
                     int mobID = hitInfo.mobID;
-                    handlePossessedAegisFury(mobID);
+                    createPossessedAegisFuryForceAtom(mobID);
                     chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv))));
                 }
             }
@@ -697,7 +696,7 @@ public class Demon extends Job {
         return 0;
     }
 
-    private void handleFuryForceAtom(AttackInfo attackInfo) {
+    private void createDemonFuryForceAtom(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -757,7 +756,7 @@ public class Demon extends Job {
         }
     }
 
-    private void handlePossessedAegisFury(int mobID) {
+    private void createPossessedAegisFuryForceAtom(int mobID) {
         Field field = chr.getField();
         Life life = field.getLifeByObjectID(mobID);
         if (life instanceof Mob) {
@@ -784,7 +783,7 @@ public class Demon extends Job {
     }
 
 
-    public void handleLeechAura(AttackInfo attackInfo) {
+    public void leechAuraHealing(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(chr.hasSkill(LEECH_AURA)) {
             if(tsm.getOptByCTSAndSkill(Regen, LEECH_AURA) != null) {
@@ -808,7 +807,7 @@ public class Demon extends Job {
         }
     }
 
-    public void handleLifeSap() {
+    public void lifeSapHealing() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(chr.hasSkill(LIFE_SAP)) {
             Skill skill = chr.getSkill(LIFE_SAP);
@@ -833,7 +832,7 @@ public class Demon extends Job {
     }
 
 
-    public void handleDiabolicRecovery() {
+    public void diabolicRecoveryHPRecovery() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(DiabolikRecovery)) {
             Skill skill = chr.getSkill(DIABOLIC_RECOVERY);
@@ -842,7 +841,7 @@ public class Demon extends Job {
             int recovery = si.getValue(x, slv);
             int duration = si.getValue(w, slv);
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / recovery)));
-            diabolicRecoveryTimer = EventManager.addEvent(() -> handleDiabolicRecovery(), duration, TimeUnit.SECONDS);
+            diabolicRecoveryTimer = EventManager.addEvent(() -> diabolicRecoveryHPRecovery(), duration, TimeUnit.SECONDS);
         }
     }
 

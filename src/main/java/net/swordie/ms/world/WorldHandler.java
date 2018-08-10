@@ -79,10 +79,7 @@ import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.*;
 import net.swordie.ms.util.container.Tuple;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.FieldInstanceType;
-import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.*;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
@@ -104,9 +101,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 import static net.swordie.ms.enums.ChatMsgColour.*;
 import static net.swordie.ms.enums.EquipBaseStat.cuc;
 import static net.swordie.ms.enums.EquipBaseStat.ruc;
-import static net.swordie.ms.enums.InvType.CONSUME;
-import static net.swordie.ms.enums.InvType.EQUIP;
-import static net.swordie.ms.enums.InvType.EQUIPPED;
+import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.enums.Stat.level;
 import static net.swordie.ms.enums.Stat.sp;
@@ -4776,5 +4771,78 @@ public class WorldHandler {
     public static void handleUserSetDressChangedRequest(Char chr, InPacket inPacket) {
         boolean on = inPacket.decodeByte() != 0;
 //        chr.write(UserLocal.setDressChanged(on, true)); // causes client to send this packet again
+    }
+
+    public static void handleEnterTownPortalRequest(Char chr, InPacket inPacket) {
+        int chrId = inPacket.decodeInt(); // Char id
+        boolean town = inPacket.decodeByte() != 0;
+
+        Field field = chr.getField();
+        TownPortal townPortal = field.getTownPortalByChrId(chrId);
+        if (townPortal != null) {       // TODO Using teleports, as grabbing the TownPortalPoint portal id is not working
+            if (town) {
+                // townField -> fieldField
+                Field fieldField = townPortal.getChannel().getField(townPortal.getFieldFieldId());
+
+                chr.warp(fieldField); // Back to the original Door
+                chr.write(CField.teleport(townPortal.getFieldPosition(), chr)); // Teleports player to the position of the TownPortal
+            } else {
+                // fieldField -> townField
+                Field returnField = townPortal.getChannel().getField(townPortal.getTownFieldId()); // Initialise the Town Map,
+
+                chr.warp(returnField); // warp Char
+                chr.write(CField.teleport(townPortal.getTownPosition(), chr));
+                if(returnField.getTownPortalByChrId(chrId) == null) { // So that every re-enter into the TownField doesn't spawn another TownPortal
+                    returnField.broadcastPacket(WvsContext.townPortal(townPortal)); // create the TownPortal
+                    returnField.addTownPortal(townPortal);
+                }
+            }
+        } else {
+            chr.dispose();
+            log.warn("Character {"+ chrId +"} tried entering a Town Portal in field {"+ field.getId() +"} which does not exist."); // Potential Hacking Log
+        }
+    }
+
+    public static void handleMiniRoom(Char chr, InPacket inPacket) {
+        byte type = inPacket.decodeByte(); // MiniRoom Type value
+        MiniRoomType mrt = MiniRoomType.getByVal(type);
+        switch (mrt) {
+            // Different Miniroom types for the same handler
+            case PlaceItem:
+            case PlaceItem_2:
+            case PlaceItem_3:
+            case PlaceItem_4:
+                byte invType = inPacket.decodeByte();
+                short bagIndex = inPacket.decodeShort();
+                short quantity = inPacket.decodeShort();
+                byte inTradeSlot = inPacket.decodeByte(); // trade window slot number
+
+
+                Item item = chr.getInventoryByType(InvType.getInvTypeByVal(invType)).getItemBySlot(bagIndex); // Separate Check for Equips?, to encodeEquips
+
+                // Potential Hacking Log
+                if(item.getQuantity() < quantity) {
+                    log.warn("Character {"+ chr.getId() +"} tried to trade an item {"+ item.getItemId() +"} with a higher quantity {"+ quantity +"} than the item has {"+ item.getQuantity() +"}.");
+                }
+                if(!item.isTradable()) {
+                    log.warn("Character {"+ chr.getId() +"} tried to trade an item {"+ item.getItemId() +"} whilst it was trade blocked.");
+                }
+
+                break;
+
+            // Different Miniroom types for the same handler
+            case SetMesos:
+            case SetMesos_2:
+            case SetMesos_3:
+            case SetMesos_4:
+                long mesos = inPacket.decodeLong(); // mesos input
+
+                break;
+
+            // Exit trade window
+            case CancelTrade:
+                break;
+        }
+        chr.dispose();
     }
 }

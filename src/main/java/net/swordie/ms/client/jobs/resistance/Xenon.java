@@ -21,7 +21,6 @@ import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -301,7 +300,7 @@ public class Xenon extends Job {
             }
 
             //Triangulation
-            handleTriangulation(attackInfo);
+            applyTriangulationOnMob(attackInfo);
         }
         handleSupplyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
@@ -383,7 +382,7 @@ public class Xenon extends Job {
                     chr.warp(toField);
                     break;
                 case PINPOINT_SALVO:
-                    handlePinPointSalvo();
+                    createPinPointSalvoForceAtom();
                     break;
                 case HEROS_WILL_XENON:
                     tsm.removeAllDebuffs();
@@ -471,7 +470,7 @@ public class Xenon extends Job {
         return 0;
     }
 
-    public void handleTriangulation(AttackInfo attackInfo) {
+    public void applyTriangulationOnMob(AttackInfo attackInfo) {
         if(!chr.hasSkill(TRIANGULATION)) {
             return;
         }
@@ -520,7 +519,7 @@ public class Xenon extends Job {
         }
     }
 
-    private void handlePinPointSalvo() { //TODO Cost
+    private void createPinPointSalvoForceAtom() { //TODO Cost
         Field field = chr.getField();
 
         SkillInfo si = SkillData.getSkillInfoById(PINPOINT_SALVO);

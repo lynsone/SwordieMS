@@ -17,7 +17,6 @@ import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
@@ -135,7 +134,7 @@ public class Hayato extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 tsm.putCharacterStatValue(HayatoStance, o1);
-                handleSwordEnergyLevels();
+                changeHayatoStanceBonus();
                 break;
             case BATTOUJUTSU_ADVANCE:
                 o1.nOption = 1;
@@ -247,22 +246,22 @@ public class Hayato extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleSwordEnergy(attackInfo);
-        handleSwordEnergyLevels();
+        incrementSwordEnergy(attackInfo);
+        changeHayatoStanceBonus();
 
         if(tsm.getOption(HayatoStance).nOption == 1) {
             resetNormalStanceBonus();
-            handleQuickDrawStanceBonus();
-            handleQuickDrawStunBonus(attackInfo);
+            quickDrawStanceBonus();
+            quickDrawStunBonus(attackInfo);
         } else
         if(tsm.getOption(HayatoStance).nOption == 0) {
             resetQuickDrawStanceBonus();
-            handleNormalStanceBonus();
+            normalStanceBonus();
         }
 
         if(hasHitMobs) {
-            handleDoT(attackInfo);
-            handleWarriorHeart(attackInfo);
+            applyDOTOnMob(attackInfo);
+            warriorHeartHealHP(attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -350,8 +349,8 @@ public class Hayato extends Job {
 
         //Dodge
         if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
-            handleJinsoku();
-            handleWillowDodge();
+            jinsoku();
+            incrementWillowDodge();
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -366,7 +365,7 @@ public class Hayato extends Job {
         return 0;
     }
 
-    public void handleSwordEnergy(AttackInfo attackInfo) {
+    public void incrementSwordEnergy(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -397,7 +396,7 @@ public class Hayato extends Job {
         }
     }
 
-    public void handleSwordEnergyLevels() {
+    public void changeHayatoStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         o.nOption = 1;
@@ -406,7 +405,7 @@ public class Hayato extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private void handleQuickDrawStanceBonus() {
+    private void quickDrawStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -449,7 +448,7 @@ public class Hayato extends Job {
         tsm.putCharacterStatValue(HayatoBooster, o3);
     }
 
-    public void handleQuickDrawStunBonus(AttackInfo attackInfo) {
+    public void quickDrawStunBonus(AttackInfo attackInfo) {
         Option o = new Option();
         int stunProc = 30;
         if(swordEnergy >= 200) {
@@ -477,7 +476,7 @@ public class Hayato extends Job {
         }
     }
 
-    private void handleNormalStanceBonus() {
+    private void normalStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -541,7 +540,7 @@ public class Hayato extends Job {
     }
 
 
-    public void handleWillowDodge() {   //TODO
+    public void incrementWillowDodge() {   //TODO
         Skill skill = chr.getSkill(WILLOW_DODGE);
         if (skill == null) {
             return;
@@ -573,7 +572,7 @@ public class Hayato extends Job {
         tsm.sendSetStatPacket();
     }
 
-    public void handleJinsoku() {
+    public void jinsoku() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         if(chr.hasSkill(JINSOKU)) {
@@ -591,7 +590,7 @@ public class Hayato extends Job {
         }
     }
 
-    public void handleDoT(AttackInfo attackInfo) {
+    public void applyDOTOnMob(AttackInfo attackInfo) {
         if(chr.hasSkill(BLOODLETTER)) {
             Skill skill = chr.getSkill(BLOODLETTER);
             byte slv = (byte) skill.getCurrentLevel();
@@ -620,7 +619,7 @@ public class Hayato extends Job {
         }
     }
 
-    public void handleWarriorHeart(AttackInfo attackInfo) { //TODO on Crit hit,  proc% to gainHP%
+    public void warriorHeartHealHP(AttackInfo attackInfo) { //TODO on Crit hit,  proc% to gainHP%
         if(chr.hasSkill(WARRIOR_HEART)) {
             Skill skill = chr.getSkill(WARRIOR_HEART);
             byte slv = (byte) skill.getCurrentLevel();

@@ -321,19 +321,19 @@ public class Zero extends Job {
 
         if(getAlphaOrBetaSkill(skillID) == 1) {
             if(hasHitMobs) {
-                handleDoubleTimeAlpha(skillID);
+                incrementDoubleTimeAlpha(skillID);
             }
 
-            handleDivineLeer(attackInfo, skillID);
+            applyDivineLeerOnMob(attackInfo, skillID);
         }
 
         if(getAlphaOrBetaSkill(skillID) == 2) {
             if(hasHitMobs) {
-                handleDoubleTimeBeta(skillID);
+                incrementDoubleTimeBeta(skillID);
             }
 
-            handleCriticalBind(attackInfo, skillID);
-            handleArmorSplit(attackInfo, skillID);
+            applyCriticalBindOnMob(attackInfo, skillID);
+            applyArmorSplitOnMob(attackInfo, skillID);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -452,7 +452,7 @@ public class Zero extends Job {
         return chr.getZeroInfo().isZeroBetaState();
     }
 
-    private void handleDivineLeer(AttackInfo ai, int skillID) {
+    private void applyDivineLeerOnMob(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(DIVINE_LEER);
         if (skill == null) {
             return;
@@ -467,7 +467,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleCriticalBind(AttackInfo ai, int skillID) {
+    private void applyCriticalBindOnMob(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(CRITICAL_BIND);
         if (skill == null) {
             return;
@@ -493,7 +493,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleArmorSplit(AttackInfo ai, int skillID) {
+    private void applyArmorSplitOnMob(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(ARMOR_SPLIT);
         if (skill == null) {
             return;
@@ -521,7 +521,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleDoubleTimeAlpha(int skillID) {
+    private void incrementDoubleTimeAlpha(int skillID) {
         if (chr.hasSkill(DOUBLE_TIME)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
@@ -546,7 +546,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleDoubleTimeBeta(int skillID) {
+    private void incrementDoubleTimeBeta(int skillID) {
         if (chr.hasSkill(DOUBLE_TIME)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();

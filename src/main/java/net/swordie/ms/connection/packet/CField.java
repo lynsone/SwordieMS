@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.PsychicArea;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.trunk.TrunkDlg;
@@ -860,6 +861,26 @@ public class CField {
         outPacket.encodeInt(green); // G  out of 100,000 (?)
         outPacket.encodeInt(blue); // B  out of 100,000 (?)
         outPacket.encodeInt(left ? 1 : 0); // bLeft
+
+        return outPacket;
+    }
+
+    public static OutPacket townPortalCreated(TownPortal townPortal, boolean noAnimation) {
+        OutPacket outPacket = new OutPacket(OutHeader.TOWN_PORTAL_CREATED);
+
+        outPacket.encodeByte(noAnimation); // No Animation  (false = Animation : true = No Animation)
+        outPacket.encodeInt(townPortal.getChr().getId());
+        outPacket.encodePosition(townPortal.getFieldPosition()); // as this doesn't need to be initialised yet.
+        outPacket.encodePosition(townPortal.getFieldPosition()); //
+
+        return outPacket;
+    }
+
+    public static OutPacket townPortalRemoved(TownPortal townPortal, boolean animation) {
+        OutPacket outPacket = new OutPacket(OutHeader.TOWN_PORTAL_REMOVED);
+
+        outPacket.encodeByte(animation); // Animation
+        outPacket.encodeInt(townPortal.getChr().getId());
 
         return outPacket;
     }
