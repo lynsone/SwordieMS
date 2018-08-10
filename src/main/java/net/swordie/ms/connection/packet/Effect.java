@@ -366,6 +366,148 @@ public class Effect {
         return effect;
     }
 
+    public static Effect showDragonFuryEffect(int skillID, byte slv, int bySummonedID, boolean show) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(show ? 1 : 0);
+
+        return effect;
+    }
+
+    public static Effect showFinalPactEffect(int skillID, byte slv, int bySummonedID, boolean show) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(show ? 1 : 0);
+
+        return effect;
+    }
+
+    public static Effect showChainsOfHellEffect(int skillID, byte slv, int bySummonedID, boolean left, int mobId) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+        effect.setArg6(mobId);
+
+        return effect;
+    }
+
+    public static Effect showHookEffect(int skillID, byte slv, int bySummonedID, boolean left, int mobId, int mobPosX, int mobPosY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+        effect.setArg6(mobId);
+        effect.setArg7(mobPosX);
+        effect.setArg8(mobPosY);
+
+        return effect;
+    }
+
+    public static Effect showCallOfTheHunterEffect(int skillID, byte slv, int bySummonedID, boolean left, int mobPosX, int mobPosY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+        effect.setArg6(mobPosX);
+        effect.setArg7(mobPosY);
+
+        return effect;
+    }
+
+    public static Effect showCaptureEffect(int skillID, byte slv, int bySummonedID, int type) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(type); // Type: 0 = Success,  1 = mob hp too high,  2 = mob cannot be captured
+
+        return effect;
+    }
+
+    public static Effect showVerticalGrappleEffect(int skillID, byte slv, int bySummonedID, int startPosY, int ropeConnectDestX, int ropeConnectDestY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(startPosY);
+        effect.setArg6(ropeConnectDestX);
+        effect.setArg7(ropeConnectDestY);
+
+        return effect;
+    }
+
+    public static Effect showFlashBlinkEffect(int skillID, byte slv, int bySummonedID, int blinkOriginX, int blinkOriginY, int blinkDestX, int blinkDestY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(blinkOriginX);
+        effect.setArg6(blinkOriginY);
+        effect.setArg7(blinkDestX);
+        effect.setArg8(blinkDestY);
+
+        return effect;
+    }
+
+    public static Effect showSuperNovaEffect(int skillID, byte slv, int bySummonedID, int x, int y) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(x);
+        effect.setArg6(y);
+
+        return effect;
+    }
+
+    public static Effect showUnregisteredSkill(int skillID, byte slv, int bySummonedID, boolean left) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+
+        return effect;
+    }
+
     public static Effect effectFromWZ(String effectPath, boolean flip, int delay, int type, int itemID) {
         Effect effect = new Effect();
 

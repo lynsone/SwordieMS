@@ -589,6 +589,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case MINI_ROOM:
                     WorldHandler.handleMiniRoom(chr, inPacket);
                     break;
+                case USER_EFFECT_LOCAL:
+                    WorldHandler.handleUserEffectLocal(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

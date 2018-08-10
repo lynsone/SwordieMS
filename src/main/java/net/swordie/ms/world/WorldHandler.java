@@ -37,8 +37,12 @@ import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
+import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.legend.Luminous;
+import net.swordie.ms.client.jobs.legend.Shade;
+import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
+import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
@@ -60,6 +64,7 @@ import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.InvType;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
@@ -79,7 +84,10 @@ import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.*;
 import net.swordie.ms.util.container.Tuple;
-import net.swordie.ms.world.field.*;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Foothold;
+import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
@@ -4947,6 +4955,52 @@ public class WorldHandler {
                 break;
             default:
                 log.error(String.format("Unhandled miniroom type %s", mrt));
+        }
+    }
+
+    public static void handleUserEffectLocal(Char chr, InPacket inPacket) {
+        int skillId = inPacket.decodeInt();
+        byte slv = inPacket.decodeByte();
+        byte sendLocal = inPacket.decodeByte();
+
+        int chrId = chr.getId();
+        Field field = chr.getField();
+
+        if(!chr.hasSkill(skillId)) {
+            log.warn(String.format("Character {%d} tried to use a skill {%d} they do not have.", chrId, skillId));
+        }
+
+        
+        if (skillId == Evan.DRAGON_FURY) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showDragonFuryEffect(skillId, slv, 0, true)));
+
+        } else if (skillId == Warrior.FINAL_PACT) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showFinalPactEffect(skillId, slv, 0, true)));
+
+        } else if (skillId == WildHunter.CALL_OF_THE_HUNTER) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showCallOfTheHunterEffect(skillId, slv, 0, chr.isLeft(), chr.getPosition().getX(), chr.getPosition().getY())));
+
+        } else if (skillId == Kaiser.VERTICAL_GRAPPLE || skillId == AngelicBuster.GRAPPLING_HEART) { // 'Grappling Hook' Skills
+            int chrPositionY = inPacket.decodeInt();
+            Position ropeConnectDest = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showVerticalGrappleEffect(skillId, slv, 0, chrPositionY, ropeConnectDest.getX(), ropeConnectDest.getY())));
+
+        } else if (skillId == 15001021/*TB  Flash*/ || skillId == Shade.FOX_TROT) { // 'Flash' Skills
+            Position beforeSkill = inPacket.decodePositionInt();
+            Position afterSkill = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showFlashBlinkEffect(skillId, slv, 0, beforeSkill.getX(), beforeSkill.getY(), afterSkill.getX(), afterSkill.getY())));
+
+        } else if (SkillConstants.isSuperNovaSkill(skillId)) { // 'SuperNova' Skills
+            Position chrPosition = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showSuperNovaEffect(skillId, slv, 0, chrPosition.getX(), chrPosition.getY())));
+
+        } else if (SkillConstants.isUnregisteredSkill(skillId)) { // 'Unregistered' Skills
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showUnregisteredSkill(skillId, slv, 0, chr.isLeft())));
+
+
+        } else {
+            log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));
+            chr.chatMessage(String.format("Unhandled Remote Effect Skill:  id = %d", skillId));
         }
     }
 }
