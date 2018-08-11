@@ -299,7 +299,7 @@ public class WildHunter extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     public boolean isBuff(int skillID) {

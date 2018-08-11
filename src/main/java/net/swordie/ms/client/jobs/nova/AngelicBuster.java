@@ -208,7 +208,7 @@ public class AngelicBuster extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void soulSeekerExpert(int skillID, byte slv, AttackInfo attackInfo) {

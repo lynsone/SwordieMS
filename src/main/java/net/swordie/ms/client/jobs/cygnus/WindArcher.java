@@ -291,7 +291,7 @@ public class WindArcher extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void createTriflingWindForceAtom(int skillID, byte slv, AttackInfo attackInfo) {

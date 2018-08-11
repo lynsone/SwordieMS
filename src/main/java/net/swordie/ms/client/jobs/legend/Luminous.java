@@ -179,7 +179,7 @@ public class Luminous extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void handleLarkness(int skillId) {

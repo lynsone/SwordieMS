@@ -206,7 +206,7 @@ public class Mihile extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void handleRoyalGuard(TemporaryStatManager tsm, Client c) { //TempStat  Shield Attack is Effect

@@ -167,7 +167,7 @@ public class ThunderBreaker extends Job {
 
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void handleLinkMastery(int skillId, TemporaryStatManager tsm, Client c) {

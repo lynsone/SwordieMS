@@ -364,7 +364,7 @@ public class Kaiser extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {

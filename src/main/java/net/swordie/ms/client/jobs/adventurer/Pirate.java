@@ -572,7 +572,7 @@ public class Pirate extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void activateQuickdraw(AttackInfo attackInfo, TemporaryStatManager tsm, Client c) {

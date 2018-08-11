@@ -209,7 +209,7 @@ public class Aran extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void handleComboAbility(TemporaryStatManager tsm, AttackInfo attackInfo) {

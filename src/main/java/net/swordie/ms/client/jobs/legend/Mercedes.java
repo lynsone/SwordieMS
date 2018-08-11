@@ -202,7 +202,7 @@ public class Mercedes extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void handleIgnisRoar(int skillID, TemporaryStatManager tsm, Client c, AttackInfo attackInfo) {

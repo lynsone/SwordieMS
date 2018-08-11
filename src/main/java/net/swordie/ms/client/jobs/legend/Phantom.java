@@ -197,7 +197,7 @@ public class Phantom extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void carteForceAtom(AttackInfo attackInfo) {

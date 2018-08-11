@@ -297,7 +297,7 @@ public class Zero extends Job {
 
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     public boolean isBuff(int skillID) {

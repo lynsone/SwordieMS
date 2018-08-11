@@ -928,7 +928,7 @@ public class Magician extends Job {
 
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     @Override

@@ -165,7 +165,7 @@ public class Shade extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void createFoxSpiritForceAtom(int skillID) {    //

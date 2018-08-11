@@ -229,7 +229,7 @@ public class Xenon extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     private void handleSupplyCost(int skillID, byte slv, SkillInfo si) {

@@ -332,7 +332,7 @@ public class Demon extends Job {
                 tsm.putCharacterStatValue(ShadowPartner, o1);
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     public boolean isBuff(int skillID) {

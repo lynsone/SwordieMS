@@ -249,7 +249,7 @@ public class BattleMage extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
+        
     }
 
     public void spawnDeath(int skillID, byte slv) {

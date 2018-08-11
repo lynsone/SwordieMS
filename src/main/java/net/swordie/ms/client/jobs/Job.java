@@ -162,9 +162,8 @@ public abstract class Job {
 		Summon summon;
 		Field field;
 		if (isBuff(skillID)) {
-			handleBuff(c, inPacket, skillID, slv);
+			handleJoblessBuff(c, inPacket, skillID, slv);
 		} else {
-
 			if(chr.hasSkill(skillID) && si.getVehicleId() > 0) {
 				TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
 				if(tsm.hasStat(RideVehicle)) {
@@ -217,10 +216,9 @@ public abstract class Job {
 				}
 			}
 		}
-
 	}
 
-	public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+	public void handleJoblessBuff(Client c, InPacket inPacket, int skillID, byte slv) {
 		Char chr = c.getChr();
 		SkillInfo si = SkillData.getSkillInfoById(skillID);
 		TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -232,6 +230,7 @@ public abstract class Job {
 		Summon summon;
 		Field field;
 		int curTime = (int) System.currentTimeMillis();
+		boolean sendStat = true;
 		switch (skillID) {
 			case LIGHTNING_GOD:
 				si = SkillData.getSkillInfoById(80010065); // Lightning God Buff (16 w/m att)
@@ -301,8 +300,12 @@ public abstract class Job {
 				field = c.getChr().getField();
 				field.spawnSummon(summon);
 				break;
+			default:
+				sendStat = false;
 		}
-		tsm.sendSetStatPacket();
+		if (sendStat) {
+			tsm.sendSetStatPacket();
+		}
 	}
 
 	/**

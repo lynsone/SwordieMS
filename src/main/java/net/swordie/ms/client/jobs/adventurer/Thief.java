@@ -369,7 +369,7 @@ public class Thief extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
+        System.out.println("Thief handleskill!");
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -472,7 +472,6 @@ public class Thief extends Job {
                 }
             }
         }
-
         super.handleHit(c, inPacket, hitInfo);
     }
 
@@ -636,7 +635,6 @@ public class Thief extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        super.handleBuff(c, inPacket, skillID, slv);
     }
 
     private void createMesoExplosionAtoms(Drop drop) {
