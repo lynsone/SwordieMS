@@ -571,15 +571,6 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void teleportToPortal(int portalId) {
-		Portal portal = chr.getField().getPortalByID(portalId);
-		if (portal != null) {
-			Position position = new Position(portal.getX(), portal.getY());
-			chr.write(CField.teleport(position, chr));
-		}
-	}
-
-	@Override
 	public int getFieldID() {
 		return chr.getField().getId();
 	}
@@ -732,11 +723,21 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void teleportInField(int portalId) {
-		Field field = chr.getField();
-		Portal portal = field.getPortalByID(portalId);
+	public void teleportInField(Position position) {
+		chr.write(CField.teleport(position, chr));
+	}
+
+	@Override
+	public void teleportInField(int x, int y) {
+		teleportInField(new Position(x, y));
+	}
+
+	@Override
+	public void teleportToPortal(int portalId) {
+		Portal portal = chr.getField().getPortalByID(portalId);
 		if (portal != null) {
-			chr.write(CField.teleport(new Position(portal.getX(), portal.getY()), chr));
+			Position position = new Position(portal.getX(), portal.getY());
+			chr.write(CField.teleport(position, chr));
 		}
 	}
 

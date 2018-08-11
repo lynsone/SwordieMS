@@ -6,6 +6,7 @@ import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
+import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
 
@@ -482,12 +483,22 @@ public interface ScriptManager extends Observer {
 
 
 	/**
-	 * Teleport the player to the specified portal Id's position.
+	 * Teleport the player to a Position in the current field.
 	 *
-	 * @param portalId
-	 * 		The id of the portal to be teleported to.
+	 * @param position
+	 * 		The position to be teleported to.
 	 */
-	void teleportInField(int portalId);
+	void teleportInField(Position position);
+
+	/**
+	 * Teleport the player to a Position in the current field.
+	 *
+	 * @param x
+	 * 		The position's x coordinate to be teleported to.
+	 * @param y
+	 * 		The position's y coordinate to be teleported to.
+	 */
+	void teleportInField(int x, int y);
 
 
 

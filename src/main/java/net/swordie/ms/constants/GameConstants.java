@@ -146,7 +146,6 @@ public class GameConstants {
     public static final int MOBS_PER_GROUP = 5;
 
     public static long[] charExp = new long[251];
-    public static int[] guildExp = new int[25]; // 0~24
     private static int[][] enchantSuccessRates = new int[25][2];
 
     private static List<QuickMoveInfo> quickMoveInfos;
@@ -462,5 +461,12 @@ public class GameConstants {
             return (long) (money - (money * 0.008));
         }
         return money;
+    }
+
+    public static int getExpRequiredForGuildLevel(int curLevel) {
+        if (curLevel >= 25) {
+            return 0;
+        }
+        return 15000 + 30000 * (curLevel - 1);
     }
 }

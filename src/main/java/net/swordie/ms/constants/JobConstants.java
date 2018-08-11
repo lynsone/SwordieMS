@@ -20,6 +20,7 @@ public class JobConstants {
     public static boolean isBeastTamer(short job) {
         return job / 1000 == 11;
     }
+
     public static boolean isPinkBean(short job){
         return job == JobEnum.PINK_BEAN_0.getJobId() || job == JobEnum.PINK_BEAN_1.getJobId();
     }
@@ -611,7 +612,7 @@ public class JobConstants {
     }
 
     public static boolean isDemon(short jobId) {
-        return jobId / 100 == 31 || jobId == 3001 || jobId == 3002 || jobId / 100 == 36;
+        return jobId / 100 == 31 || jobId == 3001 || jobId / 100 == 36;
     }
 
     public static boolean isBeginnerJob(short jobId) {
