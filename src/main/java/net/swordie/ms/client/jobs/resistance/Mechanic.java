@@ -128,10 +128,14 @@ public class Mechanic extends Job {
                 //o1.tOption = 30;
                 //tsm.putCharacterStatValue(Mechanic, o1);
                 //1932016 - Humanoid Mech
-                tsb.setNOption(1932016);
-                tsb.setROption(skillID);
-                tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
-                tsm.sendResetStatPacket();
+                if (tsm.hasStat(RideVehicle)) {
+                    tsm.removeStat(RideVehicle, false);
+                } else {
+                    tsb.setNOption(1932016);
+                    tsb.setROption(skillID);
+                    tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+                    tsm.sendSetStatPacket();
+                }
                 break;
 
             case TANK_MECH:

@@ -160,7 +160,7 @@ public class TemporaryStatManager {
         }
         getRemovedStats().put(cts, getCurrentStats().get(cts));
         getCurrentStats().remove(cts);
-        sendResetStatPacket();
+        sendResetStatPacket(cts == RideVehicle || cts == RideVehicleExpire);
         if (TSIndex.isTwoStat(cts)) {
             getTSBByTSIndex(TSIndex.getTSEFromCTS(cts)).reset();
         }
@@ -783,8 +783,12 @@ public class TemporaryStatManager {
     }
 
     public void sendResetStatPacket() {
+        sendResetStatPacket(false);
+    }
+
+    public void sendResetStatPacket(boolean demount) {
         getChr().getField().broadcastPacket(UserRemote.resetTepmoraryStat(getChr()), getChr());
-        getChr().getClient().write(WvsContext.temporaryStatReset(this, false));
+        getChr().getClient().write(WvsContext.temporaryStatReset(this, demount));
     }
 
     public void removeAllDebuffs() {
