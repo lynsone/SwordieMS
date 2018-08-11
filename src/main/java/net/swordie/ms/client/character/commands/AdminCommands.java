@@ -11,11 +11,8 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.guild.Guild;
-import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.result.GuildJoinMsg;
-import net.swordie.ms.client.guild.updates.GuildUpdate;
-import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Portal;
@@ -34,9 +31,6 @@ import net.swordie.ms.Server;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -56,26 +50,7 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            OutPacket outPacket = new OutPacket(OutHeader.MESSAGE.getValue());
-
-            outPacket.encodeByte(UserEffectType.SkillUse.getVal());
-
-            outPacket.encodeInt(100402);
-
-//            outPacket.encodeInt(100000);
-            // eX = enabled
-            // 1 mob = 0e0?
-            // an octet per mob. Probably 3 different properties, but can't figure those out atm
-            // <sessionid>=aaab bbcc cddd <repeat>
-//          // example: "0=892892892892892892889289289289289289289289289289";
-             outPacket.encodeString("2=8928928928928928928fffffffffffffffffffffffffffff");
-//             outPacket.encodeString("0=e00000000000000038000000000000000000000000000000");
-//             outPacket.encodeString("2=89289289 28928928 928fffff ffffffff ffffffff ffffffff");
-//             outPacket.encodeString("2=8928928928928920");
-//            chr.write(outPacket);
-
-
-            chr.write(User.effect(Effect.effectFromWZ("Effect/BasicEff.img/monsterCollectionGet", true, 0, 4, 0)));
+            
         }
     }
 
