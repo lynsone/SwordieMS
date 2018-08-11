@@ -590,6 +590,18 @@ public class Field {
         getMobs().forEach(mob -> aa.getField().checkMobInAffectedAreas(mob));
     }
 
+    public void spawnAffectedAreaAndRemoveOld(AffectedArea aa) {
+        AffectedArea oldAA = (AffectedArea) getLifes().stream()
+                .filter(l -> l instanceof AffectedArea &&
+                        ((AffectedArea) l).getCharID() == aa.getCharID() &&
+                        ((AffectedArea) l).getSkillID() == aa.getSkillID())
+                .findFirst().orElse(null);
+        if (oldAA != null) {
+            removeLife(oldAA.getObjectId(), false);
+        }
+        spawnAffectedArea(aa);
+    }
+
     public List<Mob> getMobs() {
         return getLifes().stream().filter(life -> life instanceof Mob).map(l -> (Mob) l).collect(Collectors.toList());
     }

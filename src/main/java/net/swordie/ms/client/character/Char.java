@@ -8,10 +8,7 @@ import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.cards.MonsterBookInfo;
 import net.swordie.ms.client.character.damage.DamageCalc;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
-import net.swordie.ms.client.character.info.ExpIncreaseInfo;
-import net.swordie.ms.client.character.info.FarmUserInfo;
-import net.swordie.ms.client.character.info.FreezeHotEventInfo;
-import net.swordie.ms.client.character.info.ZeroInfo;
+import net.swordie.ms.client.character.info.*;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
@@ -59,7 +56,6 @@ import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
-import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
@@ -3768,6 +3764,12 @@ public class Char {
 
 	public void setTradeRoom(TradeRoom tradeRoom) {
 		this.tradeRoom = tradeRoom;
+	}
+
+	public void damage(int damage) {
+		HitInfo hi = new HitInfo();
+		hi.hpDamage = damage;
+		getJobHandler().handleHit(getClient(), hi);
 	}
 
 	@Override

@@ -17,6 +17,8 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.UserRemote;
@@ -37,6 +39,7 @@ import java.util.Map;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import static net.swordie.ms.client.jobs.cygnus.Mihile.*;
 
 
 /**
@@ -395,6 +398,7 @@ public abstract class Job {
 	 * 		The hit info that should be altered if necessary
 	 */
 	public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+		Char chr = c.getChr();
 		TemporaryStatManager tsm = chr.getTemporaryStatManager();
 		if (tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
 			if (Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
@@ -403,6 +407,30 @@ public abstract class Job {
 				Magician.hmshits = 0;
 				tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
 			}
+		}
+		if (tsm.hasStat(MichaelSoulLink) && chr.getId() != tsm.getOption(MichaelSoulLink).cOption) {
+			Party party = chr.getParty();
+
+			PartyMember mihileInParty = party.getPartyMemberByID(tsm.getOption(MichaelSoulLink).cOption);
+			if (mihileInParty != null) {
+				Char mihileChr = mihileInParty.getChr();
+				Skill skill = mihileChr.getSkill(SOUL_LINK);
+				SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+				byte slv = (byte) skill.getCurrentLevel();
+
+				int hpDmg = hitInfo.hpDamage;
+				int mihileDmgTaken = (int) (hpDmg * ((double) si.getValue(q, slv) / 100));
+
+				hitInfo.hpDamage = hitInfo.hpDamage - mihileDmgTaken;
+				mihileChr.damage(mihileDmgTaken);
+			} else {
+				tsm.removeStatsBySkill(SOUL_LINK);
+				tsm.removeStatsBySkill(ROYAL_GUARD);
+				tsm.removeStatsBySkill(ENDURING_SPIRIT);
+				tsm.sendResetStatPacket();
+			}
+
+
 		}
 	}
 
