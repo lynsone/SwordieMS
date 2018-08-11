@@ -2,6 +2,7 @@ package net.swordie.ms.connection;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.handlers.header.OutHeader;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.util.FileTime;
@@ -288,5 +289,9 @@ public class OutPacket extends Packet {
 
     public void encodeFT(LocalDateTime localDateTime) {
         encodeFT(FileTime.fromDate(localDateTime));
+    }
+
+    public void encode(Encodable encodable) {
+        encodable.encode(this);
     }
 }

@@ -14,7 +14,7 @@ import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
-import net.swordie.ms.client.guild.result.GuildResultInfo;
+import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -684,10 +684,9 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket guildResult(GuildResultInfo gri) {
+    public static OutPacket guildResult(GuildResult gri) {
         OutPacket outPacket = new OutPacket(OutHeader.GUILD_RESULT);
 
-        outPacket.encodeByte(gri.getType().getVal());
         gri.encode(outPacket);
 
         return outPacket;

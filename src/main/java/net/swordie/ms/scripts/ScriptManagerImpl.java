@@ -15,7 +15,7 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.guild.result.GuildMsg;
+import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -970,7 +970,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void showGuildCreateWindow() {
-		chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Req_InputGuildName)));
+		chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Req_InputGuildName)));
 	}
 
 

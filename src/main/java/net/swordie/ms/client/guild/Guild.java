@@ -1,7 +1,11 @@
 package net.swordie.ms.client.guild;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.GameConstants;
 
 import javax.persistence.*;
 import java.util.*;
@@ -12,7 +16,7 @@ import java.util.stream.Collectors;
  */
 @Entity
 @Table(name = "guilds")
-public class Guild {
+public class Guild implements Encodable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -165,7 +169,7 @@ public class Guild {
     public void setLeader(GuildMember leader) {
         int oldGrade = leader.getGrade();
         if(getLeaderID() != 0) {
-            getMemberByID(getLeaderID()).setGrade(oldGrade);
+            getMemberByCharID(getLeaderID()).setGrade(oldGrade);
         }
         this.leaderID = leader.getCharID();
         leader.setGrade(1);
@@ -175,7 +179,7 @@ public class Guild {
         return getLeaderID() == gm.getCharID();
     }
 
-    public GuildMember getMemberByID(int id) {
+    public GuildMember getMemberByCharID(int id) {
         return getMembers().stream().filter(gm -> gm.getCharID() == id).findAny().orElse(null);
     }
 
@@ -249,6 +253,7 @@ public class Guild {
     }
 
     public void setGradeNames(String[] gradeNames) {
+        getGradeNames().clear();
         for (String gradeName : gradeNames) {
             getGradeNames().add(gradeName);
         }
@@ -372,5 +377,23 @@ public class Guild {
         outPacket.encodeByte(0);
         outPacket.encodeShort(0);
         outPacket.encodeByte(0);
+    }
+
+    /**
+     * Adds a given amount of commitment to the char.
+     * @param chr the char that the commitment should be given to
+     * @param commitment the amount of commitment to add
+     */
+    public void addCommitmentToChar(Char chr, int commitment) {
+        GuildMember gm = getMemberByCharID(chr.getId());
+        if (gm != null && gm.getRemainingDayCommitment() > 0) {
+            gm.addCommitment(commitment);
+            addGgp((int) (commitment * GameConstants.GGP_PER_CONTRIBUTION));
+        }
+    }
+
+    private void addGgp(int ggp) {
+        setGgp(getGgp() + ggp);
+        broadcast(WvsContext.guildResult(GuildResult.setGgp(this)));
     }
 }

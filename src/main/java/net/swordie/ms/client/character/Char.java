@@ -31,8 +31,7 @@ import net.swordie.ms.client.friend.FriendRecord;
 import net.swordie.ms.client.friend.FriendshipRingRecord;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.updates.GuildUpdate;
-import net.swordie.ms.client.guild.updates.GuildUpdateMemberLogin;
+import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
@@ -59,7 +58,6 @@ import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
-import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
@@ -1779,7 +1777,10 @@ public class Char {
 			getParty().updateFull();
 		}
 		if (getGuild() != null) {
-			// TODO
+			GuildMember gm = getGuild().getMemberByCharID(getId());
+			gm.setLevel(getLevel());
+			gm.setJob(getJob());
+			getGuild().broadcast(WvsContext.guildResult(GuildResult.changeLevelOrJob(getGuild(), gm)));
 		}
 	}
 
@@ -2196,7 +2197,7 @@ public class Char {
 		if (characterData) {
 			initSoulMP();
 			if (getGuild() != null) {
-				write(WvsContext.guildResult(new GuildUpdate(getGuild())));
+				write(WvsContext.guildResult(GuildResult.loadGuild(getGuild())));
 			}
 			for (Friend f : getFriends()) {
 				f.setFlag(getClient().getWorld().getCharByID(f.getFriendID()) != null
@@ -2299,6 +2300,9 @@ public class Char {
 	public void addExp(long amount, ExpIncreaseInfo eii) {
 		if(amount <= 0) {
 			return;
+		}
+		if (getGuild() != null) {
+			getGuild().addCommitmentToChar(this, (int) Math.min(amount, Integer.MAX_VALUE)); // independant of any xp buffs
 		}
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
@@ -3017,11 +3021,11 @@ public class Char {
 		if (getGuild() != null) {
 			setGuild(getGuild()); // Hack to ensure that all chars have the same instance of a guild
 			Guild g = getGuild();
-			GuildMember gm = g.getMemberByID(getId());
+			GuildMember gm = g.getMemberByCharID(getId());
 			gm.setOnline(online);
 			gm.setChr(online ? this : null);
 			getGuild().broadcast(WvsContext.guildResult(
-					new GuildUpdateMemberLogin(g.getId(), getId(), online, !this.online && online)), this);
+					GuildResult.notifyLoginOrLogout(g, gm, online, !this.online && online)), this);
 		}
 		this.online = online;
 		if (getParty() != null) {

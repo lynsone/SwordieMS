@@ -133,12 +133,20 @@ public class GameConstants {
     // Trading
     public static final int MAX_TRADE_ITEMS = 9;
 
+    // Guild
+    public static final int MAX_DAY_COMMITMENT = 50000;
+    public static final int SP_PER_GUILD_LEVEL = 2;
+    public static final double GGP_PER_CONTRIBUTION = 0.3;
+    public static final double IGP_PER_CONTRIBUTION = 0.7;
+
+
 
     // Monster Collection
     public static final int MOBS_PER_PAGE = 25;
     public static final int MOBS_PER_GROUP = 5;
 
     public static long[] charExp = new long[251];
+    public static int[] guildExp = new int[25]; // 0~24
     private static int[][] enchantSuccessRates = new int[25][2];
 
     private static List<QuickMoveInfo> quickMoveInfos;
