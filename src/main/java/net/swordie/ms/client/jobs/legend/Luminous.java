@@ -20,7 +20,6 @@ import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Util;
 
@@ -182,7 +181,7 @@ public class Luminous extends Job {
         
     }
 
-    private void handleLarkness(int skillId) {
+    private void changeLarknessState(int skillId) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         LarknessManager lm = tsm.getLarknessManager();
         if(SkillConstants.isLarknessLightSkill(skillId)) {
@@ -194,7 +193,7 @@ public class Luminous extends Job {
 
 
 
-    private void handleLunarTide() {
+    private void giveLunarTideBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(chr.hasSkill(LUNAR_TIDE)) {
             Option o1 = new Option();
@@ -235,7 +234,7 @@ public class Luminous extends Job {
         }
     }
 
-    private void handleDarkCrescendo(int skillId, TemporaryStatManager tsm, Client c) {
+    private void incrementDarkCrescendo(TemporaryStatManager tsm) {
         Option o = new Option();
         Option o1 = new Option();
         SkillInfo crescendoInfo = SkillData.getSkillInfoById(DARK_CRESCENDO);
@@ -277,7 +276,7 @@ public class Luminous extends Job {
         return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
-    public static void handleBlackBlessingIncrease(Client c) {
+    public static void incrementBlackBlessing(Client c) {
         Char chr = c.getChr();
         Option o = new Option();
         Option o1 = new Option();
@@ -343,7 +342,7 @@ public class Luminous extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleLarkness(skillID);
+        changeLarknessState(skillID);
         int crescendoProp = getCrescendoProp(chr);
         if (hasHitMobs) {
             if(!tsm.hasStat(Larkness)) {
@@ -357,11 +356,11 @@ public class Luminous extends Job {
             // Dark Crescendo
             if (tsm.hasStat(StackBuff)) {
                 if (skill != null && Util.succeedProp(crescendoProp)) {
-                    handleDarkCrescendo(skill.getSkillId(), tsm, c);
+                    incrementDarkCrescendo(tsm);
                 }
             }
         }
-        handleLunarTide();
+        giveLunarTideBuff();
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();

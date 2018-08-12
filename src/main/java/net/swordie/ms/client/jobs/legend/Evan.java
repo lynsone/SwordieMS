@@ -21,7 +21,6 @@ import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -265,7 +264,7 @@ public class Evan extends Job {
         if(hasHitMobs) {
             // Partners
             if (getEvanSkill(skillID) != 1) {
-                handlePartners(skillID);
+                givePartnersBuff(skillID);
             }
 
             // Wreckage / Magic Debris
@@ -292,7 +291,7 @@ public class Evan extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    public void handlePartners(int skillID) {
+    public void givePartnersBuff(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(PARTNERS);
         Option o = new Option();
@@ -373,7 +372,7 @@ public class Evan extends Job {
                     break;
                 case MAGIC_DEBRIS:
                 case ENHANCED_MAGIC_DEBRIS:
-                    handleMagicDebris();
+                    createMagicDebrisForceAtom();
                     break;
                 case HEROS_WILL_EVAN:
                     tsm.removeAllDebuffs();
@@ -452,7 +451,7 @@ public class Evan extends Job {
         return 0;
     }
 
-    private void handleMagicDebris() {
+    private void createMagicDebrisForceAtom() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(getDebrisSkill());
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));

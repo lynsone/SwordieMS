@@ -3,37 +3,37 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.Foothold;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 //TODO MM/BM - Passives
 
@@ -149,10 +149,10 @@ public class Archer extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleQuiverCartridge(c, chr.getTemporaryStatManager(), attackInfo, slv);
-            handleFocusedFury();
-            handleMortalBlow();
-            handleAggresiveResistance(attackInfo);
+            quiverCartridge(c, chr.getTemporaryStatManager(), attackInfo, slv);
+            incrementFocusedFury();
+            incrementMortalBlow();
+            giveAggressiveResistanceBuff(attackInfo);
 
 
         }
@@ -261,7 +261,7 @@ public class Archer extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleAggresiveResistance(AttackInfo ai) {
+    private void giveAggressiveResistanceBuff(AttackInfo ai) {
         if(!chr.hasSkill(AGGRESSIVE_RESISTANCE)) {
             return;
         }
@@ -287,10 +287,10 @@ public class Archer extends Job {
         o.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(DamAbsorbShield, o);
         tsm.sendSetStatPacket();
-        handleAggressiveResistanceEffect();
+        showAggressiveResistanceEffect();
     }
 
-    private void handleAggressiveResistanceEffect() {
+    private void showAggressiveResistanceEffect() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         Skill skill = chr.getSkill(AGGRESSIVE_RESISTANCE);
@@ -303,7 +303,7 @@ public class Archer extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private void handleMortalBlow() {
+    private void incrementMortalBlow() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         Option o1 = new Option();
@@ -325,7 +325,7 @@ public class Archer extends Job {
         }
     }
 
-    private void handleFocusedFury() {
+    private void incrementFocusedFury() {
         if(!chr.hasSkill(FOCUSED_FURY)) {
             return;
         }
@@ -348,7 +348,7 @@ public class Archer extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private void handleQuiverCartridge(Client c, TemporaryStatManager tsm, AttackInfo attackInfo, int slv) {
+    private void quiverCartridge(Client c, TemporaryStatManager tsm, AttackInfo attackInfo, int slv) {
         Char chr = c.getChr();
         if (quiverCartridge == null) {
             return;

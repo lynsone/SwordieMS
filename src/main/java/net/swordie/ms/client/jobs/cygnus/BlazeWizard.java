@@ -267,7 +267,7 @@ public class BlazeWizard extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleIgnite(attackInfo);
+            applyIgniteOnMob(attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -304,7 +304,7 @@ public class BlazeWizard extends Job {
         }
     }
 
-    private void handleIgnite(AttackInfo attackInfo) {  //TODO only registers Explosion attack if >1 mob is hit
+    private void applyIgniteOnMob(AttackInfo attackInfo) {  //TODO only registers Explosion attack if >1 mob is hit
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         if(tsm.hasStat(WizardIgnite)) {

@@ -632,7 +632,7 @@ public class Pirate extends Job {
         }
     }
 
-    private void viperEnergyCosts(int skillID) {
+    private void applyViperEnergyCosts(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
         Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
@@ -750,7 +750,7 @@ public class Pirate extends Job {
 
                 //Viper Energy
                 chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy before: "+ getViperEnergy());
-                viperEnergyCosts(attackInfo.skillId);
+                applyViperEnergyCosts(attackInfo.skillId);
                 incrementViperEnergy(getEnergyincrease());
                 chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
 

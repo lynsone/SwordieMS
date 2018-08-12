@@ -3,33 +3,41 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.*;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.MobPool;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.AssistType;
+import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.LeaveType;
+import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 //TODO Paladin Divine Shield & Guardian
 //TODO DarkKnight Sacrifice & Evil Eye
@@ -107,13 +115,11 @@ public class Warrior extends Job {
     public static final int SMITE_SHIELD = 1221052; //Lv170
 
 
-
-
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
     };
 
-    private final int[] buffs = new int[]{
+    private final int[] buffs = new int[] {
             WEAPON_BOOSTER_FIGHTER, // Weapon Booster - Fighter
             COMBO_ATTACK, // Combo Attack
             RAGE, // Rage
@@ -150,10 +156,11 @@ public class Warrior extends Job {
     private long lastEvilEyeShock = Long.MIN_VALUE;
     private int lastCharge = 0;
     private int divShieldAmount = 0;
+    private ScheduledFuture parashockGuardTimer;
 
     public Warrior(Char chr) {
         super(chr);
-        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
+        if (chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -164,7 +171,7 @@ public class Warrior extends Job {
         }
     }
 
-    
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -218,29 +225,16 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(CombatOrders, o1);
                 break;
             case PARASHOCK_GUARD:
-                if (tsm.hasStat(KnightsAura)) {
-                    tsm.removeStatsBySkill(skillID);
-                    tsm.sendResetStatPacket();
-                } else {
-                    o1.nReason = skillID;
-                    o1.nValue = si.getValue(indiePad, slv);
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndiePAD, o1);
-                    o2.nReason = skillID;
-                    o2.nValue = si.getValue(indiePddR, slv);
-                    o2.tStart = (int) System.currentTimeMillis();
-                    o2.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndiePDDR, o1);
-                    o3.nOption = si.getValue(z, slv);
-                    o3.rOption = skillID;
-                    o3.tOption = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(Guard, o3);
-                    o4.nOption = 1;
-                    o4.rOption = skillID;
-                    o4.tOption = 0;
-                    tsm.putCharacterStatValue(KnightsAura, o4);
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = 0;
+                tsm.putCharacterStatValue(EVA, o1); // Check for the main Buff method
+
+                if(parashockGuardTimer != null && !parashockGuardTimer.isDone()) {
+                    parashockGuardTimer.cancel(true);
                 }
+                giveParashockGuardBuff();
+
                 break;
             case ELEMENTAL_FORCE:
                 o1.nReason = skillID;
@@ -249,7 +243,7 @@ public class Warrior extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
                 break;
-            case GUARDIAN:
+            case GUARDIAN: //TODO
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -296,7 +290,7 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(PDD, o2);
                 break;
             case EVIL_EYE_OF_DOMINATION://TODO
-                if(tsm.hasStat(Beholder)) {
+                if (tsm.hasStat(Beholder)) {
                     tsm.removeStatsBySkill(EVIL_EYE_OF_DOMINATION);
                     spawnEvilEye(EVIL_EYE, (byte) 1);
                 } else {
@@ -309,7 +303,7 @@ public class Warrior extends Job {
                 }
                 break;
             case SACRIFICE:
-                if(tsm.hasStat(Beholder)) {
+                if (tsm.hasStat(Beholder)) {
                     o2.nOption = si.getValue(x, slv);
                     o2.rOption = skillID;
                     o2.tOption = si.getValue(time, slv);
@@ -347,7 +341,7 @@ public class Warrior extends Job {
                 tsm.putCharacterStatValue(IgnoreMobpdpR, o3);
                 break;
 
-                //Hypers
+            //Hypers
             case EPIC_ADVENTURE_DRK:
             case EPIC_ADVENTURE_HERO:
             case EPIC_ADVENTURE_PALA:
@@ -393,7 +387,7 @@ public class Warrior extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
+
     }
 
     public boolean isBuff(int skillID) {
@@ -416,27 +410,27 @@ public class Warrior extends Job {
         }
         int comboProp = getComboProp(chr);
         //if (JobConstants.isHero(chr.getJob())) {
-            if(hasHitMobs) {
-                //Combo
-                if(Util.succeedProp(comboProp)) {
+        if (hasHitMobs) {
+            //Combo
+            if (Util.succeedProp(comboProp)) {
+                addCombo(chr);
+                Skill advCombo = chr.getSkill(COMBO_ATTACK);
+                int secondProp = SkillData.getSkillInfoById(advCombo.getSkillId()).getValue(prop, slv);
+                if (advCombo != null && Util.succeedProp(secondProp)) {
                     addCombo(chr);
-                    Skill advCombo = chr.getSkill(COMBO_ATTACK);
-                    int secondProp = SkillData.getSkillInfoById(advCombo.getSkillId()).getValue(prop, slv);
-                    if(advCombo != null && Util.succeedProp(secondProp)) {
-                        addCombo(chr);
-                    }
                 }
             }
+        }
         //}
 
         if (JobConstants.isPage(chr.getJob())) {
-            if(hasHitMobs) {
+            if (hasHitMobs) {
 
             }
         }
 
         if (JobConstants.isDarkKnight(chr.getJob())) {
-            if(hasHitMobs) {
+            if (hasHitMobs) {
                 //Lord of Darkness
                 lordOfDarkness();
 
@@ -503,7 +497,7 @@ public class Warrior extends Job {
                     removeCombo(chr, 1);
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(mob.isBoss()) {
+                    if (mob.isBoss()) {
                         o1.nOption = si.getValue(x, slv);
                         o1.rOption = SHOUT_DOWN;
                         o1.tOption = si.getValue(time, slv);
@@ -517,7 +511,7 @@ public class Warrior extends Job {
                 }
                 break;
             case PUNCTURE:
-                if(hasHitMobs) {
+                if (hasHitMobs) {
                     removeCombo(chr, si.getValue(y, slv));
                 }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -527,7 +521,7 @@ public class Warrior extends Job {
                     o1.rOption = skillID;
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptions(MobStat.AddDamParty, o1);
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         mts.createAndAddBurnedInfo(chr, skill, 1);
                     }
                 }
@@ -545,9 +539,9 @@ public class Warrior extends Job {
                 }
                 break;
             case FLAME_CHARGE:
-                handleCharges(skill.getSkillId(), tsm, c);
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                giveChargeBuff(skill.getSkillId(), tsm);
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr, skill, 1);
@@ -555,9 +549,9 @@ public class Warrior extends Job {
                 }
                 break;
             case BLIZZARD_CHARGE:
-                handleCharges(skill.getSkillId(), tsm, c);
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                giveChargeBuff(skill.getSkillId(), tsm);
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.tOption = si.getValue(time, slv);
@@ -566,9 +560,9 @@ public class Warrior extends Job {
                 }
                 break;
             case LIGHTNING_CHARGE:
-                handleCharges(skill.getSkillId(), tsm, c);
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                giveChargeBuff(skill.getSkillId(), tsm);
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -583,8 +577,8 @@ public class Warrior extends Job {
                 }
                 break;
             case DIVINE_CHARGE:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(Util.succeedProp(si.getValue(prop, slv))) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -593,32 +587,32 @@ public class Warrior extends Job {
                         mts.addStatOptionsAndBroadcast(MobStat.Seal, o1);
                     }
                 }
-                handleCharges(skill.getSkillId(), tsm, c);
+                giveChargeBuff(skill.getSkillId(), tsm);
                 break;
             case BLAST:
                 int charges = tsm.getOption(ElementalCharge).mOption;
-                if(charges == SkillData.getSkillInfoById(ELEMENTAL_CHARGE).getValue(z, 1)) {
-                    if(tsm.getOptByCTSAndSkill(DamR, BLAST) == null) {
-                    resetCharges(c, tsm);
-                    int t = si.getValue(time, slv);
-                    o1.nOption = si.getValue(cr, slv);
-                    o1.rOption = skillID;
-                    o1.tOption = t;
-                    tsm.putCharacterStatValue(CriticalBuff, o1);
-                    o2.nOption = si.getValue(ignoreMobpdpR, slv);
-                    o2.rOption = skillID;
-                    o2.tOption = t;
-                    tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
-                    o3.nOption = si.getValue(damR, slv);
-                    o3.rOption = skillID;
-                    o3.tOption = t;
-                    tsm.putCharacterStatValue(DamR, o3);
-                    tsm.sendSetStatPacket();
+                if (charges == SkillData.getSkillInfoById(ELEMENTAL_CHARGE).getValue(z, 1)) {
+                    if (tsm.getOptByCTSAndSkill(DamR, BLAST) == null) {
+                        resetCharges(c, tsm);
+                        int t = si.getValue(time, slv);
+                        o1.nOption = si.getValue(cr, slv);
+                        o1.rOption = skillID;
+                        o1.tOption = t;
+                        tsm.putCharacterStatValue(CriticalBuff, o1);
+                        o2.nOption = si.getValue(ignoreMobpdpR, slv);
+                        o2.rOption = skillID;
+                        o2.tOption = t;
+                        tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
+                        o3.nOption = si.getValue(damR, slv);
+                        o3.rOption = skillID;
+                        o3.tOption = t;
+                        tsm.putCharacterStatValue(DamR, o3);
+                        tsm.sendSetStatPacket();
                     }
                 }
                 break;
             case SMITE_SHIELD:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
@@ -628,7 +622,7 @@ public class Warrior extends Job {
                 }
                 break;
             case SPEAR_SWEEP:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
@@ -640,17 +634,17 @@ public class Warrior extends Job {
             case FINAL_ATTACK_FIGHTER:
             case FINAL_ATTACK_SPEARMAN:
             case FINAL_ATTACK_PAGE:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     long dmg = 0;
                     for (int i = 0; i < mai.damages.length; i++) {
                         dmg += mai.damages[i];
                     }
-                    c.write(MobPool.mobDamaged(mob.getObjectId(),dmg, mob.getTemplateId(), (byte) 1,(int)  mob.getHp(), (int) mob.getMaxHp()));
+                    c.write(MobPool.mobDamaged(mob.getObjectId(), dmg, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
                 }
                 break;
             case EVIL_EYE_SHOCK:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
@@ -690,7 +684,7 @@ public class Warrior extends Job {
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
-        if(skill != null) {
+        if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
@@ -700,7 +694,7 @@ public class Warrior extends Job {
             Option o1 = new Option();
             Option o2 = new Option();
             Option o3 = new Option();
-            switch(skillID) {
+            switch (skillID) {
                 case MAPLE_RETURN:
                     o1.nValue = si.getValue(x, slv);
                     Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
@@ -711,14 +705,14 @@ public class Warrior extends Job {
                     break;
                 case THREATEN:
                     Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-                    if(chr.isLeft()) {
+                    if (chr.isLeft()) {
                         rect = rect.moveLeft();
                     }
-                    for(Life life : chr.getField().getLifesInRect(rect)) {
-                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                    for (Life life : chr.getField().getLifesInRect(rect)) {
+                        if (life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();
-                            if(Util.succeedProp(si.getValue(prop, slv))) {
+                            if (Util.succeedProp(si.getValue(prop, slv))) {
                                 o1.nOption = -si.getValue(x, slv);
                                 o1.rOption = skillID;
                                 o1.tOption = si.getValue(time, slv);
@@ -738,14 +732,14 @@ public class Warrior extends Job {
                 case MAGIC_CRASH_HERO:
                 case MAGIC_CRASH_PALLY:
                     Rect rect2 = chr.getPosition().getRectAround(si.getRects().get(0));
-                    if(!chr.isLeft()) {
+                    if (!chr.isLeft()) {
                         rect2 = rect2.moveRight();
                     }
-                    for(Life life : chr.getField().getLifesInRect(rect2)) {
-                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                    for (Life life : chr.getField().getLifesInRect(rect2)) {
+                        if (life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();
-                            if(Util.succeedProp(si.getValue(prop, slv))) {
+                            if (Util.succeedProp(si.getValue(prop, slv))) {
                                 mts.removeBuffs();
                                 o1.nOption = 1;
                                 o1.rOption = skillID;
@@ -769,9 +763,10 @@ public class Warrior extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
 
         //Paladin - Divine Shield
-        if(chr.hasSkill(DIVINE_SHIELD)) {
+        if (chr.hasSkill(DIVINE_SHIELD)) {
+            Skill skill = chr.getSkill(DIVINE_SHIELD);
             SkillInfo si = SkillData.getSkillInfoById(DIVINE_SHIELD);
-            int slv = si.getCurrentLevel();
+            int slv = skill.getCurrentLevel();
             int shieldprop = 50;//      si.getValue(SkillStat.prop, slv);       //TODO should be prop in WzFiles, but it's actually 0
             Option o1 = new Option();
             Option o2 = new Option();
@@ -784,7 +779,7 @@ public class Warrior extends Job {
                     divShieldAmount = 0;
                 }
             } else {
-                if(lastDivineShieldHit + (divShieldCoolDown * 1000) < System.currentTimeMillis()) {
+                if (lastDivineShieldHit + (divShieldCoolDown * 1000) < System.currentTimeMillis()) {
                     if (Util.succeedProp(shieldprop)) {
                         lastDivineShieldHit = System.currentTimeMillis();
                         o1.nOption = 1;
@@ -803,18 +798,18 @@ public class Warrior extends Job {
         }
 
         //Hero - Combo Synergy
-        if(chr.hasSkill(1110013)) {
+        if (chr.hasSkill(1110013)) {
             SkillInfo csi = SkillData.getSkillInfoById(1110013);
             int slv = csi.getCurrentLevel();
             int comboprop = 30; //csi.getValue(subProp, slv);
-            if(Util.succeedProp(comboprop)) {
+            if (Util.succeedProp(comboprop)) {
                 addCombo(chr);
             }
         }
 
         //Paladin - Shield Mastery
-        if(chr.hasSkill(1210001)) { //If Wearing a Shield
-            if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
+        if (chr.hasSkill(1210001)) { //If Wearing a Shield
+            if (hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
                 // Guarded
                 int mobID = hitInfo.mobID;
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mobID);
@@ -836,14 +831,14 @@ public class Warrior extends Job {
         }
 
         //Dark Knight - Revenge of the Evil Eye
-        if(chr.hasSkill(1320011)) {
+        if (chr.hasSkill(1320011)) {
             Skill skill = chr.getSkill(1320011);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int proc = si.getValue(prop, slv);
             int cd = 1000 * si.getValue(cooltime, slv);
             int heal = si.getValue(x, slv);
-            if(tsm.getOptByCTSAndSkill(PDD, EVIL_EYE) != null) {
+            if (tsm.getOptByCTSAndSkill(PDD, EVIL_EYE) != null) {
                 if (cd + revengeEvilEye < System.currentTimeMillis()) {
                     if (Util.succeedProp(proc)) {
                         c.write(Summoned.summonBeholderRevengeAttack(chr.getId(), evilEye, hitInfo.mobID));
@@ -947,7 +942,7 @@ public class Warrior extends Job {
 
     @Override
     public int getFinalAttackSkill() {
-        if(Util.succeedProp(getFinalAttackProc())) {
+        if (Util.succeedProp(getFinalAttackProc())) {
             int fas = 0;
             if (chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
                 fas = FINAL_ATTACK_FIGHTER;
@@ -969,17 +964,17 @@ public class Warrior extends Job {
 
     private Skill getFinalAtkSkill(Char chr) {
         Skill skill = null;
-        if(chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
+        if (chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
             skill = chr.getSkill(FINAL_ATTACK_FIGHTER);
         }
-        if(chr.hasSkill(FINAL_ATTACK_PAGE)) {
+        if (chr.hasSkill(FINAL_ATTACK_PAGE)) {
             skill = chr.getSkill(FINAL_ATTACK_PAGE);
         }
-        if(chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
+        if (chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
             skill = chr.getSkill(FINAL_ATTACK_SPEARMAN);
         }
 
-        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+        if (chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
             skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
         }
         return skill;
@@ -996,16 +991,16 @@ public class Warrior extends Job {
         return si.getValue(prop, slv);
     }
 
-    private void handleCharges(int skillId, TemporaryStatManager tsm, Client c) {
+    private void giveChargeBuff(int skillId, TemporaryStatManager tsm) {
         Option o = new Option();
         SkillInfo chargeInfo = SkillData.getSkillInfoById(1200014);
         int amount = 1;
-        if(tsm.hasStat(ElementalCharge)) {
+        if (tsm.hasStat(ElementalCharge)) {
             amount = tsm.getOption(ElementalCharge).mOption;
             if (lastCharge == skillId) {
                 return;
             }
-            if(amount < chargeInfo.getValue(z, 1)) {
+            if (amount < chargeInfo.getValue(z, 1)) {
                 amount++;
             }
         }
@@ -1028,11 +1023,11 @@ public class Warrior extends Job {
 
     private Skill getFinalAttackSkill(Char chr) {
         Skill skill = null;
-        if(chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
+        if (chr.hasSkill(FINAL_ATTACK_FIGHTER)) {
             skill = chr.getSkill(FINAL_ATTACK_FIGHTER);
-        } else if(chr.hasSkill(FINAL_ATTACK_PAGE)) {
+        } else if (chr.hasSkill(FINAL_ATTACK_PAGE)) {
             skill = chr.getSkill(FINAL_ATTACK_PAGE);
-        } else if(chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
+        } else if (chr.hasSkill(FINAL_ATTACK_SPEARMAN)) {
             skill = chr.getSkill(FINAL_ATTACK_SPEARMAN);
         }
         return skill;
@@ -1040,18 +1035,18 @@ public class Warrior extends Job {
 
     private void handleFinalAttack(Char chr, AttackInfo attackInfo) {
         Skill skill = getFinalAttackSkill(chr);
-        if(skill == null || attackInfo.skillId == skill.getSkillId()) {
+        if (skill == null || attackInfo.skillId == skill.getSkillId()) {
             return;
         }
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        for(MobAttackInfo mai: attackInfo.mobAttackInfo) {
-            if(Util.succeedProp(si.getValue(prop, skill.getCurrentLevel()))) {
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if (Util.succeedProp(si.getValue(prop, skill.getCurrentLevel()))) {
                 chr.getClient().write(CField.finalAttackRequest(chr, attackInfo.skillId, skill.getSkillId(), 10000,
                         mai.mobId, (int) System.currentTimeMillis()));
                 Skill adv = chr.getSkill(ADVANCED_FINAL_ATTACK);
-                if(adv != null) {
+                if (adv != null) {
                     SkillInfo siAdv = SkillData.getSkillInfoById(ADVANCED_FINAL_ATTACK);
-                    if(Util.succeedProp(siAdv.getValue(prop, adv.getCurrentLevel()))) {
+                    if (Util.succeedProp(siAdv.getValue(prop, adv.getCurrentLevel()))) {
                         chr.getClient().write(CField.finalAttackRequest(chr, attackInfo.skillId, adv.getSkillId(), 10000,
                                 mai.mobId, (int) System.currentTimeMillis()));
                     }
@@ -1061,19 +1056,19 @@ public class Warrior extends Job {
     }
 
     public void lordOfDarkness() {
-        if(chr.hasSkill(LORD_OF_DARKNESS)) {
+        if (chr.hasSkill(LORD_OF_DARKNESS)) {
             Skill skill = chr.getSkill(LORD_OF_DARKNESS);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int proc = si.getValue(prop, slv);
-            if(Util.succeedProp(proc)) {
+            if (Util.succeedProp(proc)) {
                 int heal = si.getValue(x, slv);
-                chr.heal((int)(chr.getMaxHP() / ((double) 100 / heal)));
+                chr.heal((int) (chr.getMaxHP() / ((double) 100 / heal)));
             }
         }
     }
 
-    public static void handleHexOfTheEvilEye(Char chr) {
+    public static void getHexOfTheEvilEyeBuffs(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -1082,7 +1077,7 @@ public class Warrior extends Job {
         Skill skill = chr.getSkill(HEX_OF_THE_EVIL_EYE);
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        if(tsm.getOptByCTSAndSkill(EPDD, HEX_OF_THE_EVIL_EYE) == null) {
+        if (tsm.getOptByCTSAndSkill(EPDD, HEX_OF_THE_EVIL_EYE) == null) {
             o1.nOption = si.getValue(epad, slv);
             o1.rOption = skill.getSkillId();
             o1.tOption = si.getValue(time, slv);
@@ -1112,16 +1107,16 @@ public class Warrior extends Job {
     public void hpRecovery() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
-        if(chr.hasSkill(HP_RECOVERY)) {
+        if (chr.hasSkill(HP_RECOVERY)) {
             Skill skill = chr.getSkill(HP_RECOVERY);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int recovery = si.getValue(x, slv);
             int amount = 10;
 
-            if(tsm.hasStat(Restoration)) {
+            if (tsm.hasStat(Restoration)) {
                 amount = tsm.getOption(Restoration).nOption;
-                if(amount < 300) {
+                if (amount < 300) {
                     amount = amount + 10;
                 }
             }
@@ -1129,7 +1124,7 @@ public class Warrior extends Job {
             o.nOption = amount;
             o.rOption = skill.getSkillId();
             o.tOption = si.getValue(time, slv);
-            int heal = (recovery + 10) - amount > 10 ? (recovery +10) - amount : 10;
+            int heal = (recovery + 10) - amount > 10 ? (recovery + 10) - amount : 10;
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / heal)));
             tsm.putCharacterStatValue(Restoration, o);
             tsm.sendSetStatPacket();
@@ -1137,27 +1132,96 @@ public class Warrior extends Job {
     }
 
     private void darkThirst(TemporaryStatManager tsm) {
-        if(tsm.getOptByCTSAndSkill(IndiePAD, DARK_THIRST) != null) {
+        if (tsm.getOptByCTSAndSkill(IndiePAD, DARK_THIRST) != null) {
             Skill skill = chr.getSkill(DARK_THIRST);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int heal = si.getValue(x, slv);
-            chr.heal((int)(chr.getMaxHP() / ((double) 100 / heal)));
+            chr.heal((int) (chr.getMaxHP() / ((double) 100 / heal)));
         }
     }
 
     private int evilEyeShock() {
-        if(!chr.hasSkill(EVIL_EYE_SHOCK)) {
+        if (!chr.hasSkill(EVIL_EYE_SHOCK)) {
             return 0;
         }
         Skill skill = chr.getSkill(EVIL_EYE_SHOCK);
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 
-        if((lastEvilEyeShock + (si.getValue(cooltime, slv) * 1000) ) < System.currentTimeMillis()) {
+        if ((lastEvilEyeShock + (si.getValue(cooltime, slv) * 1000)) < System.currentTimeMillis()) {
             lastEvilEyeShock = System.currentTimeMillis();
             return EVIL_EYE_SHOCK;
         }
         return 0;
     }
+
+    private void giveParashockGuardBuff() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (chr.hasSkill(PARASHOCK_GUARD) && tsm.getOptByCTSAndSkill(EVA, PARASHOCK_GUARD) != null) {
+            Skill skill = chr.getSkill(PARASHOCK_GUARD);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+            Party party = chr.getParty();
+
+            if (party != null) {
+                for (PartyMember partyMember : party.getOnlineMembers()) {
+                    Char partyChr = partyMember.getChr();
+                    TemporaryStatManager partyTSM = partyChr.getTemporaryStatManager();
+                    int partyChrX = partyChr.getPosition().getX();
+                    int partyChrY = partyChr.getPosition().getY();
+
+                    if (partyChr.getId() == chr.getId()) {
+                        continue;
+                    }
+
+                    if (partyChrX >= rect.getLeft() && partyChrY >= rect.getTop()       // if  Party Members in Range
+                            && partyChrX <= rect.getRight() && partyChrY <= rect.getBottom()) {
+
+                        Option o4 = new Option();
+                        Option o5 = new Option();
+                        o4.nOption = si.getValue(x, slv);
+                        o4.rOption = skill.getSkillId();
+                        o4.tOption = 2;
+                        partyTSM.putCharacterStatValue(Guard, o4);
+                        o5.nOption = chr.getId();
+                        o5.rOption = skill.getSkillId();
+                        o5.tOption = 2;
+                        o5.bOption = 1;
+                        partyTSM.putCharacterStatValue(KnightsAura, o5);
+                        partyTSM.sendSetStatPacket();
+                    } else {
+                        partyTSM.removeStatsBySkill(skill.getSkillId());
+                        partyTSM.sendResetStatPacket();
+                    }
+                }
+            }
+            Option o = new Option();
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            o.nOption = chr.getId();
+            o.rOption = skill.getSkillId();
+            o.bOption = 1;
+            tsm.putCharacterStatValue(KnightsAura, o);
+            o1.nReason = skill.getSkillId();
+            o1.nValue = si.getValue(indiePad, slv);
+            o1.tStart = (int) System.currentTimeMillis();
+            tsm.putCharacterStatValue(IndiePAD, o1);
+            o2.nReason = skill.getSkillId();
+            o2.nValue = si.getValue(z, slv);
+            o2.tStart = (int) System.currentTimeMillis();
+            tsm.putCharacterStatValue(IndiePDDR, o2);
+            o3.nOption = -si.getValue(x, slv);
+            o3.rOption = skill.getSkillId();
+            tsm.putCharacterStatValue(Guard, o3);
+
+            parashockGuardTimer = EventManager.addEvent(this::giveParashockGuardBuff, 1, TimeUnit.SECONDS);
+        } else {
+            tsm.removeStatsBySkill(PARASHOCK_GUARD);
+            tsm.sendResetStatPacket();
+        }
+    }
 }
+

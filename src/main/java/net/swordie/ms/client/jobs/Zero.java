@@ -482,9 +482,8 @@ public class Zero extends Job {
                 Option o1 = new Option();
                 o.nOption = 1;
                 o.rOption = CRITICAL_BIND;
-                o.tOption = 4;//    si.getValue(time, slv);
+                o.tOption = 4;
                 mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
                 o1.nOption = si.getValue(SkillStat.x, slv);
                 o1.rOption = skillID;
                 o1.tOption = 4;//   si.getValue(time, slv);

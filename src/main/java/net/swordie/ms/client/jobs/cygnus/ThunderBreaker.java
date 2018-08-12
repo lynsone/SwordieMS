@@ -3,25 +3,25 @@ package net.swordie.ms.client.jobs.cygnus;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.enums.TSIndex;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -170,7 +170,7 @@ public class ThunderBreaker extends Job {
         
     }
 
-    private void handleLinkMastery(int skillId, TemporaryStatManager tsm, Client c) {
+    private void giveLinkMasteryBuff(int skillId, TemporaryStatManager tsm) {
         Option o = new Option();
         SkillInfo linkInfo = SkillData.getSkillInfoById(15110025);
         if (lastAttackSkill == skillId) {
@@ -185,7 +185,7 @@ public class ThunderBreaker extends Job {
         }
     }
 
-    private void handleLightning(TemporaryStatManager tsm) {
+    private void incrementLightningElemental(TemporaryStatManager tsm) {
         Option o = new Option();
         Skill skill = chr.getSkill(LIGHTNING_ELEMENTAL);
         SkillInfo leInfo = SkillData.getSkillInfoById(skill.getSkillId());
@@ -267,12 +267,12 @@ public class ThunderBreaker extends Job {
         int chargeProp = getChargeProp();
         if (tsm.hasStat(CygnusElementSkill)) {
             if (hasHitMobs && Util.succeedProp(chargeProp)) {
-                handleLightning(tsm);
+                incrementLightningElemental(tsm);
             }
         }
         if(chr.hasSkill(LINK_MASTERY)) {
             if (hasHitMobs && skill != null) {
-                handleLinkMastery(skill.getSkillId(), tsm, c);
+                giveLinkMasteryBuff(skill.getSkillId(), tsm);
             }
         }
         Option o1 = new Option();

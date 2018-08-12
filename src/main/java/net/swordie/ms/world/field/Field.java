@@ -10,6 +10,8 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
@@ -644,6 +646,21 @@ public class Field {
             }
         }
         return chars;
+    }
+
+    public List<PartyMember> getPartyMembersInRect(Char chr, Rect rect) {
+        Party party = chr.getParty();
+        List<PartyMember> partyMembers = new ArrayList<>();
+        for (PartyMember partyMember : party.getOnlineMembers()) {
+            Position position = partyMember.getChr().getPosition();
+            int x = position.getX();
+            int y = position.getY();
+            if (x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                partyMembers.add(partyMember);
+            }
+        }
+        return partyMembers;
     }
 
     public List<Mob> getMobsInRect(Rect rect) {

@@ -21,7 +21,6 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -274,7 +273,7 @@ public class NightWalker extends Job {
 
 
     //Shadow Bat Handling
-    private void handleBatForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
+    private void createShadowBatForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(NightWalkerBat)) {
             if(batcount > 0) {
@@ -301,14 +300,14 @@ public class NightWalker extends Job {
         }
     }
 
-    private void handleShadowBat(TemporaryStatManager tsm, int skillID, byte slv, AttackInfo attackInfo) {
+    private void shadowBat(TemporaryStatManager tsm, int skillID, byte slv, AttackInfo attackInfo) {
         if(tsm.hasStat(NightWalkerBat)) {
             if(Util.succeedProp(85)) {
                 spawnBat(skillID, slv);
             }
             if(batcount > 0) {
                 if (Util.succeedProp(30)) {
-                    handleBatForceAtom(skillID, slv, attackInfo);
+                    createShadowBatForceAtom(skillID, slv, attackInfo);
                     removeBat();   //TODO Doesn't remove bats properly
                 }
             }
@@ -366,10 +365,10 @@ public class NightWalker extends Job {
         }
         if(hasHitMobs) {
             //if(skillID != 0) {  //SkillID of ShadowBat itself = 0
-                handleShadowBat(tsm, getOriginalSkillByID(skillID), slv, attackInfo);
+                shadowBat(tsm, getOriginalSkillByID(skillID), slv, attackInfo);
             //}
             if(tsm.hasStat(ElementDarkness)) {
-                handleDarkElemental(attackInfo, slv);
+                applyDarkElementalOnMob(attackInfo, slv);
             }
         }
 
@@ -408,7 +407,7 @@ public class NightWalker extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleDarkElemental(AttackInfo attackInfo, byte slv) {
+    private void applyDarkElementalOnMob(AttackInfo attackInfo, byte slv) {
 
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(ElementDarkness)) {
@@ -443,7 +442,7 @@ public class NightWalker extends Job {
 
                     //handle Vitality Siphon
                     if (chr.hasSkill(VITALITY_SIPHON)) {
-                        handleSiphonVitality(getOriginalSkillByID(skillID), tsm, c);
+                        incrementSiphonVitality(getOriginalSkillByID(skillID), tsm, c);
                     }
                 }
             }
@@ -522,7 +521,7 @@ public class NightWalker extends Job {
     }
 
 
-    private void handleSiphonVitality(int skillId, TemporaryStatManager tsm, Client c) {
+    private void incrementSiphonVitality(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         SkillInfo siphonInfo = SkillData.getSkillInfoById(VITALITY_SIPHON);

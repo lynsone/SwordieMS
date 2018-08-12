@@ -245,7 +245,7 @@ public class AngelicBuster extends Job {
         }
     }
 
-    private void handleSoulSeeker() {
+    private void createSoulSeekerForceAtom() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -270,7 +270,7 @@ public class AngelicBuster extends Job {
                 life.getPosition(), SOUL_SEEKER_ATOM, life.getPosition()));
     }
 
-    private void soulSeekerReCreation(AttackInfo attackInfo) {
+    private void recreateSoulSeekerForceAtom(AttackInfo attackInfo) {
         SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
         Skill skill = chr.getSkill(SOUL_SEEKER);
         byte slv = (byte) skill.getCurrentLevel();
@@ -315,7 +315,7 @@ public class AngelicBuster extends Job {
         if(hasHitMobs) {
             //Soul Seeker Recreation
             if (attackInfo.skillId == SOUL_SEEKER_ATOM) {
-                soulSeekerReCreation(attackInfo);
+                recreateSoulSeekerForceAtom(attackInfo);
             }
 
             //Soul Seeker Expert
@@ -432,8 +432,8 @@ public class AngelicBuster extends Job {
             Option o3 = new Option();
             switch(skillID) {
                 case SOUL_SEEKER:
-                    handleSoulSeeker();
-                    handleSoulSeeker();
+                    createSoulSeekerForceAtom();
+                    createSoulSeekerForceAtom();
                     break;
                 case DAY_DREAMER:
                     o1.nValue = si.getValue(x, slv);

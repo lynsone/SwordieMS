@@ -384,7 +384,7 @@ public class Demon extends Job {
             if(hasHitMobs) {
                 //Nether Shield Recreation
                 if (attackInfo.skillId == NETHER_SHIELD_ATOM) {
-                    recreateNetherShield(attackInfo);
+                    recreateNetherShieldForceAtom(attackInfo);
                 }
 
                 //Life Sap & Advanced Life Sap
@@ -535,7 +535,7 @@ public class Demon extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void createNetherShield() {
+    private void createNetherShieldForceAtom() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(NETHER_SHIELD);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -557,7 +557,7 @@ public class Demon extends Job {
         }
     }
 
-    private void recreateNetherShield(AttackInfo attackInfo) {
+    private void recreateNetherShieldForceAtom(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(NETHER_SHIELD);
         int anglenum = new Random().nextInt(360);
@@ -628,8 +628,8 @@ public class Demon extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case NETHER_SHIELD:
-                    createNetherShield();
-                    createNetherShield();
+                    createNetherShieldForceAtom();
+                    createNetherShieldForceAtom();
                     break;
             }
         }

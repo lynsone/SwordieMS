@@ -14,7 +14,6 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
@@ -62,7 +61,7 @@ public class Kaiser extends Job {
     public static final int NOVA_TEMPERANCE_KAISER = 61121015;
 
     public static final int FINAL_TRANCE = 61121053;
-    public static final int KAISERS_MAJESTY = 61121054;
+    public static final int KAISERS_MAJESTY = 61121054; // TODO reset Cooldown
 
 
     //Attacking Skills
@@ -164,10 +163,10 @@ public class Kaiser extends Job {
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
-                handleRealignAttackSkill();
+                giveRealignAttackBuffs();
                 break;
             case REALIGN_DEFENDER_MODE:
-                handleRealignDefendSkill();
+                giveRealignDefendBuffs();
                 break;
             case BLAZE_ON:
                 o1.nOption = si.getValue(x, slv);
@@ -337,14 +336,14 @@ public class Kaiser extends Job {
                 resetGauge(c, tsm);
                 break;
 
-            case KAISERS_MAJESTY:   //Lowers Range for w/e reason
+            case KAISERS_MAJESTY:
                 o1.nReason = skillID;
                 o1.nValue = -1;
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
                 o2.nReason = skillID;
-                o2.nValue = (-1 * si.getValue(indiePad, slv));
+                o2.nValue = si.getValue(indiePad, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
@@ -367,7 +366,7 @@ public class Kaiser extends Job {
         
     }
 
-    private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
+    private void incrementMorphGauge(TemporaryStatManager tsm, int increment) {
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -460,8 +459,7 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c,
-                    (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
+            incrementMorphGauge(tsm, (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -641,7 +639,7 @@ public class Kaiser extends Job {
         return 0;
     }
 
-    public void handleRealignAttackSkill() {
+    public void giveRealignAttackBuffs() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -677,7 +675,7 @@ public class Kaiser extends Job {
         tsm.sendSetStatPacket();
     }
 
-    public void handleRealignDefendSkill() {
+    public void giveRealignDefendBuffs() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();

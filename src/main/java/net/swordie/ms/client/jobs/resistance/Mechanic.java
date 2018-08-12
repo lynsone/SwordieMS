@@ -23,7 +23,6 @@ import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 
@@ -308,7 +307,7 @@ public class Mechanic extends Job {
                     break;
                 case HOMING_BEACON:
                     for(int i=0; i<4; i++) {
-                        handleMechRockets();
+                        createMechRocketForceAtom();
                     }
                     break;
                 case HEROS_WILL_MECH:
@@ -318,7 +317,7 @@ public class Mechanic extends Job {
         }
     }
 
-    private void handleMechRockets() { //TODO Needs to attack multiple enemies if can
+    private void createMechRocketForceAtom() { //TODO Needs to attack multiple enemies if can
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(HOMING_BEACON);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));

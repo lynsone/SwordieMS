@@ -39,6 +39,7 @@ import java.util.Map;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import static net.swordie.ms.client.jobs.adventurer.Warrior.PARASHOCK_GUARD;
 import static net.swordie.ms.client.jobs.cygnus.Mihile.*;
 
 
@@ -403,6 +404,8 @@ public abstract class Job {
 	public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 		Char chr = c.getChr();
 		TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+		// Bishop - Holy Magic Shell
 		if (tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
 			if (Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
 				Magician.hmshits++;
@@ -411,6 +414,8 @@ public abstract class Job {
 				tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
 			}
 		}
+
+		// Mihile - Soul Link
 		if (tsm.hasStat(MichaelSoulLink) && chr.getId() != tsm.getOption(MichaelSoulLink).cOption) {
 			Party party = chr.getParty();
 
@@ -432,8 +437,23 @@ public abstract class Job {
 				tsm.removeStatsBySkill(ENDURING_SPIRIT);
 				tsm.sendResetStatPacket();
 			}
+		}
 
+		// Paladin - Parashock Guard
+		if (tsm.hasStat(KnightsAura) && chr.getId() != tsm.getOption(KnightsAura).nOption) {
+			Party party = chr.getParty();
 
+			PartyMember paladinInParty = party.getPartyMemberByID(tsm.getOption(KnightsAura).nOption);
+			if (paladinInParty != null) {
+				Char paladinChr = paladinInParty.getChr();
+				Skill skill = paladinChr.getSkill(PARASHOCK_GUARD);
+				SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+				byte slv = (byte) skill.getCurrentLevel();
+
+				int dmgReductionR = si.getValue(y, slv);
+				int dmgReduceAmount = (int) (hitInfo.hpDamage * ((double) dmgReductionR / 100));
+				hitInfo.hpDamage = hitInfo.hpDamage - dmgReduceAmount;
+			}
 		}
 	}
 
