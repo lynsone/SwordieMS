@@ -3,33 +3,38 @@ package net.swordie.ms.client.jobs.cygnus;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.*;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.LeaveType;
+import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -205,9 +210,6 @@ public class NightWalker extends Job {
                 tsm.putCharacterStatValue(NoBulletConsume, o1);
                 break;
             case DARKNESS_ASCENDING:
-                if(tsm.hasStat(DarknessAscension)) {
-                    return;
-                }
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -564,5 +566,13 @@ public class NightWalker extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    public static void reviveByDarknessAscending(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(DARKNESS_ASCENDING);
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Darkness Ascending.");
     }
 }

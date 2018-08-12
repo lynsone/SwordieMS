@@ -51,6 +51,13 @@ public class Effect {
                     outPacket.encodeInt(getArg3()); // nDelta
                 }
                 break;
+            case SkillSpecial:
+                outPacket.encodeInt(getArg1()); // skill id
+                break;
+            case SkillSpecialAffected:
+                outPacket.encodeInt(getArg1()); // skill id
+                outPacket.encodeByte(getArg2());// slv
+                break;
             case TextEffect:
                 outPacket.encodeString(getString());
                 outPacket.encodeInt(getArg1()); // letter delay
@@ -362,6 +369,25 @@ public class Effect {
         effect.setArg1(skillID);
         effect.setArg2(slv);
         effect.setArg3(hpGain);
+
+        return effect;
+    }
+
+    public static Effect skillSpecial(int skillID) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillSpecial);
+        effect.setArg1(skillID);
+
+        return effect;
+    }
+
+    public static Effect skillSpecialAffected(int skillID, byte slv) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillSpecialAffected);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
 
         return effect;
     }

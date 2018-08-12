@@ -749,6 +749,8 @@ public class Warrior extends Job {
                             randomPartyChr.heal(randomPartyChr.getMaxHP());
                             partyTSM.putCharacterStatValue(NotDamaged, o1);
                             partyTSM.sendSetStatPacket();
+                            randomPartyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                            randomPartyChr.getField().broadcastPacket(UserRemote.effect(randomPartyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
                         }
                     }
 
@@ -1244,7 +1246,7 @@ public class Warrior extends Job {
         }
     }
 
-    public static void applyFinalPact(Char chr) { // TODO  Ignore Gungnir's CD whilst in Final Pact state
+    public static void reviveByFinalPact(Char chr) { // TODO  Ignore Gungnir's CD whilst in Final Pact state
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (!chr.hasSkill(FINAL_PACT_INFO)) {
             return;

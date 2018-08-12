@@ -3272,6 +3272,8 @@ public class WorldHandler {
             else if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
                 Warrior.getHexOfTheEvilEyeBuffs(chr);
             }
+            chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, objectID)));
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skillID, (byte) 1, objectID)));
         }
     }
 

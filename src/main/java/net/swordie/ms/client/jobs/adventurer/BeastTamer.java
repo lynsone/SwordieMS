@@ -16,6 +16,9 @@ import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.life.AffectedArea;
@@ -26,12 +29,15 @@ import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.FieldData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -52,6 +58,7 @@ public class BeastTamer extends Job {
     public static final int LIL_FORT = 112001007;
     public static final int FORT_FOLLOW_UP = 112000015;
     public static final int MAJESTIC_TRUMPET = 112001006;
+    public static final int BEAR_REBORN = 112000016;
     public static final int BEAR_ASSAULT = 112001009;
 
     //Snow Leopard Mode
@@ -88,6 +95,7 @@ public class BeastTamer extends Job {
     public static final int MOUSERS_INSIGHT = 112120022;
     public static final int FRIENDS_OF_ARBY = 112120016;
     public static final int MEOW_CURE = 112121010;
+    public static final int MEOW_REVIVE = 112121011;
 
 
     //Hyper
@@ -500,6 +508,27 @@ public class BeastTamer extends Job {
                 case MEOW_HEAL:
                     chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(hp, slv))));
                     break;
+                case MEOW_REVIVE:
+                    Party party = chr.getParty();
+                    if(party != null) {
+                        Field field = chr.getField();
+                        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                        List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
+                                filter(pml -> pml.getChr().getId() != chr.getId() &&
+                                        pml.getChr().getHP() <= 0).
+                                collect(Collectors.toList());
+
+                        if (eligblePartyMemberList.size() > 0) {
+                            Char randomPartyChr = Util.getRandomFromList(eligblePartyMemberList).getChr();
+                            TemporaryStatManager partyTSM = randomPartyChr.getTemporaryStatManager();
+                            randomPartyChr.heal(randomPartyChr.getMaxHP());
+                            partyTSM.putCharacterStatValue(NotDamaged, o1);
+                            partyTSM.sendSetStatPacket();
+                            randomPartyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                            randomPartyChr.getField().broadcastPacket(UserRemote.effect(randomPartyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
+                        }
+                    }
+                    break;
             }
         }
     }
@@ -584,51 +613,53 @@ public class BeastTamer extends Job {
         Option o3 = new Option();
         Option o4 = new Option();
 
+        int randomMeowCard = getRandomMeowCard();
+
         resetPrevMeowCards();
-        switch (getRandomMeowCard()) {
+        switch (randomMeowCard) {
             case MEOW_CARD_RED:
-                o1.nReason = getRandomMeowCard();
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
                 break;
             case MEOW_CARD_GREEN:
-                o1.nReason = getRandomMeowCard();
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(indieBooster, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
-                o2.nReason = getRandomMeowCard();
+                o2.nReason = randomMeowCard;
                 o2.nValue = mc.getValue(indieSpeed, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieSpeed, o1);
                 break;
             case MEOW_CARD_BLUE:
-                o1.nReason = getRandomMeowCard();
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(pdd, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePDD, o1);
                 break;
             case MEOW_CARD_GOLD:
-                o1.nReason = getRandomMeowCard();
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
-                o2.nReason = getRandomMeowCard();
+                o2.nReason = randomMeowCard;
                 o2.nValue = mc.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o2);
-                o3.nReason = getRandomMeowCard();
+                o3.nReason = randomMeowCard;
                 o3.nValue = mc.getValue(indieSpeed, slv);
                 o3.tStart = (int) System.currentTimeMillis();
                 o3.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieSpeed, o3);
-                o4.nReason = getRandomMeowCard();
+                o4.nReason = randomMeowCard;
                 o4.nValue = mc.getValue(pdd, slv);
                 o4.tStart = (int) System.currentTimeMillis();
                 o4.tTerm = mc.getValue(time, slv);
@@ -766,6 +797,16 @@ public class BeastTamer extends Job {
                 pmChr.dispose();
             }
         }
+    }
+
+    public static void reviveByBearReborn(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(BEAR_REBORN);
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Bear Reborn.");
+        chr.write(User.effect(Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
     }
 
     private boolean isBearMode() {
