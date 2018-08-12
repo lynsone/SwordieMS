@@ -1288,7 +1288,6 @@ public class Warrior extends Job {
         }
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) skill.getCurrentLevel();
-        chr.chatMessage((lastFinalPact + (si.getValue(cooltime, slv) *1000) - System.currentTimeMillis())+" Seconds left on Cooltime");
         return lastFinalPact + (si.getValue(cooltime, slv) * 1000) < System.currentTimeMillis();
     }
 
