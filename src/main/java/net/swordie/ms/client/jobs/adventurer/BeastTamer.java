@@ -594,50 +594,50 @@ public class BeastTamer extends Job {
         Option o4 = new Option();
 
         resetPrevMeowCards();
-        switch (getMeowCardChance()) {
+        switch (getRandomMeowCard()) {
             case MEOW_CARD_RED:
-                o1.nReason = getMeowCardChance();
+                o1.nReason = getRandomMeowCard();
                 o1.nValue = mc.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
                 break;
             case MEOW_CARD_GREEN:
-                o1.nReason = getMeowCardChance();
+                o1.nReason = getRandomMeowCard();
                 o1.nValue = mc.getValue(indieBooster, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
-                o2.nReason = getMeowCardChance();
+                o2.nReason = getRandomMeowCard();
                 o2.nValue = mc.getValue(indieSpeed, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieSpeed, o1);
                 break;
             case MEOW_CARD_BLUE:
-                o1.nReason = getMeowCardChance();
+                o1.nReason = getRandomMeowCard();
                 o1.nValue = mc.getValue(pdd, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePDD, o1);
                 break;
             case MEOW_CARD_GOLD:
-                o1.nReason = getMeowCardChance();
+                o1.nReason = getRandomMeowCard();
                 o1.nValue = mc.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
-                o2.nReason = getMeowCardChance();
+                o2.nReason = getRandomMeowCard();
                 o2.nValue = mc.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o2);
-                o3.nReason = getMeowCardChance();
+                o3.nReason = getRandomMeowCard();
                 o3.nValue = mc.getValue(indieSpeed, slv);
                 o3.tStart = (int) System.currentTimeMillis();
                 o3.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieSpeed, o3);
-                o4.nReason = getMeowCardChance();
+                o4.nReason = getRandomMeowCard();
                 o4.nValue = mc.getValue(pdd, slv);
                 o4.tStart = (int) System.currentTimeMillis();
                 o4.tTerm = mc.getValue(time, slv);
@@ -647,7 +647,7 @@ public class BeastTamer extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private int getMeowCardChance() {
+    private int getRandomMeowCard() {
         int rng = new Random().nextInt((chr.hasSkill(MEOW_CARD_GOLD_SKILL) ? cards.length : cards.length - 1));
         return cards[rng];
     }
