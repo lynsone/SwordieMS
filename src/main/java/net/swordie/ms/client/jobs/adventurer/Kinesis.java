@@ -19,7 +19,6 @@ import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 
@@ -120,12 +119,12 @@ public class Kinesis extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleOrb(skillID, slv, attackInfo);
+            createKineticOrbForceAtom(skillID, slv, attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        handlePPAttack(skillID, slv, si);
+        kinesisPPAttack(skillID, slv, si);
         switch (attackInfo.skillId) {
             case PSYCHIC_FORCE:
             case PSYCHIC_BLAST_FWD:
@@ -171,7 +170,7 @@ public class Kinesis extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleOrb(int skillID, byte slv, AttackInfo attackInfo) {
+    private void createKineticOrbForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         if(Arrays.asList(nonOrbSkills).contains(skillID)) {
             return;
         }
@@ -189,7 +188,7 @@ public class Kinesis extends Job {
         }
     }
 
-    private void handlePPAttack(int skillID, byte slv, SkillInfo si) {
+    private void kinesisPPAttack(int skillID, byte slv, SkillInfo si) {
         if(si == null) {
             return;
         }

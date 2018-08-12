@@ -13,7 +13,6 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
@@ -205,7 +204,7 @@ public class Mercedes extends Job {
         
     }
 
-    private void handleIgnisRoar(int skillID, TemporaryStatManager tsm, Client c, AttackInfo attackInfo) {
+    private void incrementIgnisRoarStackCount(int skillID, TemporaryStatManager tsm, Client c, AttackInfo attackInfo) {
         if (Arrays.asList(summonAttacks).contains(skillID)) {
             return;
         } else {
@@ -266,7 +265,7 @@ public class Mercedes extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            handleIgnisRoar(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, attackInfo);
+            incrementIgnisRoarStackCount(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();

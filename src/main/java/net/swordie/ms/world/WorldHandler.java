@@ -2233,7 +2233,7 @@ public class WorldHandler {
     }
 
     public static void handleRequestSetBlessOfDarkness(Client c, InPacket inPacket) {
-        Luminous.handleBlackBlessingIncrease(c);
+        Luminous.incrementBlackBlessing(c);
     }
 
     public static void handleBattleRecordOnOffRequest(Client c, InPacket inPacket) {
@@ -3267,7 +3267,7 @@ public class WorldHandler {
             chr.heal(20);
         }
         if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
-            Warrior.handleHexOfTheEvilEye(chr);
+            Warrior.getHexOfTheEvilEyeBuffs(chr);
         }
     }
 
@@ -4994,6 +4994,8 @@ public class WorldHandler {
         } else if (SkillConstants.isUnregisteredSkill(skillId)) { // 'Unregistered' Skills
             field.broadcastPacket(UserRemote.effect(chrId, Effect.showUnregisteredSkill(skillId, slv, 0, chr.isLeft())));
 
+        } else if (SkillConstants.isHomeTeleportSkill(skillId)) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.skillUse(skillId, slv, 0)));
 
         } else {
             log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));

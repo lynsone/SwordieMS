@@ -1,7 +1,6 @@
 package net.swordie.ms.client.character.skills;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
@@ -139,10 +138,10 @@ public class TownPortal {
         Field townField = channel.getField(getTownFieldId());
         if(townField.getChars().size() <= 0) {
             chr.write(WvsContext.townPortal(new TownPortal(chr, new Position(), new Position(),
-                    999999999, 999999999, Magician.MYSTIC_DOOR, 1)));
+                    999999999, 999999999, getSkillid(), 1)));
         } else {
             townField.broadcastPacket(WvsContext.townPortal(new TownPortal(chr, new Position(), new Position(),
-                    999999999, 999999999, Magician.MYSTIC_DOOR, 1)));
+                    999999999, 999999999, getSkillid(), 1)));
         }
     }
 

@@ -232,7 +232,7 @@ public class Xenon extends Job {
         
     }
 
-    private void handleSupplyCost(int skillID, byte slv, SkillInfo si) {
+    private void applySupplyCost(int skillID, byte slv, SkillInfo si) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(skillID == PINPOINT_SALVO || skillID == PINPOINT_SALVO_REDESIGN_A || skillID == PINPOINT_SALVO_REDESIGN_B || skillID == PINPOINT_SALVO_PERFECT_DESIGN) {
             return;
@@ -302,7 +302,7 @@ public class Xenon extends Job {
             //Triangulation
             applyTriangulationOnMob(attackInfo);
         }
-        handleSupplyCost(skillID, (byte) slv, si);
+        applySupplyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -357,7 +357,7 @@ public class Xenon extends Job {
         }
         chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        handleSupplyCost(skillID, slv, si);
+        applySupplyCost(skillID, slv, si);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {

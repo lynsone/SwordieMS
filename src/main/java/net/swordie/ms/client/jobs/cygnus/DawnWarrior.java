@@ -19,7 +19,6 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -325,7 +324,7 @@ public class DawnWarrior extends Job {
             skillID = skill.getSkillId();
         }
         if(tsm.hasStat(SoulMasterFinal)) {
-            handleSoulElement(attackInfo, slv);
+            applySoulElementOnMob(attackInfo, slv);
         }
 
         equinox(tsm);
@@ -354,7 +353,7 @@ public class DawnWarrior extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleSoulElement(AttackInfo attackInfo, byte slv) {
+    private void applySoulElementOnMob(AttackInfo attackInfo, byte slv) {
         Option o1 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(SOUL_ELEMENT);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {

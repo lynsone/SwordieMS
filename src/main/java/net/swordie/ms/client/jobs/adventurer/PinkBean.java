@@ -18,7 +18,6 @@ import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -217,7 +216,7 @@ public class PinkBean extends Job {
         }
         if(hasHitMobs) {
             if(skillID != MINI_BEANS) {
-                handleGoMiniBeans(attackInfo);
+                summonGoMiniBeans(attackInfo);
             }
         }
         Option o1 = new Option();
@@ -352,7 +351,7 @@ public class PinkBean extends Job {
 
 
 
-    private void handleGoMiniBeans(AttackInfo attackInfo) {
+    private void summonGoMiniBeans(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Field field;
         Summon summon;

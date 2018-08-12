@@ -278,7 +278,7 @@ public class Mihile extends Job {
         return pad;
     }
 
-    private void handleRoyalGuardAttack() {
+    private void doRoyalGuardAttack() {
         c.write(UserLocal.royalGuardAttack(true));
     }
 
@@ -411,7 +411,7 @@ public class Mihile extends Job {
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(RoyalGuardPrepare)) {
-            handleRoyalGuardAttack();
+            doRoyalGuardAttack();
             giveRoyalGuardBuff(tsm, c);
         }
         super.handleHit(c, inPacket, hitInfo);
@@ -494,7 +494,7 @@ public class Mihile extends Job {
 
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
-                        o1.tOption = 5;
+                        o1.tOption = 2;
                         o1.cOption = chr.getId(); // Owner of Soul Link (Mihile's chr Id)
                         partyTSM.putCharacterStatValue(MichaelSoulLink, o1);
 

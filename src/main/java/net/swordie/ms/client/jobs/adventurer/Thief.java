@@ -207,15 +207,15 @@ public class Thief extends Job {
         }
         if(hasHitMobs) {
             //Venom & Toxic Venom Passives
-            handlePassiveDoTSkills(attackInfo);
+            applyPassiveDoTSkillsOnMob(attackInfo);
 
             //Shadower Hyper
             if(chr.hasSkill(FLIP_THE_COIN)) {
-                handleFlipTheCoinActivation(tsm);
+                activateFlipTheCoin(tsm);
             }
 
             //Night Lord Hyper
-            handleBleedDart(attackInfo);
+            applyBleedDartOnMob(attackInfo);
         }
 
         if (JobConstants.isNightLord(chr.getJob())) {
@@ -240,7 +240,7 @@ public class Thief extends Job {
                 //Shadower Instinct
                 if (chr.hasSkill(SHADOWER_INSTINCT)) {
                     if (tsm.hasStat(IgnoreMobpdpR)) {
-                        handleShadowerInstinct(skillID, tsm, c);
+                        incrementShadowInstinct(skillID, tsm, c);
                     }
                 }
 
@@ -250,7 +250,7 @@ public class Thief extends Job {
         if (JobConstants.isDualBlade(chr.getJob())) {
             if(hasHitMobs) {
                 //Life Drain
-                handleLifeDrain();
+                recoverHPByLifeDrain();
             }
         }
         Option o1 = new Option();
@@ -429,7 +429,7 @@ public class Thief extends Job {
                     List<Drop> dropList = field.getDropsInRect(rect);
                     for(Drop drop : dropList) {
                         if(drop.isMoney() && (drop.getOwnerID() == chr.getId()) && i < si.getValue(bulletCount, slv)) {
-                            createMesoExplosionAtoms(drop);
+                            createMesoExplosionForceAtom(drop);
                             field.broadcastPacket(DropPool.dropExplodeField(drop.getObjectId()));
                             i++;
                         }
@@ -614,7 +614,7 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(IndiePAD, o2);
                 break;
             case FLIP_THE_COIN:
-                handleFlipTheCoinStacking(tsm, c);
+                incrementFlipTheCoinStack(tsm, c);
                 c.write(WvsContext.flipTheCoinEnabled((byte) 0));
                 break;
             case BLADE_CLONE:
@@ -637,7 +637,7 @@ public class Thief extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private void createMesoExplosionAtoms(Drop drop) {
+    private void createMesoExplosionForceAtom(Drop drop) {
         Field field = chr.getField();
         Rect rect = new Rect(
                 new Position(
@@ -661,7 +661,7 @@ public class Thief extends Job {
                 mob.getPosition(), MESO_EXPLOSION_ATOM, mob.getPosition()));
     }
 
-    private void handleFlipTheCoinStacking(TemporaryStatManager tsm, Client c) {
+    private void incrementFlipTheCoinStack(TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -697,7 +697,7 @@ public class Thief extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private void handleFlipTheCoinActivation(TemporaryStatManager tsm) {    //TODO  Change to proc on Critical Hits
+    private void activateFlipTheCoin(TemporaryStatManager tsm) {    //TODO  Change to proc on Critical Hits
         if(tsm.getOption(FlipTheCoin).nOption < 5) {
             if (Util.succeedProp(50)) { //Proc on Crit<<<
                 c.write(WvsContext.flipTheCoinEnabled((byte) 1));
@@ -750,7 +750,7 @@ public class Thief extends Job {
         return multiplier;
     }
 
-    private void handleShadowerInstinct(int skillId, TemporaryStatManager tsm, Client c) {
+    private void incrementShadowInstinct(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         SkillInfo InstinctInfo = SkillData.getSkillInfoById(SHADOWER_INSTINCT);
@@ -897,7 +897,7 @@ public class Thief extends Job {
         return supgrade;
     }
 
-    private void handlePassiveDoTSkills(AttackInfo attackInfo) {
+    private void applyPassiveDoTSkillsOnMob(AttackInfo attackInfo) {
 
         //Night Lord
         if(chr.hasSkill(TOXIC_VENOM_NL)) {
@@ -993,7 +993,7 @@ public class Thief extends Job {
         }
     }
 
-    private void handleBleedDart(AttackInfo attackInfo) {
+    private void applyBleedDartOnMob(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(BleedingToxin)) {
             Skill skill = chr.getSkill(BLEED_DART);
@@ -1005,7 +1005,7 @@ public class Thief extends Job {
         }
     }
 
-    private void handleLifeDrain() {
+    private void recoverHPByLifeDrain() {
         if(chr.hasSkill(LIFE_DRAIN)) {
             Skill skill = chr.getSkill(LIFE_DRAIN);
             byte slv = (byte) skill.getCurrentLevel();

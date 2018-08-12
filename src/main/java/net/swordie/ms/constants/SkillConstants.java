@@ -2,7 +2,16 @@ package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Zero;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
+import net.swordie.ms.client.jobs.adventurer.Kinesis;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.cygnus.DawnWarrior;
+import net.swordie.ms.client.jobs.legend.Aran;
+import net.swordie.ms.client.jobs.legend.Evan;
+import net.swordie.ms.client.jobs.legend.Phantom;
+import net.swordie.ms.client.jobs.nova.AngelicBuster;
+import net.swordie.ms.client.jobs.resistance.Demon;
 import net.swordie.ms.enums.SkillType;
 import net.swordie.ms.loaders.SkillData;
 import org.apache.log4j.Logger;
@@ -12,7 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static net.swordie.ms.client.jobs.legend.Aran.*;
-import static net.swordie.ms.client.jobs.legend.Mercedes.*;
+import static net.swordie.ms.client.jobs.legend.Mercedes.STAGGERING_STRIKES;
+import static net.swordie.ms.client.jobs.legend.Mercedes.STUNNING_STRIKES;
 import static net.swordie.ms.client.jobs.nova.AngelicBuster.*;
 import static net.swordie.ms.client.jobs.nova.Kaiser.*;
 import static net.swordie.ms.client.jobs.resistance.Blaster.*;
@@ -1155,6 +1165,31 @@ public class SkillConstants {
             prefix = skillID / 100;
         }
         return prefix != 9500 && skillID / 10000000 == 9;
+    }
+
+    public static boolean isHomeTeleportSkill(int skillId) {
+        switch (skillId) {
+            case Warrior.MAPLE_RETURN: // All Adventurers
+            case BeastTamer.HOMEWARD_BOUND:
+            case Kinesis.RETURN_KINESIS:
+            case DawnWarrior.IMPERIAL_RECALL: // All KoC
+            case Aran.RETURN_TO_RIEN:
+            case Evan.BACK_TO_NATURE:
+                // Mercedes
+                // Luminous
+            case Phantom.TO_THE_SKIES:
+                // Shade
+            case AngelicBuster.DAY_DREAMER:
+                // Kaiser
+            case Demon.SECRET_ASSEMBLY: // All Resistance
+                // Hayato
+                // Kanna
+            case Zero.TEMPLE_RECALL:
+
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static int getBaseSpByLevel(short level) {

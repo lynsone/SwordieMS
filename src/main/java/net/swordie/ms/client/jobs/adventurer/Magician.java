@@ -16,7 +16,6 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
@@ -227,15 +226,15 @@ public class Magician extends Job {
         }
 
         if (hasHitMobs) {
-            handleArcaneAim();
+            incrementArcaneAim();
         }
         //Ignite
-        handleIgnite(attackInfo, chr, tsm);
+        applyIgniteOnMob(attackInfo, chr, tsm);
         if (JobConstants.isFirePoison(chr.getJob())) {
             if(hasHitMobs) {
                 //Megiddo Flame Recreation
                 if(attackInfo.skillId == MEGIDDO_FLAME_ATOM) {
-                    handleMegiddoFlameReCreation(skillID, slv, attackInfo);
+                    recreateMegiddoFlameForceAtom(skillID, slv, attackInfo);
                 }
             }
             chr.chatMessage(ChatMsgColour.WHISPER_GREEN, "Elemental Drain Stack: " + getFerventDrainStack());
@@ -243,7 +242,7 @@ public class Magician extends Job {
         if (JobConstants.isIceLightning(chr.getJob())) {
             if(hasHitMobs) {
                 //Freezing Crush / Frozen Clutch
-                handleFreezingCrush(attackInfo, skillID, slv);
+                applyFreezingCrushOnMob(attackInfo, skillID, slv);
             }
         }
         if (JobConstants.isCleric(chr.getJob())) {
@@ -378,7 +377,7 @@ public class Magician extends Job {
                 tsm.sendSetStatPacket();
                 break;
             case ANGEL_RAY:
-                chr.heal(handleBishopHealingSkills(ANGEL_RAY));
+                chr.heal(changeBishopHealingBuffs(ANGEL_RAY));
                 break;
             case MEGIDDO_FLAME_ATOM:
                 Skill megSkill = chr.getSkill(MEGIDDO_FLAME);
@@ -400,7 +399,7 @@ public class Magician extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleMegiddoFlame() {
+    private void createMegiddoFlameForceAtom() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -421,7 +420,7 @@ public class Magician extends Job {
 
     }
 
-    private void handleMegiddoFlameReCreation(int skillID, byte slv, AttackInfo attackInfo) {
+    private void recreateMegiddoFlameForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
         int anglenum = new Random().nextInt(360);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -442,7 +441,7 @@ public class Magician extends Job {
         }
     }
 
-    private void handleArcaneAim() {
+    private void incrementArcaneAim() {
         Skill skill = chr.getSkill(getArcaneAimSkill());
         if (skill == null) {
             return;
@@ -479,7 +478,7 @@ public class Magician extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm) {  //TODO  Fire Attribute Spells only
+    private void applyIgniteOnMob(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm) {  //TODO  Fire Attribute Spells only
         SkillInfo si = SkillData.getSkillInfoById(attackInfo.skillId);
         if (si == null || !si.getElemAttr().contains("f") || attackInfo.skillId == IGNITE || attackInfo.skillId == IGNITE_AA) {
             return;
@@ -503,7 +502,7 @@ public class Magician extends Job {
         }
     }
 
-    private void handleChillingStep() {
+    private void createChillStepAA() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
         int slv = chr.getSkill(CHILLING_STEP).getCurrentLevel();
@@ -576,7 +575,7 @@ public class Magician extends Job {
                     tsm.sendSetStatPacket();
                     break;
                 case MEGIDDO_FLAME:
-                    handleMegiddoFlame();
+                    createMegiddoFlameForceAtom();
                     break;
                 case HOLY_FOUNTAIN:
                     AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
@@ -588,11 +587,11 @@ public class Magician extends Job {
                     break;
                 case TELEPORT:
                     if (chr.hasSkill(CHILLING_STEP)) {
-                        handleChillingStep();
+                        createChillStepAA();
                     }
                     break;
                 case HEAL:
-                    chr.heal(handleBishopHealingSkills(HEAL));
+                    chr.heal(changeBishopHealingBuffs(HEAL));
                     Rect rect3 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
                             , inPacket.decodeShort(), inPacket.decodeShort());
                     for (Life life : chr.getField().getLifesInRect(rect3)) {
@@ -817,7 +816,7 @@ public class Magician extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(HolyMagicShell, o1);
                 hmshits = 0;
-                chr.heal(handleBishopHealingSkills(HOLY_MAGIC_SHELL));
+                chr.heal(changeBishopHealingBuffs(HOLY_MAGIC_SHELL));
                 break;
             case IFRIT:
             case ELQUINES:
@@ -974,7 +973,7 @@ public class Magician extends Job {
         return res;
     }
 
-    private void handleFreezingCrush(AttackInfo attackInfo, int skillID, byte slv) {
+    private void applyFreezingCrushOnMob(AttackInfo attackInfo, int skillID, byte slv) {
         if(!SkillConstants.isIceSkill(skillID)){
             return;
         }
@@ -1000,7 +999,7 @@ public class Magician extends Job {
         }
     }
 
-    private int handleBishopHealingSkills(int skillID) {
+    private int changeBishopHealingBuffs(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = chr.getSkill(skillID);
         byte slv = (byte) skill.getCurrentLevel();
