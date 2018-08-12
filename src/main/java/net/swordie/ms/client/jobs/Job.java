@@ -17,12 +17,14 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.life.AffectedArea;
@@ -356,6 +358,20 @@ public abstract class Job {
 	public void handleHit(Client c, HitInfo hitInfo) {
 		Char chr = c.getChr();
 		hitInfo.hpDamage = Math.max(0, hitInfo.hpDamage); // to prevent -1 (dodges) healing the player.
+
+		if(chr.getStat(Stat.hp) <= hitInfo.hpDamage) {
+
+			// Dark Knight - Final Pact
+			if(JobConstants.isDarkKnight(chr.getJob()) && chr.hasSkill(Warrior.FINAL_PACT_INFO) && Warrior.isFinalPactAvailable(chr)) {
+				Warrior.applyFinalPact(chr);
+			}
+
+			// Bishop (Global) - Heaven's Door
+			//TODO
+
+			// TODO More...
+		}
+
 		int curHP = chr.getStat(Stat.hp);
 		int newHP = curHP - hitInfo.hpDamage;
 		if (newHP <= 0) {

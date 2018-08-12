@@ -592,6 +592,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case USER_EFFECT_LOCAL:
                     WorldHandler.handleUserEffectLocal(chr, inPacket);
                     break;
+                case BEAST_TAMER_REGROUP_REQUEST:
+                    WorldHandler.handleBeastTamerRegroupRequest(chr, inPacket);
+                    break;
                 default:
                     handleUnknown(inPacket, op);
                     break;

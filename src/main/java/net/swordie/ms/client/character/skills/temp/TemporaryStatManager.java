@@ -3,17 +3,20 @@ package net.swordie.ms.client.character.skills.temp;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
+import net.swordie.ms.client.character.skills.GuidedBullet;
 import net.swordie.ms.client.character.skills.*;
-import net.swordie.ms.connection.packet.UserRemote;
-import net.swordie.ms.enums.BaseStat;
-import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.client.character.skills.PartyBooster;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.enums.TSIndex;
-import org.apache.log4j.LogManager;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.enums.BaseStat;
+import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.util.container.Tuple;
+import org.apache.log4j.LogManager;
 
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
@@ -787,7 +790,10 @@ public class TemporaryStatManager {
     }
 
     public void sendResetStatPacket(boolean demount) {
-        getChr().getField().broadcastPacket(UserRemote.resetTepmoraryStat(getChr()), getChr());
+        if(getRemovedStats().containsKey(CharacterTemporaryStat.Reincarnation)) {
+            Warrior.finalPactEnd(chr);
+        }
+        getChr().getField().broadcastPacket(UserRemote.resetTemporaryStat(getChr()), getChr());
         getChr().getClient().write(WvsContext.temporaryStatReset(this, demount));
     }
 

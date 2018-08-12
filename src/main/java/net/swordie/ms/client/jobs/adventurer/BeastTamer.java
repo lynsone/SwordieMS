@@ -29,7 +29,9 @@ import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Random;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -492,17 +494,6 @@ public class BeastTamer extends Job {
                     townPortal.spawnTownPortal();
                     chr.dispose();
                     break;
-                case REGROUP:
-                    Party party = chr.getParty();
-                    if(party != null) {
-                        for(PartyMember pm : party.getOnlineMembers()) {
-                            Char pmChr = pm.getChr();
-                            pmChr.warp(chr.getField());
-                            pmChr.write(CField.teleport(chr.getPosition(), pmChr));
-                            pmChr.dispose();
-                        }
-                    }
-                    break;
                 case MEOW_CURE:
                     tsm.removeAllDebuffs();
                     break;
@@ -761,6 +752,20 @@ public class BeastTamer extends Job {
         defensiveFormation.setSummonTerm(si.getValue(time, slv));
         defensiveFormation.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal()); // Different MoveAbility?
         return defensiveFormation;
+    }
+
+    public static void beastTamerRegroup(Char chr) { //Handled in WorldHandler
+        Party party = chr.getParty();
+        if(party != null) {
+            for(PartyMember pm : party.getOnlineMembers()) {
+                Char pmChr = pm.getChr();
+                if(pmChr.getId() != chr.getId() && pmChr.getClient().getChannel() == chr.getClient().getChannel() && pmChr.getLevel() > 9) {
+                    pmChr.warp(chr.getField());
+                    pmChr.write(CField.teleport(chr.getPosition(), pmChr));
+                }
+                pmChr.dispose();
+            }
+        }
     }
 
     private boolean isBearMode() {
