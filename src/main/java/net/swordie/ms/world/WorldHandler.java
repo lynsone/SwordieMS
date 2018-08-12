@@ -5083,4 +5083,16 @@ public class WorldHandler {
 
         }
     }
+
+    public static void handleBeastTamerRegroupRequest(Char chr, InPacket inPacket) {
+        byte unk = inPacket.decodeByte();
+        int skillId = inPacket.decodeInt();
+
+        if(skillId == BeastTamer.REGROUP) {
+            BeastTamer.beastTamerRegroup(chr);
+        } else {
+            log.error(String.format("Unhandled Beast Tamer Request %d", skillId));
+            chr.chatMessage(String.format("Unhandled Beast Tamer Request %d", skillId));
+        }
+    }
 }
