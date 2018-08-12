@@ -26,6 +26,8 @@ import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.GuildRequestor;
 import net.swordie.ms.client.guild.GuildSkill;
+import net.swordie.ms.client.guild.bbs.BBSRecord;
+import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Familiar;
@@ -93,6 +95,8 @@ public class DatabaseManager {
                 GuildMember.class,
                 GuildRequestor.class,
                 GuildSkill.class,
+                BBSRecord.class,
+                BBSReply.class,
                 Friend.class,
                 Macro.class,
                 DamageSkinSaveData.class,

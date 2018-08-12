@@ -289,6 +289,9 @@ public class ChannelHandler extends ChannelInboundHandlerAdapter {
                 case GUILD_REQUEST:
                     WorldHandler.handleGuildRequest(c, inPacket);
                     break;
+                case GUILD_BBS:
+                    WorldHandler.handleGuildBBS(chr, inPacket);
+                    break;
                 case REQUEST_SET_BLESS_OF_DARKNESS:
                     WorldHandler.handleRequestSetBlessOfDarkness(c, inPacket);
                     break;

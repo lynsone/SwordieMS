@@ -104,6 +104,9 @@ public class GuildResult {
                 outPacket.encodeInt(member.getCharID());
                 outPacket.encodeInt(member.getIgp());
                 break;
+            case Res_BattleSkillOpen:
+                outPacket.encodeInt(3);
+                break;
         }
     }
 

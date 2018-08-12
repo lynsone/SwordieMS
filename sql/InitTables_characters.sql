@@ -43,6 +43,8 @@ drop table if exists questprogressmobrequirements;
 drop table if exists questlists;
 drop table if exists questmanagers;
 drop table if exists quests;
+drop table if exists bbs_replies;
+drop table if exists bbs_records;
 drop table if exists guildrequestors;
 drop table if exists gradenames;
 drop table if exists guildmembers;
@@ -496,7 +498,31 @@ create table guilds (
     appliable boolean,
     joinsetting int,
     reqlevel int,
+    bbsNotice int,
     primary key (id)
+);
+
+create table bbs_records (
+	id int not null auto_increment,
+    idforbbs int,
+    creatorid int,
+    subject varchar(255),
+    msg text,
+    creationdate bigint,
+    icon int,
+    guildid int,
+    primary key (id)
+);
+
+create table bbs_replies (
+	id int not null auto_increment,
+    idforreply int,
+    creatorid int,
+    creationdate bigint,
+    msg text,
+    recordid int,
+    primary key (id),
+    foreign key (recordid) references bbs_records(id) on delete cascade
 );
 
 create table characters (

@@ -25,6 +25,10 @@ import net.swordie.ms.client.friend.FriendType;
 import net.swordie.ms.client.friend.result.*;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
+import net.swordie.ms.client.guild.bbs.BBSRecord;
+import net.swordie.ms.client.guild.bbs.BBSReply;
+import net.swordie.ms.client.guild.bbs.GuildBBSPacket;
+import net.swordie.ms.client.guild.bbs.GuildBBSType;
 import net.swordie.ms.client.guild.result.*;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
@@ -4994,6 +4998,83 @@ public class WorldHandler {
         } else {
             log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));
             chr.chatMessage(String.format("Unhandled Remote Effect Skill:  id = %d", skillId));
+        }
+    }
+
+    public static void handleGuildBBS(Char chr, InPacket inPacket) {
+        Guild guild = chr.getGuild();
+        if (guild == null) {
+            return;
+        }
+        byte val = inPacket.decodeByte();
+        GuildBBSType type = GuildBBSType.getByValue(val);
+        if (type == null) {
+            log.error(String.format("Unknown guild bbs type %s", val));
+            return;
+        }
+        switch (type) {
+            case Req_CreateRecord:
+                inPacket.decodeByte(); // 0?
+                boolean notice = inPacket.decodeByte() != 0;
+                String subject = inPacket.decodeString();
+                String msg = inPacket.decodeString();
+                int icon = inPacket.decodeInt();
+                BBSRecord record = new BBSRecord(chr.getId(), subject, msg, FileTime.currentTime(), icon);
+                if (notice) {
+                    guild.setBbsNotice(record);
+                } else {
+                    guild.addBbsRecord(record);
+                }
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+                break;
+            case Req_DeleteRecord:
+                int id = inPacket.decodeInt();
+                record = guild.getRecordByID(id);
+                if (record != null && chr.getId() == record.getCreatorID()) {
+                    guild.removeRecord(record);
+                }
+                break;
+            case Req_LoadPages:
+                int page = inPacket.decodeInt();
+                List<BBSRecord> records = guild.getBbsRecords();
+                final int PAGE_SIZE = GameConstants.GUILD_BBS_RECORDS_PER_PAGE;
+                if (page != 0 && page * PAGE_SIZE >= records.size()) {
+                    chr.chatMessage("No more BBS records to show.");
+                    return;
+                }
+                // select all records that are on the requested page
+                int start = page * PAGE_SIZE;
+                int end = start + PAGE_SIZE >= records.size() ? records.size() : start + PAGE_SIZE;
+                List<BBSRecord> pageRecords = records.subList(start, end);
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadPages(guild.getBbsNotice(), records.size(), pageRecords)));
+                break;
+            case Req_LoadRecord:
+                id = inPacket.decodeInt();
+                record = guild.getRecordByID(id);
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+                break;
+            case Req_CreateReply:
+                id = inPacket.decodeInt();
+                msg = inPacket.decodeString();
+                record = guild.getRecordByID(id);
+                if (record != null) {
+                    BBSReply reply = new BBSReply(chr.getId(), FileTime.currentTime(), msg);
+                    record.addReply(reply);
+                }
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+                break;
+            case Req_DeleteReply:
+                id = inPacket.decodeInt();
+                int replyId = inPacket.decodeInt();
+                record = guild.getRecordByID(id);
+                if (record != null) {
+                    BBSReply reply = record.getReplyById(replyId);
+                    record.removeReply(reply);
+                }
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+            default:
+                log.error(String.format("Unhandled guild bbs type %s", type));
+
         }
     }
 }

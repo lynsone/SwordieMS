@@ -138,6 +138,7 @@ public class GameConstants {
     public static final int SP_PER_GUILD_LEVEL = 2;
     public static final double GGP_PER_CONTRIBUTION = 0.3;
     public static final double IGP_PER_CONTRIBUTION = 0.7;
+    public static final int GUILD_BBS_RECORDS_PER_PAGE = 10;
 
 
 

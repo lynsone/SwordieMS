@@ -1,6 +1,8 @@
 package net.swordie.ms.client.guild;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.guild.bbs.BBSRecord;
+import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
@@ -56,6 +58,14 @@ public class Guild implements Encodable {
     @CollectionTable(name = "guildskills")
     @MapKeyColumn(name = "skillID")
     private Map<Integer, GuildSkill> skills = new HashMap<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "guildID")
+    private List<BBSRecord> bbsRecords = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "bbsNotice")
+    private BBSRecord bbsNotice;
 
     public Guild() {
         setGradeNames(new String[]{"Guild Master", "Junior", "Veteran", "Member", "Newbie"});
@@ -395,5 +405,44 @@ public class Guild implements Encodable {
     private void addGgp(int ggp) {
         setGgp(getGgp() + ggp);
         broadcast(WvsContext.guildResult(GuildResult.setGgp(this)));
+    }
+
+    public List<BBSRecord> getBbsRecords() {
+        return bbsRecords;
+    }
+
+    public void setBbsRecords(List<BBSRecord> bbsRecords) {
+        this.bbsRecords = bbsRecords;
+    }
+
+    public void addBbsRecord(BBSRecord record) {
+        getBbsRecords().add(record);
+        record.setIdForBbs(getBbsRecords().size()); // whatevs
+    }
+
+    public BBSRecord getRecordByID(int id) {
+        BBSRecord record;
+        if (id == 0) {
+            record = getBbsNotice();
+        } else {
+            record = getBbsRecords().stream().filter(r -> r.getIdForBbs() == id).findAny().orElse(null);
+        }
+        return record;
+    }
+
+    public void removeRecord(BBSRecord record) {
+        getBbsRecords().remove(record);
+        int i = 1;
+        for (BBSRecord r : getBbsRecords()) {
+            r.setIdForBbs(i++);
+        }
+    }
+
+    public BBSRecord getBbsNotice() {
+        return bbsNotice;
+    }
+
+    public void setBbsNotice(BBSRecord bbsNotice) {
+        this.bbsNotice = bbsNotice;
     }
 }
