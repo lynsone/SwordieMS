@@ -111,6 +111,14 @@ public class Option {
         }
     }
 
+    public boolean isInMillis() {
+        return isInMillis;
+    }
+
+    public void setInMillis(boolean inMillis) {
+        isInMillis = inMillis;
+    }
+
     /**
      * Sets the time options of this Option to milliseconds, if they currently aren't. By default, an Option's time
      * is in seconds.

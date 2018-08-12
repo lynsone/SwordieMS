@@ -320,7 +320,7 @@ public class UserRemote {
         return outPacket;
     }
 
-    public static OutPacket resetTepmoraryStat(Char chr) {
+    public static OutPacket resetTemporaryStat(Char chr) {
         OutPacket outPacket = new OutPacket(OutHeader.REMOTE_RESET_TEMPORARY_STAT);
 
         TemporaryStatManager tsm = chr.getTemporaryStatManager();

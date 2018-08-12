@@ -13,14 +13,9 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.MobPool;
-import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.AssistType;
-import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Summon;
@@ -33,14 +28,15 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
-
-//TODO Paladin Divine Shield & Guardian
-//TODO DarkKnight Sacrifice & Evil Eye
 
 /**
  * Created on 12/14/2017.
@@ -94,13 +90,14 @@ public class Warrior extends Job {
     public static final int IRON_WILL = 1301006;
     public static final int HYPER_BODY = 1301007;
     public static final int EVIL_EYE = 1301013;
-    public static final int EVIL_EYE_OF_DOMINATION = 1311013; //Beholder TSM
+    public static final int EVIL_EYE_OF_DOMINATION = 1311013;
     public static final int EVIL_EYE_SHOCK = 1311014;
     public static final int CROSS_SURGE = 1311015;
     public static final int HEX_OF_THE_EVIL_EYE = 1310016;
     public static final int LORD_OF_DARKNESS = 1310009;
     public static final int MAPLE_WARRIOR_DARK_KNIGHT = 1321000;
-    public static final int FINAL_PACT = 1320016;
+    public static final int FINAL_PACT_INFO = 1320016;
+    public static final int FINAL_PACT = 1320019;
     public static final int MAGIC_CRASH_DRK = 1321014;
     public static final int SACRIFICE = 1321015; //Resets summon
     public static final int HEROS_WILL_DRK = 1321010;
@@ -131,9 +128,9 @@ public class Warrior extends Job {
             COMBAT_ORDERS,
             PARASHOCK_GUARD,
             ELEMENTAL_FORCE,
-            GUARDIAN,
             EVIL_EYE,
             EVIL_EYE_OF_DOMINATION,
+            EVIL_EYE_SHOCK,
             IRON_WILL,
             HYPER_BODY,
             CROSS_SURGE,
@@ -153,7 +150,9 @@ public class Warrior extends Job {
     private long lastPanicHit = Long.MIN_VALUE;
     private long lastDivineShieldHit = Long.MIN_VALUE;
     private long revengeEvilEye = Long.MIN_VALUE;
-    private long lastEvilEyeShock = Long.MIN_VALUE;
+    private static long lastFinalPact = Long.MIN_VALUE;
+    private static long finishFinalPact;
+    private static int killCount;
     private int lastCharge = 0;
     private int divShieldAmount = 0;
     private ScheduledFuture parashockGuardTimer;
@@ -243,12 +242,6 @@ public class Warrior extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
                 break;
-            case GUARDIAN: //TODO
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(NotDamaged, o1);
-                break;
             case IRON_WILL:
                 o1.nOption = si.getValue(pdd, slv);
                 o1.rOption = skillID;
@@ -280,7 +273,7 @@ public class Warrior extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o2);
-                //c.write(CField.summonedSkill(chr.getId(), evilEye, 8));
+                //c.write(Summoned.summonedSkill(chr.getId(), evilEye, 7));
                 break;
             case EVIL_EYE:
                 spawnEvilEye(skillID, slv);
@@ -289,21 +282,21 @@ public class Warrior extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(PDD, o2);
                 break;
-            case EVIL_EYE_OF_DOMINATION://TODO
+            case EVIL_EYE_OF_DOMINATION:
                 if (tsm.hasStat(Beholder)) {
                     tsm.removeStatsBySkill(EVIL_EYE_OF_DOMINATION);
-                    spawnEvilEye(EVIL_EYE, (byte) 1);
+                    spawnEvilEye(EVIL_EYE, slv);
                 } else {
                     o1.nOption = 1;
                     o1.rOption = skillID;
                     o1.tOption = 0;
-                    o1.sOption = 1311013;
-                    o1.ssOption = evilEyeShock();
+                    o1.sOption = skillID;
+                    o1.ssOption = 0; // EVIL_EYE_SHOCK  to use that skill
                     tsm.putCharacterStatValue(Beholder, o1);
                 }
                 break;
             case SACRIFICE:
-                if (tsm.hasStat(Beholder)) {
+                if (tsm.hasStatBySkillId(EVIL_EYE)) {
                     o2.nOption = si.getValue(x, slv);
                     o2.rOption = skillID;
                     o2.tOption = si.getValue(time, slv);
@@ -312,8 +305,11 @@ public class Warrior extends Job {
                     o3.rOption = skillID;
                     o3.tOption = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieBDR, o3);
+
                     tsm.removeStatsBySkill(EVIL_EYE_OF_DOMINATION);
+                    tsm.removeStatsBySkill(EVIL_EYE_SHOCK);
                     removeEvilEye(tsm, c);
+
                     chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv))));
                 }
                 break;
@@ -434,6 +430,7 @@ public class Warrior extends Job {
                 //Lord of Darkness
                 lordOfDarkness();
 
+                killCountFinalPactOnMob(attackInfo);
             }
         }
         //Dark Thirst
@@ -727,6 +724,34 @@ public class Warrior extends Job {
                             }
                         }
                     }
+                    break;
+                case GUARDIAN:
+                    chr.heal(chr.getMaxHP());
+
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(NotDamaged, o1);
+                    tsm.sendSetStatPacket();
+
+                    Party party = chr.getParty();
+                    if(party != null) {
+                        Field field = chr.getField();
+                        rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                        List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
+                                filter(pml -> pml.getChr().getId() != chr.getId() &&
+                                        pml.getChr().getHP() <= 0).
+                                collect(Collectors.toList());
+                                
+                        if (eligblePartyMemberList.size() > 0) {
+                            Char randomPartyChr = Util.getRandomFromList(eligblePartyMemberList).getChr();
+                            TemporaryStatManager partyTSM = randomPartyChr.getTemporaryStatManager();
+                            randomPartyChr.heal(randomPartyChr.getMaxHP());
+                            partyTSM.putCharacterStatValue(NotDamaged, o1);
+                            partyTSM.sendSetStatPacket();
+                        }
+                    }
+
                     break;
                 case MAGIC_CRASH_DRK:
                 case MAGIC_CRASH_HERO:
@@ -1068,6 +1093,16 @@ public class Warrior extends Job {
         }
     }
 
+    public static void EvilEyeHeal(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr.hasSkill(EVIL_EYE) && tsm.hasStatBySkillId(EVIL_EYE)) {
+            Skill skill = chr.getSkill(EVIL_EYE);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            chr.heal(si.getValue(hp, slv));
+        }
+    }
+
     public static void getHexOfTheEvilEyeBuffs(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
@@ -1141,21 +1176,6 @@ public class Warrior extends Job {
         }
     }
 
-    private int evilEyeShock() {
-        if (!chr.hasSkill(EVIL_EYE_SHOCK)) {
-            return 0;
-        }
-        Skill skill = chr.getSkill(EVIL_EYE_SHOCK);
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-
-        if ((lastEvilEyeShock + (si.getValue(cooltime, slv) * 1000)) < System.currentTimeMillis()) {
-            lastEvilEyeShock = System.currentTimeMillis();
-            return EVIL_EYE_SHOCK;
-        }
-        return 0;
-    }
-
     private void giveParashockGuardBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (chr.hasSkill(PARASHOCK_GUARD) && tsm.getOptByCTSAndSkill(EVA, PARASHOCK_GUARD) != null) {
@@ -1222,6 +1242,118 @@ public class Warrior extends Job {
             tsm.removeStatsBySkill(PARASHOCK_GUARD);
             tsm.sendResetStatPacket();
         }
+    }
+
+    public static void applyFinalPact(Char chr) { // TODO  Ignore Gungnir's CD whilst in Final Pact state
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (!chr.hasSkill(FINAL_PACT_INFO)) {
+            return;
+        }
+
+        Skill skill = chr.getSkill(FINAL_PACT_INFO);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        if (isFinalPactAvailable(chr)) {
+            Option o1 = new Option();
+            Option o2 = new Option();
+
+            chr.heal(chr.getMaxHP());
+            chr.healMP(chr.getMaxMP());
+
+            o1.setInMillis(true);
+            o1.nOption = 1;
+            o1.rOption = FINAL_PACT;
+            o1.tOption = si.getValue(time, slv) * 1000;
+            o1.xOption = si.getValue(z, slv);
+            tsm.putCharacterStatValue(Reincarnation, o1);
+            o2.nOption = 1;
+            o2.rOption = FINAL_PACT;
+            o2.tOption = si.getValue(time, slv);
+            tsm.putCharacterStatValue(NotDamaged, o2);
+            tsm.sendSetStatPacket();
+
+            chr.write(User.effect(Effect.showFinalPactEffect(FINAL_PACT, (byte) 1, 0, true))); // Manually broadcasting Effect packet, as FINAL PACT isn't actually ever called.
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.showFinalPactEffect(FINAL_PACT, (byte) 1, 0, true)));
+
+            lastFinalPact = System.currentTimeMillis();
+            finishFinalPact = System.currentTimeMillis() + (si.getValue(time, slv) * 1000);
+        }
+    }
+
+    public static boolean isFinalPactAvailable(Char chr) {
+        Skill skill = chr.getSkill(FINAL_PACT_INFO);
+        if(skill == null) {
+            return false;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        chr.chatMessage((lastFinalPact + (si.getValue(cooltime, slv) *1000) - System.currentTimeMillis())+" Seconds left on Cooltime");
+        return lastFinalPact + (si.getValue(cooltime, slv) * 1000) < System.currentTimeMillis();
+    }
+
+    private void lowerFinalPactKillCount() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(FINAL_PACT_INFO);
+        if(skill == null || !tsm.hasStat(Reincarnation)) {
+            return;
+        }
+        int duration = (int) (finishFinalPact - System.currentTimeMillis());
+
+        killCount = tsm.getOption(Reincarnation).xOption;
+        if(killCount > 0) {
+            killCount--;
+
+            if (duration > 0) {
+                o.setInMillis(true);
+                o.nOption = 1;
+                o.rOption = FINAL_PACT;
+                o.tOption = duration;
+                o.xOption = killCount;
+                tsm.putCharacterStatValue(Reincarnation, o);
+                tsm.sendSetStatPacket();
+            } else {
+                tsm.removeStatsBySkill(FINAL_PACT);
+                tsm.sendResetStatPacket();
+            }
+        }
+    }
+
+    private void killCountFinalPactOnMob(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(!tsm.hasStat(Reincarnation)) {
+            return;
+        }
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+
+            if(mob != null) {
+                if (mob.isBoss()) {
+                    lowerFinalPactKillCount();
+                } else {
+                    int totaldmg = Arrays.stream(mai.damages).sum();
+
+                    if (totaldmg >= mob.getHp()) {
+                        lowerFinalPactKillCount();
+                    }
+                }
+            }
+        }
+    }
+
+    public static void finalPactEnd(Char chr) {
+        if (killCount > 0) {
+            chr.setStat(Stat.hp, 0);
+            Map<Stat, Object> stats = new HashMap<>();
+            stats.put(Stat.hp, 0);
+            chr.getClient().write(WvsContext.statChanged(stats));
+
+            chr.write(UserLocal.openUIOnDead(true, chr.getBuffProtectorItem() != null,
+                    false, false, false,
+                    ReviveType.NORMAL.getVal(), 0));
+        }
+        killCount = 30; //Resetting
     }
 }
 
