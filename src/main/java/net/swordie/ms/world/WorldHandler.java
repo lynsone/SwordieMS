@@ -1751,12 +1751,42 @@ public class WorldHandler {
             String medalString = (medalInt == 0 ? "" : "<"+ StringData.getItemStringById(medalInt) +"> "); // Smegas
 
             switch (itemID) {
+
                 case 5040004: // Hyper Teleport Rock
-                    short idk = inPacket.decodeShort();
-                    int mapID = inPacket.decodeInt();
-                    Field field = chr.getOrCreateFieldByCurrentInstanceType(mapID);
-                    chr.warp(field);
+                    short type = inPacket.decodeShort();
+                    if(type == 1) {
+                        int fieldId = inPacket.decodeInt();
+                        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
+                        chr.warp(field);
+                    } else {
+                        String targetName = inPacket.decodeString();
+                        int worldID = chr.getClient().getChannelInstance().getWorldId();
+                        World world = Server.getInstance().getWorldById(worldID);
+                        Char targetChr = world.getCharByName(targetName);
+                        Position targetPosition = targetChr.getPosition();
+
+                        // Target doesn't exist
+                        if(targetChr == null) {
+                            chr.chatMessage(String.format("%s is not online.", targetName));
+
+                        // Change channels & warp & teleport
+                        } else if (targetChr.getClient().getChannel() != c.getChannel()) {
+                            int fieldId = targetChr.getFieldID();
+                            chr.changeChannelAndWarp(targetChr.getClient().getChannel(), fieldId);
+                            chr.write(CField.teleport(targetPosition, chr));
+
+                        // warp & teleport
+                        } else if (targetChr.getFieldID() != chr.getFieldID()) {
+                            chr.warp(targetChr.getField());
+                            chr.write(CField.teleport(targetPosition, chr));
+
+                        // teleport
+                        } else {
+                            chr.write(CField.teleport(targetPosition, chr));
+                        }
+                    }
                     break;
+
                 case ItemConstants.RED_CUBE: // Red Cube
                 case ItemConstants.BLACK_CUBE: // Black cube
                     short ePos = (short) inPacket.decodeInt();
