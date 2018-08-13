@@ -4904,9 +4904,9 @@ public class WorldHandler {
                     return;
                 }
                 // this is kinda weird atm, so no different colours
-                String msgWithName = String.format("%s: %s", chr.getName(), msg);
-                tradeRoom.getChr().write(MiniroomPacket.chat(1, msgWithName));
-                tradeRoom.getOther().write(MiniroomPacket.chat(1, msgWithName));
+                String msgWithName = String.format("%s : %s", chr.getName(), msg);
+                chr.write(MiniroomPacket.chat(1, msgWithName));
+                tradeRoom.getOtherChar(chr).write(MiniroomPacket.chat(0, msgWithName));
                 break;
             case Accept:
                 if (tradeRoom == null) {
