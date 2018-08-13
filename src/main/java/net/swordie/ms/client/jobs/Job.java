@@ -16,13 +16,19 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
+import net.swordie.ms.client.jobs.cygnus.NightWalker;
+import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.life.AffectedArea;
@@ -385,6 +391,56 @@ public abstract class Job {
 	public void handleHit(Client c, HitInfo hitInfo) {
 		Char chr = c.getChr();
 		hitInfo.hpDamage = Math.max(0, hitInfo.hpDamage); // to prevent -1 (dodges) healing the player.
+
+		if(chr.getStat(Stat.hp) <= hitInfo.hpDamage) {
+			TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+			// Global Revives ---------------------------------------
+
+			// Global - Door (Bishop)
+			if(tsm.hasStatBySkillId(Magician.HEAVENS_DOOR)) {
+				Magician.reviveByHeavensDoor(chr);
+			}
+
+			// Global - Shade Link Skill (Shade)
+			// TODO
+
+
+
+			// Class Revives ----------------------------------------
+
+			// Dark Knight - Final Pact
+			else if(JobConstants.isDarkKnight(chr.getJob()) && chr.hasSkill(Warrior.FINAL_PACT_INFO) && Warrior.isFinalPactAvailable(chr)) {
+				Warrior.reviveByFinalPact(chr);
+			}
+
+			// Night Walker - Darkness Ascending
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, NightWalker.DARKNESS_ASCENDING) != null ) {
+				NightWalker.reviveByDarknessAscending(chr);
+			}
+
+			// Blaze Wizard - Phoenix Run
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, BlazeWizard.PHOENIX_RUN) != null) {
+				BlazeWizard.reviveByPhoenixRun(chr);
+			}
+
+			// Shade - Summon Other Spirit
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, Shade.SUMMON_OTHER_SPIRIT) != null) {
+				Shade.reviveBySummonOtherSpirit(chr);
+			}
+
+			// Beast Tamer - Bear Reborn		TODO
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, BeastTamer.BEAR_REBORN) != null) {
+				BeastTamer.reviveByBearReborn(chr);
+			}
+
+			// Zero - Rewind
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, Zero.REWIND) != null) {
+				Zero.reviveByRewind(chr);
+			}
+
+
+		}
 		int curHP = chr.getStat(Stat.hp);
 		int newHP = curHP - hitInfo.hpDamage;
 		if (newHP <= 0) {

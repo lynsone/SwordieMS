@@ -9,6 +9,9 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.AffectedArea;
@@ -442,5 +445,18 @@ public class Shade extends Job {
                 chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
             }
         }
+    }
+
+    public static void reviveBySummonOtherSpirit(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(SUMMON_OTHER_SPIRIT);
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Summon Other Spirit.");
+        chr.write(User.effect(Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
+
+        chr.write(User.effect(Effect.skillUse(25111211, (byte) 1, 0))); // Effect
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(25111211, (byte) 1, 0))); // Effect
     }
 }

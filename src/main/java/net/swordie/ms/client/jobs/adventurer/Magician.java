@@ -13,9 +13,10 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -128,6 +130,7 @@ public class Magician extends Job {
     public static final int MAPLE_WARRIOR_BISH = 2321000;
     public static final int ARCANE_AIM_BISH = 2320011;
     public static final int ANGEL_RAY = 2321007;
+    public static final int RESURRECTION = 2321006;
     public static final int HEROS_WILL_BISH = 2321009;
 
     //Hypers
@@ -178,6 +181,7 @@ public class Magician extends Job {
             HOLY_SYMBOL,
             ADV_BLESSING,
             MAPLE_WARRIOR_BISH,
+            RESURRECTION,
             INFINITY_BISH,
             BAHAMUT,
 
@@ -370,11 +374,26 @@ public class Magician extends Job {
                 }
                 break;
             case HEAVENS_DOOR:
-                o1.nOption = 1;
-                o1.rOption = HEAVENS_DOOR;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(ReviveOnce, o1);
-                tsm.sendSetStatPacket();
+                Party party = chr.getParty();
+                if (party != null) {
+                    for(PartyMember partyMember : party.getOnlineMembers()) {
+                        Char partyChr = partyMember.getChr();
+                        TemporaryStatManager partyTSM = partyChr.getTemporaryStatManager();
+                        o1.nOption = 1;
+                        o1.rOption = HEAVENS_DOOR;
+                        o1.tOption = 0;
+                        partyTSM.putCharacterStatValue(ReviveOnce, o1);
+                        partyTSM.sendSetStatPacket();
+                        partyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                        partyChr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
+                    }
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = HEAVENS_DOOR;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(ReviveOnce, o1);
+                    tsm.sendSetStatPacket();
+                }
                 break;
             case ANGEL_RAY:
                 chr.heal(changeBishopHealingBuffs(ANGEL_RAY));
@@ -818,6 +837,29 @@ public class Magician extends Job {
                 hmshits = 0;
                 chr.heal(changeBishopHealingBuffs(HOLY_MAGIC_SHELL));
                 break;
+            case RESURRECTION:
+                Party party = chr.getParty();
+                if(party != null) {
+                    field = chr.getField();
+                    Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                    List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
+                            filter(pml -> pml.getChr().getId() != chr.getId() &&
+                                    pml.getChr().getHP() <= 0).
+                            collect(Collectors.toList());
+                    for (PartyMember partyMember : eligblePartyMemberList) {
+                        Char partyChr = partyMember.getChr();
+                        partyChr.heal(partyChr.getMaxHP());
+                        partyChr.healMP(partyChr.getMaxMP());
+                        partyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                        partyChr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
+                    }
+                }
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                tsm.sendSetStatPacket();
+                break;
             case IFRIT:
             case ELQUINES:
             case BAHAMUT:
@@ -1186,6 +1228,14 @@ public class Magician extends Job {
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
         }
+    }
+
+    public static void reviveByHeavensDoor(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(HEAVENS_DOOR);
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Heaven's Door.");
     }
 }
 

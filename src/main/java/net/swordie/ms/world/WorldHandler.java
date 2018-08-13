@@ -34,6 +34,7 @@ import net.swordie.ms.client.guild.result.*;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
@@ -3383,14 +3384,19 @@ public class WorldHandler {
         int skillID = inPacket.decodeInt();
         //5 more bytes, unknown
 
-
         Char chr = c.getChr();
+        Field field = chr.getField();
+        if(field.getLifeByObjectID(objectID) != null) {
 
-        if(skillID == Warrior.EVIL_EYE) {
-            chr.heal(20);
-        }
-        if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
-            Warrior.getHexOfTheEvilEyeBuffs(chr);
+            // Dark Knight - Evil Eye
+            if(skillID == Warrior.EVIL_EYE) {
+                Warrior.EvilEyeHeal(chr);
+            }
+            else if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
+                Warrior.getHexOfTheEvilEyeBuffs(chr);
+            }
+            chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, objectID)));
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skillID, (byte) 1, objectID)));
         }
     }
 
@@ -5200,6 +5206,18 @@ public class WorldHandler {
             default:
                 log.error(String.format("Unhandled guild bbs type %s", type));
 
+        }
+    }
+
+    public static void handleBeastTamerRegroupRequest(Char chr, InPacket inPacket) {
+        byte unk = inPacket.decodeByte();
+        int skillId = inPacket.decodeInt();
+
+        if(skillId == BeastTamer.REGROUP) {
+            BeastTamer.beastTamerRegroup(chr);
+        } else {
+            log.error(String.format("Unhandled Beast Tamer Request %d", skillId));
+            chr.chatMessage(String.format("Unhandled Beast Tamer Request %d", skillId));
         }
     }
 }

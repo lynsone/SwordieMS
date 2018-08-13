@@ -12,6 +12,9 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.life.AffectedArea;
@@ -568,6 +571,15 @@ public class Zero extends Job {
             tsm.putCharacterStatValue(TimeFastBBuff, o);
             tsm.sendSetStatPacket();
         }
+    }
+
+    public static void reviveByRewind(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(REWIND);
+        tsm.sendResetStatPacket();
+        chr.write(User.effect(Effect.skillSpecial(REWIND)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(REWIND)));
     }
 
     @Override
