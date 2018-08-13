@@ -15,9 +15,9 @@ public class BroadcastMsg {
     String string;
     String string2;
     String string3;
-    byte arg1;
-    byte arg2;
-    byte arg3;
+    int arg1;
+    int arg2;
+    int arg3;
 
     public void encode(OutPacket outPacket) {
         outPacket.encodeByte(getBroadcastMsgType().getVal());
@@ -29,6 +29,8 @@ public class BroadcastMsg {
             case PopUpMessage:
             case DarkBlueOnLightBlue:
             case PartyChat:
+            case WhiteYellow:
+            case SwedishFlag:
                 break;
             case Megaphone:
             case MegaphoneNoMessage:
@@ -54,14 +56,48 @@ public class BroadcastMsg {
                 outPacket.encodeByte(getArg2()); // Channel
                 outPacket.encodeByte(getArg3()); // Mega Ear
                 break;
-            case WhiteYellow:
+            case BlueChat_ItemInfo:
+            case BlueChat_ItemInfo_2:
+                outPacket.encodeInt(getArg1()); // item Id
+                if(getArg1() != 0) {
+                    getItem().encode(outPacket); // item encode
+                }
+                break;
+            case GM_ErrorMessage:
+                outPacket.encodeInt(getArg1()); // npc Id
+                break;
+            case RedWithChannelInfo:
+                outPacket.encodeInt(getArg1()); //  chr Id
+                // "#channel" will grab  Chr's  Channel
+                break;
+            case WhiteYellow_ItemInfo:
                 outPacket.encodeByte(getArg1()); // Boolean  Item: Yes/No
                 if(getArg1() != 0) {
                     getItem().encode(outPacket); // Item encode
                 }
                 break;
+            case YellowChatFiled_ItemInfo:
+                outPacket.encodeInt(getArg1()); // item Id
+                outPacket.encodeByte(getArg2()); // boolean: show item
+                getItem().encode(outPacket);
+                break;
+            case PopUpNotice:
+                outPacket.encodeInt(getArg1()); // width
+                outPacket.encodeInt(getArg2()); // height
+                break;
             case Yellow:
+            case Yellow_2:
                 getItem().encode(outPacket); // Item encode
+                break;
+            case TryRegisterAutoStartQuest:
+                outPacket.encodeInt(getArg1()); // Quest Id
+                outPacket.encodeInt(getArg2()); // Time Out
+                break;
+            case TryRegisterAutoStartQuest_NoAnnouncement:
+                outPacket.encodeInt(getArg1()); // Quest Id
+                break;
+            case SlideNotice:
+                outPacket.encodeByte(getArg1());
                 break;
         }
     }
@@ -126,6 +162,59 @@ public class BroadcastMsg {
         return broadcastMsg;
     }
 
+    public static BroadcastMsg popUpNotice(String string, int width, int height) {
+        BroadcastMsg broadcastMsg = new BroadcastMsg();
+        broadcastMsg.setBroadcastMsgType(BroadcastMsgType.PopUpNotice);
+
+        broadcastMsg.setString(string);
+        broadcastMsg.setArg1(width);
+        broadcastMsg.setArg2(height);
+
+        return broadcastMsg;
+    }
+
+    public static BroadcastMsg blueChatWithItemInfo(String string, Item item) {
+        BroadcastMsg broadcastMsg = new BroadcastMsg();
+        broadcastMsg.setBroadcastMsgType(BroadcastMsgType.BlueChat_ItemInfo);
+
+        broadcastMsg.setString(string);
+        broadcastMsg.setArg1(item.getItemId());
+        broadcastMsg.setItem(item);
+
+        return broadcastMsg;
+    }
+
+    public static BroadcastMsg errorMessage(String string, int npcId) {
+        BroadcastMsg broadcastMsg = new BroadcastMsg();
+        broadcastMsg.setBroadcastMsgType(BroadcastMsgType.GM_ErrorMessage);
+
+        broadcastMsg.setString(string);
+        broadcastMsg.setArg1(npcId);
+
+        return broadcastMsg;
+    }
+
+    public static BroadcastMsg yellowFilled(String string, Item item, boolean show) {
+        BroadcastMsg broadcastMsg = new BroadcastMsg();
+        broadcastMsg.setBroadcastMsgType(BroadcastMsgType.YellowChatFiled_ItemInfo);
+
+        broadcastMsg.setString(string);
+        broadcastMsg.setItem(item);
+        broadcastMsg.setArg1(show ? 1 : 0);
+
+        return broadcastMsg;
+    }
+  /*
+    public static BroadcastMsg slideNotice(String string, boolean show) {
+        BroadcastMsg broadcastMsg = new BroadcastMsg();
+        broadcastMsg.setBroadcastMsgType(BroadcastMsgType.SlideNotice);
+
+        broadcastMsg.setString(string);
+        broadcastMsg.setArg1(show ? 1 : 0);
+
+        return broadcastMsg;
+    }
+*/
 
     public BroadcastMsgType getBroadcastMsgType() {
         return broadcastMsgType;
@@ -159,27 +248,27 @@ public class BroadcastMsg {
         this.string3 = string3;
     }
 
-    public byte getArg1() {
+    public int getArg1() {
         return arg1;
     }
 
-    public void setArg1(byte arg1) {
+    public void setArg1(int arg1) {
         this.arg1 = arg1;
     }
 
-    public byte getArg2() {
+    public int getArg2() {
         return arg2;
     }
 
-    public void setArg2(byte arg2) {
+    public void setArg2(int arg2) {
         this.arg2 = arg2;
     }
 
-    public byte getArg3() {
+    public int getArg3() {
         return arg3;
     }
 
-    public void setArg3(byte arg3) {
+    public void setArg3(int arg3) {
         this.arg3 = arg3;
     }
 

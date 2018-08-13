@@ -1729,6 +1729,18 @@ public class WorldHandler {
             // Reward items
             Item reward = itemInfo.getRandomReward();
             chr.addItemToInventory(reward);
+
+        } else if (itemID / 10000 == 539) {
+            // Avatar Megaphones
+            List<String> lineList = new ArrayList<>();
+            for(int i = 0; i < 4; i++) {
+                String line = inPacket.decodeString();
+                lineList.add(line);
+            }
+            boolean whisperIcon = inPacket.decodeByte() != 0;
+            World world = c.getWorld();
+            world.broadcastPacket(WvsContext.setAvatarMegaphone(chr, itemID, lineList, whisperIcon));
+
         } else {
 
             Equip medal = (Equip) chr.getEquippedInventory().getItemBySlot((short) -49); // Get Medal
