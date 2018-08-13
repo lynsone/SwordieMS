@@ -83,15 +83,13 @@ public class BroadcastMsg {
         BroadcastMsg broadcastMsg = new BroadcastMsg();
         broadcastMsg.setBroadcastMsgType(BroadcastMsgType.TripleMegaphone);
 
-        String nexonIsFuckingBrainDead = "  ";
-
         broadcastMsg.setArg1((byte) stringList.size());
         broadcastMsg.setString(stringList.get(0));
         if(stringList.size() > 1) {
-            broadcastMsg.setString2(nexonIsFuckingBrainDead + stringList.get(1));
+            broadcastMsg.setString2(stringList.get(1));
         }
         if(stringList.size() > 2) {
-            broadcastMsg.setString3(nexonIsFuckingBrainDead + stringList.get(2));
+            broadcastMsg.setString3(stringList.get(2));
         }
         broadcastMsg.setArg2((byte) (channel - 1));
         broadcastMsg.setArg3((byte) (whisperEar ? 1 : 0));

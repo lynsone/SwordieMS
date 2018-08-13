@@ -1729,135 +1729,143 @@ public class WorldHandler {
             Item reward = itemInfo.getRandomReward();
             chr.addItemToInventory(reward);
         } else {
-        switch (itemID) {
-            case 5040004: // Hyper Teleport Rock
-                short idk = inPacket.decodeShort();
-                int mapID = inPacket.decodeInt();
-                Field field = chr.getOrCreateFieldByCurrentInstanceType(mapID);
-                chr.warp(field);
-                break;
-            case ItemConstants.RED_CUBE: // Red Cube
-            case ItemConstants.BLACK_CUBE: // Black cube
-                short ePos = (short) inPacket.decodeInt();
-                InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
-                Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
-                if (equip == null) {
-                    chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
-                    chr.dispose();
-                    return;
-                } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
-                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
-                    chr.dispose();
-                    return;
-                }
-                Equip oldEquip = equip.deepCopy();
-                int tierUpChance = ItemConstants.getTierUpChance(itemID);
-                short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
-                boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
-                if (tierUp) {
-                    hiddenValue++;
-                }
-                equip.setHiddenOptionBase(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
-                equip.releaseOptions(false);
-                if (itemID == ItemConstants.RED_CUBE) {
-                    c.write(CField.redCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
+
+            Equip medal = (Equip) chr.getEquippedInventory().getItemBySlot((short) -49); // Get Medal
+            int medalInt = 0;
+            if(medal != null) {
+                medalInt = (medal.getAnvilId() == 0 ? medal.getItemId() : medal.getAnvilId()); // Check for Anvilled items
+            }
+            String medalString = (medalInt == 0 ? "" : "<"+ StringData.getItemStringById(medalInt) +"> "); // Smegas
+
+            switch (itemID) {
+                case 5040004: // Hyper Teleport Rock
+                    short idk = inPacket.decodeShort();
+                    int mapID = inPacket.decodeInt();
+                    Field field = chr.getOrCreateFieldByCurrentInstanceType(mapID);
+                    chr.warp(field);
+                    break;
+                case ItemConstants.RED_CUBE: // Red Cube
+                case ItemConstants.BLACK_CUBE: // Black cube
+                    short ePos = (short) inPacket.decodeInt();
+                    InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
+                    Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
+                    if (equip == null) {
+                        chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                        chr.dispose();
+                        return;
+                    } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
+                        log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                        chr.dispose();
+                        return;
+                    }
+                    Equip oldEquip = equip.deepCopy();
+                    int tierUpChance = ItemConstants.getTierUpChance(itemID);
+                    short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
+                    boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    if (tierUp) {
+                        hiddenValue++;
+                    }
+                    equip.setHiddenOptionBase(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
+                    equip.releaseOptions(false);
+                    if (itemID == ItemConstants.RED_CUBE) {
+                        c.write(CField.redCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
+                        c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
+                    } else {
+                        if (chr.getMemorialCubeInfo() == null) {
+                            chr.setMemorialCubeInfo(new MemorialCubeInfo(equip, oldEquip, itemID));
+                        }
+                        chr.getField().broadcastPacket(User.showItemMemorialEffect(chr.getId(), true, itemID));
+                        c.write(WvsContext.blackCubeResult(equip, chr.getMemorialCubeInfo()));
+                    }
+                    equip.updateToChar(chr);
+                    break;
+                case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
+                    ePos = (short) inPacket.decodeInt();
+                    invType = ePos < 0 ? EQUIPPED : EQUIP;
+                    equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
+                    if (equip == null) {
+                        chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                        return;
+                    } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
+                        log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                        chr.dispose();
+                        return;
+                    }
+                    tierUpChance = ItemConstants.getTierUpChance(itemID);
+                    hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
+                    tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    if (tierUp) {
+                        hiddenValue++;
+                    }
+                    equip.setHiddenOptionBonus(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
+                    equip.releaseOptions(true);
+                    c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
                     c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
-                } else {
-                    if (chr.getMemorialCubeInfo() == null) {
-                        chr.setMemorialCubeInfo(new MemorialCubeInfo(equip, oldEquip, itemID));
+                    equip.updateToChar(chr);
+                    break;
+                case 5750001: // Nebulite Diffuser
+                    ePos = inPacket.decodeShort();
+                    equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
+                    if (equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
+                        chr.chatMessage("That item currently does not have an active socket.");
+                        chr.dispose();
+                        return;
                     }
-                    chr.getField().broadcastPacket(User.showItemMemorialEffect(chr.getId(), true, itemID));
-                    c.write(WvsContext.blackCubeResult(equip, chr.getMemorialCubeInfo()));
-                }
-                equip.updateToChar(chr);
-                break;
-            case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
-                ePos = (short) inPacket.decodeInt();
-                invType = ePos < 0 ? EQUIPPED : EQUIP;
-                equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
-                if (equip == null) {
-                    chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
-                    return;
-                } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
-                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
-                    chr.dispose();
-                    return;
-                }
-                tierUpChance = ItemConstants.getTierUpChance(itemID);
-                hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
-                tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
-                if (tierUp) {
-                    hiddenValue++;
-                }
-                equip.setHiddenOptionBonus(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
-                equip.releaseOptions(true);
-                c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
-                c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
-                equip.updateToChar(chr);
-                break;
-            case 5750001: // Nebulite Diffuser
-                ePos = inPacket.decodeShort();
-                equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-                if (equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
-                    chr.chatMessage("That item currently does not have an active socket.");
-                    chr.dispose();
-                    return;
-                }
-                equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
-                equip.updateToChar(chr);
-                break;
-            case 5072000: // Super Megaphone
-                String text = inPacket.decodeString();
-                boolean whisperIcon = inPacket.decodeByte() != 0;
-                World world = chr.getClient().getWorld();
-                BroadcastMsg smega = BroadcastMsg.megaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
-                world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                break;
-            case 5076000: // Item Megaphone
-                text = inPacket.decodeString();
-                whisperIcon = inPacket.decodeByte() != 0;
-                boolean eqpSelected = inPacket.decodeByte() != 0;
-                invType = EQUIP;
-                int itemPosition = 0;
-                if (eqpSelected) {
-                    invType = InvType.getInvTypeByVal(inPacket.decodeInt());
-                    itemPosition = inPacket.decodeInt();
-                    if (invType == EQUIP && itemPosition < 0) {
-                        invType = EQUIPPED;
+                    equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+                    equip.updateToChar(chr);
+                    break;
+                case 5072000: // Super Megaphone
+                    String text = inPacket.decodeString();
+                    boolean whisperIcon = inPacket.decodeByte() != 0;
+                    World world = chr.getClient().getWorld();
+                    BroadcastMsg smega = BroadcastMsg.megaphone(String.format("%s%s : %s", medalString, chr.getName(), text), (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
+                    world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                    break;
+                case 5076000: // Item Megaphone
+                    text = inPacket.decodeString();
+                    whisperIcon = inPacket.decodeByte() != 0;
+                    boolean eqpSelected = inPacket.decodeByte() != 0;
+                    invType = EQUIP;
+                    int itemPosition = 0;
+                    if (eqpSelected) {
+                        invType = InvType.getInvTypeByVal(inPacket.decodeInt());
+                        itemPosition = inPacket.decodeInt();
+                        if (invType == EQUIP && itemPosition < 0) {
+                            invType = EQUIPPED;
+                        }
                     }
-                }
-                Item broadcastedItem = chr.getInventoryByType(invType).getItemBySlot((short) itemPosition);
+                    Item broadcastedItem = chr.getInventoryByType(invType).getItemBySlot((short) itemPosition);
 
-                world = chr.getClient().getWorld();
-                smega = BroadcastMsg.itemMegaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon, eqpSelected, broadcastedItem);
-                world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                break;
-            case 5077000: // Triple Megaphone
-                byte stringListSize = inPacket.decodeByte();
-                List<String> stringList = new ArrayList<>();
-                for (int i = 0; i < stringListSize; i++) {
-                    stringList.add(inPacket.decodeString());
-                }
-                whisperIcon = inPacket.decodeByte() != 0;
+                    world = chr.getClient().getWorld();
+                    smega = BroadcastMsg.itemMegaphone(String.format("%s%s : %s", medalString, chr.getName(), text), (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon, eqpSelected, broadcastedItem);
+                    world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                    break;
+                case 5077000: // Triple Megaphone
+                    byte stringListSize = inPacket.decodeByte();
+                    List<String> stringList = new ArrayList<>();
+                    for (int i = 0; i < stringListSize; i++) {
+                        stringList.add(String.format("%s%s : %s", medalString, chr.getName(), inPacket.decodeString()));
+                    }
+                    whisperIcon = inPacket.decodeByte() != 0;
 
-                world = chr.getClient().getWorld();
-                smega = BroadcastMsg.tripleMegaphone(stringList, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
-                world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                break;
-            case 5062405: // Fusion anvil
-                int appearancePos = inPacket.decodeInt();
-                int functionPos = inPacket.decodeInt();
-                Inventory inv = chr.getEquipInventory();
-                Equip appearance = (Equip) inv.getItemBySlot((short) appearancePos);
-                Equip function = (Equip) inv.getItemBySlot((short) functionPos);
-                if (appearance != null && function != null && appearance.getItemId() / 10000 == function.getItemId() / 10000) {
-                    function.getOptions().set(6, appearance.getItemId());
-                }
-                function.updateToChar(chr);
-                break;
-            default:
-                chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
-                return;
+                    world = chr.getClient().getWorld();
+                    smega = BroadcastMsg.tripleMegaphone(stringList, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
+                    world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                    break;
+                case 5062405: // Fusion anvil
+                    int appearancePos = inPacket.decodeInt();
+                    int functionPos = inPacket.decodeInt();
+                    Inventory inv = chr.getEquipInventory();
+                    Equip appearance = (Equip) inv.getItemBySlot((short) appearancePos);
+                    Equip function = (Equip) inv.getItemBySlot((short) functionPos);
+                    if (appearance != null && function != null && appearance.getItemId() / 10000 == function.getItemId() / 10000) {
+                        function.getOptions().set(6, appearance.getItemId());
+                    }
+                    function.updateToChar(chr);
+                    break;
+                default:
+                    chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
+                    return;
             }
         }
         if (itemID != 5040004) {

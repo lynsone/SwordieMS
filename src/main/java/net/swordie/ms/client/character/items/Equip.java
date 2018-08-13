@@ -1365,6 +1365,10 @@ public class Equip extends Item {
         }
     }
 
+    public int getAnvilId() {
+        return getOptions().get(6); // Anvil
+    }
+
     public Map<EnchantStat, Integer> getEnchantStats() {
         return enchantStats;
     }
