@@ -3,6 +3,7 @@ package net.swordie.ms.client.guild.result;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
+import net.swordie.ms.client.guild.GuildSkill;
 import net.swordie.ms.connection.OutPacket;
 
 import static net.swordie.ms.client.guild.result.GuildType.*;
@@ -21,6 +22,7 @@ public class GuildResult {
     private Char chr;
     private int intArg;
     private String stringArg;
+    private GuildSkill skill;
 
     private GuildResult(GuildType type) {
         this.type = type;
@@ -104,8 +106,26 @@ public class GuildResult {
                 outPacket.encodeInt(member.getCharID());
                 outPacket.encodeInt(member.getIgp());
                 break;
+            case Res_IncPoint_Done:
+                outPacket.encodeInt(guild.getId());
+                outPacket.encodeInt(guild.getPoints());
+                outPacket.encodeInt(guild.getLevel());
+                outPacket.encodeInt(guild.getGgp());
+                break;
+            case Res_SetSkill_Done:
+                outPacket.encodeInt(guild.getId());
+                outPacket.encodeInt(skill.getSkillID());
+                outPacket.encodeInt(intArg); // nBuyCharacterID
+                outPacket.encode(skill);
+                break;
             case Res_BattleSkillOpen:
-                outPacket.encodeInt(3);
+                outPacket.encodeInt(guild.getBattleSp());
+                break;
+            case Res_Rank_Reflash:
+                outPacket.encodeInt(guild.getRank());
+                break;
+            case Res_SetSkill_LevelSet_Unknown:
+                outPacket.encodeByte(false);
                 break;
         }
     }
@@ -201,6 +221,32 @@ public class GuildResult {
         GuildResult gri = new GuildResult(Res_SetGGP_Done);
         gri.guild = guild;
         return gri;
+    }
+
+    public static GuildResult setPointAndLevel(Guild guild) {
+        GuildResult gr = new GuildResult(Res_IncPoint_Done);
+        gr.guild = guild;
+        return gr;
+    }
+
+    public static GuildResult setSkill(Guild guild, GuildSkill skill, int buyCharID) {
+        GuildResult gr = new GuildResult(Res_SetSkill_Done);
+        gr.guild = guild;
+        gr.skill = skill;
+        gr.intArg = buyCharID;
+        return gr;
+    }
+
+    public static GuildResult battleSkillOpen(Guild guild) {
+        GuildResult gr = new GuildResult(Res_BattleSkillOpen);
+        gr.guild = guild;
+        return gr;
+    }
+
+    public static GuildResult setRank(Guild guild) {
+        GuildResult gr = new GuildResult(Res_Rank_Reflash);
+        gr.guild = guild;
+        return gr;
     }
 
 }

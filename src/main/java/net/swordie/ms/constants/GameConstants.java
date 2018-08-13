@@ -139,8 +139,7 @@ public class GameConstants {
     public static final double GGP_PER_CONTRIBUTION = 0.3;
     public static final double IGP_PER_CONTRIBUTION = 0.7;
     public static final int GUILD_BBS_RECORDS_PER_PAGE = 10;
-
-
+    public static final int GGP_FOR_SKILL_RESET = 50000;
 
     // Monster Collection
     public static final int MOBS_PER_PAGE = 25;

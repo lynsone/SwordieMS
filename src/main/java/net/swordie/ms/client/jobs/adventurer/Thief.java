@@ -369,7 +369,6 @@ public class Thief extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        System.out.println("Thief handleskill!");
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);

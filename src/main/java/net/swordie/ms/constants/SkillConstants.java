@@ -1207,4 +1207,20 @@ public class SkillConstants {
     public static int getTotalActiveHyperSpByLevel(short level) {
         return level < 140 ? 0 : level < 170 ? 1 : level < 200 ? 2 : 3;
     }
+
+    public static boolean isGuildSkill(int skillID) {
+        int prefix = skillID / 10000;
+        if (prefix == 8000) {
+            prefix = skillID / 100;
+        }
+        return prefix == 9100;
+    }
+
+    public static boolean isGuildContentSkill(int skillID) {
+        return (skillID >= 91000007 && skillID <= 91000015) || (skillID >= 91001016 && skillID <= 91001021);
+    }
+
+    public static boolean isGuildNoblesseSkill(int skillID) {
+        return skillID >= 91001022 && skillID <= 91001024;
+    }
 }

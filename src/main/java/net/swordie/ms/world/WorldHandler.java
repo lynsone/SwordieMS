@@ -25,6 +25,7 @@ import net.swordie.ms.client.friend.FriendType;
 import net.swordie.ms.client.friend.result.*;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
+import net.swordie.ms.client.guild.GuildSkill;
 import net.swordie.ms.client.guild.bbs.BBSRecord;
 import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.guild.bbs.GuildBBSPacket;
@@ -2285,7 +2286,8 @@ public class WorldHandler {
             answer = inPacket.decodeByte();
         }
         if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
-                nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero) || hasAnswer) {
+                nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
+                nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
             // else -> User pressed escape in a selection (choice) screen
             chr.getScriptManager().handleAction(lastType, action, answer);
         } else {
@@ -2792,12 +2794,18 @@ public class WorldHandler {
                 }
                 break;
             case Req_WithdrawGuild:
+                if (guild == null) {
+                    return;
+                }
                 name = chr.getName();
                 guild.broadcast(WvsContext.guildResult(GuildResult.leaveGuild(guild, chr.getId(), name, false)));
                 guild.removeMember(chr);
                 chr.setGuild(null);
                 break;
             case Req_KickGuild:
+                if (guild == null) {
+                    return;
+                }
                 int expelledID = inPacket.decodeInt();
                 String expelledName = inPacket.decodeString();
                 GuildMember gm = guild.getMemberByCharID(expelledID);
@@ -2812,6 +2820,9 @@ public class WorldHandler {
                 }
                 break;
             case Req_SetMark:
+                if (guild == null) {
+                    return;
+                }
                 guild.setMarkBg(inPacket.decodeShort());
                 guild.setMarkBgColor(inPacket.decodeByte());
                 guild.setMark(inPacket.decodeShort());
@@ -2820,6 +2831,9 @@ public class WorldHandler {
                 guild.broadcast(WvsContext.guildResult(GuildResult.loadGuild(guild)));
                 break;
             case Req_SetGradeName:
+                if (guild == null) {
+                    return;
+                }
                 String[] newNames = new String[guild.getGradeNames().size()];
                 for (int i = 0; i < newNames.length; i++) {
                     newNames[i] = inPacket.decodeString();
@@ -2828,15 +2842,124 @@ public class WorldHandler {
                 guild.broadcast(WvsContext.guildResult(GuildResult.setGradeName(guild, newNames)));
                 break;
             case Req_SetMemberGrade:
+                if (guild == null) {
+                    return;
+                }
                 int id = inPacket.decodeInt();
                 byte grade = inPacket.decodeByte();
                 gm = guild.getMemberByCharID(id);
                 gm.setGrade(grade);
                 guild.broadcast(WvsContext.guildResult(GuildResult.setMemberGrade(guild, gm)));
                 break;
+            case Req_SkillLevelSetUp:
+                if (guild == null) {
+                    return;
+                }
+                int skillID = inPacket.decodeInt();
+                boolean up = inPacket.decodeByte() != 0;
+                if (up) {
+                    if (!SkillConstants.isGuildContentSkill(skillID) && !SkillConstants.isGuildNoblesseSkill(skillID)) {
+                        log.error(String.format("Character %d tried to add an invalid guild skill (%d)", chr.getId(), skillID));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_UseSkill_Err)));
+                        return;
+                    }
+                    int spentSp = guild.getSpentSp();
+                    if (SkillConstants.isGuildContentSkill(skillID)) {
+                        if (spentSp >= guild.getLevel() * 2) {
+                            log.error(String.format("Character %d tried to add a guild skill without enough sp (spent %d, level %d).",
+                                    chr.getId(), spentSp, guild.getLevel()));
+                            chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                            return;
+                        }
+                    } else if (guild.getBattleSp() - guild.getSpentBattleSp() <= 0){ // Noblesse
+                        log.error(String.format("Character %d tried to add a guild battle skill without enough sp (spent %d).",
+                                chr.getId(), guild.getSpentSp()));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    SkillInfo si = SkillData.getSkillInfoById(skillID);
+                    if (spentSp < si.getReqTierPoint()) {
+                        log.error(String.format("Character %d tried to add a guild skill without enough sp spent (spent %d, needed %d).",
+                                chr.getId(), spentSp, si.getReqTierPoint()));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    for (Map.Entry<Integer, Integer> entry : si.getReqSkills().entrySet()) {
+                        int reqSkillID = entry.getKey();
+                        int reqSlv = entry.getValue();
+                        GuildSkill gs = guild.getSkillById(skillID);
+                        if (gs == null || gs.getLevel() < reqSlv) {
+                            log.error(String.format("Character %d tried to add a guild skill without having the required " +
+                                            "skill first (req id %d, needed %d, has %d).",
+                                    chr.getId(), reqSkillID, reqSlv, gs == null ? 0 : gs.getLevel()));
+                            chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                            return;
+                        }
+                    }
+                    GuildSkill skill = guild.getSkillById(skillID);
+                    if (skill == null) {
+                        skill = new GuildSkill();
+                        skill.setBuyCharacterName(chr.getName());
+                        skill.setExtendCharacterName(chr.getName());
+                        skill.setSkillID(skillID);
+                        guild.addGuildSkill(skill);
+                    }
+                    if (skill.getLevel() >= si.getMaxLevel()) {
+                        chr.chatMessage("That skill is already at its max level.");
+                        chr.dispose();
+                        return;
+                    }
+                    skill.setLevel((short) (skill.getLevel() + 1));
+                    guild.broadcast(WvsContext.guildResult(GuildResult.setSkill(guild, skill, chr.getId())));
+                } else {
+                    GuildSkill gs = guild.getSkillById(skillID);
+                    if (gs == null || gs.getLevel() == 0) {
+                        log.error(String.format("Character %d tried to decrement a guild skill without that skill existing (id %d).",
+                                chr.getId(), skillID));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    if (guild.getGgp() < GameConstants.GGP_FOR_SKILL_RESET) {
+                        log.error(String.format("Character %d tried to decrement a guild skill without having enough GGP (needed %d, has %d).",
+                                chr.getId(), GameConstants.GGP_FOR_SKILL_RESET, guild.getGgp()));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    guild.setGgp(guild.getGgp() - GameConstants.GGP_FOR_SKILL_RESET);
+                    gs.setLevel((short) (gs.getLevel() - 1));
+                    guild.broadcast(WvsContext.guildResult(GuildResult.setSkill(guild, gs, chr.getId())));
+                    guild.broadcast(WvsContext.guildResult(GuildResult.setGgp(guild)));
+                }
+                break;
+            case Req_BattleSkillOpen:
+                if (guild == null) {
+                    return;
+                }
+                chr.write(WvsContext.guildResult(GuildResult.battleSkillOpen(guild)));
+                break;
+            case Req_UseActiveSkill:
+                skillID = inPacket.decodeInt();
+                // TODO Remove igp
+                long usabletime = chr.getSkillCoolTimes().getOrDefault(skillID, Long.MIN_VALUE);
+                if (usabletime > System.currentTimeMillis() && !chr.hasSkillCDBypass()) {
+                    chr.chatMessage("That skill is still on cooldown.");
+                    return;
+                }
+                GuildSkill gs = guild.getSkillById(skillID);
+                if (gs == null || gs.getLevel() == 0) {
+                    log.error(String.format("Character %d tried to use a guild skill without having it (id %d).",
+                            chr.getId(), skillID));
+                    chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                    return;
+                }
+                SkillInfo si = SkillData.getSkillInfoById(skillID);
+                chr.getSkillCoolTimes().put(skillID, System.currentTimeMillis() + 1000 * si.getValue(SkillStat.cooltime, gs.getLevel()));
+                chr.getJobHandler().handleJoblessBuff(c, inPacket, skillID, (byte) gs.getLevel());
+                break;
             default:
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
+
         }
     }
 
@@ -4918,9 +5041,9 @@ public class WorldHandler {
                     return;
                 }
                 // this is kinda weird atm, so no different colours
-                String msgWithName = String.format("%s: %s", chr.getName(), msg);
-                tradeRoom.getChr().write(MiniroomPacket.chat(1, msgWithName));
-                tradeRoom.getOther().write(MiniroomPacket.chat(1, msgWithName));
+                String msgWithName = String.format("%s : %s", chr.getName(), msg);
+                chr.write(MiniroomPacket.chat(1, msgWithName));
+                tradeRoom.getOtherChar(chr).write(MiniroomPacket.chat(0, msgWithName));
                 break;
             case Accept:
                 if (tradeRoom == null) {
