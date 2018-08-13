@@ -8,6 +8,7 @@ import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.constants.SkillConstants;
 
 import javax.persistence.*;
 import java.util.*;
@@ -52,6 +53,7 @@ public class Guild implements Encodable {
     private int joinSetting;
     private int reqLevel;
     // End GUILDSETTING struct
+    private int battleSp;
 
     @ElementCollection
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -70,7 +72,8 @@ public class Guild implements Encodable {
     public Guild() {
         setGradeNames(new String[]{"Guild Master", "Junior", "Veteran", "Member", "Newbie"});
         setAppliable(true);
-        setMaxMembers(10);
+        setMaxMembers(50);
+        setLevel(1);
         setName("Default guild");
     }
 
@@ -110,13 +113,14 @@ public class Guild implements Encodable {
         outPacket.encodeString(getNotice());
         outPacket.encodeInt(getPoints());
         outPacket.encodeInt(getSeasonPoints());
+        outPacket.encodeInt(0); // nAllianceID
         outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getRank());
         outPacket.encodeInt(getGgp());
         outPacket.encodeShort(getSkills().size());
         getSkills().forEach((id, skill) -> {
             outPacket.encodeInt(id);
-            skill.encode(outPacket);
+            outPacket.encode(skill);
         });
         outPacket.encodeByte(isAppliable());
         if(isAppliable()) {
@@ -444,5 +448,26 @@ public class Guild implements Encodable {
 
     public void setBbsNotice(BBSRecord bbsNotice) {
         this.bbsNotice = bbsNotice;
+    }
+
+    public int getSpentSp() {
+        return getSkills().values().stream().mapToInt(GuildSkill::getLevel).sum();
+    }
+
+    public int getSpentBattleSp() {
+        int spentSp = 0;
+        for (int i = 91001022; i < 91001024; i++) {
+            GuildSkill gs = getSkills().getOrDefault(i, null);
+            spentSp += gs == null ? 0 : gs.getLevel();
+        }
+        return spentSp;
+    }
+
+    public int getBattleSp() {
+        return getLevel() + 4;
+    }
+
+    public GuildSkill getSkillById(int skillID) {
+        return getSkills().getOrDefault(skillID, null);
     }
 }

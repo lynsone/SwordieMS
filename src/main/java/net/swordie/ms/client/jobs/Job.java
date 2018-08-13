@@ -84,11 +84,19 @@ public abstract class Job {
 	public static final int DARK_ANGEL = 40011087;
 	public static final int ARCHANGEL = 40011085;
 
+	public static final int BOSS_SLAYERS = 91001022;
+	public static final int UNDETERRED = 91001023;
+	public static final int FOR_THE_GUILD = 91001024;
+
+
 	private int[] buffs = new int[]{
 			LIGHTNING_GOD,
 			WHITE_ANGEL,
 			DARK_ANGEL,
-			ARCHANGEL
+			ARCHANGEL,
+			BOSS_SLAYERS,
+			UNDETERRED,
+			FOR_THE_GUILD
 	};
 
 	public Job(Char chr) {
@@ -303,6 +311,27 @@ public abstract class Job {
 				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 				field = c.getChr().getField();
 				field.spawnSummon(summon);
+				break;
+			case BOSS_SLAYERS:
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieBDR, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieBDR, o1);
+				break;
+			case UNDETERRED:
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieIgnoreMobpdpR, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o1);
+				break;
+			case FOR_THE_GUILD:
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieDamR, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieDamR, o1);
 				break;
 			default:
 				sendStat = false;

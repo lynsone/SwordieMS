@@ -499,6 +499,7 @@ create table guilds (
     joinsetting int,
     reqlevel int,
     bbsNotice int,
+    battleSp int,
     primary key (id)
 );
 

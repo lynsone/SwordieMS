@@ -36,6 +36,10 @@ public class SkillInfo {
     private int hyper;
     private int hyperstat;
     private int vehicleId;
+    private int reqTierPoint;
+    private Map<Integer, Integer> reqSkills = new HashMap<>();
+    private boolean notCooltimeReset;
+    private boolean notIncBuffDuration;
 
     public int getSkillId() {
         return skillId;
@@ -268,5 +272,37 @@ public class SkillInfo {
 
     public void setVehicleId(int vehicleId) {
         this.vehicleId = vehicleId;
+    }
+
+    public void setReqTierPoint(int reqTierPoint) {
+        this.reqTierPoint = reqTierPoint;
+    }
+
+    public int getReqTierPoint() {
+        return reqTierPoint;
+    }
+
+    public void addReqSkill(int skillID, int slv) {
+        getReqSkills().put(skillID, slv);
+    }
+
+    public Map<Integer, Integer> getReqSkills() {
+        return reqSkills;
+    }
+
+    public void setNotCooltimeReset(boolean notCooltimeReset) {
+        this.notCooltimeReset = notCooltimeReset;
+    }
+
+    public boolean isNotCooltimeReset() {
+        return notCooltimeReset;
+    }
+
+    public void setNotIncBuffDuration(boolean notIncBuffDuration) {
+        this.notIncBuffDuration = notIncBuffDuration;
+    }
+
+    public boolean isNotIncBuffDuration() {
+        return notIncBuffDuration;
     }
 }
