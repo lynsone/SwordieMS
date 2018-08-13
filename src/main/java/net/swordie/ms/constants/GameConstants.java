@@ -140,6 +140,7 @@ public class GameConstants {
     public static final double IGP_PER_CONTRIBUTION = 0.7;
     public static final int GUILD_BBS_RECORDS_PER_PAGE = 10;
     public static final int GGP_FOR_SKILL_RESET = 50000;
+    public static final int MAX_GUILD_LV = 25;
 
     // Monster Collection
     public static final int MOBS_PER_PAGE = 25;
@@ -147,6 +148,7 @@ public class GameConstants {
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
+    private static int[] guildExp = new int[MAX_GUILD_LV];
 
     private static List<QuickMoveInfo> quickMoveInfos;
 
@@ -154,6 +156,7 @@ public class GameConstants {
         initCharExp();
         initEnchantRates();
         initQuickMove();
+        initGuildExp();
     }
 
     private static void initQuickMove() {
@@ -271,6 +274,13 @@ public class GameConstants {
                 {20, 294},
                 {10, 396},
         };
+    }
+
+    public static void initGuildExp() {
+        guildExp[1] = 15000;
+        for (int i = 2; i < guildExp.length; i++) {
+            guildExp[i] = guildExp[i - 1] + 30000;
+        }
     }
 
     public static long getEnchantmentMesoCost(int reqLevel, int chuc) {
@@ -463,10 +473,10 @@ public class GameConstants {
         return money;
     }
 
-    public static int getExpRequiredForGuildLevel(int curLevel) {
-        if (curLevel >= 25) {
+    public static int getExpRequiredForNextGuildLevel(int curLevel) {
+        if (curLevel >= 25 || curLevel < 0) {
             return 0;
         }
-        return 15000 + 30000 * (curLevel - 1);
+        return guildExp[curLevel];
     }
 }

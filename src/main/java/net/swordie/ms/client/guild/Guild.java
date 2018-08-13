@@ -2,13 +2,13 @@ package net.swordie.ms.client.guild;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.guild.bbs.BBSRecord;
-import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.ChatMsgColour;
 
 import javax.persistence.*;
 import java.util.*;
@@ -401,9 +401,23 @@ public class Guild implements Encodable {
     public void addCommitmentToChar(Char chr, int commitment) {
         GuildMember gm = getMemberByCharID(chr.getId());
         if (gm != null && gm.getRemainingDayCommitment() > 0) {
-            gm.addCommitment(commitment);
-            addGgp((int) (commitment * GameConstants.GGP_PER_CONTRIBUTION));
+            int commitmentInc = gm.getDayCommitment() + commitment > GameConstants.MAX_DAY_COMMITMENT
+                    ? GameConstants.MAX_DAY_COMMITMENT - gm.getDayCommitment()
+                    : commitment;
+            gm.addCommitment(commitmentInc);
+            addGgp((int) (commitmentInc * GameConstants.GGP_PER_CONTRIBUTION));
+            addPoints(commitment);
         }
+    }
+
+    private void addPoints(int commitment) {
+        setPoints(getPoints() + commitment);
+        if (getLevel() < GameConstants.MAX_GUILD_LV && getPoints() > GameConstants.getExpRequiredForNextGuildLevel(getLevel())) {
+            setLevel(getLevel() + 1);
+            broadcast(UserLocal.chatMsg(ChatMsgColour.GAME_NOTICE, String.format("%s has reached level %d!",
+                    getName(), getLevel())));
+        }
+        broadcast(WvsContext.guildResult(GuildResult.setPointAndLevel(this)));
     }
 
     private void addGgp(int ggp) {

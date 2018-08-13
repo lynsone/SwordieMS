@@ -558,7 +558,7 @@ public class WvsContext {
                 break;
             case INC_COMMITMENT_MESSAGE:
                 outPacket.encodeInt(i);
-                outPacket.encodeByte(type);
+                outPacket.encodeByte(i < 0 ? 1 : i == 0 ? 2 : 0); // gained = 0, lost = 1, cap = 2
                 break;
             case SYSTEM_MESSAGE:
                 outPacket.encodeString(string);
@@ -958,7 +958,6 @@ public class WvsContext {
      *      1: Item is not upgradable
      *      2: 2 upgrade increases have been used already
      *      3: You can't vicious hammer non-horntail necklace
-     * @param upgradesLeft amount of upgrades left. NOTE: ((v9 >> 8) & 0xFF) - v9 + 2) (where v9 = upgradesLeft)
      * @return the created packet
      */
     public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, Equip equip) {

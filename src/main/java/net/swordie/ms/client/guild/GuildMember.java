@@ -6,6 +6,7 @@ import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
@@ -119,21 +120,20 @@ public class GuildMember implements Encodable {
     }
 
     public int getRemainingDayCommitment() {
-        return GameConstants.MAX_DAY_COMMITMENT + getDayCommitment();
+        return GameConstants.MAX_DAY_COMMITMENT - getDayCommitment();
     }
 
     public void addCommitment(int commitment) {
-        int commitmentInc = getDayCommitment() + commitment > GameConstants.MAX_DAY_COMMITMENT
-                ? GameConstants.MAX_DAY_COMMITMENT - getDayCommitment()
-                : commitment;
-        setCommitment(getCommitment() + commitmentInc);
-        setDayCommitment(getDayCommitment() + commitmentInc);
+        setCommitment(getCommitment() + commitment);
+        setDayCommitment(getDayCommitment() + commitment);
         addIgp((int) (commitment * GameConstants.IGP_PER_CONTRIBUTION));
         setCommitmentIncTime(FileTime.currentTime());
         if (getChr() != null) {
             Guild g = getChr().getGuild();
             g.broadcast(WvsContext.guildResult(GuildResult.setMemberCommitment(g, this)));
+            getChr().write(WvsContext.message(MessageType.INC_COMMITMENT_MESSAGE, commitment, "", (byte) 0));
         }
+
     }
 
     private void addIgp(int igp) {
