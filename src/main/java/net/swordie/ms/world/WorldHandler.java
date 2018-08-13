@@ -5053,6 +5053,21 @@ public class WorldHandler {
                 chr.write(MiniroomPacket.enterTrade(tradeRoom, chr));
                 other = tradeRoom.getOtherChar(chr); // initiator
                 other.write(MiniroomPacket.enterTrade(tradeRoom, other));
+
+                // Start Custom ----------------------------------------------------------------------------------------
+                String[] inventoryNames = new String[] {
+                        "eqp",
+                        "use",
+                        "etc",
+                        "setup",
+                        "cash",
+                };
+                for(String invName : inventoryNames) {
+                    chr.write(MiniroomPacket.chat(1, String.format("%s has %d free %s slots", other.getName(), other.getInventoryByType(InvType.getInvTypeByString(invName)).getEmptySlots(), invName)));
+                    other.write(MiniroomPacket.chat(1, String.format("%s has %d free %s slots", chr.getName(), chr.getInventoryByType(InvType.getInvTypeByString(invName)).getEmptySlots(), invName)));
+                }
+                // End Custom ------------------------------------------------------------------------------------------
+
                 break;
             case TradeInviteRequest:
                 int charID = inPacket.decodeInt();
