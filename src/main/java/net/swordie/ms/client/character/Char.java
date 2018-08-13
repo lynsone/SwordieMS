@@ -3782,15 +3782,17 @@ public class Char {
 		getJobHandler().handleHit(getClient(), hi);
 	}
 
-	private void changeChannelAndWarp(byte channelNumber) {
-		changeChannelAndWarp(channelNumber, getFieldID());
+	public void changeChannel(byte channelId) {
+		changeChannelAndWarp(channelId, getFieldID());
 	}
 
-	public void changeChannelAndWarp(byte channelNumber, int fieldId) {
+	public void changeChannelAndWarp(byte channelId, int fieldId) {
 		logout();
 		setChangingChannel(true);
 		Field field = getField();
-		setField(getOrCreateFieldByCurrentInstanceType(fieldId));
+		if(getFieldID() != fieldId) {
+			setField(getOrCreateFieldByCurrentInstanceType(fieldId));
+		}
 		if (getAccount() != null) {
 			getAccount().setLoginState(LoginState.Loading);
 			DatabaseManager.saveToDB(getAccount());
@@ -3799,9 +3801,8 @@ public class Char {
 		int worldID = getClient().getChannelInstance().getWorldId();
 		World world = Server.getInstance().getWorldById(worldID);
 		field.removeChar(this);
-		byte channelID = (byte) (channelNumber);
-		Channel channel = world.getChannelById(channelID);
-		channel.addClientInTransfer(channelID, getId(), getClient());
+		Channel channel = world.getChannelById(channelId);
+		channel.addClientInTransfer(channelId, getId(), getClient());
 		short port = (short) channel.getPort();
 		write(ClientSocket.migrateCommand(true, port));
 	}

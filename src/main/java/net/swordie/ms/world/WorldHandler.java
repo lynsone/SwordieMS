@@ -1494,22 +1494,8 @@ public class WorldHandler {
 
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        chr.logout();
-        chr.setChangingChannel(true);
-        if (c.getAccount() != null) {
-            chr.getAccount().setLoginState(LoginState.Loading);
-            DatabaseManager.saveToDB(c.getAccount());
-        }
-        DatabaseManager.saveToDB(chr);
-        int worldID = chr.getClient().getChannelInstance().getWorldId();
-        World world = Server.getInstance().getWorldById(worldID);
-        Field field = chr.getField();
-        field.removeChar(chr);
-        byte channelID = (byte) (inPacket.decodeByte() + 1);
-        Channel channel = world.getChannelById(channelID);
-        channel.addClientInTransfer(channelID, chr.getId(), c);
-        short port = (short) channel.getPort();
-        c.write(ClientSocket.migrateCommand(true, port));
+        byte channelId = (byte) (inPacket.decodeByte() +1);
+        chr.changeChannel(channelId);
     }
 
     public static void handleUserChangeStatRequest(Client c, InPacket inPacket) {
@@ -1769,11 +1755,14 @@ public class WorldHandler {
                         if(targetChr == null) {
                             chr.chatMessage(String.format("%s is not online.", targetName));
 
+                        // Target is in an instanced Map
+                        } else if (targetChr.getFieldInstanceType() != FieldInstanceType.CHANNEL) {
+                            chr.chatMessage(String.format("cannot find %s", targetName));
+
                         // Change channels & warp & teleport
                         } else if (targetChr.getClient().getChannel() != c.getChannel()) {
                             int fieldId = targetChr.getFieldID();
                             chr.changeChannelAndWarp(targetChr.getClient().getChannel(), fieldId);
-                            chr.write(CField.teleport(targetPosition, chr));
 
                         // warp & teleport
                         } else if (targetChr.getFieldID() != chr.getFieldID()) {
