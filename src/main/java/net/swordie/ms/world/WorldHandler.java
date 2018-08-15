@@ -672,24 +672,24 @@ public class WorldHandler {
                                         UserRemote.effect(ptChr.getId(), effect)
                                         , ptChr);
                                 ptChr.write(User.effect(effect));
+                                sourceJobHandler.handleAttack(c, attackInfo);
                             }
-                            sourceJobHandler.handleAttack(c, attackInfo);
+
                         }
                     }
                 }
-            } else {
-                sourceJobHandler.handleAttack(c, attackInfo);
-                if (attackInfo.attackHeader != null) {
-                    switch (attackInfo.attackHeader) {
-                        case SUMMONED_ATTACK:
-                            chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
-                            break;
-                        case FAMILIAR_ATTACK:
-                            chr.getField().broadcastPacket(CFamiliar.familiarAttack(chr.getId(), attackInfo), chr);
-                            break;
-                        default:
-                            chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
-                    }
+            }
+            sourceJobHandler.handleAttack(c, attackInfo);
+            if (attackInfo.attackHeader != null) {
+                switch (attackInfo.attackHeader) {
+                    case SUMMONED_ATTACK:
+                        chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
+                        break;
+                    case FAMILIAR_ATTACK:
+                        chr.getField().broadcastPacket(CFamiliar.familiarAttack(chr.getId(), attackInfo), chr);
+                        break;
+                    default:
+                        chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
                 }
             }
             int multiKillMessage = 0;
