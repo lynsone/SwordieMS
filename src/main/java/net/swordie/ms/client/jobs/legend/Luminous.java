@@ -3,31 +3,36 @@ package net.swordie.ms.client.jobs.legend;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.LarknessManager;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.Stat;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -45,6 +50,7 @@ public class Luminous extends Job {
     public static final int BLACK_BLESSING = 27100003;
 
     public static final int SHADOW_SHELL = 27111004; //Buff
+    public static final int RAY_OF_REDEMPTION = 27111101; // Attack + heals party members
     public static final int DUSK_GUARD = 27111005; //Buff
     public static final int PHOTIC_MEDITATION = 27111006; //Buff
     public static final int LUNAR_TIDE = 27110007;
@@ -75,6 +81,7 @@ public class Luminous extends Job {
             SHADOW_SHELL,
             DUSK_GUARD,
             PHOTIC_MEDITATION,
+            RAY_OF_REDEMPTION,
             DARK_CRESCENDO,
             ARCANE_PITCH,
             MAPLE_WARRIOR_LUMI,
@@ -116,7 +123,10 @@ public class Luminous extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case SHADOW_SHELL:
-                //TODO Handler once Mob Skills are implemented
+                o1.nOption = 3;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AntiMagicShell, o1);
                 break;
             case DUSK_GUARD:
                 o1.nValue = si.getValue(indieMdd, slv);
@@ -137,7 +147,7 @@ public class Luminous extends Job {
                 tsm.putCharacterStatValue(EMAD, o1);
                 break;
             case DARK_CRESCENDO:
-                o1.nOption = 1;
+                o1.nOption = 2;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(StackBuff, o1);
@@ -375,6 +385,9 @@ public class Luminous extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
                 break;
+            case RAY_OF_REDEMPTION:
+                chr.heal(chr.getMaxHP()); // 800% Recovery
+                break;
         }
 
         super.handleAttack(c, attackInfo);
@@ -480,5 +493,46 @@ public class Luminous extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    @Override
+    public void handleMobDebuffSkill(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(AntiMagicShell)) {
+            tsm.removeAllDebuffs();
+            deductShadowShell();
+        }
+
+    }
+
+    private void deductShadowShell() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(!chr.hasSkill(SHADOW_SHELL)) {
+            return;
+        }
+        Skill skill = chr.getSkill(SHADOW_SHELL);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o = new Option();
+        if (tsm.hasStat(AntiMagicShell)) {
+            int shadowShellCount = tsm.getOption(AntiMagicShell).nOption;
+
+            if(shadowShellCount > 0) {
+                shadowShellCount--;
+            }
+
+            if(shadowShellCount <= 0) {
+                tsm.removeStatsBySkill(skill.getSkillId());
+                tsm.sendResetStatPacket();
+            } else {
+                o.nOption = shadowShellCount;
+                o.rOption = skill.getSkillId();
+                o.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AntiMagicShell, o);
+                tsm.sendSetStatPacket();
+            }
+            chr.write(User.effect(Effect.skillSpecial(skill.getSkillId())));
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(skill.getSkillId())));
+        }
     }
 }

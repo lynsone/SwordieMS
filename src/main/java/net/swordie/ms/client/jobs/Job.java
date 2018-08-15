@@ -236,6 +236,17 @@ public abstract class Job {
 		}
 	}
 
+	/**
+	 * Gets called when Client receives a debuff from a Mob Skill
+	 *
+	 * @param c
+	 * 		The Client
+	 */
+
+	public void handleMobDebuffSkill(Char chr) {
+
+	}
+
 	public void handleJoblessBuff(Client c, InPacket inPacket, int skillID, byte slv) {
 		Char chr = c.getChr();
 		SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -490,54 +501,58 @@ public abstract class Job {
 		Char chr = c.getChr();
 		TemporaryStatManager tsm = chr.getTemporaryStatManager();
 
-		// Bishop - Holy Magic Shell
-		if (tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
-			if (Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
-				Magician.hmshits++;
-			} else {
-				Magician.hmshits = 0;
-				tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
+		// If no job specific skills already nullified the dmg taken
+		if(hitInfo.hpDamage != 0) {
+
+			// Bishop - Holy Magic Shell
+			if (tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
+				if (Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
+					Magician.hmshits++;
+				} else {
+					Magician.hmshits = 0;
+					tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
+				}
 			}
-		}
 
-		// Mihile - Soul Link
-		if (tsm.hasStat(MichaelSoulLink) && chr.getId() != tsm.getOption(MichaelSoulLink).cOption) {
-			Party party = chr.getParty();
+			// Mihile - Soul Link
+			else if (tsm.hasStat(MichaelSoulLink) && chr.getId() != tsm.getOption(MichaelSoulLink).cOption) {
+				Party party = chr.getParty();
 
-			PartyMember mihileInParty = party.getPartyMemberByID(tsm.getOption(MichaelSoulLink).cOption);
-			if (mihileInParty != null) {
-				Char mihileChr = mihileInParty.getChr();
-				Skill skill = mihileChr.getSkill(SOUL_LINK);
-				SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-				byte slv = (byte) skill.getCurrentLevel();
+				PartyMember mihileInParty = party.getPartyMemberByID(tsm.getOption(MichaelSoulLink).cOption);
+				if (mihileInParty != null) {
+					Char mihileChr = mihileInParty.getChr();
+					Skill skill = mihileChr.getSkill(SOUL_LINK);
+					SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+					byte slv = (byte) skill.getCurrentLevel();
 
-				int hpDmg = hitInfo.hpDamage;
-				int mihileDmgTaken = (int) (hpDmg * ((double) si.getValue(q, slv) / 100));
+					int hpDmg = hitInfo.hpDamage;
+					int mihileDmgTaken = (int) (hpDmg * ((double) si.getValue(q, slv) / 100));
 
-				hitInfo.hpDamage = hitInfo.hpDamage - mihileDmgTaken;
-				mihileChr.damage(mihileDmgTaken);
-			} else {
-				tsm.removeStatsBySkill(SOUL_LINK);
-				tsm.removeStatsBySkill(ROYAL_GUARD);
-				tsm.removeStatsBySkill(ENDURING_SPIRIT);
-				tsm.sendResetStatPacket();
+					hitInfo.hpDamage = hitInfo.hpDamage - mihileDmgTaken;
+					mihileChr.damage(mihileDmgTaken);
+				} else {
+					tsm.removeStatsBySkill(SOUL_LINK);
+					tsm.removeStatsBySkill(ROYAL_GUARD);
+					tsm.removeStatsBySkill(ENDURING_SPIRIT);
+					tsm.sendResetStatPacket();
+				}
 			}
-		}
 
-		// Paladin - Parashock Guard
-		if (tsm.hasStat(KnightsAura) && chr.getId() != tsm.getOption(KnightsAura).nOption) {
-			Party party = chr.getParty();
+			// Paladin - Parashock Guard
+			else if (tsm.hasStat(KnightsAura) && chr.getId() != tsm.getOption(KnightsAura).nOption) {
+				Party party = chr.getParty();
 
-			PartyMember paladinInParty = party.getPartyMemberByID(tsm.getOption(KnightsAura).nOption);
-			if (paladinInParty != null) {
-				Char paladinChr = paladinInParty.getChr();
-				Skill skill = paladinChr.getSkill(PARASHOCK_GUARD);
-				SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-				byte slv = (byte) skill.getCurrentLevel();
+				PartyMember paladinInParty = party.getPartyMemberByID(tsm.getOption(KnightsAura).nOption);
+				if (paladinInParty != null) {
+					Char paladinChr = paladinInParty.getChr();
+					Skill skill = paladinChr.getSkill(PARASHOCK_GUARD);
+					SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+					byte slv = (byte) skill.getCurrentLevel();
 
-				int dmgReductionR = si.getValue(y, slv);
-				int dmgReduceAmount = (int) (hitInfo.hpDamage * ((double) dmgReductionR / 100));
-				hitInfo.hpDamage = hitInfo.hpDamage - dmgReduceAmount;
+					int dmgReductionR = si.getValue(y, slv);
+					int dmgReduceAmount = (int) (hitInfo.hpDamage * ((double) dmgReductionR / 100));
+					hitInfo.hpDamage = hitInfo.hpDamage - dmgReduceAmount;
+				}
 			}
 		}
 	}

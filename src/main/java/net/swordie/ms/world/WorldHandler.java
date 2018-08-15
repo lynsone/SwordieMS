@@ -650,20 +650,46 @@ public class WorldHandler {
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         if (chr.checkAndSetSkillCooltime(attackInfo.skillId)) {
-            chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
-            log.debug("SkillID: " + attackInfo.skillId);
+            int skillID = attackInfo.skillId;
+            byte slv = attackInfo.slv;
+            chr.chatMessage(YELLOW, "SkillID: " + skillID);
+            log.debug("SkillID: " + skillID);
             Field field = c.getChr().getField();
-            c.getChr().getJobHandler().handleAttack(c, attackInfo);
-            if (attackInfo.attackHeader != null) {
-                switch (attackInfo.attackHeader) {
-                    case SUMMONED_ATTACK:
-                        chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
-                        break;
-                    case FAMILIAR_ATTACK:
-                        chr.getField().broadcastPacket(CFamiliar.familiarAttack(chr.getId(), attackInfo), chr);
-                        break;
-                    default:
-                        chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
+            Job sourceJobHandler = chr.getJobHandler();
+            SkillInfo si = SkillData.getSkillInfoById(skillID);
+            if (si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
+                Rect r = si.getFirstRect();
+                if (r != null) {
+                    Rect rectAround = chr.getRectAround(r);
+                    for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+                        if (pm.getChr() != null
+                                && pm.getFieldID() == chr.getFieldID()
+                                && rectAround.hasPositionInside(pm.getChr().getPosition())) {
+                            Char ptChr = pm.getChr();
+                            Effect effect = Effect.skillAffected(skillID, slv, 0);
+                            if(ptChr != chr) {  // Caster shouldn't get the Affected Skill Effect
+                                chr.getField().broadcastPacket(
+                                        UserRemote.effect(ptChr.getId(), effect)
+                                        , ptChr);
+                                ptChr.write(User.effect(effect));
+                            }
+                            sourceJobHandler.handleAttack(c, attackInfo);
+                        }
+                    }
+                }
+            } else {
+                sourceJobHandler.handleAttack(c, attackInfo);
+                if (attackInfo.attackHeader != null) {
+                    switch (attackInfo.attackHeader) {
+                        case SUMMONED_ATTACK:
+                            chr.getField().broadcastPacket(Summoned.summonedAttack(chr.getId(), attackInfo, false), chr);
+                            break;
+                        case FAMILIAR_ATTACK:
+                            chr.getField().broadcastPacket(CFamiliar.familiarAttack(chr.getId(), attackInfo), chr);
+                            break;
+                        default:
+                            chr.getField().broadcastPacket(UserRemote.attack(chr, attackInfo), chr);
+                    }
                 }
             }
             int multiKillMessage = 0;
@@ -671,7 +697,7 @@ public class WorldHandler {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
                 if (mob == null) {
-                    chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
+                    chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", skillID, mai.mobId));
                 } else if (mob.getHp() > 0) {
                     long totalDamage = 0;
                     for (int dmg : mai.damages) {
@@ -1613,6 +1639,9 @@ public class WorldHandler {
     }
 
     public static void handleRequestArrowPlatterObj(Client c, InPacket inPacket) {
+        boolean flip = inPacket.decodeByte() != 0; // 0 = Left | 1 = Right
+        Position position = inPacket.decodePositionInt(); // Chr position (int)
+
         // TODO
     }
 
@@ -3041,10 +3070,12 @@ public class WorldHandler {
                                 && rectAround.hasPositionInside(pm.getChr().getPosition())) {
                             Char ptChr = pm.getChr();
                             Effect effect = Effect.skillAffected(skillID, slv, 0);
-                            chr.getField().broadcastPacket(
-                                    UserRemote.effect(ptChr.getId(), effect)
-                                    , ptChr);
-                            ptChr.write(User.effect(effect));
+                            if(ptChr != chr) { // Caster shouldn't get the Affected Skill Effect
+                                chr.getField().broadcastPacket(
+                                        UserRemote.effect(ptChr.getId(), effect)
+                                        , ptChr);
+                                ptChr.write(User.effect(effect));
+                            }
                             sourceJobHandler.handleSkill(pm.getChr().getClient(), skillID, slv, inPacket);
                         }
                     }

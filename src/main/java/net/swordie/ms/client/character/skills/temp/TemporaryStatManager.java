@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.skills.GuidedBullet;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.PartyBooster;
+import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.UserRemote;
@@ -891,6 +892,8 @@ public class TemporaryStatManager {
     public void putCharacterStatValueFromMobSkill(CharacterTemporaryStat cts, Option o) {
         o.rOption |= o.slv << 16; // mob skills are encoded differently: not an int, but short (skill ID), then short (slv).
         putCharacterStatValue(cts, o);
+        Job sourceJobHandler = chr.getJobHandler();
+        sourceJobHandler.handleMobDebuffSkill(chr);
     }
 
     public void removeAllStats() {
