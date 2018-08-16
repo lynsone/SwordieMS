@@ -9,15 +9,21 @@ public class PartyMember {
     private Char chr;
     private int partyBossCharacterID;
     private TownPortal townPortal;
+    private int charID;
 
     // 4 + 13 + 4 + 4 + 4 + 4 + 4 + 4
 
     public PartyMember(Char chr) {
         this.chr = chr;
+        this.charID = chr.getId();
     }
 
     public int getCharID() {
-        return chr.getId();
+        return charID;
+    }
+
+    public void setCharID(int charID) {
+        this.charID = charID;
     }
 
     public String getCharName() {

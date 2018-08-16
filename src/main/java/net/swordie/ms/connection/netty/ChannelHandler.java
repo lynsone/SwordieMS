@@ -376,7 +376,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 WorldHandler.handleChangeChannelRequest(c, inPacket);
                 break;
             case USER_MOVE:
-                WorldHandler.handleMove(c, inPacket);
+                WorldHandler.handleUserMove(c, inPacket);
                 break;
             case USER_FORCE_ATOM_COLLISION:
                 WorldHandler.handleForceAtomCollision(c, inPacket);

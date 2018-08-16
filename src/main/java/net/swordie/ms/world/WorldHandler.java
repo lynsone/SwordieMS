@@ -78,6 +78,7 @@ import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.MobSkillID;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.pet.Pet;
@@ -153,6 +154,9 @@ public class WorldHandler {
         chr.getAccount().setCurrentChr(chr);
         DatabaseManager.saveToDB(chr.getAccount());
         Field field = chr.getOrCreateFieldByCurrentInstanceType(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
+        if (chr.getHP() <= 0) { // automatically revive when relogging
+            chr.heal(chr.getMaxHP() / 2);
+        }
         chr.warp(field, true);
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         if(chr.getGuild() != null) {
@@ -183,52 +187,30 @@ public class WorldHandler {
         chr.getAccount().getMonsterCollection().init(chr);
     }
 
-    public static void handleMove(Client c, InPacket inPacket) {
+    public static void handleUserMove(Client c, InPacket inPacket) {
         // CVecCtrlUser::EndUpdateActive
         byte fieldKey = inPacket.decodeByte();
         inPacket.decodeInt(); // ? something with field
         inPacket.decodeInt(); // tick
         inPacket.decodeByte(); // ? doesn't get set at all
-        // CMovePathCommon::Encode
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
         Char chr = c.getChr();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        for (Movement m : movements) {
-            Position pos = m.getPosition();
-            chr.setOldPosition(chr.getPosition());
-            chr.setPosition(pos);
-            chr.setMoveAction(m.getMoveAction());
-            chr.setLeft(m.getMoveAction() % 2 == 1);
-            chr.setFoothold(m.getFh());
-        }
+        // CMovePathCommon::Encode
+        MovementInfo movementInfo = new MovementInfo(inPacket);
+        movementInfo.applyTo(chr);
         chr.getField().checkCharInAffectedAreas(chr);
-        chr.getField().broadcastPacket(UserRemote.move(chr, encodedGatherDuration, oldPos, oldVPos, movements), chr);
+        chr.getField().broadcastPacket(UserRemote.move(chr, movementInfo), chr);
     }
 
     public static void handleSummonedMove(Char chr, InPacket inPacket) {
         // CVecCtrlSummoned::EndUpdateActive
         int summonID = inPacket.decodeInt();
         Life life = chr.getField().getLifeByObjectID(summonID);
-        if (!(life instanceof Summon)) {
-            return;
+        if (life instanceof Summon) {
+            Summon summon = (Summon) life;
+            MovementInfo movementInfo = new MovementInfo(inPacket);
+            movementInfo.applyTo(summon);
+            chr.getField().broadcastPacket(Summoned.summonedMove(chr.getId(), summonID, movementInfo), chr);
         }
-        Summon summon = (Summon) life;
-        // CMovePathCommon::Encode
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
-        summon.setPosition(oldPos);
-        summon.setvPosition(oldVPos);
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        for (Movement m : movements) {
-            summon.setPosition(m.getPosition());
-            summon.setvPosition(m.getVPosition());
-            summon.setMoveAction(m.getMoveAction());
-            summon.setFh(m.getFh());
-        }
-        chr.getField().broadcastPacket(Summoned.summonedMove(chr.getId(), summonID, encodedGatherDuration, oldPos, oldVPos, movements), chr);
     }
 
     public static void handleUserChat(Client c, InPacket inPacket) {
@@ -657,13 +639,12 @@ public class WorldHandler {
             Field field = c.getChr().getField();
             Job sourceJobHandler = chr.getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
-            if (si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
+            if (si != null && si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
                 Rect r = si.getFirstRect();
                 if (r != null) {
                     Rect rectAround = chr.getRectAround(r);
                     for (PartyMember pm : chr.getParty().getOnlineMembers()) {
-                        if (pm.getChr() != null
-                                && pm.getFieldID() == chr.getFieldID()
+                        if (pm.getChr() != null && pm.getChr().getField() == chr.getField()
                                 && rectAround.hasPositionInside(pm.getChr().getPosition())) {
                             Char ptChr = pm.getChr();
                             Effect effect = Effect.skillAffected(skillID, slv, 0);
@@ -1253,29 +1234,15 @@ public class WorldHandler {
         boolean targetUserIDFromSvr = (mask & 1) != 0;
         boolean isCheatMobMoveRand = ((mask >> 4) & 1) != 0;
         int hackedCode = inPacket.decodeInt();
-        int moveAction = inPacket.decodeInt(); // not 100% sure
+        int oneTimeActionCS = inPacket.decodeInt();
         int moveActionCS = inPacket.decodeInt();
         int hitExpire = inPacket.decodeInt();
         byte idk = inPacket.decodeByte();
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position pos = inPacket.decodePosition();
-        Position vPos = inPacket.decodePosition();
-        Position oldPos = mob.getPosition();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        if (movements.size() > 0) {
-            c.write(MobPool.mobCtrlAck(mob, true, moveID, skillID, (byte) slv, 0));
-            field.checkMobInAffectedAreas(mob);
-            for (Movement m : movements) {
-                Position p = m.getPosition();
-                mob.setPosition(p);
-                mob.setMoveAction(m.getMoveAction());
-                mob.setFh(m.getFh());
-            }
-        }
-        msai.oldPos = pos;
-        msai.oldVPos = vPos;
-        msai.encodedGatherDuration = encodedGatherDuration;
-        field.broadcastPacket(MobPool.mobMove(mob, msai, movements), controller);
+        MovementInfo movementInfo = new MovementInfo(inPacket);
+        c.write(MobPool.mobCtrlAck(mob, true, moveID, skillID, (byte) slv, 0));
+        movementInfo.applyTo(mob);
+        field.checkMobInAffectedAreas(mob);
+        field.broadcastPacket(MobPool.mobMove(mob, msai, movementInfo), controller);
     }
 
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
@@ -1758,12 +1725,12 @@ public class WorldHandler {
 
         } else {
 
-            Equip medal = (Equip) chr.getEquippedInventory().getItemBySlot((short) -49); // Get Medal
+            Equip medal = (Equip) chr.getEquippedInventory().getFirstItemByBodyPart(BodyPart.MEDAL);
             int medalInt = 0;
             if(medal != null) {
-                medalInt = (medal.getAnvilId() == 0 ? medal.getItemId() : medal.getAnvilId()); // Check for Anvilled items
+                medalInt = (medal.getAnvilId() == 0 ? medal.getItemId() : medal.getAnvilId()); // Check for Anvilled medal
             }
-            String medalString = (medalInt == 0 ? "" : "<"+ StringData.getItemStringById(medalInt) +"> "); // Smegas
+            String medalString = (medalInt == 0 ? "" : String.format("<%s> ", StringData.getItemStringById(medalInt)));
 
             switch (itemID) {
 
@@ -2311,6 +2278,7 @@ public class WorldHandler {
         boolean on = inPacket.decodeByte() != 0;
         boolean isNew = inPacket.decodeByte() != 0;
         boolean clear = inPacket.decodeByte() != 0;
+        c.getChr().setBattleRecordOn(on);
         c.write(BattleRecordMan.serverOnCalcRequestResult(on));
     }
 
@@ -4085,17 +4053,11 @@ public class WorldHandler {
         if (life instanceof Npc && ((Npc) life).isMove()){
             Npc npc = (Npc) chr.getField().getLifeByObjectID(objectID);
             boolean move = npc.isMove();
-            Position oldPos = npc.getPosition();
-            Position oldVPos = npc.getVPosition();
-            int encodedGatherDuration = 0;
-            List<Movement> movements = new ArrayList<>();
+            MovementInfo movementInfo = new MovementInfo(npc.getPosition(), npc.getVPosition());
             byte keyPadState = 0;
             if (move) {
-                encodedGatherDuration = inPacket.decodeInt();
-                oldPos = inPacket.decodePosition();
-                oldVPos = inPacket.decodePosition();
-                movements = WvsContext.parseMovement(inPacket);
-                for (Movement m : movements) {
+                movementInfo.decode(inPacket);
+                for (Movement m : movementInfo.getMovements()) {
                     Position pos = m.getPosition();
                     Position vPos = m.getVPosition();
                     if (pos != null) {
@@ -4109,8 +4071,8 @@ public class WorldHandler {
                 }
                 keyPadState = inPacket.decodeByte();
             }
-            chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move, oldPos,
-                    oldVPos, encodedGatherDuration, movements, keyPadState));
+            chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move,
+                    movementInfo, keyPadState));
         }
     }
 
@@ -4430,11 +4392,12 @@ public class WorldHandler {
     public static void handleFamiliarMove(Char chr, InPacket inPacket) {
         inPacket.decodeByte(); // ?
         inPacket.decodeInt(); // familiar id
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        chr.getField().broadcastPacket(CFamiliar.familiarMove(chr.getId(), encodedGatherDuration, oldPos, oldVPos, movements) ,chr);
+        Life life = chr.getActiveFamiliar();
+        if (life instanceof Familiar) {
+            MovementInfo movementInfo = new MovementInfo(inPacket);
+            movementInfo.applyTo(life);
+            chr.getField().broadcastPacket(CFamiliar.familiarMove(chr.getId(), movementInfo), chr);
+        }
     }
 
     public static void handleFamiliarAttack(Char chr, InPacket inPacket) {
@@ -4742,19 +4705,12 @@ public class WorldHandler {
     public static void handlePetMove(Char chr, InPacket inPacket) {
         int petID = inPacket.decodeInt();
         inPacket.decodeByte(); // ?
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        for (Movement m : movements) {
-            Position pos = m.getPosition();
-            chr.setOldPosition(chr.getPosition());
-            chr.setPosition(pos);
-            chr.setMoveAction(m.getMoveAction());
-            chr.setLeft(m.getMoveAction() % 2 == 1);
-            chr.setFoothold(m.getFh());
+        MovementInfo movementInfo = new MovementInfo(inPacket);
+        Pet pet = chr.getPetByIdx(petID);
+        if (pet != null) {
+            movementInfo.applyTo(pet);
+            chr.getField().broadcastPacket(UserLocal.petMove(chr.getId(), petID, movementInfo), chr);
         }
-        chr.getField().broadcastPacket(UserLocal.petMove(chr.getId(), petID, encodedGatherDuration, oldPos, oldVPos, movements), chr);
     }
 
     public static void handlePetDropPickUpRequest(Char chr, InPacket inPacket) {

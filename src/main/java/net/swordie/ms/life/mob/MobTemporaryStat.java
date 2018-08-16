@@ -405,9 +405,11 @@ public class MobTemporaryStat {
 				getCurrentStatVals().remove(BurnedInfo);
 			}
 			getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false, biList));
-			for (net.swordie.ms.life.mob.skill.BurnedInfo bi : biList) {
-				int count = Math.min(bi.getDotCount(), (Util.getCurrentTime() - bi.getStartTime()) / bi.getInterval());
-				chr.write(BattleRecordMan.dotDamageInfo(bi, count));
+			if (chr.isBattleRecordOn()) {
+				for (net.swordie.ms.life.mob.skill.BurnedInfo bi : biList) {
+					int count = Math.min(bi.getDotCount(), (Util.getCurrentTime() - bi.getStartTime()) / bi.getInterval());
+					chr.write(BattleRecordMan.dotDamageInfo(bi, count));
+				}
 			}
 			if (!fromSchedule) {
 				getBurnCancelSchedules().get(charID).cancel(true);

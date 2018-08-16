@@ -13,6 +13,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AvatarModifiedMask;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.util.Position;
 
 import java.util.List;
@@ -30,19 +31,11 @@ public class UserRemote {
         return outPacket;
     }
 
-    public static OutPacket move(Char chr, int encodedGatherDuration, Position oldPos, Position oldVPos,
-                                 List<Movement> movements) {
+    public static OutPacket move(Char chr, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.REMOTE_MOVE);
 
         outPacket.encodeInt(chr.getId());
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }

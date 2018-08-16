@@ -26,7 +26,7 @@ public enum BodyPart {
     TAMINGMOB(18),
     SADDLE(19),
     MOBEQUIP(20),
-    MEDAL(21),
+    MEDAL_OLD(21), // ?
     BELT(22),
     SHOULDER(23),
     PETWEAR2(24),
@@ -44,6 +44,7 @@ public enum BodyPart {
     EXT_4(35),
     EXT_5(36),
     EXT_6(37),
+    MEDAL(49), // ?
     BOOK(55),
     STICKER(100),
     BP_END(100),

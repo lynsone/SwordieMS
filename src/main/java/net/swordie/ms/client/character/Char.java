@@ -348,6 +348,8 @@ public class Char {
 	private TownPortal townPortal;
 	@Transient
 	private TradeRoom tradeRoom;
+	@Transient
+	private boolean battleRecordOn;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -3030,8 +3032,10 @@ public class Char {
 		this.online = online;
 		if (getParty() != null) {
 			PartyMember pm = getParty().getPartyMemberByID(getId());
-			party.updatePartyMemberInfoByChr(this);
-			pm.setChr(online ? this : null);
+			if (pm != null) {
+				party.updatePartyMemberInfoByChr(this);
+				pm.setChr(online ? this : null);
+			}
 		}
 	}
 
@@ -3815,5 +3819,13 @@ public class Char {
 				", accId=" + accId +
 				", name=" + getName() +
 				'}';
+	}
+
+	public void setBattleRecordOn(boolean battleRecordOn) {
+		this.battleRecordOn = battleRecordOn;
+	}
+
+	public boolean isBattleRecordOn() {
+		return battleRecordOn;
 	}
 }

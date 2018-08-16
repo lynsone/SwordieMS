@@ -3,6 +3,7 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.util.Position;
 
@@ -43,8 +44,7 @@ public class NpcPool {
 	}
 
 	public static OutPacket npcMove(int objectID, byte oneTimeAction, byte chatIdx, int duration, boolean move,
-	                                Position oldPos, Position oldVPos, int encodedGatherDuration,
-	                                List<Movement> movements, byte keyPadState) {
+									MovementInfo movementInfo, byte keyPadState) {
 		OutPacket outPacket = new OutPacket(OutHeader.NPC_MOVE);
 
 		outPacket.encodeInt(objectID);
@@ -53,14 +53,7 @@ public class NpcPool {
 		outPacket.encodeInt(duration);
 
 		if (move) {
-			outPacket.encodeInt(encodedGatherDuration);
-			outPacket.encodePosition(oldPos);
-			outPacket.encodePosition(oldVPos);
-			outPacket.encodeByte(movements.size());
-			for (Movement m : movements) {
-				m.encode(outPacket);
-			}
-			outPacket.encodeByte(keyPadState);
+			outPacket.encode(movementInfo);
 		}
 
 		return outPacket;

@@ -14,6 +14,7 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
@@ -351,19 +352,12 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket petMove(int id, int petID, int encodedGatherDuration, Position oldPos, Position oldVPos, List<Movement> movements) {
+    public static OutPacket petMove(int id, int petID, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.PET_MOVE);
 
         outPacket.encodeInt(id);
         outPacket.encodeInt(petID);
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }

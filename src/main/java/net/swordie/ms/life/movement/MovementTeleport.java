@@ -1,14 +1,16 @@
 package net.swordie.ms.life.movement;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.util.Position;
 
 /**
  * Created on 1/2/2018.
  */
-public class Movement5 extends MovementBase {
-    public Movement5(InPacket inPacket, byte command) {
+public class MovementTeleport extends MovementBase {
+    public MovementTeleport(InPacket inPacket, byte command) {
         super();
         this.command = command;
 
@@ -31,5 +33,19 @@ public class Movement5 extends MovementBase {
         outPacket.encodeByte(getMoveAction());
         outPacket.encodeShort(getDuration());
         outPacket.encodeByte(getForcedStop());
+    }
+
+    @Override
+    public void applyTo(Char chr) {
+        chr.setPosition(getPosition());
+        chr.setFoothold(getFh());
+        chr.setMoveAction(getMoveAction());
+    }
+
+    @Override
+    public void applyTo(Life life) {
+        life.setPosition(getPosition());
+        life.setFh(getFh());
+        life.setMoveAction(getMoveAction());
     }
 }

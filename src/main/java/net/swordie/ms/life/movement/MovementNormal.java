@@ -1,16 +1,18 @@
 package net.swordie.ms.life.movement;
 
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.util.Position;
 
 /**
  * Created on 1/2/2018.
  * These classes + children/parents are basically the same as Mushy, credits to @MaxCloud.
  */
-public class Movement1 extends MovementBase {
-    public Movement1(InPacket inPacket, byte command) {
+public class MovementNormal extends MovementBase {
+    public MovementNormal(InPacket inPacket, byte command) {
         super();
         this.command = command;
 
@@ -50,5 +52,20 @@ public class Movement1 extends MovementBase {
         outPacket.encodeByte(getMoveAction());
         outPacket.encodeShort(getDuration());
         outPacket.encodeByte(getForcedStop());
+    }
+
+    @Override
+    public void applyTo(Char chr) {
+        chr.setPosition(getPosition());
+        chr.setFoothold(getFh());
+        chr.setMoveAction(getMoveAction());
+    }
+
+    @Override
+    public void applyTo(Life life) {
+        life.setPosition(getPosition());
+        life.setvPosition(getVPosition());
+        life.setFh(getFh());
+        life.setMoveAction(getMoveAction());
     }
 }

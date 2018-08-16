@@ -11,6 +11,7 @@ import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.container.Tuple;
@@ -221,11 +222,11 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobCtrlAck(Mob mob, boolean nextAttackPossible, short moveID, int skillID, byte slv, int forcedAttack) {
+    public static OutPacket mobCtrlAck(Mob mob, boolean nextAttackPossible, short mobCtrlSN, int skillID, byte slv, int forcedAttack) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_CONTROL_ACK);
 
         outPacket.encodeInt(mob.getObjectId());
-        outPacket.encodeShort(moveID);
+        outPacket.encodeShort(mobCtrlSN);
         outPacket.encodeByte(nextAttackPossible);
         outPacket.encodeInt((int) mob.getMp());
         outPacket.encodeInt(skillID);
@@ -321,7 +322,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobMove(Mob mob, MobSkillAttackInfo msai, List<Movement> movements) {
+    public static OutPacket mobMove(Mob mob, MobSkillAttackInfo msai, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_MOVE);
 
         outPacket.encodeInt(mob.getObjectId());
@@ -336,15 +337,7 @@ public class MobPool {
         for(short s : msai.randTimeForAreaAttacks) {
             outPacket.encodeShort(s);
         }
-        outPacket.encodeInt(msai.encodedGatherDuration);
-        outPacket.encodePosition(msai.oldPos);
-        outPacket.encodePosition(msai.oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
-
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }

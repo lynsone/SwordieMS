@@ -9,6 +9,7 @@ import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.util.Position;
 
 import java.util.List;
@@ -136,21 +137,13 @@ public class Summoned {
         return outPacket;
     }
 
-    public static OutPacket summonedMove(int charID, int summonID, int encodedGatherDuration, Position oldPos,
-                                         Position oldVPos, List<Movement> movements) {
+    public static OutPacket summonedMove(int charID, int summonID, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_MOVE);
 
         outPacket.encodeInt(charID);
 
         outPacket.encodeInt(summonID);
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }

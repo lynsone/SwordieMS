@@ -1,14 +1,17 @@
 package net.swordie.ms.life.movement;
 
+
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.util.Position;
 
 /**
  * Created on 1/2/2018.
  */
-public class Movement7 extends MovementBase {
-    public Movement7(InPacket inPacket, byte command) {
+public class MovementAngle extends MovementBase {
+    public MovementAngle(InPacket inPacket, byte command) {
         super();
         this.command = command;
 
@@ -16,9 +19,11 @@ public class Movement7 extends MovementBase {
         short y = inPacket.decodeShort();
         position = new Position(x, y);
 
-        short vx = inPacket.decodeShort();
-        short vy = inPacket.decodeShort();
-        vPosition = new Position(vx, vy);
+        short xv = inPacket.decodeShort();
+        short xy = inPacket.decodeShort();
+        vPosition = new Position(xv, xy);
+
+        fh = inPacket.decodeShort();
 
         moveAction = inPacket.decodeByte();
         elapse = inPacket.decodeShort();
@@ -30,8 +35,24 @@ public class Movement7 extends MovementBase {
         outPacket.encodeByte(getCommand());
         outPacket.encodePosition(getPosition());
         outPacket.encodePosition(getVPosition());
+        outPacket.encodeShort(getFh());
         outPacket.encodeByte(getMoveAction());
         outPacket.encodeShort(getDuration());
         outPacket.encodeByte(getForcedStop());
+    }
+
+    @Override
+    public void applyTo(Char chr) {
+        chr.setPosition(getPosition());
+        chr.setFoothold(getFh());
+        chr.setMoveAction(getMoveAction());
+    }
+
+    @Override
+    public void applyTo(Life life) {
+        life.setPosition(getPosition());
+        life.setvPosition(getVPosition());
+        life.setFh(getFh());
+        life.setMoveAction(getMoveAction());
     }
 }

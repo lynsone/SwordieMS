@@ -7,6 +7,7 @@ import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.util.Position;
 
 import java.util.List;
@@ -36,22 +37,12 @@ public class CFamiliar {
         return outPacket;
     }
 
-    public static OutPacket familiarMove(int charID, int encodedGatherDuration, Position oldPos, Position oldVPos,
-                                         List<Movement> movements) {
+    public static OutPacket familiarMove(int charID, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.FAMILIAR_MOVE);
 
         outPacket.encodeInt(charID);
-        outPacket.encodeByte(0); // ?
-
-        // Common move path yadayada
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for (Movement m : movements) {
-            m.encode(outPacket);
-        }
         outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }
