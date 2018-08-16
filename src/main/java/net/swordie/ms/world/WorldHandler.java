@@ -1161,7 +1161,7 @@ public class WorldHandler {
         Field field = c.getChr().getField();
         int objectID = inPacket.decodeInt();
         Life life = field.getLifeByObjectID(objectID);
-        if (life == null || !(life instanceof Mob)) {
+        if (!(life instanceof Mob)) {
             return;
         }
         MobSkillAttackInfo msai = new MobSkillAttackInfo();
@@ -1178,7 +1178,7 @@ public class WorldHandler {
         int skillID = 0;
         int slv = 0;
         msai.targetInfo = inPacket.decodeInt();
-        if (usedSkill && /*actionAndDir != -1 && */mob.hasSkillDelayExpired()) {
+        if (usedSkill && actionAndDir != -1 && mob.hasSkillDelayExpired()) {
             MobSkill mobSkill = null;
             List<MobSkill> skillList = mob.getSkills();
             if (skillList.size() > 0) {

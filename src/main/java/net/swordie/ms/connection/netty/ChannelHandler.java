@@ -1,13 +1,10 @@
 package net.swordie.ms.connection.netty;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.ReferenceCountUtil;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.Packet;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.handlers.ChatHandler;

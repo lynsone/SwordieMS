@@ -104,9 +104,12 @@ def init():
 		portal = 0
 
 	# To Crimson Queen
+	# These need a better looking solution
 	elif fieldID == 105200300:
 		if sm.mobsPresentInField():
 			sm.chat("Eliminate all monster before proceeding.")
+			warp = False
+			sm.dispose()
 		else:
 			map = 105200310
 			portal = 0
@@ -115,6 +118,8 @@ def init():
 	elif fieldID == 105200200:
 		if sm.mobsPresentInField():
 			sm.chat("Eliminate all monster before proceeding.")
+			warp = False
+			sm.dispose()
 		else:
 			map = 105200210
 			portal = 0
@@ -123,6 +128,8 @@ def init():
 	elif fieldID == 105200100:
 		if sm.mobsPresentInField():
 			sm.chat("Eliminate all monster before proceeding.")
+			warp = False
+			sm.dispose()
 		else:
 			map = 105200110
 			portal = 0
@@ -131,6 +138,8 @@ def init():
 	elif fieldID == 105200400:
 		if sm.mobsPresentInField():
 			sm.chat("Eliminate all monster before proceeding.")
+			warp = False
+			sm.dispose()
 		else:
 			map = 105200410
 			portal = 0
