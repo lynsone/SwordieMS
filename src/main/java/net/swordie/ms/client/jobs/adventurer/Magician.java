@@ -184,6 +184,7 @@ public class Magician extends Job {
             RESURRECTION,
             INFINITY_BISH,
             BAHAMUT,
+            HEAL,
 
             EPIC_ADVENTURE_FP,
             EPIC_ADVENTURE_IL,
@@ -191,6 +192,7 @@ public class Magician extends Job {
             ABSOLUTE_ZERO_AURA,
             INFERNO_AURA,
             RIGHTEOUSLY_INDIGNANT,
+            HEAVENS_DOOR,
     };
 
     public static int hmshits = 0;
@@ -384,8 +386,10 @@ public class Magician extends Job {
                         o1.tOption = 0;
                         partyTSM.putCharacterStatValue(ReviveOnce, o1);
                         partyTSM.sendSetStatPacket();
-                        partyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
-                        partyChr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
+                        if(partyChr != chr) {
+                          chr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, slv, 0)), partyChr);
+                          partyChr.write(User.effect(Effect.skillAffected(skillID, slv, 0)));
+                        }
                     }
                 } else {
                     o1.nOption = 1;
@@ -611,9 +615,9 @@ public class Magician extends Job {
                     break;
                 case HEAL:
                     chr.heal(changeBishopHealingBuffs(HEAL));
-                    Rect rect3 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
-                            , inPacket.decodeShort(), inPacket.decodeShort());
-                    for (Life life : chr.getField().getLifesInRect(rect3)) {
+                    rect = new Rect(inPacket.decodeShort(), inPacket.decodeShort(),
+                            inPacket.decodeShort(), inPacket.decodeShort());
+                    for (Life life : chr.getField().getLifesInRect(rect)) {
                         if (life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();

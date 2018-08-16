@@ -650,10 +650,36 @@ public class WorldHandler {
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         if (chr.checkAndSetSkillCooltime(attackInfo.skillId)) {
-            chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
-            log.debug("SkillID: " + attackInfo.skillId);
+            int skillID = attackInfo.skillId;
+            byte slv = attackInfo.slv;
+            chr.chatMessage(YELLOW, "SkillID: " + skillID);
+            log.debug("SkillID: " + skillID);
             Field field = c.getChr().getField();
-            c.getChr().getJobHandler().handleAttack(c, attackInfo);
+            Job sourceJobHandler = chr.getJobHandler();
+            SkillInfo si = SkillData.getSkillInfoById(skillID);
+            if (si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
+                Rect r = si.getFirstRect();
+                if (r != null) {
+                    Rect rectAround = chr.getRectAround(r);
+                    for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+                        if (pm.getChr() != null
+                                && pm.getFieldID() == chr.getFieldID()
+                                && rectAround.hasPositionInside(pm.getChr().getPosition())) {
+                            Char ptChr = pm.getChr();
+                            Effect effect = Effect.skillAffected(skillID, slv, 0);
+                            if(ptChr != chr) {  // Caster shouldn't get the Affected Skill Effect
+                                chr.getField().broadcastPacket(
+                                        UserRemote.effect(ptChr.getId(), effect)
+                                        , ptChr);
+                                ptChr.write(User.effect(effect));
+                                sourceJobHandler.handleAttack(c, attackInfo);
+                            }
+
+                        }
+                    }
+                }
+            }
+            sourceJobHandler.handleAttack(c, attackInfo);
             if (attackInfo.attackHeader != null) {
                 switch (attackInfo.attackHeader) {
                     case SUMMONED_ATTACK:
@@ -671,7 +697,7 @@ public class WorldHandler {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
                 if (mob == null) {
-                    chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
+                    chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", skillID, mai.mobId));
                 } else if (mob.getHp() > 0) {
                     long totalDamage = 0;
                     for (int dmg : mai.damages) {
@@ -1494,22 +1520,8 @@ public class WorldHandler {
 
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        chr.logout();
-        chr.setChangingChannel(true);
-        if (c.getAccount() != null) {
-            chr.getAccount().setLoginState(LoginState.Loading);
-            DatabaseManager.saveToDB(c.getAccount());
-        }
-        DatabaseManager.saveToDB(chr);
-        int worldID = chr.getClient().getChannelInstance().getWorldId();
-        World world = Server.getInstance().getWorldById(worldID);
-        Field field = chr.getField();
-        field.removeChar(chr);
-        byte channelID = (byte) (inPacket.decodeByte() + 1);
-        Channel channel = world.getChannelById(channelID);
-        channel.addClientInTransfer(channelID, chr.getId(), c);
-        short port = (short) channel.getPort();
-        c.write(ClientSocket.migrateCommand(true, port));
+        byte channelId = (byte) (inPacket.decodeByte() +1);
+        chr.changeChannel(channelId);
     }
 
     public static void handleUserChangeStatRequest(Client c, InPacket inPacket) {
@@ -1627,6 +1639,9 @@ public class WorldHandler {
     }
 
     public static void handleRequestArrowPlatterObj(Client c, InPacket inPacket) {
+        boolean flip = inPacket.decodeByte() != 0; // 0 = Left | 1 = Right
+        Position position = inPacket.decodePositionInt(); // Chr position (int)
+
         // TODO
     }
 
@@ -1729,6 +1744,18 @@ public class WorldHandler {
             // Reward items
             Item reward = itemInfo.getRandomReward();
             chr.addItemToInventory(reward);
+
+        } else if (itemID / 10000 == 539) {
+            // Avatar Megaphones
+            List<String> lineList = new ArrayList<>();
+            for(int i = 0; i < 4; i++) {
+                String line = inPacket.decodeString();
+                lineList.add(line);
+            }
+            boolean whisperIcon = inPacket.decodeByte() != 0;
+            World world = c.getWorld();
+            world.broadcastPacket(WvsContext.setAvatarMegaphone(chr, itemID, lineList, whisperIcon));
+
         } else {
 
             Equip medal = (Equip) chr.getEquippedInventory().getItemBySlot((short) -49); // Get Medal
@@ -1739,12 +1766,45 @@ public class WorldHandler {
             String medalString = (medalInt == 0 ? "" : "<"+ StringData.getItemStringById(medalInt) +"> "); // Smegas
 
             switch (itemID) {
+
                 case 5040004: // Hyper Teleport Rock
-                    short idk = inPacket.decodeShort();
-                    int mapID = inPacket.decodeInt();
-                    Field field = chr.getOrCreateFieldByCurrentInstanceType(mapID);
-                    chr.warp(field);
+                    short type = inPacket.decodeShort();
+                    if(type == 1) {
+                        int fieldId = inPacket.decodeInt();
+                        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
+                        chr.warp(field);
+                    } else {
+                        String targetName = inPacket.decodeString();
+                        int worldID = chr.getClient().getChannelInstance().getWorldId();
+                        World world = Server.getInstance().getWorldById(worldID);
+                        Char targetChr = world.getCharByName(targetName);
+                        Position targetPosition = targetChr.getPosition();
+
+                        // Target doesn't exist
+                        if(targetChr == null) {
+                            chr.chatMessage(String.format("%s is not online.", targetName));
+
+                        // Target is in an instanced Map
+                        } else if (targetChr.getFieldInstanceType() != FieldInstanceType.CHANNEL) {
+                            chr.chatMessage(String.format("cannot find %s", targetName));
+
+                        // Change channels & warp & teleport
+                        } else if (targetChr.getClient().getChannel() != c.getChannel()) {
+                            int fieldId = targetChr.getFieldID();
+                            chr.changeChannelAndWarp(targetChr.getClient().getChannel(), fieldId);
+
+                        // warp & teleport
+                        } else if (targetChr.getFieldID() != chr.getFieldID()) {
+                            chr.warp(targetChr.getField());
+                            chr.write(CField.teleport(targetPosition, chr));
+
+                        // teleport
+                        } else {
+                            chr.write(CField.teleport(targetPosition, chr));
+                        }
+                    }
                     break;
+
                 case ItemConstants.RED_CUBE: // Red Cube
                 case ItemConstants.BLACK_CUBE: // Black cube
                     short ePos = (short) inPacket.decodeInt();
@@ -3010,10 +3070,12 @@ public class WorldHandler {
                                 && rectAround.hasPositionInside(pm.getChr().getPosition())) {
                             Char ptChr = pm.getChr();
                             Effect effect = Effect.skillAffected(skillID, slv, 0);
-                            chr.getField().broadcastPacket(
-                                    UserRemote.effect(ptChr.getId(), effect)
-                                    , ptChr);
-                            ptChr.write(User.effect(effect));
+                            if(ptChr != chr) { // Caster shouldn't get the Affected Skill Effect
+                                chr.getField().broadcastPacket(
+                                        UserRemote.effect(ptChr.getId(), effect)
+                                        , ptChr);
+                                ptChr.write(User.effect(effect));
+                            }
                             sourceJobHandler.handleSkill(pm.getChr().getClient(), skillID, slv, inPacket);
                         }
                     }

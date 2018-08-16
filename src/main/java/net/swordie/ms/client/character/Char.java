@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.LinkSkill;
@@ -43,6 +44,7 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ChatHandler;
+import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Familiar;
@@ -55,6 +57,8 @@ import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.world.Channel;
+import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
@@ -3776,6 +3780,31 @@ public class Char {
 		HitInfo hi = new HitInfo();
 		hi.hpDamage = damage;
 		getJobHandler().handleHit(getClient(), hi);
+	}
+
+	public void changeChannel(byte channelId) {
+		changeChannelAndWarp(channelId, getFieldID());
+	}
+
+	public void changeChannelAndWarp(byte channelId, int fieldId) {
+		logout();
+		setChangingChannel(true);
+		Field field = getField();
+		if(getFieldID() != fieldId) {
+			setField(getOrCreateFieldByCurrentInstanceType(fieldId));
+		}
+		if (getAccount() != null) {
+			getAccount().setLoginState(LoginState.Loading);
+			DatabaseManager.saveToDB(getAccount());
+		}
+		DatabaseManager.saveToDB(this);
+		int worldID = getClient().getChannelInstance().getWorldId();
+		World world = Server.getInstance().getWorldById(worldID);
+		field.removeChar(this);
+		Channel channel = world.getChannelById(channelId);
+		channel.addClientInTransfer(channelId, getId(), getClient());
+		short port = (short) channel.getPort();
+		write(ClientSocket.migrateCommand(true, port));
 	}
 
 	@Override

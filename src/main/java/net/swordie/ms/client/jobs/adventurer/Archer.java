@@ -13,6 +13,9 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
@@ -74,6 +77,7 @@ public class Archer extends Job {
     public static final int ARROW_ILLUSION = 3221014;
     public static final int SHARP_EYES_XBOW = 3221002;
     public static final int SHARP_EYES_XBOW_IED_H = 3220044;
+    public static final int ARMOR_BREAK = 3120018;
     public static final int ILLUSION_STEP_XBOW = 3221006;
     public static final int HEROS_WILL_BM = 3121009;
     public static final int HEROS_WILL_MM = 3221008;
@@ -90,6 +94,7 @@ public class Archer extends Job {
 
 
     private QuiverCartridge quiverCartridge;
+    private long lastArmorBreak = Long.MIN_VALUE;
 
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
@@ -153,7 +158,7 @@ public class Archer extends Job {
             incrementFocusedFury();
             incrementMortalBlow();
             giveAggressiveResistanceBuff(attackInfo);
-
+            procArmorBreak(attackInfo);
 
         }
         Option o1 = new Option();
@@ -261,6 +266,25 @@ public class Archer extends Job {
         super.handleAttack(c, attackInfo);
     }
 
+    private void procArmorBreak(AttackInfo attackInfo) {
+        if(chr.hasSkill(ARMOR_BREAK)) {
+            Skill skill = chr.getSkill(ARMOR_BREAK);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            if(lastArmorBreak + (si.getValue(y, slv) * 1000) < System.currentTimeMillis()) {
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    // TODO 50% ignore PDR
+                    // TODO Mob x %  of PDR  as Final Damage%
+                }
+
+                lastArmorBreak = System.currentTimeMillis();
+                chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
+            }
+        }
+
+    }
+
     private void giveAggressiveResistanceBuff(AttackInfo ai) {
         if(!chr.hasSkill(AGGRESSIVE_RESISTANCE)) {
             return;
@@ -346,6 +370,10 @@ public class Archer extends Job {
         o2.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(BowMasterConcentration, o2);
         tsm.sendSetStatPacket();
+        if(amount < 20) {
+            chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
+        }
     }
 
     private void quiverCartridge(Client c, TemporaryStatManager tsm, AttackInfo attackInfo, int slv) {

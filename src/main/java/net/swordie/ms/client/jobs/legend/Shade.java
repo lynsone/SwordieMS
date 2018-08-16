@@ -3,37 +3,38 @@ package net.swordie.ms.client.jobs.legend;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -92,6 +93,8 @@ public class Shade extends Job {
         }
     }
 
+    private long spiritWardTimer;
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -119,6 +122,7 @@ public class Shade extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(SpiritGuard, o1);
+                spiritWardTimer = System.currentTimeMillis() + (si.getValue(time, slv) * 1000);
                 break;
             case MAPLE_WARRIOR_SH:
                 o1.nReason = skillID;
@@ -393,33 +397,14 @@ public class Shade extends Job {
     }
 
     @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {   //TODO Needs to not Reset the Timer when Hit
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        if (tsm.hasStat(SpiritGuard)) {
-            if (tsm.getOption(SpiritGuard).nOption == 3) {
-                o.nOption = 2;
-                o.rOption = SPIRIT_WARD;
-                o.tOption = 30;
-                tsm.putCharacterStatValue(SpiritGuard, o);
-                tsm.sendSetStatPacket();
-            } else if (tsm.getOption(SpiritGuard).nOption == 2) {
-                o.nOption = 1;
-                o.rOption = SPIRIT_WARD;
-                o.tOption = 30;
-                tsm.putCharacterStatValue(SpiritGuard, o);
-                tsm.sendSetStatPacket();
-            } else if (tsm.getOption(SpiritGuard).nOption == 1) {
-                resetSpiritGuard();
-            }
+        if(tsm.hasStat(SpiritGuard) && hitInfo.hpDamage > 0) {
+            deductSpiritWard();
+            hitInfo.hpDamage = 0;
+            hitInfo.mpDamage = 0;
         }
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    public void resetSpiritGuard() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        tsm.removeStat(SpiritGuard, false);
-        tsm.sendResetStatPacket();
     }
 
     @Override
@@ -445,6 +430,44 @@ public class Shade extends Job {
                 chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
             }
         }
+    }
+
+    private void deductSpiritWard() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(!chr.hasSkill(SPIRIT_WARD)) {
+            return;
+        }
+        Skill skill = chr.getSkill(SPIRIT_WARD);
+        Option o = new Option();
+        if (tsm.hasStat(SpiritGuard)) {
+            int spiritWardCount = tsm.getOption(SpiritGuard).nOption;
+
+            if(spiritWardCount > 0) {
+                spiritWardCount--;
+            }
+
+            if(spiritWardCount <= 0) {
+                tsm.removeStatsBySkill(skill.getSkillId());
+                tsm.sendResetStatPacket();
+            } else {
+                o.setInMillis(true);
+                o.nOption = spiritWardCount;
+                o.rOption = skill.getSkillId();
+                o.tOption = (int) (spiritWardTimer - System.currentTimeMillis());
+                tsm.putCharacterStatValue(SpiritGuard, o);
+                tsm.sendSetStatPacket();
+            }
+        }
+    }
+
+    @Override
+    public void handleMobDebuffSkill(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(SpiritGuard)) {
+            tsm.removeAllDebuffs();
+            deductSpiritWard();
+        }
+
     }
 
     public static void reviveBySummonOtherSpirit(Char chr) {

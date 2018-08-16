@@ -878,6 +878,24 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket setAvatarMegaphone(Char chr, int megaItemId, List<String> lineList, boolean whisperIcon) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_AVATAR_MEGAPHONE);
+
+        outPacket.encodeInt(megaItemId); // Avatar Megaphone Item ID
+        outPacket.encodeString(chr.getName());
+
+        for(String line : lineList) {
+            outPacket.encodeString(line);
+        }
+
+        outPacket.encodeInt(chr.getClient().getChannel() - 1);
+        outPacket.encodeByte(whisperIcon);
+
+        chr.getAvatarData().getAvatarLook().encode(outPacket); // encode AvatarLook
+
+        return outPacket;
+    }
+
     public static OutPacket receiveHyperStatSkillResetResult(int charID, boolean exclRequest, boolean success) {
         OutPacket outPacket = new OutPacket(OutHeader.RECEIVE_HYPER_STAT_SKILL_RESET_RESULT);
 
