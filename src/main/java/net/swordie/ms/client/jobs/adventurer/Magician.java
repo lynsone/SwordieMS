@@ -115,6 +115,7 @@ public class Magician extends Job {
     //Bishop
     public static final int HEAL = 2301002;
     public static final int MAGIC_BOOSTER_BISH = 2301008;
+    public static final int BLESSED_ENSEMBLE = 2300009;
     public static final int BLESS = 2301004;
     public static final int DISPEL = 2311001;
     public static final int SHINING_RAY = 2311004;
@@ -127,7 +128,10 @@ public class Magician extends Job {
     public static final int ADV_BLESSING = 2321005;
     public static final int BAHAMUT = 2321003;
     public static final int INFINITY_BISH = 2321004;
+    public static final int BLESSED_HARMONY = 2320013;
     public static final int MAPLE_WARRIOR_BISH = 2321000;
+    public static final int GENESIS = 2321008;
+    public static final int BIG_BANG = 2321001;
     public static final int ARCANE_AIM_BISH = 2320011;
     public static final int ANGEL_RAY = 2321007;
     public static final int RESURRECTION = 2321006;
@@ -402,6 +406,13 @@ public class Magician extends Job {
             case ANGEL_RAY:
                 chr.heal(changeBishopHealingBuffs(ANGEL_RAY));
                 break;
+            case GENESIS:
+                o1.nOption = 1;
+                o1.rOption = BIG_BANG;
+                o1.tOption = si.getValue(cooltime, slv);
+                tsm.putCharacterStatValue(KeyDownTimeIgnore, o1);
+                tsm.sendSetStatPacket();
+                break;
             case MEGIDDO_FLAME_ATOM:
                 Skill megSkill = chr.getSkill(MEGIDDO_FLAME);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -556,6 +567,7 @@ public class Magician extends Job {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
+        changeBlessedCount();
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -667,11 +679,6 @@ public class Magician extends Job {
             hitInfo.hpDamage = dmg - mpDmg;
             hitInfo.mpDamage = mpDmg;
         }
-
-        if(tsm.getOptByCTSAndSkill(AntiMagicShell, ELEMENTAL_ADAPTATION_FP) != null) {
-            eleAdaptationFP();
-        }
-
         super.handleHit(c, inPacket, hitInfo);
     }
 
@@ -737,18 +744,20 @@ public class Magician extends Job {
             case ELEMENTAL_ADAPTATION_FP:
                 o1.nOption = 6;
                 o1.rOption = skillID;
+                // no bOption for FP's AntiMagicShell
                 tsm.putCharacterStatValue(AntiMagicShell, o1);
                 break;
             case DIVINE_PROTECTION:
-            case ELEMENTAL_ADAPTATION_IL:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
+                o1.bOption = 1;
                 tsm.putCharacterStatValue(AntiMagicShell, o1);
-                o2.nOption = 1;
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamAbsorbShield, o2);
+                break;
+            case ELEMENTAL_ADAPTATION_IL:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(AntiMagicShell, o1);
                 break;
             case TELEPORT_MASTERY_FP:
             case TELEPORT_MASTERY_IL:
@@ -1146,37 +1155,6 @@ public class Magician extends Job {
         chr.chatMessage(ChatMsgColour.WHISPER_GREEN, "Elemental Drain Stack: " + getFerventDrainStack());
     }
 
-    //Elemental Adaptation - FP
-    private void eleAdaptationFP() {
-        if(!chr.hasSkill(ELEMENTAL_ADAPTATION_FP)) {
-            return;
-        }
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        Skill skill = chr.getSkill(ELEMENTAL_ADAPTATION_FP);
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        int proc = si.getValue(prop, slv);
-
-        int stack = tsm.getOption(AntiMagicShell).nOption;
-        if(stack > 0) {
-            if(Util.succeedProp(proc)) {
-                stack--;
-
-                o.nOption = stack;
-                o.rOption = ELEMENTAL_ADAPTATION_FP;
-                tsm.putCharacterStatValue(AntiMagicShell, o);
-                tsm.sendSetStatPacket();
-            } else {
-                tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
-                tsm.sendResetStatPacket();
-            }
-        } else {
-            tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
-            tsm.sendResetStatPacket();
-        }
-    }
-
     private void infinity() {
         if(!chr.hasSkill(getInfinitySkill())) {
             return;
@@ -1232,6 +1210,123 @@ public class Magician extends Job {
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
         }
+    }
+
+    public void handleMobDebuffSkill(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+        // Elemental Adaptation - FP
+        if(chr.hasSkill(ELEMENTAL_ADAPTATION_FP) && tsm.getOptByCTSAndSkill(AntiMagicShell, ELEMENTAL_ADAPTATION_FP) != null) {
+            deductEleAdaptationFP();
+            tsm.removeAllDebuffs();
+        }
+
+        // Elemental Adaptation - IL
+        if(chr.hasSkill(ELEMENTAL_ADAPTATION_IL) && tsm.getOptByCTSAndSkill(AntiMagicShell, ELEMENTAL_ADAPTATION_IL) != null) {
+            if(tsm.getOption(AntiMagicShell).bOption == 0) {
+                Skill skill = chr.getSkill(ELEMENTAL_ADAPTATION_IL);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+
+                tsm.removeStatsBySkill(skill.getSkillId());
+                tsm.removeAllDebuffs();
+
+                Option o = new Option();
+                o.nOption = 1;
+                o.rOption = skill.getSkillId();
+                o.tOption = si.getValue(time, slv);
+                o.bOption = 1;
+                tsm.putCharacterStatValue(AntiMagicShell, o);
+                tsm.sendSetStatPacket();
+            } else {
+                tsm.removeAllDebuffs();
+            }
+        }
+
+        // Divine Protection - Bishop
+        if(chr.hasSkill(DIVINE_PROTECTION) && tsm.getOptByCTSAndSkill(AntiMagicShell, DIVINE_PROTECTION) != null) {
+            tsm.removeStatsBySkill(DIVINE_PROTECTION);
+            tsm.sendResetStatPacket();
+            tsm.removeAllDebuffs();
+        }
+    }
+
+    // Elemental Adaptation - FP
+    private void deductEleAdaptationFP() {
+        if(!chr.hasSkill(ELEMENTAL_ADAPTATION_FP)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(ELEMENTAL_ADAPTATION_FP);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        int proc = si.getValue(prop, slv);
+
+        int stack = tsm.getOption(AntiMagicShell).nOption;
+        if(stack > 0) {
+            if(Util.succeedProp(proc)) {
+                stack--;
+
+                o.nOption = stack;
+                o.rOption = ELEMENTAL_ADAPTATION_FP;
+                tsm.putCharacterStatValue(AntiMagicShell, o);
+                tsm.sendSetStatPacket();
+            } else {
+                tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
+                tsm.sendResetStatPacket();
+            }
+        } else {
+            tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
+            tsm.sendResetStatPacket();
+        }
+    }
+
+    private void changeBlessedCount() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(getBlessedSkill() == null) {
+            return;
+        }
+        Skill skill = getBlessedSkill();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        int amount = 0;
+
+        if(chr.getParty() != null) { // Should be increasing by Given Party Buffs
+            for(PartyMember pm : chr.getParty().getOnlineMembers()) {
+                if(chr.getFieldID() == pm.getChr().getFieldID()) {
+                    amount++;
+                }
+            }
+        }
+
+        if(amount > 1) { // amount = 2  ->  1 count on Icon
+            o1.nOption = amount;
+            o1.rOption = BLESSED_ENSEMBLE;
+            tsm.putCharacterStatValue(BlessEnsenble, o1);
+
+            o2.nValue = si.getValue(x, slv) * amount;
+            o2.nReason = BLESSED_ENSEMBLE;
+            o2.tStart = (int) System.currentTimeMillis();
+            tsm.putCharacterStatValue(IndieDamR, o1);
+            tsm.sendSetStatPacket();
+        } else {
+            tsm.removeStatsBySkill(BLESSED_ENSEMBLE);
+            tsm.sendResetStatPacket();
+        }
+    }
+
+    private Skill getBlessedSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(BLESSED_ENSEMBLE)) {
+            skill = chr.getSkill(BLESSED_ENSEMBLE);
+        }
+        if(chr.hasSkill(BLESSED_HARMONY)) {
+            skill = chr.getSkill(BLESSED_HARMONY);
+        }
+        return skill;
     }
 
     public static void reviveByHeavensDoor(Char chr) {

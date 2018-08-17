@@ -554,6 +554,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		return chr.hasSkill(skillId);
 	}
 
+	public void heal() {
+		chr.heal(chr.getMaxHP());
+		chr.healMP(chr.getMaxMP());
+	}
+
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 

@@ -2499,6 +2499,7 @@ public class Char {
 			Item item = drop.getItem();
 			int itemID = item.getItemId();
 			boolean isConsume = false;
+			boolean isRunOnPickUp = false;
 			if (itemID == GameConstants.BLUE_EXP_ORB_ID || itemID == GameConstants.PURPLE_EXP_ORB_ID ||
 					itemID == GameConstants.RED_EXP_ORB_ID) {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
@@ -2513,10 +2514,19 @@ public class Char {
 			if (!ItemConstants.isEquip(itemID)) {
 				ItemInfo ii = ItemData.getItemInfoByID(itemID);
 				isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
+				isRunOnPickUp = ii.getSpecStats().getOrDefault(SpecStat.runOnPickup, 0) != 0;
 			}
 			if (isConsume) {
 				consumeItemOnPickup(item);
 				dispose();
+				return true;
+			} else if (isRunOnPickUp) {
+				String script = String.valueOf(itemID);
+				ItemInfo ii = ItemData.getItemInfoByID(itemID);
+				if(ii.getScript() != null && !"".equals(ii.getScript())) {
+					script = ii.getScript();
+				}
+				getScriptManager().startScript(itemID, script, ScriptType.ITEM);
 				return true;
 			} else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
 				if (item instanceof Equip) {
