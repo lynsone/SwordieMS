@@ -152,8 +152,10 @@ public class SkillConstants {
             case 21120020:
             case 21120021:
             case 22171069:
-            case 23121008:
+            case 23120011:
             case 23120012:
+            case 23120013:
+            case 23121008:
             case 33120010:
             case 35120014:
             case 80001913:
