@@ -14,9 +14,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.*;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
@@ -132,7 +130,10 @@ public class Phantom extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case FINAL_FEINT:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ReviveOnce, o1);
                 break;
             case BAD_LUCK_WARD:
                 o1.nValue = si.getValue(indieMhpR, slv);
@@ -206,7 +207,7 @@ public class Phantom extends Job {
             int anglenum = new Random().nextInt(30) + 295;
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                int TW1prop = 100;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change
+                int TW1prop = 100;
                 if (Util.succeedProp(TW1prop)) {
                     if (chr.hasSkill(CARTE_NOIR)) {
                         int mobID = mai.mobId;
@@ -258,21 +259,21 @@ public class Phantom extends Job {
                     int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();
                     int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
-                            355 - (10 * i), i * 15, (int) System.currentTimeMillis(), 1, 0,
+                            350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
                             new Position()); //Slightly behind the player
                     chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
-                            mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
+                            mob.getPosition(), CARTE_NOIR, mob.getPosition()));
                 } else if (chr.hasSkill(CARTE_BLANCHE)) {
                     int mobID = mob.getObjectId();
                     int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
                     int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                            355 - (10 * i), i * 15, (int) System.currentTimeMillis(), 1, 0,
+                            350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
                             new Position()); //Slightly behind the player
                     chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
-                            mob.getPosition(), CARTE_BLANCHE, mob.getPosition())); //TODO NPE on Mille
+                            mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
                 }
             }
         }
@@ -304,6 +305,7 @@ public class Phantom extends Job {
                 cartDeck();
                 carteForceAtom(attackInfo);
             }
+            drainLifeByJudgmentDraw();
         }
 
         Option o1 = new Option();
@@ -348,73 +350,7 @@ public class Phantom extends Job {
             Option o3 = new Option();
             switch (skillID) {
                 case VOL_DAME:
-                    Rect rect = new Rect(   //NPE when using the skill's rect
-                            new Position(
-                                    chr.getPosition().getX() - 250,
-                                    chr.getPosition().getY() - 250),
-                            new Position(
-                                    chr.getPosition().getX() + 250,
-                                    chr.getPosition().getY() + 250)
-                    );
-                    List<Mob> mobs = chr.getField().getMobsInRect(rect);
-                    MobStat buffFromMobStat = MobStat.Mystery; //Needs to be initialised
-                    MobStat[] mobStats = new MobStat[]{ //Ordered from Weakest to Strongest, since  the for loop will save the last MobsStat
-                            PCounter,           //Dmg Reflect 600%
-                            MCounter,           //Dmg Reflect 600%
-                            PImmune,            //Dmg Recv -40%
-                            MImmune,            //Dmg Recv -40%
-                            PowerUp,            //Attack +40
-                            MagicUp,            //Attack +40
-                            MobStat.Invincible, //Invincible for short time
-                    };
-                    for (Mob mob : mobs) {
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        List<MobStat> currentMobStats = Arrays.stream(mobStats).filter(ms -> mts.hasCurrentMobStat(ms)).collect(Collectors.toList());
-                        for (MobStat currentMobStat : currentMobStats) {
-                            if (mts.hasCurrentMobStat(currentMobStat)) {
-                                mts.removeMobStat(currentMobStat, true);
-                                buffFromMobStat = currentMobStat;
-                            }
-                        }
-                    }
-                    switch (buffFromMobStat) {
-                        case PCounter:
-                        case MCounter:
-                            o1.nOption = si.getValue(y, slv);
-                            o1.rOption = skillID;
-                            o1.tOption = 30;
-                            tsm.putCharacterStatValue(PowerGuard, o1);
-                            break;
-                        case PImmune:
-                        case MImmune:
-                            o1.nOption = si.getValue(x, slv);
-                            o1.rOption = skillID;
-                            o1.tOption = 30;
-                            tsm.putCharacterStatValue(CharacterTemporaryStat.EVA, o1); //as a check to allow for DmgReduction in the Hit Handler
-                            break;
-                        case PowerUp:
-                        case MagicUp:
-                            o1.nOption = si.getValue(epad, slv);
-                            o1.rOption = skillID;
-                            o1.tOption = 30;
-                            tsm.putCharacterStatValue(CharacterTemporaryStat.PAD, o1);
-                            break;
-                        case Invincible:
-                            o1.nOption = 1;
-                            o1.rOption = skillID;
-                            o1.tOption = 5;
-                            tsm.putCharacterStatValue(NotDamaged, o1);
-                            break;
-                    }
-                    tsm.sendSetStatPacket();
-                    break;
-
-                case IMPECCABLE_MEMORY_I:
-                case IMPECCABLE_MEMORY_II:
-                case IMPECCABLE_MEMORY_III:
-                case IMPECCABLE_MEMORY_IV:
-                    //case IMPECCABLE_MEMORY_H
-                    //TODO
+                    stealBuffVolDame();
                     break;
                 case TO_THE_SKIES:
                     o1.nValue = si.getValue(x, slv);
@@ -424,6 +360,7 @@ public class Phantom extends Job {
                 case JUDGMENT_DRAW_1:
                 case JUDGMENT_DRAW_2:
                     carteForceAtomJudgmentDraw();
+                    giveJudgmentDrawBuff(skillID);
                     resetCardStack();
                     break;
                 case HEROS_WILL_PH:
@@ -502,5 +439,149 @@ public class Phantom extends Job {
         if (getCardAmount() < getMaxCards()) {
             setCardAmount((byte) (getCardAmount() + 1));
         }
+    }
+
+    private void stealBuffVolDame() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+
+        if(!chr.hasSkill(VOL_DAME)) {
+            return;
+        }
+
+        Skill skill = chr.getSkill(VOL_DAME);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        Rect rect = new Rect(   //NPE when using the skill's rect
+                new Position(
+                        chr.getPosition().getX() - 250,
+                        chr.getPosition().getY() - 250),
+                new Position(
+                        chr.getPosition().getX() + 250,
+                        chr.getPosition().getY() + 250)
+        );
+        List<Mob> mobs = chr.getField().getMobsInRect(rect);
+        MobStat buffFromMobStat = MobStat.Mystery; //Needs to be initialised
+        MobStat[] mobStats = new MobStat[]{ //Ordered from Weakest to Strongest, since  the for loop will save the last MobsStat
+                PCounter,           //Dmg Reflect 600%
+                MCounter,           //Dmg Reflect 600%
+                PImmune,            //Dmg Recv -40%
+                MImmune,            //Dmg Recv -40%
+                PowerUp,            //Attack +40
+                MagicUp,            //Attack +40
+                MobStat.Invincible, //Invincible for short time
+        };
+        for (Mob mob : mobs) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            List<MobStat> currentMobStats = Arrays.stream(mobStats).filter(mts::hasCurrentMobStat).collect(Collectors.toList());
+            for (MobStat currentMobStat : currentMobStats) {
+                if (mts.hasCurrentMobStat(currentMobStat)) {
+                    mts.removeMobStat(currentMobStat, true);
+                    buffFromMobStat = currentMobStat;
+                }
+            }
+        }
+        switch (buffFromMobStat) {
+            case PCounter:
+            case MCounter:
+                o1.nOption = si.getValue(y, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 30;
+                tsm.putCharacterStatValue(PowerGuard, o1);
+                break;
+            case PImmune:
+            case MImmune:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 30;
+                tsm.putCharacterStatValue(CharacterTemporaryStat.EVA, o1); //as a check to allow for DmgReduction in the Hit Handler
+                break;
+            case PowerUp:
+            case MagicUp:
+                o1.nOption = si.getValue(epad, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 30;
+                tsm.putCharacterStatValue(CharacterTemporaryStat.PAD, o1);
+                break;
+            case Invincible:
+                o1.nOption = 1;
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 5;
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                break;
+        }
+        tsm.sendSetStatPacket();
+    }
+
+    private void giveJudgmentDrawBuff(int skillId) {
+
+        Skill skill = chr.getSkill(skillId);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        int randomInt = new Random().nextInt((skillId == JUDGMENT_DRAW_1 ? 2 : 5))+1;
+        int xOpt = 0;
+        switch (randomInt) {
+            case 1: // Crit Rate
+                xOpt = si.getValue(v, slv);
+                break;
+            case 2: // Item Drop Rate
+                xOpt = si.getValue(w, slv);
+                break;
+            case 3: // AsrR & TerR
+                xOpt = si.getValue(x, slv);
+                break;
+            case 4: // Defense %
+                xOpt = 10;
+                break;
+            case 5: // Life Drain
+                break;
+        }
+
+        o.nOption = randomInt;
+        o.rOption = skill.getSkillId();
+        o.tOption = si.getValue(time, slv);
+        o.xOption = xOpt;
+        tsm.putCharacterStatValue(Judgement, o);
+        tsm.sendSetStatPacket();
+        //TODO Draw Card Effect
+    }
+
+    private void drainLifeByJudgmentDraw() {
+        if(!chr.hasSkill(JUDGMENT_DRAW_2)) {
+            return;
+        }
+        Skill skill = chr.getSkill(JUDGMENT_DRAW_2);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(Judgement) && tsm.getOption(Judgement).nOption == 5) {
+            int healrate = si.getValue(z, slv);
+            chr.heal((int) (chr.getMaxHP() * ((double) healrate / 100)));
+        }
+    }
+
+    public static void reviveByFinalFeint(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(FINAL_FEINT);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(skill.getSkillId());
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Final Feint.");
+        chr.write(User.effect(Effect.skillSpecial(skill.getSkillId())));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(skill.getSkillId())));
+
+        o.nOption = 1;
+        o.rOption = skill.getSkillId();
+        o.tStart = si.getValue(y, slv);
+        tsm.putCharacterStatValue(NotDamaged, o);
+        tsm.sendSetStatPacket();
     }
 }

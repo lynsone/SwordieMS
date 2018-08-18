@@ -36,11 +36,6 @@ import java.util.concurrent.TimeUnit;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 
-//TODO Scurvy Summons
-//TODO Roll of Dice
-//TODO Octo-Cannon
-//TODO CM - Barrel Roulette
-
 //nUnityPower is stack icon
 /**
  * Created on 12/14/2017.
@@ -87,7 +82,7 @@ public class Pirate extends Job {
     public static final int OCTO_CANNON = 5211014; //Summon
 
     public static final int QUICKDRAW = 5221021; //Buff
-    public static final int PARROTARGETTING = 5221015; //Special Attack //TODO  GuidedBullet TempStat (TwoState)
+    public static final int PARROTARGETTING = 5221015; //Special Attack
     public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
@@ -273,11 +268,13 @@ public class Pirate extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case SPEED_INFUSION:
-                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.PartyBooster);
-                tsb.setNOption(-1);
-                tsb.setROption(skillID);
-                tsb.setExpireTerm(1);
-                tsm.putCharacterStatValue(PartyBooster, tsb.getOption());
+                PartyBooster pb = (PartyBooster) tsm.getTSBByTSIndex(TSIndex.PartyBooster);
+                pb.setDynamicTermSet(false);
+                pb.setNOption(-1);
+                pb.setROption(skillID);
+                pb.setCurrentTime((int) System.currentTimeMillis());
+                pb.setExpireTerm(1);
+                tsm.putCharacterStatValue(PartyBooster, pb.getOption());
                 break;
             case INFINITY_BLAST:
                 o1.nOption = si.getValue(x, slv);
@@ -808,6 +805,35 @@ public class Pirate extends Job {
                 break;
             case POWER_UNITY:
                 powerUnity();
+                break;
+            case PARROTARGETTING:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+
+                    GuidedBullet gb = (GuidedBullet) tsm.getTSBByTSIndex(TSIndex.GuidedBullet);
+
+                    if(gb.getMobID() != 0) {
+                        Mob gbMob = (Mob) chr.getField().getLifeByObjectID(gb.getMobID());
+                        if(gbMob != null) {
+                            MobTemporaryStat mobTemporaryStat = gbMob.getTemporaryStat();
+                            if(mobTemporaryStat.hasCurrentMobStatBySkillId(skillID)) {
+                                mobTemporaryStat.removeMobStat(MobStat.AddDamParty, false);
+                            }
+                        }
+                    }
+
+                    gb.setNOption(1);
+                    gb.setROption(skillID);
+                    gb.setMobID(mai.mobId);
+                    gb.setUserID(chr.getId());
+                    tsm.putCharacterStatValue(GuidedBullet, gb.getOption());
+                    tsm.sendSetStatPacket();
+                }
                 break;
         }
 
