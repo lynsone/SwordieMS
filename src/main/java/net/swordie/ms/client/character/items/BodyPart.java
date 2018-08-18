@@ -1,5 +1,7 @@
 package net.swordie.ms.client.character.items;
 
+import java.util.Arrays;
+
 /**
  * Created on 1/7/2018.
  */
@@ -120,6 +122,10 @@ public enum BodyPart {
 
     BodyPart(int val) {
         this.val = val;
+    }
+
+    public static BodyPart getByVal(int bodyPartVal) {
+        return Arrays.stream(values()).filter(bp -> bp.getVal() == bodyPartVal).findAny().orElse(null);
     }
 
     public int getVal() {

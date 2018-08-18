@@ -4,7 +4,7 @@ package net.swordie.ms.enums;
  * Created on 12/22/2017.
  */
 public enum EquipBaseStat {
-    ruc(0x1, 0),
+    tuc(0x1, 0),
     cuc(0x2, 0),
     iStr(0x4, 0),
     iDex(0x8, 0),

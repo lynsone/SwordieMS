@@ -307,7 +307,7 @@ public class LoginHandler {
         if (BCrypt.checkpw(pic, c.getAccount().getPic())) {
             success = true;
         } else {
-            c.write(Login.selectCharacterResult(LoginType.IncorrectSPW, (byte) 0, 0, 0));
+            c.write(Login.selectCharacterResult(LoginType.IncorrectPassword, (byte) 0, 0, 0));
         }
         c.setAuthorized(success);
         return success;

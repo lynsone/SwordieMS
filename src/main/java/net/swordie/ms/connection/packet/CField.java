@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.MarriageRecord;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.PetItem;
+import net.swordie.ms.client.character.items.ScrollUpgradeInfo;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.PsychicArea;
@@ -419,28 +420,31 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket scrollUpgradeDisplay() {
+    public static OutPacket scrollUpgradeDisplay(boolean feverTime, List<ScrollUpgradeInfo> infos) {
         OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
-        boolean bool = false;
 
         outPacket.encodeByte(EquipmentEnchantType.ScrollUpgradeDisplay.getVal());
-        outPacket.encodeByte(bool); //boolean
-        if(!bool) {
-            //ResetScrollInfo
-            outPacket.encodeByte(true); //while 1,
+        outPacket.encodeByte(feverTime);
 
-            outPacket.encodeInt(2046301); //Scroll Icon ID
-            outPacket.encodeString("AccINT"); //Scroll Name
-            outPacket.encodeInt(2046301); //Scroll Type
-            outPacket.encodeInt(2046301); //Scroll Option
-
-            outPacket.encodeInt(0); //Flag
-            outPacket.encodeInt(0); //Unk0
-
-            outPacket.encodeInt(5); //Cost
-            outPacket.encodeByte(true); //Unk1
-
+        outPacket.encodeByte(infos.size());
+        for (ScrollUpgradeInfo sui : infos) {
+            outPacket.encode(sui);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket showScrollUpgradeResult(boolean feverAfter, int result, String desc, Equip prevEquip,
+                                                    Equip newEquip) {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+
+        outPacket.encodeByte(EquipmentEnchantType.ShowScrollUpgradeResult.getVal());
+
+        outPacket.encodeByte(feverAfter);
+        outPacket.encodeInt(result);
+        outPacket.encodeString(desc);
+        outPacket.encode(prevEquip);
+        outPacket.encode(newEquip);
 
         return outPacket;
     }

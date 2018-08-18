@@ -4,6 +4,8 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
 
@@ -23,7 +25,7 @@ public class Equip extends Item {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FileTime equippedDate = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
     private int prevBonusExpRate;
-    private short ruc;
+    private short tuc;
     private short cuc;
     private short iStr;
     private short iDex;
@@ -105,7 +107,7 @@ public class Equip extends Item {
     }
 
     public Equip(int itemId, int bagIndex, long cashItemSerialNumber, FileTime dateExpire, long serialNumber,
-                 String title, FileTime equippedDate, int prevBonusExpRate, short ruc, short cuc, short iStr,
+                 String title, FileTime equippedDate, int prevBonusExpRate, short tuc, short cuc, short iStr,
                  short iDex, short iInt, short iLuk, short iMaxHp, short iMaxMp, short iPad, short iMad, short iPDD,
                  short iMDD, short iAcc, short iEva, short iCraft, short iSpeed, short iJump, short attribute,
                  short levelUpType, short level, short exp, short durability, short iuc, short iPvpDamage,
@@ -121,7 +123,7 @@ public class Equip extends Item {
         this.title = title;
         this.equippedDate = equippedDate;
         this.prevBonusExpRate = prevBonusExpRate;
-        this.ruc = ruc;
+        this.tuc = tuc;
         this.cuc = cuc;
         this.iStr = iStr;
         this.iDex = iDex;
@@ -197,7 +199,7 @@ public class Equip extends Item {
         ret.title = title;
         ret.equippedDate = equippedDate.deepCopy();
         ret.prevBonusExpRate = prevBonusExpRate;
-        ret.ruc = ruc;
+        ret.tuc = tuc;
         ret.cuc = cuc;
         ret.iStr = iStr;
         ret.iDex = iDex;
@@ -295,8 +297,8 @@ public class Equip extends Item {
     }
 
     // scroll slots
-    public short getRuc() {
-        return ruc;
+    public short getTuc() {
+        return tuc;
     }
 
     public short getCuc() {
@@ -801,8 +803,8 @@ public class Equip extends Item {
         this.prevBonusExpRate = prevBonusExpRate;
     }
 
-    public void setRuc(short ruc) {
-        this.ruc = ruc;
+    public void setTuc(short tuc) {
+        this.tuc = tuc;
     }
 
     public void setSpecialGrade(int specialGrade) {
@@ -872,8 +874,8 @@ public class Equip extends Item {
         // GW_ItemSlotEquipBase
         int mask = getStatMask(0);
         outPacket.encodeInt(mask);
-        if(hasStat(EquipBaseStat.ruc)) {
-            outPacket.encodeByte(getRuc());
+        if(hasStat(EquipBaseStat.tuc)) {
+            outPacket.encodeByte(getTuc());
         }
         if(hasStat(EquipBaseStat.cuc)) {
             outPacket.encodeByte(getCuc());
@@ -1034,8 +1036,8 @@ public class Equip extends Item {
 
     public void setBaseStat(EquipBaseStat equipBaseStat, long amount) {
         switch(equipBaseStat){
-            case ruc:
-                setRuc((short) amount);
+            case tuc:
+                setTuc((short) amount);
                 break;
             case cuc:
                 setCuc((short) amount);
@@ -1150,8 +1152,8 @@ public class Equip extends Item {
 
     public long getBaseStat(EquipBaseStat equipBaseStat) {
         switch(equipBaseStat){
-            case ruc:
-                return getRuc();
+            case tuc:
+                return getTuc();
             case cuc:
                 return getCuc();
             case iStr:
@@ -1479,5 +1481,21 @@ public class Equip extends Item {
     @Override
     public boolean isTradable() {
         return !hasAttribute(EquipAttribute.UNTRADABLE);
+    }
+
+    public void applyInnocenceScroll() {
+        Equip defaultEquip = ItemData.getEquipDeepCopyFromID(getItemId(), false);
+        for (EquipBaseStat ebs : EquipBaseStat.values()) {
+            if (ebs != EquipBaseStat.attribute && ebs != EquipBaseStat.growthEnchant && ebs != EquipBaseStat.psEnchant) {
+                setBaseStat(ebs, defaultEquip.getBaseStat(ebs));
+            }
+        }
+        setChuc((short) 0);
+        recalcEnchantmentStats();
+    }
+
+    public boolean hasUsedSlots() {
+        Equip defaultEquip = ItemData.getEquipDeepCopyFromID(getItemId(), false);
+        return defaultEquip.getTuc() != getTuc();
     }
 }

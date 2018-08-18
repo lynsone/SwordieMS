@@ -1,6 +1,7 @@
 package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.InvType;
@@ -22,7 +23,7 @@ import static net.swordie.ms.enums.InventoryOperation.ADD;
 @Entity
 @Table(name = "items")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Item implements Serializable {
+public class Item implements Serializable, Encodable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

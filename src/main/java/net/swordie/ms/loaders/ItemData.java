@@ -183,7 +183,7 @@ public class ItemData {
                 dataOutputStream.writeShort(equip.getiJump());
                 dataOutputStream.writeShort(equip.getDamR());
                 dataOutputStream.writeShort(equip.getStatR());
-                dataOutputStream.writeShort(equip.getRuc());
+                dataOutputStream.writeShort(equip.getTuc());
                 dataOutputStream.writeInt(equip.getCharmEXP());
                 dataOutputStream.writeInt(equip.getSetItemID());
                 dataOutputStream.writeInt(equip.getPrice());

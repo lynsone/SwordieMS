@@ -20,12 +20,10 @@ import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.result.PartyResultInfo;
-import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
-import net.swordie.ms.life.movement.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import org.apache.log4j.LogManager;
@@ -875,7 +873,7 @@ public class WvsContext {
         if (returnResult != 1) {
             outPacket.encodeInt(msg);
         }
-        outPacket.encodeInt(equip == null ? 0 : equip.getRuc());
+        outPacket.encodeInt(equip == null ? 0 : equip.getTuc());
 
         return outPacket;
     }
