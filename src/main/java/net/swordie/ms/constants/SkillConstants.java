@@ -1192,6 +1192,20 @@ public class SkillConstants {
         }
     }
 
+    public static boolean isArmorPiercingSkill(int skillId) {
+        switch (skillId) {
+            case 3120017:
+            case 95001000:
+            case 3120008:
+            case 3100001:
+            case 3100010:
+                return false;
+
+            default:
+                return true;
+        }
+    }
+
     public static int getBaseSpByLevel(short level) {
         return level > 140 ? 0
                 : level > 130 ? 6

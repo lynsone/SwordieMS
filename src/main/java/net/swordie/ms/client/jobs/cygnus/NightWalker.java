@@ -20,6 +20,7 @@ import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -30,8 +31,10 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -118,8 +121,15 @@ public class NightWalker extends Job {
             SHADOW_ILLUSION,
     };
 
-    private Summon bats;
-    private int batcount;
+    private int[] batSkills = new int[] {
+            SHADOW_BAT,
+            BAT_AFFINITY,
+            BAT_AFFINITY_II,
+            BAT_AFFINITY_III,
+    };
+
+    private List<Summon> bats = new ArrayList<>();
+    private Summon darkServant;
 
     public static int getOriginalSkillByID(int skillID) {
         switch(skillID) {
@@ -190,18 +200,7 @@ public class NightWalker extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case DARK_SERVANT:
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(ShadowServant, o1);
-
-/*  TODO    WVS_CRASH_CALLBACK error upon summoning
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
-                field.spawnSummon(summon);
-*/
+                applyDarkServant();
                 break;
             case SPIRIT_PROJECTION:
                 o1.nOption = si.getValue(x, slv);
@@ -224,11 +223,15 @@ public class NightWalker extends Job {
                 break;
 
             case SHADOW_BAT:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(NightWalkerBat, o1);
-                //spawnBats(skillID, slv);
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(NightWalkerBat, o1);
+                }
                 break;
 
             case GLORY_OF_THE_GUARDIANS_NW:
@@ -244,17 +247,23 @@ public class NightWalker extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
             case SHADOW_ILLUSION:
+                tsm.removeStatsBySkill(DARK_SERVANT);
+                c.getChr().getField().broadcastPacket(Summoned.summonedRemoved(darkServant, LeaveType.ANIMATION));
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowIllusion, o1);
-/*
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.FIND_NEAREST_MOB.getVal());
-                field.spawnSummon(summon);
-*/
+                for(int i = skillID; i < skillID+3; i++) {
+                    summon = Summon.getSummonBy(c.getChr(), i, slv);
+                    field = c.getChr().getField();
+                    summon.setFlyMob(false);
+                    summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
+                    summon.setMoveAbility(MoveAbility.SHADOW_SERVANT.getVal());
+                    field.spawnSummon(summon);
+                }
+                if(chr.hasSkill(DARK_SERVANT)) {
+                    EventManager.addEvent(this::applyDarkServant, si.getValue(time, slv) * 1001, TimeUnit.MILLISECONDS);
+                }
                 break;
 
             case DARK_OMEN:
@@ -273,81 +282,104 @@ public class NightWalker extends Job {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-
-    //Shadow Bat Handling
-    private void createShadowBatForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
+    // handling Shadow Bats
+    private void shadowBats(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(NightWalkerBat)) {
-            if(batcount > 0) {
-                SkillInfo si = SkillData.getSkillInfoById(SHADOW_BAT);
-                for(int i=0; i<batcount; i++) {
-                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        int tw1prop = 100;//  SkillData.getSkillInfoById(SHADOW_BAT).getValue(prop, slv);   //TODO Change
-                        if (Util.succeedProp(tw1prop)) {
-                            int mobID = mai.mobId;
-                            int position = new Random().nextInt(80);
-                            int inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getInc();
-                            int type = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getForceAtomType();
-                            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 3,
-                                    90, 0, (int) System.currentTimeMillis(), 1, 0,
-                                    new Position(-20, position));
-                            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                                    true, mobID, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                                    mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));    //TODO mob.getPosition()  QUINT_THROW giving NPE
-                        }
-                    }
+        if(!tsm.hasStat(NightWalkerBat)) {
+            return;
+        }
+        int removeBatSize = 0;
+        if(bats.size() > 0) {
+            for(Summon bat : bats) {
+                if(Util.succeedProp(getBatAttackProp())) { // 2x attack rate  for Mobs with Mark
+                    createShadowBatForceAtom(attackInfo, bat);
+                    c.getChr().getField().broadcastPacket(Summoned.summonedRemoved(bat, LeaveType.ANIMATION));
+                    removeBatSize++;
                 }
             }
-        }
-    }
-
-    private void shadowBat(TemporaryStatManager tsm, int skillID, byte slv, AttackInfo attackInfo) {
-        if(tsm.hasStat(NightWalkerBat)) {
-            if(Util.succeedProp(85)) {
-                spawnBat(skillID, slv);
-            }
-            if(batcount > 0) {
-                if (Util.succeedProp(30)) {
-                    createShadowBatForceAtom(skillID, slv, attackInfo);
-                    removeBat();   //TODO Doesn't remove bats properly
-                }
+            for(int i = 0; i < removeBatSize; i++) {
+                bats.remove(0);
             }
         }
+
+        if(bats.size() < getMaxBats()) {
+            Summon summon = Summon.getSummonBy(chr, SHADOW_BAT, (byte) 1);
+            summon.setFlyMob(true);
+            summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+            chr.getField().spawnAddSummon(summon);
+            bats.add(summon);
+        }
+
+        chr.chatMessage("list size: "+bats.size());
+        chr.chatMessage("max bats: "+getMaxBats());
+        chr.chatMessage("attack prop: "+getBatAttackProp());
     }
 
-    private void spawnBat(int skillID, byte slv) {
-        if(batcount < 5) {
-            Field field;
-            bats = Summon.getSummonBy(c.getChr(), getBatType(chr), slv);
-            field = c.getChr().getField();
-            bats.setFlyMob(true);
-            bats.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-            field.spawnAddSummon(bats);
-            batcount++;
+    private void createShadowBatForceAtom(AttackInfo attackInfo, Summon summon) {
+        SkillInfo si = SkillData.getSkillInfoById(getBatSkill().getSkillId());
+        Mob mob = (Mob) chr.getField().getLifeByObjectID(Util.getRandomFromList(attackInfo.mobAttackInfo).mobId);
+
+        if(mob == null) {
+            Rect rect = new Rect(
+                    new Position(
+                            chr.getPosition().getX() - 1500,
+                            chr.getPosition().getY() - 1500),
+                    new Position(
+                            chr.getPosition().getX() + 1500,
+                            chr.getPosition().getY() + 1500)
+            );
+            mob = Util.getRandomFromList(chr.getField().getMobsInRect(rect));
         }
+        int mobId = mob.getObjectId();
+
+        int inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB.getInc();
+        int type = ForceAtomEnum.NIGHT_WALKER_FROM_MOB.getForceAtomType();
+
+        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 1, 1,
+                ((chr.getPosition().getX() > mob.getPosition().getX()) ? 90 : 270), 50, (int) System.currentTimeMillis(), 1, 0,
+                new Position());
+
+        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                mob.getPosition(), SHADOW_BAT_ATOM, summon.getPosition()));
     }
 
-    private void removeBat() {
-        //c.write(CField.summonedRemoved(bats, LeaveType.ANIMATION));
-        Field field = c.getChr().getField();
-        c.write(Summoned.summonedRemoved(bats, LeaveType.ANIMATION));
-        //field.removeLife(getBatType(chr),true);
-        batcount = batcount -1;
+    private int getMaxBats() {
+        int maxBats = 0;
+        for(int batSkill : batSkills) {
+            Skill skill = chr.getSkill(batSkill);
+            if(skill == null) {
+                continue;
+            }
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            maxBats += si.getValue(y, slv);
+        }
+        return maxBats;
     }
 
-    private int getBatType(Char chr) {
-        int batType = SHADOW_BAT;
-        if(chr.hasSkill(BAT_AFFINITY)) {
-            batType = BAT_AFFINITY;
+    private int getBatAttackProp() {
+        int batAttackProp = 0;
+        for(int batSkill : batSkills) {
+            Skill skill = chr.getSkill(batSkill);
+            if(skill == null) {
+                continue;
+            }
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            batAttackProp += si.getValue(prop, slv);
         }
-        if(chr.hasSkill(BAT_AFFINITY_II)) {
-            batType = BAT_AFFINITY_II;
+        return batAttackProp;
+    }
+
+    private Skill getBatSkill() {
+        Skill skill = null;
+        for(int batSkill : batSkills) {
+            if(chr.hasSkill(batSkill)) {
+                skill = chr.getSkill(batSkill);
+            }
         }
-        if(chr.hasSkill(BAT_AFFINITY_III)) {
-            batType = BAT_AFFINITY_III;
-        }
-        return batType;
+        return skill;
     }
     
 
@@ -365,9 +397,13 @@ public class NightWalker extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        chr.chatMessage(""+bats.size());
         if(hasHitMobs) {
             //if(skillID != 0) {  //SkillID of ShadowBat itself = 0
-                shadowBat(tsm, getOriginalSkillByID(skillID), slv, attackInfo);
+                if(attackInfo.skillId != SHADOW_BAT_ATOM) {
+                    shadowBats(attackInfo);
+                }
+
             //}
             if(tsm.hasStat(ElementDarkness)) {
                 applyDarkElementalOnMob(attackInfo, slv);
@@ -378,30 +414,36 @@ public class NightWalker extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
+        Option o4 = new Option();
         switch (attackInfo.skillId) {
             case SHADOW_STITCH:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = (si.getValue(time, slv) + attackInfo.mobAttackInfo.size() > 25 ? 25 : si.getValue(time, slv) + attackInfo.mobAttackInfo.size());
+                    mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                 }
                 break;
-            case DOMINION:  //TODO Max Darkness Stack whilst active,
+            case DOMINION:
                 o1.nOption = 1;
                 o1.rOption = skillID;
-                o1.tOption = si.getValue(time ,slv);
+                o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NotDamaged, o1);
                 o2.nOption = 100;
                 o2.rOption = skillID;
-                o2.tOption = si.getValue(time ,slv);
+                o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(CriticalBuff, o2);
                 o3.nOption = 100;
                 o3.rOption = skillID;
-                o3.tOption = si.getValue(time ,slv);
+                o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Stance, o3);
+                o4.nReason = skillID;
+                o4.nValue = 20;
+                o4.tStart = (int) System.currentTimeMillis();
+                o4.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o4);
                 tsm.sendSetStatPacket();
                 break;
         }
@@ -430,6 +472,12 @@ public class NightWalker extends Job {
                             amount++;
                         }
                     }
+
+                    // if dominion is active, instantly gain max stack
+                    if(tsm.getOptByCTSAndSkill(Stance, DOMINION) != null) {
+                        amount = getMaxDarkEleStack();
+                    }
+
                     o1.nOption = amount;
                     o1.rOption = DARK_ELEMENTAL;
                     o1.tOption = 15;
@@ -444,7 +492,7 @@ public class NightWalker extends Job {
 
                     //handle Vitality Siphon
                     if (chr.hasSkill(VITALITY_SIPHON)) {
-                        incrementSiphonVitality(getOriginalSkillByID(skillID), tsm, c);
+                        incrementSiphonVitality(tsm);
                     }
                 }
             }
@@ -523,7 +571,7 @@ public class NightWalker extends Job {
     }
 
 
-    private void incrementSiphonVitality(int skillId, TemporaryStatManager tsm, Client c) {
+    private void incrementSiphonVitality(TemporaryStatManager tsm) {
         Option o = new Option();
         Option o1 = new Option();
         SkillInfo siphonInfo = SkillData.getSkillInfoById(VITALITY_SIPHON);
@@ -533,10 +581,16 @@ public class NightWalker extends Job {
         if(tsm.hasStat(ElementDarkness)) {
             if (tsm.hasStat(SiphonVitality)) {
                 amount = tsm.getOption(SiphonVitality).nOption;
-                if (amount < getMaxSiphon(chr)) {
+                if (amount < getMaxSiphon()) {
                     amount++;
                 }
             }
+
+            // if dominion is active, instantly gain max stack
+            if(tsm.getOptByCTSAndSkill(Stance, DOMINION) != null) {
+                amount = getMaxSiphon();
+            }
+
             o.nOption = amount;
             o.rOption = VITALITY_SIPHON;
             o.tOption = siphonInfo.getValue(time, slv);
@@ -549,7 +603,7 @@ public class NightWalker extends Job {
         }
     }
 
-    private int getMaxSiphon(Char chr) { //TODO Doesn't function correctly      stays at 5 stacks
+    private int getMaxSiphon() {
         Skill skill = null;
         if (chr.hasSkill(14120009)) {
             skill = chr.getSkill(14120009);
@@ -557,6 +611,27 @@ public class NightWalker extends Job {
         return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
+    private void applyDarkServant() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(DARK_SERVANT);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o1 = new Option();
+
+
+        o1.nOption = si.getValue(x, slv);
+        o1.rOption = skill.getSkillId();
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(ShadowServant, o1);
+        tsm.sendSetStatPacket();
+
+        darkServant = Summon.getSummonBy(c.getChr(), skill.getSkillId(), slv);
+        Field field = c.getChr().getField();
+        darkServant.setFlyMob(false);
+        darkServant.setAvatarLook(chr.getAvatarData().getAvatarLook());
+        darkServant.setMoveAbility(MoveAbility.SHADOW_SERVANT.getVal());
+        field.spawnSummon(darkServant);
+    }
 
     @Override
     public boolean isHandlerOfJob(short id) {
