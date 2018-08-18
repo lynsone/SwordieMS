@@ -131,30 +131,32 @@ public class SkillConstants {
 
     public static boolean isIgnoreMasterLevel(int skillId) {
         switch (skillId) {
-            case 35120014:
-            case 23120012:
-            case 23121008:
-            case 33120010:
-            case 80001913:
-            case 21120020:
-            case 21120021:
-            case 5321006:
-            case 21120011:
-            case 21120014:
-            case 22171069:
-            case 5321004:
-            case 5320007:
-            case 5120011:
-            case 5120012:
-            case 4340009:
-            case 4210012:
-            case 2321010:
-            case 3210015:
-            case 4110012:
-            case 2221009:
             case 1120012:
             case 1320011:
             case 2121009:
+            case 2221009:
+            case 2321010:
+            case 3210015:
+            case 4110012:
+            case 4210012:
+            case 4340009:
+            case 5120011:
+            case 5120012:
+            case 5220012:
+            case 5220014:
+            case 5320007:
+            case 5321004:
+            case 5321006:
+            case 21120011:
+            case 21120014:
+            case 21120020:
+            case 21120021:
+            case 22171069:
+            case 23121008:
+            case 23120012:
+            case 33120010:
+            case 35120014:
+            case 80001913:
                 return true;
             default:
                 return false;
