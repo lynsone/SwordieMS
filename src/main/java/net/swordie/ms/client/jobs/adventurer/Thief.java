@@ -3,6 +3,7 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -24,9 +25,11 @@ import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -34,7 +37,9 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -206,21 +211,21 @@ public class Thief extends Job {
             skillID = SkillConstants.getActualSkillIDfromSkillID(skill.getSkillId());
         }
         if(hasHitMobs) {
-            //Venom & Toxic Venom Passives
+            // Venom & Toxic Venom Passives
             applyPassiveDoTSkillsOnMob(attackInfo);
 
-            //Shadower Hyper
+            // Shadower Hyper
             if(chr.hasSkill(FLIP_THE_COIN)) {
                 activateFlipTheCoin(tsm);
             }
 
-            //Night Lord Hyper
+            // Night Lord Hyper
             applyBleedDartOnMob(attackInfo);
         }
 
         if (JobConstants.isNightLord(chr.getJob())) {
             if(hasHitMobs) {
-                //NightLord's Mark & ForceAtom
+                // NightLord's Mark & ForceAtom
                 if(chr.hasSkill(ASSASSINS_MARK)) {
                     setMarkonMob(attackInfo);
                     handleMark(attackInfo);
@@ -232,12 +237,15 @@ public class Thief extends Job {
 
         if (JobConstants.isShadower(chr.getJob())) {
             if(hasHitMobs) {
-                //Critical Growth & Prime Critical
+                // Critical Growth & Prime Critical
                 if(chr.hasSkill(CRITICAL_GROWTH)) {
                     incrementCritGrowing();
                 }
 
-                //Shadower Instinct
+                // Pick Pocket
+                dropFromPickPocket(attackInfo);
+
+                // Shadower Instinct
                 if (chr.hasSkill(SHADOWER_INSTINCT)) {
                     if (tsm.hasStat(IgnoreMobpdpR)) {
                         incrementShadowInstinct(skillID, tsm, c);
@@ -249,7 +257,7 @@ public class Thief extends Job {
 
         if (JobConstants.isDualBlade(chr.getJob())) {
             if(hasHitMobs) {
-                //Life Drain
+                // Life Drain
                 recoverHPByLifeDrain();
             }
         }
@@ -262,11 +270,19 @@ public class Thief extends Job {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
+                        Field field = chr.getField();
+                        int itemId = 2431835;
+                        if(mob.isBoss()) {
+                            itemId = 2431850;
+                        }
+                        Item item = ItemData.getItemDeepCopy(itemId);
+                        Drop drop = new Drop(item.getItemId(), item);
+                        field.drop(drop, mob.getPosition());
+
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
                         o1.tOption = si.getValue(time, slv);
-                        //mts.addStatOptionsAndBroadcast(MobStat.STEAL, o1); //TODO Steal MobStat
-                        // Unsure
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                     }
                 }
                 break;
@@ -1014,6 +1030,31 @@ public class Thief extends Job {
             if(Util.succeedProp(proc)) {
                 int healamount = (int) ((chr.getMaxHP()) / ((double)100 / amounthealed));
                 chr.heal(healamount);
+            }
+        }
+    }
+
+    private void dropFromPickPocket(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Field field = chr.getField();
+        if(!chr.hasSkill(PICK_POCKET)) {
+            return;
+        }
+        if(tsm.getOptByCTSAndSkill(PickPocket, PICK_POCKET) != null) {
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
+                Skill skill = chr.getSkill(PICK_POCKET);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+                Set<DropInfo> dropInfoSet = new HashSet<>();
+                for (int i = 0; i < slv; i++) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        dropInfoSet.add(new DropInfo(0, 100, 0, 50, 150)); // min 50; max 150;
+                    }
+                }
+                if (dropInfoSet.size() > 0) {
+                    field.drop(dropInfoSet, mob.getPosition(), chr.getId());
+                }
             }
         }
     }

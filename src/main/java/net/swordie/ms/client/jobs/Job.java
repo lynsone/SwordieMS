@@ -237,10 +237,10 @@ public abstract class Job {
 	}
 
 	/**
-	 * Gets called when Client receives a debuff from a Mob Skill
+	 * Gets called when Character receives a debuff from a Mob Skill
 	 *
-	 * @param c
-	 * 		The Client
+	 * @param chr
+	 * 		The Character
 	 */
 
 	public void handleMobDebuffSkill(Char chr) {

@@ -278,11 +278,10 @@ public class Archer extends Job {
                 }
 
                 lastArmorBreak = System.currentTimeMillis();
-                chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
-                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
+                chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0)));
             }
         }
-
     }
 
     private void giveAggressiveResistanceBuff(AttackInfo ai) {
@@ -359,6 +358,7 @@ public class Archer extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o2 = new Option();
         int amount = 0;
+
         if(tsm.hasStat(BowMasterConcentration)) {
             amount = tsm.getOption(BowMasterConcentration).nOption;
             if (amount < 20) {
@@ -371,8 +371,8 @@ public class Archer extends Job {
         tsm.putCharacterStatValue(BowMasterConcentration, o2);
         tsm.sendSetStatPacket();
         if(amount < 20) {
-            chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
-            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0))); // Effect
+            chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0)));
         }
     }
 
@@ -839,5 +839,16 @@ public class Archer extends Job {
             num = 10;
         }
         return type == 3 ? num * 2 : num; // Magic Arrow has 2x as many arrows
+    }
+
+    public void handleMobDebuffSkill(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr.hasSkill(FOCUSED_FURY) && tsm.hasStat(BowMasterConcentration)) {
+            tsm.removeStatsBySkill(FOCUSED_FURY);
+            tsm.sendResetStatPacket();
+            chr.write(User.effect(Effect.skillSpecial(FOCUSED_FURY)));
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(FOCUSED_FURY)));
+            tsm.removeAllDebuffs();
+        }
     }
 }

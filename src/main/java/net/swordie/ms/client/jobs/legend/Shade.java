@@ -479,7 +479,7 @@ public class Shade extends Job {
         chr.write(User.effect(Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
 
-        chr.write(User.effect(Effect.skillUse(25111211, (byte) 1, 0))); // Effect
-        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(25111211, (byte) 1, 0))); // Effect
+        chr.write(User.effect(Effect.skillUse(25111211, (byte) 1, 0)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(25111211, (byte) 1, 0)));
     }
 }

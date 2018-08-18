@@ -535,7 +535,7 @@ public class TemporaryStatManager {
                         outPacket.encodeInt(o.rOption);
                         outPacket.encodeInt(o.xOption);
                         break;
-                    case AntiMagicShellBool:
+                    case AntiMagicShell:
                     case PoseTypeBool:
                         outPacket.encodeByte(o.bOption);
                         break;

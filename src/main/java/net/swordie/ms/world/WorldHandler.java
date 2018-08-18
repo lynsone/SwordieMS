@@ -2270,7 +2270,7 @@ public class WorldHandler {
     }
 
     public static void handleRequestSetBlessOfDarkness(Client c, InPacket inPacket) {
-        Luminous.incrementBlackBlessing(c);
+        Luminous.changeBlackBlessingCount(c, true); // Increment
     }
 
     public static void handleBattleRecordOnOffRequest(Client c, InPacket inPacket) {
