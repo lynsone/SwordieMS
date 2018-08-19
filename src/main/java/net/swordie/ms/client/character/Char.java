@@ -1363,6 +1363,11 @@ public class Char {
 		return other instanceof Char && ((Char) other).getId() == getId();
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
 	private String getBlessingOfEmpress() {
 		return null;
 	}

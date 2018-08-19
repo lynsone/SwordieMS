@@ -633,14 +633,18 @@ public class QuestData {
         QuestInfo qi = getQuestInfoById(questID);
         Quest quest = new Quest();
         quest.setQRKey(questID);
-        if (qi.isAutoComplete()) {
-            quest.setStatus(QuestStatus.STARTED);
+        if (qi != null) {
+            if (qi.isAutoComplete()) {
+                quest.setStatus(QuestStatus.STARTED);
 //            quest.completeQuest(); // TODO check what autocomplete actually means
+            } else {
+                quest.setStatus(QuestStatus.STARTED);
+            }
+            for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
+                quest.addQuestProgressRequirement(qpr.deepCopy());
+            }
         } else {
             quest.setStatus(QuestStatus.STARTED);
-        }
-        for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
-            quest.addQuestProgressRequirement(qpr.deepCopy());
         }
         return quest;
     }

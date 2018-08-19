@@ -150,7 +150,7 @@ public class NpcData {
 				SWEntity itemEntity = itemEntry.getValue();
 				NpcShopItem nsi = new NpcShopItem();
 				for (Map.Entry<String, String> itemProps : itemEntity.getPropertyValues().entrySet()) {
-					String key = itemProps.getKey();
+					String key = itemProps.getKey().toLowerCase();
 					String value = itemProps.getValue();
 					switch (key) {
 						case "loc":

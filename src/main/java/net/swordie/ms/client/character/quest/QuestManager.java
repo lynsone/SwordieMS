@@ -155,6 +155,9 @@ public class QuestManager {
      */
     public boolean canStartQuest(int questID) {
         QuestInfo qi = QuestData.getQuestInfoById(questID);
+        if (qi == null) {
+            return true;
+        }
         Set<QuestStartRequirement> questReqs = qi.getQuestStartRequirements().stream()
                 .filter(qsr -> qsr instanceof QuestStartCompletionRequirement)
                 .collect(Collectors.toSet());

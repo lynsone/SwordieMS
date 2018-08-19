@@ -19378,3 +19378,18 @@
         price 1400;
     }
 }
+2540017{
+    alicia_skin{
+        loc 1;
+        tabindex 1;
+        id 2432465;
+        pointquestid 42003;
+        pointprice 300000;
+    }
+    alicia_skin2{
+        loc 2;
+        tabindex 1;
+        id 2432465;
+        price 300;
+    }
+}

@@ -210,15 +210,18 @@ public class LoginHandler {
     }
 
     public static void handleDeleteCharacter(Client c, InPacket inPacket) {
-        if (handleCheckSpwRequest(c, inPacket)) {
+        if (c.getAccount() != null && handleCheckSpwRequest(c, inPacket)) {
             int charId = inPacket.decodeInt();
-            Char chr = Char.getFromDBById(charId);
-            Account a = Account.getFromDBById(c.getAccount().getId());
-            a.removeLinkSkillByOwnerID(chr.getId());
-            a.getCharacters().remove(chr);
-            DatabaseManager.saveToDB(a);
-            DatabaseManager.deleteFromDB(chr);
-            c.write(Login.sendDeleteCharacterResult(charId, LoginType.Success));
+            Account acc = c.getAccount();
+            Char chr = acc.getCharById(charId);
+            if (chr != null) {
+                acc.removeLinkSkillByOwnerID(chr.getId());
+                acc.getCharacters().remove(chr);
+                DatabaseManager.saveToDB(acc);
+                c.write(Login.sendDeleteCharacterResult(charId, LoginType.Success));
+            } else {
+                c.write(Login.sendDeleteCharacterResult(charId, LoginType.UnauthorizedUser));
+            }
         }
     }
 

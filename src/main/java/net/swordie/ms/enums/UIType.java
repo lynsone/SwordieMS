@@ -325,13 +325,13 @@ public enum UIType {
     UI_NOT_DEFINED(-1),
     ;
     
-    private byte val;
+    private int val;
     
     UIType(int val) {
-        this.val = (byte) val;
+        this.val =  val;
     }
 
-    public byte getVal() {
+    public int getVal() {
         return val;
     }
 }

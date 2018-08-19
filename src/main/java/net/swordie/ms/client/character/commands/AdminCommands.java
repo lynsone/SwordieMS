@@ -1226,6 +1226,7 @@ public class AdminCommands {
             gotomaps.put("ra", 105200000);
             gotomaps.put("goldenbeach", 914200000);
             gotomaps.put("ardentmill", 910001000);
+            gotomaps.put("oz", 992000000);
 
             if (args.length == 1) {
                 chr.chatMessage(GAME_NOTICE, "List of locations: " + gotomaps.keySet());

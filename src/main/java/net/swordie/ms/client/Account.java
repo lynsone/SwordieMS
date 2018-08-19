@@ -537,4 +537,13 @@ public class Account {
     public void setBanReason(String banReason) {
         this.banReason = banReason;
     }
+
+    public boolean hasCharacter(int charID) {
+        // doing a .contains on getCharacters() does not work, even if the hashcode is just a hash of the id
+        return getCharById(charID) != null;
+    }
+
+    public Char getCharById(int id) {
+        return getCharacters().stream().filter(charr -> charr.getId() == id).findAny().orElse(null);
+    }
 }
