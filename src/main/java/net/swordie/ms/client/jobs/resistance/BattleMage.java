@@ -270,18 +270,15 @@ public class BattleMage extends Job {
         if (!tsm.hasStat(BMageDeath)) {
             return;
         }
-
         int killCount = tsm.getOption(BMageDeath).nOption;
-
+        
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
             int dmgOnMob = Arrays.stream(mai.damages).sum();
             if (mob == null) {
-                return;
+                continue;
             }
-
             if (mob.isBoss()) {
-                // Boss
                 if(hitCountBoss < 1) {
                     hitCountBoss++;
                 } else {
@@ -292,9 +289,7 @@ public class BattleMage extends Job {
                         killCount = doCondemnationAttack(killCount);
                     }
                 }
-
             } else {
-                // Mob
                 if(mob.getHp() <= dmgOnMob) {
                     if(killCount < getCondemnationKillReq()) {
                         killCount++;
@@ -303,7 +298,6 @@ public class BattleMage extends Job {
                     }
 
                 }
-
             }
         }
         setCondemnationCount(killCount);
