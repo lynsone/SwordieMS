@@ -89,6 +89,14 @@ public class BattleMage extends Job {
             MASTER_OF_DEATH,
     };
 
+    private int[] auras = new int[] {
+            HASTY_AURA,
+            DRAINING_AURA,
+            BLUE_AURA,
+            DARK_AURA,
+            WEAKENING_AURA,
+    };
+
     private Summon death;
     private long drainAuraCD = Long.MIN_VALUE;
     private ScheduledFuture WeaknessAuraTimer;
@@ -136,6 +144,10 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case HASTY_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieSpeed, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -152,12 +164,20 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case DRAINING_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o3.nOption = 1;
                 o3.rOption = skillID;
                 o3.tOption = 0;
                 tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case BLUE_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o1.nOption = si.getValue(asrR, slv);
                 o1.rOption = skillID;
                 o1.tOption = 0;
@@ -177,6 +197,10 @@ public class BattleMage extends Job {
                 applyBlueAuraDispel(); //Hyper
                 break;
             case DARK_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -188,6 +212,10 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case WEAKENING_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o3.nOption = 1;
                 o3.rOption = skillID;
                 o3.tOption = 0;

@@ -163,17 +163,26 @@ public class Kaiser extends Job {
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
-                giveRealignAttackBuffs();
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    tsm.removeStatsBySkill(REALIGN_DEFENDER_MODE);
+                    giveRealignAttackBuffs();
+                }
                 break;
             case REALIGN_DEFENDER_MODE:
-                giveRealignDefendBuffs();
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    tsm.removeStatsBySkill(REALIGN_ATTACKER_MODE);
+                    giveRealignDefendBuffs();
+                }
                 break;
             case BLAZE_ON:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case CURSEBITE:
                 o1.nOption = si.getValue(asrR, slv);
@@ -217,7 +226,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case TEMPEST_BLADES_THREE_FF: //Final Form
                 if(tsm.getOption(StopForceAtomInfo).nOption != 3 && tsm.hasStat(StopForceAtomInfo)) {
@@ -233,7 +241,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
 
             case TEMPEST_BLADES_FIVE:
@@ -250,7 +257,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case TEMPEST_BLADES_FIVE_FF: //Final Form
                 if(tsm.getOption(StopForceAtomInfo).nOption != 4 && tsm.hasStat(StopForceAtomInfo)) {
@@ -266,7 +272,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
 
             case FINAL_FORM_THIRD:
