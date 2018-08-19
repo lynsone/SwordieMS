@@ -868,7 +868,7 @@ public class Warrior extends Job {
             if (tsm.getOptByCTSAndSkill(PDD, EVIL_EYE) != null) {
                 if (cd + revengeEvilEye < System.currentTimeMillis()) {
                     if (Util.succeedProp(proc)) {
-                        c.write(Summoned.summonBeholderRevengeAttack(chr.getId(), evilEye, hitInfo.mobID));
+                        c.write(Summoned.summonBeholderRevengeAttack(evilEye, hitInfo.mobID));
                         chr.heal((int) (chr.getMaxHP() / ((double) 100 / heal)));
                         revengeEvilEye = System.currentTimeMillis();
                     }

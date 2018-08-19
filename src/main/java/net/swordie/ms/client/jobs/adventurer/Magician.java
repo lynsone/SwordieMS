@@ -81,7 +81,8 @@ public class Magician extends Job {
     public static final int MAPLE_WARRIOR_FP = 2121000;
     public static final int ELEMENTAL_DRAIN = 2100009;
     public static final int FERVENT_DRAIN = 2120014;
-    public static final int METEOR_SHOWER_CD_ATTACK = 2120013;
+    public static final int METEOR_SHOWER = 2121007;
+    public static final int METEOR_SHOWER_FA = 2120013;
     public static final int ARCANE_AIM_FP = 2120010;
     public static final int HEROS_WILL_FP = 2121008;
 
@@ -104,7 +105,7 @@ public class Magician extends Job {
     public static final int CHAIN_LIGHTNING = 2221006;
     public static final int FREEZING_BREATH = 2221011;
     public static final int BLIZZARD = 2221007;
-    public static final int BLIZZARD_CD_ATTACK = 2220014;
+    public static final int BLIZZARD_FA = 2220014;
     public static final int FROZEN_ORB = 2221012;
     public static final int INFINITY_IL = 2221004;
     public static final int ELQUINES = 2221005;
@@ -1008,10 +1009,23 @@ public class Magician extends Job {
     @Override
     public int getFinalAttackSkill() {
         if(JobConstants.isFirePoison(chr.getJob())) {
-            return METEOR_SHOWER_CD_ATTACK;
+            SkillInfo si = SkillData.getSkillInfoById(METEOR_SHOWER_FA);
+            if(chr.getSkill(METEOR_SHOWER) != null) {
+                byte slv = (byte) chr.getSkill(METEOR_SHOWER).getCurrentLevel();
+                if(Util.succeedProp(si.getValue(prop, slv))) {
+                    return METEOR_SHOWER_FA;
+                }
+            }
+
         }
-        if(JobConstants.isIceLightning(chr.getJob())) {
-            return BLIZZARD_CD_ATTACK;
+        else if(JobConstants.isIceLightning(chr.getJob())) {
+            SkillInfo si = SkillData.getSkillInfoById(BLIZZARD_FA);
+            if(chr.getSkill(BLIZZARD) != null) {
+                byte slv = (byte) chr.getSkill(BLIZZARD).getCurrentLevel();
+                if(Util.succeedProp(si.getValue(prop, slv))) {
+                    return BLIZZARD_FA;
+                }
+            }
         }
         return 0;
     }

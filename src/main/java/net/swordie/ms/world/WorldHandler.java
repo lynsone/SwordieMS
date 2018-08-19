@@ -44,6 +44,7 @@ import net.swordie.ms.client.jobs.legend.Luminous;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
+import net.swordie.ms.client.jobs.resistance.BattleMage;
 import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
@@ -1587,6 +1588,16 @@ public class WorldHandler {
 
     public static void handleSummonedRemove(Client c, InPacket inPacket) {
         int id = inPacket.decodeInt();
+
+        Char chr = c.getChr();
+        Summon summon = (Summon) chr.getField().getLifeByObjectID(id);
+        if(summon == null) {
+            return;
+        }
+        if(summon.getSkillID() == BattleMage.CONDEMNATION || summon.getSkillID() == BattleMage.CONDEMNATION_I || summon.getSkillID() == BattleMage.CONDEMNATION_II || summon.getSkillID() == BattleMage.CONDEMNATION_III) {
+            BattleMage.removeCondemnationBuff(chr, summon);
+        }
+
         c.getChr().getField().removeLife(id, false);
     }
 
@@ -5206,9 +5217,9 @@ public class WorldHandler {
             field.broadcastPacket(UserRemote.effect(chrId, Effect.showVerticalGrappleEffect(skillId, slv, 0, chrPositionY, ropeConnectDest.getX(), ropeConnectDest.getY())));
 
         } else if (skillId == 15001021/*TB  Flash*/ || skillId == Shade.FOX_TROT) { // 'Flash' Skills
-            Position beforeSkill = inPacket.decodePositionInt();
-            Position afterSkill = inPacket.decodePositionInt();
-            field.broadcastPacket(UserRemote.effect(chrId, Effect.showFlashBlinkEffect(skillId, slv, 0, beforeSkill.getX(), beforeSkill.getY(), afterSkill.getX(), afterSkill.getY())));
+            Position origin = inPacket.decodePositionInt();
+            Position dest = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showFlashBlinkEffect(skillId, slv, 0, origin.getX(), origin.getY(), dest.getX(), dest.getY())));
 
         } else if (SkillConstants.isSuperNovaSkill(skillId)) { // 'SuperNova' Skills
             Position chrPosition = inPacket.decodePositionInt();
@@ -5219,6 +5230,11 @@ public class WorldHandler {
 
         } else if (SkillConstants.isHomeTeleportSkill(skillId)) {
             field.broadcastPacket(UserRemote.effect(chrId, Effect.skillUse(skillId, slv, 0)));
+
+        } else if (skillId == BattleMage.DARK_SHOCK) {
+            Position origin = inPacket.decodePositionInt();
+            Position dest = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showDarkShockSkill(skillId, slv, origin, dest)));
 
         } else {
             log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));

@@ -8,6 +8,7 @@ import net.swordie.ms.client.jobs.legend.Luminous;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
+import net.swordie.ms.client.jobs.resistance.BattleMage;
 import net.swordie.ms.client.jobs.resistance.Demon;
 import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.connection.OutPacket;
@@ -53,6 +54,12 @@ public class Effect {
                 break;
             case SkillSpecial:
                 outPacket.encodeInt(getArg1()); // skill id
+                if(getArg1() == BattleMage.DARK_SHOCK) {
+                    outPacket.encodeByte(getArg2()); // slv
+                    outPacket.encodeByte(getArg3()); // show effect
+                    outPacket.encodePositionInt(new Position(getArg4(), getArg5())); // Origin Position -  arg4 = x, arg5 = y
+                    outPacket.encodePositionInt(new Position(getArg6(), getArg7())); // Destination Position -  arg6 = x, arg7 = y
+                }
                 break;
             case SkillSpecialAffected:
                 outPacket.encodeInt(getArg1()); // skill id
@@ -530,6 +537,21 @@ public class Effect {
         effect.setArg2(slv);
         effect.setArg3(slv);
         effect.setArg5(left ? 1 : 0);
+
+        return effect;
+    }
+
+    public static Effect showDarkShockSkill(int skillId, byte slv, Position origin, Position dest) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillSpecial);
+        effect.setArg1(skillId);
+        effect.setArg2(slv);
+        effect.setArg3(0); // show effect
+        effect.setArg4(origin.getX());
+        effect.setArg5(origin.getY());
+        effect.setArg6(dest.getX());
+        effect.setArg7(dest.getY());
 
         return effect;
     }
