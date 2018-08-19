@@ -162,11 +162,11 @@ public class GameConstants {
     private static void initQuickMove() {
         quickMoveInfos = new ArrayList<>();
         quickMoveInfos.add(new QuickMoveInfo(0, 9072302, QuickMoveType.Boat, 1, "Warping",
-                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
         quickMoveInfos.add(new QuickMoveInfo(0, 9010022, QuickMoveType.DimensionalPortal, 1, "Dimensional Portal",
-                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
         quickMoveInfos.add(new QuickMoveInfo(0, 9071003, QuickMoveType.MonsterPark, 1, "Monster Park",
-                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
 
     }
 

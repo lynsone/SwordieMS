@@ -1586,4 +1586,14 @@ public class AdminCommands {
         }
     }
 
+    public static class KillMobs extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+            for (Mob mob : mobs) {
+                mob.die();
+            }
+        }
+    }
+
 }

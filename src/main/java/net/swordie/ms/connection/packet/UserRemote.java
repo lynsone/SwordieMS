@@ -8,7 +8,6 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.enums.BaseStat;
-import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AvatarModifiedMask;
@@ -16,7 +15,6 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.util.Position;
 
-import java.util.List;
 
 /**
  * Created on 2/3/2018.

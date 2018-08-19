@@ -54,32 +54,39 @@ public class Archer extends Job {
     public static final int XBOW_BOOSTER = 3201002;
     public static final int QUIVER_CARTRIDGE = 3101009;
     public static final int QUIVER_CARTRIDGE_ATOM = 3100010; //3100010;
-    public static final int FLAME_SURGE = 3111003;
+
     public static final int PHOENIX = 3111005;
     public static final int FREEZER = 3211005;
+
+    public static final int FLAME_SURGE = 3111003;
     public static final int RECKLESS_HUNT_BOW = 3111011;
     public static final int FOCUSED_FURY = 3110012;
     public static final int MORTAL_BLOW_BOW = 3110001;
     public static final int ARROW_PLATTER = 3111013;
     public static final int EVASION_BOOST = 3110007;
+
     public static final int SHARP_EYES_BOW = 3121002;
     public static final int SHARP_EYES_BOW_IED_H = 3120044;
     public static final int ILLUSION_STEP_BOW = 3121007;
     public static final int ENCHANTED_QUIVER = 3121016;
     public static final int BINDING_SHOT = 3121014;
     public static final int MAPLE_WARRIOR_BOW = 3121000;
+
     public static final int NET_TOSS = 3201008;
+
     public static final int PAIN_KILLER = 3211011;
     public static final int RECKLESS_HUNT_XBOW = 3211012;
     public static final int MORTAL_BLOW_XBOW = 3210001;
     public static final int AGGRESSIVE_RESISTANCE = 3210013;
     public static final int EVASION_BOOST_XBOW = 3210007;
+
     public static final int MAPLE_WARRIOR_XBOW = 3221000;
     public static final int ARROW_ILLUSION = 3221014;
     public static final int SHARP_EYES_XBOW = 3221002;
     public static final int SHARP_EYES_XBOW_IED_H = 3220044;
     public static final int ARMOR_BREAK = 3120018;
     public static final int ILLUSION_STEP_XBOW = 3221006;
+
     public static final int HEROS_WILL_BM = 3121009;
     public static final int HEROS_WILL_MM = 3221008;
 

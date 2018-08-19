@@ -35,7 +35,7 @@ public class Item implements Serializable, Encodable {
     protected long cashItemSerialNumber;
     @JoinColumn(name = "dateExpire")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    protected FileTime dateExpire = FileTime.fromType(FileTime.Type.PERMANENT);
+    protected FileTime dateExpire = FileTime.fromType(FileTime.Type.MAX_TIME);
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "invType")
     protected InvType invType;
@@ -184,7 +184,7 @@ public class Item implements Serializable, Encodable {
         if (hasSN) {
             outPacket.encodeLong(getId());
         }
-        outPacket.encodeFT(getDateExpire());
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
         outPacket.encodeInt(getBagIndex());
         if (getType() == Type.ITEM) {
             outPacket.encodeShort(getQuantity()); // nQuantity

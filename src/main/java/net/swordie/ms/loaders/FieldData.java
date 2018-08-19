@@ -98,7 +98,7 @@ public class FieldData {
                         dataOutputStream.writeInt(l.getX());
                         dataOutputStream.writeInt(l.getY());
                         dataOutputStream.writeInt(l.getMobTime());
-                        dataOutputStream.writeInt(l.getF());
+                        dataOutputStream.writeInt(l.getFlip());
                         dataOutputStream.writeBoolean(l.isHide());
                         dataOutputStream.writeInt(l.getFh());
                         dataOutputStream.writeInt(l.getCy());
@@ -121,7 +121,7 @@ public class FieldData {
                         dataOutputStream.writeShort(r.getHomePosition().getX());
                         dataOutputStream.writeShort(r.getHomePosition().getY());
                         dataOutputStream.writeInt(r.getReactorTime());
-                        dataOutputStream.writeInt(r.getF());
+                        dataOutputStream.writeInt(r.getFlip());
                         dataOutputStream.writeUTF(r.getName());
                         dataOutputStream.writeBoolean(r.isPhantomForest());
                     }
@@ -358,7 +358,7 @@ public class FieldData {
                                     life.setMobTime(Integer.parseInt(value));
                                     break;
                                 case "f":
-                                    life.setF(Integer.parseInt(value));
+                                    life.setFlip(Integer.parseInt(value));
                                     break;
                                 case "hide":
                                     life.setHide(Integer.parseInt(value) != 0);
@@ -445,7 +445,7 @@ public class FieldData {
                                     reactor.setReactorTime(iVal);
                                     break;
                                 case "f":
-                                    reactor.setF(iVal);
+                                    reactor.setFlip(iVal);
                                     break;
                                 case "name":
                                     reactor.setName(value);
@@ -559,7 +559,7 @@ public class FieldData {
                 l.setY(dataInputStream.readInt());
                 l.setHomePosition(new Position(l.getX(), l.getY()));
                 l.setMobTime(dataInputStream.readInt());
-                l.setF(dataInputStream.readInt());
+                l.setFlip(dataInputStream.readInt());
                 l.setHide(dataInputStream.readBoolean());
                 l.setFh(dataInputStream.readInt());
                 l.setCy(dataInputStream.readInt());
@@ -590,7 +590,7 @@ public class FieldData {
                 Reactor r = new Reactor(dataInputStream.readInt());
                 r.setHomePosition(new Position(dataInputStream.readShort(), dataInputStream.readShort()));
                 r.setReactorTime(dataInputStream.readInt());
-                r.setF(dataInputStream.readInt());
+                r.setFlip(dataInputStream.readInt());
                 r.setName(dataInputStream.readUTF());
                 r.setPhantomForest(dataInputStream.readBoolean());
                 field.addReactor(r);

@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.jobs.adventurer.Archer;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
@@ -18,10 +19,7 @@ import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.Reactor;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
@@ -501,11 +499,16 @@ public class Field {
                 putLifeController(entry.getKey(), null);
             }
         }
-        // remove summons of that char
+        // remove summons of that char & remove field attacks of that char
         List<Integer> removedList = new ArrayList<>();
         for (Life life : getLifes()) {
             if (life instanceof Summon && ((Summon) life).getCharID() == chr.getId()) {
                 removedList.add(life.getObjectId());
+            } else if (life instanceof FieldAttackObj) {
+                FieldAttackObj fao = (FieldAttackObj) life;
+                if (fao.getOwnerID() == chr.getId() && fao.getTemplateId() == Archer.ARROW_PLATTER) {
+                    removedList.add(life.getObjectId());
+                }
             }
         }
         for (int id : removedList) {
@@ -729,6 +732,8 @@ public class Field {
                     tsm.removeStatsBySkill(aa.getSkillID());
                 }
             }
+        } else if (life instanceof FieldAttackObj) {
+            broadcastPacket(FieldAttackObjPool.objRemoveByKey(life.getObjectId()));
         }
     }
 

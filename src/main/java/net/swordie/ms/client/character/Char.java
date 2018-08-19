@@ -868,7 +868,7 @@ public class Char {
 				for (Skill skill : getSkills()) {
 					outPacket.encodeInt(skill.getSkillId());
 					outPacket.encodeInt(skill.getCurrentLevel());
-					outPacket.encodeFT(FileTime.fromType(FileTime.Type.PERMANENT));
+					outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
 					if (SkillConstants.isSkillNeedMasterLevel(skill.getSkillId())) {
 						outPacket.encodeInt(skill.getMasterLevel());
 					}
@@ -876,7 +876,7 @@ public class Char {
 				for (LinkSkill linkSkill : linkSkills) {
 					outPacket.encodeInt(linkSkill.getLinkSkillID());
 					outPacket.encodeInt(linkSkill.getOwnerID());
-					outPacket.encodeFT(FileTime.fromType(FileTime.Type.PERMANENT));
+					outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
 					if (SkillConstants.isSkillNeedMasterLevel(linkSkill.getLinkSkillID())) {
 						outPacket.encodeInt(3); // whatevs
 					}

@@ -42,7 +42,6 @@ public class FileTime implements Serializable {
 		// Mushy
 		MAX_TIME(35120710, -1157267456),
 		ZERO_TIME(21968699, -35635200),
-		PERMANENT(150841440000000000L),
 		FT_UT_OFFSET(116444592000000000L),
 		QUEST_TIME(27111903),
 		PLAIN_ZERO(0);
@@ -65,6 +64,9 @@ public class FileTime implements Serializable {
 	public FileTime(int lowDateTime, int highDateTime) {
 		this.lowDateTime = lowDateTime;
 		this.highDateTime = highDateTime;
+		if (FileTime.fromType(Type.MAX_TIME).equals(this) || FileTime.fromType(Type.ZERO_TIME).equals(this)) {
+			isConvertedForClient = true;
+		}
 	}
 
 	public FileTime() {

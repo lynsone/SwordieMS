@@ -190,9 +190,11 @@ public class QuestManager {
         quest.setCompletedTime(FileTime.currentTime());
         chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
         chr.write(WvsContext.questRecordMessage(quest));
-        for(QuestReward qr : questInfo.getQuestRewards()) {
-            if (!(qr instanceof QuestItemReward) || ((QuestItemReward) qr).getStatus() != 0) {
-                qr.giveReward(chr);
+        if (questInfo != null) {
+            for (QuestReward qr : questInfo.getQuestRewards()) {
+                if (!(qr instanceof QuestItemReward) || ((QuestItemReward) qr).getStatus() != 0) {
+                    qr.giveReward(chr);
+                }
             }
         }
     }

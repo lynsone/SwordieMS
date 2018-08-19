@@ -1011,7 +1011,7 @@ public class Equip extends Item {
         // GW_CashItemOption
         outPacket.encodeLong(getCashItemSerialNumber());
         outPacket.encodeFT(getDateExpire());
-        outPacket.encodeFT(FileTime.fromType(FileTime.Type.PERMANENT));
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
         for (int i = 0; i < 2; i++) {
             outPacket.encodeLong(0);
         }

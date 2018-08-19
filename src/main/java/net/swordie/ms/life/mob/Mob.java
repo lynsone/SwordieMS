@@ -7,7 +7,6 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyDamageInfo;
-import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.MobPool;
 import net.swordie.ms.connection.packet.WvsContext;
@@ -21,7 +20,6 @@ import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
 import net.swordie.ms.loaders.MobData;
-import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
@@ -142,7 +140,7 @@ public class Mob extends Life {
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setF(getF());
+        copy.setFlip(getFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -1402,7 +1400,7 @@ public class Mob extends Life {
             fh = field.findFootHoldBelow(pos);
         }
         if (fh == null) {
-            // Some weird edge case where the mob is spawned on some weird foothold
+            // Edge case where the mob is spawned on some weird foothold
             return;
         }
         setHomeFoothold(fh.deepCopy());

@@ -34,7 +34,7 @@ public class Npc extends Life {
         // CNpc::Init
         outPacket.encodePosition(getPosition());
         outPacket.encodeByte(isMove());
-        outPacket.encodeByte(getF() == 1 ? 0 : 1);
+        outPacket.encodeByte(getFlip() == 1 ? 0 : 1);
         outPacket.encodeShort(getFh());
         outPacket.encodeShort(getRx0()); // rgHorz.low
         outPacket.encodeShort(getRx1()); // rgHorz.high
@@ -135,7 +135,7 @@ public class Npc extends Life {
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setF(getF());
+        copy.setFlip(getFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());

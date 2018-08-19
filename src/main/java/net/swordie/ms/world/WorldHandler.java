@@ -108,6 +108,7 @@ import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -1616,11 +1617,23 @@ public class WorldHandler {
         }
     }
 
-    public static void handleRequestArrowPlatterObj(Client c, InPacket inPacket) {
-        boolean flip = inPacket.decodeByte() != 0; // 0 = Left | 1 = Right
-        Position position = inPacket.decodePositionInt(); // Chr position (int)
+    public static void handleRequestArrowPlatterObj(Char chr, InPacket inPacket) {
+        boolean flip = inPacket.decodeByte() != 0;
+        Position position = inPacket.decodePositionInt(); // ignoring this, we just take the char's info we know
+        int skillID = Archer.ARROW_PLATTER;
+        Skill skill = chr.getSkill(skillID);
+        if (skill != null && skill.getCurrentLevel() > 0) {
+            Field field = chr.getField();
+            SkillInfo si = SkillData.getSkillInfoById(skillID);
+            int slv = skill.getCurrentLevel();
+            FieldAttackObj fao = new FieldAttackObj(skillID, chr.getId(), chr.getPosition().deepCopy(), flip);
+            field.spawnLife(fao, chr);
+            field.broadcastPacket(FieldAttackObjPool.objCreate(fao), chr);
+            ScheduledFuture sf = EventManager.addEvent(() -> field.removeLife(fao.getObjectId(), true),
+                    si.getValue(SkillStat.time, slv));
+            field.addLifeSchedule(fao, sf);
+        }
 
-        // TODO
     }
 
     public static void handleUserCharacterInfoRequest(Client c, InPacket inPacket) {
@@ -4411,7 +4424,7 @@ public class WorldHandler {
         Familiar familiar = chr.getFamiliarByID(familiarID);
         boolean showInfo = true;
         if (familiar == null) {
-            familiar = new Familiar(0, familiarID, "Familiar", FileTime.fromType(FileTime.Type.PERMANENT), (short) 1);
+            familiar = new Familiar(0, familiarID, "Familiar", FileTime.fromType(FileTime.Type.MAX_TIME), (short) 1);
             showInfo = false;
             chr.addFamiliar(familiar);
         } else {

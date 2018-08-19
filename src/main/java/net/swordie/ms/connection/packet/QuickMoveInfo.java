@@ -22,7 +22,7 @@ public class QuickMoveInfo {
         this.templateID = templateID;
         this.code = code;
         this.start = FileTime.fromType(FileTime.Type.ZERO_TIME);
-        this.start = FileTime.fromType(FileTime.Type.PERMANENT);
+        this.start = FileTime.fromType(FileTime.Type.MAX_TIME);
     }
 
     public QuickMoveInfo(int qmiID, int templateID, QuickMoveType code, int levelMin, String msg, FileTime start, FileTime end) {
