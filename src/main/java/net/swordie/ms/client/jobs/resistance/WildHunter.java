@@ -269,6 +269,7 @@ public class WildHunter extends Citizen {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o2);
+                tsm.putCharacterStatValue(Guard, o2);
                 tsm.putCharacterStatValue(EVAR, o2);
                 o3.nReason = skillID;
                 o3.nValue = si.getValue(x, slv);
@@ -282,14 +283,14 @@ public class WildHunter extends Citizen {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
-                o1.nOption = si.getValue(z, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamR, o1);
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Speed, o1);
+                o2.nOption = si.getValue(z, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamR, o2);
+                o3.nOption = si.getValue(x, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Speed, o3);
                 break;
             case BACKSTEP:
                 o1.nOption = 1;
