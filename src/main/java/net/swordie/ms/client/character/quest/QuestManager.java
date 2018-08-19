@@ -129,9 +129,11 @@ public class QuestManager {
                 chr.chatMessage(YELLOW, "[Info] Accepted quest " + quest.getQRKey());
                 if(addRewardsFromWz) {
                     QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
-                    for (QuestReward qr : qi.getQuestRewards()) {
-                        if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
-                            qr.giveReward(getChr());
+                    if (qi != null) {
+                        for (QuestReward qr : qi.getQuestRewards()) {
+                            if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
+                                qr.giveReward(getChr());
+                            }
                         }
                     }
                 }
@@ -262,5 +264,9 @@ public class QuestManager {
         if (q != null) {
             addQuest(q);
         }
+    }
+
+    public Quest getQuestById(int questID) {
+        return getQuests().getOrDefault(questID, null);
     }
 }

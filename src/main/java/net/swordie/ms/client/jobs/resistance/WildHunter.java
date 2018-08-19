@@ -3,12 +3,17 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.constants.QuestConstants;
+import net.swordie.ms.enums.*;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.AffectedArea;
@@ -17,13 +22,8 @@ import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
@@ -34,7 +34,7 @@ import static net.swordie.ms.client.character.skills.SkillStat.*;
 /**
  * Created on 12/14/2017.
  */
-public class WildHunter extends Job {
+public class WildHunter extends Citizen {
 
     //Jaguar Summon
     public static final int SUMMON_JAGUAR_GREY = 33001007;           //No Special Jaguar Stats
@@ -46,6 +46,9 @@ public class WildHunter extends Job {
     public static final int SUMMON_JAGUAR_SNOW_WHITE = 33001013;     //Buff Duration +10%
     public static final int SUMMON_JAGUAR_ONYX = 33001014;           //Buff Duration +10%
     public static final int SUMMON_JAGUAR_CRIMSON = 33001015;        //Dmg Absorption +10%
+    public static final int[] SUMMONS = new int[]{SUMMON_JAGUAR_GREY, SUMMON_JAGUAR_YELLOW, SUMMON_JAGUAR_RED,
+            SUMMON_JAGUAR_PURPLE, SUMMON_JAGUAR_BLUE, SUMMON_JAGUAR_JAIRA, SUMMON_JAGUAR_SNOW_WHITE, SUMMON_JAGUAR_ONYX,
+            SUMMON_JAGUAR_CRIMSON};
 
     //Jaguar Mount
     public static final int MOUNT_JAGUAR_GREY = 1932015;
@@ -57,6 +60,9 @@ public class WildHunter extends Job {
     public static final int MOUNT_JAGUAR_SNOW_WHITE = 1932100;
     public static final int MOUNT_JAGUAR_ONYX = 1932149;
     public static final int MOUNT_JAGUAR_CRIMSON = 1932215;
+    public static final int[] MOUNTS = new int[]{MOUNT_JAGUAR_GREY, MOUNT_JAGUAR_YELLOW, MOUNT_JAGUAR_RED,
+            MOUNT_JAGUAR_PURPLE, MOUNT_JAGUAR_BLUE, MOUNT_JAGUAR_JAIRA, MOUNT_JAGUAR_SNOW_WHITE, MOUNT_JAGUAR_ONYX,
+            MOUNT_JAGUAR_CRIMSON};
 
 
 
@@ -96,8 +102,6 @@ public class WildHunter extends Job {
 
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,
-            CAPTURE,
-            CALL_OF_THE_HUNTER,
     };
 
     private int[] buffs = new int[] {
@@ -134,9 +138,10 @@ public class WildHunter extends Job {
                 chr.setWildHunterInfo(new WildHunterInfo());
             }
             for (int id : addedSkills) {
-                if (!chr.hasSkill(id)) {
-                    Skill skill = SkillData.getSkillDeepCopyById(id);
-                    skill.setCurrentLevel(skill.getMasterLevel());
+                Skill skill = chr.getSkill(id);
+                if (!chr.hasSkill(id) || skill.getCurrentLevel() != skill.getMaxLevel()) {
+                    skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setCurrentLevel(skill.getMaxLevel());
                     chr.addSkill(skill);
                 }
             }
@@ -162,7 +167,13 @@ public class WildHunter extends Job {
             case SUMMON_JAGUAR_SNOW_WHITE:
             case SUMMON_JAGUAR_ONYX:
             case SUMMON_JAGUAR_CRIMSON:
-                summon = Summon.getSummonBy(chr, skillID, (byte) 1);
+                if (chr.getWildHunterInfo() == null
+                        || chr.getWildHunterInfo().getIdx() < 0
+                        || chr.getWildHunterInfo().getIdx() >= MOUNTS.length) {
+                    chr.chatMessage("You haven't selected a jaguar.");
+                    return;
+                }
+                summon = Summon.getSummonBy(chr, SUMMONS[chr.getWildHunterInfo().getIdx()], (byte) 1);
                 summon.setSummonTerm(0);
                 field = c.getChr().getField();
                 field.spawnSummon(summon);
@@ -177,23 +188,23 @@ public class WildHunter extends Job {
                 tsm.putCharacterStatValue(JaguarCount, o1);
                 break;
             case RIDE_JAGUAR:
-                o1.nOption = 0;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(JaguarSummoned, o1);
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(JaguarCount, o1);
-//                o1.nOption =
+                if (chr.getWildHunterInfo() == null
+                        || chr.getWildHunterInfo().getIdx() < 0
+                        || chr.getWildHunterInfo().getIdx() >= MOUNTS.length) {
+                    chr.chatMessage("You haven't selected a jaguar.");
+                    return;
+                }
+                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+                if (tsm.hasStat(RideVehicle)) {
+                    tsm.removeStat(RideVehicle, false);
+                } else {
+                    tsb.setNOption(MOUNTS[chr.getWildHunterInfo().getIdx()]);
+                    tsb.setROption(skillID);
+                    tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+                    tsm.sendSetStatPacket();
+                }
                 break;
             case SOUL_ARROW_CROSSBOW:
-                summon = Summon.getSummonBy(chr, SUMMON_JAGUAR_JAIRA, (byte) 1);
-                summon.setSummonTerm(0);
-                field = c.getChr().getField();
-                field.spawnSummon(summon);
-                c.write(UserLocal.jaguarActive(true));
-
                 o1.nOption = 10; //si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -205,13 +216,6 @@ public class WildHunter extends Job {
                 tsm.putCharacterStatValue(IndiePAD, o2);
                 break;
             case CROSSBOW_BOOSTER:
-
-                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
-                tsb.setNOption(MOUNT_JAGUAR_CRIMSON);
-                tsb.setROption(RIDE_JAGUAR);
-                tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
-                tsm.sendSetStatPacket();
-
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -459,6 +463,31 @@ public class WildHunter extends Job {
                     break;
                 case HEROS_WILL_WH:
                     tsm.removeAllDebuffs();
+                    break;
+                case CAPTURE:
+                    int mobID = inPacket.decodeInt();
+                    Life life = chr.getField().getLifeByObjectID(mobID);
+                    if (life instanceof Mob) {
+                        Mob mob = (Mob) life;
+                        if (mob.getMaxHp() * 0.90 <= mob.getHp()) {
+                            chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 1)));
+                            return;
+                        }
+                        Quest quest = chr.getQuestManager().getQuestById(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID);
+                        if (quest == null) {
+                            quest = new Quest(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID, QuestStatus.STARTED);
+                        }
+                        String key = QuestConstants.getWhStorageQuestValByTemplateID(mob.getTemplateId());
+                        if (key != null) {
+                            quest.setProperty(key, "1");
+                            chr.write(WvsContext.message(MessageType.QUEST_RECORD_EX_MESSAGE,
+                                    quest.getQRKey(), quest.getQRValue(), (byte) 0));
+                            chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 0)));
+                            mob.die();
+                        } else {
+                            chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 2)));
+                        }
+                    }
                     break;
             }
         }

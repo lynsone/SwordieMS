@@ -311,6 +311,12 @@ public interface ScriptManager extends Observer {
 	 */
 	void giveSkill(int skillId, int slv);
 
+	/**
+	 * Adds a given amount of levels to the Char. Also includes adding AP/SP.
+	 * @param level the amount of levels to give.
+	 */
+	void addLevel(int level);
+
 
 
 	// Field-related methods -------------------------------------------------------------------------------------------

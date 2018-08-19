@@ -622,6 +622,8 @@ public abstract class Job {
 				chr.addSkill(linkSkillID, linkSkillLevel, 3);
 			}
 		}
+		chr.heal(chr.getMaxHP());
+		chr.healMP(chr.getMaxMP());
 	}
 
 	public boolean isBuff(int skillID) {

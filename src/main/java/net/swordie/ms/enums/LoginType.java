@@ -109,10 +109,4 @@ public enum LoginType {
     public byte getValue() {
         return value;
     }
-
-    public static void main(String[] args) {
-        for(LoginType lt : values()) {
-            System.out.println(lt + "(" + lt.getValue() + "), ");
-        }
-    }
 }

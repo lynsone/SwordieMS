@@ -1143,7 +1143,7 @@ public class Mob extends Life {
         }
     }
 
-    private void die() {
+    public void die() {
         Field field = getField();
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH));
         getField().removeLife(getObjectId());

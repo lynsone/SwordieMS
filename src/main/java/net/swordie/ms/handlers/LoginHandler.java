@@ -186,7 +186,6 @@ public class LoginHandler {
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
-        cs.setPosMap(100000000);
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromID(i, false);
             if (equip != null && equip.getItemId() >= 1000000) {

@@ -246,6 +246,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_CHAT:
                 WorldHandler.handleUserChat(c, inPacket);
                 break;
+            case USER_JAGUAR_CHANGE_REQUEST:
+                WorldHandler.handleUserJaguarChangeRequest(chr, inPacket);
+                break;
             case USER_SHOP_REQUEST:
                 WorldHandler.handleUserShopRequest(c, inPacket);
                 break;

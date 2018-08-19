@@ -46,6 +46,7 @@ import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.client.jobs.resistance.BattleMage;
 import net.swordie.ms.client.jobs.resistance.WildHunter;
+import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
@@ -636,7 +637,6 @@ public class WorldHandler {
             int skillID = attackInfo.skillId;
             byte slv = attackInfo.slv;
             chr.chatMessage(YELLOW, "SkillID: " + skillID);
-            log.debug("SkillID: " + skillID);
             Field field = c.getChr().getField();
             Job sourceJobHandler = chr.getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -5328,6 +5328,26 @@ public class WorldHandler {
         } else {
             log.error(String.format("Unhandled Beast Tamer Request %d", skillId));
             chr.chatMessage(String.format("Unhandled Beast Tamer Request %d", skillId));
+        }
+    }
+
+    public static void handleUserJaguarChangeRequest(Char chr, InPacket inPacket) {
+        final int questID = QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID;
+        Quest quest = chr.getQuestManager().getQuestById(questID);
+        if (quest == null) {
+            return;
+        }
+        quest.convertQRValueToProperties();
+        int fromID = inPacket.decodeInt();
+        int toID = inPacket.decodeInt();
+        String value = quest.getProperty("" + (toID + 1));
+        if (value != null) {
+            WildHunterInfo whi = chr.getWildHunterInfo();
+            whi.setIdx((byte) toID);
+            whi.setRidingType((byte) toID);
+            chr.write(WvsContext.wildHunterInfo(whi));
+        } else {
+            chr.chatMessage("You do not have that jaguar.");
         }
     }
 }

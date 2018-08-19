@@ -559,6 +559,19 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.healMP(chr.getMaxMP());
 	}
 
+	public void addLevel(int level) {
+		int curLevel = chr.getLevel();
+		for (int i = curLevel + 1; i <= curLevel + level; i++) {
+			chr.setStat(Stat.level, i);
+			Map<Stat, Object> stats = new HashMap<>();
+			stats.put(Stat.level, (byte) i);
+			stats.put(Stat.exp, (long) 0);
+			chr.getClient().write(WvsContext.statChanged(stats));
+			chr.getJobHandler().handleLevelUp();
+			chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
+		}
+	}
+
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 
