@@ -183,6 +183,13 @@ public class Mechanic extends Job {
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case ROBO_LAUNCHER_RM7:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -190,6 +197,13 @@ public class Mechanic extends Job {
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case ROCK_N_SHOCK:      //TODO TeslaCoil
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -199,6 +213,14 @@ public class Mechanic extends Job {
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 //field.spawnAddSummon(summon);
+/*
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
+*/
                 break;
             case BOTS_N_TOTS:       //TODO spawn other summons from this summon pos.
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -208,8 +230,14 @@ public class Mechanic extends Job {
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
-                break;
 
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
+                break;
             case FOR_LIBERTY_MECH:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
@@ -222,12 +250,12 @@ public class Mechanic extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
-
             case FULL_SPREAD:   //TODO  WVS_CRASH_CALLBACK
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
                 field.spawnSummon(summon);
                 break;
         }

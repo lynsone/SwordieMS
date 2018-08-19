@@ -29,7 +29,6 @@ import net.swordie.ms.world.field.Field;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -95,9 +94,7 @@ public class Mercedes extends Job {
     };
 
     private int eleKnightSummonID = 1;
-    private int eleKnightAmount = 1;
     private int lastAttackSkill = 0;
-    private HashMap<Integer,Summon> eleKnightSummon = new HashMap<>();
     private List<Summon> summonList = new ArrayList<>();
 
     public Mercedes(Char chr) {
@@ -431,31 +428,13 @@ public class Mercedes extends Job {
         return proc;
     }
 
-    private void summonKnights(byte slv) {
-        List<Integer> set = new ArrayList<>();
-        set.add(23111008);
-        set.add(23111009);
-        set.add(23111010);
-
-        if(eleKnightSummonID != 0) {
-            set.remove((Integer) eleKnightSummonID);
-        }
-
-        int random = Util.getRandomFromList(set);
-        eleKnightSummonID = random;
-        Summon summon = Summon.getSummonBy(chr, random, slv);
-        Field field = chr.getField();
-        summon.setFlyMob(true);
-        summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-        field.spawnSummon(summon);
-        eleKnightAmount++;
-    }
-
     private void summonEleKnights() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
         List<Integer> set = new ArrayList<>();
-        set.add(23111008);
-        set.add(23111009);
-        set.add(23111010);
+        set.add(ELEMENTAL_KNIGHTS_BLUE);
+        set.add(ELEMENTAL_KNIGHTS_RED);
+        set.add(ELEMENTAL_KNIGHTS_PURPLE);
 
         if(eleKnightSummonID != 0) {
             set.remove((Integer) eleKnightSummonID);
@@ -465,14 +444,27 @@ public class Mercedes extends Job {
         Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
         Field field = chr.getField();
         summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        summon.setSummonTerm(0);
 
         summonList.add(summon);
         if(summonList.size() > 2) {
             c.write(Summoned.summonedRemoved(summonList.get(0), LeaveType.ANIMATION));
+            tsm.removeStatsBySkill(summonList.get(0).getSkillID());
             summonList.remove(0);
         }
 
         field.spawnSummon(summon);
+
+        SkillInfo si = SkillData.getSkillInfoById(ELEMENTAL_KNIGHTS_BLUE);
+        byte slv = (byte) chr.getSkill(ELEMENTAL_KNIGHTS_BLUE).getCurrentLevel();
+
+        o1.nReason = random;
+        o1.nValue = 1;
+        o1.summon = summon;
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IndieEmpty, o1);
+        tsm.sendSetStatPacket();
     }
 
     @Override

@@ -518,6 +518,13 @@ public class Pirate extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case OCTO_CANNON: //Stationary, Attacks
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -526,6 +533,13 @@ public class Pirate extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnAddSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case MONKEY_MALITIA: //Stationary, Attacks
                 int[] summons = new int[] {
@@ -539,6 +553,13 @@ public class Pirate extends Job {
                     summon.setMoveAction((byte) 0);
                     summon.setMoveAbility((byte) 0);
                     field.spawnSummon(summon);
+
+                    o1.nReason = skillID;
+                    o1.nValue = 1;
+                    o1.summon = summon;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieEmpty, o1);
                 }
                 break;
             case TURRET_DEPLOYMENT: //Stationary, Attacks
@@ -548,6 +569,13 @@ public class Pirate extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case ALL_ABOARD: //Moves, Attacks
                 tsm.removeStatsBySkill(AHOY_MATEYS);
@@ -566,6 +594,13 @@ public class Pirate extends Job {
                 summon.setPosition(position);
                 summon.setSummonTerm(20);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
         tsm.sendSetStatPacket();
@@ -958,6 +993,9 @@ public class Pirate extends Job {
     }
 
     private void corsairSummons() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o3 = new Option();
         List<Integer> set = new ArrayList<>();
         if(chr.hasSkill(ALL_ABOARD)) {
             set.add(5210015);
@@ -973,20 +1011,25 @@ public class Pirate extends Job {
         if(corsairSummonID != 0) {
             set.remove((Integer) corsairSummonID);
         }
-
-        int random = Util.getRandomFromList(set);
-        corsairSummonID = random;
-        Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
-        Field field = chr.getField();
-        summon.setFlyMob(false);
-        summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
-        field.spawnSummon(summon);
         if(chr.hasSkill(AHOY_MATEYS)) {
             Skill skill = chr.getSkill(AHOY_MATEYS);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            Option o1 = new Option();
+            int random = Util.getRandomFromList(set);
+            corsairSummonID = random;
+            Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
+            Field field = chr.getField();
+            summon.setFlyMob(false);
+            summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+            field.spawnSummon(summon);
+
+            o3.nReason = random;
+            o3.nValue = 1;
+            o3.summon = summon;
+            o3.tStart = (int) System.currentTimeMillis();
+            o3.tTerm = 120;
+            tsm.putCharacterStatValue(IndieEmpty, o3);
+
             switch (random) {
                 case 5210015:
                     o1.nOption = si.getValue(z, slv);

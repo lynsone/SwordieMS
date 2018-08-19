@@ -658,6 +658,10 @@ public class Warrior extends Job {
     }
 
     public void spawnEvilEye(int skillID, byte slv) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+
         Field field;
         evilEye = Summon.getSummonBy(c.getChr(), skillID, slv);
         field = c.getChr().getField();
@@ -666,6 +670,14 @@ public class Warrior extends Job {
         evilEye.setAssistType(AssistType.BUFFING.getVal());
         evilEye.setAttackActive(true);
         field.spawnSummon(evilEye);
+
+        o1.nReason = skillID;
+        o1.nValue = 1;
+        o1.summon = evilEye;
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IndieEmpty, o1);
+        tsm.sendSetStatPacket();
     }
 
     public void removeEvilEye(TemporaryStatManager tsm, Client c) {
