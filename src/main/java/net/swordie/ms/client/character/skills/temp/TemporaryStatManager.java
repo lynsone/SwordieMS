@@ -299,7 +299,7 @@ public class TemporaryStatManager {
             outPacket.encodeByte(getOption(PinkbeanRollingGrade).nOption);
         }
         if (hasNewStat(Judgement)) {
-            outPacket.encodeByte(getOption(Judgement).xOption);
+            outPacket.encodeInt(getOption(Judgement).xOption); // byte would  err38
         }
         if (hasNewStat(StackBuff)) {
             outPacket.encodeByte(getOption(StackBuff).mOption);

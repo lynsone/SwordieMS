@@ -17,6 +17,7 @@ import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
@@ -267,19 +268,46 @@ public class Archer extends Job {
     }
 
     private void procArmorBreak(AttackInfo attackInfo) {
-        if(chr.hasSkill(ARMOR_BREAK)) {
-            Skill skill = chr.getSkill(ARMOR_BREAK);
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            byte slv = (byte) skill.getCurrentLevel();
-            if(lastArmorBreak + (si.getValue(y, slv) * 1000) < System.currentTimeMillis()) {
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    // TODO 50% ignore PDR
-                    // TODO Mob x %  of PDR  as Final Damage%
-                }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Option o1 = new Option();
+        int skillId = attackInfo.skillId;
+        if(!chr.hasSkill(ARMOR_BREAK) || !SkillConstants.isArmorPiercingSkill(skillId)) {
+            tsm.removeStatsBySkill(ARMOR_BREAK);
+            return;
+        }
 
-                lastArmorBreak = System.currentTimeMillis();
-                chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
-                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0)));
+        Skill skill = chr.getSkill(ARMOR_BREAK);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        int pdr = 0;
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            pdr = mob.getForcedMobStat().getPdr();
+        }
+
+        int finalDmgRate = si.getValue(x, slv);
+        if(lastArmorBreak + (si.getValue(y, slv) * 1000) < System.currentTimeMillis()) {
+            if(pdr > 0) {
+                if (tsm.getOptByCTSAndSkill(IndieIgnoreMobpdpR, ARMOR_BREAK) == null) {
+                    o.nReason = ARMOR_BREAK;
+                    o.nValue = si.getValue(z, slv);
+                    o.tStart = (int) System.currentTimeMillis();
+                    o.tTerm = 2;
+                    tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o);
+                    o1.nReason = ARMOR_BREAK;
+                    o1.nValue = (int) (pdr * ((double) finalDmgRate / 100));
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = 2;
+                    tsm.putCharacterStatValue(IndieDamR, o1);
+                    tsm.sendSetStatPacket();
+                } else {
+                    tsm.removeStatsBySkill(ARMOR_BREAK);
+                    lastArmorBreak = System.currentTimeMillis();
+                    chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
+                    chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0)));
+                }
             }
         }
     }
@@ -564,7 +592,6 @@ public class Archer extends Job {
         Option o5 = new Option();
         Summon summon;
         Field field;
-        int curTime = (int) System.currentTimeMillis();
         switch (skillID) {
             case SOUL_ARROW_BOW:
             case SOUL_ARROW_XBOW:
@@ -576,9 +603,9 @@ public class Archer extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(EPAD, o2);
-                o1.nOption = 1; //si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
+                o3.nOption = 1; //si.getValue(x, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NoBulletConsume, o3);
                 break;
             case BOW_BOOSTER:
@@ -615,13 +642,11 @@ public class Archer extends Job {
                     o1.nValue = -si.getValue(x, slv);
                     o1.nReason = skillID;
                     o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = 0;
                     tsm.putCharacterStatValue(IndiePADR, o1);
                     tsm.putCharacterStatValue(IndieMADR, o1);
                     o2.nValue = si.getValue(indieDamR, slv);
                     o2.nReason = skillID;
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = 0;
+                    o2.tStart = (int) System.currentTimeMillis();
                     tsm.putCharacterStatValue(IndieDamR, o2);
                     o3.nOption = si.getValue(padX, slv);
                     o3.rOption = skillID;

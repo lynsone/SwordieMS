@@ -350,6 +350,10 @@ public class MobTemporaryStat {
 		return getCurrentStatVals().keySet().contains(mobStat);
 	}
 
+	public boolean hasCurrentMobStatBySkillId(int skillId) {
+		return getCurrentStatVals().entrySet().stream().anyMatch(map -> map.getValue().rOption == skillId);
+	}
+
 	public boolean hasBurnFromSkill(int skillID) {
 		return getBurnBySkill(skillID) != null;
 	}

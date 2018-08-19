@@ -21,6 +21,7 @@ import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.cygnus.NightWalker;
+import net.swordie.ms.client.jobs.legend.Phantom;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -448,6 +449,11 @@ public abstract class Job {
 			// Zero - Rewind
 			else if (tsm.getOptByCTSAndSkill(ReviveOnce, Zero.REWIND) != null) {
 				Zero.reviveByRewind(chr);
+			}
+
+			// Phantom - Final Feint
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, Phantom.FINAL_FEINT) != null) {
+				Phantom.reviveByFinalFeint(chr);
 			}
 
 

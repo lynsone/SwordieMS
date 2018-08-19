@@ -13,9 +13,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.DropPool;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
@@ -63,6 +61,7 @@ public class Thief extends Job {
     public static final int CLAW_BOOSTER = 4101003; //Buff
 
     public static final int SHADOW_PARTNER_NL = 4111002; //Buff
+    public static final int EXPERT_THROWING_STAR_HANDLING = 4110012;
     public static final int SHADOW_STARS = 4111009; //Buff
     public static final int DARK_FLARE_NL = 4111007; //Summon
     public static final int SHADOW_WEB = 4111003; //Special Attack (Dot + Bind)
@@ -231,6 +230,8 @@ public class Thief extends Job {
                     handleMark(attackInfo);
                 }
 
+                // Expert Throwing Star Handling
+                procExpertThrowingStar(skillID);
             }
         }
 
@@ -497,7 +498,6 @@ public class Thief extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int curTime = (int) System.currentTimeMillis();
         Summon summon;
         Field field;
         switch (skillID) {
@@ -583,15 +583,19 @@ public class Thief extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                 break;
-            case MIRRORED_TARGET: //Special Summon   //TODO Crashes - not 38*
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(false);
-                summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
-                summon.setAssistType((byte) 0);
-                summon.setAttackActive(false);
-                field.spawnSummon(summon);
+            case MIRRORED_TARGET:
+                if(tsm.getOptByCTSAndSkill(ShadowPartner, MIRROR_IMAGE) != null) {
+                    summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                    field = c.getChr().getField();
+                    summon.setFlyMob(false);
+                    summon.setMoveAction((byte) 0);
+                    summon.setMoveAbility((byte) 0);
+                    summon.setAssistType((byte) 0);
+                    summon.setAttackActive(false);
+                    summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
+                    field.spawnSummon(summon);
+                    tsm.removeStatsBySkill(MIRROR_IMAGE);
+                }
                 break;
             case DARK_FLARE_NL:
             case DARK_FLARE_SHAD:
@@ -1056,6 +1060,45 @@ public class Thief extends Job {
                     field.drop(dropInfoSet, mob.getPosition(), chr.getId());
                 }
             }
+        }
+    }
+
+    private void procExpertThrowingStar(int skillId) {
+        if(!chr.hasSkill(EXPERT_THROWING_STAR_HANDLING)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+
+        Skill skill = chr.getSkill(EXPERT_THROWING_STAR_HANDLING);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        int hideIconSkillId = skill.getSkillId() + 100; // there's no Buff Icon
+
+        if(tsm.getOptByCTSAndSkill(IndieDamR, hideIconSkillId) == null) {
+            tsm.removeStatsBySkill(hideIconSkillId);
+            if(Util.succeedProp(si.getValue(prop, slv))) {
+                o.nReason = hideIconSkillId;
+                o.nValue = si.getValue(pdR, slv);
+                o.tStart = (int) System.currentTimeMillis();
+                o.tTerm = 5;
+                tsm.putCharacterStatValue(IndieDamR, o);
+                tsm.sendSetStatPacket();
+            }
+        } else {
+            tsm.removeStatsBySkill(hideIconSkillId);
+            o.nOption = 100;
+            o.rOption = hideIconSkillId;
+            o.tOption = 5;
+            tsm.putCharacterStatValue(CriticalBuff, o);
+            tsm.sendSetStatPacket();
+
+            if(SkillData.getSkillInfoById(skillId) != null) {
+                chr.healMP(SkillData.getSkillInfoById(skillId).getValue(mpCon, slv));
+            }
+
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skill.getSkillId(), slv, 0)));
+            chr.write(User.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
         }
     }
 }
