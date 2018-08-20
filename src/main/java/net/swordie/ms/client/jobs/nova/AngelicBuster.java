@@ -253,6 +253,9 @@ public class AngelicBuster extends Job {
             rect = rect.moveRight();
         }
         List<Mob> lifes = field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
         List<Mob> bossLifes = field.getBossMobsInRect(rect);
         Life life = Util.getRandomFromList(lifes);
         if(bossLifes.size() > 0) {
@@ -334,7 +337,7 @@ public class AngelicBuster extends Job {
                 if(chr.hasSkill(AFFINITY_HEART_IV) && Util.succeedProp(getRechargeProc(attackInfo))) {
                     Skill ah4Skill = chr.getSkill(AFFINITY_HEART_IV);
                     byte ah4LV = (byte) ah4Skill.getCurrentLevel();
-                    SkillInfo ah4SI = SkillData.getSkillInfoById(skill.getSkillId());
+                    SkillInfo ah4SI = SkillData.getSkillInfoById(ah4Skill.getSkillId());
                     if(Util.succeedProp(ah4SI.getValue(x, ah4LV))) {
                         rechargeABSkills();
                         affinityHeartIIIcounter = 0;

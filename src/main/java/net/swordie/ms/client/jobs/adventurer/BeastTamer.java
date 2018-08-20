@@ -446,7 +446,11 @@ public class BeastTamer extends Job {
                 //int y = chr.getPosition().getY() + 41;
                 //aa.setPosition(new Position(x, y));
                 aa2.setPosition(chr.getPosition());
-                aa2.setRect(aa2.getPosition().getRectAround(tdi.getRects().get(0)));
+                Rect rect = tdi.getRects().get(0);
+                if(!chr.isLeft()) {
+                    rect = rect.moveRight();
+                }
+                aa2.setRect(aa2.getPosition().getRectAround(rect));
                 aa2.setDelay((short) 4);
                 chr.getField().spawnAffectedArea(aa2);
                 break;
@@ -520,6 +524,9 @@ public class BeastTamer extends Job {
                     if(party != null) {
                         Field field = chr.getField();
                         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                        if(!chr.isLeft()) {
+                            rect = rect.moveRight();
+                        }
                         List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
                                 filter(pml -> pml.getChr().getId() != chr.getId() &&
                                         pml.getChr().getHP() <= 0).

@@ -335,6 +335,9 @@ public class NightWalker extends Job {
                             chr.getPosition().getX() + 1500,
                             chr.getPosition().getY() + 1500)
             );
+            if(chr.getField().getMobsInRect(rect).size() <= 0) {
+                return;
+            }
             mob = Util.getRandomFromList(chr.getField().getMobsInRect(rect));
         }
         int mobId = mob.getObjectId();

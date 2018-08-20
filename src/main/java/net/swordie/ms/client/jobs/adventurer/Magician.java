@@ -442,6 +442,9 @@ public class Magician extends Job {
             rect = rect.moveRight();
         }
         List<Mob> lifes = field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
         Mob life = Util.getRandomFromList(lifes);
         int mobID2 = (life).getObjectId();
         int inc = ForceAtomEnum.DA_ORB.getInc();
@@ -855,6 +858,9 @@ public class Magician extends Job {
                 if(party != null) {
                     field = chr.getField();
                     Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.moveRight();
+                    }
                     List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
                             filter(pml -> pml.getChr().getId() != chr.getId() &&
                                     pml.getChr().getHP() <= 0).

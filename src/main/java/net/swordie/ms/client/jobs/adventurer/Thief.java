@@ -423,11 +423,7 @@ public class Thief extends Job {
                     aa2.setMobOrigin((byte) 0);
                     aa2.setPosition(chr.getPosition());
                     aa2.setRect(aa2.getPosition().getRectAround(fci.getRects().get(0)));
-                    if (chr.isLeft()) {
-                        aa2.setFlip(false);
-                    } else {
-                        aa2.setFlip(true);
-                    }
+                    aa2.setFlip(!chr.isLeft());
                     aa2.setDelay((short) 9);
                     chr.getField().spawnAffectedArea(aa2);
                     break;
@@ -653,6 +649,9 @@ public class Thief extends Job {
                         chr.getPosition().getY() + 4000)
         );
         List<Mob> mobs = field.getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
+        }
         Mob mob = Util.getRandomFromList(mobs);
         int inc = ForceAtomEnum.FLYING_MESO.getInc();
         int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
@@ -839,6 +838,9 @@ public class Thief extends Job {
                     MobTemporaryStat mts = mob.getTemporaryStat();
 
                     List<Mob> lifes = chr.getField().getMobsInRect(rect);
+                    if(lifes.size() <= 0) {
+                        return;
+                    }
                     List<Mob> bossLifes = chr.getField().getBossMobsInRect(rect);
                     if(mts.hasBurnFromSkill(getCurMarkLv())) {
                         for (int i = 0; i < 6; i++) {

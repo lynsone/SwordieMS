@@ -572,6 +572,9 @@ public class BattleMage extends Job {
         int delay = si.getValue(y, slv);
         if (tsm.getOptByCTSAndSkill(BMageAura, skill.getSkillId()) != null) {
             Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+            if(!chr.isLeft()) {
+                rect = rect.moveRight();
+            }
             Field field = chr.getField();
             List<Life> lifes = field.getLifesInRect(rect);
             for (Life life : lifes) {

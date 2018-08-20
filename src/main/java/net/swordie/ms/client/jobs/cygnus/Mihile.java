@@ -335,7 +335,11 @@ public class Mihile extends Job {
                     aa.setMobOrigin((byte) 0);
                     aa.setSkillID(RADIANT_CROSS_AA);
                     aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
+                    Rect rect = aa.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.horizontalFlipAround(chr.getPosition().getX());
+                    }
+                    aa.setRect(rect);
                     aa.setFlip(!attackInfo.left);
                     aa.setDelay((short) 7); //spawn delay
                     field.spawnAffectedAreaAndRemoveOld(aa);
@@ -467,6 +471,9 @@ public class Mihile extends Job {
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             byte slv = (byte) skill.getCurrentLevel();
             Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+            if(!chr.isLeft()) {
+                rect = rect.moveRight();
+            }
             Party party = chr.getParty();
             int partySize = 0;
 

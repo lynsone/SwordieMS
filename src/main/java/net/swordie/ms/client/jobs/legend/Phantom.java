@@ -462,6 +462,9 @@ public class Phantom extends Job {
                         chr.getPosition().getY() + 250)
         );
         List<Mob> mobs = chr.getField().getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
+        }
         MobStat buffFromMobStat = MobStat.Mystery; //Needs to be initialised
         MobStat[] mobStats = new MobStat[]{ //Ordered from Weakest to Strongest, since  the for loop will save the last MobsStat
                 PCounter,           //Dmg Reflect 600%
