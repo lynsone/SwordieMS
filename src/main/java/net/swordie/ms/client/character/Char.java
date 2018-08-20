@@ -220,8 +220,6 @@ public class Char {
 	@Transient
 	private Job jobHandler;
 	@Transient
-	private boolean left;
-	@Transient
 	private MarriageRecord marriageRecord;
 	@Transient
 	private WildHunterInfo wildHunterInfo;
@@ -2080,12 +2078,8 @@ public class Char {
 		return items.size() > 0 ? items.get(0) : null;
 	}
 
-	public void setLeft(boolean left) {
-		this.left = left;
-	}
-
 	public boolean isLeft() {
-		return left;
+		return moveAction > 0 && (moveAction % 2) == 1;
 	}
 
 	public MarriageRecord getMarriageRecord() {
