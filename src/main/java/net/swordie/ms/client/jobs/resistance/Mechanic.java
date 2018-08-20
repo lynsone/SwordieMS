@@ -513,6 +513,7 @@ public class Mechanic extends Job {
             o.rOption = skill.getSkillId();
             o.tOption = 6;
             mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
+            mts.addStatOptionsAndBroadcast(MobStat.MDR, o);
         }
 
         supportUnitTimer = EventManager.addEvent(() -> applySupportUnitDebuffOnMob(skillId), si.getValue(x, slv), TimeUnit.SECONDS);

@@ -129,6 +129,7 @@ public class NightWalker extends Job {
     };
 
     private List<Summon> bats = new ArrayList<>();
+    private List<Summon> removeBatsList = new ArrayList<>();
     private Summon darkServant;
 
     public static int getOriginalSkillByID(int skillID) {
@@ -185,7 +186,6 @@ public class NightWalker extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(EVAR, o3);
-                // SpeedMax
                 break;
             case DARK_SIGHT:
                 o1.nOption = si.getValue(x, slv);
@@ -295,45 +295,46 @@ public class NightWalker extends Job {
         if(!tsm.hasStat(NightWalkerBat)) {
             return;
         }
-        int removeBatSize = 0;
-        if(bats.size() > 0) {
-            for(Summon bat : bats) {
-                if(Util.succeedProp(getBatAttackProp())) { // 2x attack rate  for Mobs with Mark
-                    createShadowBatForceAtom(attackInfo, bat);
-                    c.getChr().getField().broadcastPacket(Summoned.summonedRemoved(bat, LeaveType.ANIMATION));
-                    removeBatSize++;
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            // Remove Bats & Create ForceAtom
+            if (bats.size() > 0) {
+                for (Summon bat : bats) {
+                    if (Util.succeedProp((mts.hasCurrentMobStat(MobStat.ElementDarkness) ? 2*getBatAttackProp() : getBatAttackProp()))) {
+                        removeBatAndCreateFA(attackInfo, bat);
+                    }
+                }
+                for (Summon removeBat : removeBatsList) {
+                    bats.remove(removeBat);
                 }
             }
-            for(int i = 0; i < removeBatSize; i++) {
-                bats.remove(0);
+
+            // Spawn Bat
+            if (bats.size() < getMaxBats() && Util.succeedProp(33)) {
+                summonBatAndRegister();
             }
         }
-
-        if(bats.size() < getMaxBats()) {
-            Summon summon = Summon.getSummonBy(chr, SHADOW_BAT, (byte) 1);
-            summon.setFlyMob(true);
-            summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-            chr.getField().spawnAddSummon(summon);
-            bats.add(summon);
-        }
-
-        chr.chatMessage("list size: "+bats.size());
-        chr.chatMessage("max bats: "+getMaxBats());
-        chr.chatMessage("attack prop: "+getBatAttackProp());
     }
 
-    private void createShadowBatForceAtom(AttackInfo attackInfo, Summon summon) {
+    private void removeBatAndCreateFA(AttackInfo attackInfo, Summon bat) {
+        removeBatsList.add(bat);
+        chr.getField().broadcastPacket(Summoned.summonedRemoved(bat, LeaveType.ANIMATION));
+        createShadowBatForceAtom(attackInfo);
+    }
+
+    private void createShadowBatForceAtom(AttackInfo attackInfo) {
         SkillInfo si = SkillData.getSkillInfoById(getBatSkill().getSkillId());
         Mob mob = (Mob) chr.getField().getLifeByObjectID(Util.getRandomFromList(attackInfo.mobAttackInfo).mobId);
 
         if(mob == null) {
-            Rect rect = new Rect(
+            Rect rect = new Rect( // Skill itself doesn't hold any rect info
                     new Position(
-                            chr.getPosition().getX() - 1500,
-                            chr.getPosition().getY() - 1500),
+                            chr.getPosition().getX() - 500,
+                            chr.getPosition().getY() - 500),
                     new Position(
-                            chr.getPosition().getX() + 1500,
-                            chr.getPosition().getY() + 1500)
+                            chr.getPosition().getX() + 500,
+                            chr.getPosition().getY() + 500)
             );
             if(chr.getField().getMobsInRect(rect).size() <= 0) {
                 return;
@@ -345,13 +346,57 @@ public class NightWalker extends Job {
         int inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB.getInc();
         int type = ForceAtomEnum.NIGHT_WALKER_FROM_MOB.getForceAtomType();
 
-        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 1, 1,
-                ((chr.getPosition().getX() > mob.getPosition().getX()) ? 90 : 270), 50, (int) System.currentTimeMillis(), 1, 0,
+        if(getBatSkill().getSkillId() == BAT_AFFINITY_III) {
+            inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getInc();
+            type = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getForceAtomType();
+        }
+
+        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 2, 1,
+                ((chr.getPosition().getX() > mob.getPosition().getX()) ? 90 : 270), 0, (int) System.currentTimeMillis(), 1, 0,
                 new Position());
 
         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                mob.getPosition(), SHADOW_BAT_ATOM, summon.getPosition()));
+                true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
+                mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));
+    }
+
+    private void recreateShadowBatForceAtom() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(!tsm.hasStat(NightWalkerBat)) {
+            return;
+        }
+        if(Util.succeedProp(45)) {
+            Rect rect = new Rect( // Skill itself doesn't hold any rect info
+                    new Position(
+                            chr.getPosition().getX() - 500,
+                            chr.getPosition().getY() - 500),
+                    new Position(
+                            chr.getPosition().getX() + 500,
+                            chr.getPosition().getY() + 500)
+            );
+            List<Mob> mobs = chr.getField().getMobsInRect(rect);
+            if (mobs.size() <= 0) {
+                return;
+            }
+            Mob mob = Util.getRandomFromList(mobs);
+            int mobId = mob.getObjectId();
+
+            int inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB.getInc();
+            int type = ForceAtomEnum.NIGHT_WALKER_FROM_MOB.getForceAtomType();
+
+            if (getBatSkill().getSkillId() == BAT_AFFINITY_III) {
+                inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getInc();
+                type = ForceAtomEnum.NIGHT_WALKER_FROM_MOB_4.getForceAtomType();
+            }
+
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 2, 1,
+                    ((chr.getPosition().getX() > mob.getPosition().getX()) ? 90 : 270), 0, (int) System.currentTimeMillis(), 1, 0,
+                    new Position());
+
+            chr.getField().broadcastPacket(CField.createForceAtom(true, mobId, 0, type,
+                    true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
+                    mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));
+        }
     }
 
     private int getMaxBats() {
@@ -391,7 +436,17 @@ public class NightWalker extends Job {
         }
         return skill;
     }
-    
+
+    private Summon summonBatAndRegister() {
+        Summon bat = Summon.getSummonBy(chr, getBatSkill().getSkillId(), (byte) getBatSkill().getCurrentLevel());
+        bat.setFlyMob(true);
+        bat.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        bat.setAttackActive(false);
+        chr.getField().spawnAddSummon(bat);
+        bats.add(bat);
+
+        return bat;
+    }
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -407,14 +462,15 @@ public class NightWalker extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        chr.chatMessage(""+bats.size());
         if(hasHitMobs) {
-            //if(skillID != 0) {  //SkillID of ShadowBat itself = 0
-                if(attackInfo.skillId != SHADOW_BAT_ATOM) {
-                    shadowBats(attackInfo);
-                }
+            // Handling Shadow Bats
+            if(attackInfo.skillId != SHADOW_BAT_ATOM) {
+                shadowBats(attackInfo);
+            } else {
+                recreateShadowBatForceAtom();
+            }
 
-            //}
+            // Handling Dark Elemental
             if(tsm.hasStat(ElementDarkness)) {
                 applyDarkElementalOnMob(attackInfo, slv);
             }

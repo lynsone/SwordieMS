@@ -273,7 +273,6 @@ public class Warrior extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o2);
-                //c.write(Summoned.summonedSkill(chr.getId(), evilEye, 7));
                 break;
             case EVIL_EYE:
                 spawnEvilEye(skillID, slv);

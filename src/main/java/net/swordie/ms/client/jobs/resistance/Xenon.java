@@ -302,7 +302,12 @@ public class Xenon extends Job {
         }
         if (hasHitMobs) {
             //Increment Supply on attack
-            if (Util.succeedProp(supplyProp)) {
+            if (Util.succeedProp(supplyProp) &&
+                    attackInfo.skillId != 0 &&
+                    attackInfo.skillId != PINPOINT_SALVO &&
+                    attackInfo.skillId != PINPOINT_SALVO_REDESIGN_A &&
+                    attackInfo.skillId != PINPOINT_SALVO_REDESIGN_B &&
+                    attackInfo.skillId != PINPOINT_SALVO_PERFECT_DESIGN) {
                 incrementSupply();
             }
 
@@ -389,6 +394,7 @@ public class Xenon extends Job {
                     chr.warp(toField);
                     break;
                 case PINPOINT_SALVO:
+                    incrementSupply(-1);
                     createPinPointSalvoForceAtom();
                     break;
                 case HEROS_WILL_XENON:
@@ -549,7 +555,7 @@ public class Xenon extends Job {
                     new Position());
             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                     true, mobID, getPinPointSkill(), forceAtomInfo, new Rect(), 0, 300,
-                    mob.getPosition(), getPinPointSkill(), mob.getPosition()));
+                    mob.getPosition(), 0, mob.getPosition()));
         }
     }
 
