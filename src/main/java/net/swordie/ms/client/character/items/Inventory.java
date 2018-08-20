@@ -20,7 +20,6 @@ public class Inventory {
     private int id;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventoryId")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Item> items;
     @Column(name = "type")
     private InvType type;

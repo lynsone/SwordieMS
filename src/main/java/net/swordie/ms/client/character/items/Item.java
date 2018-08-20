@@ -29,7 +29,6 @@ public class Item implements Serializable, Encodable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
-    protected int inventoryId;
     protected int itemId;
     protected int bagIndex;
     protected long cashItemSerialNumber;
@@ -81,14 +80,6 @@ public class Item implements Serializable, Encodable {
         this.id = id;
     }
 
-    public int getInventoryId() {
-        return inventoryId;
-    }
-
-    public void setInventoryId(int inventoryId) {
-        this.inventoryId = inventoryId;
-    }
-
     public String getOwner() {
         return owner;
     }
@@ -112,7 +103,6 @@ public class Item implements Serializable, Encodable {
             setQuantity(Math.max(0, getQuantity() - amount));
         }
     }
-
 
     public Item() {
     }
@@ -139,7 +129,6 @@ public class Item implements Serializable, Encodable {
         item.setType(getType());
         item.setOwner(getOwner());
         item.setQuantity(getQuantity());
-        item.setInventoryId(getInventoryId());
         return item;
     }
 
@@ -192,7 +181,7 @@ public class Item implements Serializable, Encodable {
             outPacket.encodeShort(0); // flag
             if (ItemConstants.isThrowingStar(getItemId()) || ItemConstants.isBullet(getItemId()) ||
                     ItemConstants.isFamiliar(getItemId())) {
-                outPacket.encodeLong(getInventoryId());
+                outPacket.encodeLong(id); // is inv id really required?
             }
         }
     }
@@ -245,4 +234,16 @@ public class Item implements Serializable, Encodable {
                 bagIndex, (short) 0, 0, this));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return id == item.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

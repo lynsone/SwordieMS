@@ -432,4 +432,14 @@ public class AvatarLook {
     public void setKaiserTailID(int kaiserTailID) {
         this.kaiserTailID = kaiserTailID;
     }
+
+    public void removeItem(int itemID) {
+        List<Integer> hairEquips = getHairEquips();
+        if (ItemConstants.isWeapon(itemID)) {
+            setWeaponId(0);
+        }
+        if (hairEquips.contains(itemID)) {
+            hairEquips.remove((Integer) itemID);
+        }
+    }
 }

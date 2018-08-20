@@ -5,7 +5,6 @@ import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
 
@@ -1480,7 +1479,7 @@ public class Equip extends Item {
 
     @Override
     public boolean isTradable() {
-        return !hasAttribute(EquipAttribute.UNTRADABLE);
+        return !hasAttribute(EquipAttribute.Untradable);
     }
 
     public void applyInnocenceScroll() {
@@ -1498,4 +1497,6 @@ public class Equip extends Item {
         Equip defaultEquip = ItemData.getEquipDeepCopyFromID(getItemId(), false);
         return defaultEquip.getTuc() != getTuc();
     }
+
+
 }

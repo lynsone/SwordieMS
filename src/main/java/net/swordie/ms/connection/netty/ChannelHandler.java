@@ -39,12 +39,10 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
     public void channelInactive(ChannelHandlerContext ctx) {
         log.debug("[ChannelHandler] | Channel inactive.");
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
-        if(c != null && c.getChr() != null) {
+        if(c != null && c.getChr() != null && !c.getChr().isChangingChannel()) {
             c.getChr().logout();
+        } else if (c != null && c.getChr() != null && c.getChr().isChangingChannel()) {
             c.getChr().setChangingChannel(false);
-        } else if (c!= null && c.getAccount() != null) {
-            c.getAccount().setLoginState(LoginState.Out);
-            DatabaseManager.saveToDB(c.getAccount());
         } else {
             log.warn("[ChannelHandler] | Was not able to save character, data inconsistency may have occurred.");
         }
@@ -87,7 +85,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 LoginHandler.handleClientStart(c, inPacket);
                 break;
             case WVS_CRASH_CALLBACK:
-                if (c != null && c.getAccount() != null) {
+                if (c != null && c.getChr() != null) {
                     c.getChr().setChangingChannel(false);
                     c.getChr().logout();
                 }

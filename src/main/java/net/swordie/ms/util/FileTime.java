@@ -129,7 +129,7 @@ public class FileTime implements Serializable {
 	 * @return formatted FileTime
 	 */
 	public FileTime toClientFormat() {
-		FileTime ft = fromLong((long) (Type.QUEST_TIME.getVal() + (toLong() / 3600000 * 8.38195)));
+		FileTime ft = fromLong((long) (toLong() - 116444736000000000L) * 100000L);
 		ft.setConvertedForClient(true);
 		return ft;
 	}
@@ -149,7 +149,7 @@ public class FileTime implements Serializable {
 	 */
 	public long toMillis() {
 		if (isConvertedForClient()) {
-			return (long) (((toLong() - Type.QUEST_TIME.getVal()) * 3600000) / 8.3819306);
+			return (toLong() - 116444736000000000L) / 10000L;
 		}
 		return toLong();
 	}
@@ -177,7 +177,8 @@ public class FileTime implements Serializable {
 	 */
 	public void encode(OutPacket outPacket) {
 		if (!isConvertedForClient()) {
-			toClientFormat().encode(outPacket);
+			// https://stackoverflow.com/questions/46201834/how-to-convert-milli-seconds-time-to-filetime-in-c
+			outPacket.encodeLong(toLong() * 10000L + 116444736000000000L);
 		} else {
 			outPacket.encodeInt(getHighDateTime());
 			outPacket.encodeInt(getLowDateTime());
@@ -189,7 +190,7 @@ public class FileTime implements Serializable {
 	 * @return addition of the low and high part
 	 */
 	public long toLong() {
-		return (getLowDateTime() & 0xFFFFFFFFL) + ((long) getHighDateTime() << 32);
+		return (getLowDateTime() & 0xFFFFFFFFL) | ((long) getHighDateTime() << 32);
 	}
 
 	/**
@@ -197,7 +198,11 @@ public class FileTime implements Serializable {
 	 * @return expiredness
 	 */
 	public boolean isExpired() {
-		return toMillis() < System.currentTimeMillis();
+		return !isPermanent() && toMillis() < System.currentTimeMillis();
+	}
+
+	private boolean isPermanent() {
+		return equals(FileTime.fromType(Type.MAX_TIME)) || equals(new FileTime(21968699, -35635200));
 	}
 
 	/**

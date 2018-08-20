@@ -154,7 +154,7 @@ public class LoginHandler {
         if (name.toLowerCase().contains("virtual") || name.toLowerCase().contains("kernel")) {
             code = CharNameResult.INVALID_NAME;
         } else {
-            code = Account.getFromDBByName(name) == null ? CharNameResult.OK : CharNameResult.ALREADY_IN_USE;
+            code = Char.getFromDBByName(name) == null ? CharNameResult.OK : CharNameResult.ALREADY_IN_USE;
         }
         c.write(Login.checkDuplicatedIDResult(name, code.getVal()));
     }

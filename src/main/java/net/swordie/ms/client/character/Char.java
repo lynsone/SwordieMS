@@ -140,7 +140,7 @@ public class Char {
 	private FuncKeyMap funcKeyMap;
 
 	@JoinColumn(name = "charId")
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<Skill> skills;
 
 	@JoinColumn(name = "ownerID")
@@ -420,6 +420,7 @@ public class Char {
 				999999999,
 		};
 		monsterParkCount = 0;
+		potentials = new HashSet<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -489,14 +490,10 @@ public class Char {
 				write(WvsContext.inventoryOperation(true, false,
 						UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
 			} else {
-				item.setInventoryId(inventory.getId());
 				if (!hasCorrectBagIndex) {
 					item.setBagIndex(inventory.getFirstOpenSlot());
 				}
 				inventory.addItem(item);
-				if (item.getId() == 0) {
-					DatabaseManager.saveToDB(item);
-				}
 				write(WvsContext.inventoryOperation(true, false,
 						ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
 			}
@@ -1151,7 +1148,12 @@ public class Char {
 			if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
 				for (int i = 1; i <= 5; i++) { //Shifted by +1 to accomodate the Skill Management Tabs
 					ChosenSkill chosenSkill = getChosenSkillByPosition(i);
-					outPacket.encodeInt(chosenSkill == null ? 0 : ( isChosenSkillInStolenSkillList(chosenSkill.getSkillId()) ? chosenSkill.getSkillId() : 0) );
+					outPacket.encodeInt(chosenSkill == null
+							? 0
+							: isChosenSkillInStolenSkillList(chosenSkill.getSkillId())
+								? chosenSkill.getSkillId()
+								: 0
+					);
 				}
 			} else {
 				for (int i = 0; i < 5; i++) {
@@ -1982,13 +1984,7 @@ public class Char {
 		int itemID = item.getItemId();
 		getInventoryByType(EQUIPPED).removeItem(item);
 		getInventoryByType(EQUIP).addItem(item);
-		List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-		if (ItemConstants.isWeapon(itemID)) {
-			al.setWeaponId(0);
-		}
-		if (hairEquips.contains(itemID)) {
-			hairEquips.remove((Integer) itemID);
-		}
+		al.removeItem(itemID);
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		if (getTemporaryStatManager().hasStat(SoulMP)) {
@@ -2010,7 +2006,7 @@ public class Char {
 			equip.setTradeBlock(true);
 			equip.setEquipTradeBlock(false);
 			equip.setEquippedDate(FileTime.currentTime());
-			equip.addAttribute(EquipAttribute.UNTRADABLE);
+			equip.addAttribute(EquipAttribute.Untradable);
 		}
 		AvatarLook al = getAvatarData().getAvatarLook();
 		int itemID = item.getItemId();
@@ -2197,7 +2193,6 @@ public class Char {
 		}
 		setField(toField);
 		toField.addChar(this);
-		fixBuggedItems();
 		getAvatarData().getCharacterStat().setPortal(portal.getId());
 		getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
@@ -2254,33 +2249,6 @@ public class Char {
 		if (JobConstants.isAngelicBuster(getJob())) {
             write(UserLocal.setDressChanged(false, true));
         }
-	}
-
-	/**
-	 * Hacky fix for a bug I can't seem to fix. If having 3 equips in your inventory (x, y, z):
-	 * equip x, equip y, swap x and z, equip x. Upon relogging, x will be in the EQUIP inventory,
-	 * but with InvType EQUIPPED.
-	 * Server side it goes correctly, but when logging out, Hibernate puts x back into the EQUIP
-	 * inventory.
-	 */
-	private void fixBuggedItems() {
-		List<Item> buggedItems = new ArrayList<>();
-		for (Item item : getEquipInventory().getItems()) {
-			if (item.getInvType() == InvType.EQUIPPED) {
-				buggedItems.add(item);
-			}
-		}
-		getEquipInventory().getItems().removeAll(buggedItems);
-		getEquippedInventory().getItems().addAll(buggedItems);
-		buggedItems = new ArrayList<>();
-		for (Item item : getEquippedInventory().getItems()) {
-			if (item.getInvType() == InvType.EQUIP) {
-				buggedItems.add(item);
-			}
-		}
-		getEquippedInventory().getItems().removeAll(buggedItems);
-		getEquipInventory().getItems().addAll(buggedItems);
-
 	}
 
 	/**
@@ -2536,9 +2504,9 @@ public class Char {
 			} else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
 				if (item instanceof Equip) {
 					Equip equip = (Equip) item;
-					if (equip.hasAttribute(EquipAttribute.UNTRADABLE_AFTER_TRANSACTION)) {
-						equip.removeAttribute(EquipAttribute.UNTRADABLE_AFTER_TRANSACTION);
-						equip.addAttribute(EquipAttribute.UNTRADABLE);
+					if (equip.hasAttribute(EquipAttribute.UntradableAfterTransaction)) {
+						equip.removeAttribute(EquipAttribute.UntradableAfterTransaction);
+						equip.addAttribute(EquipAttribute.Untradable);
 					}
 				}
 				addItemToInventory(item);
@@ -2678,6 +2646,7 @@ public class Char {
 			inventory.removeItem(item);
 			short bagIndex = (short) item.getBagIndex();
 			if (item.getInvType() == EQUIPPED) {
+				getAvatarData().getAvatarLook().removeItem(item.getItemId());
 				bagIndex = (short) -bagIndex;
 			}
 			write(WvsContext.inventoryOperation(true, false,
@@ -3081,13 +3050,13 @@ public class Char {
 		setOnline(false);
 		getField().removeChar(this);
 		getAccount().setCurrentChr(null);
-		DatabaseManager.saveToDB(this);
 		if (!isChangingChannel()) {
 			getClient().getChannelInstance().removeChar(this);
 			getAccount().setLoginState(LoginState.Out);
+		} else {
+			getClient().setChr(null);
 		}
 		DatabaseManager.saveToDB(getAccount());
-//		getClient().setChr(null);
 	}
 
 	public int getSubJob() {
@@ -3812,11 +3781,8 @@ public class Char {
 		if(getFieldID() != fieldId) {
 			setField(getOrCreateFieldByCurrentInstanceType(fieldId));
 		}
-		if (getAccount() != null) {
-			getAccount().setLoginState(LoginState.Loading);
-			DatabaseManager.saveToDB(getAccount());
-		}
-		DatabaseManager.saveToDB(this);
+		getAccount().setLoginState(LoginState.Loading);
+		DatabaseManager.saveToDB(getAccount());
 		int worldID = getClient().getChannelInstance().getWorldId();
 		World world = Server.getInstance().getWorldById(worldID);
 		field.removeChar(this);
@@ -3842,5 +3808,23 @@ public class Char {
 
 	public boolean isBattleRecordOn() {
 		return battleRecordOn;
+	}
+
+	public void checkAndRemoveExpiredItems() {
+		Inventory[] inventories = new Inventory[]{getEquippedInventory(), getEquipInventory(), getConsumeInventory(),
+			getEtcInventory(), getInstallInventory(), getCashInventory()};
+		Set<Item> expiredItems = new HashSet<>();
+		for (Inventory inv : inventories) {
+			expiredItems.addAll(
+					inv.getItems().stream()
+							.filter(item -> item.getDateExpire().isExpired())
+							.collect(Collectors.toSet())
+			);
+		}
+		List<Integer> expiredItemIDs = expiredItems.stream().map(Item::getItemId).collect(Collectors.toList());
+		write(WvsContext.message(MessageType.GENERAL_ITEM_EXPIRE_MESSAGE, expiredItemIDs));
+		for (Item item : expiredItems) {
+			consumeItem(item);
+		}
 	}
 }

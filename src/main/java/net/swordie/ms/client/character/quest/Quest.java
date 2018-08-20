@@ -166,10 +166,13 @@ public class Quest {
     }
 
     public String getQRValue() {
-        if(qrValue != null && !qrValue.equalsIgnoreCase("")) {
+        if (qrValue != null && !qrValue.equalsIgnoreCase("")) {
             return qrValue;
         } else {
             StringBuilder sb = new StringBuilder();
+            if (getProgressRequirements() == null) {
+                return "";
+            }
             for(QuestProgressRequirement qpr : getProgressRequirements()) {
                 if(qpr instanceof QuestValueRequirement) {
                     sb.append(Util.leftPaddedString(3, '0', ((QuestValueRequirement) qpr).getValue()));

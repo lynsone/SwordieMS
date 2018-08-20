@@ -133,29 +133,28 @@ public class WorldHandler {
         int charId = inPacket.decodeInt();
         Tuple<Byte, Client> info = Server.getInstance().getChannelFromTransfer(charId, worldId);
         byte channel = info.getLeft();
+        Client oldClient = info.getRight();
+        Account acc = oldClient.getAccount();
+        c.setAccount(acc);
         Server.getInstance().getWorldById(worldId).getChannelById(channel).removeClientFromTransfer(charId);
         c.setChannel(channel);
         c.setWorldId((byte) worldId);
         c.setChannelInstance(Server.getInstance().getWorldById(worldId).getChannelById(channel));
-        Char chr = info.getRight().getChr();
+        Char chr = oldClient.getChr();
         if (chr == null || chr.getId() != charId) {
-            chr = Char.getFromDBById(charId);
-            chr.initEquips();
-            chr.initBaseStats();
+            chr = acc.getCharById(charId);
         }
         chr.setClient(c);
+        chr.setAccount(acc);
         c.setChr(chr);
         c.getChannelInstance().addChar(chr);
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
         chr.setOnline(true);
         chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
-        if(chr.getAccount() == null) {
-            chr.setAccount(Account.getFromDBById(chr.getAccId()));
-        }
-        chr.getAccount().setLoginState(LoginState.Game);
-        chr.getAccount().setLastLoggedIn(chr.getName());
-        chr.getAccount().setCurrentChr(chr);
-        DatabaseManager.saveToDB(chr.getAccount());
+        acc.setLoginState(LoginState.Game);
+        acc.setLastLoggedIn(chr.getName());
+        acc.setCurrentChr(chr);
+        DatabaseManager.saveToDB(acc);
         Field field = chr.getOrCreateFieldByCurrentInstanceType(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
         if (chr.getHP() <= 0) { // automatically revive when relogging
             chr.heal(chr.getMaxHP() / 2);
@@ -187,7 +186,8 @@ public class WorldHandler {
                 chr.write(WvsContext.partyResult(new UpdatePartyResult(party)));
             }
         }
-        chr.getAccount().getMonsterCollection().init(chr);
+        acc.getMonsterCollection().init(chr);
+        chr.checkAndRemoveExpiredItems();
     }
 
     public static void handleUserMove(Client c, InPacket inPacket) {
@@ -1958,20 +1958,20 @@ public class WorldHandler {
             case 2532003: // Safety Scroll
             case 2532004: // Pet Safety Scroll
             case 2532005: // Safety Scroll
-                equip.addAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION);
+                equip.addAttribute(EquipAttribute.UpgradeCountProtection);
                 break;
             case 2530000: // Lucky Day
             case 2530002: // Lucky Day
             case 2530003: // Pet Lucky Day
             case 2530004: // Lucky Day
             case 2530006: // Pet Lucky Day
-                equip.addAttribute(EquipAttribute.LUCKY_DAY);
+                equip.addAttribute(EquipAttribute.LuckyDay);
                 break;
             case 2531000: // Protection Scroll
             case 2531001:
             case 2531004:
             case 2531005:
-                equip.addAttribute(EquipAttribute.PROTECTION_SCROLL);
+                equip.addAttribute(EquipAttribute.ProtectionScroll);
                 break;
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), true, false, scrollID, equip.getItemId(), false));
@@ -2041,21 +2041,21 @@ public class WorldHandler {
             } else {
                 if (curse > 0) {
                     boom = Util.succeedProp(curse);
-                    if (boom && !equip.hasAttribute(EquipAttribute.PROTECTION_SCROLL)) {
+                    if (boom && !equip.hasAttribute(EquipAttribute.ProtectionScroll)) {
                         chr.consumeItem(equip);
                     } else {
                         boom = false;
-                        equip.removeAttribute(EquipAttribute.PROTECTION_SCROLL);
+                        equip.removeAttribute(EquipAttribute.ProtectionScroll);
                     }
                 }
-                if (!equip.hasAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION)) {
+                if (!equip.hasAttribute(EquipAttribute.UpgradeCountProtection)) {
                     equip.addStat(tuc, -1);
                 } else {
-                    equip.removeAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION);
+                    equip.removeAttribute(EquipAttribute.UpgradeCountProtection);
                 }
             }
-            if(equip.hasAttribute(EquipAttribute.LUCKY_DAY)) {
-                equip.removeAttribute(EquipAttribute.LUCKY_DAY);
+            if(equip.hasAttribute(EquipAttribute.LuckyDay)) {
+                equip.removeAttribute(EquipAttribute.LuckyDay);
             }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), boom));
@@ -3732,7 +3732,7 @@ public class WorldHandler {
                     equip.setChuc((short) (equip.getChuc() + 1));
                 } else if (Util.succeedProp(destroyProp, 1000)){
                     equip.setChuc((short) 0);
-                    equip.addSpecialAttribute(EquipSpecialAttribute.TRACE);
+                    equip.addSpecialAttribute(EquipSpecialAttribute.Vestige);
                     boom = true;
                 } else if (canDegrade){
                     equip.setChuc((short) (equip.getChuc() - 1));
@@ -3751,12 +3751,12 @@ public class WorldHandler {
                 Equip fromEq = (Equip) chr.getEquipInventory().getItemBySlot(fromPos);
                 Equip toEq = (Equip) chr.getEquipInventory().getItemBySlot(toPos);
                 if (fromEq == null || toEq == null || fromEq.getItemId() != toEq.getItemId() ||
-                        !fromEq.hasSpecialAttribute(EquipSpecialAttribute.TRACE)) {
+                        !fromEq.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
                     log.error(String.format("Equip transmission failed: from = %s, to = %s", fromEq, toEq));
                     c.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
-                fromEq.removeSpecialAttribute(EquipSpecialAttribute.TRACE);
+                fromEq.removeSpecialAttribute(EquipSpecialAttribute.Vestige);
                 fromEq.setChuc((short) 0);
                 chr.consumeItem(toEq);
                 fromEq.updateToChar(chr);
