@@ -30,7 +30,8 @@ import net.swordie.ms.client.guild.bbs.BBSRecord;
 import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.guild.bbs.GuildBBSPacket;
 import net.swordie.ms.client.guild.bbs.GuildBBSType;
-import net.swordie.ms.client.guild.result.*;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.*;
@@ -41,10 +42,7 @@ import net.swordie.ms.client.jobs.legend.Luminous;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
-import net.swordie.ms.client.jobs.resistance.BattleMage;
-import net.swordie.ms.client.jobs.resistance.WildHunter;
-import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.client.jobs.resistance.Xenon;
+import net.swordie.ms.client.jobs.resistance.*;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -1266,7 +1264,15 @@ public class WorldHandler {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int skillId = inPacket.decodeInt();
         tsm.removeStatsBySkill(skillId);
-        tsm.sendResetStatPacket();
+
+        if(skillId == net.swordie.ms.client.jobs.resistance.Mechanic.HUMANOID_MECH || skillId == net.swordie.ms.client.jobs.resistance.Mechanic.TANK_MECH) {
+            tsm.removeStatsBySkill(skillId+100); // because of special use
+            tsm.sendResetStatPacket(true);
+        } else {
+            tsm.sendResetStatPacket();
+        }
+
+
         chr.getJobHandler().handleSkillRemove(c, skillId);
     }
 
@@ -3448,14 +3454,20 @@ public class WorldHandler {
 
         Char chr = c.getChr();
         Field field = chr.getField();
-        if(field.getLifeByObjectID(objectID) != null) {
-
+        if(field.getLifeByObjectID(objectID) != null && field.getLifeByObjectID(objectID) instanceof Summon) {
+            Summon summon = (Summon) field.getLifeByObjectID(objectID);
             // Dark Knight - Evil Eye
             if(skillID == Warrior.EVIL_EYE) {
                 Warrior.EvilEyeHeal(chr);
             }
             else if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
                 Warrior.getHexOfTheEvilEyeBuffs(chr);
+            }
+
+            // Mechanic - Support Unit H-EX
+            else if(skillID == net.swordie.ms.client.jobs.resistance.Mechanic.SUPPORT_UNIT_HEX ||
+                    skillID == net.swordie.ms.client.jobs.resistance.Mechanic.ENHANCED_SUPPORT_UNIT) {
+                net.swordie.ms.client.jobs.resistance.Mechanic.healFromSupportUnit(c, summon);
             }
             chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, objectID)));
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skillID, (byte) 1, objectID)));
