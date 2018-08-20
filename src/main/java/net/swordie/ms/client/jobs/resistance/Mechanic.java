@@ -3,35 +3,44 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.TSIndex;
+import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.Mechanic;
+import static net.swordie.ms.enums.ForceAtomEnum.MECH_MEGA_ROCKET_1;
+import static net.swordie.ms.enums.ForceAtomEnum.MECH_MEGA_ROCKET_2;
+import static net.swordie.ms.enums.ForceAtomEnum.MECH_ROCKET;
 
 /**
  * Created on 12/14/2017.
@@ -40,6 +49,8 @@ import static net.swordie.ms.client.character.skills.SkillStat.*;
 //TODO  DCes (38 in SET_FIELD)
 
 public class Mechanic extends Job {
+
+    public static final int MECH_VEHICLE = 1932016;
 
     public static final int SECRET_ASSEMBLY = 30001281;
     public static final int MECHANIC_DASH = 30001068;
@@ -60,13 +71,15 @@ public class Mechanic extends Job {
     public static final int ADV_HOMING_BEACON = 35110017;
 
     public static final int BOTS_N_TOTS = 35121009; //Special Summon
+    public static final int BOTS_N_TOTS_SUB_SUMMON = 35121011; // Summon that spawn from the main BotsNtots
     public static final int MAPLE_WARRIOR_MECH = 35121007; //Buff
     public static final int ENHANCED_SUPPORT_UNIT = 35120002;
     public static final int HEROS_WILL_MECH = 35121008;
+    public static final int HOMING_BEACON_RESEARCH = 35120017;
 
     public static final int FOR_LIBERTY_MECH = 35121053;
     public static final int FULL_SPREAD = 35121055;
-    public static final int DISTORTION_BOMB = 35121055;
+    public static final int DISTORTION_BOMB = 35121052;
 
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,
@@ -84,6 +97,7 @@ public class Mechanic extends Job {
             MAPLE_WARRIOR_MECH,
 
             SUPPORT_UNIT_HEX, //Summon
+            ENHANCED_SUPPORT_UNIT,
             ROBO_LAUNCHER_RM7, //Summon
             ROCK_N_SHOCK, //Summon
             BOTS_N_TOTS, //Summon
@@ -91,8 +105,14 @@ public class Mechanic extends Job {
             FOR_LIBERTY_MECH,
     };
 
+    private int[] homingBeacon = new int[] {
+            HOMING_BEACON,
+            ADV_HOMING_BEACON,
+            HOMING_BEACON_RESEARCH,
+    };
 
-    private Summon botsNtotsSummons;
+    private ScheduledFuture botsNTotsTimer;
+    private ScheduledFuture supportUnitTimer;
     private byte gateId = 0;
 
     public Mechanic(Char chr) {
@@ -122,28 +142,25 @@ public class Mechanic extends Job {
         Field field;
         switch (skillID) {
             case HUMANOID_MECH:
-                //o1.nOption = 1;
-                //o1.rOption = skillID;
-                //o1.tOption = 30;
-                //tsm.putCharacterStatValue(Mechanic, o1);
-                //1932016 - Humanoid Mech
-                if (tsm.hasStat(RideVehicle)) {
-                    tsm.removeStat(RideVehicle, false);
-                } else {
-                    tsb.setNOption(1932016);
-                    tsb.setROption(skillID);
-                    tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
-                    tsm.sendSetStatPacket();
-                }
-                break;
-
-            case TANK_MECH:
-                o1.nOption = 2;
+                o1.nOption = 0;
                 o1.rOption = skillID;
-                o1.tOption = 30;
-                //tsm.putCharacterStatValue(Mechanic, o1);
-                break;
+                tsm.putCharacterStatValue(Mechanic, o1);
+                tsm.sendSetStatPacket();
 
+                tsb.setNOption(MECH_VEHICLE);
+                tsb.setROption(skillID+100);
+                tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+                break;
+            case TANK_MECH:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(Mechanic, o1);
+                tsm.sendSetStatPacket();
+
+                tsb.setNOption(MECH_VEHICLE);
+                tsb.setROption(skillID + 100);
+                tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+                break;
             case MECHANIC_RAGE:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
@@ -151,10 +168,14 @@ public class Mechanic extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case PERFECT_ARMOR:
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = 0; //(ON/OFF)
-                tsm.putCharacterStatValue(PowerGuard, o1);
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = 0; //(ON/OFF)
+                    tsm.putCharacterStatValue(PowerGuard, o1);
+                }
                 break;
             case ROLL_OF_THE_DICE:
                 int random = new Random().nextInt(6)+1;
@@ -174,11 +195,18 @@ public class Mechanic extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-            case SUPPORT_UNIT_HEX:
             case ENHANCED_SUPPORT_UNIT:
+                o2.nReason = skillID;
+                o2.nValue = si.getValue(z, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 80;
+                tsm.putCharacterStatValue(IndieDamR, o2);
+                // Fallthrough intended
+            case SUPPORT_UNIT_HEX:
+
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setFlyMob(true);
+                summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
@@ -190,6 +218,11 @@ public class Mechanic extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieEmpty, o1);
+
+                if(supportUnitTimer != null && !supportUnitTimer.isDone()) {
+                    supportUnitTimer.cancel(true);
+                }
+                applySupportUnitDebuffOnMob(skillID);
                 break;
             case ROBO_LAUNCHER_RM7:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -222,10 +255,10 @@ public class Mechanic extends Job {
                 tsm.putCharacterStatValue(IndieEmpty, o1);
 */
                 break;
-            case BOTS_N_TOTS:       //TODO spawn other summons from this summon pos.
+            case BOTS_N_TOTS:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
-                summon.setFlyMob(true);
+                summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
@@ -237,6 +270,11 @@ public class Mechanic extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieEmpty, o1);
+
+                if(botsNTotsTimer != null && !botsNTotsTimer.isDone()) {
+                    botsNTotsTimer.cancel(true);
+                }
+                botsNTotsTimer = EventManager.addEvent(() -> spawnBotsNTotsSubSummons(summon), 3, TimeUnit.SECONDS);
                 break;
             case FOR_LIBERTY_MECH:
                 o1.nReason = skillID;
@@ -250,13 +288,11 @@ public class Mechanic extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
-            case FULL_SPREAD:   //TODO  WVS_CRASH_CALLBACK
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
-                summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
-                field.spawnSummon(summon);
+            case FULL_SPREAD:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(BombTime, o1);
                 break;
         }
         tsm.sendSetStatPacket();
@@ -285,14 +321,15 @@ public class Mechanic extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         switch (skillID) {
-            case DISTORTION_BOMB:
+            case DISTORTION_BOMB: // TODO  AA 38's
+                /*
                 AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa.setMobOrigin((byte) 0);
-                int x = attackInfo.forcedX;
-                int y = attackInfo.forcedY;
-                aa.setPosition(new Position(x, y));
+                aa.setPosition(chr.getPosition());
                 aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                aa.setFlip(!attackInfo.left);
                 chr.getField().spawnAffectedArea(aa);
+                */
                 break;
         }
 
@@ -333,9 +370,12 @@ public class Mechanic extends Job {
                     }
                     openGate.spawnOpenGate(field);
                     break;
-                case HOMING_BEACON:
-                    for(int i=0; i<4; i++) {
-                        createMechRocketForceAtom();
+                case HOMING_BEACON: //4
+                case ADV_HOMING_BEACON: // 4thJob upgrade +5 -> 9
+                    if(tsm.hasStat(Mechanic) && tsm.getOption(Mechanic).nOption <= 0) {
+                        createHumanoidMechRocketForceAtom();
+                    } else if (tsm.hasStat(Mechanic) && tsm.getOption(Mechanic).nOption == 1) {
+                        createTankMechRocketForceAtom();
                     }
                     break;
                 case HEROS_WILL_MECH:
@@ -345,24 +385,152 @@ public class Mechanic extends Job {
         }
     }
 
-    private void createMechRocketForceAtom() { //TODO Needs to attack multiple enemies if can
+    private void createHumanoidMechRocketForceAtom() { // Humanoid Rockets are spread around
         Field field = chr.getField();
-        SkillInfo si = SkillData.getSkillInfoById(HOMING_BEACON);
+        SkillInfo si = SkillData.getSkillInfoById((chr.hasSkill(ADV_HOMING_BEACON) ? ADV_HOMING_BEACON : HOMING_BEACON));
+        byte slv = (byte) getHomingBeaconSkill().getCurrentLevel();
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        List<Life> lifes = field.getLifesInRect(rect);
-        for(Life life : lifes) {
-            if(life instanceof Mob) {
-                int ran = new Random().nextInt(41)+39;
-                int mobID = ((Mob) life).getRefImgMobID(); //
-                int inc = ForceAtomEnum.MECH_MEGA_ROCKET_1.getInc();
-                int type = ForceAtomEnum.MECH_MEGA_ROCKET_1.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, ran, 30,
-                        0, 200, (int) System.currentTimeMillis(), 1, 0,
-                        new Position(0, 0));
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, HOMING_BEACON, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), 0, life.getPosition()));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
+        List<Mob> mobs = field.getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
+        }
+        for(int i = 0; i < getHomingBeaconBulletCount(); i++) {
+            Mob mob = Util.getRandomFromList(mobs);
+            int inc = getHomingBeaconForceAtomEnum().getInc();
+            int type = getHomingBeaconForceAtomEnum().getForceAtomType();
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 25,
+                    0, 200 + (i * 2), (int) System.currentTimeMillis(), 1, 0,
+                    new Position());
+            field.broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mob.getObjectId(), HOMING_BEACON, forceAtomInfo, rect, 90, 30,
+                    mob.getPosition(), 0, mob.getPosition()));
+        }
+
+    }
+
+    private void createTankMechRocketForceAtom() { // Tank Rockets are focused on 1 enemy
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById((chr.hasSkill(ADV_HOMING_BEACON) ? ADV_HOMING_BEACON : HOMING_BEACON));
+        byte slv = (byte) getHomingBeaconSkill().getCurrentLevel();
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
+        if(field.getMobsInRect(rect).size() <= 0) {
+            return;
+        }
+        Mob mob = Util.getRandomFromList(field.getMobsInRect(rect));
+        if(field.getBossMobsInRect(rect).size() > 0) {
+            mob = Util.getRandomFromList(field.getBossMobsInRect(rect));
+        }
+
+
+        for(int i = 0; i < getHomingBeaconBulletCount(); i++) {
+            int inc = getHomingBeaconForceAtomEnum().getInc();
+            int type = getHomingBeaconForceAtomEnum().getForceAtomType();
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 25,
+                    0, 200, (int) System.currentTimeMillis(), 1, 0,
+                    new Position());
+            field.broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mob.getObjectId(), HOMING_BEACON, forceAtomInfo, rect, 90, 30,
+                    mob.getPosition(), 0, mob.getPosition()));
+        }
+    }
+
+    private ForceAtomEnum getHomingBeaconForceAtomEnum() {
+        switch (getHomingBeaconSkill().getSkillId()) {
+            case ADV_HOMING_BEACON:
+                return MECH_MEGA_ROCKET_1;
+            case HOMING_BEACON_RESEARCH:
+                return MECH_MEGA_ROCKET_2;
+            case HOMING_BEACON:
+            default:
+                return MECH_ROCKET;
+        }
+    }
+
+    private Skill getHomingBeaconSkill() {
+        Skill skill = null;
+        for(int skillId : homingBeacon) {
+            if(chr.hasSkill(skillId)) {
+                skill = chr.getSkill(skillId);
             }
+        }
+
+        return skill;
+    }
+
+    private int getHomingBeaconBulletCount() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int forceAtomCount = 0;
+        for(int skillId : homingBeacon) {
+            if(chr.hasSkill(skillId)) {
+                Skill skill = chr.getSkill(skillId);
+                SkillInfo si = SkillData.getSkillInfoById(skillId);
+                byte slv = (byte) skill.getCurrentLevel();
+                forceAtomCount += si.getValue(bulletCount, slv);
+            }
+        }
+        if(tsm.getOptByCTSAndSkill(BombTime, FULL_SPREAD) != null) {
+            forceAtomCount = forceAtomCount * 2;
+        }
+        return forceAtomCount;
+    }
+
+    private void spawnBotsNTotsSubSummons(Summon summon) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Position position = summon.getPosition();
+
+        if((tsm.getOptByCTSAndSkill(IndieEmpty, BOTS_N_TOTS) != null) && chr.hasSkill(BOTS_N_TOTS)) {
+            Skill skill = chr.getSkill(BOTS_N_TOTS);
+            byte slv = (byte) skill.getCurrentLevel();
+            Summon subSummon = Summon.getSummonBy(chr, BOTS_N_TOTS_SUB_SUMMON, slv);
+            subSummon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
+            subSummon.setPosition(position);
+            subSummon.setAttackActive(false);
+            subSummon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+
+            chr.getField().spawnAddSummon(subSummon);
+
+            botsNTotsTimer = EventManager.addEvent(() -> spawnBotsNTotsSubSummons(summon), 3, TimeUnit.SECONDS);
+        }
+    }
+
+    private void applySupportUnitDebuffOnMob(int skillId) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(!chr.hasSkill(SUPPORT_UNIT_HEX) || tsm.getOptByCTSAndSkill(IndieEmpty, skillId) == null) {
+            return;
+        }
+        Skill skill = chr.getSkill(skillId);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        SkillInfo suhInfo = SkillData.getSkillInfoById(SUPPORT_UNIT_HEX);
+        byte slv = (byte) skill.getCurrentLevel();
+
+        Option o = new Option();
+        Field field = chr.getField();
+        for(Mob mob : field.getMobs()) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            o.nOption = -suhInfo.getValue(w, chr.getSkill(SUPPORT_UNIT_HEX).getCurrentLevel()); // enhancement doesn't contain the debuff info
+            o.rOption = skill.getSkillId();
+            o.tOption = 6;
+            mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
+        }
+
+        supportUnitTimer = EventManager.addEvent(() -> applySupportUnitDebuffOnMob(skillId), si.getValue(x, slv), TimeUnit.SECONDS);
+    }
+
+
+
+    public static void healFromSupportUnit(Client c, Summon summon) {
+        Char summonOwner = c.getWorld().getCharByID(summon.getCharID());
+        if (summonOwner.hasSkill(ENHANCED_SUPPORT_UNIT) || summonOwner.hasSkill(SUPPORT_UNIT_HEX)) {
+            SkillInfo si = SkillData.getSkillInfoById(SUPPORT_UNIT_HEX);
+            byte slv = (byte) summonOwner.getSkill(SUPPORT_UNIT_HEX).getCurrentLevel();
+            int healrate = si.getValue(hp, slv);
+            c.getChr().heal((int) (c.getChr().getMaxHP() * ((double) healrate / 100)));
         }
     }
 
