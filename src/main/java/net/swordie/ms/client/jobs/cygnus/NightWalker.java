@@ -33,6 +33,7 @@ import net.swordie.ms.world.field.Field;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -129,20 +130,7 @@ public class NightWalker extends Job {
     };
 
     private List<Summon> bats = new ArrayList<>();
-    private List<Summon> removeBatsList = new ArrayList<>();
     private Summon darkServant;
-
-    public static int getOriginalSkillByID(int skillID) {
-        switch(skillID) {
-            case TRIPLE_THROW_FINISHER:
-                return TRIPLE_THROW;
-            case QUAD_STAR_FINISHER:
-                return QUAD_STAR;
-            case QUINTUPLE_STAR_FINISHER:
-                return QUINTUPLE_STAR;
-        }
-        return skillID; // no original skill linked with this one
-    }
 
     public NightWalker(Char chr) {
         super(chr);
@@ -247,8 +235,14 @@ public class NightWalker extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
             case SHADOW_ILLUSION:
-                tsm.removeStatsBySkill(DARK_SERVANT);
-                c.getChr().getField().broadcastPacket(Summoned.summonedRemoved(darkServant, LeaveType.ANIMATION));
+                if(chr.getField().getLifes().stream()
+                        .anyMatch(l -> l instanceof Summon &&
+                                ((Summon) l).getCharID() == chr.getId() &&
+                                ((Summon) l).getSkillID() == DARK_SERVANT)
+                        ) {
+                    tsm.removeStatsBySkill(DARK_SERVANT);
+                    c.getChr().getField().broadcastPacket(Summoned.summonedRemoved(darkServant, LeaveType.ANIMATION));
+                }
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -300,13 +294,13 @@ public class NightWalker extends Job {
             MobTemporaryStat mts = mob.getTemporaryStat();
             // Remove Bats & Create ForceAtom
             if (bats.size() > 0) {
-                for (Summon bat : bats) {
+                for(Iterator<Summon> it = bats.iterator(); it.hasNext();) {
+                    Summon bat = it.next();
                     if (Util.succeedProp((mts.hasCurrentMobStat(MobStat.ElementDarkness) ? 2*getBatAttackProp() : getBatAttackProp()))) {
-                        removeBatAndCreateFA(attackInfo, bat);
+                        it.remove();
+                        chr.getField().broadcastPacket(Summoned.summonedRemoved(bat, LeaveType.ANIMATION));
+                        createShadowBatForceAtom(attackInfo);
                     }
-                }
-                for (Summon removeBat : removeBatsList) {
-                    bats.remove(removeBat);
                 }
             }
 
@@ -315,12 +309,6 @@ public class NightWalker extends Job {
                 summonBatAndRegister();
             }
         }
-    }
-
-    private void removeBatAndCreateFA(AttackInfo attackInfo, Summon bat) {
-        removeBatsList.add(bat);
-        chr.getField().broadcastPacket(Summoned.summonedRemoved(bat, LeaveType.ANIMATION));
-        createShadowBatForceAtom(attackInfo);
     }
 
     private void createShadowBatForceAtom(AttackInfo attackInfo) {
@@ -356,7 +344,7 @@ public class NightWalker extends Job {
                 new Position());
 
         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
+                true, mobId, SHADOW_BAT, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
                 mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));
     }
 
@@ -475,8 +463,6 @@ public class NightWalker extends Job {
                 applyDarkElementalOnMob(attackInfo, slv);
             }
         }
-
-
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
