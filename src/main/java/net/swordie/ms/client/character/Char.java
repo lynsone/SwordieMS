@@ -2215,8 +2215,8 @@ public class Char {
 
 		if(tsm.hasStat(IndieEmpty)) {
 			for(Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext();) {
-				if(iterator.next().summon != null) {
-					Summon summon = iterator.next().summon;
+				Summon summon = iterator.next().summon;
+				if(summon != null) {
 					if (summon.getMoveAbility() == MoveAbility.SHADOW_SERVANT.getVal() ||
 							summon.getMoveAbility() == MoveAbility.FOLLOW.getVal() ||
 							summon.getMoveAbility() == MoveAbility.FLY_AROUND_CHAR.getVal() ||
