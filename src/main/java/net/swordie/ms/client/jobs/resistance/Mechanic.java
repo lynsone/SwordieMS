@@ -14,10 +14,8 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
@@ -38,9 +36,7 @@ import java.util.concurrent.TimeUnit;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.Mechanic;
-import static net.swordie.ms.enums.ForceAtomEnum.MECH_MEGA_ROCKET_1;
-import static net.swordie.ms.enums.ForceAtomEnum.MECH_MEGA_ROCKET_2;
-import static net.swordie.ms.enums.ForceAtomEnum.MECH_ROCKET;
+import static net.swordie.ms.enums.ForceAtomEnum.*;
 
 /**
  * Created on 12/14/2017.
@@ -475,7 +471,7 @@ public class Mechanic extends Job {
             }
         }
         if(tsm.getOptByCTSAndSkill(BombTime, FULL_SPREAD) != null) {
-            forceAtomCount = forceAtomCount * 2;
+            forceAtomCount += chr.hasSkill(FULL_SPREAD) ? SkillData.getSkillInfoById(FULL_SPREAD).getValue(x, chr.getSkill(FULL_SPREAD).getCurrentLevel()) : 0;
         }
         return forceAtomCount;
     }
@@ -521,8 +517,6 @@ public class Mechanic extends Job {
 
         supportUnitTimer = EventManager.addEvent(() -> applySupportUnitDebuffOnMob(skillId), si.getValue(x, slv), TimeUnit.SECONDS);
     }
-
-
 
     public static void healFromSupportUnit(Client c, Summon summon) {
         Char summonOwner = c.getWorld().getCharByID(summon.getCharID());
