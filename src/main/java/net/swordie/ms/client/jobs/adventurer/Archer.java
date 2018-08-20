@@ -640,6 +640,12 @@ public class Archer extends Job {
                 summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
                 field.spawnSummon(summon);
 
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case RECKLESS_HUNT_BOW:
                 if (tsm.hasStatBySkillId(skillID)) {
@@ -736,6 +742,13 @@ public class Archer extends Job {
                 summon.setPosition(position);
                 field = c.getChr().getField();
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
 
             case EPIC_ADVENTURE_XBOW:

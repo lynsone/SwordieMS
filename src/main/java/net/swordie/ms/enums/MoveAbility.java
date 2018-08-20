@@ -13,6 +13,7 @@ public enum MoveAbility {
     THROW(6),
     FIND_NEAREST_MOB(7),
     SHADOW_SERVANT(8),
+    JAGUAR(11),
 
     ;
 

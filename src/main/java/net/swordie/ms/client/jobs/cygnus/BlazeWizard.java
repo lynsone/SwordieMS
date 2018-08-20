@@ -199,6 +199,14 @@ public class BlazeWizard extends Job {
                     summonLion = summon;
                 }
 
+
+                o3.nReason = skillID;
+                o3.nValue = 1;
+                o3.summon = summon;
+                o3.tStart = (int) System.currentTimeMillis();
+                o3.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o3);
+
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(y, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -425,6 +433,7 @@ public class BlazeWizard extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.getOptByCTSAndSkill(MAD, getFlameElement()) == null) {
             Option o1 = new Option();
+            Option o2 = new Option();
             Skill skill = chr.getSkill(FLAME_ELEMENT);
             SkillInfo si = SkillData.getSkillInfoById(getFlameElement());
             byte slv = (byte) chr.getSkill(getFlameElement()).getCurrentLevel();
@@ -436,6 +445,13 @@ public class BlazeWizard extends Job {
             summon.setAttackActive(false);
             summon.setAssistType((byte) 0);
             field.spawnSummon(summon);
+
+            o2.nReason = getFlameElement();
+            o2.nValue = 1;
+            o2.summon = summon;
+            o2.tStart = (int) System.currentTimeMillis();
+            o2.tTerm = si.getValue(time, slv);
+            tsm.putCharacterStatValue(IndieEmpty, o2);
 
             o1.nOption = si.getValue(x, slv);
             o1.rOption = getFlameElement();

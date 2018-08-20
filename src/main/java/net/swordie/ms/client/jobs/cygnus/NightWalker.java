@@ -272,6 +272,13 @@ public class NightWalker extends Job {
                 summon.setFlyMob(false);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
         tsm.sendSetStatPacket();

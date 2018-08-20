@@ -89,6 +89,14 @@ public class BattleMage extends Job {
             MASTER_OF_DEATH,
     };
 
+    private int[] auras = new int[] {
+            HASTY_AURA,
+            DRAINING_AURA,
+            BLUE_AURA,
+            DARK_AURA,
+            WEAKENING_AURA,
+    };
+
     private Summon death;
     private long drainAuraCD = Long.MIN_VALUE;
     private ScheduledFuture WeaknessAuraTimer;
@@ -136,6 +144,10 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case HASTY_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieSpeed, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -152,12 +164,20 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case DRAINING_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o3.nOption = 1;
                 o3.rOption = skillID;
                 o3.tOption = 0;
                 tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case BLUE_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o1.nOption = si.getValue(asrR, slv);
                 o1.rOption = skillID;
                 o1.tOption = 0;
@@ -177,6 +197,10 @@ public class BattleMage extends Job {
                 applyBlueAuraDispel(); //Hyper
                 break;
             case DARK_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -188,6 +212,10 @@ public class BattleMage extends Job {
                 tsm.putCharacterStatValue(BMageAura, o3);
                 break;
             case WEAKENING_AURA:
+                for(int aura : auras) {
+                    tsm.removeStatsBySkill(aura);
+                }
+
                 o3.nOption = 1;
                 o3.rOption = skillID;
                 o3.tOption = 0;
@@ -252,6 +280,9 @@ public class BattleMage extends Job {
     }
 
     public void spawnDeath(int skillID, byte slv) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
         Field field = c.getChr().getField();
         death = Summon.getSummonBy(c.getChr(), skillID, slv);
         death.setFlyMob(true);
@@ -261,6 +292,14 @@ public class BattleMage extends Job {
         death.setAttackActive(false);
         death.setBeforeFirstAttack(false);
         field.spawnSummon(death);
+
+        o1.nReason = skillID;
+        o1.nValue = 1;
+        o1.summon = death;
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = 0; // #time is used for something else
+        tsm.putCharacterStatValue(IndieEmpty, o1);
+        tsm.sendSetStatPacket();
     }
 
     private void incrementCondemnation(AttackInfo attackInfo) {
@@ -271,7 +310,6 @@ public class BattleMage extends Job {
             return;
         }
         int killCount = tsm.getOption(BMageDeath).nOption;
-        
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
             int dmgOnMob = Arrays.stream(mai.damages).sum();
@@ -326,28 +364,26 @@ public class BattleMage extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = getCondemnationSkill();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
 
         // Master of Death Buff
         if(tsm.getOptByCTSAndSkill(AttackCountX, MASTER_OF_DEATH) != null) {
             return 0;
         }
 
-        return si.getValue(time, slv);
+        return si.getValue(time, 1);
     }
 
     private int getCondemnationKillReq() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = getCondemnationSkill();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
 
         // Master of Death Buff
         if(tsm.getOptByCTSAndSkill(AttackCountX, MASTER_OF_DEATH) != null) {
             return 1;
         }
 
-        return si.getValue(x, slv);
+        return si.getValue(x, 1);
     }
 
     private Skill getCondemnationSkill() {

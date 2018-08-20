@@ -4,32 +4,35 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.quest.Quest;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.QuestConstants;
 import net.swordie.ms.enums.*;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Summon;
-import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -99,9 +102,22 @@ public class WildHunter extends Citizen {
 
     public static final int FOR_LIBERTY_WH = 33121053;
     public static final int SILENT_RAMPAGE = 33121054;
+    public static final int JAGUAR_RAMPAGE = 33121255;
 
     private int[] addedSkills = new int[] {
             SECRET_ASSEMBLY,
+    };
+
+    private int[] jaguarSummons = new int[] {
+            SUMMON_JAGUAR_GREY,
+            SUMMON_JAGUAR_YELLOW,
+            SUMMON_JAGUAR_RED,
+            SUMMON_JAGUAR_PURPLE,
+            SUMMON_JAGUAR_BLUE,
+            SUMMON_JAGUAR_JAIRA,
+            SUMMON_JAGUAR_SNOW_WHITE,
+            SUMMON_JAGUAR_ONYX,
+            SUMMON_JAGUAR_CRIMSON,
     };
 
     private int[] buffs = new int[] {
@@ -175,16 +191,31 @@ public class WildHunter extends Citizen {
                 }
                 summon = Summon.getSummonBy(chr, SUMMONS[chr.getWildHunterInfo().getIdx()], (byte) 1);
                 summon.setSummonTerm(0);
+
+                summon.setMoveAbility(MoveAbility.JAGUAR.getVal());
+                summon.setAssistType(AssistType.ATTACKING.getVal());
+                summon.setAttackActive(true);
+
                 field = c.getChr().getField();
                 field.spawnSummon(summon);
+
+                if(tsm.hasStatBySkillId(RIDE_JAGUAR)) {
+                    tsm.removeStatsBySkill(RIDE_JAGUAR);
+                    tsm.sendResetStatPacket();
+                }
+
                 c.write(UserLocal.jaguarActive(true));
+                o2.nReason = skillID;
+                o2.nValue = 1;
+                o2.summon = summon;
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = 0;
+                tsm.putCharacterStatValue(IndieEmpty, o2);
+
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(JaguarSummoned, o1);
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
                 tsm.putCharacterStatValue(JaguarCount, o1);
                 break;
             case RIDE_JAGUAR:
@@ -194,6 +225,12 @@ public class WildHunter extends Citizen {
                     chr.chatMessage("You haven't selected a jaguar.");
                     return;
                 }
+
+                for(int jaguarSummonSkill : jaguarSummons) {
+                    tsm.removeStatsBySkill(jaguarSummonSkill);
+                    tsm.sendResetStatPacket();
+                }
+
                 TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
                 if (tsm.hasStat(RideVehicle)) {
                     tsm.removeStat(RideVehicle, false);
@@ -232,6 +269,7 @@ public class WildHunter extends Citizen {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o2);
+                tsm.putCharacterStatValue(Guard, o2);
                 tsm.putCharacterStatValue(EVAR, o2);
                 o3.nReason = skillID;
                 o3.nValue = si.getValue(x, slv);
@@ -245,14 +283,14 @@ public class WildHunter extends Citizen {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
-                o1.nOption = si.getValue(z, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamR, o1);
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Speed, o1);
+                o2.nOption = si.getValue(z, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamR, o2);
+                o3.nOption = si.getValue(x, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Speed, o3);
                 break;
             case BACKSTEP:
                 o1.nOption = 1;
@@ -440,6 +478,8 @@ public class WildHunter extends Citizen {
                 case SWIPE:
                 case DASH_N_SLASH_JAGUAR_SUMMONED:
                 case SONIC_ROAR:
+                case JAGUAR_SOUL:
+                case JAGUAR_RAMPAGE:
                     lastUsedSkill = skillID;
                     c.write(UserLocal.jaguarSkill(skillID));
                     break;
@@ -453,13 +493,9 @@ public class WildHunter extends Citizen {
                     aa.setMobOrigin((byte) 0);
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    if(chr.isLeft()) {
-                        aa.setFlip(false);
-                    } else {
-                        aa.setFlip(true);
-                    }
+                    aa.setFlip(chr.isLeft());
                     aa.setDelay((short) 4);
-                    chr.getField().spawnAffectedArea(aa);
+                    chr.getField().spawnAffectedAreaAndRemoveOld(aa);
                     break;
                 case HEROS_WILL_WH:
                     tsm.removeAllDebuffs();

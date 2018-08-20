@@ -48,6 +48,7 @@ import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Familiar;
+import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
@@ -76,8 +77,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
@@ -2218,6 +2218,30 @@ public class Char {
 				write(UserPool.userEnterField(c));
 			}
 		}
+
+		if(tsm.hasStat(IndieEmpty)) {
+			List<Integer> removingSkills = new ArrayList<>();
+			for (Option o : tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>())) {
+				if (o.summon != null) {
+					Summon summon = o.summon;
+					if (summon.getMoveAbility() == MoveAbility.SHADOW_SERVANT.getVal() ||
+							summon.getMoveAbility() == MoveAbility.FOLLOW.getVal() ||
+							summon.getMoveAbility() == MoveAbility.FLY_AROUND_CHAR.getVal() ||
+							summon.getMoveAbility() == MoveAbility.JAGUAR.getVal()) {
+						summon.setObjectId(getField().getNewObjectID());
+						getField().spawnSummon(summon);
+					} else {
+						removingSkills.add(o.nReason);
+					}
+				}
+			}
+			for(int skills : removingSkills) {
+				tsm.removeStatsBySkill(skills);
+				tsm.sendResetStatPacket();
+			}
+		}
+
+
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();

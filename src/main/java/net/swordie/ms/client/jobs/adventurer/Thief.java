@@ -135,6 +135,7 @@ public class Thief extends Job {
     private int supposedCrit;
     private final int MAX_CRIT = 100;
     private ScheduledFuture critGrowthTimer;
+    public static long lastShadowMelt = Long.MIN_VALUE;
 
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
@@ -462,31 +463,8 @@ public class Thief extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
-            // Dodged
-            if(chr.hasSkill(SHADOW_MELD)) {
-                if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
-                    Skill skill = chr.getSkill(SHADOW_MELD);
-                    byte slv = (byte) skill.getCurrentLevel();
-                    SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                    int dodgeProc = si.getValue(er, slv);
-                    if (Util.succeedProp(dodgeProc)) {
-                        Option o1 = new Option();
-                        Option o2 = new Option();
-                        o1.nOption = 100;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        tsm.putCharacterStatValue(CriticalBuff, o1);
-                        o2.nReason = skill.getSkillId();
-                        o2.nValue = si.getValue(indiePad, slv);
-                        o2.tStart = (int) System.currentTimeMillis();
-                        o2.tTerm = si.getValue(time, slv);
-                        tsm.putCharacterStatValue(IndiePAD, o2); //Indie
-                        tsm.sendSetStatPacket();
-                    }
-                }
-            }
+        if(hitInfo.hpDamage <= 0) {
+            giveShadowMelt(chr);
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -594,6 +572,7 @@ public class Thief extends Job {
                     summon.setAttackActive(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
                     field.spawnSummon(summon);
+
                     tsm.removeStatsBySkill(MIRROR_IMAGE);
                 }
                 break;
@@ -605,6 +584,13 @@ public class Thief extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
 
             case EPIC_ADVENTURE_DB:
@@ -1099,6 +1085,33 @@ public class Thief extends Job {
 
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skill.getSkillId(), slv, 0)));
             chr.write(User.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
+        }
+    }
+
+    public static void giveShadowMelt(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr.hasSkill(SHADOW_MELD)) {
+            if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
+                Skill skill = chr.getSkill(SHADOW_MELD);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+
+                if(lastShadowMelt + 5000 < System.currentTimeMillis()) {
+                    Option o1 = new Option();
+                    Option o2 = new Option();
+                    o1.nOption = 100;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(CriticalBuff, o1);
+                    o2.nReason = skill.getSkillId();
+                    o2.nValue = si.getValue(indiePad, slv);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndiePAD, o2); //Indie
+                    tsm.sendSetStatPacket();
+                    lastShadowMelt = System.currentTimeMillis();
+                }
+            }
         }
     }
 }

@@ -33,10 +33,7 @@ import net.swordie.ms.client.guild.bbs.GuildBBSType;
 import net.swordie.ms.client.guild.result.*;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
-import net.swordie.ms.client.jobs.adventurer.Archer;
-import net.swordie.ms.client.jobs.adventurer.BeastTamer;
-import net.swordie.ms.client.jobs.adventurer.Magician;
-import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.adventurer.*;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
@@ -1656,6 +1653,9 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(id);
         if (life == null || !(life instanceof Summon)) {
             return;
+        }
+        if(((Summon) life).getSkillID() == Thief.MIRRORED_TARGET) {
+            Thief.giveShadowMelt(chr);
         }
     }
 
@@ -3906,8 +3906,8 @@ public class WorldHandler {
                     0, 10 * i, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                    true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
-                    mob.getPosition(), Kaiser.getTempBladeSkill(chr, tsm), mob.getPosition()));
+                    true, mob.getObjectId(), Kaiser.TEMPEST_BLADES_FIVE_FF, forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), Kaiser.TEMPEST_BLADES_FIVE_FF, mob.getPosition()));
 
             lastMobID = mobid;
         }
@@ -3938,8 +3938,8 @@ public class WorldHandler {
                     0, 12 * i, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                    true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
-                    mob.getPosition(), Kaiser.getTempBladeSkill(chr, tsm), mob.getPosition()));
+                    true, mob.getObjectId(), Kaiser.TEMPEST_BLADES_FIVE_FF, forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), Kaiser.TEMPEST_BLADES_FIVE_FF, mob.getPosition()));
         }
 
         tsm.removeStat(StopForceAtomInfo, false);

@@ -452,7 +452,6 @@ public class Magician extends Job {
         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                 true, mobID2, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
                 life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
-
     }
 
     private void recreateMegiddoFlameForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
@@ -554,7 +553,7 @@ public class Magician extends Job {
                 aa.setSkillID(CHILLING_STEP);
                 aa.setRemoveSkill(false);
                 chr.getField().spawnAffectedArea(aa);
-            }
+           }
         }
     }
 
@@ -882,6 +881,13 @@ public class Magician extends Job {
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case MAPLE_WARRIOR_FP:
             case MAPLE_WARRIOR_IL:

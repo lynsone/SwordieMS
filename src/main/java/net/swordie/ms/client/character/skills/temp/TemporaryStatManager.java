@@ -9,10 +9,12 @@ import net.swordie.ms.client.character.skills.PartyBooster;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.BaseStat;
+import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
@@ -183,6 +185,10 @@ public class TemporaryStatManager {
             removeBaseStat(stats.getKey(), stats.getValue());
         }
         if(getCurrentStats().containsKey(cts)) {
+            if(option.summon != null) {
+                getChr().getField().broadcastPacket(Summoned.summonedRemoved(option.summon, LeaveType.ANIMATION));
+                option.summon = null;
+            }
             getCurrentStats().get(cts).remove(option);
             if(getCurrentStats().get(cts).size() == 0) {
                 getCurrentStats().remove(cts);

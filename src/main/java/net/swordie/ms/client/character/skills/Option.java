@@ -1,6 +1,7 @@
 package net.swordie.ms.client.character.skills;
 
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.life.Summon;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Util;
 
@@ -34,6 +35,7 @@ public class Option {
     public int tTerm;
     public int pOption;
     public int slv;
+    public Summon summon;
     public List<Option> extraOpts = new ArrayList<>();
     public boolean isInMillis = false;
 
@@ -84,6 +86,7 @@ public class Option {
         copy.tStart = tStart;
         copy.tTerm = tTerm;
         copy.slv = slv;
+        copy.summon = summon;
         extraOpts.forEach(o -> extraOpts.add(o.deepCopy()));
         return copy;
     }
