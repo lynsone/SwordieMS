@@ -184,14 +184,6 @@ public class SkillInfo {
         int value = getValue(ss, slv);
         switch (ss) {
             case lv2damX:
-            case lv2dex:
-            case lv2int:
-            case lv2luk:
-            case lv2mad:
-            case lv2mhp:
-            case lv2mmp:
-            case lv2pad:
-            case lv2str:
                 value *= chr.getLevel();
                 break;
             case str2dex:

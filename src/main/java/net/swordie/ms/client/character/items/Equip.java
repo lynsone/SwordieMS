@@ -1409,9 +1409,18 @@ public class Equip extends Item {
         this.sockets = sockets;
     }
 
-    public int getBaseStat(BaseStat baseStat) {
-        // TODO Potentials + sockets
-        int res = 0;
+    public double getBaseStat(BaseStat baseStat) {
+        // TODO: Sockets
+        double res = 0;
+        for (int i = 0; i < getOptions().size() - 1; i++) { // last one is anvil => skipped
+            int id = getOptions().get(i);
+            int level = getrLevel() / 10;
+            ItemOption io = ItemData.getItemOptionById(id);
+            if (io != null) {
+                Map<BaseStat, Double> valMap = io.getStatValuesByLevel(level);
+                res += valMap.getOrDefault(baseStat, 0D);
+            }
+        }
         switch (baseStat) {
             case str:
                 res += getiStr();

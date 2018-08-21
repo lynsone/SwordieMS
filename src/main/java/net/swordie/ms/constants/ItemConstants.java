@@ -479,9 +479,10 @@ public class ItemConstants {
 
     public static List<ItemOption> getOptionsByEquip(Equip equip, boolean bonus, int line) {
         int id = equip.getItemId();
-        List<ItemOption> data = ItemData.getItemOptions();
+        Collection<ItemOption> data = ItemData.getItemOptions().values();
         ItemGrade grade = getLineTier(line, ItemGrade.getGradeByVal(bonus ? equip.getBonusGrade() : equip.getBaseGrade()));
 
+        // need a list, as we take a random item from it later on
         List<ItemOption> res = data.stream().filter(
                 io -> io.getOptionType() == 0 &&
                 io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)

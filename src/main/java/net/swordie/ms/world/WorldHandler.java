@@ -169,9 +169,6 @@ public class WorldHandler {
         c.write(WvsContext.macroSysDataInit(chr.getMacros()));
         c.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_SendInfo, null, chr));
         c.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, (byte) 5, chr.getHyperRockFields()));
-        if(chr.getQuestManager().hasQuestInProgress(7291)) { // damage skin update
-            c.write(WvsContext.questRecordMessage(chr.getQuestManager().getQuests().get(7291)));
-        }
         if (chr.getPartyID() != 0) {
             Party party = c.getWorld().getPartybyId(chr.getPartyID());
             if (party == null) {
@@ -183,6 +180,7 @@ public class WorldHandler {
         }
         acc.getMonsterCollection().init(chr);
         chr.checkAndRemoveExpiredItems();
+        chr.initBaseStats();
     }
 
     public static void handleUserMove(Client c, InPacket inPacket) {

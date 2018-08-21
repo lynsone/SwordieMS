@@ -23,10 +23,6 @@ public class CharacterPotentialMan {
         return chr.getPotentials();
     }
 
-    public CharacterPotential getPotentialByKey(int key) {
-        return getPotentialByKey((byte) key);
-    }
-
     public CharacterPotential getPotentialByKey(byte key) {
         return getPotentials().stream().filter(pot -> pot.getKey() == key).findAny().orElse(null);
     }

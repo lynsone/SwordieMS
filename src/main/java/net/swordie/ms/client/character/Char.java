@@ -3359,33 +3359,49 @@ public class Char {
 
 	/**
 	 * Gets the current amount of a given stat the character has. Includes things such as skills, items, etc...
-	 * @param mainStat the requested stat
+	 * @param baseStat the requested stat
 	 * @return the amount of stat
 	 */
-	public int getTotalStat(BaseStat mainStat) {
+	private double getTotalStatAsDouble(BaseStat baseStat) {
 		// TODO cache this completely
-		int stat = 0;
+		double stat = 0;
 		// Stat allocated by sp
-		stat += mainStat.toStat() == null ? 0 : getStat(mainStat.toStat());
+		stat += baseStat.toStat() == null ? 0 : getStat(baseStat.toStat());
 		// Stat gained by passives
-		stat += getBaseStats().getOrDefault(mainStat, 0L);
+		stat += getBaseStats().getOrDefault(baseStat, 0L);
 		// Stat gained by buffs
-		int ctsStat = getTemporaryStatManager().getBaseStats().getOrDefault(mainStat, 0);
+		int ctsStat = getTemporaryStatManager().getBaseStats().getOrDefault(baseStat, 0);
 		stat += ctsStat;
-		// Stat gained by the stat's corresponding rate value
-		if (mainStat.getRateVar() != null) {
-			stat += stat * (getTotalStat(mainStat.getRateVar()) / 100D);
+		// Stat gained by the stat's corresponding "per level" value
+		if (baseStat.getLevelVar() != null) {
+			stat += getTotalStatAsDouble(baseStat.getLevelVar()) * getLevel();
 		}
 		// Stat gained by equips
 		for (Item item : getEquippedInventory().getItems()) {
 			Equip equip = (Equip) item;
-			stat += equip.getBaseStat(mainStat);
+			stat += equip.getBaseStat(baseStat);
+		}
+		// Stat gained by the stat's corresponding rate value
+		if (baseStat.getRateVar() != null) {
+			stat += stat * (getTotalStat(baseStat.getRateVar()) / 100D);
+		}
+		// --- Everything below this doesn't get affected by the rate var
+		// Character potential
+		for (CharacterPotential cp : getPotentials()) {
+			Skill skill = cp.getSkill();
+			SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+			Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
+			stat += stats.getOrDefault(baseStat, 0);
 		}
 		return stat;
 	}
 
+	public int getTotalStat(BaseStat stat) {
+		return (int) getTotalStatAsDouble(stat);
+	}
+
 	/**
-	 * Gets a total list of basic stats that a character has, including skills, items, etc...
+	 * Gets a total list of basic stats that a character has, including from skills, items, etc...
 	 * @return the total list of basic stats
 	 */
 	public Map<BaseStat, Integer> getTotalBasicStats() {
