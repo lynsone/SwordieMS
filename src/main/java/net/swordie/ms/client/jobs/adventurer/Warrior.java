@@ -273,7 +273,6 @@ public class Warrior extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o2);
-                //c.write(Summoned.summonedSkill(chr.getId(), evilEye, 7));
                 break;
             case EVIL_EYE:
                 spawnEvilEye(skillID, slv);
@@ -714,8 +713,8 @@ public class Warrior extends Job {
                     break;
                 case THREATEN:
                     Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-                    if (chr.isLeft()) {
-                        rect = rect.moveLeft();
+                    if(!chr.isLeft()) {
+                        rect = rect.moveRight();
                     }
                     for (Life life : chr.getField().getLifesInRect(rect)) {
                         if (life instanceof Mob && ((Mob) life).getHp() > 0) {
@@ -750,6 +749,9 @@ public class Warrior extends Job {
                     if(party != null) {
                         Field field = chr.getField();
                         rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                        if(!chr.isLeft()) {
+                            rect = rect.moveRight();
+                        }
                         List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
                                 filter(pml -> pml.getChr().getId() != chr.getId() &&
                                         pml.getChr().getHP() <= 0).
@@ -1197,6 +1199,9 @@ public class Warrior extends Job {
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             byte slv = (byte) skill.getCurrentLevel();
             Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+            if(!chr.isLeft()) {
+                rect = rect.moveRight();
+            }
             Party party = chr.getParty();
 
             if (party != null) {

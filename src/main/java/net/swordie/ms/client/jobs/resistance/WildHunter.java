@@ -26,6 +26,7 @@ import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
@@ -492,8 +493,12 @@ public class WildHunter extends Citizen {
                     AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
                     aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    aa.setFlip(chr.isLeft());
+                    Rect rect = aa.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.horizontalFlipAround(chr.getPosition().getX());
+                    }
+                    aa.setRect(rect);
+                    aa.setFlip(!chr.isLeft());
                     aa.setDelay((short) 4);
                     chr.getField().spawnAffectedAreaAndRemoveOld(aa);
                     break;

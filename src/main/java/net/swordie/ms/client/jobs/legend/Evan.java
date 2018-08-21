@@ -345,7 +345,6 @@ public class Evan extends Job {
                     aa.setMobOrigin((byte) 0);
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(rft.getRects().get(0)));
-                    //aa.setRect(rect);
                     chr.getField().spawnAffectedArea(aa);
                     break;
                 case RETURN_FLASH:
@@ -455,7 +454,13 @@ public class Evan extends Job {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(getDebrisSkill());
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
         List<Mob> lifes =  field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
         for(int i = 0; i<debrisCount; i++) {
             c.write(CField.delWreckage(chr));
             Life life = Util.getRandomFromList(lifes);

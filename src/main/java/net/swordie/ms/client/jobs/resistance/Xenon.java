@@ -3,31 +3,31 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.world.field.Field;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -302,7 +302,12 @@ public class Xenon extends Job {
         }
         if (hasHitMobs) {
             //Increment Supply on attack
-            if (Util.succeedProp(supplyProp)) {
+            if (Util.succeedProp(supplyProp) &&
+                    attackInfo.skillId != 0 &&
+                    attackInfo.skillId != PINPOINT_SALVO &&
+                    attackInfo.skillId != PINPOINT_SALVO_REDESIGN_A &&
+                    attackInfo.skillId != PINPOINT_SALVO_REDESIGN_B &&
+                    attackInfo.skillId != PINPOINT_SALVO_PERFECT_DESIGN) {
                 incrementSupply();
             }
 
@@ -389,6 +394,7 @@ public class Xenon extends Job {
                     chr.warp(toField);
                     break;
                 case PINPOINT_SALVO:
+                    incrementSupply(-1);
                     createPinPointSalvoForceAtom();
                     break;
                 case HEROS_WILL_XENON:
@@ -534,22 +540,22 @@ public class Xenon extends Job {
         if(!chr.isLeft()) {
             rect = rect.moveRight();
         }
-        List<Life> lifes = field.getLifesInRect(rect);
-        //for(Life life : lifes) {
-        Life life = lifes.get(0);
-        if(life instanceof Mob) {
-            for(int i = 0; i<4; i++) {
-                int anglenum = new Random().nextInt(160) + 20;
-                int mobID = ((Mob) life).getRefImgMobID(); //
-                int inc = ForceAtomEnum.XENON_ROCKET_3.getInc();
-                int type = ForceAtomEnum.XENON_ROCKET_3.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                        new Position());
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, getPinPointSkill(), forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), getPinPointSkill(), life.getPosition()));
-            }
+        List<Mob> mobs = field.getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
+        }
+        Mob mob = Util.getRandomFromList(mobs);
+        for(int i = 0; i<4; i++) {
+            int anglenum = new Random().nextInt(160) + 20;
+            int mobID = mob.getObjectId();
+            int inc = ForceAtomEnum.XENON_ROCKET_3.getInc();
+            int type = ForceAtomEnum.XENON_ROCKET_3.getForceAtomType();
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                    anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                    new Position());
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mobID, getPinPointSkill(), forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), 0, mob.getPosition()));
         }
     }
 

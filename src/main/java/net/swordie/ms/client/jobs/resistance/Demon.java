@@ -542,19 +542,20 @@ public class Demon extends Job {
         if(!chr.isLeft()) {
             rect = rect.moveRight();
         }
-        List<Life> lifes = field.getLifesInRect(rect);
-        Life life = lifes.get(0);
-        if(life instanceof Mob) {
-            int mobID = (life).getObjectId(); //
-            int inc = ForceAtomEnum.NETHER_SHIELD.getInc();
-            int type = ForceAtomEnum.NETHER_SHIELD.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 500, (int) System.currentTimeMillis(), 1, 0,
-                        new Position(0, -100));
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), NETHER_SHIELD_ATOM, life.getPosition()));
+        List<Mob> mobs = field.getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
         }
+        Mob mob = Util.getRandomFromList(mobs);
+        int mobID = mob.getObjectId(); //
+        int inc = ForceAtomEnum.NETHER_SHIELD.getInc();
+        int type = ForceAtomEnum.NETHER_SHIELD.getForceAtomType();
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                    0, 500, (int) System.currentTimeMillis(), 1, 0,
+                    new Position(0, -100));
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), NETHER_SHIELD_ATOM, mob.getPosition()));
     }
 
     private void recreateNetherShieldForceAtom(AttackInfo attackInfo) {

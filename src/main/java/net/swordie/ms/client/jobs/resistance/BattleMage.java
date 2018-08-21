@@ -17,7 +17,6 @@ import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -572,18 +571,17 @@ public class BattleMage extends Job {
         int delay = si.getValue(y, slv);
         if (tsm.getOptByCTSAndSkill(BMageAura, skill.getSkillId()) != null) {
             Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+            if(!chr.isLeft()) {
+                rect = rect.moveRight();
+            }
             Field field = chr.getField();
-            List<Life> lifes = field.getLifesInRect(rect);
-            for (Life life : lifes) {
-                if (life instanceof Mob) {
-                    int mobID = life.getObjectId();
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mobID);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o.nOption = -si.getValue(x, slv);
-                    o.rOption = skill.getSkillId();
-                    o.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
-                }
+            List<Mob> mobs = field.getMobsInRect(rect);
+            for (Mob mob : mobs) {
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                o.nOption = -si.getValue(x, slv);
+                o.rOption = skill.getSkillId();
+                o.tOption = si.getValue(time, slv);
+                mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
             }
             WeaknessAuraTimer = EventManager.addEvent(this::applyWeakenAuraOnMob, delay, TimeUnit.SECONDS);
         }

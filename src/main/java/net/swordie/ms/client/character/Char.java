@@ -2214,10 +2214,9 @@ public class Char {
 		}
 
 		if(tsm.hasStat(IndieEmpty)) {
-			List<Integer> removingSkills = new ArrayList<>();
-			for (Option o : tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>())) {
-				if (o.summon != null) {
-					Summon summon = o.summon;
+			for(Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext();) {
+				Summon summon = iterator.next().summon;
+				if(summon != null) {
 					if (summon.getMoveAbility() == MoveAbility.SHADOW_SERVANT.getVal() ||
 							summon.getMoveAbility() == MoveAbility.FOLLOW.getVal() ||
 							summon.getMoveAbility() == MoveAbility.FLY_AROUND_CHAR.getVal() ||
@@ -2225,13 +2224,9 @@ public class Char {
 						summon.setObjectId(getField().getNewObjectID());
 						getField().spawnSummon(summon);
 					} else {
-						removingSkills.add(o.nReason);
+						iterator.remove();
 					}
 				}
-			}
-			for(int skills : removingSkills) {
-				tsm.removeStatsBySkill(skills);
-				tsm.sendResetStatPacket();
 			}
 		}
 

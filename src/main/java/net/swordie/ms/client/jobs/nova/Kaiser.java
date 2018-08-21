@@ -26,11 +26,13 @@ import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -597,13 +599,29 @@ public class Kaiser extends Job {
             case INFERNO_BREATH:
             case INFERNO_BREATH_FINAL_FORM:
                 SkillInfo rca = SkillData.getSkillInfoById(INFERNO_BREATH);
-                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
-                aa.setMobOrigin((byte) 0);
-                aa.setSkillID(INFERNO_BREATH);
-                aa.setPosition(chr.getPosition());
-                aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
-                aa.setDelay((short) 7); //spawn delay
-                chr.getField().spawnAffectedArea(aa);
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+
+                    if(chr.getField().getLifes().stream()
+                            .filter(l -> l instanceof AffectedArea &&
+                                    ((AffectedArea) l).getSkillID() == INFERNO_BREATH)
+                            .collect(Collectors.toList()).size() > 3) {
+                        continue; // to limit the amount of AAs
+                    }
+
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
+                    aa.setDuration(rca.getValue(cooltime, slv) * 1000);
+                    aa.setMobOrigin((byte) 1);
+                    aa.setSkillID(INFERNO_BREATH);
+                    aa.setPosition(mob.getPosition());
+                    Rect rect = rca.getRects().get(0);
+                    if(!attackInfo.left) {
+                        rect = rect.moveRight();
+                    }
+                    aa.setRect(aa.getPosition().getRectAround(rect));
+                    aa.setDelay((short) 7); //spawn delay
+                    chr.getField().spawnAffectedArea(aa);
+                }
                 break;
         }
 
