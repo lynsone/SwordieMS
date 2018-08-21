@@ -1067,7 +1067,6 @@ public class ItemData {
                                 case "reqCUC":
                                 case "incCraft":
                                 case "reqEquipLevelMin":
-                                case "incRandVol":
                                 case "incPVPDamage":
                                 case "successRates":
                                 case "enchantCategory":
@@ -1164,6 +1163,9 @@ public class ItemData {
                                     break;
                                 case "noNegative":
                                     item.putScrollStat(noNegative, Integer.parseInt(value));
+                                    break;
+                                case "incRandVol":
+                                    item.putScrollStat(incRandVol, Integer.parseInt(value));
                                     break;
                                 case "success":
                                     item.putScrollStat(success, Integer.parseInt(value));

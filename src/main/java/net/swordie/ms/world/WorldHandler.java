@@ -2006,18 +2006,10 @@ public class WorldHandler {
             int curse = vals.getOrDefault(ScrollStat.cursed, 0);
             success = Util.succeedProp(chance);
             if (success) {
-                boolean chaos = vals.containsKey(ScrollStat.randStat) || vals.containsKey(ScrollStat.noNegative);
+                boolean chaos = vals.containsKey(ScrollStat.randStat);
                 if (chaos) {
                     boolean noNegative = vals.containsKey(ScrollStat.noNegative);
-                    int max = 5;
-                    switch (scrollID) {
-                        case 2049129: // Chaos Scroll of Goodness
-                        case 2049130:
-                        case 2049131:
-                        case 2049132:
-                            max = 3;
-                            break;
-                    }
+                    int max = vals.containsKey(ScrollStat.incRandVol) ? ItemConstants.RAND_CHAOS_MAX : ItemConstants.INC_RAND_CHAOS_MAX;
                     for (EquipBaseStat ebs : ScrollStat.getRandStats()) {
                         int cur = (int) equip.getBaseStat(ebs);
                         if (cur == 0) {

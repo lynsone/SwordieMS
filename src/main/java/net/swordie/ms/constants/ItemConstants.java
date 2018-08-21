@@ -26,6 +26,8 @@ public class ItemConstants {
     public static final int MOB_CARD_BASE_ID = 2380000;
     public static final int FAMILIAR_PREFIX = 996;
     public static final int SPELL_TRACE_ID = 4001832;
+    public static final int RAND_CHAOS_MAX = 5;
+    public static final int INC_RAND_CHAOS_MAX = 10;
 
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
