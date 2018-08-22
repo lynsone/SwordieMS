@@ -484,38 +484,16 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket cancelChair(int chrid, int id) {
+    public static OutPacket sitResult(int chrId, int fieldSeatId) {
         OutPacket outPacket = new OutPacket(OutHeader.SIT_RESULT);
 
-        outPacket.encodeInt(chrid);
-        if(id == -1) {
+        outPacket.encodeInt(chrId);
+        if(fieldSeatId == -1) {
             outPacket.encodeByte(0);
         } else {
             outPacket.encodeByte(1);
-            outPacket.encodeShort(id);
+            outPacket.encodeShort(fieldSeatId);
         }
-
-        return outPacket;
-    }
-
-    public static OutPacket showChair(int characterid, int itemid) {
-        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_ACTIVE_PORTABLE_CHAIR);
-
-        outPacket.encodeInt(characterid);
-        outPacket.encodeInt(itemid);
-        int message = 0;
-        outPacket.encodeInt(message);
-        if (message > 0) {
-            outPacket.encodeString("");
-        }
-        int towerChair = 0;
-        outPacket.encodeInt(towerChair);
-        if (towerChair > 0) {
-            outPacket.encodeInt(0);//TowerChairID
-        }
-        outPacket.encodeInt(0);//mesochaircount
-        outPacket.encodeInt(0);//unkGMS
-        outPacket.encodeInt(0);//unkGMS
 
         return outPacket;
     }

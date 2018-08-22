@@ -5,8 +5,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
 import net.swordie.ms.handlers.header.InHeader;
@@ -437,10 +435,10 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 WorldHandler.handleBattleRecordOnOffRequest(c, inPacket);
                 break;
             case USER_SIT_REQUEST:
-                WorldHandler.handleCancelChair(c, inPacket);
+                WorldHandler.handleUserSitRequest(chr, inPacket);
                 break;
             case USER_PORTABLE_CHAIR_SIT_REQUEST:
-                WorldHandler.handleShowChair(c, inPacket);
+                WorldHandler.handleUserPortableChairSitRequest(chr, inPacket);
                 break;
             case RW_MULTI_CHARGE_CANCEL_REQUEST:
                 WorldHandler.handleRWMultiChargeCancelRequest(c, inPacket);
