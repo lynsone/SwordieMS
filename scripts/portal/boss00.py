@@ -17,6 +17,16 @@ def init():
 	elif fieldID == 240020400:
 		map = 240020401
 		portal = 3
+	elif fieldID == 252020000:
+		map = 252020700
+		portal = 0
+
+	elif fieldID == 252030000: # Ravana's Entrance
+		warp = False
+		if sm.checkParty():
+			sm.warpPartyIn(252030100) # Ravana's Golden Altar
+		sm.dispose()
+
 	else:
 		sm.chat("(Portal) This script (boss00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
 		map = sm.getChr().getField().getReturnMap()

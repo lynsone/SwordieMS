@@ -86,21 +86,14 @@ elif sm.getFieldID() == 951000000:
 else:
 
     field = {
-        220070400 : 922020000,
-        222020400 : 300000100,
-        104020100 : 104020120,
-        100000200 : 100000202, # Henesys Park : Pet-Walking Road
-        130020000 : 913001000,
-        865000000 : 865000002,
-    }
+        220070400 : [922020000, 0],
+        222020400 : [300000100, 1],
+        104020100 : [104020120, 2],
+        100000200 : [100000202, 5], # Henesys Park : Pet-Walking Road
+        130020000 : [913001000, 0],
+        865000000 : [865000002, 1],
 
-    portal = {
-        220070400 : 0,
-        222020400 : 1,
-        104020100 : 2,
-        100000200 : 5,
-        130020000 : 0,
-        865000000 : 1,
+        252010300 : [925120000, 0],
     }
 
     def init():
@@ -112,11 +105,16 @@ else:
                 sm.chat("Sorry, only knights looking to job advance to the second job may enter here.")
                 warp = False
 
+        if fieldID == 252010300:  # Golden Temple Training Ground 4
+            warp = False
+            if sm.checkParty():
+                sm.warpPartyIn(925120000) # SnowFro's Lair
+
         # Default
         if field[fieldID] is None:
             sm.chat("(Portal) This script (in01.py) is not coded for this map. (ID: " + str(fieldID) + ")")
             warp = False
 
         if warp:
-            sm.warp(field[fieldID], portal[fieldID])
+            sm.warp(field[fieldID][0], field[fieldID][1])
         sm.dispose()

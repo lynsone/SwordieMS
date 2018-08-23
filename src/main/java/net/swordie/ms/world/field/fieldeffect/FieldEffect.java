@@ -41,7 +41,7 @@ public class FieldEffect {
                 outPacket.encodeInt(getArg3());     // Reward Level ID
                 break;
             case TopScreen:
-                outPacket.encodeString(getString());
+                outPacket.encodeString(getString());// Directory to the Effect
                 break;
             case TopScreenEffect:                   // Goes over other effects
                 outPacket.encodeString(getString());// Directory to the Effect
@@ -55,15 +55,25 @@ public class FieldEffect {
                 outPacket.encodeShort(getArg1());   // GreyField Type
                 outPacket.encodeByte(getArg2());    // boolean: ON/OFF
                 break;
-            case ClientSnapShot:                    // Takes a Snapshot of the Client and slowly fades away
-                outPacket.encodeInt(getArg1());     // Duration of the SnapShot persistence (ms)
+            case ChangeColor:
+                outPacket.encodeShort(getArg1());   // GreyField Type (but doesn't contain Reactor
+                outPacket.encodeShort(getArg2());   // red      (250 is normal value)
+                outPacket.encodeShort(getArg3());   // green    (250 is normal value)
+                outPacket.encodeShort(getArg4());   // blue     (250 is normal value)
+                outPacket.encodeInt(getArg5());     // time in ms, that it takes to transition from old colours to the new colours
+                outPacket.encodeInt(0);          // is in queue
                 break;
-            case ClientSnapShot2:
+            case OverlapScreen:                    // Takes a Snapshot of the Client and slowly fades away
+                outPacket.encodeInt(getArg1());     // Duration of the overlap (ms)
+                break;
+            case OverlapScreenDetail:
                 outPacket.encodeInt(getArg1());     // Fade In
                 outPacket.encodeInt(getArg2());     // wait time
                 outPacket.encodeInt(getArg3());     // Fade Out
                 outPacket.encodeByte(getArg4());    // some boolean
                 break;
+            case RemoveOverlapScreen:
+                outPacket.encodeInt(getArg1());     // Fade Out duration
             case StageClearExpOnly:
                 outPacket.encodeInt(getArg1());     // Exp Number given
                 break;
@@ -105,12 +115,25 @@ public class FieldEffect {
         return fieldEffect;
     }
 
-    public static FieldEffect setUserFieldGrey(GreyFieldType greyFieldType, boolean setGrey) {
+    public static FieldEffect setFieldGrey(GreyFieldType greyFieldType, boolean setGrey) {
         FieldEffect fieldEffect = new FieldEffect();
         fieldEffect.setFieldEffectType(FieldEffectType.SetGrey);
 
         fieldEffect.setArg1(greyFieldType.getVal());
         fieldEffect.setArg2(setGrey ? 1 : 0);
+
+        return fieldEffect;
+    }
+
+    public static FieldEffect setFieldColor(GreyFieldType colorFieldType, short red, short green, short blue, int time) {
+        FieldEffect fieldEffect = new FieldEffect();
+        fieldEffect.setFieldEffectType(FieldEffectType.ChangeColor);
+
+        fieldEffect.setArg1(colorFieldType.getVal());
+        fieldEffect.setArg2(red);
+        fieldEffect.setArg3(green);
+        fieldEffect.setArg4(blue);
+        fieldEffect.setArg5(time);
 
         return fieldEffect;
     }
@@ -126,7 +149,7 @@ public class FieldEffect {
 
     public static FieldEffect takeSnapShotOfClient(int duration) {
         FieldEffect fieldEffect = new FieldEffect();
-        fieldEffect.setFieldEffectType(FieldEffectType.ClientSnapShot);
+        fieldEffect.setFieldEffectType(FieldEffectType.OverlapScreen);
 
         fieldEffect.setArg1(duration);
 
@@ -135,7 +158,7 @@ public class FieldEffect {
 
     public static FieldEffect takeSnapShotOfClient2(int transitionDurationToSnapShot, int inBetweenDuration, int transitionBack, boolean someBoolean) {
         FieldEffect fieldEffect = new FieldEffect();
-        fieldEffect.setFieldEffectType(FieldEffectType.ClientSnapShot2);
+        fieldEffect.setFieldEffectType(FieldEffectType.OverlapScreenDetail);
 
         fieldEffect.setArg1(transitionDurationToSnapShot);
         fieldEffect.setArg2(inBetweenDuration);
