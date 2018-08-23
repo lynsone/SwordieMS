@@ -89,11 +89,10 @@ else:
         220070400 : [922020000, 0],
         222020400 : [300000100, 1],
         104020100 : [104020120, 2],
-        100000200 : [100000202, 5], # Henesys Park : Pet-Walking Road
+        100000200 : [100000202, 5], # Henesys Park -> Pet-Walking Road
         130020000 : [913001000, 0],
         865000000 : [865000002, 1],
-
-        252010300 : [925120000, 0],
+        252010300 : [925120000, 0], # Golden Temple Training Ground 4 -> SnowFro's Lair
     }
 
     def init():
@@ -104,11 +103,6 @@ else:
             if not sm.hasQuest(20873):  # WA 2nd job quest
                 sm.chat("Sorry, only knights looking to job advance to the second job may enter here.")
                 warp = False
-
-        if fieldID == 252010300:  # Golden Temple Training Ground 4
-            warp = False
-            if sm.checkParty():
-                sm.warpPartyIn(925120000) # SnowFro's Lair
 
         # Default
         if field[fieldID] is None:
