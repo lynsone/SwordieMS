@@ -16,7 +16,7 @@ public enum FieldEffectType {
     SetBGMVolume(9),
     RewardRoulette(10),
     TopScreen(11),
-    ScreenDelayed(12),
+    BackScreen(12),
     TopScreenEffect(13),
     ScreenEffect(14),
     ScreenFloatingEffect(15),

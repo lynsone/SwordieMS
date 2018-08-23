@@ -8,9 +8,8 @@ def init():
 		map = 130000210
 		portal = 0
 	else:
-		sm.chat("(Portal) This script (out01.py) is not coded for this map. (ID: " + str(fieldID) + ")")
-		map = sm.getChr().getField().getReturnMap()
-		portal = 0
+		sm.chat("(Portal) This script (out01.py) is not coded for this map. (ID: " + str(currentmap) + ")")
+		warp = False
 	if warp:
 		sm.warp(map, portal)
 	sm.dispose()

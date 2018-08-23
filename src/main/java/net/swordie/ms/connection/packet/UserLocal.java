@@ -4,7 +4,6 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.MessageType;
@@ -13,13 +12,11 @@ import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -367,6 +364,19 @@ public class UserLocal {
 
         outPacket.encodeByte(on);
         outPacket.encodeByte(dressInfinity);
+
+        return outPacket;
+    }
+
+    public static OutPacket setInGameDirectionMode(boolean lock) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_IN_GAME_DIRECTION_MODE);
+
+        outPacket.encodeByte(lock); // Locks User's UI
+        outPacket.encodeByte(0); // unknown
+        if(lock) {
+            outPacket.encodeByte(0); // unknown | doesn't seemt to be used (?)
+            outPacket.encodeByte(!lock); // showUI
+        }
 
         return outPacket;
     }

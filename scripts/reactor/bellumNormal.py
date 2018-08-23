@@ -10,6 +10,6 @@ def action(type):
         # hitCount += 1
         # sm.chat(str(hitCount))
         # if hitCount >= 1:
-        sm.spawnMob(9400942, -200, 440, False)  # NPE at Foothold
+        sm.invokeAfterDelay(4500, "spawnMob", 9400942, -200, 440, False)  # NPE at Foothold
         sm.removeReactor()
         sm.dispose()

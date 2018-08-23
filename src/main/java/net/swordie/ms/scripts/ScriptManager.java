@@ -1172,10 +1172,13 @@ public interface ScriptManager extends Observer {
 	 * @param dir
 	 * 		The Directory to the Effect.
 	 *
+	 * @param placement
+	 * 		The place where the effect is, goes in types (0 is on character, 3 is on character's feet, 4 is middle of screen)
+	 *
 	 * @param delay
 	 * 		The delay in ms before the effect shows
 	 */
-	void showEffect(String dir, int delay);
+	void showEffect(String dir, int placement, int delay);
 
 	/**
 	 * Gives the user a weather notice with specified variables

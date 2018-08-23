@@ -126,6 +126,17 @@ def init():
         sm.sendAskYesNo("Would you like to leave?")
         warp = False
 
+    # Root Abyss Quest Line
+    elif fieldID == 910700200: # Root Abyss : Colossal Root  (Quest Map)
+        warp = False
+        if sm.hasQuest(30002):
+            sm.setPlayerAsSpeaker()
+            sm.sendNext("I should tell that girl about the exit first.")
+            sm.completeQuest(30002)
+        else:
+            sm.warp(105010200, 0) # Secret Swamp
+        sm.dispose()
+
     # CQueen
     elif fieldID == 105200310:
         sm.sendAskYesNo("Would you like to leave?")
