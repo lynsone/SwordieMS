@@ -2592,21 +2592,21 @@ public class Char {
 	}
 
 	/**
-	 * Gets the max hp of this Char. TODO: factor in skills, items, etc...
+	 * Gets the max hp of this Char.
 	 *
 	 * @return The max hp of this Char
 	 */
 	public int getMaxHP() {
-		return getStat(Stat.mhp);
+		return getTotalStat(BaseStat.mhp);
 	}
 
 	/**
-	 * Gets the max mp of this Char. TODO: factor in skills, items, etc...
+	 * Gets the max mp of this Char.
 	 *
 	 * @return The max mp of this Char
 	 */
 	public int getMaxMP() {
-		return getStat(Stat.mmp);
+		return getTotalStat(BaseStat.mmp);
 	}
 
 	/**
@@ -2617,7 +2617,7 @@ public class Char {
 	 */
 	public void heal(int amount) {
 		int curHP = getHP();
-		int maxHP = getTotalStat(BaseStat.mhp);
+		int maxHP = getMaxHP();
 		int newHP = curHP + amount > maxHP ? maxHP : curHP + amount;
 		Map<Stat, Object> stats = new HashMap<>();
 		setStat(Stat.hp, newHP);
@@ -2636,7 +2636,7 @@ public class Char {
 	 */
 	public void healMP(int amount) {
 		int curMP = getMP();
-		int maxMP = getTotalStat(BaseStat.mmp);
+		int maxMP = getMaxMP();
 		int newMP = curMP + amount > maxMP ? maxMP : curMP + amount;
 		Map<Stat, Object> stats = new HashMap<>();
 		setStat(Stat.mp, newMP);

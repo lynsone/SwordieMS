@@ -1153,17 +1153,23 @@ public class Field {
         return scriptManagerImpl;
     }
 
+    /**
+     * Goes through all MobGens, and spawns a Mob from it if allowed to do so. Only generates when there are Chars
+     * on this Field.
+     */
     public void generateMobs() {
-        int currentMobs = getMobs().size();
-        for (MobGen mg : getLifes().stream()
-                .filter(l -> l instanceof MobGen)
-                .map(l -> ((MobGen) l))
-                .collect(Collectors.toSet())) {
-            if (mg.canSpawnOnField(this)) {
-                mg.spawnMob(this);
-                currentMobs++;
-                if (currentMobs > getFixedMobCapacity()) {
-                    break;
+        if (getChars().size() > 0) {
+            int currentMobs = getMobs().size();
+            for (MobGen mg : getLifes().stream()
+                    .filter(l -> l instanceof MobGen)
+                    .map(l -> ((MobGen) l))
+                    .collect(Collectors.toSet())) {
+                if (mg.canSpawnOnField(this)) {
+                    mg.spawnMob(this);
+                    currentMobs++;
+                    if (currentMobs > getFixedMobCapacity()) {
+                        break;
+                    }
                 }
             }
         }

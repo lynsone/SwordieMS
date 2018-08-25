@@ -25,6 +25,7 @@ public class MobGen extends Life {
 
     public void setMob(Mob mob) {
         this.mob = mob;
+        this.setPosition(mob.getHomePosition().deepCopy());
     }
 
     /**
