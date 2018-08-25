@@ -218,7 +218,8 @@ public class WorldHandler {
                 WvsContext.dispose(c.getChr());
                 Map<BaseStat, Integer> basicStats = chr.getTotalBasicStats();
                 StringBuilder sb = new StringBuilder();
-                for (BaseStat bs : BaseStat.values()) {
+                List<BaseStat> sortedList = Arrays.stream(BaseStat.values()).sorted(Comparator.comparing(Enum::toString)).collect(Collectors.toList());
+                for (BaseStat bs : sortedList) {
                     sb.append(String.format("%s = %d, ", bs, basicStats.getOrDefault(bs, 0)));
                 }
                 chr.chatMessage(YELLOW, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
@@ -1417,7 +1418,7 @@ public class WorldHandler {
             ai.bulletCount = inPacket.decodeInt();
         }
         ai.rect = inPacket.decodeShortRect();
-        if(SkillConstants.needsOneMoreByte(ai.skillId)) {
+        if(SkillConstants.needsOneMoreInt(ai.skillId)) {
             inPacket.decodeInt();
         }
         for (int i = 0; i < ai.mobCount; i++) {

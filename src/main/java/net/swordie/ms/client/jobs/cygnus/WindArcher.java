@@ -34,7 +34,7 @@ import static net.swordie.ms.client.character.skills.SkillStat.*;
 /**
  * Created on 12/14/2017.
  */
-public class WindArcher extends Job {
+public class WindArcher extends Noblesse {
 
 
     public static final int IMPERIAL_RECALL = 10001245;

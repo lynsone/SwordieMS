@@ -1889,6 +1889,14 @@ public class Char {
 			case mmp:
 			case face:
 			case hair:
+			case pop:
+			case charismaEXP:
+			case insightEXP:
+			case willEXP:
+			case craftEXP:
+			case senseEXP:
+			case charmEXP:
+			case eventPoints:
 				stats.put(charStat, getStat(charStat));
 				break;
 		}
@@ -2016,6 +2024,10 @@ public class Char {
 		}
 		if (!hairEquips.contains(itemID)) {
 			hairEquips.add(itemID);
+		}
+		if (!equip.hasAttribute(EquipAttribute.NoNonCombatStatGain) && equip.getCharmEXP() != 0) {
+			addStatAndSendPacket(Stat.charmEXP, equip.getCharmEXP());
+			equip.addAttribute(EquipAttribute.NoNonCombatStatGain);
 		}
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);

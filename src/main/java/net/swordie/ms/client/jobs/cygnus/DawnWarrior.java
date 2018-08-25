@@ -33,7 +33,7 @@ import static net.swordie.ms.client.character.skills.SkillStat.*;
 /**
  * Created on 12/14/2017.
  */
-public class DawnWarrior extends Job {
+public class DawnWarrior extends Noblesse {
 
     public static final int IMPERIAL_RECALL = 10001245;
     public static final int ELEMENTAL_EXPERT = 10000250;

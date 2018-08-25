@@ -40,7 +40,7 @@ import static net.swordie.ms.client.character.skills.SkillStat.*;
 /**
  * Created on 12/14/2017.
  */
-public class Pirate extends Job {
+public class Pirate extends Beginner {
     public static final int MAPLE_RETURN = 1281;
 
     //Pirate
