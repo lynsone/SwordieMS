@@ -330,4 +330,29 @@ public class UserRemote {
 
         return outPacket;
     }
+
+    public static OutPacket remoteSetActivePortableChair(int chrId, int itemId, boolean textChair, String text) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_ACTIVE_PORTABLE_CHAIR);
+
+        outPacket.encodeInt(chrId);
+
+        outPacket.encodeInt(itemId);
+        outPacket.encodeInt(textChair ? 1 : 0);
+        if (textChair) {
+            outPacket.encodeString(text);
+        }
+
+        int towerChair = 0;
+        outPacket.encodeInt(towerChair);
+        if (towerChair > 0) {
+            outPacket.encodeInt(0);//TowerChairID
+        }
+
+
+        outPacket.encodeInt(0);//mesochaircount
+        outPacket.encodeInt(0);//unkGMS
+        outPacket.encodeInt(0);//unkGMS
+
+        return outPacket;
+    }
 }

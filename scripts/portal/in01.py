@@ -86,21 +86,13 @@ elif sm.getFieldID() == 951000000:
 else:
 
     field = {
-        220070400 : 922020000,
-        222020400 : 300000100,
-        104020100 : 104020120,
-        100000200 : 100000202, # Henesys Park : Pet-Walking Road
-        130020000 : 913001000,
-        865000000 : 865000002,
-    }
-
-    portal = {
-        220070400 : 0,
-        222020400 : 1,
-        104020100 : 2,
-        100000200 : 5,
-        130020000 : 0,
-        865000000 : 1,
+        220070400 : [922020000, 0],
+        222020400 : [300000100, 1],
+        104020100 : [104020120, 2],
+        100000200 : [100000202, 5], # Henesys Park -> Pet-Walking Road
+        130020000 : [913001000, 0],
+        865000000 : [865000002, 1],
+        252010300 : [925120000, 0], # Golden Temple Training Ground 4 -> SnowFro's Lair
     }
 
     def init():
@@ -118,5 +110,5 @@ else:
             warp = False
 
         if warp:
-            sm.warp(field[fieldID], portal[fieldID])
+            sm.warp(field[fieldID][0], field[fieldID][1])
         sm.dispose()

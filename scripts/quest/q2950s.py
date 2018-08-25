@@ -10,6 +10,6 @@ def init():
 
 def action(response, answer):
     if response == 1:
-        sm.completeQuestNoRewards(parentID)
+        sm.completeQuest(parentID)
         sm.warp(mapid, 0)
     sm.dispose()

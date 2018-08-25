@@ -572,6 +572,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
+	public void lockInGameUI(boolean lock) {
+		chr.write(UserLocal.setInGameDirectionMode(lock));
+	}
+
+
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 
@@ -726,8 +731,33 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void showFieldEffect(String dir, int delay) {
+		chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+	}
+
+	public void showFieldEffectToField(String dir) {
+		showFieldEffect(dir, 0);
+	}
+
+	public void showFieldEffectToField(String dir, int delay) {
 		Field field = chr.getField();
 		field.broadcastPacket(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+	}
+
+	public void showFieldBackgroundEffect(String dir) {
+		showFieldBackgroundEffect(dir, 0);
+	}
+
+	public void showFieldBackgroundEffect(String dir, int delay) {
+		Field field = chr.getField();
+		chr.write(CField.fieldEffect(FieldEffect.getFieldBackgroundEffectFromWz(dir, delay)));
+	}
+
+	public void showFadeTransition(int duration, int fadeInTime, int fadeOutTime) {
+		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient2(fadeInTime, duration, fadeOutTime, true)));
+	}
+
+	public void showFade(int duration) {
+		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient(duration)));
 	}
 
 	@Override
@@ -768,6 +798,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void spawnNpc(int npcId, int x, int y) {
 		Npc npc = NpcData.getNpcDeepCopyById(npcId);
+		npc.setPosition(new Position(x, y));
 		chr.getField().spawnLife(npc, chr);
 	}
 
@@ -1405,9 +1436,13 @@ public class ScriptManagerImpl implements ScriptManager {
 		showEffect(dir, 0);
 	}
 
-	@Override
 	public void showEffect(String dir, int delay) {
-		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
+		showEffect(dir, 4, delay);
+	}
+
+	@Override
+	public void showEffect(String dir, int placement, int delay) {
+		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, placement, 0)));
 	}
 
 	public String formatNumber(String number) {

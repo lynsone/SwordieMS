@@ -14,7 +14,7 @@ def init():
     sm.completeQuestNoRewards(32164) # [Riena Strait] Wood That's Good 1
     sm.completeQuestNoRewards(32165) # [Riena Strait] Wood That's Good 2
     sm.completeQuestNoRewards(32166) # [Riena Strait] Wood That's Good 3
-    sm.completeQuestNoRewards(parentID)
+    sm.completeQuest(parentID)
     sm.giveExp(exp)
 
 def action(response, answer):

@@ -2364,19 +2364,38 @@ public class WorldHandler {
 
     }
 
-    public static void handleShowChair(Client c, InPacket inPacket) {
-        Char chr = c.getChr();
-        int chrid = chr.getId();
-        int itemid = inPacket.decodeInt();
+    public static void handleUserSitRequest(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        int fieldSeatId = inPacket.decodeShort();
 
-
-        c.write(CField.showChair(chrid, itemid));
-        WvsContext.dispose(chr);
+        chr.setPortableChairID(0);
+        chr.setPortableChairMsg("");
+        chr.write(CField.sitResult(chr.getId(), fieldSeatId));
+        field.broadcastPacket(UserRemote.remoteSetActivePortableChair(chr.getId(), 0, false, ""));
+        chr.dispose();
     }
 
-    public static void handleCancelChair(Client c, InPacket inpacket) {
-        int chrid = c.getChr().getId();
-        c.write(CField.cancelChair(chrid, -1));
+    public static void handleUserPortableChairSitRequest(Char chr, InPacket inpacket) {
+        Field field = chr.getField();
+        int itemId = inpacket.decodeInt(); // item id
+        int pos = inpacket.decodeInt(); // setup position
+        byte chairBag = inpacket.decodeByte(); // is Chair in a bag
+        boolean textChair = inpacket.decodeInt() != 0; // boolean to show text
+        String text = "";
+        if(textChair) {
+            text = inpacket.decodeString(); // text to display
+        }
+
+        // Tower Chair  check & id
+        inpacket.decodeInt(); // encodes 0
+        int unknown = inpacket.decodeInt();
+
+        inpacket.decodeInt(); // Time
+
+        field.broadcastPacket(UserRemote.remoteSetActivePortableChair(chr.getId(), itemId, textChair, text));
+        chr.setPortableChairID(itemId);
+        chr.setPortableChairMsg(text);
+        chr.dispose();
     }
 
     public static void handleUserDropMoneyRequest(Client c, InPacket inPacket) {

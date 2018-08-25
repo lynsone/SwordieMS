@@ -6,6 +6,9 @@ import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionReq
 import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
 import net.swordie.ms.client.character.quest.reward.QuestItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestReward;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.life.mob.Mob;
@@ -189,6 +192,8 @@ public class QuestManager {
         quest.setStatus(QuestStatus.COMPLETE);
         quest.setCompletedTime(FileTime.currentTime());
         chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.questCompleteEffect()));
+        chr.write(User.effect(Effect.questCompleteEffect()));
         chr.write(WvsContext.questRecordMessage(quest));
         if (questInfo != null) {
             for (QuestReward qr : questInfo.getQuestRewards()) {

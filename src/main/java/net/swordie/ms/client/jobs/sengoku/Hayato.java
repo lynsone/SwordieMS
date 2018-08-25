@@ -272,11 +272,13 @@ public class Hayato extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(subProp, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -467,11 +469,13 @@ public class Hayato extends Job {
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             if(Util.succeedProp(stunProc)) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                MobTemporaryStat mts = mob.getTemporaryStat();
-                o.nOption = 1;
-                o.rOption = QUICK_DRAW;
-                o.tOption = 3;
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                if(!mob.isBoss()) {
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o.nOption = 1;
+                    o.rOption = QUICK_DRAW;
+                    o.tOption = 3;
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                }
             }
         }
     }

@@ -3,7 +3,6 @@ status = -1
 
 frostWitchBarbara = 1510008
 noraTheExplorer = 1510007
-exp = 11087
 
 def init():
     sm.setSpeakerID(frostWitchBarbara)
@@ -34,9 +33,7 @@ def action(response, answer):
 
     if status == 4:
         sm.setPlayerAsSpeaker()
-        sm.sendNext("There also is a rumor that she is conducting some experiments with the children."
-                    ""
-                    "\r\n\r\n#r#e[This is meant to be Player Avatar]#k#n")
+        sm.sendNext("There also is a rumor that she is conducting some experiments with the children.")
 
     if status == 5:
         sm.setSpeakerID(frostWitchBarbara)
@@ -63,14 +60,11 @@ def action(response, answer):
 
     if status == 10:
         sm.setPlayerAsSpeaker()
-        sm.sendNext("But why would you do such a thing despite all the misunderstandings?..."
-                    ""
-                    "\r\n\r\n#r#e[This is meant to be Player Avatar]#k#n")
+        sm.sendNext("But why would you do such a thing despite all the misunderstandings?...")
 
     if status == 11:
         sm.setSpeakerID(frostWitchBarbara)
         sm.sendNext("Whew.. That mouth of yours.. How does it help you to talk so much? "
                     "If you have time for talking, shut up and do me a favor.")
-        sm.completeQuestNoRewards(parentID)
-        sm.giveExp(exp)
+        sm.completeQuest(parentID)
         sm.dispose()

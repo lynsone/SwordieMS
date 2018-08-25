@@ -1,4 +1,5 @@
 def init():
+    sm.setSpeakerID(1064013) # Second Seal Door
     sm.sendAskYesNo("Would you like to fight Von Bon?")
 
 def action(response, answer):

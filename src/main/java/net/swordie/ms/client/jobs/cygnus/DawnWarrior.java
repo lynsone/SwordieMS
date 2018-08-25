@@ -360,10 +360,12 @@ public class DawnWarrior extends Job {
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 MobTemporaryStat mts = mob.getTemporaryStat();
-                o1.nOption = 1;
-                o1.rOption = SOUL_ELEMENT;
-                o1.tOption = si.getValue(subTime, slv);
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                if(!mob.isBoss()) {
+                    o1.nOption = 1;
+                    o1.rOption = SOUL_ELEMENT;
+                    o1.tOption = si.getValue(subTime, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                }
             }
         }
     }
