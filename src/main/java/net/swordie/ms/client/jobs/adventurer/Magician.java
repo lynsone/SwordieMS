@@ -53,7 +53,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 /**
  * Created on 12/14/2017.
  */
-public class Magician extends Job {
+public class Magician extends Beginner {
     //Common
     public static final int MAPLE_RETURN = 1281;
     public static final int TELEPORT = 2001009;

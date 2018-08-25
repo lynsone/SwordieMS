@@ -41,7 +41,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 /**
  * Created on 12/14/2017.
  */
-public class Warrior extends Job {
+public class Warrior extends Beginner {
 
     public static final int MAPLE_RETURN = 1281;
 

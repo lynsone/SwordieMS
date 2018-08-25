@@ -37,7 +37,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 /**
  * Created on 12/14/2017.
  */
-public class BattleMage extends Job {
+public class BattleMage extends Citizen {
 
     public static final int SECRET_ASSEMBLY = 30001281;
 

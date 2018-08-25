@@ -12,6 +12,7 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.jobs.cygnus.Noblesse;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
@@ -46,7 +47,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 /**
  * Created on 12/14/2017.
  */
-public class Thief extends Job {
+public class Thief extends Beginner {
     public static final int MAPLE_RETURN = 1281;
 
     // Rogue
@@ -395,6 +396,7 @@ public class Thief extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);

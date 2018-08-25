@@ -44,7 +44,7 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
 /**
  * Created on 12/14/2017.
  */
-public class Archer extends Job {
+public class Archer extends Beginner {
     public static final int MAPLE_RETURN = 1281;
 
     public static final int SOUL_ARROW_BOW = 3101004;

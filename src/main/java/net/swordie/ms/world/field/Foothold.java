@@ -145,7 +145,7 @@ public class Foothold {
         int x2 = getX2() - x1;
         x = x - x1;
         double perc = (double) x / (double) x2;
-        return (int) (getY1() + (perc * (getY2() - getY1())));
+        return (int) Math.ceil(getY1() + (perc * (getY2() - getY1())));
     }
 
     /**

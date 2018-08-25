@@ -1,6 +1,7 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.runestones.RuneStone;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.world.field.*;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.npc.Npc;
@@ -658,6 +659,8 @@ public class FieldData {
         copy.setVrBottom(field.getVrBottom());
         copy.setVrRight(field.getVrRight());
         copy.startBurningFieldTimer();
+        int mobGens = (int) (copy.getLifes().stream().filter(l -> l instanceof MobGen).count());
+        copy.setFixedMobCapacity((int) (mobGens * GameConstants.DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT));
         copy.generateMobs();
         return copy;
     }

@@ -41,10 +41,7 @@ import static net.swordie.ms.enums.ForceAtomEnum.*;
 /**
  * Created on 12/14/2017.
  */
-
-//TODO  DCes (38 in SET_FIELD)
-
-public class Mechanic extends Job {
+public class Mechanic extends Citizen {
 
     public static final int MECH_VEHICLE = 1932016;
 

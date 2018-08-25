@@ -179,7 +179,8 @@ public class SkillConstants {
                 skillId == 3111013 || skillId == 1311011 || skillId == 2221011 || skillId == 2221052 ||
                 skillId == 25121030 || skillId == 27101202 || skillId == 25111005 || skillId == 23121000 ||
                 skillId == 22171083 || skillId == 14121004 || skillId == 13111020 || skillId == 13121001 ||
-                skillId == 14111006 || (skillId >= 80001389 && skillId <= 80001392);
+                skillId == 14111006 || (skillId >= 80001389 && skillId <= 80001392) || skillId == 42121000 ||
+                skillId == 42120003;
 
     }
 
@@ -779,8 +780,11 @@ public class SkillConstants {
         }
     }
 
-    public static boolean needsOneMoreByte(int skillId) {
+    public static boolean needsOneMoreInt(int skillId) {
+        // Are part of another function
         switch(skillId) {
+            // Ranged
+            // Merc
             case 23100006: // Merc FA
             case 23120012: // Merc Advanced Final Attack
             case 23121000: // Ishtar's Ring
@@ -791,9 +795,13 @@ public class SkillConstants {
             case 23121052: // Wrath of Enlil
             case 23120013: // Staggering Strikes
             case 13101020: // Fairy Spiral
-
+            // AB
             case 60011216: // AB Auto attack
             case 65001100: // Star Bubble
+
+            // Magic
+            // Kanna
+            case 42121000: // Vanquisher's Charm
                 return true;
             default:
                 return false;
