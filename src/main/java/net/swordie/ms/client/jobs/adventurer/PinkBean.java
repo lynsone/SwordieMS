@@ -18,7 +18,6 @@ import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -193,11 +192,12 @@ public class PinkBean extends Job {
                 tsm.putCharacterStatValue(IndieMADR, o5);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -216,7 +216,7 @@ public class PinkBean extends Job {
         }
         if(hasHitMobs) {
             if(skillID != MINI_BEANS) {
-                handleGoMiniBeans(attackInfo);
+                summonGoMiniBeans(attackInfo);
             }
         }
         Option o1 = new Option();
@@ -230,6 +230,7 @@ public class PinkBean extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -350,8 +351,9 @@ public class PinkBean extends Job {
 
 
 
-    private void handleGoMiniBeans(AttackInfo attackInfo) {
+    private void summonGoMiniBeans(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
         Field field;
         Summon summon;
         if(tsm.hasStat(PinkbeanMinibeenMove)) {
@@ -367,6 +369,14 @@ public class PinkBean extends Job {
                     summon.setPosition(mob.getPosition());
                     summon.setMoveAbility(MoveAbility.FLY_AWAY.getVal());
                     field.spawnAddSummon(summon);
+
+                    o1.nReason = GO_MINI_BEANS;
+                    o1.nValue = 1;
+                    o1.summon = summon;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = miniBeanInfo.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieEmpty, o1);
+                    tsm.sendSetStatPacket();
                 }
             }
         }

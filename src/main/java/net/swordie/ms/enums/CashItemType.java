@@ -334,41 +334,4 @@ public enum CashItemType {
     public int getVal() {
         return val;
     }
-
-    public static void main(String[] args) {
-        Map<String, CashItemType> resMap = new HashMap<>();
-        Map<String, CashItemType> reqMap = new HashMap<>();
-        Map<String, CashItemType> failedMap = new HashMap<>();
-        for (CashItemType cit : values()) {
-            String str = cit.toString();
-            if (str.startsWith("Res")) {
-                resMap.put(str, cit);
-            } else if (str.startsWith("Req")) {
-                reqMap.put(str, cit);
-            } else {
-                failedMap.put(str, cit);
-            }
-        }
-        List<CashItemType> reqCit = new ArrayList<>(reqMap.values());
-        reqCit.sort(Comparator.comparingInt(CashItemType::getVal));
-        for (CashItemType cit : reqCit) {
-            int val = cit.getVal();
-
-            System.out.println(String.format("%s(%d), ", cit.toString(), val));
-        }
-        List<CashItemType> resCit = new ArrayList<>(resMap.values());
-        resCit.sort(Comparator.comparingInt(CashItemType::getVal));
-        for (CashItemType cit : resCit) {int val = cit.getVal();
-            if (val >= 36) {
-                val += 3;
-            }
-            System.out.println(String.format("%s(%d), ", cit.toString(), val));
-        }
-        List<CashItemType> failCit = new ArrayList<>(failedMap.values());
-        failCit.sort(Comparator.comparingInt(CashItemType::getVal));
-        for (CashItemType cit : failCit) {
-            System.out.println(String.format("%s(%d), ", cit.toString(), cit.getVal()));
-        }
-
-    }
 }

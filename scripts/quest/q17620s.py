@@ -10,7 +10,7 @@ def action(response, answer):
     status += 1
 
     if status == 0:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Can you introduce me to Gilberto Daniella?")
 
     elif status == 1:
@@ -18,7 +18,7 @@ def action(response, answer):
         sm.sendNext("I offer to make your wildest dreams coe true, and that is what you want?")
 
     elif status == 2:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Yup, I really want to meet Gilberto Daniella.")
 
     elif status == 3:
@@ -26,7 +26,7 @@ def action(response, answer):
         sm.sendNext("I heard you the first time, it's just...")
 
     elif status == 4:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("What?")
 
     elif status == 5:
@@ -34,7 +34,7 @@ def action(response, answer):
         sm.sendNext("Well, I thought you'd ask for something difficult, like borrowing my hat.")
 
     elif status == 6:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("That was next on my list.")
 
     elif status == 7:

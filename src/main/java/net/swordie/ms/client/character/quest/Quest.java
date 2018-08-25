@@ -8,9 +8,7 @@ import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -39,6 +37,9 @@ public class Quest {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "completedTime")
     private FileTime completedTime;
+
+    @Transient
+    private Map<String, String> properties = new HashMap<>();
 
     public Quest() {
         progressRequirements = new ArrayList<>();
@@ -165,10 +166,13 @@ public class Quest {
     }
 
     public String getQRValue() {
-        if(qrValue != null && !qrValue.equalsIgnoreCase("")) {
+        if (qrValue != null && !qrValue.equalsIgnoreCase("")) {
             return qrValue;
         } else {
             StringBuilder sb = new StringBuilder();
+            if (getProgressRequirements() == null) {
+                return "";
+            }
             for(QuestProgressRequirement qpr : getProgressRequirements()) {
                 if(qpr instanceof QuestValueRequirement) {
                     sb.append(Util.leftPaddedString(3, '0', ((QuestValueRequirement) qpr).getValue()));
@@ -180,5 +184,37 @@ public class Quest {
 
     public void setQrValue(String qrValue) {
         this.qrValue = qrValue;
+    }
+
+    public void convertQRValueToProperties() {
+        String val = getQRValue();
+        String[] props = val.split(";");
+        for (String prop : props) {
+            String[] keyVal = prop.split("=");
+            if (keyVal.length == 2) {
+                setProperty(keyVal[0], keyVal[1]);
+            }
+        }
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperty(String key, String value) {
+        getProperties().put(key, value);
+        setQRValueToProperties();
+    }
+
+    private void setQRValueToProperties() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : getProperties().entrySet()) {
+            stringBuilder.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
+        }
+        setQrValue(stringBuilder.toString());
+    }
+
+    public String getProperty(String key) {
+        return getProperties().getOrDefault(key, null);
     }
 }

@@ -9,8 +9,4 @@ public class ServerConfig {
     public static final String SERVER_NAME = "SwordieMS";
     public static final String EVENT_MSG = "Scratchy";
     public static final int MAX_CHARACTERS = 30;
-    public static String SQL_PORT;
-    public static String SQL_USERNAME;
-    public static String SQL_PASSWORD;
-    public static String SQL_SCHEMA;
 }

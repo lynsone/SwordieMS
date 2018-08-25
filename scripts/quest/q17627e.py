@@ -16,7 +16,7 @@ def action(response, answer):
         sm.sendNext("What are you waiting for, my loyal sidekick?")
 
     elif status == 2:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Hold up. I have a really bad feeling about this...")
 
     elif status == 3:
@@ -24,7 +24,7 @@ def action(response, answer):
         sm.sendNext("Don't feel bad. I'm here for you, pal.")
 
     elif status == 4:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("No, listen. These fishmen seem like they're barely even trying...")
 
     elif status == 5:
@@ -32,7 +32,7 @@ def action(response, answer):
         sm.sendNext("That's only because I'm totally awesome. So they look weak in comparison.")
 
     elif status == 6:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("But...")
 
     elif status == 7:

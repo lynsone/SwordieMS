@@ -2,7 +2,7 @@
 
 status = -1
 def init():
-    sm.setSpeakerID(0) # Has to be Player Avatar
+    sm.setPlayerAsSpeaker() # Has to be Player Avatar
     sm.sendNext("Excuse me, Mayor? A-are you busy?")
 
 def action(response, answer):
@@ -15,7 +15,7 @@ def action(response, answer):
                     "It'd been a fishful day, and that's the best kinda day, if you ask me.")
 
     elif status == 1:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Oh, great! That's... I need to tell you something.")
 
     elif status == 2:
@@ -27,7 +27,7 @@ def action(response, answer):
 
     elif status == 3:
         selection = answer
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         if selection == 0:
             sm.sendNext("Oh, I just wanted to tell you what a beautiful day it is")
         elif selection == 1:
@@ -43,7 +43,7 @@ def action(response, answer):
                         "how'd you get here? And what do you mean you lied?")
 
     elif status == 5:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("I came across the northern barrier.")
 
     elif status == 6:
@@ -53,7 +53,7 @@ def action(response, answer):
                     "You sayin' you're some kinda demon?!")
 
     elif status == 7:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("No, no... the demons are... Look, I'm from a place called Maple World, and I guess technically you are too. "
                     "I traveled to Dawnveil from a different continent, far away.")
 
@@ -64,7 +64,7 @@ def action(response, answer):
                     "If this is all true, how'd you get across that barrier?")
 
     elif status == 9:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("The barrier is breaking down... Where I came from, no one had even heard of Dawnveil, "
                     "and our leaders feared it might be a danger to the rest of Maple World.")
 
@@ -77,7 +77,7 @@ def action(response, answer):
                     "but I can tell you wasn't tryin' to cause no trouble.")
 
     elif status == 12:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Thanks... I'm really sorry.")
 
     elif status == 13:
@@ -85,7 +85,7 @@ def action(response, answer):
         sm.sendNext("Let's let bygones go on down bygone way. Can I help you with your plan?")
 
     elif status == 14:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Maybe you can... Your people really seem to be about the same as ours, "
                     "but I think the fear of what's beyond the barrier could stir up trouble. "
                     "They might perceive me as a threat...")
@@ -96,7 +96,7 @@ def action(response, answer):
                     "and changing minds one by one will get you nowhere fast. I've got me another plan.")
 
     elif status == 16:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Yes?")
 
     elif status == 17:
@@ -110,7 +110,7 @@ def action(response, answer):
         sm.sendNext("You show those Daniellas you're worth trustin', and you might just have yourself a strong supporter in the richest nation of Dawnveil.")
 
     elif status == 19:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("You're a lot smarter than I took you for. I'm sorry for underestimating you. "
                     "I don't know how I can thank you...")
 

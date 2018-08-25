@@ -3,32 +3,34 @@ package net.swordie.ms.client.jobs.legend;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.LarknessManager;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.Stat;
-import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -46,6 +48,7 @@ public class Luminous extends Job {
     public static final int BLACK_BLESSING = 27100003;
 
     public static final int SHADOW_SHELL = 27111004; //Buff
+    public static final int RAY_OF_REDEMPTION = 27111101; // Attack + heals party members
     public static final int DUSK_GUARD = 27111005; //Buff
     public static final int PHOTIC_MEDITATION = 27111006; //Buff
     public static final int LUNAR_TIDE = 27110007;
@@ -76,12 +79,15 @@ public class Luminous extends Job {
             SHADOW_SHELL,
             DUSK_GUARD,
             PHOTIC_MEDITATION,
+            RAY_OF_REDEMPTION,
             DARK_CRESCENDO,
             ARCANE_PITCH,
             MAPLE_WARRIOR_LUMI,
             HEROIC_MEMORIES_LUMI,
             EQUALIZE,
     };
+
+    private long darkCrescendoTimer;
 
     public Luminous(Char chr) {
         super(chr);
@@ -97,15 +103,12 @@ public class Luminous extends Job {
             if (chr.getTemporaryStatManager().getLarknessManager() == null) {
                 chr.getTemporaryStatManager().setLarknessManager(new LarknessManager(chr));
             }
-//        changeMode();
         }
     }
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
-        Summon summon;
-        Field field;
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -117,7 +120,11 @@ public class Luminous extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case SHADOW_SHELL:
-                //TODO Handler once Mob Skills are implemented
+                o1.nOption = 3;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                // no bOption for Luminous' AntiMagicShell
+                tsm.putCharacterStatValue(AntiMagicShell, o1);
                 break;
             case DUSK_GUARD:
                 o1.nValue = si.getValue(indieMdd, slv);
@@ -141,7 +148,9 @@ public class Luminous extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
+                o1.mOption = 1;
                 tsm.putCharacterStatValue(StackBuff, o1);
+                darkCrescendoTimer = System.currentTimeMillis() + (si.getValue(time, slv) * 1000);
                 break;
             case ARCANE_PITCH:
                 o1.nOption = si.getValue(y, slv);
@@ -178,10 +187,11 @@ public class Luminous extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
-    private void handleLarkness(int skillId) {
+    private void changeLarknessState(int skillId) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         LarknessManager lm = tsm.getLarknessManager();
         if(SkillConstants.isLarknessLightSkill(skillId)) {
@@ -193,7 +203,7 @@ public class Luminous extends Job {
 
 
 
-    private void handleLunarTide() {
+    private void giveLunarTideBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(chr.hasSkill(LUNAR_TIDE)) {
             Option o1 = new Option();
@@ -230,45 +240,46 @@ public class Luminous extends Job {
                 o2.tOption = 0;
                 tsm.putCharacterStatValue(DamR, o2);
             }
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
-    private void handleDarkCrescendo(int skillId, TemporaryStatManager tsm, Client c) {
+    private void incrementDarkCrescendo(TemporaryStatManager tsm) {
         Option o = new Option();
         Option o1 = new Option();
         SkillInfo crescendoInfo = SkillData.getSkillInfoById(DARK_CRESCENDO);
         Skill skill = chr.getSkill(DARK_CRESCENDO);
         byte slv = (byte) skill.getCurrentLevel();
-        int MaxStack = getMaxDarkCrescendoStack(chr);
         int amount = 1;
         if(tsm.hasStat(StackBuff)) {
             amount = tsm.getOption(StackBuff).mOption;
-            if(amount < getMaxDarkCrescendoStack(chr)) {
+            if(amount < getMaxDarkCrescendoStack()) {
                 amount++;
             }
         }
+        o.setInMillis(true);
         o.nOption = 1;
         o.rOption = DARK_CRESCENDO;
-        o.tOption = crescendoInfo.getValue(time, slv);
+        o.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
         o.mOption = amount;
         tsm.putCharacterStatValue(StackBuff, o);
+        o1.setInMillis(true);
         o1.nOption = (amount * crescendoInfo.getValue(damR, slv));
         o1.rOption = DARK_CRESCENDO;
-        o1.tOption = crescendoInfo.getValue(time, slv);
+        o1.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
         tsm.putCharacterStatValue(DamR, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    private int getCrescendoProp(Char chr) {
+    private int getCrescendoProp() {
         Skill skill = null;
         if (chr.hasSkill(DARK_CRESCENDO)) {
             skill = chr.getSkill(DARK_CRESCENDO);
         }
-        return skill == null ? 0 : SkillData.getSkillInfoById(DARK_CRESCENDO).getValue(prop, chr.getSkill(27121005).getCurrentLevel());
+        return skill == null ? 0 : SkillData.getSkillInfoById(DARK_CRESCENDO).getValue(prop, skill.getCurrentLevel());
     }
 
-    private int getMaxDarkCrescendoStack(Char chr) {
+    private int getMaxDarkCrescendoStack() {
         Skill skill = null;
         if (chr.hasSkill(DARK_CRESCENDO)) {
             skill = chr.getSkill(DARK_CRESCENDO);
@@ -276,56 +287,61 @@ public class Luminous extends Job {
         return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
-    public static void handleBlackBlessingIncrease(Client c) {
+    public static void changeBlackBlessingCount(Client c, boolean increment) {
         Char chr = c.getChr();
         Option o = new Option();
-        Option o1 = new Option();
         Option o2 = new Option();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-
-        int orbmad = 0;
-        if(tsm.getOption(BlessOfDarkness).nOption == 1) {
-            orbmad = 15;
-        } else if (tsm.getOption(BlessOfDarkness).nOption == 2) {
-            orbmad = 24;
-        } else if(tsm.getOption(BlessOfDarkness).nOption == 3) {
-            orbmad = 30;
-        }
 
         int amount = 1;
         if(tsm.hasStat(BlessOfDarkness)) {
             amount = tsm.getOption(BlessOfDarkness).nOption;
-            if(amount < 3) {
-                amount++;
+
+            if(increment) {
+                if (amount < 3) {
+                    amount++;
+                }
+            } else {
+                if (amount > 0) {
+                    amount--;
+                }
             }
         }
-        o.nOption = amount;
-        o.rOption = BLACK_BLESSING;
-        o.tOption = 0;
-        tsm.putCharacterStatValue(BlessOfDarkness, o);
-        if(tsm.getOption(BlessOfDarkness).nOption > 0) {
-            o1.nOption = 1; //absorbs ~70% of dmg
-            o1.rOption = BLACK_BLESSING;
-            o1.tOption = 0;
-            tsm.putCharacterStatValue(IgnoreMobDamR, o1);
-        }
-        o2.nOption = orbmad;
-        o2.rOption = BLACK_BLESSING;
-        o2.tOption = 0;
-        tsm.putCharacterStatValue(MAD, o2);
-        c.write(WvsContext.temporaryStatSet(tsm));
-    }
 
-    public void resetBlackBlessing() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        tsm.removeStat(MAD, false);
-        tsm.removeStat(BlessOfDarkness, false);
-        tsm.removeStat(IgnoreMobDamR, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        int orbmad;
+        switch (amount) {
+            case 1:
+                orbmad = 15;
+                break;
+            case 2:
+                orbmad = 24;
+                break;
+            case 3:
+                orbmad = 30;
+                break;
+            default:
+                orbmad = 0;
+                break;
+        }
+
+        if(amount > 0) {
+            o.nOption = amount;
+            o.rOption = BLACK_BLESSING;
+            o.tOption = 0;
+            tsm.putCharacterStatValue(BlessOfDarkness, o);
+            o2.nOption = orbmad;
+            o2.rOption = BLACK_BLESSING;
+            o2.tOption = 0;
+            tsm.putCharacterStatValue(MAD, o2);
+            tsm.sendSetStatPacket();
+        } else {
+            tsm.removeStatsBySkill(BLACK_BLESSING);
+            tsm.sendResetStatPacket();
+        }
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -342,8 +358,8 @@ public class Luminous extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleLarkness(skillID);
-        int crescendoProp = getCrescendoProp(chr);
+        changeLarknessState(skillID);
+        int crescendoProp = getCrescendoProp();
         if (hasHitMobs) {
             if(!tsm.hasStat(Larkness)) {
                 LarknessManager lm = tsm.getLarknessManager();
@@ -356,11 +372,11 @@ public class Luminous extends Job {
             // Dark Crescendo
             if (tsm.hasStat(StackBuff)) {
                 if (skill != null && Util.succeedProp(crescendoProp)) {
-                    handleDarkCrescendo(skill.getSkillId(), tsm, c);
+                    incrementDarkCrescendo(tsm);
                 }
             }
         }
-        handleLunarTide();
+        giveLunarTideBuff();
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -375,6 +391,9 @@ public class Luminous extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                 }
                 break;
+            case RAY_OF_REDEMPTION:
+                chr.heal(chr.getMaxHP()); // 800% Recovery
+                break;
         }
 
         super.handleAttack(c, attackInfo);
@@ -382,6 +401,7 @@ public class Luminous extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -444,18 +464,13 @@ public class Luminous extends Job {
         if(tsm.getOption(Larkness).rOption == EQUILIBRIUM) {
             return;
         } else {
-            if (tsm.hasStat(BlessOfDarkness)) {
-                if (tsm.getOption(BlessOfDarkness).nOption == 3) {
-                    o.nOption = 2;
-                    tsm.putCharacterStatValue(BlessOfDarkness, o);
-                    tsm.sendSetStatPacket();
-                } else if (tsm.getOption(BlessOfDarkness).nOption == 2) {
-                    o.nOption = 1;
-                    tsm.putCharacterStatValue(BlessOfDarkness, o);
-                    tsm.sendSetStatPacket();
-                } else if (tsm.getOption(BlessOfDarkness).nOption == 1) {
-                    resetBlackBlessing();
-                }
+            if (tsm.hasStat(BlessOfDarkness) && chr.hasSkill(BLACK_BLESSING) && hitInfo.hpDamage > 0) {
+                Skill skill = chr.getSkill(BLACK_BLESSING);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+                changeBlackBlessingCount(c, false); // deduct orbs as player gets hit
+                int dmgAbsorbed = si.getValue(x, slv);
+                hitInfo.hpDamage = (int) (hitInfo.hpDamage * ((double) dmgAbsorbed / 100));
             }
         }
         super.handleHit(c, inPacket, hitInfo);
@@ -479,5 +494,46 @@ public class Luminous extends Job {
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+    @Override
+    public void handleMobDebuffSkill(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(AntiMagicShell)) {
+            tsm.removeAllDebuffs();
+            deductShadowShell();
+        }
+
+    }
+
+    private void deductShadowShell() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(!chr.hasSkill(SHADOW_SHELL)) {
+            return;
+        }
+        Skill skill = chr.getSkill(SHADOW_SHELL);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o = new Option();
+        if (tsm.hasStat(AntiMagicShell)) {
+            int shadowShellCount = tsm.getOption(AntiMagicShell).nOption;
+
+            if(shadowShellCount > 0) {
+                shadowShellCount--;
+            }
+
+            if(shadowShellCount <= 0) {
+                tsm.removeStatsBySkill(skill.getSkillId());
+                tsm.sendResetStatPacket();
+            } else {
+                o.nOption = shadowShellCount;
+                o.rOption = skill.getSkillId();
+                o.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AntiMagicShell, o);
+                tsm.sendSetStatPacket();
+            }
+            chr.write(User.effect(Effect.skillSpecial(skill.getSkillId())));
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(skill.getSkillId())));
+        }
     }
 }

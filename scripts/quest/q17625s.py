@@ -30,7 +30,7 @@ def action(response, answer):
         sm.sendNext("The Delfinos must be treated with a firm and swift hand. It's the only thing they'll respect.")
 
     elif status == 4:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("#b(This is my chance!)#k\r\n"
                     "Excuse me, prime minister, but I'd like to help you against the Delfinos.")
 
@@ -39,7 +39,7 @@ def action(response, answer):
         sm.sendNext("Why? This isn't your fight. This isn't even your country.")
 
     elif status == 6:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("It's part of my responsibility as an envoy from Maple World to aid in the affairs of our #bAlly nations#k.")
 
     elif status == 7:

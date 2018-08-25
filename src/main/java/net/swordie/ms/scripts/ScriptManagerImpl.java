@@ -3,6 +3,8 @@ package net.swordie.ms.scripts;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.MonsterPark;
+import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.Item;
@@ -13,11 +15,12 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.guild.result.GuildMsg;
-import net.swordie.ms.client.guild.result.GuildResultType;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.trunk.TrunkOpen;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
@@ -27,30 +30,37 @@ import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Reactor;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
-import net.swordie.ms.loaders.FieldData;
-import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.NpcData;
-import net.swordie.ms.loaders.QuestData;
+import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
+import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
+import net.swordie.ms.world.field.obtacleatom.ObtacleAtomInfo;
+import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
+import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.LogManager;
 
 import javax.script.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
 import static net.swordie.ms.enums.ChatMsgColour.*;
@@ -61,7 +71,7 @@ import static net.swordie.ms.life.npc.NpcMessageType.*;
  *
  * @see ScriptManager
  */
-public class ScriptManagerImpl implements ScriptManager, Observer {
+public class ScriptManagerImpl implements ScriptManager {
 
 	public static final String SCRIPT_ENGINE_NAME = "python";
 	public static final String SCRIPT_ENGINE_EXTENSION = ".py";
@@ -77,6 +87,8 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	private Map<ScriptType, ScriptInfo> scripts;
 	private int returnField = 0;
 	private ScriptType lastActiveScriptType;
+	private Map<ScriptType, Set<ScheduledFuture>> eventsByScriptType = new HashMap<>();
+	private Set<ScheduledFuture> scheduledFutureSet;
 
 	private ScriptManagerImpl(Char chr, Field field) {
 		this.chr = chr;
@@ -168,10 +180,18 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		getScripts().put(scriptType, scriptInfo);
 		Invocable inv = getInvocableFromScriptNameAndType(scriptName, scriptType);
 		getScripts().get(scriptType).setInvocable(inv);
-		try {
-			getInvocableByType(scriptType).invokeFunction(initFuncName);
-		} catch (ScriptException | NoSuchMethodException e) {
-			e.printStackTrace();
+		EventManager.addEvent(() -> getInvocableByType(scriptType).invokeFunction(initFuncName), 0);
+	}
+
+	public void notifyMobDeath(Mob mob) {
+		if (isActive(ScriptType.FIELD)) {
+			try {
+				getInvocableByType(ScriptType.FIELD).invokeFunction("onMobDeath", mob);
+			} catch (ScriptException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// Intended: no method is no problem
+			}
 		}
 	}
 
@@ -216,7 +236,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		// TODO listening for updates if needed
+		if (o instanceof Mob) {
+			notifyMobDeath((Mob) o);
+		}
 	}
 
 	public void handleAction(byte lastType, byte response, int answer) {
@@ -391,13 +413,27 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	}
 
 	@Override
-	public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta) {
+	public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options) {
 		getNpcScriptInfo().setAngelicBuster(angelicBuster);
 		getNpcScriptInfo().setZeroBeta(zeroBeta);
+		getNpcScriptInfo().setOptions(options);
 		sendGeneralSay(text, AskAvatar);
 	}
 
+	public void sendAskSlideMenu(int dlgType) {
+		getNpcScriptInfo().setDlgType(dlgType);
+		chr.write(ScriptMan.scriptMessage(this, AskSlideMenu));
+	}
 
+	// Start of param methods ------------------------------------------------------------------------------------------
+
+	public void setPlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
+	}
+
+	public void resetParam() {
+		getNpcScriptInfo().resetParam();
+	}
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
 
@@ -413,6 +449,10 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	public void dispose(ScriptType scriptType) {
 		stop(scriptType);
+	}
+
+	public Position getPosition(int objId) {
+		return chr.getField().getLifeByObjectID(objId).getPosition();
 	}
 
 
@@ -475,6 +515,67 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		chr.addExpNoMsg(expGiven);
 	}
 
+	@Override
+	public void changeCharacterLook(int look) {
+		AvatarLook al = chr.getAvatarData().getAvatarLook();
+		if (look < 100) { // skin
+			al.setSkin(look);
+			chr.setStatAndSendPacket(Stat.skin, look);
+		} else if (look < 30000) {
+			al.setFace(look);
+			chr.setStatAndSendPacket(Stat.face, look);
+		} else if (look < 1000000) {
+			al.setHair(look);
+			chr.setStatAndSendPacket(Stat.hair, look);
+		} else {
+			log.error(String.format("Tried changing a look with invalid id (%d)", look));
+		}
+	}
+
+	public void giveSkill(int skillId) {
+		giveSkill(skillId, 1);
+	}
+
+	@Override
+	public void giveSkill(int skillId, int slv) {
+		chr.addSkill(skillId, slv, slv);
+	}
+
+	public int getSkillByItem() {
+		return getSkillByItem(getParentID());
+	}
+
+	public int getSkillByItem(int itemId) {
+		ItemInfo itemInfo = ItemData.getItemInfoByID(itemId);
+		return itemInfo.getSkillId();
+	}
+
+	public boolean hasSkill(int skillId) {
+		return chr.hasSkill(skillId);
+	}
+
+	public void heal() {
+		chr.heal(chr.getMaxHP());
+		chr.healMP(chr.getMaxMP());
+	}
+
+	public void addLevel(int level) {
+		int curLevel = chr.getLevel();
+		for (int i = curLevel + 1; i <= curLevel + level; i++) {
+			chr.setStat(Stat.level, i);
+			Map<Stat, Object> stats = new HashMap<>();
+			stats.put(Stat.level, (byte) i);
+			stats.put(Stat.exp, (long) 0);
+			chr.getClient().write(WvsContext.statChanged(stats));
+			chr.getJobHandler().handleLevelUp();
+			chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
+		}
+	}
+
+	public void lockInGameUI(boolean lock) {
+		chr.write(UserLocal.setInGameDirectionMode(lock));
+	}
+
 
 
 	// Field-related methods -------------------------------------------------------------------------------------------
@@ -490,15 +591,6 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	public void warp(int id) {
 		Field field = chr.getClient().getChannelInstance().getField(id);
 		chr.warp(field);
-	}
-
-	@Override
-	public void teleportToPortal(int portalId) {
-		Portal portal = chr.getField().getPortalByID(portalId);
-		if (portal != null) {
-			Position position = new Position(portal.getX(), portal.getY());
-			chr.write(CField.teleport(position, chr));
-		}
 	}
 
 	@Override
@@ -522,7 +614,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 			Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
 			chr.warp(field);
 		} else {
-
+			if (!in) {
+				clearPartyInfo(GameConstants.NO_MAP_ID);
+			}
 			for (PartyMember pm : chr.getParty().getPartyMembers()) {
 				if (pm != null && pm.getChr() != null) {
 					Char partyChr = pm.getChr();
@@ -548,20 +642,32 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		}
 	}
 
+	public void warpInstanceIn(int id, int portal) {
+		warpInstance(id, true, portal);
+	}
+
+	public void warpInstanceOut(int id, int portal) {
+		warpInstance(id, false, portal);
+	}
+
 	@Override
 	public void warpInstanceIn(int id) {
-		warpInstance(id, true);
+		warpInstance(id, true, 0);
 	}
 
 	@Override
 	public void warpInstanceOut(int id) {
-		warpInstance(id, false);
+		warpInstance(id, false, 0);
 	}
 
-	public void warpInstance(int id, boolean in) {
+	public void warpInstance(int id, boolean in, int portalID) {
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
+		if (!in) {
+			chr.getFields().clear();
+		}
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
-		chr.warp(field);
+		Portal portal = field.getPortalByID(portalID);
+		chr.warp(field, portal);
 	}
 
 	@Override
@@ -601,6 +707,88 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		return field.getMobs().size();
 	}
 
+	public void showWeatherNoticeToField(String text, WeatherEffNoticeType type) {
+		showWeatherNoticeToField(text, type, 7000); // 7 seconds
+	}
+
+	public void showWeatherNoticeToField(String text, WeatherEffNoticeType type, int duration) {
+		Field field = chr.getField();
+		field.broadcastPacket(WvsContext.weatherEffectNotice(type, text, duration));
+	}
+
+	public void showEffectToField(String dir) {
+		showEffectToField(dir, 0);
+	}
+
+	public void showEffectToField(String dir, int delay) {
+		Field field = chr.getField();
+		field.broadcastPacket(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
+	}
+
+	public void showFieldEffect(String dir) {
+		showFieldEffect(dir, 0);
+	}
+
+	@Override
+	public void showFieldEffect(String dir, int delay) {
+		chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+	}
+
+	public void showFieldEffectToField(String dir) {
+		showFieldEffect(dir, 0);
+	}
+
+	public void showFieldEffectToField(String dir, int delay) {
+		Field field = chr.getField();
+		field.broadcastPacket(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+	}
+
+	public void showFieldBackgroundEffect(String dir) {
+		showFieldBackgroundEffect(dir, 0);
+	}
+
+	public void showFieldBackgroundEffect(String dir, int delay) {
+		Field field = chr.getField();
+		chr.write(CField.fieldEffect(FieldEffect.getFieldBackgroundEffectFromWz(dir, delay)));
+	}
+
+	public void showFadeTransition(int duration, int fadeInTime, int fadeOutTime) {
+		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient2(fadeInTime, duration, fadeOutTime, true)));
+	}
+
+	public void showFade(int duration) {
+		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient(duration)));
+	}
+
+	@Override
+	public void dropItem(int itemId, int x, int y) {
+		Field field = chr.getField();
+		Drop drop = new Drop(field.getNewObjectID());
+		drop.setItem(ItemData.getItemDeepCopy(itemId));
+		Position position = new Position(x, y);
+		drop.setPosition(position);
+		field.drop(drop, position);
+	}
+
+	@Override
+	public void teleportInField(Position position) {
+		chr.write(CField.teleport(position, chr));
+	}
+
+	@Override
+	public void teleportInField(int x, int y) {
+		teleportInField(new Position(x, y));
+	}
+
+	@Override
+	public void teleportToPortal(int portalId) {
+		Portal portal = chr.getField().getPortalByID(portalId);
+		if (portal != null) {
+			Position position = new Position(portal.getX(), portal.getY());
+			chr.write(CField.teleport(position, chr));
+		}
+	}
+
 
 
 	// Life-related methods --------------------------------------------------------------------------------------------
@@ -610,6 +798,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	@Override
 	public void spawnNpc(int npcId, int x, int y) {
 		Npc npc = NpcData.getNpcDeepCopyById(npcId);
+		npc.setPosition(new Position(x, y));
 		chr.getField().spawnLife(npc, chr);
 	}
 
@@ -664,6 +853,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void setSpeakerID(int templateID) {
+		getNpcScriptInfo().resetParam();
 		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
 	}
 
@@ -754,6 +944,27 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		}
 	}
 
+	@Override
+	public void spawnReactor(int reactorId, int x, int y) {
+		Field field = chr.getField();
+		Reactor reactor = ReactorData.getReactorByID(reactorId);
+		Position position = new Position(x, y);
+		reactor.setPosition(position);
+		field.addReactor(reactor);
+	}
+
+	@Override
+	public boolean hasReactors() {
+		Field field = chr.getField();
+		return field.getReactors().size() > 0;
+	}
+
+	@Override
+	public int getReactorQuantity() {
+		Field field = chr.getField();
+		return field.getReactors().size();
+	}
+
 
 
 	// Party-related methods -------------------------------------------------------------------------------------------
@@ -809,7 +1020,7 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void showGuildCreateWindow() {
-		chr.write(WvsContext.guildResult(new GuildMsg(GuildResultType.InputGuildName)));
+		chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Req_InputGuildName)));
 	}
 
 
@@ -834,6 +1045,14 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	@Override
 	public void chatScript(String text) {chr.chatScriptMessage(text);}
 
+	public void showWeatherNotice(String text, WeatherEffNoticeType type) {
+		showWeatherNotice(text, type, 7000); // 7 seconds
+	}
+
+	@Override
+	public void showWeatherNotice(String text, WeatherEffNoticeType type, int duration) {
+		chr.write(WvsContext.weatherEffectNotice(type, text, duration));
+	}
 
 
 	// Inventory-related methods ---------------------------------------------------------------------------------------
@@ -871,6 +1090,10 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	@Override
 	public boolean hasItem(int id, int quantity) {
 		return getQuantityOfItem(id) >= quantity;
+	}
+
+	public void consumeItem() {
+		consumeItem(getParentID());
 	}
 
 	@Override
@@ -923,7 +1146,9 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 
 	@Override
 	public void completeQuest(int id) {
-		chr.getQuestManager().completeQuest(id);
+		if (hasQuest(id) && isComplete(id)) {
+			chr.getQuestManager().completeQuest(id);
+		}
 	}
 
 	@Override
@@ -963,6 +1188,89 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 		return chr.getQuestManager().hasQuestCompleted(id);
 	}
 
+	public void createQuestWithQRValue(int questId, String qrValue) {
+		createQuestWithQRValue(chr, questId, qrValue);
+	}
+
+	public void createQuestWithQRValue(Char character, int questId, String qrValue) {
+		QuestManager qm = character.getQuestManager();
+		Quest quest = qm.getQuests().get(questId);
+		if (quest == null) {
+			quest = new Quest(questId, QuestStatus.STARTED);
+			quest.setQrValue(qrValue);
+			qm.addCustomQuest(quest);
+		}
+		quest.setQrValue(qrValue);
+	}
+
+	public void deleteQuest(int questId) {
+		deleteQuest(chr, questId);
+	}
+
+	public void deleteQuest(Char character, int questId) {
+		QuestManager qm = chr.getQuestManager();
+		Quest quest = qm.getQuests().get(questId);
+		if(quest == null) {
+			return;
+		}
+		qm.removeQuest(quest.getQRKey());
+	}
+
+	public String getQRValue(int questId) {
+		return getQRValue(chr, questId);
+	}
+
+	public String getQRValue(Char character, int questId) {
+		Quest quest = chr.getQuestManager().getQuests().get(questId);
+		if (quest == null) {
+			return "Quest is Null";
+		}
+		return quest.getQRValue();
+	}
+
+	public void setQRValue(int questId, String qrValue) {
+		setQRValue(chr, questId, qrValue);
+	}
+
+	public void setQRValue(Char character, int questId, String qrValue) {
+		Quest quest = chr.getQuestManager().getQuests().get(questId);
+		quest.setQrValue(qrValue);
+	}
+
+	public boolean isComplete(int questID) {
+		return chr.getQuestManager().isComplete(questID);
+	}
+	
+
+	// Party Quest-related methods -------------------------------------------------------------------------------------
+
+	public void incrementMonsterParkCount() {
+		chr.setMonsterParkCount( (byte) (chr.getMonsterParkCount() + 1));
+	}
+
+	public byte getMonsterParkCount() {
+		return chr.getMonsterParkCount();
+	}
+
+	public String getDay() {
+		return new SimpleDateFormat("EEEE", Locale.ENGLISH).format(System.currentTimeMillis());
+	}
+
+	public int getMPExpByMobId(int templateId) {
+		return MonsterPark.getExpByMobId(templateId);
+	}
+
+	public int getMPReward() {
+		return MonsterPark.getRewardByDay();
+	}
+
+	public long getPQExp() {
+		return getPQExp(chr);
+	}
+
+	public long getPQExp(Char chr) {
+		return GameConstants.PARTY_QUEST_EXP_FORMULA(chr);
+	}
 
 
 	// Boss-related methods --------------------------------------------------------------------------------------------
@@ -979,6 +1287,47 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
 				pm.getChr().setDeathCount(deathCount);
 			}
+		}
+	}
+
+	public void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int amount, int proc) {
+		createObstacleAtom(oae, key, damage, velocity, 0, amount, proc);
+	}
+
+	@Override
+	public void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int angle, int amount, int proc) {
+		Field field = chr.getField();
+		int xLeft = field.getVrLeft();
+		int yTop = field.getVrTop();
+
+		ObtacleInRowInfo obtacleInRowInfo = new ObtacleInRowInfo(4, false, 5000, 0, 0, 0);
+		ObtacleRadianInfo obtacleRadianInfo = new ObtacleRadianInfo(4, 0, 0, 0, 0);
+		Set<ObtacleAtomInfo> obtacleAtomInfosSet = new HashSet<>();
+
+		for(int i = 0; i < amount; i++) {
+			if(Util.succeedProp(proc)) {
+				int randomX = new Random().nextInt(field.getWidth()) + xLeft;
+				Position position = new Position(randomX, yTop);
+				Foothold foothold = field.findFootHoldBelow(position);
+				if (foothold != null) {
+					int footholdY = foothold.getYFromX(position.getX());
+					int height = position.getY() - footholdY;
+					height = height < 0 ? -height : height;
+
+					obtacleAtomInfosSet.add(new ObtacleAtomInfo(oae.getType(), key, position, new Position(), oae.getHitBox(),
+							damage, 0, 0, height, 0, velocity, height, angle));
+				}
+			}
+		}
+
+		field.broadcastPacket(CField.createObtacle(ObtacleAtomCreateType.NORMAL, obtacleInRowInfo, obtacleRadianInfo, obtacleAtomInfosSet));
+	}
+
+	public void stopEventsByScriptType(ScriptType scriptType) {
+		Set<ScheduledFuture> events = eventsByScriptType.get(scriptType);
+		if (events != null) {
+			events.forEach(st -> st.cancel(true));
+			events.clear();
 		}
 	}
 
@@ -1081,5 +1430,72 @@ public class ScriptManagerImpl implements ScriptManager, Observer {
 	@Override
 	public int getRandomIntBelow(int upBound) {
 		return new Random().nextInt(upBound);
+	}
+
+	public void showEffect(String dir) {
+		showEffect(dir, 0);
+	}
+
+	public void showEffect(String dir, int delay) {
+		showEffect(dir, 4, delay);
+	}
+
+	@Override
+	public void showEffect(String dir, int placement, int delay) {
+		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, placement, 0)));
+	}
+
+	public String formatNumber(String number) {
+		return Util.formatNumber(number);
+	}
+
+	private Object invoke(Object invokeOn, String methodName, Object... args) {
+		List<Class<?>> classList = Arrays.stream(args).map(Object::getClass).collect(Collectors.toList());
+		Class<?>[] classes = classList.stream().map(Util::convertBoxedToPrimitiveClass).toArray(Class<?>[]::new);
+		Method func;
+		try {
+			func = getClass().getMethod(methodName, classes);
+			return func.invoke(invokeOn, args);
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void invokeForParty(String methodName, Object... args) {
+		for (PartyMember pm : chr.getParty().getMembers()) {
+			boolean fromDB = false;
+			Char chr = pm.getChr();
+			if (chr == null) {
+				chr = Char.getFromDBById(pm.getCharID());
+				fromDB = true;
+			}
+			invoke(chr.getScriptManager(), methodName, args);
+			if (fromDB) {
+				DatabaseManager.saveToDB(chr);
+			}
+		}
+	}
+
+	public ScheduledFuture invokeAfterDelay(long delay, String methodName, Object...args) {
+		return EventManager.addEvent(() -> invoke(this, methodName, args), delay);
+	}
+
+	public ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
+											 int executes, String methodName, Object...args) {
+		ScheduledFuture scheduledFuture;
+		if (executes == 0) {
+			scheduledFuture =  EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
+					delayBetweenExecutions);
+		} else {
+			scheduledFuture = EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
+					delayBetweenExecutions, executes);
+		}
+		if (scheduledFutureSet == null) {
+			scheduledFutureSet = new HashSet<>();
+		}
+		scheduledFutureSet.add(scheduledFuture);
+		eventsByScriptType.put(getLastActiveScriptType(), scheduledFutureSet);
+		return scheduledFuture;
 	}
 }

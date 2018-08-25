@@ -144,4 +144,13 @@ public class DropInfo {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    @Override
+    public String toString() {
+        if (getItemID() != 0) {
+            return String.format("Item %d, chance %d", getItemID(), getChance());
+        } else {
+            return String.format("%d mesos.", getMoney());
+        }
+    }
 }

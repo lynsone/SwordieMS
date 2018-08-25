@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.MobPool;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.life.mob.Mob;
@@ -12,6 +13,7 @@ import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.world.field.Field;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import net.swordie.ms.util.Position;
@@ -268,6 +270,7 @@ public class MobSkill {
         short level = (short) getLevel();
         MobSkillInfo msi = SkillData.getMobSkillInfoByIdAndLevel(skill, level);
         MobSkillID msID = MobSkillID.getMobSkillIDByVal(skill);
+        Field field = mob.getField();
         Option o = new Option(skill);
         o.slv = level;
         o.tOption = msi.getSkillStatIntValue(time);
@@ -396,9 +399,15 @@ public class MobSkill {
             case TELEPORT:
                 int xPos = msi.getSkillStatIntValue(x);
                 int yPos = msi.getSkillStatIntValue(y);
-                Rect possibleRect = mob.getPosition().getRectAround(new Rect(-xPos, -yPos, xPos, yPos));
-                mob.setPosition(new Position(Util.getRandom(possibleRect.getLeft(), possibleRect.getRight()),
-                        Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
+                // probably not the right logic
+                if (xPos != 0 && yPos != 0) {
+                    Rect possibleRect = mob.getPosition().getRectAround(new Rect(-xPos, -yPos, xPos, yPos));
+                    mob.setPosition(new Position(Util.getRandom(possibleRect.getLeft(), possibleRect.getRight()),
+                            Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
+                } else {
+                    // xPos == skillAfter (both x)
+                    mob.getField().getLifeToControllers().get(mob).write(MobPool.mobTeleportRequest(xPos));
+                }
                 break;
             case PM_COUNTER:
                 o.nOption = msi.getSkillStatIntValue(x);
@@ -423,6 +432,24 @@ public class MobSkill {
                         m.setHp(msi.getSkillStatIntValue(hp));
                     }
                 }
+                break;
+            case CASTINGBAR:
+                field.broadcastPacket(MobPool.castingBarSkillStart(1,
+                        msi.getSkillStatIntValue(MobSkillStat.castingTime), false, false));
+                break;
+            case BOUNCE_ATTACK:
+                mob.getField().broadcastPacket(MobPool.createBounceAttackSkill(mob, msi, false));
+                break;
+            case LASER_ATTACK:
+                if (!mts.hasCurrentMobStat(MobStat.Laser)) {
+                    o.nOption = 1;
+                    o.wOption = msi.getSkillStatIntValue(MobSkillStat.w);
+                    o.uOption = msi.getSkillStatIntValue(MobSkillStat.z);
+                    mts.addMobSkillOptionsAndBroadCast(MobStat.Laser, o);
+                }
+                break;
+            case LASER_CONTROL:
+                // Not needed? Automatically handled well by the controller
                 break;
             case UNK:
                 log.warn(String.format("Unknown mob skill %d, slv = %d", skill, level));

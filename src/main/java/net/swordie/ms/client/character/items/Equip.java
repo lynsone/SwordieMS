@@ -4,6 +4,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
 
@@ -21,9 +22,9 @@ public class Equip extends Item {
     private String title;
     @JoinColumn(name = "equippedDate")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private FileTime equippedDate = new FileTime();
+    private FileTime equippedDate = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
     private int prevBonusExpRate;
-    private short ruc;
+    private short tuc;
     private short cuc;
     private short iStr;
     private short iDex;
@@ -77,6 +78,7 @@ public class Equip extends Item {
     private List<Integer> options = new ArrayList<>(); // base + add pot + anvil
     private int specialGrade;
     private boolean fixedPotential;
+    private boolean noPotential;
     private boolean tradeBlock;
     @Column(name = "isOnly")
     private boolean only;
@@ -104,7 +106,7 @@ public class Equip extends Item {
     }
 
     public Equip(int itemId, int bagIndex, long cashItemSerialNumber, FileTime dateExpire, long serialNumber,
-                 String title, FileTime equippedDate, int prevBonusExpRate, short ruc, short cuc, short iStr,
+                 String title, FileTime equippedDate, int prevBonusExpRate, short tuc, short cuc, short iStr,
                  short iDex, short iInt, short iLuk, short iMaxHp, short iMaxMp, short iPad, short iMad, short iPDD,
                  short iMDD, short iAcc, short iEva, short iCraft, short iSpeed, short iJump, short attribute,
                  short levelUpType, short level, short exp, short durability, short iuc, short iPvpDamage,
@@ -113,14 +115,14 @@ public class Equip extends Item {
                  short itemState, short chuc, short soulOptionId, short soulSocketId, short soulOption,
                  short rStr, short rDex, short rInt, short rLuk, short rLevel, short rJob, short rPop, boolean isCash,
                  String iSlot, String vSlot, int fixedGrade, List<Integer> options, int specialGrade, boolean fixedPotential,
-                 boolean tradeBlock, boolean only, boolean notSale, int attackSpeed, int price, int charmEXP,
+                 boolean noPotential, boolean tradeBlock, boolean only, boolean notSale, int attackSpeed, int price, int charmEXP,
                  boolean expireOnLogout, int setItemID, boolean exItem, boolean hasEquipTradeBlock, String owner) {
         super(itemId, bagIndex, cashItemSerialNumber, dateExpire, InvType.EQUIP, isCash, Type.EQUIP);
         this.serialNumber = serialNumber;
         this.title = title;
         this.equippedDate = equippedDate;
         this.prevBonusExpRate = prevBonusExpRate;
-        this.ruc = ruc;
+        this.tuc = tuc;
         this.cuc = cuc;
         this.iStr = iStr;
         this.iDex = iDex;
@@ -174,6 +176,7 @@ public class Equip extends Item {
         this.options = options;
         this.specialGrade = specialGrade;
         this.fixedPotential = fixedPotential;
+        this.noPotential = noPotential;
         this.tradeBlock = tradeBlock;
         this.only = only;
         this.notSale = notSale;
@@ -195,7 +198,7 @@ public class Equip extends Item {
         ret.title = title;
         ret.equippedDate = equippedDate.deepCopy();
         ret.prevBonusExpRate = prevBonusExpRate;
-        ret.ruc = ruc;
+        ret.tuc = tuc;
         ret.cuc = cuc;
         ret.iStr = iStr;
         ret.iDex = iDex;
@@ -250,6 +253,7 @@ public class Equip extends Item {
         ret.options.addAll(options);
         ret.specialGrade = specialGrade;
         ret.fixedPotential = fixedPotential;
+        ret.noPotential = noPotential;
         ret.tradeBlock = tradeBlock;
         ret.only = only;
         ret.notSale = notSale;
@@ -291,8 +295,9 @@ public class Equip extends Item {
         return prevBonusExpRate;
     }
 
-    public short getRuc() {
-        return ruc;
+    // scroll slots
+    public short getTuc() {
+        return tuc;
     }
 
     public short getCuc() {
@@ -737,6 +742,10 @@ public class Equip extends Item {
         return fixedPotential;
     }
 
+    public boolean isNoPotential() {
+        return noPotential;
+    }
+
     public boolean isTradeBlock() {
         return tradeBlock;
     }
@@ -793,8 +802,8 @@ public class Equip extends Item {
         this.prevBonusExpRate = prevBonusExpRate;
     }
 
-    public void setRuc(short ruc) {
-        this.ruc = ruc;
+    public void setTuc(short tuc) {
+        this.tuc = tuc;
     }
 
     public void setSpecialGrade(int specialGrade) {
@@ -803,6 +812,10 @@ public class Equip extends Item {
 
     public void setFixedPotential(boolean fixedPotential) {
         this.fixedPotential = fixedPotential;
+    }
+
+    public void setNoPotential(boolean noPotential) {
+        this.noPotential = noPotential;
     }
 
     public void setTradeBlock(boolean tradeBlock) {
@@ -860,8 +873,8 @@ public class Equip extends Item {
         // GW_ItemSlotEquipBase
         int mask = getStatMask(0);
         outPacket.encodeInt(mask);
-        if(hasStat(EquipBaseStat.ruc)) {
-            outPacket.encodeByte(getRuc());
+        if(hasStat(EquipBaseStat.tuc)) {
+            outPacket.encodeByte(getTuc());
         }
         if(hasStat(EquipBaseStat.cuc)) {
             outPacket.encodeByte(getCuc());
@@ -996,8 +1009,8 @@ public class Equip extends Item {
         outPacket.encodeInt(-1); // ?
         // GW_CashItemOption
         outPacket.encodeLong(getCashItemSerialNumber());
-        getDateExpire().encode(outPacket);
-        outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+        outPacket.encodeFT(getDateExpire());
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
         for (int i = 0; i < 2; i++) {
             outPacket.encodeLong(0);
         }
@@ -1022,8 +1035,8 @@ public class Equip extends Item {
 
     public void setBaseStat(EquipBaseStat equipBaseStat, long amount) {
         switch(equipBaseStat){
-            case ruc:
-                setRuc((short) amount);
+            case tuc:
+                setTuc((short) amount);
                 break;
             case cuc:
                 setCuc((short) amount);
@@ -1138,8 +1151,8 @@ public class Equip extends Item {
 
     public long getBaseStat(EquipBaseStat equipBaseStat) {
         switch(equipBaseStat){
-            case ruc:
-                return getRuc();
+            case tuc:
+                return getTuc();
             case cuc:
                 return getCuc();
             case iStr:
@@ -1296,8 +1309,8 @@ public class Equip extends Item {
         }
     }
 
-    public int getRandomOption(boolean bonus) {
-        List<Integer> data = ItemConstants.getWeightedOptionsByEquip(this, bonus);
+    public int getRandomOption(boolean bonus, int line) {
+        List<Integer> data = ItemConstants.getWeightedOptionsByEquip(this, bonus, line);
         return data.get(Util.getRandom(data.size() - 1));
     }
 
@@ -1308,6 +1321,10 @@ public class Equip extends Item {
      * @param thirdLineChance The chance of a third line being added.
      */
     public void setHiddenOptionBase(short val, int thirdLineChance) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         int max = 3;
         if(getOptionBase(3) == 0) {
             // If this equip did not have a 3rd line already, thirdLineChance to get it
@@ -1321,6 +1338,10 @@ public class Equip extends Item {
     }
 
     public void setHiddenOptionBonus(short val, int thirdLineChance) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         int max = 3;
         if(getOptionBonus(3) == 0) {
             // If this equip did not have a 3rd line already, thirdLineChance to get it
@@ -1334,11 +1355,19 @@ public class Equip extends Item {
     }
 
     public void releaseOptions(boolean bonus) {
+        if (!ItemConstants.canEquipHavePotential(this)) {
+            return;
+        }
+
         for (int i = 0; i < 3; i++) {
             if(getOption(i, bonus) < 0) {
-                setOption(i, getRandomOption(bonus), bonus);
+                setOption(i, getRandomOption(bonus, i), bonus);
             }
         }
+    }
+
+    public int getAnvilId() {
+        return getOptions().get(6); // Anvil
     }
 
     public Map<EnchantStat, Integer> getEnchantStats() {
@@ -1380,9 +1409,18 @@ public class Equip extends Item {
         this.sockets = sockets;
     }
 
-    public int getBaseStat(BaseStat baseStat) {
-        // TODO Potentials + sockets
-        int res = 0;
+    public double getBaseStat(BaseStat baseStat) {
+        // TODO: Sockets
+        double res = 0;
+        for (int i = 0; i < getOptions().size() - 1; i++) { // last one is anvil => skipped
+            int id = getOptions().get(i);
+            int level = getrLevel() / 10;
+            ItemOption io = ItemData.getItemOptionById(id);
+            if (io != null) {
+                Map<BaseStat, Double> valMap = io.getStatValuesByLevel(level);
+                res += valMap.getOrDefault(baseStat, 0D);
+            }
+        }
         switch (baseStat) {
             case str:
                 res += getiStr();
@@ -1447,4 +1485,27 @@ public class Equip extends Item {
         }
         return res;
     }
+
+    @Override
+    public boolean isTradable() {
+        return !hasAttribute(EquipAttribute.Untradable);
+    }
+
+    public void applyInnocenceScroll() {
+        Equip defaultEquip = ItemData.getEquipDeepCopyFromID(getItemId(), false);
+        for (EquipBaseStat ebs : EquipBaseStat.values()) {
+            if (ebs != EquipBaseStat.attribute && ebs != EquipBaseStat.growthEnchant && ebs != EquipBaseStat.psEnchant) {
+                setBaseStat(ebs, defaultEquip.getBaseStat(ebs));
+            }
+        }
+        setChuc((short) 0);
+        recalcEnchantmentStats();
+    }
+
+    public boolean hasUsedSlots() {
+        Equip defaultEquip = ItemData.getEquipDeepCopyFromID(getItemId(), false);
+        return defaultEquip.getTuc() != getTuc();
+    }
+
+
 }

@@ -51,6 +51,7 @@ public class Noblesse extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
 
     }
 

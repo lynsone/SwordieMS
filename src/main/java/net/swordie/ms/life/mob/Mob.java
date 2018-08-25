@@ -8,12 +8,11 @@ import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyDamageInfo;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.MobPool;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.EliteState;
-import net.swordie.ms.enums.TextEffectType;
+import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
@@ -124,9 +123,8 @@ public class Mob extends Life {
     private List<Tuple<Integer, Integer>> eliteSkills = new ArrayList<>();
     private boolean selfDestruction;
 
-    public Mob(int templateId, int objectId) {
-        super(objectId);
-        super.templateId = templateId;
+    public Mob(int templateId) {
+        super(templateId);
         forcedMobStat = new ForcedMobStat();
         temporaryStat = new MobTemporaryStat(this);
         scale = 100;
@@ -134,14 +132,15 @@ public class Mob extends Life {
     }
 
     public Mob deepCopy() {
-        Mob copy = new Mob(getTemplateId(), getObjectId());
+        Mob copy = new Mob(getTemplateId());
         // start life
+        copy.setObjectId(getObjectId());
         copy.setLifeType(getLifeType());
         copy.setTemplateId(getTemplateId());
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setF(getF());
+        copy.setFlip(getFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -1142,26 +1141,21 @@ public class Mob extends Life {
         }
     }
 
-    private void die() {
+    public void die() {
         Field field = getField();
         getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH));
-        getTemporaryStat().removeEverything();
-        if (!isNotRespawnable()) { // double negative
-            EventManager.addEvent(() -> field.respawn(this),
-                    (long) (GameConstants.BASE_MOB_RESPAWN_RATE * (1 / field.getMobRate())));
-            field.putLifeController(this, null);
-        } else {
-            getField().removeLife(getObjectId());
-        }
+        getField().removeLife(getObjectId());
         if(isSplit()) {
             return;
         }
         distributeExp();
         dropDrops(); // xd
-        setPosition(getHomePosition());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
+            if (!chr.getAccount().getMonsterCollection().hasMob(getTemplateId())) {
+                chr.getAccount().getMonsterCollection().addMobAndUpdateClient(getTemplateId(), chr);
+            }
         }
         getDamageDone().clear();
         if (field.canSpawnElite() && getEliteType() == 0 && !isNotRespawnable() &&
@@ -1191,14 +1185,13 @@ public class Mob extends Life {
             } else {
                 msg = "The dark energy is still here. It's making the place quite grim.";
             }
-            Effect effect = Effect.createFieldTextEffect(msg, 75, 2000, 4,
-                    new Position(0, -200), 1, 4, TextEffectType.BlackFadedBrush, 0, 0);
-            getField().broadcastPacket(User.effect(effect));
+            getField().broadcastPacket(WvsContext.weatherEffectNotice(WeatherEffNoticeType.EliteBoss, msg, 8000)); // 8 seconds
         } else if (getEliteType() == 3) {
             field.broadcastPacket(CField.eliteState(EliteState.NORMAL, true, null, null, null));
             field.setEliteState(EliteState.NORMAL);
         }
-
+        setChanged();
+        notifyObservers();
         //TEST
         reviveMob();
     }
@@ -1407,7 +1400,7 @@ public class Mob extends Life {
             fh = field.findFootHoldBelow(pos);
         }
         if (fh == null) {
-            // Some weird edge case where the mob is spawned on some weird foothold
+            // Edge case where the mob is spawned on some weird foothold
             return;
         }
         setHomeFoothold(fh.deepCopy());

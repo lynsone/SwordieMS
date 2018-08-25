@@ -7,7 +7,9 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Created on 2/18/2017.
@@ -21,18 +23,28 @@ public class FileTime implements Serializable {
 	private int id;
 	private int lowDateTime;
 	private int highDateTime;
+	@Transient
+	private boolean isConvertedForClient;
 
 	public long getLongValue() {
 		return getLowDateTime() + (long) getHighDateTime() << 32;
+	}
+
+	public boolean isConvertedForClient() {
+		return isConvertedForClient;
+	}
+
+	public void setConvertedForClient(boolean convertedForClient) {
+		isConvertedForClient = convertedForClient;
 	}
 
 	public enum Type {
 		// Mushy
 		MAX_TIME(35120710, -1157267456),
 		ZERO_TIME(21968699, -35635200),
-		PERMANENT(150841440000000000L),
 		FT_UT_OFFSET(116444592000000000L),
-		QUEST_TIME(27111903);
+		QUEST_TIME(27111903),
+		PLAIN_ZERO(0);
 
 		private long val;
 
@@ -52,9 +64,17 @@ public class FileTime implements Serializable {
 	public FileTime(int lowDateTime, int highDateTime) {
 		this.lowDateTime = lowDateTime;
 		this.highDateTime = highDateTime;
+		if (FileTime.fromType(Type.MAX_TIME).equals(this) || FileTime.fromType(Type.ZERO_TIME).equals(this)) {
+			isConvertedForClient = true;
+		}
 	}
 
 	public FileTime() {
+	}
+
+	public FileTime(long time, boolean isConvertedForClient) {
+		this(time);
+		this.isConvertedForClient = isConvertedForClient;
 	}
 
 	/**
@@ -65,8 +85,8 @@ public class FileTime implements Serializable {
 		return new FileTime(getLowDateTime(), getHighDateTime());
 	}
 
-	public static FileTime getFileTimeFromType(Type type) {
-		return new FileTime(type.getVal());
+	public static FileTime fromType(Type type) {
+		return new FileTime(type.getVal(), true);
 	}
 
 	/**
@@ -96,13 +116,22 @@ public class FileTime implements Serializable {
 	}
 
 	/**
-	 * Creates a new FileTime from a given time (millis since epoch). Ensures the date is correctly calculated for the
-	 * client.
+	 * Creates a new FileTime from a given time (millis since epoch).
 	 * @param time millis since epoch that this FileTime should correspond to
 	 * @return FileTime corresponding to the given time
 	 */
 	public static FileTime fromEpochMillis(long time) {
-		return fromLong((long) (Type.QUEST_TIME.getVal() + (time / 3600000 * 8.38195)));
+		return fromLong(time);
+	}
+
+	/**
+	 * Converts this FileTime (storing epoch millis) to a format that the client expects.
+	 * @return formatted FileTime
+	 */
+	public FileTime toClientFormat() {
+		FileTime ft = fromLong((long) (toLong() - 116444736000000000L) * 100000L);
+		ft.setConvertedForClient(true);
+		return ft;
 	}
 
 	/**
@@ -113,12 +142,16 @@ public class FileTime implements Serializable {
 	public static FileTime fromDate(LocalDateTime localDateTime) {
 		return fromEpochMillis(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 	}
+
 	/**
 	 * Returns the millis since epoch that this FileTime corresponds to.
 	 * @return millis since epoch
 	 */
 	public long toMillis() {
-		return (long) ((toLong() - Type.QUEST_TIME.getVal()) * 3600000 / 8.38196);
+		if (isConvertedForClient()) {
+			return (toLong() - 116444736000000000L) / 10000L;
+		}
+		return toLong();
 	}
 
 	/**
@@ -143,8 +176,13 @@ public class FileTime implements Serializable {
 	 * @param outPacket the packet to encode to
 	 */
 	public void encode(OutPacket outPacket) {
-		outPacket.encodeInt(getHighDateTime());
-		outPacket.encodeInt(getLowDateTime());
+		if (!isConvertedForClient()) {
+			// https://stackoverflow.com/questions/46201834/how-to-convert-milli-seconds-time-to-filetime-in-c
+			outPacket.encodeLong(toLong() * 10000L + 116444736000000000L);
+		} else {
+			outPacket.encodeInt(getHighDateTime());
+			outPacket.encodeInt(getLowDateTime());
+		}
 	}
 
 	/**
@@ -152,7 +190,7 @@ public class FileTime implements Serializable {
 	 * @return addition of the low and high part
 	 */
 	public long toLong() {
-		return (long) getLowDateTime() + ((long) getHighDateTime() << 32);
+		return (getLowDateTime() & 0xFFFFFFFFL) | ((long) getHighDateTime() << 32);
 	}
 
 	/**
@@ -160,7 +198,11 @@ public class FileTime implements Serializable {
 	 * @return expiredness
 	 */
 	public boolean isExpired() {
-		return toMillis() < System.currentTimeMillis();
+		return !isPermanent() && toMillis() < System.currentTimeMillis();
+	}
+
+	private boolean isPermanent() {
+		return equals(FileTime.fromType(Type.MAX_TIME)) || equals(new FileTime(21968699, -35635200));
 	}
 
 	/**

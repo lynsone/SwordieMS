@@ -47,7 +47,6 @@ def action(response, answer):
     elif status == 10:
         sm.sendNext("Thank you! You will not regret it.\r\n"
                     "(You will be transported to the 1st Observatory.)")
-        sm.completeQuestNoRewards(32170) # [Riena Strait] Nerd Rescue
-        sm.giveExp(27718) # Exp Given
+        sm.completeQuest(32170) # [Riena Strait] Nerd Rescue
         sm.warp(141010000,0) # Ice Station 1
         sm.dispose()

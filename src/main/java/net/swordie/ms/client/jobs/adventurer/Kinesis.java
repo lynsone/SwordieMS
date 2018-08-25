@@ -19,7 +19,6 @@ import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 
@@ -120,12 +119,12 @@ public class Kinesis extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleOrb(skillID, slv, attackInfo);
+            createKineticOrbForceAtom(skillID, slv, attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        handlePPAttack(skillID, slv, si);
+        kinesisPPAttack(skillID, slv, si);
         switch (attackInfo.skillId) {
             case PSYCHIC_FORCE:
             case PSYCHIC_BLAST_FWD:
@@ -154,16 +153,18 @@ public class Kinesis extends Job {
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePMdR, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case MENTAL_SHOCK:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
                 }
                 break;
         }
@@ -171,7 +172,7 @@ public class Kinesis extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleOrb(int skillID, byte slv, AttackInfo attackInfo) {
+    private void createKineticOrbForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         if(Arrays.asList(nonOrbSkills).contains(skillID)) {
             return;
         }
@@ -189,7 +190,7 @@ public class Kinesis extends Job {
         }
     }
 
-    private void handlePPAttack(int skillID, byte slv, SkillInfo si) {
+    private void kinesisPPAttack(int skillID, byte slv, SkillInfo si) {
         if(si == null) {
             return;
         }
@@ -199,7 +200,7 @@ public class Kinesis extends Job {
         substractPP(ppCons);
     }
 
-    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+    public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -281,11 +282,13 @@ public class Kinesis extends Job {
                 tsm.putCharacterStatValue(NewFlying, o1); //38s
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -311,7 +314,7 @@ public class Kinesis extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
 
@@ -319,7 +322,7 @@ public class Kinesis extends Job {
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(KinesisPsychicShield)) {
-            hitInfo.HPDamage = (int) (hitInfo.HPDamage * (tsm.getOption(KinesisPsychicEnergeShield).nOption / 100D));
+            hitInfo.hpDamage = (int) (hitInfo.hpDamage * (tsm.getOption(KinesisPsychicEnergeShield).nOption / 100D));
             substractPP(1);
         }
         if(getPp() <= 0) {
@@ -371,6 +374,6 @@ public class Kinesis extends Job {
         o.nOption = pp;
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.putCharacterStatValue(KinesisPsychicPoint, o);
-        chr.getClient().write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 }

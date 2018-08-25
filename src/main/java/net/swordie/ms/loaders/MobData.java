@@ -24,30 +24,27 @@ import static net.swordie.ms.life.mob.MobStat.*;
 public class MobData {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
-    private static Set<Mob> mobs = new HashSet<>();
+    private static Map<Integer, Mob> mobs = new HashMap<>();
 
-    public static Set<Mob> getMobs() {
+    public static Map<Integer, Mob> getMobs() {
         return mobs;
     }
 
     public static void addMob(Mob mob) {
-        getMobs().add(mob);
+        getMobs().put(mob.getTemplateId(), mob);
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating mob data.");
+        long start = System.currentTimeMillis();
         loadMobsFromWz();
         QuestData.linkMobData();
         saveToFile(ServerConstants.DAT_DIR + "/mobs");
+        log.info(String.format("Completed generating mob data in %dms.", System.currentTimeMillis() - start));
     }
 
     public static Mob getMobById(int id) {
-        for (Mob mob : getMobs()) {
-            if (mob.getTemplateId() == id) {
-                return mob;
-            }
-        }
-        return loadMobFromFile(id);
-//        return getMobs().stream().filter(mob -> mob.getTemplateId() == id).findFirst().orElse(loadMobFromFile(id));
+        return getMobs().getOrDefault(id, loadMobFromFile(id));
     }
 
     public static Mob getMobDeepCopyById(int id) {
@@ -61,7 +58,7 @@ public class MobData {
 
     private static void saveToFile(String dir) {
         Util.makeDirIfAbsent(dir);
-        for (Mob mob : getMobs()) {
+        for (Mob mob : getMobs().values()) {
             File file = new File(dir + "/" + mob.getTemplateId() + ".dat");
             try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
                 ForcedMobStat fms = mob.getForcedMobStat();
@@ -194,7 +191,7 @@ public class MobData {
         }
         Mob mob = null;
         try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
-            mob = new Mob(dataInputStream.readInt(), -1);
+            mob = new Mob(dataInputStream.readInt());
             ForcedMobStat fms = mob.getForcedMobStat();
             fms.setLevel(dataInputStream.readInt());
             mob.setFirstAttack(dataInputStream.readInt());
@@ -360,7 +357,7 @@ public class MobData {
             }
             int id = Integer.parseInt(XMLApi.getNamedAttribute(node, "name").replace(".img", ""));
             Node infoNode = XMLApi.getFirstChildByNameBF(node, "info");
-            Mob mob = new Mob(id, -1);
+            Mob mob = new Mob(id);
             ForcedMobStat fms = mob.getForcedMobStat();
             MobTemporaryStat mts = mob.getTemporaryStat();
             for (Node n : XMLApi.getAllChildren(infoNode)) {
@@ -859,7 +856,7 @@ public class MobData {
                     default:
                         log.warn(String.format("Unkown property %s with value %s.", name, value));
                 }
-                getMobs().add(mob);
+                getMobs().put(mob.getTemplateId(), mob);
             }
         }
     }

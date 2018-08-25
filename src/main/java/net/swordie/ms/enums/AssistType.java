@@ -7,6 +7,8 @@ public enum AssistType {
     PASSIVE(0),
     ATTACKING(1),
     BUFFING(2),
+
+    MANUAL(6),
     ;
 
     private byte val;

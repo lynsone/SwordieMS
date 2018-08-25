@@ -4,43 +4,42 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
-import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.resistance.OpenGate;
+import net.swordie.ms.client.jobs.sengoku.Kanna;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.enums.DropLeaveType;
-import net.swordie.ms.enums.EliteState;
-import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.TextEffectType;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.Reactor;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.scripts.ScriptManager;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import org.apache.log4j.Logger;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static net.swordie.ms.client.character.skills.SkillStat.subTime;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**
@@ -48,7 +47,8 @@ import static net.swordie.ms.client.character.skills.SkillStat.time;
  */
 public class Field {
     private static final Logger log = Logger.getLogger(Field.class);
-    private Rectangle rect;
+    private Rect rect;
+    private int vrTop, vrLeft, vrBottom, vrRight;
     private double mobRate;
     private int id;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
@@ -71,16 +71,19 @@ public class Field {
     private RuneStone runeStone;
     private ScheduledFuture runeStoneHordesTimer;
     private int burningFieldLevel;
-    private ScheduledFuture burningFieldCheckTimer;
     private long nextEliteSpawnTime = System.currentTimeMillis();
     private int killedElites;
     private EliteState eliteState;
     private int bossMobID;
+    private boolean kishin;
+    private List<OpenGate> openGateList = new ArrayList<>();
+    private List<TownPortal> townPortalList = new ArrayList<>();
+    private boolean canSpawnRunestone;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
         this.uniqueId = uniqueId;
-        this.rect = new Rectangle(800, 600);
+        this.rect = new Rect();
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
         this.lifes = Collections.synchronizedList(new ArrayList<>());
@@ -88,6 +91,7 @@ public class Field {
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
         this.reactors = new HashSet<>();
+        this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
         startFieldScript();
     }
 
@@ -100,21 +104,49 @@ public class Field {
         }
     }
 
-    public Rectangle getRect() {
+    public Rect getRect() {
         return rect;
     }
 
-    public void setRect(Rectangle rect) {
+    public void setRect(Rect rect) {
         this.rect = rect;
     }
 
-    public int getWidth() {
-        return (int) getRect().getWidth();
+    public int getVrTop() {
+        return vrTop;
     }
 
-    public int getHeight() {
-        return (int) getRect().getHeight();
+    public void setVrTop(int vrTop) {
+        this.vrTop = vrTop;
     }
+
+    public int getVrLeft() {
+        return vrLeft;
+    }
+
+    public void setVrLeft(int vrLeft) {
+        this.vrLeft = vrLeft;
+    }
+
+    public int getVrBottom() {
+        return vrBottom;
+    }
+
+    public void setVrBottom(int vrBottom) {
+        this.vrBottom = vrBottom;
+    }
+
+    public int getVrRight() {
+        return vrRight;
+    }
+
+    public void setVrRight(int vrRight) {
+        this.vrRight = vrRight;
+    }
+
+    public int getHeight() {return getVrTop() - getVrBottom();}
+
+    public int getWidth() {return getVrRight() - getVrLeft();}
 
     public int getId() {
         return id;
@@ -370,6 +402,14 @@ public class Field {
         if (!getLifes().contains(life)) {
             getLifes().add(life);
             life.setField(this);
+            if (life instanceof Mob) {
+                if (getScriptManager() != null) {
+                    life.addObserver(getScriptManager());
+                }
+                for (Char chr : getChars()) {
+                    life.addObserver(chr.getScriptManager());
+                }
+            }
         }
     }
 
@@ -459,11 +499,16 @@ public class Field {
                 putLifeController(entry.getKey(), null);
             }
         }
-        // remove summons of that char
+        // remove summons of that char & remove field attacks of that char
         List<Integer> removedList = new ArrayList<>();
         for (Life life : getLifes()) {
             if (life instanceof Summon && ((Summon) life).getCharID() == chr.getId()) {
                 removedList.add(life.getObjectId());
+            } else if (life instanceof FieldAttackObj) {
+                FieldAttackObj fao = (FieldAttackObj) life;
+                if (fao.getOwnerID() == chr.getId() && fao.getTemplateId() == Archer.ARROW_PLATTER) {
+                    removedList.add(life.getObjectId());
+                }
             }
         }
         for (int id : removedList) {
@@ -498,12 +543,19 @@ public class Field {
         for (Reactor reactor : getReactors()) {
             spawnLife(reactor, chr);
         }
-        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0) {
+        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && canSpawnRunestone()) {
             chr.write(CField.runeStoneAppear(runeStone));
         }
-        //if (getMobs().size() > 0 && getBurningFieldLevel() > 0) { //Burning Level shown per map entry is commented out.
-        //    showBurningLevel();
-        //}
+        if (getOpenGates() != null && getOpenGates().size() > 0) {
+            for (OpenGate openGate : getOpenGates()) {
+                openGate.showOpenGate(this);
+            }
+        }
+        if (getTownPortalList() != null && getTownPortalList().size() > 0) {
+            for (TownPortal townPortal : getTownPortalList()) {
+                townPortal.showTownPortal(this);
+            }
+        }
     }
 
     @Override
@@ -524,6 +576,10 @@ public class Field {
         }
     }
 
+    private void broadcast(OutPacket outPacket, Predicate<? super Char> predicate) {
+        getChars().stream().filter(predicate).forEach(chr -> chr.write(outPacket));
+    }
+
     public void spawnAffectedArea(AffectedArea aa) {
         addLife(aa);
         SkillInfo si = SkillData.getSkillInfoById(aa.getSkillID());
@@ -539,8 +595,24 @@ public class Field {
         getMobs().forEach(mob -> aa.getField().checkMobInAffectedAreas(mob));
     }
 
+    public void spawnAffectedAreaAndRemoveOld(AffectedArea aa) {
+        AffectedArea oldAA = (AffectedArea) getLifes().stream()
+                .filter(l -> l instanceof AffectedArea &&
+                        ((AffectedArea) l).getCharID() == aa.getCharID() &&
+                        ((AffectedArea) l).getSkillID() == aa.getSkillID())
+                .findFirst().orElse(null);
+        if (oldAA != null) {
+            removeLife(oldAA.getObjectId(), false);
+        }
+        spawnAffectedArea(aa);
+    }
+
     public List<Mob> getMobs() {
         return getLifes().stream().filter(life -> life instanceof Mob).map(l -> (Mob) l).collect(Collectors.toList());
+    }
+
+    public List<Drop> getDrops() {
+        return getLifes().stream().filter(life -> life instanceof Drop).map(l -> (Drop) l).collect(Collectors.toList());
     }
 
     public void setObjectIDCounter(int idCounter) {
@@ -579,6 +651,21 @@ public class Field {
         return chars;
     }
 
+    public List<PartyMember> getPartyMembersInRect(Char chr, Rect rect) {
+        Party party = chr.getParty();
+        List<PartyMember> partyMembers = new ArrayList<>();
+        for (PartyMember partyMember : party.getOnlineMembers()) {
+            Position position = partyMember.getChr().getPosition();
+            int x = position.getX();
+            int y = position.getY();
+            if (x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                partyMembers.add(partyMember);
+            }
+        }
+        return partyMembers;
+    }
+
     public List<Mob> getMobsInRect(Rect rect) {
         List<Mob> mobs = new ArrayList<>();
         for (Mob mob : getMobs()) {
@@ -609,6 +696,20 @@ public class Field {
         return mobs;
     }
 
+    public List<Drop> getDropsInRect(Rect rect) {
+        List<Drop> drops = new ArrayList<>();
+        for (Drop drop : getDrops()) {
+            Position position = drop.getPosition();
+            int x = position.getX();
+            int y = position.getY();
+            if (x >= rect.getLeft() && y >= rect.getTop()
+                    && x <= rect.getRight() && y <= rect.getBottom()) {
+                drops.add(drop);
+            }
+        }
+        return drops;
+    }
+
     public synchronized void removeLife(int id, boolean fromSchedule) {
         Life life = getLifeByObjectID(id);
         if (life == null) {
@@ -618,6 +719,9 @@ public class Field {
         removeSchedule(life, fromSchedule);
         if (life instanceof Summon) {
             Summon summon = (Summon) life;
+            if (summon.getSkillID() == Kanna.KISHIN_SHOUKAN || summon.getSkillID() == Job.MONOLITH) {
+                setKishin(false);
+            }
             broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
         } else if (life instanceof AffectedArea) {
             AffectedArea aa = (AffectedArea) life;
@@ -628,6 +732,8 @@ public class Field {
                     tsm.removeStatsBySkill(aa.getSkillID());
                 }
             }
+        } else if (life instanceof FieldAttackObj) {
+            broadcastPacket(FieldAttackObjPool.objRemoveByKey(life.getObjectId()));
         }
     }
 
@@ -689,10 +795,6 @@ public class Field {
         }
     }
 
-    private void broadcastWithPredicate(OutPacket outPacket, Predicate<? super Char> predicate) {
-        getChars().stream().filter(predicate).forEach(chr -> chr.write(outPacket));
-    }
-
     /**
      * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
      * Immediately broadcasts the drop packet.
@@ -702,13 +804,27 @@ public class Field {
      * @param posTo   The Position where the drop lands.
      */
     public void drop(Drop drop, Position posFrom, Position posTo) {
-        addLife(drop);
+        boolean isTradable = true;
+        Item item = drop.getItem();
+        if (item != null) {
+            ItemInfo itemInfo = ItemData.getItemInfoByID(item.getItemId());
+            // must be tradable, and if not an equip, not a quest item
+            isTradable = item != null && item.isTradable() && (ItemConstants.isEquip(item.getItemId()) ||
+                    (itemInfo != null && !itemInfo.isQuest()));
+        }
         drop.setPosition(posTo);
-        getLifeSchedules().put(drop,
-                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
-                        GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
+        if (isTradable) {
+            addLife(drop);
+            getLifeSchedules().put(drop,
+                    EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
+                            GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
+        } else {
+            drop.setObjectId(getNewObjectID()); // just so the client sees the drop
+        }
         // Check for collision items such as exp orbs from combo kills
-        if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
+        if (!isTradable) {
+            broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FADE_AWAY));
+        } else if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
         } else {
             broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
@@ -746,7 +862,7 @@ public class Field {
         getLifeSchedules().put(drop,
                 EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
-        broadcastWithPredicate(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
+        broadcast(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
                 (Char chr) -> dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq()));
     }
 
@@ -785,13 +901,18 @@ public class Field {
      */
     public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID) {
         int x = position.getX();
-        int minX = fh.getX1();
-        int maxX = fh.getX2();
+        int minX = fh == null ? position.getX() : fh.getX1();
+        int maxX = fh == null ? position.getX() : fh.getX2();
         int diff = 0;
         for (DropInfo dropInfo : dropInfos) {
             if (dropInfo.willDrop()) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
-                Position posTo = new Position(x, fh.getYFromX(x));
+                Position posTo;
+                if (fh == null) {
+                    posTo = position.deepCopy();
+                } else {
+                    posTo = new Position(x, fh.getYFromX(x));
+                }
                 drop(dropInfo, position, posTo, ownerID);
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
                 dropInfo.generateNextDrop();
@@ -799,7 +920,7 @@ public class Field {
         }
     }
 
-    public List<Portal> getclosestPortal(Rect rect) {
+    public List<Portal> getClosestPortal(Rect rect) {
         List<Portal> portals = new ArrayList<>();
         for (Portal portals2 : getPortals()) {
             int x = portals2.getX();
@@ -899,7 +1020,7 @@ public class Field {
     }
 
     public void spawnRuneStone() {
-        if(getMobs().size() <= 0 || getBossMobID() != 0) {
+        if(getMobs().size() <= 0 || getBossMobID() != 0 || !canSpawnRunestone()) {
             return;
         }
         if(getRuneStone() == null) {
@@ -954,7 +1075,7 @@ public class Field {
         if(getMobs().size() > 0 &&
                 getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
             setBurningFieldLevel(GameConstants.BURNING_FIELD_LEVEL_ON_START);
-            burningFieldCheckTimer = EventManager.addFixedRateEvent(() -> changeBurningLevel(), 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
+            EventManager.addFixedRateEvent(this::changeBurningLevel, 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
         }
     }
 
@@ -1021,5 +1142,94 @@ public class Field {
 
     public int getBossMobID() {
         return bossMobID;
+    }
+
+    public Portal getDefaultPortal() {
+        Portal p = getPortalByName("sp");
+        return p == null ? getPortalByID(0) : p;
+    }
+
+    private ScriptManager getScriptManager() {
+        return scriptManagerImpl;
+    }
+
+    public void generateMobs() {
+        int currentMobs = getMobs().size();
+        for (MobGen mg : getLifes().stream()
+                .filter(l -> l instanceof MobGen)
+                .map(l -> ((MobGen) l))
+                .collect(Collectors.toSet())) {
+            if (mg.canSpawnOnField(this)) {
+                mg.spawnMob(this);
+                currentMobs++;
+                if (currentMobs > getFixedMobCapacity()) {
+                    break;
+                }
+            }
+        }
+        // No fixed rate to ensure kishin-ness keeps being checked
+        double kishinMultiplier = hasKishin() ? GameConstants.KISHIN_MOB_RATE_MULTIPLIER : 1;
+        EventManager.addEvent(this::generateMobs,
+                (long) (GameConstants.BASE_MOB_RESPAWN_RATE / (getMobRate() * kishinMultiplier)));
+    }
+
+    public int getMobCapacity() {
+        return (int) (getFixedMobCapacity() * (hasKishin() ? GameConstants.KISHIN_MOB_MULTIPLIER : 1));
+    }
+
+    public boolean hasKishin() {
+        return kishin;
+    }
+
+    public void setKishin(boolean kishin) {
+        this.kishin = kishin;
+    }
+
+    public List<OpenGate> getOpenGates() {
+        return openGateList;
+    }
+
+    public void setOpenGates(List<OpenGate> openGateList) {
+        this.openGateList = openGateList;
+    }
+
+    public void addOpenGate(OpenGate openGate) {
+        getOpenGates().add(openGate);
+    }
+
+    public void removeOpenGate(OpenGate openGate) {
+        if (getOpenGates().contains(openGate)) {
+            getOpenGates().remove(openGate);
+        }
+    }
+
+    public boolean canSpawnRunestone() {
+        return canSpawnRunestone;
+    }
+
+    public void setCanSpawnRunestone(boolean canSpawnRunestone) {
+        this.canSpawnRunestone = canSpawnRunestone;
+    }
+
+    public List<TownPortal> getTownPortalList() {
+        return townPortalList;
+    }
+
+    public void setTownPortalList(List<TownPortal> townPortalList) {
+        this.townPortalList = townPortalList;
+    }
+
+    public void addTownPortal(TownPortal townPortal) {
+        getTownPortalList().add(townPortal);
+    }
+
+    public void removeTownPortal(TownPortal townPortal) {
+        if (getTownPortalList().contains(townPortal)) {
+            getTownPortalList().remove(townPortal);
+        }
+    }
+
+    public TownPortal getTownPortalByChrId(int chrId) {
+        return getTownPortalList().stream().filter(tp -> tp.getChr().getId() == chrId).findAny().orElse(null);
     }
 }

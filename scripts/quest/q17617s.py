@@ -10,12 +10,12 @@ def action(response, answer):
     status += 1
 
     if status == 0:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendAskYesNo("#b(Aha! I knew there had to be something!)")
 
     elif status == 1:
         if response == 1:
-            sm.setSpeakerID(0) # Has to be Player Avatar
+            sm.setPlayerAsSpeaker() # Has to be Player Avatar
             sm.sendNext("Yes?")
         else:
             sm.dispose()
@@ -26,7 +26,7 @@ def action(response, answer):
                     "Usually the marchants move them straight to the ships...")
 
     elif status == 3:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Did you see which way he went?")
 
     elif status == 4:
@@ -38,7 +38,7 @@ def action(response, answer):
         sm.sendNext("And if he didn't go west, he probably went east, towards the canals")
 
     elif status == 6:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Alright, thank you so much for the information.")
 
     elif status == 7:

@@ -2,7 +2,9 @@ package net.swordie.ms.client.character.skills.temp;
 
 import org.apache.log4j.LogManager;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created on 1/2/2018.
@@ -292,6 +294,7 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
     StackBuff(0x20, 7),
     BlessOfDarkness(0x10, 7),
     AntiMagicShell(0x8, 7),
+    AntiMagicShellBool(0x8, 7), // Seperate one for remote
     LifeTidal(0x4, 7),
     HitCriDamR(0x2, 7),
     SmashStack(0x1, 7),
@@ -370,6 +373,7 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
 
     Translucence(0x80000000, 10),
     PoseType(0x40000000, 10),
+    PoseTypeBool(0x40000000, 10), // for remote
     LightOfSpirit(0x20000000, 10),
     ElementSoul(0x10000000, 10),
     GlimmeringTime(0x8000000, 10),
@@ -570,7 +574,8 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
     GuidedBullet(0x4000, 15),
     Undead(0x2000, 15),
     RideVehicleExpire(0x1000, 15),
-    
+    ;
+
 //    Unk50000(0x80000, 15),
 //    Unk60000(0x40000, 15),
 //    Unk70000(0x20000, 15),
@@ -639,12 +644,96 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
 //    GuidedBullet(0x80000, 14),
 //    Undead(0x40000, 14),
 //    RideVehicleExpire(0x20000, 14),
-    ;
 
     private int val;
     private int pos;
     public static final int length = 17;
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+
+    private static final List<CharacterTemporaryStat> ORDER = Arrays.asList(
+            STR, INT, DEX, LUK, PAD, PDD, MAD, MDD, ACC, EVA, EVAR, Craft, Speed, Jump, EMHP, EMMP, EPAD, EMAD, EPDD,
+            EMDD, MagicGuard, DarkSight, Booster, PowerGuard, Guard, MaxHP, MaxMP, Invincible, SoulArrow, Stun, Shock,
+            Poison, Seal, Darkness, ComboCounter, WeaponCharge, ElementalCharge, HolySymbol, MesoUp, ShadowPartner,
+            PickPocket, MesoGuard, Thaw, Weakness, WeaknessMdamage, Curse, Slow, TimeBomb, BuffLimit, Team, DisOrder,
+            Thread, Morph, Ghost, Regen, BasicStatUp, Stance, SharpEyes, ManaReflection, Attract, Magnet, MagnetArea,
+            NoBulletConsume, StackBuff, Trinity, Infinity, AdvancedBless, IllusionStep, Blind, Concentration, BanMap,
+            MaxLevelBuff, Barrier, DojangShield, ReverseInput, MesoUpByItem, ItemUpByItem, RespectPImmune,
+            RespectMImmune, DefenseAtt, DefenseState, DojangBerserk, DojangInvincible, SoulMasterFinal,
+            WindBreakerFinal, ElementalReset, HideAttack, EventRate, ComboAbilityBuff, ComboDrain, ComboBarrier,
+            PartyBarrier, BodyPressure, RepeatEffect, ExpBuffRate, StopPortion, StopMotion, Fear, MagicShield,
+            MagicResistance, SoulStone, Flying, NewFlying, NaviFlying, Frozen, Frozen2, Web, Enrage, NotDamaged,
+            FinalCut, HowlingAttackDamage, BeastFormDamageUp, Dance, Cyclone, OnCapsule, HowlingCritical,
+            HowlingMaxMP, HowlingDefence, HowlingEvasion, Conversion, Revive, PinkbeanMinibeenMove, Sneak, Mechanic,
+            DrawBack, BeastFormMaxHP, Dice, BlessingArmor, BlessingArmorIncPAD, DamR, TeleportMasteryOn, CombatOrders,
+            Beholder, DispelItemOption, DispelItemOptionByField, Inflation, OnixDivineProtection, Bless, Explosion,
+            DarkTornado, IncMaxHP, IncMaxMP, PVPDamage, PVPDamageSkill, PvPScoreBonus, PvPInvincible, PvPRaceEffect,
+            IceKnight, HolyMagicShell, InfinityForce, AmplifyDamage, KeyDownTimeIgnore, MasterMagicOn, AsrR,
+            AsrRByItem, TerR, DamAbsorbShield, Roulette, Event, SpiritLink, CriticalBuff, DropRate, PlusExpRate,
+            ItemInvincible, ItemCritical, ItemEvade, Event2, VampiricTouch, DDR, IncCriticalDamMin, IncCriticalDamMax,
+            IncTerR, IncAsrR, DeathMark, PainMark, UsefulAdvancedBless, Lapidification, VampDeath, VampDeathSummon,
+            VenomSnake, CarnivalAttack, CarnivalDefence, CarnivalExp, SlowAttack, PyramidEffect, HollowPointBullet,
+            KeyDownMoving, KeyDownAreaMoving, CygnusElementSkill, IgnoreTargetDEF, Invisible, ReviveOnce,
+            AntiMagicShell, EnrageCr, EnrageCrDamMin, BlessOfDarkness, LifeTidal, Judgement, DojangLuckyBonus,
+            HitCriDamR, Larkness, SmashStack, ReshuffleSwitch, SpecialAction, ArcaneAim, StopForceAtomInfo,
+            SoulGazeCriDamR, SoulRageCount, PowerTransferGauge, AffinitySlug, SoulExalt, HiddenPieceOn,
+            BossShield, MobZoneState, GiveMeHeal, TouchMe, Contagion, ComboUnlimited, IgnorePCounter,
+            IgnoreAllCounter, IgnorePImmune, IgnoreAllImmune, FinalJudgement, KnightsAura, IceAura, FireAura,
+            VengeanceOfAngel, HeavensDoor, Preparation, BullsEye, IncEffectHPPotion, IncEffectMPPotion, SoulMP,
+            FullSoulMP, SoulSkillDamageUp, BleedingToxin, IgnoreMobDamR, Asura, FlipTheCoin, UnityOfPower,
+            Stimulate, ReturnTeleport, CapDebuff, DropRIncrease, IgnoreMobpdpR, BdR, Exceed, DiabolikRecovery,
+            FinalAttackProp, ExceedOverload, DevilishPower, OverloadCount, BuckShot, FireBomb, HalfstatByDebuff,
+            SurplusSupply, SetBaseDamage, AmaranthGenerator, StrikerHyperElectric, EventPointAbsorb, EventAssemble,
+            StormBringer, ACCR, DEXR, Albatross, Translucence, PoseType, LightOfSpirit, ElementSoul, GlimmeringTime,
+            Restoration, ComboCostInc, ChargeBuff, TrueSight, CrossOverChain, ChillingStep, Reincarnation, DotBasedBuff,
+            BlessEnsenble, ExtremeArchery, QuiverCatridge, AdvancedQuiver, UserControlMob, ImmuneBarrier, ArmorPiercing,
+            ZeroAuraStr, ZeroAuraSpd, CriticalGrowing, QuickDraw, BowMasterConcentration, TimeFastABuff, TimeFastBBuff,
+            GatherDropR, AimBox2D, CursorSniping, IncMonsterBattleCaptureRate, DebuffTolerance, DotHealHPPerSecond,
+            SpiritGuard, PreReviveOnce, SetBaseDamageByBuff, LimitMP, ReflectDamR, ComboTempest, MHPCutR, MMPCutR,
+            SelfWeakness, ElementDarkness, FlareTrick, Ember, Dominion, SiphonVitality, DarknessAscension,
+            BossWaitingLinesBuff, DamageReduce, ShadowServant, ShadowIllusion, AddAttackCount, ComplusionSlant,
+            JaguarSummoned, JaguarCount, SSFShootingAttack, DevilCry, ShieldAttack, BMageAura, DarkLighting,
+            AttackCountX, BMageDeath, BombTime, NoDebuff, XenonAegisSystem, AngelicBursterSoulSeeker, HiddenPossession,
+            NightWalkerBat, NightLordMark, WizardIgnite, BattlePvPHelenaMark, BattlePvPHelenaWindSpirit,
+            BattlePvPLangEProtection, BattlePvPLeeMalNyunScaleUp, BattlePvPRevive, PinkbeanAttackBuff, RandAreaAttack,
+            BattlePvPMikeShield, BattlePvPMikeBugle, PinkbeanRelax, PinkbeanYoYoStack, NextAttackEnhance,
+            AranBeyonderDamAbsorb, AranCombotempastOption, NautilusFinalAttack, ViperTimeLeap, RoyalGuardState,
+            RoyalGuardPrepare, MichaelSoulLink, MichaelStanceLink, TriflingWhimOnOff, AddRangeOnOff,
+            KinesisPsychicPoint, KinesisPsychicOver, KinesisPsychicShield, KinesisIncMastery,
+            KinesisPsychicEnergeShield, BladeStance, DebuffActiveSkillHPCon, DebuffIncHP, BowMasterMortalBlow,
+            AngelicBursterSoulResonance, Fever, IgnisRore, RpSiksin, TeleportMasteryRange, FireBarrier, ChangeFoxMan,
+            FixCoolTime, IncMobRateDummy, AdrenalinBoost, AranSmashSwing, AranDrain, AranBoostEndHunt,
+            HiddenHyperLinkMaximization, RWCylinder, RWCombination, RWMagnumBlow, RWBarrier, RWBarrierHeal,
+            RWMaximizeCannon, RWOverHeat, RWMovingEvar, Stigma, HayatoStance, HayatoStanceBonus, EyeForEye,
+            WillowDodge, HayatoPAD, HayatoHPR, HayatoMPR, HayatoBooster, Jinsoku, HayatoCr, HakuBlessing,
+            HayatoBoss, BattoujutsuAdvance, BlackHeartedCurse, BeastMode, TeamRoar
+    );
+
+    private static final List<CharacterTemporaryStat> REMOTE_ORDER = Arrays.asList(
+            Speed, ComboCounter, WeaponCharge, ElementalCharge, Stun, Shock, Darkness, Seal, Weakness, WeaknessMdamage,
+            Curse, Slow, PvPRaceEffect, IceKnight, TimeBomb, Team, DisOrder, Thread, Poison, ShadowPartner, Morph,
+            Ghost, Attract, Magnet, MagnetArea, NoBulletConsume, BanMap, Barrier, DojangShield, ReverseInput,
+            RespectPImmune, RespectMImmune, DefenseAtt, DefenseState, DojangBerserk, RepeatEffect, StopPortion,
+            StopMotion, Fear, MagicShield, Frozen, Frozen2, Web, DrawBack, FinalCut, Cyclone, OnCapsule, Mechanic,
+            Inflation, Explosion, DarkTornado, AmplifyDamage, HideAttack, DevilishPower, SpiritGuard, Event, Event2,
+            DeathMark, PainMark, Lapidification, VampDeath, VampDeathSummon, VenomSnake, PyramidEffect, KillingPoint,
+            PinkbeanRollingGrade, IgnoreTargetDEF, Invisible, Judgement, KeyDownAreaMoving, StackBuff, BlessOfDarkness,
+            Larkness, ReshuffleSwitch, SpecialAction, StopForceAtomInfo, SoulGazeCriDamR, PowerTransferGauge,
+            AffinitySlug, SoulExalt, HiddenPieceOn, SmashStack, MobZoneState, GiveMeHeal, TouchMe, Contagion,
+            ComboUnlimited, IgnorePCounter, IgnoreAllCounter, IgnorePImmune, IgnoreAllImmune, FinalJudgement,
+            KnightsAura, IceAura, FireAura, HeavensDoor, DamAbsorbShield, AntiMagicShell, NotDamaged, BleedingToxin,
+            WindBreakerFinal, IgnoreMobDamR, Asura, UnityOfPower, Stimulate, ReturnTeleport, CapDebuff, OverloadCount,
+            FireBomb, SurplusSupply, NewFlying, NaviFlying, AmaranthGenerator, CygnusElementSkill, StrikerHyperElectric,
+            EventPointAbsorb, EventAssemble, Albatross, Translucence, PoseType, LightOfSpirit, ElementSoul,
+            GlimmeringTime, Reincarnation, Beholder, QuiverCatridge, ArmorPiercing, ZeroAuraStr, ZeroAuraSpd,
+            ImmuneBarrier, FullSoulMP, AntiMagicShellBool, Dance, SpiritGuard, ComboTempest, HalfstatByDebuff,
+            ComplusionSlant, JaguarSummoned, BMageAura, DarkLighting, AttackCountX, FireBarrier, KeyDownMoving,
+            MichaelSoulLink, KinesisPsychicEnergeShield, BladeStance, Fever, AdrenalinBoost, RWBarrier, RWMagnumBlow,
+            Stigma, Unk1, BeastMode, TeamRoar, HayatoStance, HayatoBooster, HayatoStanceBonus, HayatoPAD, HayatoHPR,
+            HayatoMPR, HayatoCr, HayatoBoss, Stance, BattoujutsuAdvance, Unk700, BlackHeartedCurse, EyeForEye, Unk3,
+            Unk4000, Unk8000, Unk10000, Unk20000, Unk40000, Unk5, PoseTypeBool
+    );
+
+
 
     CharacterTemporaryStat(int val, int pos) {
         this.val = val;
@@ -731,6 +820,106 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
 
     public int getPos() {
         return pos;
+    }
+
+    public int getOrder() {
+        return ORDER.indexOf(this);
+    }
+
+    public int getRemoteOrder() {
+        return REMOTE_ORDER.indexOf(this);
+    }
+
+    public boolean isRemoteEncode4() {
+        switch (this) {
+            case NoBulletConsume:
+            case RespectPImmune:
+            case RespectMImmune:
+            case DefenseAtt:
+            case DefenseState:
+            case MagicShield:
+            case PyramidEffect:
+            case BlessOfDarkness:
+            case ImmuneBarrier:
+            case Dance:
+            case SpiritGuard:
+            case KinesisPsychicEnergeShield:
+            case AdrenalinBoost:
+            case RWBarrier:
+            case RWMagnumBlow:
+            case HayatoStance:
+            case Unk8000:
+            case Unk10000:
+            case Unk20000:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isRemoteEncode1() {
+        switch (this) {
+            case Speed:
+            case Shock:
+            case Team:
+            case Cyclone:
+            case OnCapsule:
+            case KillingPoint:
+            case PinkbeanRollingGrade:
+            case ReturnTeleport:
+            case FireBomb:
+            case SurplusSupply:
+            case Unk5:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isNotEncodeReason() {
+        switch (this) {
+            case Speed:
+            case ElementalCharge:
+            case Shock:
+            case Team:
+            case Ghost:
+            case NoBulletConsume:
+            case RespectPImmune:
+            case RespectMImmune:
+            case DefenseAtt:
+            case DefenseState:
+            case MagicShield:
+            case Cyclone:
+            case OnCapsule:
+            case PyramidEffect:
+            case KillingPoint:
+            case PinkbeanRollingGrade:
+            case StackBuff:
+            case BlessOfDarkness:
+            case SurplusSupply:
+            case ImmuneBarrier:
+            case AdrenalinBoost:
+            case RWBarrier:
+            case RWMagnumBlow:
+            case HayatoStance:
+            case Unk10000:
+            case Unk20000:
+            case Unk5:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isNotEncodeAnything() {
+        switch (this) {
+            case FullSoulMP:
+            case AntiMagicShellBool:
+            case PoseTypeBool:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static void mainNoMainPls(String[] args) {

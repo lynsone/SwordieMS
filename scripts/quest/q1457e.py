@@ -5,6 +5,7 @@ heroicStar = 4031518
 status = -1
 
 def init():
+    sm.setSpeakerID(2081400) # Hellin
     sm.sendNext("You have returned.")
 
 def action(response, answer):

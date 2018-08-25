@@ -313,6 +313,7 @@ public enum SkillStat {
             case indieMddR:
                 return BaseStat.mddR;
             case lv2mhp:
+                return BaseStat.mhpLv;
             case mhpX:
             case emhp:
             case indieMhp:
@@ -322,9 +323,10 @@ public enum SkillStat {
             case mhpR:
             case indieMhpR:
                 return BaseStat.mhpR;
+            case lv2mmp:
+                return BaseStat.mmpLv;
             case mmpX:
             case indieMmp:
-            case lv2mmp:
             case emmp:
                 return BaseStat.mmp;
             case mmpR:
@@ -350,18 +352,20 @@ public enum SkillStat {
             case pad:
             case padX:
             case indiePad:
-            case lv2pad:
             case epad:
                 return BaseStat.pad;
+            case lv2pad:
+                return BaseStat.padLv;
             case padR:
             case indiePadR:
                 return BaseStat.padR;
             case indieMad:
             case mad:
             case madX:
-            case lv2mad:
             case emad:
                 return BaseStat.mad;
+            case lv2mad:
+                return BaseStat.madLv;
             case madR:
             case indieMadR:
                 return BaseStat.madR;
@@ -378,32 +382,36 @@ public enum SkillStat {
             case strFX:
             case strX:
             case dex2str:
-            case lv2str:
                 return BaseStat.str;
+            case lv2str:
+                return BaseStat.strLv;
             case strR:
                 return BaseStat.strR;
             case dex:
             case dexFX:
             case dexX:
             case luk2dex:
-            case lv2dex:
             case str2dex:
                 return BaseStat.dex;
+            case lv2dex:
+                return BaseStat.dexLv;
             case dexR:
                 return BaseStat.dexR;
             case intFX:
             case intX:
             case luk2int:
-            case lv2int:
                 return BaseStat.inte;
+            case lv2int:
+                return BaseStat.intLv;
             case intR:
                 return BaseStat.intR;
             case lukFX:
             case lukX:
-            case lv2luk:
             case dex2luk:
             case int2luk:
                 return BaseStat.luk;
+            case lv2luk:
+                return BaseStat.lukLv;
             case lukR:
                 return BaseStat.lukR;
             case bdR:

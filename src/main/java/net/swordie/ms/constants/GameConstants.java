@@ -1,8 +1,13 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
+import net.swordie.ms.enums.QuickMoveType;
+import net.swordie.ms.util.FileTime;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
 
 import java.util.ArrayList;
@@ -14,27 +19,36 @@ import java.util.List;
 public class GameConstants {
     public static final int EXP_RATE = 10;
     public static final long MAX_MONEY = 10_000_000_000L;
+    public static final short DAMAGE_SKIN_MAX_SIZE = 100;
+    public static final int MAX_PET_AMOUNT = 3;
+    public static final int MAX_HP_MP = 500000;
+
+    // Field
+    public static final int NO_MAP_ID = 999999999;
+    public static final int DEFAULT_FIELD_MOB_CAPACITY = 25;
+    public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
+    public static final double KISHIN_MOB_MULTIPLIER = 1.7;
+    public static final double KISHIN_MOB_RATE_MULTIPLIER = 1.7;
+    public static final Rect MOB_CHECK_RECT = new Rect(-100, -100, 100, 100);
+
+    // Drop
     public static final int DROP_HEIGHT = 100; // was 20
     public static final int DROP_DIFF = 25;
     public static final int DROP_REMAIN_ON_GROUND_TIME = 120; // 2 minutes
     public static final int DROP_REMOVE_OWNERSHIP_TIME = 30; // 30 sec
-    public static final short DAMAGE_SKIN_MAX_SIZE = 100;
-    public static final int MAX_PET_AMOUNT = 3;
-    public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
-    public static final int NO_MAP_ID = 999999999;
 
-    //Combo Kill
+    // Combo Kill
     public static final int COMBO_KILL_RESET_TIMER = 5; // 5 sec
     public static final int COMBO_KILL_REWARD_BLUE = 50; // Combo kills
     public static final int COMBO_KILL_REWARD_PURPLE = 350; // Combo kills
     public static final int COMBO_KILL_REWARD_RED = 750; // Combo kills
 
-    //Multi Kill
+    // Multi Kill
     public static final float MULTI_KILL_BONUS_EXP_MULTIPLIER = 0.01f; // Multi Kill Bonus Exp given  =  mobEXP * (( multi Kill Amount - 2 ) * 5) * BONUS_EXP_FOR_MULTI_KILL
 
-    //Inner Ability
+    // Inner Ability
     public static final int CHAR_POT_BASE_ID = 70000000;
     public static final int CHAR_POT_END_ID = 70000062;
     public static final int BASE_CHAR_POT_UP_RATE = 10; // 10%
@@ -44,25 +58,25 @@ public class GameConstants {
     public static final int CHAR_POT_LOCK_1_COST = 3000;
     public static final int CHAR_POT_LOCK_2_COST = 5000;
 
-    //Potential Chance on Drop Equips
+    // Potential Chance on Drop Equips
     public static final int RANDOM_EQUIP_UNIQUE_CHANCE = 1; // out of a 100
     public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
 
-    //Rune
+    // Rune
     public static final int RUNE_RESPAWN_TIME = 5; // minutes
     public static final int RUNE_COOLDOWN_TIME = 4; // minutes
     public static final int THUNDER_RUNE_ATTACK_DELAY = 4; // seconds
     public static final int DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED = 3; // number of elites spawned when activating Rune of Darkness
 
-    //BurningField
+    // BurningField
     public static final int BURNING_FIELD_MAX_LEVEL = 10; //Maximum Burning Field Level
     public static final int BURNING_FIELD_LEVEL_ON_START = BURNING_FIELD_MAX_LEVEL; //Starts Burning Maps at BurningLevel 10
     public static final int BURNING_FIELD_TIMER = 10; // minutes
     public static final int BURNING_FIELD_MIN_MOB_LEVEL = 0; //Minimum Mob Level for the Field to become a Burning Field
     public static final int BURNING_FIELD_BONUS_EXP_MULTIPLIER_PER_LEVEL = 10; // multiplied by the BurningField Level  =  Bonus Exp% given
 
-    //Exp Orb
+    // Exp Orb
     public static final int BLUE_EXP_ORB_ID = 2023484;
     public static final double BLUE_EXP_ORB_MULT = 2;
     public static final int PURPLE_EXP_ORB_ID = 2023494;
@@ -95,16 +109,69 @@ public class GameConstants {
     public static final int MAX_CS_ITEMS_PER_PAGE = 12;
     public static final int MAX_LOCKER_SIZE = 9999;
 
+
+    // START OF Party Quests
+    public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
+
+    public static final long PARTY_QUEST_EXP_FORMULA(Char chr) {
+        return PARTY_QUEST_GLOBAL_EXP * (1+(chr.getParty().getPartyMembers().length*100 / chr.getParty().getAvgLevel()));
+    } // Exp formula for giving Exp from Party Quests
+
     // Dojo
     public static final int DOJO_DUMMY_DURATION = 10; // Dummy will stay alive for [] minutes, after which it will be removed.
     public static final int DOJO_SPAWM_BOSS_DELAY = 3; // Spawn delay, in seconds, per boss on the Dojo Floors
 
+    // Monster Park
+    public static final byte MAX_MONSTER_PARK_RUNS = 7; // Max Monster Park runs per character
+    public static final int MONSTER_PARK_EXP_QUEST = 99999; // Quest where the Exp for MP runs gets stored.
+
+    // Lord Pirate Party Quest
+    public static final int LORD_PIRATE_QUEST = 99998; // Quest where the NPC state is stored, to close/open portals
+
+    // END OF Party Quests
+
+    // Trading
+    public static final int MAX_TRADE_ITEMS = 9;
+
+    // Guild
+    public static final int MAX_DAY_COMMITMENT = 50000;
+    public static final int SP_PER_GUILD_LEVEL = 2;
+    public static final double GGP_PER_CONTRIBUTION = 0.3;
+    public static final double IGP_PER_CONTRIBUTION = 0.7;
+    public static final int GUILD_BBS_RECORDS_PER_PAGE = 10;
+    public static final int GGP_FOR_SKILL_RESET = 50000;
+    public static final int MAX_GUILD_LV = 25;
+
+    // Monster Collection
+    public static final int MOBS_PER_PAGE = 25;
+    public static final int MOBS_PER_GROUP = 5;
+
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
+    private static int[] guildExp = new int[MAX_GUILD_LV];
+
+    private static List<QuickMoveInfo> quickMoveInfos;
 
     static {
         initCharExp();
         initEnchantRates();
+        initQuickMove();
+        initGuildExp();
+    }
+
+    private static void initQuickMove() {
+        quickMoveInfos = new ArrayList<>();
+        quickMoveInfos.add(new QuickMoveInfo(0, 9072302, QuickMoveType.Boat, 1, "Warping",
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
+        quickMoveInfos.add(new QuickMoveInfo(0, 9010022, QuickMoveType.DimensionalPortal, 1, "Dimensional Portal",
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
+        quickMoveInfos.add(new QuickMoveInfo(0, 9071003, QuickMoveType.MonsterPark, 1, "Monster Park",
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
+
+    }
+
+    public static List<QuickMoveInfo> getQuickMoveInfos() {
+        return quickMoveInfos;
     }
 
     private static void initCharExp() {
@@ -207,6 +274,13 @@ public class GameConstants {
                 {20, 294},
                 {10, 396},
         };
+    }
+
+    public static void initGuildExp() {
+        guildExp[1] = 15000;
+        for (int i = 2; i < guildExp.length; i++) {
+            guildExp[i] = guildExp[i - 1] + 30000;
+        }
     }
 
     public static long getEnchantmentMesoCost(int reqLevel, int chuc) {
@@ -379,5 +453,30 @@ public class GameConstants {
                     return 0.15 + attackers * 0.1;
             }
         }
+    }
+
+    public static long applyTax(long money) {
+        // https://gamefaqs.gamespot.com/pc/924697-maplestory/answers/56187-how-many-is-the-tax-on-meso-when-trading
+        if (money >= 100_000_000) {
+            return (long) (money - (money * 0.06));
+        } else if (money >= 25_000_000) {
+            return (long) (money - (money * 0.05));
+        } else if (money >= 10_000_000) {
+            return (long) (money - (money * 0.04));
+        } else if (money >= 5_000_000) {
+            return (long) (money - (money * 0.03));
+        } else if (money >= 1_000_000) {
+            return (long) (money - (money * 0.018));
+        } else if (money >= 100_000) {
+            return (long) (money - (money * 0.008));
+        }
+        return money;
+    }
+
+    public static int getExpRequiredForNextGuildLevel(int curLevel) {
+        if (curLevel >= 25 || curLevel < 0) {
+            return 0;
+        }
+        return guildExp[curLevel];
     }
 }

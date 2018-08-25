@@ -10,7 +10,6 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.AffectedArea;
@@ -111,7 +110,7 @@ public class Blaster extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        handleComboTraining(skillID, tsm, c);
+        incrementComboTraining(skillID, tsm);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -146,6 +145,7 @@ public class Blaster extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -165,7 +165,7 @@ public class Blaster extends Job {
                     chr.warp(toField);
                     break;
                 case REVOLVING_CANNON_RELOAD:
-                    handleCylinderReload();
+                    reloadCylinder();
                     break;
                 case REVOLVING_CANNON_3:
                 case REVOLVING_CANNON_2:
@@ -176,7 +176,7 @@ public class Blaster extends Job {
                     if(getGauge() < 6) {
                         addGauge();
                     }
-                    //c.write(UserLocal.onRWMultiChargeCancelRequest((byte)1, skillID));
+                    //c.write(UserLocal.rwMultiChargeCancelRequest((byte)1, skillID));
                     break;
                 case VITALITY_SHIELD:
                     resetBlastShield();
@@ -199,7 +199,7 @@ public class Blaster extends Job {
             o.rOption = BLAST_SHIELD;
             o.tOption = 3;
             tsm.putCharacterStatValue(RWBarrier, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -207,14 +207,14 @@ public class Blaster extends Job {
     public void resetBlastShield() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStat(RWBarrier, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+    public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -254,7 +254,8 @@ public class Blaster extends Job {
                 tsm.putCharacterStatValue(RWMaximizeCannon, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     @Override
@@ -267,7 +268,7 @@ public class Blaster extends Job {
         return 0;
     }
 
-    private void handleComboTraining(int skillId, TemporaryStatManager tsm, Client c) {
+    private void incrementComboTraining(int skillId, TemporaryStatManager tsm) {
         Option o = new Option();
         SkillInfo chargeInfo = SkillData.getSkillInfoById(COMBO_TRAINING);
         int amount = 1;
@@ -285,7 +286,7 @@ public class Blaster extends Job {
         o.rOption = COMBO_TRAINING;
         o.tOption = 10;
         tsm.putCharacterStatValue(RWCombination, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public int getGauge() {
@@ -376,13 +377,13 @@ public class Blaster extends Job {
         return maxAmmo;
     }
 
-    public void handleCylinderReload() {
+    public void reloadCylinder() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         o.nOption = 1;
         o.bOption = getMaxAmmo(); //ammo
         o.cOption = getGauge(); //gauge
         tsm.putCharacterStatValue(RWCylinder, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 }

@@ -63,9 +63,9 @@ public class CashShopItem {
 
     public CashShopItem() {
         idkTime1 = FileTime.currentTime();
-        idkTime2 = FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME);
+        idkTime2 = FileTime.fromType(FileTime.Type.MAX_TIME);
         idkTime3 = FileTime.currentTime();
-        idkTime4 = FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME);
+        idkTime4 = FileTime.fromType(FileTime.Type.MAX_TIME);
         stock = 100;
         buyableWithMaplePoints = 1;
         buyableWithCredit = 1;

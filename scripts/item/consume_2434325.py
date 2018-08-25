@@ -4,7 +4,7 @@ from net.swordie.ms.constants import GameConstants
 STRAW_DUMMY_ID = 9305655
 
 def init():
-    if not sm.getChr().getField().getReturnMap() == sm.getFieldID():
+    if not sm.getChr().getField().isTown():
         sm.chat("You can only spawn a dummy in a Town Map")
 
     elif sm.mobsPresentInField():
@@ -14,5 +14,5 @@ def init():
         sm.spawnMobOnChar(STRAW_DUMMY_ID)
         sm.removeMobsAfterTimer(STRAW_DUMMY_ID, GameConstants.DOJO_DUMMY_DURATION * 60) # Template ID & Seconds
         sm.chatBlue("The Training Dummy will be removed after "+ str(GameConstants.DOJO_DUMMY_DURATION) +" minutes.")
-        sm.consumeItem(parentID)
+        sm.consumeItem()
     sm.dispose()

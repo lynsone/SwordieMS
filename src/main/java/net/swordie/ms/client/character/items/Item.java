@@ -1,10 +1,12 @@
 package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
@@ -13,8 +15,6 @@ import java.util.*;
 
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
-import static net.swordie.ms.enums.InventoryOperation.REMOVE;
-import static net.swordie.ms.enums.InventoryOperation.UPDATE_ITEM_INFO;
 
 /**
  * GW_ItemSlotBase
@@ -23,19 +23,18 @@ import static net.swordie.ms.enums.InventoryOperation.UPDATE_ITEM_INFO;
 @Entity
 @Table(name = "items")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Item implements Serializable {
+public class Item implements Serializable, Encodable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
-    protected int inventoryId;
     protected int itemId;
     protected int bagIndex;
     protected long cashItemSerialNumber;
     @JoinColumn(name = "dateExpire")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    protected FileTime dateExpire = FileTime.getFileTimeFromType(FileTime.Type.PERMANENT);
+    protected FileTime dateExpire = FileTime.fromType(FileTime.Type.MAX_TIME);
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "invType")
     protected InvType invType;
@@ -46,6 +45,9 @@ public class Item implements Serializable {
     protected int quantity;
     private String owner = "";
 
+    public boolean isTradable() {
+        return !ItemData.getItemInfoByID(getItemId()).isTradeBlock();
+    }
 
     public enum Type {
         EQUIP(1),
@@ -78,14 +80,6 @@ public class Item implements Serializable {
         this.id = id;
     }
 
-    public int getInventoryId() {
-        return inventoryId;
-    }
-
-    public void setInventoryId(int inventoryId) {
-        this.inventoryId = inventoryId;
-    }
-
     public String getOwner() {
         return owner;
     }
@@ -109,7 +103,6 @@ public class Item implements Serializable {
             setQuantity(Math.max(0, getQuantity() - amount));
         }
     }
-
 
     public Item() {
     }
@@ -136,7 +129,6 @@ public class Item implements Serializable {
         item.setType(getType());
         item.setOwner(getOwner());
         item.setQuantity(getQuantity());
-        item.setInventoryId(getInventoryId());
         return item;
     }
 
@@ -181,7 +173,7 @@ public class Item implements Serializable {
         if (hasSN) {
             outPacket.encodeLong(getId());
         }
-        getDateExpire().encode(outPacket);
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
         outPacket.encodeInt(getBagIndex());
         if (getType() == Type.ITEM) {
             outPacket.encodeShort(getQuantity()); // nQuantity
@@ -189,7 +181,7 @@ public class Item implements Serializable {
             outPacket.encodeShort(0); // flag
             if (ItemConstants.isThrowingStar(getItemId()) || ItemConstants.isBullet(getItemId()) ||
                     ItemConstants.isFamiliar(getItemId())) {
-                outPacket.encodeLong(getInventoryId());
+                outPacket.encodeLong(id); // is inv id really required?
             }
         }
     }
@@ -242,4 +234,16 @@ public class Item implements Serializable {
                 bagIndex, (short) 0, 0, this));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return id == item.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

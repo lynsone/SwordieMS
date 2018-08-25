@@ -1,6 +1,7 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.enums.QuickMoveType;
 import net.swordie.ms.util.FileTime;
 
 /**
@@ -10,21 +11,21 @@ import net.swordie.ms.util.FileTime;
 public class QuickMoveInfo {
     private int qmiID;
     private int templateID;
-    private int code;
+    private QuickMoveType code;
     private int levelMin;
     private String msg;
     private FileTime start;
     private FileTime end;
 
-    public QuickMoveInfo(int qmiID, int templateID, int code) {
+    public QuickMoveInfo(int qmiID, int templateID, QuickMoveType code) {
         this.qmiID = qmiID;
         this.templateID = templateID;
         this.code = code;
-        this.start = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
-        this.start = FileTime.getFileTimeFromType(FileTime.Type.PERMANENT);
+        this.start = FileTime.fromType(FileTime.Type.ZERO_TIME);
+        this.start = FileTime.fromType(FileTime.Type.MAX_TIME);
     }
 
-    public QuickMoveInfo(int qmiID, int templateID, int code, int levelMin, String msg, FileTime start, FileTime end) {
+    public QuickMoveInfo(int qmiID, int templateID, QuickMoveType code, int levelMin, String msg, FileTime start, FileTime end) {
         this.qmiID = qmiID;
         this.templateID = templateID;
         this.code = code;
@@ -53,7 +54,7 @@ public class QuickMoveInfo {
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getQmiID());
         outPacket.encodeInt(getTemplateID());
-        outPacket.encodeInt(getCode());
+        outPacket.encodeInt(getCode().getVal());
         outPacket.encodeInt(getLevelMin());
         outPacket.encodeString(getMsg());
         outPacket.encodeFT(getStart());
@@ -76,11 +77,11 @@ public class QuickMoveInfo {
         this.templateID = templateID;
     }
 
-    public int getCode() {
+    public QuickMoveType getCode() {
         return code;
     }
 
-    public void setCode(int code) {
+    public void setCode(QuickMoveType code) {
         this.code = code;
     }
 

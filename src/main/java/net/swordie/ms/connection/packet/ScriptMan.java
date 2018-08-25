@@ -1,5 +1,6 @@
 package net.swordie.ms.connection.packet;
 
+import net.swordie.ms.enums.DimensionalPortalType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.connection.OutPacket;
@@ -101,10 +102,27 @@ public class ScriptMan {
                 }
                 break;
             case AskAvatar:
+                int[] options = nsi.getOptions();
                 outPacket.encodeByte(nsi.isAngelicBuster());
                 outPacket.encodeByte(nsi.isZeroBeta());
                 outPacket.encodeString(nsi.getText());
-                outPacket.encodeByte(0); // Some int array, no clue what it stands for
+                outPacket.encodeByte(options.length);
+                for (int i = 0; i < options.length; i++) {
+                    outPacket.encodeInt(options[i]);
+                }
+                break;
+            case AskSlideMenu:
+                outPacket.encodeInt(nsi.getDlgType());
+                // start CSlideMenuDlg::SetSlideMenuDlg
+                outPacket.encodeInt(0); // last selected
+                StringBuilder sb = new StringBuilder();
+                for (DimensionalPortalType dpt : DimensionalPortalType.values()) {
+                    if (dpt.getMapID() != 0) {
+                        sb.append("#").append(dpt.getVal()).append("#").append(dpt.getDesc());
+                    }
+                }
+                outPacket.encodeString(sb.toString());
+                outPacket.encodeInt(0);
                 break;
         }
         if ((nsi.getParam() & 4) != 0) {

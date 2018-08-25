@@ -2,6 +2,7 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.client.character.cards.CharacterCard;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.util.SystemTime;
 
@@ -89,12 +90,14 @@ public class CharacterStat {
     private FileTime lastLogout;
     private int gachExp;
     private int honorExp;
+    @Transient
+    private int wingItem;
 
     public CharacterStat() {
-        extendSP = new ExtendSP(5);
+        extendSP = new ExtendSP(7);
         nonCombatStatDayLimit = new NonCombatStatDayLimit();
-        albaStartTime = new FileTime(0);
-        lastLogout = new FileTime(0);
+        albaStartTime = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
+        lastLogout = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
         characterCard = new CharacterCard(0, 0, (byte) 0);
         accountLastLogout = new SystemTime(1970, 1);
         // TODO fill in default vals
@@ -377,11 +380,11 @@ public class CharacterStat {
         outPacket.encodeByte(getPvpModeType());
         outPacket.encodeInt(getEventPoint());
         outPacket.encodeByte(getAlbaActivityID()); // part time job
-        getAlbaStartTime().encode(outPacket);
+        outPacket.encodeFT(getAlbaStartTime());
         outPacket.encodeInt(getAlbaDuration());
         outPacket.encodeByte(getAlbaSpecialReward());
         getCharacterCard().encode(outPacket);
-        getLastLogout().encode(outPacket);
+        outPacket.encodeFT(getLastLogout());
         outPacket.encodeByte(isBurning()); // bBurning
     }
 
@@ -474,19 +477,19 @@ public class CharacterStat {
     }
 
     public void setHp(int hp) {
-        this.hp = hp;
+        this.hp = Math.min(hp, GameConstants.MAX_HP_MP);
     }
 
     public void setMaxHp(int maxHp) {
-        this.maxHp = maxHp;
+        this.maxHp = Math.min(maxHp, GameConstants.MAX_HP_MP);
     }
 
     public void setMp(int mp) {
-        this.mp = mp;
+        this.mp = Math.min(mp, GameConstants.MAX_HP_MP);
     }
 
     public void setMaxMp(int maxMp) {
-        this.maxMp = maxMp;
+        this.maxMp = Math.min(maxMp, GameConstants.MAX_HP_MP);
     }
 
     public void setAp(int ap) {
@@ -635,6 +638,14 @@ public class CharacterStat {
 
     public void setHonorExp(int honorExp) {
         this.honorExp = honorExp;
+    }
+
+    public void setWingItem(int wingItem) {
+        this.wingItem = wingItem;
+    }
+
+    public int getWingItem() {
+        return wingItem;
     }
 }
 

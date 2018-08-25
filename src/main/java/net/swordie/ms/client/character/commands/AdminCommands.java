@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.commands;
 
+import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
@@ -10,6 +11,9 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.client.guild.result.GuildType;
+import net.swordie.ms.util.FileTime;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.client.jobs.nova.Kaiser;
@@ -30,6 +34,7 @@ import net.swordie.ms.util.Util;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -45,32 +50,7 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            OutPacket outPacket = new OutPacket(OutHeader.SET_CASH_SHOP.getValue());
-
-            chr.encode(outPacket, DBChar.All);
-            log.debug(outPacket);
-            outPacket.encodeByte(1);
-            outPacket.encodeInt(0);
-            outPacket.encodeShort(0);
-            outPacket.encodeInt(0);
-
-            //
-            outPacket.encodeArr(new byte[1080]); // --v
-
-//  outPacket.encodeArr(Util.getByteArrayByString("73 00 69 00 73 00 2E 00 20 00 54 00 68 00 65 00 20 00 66 00 6F 00 6C 00 6C 00 6F 00 77 00 69 00 6E 00 67 00 20 00 61 00 63 00 74 00 69 00 6F 00 6E 00 73 00 20 00 63 00 61 00 6E 00 20 00 62 00 65 00 20 00 64 00 6F 00 6E 00 65 00 20 00 77 00 68 00 69 00 6C 00 65 00 20 00 68 00 6F 00 6C 00 64 00 69 00 6E 00 67 00 2E 00 23 00 63 00 5C 00 6E 00 5C 00 63 00 5C 00 6E 00 5C 00 63 00 5B 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 53 00 6D 00 61 00 73 00 68 00 5D 00 3A 00 23 00 20 00 55 00 73 00 69 00 6E 00 67 00 20 00 5B 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 47 00 72 00 61 00 62 00 5D 00 20 00 77 00 69 00 74 00 68 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 6C 00 69 00 66 00 74 00 65 00 64 00 20 00 77 00 69 00 6C 00 6C 00 20 00 74 00 68 00 72 00 6F 00 77 00 20 00 74 00 68 00 61 00 74 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 61 00 74 00 20 00 65 00 6E 00 65 00 6D 00 69 00 65 00 73 00 20 00 69 00 6E 00 20 00 66 00 72 00 6F 00 6E 00 74 00 20 00 6F 00 66 00 20 00 79 00 6F 00 75 00 2C 00 20 00 64 00 65 00 61 00 6C 00 69 00 6E 00 67 00 20 00 64 00 61 00 6D 00 61 00 67 00 65 00 2E 00 5C 00 6E 00 5C 00 63 00 5C 00 6E 00 5C 00 63 00 23 00 63 00 5B 00 55 00 6C 00 74 00 69 00 6D 00 61 00 74 00 65 00 20 00 2D 00 20 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 53 00 68 00 6F 00 74 00 5D 00 3A 00 23 00 20 00 20 00 50 00 72 00 65 00 73 00 73 00 69 00 6E 00 67 00 20 00 74 00 68 00 65 00 20 00 75 00 70 00 20 00 6B 00 65 00 79 00 20 00 61 00 6E 00 64 00 20 00 5B 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 47 00 72 00 61 00 62 00 5D 00 20 00 77 00 69 00 74 00 68 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 6C 00 69 00 66 00 74 00 65 00 64 00 20 00 77 00 69 00 6C 00 6C 00 20 00 74 00 68 00 72 00 6F 00 77 00 20 00 74 00 68 00 65 00 20 00 6D 00 6F 00 6E 00 73 00 74 00 65 00 72 00 20 00 69 00 6E 00 20 00 74 00 68 00 65 00 20 00 64 00 69 00 72 00 65 00 63 00 74 00 69 00 6F 00 6E 00 20 00 69 00 74 00 20 00 69 00 73 00 20 00 66 00 61 00 63 00 69 00 6E 00 67 00 2E 00 00 00 70 00 4A 00 01 4B 18 48 9C 10 3A 02 00 00 45 00 6E 00 65 00 6D 00 69 00 65 00 73 00 20 00 48 00 69 00 74 00 3A 00 20 00 23 00 6D 00 6F 00 62 00 43 00 6F 00 75 00 6E 00 74 00 2C 00 20 00 44 00 61 00 6D 00 61 00 67 00 65 00 3A 00 20 00 23 00 64 00 61 00 6D 00 61 00 67 00 65 00 25 00 2C 00 20 00 4E 00 75 00 6D 00 62 00 65 00 72 00 20 00 6F 00 66 00 20 00 41 00 74 00 74 00 61 00 63 00 6B 00 73 00 3A 00 20 00 23 00 61 00 74 00 74 00 61 00 63 00 6B 00 43 00 6F 00 75 00 6E 00 74 00 2C 00 20 00 50 00 73 00 79 00 63 00 68 00 69 00 63 00 20 00 50 00 6F 00 69 00 6E 00 74 00 20 00 43 00 6F 00 73 00 74 00 20 00 6F 00 6E 00 20 00 46 00 69 00 72 00 73 00 74 00 20 00 55 00 73 00 65 00 3A 00 20 00 23 00 77 00 2E 00 20 00 23 00 63 00 4F 00 6E 00 2F 00 4F 00 66 00 66 00 20 00 73 00 6B 00 69 00 6C 00 6C 00 23 00 23 00 5C 00 6E 00 43 00 6F 00 6F 00 6C 00 64 00 6F 00 77 00 6E 00 3A 00 20 00 23 00 63 00 6F 00 6F 00 6C 00 74 00 69 00 6D 00 65 00 20 00 73 00 65 00 63 00 23 00 5C 00 6E 00 5C 00 63 00 23 00 63 00 5B 00 55 00 6C 00 74 00 69 00 6D 00 61 00 74 00 65 00 20 00 2D 00 20 00 4D 00 65 00 74 00 61 00 6C 00 20 00 50 00 72 00 65 00 73 00 73 00 5D 00 20 00 44 00 61 00 6D 00 61 00 67 00 65 00 3A 00"));
-            outPacket.encodeLong(0);
-            outPacket.encodeByte(1);
-            outPacket.encodeInt(0); // 0x96
-            outPacket.encodeByte(1);
-            outPacket.encodeByte(0);
-            outPacket.encodeByte(0);
-//            outPacket.encodeArr(Util.getByteArrayByString("40 64 2B 70 84 7A D3 01"));
-            outPacket.encodeLong(0);
-            outPacket.encodeShort(0);
-            outPacket.encodeInt(0); // 0x1e
-            outPacket.encodeShort(0);
-
-            chr.write(outPacket);
+            
         }
     }
 
@@ -457,7 +437,7 @@ public class AdminCommands {
             chr.chatMessage(GM_BLUE_CHAT, "Current Map: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getFieldID()));
             chr.chatMessage(GM_BLUE_CHAT, "Current ReturnMap: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getField().getReturnMap()));
             chr.chatMessage(GM_BLUE_CHAT, "");
-            for (Portal portal : chr.getField().getclosestPortal(rect)) {
+            for (Portal portal : chr.getField().getClosestPortal(rect)) {
                 chr.chatMessage(GM_BLUE_CHAT, "Portal Name: " + portal.getName());
                 chr.chatMessage(GM_BLUE_CHAT, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
                 chr.chatMessage(GM_BLUE_CHAT, "Portal target map: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getTargetMapId()));
@@ -647,7 +627,7 @@ public class AdminCommands {
                 }
                 for (Map.Entry<Integer, String> entry : map.entrySet()) {
                     int id = entry.getKey();
-                    Item item = ItemData.getEquipDeepCopyFromID(id, false);
+                    Item item = ItemData.getEquipDeepCopyFromID(id, true);
                     if (item != null) {
                         Equip equip = (Equip) item;
                         if (equip.getItemId() < 1000000) {
@@ -866,6 +846,23 @@ public class AdminCommands {
                 stats.put(Stat.exp, (long) 0);
                 chr.getClient().write(WvsContext.statChanged(stats));
                 chr.getJobHandler().handleLevelUp();
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
+            }
+        }
+    }
+    public static class LevelUntil extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int num = Integer.parseInt(args[1]);
+            short level = chr.getLevel();
+            while (level < num) {
+                level++;
+                chr.setStat(Stat.level, level);
+                Map<Stat, Object> stats = new HashMap<>();
+                stats.put(Stat.level, (byte) level);
+                stats.put(Stat.exp, (long) 0);
+                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.getJobHandler().handleLevelUp();
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
             }
         }
     }
@@ -918,7 +915,7 @@ public class AdminCommands {
             } else {
                 o1.nOption = 3;
                 tsm.putCharacterStatValue(NotDamaged, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 chr.chatMessage(GAME_NOTICE, "You are invincible.");
             }
         }
@@ -936,7 +933,7 @@ public class AdminCommands {
             o1.nOption = morphID;
             o1.rOption = Kaiser.FINAL_TRANCE;
             tsm.putCharacterStatValue(Morph, o1);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -1031,21 +1028,22 @@ public class AdminCommands {
     public static class Lookup extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 3) {
-                chr.chatMessage(GAME_NOTICE, "Needs more args! <what to lookup> <id>");
+                chr.chatMessage(GAME_NOTICE, "Needs more args! <what to lookup> <id/(part of) name>");
+                chr.chatMessage(GAME_NOTICE, "Possible lookup types are: item, skill, mob, npc, map");
                 return;
             }
-            String query = "";
+            StringBuilder query = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
-                query += args[i].toLowerCase() + " ";
+                query.append(args[i].toLowerCase()).append(" ");
             }
-            query = query.substring(0, query.length() - 1);
+            query = new StringBuilder(query.substring(0, query.length() - 1));
             chr.chatMessage("Query: " + query);
-            boolean isNumber = Util.isNumber(query);
+            boolean isNumber = Util.isNumber(query.toString());
             if ("skill".equalsIgnoreCase(args[1])) {
                 SkillStringInfo ssi;
                 int id;
                 if (isNumber) {
-                    id = Integer.parseInt(query);
+                    id = Integer.parseInt(query.toString());
                     ssi = StringData.getSkillStringById(id);
                     if (ssi == null) {
                         chr.chatMessage(YELLOW, "Cannot find skill " + id);
@@ -1057,7 +1055,7 @@ public class AdminCommands {
                     chr.chatMessage(YELLOW, "h: " + ssi.getH());
                     chr.chatMessage(YELLOW, "type: " + skillInfo.getType());
                 } else {
-                    Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query);
+                    Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query.toString());
                     if (map.size() == 0) {
                         chr.chatMessage(YELLOW, "No skills found for query " + query);
                     }
@@ -1074,31 +1072,67 @@ public class AdminCommands {
                         }
                     }
                 }
-            } else if ("item".equalsIgnoreCase(args[1])) {
+            } else {
+                String queryType = args[1].toLowerCase();
                 int id;
                 String name;
                 if (isNumber) {
-                    id = Integer.parseInt(query);
-                    name = StringData.getItemStringById(id);
+                    id = Integer.parseInt(query.toString());
+                    switch (queryType) {
+                        case "item":
+                            name = StringData.getItemStringById(id);
+                            break;
+                        case "mob":
+                            name = StringData.getMobStringById(id);
+                            break;
+                        case "npc":
+                            name = StringData.getNpcStringById(id);
+                            break;
+                        case "map":
+                            name = StringData.getMapStringById(id);
+                            break;
+                        default:
+                            chr.chatMessage("Unknown query type " + queryType);
+                            return;
+                    }
                     if (name == null) {
-                        chr.chatMessage(YELLOW, "Cannot find item " + id);
+                        chr.chatMessage(YELLOW, "Cannot find " + queryType + " " + id);
                         return;
                     }
                     chr.chatMessage(YELLOW, "Name: " + name);
                 } else {
-                    Map<Integer, String> map = StringData.getItemStringByName(query);
+                    Map<Integer, String> map;
+                    switch (queryType) {
+                        case "item":
+                            map = StringData.getItemStringByName(query.toString());
+                            break;
+                        case "mob":
+                            map = StringData.getMobStringByName(query.toString());
+                            break;
+                        case "npc":
+                            map = StringData.getNpcStringByName(query.toString());
+                            break;
+                        case "map":
+                            map = StringData.getMapStringByName(query.toString());
+                            break;
+                        default:
+                            chr.chatMessage("Unknown query type " + queryType);
+                            return;
+                    }
                     if (map.size() == 0) {
-                        chr.chatMessage(YELLOW, "No items found for query " + query);
+                        chr.chatMessage(YELLOW, "No " + queryType + "s found for query " + query);
                     }
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
-                        Item item = ItemData.getEquipDeepCopyFromID(id, false);
-                        if (item == null) {
-                            item = ItemData.getItemDeepCopy(id);
-                        }
-                        if (item == null) {
-                            continue;
+                        if (queryType.equalsIgnoreCase("item")) {
+                            Item item = ItemData.getEquipDeepCopyFromID(id, false);
+                            if (item == null) {
+                                item = ItemData.getItemDeepCopy(id);
+                            }
+                            if (item == null) {
+                                continue;
+                            }
                         }
                         chr.chatMessage(YELLOW, "Id: " + id);
                         chr.chatMessage(YELLOW, "Name: " + name);
@@ -1191,10 +1225,14 @@ public class AdminCommands {
             gotomaps.put("cygnus", 271040000);
             gotomaps.put("ra", 105200000);
             gotomaps.put("goldenbeach", 914200000);
+            gotomaps.put("ardentmill", 910001000);
+            gotomaps.put("oz", 992000000);
 
-            if (gotomaps.containsKey(args[1])) {
+            if (args.length == 1) {
+                chr.chatMessage(GAME_NOTICE, "List of locations: " + gotomaps.keySet());
+            } else if (gotomaps.containsKey(args[1])) {
                 Field toField = chr.getClient().getChannelInstance().getField(gotomaps.get(args[1]));
-                Portal portal = chr.getField().getPortalByID(0);
+                Portal portal = chr.getField().getDefaultPortal();
                 chr.warp(toField, portal);
             } else if (args[1].equals("locations")) {
                 chr.chatMessage(GAME_NOTICE, "Use !goto <location>");
@@ -1237,7 +1275,7 @@ public class AdminCommands {
                     return;
                 }
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType((quickmaps.get(key)));
-                Portal portal = chr.getField().getPortalByID(0);
+                Portal portal = chr.getField().getDefaultPortal();
                 chr.warp(toField, portal);
             } else if (args[1].equalsIgnoreCase("list")) {
                 Set keys = quickmaps.keySet();
@@ -1380,15 +1418,17 @@ public class AdminCommands {
                     chr.getPosition().deepCopy().getY() + 100
             );
             Mob mob = chr.getField().getMobs().stream().filter(m -> rect.hasPositionInside(m.getPosition())).findFirst().orElse(null);
+            Char controller = chr.getField().getLifeToControllers().getOrDefault(mob, null);
             if (mob != null) {
-                chr.chatMessage(GM_BLUE_CHAT, String.format("Mob ID: %s | Template ID: %s | HP: %s/%s | MP: %s/%s | Left: %s",
+                chr.chatMessage(GM_BLUE_CHAT, String.format("Mob ID: %s | Template ID: %s | HP: %s/%s | MP: %s/%s | Left: %s | Controller: %s",
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getObjectId()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getTemplateId()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getHp()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getMaxHp()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getMp()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getMaxMp()),
-                        mob.isLeft()
+                        mob.isLeft(),
+                        controller == null ? "null" : chr.getName()
                         )
                 );
             } else {
@@ -1478,6 +1518,81 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
             Server.getInstance().initCashShop();
+        }
+    }
+
+    public static class Ban extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 5) {
+                chr.chatMessage(GM_BLUE_CHAT, "Not enough args! Use !ban <name> <amount> <min/hour/day/year> <reason>");
+            }
+            String name = args[1];
+            int amount = Integer.parseInt(args[2]);
+            String amountType = args[3].toLowerCase();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 4; i < args.length; i++) {
+                builder.append(args[i] + " ");
+            }
+            String reason = builder.toString();
+            reason = reason.substring(0, reason.length() - 1); // gets rid of the last space
+            if (reason.length() > 255) {
+                chr.chatMessage(GM_BLUE_CHAT, "That ban reason is too long.");
+                return;
+            }
+            Char banChr = Server.getInstance().getWorldById(chr.getClient().getWorldId()).getCharByName(name);
+            boolean online = true;
+            if (banChr == null) {
+                online = false;
+                banChr = Char.getFromDBByName(name);
+                if (banChr == null) {
+                    chr.chatMessage(GM_BLUE_CHAT, "Could not find that character.");
+                    return;
+                }
+            }
+            Account banAccount = banChr.getAccount();
+            LocalDateTime banDate = LocalDateTime.now();
+            switch (amountType) {
+                case "m":
+                case "min":
+                case "mins":
+                    banDate = banDate.plusMinutes(amount);
+                    break;
+                case "h":
+                case "hour":
+                case "hours":
+                    banDate = banDate.plusHours(amount);
+                    break;
+                case "d":
+                case "day":
+                case "days":
+                    banDate = banDate.plusDays(amount);
+                    break;
+                case "y":
+                case "year":
+                case "years":
+                    banDate = banDate.plusYears(amount);
+                    break;
+                default:
+                    chr.chatMessage(GM_BLUE_CHAT, String.format("Unknown date type %s", amountType));
+                    break;
+            }
+            banAccount.setBanExpireDate(FileTime.fromDate(banDate));
+            banAccount.setBanReason(reason);
+            chr.chatMessage(GM_BLUE_CHAT, String.format("Character %s has been banned. Expire date: %s", name, banDate));
+            if (online) {
+                banChr.write(WvsContext.returnToTitle());
+            }
+        }
+    }
+
+    public static class KillMobs extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+            for (Mob mob : mobs) {
+                mob.die();
+            }
         }
     }
 

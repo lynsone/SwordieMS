@@ -1,6 +1,5 @@
 package net.swordie.ms.connection.packet;
 
-import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -8,49 +7,47 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Summon;
-import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.util.Position;
-
-import java.util.List;
 
 /**
  * Created on 5/21/2018.
  */
 public class Summoned {
 
-    public static OutPacket summonedAssistAttackRequest(int charID, int summonID) {
+    public static OutPacket summonedAssistAttackRequest(Summon summon) {
         OutPacket outpacket = new OutPacket(OutHeader.SUMMONED_ASSIST_ATTACK_REQUEST);
 
-        outpacket.encodeInt(charID);
-        outpacket.encodeInt(summonID);
+        outpacket.encodeInt(summon.getCharID());
+        outpacket.encodeInt(summon.getObjectId());
 
         return outpacket;
     }
 
-    public static OutPacket summonedSummonAttackActive(int charID, Summon summon) {
+    public static OutPacket summonedSummonAttackActive(Summon summon) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_SUMMON_ATTACK_ACTIVE);
 
-        outPacket.encodeInt(charID);
+        outPacket.encodeInt(summon.getCharID());
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(summon.isAttackActive());
 
         return outPacket;
     }
 
-    public static OutPacket summonedSkill(int charID, Summon summon, int summonSkillID) {
+    public static OutPacket summonedSkill(Summon summon, int summonSkillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_SKILL);
 
-        outPacket.encodeInt(charID);
+        outPacket.encodeInt(summon.getCharID());
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(summonSkillID);
 
         return outPacket;
     }
 
-    public static OutPacket summonBeholderRevengeAttack(int charID, Summon summon, int mob) {
+    public static OutPacket summonBeholderRevengeAttack(Summon summon, int mob) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_BEHOLDER_REVENGE_ATTACK);
 
-        outPacket.encodeInt(charID);//char ID
+        outPacket.encodeInt(summon.getCharID());//char ID
         outPacket.encodeInt(summon.getObjectId());//summon
         outPacket.encodeInt(mob);//mob
 
@@ -136,21 +133,13 @@ public class Summoned {
         return outPacket;
     }
 
-    public static OutPacket summonedMove(int charID, int summonID, int encodedGatherDuration, Position oldPos,
-                                         Position oldVPos, List<Movement> movements) {
+    public static OutPacket summonedMove(int charID, int summonID, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_MOVE);
 
         outPacket.encodeInt(charID);
 
         outPacket.encodeInt(summonID);
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }

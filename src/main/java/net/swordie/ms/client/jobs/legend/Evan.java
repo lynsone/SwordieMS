@@ -21,7 +21,6 @@ import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -60,6 +59,7 @@ public class Evan extends Job {
     public static final int HEROIC_MEMORIES_EVAN = 22171082;
     public static final int ENHANCED_MAGIC_DEBRIS = 22170070;
     public static final int HEROS_WILL_EVAN = 22171004;
+    public static final int DRAGON_FURY = 22170074;
 
     //Returns
     public static final int RETURN_FLASH = 22110013; //Return after Wind Skills (Mob Debuff)
@@ -234,11 +234,12 @@ public class Evan extends Job {
             case DRAGON_MASTER_2:
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -263,7 +264,7 @@ public class Evan extends Job {
         if(hasHitMobs) {
             // Partners
             if (getEvanSkill(skillID) != 1) {
-                handlePartners(skillID);
+                givePartnersBuff(skillID);
             }
 
             // Wreckage / Magic Debris
@@ -290,7 +291,7 @@ public class Evan extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    public void handlePartners(int skillID) {
+    public void givePartnersBuff(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(PARTNERS);
         Option o = new Option();
@@ -306,12 +307,13 @@ public class Evan extends Job {
             o1.rOption = PARTNERS;
             o1.tOption = 3;
             tsm.putCharacterStatValue(Stance, o1);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         if(chr.getField() != oldField) {
             debrisCount = 0;
             c.write(CField.delWreckage(chr));
@@ -343,7 +345,6 @@ public class Evan extends Job {
                     aa.setMobOrigin((byte) 0);
                     aa.setPosition(chr.getPosition());
                     aa.setRect(aa.getPosition().getRectAround(rft.getRects().get(0)));
-                    //aa.setRect(rect);
                     chr.getField().spawnAffectedArea(aa);
                     break;
                 case RETURN_FLASH:
@@ -370,7 +371,7 @@ public class Evan extends Job {
                     break;
                 case MAGIC_DEBRIS:
                 case ENHANCED_MAGIC_DEBRIS:
-                    handleMagicDebris();
+                    createMagicDebrisForceAtom();
                     break;
                 case HEROS_WILL_EVAN:
                     tsm.removeAllDebuffs();
@@ -386,11 +387,11 @@ public class Evan extends Job {
             Skill skill = chr.getSkill(MAGIC_GUARD);
             SkillInfo si = SkillData.getSkillInfoById(MAGIC_GUARD);
             int dmgPerc = si.getValue(x, skill.getCurrentLevel());
-            int dmg = hitInfo.HPDamage;
+            int dmg = hitInfo.hpDamage;
             int mpDmg = (int) (dmg * (dmgPerc / 100D));
             mpDmg = chr.getStat(Stat.mp) - mpDmg < 0 ? chr.getStat(Stat.mp) : mpDmg;
-            hitInfo.HPDamage = dmg - mpDmg;
-            hitInfo.MPDamage = mpDmg;
+            hitInfo.hpDamage = dmg - mpDmg;
+            hitInfo.mpDamage = mpDmg;
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -449,11 +450,17 @@ public class Evan extends Job {
         return 0;
     }
 
-    private void handleMagicDebris() {
+    private void createMagicDebrisForceAtom() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(getDebrisSkill());
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
         List<Mob> lifes =  field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
         for(int i = 0; i<debrisCount; i++) {
             c.write(CField.delWreckage(chr));
             Life life = Util.getRandomFromList(lifes);

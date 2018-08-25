@@ -14,7 +14,6 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
@@ -27,11 +26,13 @@ import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -62,7 +63,7 @@ public class Kaiser extends Job {
     public static final int NOVA_TEMPERANCE_KAISER = 61121015;
 
     public static final int FINAL_TRANCE = 61121053;
-    public static final int KAISERS_MAJESTY = 61121054;
+    public static final int KAISERS_MAJESTY = 61121054; // TODO reset Cooldown
 
 
     //Attacking Skills
@@ -164,17 +165,26 @@ public class Kaiser extends Job {
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
-                handleRealignAttackSkill();
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    tsm.removeStatsBySkill(REALIGN_DEFENDER_MODE);
+                    giveRealignAttackBuffs();
+                }
                 break;
             case REALIGN_DEFENDER_MODE:
-                handleRealignDefendSkill();
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    tsm.removeStatsBySkill(REALIGN_ATTACKER_MODE);
+                    giveRealignDefendBuffs();
+                }
                 break;
             case BLAZE_ON:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case CURSEBITE:
                 o1.nOption = si.getValue(asrR, slv);
@@ -218,7 +228,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case TEMPEST_BLADES_THREE_FF: //Final Form
                 if(tsm.getOption(StopForceAtomInfo).nOption != 3 && tsm.hasStat(StopForceAtomInfo)) {
@@ -234,7 +243,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
 
             case TEMPEST_BLADES_FIVE:
@@ -251,7 +259,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case TEMPEST_BLADES_FIVE_FF: //Final Form
                 if(tsm.getOption(StopForceAtomInfo).nOption != 4 && tsm.hasStat(StopForceAtomInfo)) {
@@ -267,7 +274,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
 
             case FINAL_FORM_THIRD:
@@ -337,14 +343,14 @@ public class Kaiser extends Job {
                 resetGauge(c, tsm);
                 break;
 
-            case KAISERS_MAJESTY:   //Lowers Range for w/e reason
+            case KAISERS_MAJESTY:
                 o1.nReason = skillID;
                 o1.nValue = -1;
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
                 o2.nReason = skillID;
-                o2.nValue = (-1 * si.getValue(indiePad, slv));
+                o2.nValue = si.getValue(indiePad, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
@@ -361,12 +367,20 @@ public class Kaiser extends Job {
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
-    private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
+    private void incrementMorphGauge(TemporaryStatManager tsm, int increment) {
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -412,12 +426,12 @@ public class Kaiser extends Job {
         o4.tStart = (int) System.currentTimeMillis();
         o4.tTerm = 0;
         tsm.putCharacterStatValue(IndieBooster, o4); //Indie
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private void resetGauge(Client c, TemporaryStatManager tsm) {
         tsm.removeStat(SmashStack, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     private int getKaiserGauge(Char chr) {
@@ -440,7 +454,7 @@ public class Kaiser extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -459,8 +473,7 @@ public class Kaiser extends Job {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c,
-                    (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
+            incrementMorphGauge(tsm, (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -471,11 +484,13 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(pbi.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = pbi.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skillID;
+                            o1.tOption = pbi.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -483,11 +498,13 @@ public class Kaiser extends Job {
                 SkillInfo pbffi = SkillData.getSkillInfoById(PIERCING_BLAZE_FINAL_FORM);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = pbffi.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = pbffi.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
                 }
                 break;
             case WING_BEAT:
@@ -517,22 +534,26 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = 3;
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skillID;
+                            o1.tOption = 3;
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
             case PRESSURE_CHAIN_FINAL_FORM:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = 3;
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = 3;
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
                 }
                 break;
             case GIGA_WAVE:
@@ -586,13 +607,29 @@ public class Kaiser extends Job {
             case INFERNO_BREATH:
             case INFERNO_BREATH_FINAL_FORM:
                 SkillInfo rca = SkillData.getSkillInfoById(INFERNO_BREATH);
-                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
-                aa.setMobOrigin((byte) 0);
-                aa.setSkillID(INFERNO_BREATH);
-                aa.setPosition(chr.getPosition());
-                aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
-                aa.setDelay((short) 7); //spawn delay
-                chr.getField().spawnAffectedArea(aa);
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+
+                    if(chr.getField().getLifes().stream()
+                            .filter(l -> l instanceof AffectedArea &&
+                                    ((AffectedArea) l).getSkillID() == INFERNO_BREATH)
+                            .collect(Collectors.toList()).size() > 3) {
+                        continue; // to limit the amount of AAs
+                    }
+
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
+                    aa.setDuration(rca.getValue(cooltime, slv) * 1000);
+                    aa.setMobOrigin((byte) 1);
+                    aa.setSkillID(INFERNO_BREATH);
+                    aa.setPosition(mob.getPosition());
+                    Rect rect = rca.getRects().get(0);
+                    if(!attackInfo.left) {
+                        rect = rect.moveRight();
+                    }
+                    aa.setRect(aa.getPosition().getRectAround(rect));
+                    aa.setDelay((short) 7); //spawn delay
+                    chr.getField().spawnAffectedArea(aa);
+                }
                 break;
         }
 
@@ -601,6 +638,7 @@ public class Kaiser extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -639,7 +677,7 @@ public class Kaiser extends Job {
         return 0;
     }
 
-    public void handleRealignAttackSkill() {
+    public void giveRealignAttackBuffs() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -675,7 +713,7 @@ public class Kaiser extends Job {
         tsm.sendSetStatPacket();
     }
 
-    public void handleRealignDefendSkill() {
+    public void giveRealignDefendBuffs() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();

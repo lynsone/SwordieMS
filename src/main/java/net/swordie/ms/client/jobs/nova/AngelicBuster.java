@@ -3,6 +3,7 @@ package net.swordie.ms.client.jobs.nova;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
@@ -10,6 +11,8 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.Life;
@@ -204,7 +207,8 @@ public class AngelicBuster extends Job {
                 tsm.putCharacterStatValue(Stance, o3);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     private void soulSeekerExpert(int skillID, byte slv, AttackInfo attackInfo) {
@@ -241,7 +245,7 @@ public class AngelicBuster extends Job {
         }
     }
 
-    private void handleSoulSeeker() {
+    private void createSoulSeekerForceAtom() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -249,6 +253,9 @@ public class AngelicBuster extends Job {
             rect = rect.moveRight();
         }
         List<Mob> lifes = field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
         List<Mob> bossLifes = field.getBossMobsInRect(rect);
         Life life = Util.getRandomFromList(lifes);
         if(bossLifes.size() > 0) {
@@ -266,7 +273,7 @@ public class AngelicBuster extends Job {
                 life.getPosition(), SOUL_SEEKER_ATOM, life.getPosition()));
     }
 
-    private void soulSeekerReCreation(AttackInfo attackInfo) {
+    private void recreateSoulSeekerForceAtom(AttackInfo attackInfo) {
         SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
         Skill skill = chr.getSkill(SOUL_SEEKER);
         byte slv = (byte) skill.getCurrentLevel();
@@ -290,7 +297,7 @@ public class AngelicBuster extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -311,7 +318,7 @@ public class AngelicBuster extends Job {
         if(hasHitMobs) {
             //Soul Seeker Recreation
             if (attackInfo.skillId == SOUL_SEEKER_ATOM) {
-                soulSeekerReCreation(attackInfo);
+                recreateSoulSeekerForceAtom(attackInfo);
             }
 
             //Soul Seeker Expert
@@ -330,7 +337,7 @@ public class AngelicBuster extends Job {
                 if(chr.hasSkill(AFFINITY_HEART_IV) && Util.succeedProp(getRechargeProc(attackInfo))) {
                     Skill ah4Skill = chr.getSkill(AFFINITY_HEART_IV);
                     byte ah4LV = (byte) ah4Skill.getCurrentLevel();
-                    SkillInfo ah4SI = SkillData.getSkillInfoById(skill.getSkillId());
+                    SkillInfo ah4SI = SkillData.getSkillInfoById(ah4Skill.getSkillId());
                     if(Util.succeedProp(ah4SI.getValue(x, ah4LV))) {
                         rechargeABSkills();
                         affinityHeartIIIcounter = 0;
@@ -388,11 +395,13 @@ public class AngelicBuster extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -411,6 +420,7 @@ public class AngelicBuster extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -427,8 +437,8 @@ public class AngelicBuster extends Job {
             Option o3 = new Option();
             switch(skillID) {
                 case SOUL_SEEKER:
-                    handleSoulSeeker();
-                    handleSoulSeeker();
+                    createSoulSeekerForceAtom();
+                    createSoulSeekerForceAtom();
                     break;
                 case DAY_DREAMER:
                     o1.nValue = si.getValue(x, slv);
@@ -460,6 +470,9 @@ public class AngelicBuster extends Job {
 
     private int getRechargeProc(AttackInfo attackInfo) {
         Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(attackInfo.skillId));
+        if (skill == null) {
+            return 0;
+        }
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo rechargeInfo = SkillData.getSkillInfoById(skill.getSkillId());
         int rechargeproc = rechargeInfo.getValue(onActive, slv);
@@ -476,6 +489,9 @@ public class AngelicBuster extends Job {
     }
 
     private void affinityHeartII(AttackInfo attackInfo) {
+        if (!chr.hasSkill(AFFINITY_HEART_II)) {
+            return;
+        }
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
             if(affinityHeartIIcounter >= 10) {
@@ -536,5 +552,19 @@ public class AngelicBuster extends Job {
         Effect effect = Effect.createABRechargeEffect();
         chr.write(User.effect(effect));
         chr.write(UserLocal.resetStateForOffSkill());
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.setStat(Stat.level, 10);
+        chr.setStat(Stat.dex, 49);
+        chr.getAvatarData().getCharacterStat().setPosMap(400000000);
+        chr.getAvatarData().getCharacterStat().setJob(JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId());
+        Item secondary = ItemData.getItemDeepCopy(1352601);
+        secondary.setBagIndex(10);
+        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
+        chr.setSpToCurrentJob(5);
+        chr.getEquippedInventory().addItem(secondary);
     }
 }

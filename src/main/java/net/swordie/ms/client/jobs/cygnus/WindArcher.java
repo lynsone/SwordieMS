@@ -21,7 +21,6 @@ import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -269,6 +268,13 @@ public class WindArcher extends Job {
                 summon.setAttackActive(false);
                 summon.setAssistType((byte) 0);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
 
             case GLORY_OF_THE_GUARDIANS_WA:
@@ -291,10 +297,11 @@ public class WindArcher extends Job {
                 tsm.putCharacterStatValue(StormBringer, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
-    private void handleTriflingWind(int skillID, byte slv, AttackInfo attackInfo) {
+    private void createTriflingWindForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             if (tsm.hasStat(TriflingWhimOnOff)) {
                 SkillInfo si = SkillData.getSkillInfoById(TRIFLING_WIND_I);
@@ -342,7 +349,7 @@ public class WindArcher extends Job {
             }
     }
 
-    private void handleStormBringer(int skillID, byte slv, AttackInfo attackInfo) {
+    private void createStormBringerForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(StormBringer)) {
             SkillInfo si = SkillData.getSkillInfoById(STORM_BRINGER);
@@ -406,7 +413,7 @@ public class WindArcher extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -425,11 +432,11 @@ public class WindArcher extends Job {
         }
         if(hasHitMobs) {
             if(attackInfo.skillId != TRIFLING_WIND_ATOM && attackInfo.skillId != 0 && attackInfo.skillId != STORM_BRINGER) {
-                handleStormBringer(skillID, slv, attackInfo);
+                createStormBringerForceAtom(skillID, slv, attackInfo);
 
                 int maxtrif = getMaxTriffling(chr);
                 for (int i = 0; i < maxtrif; i++) {
-                    handleTriflingWind(skillID, slv, attackInfo);
+                    createTriflingWindForceAtom(skillID, slv, attackInfo);
 
                 }
             }
@@ -446,6 +453,7 @@ public class WindArcher extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -476,7 +484,7 @@ public class WindArcher extends Job {
         Option o2 = new Option();
         Option o3 = new Option();
         if(chr.hasSkill(SECOND_WIND)) {
-            if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
+            if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
                 Skill skill = chr.getSkill(SECOND_WIND);
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 byte slv = (byte) skill.getCurrentLevel();

@@ -265,8 +265,8 @@ public class QuestData {
                             }
                             break;
                         case "mob":
-                            QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
+                                QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -284,8 +284,8 @@ public class QuestData {
                                             break;
                                     }
                                 }
+                                quest.addProgressRequirement(qpmr);
                             }
-                            quest.addProgressRequirement(qpmr);
                             break;
                         case "skill":
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
@@ -488,10 +488,13 @@ public class QuestData {
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating quest data.");
+        long start = System.currentTimeMillis();
         if (getBaseQuests().size() == 0) {
             loadQuestsFromWZ();
         }
         saveAllQuestInfos(String.format("%s/quests", ServerConstants.DAT_DIR));
+        log.info(String.format("Completed generating quest data in %dms.", System.currentTimeMillis() - start));
     }
 
     private static void saveAllQuestInfos(String dir) {
@@ -630,14 +633,18 @@ public class QuestData {
         QuestInfo qi = getQuestInfoById(questID);
         Quest quest = new Quest();
         quest.setQRKey(questID);
-        if (qi.isAutoComplete()) {
-            quest.setStatus(QuestStatus.STARTED);
+        if (qi != null) {
+            if (qi.isAutoComplete()) {
+                quest.setStatus(QuestStatus.STARTED);
 //            quest.completeQuest(); // TODO check what autocomplete actually means
+            } else {
+                quest.setStatus(QuestStatus.STARTED);
+            }
+            for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
+                quest.addQuestProgressRequirement(qpr.deepCopy());
+            }
         } else {
             quest.setStatus(QuestStatus.STARTED);
-        }
-        for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
-            quest.addQuestProgressRequirement(qpr.deepCopy());
         }
         return quest;
     }

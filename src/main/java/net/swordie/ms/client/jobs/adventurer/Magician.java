@@ -5,16 +5,18 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
@@ -25,6 +27,7 @@ import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.FieldData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -37,6 +40,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -77,7 +81,8 @@ public class Magician extends Job {
     public static final int MAPLE_WARRIOR_FP = 2121000;
     public static final int ELEMENTAL_DRAIN = 2100009;
     public static final int FERVENT_DRAIN = 2120014;
-    public static final int METEOR_SHOWER_CD_ATTACK = 2120013;
+    public static final int METEOR_SHOWER = 2121007;
+    public static final int METEOR_SHOWER_FA = 2120013;
     public static final int ARCANE_AIM_FP = 2120010;
     public static final int HEROS_WILL_FP = 2121008;
 
@@ -94,12 +99,13 @@ public class Magician extends Job {
     public static final int GLACIER_CHAIN = 2211010;
     public static final int THUNDER_STORM = 2211011;
     public static final int TELEPORT_MASTERY_IL = 2211007;
+    public static final int TELEPORT_MASTERY_RANGE_IL = 2221045;
     public static final int ELEMENTAL_DECREASE_IL = 2211008;
     public static final int ELEMENTAL_ADAPTATION_IL = 2211012;
     public static final int CHAIN_LIGHTNING = 2221006;
     public static final int FREEZING_BREATH = 2221011;
     public static final int BLIZZARD = 2221007;
-    public static final int BLIZZARD_CD_ATTACK = 2220014;
+    public static final int BLIZZARD_FA = 2220014;
     public static final int FROZEN_ORB = 2221012;
     public static final int INFINITY_IL = 2221004;
     public static final int ELQUINES = 2221005;
@@ -110,6 +116,7 @@ public class Magician extends Job {
     //Bishop
     public static final int HEAL = 2301002;
     public static final int MAGIC_BOOSTER_BISH = 2301008;
+    public static final int BLESSED_ENSEMBLE = 2300009;
     public static final int BLESS = 2301004;
     public static final int DISPEL = 2311001;
     public static final int SHINING_RAY = 2311004;
@@ -122,9 +129,13 @@ public class Magician extends Job {
     public static final int ADV_BLESSING = 2321005;
     public static final int BAHAMUT = 2321003;
     public static final int INFINITY_BISH = 2321004;
+    public static final int BLESSED_HARMONY = 2320013;
     public static final int MAPLE_WARRIOR_BISH = 2321000;
+    public static final int GENESIS = 2321008;
+    public static final int BIG_BANG = 2321001;
     public static final int ARCANE_AIM_BISH = 2320011;
     public static final int ANGEL_RAY = 2321007;
+    public static final int RESURRECTION = 2321006;
     public static final int HEROS_WILL_BISH = 2321009;
 
     //Hypers
@@ -160,6 +171,7 @@ public class Magician extends Job {
             MEDITATION_IL,
             THUNDER_STORM,
             TELEPORT_MASTERY_IL,
+            TELEPORT_MASTERY_RANGE_IL,
             ELEMENTAL_DECREASE_IL,
             ELEMENTAL_ADAPTATION_IL,
             INFINITY_IL,
@@ -171,12 +183,13 @@ public class Magician extends Job {
             HOLY_MAGIC_SHELL,
             TELEPORT_MASTERY_BISH,
             DIVINE_PROTECTION,
-            MYSTIC_DOOR,
             HOLY_SYMBOL,
             ADV_BLESSING,
             MAPLE_WARRIOR_BISH,
+            RESURRECTION,
             INFINITY_BISH,
             BAHAMUT,
+            HEAL,
 
             EPIC_ADVENTURE_FP,
             EPIC_ADVENTURE_IL,
@@ -184,6 +197,7 @@ public class Magician extends Job {
             ABSOLUTE_ZERO_AURA,
             INFERNO_AURA,
             RIGHTEOUSLY_INDIGNANT,
+            HEAVENS_DOOR,
     };
 
     public static int hmshits = 0;
@@ -223,36 +237,30 @@ public class Magician extends Job {
         }
 
         if (hasHitMobs) {
-            handleArcaneAim();
+            incrementArcaneAim();
         }
         //Ignite
-        handleIgnite(attackInfo, chr, tsm);
+        applyIgniteOnMob(attackInfo, chr, tsm);
         if (JobConstants.isFirePoison(chr.getJob())) {
             if(hasHitMobs) {
-
-
                 //Megiddo Flame Recreation
                 if(attackInfo.skillId == MEGIDDO_FLAME_ATOM) {
-                    handleMegiddoFlameReCreation(skillID, slv, attackInfo);
+                    recreateMegiddoFlameForceAtom(skillID, slv, attackInfo);
                 }
             }
             chr.chatMessage(ChatMsgColour.WHISPER_GREEN, "Elemental Drain Stack: " + getFerventDrainStack());
         }
-
         if (JobConstants.isIceLightning(chr.getJob())) {
             if(hasHitMobs) {
                 //Freezing Crush / Frozen Clutch
-                handleFreezingCrush(attackInfo, skillID, slv);
-
+                applyFreezingCrushOnMob(attackInfo, skillID, slv);
             }
         }
-
         if (JobConstants.isCleric(chr.getJob())) {
             if(hasHitMobs) {
 
             }
         }
-
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -280,12 +288,14 @@ public class Magician extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptions(MobStat.Stun, o1);
-                        fpBurnedInfo(mob, skill);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptions(MobStat.Stun, o1);
+                            fpBurnedInfo(mob, skill);
+                        }
                     }
                 }
                 break;
@@ -322,12 +332,14 @@ public class Magician extends Job {
             case PARALYZE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    fpBurnedInfo(mob, skill);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        fpBurnedInfo(mob, skill);
+                    }
                 }
                 break;
             case COLD_BEAM:
@@ -348,11 +360,13 @@ public class Magician extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skillID;
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -373,14 +387,38 @@ public class Magician extends Job {
                 }
                 break;
             case HEAVENS_DOOR:
-                o1.nOption = 1;
-                o1.rOption = HEAVENS_DOOR;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(ReviveOnce, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                Party party = chr.getParty();
+                if (party != null) {
+                    for(PartyMember partyMember : party.getOnlineMembers()) {
+                        Char partyChr = partyMember.getChr();
+                        TemporaryStatManager partyTSM = partyChr.getTemporaryStatManager();
+                        o1.nOption = 1;
+                        o1.rOption = HEAVENS_DOOR;
+                        o1.tOption = 0;
+                        partyTSM.putCharacterStatValue(ReviveOnce, o1);
+                        partyTSM.sendSetStatPacket();
+                        if(partyChr != chr) {
+                          chr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, slv, 0)), partyChr);
+                          partyChr.write(User.effect(Effect.skillAffected(skillID, slv, 0)));
+                        }
+                    }
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = HEAVENS_DOOR;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(ReviveOnce, o1);
+                    tsm.sendSetStatPacket();
+                }
                 break;
             case ANGEL_RAY:
-                chr.heal(handleBishopHealingSkills(ANGEL_RAY));
+                chr.heal(changeBishopHealingBuffs(ANGEL_RAY));
+                break;
+            case GENESIS:
+                o1.nOption = 1;
+                o1.rOption = BIG_BANG;
+                o1.tOption = si.getValue(cooltime, slv);
+                tsm.putCharacterStatValue(KeyDownTimeIgnore, o1);
+                tsm.sendSetStatPacket();
                 break;
             case MEGIDDO_FLAME_ATOM:
                 Skill megSkill = chr.getSkill(MEGIDDO_FLAME);
@@ -402,7 +440,7 @@ public class Magician extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleMegiddoFlame() {
+    private void createMegiddoFlameForceAtom() {
         Field field = chr.getField();
         SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
         Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
@@ -410,6 +448,9 @@ public class Magician extends Job {
             rect = rect.moveRight();
         }
         List<Mob> lifes = field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
         Mob life = Util.getRandomFromList(lifes);
         int mobID2 = (life).getObjectId();
         int inc = ForceAtomEnum.DA_ORB.getInc();
@@ -420,10 +461,9 @@ public class Magician extends Job {
         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                 true, mobID2, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
                 life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
-
     }
 
-    private void handleMegiddoFlameReCreation(int skillID, byte slv, AttackInfo attackInfo) {
+    private void recreateMegiddoFlameForceAtom(int skillID, byte slv, AttackInfo attackInfo) {
         SkillInfo si = SkillData.getSkillInfoById(MEGIDDO_FLAME);
         int anglenum = new Random().nextInt(360);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -444,7 +484,7 @@ public class Magician extends Job {
         }
     }
 
-    private void handleArcaneAim() {
+    private void incrementArcaneAim() {
         Skill skill = chr.getSkill(getArcaneAimSkill());
         if (skill == null) {
             return;
@@ -478,10 +518,14 @@ public class Magician extends Job {
         o2.rOption = 2320011;
         o2.tOption = 5; // No Time Variable
         tsm.putCharacterStatValue(DamR, o2);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    private void handleIgnite(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm) {  //TODO  Fire Attribute Spells only
+    private void applyIgniteOnMob(AttackInfo attackInfo, Char chr, TemporaryStatManager tsm) {  //TODO  Fire Attribute Spells only
+        SkillInfo si = SkillData.getSkillInfoById(attackInfo.skillId);
+        if (si == null || !si.getElemAttr().contains("f") || attackInfo.skillId == IGNITE || attackInfo.skillId == IGNITE_AA) {
+            return;
+        }
         if (tsm.hasStat(WizardIgnite)) {
             SkillInfo igniteInfo = SkillData.getSkillInfoById(IGNITE);
             Skill skill = chr.getSkill(IGNITE);
@@ -501,13 +545,12 @@ public class Magician extends Job {
         }
     }
 
-    private void handleChillingStep() {
+    private void createChillStepAA() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(ChillingStep)) {
-            for (int i = 0; i < 168; i += 56) {
-                SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
-                Skill skill = chr.getSkill(CHILLING_STEP);
-                int slv = skill.getCurrentLevel();
+        SkillInfo chillingStepInfo = SkillData.getSkillInfoById(CHILLING_STEP);
+        int slv = chr.getSkill(CHILLING_STEP).getCurrentLevel();
+        if (tsm.hasStat(ChillingStep) && Util.succeedProp(chillingStepInfo.getValue(prop, slv))) {
+           for (int i = 0; i < 168; i += 56) {
                 AffectedArea aa = AffectedArea.getPassiveAA(chr, CHILLING_STEP, (byte) slv);
                 aa.setMobOrigin((byte) 0);
                 int x = chr.isLeft() ? chr.getPosition().getX() - i : chr.getPosition().getX() + i;
@@ -516,13 +559,16 @@ public class Magician extends Job {
                 aa.setRect(aa.getPosition().getRectAround(chillingStepInfo.getRects().get(0)));
                 aa.setCurFoothold();
                 aa.setDelay((short) 4);
+                aa.setSkillID(CHILLING_STEP);
+                aa.setRemoveSkill(false);
                 chr.getField().spawnAffectedArea(aa);
-            }
+           }
         }
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -530,7 +576,7 @@ public class Magician extends Job {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        changeBlessedCount();
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -570,10 +616,10 @@ public class Magician extends Job {
                     o1.rOption = skillID;
                     o1.tOption = 1;
                     tsm.putCharacterStatValue(NotDamaged, o1);
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     break;
                 case MEGIDDO_FLAME:
-                    handleMegiddoFlame();
+                    createMegiddoFlameForceAtom();
                     break;
                 case HOLY_FOUNTAIN:
                     AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
@@ -584,13 +630,15 @@ public class Magician extends Job {
                     chr.getField().spawnAffectedArea(aa);
                     break;
                 case TELEPORT:
-                    handleChillingStep();
+                    if (chr.hasSkill(CHILLING_STEP)) {
+                        createChillStepAA();
+                    }
                     break;
                 case HEAL:
-                    chr.heal(handleBishopHealingSkills(HEAL));
-                    Rect rect3 = new Rect(inPacket.decodeShort(), inPacket.decodeShort()
-                            , inPacket.decodeShort(), inPacket.decodeShort());
-                    for (Life life : chr.getField().getLifesInRect(rect3)) {
+                    chr.heal(changeBishopHealingBuffs(HEAL));
+                    rect = new Rect(inPacket.decodeShort(), inPacket.decodeShort(),
+                            inPacket.decodeShort(), inPacket.decodeShort());
+                    for (Life life : chr.getField().getLifesInRect(rect)) {
                         if (life instanceof Mob && ((Mob) life).getHp() > 0) {
                             Mob mob = (Mob) life;
                             MobTemporaryStat mts = mob.getTemporaryStat();
@@ -603,6 +651,20 @@ public class Magician extends Job {
                     break;
                 case DISPEL:
                     tsm.removeAllDebuffs();
+                    break;
+                case MYSTIC_DOOR:
+                    Field townField = FieldData.getFieldById(chr.getField().getReturnMap());
+                    int x = townField.getPortalByName("tp").getX();
+                    int y = townField.getPortalByName("tp").getY();
+                    Position townPosition = new Position(x, y); // Grabs the Portal Co-ordinates for the TownPortalPoint
+                    int duration = si.getValue(time, slv);
+                    if(chr.getTownPortal() != null) {
+                        TownPortal townPortal = chr.getTownPortal();
+                        townPortal.despawnTownPortal();
+                    }
+                    TownPortal townPortal = new TownPortal(chr, townPosition, chr.getPosition(), chr.getField().getReturnMap(), chr.getFieldID(), skillID, duration);
+                    townPortal.spawnTownPortal();
+                    chr.dispose();
                     break;
                 case HEROS_WILL_FP:
                 case HEROS_WILL_IL:
@@ -620,26 +682,21 @@ public class Magician extends Job {
             Skill skill = chr.getSkill(MAGIC_GUARD);
             SkillInfo si = SkillData.getSkillInfoById(MAGIC_GUARD);
             int dmgPerc = si.getValue(x, skill.getCurrentLevel());
-            int dmg = hitInfo.HPDamage;
+            int dmg = hitInfo.hpDamage;
             int mpDmg = (int) (dmg * (dmgPerc / 100D));
             mpDmg = chr.getStat(Stat.mp) - mpDmg < 0 ? chr.getStat(Stat.mp) : mpDmg;
-            hitInfo.HPDamage = dmg - mpDmg;
-            hitInfo.MPDamage = mpDmg;
+            hitInfo.hpDamage = dmg - mpDmg;
+            hitInfo.mpDamage = mpDmg;
         }
-
-        if(tsm.getOptByCTSAndSkill(AntiMagicShell, ELEMENTAL_ADAPTATION_FP) != null) {
-            eleAdaptationFP();
-        }
-
         super.handleHit(c, inPacket, hitInfo);
     }
 
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+    public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -676,10 +733,15 @@ public class Magician extends Job {
                 tsm.putCharacterStatValue(IndieMAD, o1);
                 break;
             case IGNITE:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(WizardIgnite, o1);
+                if (tsm.hasStat(WizardIgnite)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(WizardIgnite, o1);
+                }
                 break;
             case ELEMENTAL_DECREASE_FP:
             case ELEMENTAL_DECREASE_IL:
@@ -691,26 +753,35 @@ public class Magician extends Job {
             case ELEMENTAL_ADAPTATION_FP:
                 o1.nOption = 6;
                 o1.rOption = skillID;
+                // no bOption for FP's AntiMagicShell
                 tsm.putCharacterStatValue(AntiMagicShell, o1);
                 break;
             case DIVINE_PROTECTION:
-            case ELEMENTAL_ADAPTATION_IL:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
+                o1.bOption = 1;
                 tsm.putCharacterStatValue(AntiMagicShell, o1);
-                o2.nOption = 1;
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamAbsorbShield, o2);
+                break;
+            case ELEMENTAL_ADAPTATION_IL:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(AntiMagicShell, o1);
                 break;
             case TELEPORT_MASTERY_FP:
             case TELEPORT_MASTERY_IL:
+            case TELEPORT_MASTERY_RANGE_IL:
             case TELEPORT_MASTERY_BISH:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(TeleportMasteryOn, o1);
+                CharacterTemporaryStat masteryStat = skillID == TELEPORT_MASTERY_RANGE_IL ? TeleportMasteryRange : TeleportMasteryOn;
+                if (tsm.hasStat(masteryStat)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(masteryStat, o1);
+                }
                 break;
             case INFINITY_FP:
             case INFINITY_IL:
@@ -786,7 +857,33 @@ public class Magician extends Job {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(HolyMagicShell, o1);
                 hmshits = 0;
-                chr.heal(handleBishopHealingSkills(HOLY_MAGIC_SHELL));
+                chr.heal(changeBishopHealingBuffs(HOLY_MAGIC_SHELL));
+                break;
+            case RESURRECTION:
+                Party party = chr.getParty();
+                if(party != null) {
+                    field = chr.getField();
+                    Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.moveRight();
+                    }
+                    List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
+                            filter(pml -> pml.getChr().getId() != chr.getId() &&
+                                    pml.getChr().getHP() <= 0).
+                            collect(Collectors.toList());
+                    for (PartyMember partyMember : eligblePartyMemberList) {
+                        Char partyChr = partyMember.getChr();
+                        partyChr.heal(partyChr.getMaxHP());
+                        partyChr.healMP(partyChr.getMaxMP());
+                        partyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                        partyChr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
+                    }
+                }
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                tsm.sendSetStatPacket();
                 break;
             case IFRIT:
             case ELQUINES:
@@ -796,6 +893,13 @@ public class Magician extends Job {
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case MAPLE_WARRIOR_FP:
             case MAPLE_WARRIOR_IL:
@@ -813,9 +917,13 @@ public class Magician extends Job {
                 field.spawnSummon(summon);
                 break;
             case CHILLING_STEP:
-                o1.nOption = 5;
-                o1.rOption = skillID;
-                tsm.putCharacterStatValue(ChillingStep, o1);
+                if (tsm.hasStat(ChillingStep)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.rOption = skillID;
+                    tsm.putCharacterStatValue(ChillingStep, o1);
+                }
                 break;
             case EPIC_ADVENTURE_FP:
             case EPIC_ADVENTURE_IL:
@@ -892,7 +1000,8 @@ public class Magician extends Job {
                 break;
 
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     @Override
@@ -918,10 +1027,23 @@ public class Magician extends Job {
     @Override
     public int getFinalAttackSkill() {
         if(JobConstants.isFirePoison(chr.getJob())) {
-            return METEOR_SHOWER_CD_ATTACK;
+            SkillInfo si = SkillData.getSkillInfoById(METEOR_SHOWER_FA);
+            if(chr.getSkill(METEOR_SHOWER) != null) {
+                byte slv = (byte) chr.getSkill(METEOR_SHOWER).getCurrentLevel();
+                if(Util.succeedProp(si.getValue(prop, slv))) {
+                    return METEOR_SHOWER_FA;
+                }
+            }
+
         }
-        if(JobConstants.isIceLightning(chr.getJob())) {
-            return BLIZZARD_CD_ATTACK;
+        else if(JobConstants.isIceLightning(chr.getJob())) {
+            SkillInfo si = SkillData.getSkillInfoById(BLIZZARD_FA);
+            if(chr.getSkill(BLIZZARD) != null) {
+                byte slv = (byte) chr.getSkill(BLIZZARD).getCurrentLevel();
+                if(Util.succeedProp(si.getValue(prop, slv))) {
+                    return BLIZZARD_FA;
+                }
+            }
         }
         return 0;
     }
@@ -938,7 +1060,7 @@ public class Magician extends Job {
         return res;
     }
 
-    private void handleFreezingCrush(AttackInfo attackInfo, int skillID, byte slv) {
+    private void applyFreezingCrushOnMob(AttackInfo attackInfo, int skillID, byte slv) {
         if(!SkillConstants.isIceSkill(skillID)){
             return;
         }
@@ -964,7 +1086,7 @@ public class Magician extends Job {
         }
     }
 
-    private int handleBishopHealingSkills(int skillID) {
+    private int changeBishopHealingBuffs(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = chr.getSkill(skillID);
         byte slv = (byte) skill.getCurrentLevel();
@@ -1065,37 +1187,6 @@ public class Magician extends Job {
         chr.chatMessage(ChatMsgColour.WHISPER_GREEN, "Elemental Drain Stack: " + getFerventDrainStack());
     }
 
-    //Elemental Adaptation - FP
-    private void eleAdaptationFP() {
-        if(!chr.hasSkill(ELEMENTAL_ADAPTATION_FP)) {
-            return;
-        }
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        Skill skill = chr.getSkill(ELEMENTAL_ADAPTATION_FP);
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        int proc = si.getValue(prop, slv);
-
-        int stack = tsm.getOption(AntiMagicShell).nOption;
-        if(stack > 0) {
-            if(Util.succeedProp(proc)) {
-                stack--;
-
-                o.nOption = stack;
-                o.rOption = ELEMENTAL_ADAPTATION_FP;
-                tsm.putCharacterStatValue(AntiMagicShell, o);
-                tsm.sendSetStatPacket();
-            } else {
-                tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
-                tsm.sendResetStatPacket();
-            }
-        } else {
-            tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
-            tsm.sendResetStatPacket();
-        }
-    }
-
     private void infinity() {
         if(!chr.hasSkill(getInfinitySkill())) {
             return;
@@ -1151,6 +1242,131 @@ public class Magician extends Job {
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
         }
+    }
+
+    public void handleMobDebuffSkill(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+        // Elemental Adaptation - FP
+        if(chr.hasSkill(ELEMENTAL_ADAPTATION_FP) && tsm.getOptByCTSAndSkill(AntiMagicShell, ELEMENTAL_ADAPTATION_FP) != null) {
+            deductEleAdaptationFP();
+            tsm.removeAllDebuffs();
+        }
+
+        // Elemental Adaptation - IL
+        if(chr.hasSkill(ELEMENTAL_ADAPTATION_IL) && tsm.getOptByCTSAndSkill(AntiMagicShell, ELEMENTAL_ADAPTATION_IL) != null) {
+            if(tsm.getOption(AntiMagicShell).bOption == 0) {
+                Skill skill = chr.getSkill(ELEMENTAL_ADAPTATION_IL);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+
+                tsm.removeStatsBySkill(skill.getSkillId());
+                tsm.removeAllDebuffs();
+
+                Option o = new Option();
+                o.nOption = 1;
+                o.rOption = skill.getSkillId();
+                o.tOption = si.getValue(time, slv);
+                o.bOption = 1;
+                tsm.putCharacterStatValue(AntiMagicShell, o);
+                tsm.sendSetStatPacket();
+            } else {
+                tsm.removeAllDebuffs();
+            }
+        }
+
+        // Divine Protection - Bishop
+        if(chr.hasSkill(DIVINE_PROTECTION) && tsm.getOptByCTSAndSkill(AntiMagicShell, DIVINE_PROTECTION) != null) {
+            tsm.removeStatsBySkill(DIVINE_PROTECTION);
+            tsm.sendResetStatPacket();
+            tsm.removeAllDebuffs();
+        }
+    }
+
+    // Elemental Adaptation - FP
+    private void deductEleAdaptationFP() {
+        if(!chr.hasSkill(ELEMENTAL_ADAPTATION_FP)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(ELEMENTAL_ADAPTATION_FP);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        int proc = si.getValue(prop, slv);
+
+        int stack = tsm.getOption(AntiMagicShell).nOption;
+        if(stack > 0) {
+            if(Util.succeedProp(proc)) {
+                stack--;
+
+                o.nOption = stack;
+                o.rOption = ELEMENTAL_ADAPTATION_FP;
+                tsm.putCharacterStatValue(AntiMagicShell, o);
+                tsm.sendSetStatPacket();
+            } else {
+                tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
+                tsm.sendResetStatPacket();
+            }
+        } else {
+            tsm.removeStatsBySkill(ELEMENTAL_ADAPTATION_FP);
+            tsm.sendResetStatPacket();
+        }
+    }
+
+    private void changeBlessedCount() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(getBlessedSkill() == null) {
+            return;
+        }
+        Skill skill = getBlessedSkill();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        int amount = 0;
+
+        if(chr.getParty() != null) { // Should be increasing by Given Party Buffs
+            for(PartyMember pm : chr.getParty().getOnlineMembers()) {
+                if(chr.getFieldID() == pm.getChr().getFieldID()) {
+                    amount++;
+                }
+            }
+        }
+
+        if(amount > 1) { // amount = 2  ->  1 count on Icon
+            o1.nOption = amount;
+            o1.rOption = BLESSED_ENSEMBLE;
+            tsm.putCharacterStatValue(BlessEnsenble, o1);
+
+            o2.nValue = si.getValue(x, slv) * amount;
+            o2.nReason = BLESSED_ENSEMBLE;
+            o2.tStart = (int) System.currentTimeMillis();
+            tsm.putCharacterStatValue(IndieDamR, o1);
+            tsm.sendSetStatPacket();
+        } else {
+            tsm.removeStatsBySkill(BLESSED_ENSEMBLE);
+            tsm.sendResetStatPacket();
+        }
+    }
+
+    private Skill getBlessedSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(BLESSED_ENSEMBLE)) {
+            skill = chr.getSkill(BLESSED_ENSEMBLE);
+        }
+        if(chr.hasSkill(BLESSED_HARMONY)) {
+            skill = chr.getSkill(BLESSED_HARMONY);
+        }
+        return skill;
+    }
+
+    public static void reviveByHeavensDoor(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(HEAVENS_DOOR);
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Heaven's Door.");
     }
 }
 

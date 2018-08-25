@@ -17,8 +17,6 @@
 */
 package net.swordie.ms.connection.netty;
 
-import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.connection.crypto.MapleCrypto;
 import io.netty.buffer.ByteBuf;

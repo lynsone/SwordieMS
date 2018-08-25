@@ -34,7 +34,8 @@ public enum ScrollStat {
     forceUpgrade,
     cursed,
     maxSuperiorEqp,
-    noNegative;
+    noNegative,
+    incRandVol;
 
     public static ScrollStat getScrollStatByString(String name) {
         return Arrays.stream(values()).filter(ss -> ss.toString().equalsIgnoreCase(name))

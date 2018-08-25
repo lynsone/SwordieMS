@@ -152,12 +152,14 @@
         tabindex 1;
         id 2070000;
         price 500;
+        quantity 500;
     }
     bullet{
         loc 24;
         tabindex 1;
         id 2330000;
         price 600;
+        quantity 500;
     }
 }
 1011101{
@@ -3820,12 +3822,14 @@
         tabindex 1;
         id 2070000;
         price 500;
+        quantity 500;
     }
     bullet{
         loc 23;
         tabindex 1;
         id 2330000;
         price 600;
+        quantity 500;
     }
 }
 1031001{
@@ -4378,12 +4382,14 @@
         tabindex 1;
         id 2070000;
         price 500;
+        quantity 500;
     }
     bullet{
         loc 22;
         tabindex 1;
         id 2330000;
         price 600;
+        quantity 500;
     }
 }
 1001100{
@@ -4512,12 +4518,14 @@
         tabindex 1;
         id 2070000;
         price 500;
+        quantity 500;
     }
     bullet{
         loc 21;
         tabindex 1;
         id 2330000;
         price 600;
+        quantity 500;
     }
 }
 1001000{
@@ -5234,12 +5242,14 @@
         tabindex 1;
         id 2070000;
         price 500;
+        quantity 500;
     }
     bullet{
         loc 22;
         tabindex 1;
         id 2330000;
         price 600;
+        quantity 500;
     }
 }
 1051000{
@@ -6128,12 +6138,14 @@
         tabindex 1;
         id 2070000;
         price 500;
+        quantity 500;
     }
     bullet{
         loc 23;
         tabindex 1;
         id 2330000;
         price 600;
+        quantity 500;
     }
 }
 1091002{
@@ -6262,12 +6274,14 @@
         tabindex 1;
         id 2070000;
         price 500;
+        quantity 500;
     }
     bullet{
         loc 21;
         tabindex 1;
         id 2330000;
         price 600;
+        quantity 500;
     }
 }
 1091001{
@@ -11400,7 +11414,7 @@
     watermelon{
         loc 12;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -12086,7 +12100,7 @@
     watermelon{
         loc 13;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -13504,7 +13518,7 @@
     watermelon{
         loc 12;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -14388,7 +14402,7 @@
     watermelon{
         loc 10;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -14730,7 +14744,7 @@
     watermelon{
         loc 12;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -16248,7 +16262,7 @@
     watermelon{
         loc 25;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -17186,7 +17200,7 @@
     watermelon{
         loc 11;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3040;
     }
     ice_cream_pop{
@@ -17724,7 +17738,7 @@
     watermelon{
         loc 12;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -17894,7 +17908,7 @@
     watermelon{
         loc 12;
         tabindex 1;
-        id 4034409;
+        id 2001512;
         price 3200;
     }
     ice_cream_pop{
@@ -18926,5 +18940,456 @@
         id 2330000;
         price 600;
         quantity 500;
+    }
+}
+9071001{
+    nebulite_socket_creator{
+        loc 0;
+        tabindex 1;
+        id 2930000;
+        price 5000;
+    }
+    red_potion{
+        loc 1;
+        tabindex 1;
+        id 2001500;
+        price 50;
+    }
+    orange_potion{
+        loc 2;
+        tabindex 1;
+        id 2001501;
+        price 160;
+    }
+    white_potion{
+        loc 3;
+        tabindex 1;
+        id 2022174;
+        price 320;
+    }
+    blue_potion{
+        loc 4;
+        tabindex 1;
+        id 2001503;
+        price 200;
+    }
+    mana_elixir{
+        loc 5;
+        tabindex 1;
+        id 2022177;
+        price 620;
+    }
+    dexterity_potion{
+        loc 6;
+        tabindex 1;
+        id 2002000;
+        price 500;
+    }
+    speed_potion{
+        loc 7;
+        tabindex 1;
+        id 2002001;
+        price 400;
+    }
+    magic_potion{
+        loc 8;
+        tabindex 1;
+        id 2002002;
+        price 500;
+    }
+    warrior_potion{
+        loc 9;
+        tabindex 1;
+        id 2002004;
+        price 500;
+    }
+    sniper_potion{
+        loc 10;
+        tabindex 1;
+        id 2002005;
+        price 500;
+    }
+    watermelon{
+        loc 11;
+        tabindex 1;
+        id 2001512;
+        price 3200;
+    }
+    ice_cream_pop{
+        loc 12;
+        tabindex 1;
+        id 2001513;
+        price 2300;
+    }
+    very_special_sundae{
+        loc 13;
+        tabindex 1;
+        id 2001514;
+        price 4000;
+    }
+    apple{
+        loc 14;
+        tabindex 1;
+        id 2001532;
+        price 30;
+    }
+    egg{
+        loc 15;
+        tabindex 1;
+        id 2001533;
+        price 50;
+    }
+    meat{
+        loc 16;
+        tabindex 1;
+        id 2010001;
+        price 106;
+    }
+    orange{
+        loc 17;
+        tabindex 1;
+        id 2001534;
+        price 100;
+    }
+    lemon{
+        loc 18;
+        tabindex 1;
+        id 2001535;
+        price 310;
+    }
+    melting_cheese{
+        loc 19;
+        tabindex 1;
+        id 2020012;
+        price 4500;
+    }
+    reindeer_milk{
+        loc 20;
+        tabindex 1;
+        id 2020013;
+        price 5600;
+    }
+    sunrise_dew{
+        loc 21;
+        tabindex 1;
+        id 2020045;
+        price 8100;
+    }
+    sunset_dew{
+        loc 22;
+        tabindex 1;
+        id 2020046;
+        price 10200;
+    }
+    arrow_for_bow{
+        loc 23;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_crossbow{
+        loc 24;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    bronze_arrow_for_bow{
+        loc 25;
+        tabindex 1;
+        id 2060001;
+        price 10;
+    }
+    bronze_arrow_for_crossbow{
+        loc 26;
+        tabindex 1;
+        id 2061001;
+        price 10;
+    }
+    subi_throwing-stars{
+        loc 27;
+        tabindex 1;
+        id 2070000;
+        price 500;
+    }
+    bullet{
+        loc 28;
+        tabindex 1;
+        id 2330000;
+        price 600;
+    }
+    spiegelmann_badge_chest{
+        loc 29;
+        tabindex 2;
+        id 2550000;
+        tokenitemid 4310020;
+        tokenprice 30;
+    }
+    spiegelmann_mustache{
+        loc 30;
+        tabindex 2;
+        id 1012270;
+        tokenitemid 4310020;
+        tokenprice 50;
+    }
+    spiegelmann_autograph{
+        loc 31;
+        tabindex 2;
+        id 1162008;
+        tokenitemid 4310020;
+        tokenprice 100;
+    }
+    spiegelmann_hot-air_balloon_7day{
+        loc 32;
+        tabindex 2;
+        id 2430275;
+        tokenitemid 4310020;
+        tokenprice 70;
+    }
+    extreme_red_potion{
+        loc 33;
+        tabindex 2;
+        id 2023125;
+        tokenitemid 4310020;
+        tokenprice 5;
+    }
+    extreme_green_potion{
+        loc 34;
+        tabindex 2;
+        id 2023126;
+        tokenitemid 4310020;
+        tokenprice 5;
+    }
+    extreme_blue_potion{
+        loc 35;
+        tabindex 2;
+        id 2023127;
+        tokenitemid 4310020;
+        tokenprice 5;
+    }
+    extreme_gold_potion{
+        loc 36;
+        tabindex 2;
+        id 2023128;
+        tokenitemid 4310020;
+        tokenprice 10;
+    }
+    greed_pendant{
+        loc 37;
+        tabindex 2;
+        id 1122219;
+        tokenitemid 4310020;
+        tokenprice 150;
+    }
+    monster_park_damage_skin{
+        loc 38;
+        tabindex 2;
+        id 2434824;
+        tokenitemid 4310020;
+        tokenprice 50;
+    }
+}
+9031007{
+    heart_s_series{
+        loc 0;
+        tabindex 1;
+        id 1672034;
+        price 1000000;
+    }
+    heart_i_series{
+        loc 1;
+        tabindex 1;
+        id 1672035;
+        price 1000000;
+    }
+    heart_d_series{
+        loc 2;
+        tabindex 1;
+        id 1672036;
+        price 1000000;
+    }
+    heart_l_series{
+        loc 3;
+        tabindex 1;
+        id 1672037;
+        price 1000000;
+    }
+    heart_g_series{
+        loc 4;
+        tabindex 1;
+        id 1672038;
+        price 1000000;
+    }
+    imp_disease_cure{
+        loc 5;
+        tabindex 1;
+        id 4340000;
+        price 1000;
+    }
+    basic_mold{
+        loc 6;
+        tabindex 1;
+        id 4024004;
+        price 100;
+    }
+    int_mold{
+        loc 7;
+        tabindex 1;
+        id 4024005;
+        price 300;
+    }
+    adv_mold{
+        loc 8;
+        tabindex 1;
+        id 4024006;
+        price 500;
+    }
+    sup_mold{
+        loc 9;
+        tabindex 1;
+        id 4024007;
+        price 1000;
+    }
+    basic_abrasive{
+        loc 10;
+        tabindex 1;
+        id 4025000;
+        price 1000;
+    }
+    int_abrasive{
+        loc 11;
+        tabindex 1;
+        id 4025001;
+        price 5000;
+    }
+    adv_abrasive{
+        loc 12;
+        tabindex 1;
+        id 4025002;
+        price 10000;
+    }
+    sup_abrasive{
+        loc 13;
+        tabindex 1;
+        id 4025003;
+        price 50000;
+    }
+    basic_herb_oil_bottle{
+        loc 14;
+        tabindex 1;
+        id 4024000;
+        price 100;
+    }
+    int_herb_oil_bottle{
+        loc 15;
+        tabindex 1;
+        id 4024001;
+        price 300;
+    }
+    adv_herb_oil_bottle{
+        loc 16;
+        tabindex 1;
+        id 4024002;
+        price 500;
+    }
+    sup_herb_oil_bottle{
+        loc 17;
+        tabindex 1;
+        id 4024003;
+        price 1000;
+    }
+    basic_empty_bottle{
+        loc 18;
+        tabindex 1;
+        id 4025004;
+        price 100;
+    }
+    int_empty_bottle{
+        loc 19;
+        tabindex 1;
+        id 4025005;
+        price 200;
+    }
+    adv_empty_bottle{
+        loc 20;
+        tabindex 1;
+        id 4025006;
+        price 400;
+    }
+    sup_empty_bottle{
+        loc 21;
+        tabindex 1;
+        id 4025007;
+        price 800;
+    }
+    basic_potion_coagulant{
+        loc 22;
+        tabindex 1;
+        id 4025008;
+        price 50;
+    }
+    int_potion_coagulant{
+        loc 23;
+        tabindex 1;
+        id 4025009;
+        price 100;
+    }
+    adv_potion_coagulant{
+        loc 24;
+        tabindex 1;
+        id 4025010;
+        price 200;
+    }
+    sup_potion_coagulant{
+        loc 25;
+        tabindex 1;
+        id 4025011;
+        price 400;
+    }
+    alchemist_stone{
+        loc 26;
+        tabindex 1;
+        id 4021017;
+        price 5000;
+    }
+    arrow_for_bow{
+        loc 27;
+        tabindex 1;
+        id 2060000;
+        price 1;
+    }
+    arrow_for_xbow{
+        loc 28;
+        tabindex 1;
+        id 2061000;
+        price 1;
+    }
+    arrow_for_bow_bundle{
+        loc 29;
+        tabindex 1;
+        quantity 2000;
+        id 2060000;
+        price 1400;
+    }
+    arrow_for_xbow_bundle{
+        loc 30;
+        tabindex 1;
+        quantity 2000;
+        id 2061000;
+        price 1400;
+    }
+}
+2540017{
+    alicia_skin{
+        loc 1;
+        tabindex 1;
+        id 2432465;
+        pointquestid 42003;
+        pointprice 300000;
+    }
+    alicia_skin2{
+        loc 2;
+        tabindex 1;
+        id 2432465;
+        price 300;
     }
 }

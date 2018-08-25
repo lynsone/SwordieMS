@@ -12,17 +12,14 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
@@ -100,11 +97,13 @@ public class Kanna extends Job {
             case VERITABLE_PANDEMONIUM:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
                 }
 
                 break;
@@ -147,22 +146,9 @@ public class Kanna extends Job {
                 getHakuFollow();
                 break;
             case KISHIN_SHOUKAN: //TODO
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(true);
+                chr.getField().setKishin(true);
 
-                Position leftKishin = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
-                Position rightKishin = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
-
-                summon.setKishinPositions(new Position[]{
-                        leftKishin,
-                        rightKishin
-                });
-
-                summon.setCurFoothold((short) chr.getField().findFootHoldBelow(leftKishin).getId());
-                summon.setPosition(leftKishin);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
-                field.spawnAddSummon(summon);
+                Summon.summonKishin(chr, slv);
                 break;
             case AKATUSKI_HERO_KANNA:
                 o1.nReason = skillID;
@@ -190,15 +176,17 @@ public class Kanna extends Job {
                 tsm.putCharacterStatValue(BlackHeartedCurse, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -229,7 +217,7 @@ public class Kanna extends Job {
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     break;
                 case BLOSSOMING_DAWN:
                     tsm.removeAllDebuffs();
@@ -274,7 +262,7 @@ public class Kanna extends Job {
     public void resetFireBarrier() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStat(FireBarrier, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     @Override
@@ -297,7 +285,7 @@ public class Kanna extends Job {
         o1.rOption = FOXFIRE;
         o1.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(FireBarrier, o1);
-        chr.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public static void hakuHakuBlessing(Char chr) {
@@ -311,7 +299,7 @@ public class Kanna extends Job {
         o1.tStart = (int) System.currentTimeMillis();
         o1.tTerm = si.getValue(time, slv);
         tsm.putCharacterStatValue(IndiePDD, o1);
-        chr.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public static void hakuBreathUnseen(Char chr) {
@@ -329,6 +317,6 @@ public class Kanna extends Job {
         o2.rOption = BREATH_UNSEEN;
         o2.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
-        chr.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 }

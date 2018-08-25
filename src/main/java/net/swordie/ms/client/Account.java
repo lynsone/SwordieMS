@@ -1,18 +1,26 @@
 package net.swordie.ms.client;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.world.shop.cashshop.CashItemInfo;
+import net.swordie.ms.util.FileTime;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -22,9 +30,13 @@ import java.util.Set;
 @Table(name = "accounts")
 public class Account {
 
+    @Transient
+    private static final Logger log = Logger.getLogger(Account.class);
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
+    private String password;
     @Column(name = "accountTypeMask")
     private int accountType;
     private int age;
@@ -45,9 +57,12 @@ public class Account {
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
+    @JoinColumn(name = "monsterCollectionID")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private MonsterCollection monsterCollection;
     // no eager -> sometimes get a "resultset closed" when fetching friends/damage skins
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "ownerAccID")
+    @JoinColumn(name = "owneraccid")
     private Set<Friend> friends;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
@@ -65,11 +80,17 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
+    @Enumerated(EnumType.ORDINAL)
+    private LoginState loginState = LoginState.Out;
+    @Convert(converter = FileTimeConverter.class)
+    private FileTime banExpireDate;
+    private String banReason;
 
-    public Account(String username, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
+    public Account(String username, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
                    byte gradeCode, String censoredNxLoginID, int characterSlots, long creationDate) {
         this.username = username;
+        this.password = password;
         this.id = accountId;
         this.pic = pic;
         this.accountType = accountType;
@@ -86,13 +107,14 @@ public class Account {
         this.censoredNxLoginID = censoredNxLoginID;
         this.characterSlots = characterSlots;
         this.creationDate = creationDate;
-        friends = new HashSet<>();
-        trunk = new Trunk((byte) 20);
+        this.monsterCollection = new MonsterCollection();
+        this.friends = new HashSet<>();
+        this.trunk = new Trunk((byte) 20);
         setManager();
     }
 
     public Account(String id, int accountId) {
-        this(id, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
+        this(id, null, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
                 0, false, (byte) 0, "", 16,
                 System.currentTimeMillis());
     }
@@ -100,8 +122,29 @@ public class Account {
     public Account(){
     }
 
+    public static Account getFromDBByName(String name) {
+        log.info(String.format("%s: Trying to get Account by name (%s).", LocalDateTime.now(), name));
+        // DAO?
+        Session session = DatabaseManager.getSession();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery("FROM Account acc WHERE acc.username = :name");
+        query.setParameter("name", name);
+        List l = ((org.hibernate.query.Query) query).list();
+        Account account = null;
+        if (l != null && l.size() > 0) {
+            account = (Account) l.get(0);
+        }
+        transaction.commit();
+        session.close();
+        return account;
+    }
+
     public String getUsername() {
         return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public int getId() {
@@ -178,6 +221,10 @@ public class Account {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public int getnBlockReason() {
@@ -454,5 +501,49 @@ public class Account {
 
     public void deductNXPrepaid(int prepaid) {
         addNXPrepaid(-prepaid);
+    }
+
+    public MonsterCollection getMonsterCollection() {
+        if (monsterCollection == null) {
+            monsterCollection = new MonsterCollection();
+        }
+        return monsterCollection;
+    }
+
+    public void setMonsterCollection(MonsterCollection monsterCollection) {
+        this.monsterCollection = monsterCollection;
+    }
+
+    public LoginState getLoginState() {
+        return loginState;
+    }
+
+    public void setLoginState(LoginState loginState) {
+        this.loginState = loginState;
+    }
+
+    public FileTime getBanExpireDate() {
+        return banExpireDate;
+    }
+
+    public void setBanExpireDate(FileTime banExpireDate) {
+        this.banExpireDate = banExpireDate;
+    }
+
+    public String getBanReason() {
+        return banReason;
+    }
+
+    public void setBanReason(String banReason) {
+        this.banReason = banReason;
+    }
+
+    public boolean hasCharacter(int charID) {
+        // doing a .contains on getCharacters() does not work, even if the hashcode is just a hash of the id
+        return getCharById(charID) != null;
+    }
+
+    public Char getCharById(int id) {
+        return getCharacters().stream().filter(charr -> charr.getId() == id).findAny().orElse(null);
     }
 }

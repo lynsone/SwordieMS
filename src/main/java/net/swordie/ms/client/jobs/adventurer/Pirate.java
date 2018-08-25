@@ -23,7 +23,6 @@ import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Util;
 
@@ -36,11 +35,6 @@ import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
-
-//TODO Scurvy Summons
-//TODO Roll of Dice
-//TODO Octo-Cannon
-//TODO CM - Barrel Roulette
 
 //nUnityPower is stack icon
 /**
@@ -88,7 +82,7 @@ public class Pirate extends Job {
     public static final int OCTO_CANNON = 5211014; //Summon
 
     public static final int QUICKDRAW = 5221021; //Buff
-    public static final int PARROTARGETTING = 5221015; //Special Attack //TODO  GuidedBullet TempStat (TwoState)
+    public static final int PARROTARGETTING = 5221015; //Special Attack
     public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
@@ -274,11 +268,13 @@ public class Pirate extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case SPEED_INFUSION:
-                TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.PartyBooster);
-                tsb.setNOption(-1);
-                tsb.setROption(skillID);
-                tsb.setExpireTerm(1);
-                tsm.putCharacterStatValue(PartyBooster, tsb.getOption());
+                PartyBooster pb = (PartyBooster) tsm.getTSBByTSIndex(TSIndex.PartyBooster);
+                pb.setDynamicTermSet(false);
+                pb.setNOption(-1);
+                pb.setROption(skillID);
+                pb.setCurrentTime((int) System.currentTimeMillis());
+                pb.setExpireTerm(1);
+                tsm.putCharacterStatValue(PartyBooster, pb.getOption());
                 break;
             case INFINITY_BLAST:
                 o1.nOption = si.getValue(x, slv);
@@ -361,7 +357,7 @@ public class Pirate extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Roulette, o1);
-                handleBarrelRoulette(roulette);
+                giveBarrelRouletteBuff(roulette);
                 break;
             case BOUNTY_CHASER:
                 o1.nOption = si.getValue(dexX, slv);
@@ -488,7 +484,7 @@ public class Pirate extends Job {
                 if(stimulatingConversationTimer != null && !stimulatingConversationTimer.isDone()) {
                     stimulatingConversationTimer.cancel(true);
                 }
-                handleStimulatingConversation();
+                incrementStimulatingConversation();
                 break;
             case BIONIC_MAXIMIZER:
             case WHALERS_POTION:
@@ -522,6 +518,13 @@ public class Pirate extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case OCTO_CANNON: //Stationary, Attacks
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -530,6 +533,13 @@ public class Pirate extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnAddSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case MONKEY_MALITIA: //Stationary, Attacks
                 int[] summons = new int[] {
@@ -543,6 +553,13 @@ public class Pirate extends Job {
                     summon.setMoveAction((byte) 0);
                     summon.setMoveAbility((byte) 0);
                     field.spawnSummon(summon);
+
+                    o1.nReason = skillID;
+                    o1.nValue = 1;
+                    o1.summon = summon;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieEmpty, o1);
                 }
                 break;
             case TURRET_DEPLOYMENT: //Stationary, Attacks
@@ -552,6 +569,13 @@ public class Pirate extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case ALL_ABOARD: //Moves, Attacks
                 tsm.removeStatsBySkill(AHOY_MATEYS);
@@ -570,12 +594,20 @@ public class Pirate extends Job {
                 summon.setPosition(position);
                 summon.setSummonTerm(20);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
-    private void handleQuickdraw(AttackInfo attackInfo, TemporaryStatManager tsm, Client c) {
+    private void activateQuickdraw(AttackInfo attackInfo, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
@@ -589,28 +621,30 @@ public class Pirate extends Job {
                 o.nOption = 1;
                 o.rOption = QUICKDRAW;
                 tsm.putCharacterStatValue(QuickDraw, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
             }
         }
     }
 
-    private void handleStunMastery(AttackInfo attackInfo) {
+    private void applyStunMasteryOnMob(AttackInfo attackInfo) {
         Option o1 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(STUN_MASTERY);
         int slv = si.getCurrentLevel();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(subProp, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                MobTemporaryStat mts = mob.getTemporaryStat();
-                o1.nOption = 1;
-                o1.rOption = STUN_MASTERY;
-                o1.tOption = 3;
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                if(!mob.isBoss()) {
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = STUN_MASTERY;
+                    o1.tOption = 3;
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                }
             }
         }
     }
 
-    private void handleViperEnergy(int increase) {
+    private void incrementViperEnergy(int increase) {
         if(chr.hasSkill(ENERGY_CHARGE)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
@@ -632,7 +666,7 @@ public class Pirate extends Job {
         }
     }
 
-    private void handleViperEnergyCostSkills(int skillID) {
+    private void applyViperEnergyCosts(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
         Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
@@ -688,7 +722,7 @@ public class Pirate extends Job {
         return icon;
     }
 
-    private void handlePirateRevenge() {
+    private void applyPirateRevenge() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Skill skill = getPirateRevenge();
         if (skill == null) {
@@ -709,7 +743,7 @@ public class Pirate extends Job {
             o2.tStart = (int) System.currentTimeMillis();
             o2.tTerm = si.getValue(time, slv);
             tsm.putCharacterStatValue(IndieDamR, o2);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -725,7 +759,7 @@ public class Pirate extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -746,12 +780,12 @@ public class Pirate extends Job {
         if (JobConstants.isBuccaneer(chr.getJob())) {
             if(hasHitMobs && attackInfo.skillId != 0) {
                 //Stun Mastery
-                handleStunMastery(attackInfo);
+                applyStunMasteryOnMob(attackInfo);
 
                 //Viper Energy
                 chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy before: "+ getViperEnergy());
-                handleViperEnergyCostSkills(attackInfo.skillId);
-                handleViperEnergy(getEnergyincrease());
+                applyViperEnergyCosts(attackInfo.skillId);
+                incrementViperEnergy(getEnergyincrease());
                 chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
 
             }
@@ -760,7 +794,7 @@ public class Pirate extends Job {
         if (JobConstants.isCorsair(chr.getJob())) {
             if(hasHitMobs) {
                 //Quickdraw
-                handleQuickdraw(attackInfo, tsm, c);
+                activateQuickdraw(attackInfo, tsm, c);
             }
         }
 
@@ -770,7 +804,7 @@ public class Pirate extends Job {
             }
         }
         //Barrel Roulette
-        handleBarrelRouletteDebuffs(attackInfo);
+        applyBarrelRouletteDebuffOnMob(attackInfo);
 
         if (JobConstants.isJett(chr.getJob())) {
             if(hasHitMobs) {
@@ -798,16 +832,47 @@ public class Pirate extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(hcProp, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(hcTime, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(hcTime, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
             case POWER_UNITY:
                 powerUnity();
+                break;
+            case PARROTARGETTING:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+
+                    GuidedBullet gb = (GuidedBullet) tsm.getTSBByTSIndex(TSIndex.GuidedBullet);
+
+                    if(gb.getMobID() != 0) {
+                        Mob gbMob = (Mob) chr.getField().getLifeByObjectID(gb.getMobID());
+                        if(gbMob != null) {
+                            MobTemporaryStat mobTemporaryStat = gbMob.getTemporaryStat();
+                            if(mobTemporaryStat.hasCurrentMobStatBySkillId(skillID)) {
+                                mobTemporaryStat.removeMobStat(MobStat.AddDamParty, false);
+                            }
+                        }
+                    }
+
+                    gb.setNOption(1);
+                    gb.setROption(skillID);
+                    gb.setMobID(mai.mobId);
+                    gb.setUserID(chr.getId());
+                    tsm.putCharacterStatValue(GuidedBullet, gb.getOption());
+                    tsm.sendSetStatPacket();
+                }
                 break;
         }
 
@@ -816,6 +881,7 @@ public class Pirate extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -852,7 +918,7 @@ public class Pirate extends Job {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         if(chr.hasSkill(PIRATE_REVENGE_BUCC) || chr.hasSkill(PIRATE_REVENGE_SAIR)) {
-            handlePirateRevenge();
+            applyPirateRevenge();
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -877,7 +943,7 @@ public class Pirate extends Job {
         return 0;
     }
 
-    private void handleBarrelRoulette(int roulette) {   //TODO
+    private void giveBarrelRouletteBuff(int roulette) {   //TODO
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         Skill skill = chr.getSkill(BARREL_ROULETTE);
@@ -892,7 +958,7 @@ public class Pirate extends Job {
                 o.rOption = 0;
                 o.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IncCriticalDamMin, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case 3: // Slow Debuff
                 //Handled, See Attack Handler
@@ -903,7 +969,7 @@ public class Pirate extends Job {
         }
     }
 
-    private void handleBarrelRouletteDebuffs(AttackInfo attackInfo) {   //TODO
+    private void applyBarrelRouletteDebuffOnMob(AttackInfo attackInfo) {   //TODO
         if(chr.hasSkill(BARREL_ROULETTE)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
@@ -931,6 +997,9 @@ public class Pirate extends Job {
     }
 
     private void corsairSummons() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o3 = new Option();
         List<Integer> set = new ArrayList<>();
         if(chr.hasSkill(ALL_ABOARD)) {
             set.add(5210015);
@@ -946,20 +1015,25 @@ public class Pirate extends Job {
         if(corsairSummonID != 0) {
             set.remove((Integer) corsairSummonID);
         }
-
-        int random = Util.getRandomFromList(set);
-        corsairSummonID = random;
-        Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
-        Field field = chr.getField();
-        summon.setFlyMob(false);
-        summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
-        field.spawnSummon(summon);
         if(chr.hasSkill(AHOY_MATEYS)) {
             Skill skill = chr.getSkill(AHOY_MATEYS);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            Option o1 = new Option();
+            int random = Util.getRandomFromList(set);
+            corsairSummonID = random;
+            Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
+            Field field = chr.getField();
+            summon.setFlyMob(false);
+            summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+            field.spawnSummon(summon);
+
+            o3.nReason = random;
+            o3.nValue = 1;
+            o3.summon = summon;
+            o3.tStart = (int) System.currentTimeMillis();
+            o3.tTerm = 120;
+            tsm.putCharacterStatValue(IndieEmpty, o3);
+
             switch (random) {
                 case 5210015:
                     o1.nOption = si.getValue(z, slv);
@@ -989,7 +1063,7 @@ public class Pirate extends Job {
                     tsm.putCharacterStatValue(DamageReduce, o1);
                     break;
             }
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
@@ -1013,10 +1087,10 @@ public class Pirate extends Job {
         o1.rOption = skill.getSkillId();
         o1.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(UnityOfPower, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    private void handleStimulatingConversation() {
+    private void incrementStimulatingConversation() {
         if(!chr.hasSkill(STIMULATING_CONVERSATION)) {
             return;
         }
@@ -1026,9 +1100,9 @@ public class Pirate extends Job {
             Skill skill = chr.getSkill(STIMULATING_CONVERSATION);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            handleViperEnergy(si.getValue(x, slv));
+            incrementViperEnergy(si.getValue(x, slv));
             chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
-            stimulatingConversationTimer = EventManager.addEvent(this::handleStimulatingConversation, 4, TimeUnit.SECONDS);
+            stimulatingConversationTimer = EventManager.addEvent(this::incrementStimulatingConversation, 4, TimeUnit.SECONDS);
         }
     }
 }

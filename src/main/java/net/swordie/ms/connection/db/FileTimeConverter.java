@@ -11,7 +11,7 @@ import javax.persistence.AttributeConverter;
 public class FileTimeConverter implements AttributeConverter<FileTime, Long> {
     @Override
     public Long convertToDatabaseColumn(FileTime fileTime) {
-        return fileTime.toLong();
+        return fileTime == null ? null : fileTime.toLong();
     }
 
     @Override

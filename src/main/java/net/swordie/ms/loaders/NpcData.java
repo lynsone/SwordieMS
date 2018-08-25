@@ -7,6 +7,7 @@ import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.util.dsl.SWEntity;
 import net.swordie.ms.util.dsl.SWParser;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
@@ -19,6 +20,7 @@ import java.util.*;
  * Created on 2/19/2018.
  */
 public class NpcData {
+	private static final Logger log = Logger.getLogger(NpcData.class);
 
 	private static Set<Npc> npcs = new HashSet<>();
 	private static Map<Integer, NpcShopDlg> shops = new HashMap<>();
@@ -34,7 +36,7 @@ public class NpcData {
 	private static void loadNpcsFromWz() {
 		String wzDir = String.format("%s/Npc.wz", ServerConstants.WZ_DIR);
 		for (File file : new File(wzDir).listFiles()) {
-			Npc npc = new Npc(-1);
+			Npc npc = new Npc(0);
 			Node node = XMLApi.getRoot(file);
 			Node mainNode = XMLApi.getAllChildren(node).get(0);
 			int id = Integer.parseInt(XMLApi.getNamedAttribute(mainNode, "name")
@@ -100,8 +102,7 @@ public class NpcData {
 
 	private static Npc loadNpcFromDat(File file) {
 		try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
-			Npc npc = new Npc(-1);
-			npc.setTemplateId(dis.readInt());
+			Npc npc = new Npc(dis.readInt());
 			npc.setMove(dis.readBoolean());
 			short size = dis.readShort();
 			for (int i = 0; i < size; i++) {
@@ -149,7 +150,7 @@ public class NpcData {
 				SWEntity itemEntity = itemEntry.getValue();
 				NpcShopItem nsi = new NpcShopItem();
 				for (Map.Entry<String, String> itemProps : itemEntity.getPropertyValues().entrySet()) {
-					String key = itemProps.getKey();
+					String key = itemProps.getKey().toLowerCase();
 					String value = itemProps.getValue();
 					switch (key) {
 						case "loc":
@@ -380,10 +381,13 @@ public class NpcData {
 	}
 
 	public static void generateDatFiles() {
+		log.info("Started generating npc data.");
+		long start = System.currentTimeMillis();
 		loadNpcsFromWz();
 		saveNpcsToDat(ServerConstants.DAT_DIR + "/npc");
 		loadShopsFromSw();
 		saveShopsToDat(ServerConstants.DAT_DIR + "/shop");
+		log.info(String.format("Completed generating npc data in %dms.", System.currentTimeMillis() - start));
 	}
 
 	public static Set<Npc> getBaseNpcs() {

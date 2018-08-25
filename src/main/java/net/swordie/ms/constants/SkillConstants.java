@@ -2,15 +2,27 @@ package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Zero;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
+import net.swordie.ms.client.jobs.adventurer.Kinesis;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.cygnus.DawnWarrior;
+import net.swordie.ms.client.jobs.legend.Aran;
+import net.swordie.ms.client.jobs.legend.Evan;
+import net.swordie.ms.client.jobs.legend.Phantom;
+import net.swordie.ms.client.jobs.nova.AngelicBuster;
+import net.swordie.ms.client.jobs.resistance.Demon;
 import net.swordie.ms.enums.SkillType;
 import net.swordie.ms.loaders.SkillData;
 import org.apache.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import static net.swordie.ms.client.jobs.legend.Aran.*;
-import static net.swordie.ms.client.jobs.legend.Mercedes.*;
+import static net.swordie.ms.client.jobs.legend.Mercedes.STAGGERING_STRIKES;
+import static net.swordie.ms.client.jobs.legend.Mercedes.STUNNING_STRIKES;
 import static net.swordie.ms.client.jobs.nova.AngelicBuster.*;
 import static net.swordie.ms.client.jobs.nova.Kaiser.*;
 import static net.swordie.ms.client.jobs.resistance.Blaster.*;
@@ -20,11 +32,17 @@ import static net.swordie.ms.client.jobs.resistance.Blaster.*;
  */
 public class SkillConstants {
 
+    public static final short PASSIVE_HYPER_MIN_LEVEL = 140;
+    public static final List<Short> ACTIVE_HYPER_LEVELS = Arrays.asList((short) 150, (short) 170, (short) 200);
+
     private static final Logger log = Logger.getLogger(SkillConstants.class);
 
     public static final short LINK_SKILL_1_LEVEL = 70;
     public static final short LINK_SKILL_2_LEVEL = 120;
     public static final short LINK_SKILL_3_LEVEL = 210;
+
+    public static final byte PASSIVE_HYPER_JOB_LEVEL = 6;
+    public static final byte ACTIVE_HYPER_JOB_LEVEL = 7;
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
@@ -36,7 +54,8 @@ public class SkillConstants {
             return false;
         }
         int job = getSkillRootFromSkill(skillId);
-        return isAddedSpDualAndZeroSkill(skillId) || JobConstants.getJobLevel((short) job) == 4 && !JobConstants.isZero((short) job);
+        return skillId != 42120024 && !JobConstants.isBeastTamer((short) job)
+                && (isAddedSpDualAndZeroSkill(skillId) || (JobConstants.getJobLevel((short) job) == 4 && !JobConstants.isZero((short) job)));
     }
 
     public static boolean isAddedSpDualAndZeroSkill(int skillId) {
@@ -74,31 +93,30 @@ public class SkillConstants {
     }
 
     private static boolean isFieldAttackObjSkill(int skillId) {
-        int v1; // eax
-
-        if (skillId <= 0)
+        if (skillId <= 0) {
             return false;
-        v1 = skillId / 10000;
-        if (skillId / 10000 == 8000)
-            v1 = skillId / 100;
-        return v1 == 9500;
+        }
+        int prefix = skillId / 10000;
+        if (skillId / 10000 == 8000) {
+            prefix = skillId / 100;
+        }
+        return prefix == 9500;
     }
 
     private static boolean isNoviceSkill(int skillId) {
-        int prefix; // eax
-
-        prefix = skillId / 10000;
-        if (skillId / 10000 == 8000)
+        int prefix  = skillId / 10000;
+        if (skillId / 10000 == 8000) {
             prefix = skillId / 100;
+        }
         return JobConstants.isBeginnerJob((short) prefix);
     }
 
     private static boolean isCommonSkill(int skillId) {
-        int prefix; // eax
-        prefix = skillId / 10000;
-        if (skillId / 10000 == 8000)
+        int prefix = skillId / 10000;
+        if (skillId / 10000 == 8000) {
             prefix = skillId / 100;
-        return prefix >= 800000 && prefix <= 800099;
+        }
+        return (prefix >= 800000 && prefix <= 800099) || prefix == 8001;
     }
 
     private static boolean isMakingSkillRecipe(int recipeId) {
@@ -112,52 +130,38 @@ public class SkillConstants {
     }
 
     public static boolean isIgnoreMasterLevel(int skillId) {
-        // is_ignore_master_level(int skillId)
-        if (skillId > 5321004) {
-            if (skillId > 23120011) {
-                if (skillId <= 35054478) {
-                    return skillId == 35054478 || skillId == 23120013 || skillId == 23121008;
-                }
-                if (skillId != 51120000) {
-                    return skillId == 80001913;
-                }
-            } else if (skillId != 23120011) {
-                if (skillId <= 21120021) {
-                    return skillId >= 21120020 || skillId == 5321006 || (skillId - 5321006 == 15799005) ||
-                            (skillId - 5321006 - 15799005 == 3);
-                }
-                if (skillId != 21121008) {
-                    return skillId == 22171069;
-                }
-            }
-            return true;
-        }
-        if (skillId == 5321004)
-            return true;
-        if (skillId > 4210012) {
-            if (skillId > 5220012) {
-                if (skillId != 5220014) {
-                    return skillId == 5320007;
-                }
-            } else if (skillId != 5220012) {
-                if (skillId > 4340012) {
-	                return skillId >= 5120011 && skillId <= 5120012;
-                } else if (skillId != 4340012) {
-                    return skillId == 4340010;
-                }
-            }
-            return true;
-        }
-        if (skillId == 4210012)
-            return true;
-        if (skillId > 2221009) {
-            if (skillId == 2321010 || skillId == 3210015)
+        switch (skillId) {
+            case 1120012:
+            case 1320011:
+            case 2121009:
+            case 2221009:
+            case 2321010:
+            case 3210015:
+            case 4110012:
+            case 4210012:
+            case 4340009:
+            case 5120011:
+            case 5120012:
+            case 5220012:
+            case 5220014:
+            case 5320007:
+            case 5321004:
+            case 5321006:
+            case 21120011:
+            case 21120014:
+            case 21120020:
+            case 21120021:
+            case 22171069:
+            case 23120011:
+            case 23120012:
+            case 23120013:
+            case 23121008:
+            case 33120010:
+            case 35120014:
+            case 80001913:
                 return true;
-            return skillId == 4110012;
-        } else {
-            if (skillId == 2221009 || skillId == 1120012 || skillId == 1320011)
-                return true;
-            return skillId == 2121009;
+            default:
+                return false;
         }
     }
 
@@ -295,7 +299,6 @@ public class SkillConstants {
             case 61001101:
             case 51121008:
             case 51111007:
-            case 36121001:
             case 51001004:
             case 36111010:
             case 36101009:
@@ -788,6 +791,9 @@ public class SkillConstants {
             case 23121052: // Wrath of Enlil
             case 23120013: // Staggering Strikes
             case 13101020: // Fairy Spiral
+
+            case 60011216: // AB Auto attack
+            case 65001100: // Star Bubble
                 return true;
             default:
                 return false;
@@ -1091,12 +1097,16 @@ public class SkillConstants {
         return skillID >= 80000400 && skillID <= 80000418;
     }
 
-    public static int getTotalSpByLevel(short level) {
+    public static int getTotalHyperStatSpByLevel(short level) {
         int sp = 0;
         for (int i = 140; i < level; i++) {
-            sp += 3 + ((i - 140) / 10);
+            sp += getHyperStatSpByLv(level);
         }
         return sp;
+    }
+
+    public static int getHyperStatSpByLv(short level) {
+        return 3 + ((level - 140) / 10);
     }
 
     public static int getNeededSpForHyperStatSkill(int lv) {
@@ -1151,5 +1161,84 @@ public class SkillConstants {
             default:
                 return 0;
         }
+    }
+
+    public static boolean isUnregisteredSkill(int skillID) {
+        int prefix = skillID / 10000;
+        if (prefix == 8000) {
+            prefix = skillID / 100;
+        }
+        return prefix != 9500 && skillID / 10000000 == 9;
+    }
+
+    public static boolean isHomeTeleportSkill(int skillId) {
+        switch (skillId) {
+            case Warrior.MAPLE_RETURN: // All Adventurers
+            case BeastTamer.HOMEWARD_BOUND:
+            case Kinesis.RETURN_KINESIS:
+            case DawnWarrior.IMPERIAL_RECALL: // All KoC
+            case Aran.RETURN_TO_RIEN:
+            case Evan.BACK_TO_NATURE:
+                // Mercedes
+                // Luminous
+            case Phantom.TO_THE_SKIES:
+                // Shade
+            case AngelicBuster.DAY_DREAMER:
+                // Kaiser
+            case Demon.SECRET_ASSEMBLY: // All Resistance
+                // Hayato
+                // Kanna
+            case Zero.TEMPLE_RECALL:
+
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isArmorPiercingSkill(int skillId) {
+        switch (skillId) {
+            case 3120017:
+            case 95001000:
+            case 3120008:
+            case 3100001:
+            case 3100010:
+                return false;
+
+            default:
+                return true;
+        }
+    }
+
+    public static int getBaseSpByLevel(short level) {
+        return level > 140 ? 0
+                : level > 130 ? 6
+                : level > 120 ? 5
+                : level > 110 ? 4
+                : 3;
+    }
+
+    public static int getTotalPassiveHyperSpByLevel(short level) {
+        return level < 140 ? 0 : (level - 130) / 10;
+    }
+
+    public static int getTotalActiveHyperSpByLevel(short level) {
+        return level < 140 ? 0 : level < 170 ? 1 : level < 200 ? 2 : 3;
+    }
+
+    public static boolean isGuildSkill(int skillID) {
+        int prefix = skillID / 10000;
+        if (prefix == 8000) {
+            prefix = skillID / 100;
+        }
+        return prefix == 9100;
+    }
+
+    public static boolean isGuildContentSkill(int skillID) {
+        return (skillID >= 91000007 && skillID <= 91000015) || (skillID >= 91001016 && skillID <= 91001021);
+    }
+
+    public static boolean isGuildNoblesseSkill(int skillID) {
+        return skillID >= 91001022 && skillID <= 91001024;
     }
 }

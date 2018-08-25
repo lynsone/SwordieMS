@@ -2,6 +2,9 @@ drop table if exists damageskinsavedatas;
 drop table if exists friends;
 drop table if exists linkskills;
 drop table if exists accounts;
+drop table if exists monster_collection_rewards;
+drop table if exists monster_collection_mobs;
+drop table if exists monster_collections;
 drop table if exists macroskills;
 drop table if exists macros;
 drop table if exists familiars;
@@ -40,6 +43,8 @@ drop table if exists questprogressmobrequirements;
 drop table if exists questlists;
 drop table if exists questmanagers;
 drop table if exists quests;
+drop table if exists bbs_replies;
+drop table if exists bbs_records;
 drop table if exists guildrequestors;
 drop table if exists gradenames;
 drop table if exists guildmembers;
@@ -177,7 +182,7 @@ create table equips (
     title varchar(255),
     equippeddate bigint,
     prevbonusexprate int,
-    ruc smallint,
+    tuc smallint,
     cuc smallint,
     istr smallint,
     idex smallint,
@@ -233,7 +238,6 @@ create table equips (
     notsale boolean,
     attackspeed int,
     price int,
-    tuc int,
     charmexp int,
     expireonlogout boolean,
     setitemid int,
@@ -242,6 +246,7 @@ create table equips (
     islot varchar(255),
     vslot varchar(255),
     fixedgrade int,
+    nopotential tinyint,
     primary key (itemid),
     foreign key (itemid) references items(id) on delete cascade,
     foreign key (equippeddate) references filetimes(id)
@@ -492,7 +497,32 @@ create table guilds (
     appliable boolean,
     joinsetting int,
     reqlevel int,
+    bbsNotice int,
+    battleSp int,
     primary key (id)
+);
+
+create table bbs_records (
+	id int not null auto_increment,
+    idforbbs int,
+    creatorid int,
+    subject varchar(255),
+    msg text,
+    creationdate bigint,
+    icon int,
+    guildid int,
+    primary key (id)
+);
+
+create table bbs_replies (
+	id int not null auto_increment,
+    idforreply int,
+    creatorid int,
+    creationdate bigint,
+    msg text,
+    recordid int,
+    primary key (id),
+    foreign key (recordid) references bbs_records(id) on delete cascade
 );
 
 create table characters (
@@ -511,6 +541,8 @@ create table characters (
     guild int,
     rewardPoints int,
     monsterbook int,
+    partyid int,
+    monsterparkcount tinyint default 0,
 	primary key (id),
     foreign key (avatardata) references avatardata(id),
     foreign key (equippedinventory) references inventories(id),
@@ -674,6 +706,26 @@ create table macroskills (
     foreign key (macroid) references macros(id) on delete cascade
 );
 
+create table monster_collections (
+	id int not null auto_increment,
+    primary key (id)
+);
+
+create table monster_collection_mobs (
+	id int not null auto_increment,
+    collectionid int,
+    mobid int,
+    primary key (id)
+);
+
+create table monster_collection_rewards (
+	region int,
+    session int,
+    groupid int,
+    collectionid int,
+    primary key (region, session, groupid)
+);
+
 create table accounts (
 	id int not null auto_increment,
 	username varchar(255),
@@ -700,9 +752,15 @@ create table accounts (
     nxCredit int default 0,
     maplePoints int default 0,
     nxPrepaid int default 0,
+    monstercollectionid int,
+    loginState int,
+    banExpireDate bigint,
+    banReason varchar(255),
 	primary key (id),
-    foreign key (trunkid) references trunks(id)
+    foreign key (trunkid) references trunks(id),
+    foreign key (monstercollectionid) references monster_collections(id)
 );
+
 
 create table linkskills (
 	id bigint not null auto_increment,
@@ -742,5 +800,6 @@ create table friends (
 
 
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '0', '111111', '40', '500000');
+insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '0', '111111', '40', '500000');
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '0', '111111', '40');
 insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '0', '111111', '40');

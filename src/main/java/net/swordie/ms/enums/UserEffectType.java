@@ -92,14 +92,4 @@ public enum UserEffectType {
     public static UserEffectType getTypeByVal(int val) {
         return Arrays.stream(values()).filter(uet -> uet.getVal() == val).findAny().orElse(null);
     }
-
-    public static void main(String[] args) {
-        for(UserEffectType uet : values()) {
-            int val = uet.getVal();
-            if (val >= 27) {
-                val += 2;
-            }
-            System.out.println(uet + "(" + val + "),");
-        }
-    }
 }

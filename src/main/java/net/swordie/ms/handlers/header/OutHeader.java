@@ -592,8 +592,8 @@ public enum OutHeader {
     CLOSE_UI(702),
     OPEN_UI_WITH_OPTION(703),
     OPEN_WEB_UI(704),
-    SET_DIRECTIMODE(705),
-    SET_IN_GAME_DIRECTIMODE(706),
+    SET_DIRECTION_MODE(705),
+    SET_IN_GAME_DIRECTION_MODE(706),
     SET_STAND_ALONE_MODE(707),
     HIRE_TUTOR(708),
     TUTOR_MSG(709),
@@ -1077,6 +1077,20 @@ public enum OutHeader {
     PET_CONSUME_ITEM_INIT(1426),
     PET_CONSUME_MP_ITEM(1427),
 
+    // CUIGoldHammer::OnPacket
+    GOLD_HAMMER_ITEM_UPGRADE_RESULT(1445),
+
+    // CFieldAttackObjPool::OnPacket
+    FIELD_ATTACK_CREATE(1460),
+    FIELD_ATTACK_REMOVE_BY_KEY(1461),
+    FIELD_ATTACK_REMOVE_LIST(1462),
+    FIELD_ATTACK_REMOVE_ALL(1463),
+    FIELD_ATTACK_SET_ATTACK(1465),
+    FIELD_ATTACK_RESULT_BOARD(1466),
+    FIELD_ATTACK_RESULT_GET_OFF(1467),
+    FIELD_ATTACK_PUSH_ACT(1468),
+    FIELD_ATTACK_INFO(1470),
+
     // CBattleRecordMan::OnPacket
     DOT_DAMAGE_INFO(1472),
     KILL_DAMAGE_INFO(1473),
@@ -1123,8 +1137,12 @@ public enum OutHeader {
                 NPC_MOVE,
                 DROP_LEAVE_FIELD,
                 TEMPORARY_STAT_RESET,
-                PET_MOVE
-
+                PET_MOVE,
+                NPC_ENTER_FIELD,
+                NPC_CHANGE_CONTROLLER,
+                MOB_ENTER_FIELD,
+                RESULT_INSTANCE_TABLE,
+                CREATE_OBTACLE
                 );
         return spam.contains(outHeader);
     }

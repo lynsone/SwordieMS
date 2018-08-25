@@ -26,8 +26,8 @@ public class Drop extends Life {
     private boolean byPet;
     private long mobExp;
 
-    public Drop(int objectId) {
-        super(objectId);
+    public Drop(int templateId) {
+        super(templateId);
     }
 
     public DropType getDropType() {
@@ -38,18 +38,18 @@ public class Drop extends Life {
         this.dropType = dropType;
     }
 
-    public Drop(int objectID, Item item) {
-        super(objectID);
+    public Drop(int templateId, Item item) {
+        super(templateId);
         this.item = item;
         dropType = DropType.ITEM;
-        expireTime = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
+        expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
-    public Drop(int objectId, int money) {
-        super(objectId);
+    public Drop(int templateId, int money) {
+        super(templateId);
         this.money = money;
         dropType = DropType.MONEY;
-        expireTime = FileTime.getFileTimeFromType(FileTime.Type.ZERO_TIME);
+        expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
     public Item getItem() {

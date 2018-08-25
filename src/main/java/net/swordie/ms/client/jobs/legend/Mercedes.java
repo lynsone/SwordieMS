@@ -13,7 +13,6 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
@@ -30,7 +29,6 @@ import net.swordie.ms.world.field.Field;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -96,9 +94,7 @@ public class Mercedes extends Job {
     };
 
     private int eleKnightSummonID = 1;
-    private int eleKnightAmount = 1;
     private int lastAttackSkill = 0;
-    private HashMap<Integer,Summon> eleKnightSummon = new HashMap<>();
     private List<Summon> summonList = new ArrayList<>();
 
     public Mercedes(Char chr) {
@@ -201,10 +197,11 @@ public class Mercedes extends Job {
                 summonEleKnights();
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
-    private void handleIgnisRoar(int skillID, TemporaryStatManager tsm, Client c, AttackInfo attackInfo) {
+    private void incrementIgnisRoarStackCount(int skillID, TemporaryStatManager tsm, Client c, AttackInfo attackInfo) {
         if (Arrays.asList(summonAttacks).contains(skillID)) {
             return;
         } else {
@@ -242,12 +239,12 @@ public class Mercedes extends Job {
                 o1.tOption = ignisRoarInfo.getValue(subTime, slv);
                 tsm.putCharacterStatValue(DamR, o1);
             }
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -265,7 +262,7 @@ public class Mercedes extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            handleIgnisRoar(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, attackInfo);
+            incrementIgnisRoarStackCount(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -277,11 +274,13 @@ public class Mercedes extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if(Util.succeedProp(proc)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = STUNNING_STRIKES;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = STUNNING_STRIKES;
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -291,11 +290,13 @@ public class Mercedes extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if(Util.succeedProp(procc)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = STAGGERING_STRIKES;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = STAGGERING_STRIKES;
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -358,6 +359,7 @@ public class Mercedes extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -430,31 +432,13 @@ public class Mercedes extends Job {
         return proc;
     }
 
-    private void summonKnights(byte slv) {
-        List<Integer> set = new ArrayList<>();
-        set.add(23111008);
-        set.add(23111009);
-        set.add(23111010);
-
-        if(eleKnightSummonID != 0) {
-            set.remove((Integer) eleKnightSummonID);
-        }
-
-        int random = Util.getRandomFromList(set);
-        eleKnightSummonID = random;
-        Summon summon = Summon.getSummonBy(chr, random, slv);
-        Field field = chr.getField();
-        summon.setFlyMob(true);
-        summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-        field.spawnSummon(summon);
-        eleKnightAmount++;
-    }
-
     private void summonEleKnights() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
         List<Integer> set = new ArrayList<>();
-        set.add(23111008);
-        set.add(23111009);
-        set.add(23111010);
+        set.add(ELEMENTAL_KNIGHTS_BLUE);
+        set.add(ELEMENTAL_KNIGHTS_RED);
+        set.add(ELEMENTAL_KNIGHTS_PURPLE);
 
         if(eleKnightSummonID != 0) {
             set.remove((Integer) eleKnightSummonID);
@@ -464,14 +448,27 @@ public class Mercedes extends Job {
         Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
         Field field = chr.getField();
         summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        summon.setSummonTerm(0);
 
         summonList.add(summon);
         if(summonList.size() > 2) {
             c.write(Summoned.summonedRemoved(summonList.get(0), LeaveType.ANIMATION));
+            tsm.removeStatsBySkill(summonList.get(0).getSkillID());
             summonList.remove(0);
         }
 
         field.spawnSummon(summon);
+
+        SkillInfo si = SkillData.getSkillInfoById(ELEMENTAL_KNIGHTS_BLUE);
+        byte slv = (byte) chr.getSkill(ELEMENTAL_KNIGHTS_BLUE).getCurrentLevel();
+
+        o1.nReason = random;
+        o1.nValue = 1;
+        o1.summon = summon;
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IndieEmpty, o1);
+        tsm.sendSetStatPacket();
     }
 
     @Override

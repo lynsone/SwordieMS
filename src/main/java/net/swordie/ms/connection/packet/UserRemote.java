@@ -2,18 +2,19 @@ package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AvatarModifiedMask;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.util.Position;
 
-import java.util.List;
 
 /**
  * Created on 2/3/2018.
@@ -28,19 +29,11 @@ public class UserRemote {
         return outPacket;
     }
 
-    public static OutPacket move(Char chr, int encodedGatherDuration, Position oldPos, Position oldVPos,
-                                 List<Movement> movements) {
+    public static OutPacket move(Char chr, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.REMOTE_MOVE);
 
         outPacket.encodeInt(chr.getId());
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }
@@ -230,6 +223,135 @@ public class UserRemote {
 
         outPacket.encodeInt(charID);
         outPacket.encodeInt(grenadeID);
+
+        return outPacket;
+    }
+
+    public static OutPacket receiveHP(Char chr) {
+        return receiveHP(chr.getId(), chr.getHP(), chr.getTotalStat(BaseStat.mhp));
+    }
+
+    public static OutPacket receiveHP(int charID, int curHP, int maxHP) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_RECEIVE_HP);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(curHP);
+        outPacket.encodeInt(maxHP);
+
+        return outPacket;
+    }
+
+    public static OutPacket hit(Char chr, HitInfo hitInfo) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_HIT);
+
+        outPacket.encodeInt(chr.getId());
+
+        outPacket.encodeByte(hitInfo.type);
+        outPacket.encodeInt(hitInfo.hpDamage);
+        outPacket.encodeByte(hitInfo.isCrit);
+        outPacket.encodeByte(hitInfo.hpDamage == 0);
+        if (hitInfo.type == -8) {
+            outPacket.encodeInt(hitInfo.skillID);
+            outPacket.encodeInt(0); // ignored
+            outPacket.encodeInt(hitInfo.otherUserID);
+        } else {
+            outPacket.encodeInt(hitInfo.templateID);
+            outPacket.encodeByte(hitInfo.action);
+            outPacket.encodeInt(hitInfo.mobID);
+
+            outPacket.encodeInt(0); // ignored
+            outPacket.encodeInt(hitInfo.reflectDamage);
+            outPacket.encodeByte(hitInfo.hpDamage == 0); // bGuard
+            if (hitInfo.reflectDamage > 0) {
+                outPacket.encodeByte(hitInfo.isGuard);
+                outPacket.encodeInt(hitInfo.mobID);
+
+                outPacket.encodeByte(hitInfo.hitAction);
+                outPacket.encodePosition(chr.getPosition());
+            }
+            outPacket.encodeByte(hitInfo.specialEffectSkill);
+            if ((hitInfo.specialEffectSkill & 1) != 0) {
+                outPacket.encodeInt(hitInfo.curStanceSkill);
+            }
+        }
+        outPacket.encodeInt(hitInfo.hpDamage);
+        if (hitInfo.hpDamage == -1) {
+           outPacket.encodeInt(hitInfo.userSkillID);
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket effect(int id, Effect effect) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_EFFECT);
+
+        outPacket.encodeInt(id);
+        effect.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket setDefaultWingItem(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_DEFAULT_WING_ITEM);
+
+        outPacket.encodeInt(chr.getId());
+        outPacket.encodeInt(chr.getAvatarData().getCharacterStat().getWingItem());
+
+        return outPacket;
+    }
+
+    public static OutPacket setTemporaryStat(Char chr, short delay) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_TEMPORARY_STAT);
+
+        outPacket.encodeInt(chr.getId());
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.encodeForRemote(outPacket, tsm.getNewStats());
+        outPacket.encodeShort(delay);
+
+        return outPacket;
+    }
+
+    public static OutPacket resetTemporaryStat(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_RESET_TEMPORARY_STAT);
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+        outPacket.encodeInt(chr.getId());
+        int[] mask = tsm.getMaskByCollection(tsm.getRemovedStats());
+        for (int maskElem : mask) {
+            outPacket.encodeInt(maskElem);
+        }
+        int poseType = 0;
+        if (tsm.hasStat(CharacterTemporaryStat.PoseType)) {
+            poseType = tsm.getOption(CharacterTemporaryStat.PoseType).bOption;
+        }
+        outPacket.encodeByte(poseType);
+        outPacket.encodeByte(false); // if true, show a ride vehicle effect. Why should this be called on reset tho?
+
+        return outPacket;
+    }
+
+    public static OutPacket remoteSetActivePortableChair(int chrId, int itemId, boolean textChair, String text) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_ACTIVE_PORTABLE_CHAIR);
+
+        outPacket.encodeInt(chrId);
+
+        outPacket.encodeInt(itemId);
+        outPacket.encodeInt(textChair ? 1 : 0);
+        if (textChair) {
+            outPacket.encodeString(text);
+        }
+
+        int towerChair = 0;
+        outPacket.encodeInt(towerChair);
+        if (towerChair > 0) {
+            outPacket.encodeInt(0);//TowerChairID
+        }
+
+
+        outPacket.encodeInt(0);//mesochaircount
+        outPacket.encodeInt(0);//unkGMS
+        outPacket.encodeInt(0);//unkGMS
 
         return outPacket;
     }

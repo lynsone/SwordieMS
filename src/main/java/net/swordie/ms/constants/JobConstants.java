@@ -20,6 +20,7 @@ public class JobConstants {
     public static boolean isBeastTamer(short job) {
         return job / 1000 == 11;
     }
+
     public static boolean isPinkBean(short job){
         return job == JobEnum.PINK_BEAN_0.getJobId() || job == JobEnum.PINK_BEAN_1.getJobId();
     }
@@ -611,24 +612,30 @@ public class JobConstants {
     }
 
     public static boolean isDemon(short jobId) {
-        return jobId / 100 == 31 || jobId == 3001 || jobId == 3002 || jobId / 100 == 36;
+        return jobId / 100 == 31 || jobId == 3001 || jobId / 100 == 36;
     }
 
     public static boolean isBeginnerJob(short jobId) {
-        if ( jobId > 6001 ) {
-            return jobId == 13000 || jobId == 14000;
+        switch (jobId) {
+            case 8001:
+            case 13000:
+            case 14000:
+            case 6000:
+            case 6001:
+            case 5000:
+            case 4001:
+            case 4002:
+            case 3001:
+            case 3002:
+            case 2001:
+            case 2002:
+            case 2003:
+            case 2004:
+            case 2005:
+                return true;
+            default:
+                return jobId % 1000 == 0 || jobId / 100 == 8000;
         }
-        if ( jobId >= 6000 )
-            return true;
-        if ( jobId > 3002 )
-        {
-            return jobId == 5000;
-        }
-        if ( jobId >= 3001 || jobId >= 2001 && jobId <= 2005 )
-            return true;
-        if ( (jobId % 1000 == 0) )
-            return true;
-        return jobId / 100 == 8000;
     }
 
     public static int getJobLevel(short jobId) {

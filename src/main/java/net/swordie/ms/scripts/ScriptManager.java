@@ -3,16 +3,22 @@ package net.swordie.ms.scripts;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
+import net.swordie.ms.enums.WeatherEffNoticeType;
+import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
+
+import java.util.Observer;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * Script manager {@code interface} used in all scripts.
  *
  * @author NullByte
  */
-public interface ScriptManager {
+public interface ScriptManager extends Observer {
 
 	/**
 	 * The character instance, can be null if none is implied.<br>
@@ -187,8 +193,8 @@ public interface ScriptManager {
 	void sendICQuiz(byte type, String text, String hintText, int time);
 
 	/**
-	 * Sends a chat window with the user's avatar as speaker.
-	 * Example: "sm.sendAskAvatar("What's up buddy boi", false, false)"
+	 * Sends a chat window with Avatar options (different hairstyles, eyestyles, things like that)
+	 * Example: "sm.sendAskAvatar("Choose your hair here!", false, false)"
 	 *
 	 * @param text
 	 * 		The text to display.
@@ -196,8 +202,10 @@ public interface ScriptManager {
 	 * 		Whether or not the avatar should be in its dress up form.
 	 * @param zeroBeta
 	 * 		Whether or not the avatar should be in its beta form.
+	 * @param options
+	 * 		A list of hair/eye options available to choose
 	 */
-	void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta);
+	void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options);
 
 
 
@@ -285,6 +293,29 @@ public interface ScriptManager {
 	 * 		The amount of Exp given
 	 */
 	void giveExpNoMsg(long expGiven);
+
+
+	/**
+	 * Changes a part of the characterlook of a Char.
+	 * @param look the id of the look (skin/eyes/hair) to change
+	 */
+	void changeCharacterLook(int look);
+
+	/**
+	 * Adds the specified skill to the Char.
+	 *
+	 * @param skillId
+	 * 		The id of the skill
+	 * @param slv
+	 * 		The skill level of the skill
+	 */
+	void giveSkill(int skillId, int slv);
+
+	/**
+	 * Adds a given amount of levels to the Char. Also includes adding AP/SP.
+	 * @param level the amount of levels to give.
+	 */
+	void addLevel(int level);
 
 
 
@@ -433,6 +464,47 @@ public interface ScriptManager {
 	 * @return The number of mobs in the selected {@link Field}.
 	 */
 	int numberMobsInField(int fieldID);
+
+	/**
+	 * Shows an Effect from the directory specified.
+	 *
+	 * @param dir
+	 * 		directory towards the effect
+	 * @param delay
+	 * 		delay (ms) till the effect gets displayed
+	 */
+	void showFieldEffect(String dir, int delay);
+
+	/**
+	 * Drops the specified Item on the field at the given position (x, y).
+	 *
+	 * @param itemId
+	 * 		The Id of the Item to be spawned.
+	 * @param x
+	 * 		The X-coordinate of the Position.
+	 * @param y
+	 * 		The Y-Coordinate of the Position.
+	 */
+	void dropItem(int itemId, int x, int y);
+
+
+	/**
+	 * Teleport the player to a Position in the current field.
+	 *
+	 * @param position
+	 * 		The position to be teleported to.
+	 */
+	void teleportInField(Position position);
+
+	/**
+	 * Teleport the player to a Position in the current field.
+	 *
+	 * @param x
+	 * 		The position's x coordinate to be teleported to.
+	 * @param y
+	 * 		The position's y coordinate to be teleported to.
+	 */
+	void teleportInField(int x, int y);
 
 
 
@@ -624,6 +696,34 @@ public interface ScriptManager {
 	 * Example: "sm.removeReactor()"
 	 */
 	void removeReactor();
+
+	/**
+	 * Spawns a reactor in {@link Char} field.
+	 *
+	 * @param reactorId
+	 * 		The Id of the Reactor spawned.
+	 * @param x
+	 * 		The X-coordinate of the Position.
+	 * @param y
+	 * 		The Y-coordinate of the Position.
+	 */
+	void spawnReactor(int reactorId, int x, int y);
+
+	/**
+	 * Returns whether or not there is a Reactor on the {@link Char} field.
+	 *
+	 * @return
+	 * 		Returns a boolean, true if there is 1 or more reactor(s) on the field.
+	 */
+	boolean hasReactors();
+
+	/**
+	 * Returns the quantity of Reactors in {@link Char} field.
+	 *
+	 * @return
+	 * 		Returns the quantity of reactors in the field.
+	 */
+	int getReactorQuantity();
 
 
 
@@ -938,6 +1038,26 @@ public interface ScriptManager {
 	 */
 	void setPartyDeathCount(int deathCount);
 
+	/**
+	 * Creates Obstacle Atoms randomly within the map from the top position, it dies when hitting a platform.
+	 *
+	 * @param oae
+	 * 		The Obstacle Atom, from this we grab the Atom Type and the Atom HitBox.
+	 * @param key
+	 * 		The Key is given when the Obstacle Atom Collides with something. as to allow a way to differentiate Atoms.
+	 * @param damage
+	 * 		The amount of damage done to the player in HP%.
+	 * @param velocity
+	 * 		The speed at which the Atom falls down.
+	 * @param angle
+	 * 		The angle at the Atom will travel
+	 * @param amount
+	 * 		The amount of atoms spawned in 1 method.
+	 * @param proc
+	 * 		The chance (out of 100) of creating an atom. As to randomise the creation.
+	 */
+	void createObstacleAtom(ObtacleAtomEnum oae, int key, int damage, int velocity, int angle, int amount, int proc);
+
 
 
 	// Character Temporary Stat-related methods ------------------------------------------------------------------------
@@ -1045,4 +1165,77 @@ public interface ScriptManager {
 	 * 		Returns a random integer below the number specified.
 	 */
 	int getRandomIntBelow(int upBound);
+
+	/**
+	 * Grabs an effect from the WzFiles and displays it.
+	 *
+	 * @param dir
+	 * 		The Directory to the Effect.
+	 *
+	 * @param placement
+	 * 		The place where the effect is, goes in types (0 is on character, 3 is on character's feet, 4 is middle of screen)
+	 *
+	 * @param delay
+	 * 		The delay in ms before the effect shows
+	 */
+	void showEffect(String dir, int placement, int delay);
+
+	/**
+	 * Gives the user a weather notice with specified variables
+	 *
+	 *
+	 * @param text
+	 * 		Text in the weather notice
+	 * @param type
+	 * 		Type of weather notice
+	 * @param duration
+	 * 		Duration the weather notice stays on the screen
+	 */
+	void showWeatherNotice(String text, WeatherEffNoticeType type, int duration);
+
+	/**
+	 * Calls a given method for the entire party. If a party member is offline, gets it from the database, and applies
+	 * the method on it, and saves it back to the database.
+	 * Note: the arguments of the
+	 *
+	 * @param methodName
+	 * 		The name of the method that should be invoked
+	 * @param args
+	 * 		The arguments of the method
+	 */
+	void invokeForParty(String methodName, Object... args);
+
+	/**
+	 * Invokes a method after a given delay.
+	 *
+	 * @param delay
+	 * 		The delay (in ms) after which the method should be invoked.
+	 * @param methodName
+	 * 		The name of the method that should be invoked
+	 * @param args
+	 * 		The arguments that the method should have
+	 * @return the resulting ScheduledFuture
+	 */
+	ScheduledFuture invokeAfterDelay(long delay, String methodName, Object...args);
+
+	/**
+	 * Invokes the method after a given delay, after which it will keep invoking the method each
+	 * <code>delayBetweenExecutions</code> milliseconds, until it has been invoked <code>executes</code> times.
+	 * If <code>executes</code> is 0, will continue until the end of the main process.
+	 *
+	 * @param initialDelay
+	 * 		The initial delay (in ms) after which the method should be invoked.
+	 * @param delayBetweenExecutions
+	 * 		The amount of time (in ms) between two invokes
+	 * @param executes
+	 * 		The amount of times that the method should be invoked (0 if no limit)
+	 * @param methodName
+	 * 		The name of the method that should be invoked*
+	 * @param args
+	 * 		The arguments that the method should have
+	 * @return
+	 * 		the resulting ScheduledFuture
+	 */
+	ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
+									  int executes, String methodName, Object...args);
 }

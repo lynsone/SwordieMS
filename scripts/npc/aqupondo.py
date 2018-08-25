@@ -5,5 +5,5 @@ def init():
 
 def action(response, answer):
     if response == 1:
-        sm.warp(865020300, 0)
+        sm.warpInstanceOut(865020300)
     sm.dispose()

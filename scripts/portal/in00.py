@@ -1,5 +1,7 @@
 status = -1
 
+from net.swordie.ms.constants import GameConstants
+
 if sm.getFieldID() == 951000000:
 	# Monster Park
 
@@ -12,15 +14,19 @@ if sm.getFieldID() == 951000000:
 	sm.setSpeakerID(9071004)
 
 	def init():
-		if sm.getParty() is None or sm.getPartySize() > 1:
-			sm.sendSayOkay("You must be in a party of 1 to enter Monster Park.")
+		if not sm.getParty() is None:
+			sm.sendSayOkay("Please leave your party to enter Monster Park.")
 			sm.dispose()
 		else:
 			if sm.getChr().getLevel() < minLv or sm.getChr().getLevel() > maxLv:
 				sm.sendSayOkay("You need to be between Level "+ str(minLv) +" and "+ str(maxLv) +" to enter.")
 				sm.dispose()
 			else:
-				string = "#eToday is #b[Day]#k.\r\nToday's Clear Count #b"+ str(0) +"/7#k (Per Maple account)\r\n\r\nYou have #b"+ str(2) +"#k free clears left for today.\r\n\r\n#n#b"
+				if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
+					colour = "#r"
+				else:
+					colour = "#b"
+				string = "#eToday is #b"+ sm.getDay() +"#k.\r\nToday's Clear Count "+ colour +""+ str(sm.getMonsterParkCount()) +"/"+ str(GameConstants.MAX_MONSTER_PARK_RUNS) +"#k (per Maple Character)\r\n\r\nYou have #b"+ str(2) +"#k free clears left for today.\r\n\r\n#n#b"
 				i = 0
 				while i < len(maps):
 					string += "#L"+ str(i) +"#"+ maps[i][0] +"#l\r\n"
@@ -32,97 +38,68 @@ if sm.getFieldID() == 951000000:
 		status += 1
 
 		if status == 0:
-			selection = answer
-			sm.sendAskYesNo("#eToday is #b[Day]#k.\r\n\r\n"
-							"Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
-						 	"Clearing the dungeion will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
-						 	"Would you like to enter the dungeon?")
+			if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
+				sm.sendSayOkay("I'm sorry, but you've used up all your clears for today.")
+				sm.dispose()
+			else:
+				selection = answer
+				sm.sendAskYesNo("#eToday is #b"+ sm.getDay() +"#k.\r\n\r\n"
+								"Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
+								"Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
+								"Would you like to enter the dungeon?")
+
 
 		elif status == 1:
 			if response == 1:
-				sm.warpPartyIn(maps[selection][1])
+				sm.warpInstanceIn(maps[selection][1])
+				sm.incrementMonsterParkCount()
+				sm.createQuestWithQRValue(GameConstants.MONSTER_PARK_EXP_QUEST, "0")
 			sm.dispose()
 
 
 
 
 else:
-	field = {
-		240010500 : 240010501,
-		103020000 : 103020100,
-		200000300 : 200000301,
-		103020310 : 103020320,
-		260010601 : 915020100,
-		915020100 : 915020101,
-		106030100 : 106030000, # Mush Castle Castle Entrace : Banquet Hall
-		106030200 : 106030300,
-		120041800 : 120041900,
-		106030501 : 106030600,
-		271030600 : 271040000,
-		863010300 : 863010310,
-		863010400 : 863010410,
-		863010220 : 863010230,
-		863010230 : 863010240,
-		863010210 : 863010240,
-		863010240 : 863010500,
-		863010500 : 863010600,
-		863010320 : 863010330,
-		863010420 : 863010430,
-		221023200 : 221023300,
-		223000000 : 223010000,
-		223010100 : 223010110,
-		200020001 : 915020000,
-		915020000 : 915020001,
-		915020200 : 915020201,
-		240010102 : 915020200,
-		200090510 : 270000100, # Dragon Flight 2nd Map : Temple of Time
-		310050100 : 931000200,
-		310060221 : 931000300,
-		222020000 : 922030400,
-		270000000 : 270010000,
-		270010100 : 270010110,
-		270010200 : 270010300,
-		270010300 : 270010400,
-		270010400 : 270010500,
-	}
-
-	portal = {
-		240010500 : 1,
-		103020000 : 2,
-		200000300 : 3,
-		103020310 : 2,
-		260010601 : 1,
-		915020100 : 1,
-		106030100 : 2,
-		106030200 : 2,
-		120041800 : 2,
-		106030501 : 2,
-		271030600 : 5,
-		863010300 : 1,
-		863010400 : 1,
-		863010220 : 1,
-		863010230 : 0,
-		863010210 : 0,
-		863010240 : 0,
-		863010500 : 0,
-		863010320 : 0,
-		863010420 : 0,
-		221023200 : 0,
-		223000000 : 1,
-		223010100 : 0,
-		200020001 : 2,
-		915020000 : 2,
-		915020200 : 2,
-		240010102 : 1,
-		200090510 : 2,
-		310050100 : 1,
-		310060221 : 0,
-		222020000 : 0,
-		270000000 : 3,
-		270010100 : 0,
-		270010200 : 0,
-		270010300 : 5,
-		270010400 : 0,
+	fields = {
+		# fromField : [toField, portal]
+		240010500 : [240010501, 1],
+		103020000 : [103020100, 2],
+		200000300 : [200000301, 3],
+		103020310 : [103020320, 2],
+		260010601 : [915020100, 1],
+		915020100 : [915020101, 1],
+		106030100 : [106030000, 2],# Mush Castle Castle Entrace : Banquet Hall
+		106030200 : [106030300, 2],
+		120041800 : [120041900, 2],
+		106030501 : [106030600, 2],
+		271030600 : [271040000, 5],
+		863010300 : [863010310, 1],
+		863010400 : [863010410, 1],
+		863010220 : [863010230, 1],
+		863010230 : [863010240, 0],
+		863010210 : [863010240, 0],
+		863010240 : [863010500, 0],
+		863010500 : [863010600, 0],
+		863010320 : [863010330, 0],
+		863010420 : [863010430, 0],
+		221023200 : [221023300, 0],
+		223000000 : [223010000, 1],
+		223010100 : [223010110, 0],
+		200020001 : [915020000, 2],
+		915020000 : [915020001, 2],
+		915020200 : [915020201, 2],
+		240010102 : [915020200, 1],
+		200090510 : [270000100, 2],# Dragon Flight 2nd Map : Temple of Time
+		310050100 : [931000200, 1],
+		310060221 : [931000300, 0],
+		222020000 : [922030400, 0],
+		270000000 : [270010000, 3],
+		270010100 : [270010110, 0],
+		270010200 : [270010300, 0],
+		270010300 : [270010400, 5],
+		270010400 : [270010500, 0],
+		931000001 : [931000010, 0],
+		252010300 : [252020000, 0],
 	}
 
 	def init():
@@ -197,13 +174,14 @@ else:
 
 
 		# Default script
-		else:
+		elif currentMap not in fields:
 			sm.chat("(Portal - in00) This script isn't coded for this map.")
+			warp = False
 			sm.dispose()
 
 		# Warp
 		if warp:
-			sm.warp(field[currentMap], portal[currentMap])
+			sm.warp(fields[currentMap][0], fields[currentMap][1])
 			sm.dispose()
 
 	def action(response, answer):

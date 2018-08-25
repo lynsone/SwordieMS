@@ -10,7 +10,7 @@ def action(response, answer):
     status += 1
 
     if status == 0:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("At least we made it. Now let's get out of here before the really tough fish come out.")
 
     elif status == 1:

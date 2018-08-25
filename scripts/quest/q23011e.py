@@ -5,8 +5,6 @@ def init():
     sm.setSpeakerID(2151001)
     if chr.getJob() == 3000 and chr.getLevel() >= 10:
         sm.setJob(3200)
-        sm.getChr().addStatAndSendPacket(Stat.ap, 45)
-        sm.getChr().addStatAndSendPacket(Stat.str, -45)
         sm.addSP(5)
         sm.completeQuest(23011)
         sm.giveItem(1382000, 1)

@@ -4,7 +4,6 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ScrollStat;
 import net.swordie.ms.enums.SpecStat;
-import net.swordie.ms.util.Util;
 
 import java.util.*;
 
@@ -42,6 +41,7 @@ public class ItemInfo {
     private Set<Integer> skills = new HashSet<>();
     private int moveTo;
     private Set<ItemRewardInfo> itemRewardInfos = new HashSet<>();
+    private int skillId;
 
     public void setItemId(int itemId) {
         this.itemId = itemId;
@@ -283,6 +283,14 @@ public class ItemInfo {
 
     public void setMoveTo(int moveTo) {
         this.moveTo = moveTo;
+    }
+
+    public int getSkillId() {
+        return skillId;
+    }
+
+    public void setSkillId(int skillId) {
+        this.skillId = skillId;
     }
 
     public void addItemReward(ItemRewardInfo iri) {

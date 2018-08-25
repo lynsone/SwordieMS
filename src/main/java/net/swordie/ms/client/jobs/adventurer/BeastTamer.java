@@ -3,30 +3,44 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.FieldData;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -44,6 +58,7 @@ public class BeastTamer extends Job {
     public static final int LIL_FORT = 112001007;
     public static final int FORT_FOLLOW_UP = 112000015;
     public static final int MAJESTIC_TRUMPET = 112001006;
+    public static final int BEAR_REBORN = 112000016;
     public static final int BEAR_ASSAULT = 112001009;
 
     //Snow Leopard Mode
@@ -64,14 +79,15 @@ public class BeastTamer extends Job {
 
     //Cat Mode
     public static final int MEOW_HEAL = 112121013;
-    public static final int PURR_ZONE = 112121005; //Tile
-    public static final int MEOW_CARD = 112121006; //Meow Card
+    public static final int PURR_ZONE = 112121005; // Special Skill
+    public static final int MEOW_CARD = 112121006; // Meow Card
     public static final int MEOW_CARD_RED = 112121007; //Red
     public static final int MEOW_CARD_BLUE = 112121008; //Blue
     public static final int MEOW_CARD_GREEN = 112121009; //Green
-    public static final int MEOW_CARD_GOLD = 112120009; //Gold
+    public static final int MEOW_CARD_GOLD = 112121020; //112120009;    //Gold
+    public static final int MEOW_CARD_GOLD_SKILL = 112120019; // If chr has the Gold Card Skill
     public static final int FIRE_KITTY = 112121004;
-    public static final int CATS_CRADLE_BLITZKRIEG = 112121057;
+    public static final int CATS_CRADLE_BLITZKRIEG = 112121057; // Special Skill (like PURR_ZONE)
     public static final int KITTY_BATTLE_SQUAD = 112120021;
     public static final int KITTY_TREATS = 112120023;
     public static final int STICKY_PAWS = 112120017;
@@ -79,6 +95,7 @@ public class BeastTamer extends Job {
     public static final int MOUSERS_INSIGHT = 112120022;
     public static final int FRIENDS_OF_ARBY = 112120016;
     public static final int MEOW_CURE = 112121010;
+    public static final int MEOW_REVIVE = 112121011;
 
 
     //Hyper
@@ -96,7 +113,6 @@ public class BeastTamer extends Job {
 
             BRO_ATTACK,
 
-            EKA_EXPRESS,
             FLY,
             HAWK_FLOCK,
             RAPTOR_TALONS,
@@ -109,6 +125,7 @@ public class BeastTamer extends Job {
             MEOW_CARD_BLUE,
             MEOW_CARD_GREEN,
             MEOW_CARD_GOLD,
+            MEOW_CARD_GOLD_SKILL,
             KITTY_BATTLE_SQUAD,
             KITTY_TREATS,
             STICKY_PAWS,
@@ -127,6 +144,56 @@ public class BeastTamer extends Job {
             HOMEWARD_BOUND,
     };
 
+    private static int[] bearBuffs = new int[] {
+            BEAR_ASSAULT,
+    };
+
+    private static int[] leopardBuffs = new int[] {
+            BRO_ATTACK,
+
+    };
+
+    private static int[] hawkBuffs = new int[] {
+            HAWK_FLOCK,
+            RAPTOR_TALONS,
+            BIRDS_EYE_VIEW,
+            RAZOR_BEAK,
+    };
+
+    private static int[] catBuffs = new int[] {
+            MEOW_CARD,
+            MEOW_CARD_RED,
+            MEOW_CARD_BLUE,
+            MEOW_CARD_GREEN,
+            MEOW_CARD_GOLD,
+            MEOW_CARD_GOLD_SKILL,
+            KITTY_BATTLE_SQUAD,
+            KITTY_TREATS,
+            STICKY_PAWS,
+            CAT_CLAWS,
+            MOUSERS_INSIGHT,
+            FRIENDS_OF_ARBY,
+    };
+
+    private int[] cards = new int[] {
+            MEOW_CARD_RED,
+            MEOW_CARD_GREEN,
+            MEOW_CARD_BLUE,
+            MEOW_CARD_GOLD
+    };
+
+    private static final HashMap<Integer, int[]> buffsByMode;
+    static {
+        buffsByMode = new HashMap<>();
+        buffsByMode.put(BEAR_MODE, bearBuffs);
+        buffsByMode.put(SNOW_LEOPARD_MODE, leopardBuffs);
+        buffsByMode.put(HAWK_MODE, hawkBuffs);
+        buffsByMode.put(CAT_MODE, catBuffs);
+    }
+
+    private int fortFollowUpAddAttack = 0;
+    private Summon defensiveFormation;
+
     public BeastTamer(Char chr) {
         super(chr);
         if (chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
@@ -140,7 +207,7 @@ public class BeastTamer extends Job {
         }
     }
 
-    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+    public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -161,6 +228,16 @@ public class BeastTamer extends Job {
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(BeastMode, o1);
+
+                for(int modeId : buffsByMode.keySet()) {
+                    if(skillID == modeId) {
+                        continue;
+                    }
+                    for(int buffId : buffsByMode.get(modeId)) {
+                        tsm.removeStatsBySkill(buffId);
+                        tsm.sendResetStatPacket();
+                    }
+                }
                 break;
             case MAPLE_GUARDIAN:
                 o1.nReason = skillID;
@@ -178,6 +255,13 @@ public class BeastTamer extends Job {
                 summon.setSummonTerm(si.getValue(time, slv));
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case BEAR_ASSAULT:
                 o1.nOption = si.getValue(x, slv);
@@ -213,14 +297,7 @@ public class BeastTamer extends Job {
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(NewFlying, o1);
 
-                if (chr.hasSkill(DEFENSIVE_FORMATION)) {
-                    summon = Summon.getSummonBy(c.getChr(), DEFENSIVE_FORMATION, slv);
-                    field = c.getChr().getField();
-                    summon.setFlyMob(true);
-                    summon.setSummonTerm(si.getValue(time, slv));
-                    summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
-                    field.spawnSummon(summon);  //TODO
-                }
+                //TODO  summon Defensive Formation
                 break;
             case HAWK_FLOCK:
                 o1.nOption = si.getValue(speed, slv);
@@ -277,7 +354,8 @@ public class BeastTamer extends Job {
 
             //Cat Mode
             case MEOW_CARD:
-                handleMeowCard(slv);    //TODO
+            case MEOW_CARD_GOLD_SKILL:
+                giveMeowCard(slv);
                 break;
 
             //Hyper
@@ -297,11 +375,12 @@ public class BeastTamer extends Job {
                 tsm.putCharacterStatValue(TeamRoar, o3);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        chr.dispose();
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -319,27 +398,27 @@ public class BeastTamer extends Job {
             skillID = skill.getSkillId();
         }
 
-        if (tsm.getOption(BeastMode).nOption == 2) { // Leopard
+        if (isLeopardMode()) { // Leopard
             if (hasHitMobs) {
-                if(skillID != 112101016) {
-                    handleBroAttack(skillID, slv, attackInfo);
+                if(skillID != BRO_ATTACK) {
+                    procBroAttack(attackInfo);
                 }
             }
         }
 
-        if (tsm.getOption(BeastMode).nOption == 3) { // Hawk
+        if (isHawkMode()) { // Hawk
             if (hasHitMobs) {
-                handleRaptorTalons(slv, attackInfo);
+                applyRaptorTalonsOnMob(attackInfo);
             }
         }
 
-        if (tsm.getOption(BeastMode).nOption == 4) { // Cat
-            handleKittyBattleSquad();
-            handleKittyTreats();
-            handleStickyPaws();
-            handleCatClaws();
-            handleMouserInsight();
-            handleFriendsOfArby();
+        if (isCatMode()) { // Cat
+            giveKittyBattleSquadBuff();
+            giveKittyTreatsBuff();
+            giveStickyPawsBuff();
+            giveCatClawsBuff();
+            giveMouserInsightBuff();
+            giveFriendsOfArbyBuff();
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -367,11 +446,15 @@ public class BeastTamer extends Job {
                 //int y = chr.getPosition().getY() + 41;
                 //aa.setPosition(new Position(x, y));
                 aa2.setPosition(chr.getPosition());
-                aa2.setRect(aa2.getPosition().getRectAround(tdi.getRects().get(0)));
+                Rect rect = tdi.getRects().get(0);
+                if(!chr.isLeft()) {
+                    rect = rect.moveRight();
+                }
+                aa2.setRect(aa2.getPosition().getRectAround(rect));
                 aa2.setDelay((short) 4);
                 chr.getField().spawnAffectedArea(aa2);
                 break;
-            case PURR_ZONE: //TODO
+            case PURR_ZONE: //TODO  isn't a AffectedArea, but a 'Special'
                 SkillInfo pz = SkillData.getSkillInfoById(PURR_ZONE);
                 AffectedArea aa3 = AffectedArea.getAffectedArea(chr, attackInfo);
                 aa3.setMobOrigin((byte) 0);
@@ -381,6 +464,16 @@ public class BeastTamer extends Job {
                 aa3.setSlv((byte)skill.getCurrentLevel());
                 chr.getField().spawnAffectedArea(aa3);
                 break;
+            case FIRE_KITTY:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(SkillStat.x, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                }
+                break;
         }
 
         super.handleAttack(c, attackInfo);
@@ -388,6 +481,7 @@ public class BeastTamer extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
@@ -405,11 +499,49 @@ public class BeastTamer extends Job {
                     Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
                     chr.warp(toField);
                     break;
+                case EKA_EXPRESS: //TODO Eka Express Skill
+                    Field townField = FieldData.getFieldById(chr.getField().getReturnMap());
+                    int x = townField.getPortalByName("tp").getX();
+                    int y = townField.getPortalByName("tp").getY();
+                    Position townPosition = new Position(x, y); // Grabs the Portal Co-ordinates for the TownPortalPoint
+                    int duration = si.getValue(time, slv);
+                    if(chr.getTownPortal() != null) {
+                        TownPortal townPortal = chr.getTownPortal();
+                        townPortal.despawnTownPortal();
+                    }
+                    TownPortal townPortal = new TownPortal(chr, townPosition, chr.getPosition(), chr.getField().getReturnMap(), chr.getFieldID(), skillID, duration);
+                    townPortal.spawnTownPortal();
+                    chr.dispose();
+                    break;
                 case MEOW_CURE:
                     tsm.removeAllDebuffs();
                     break;
                 case MEOW_HEAL:
                     chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(hp, slv))));
+                    break;
+                case MEOW_REVIVE:
+                    Party party = chr.getParty();
+                    if(party != null) {
+                        Field field = chr.getField();
+                        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                        if(!chr.isLeft()) {
+                            rect = rect.moveRight();
+                        }
+                        List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
+                                filter(pml -> pml.getChr().getId() != chr.getId() &&
+                                        pml.getChr().getHP() <= 0).
+                                collect(Collectors.toList());
+
+                        if (eligblePartyMemberList.size() > 0) {
+                            Char randomPartyChr = Util.getRandomFromList(eligblePartyMemberList).getChr();
+                            TemporaryStatManager partyTSM = randomPartyChr.getTemporaryStatManager();
+                            randomPartyChr.heal(randomPartyChr.getMaxHP());
+                            partyTSM.putCharacterStatValue(NotDamaged, o1);
+                            partyTSM.sendSetStatPacket();
+                            randomPartyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                            randomPartyChr.getField().broadcastPacket(UserRemote.effect(randomPartyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
+                        }
+                    }
                     break;
             }
         }
@@ -428,15 +560,27 @@ public class BeastTamer extends Job {
 
     @Override
     public int getFinalAttackSkill() {
+        fortFollowUpAddAttack++;
+        if (isBearMode() && chr.hasSkill(FORT_FOLLOW_UP) && fortFollowUpAddAttack >= 4) {
+            fortFollowUpAddAttack = 0;
+            return FORT_FOLLOW_UP;
+        }
+
         return 0;
     }
 
-    public void handleBroAttack(int skillID, byte slv, AttackInfo attackInfo) {
+    private void procBroAttack(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
         if(tsm.getOptByCTSAndSkill(ACC, BRO_ATTACK) != null) {
             Summon summon;
             Field field;
+            Skill skill = chr.getSkill(BRO_ATTACK);
+            if(!chr.hasSkill(BRO_ATTACK)) {
+                return;
+            }
             SkillInfo si = SkillData.getSkillInfoById(BRO_ATTACK);
+            byte slv = (byte) skill.getCurrentLevel();
             int summonProp = si.getValue(prop, slv);
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
@@ -448,17 +592,33 @@ public class BeastTamer extends Job {
                     summon.setSummonTerm(si.getValue(x, slv));
                     summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
                     field.spawnAddSummon(summon);
+
+                    o1.nReason = skill.getSkillId();
+                    o1.nValue = 1;
+                    o1.summon = summon;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieEmpty, o1);
+                    tsm.sendSetStatPacket();
                 }
             }
+
         }
     }
 
-    public void handleRaptorTalons(byte slv, AttackInfo attackInfo) {
+    private void applyRaptorTalonsOnMob(AttackInfo attackInfo) {
         Option o1 = new Option();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        SkillInfo si = SkillData.getSkillInfoById(RAPTOR_TALONS);
+        if(!chr.hasSkill(RAPTOR_TALONS)) {
+            return;
+        }
+        Skill skill = chr.getSkill(RAPTOR_TALONS);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if(mob == null) {
+                return;
+            }
             MobTemporaryStat mts = mob.getTemporaryStat();
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 mts.createAndAddBurnedInfo(chr, skill, 1);
@@ -466,96 +626,89 @@ public class BeastTamer extends Job {
         }
     }
 
-    public void handleMeowCard(byte slv) {
+    private void giveMeowCard(byte slv) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(!chr.hasSkill(MEOW_CARD) && !chr.hasSkill(MEOW_CARD_GOLD_SKILL)) {
+            return;
+        }
         SkillInfo mc = SkillData.getSkillInfoById(MEOW_CARD);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
         Option o4 = new Option();
 
-        switch (getMeowCardChance()) {
+        int randomMeowCard = getRandomMeowCard();
+
+        resetPrevMeowCards();
+        switch (randomMeowCard) {
             case MEOW_CARD_RED:
-                o1.nReason = MEOW_CARD_RED;
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
                 break;
             case MEOW_CARD_GREEN:
-                o1.nReason = MEOW_CARD_GREEN;
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(indieBooster, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
-                o1.nReason = MEOW_CARD_GREEN;
-                o1.nValue = mc.getValue(indieSpeed, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = mc.getValue(time, slv);
+                o2.nReason = randomMeowCard;
+                o2.nValue = mc.getValue(indieSpeed, slv);
+                o2.tStart = (int) System.currentTimeMillis();
+                o2.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieSpeed, o1);
                 break;
             case MEOW_CARD_BLUE:
-                o1.nReason = MEOW_CARD_BLUE;
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(pdd, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePDD, o1);
                 break;
             case MEOW_CARD_GOLD:
-                o1.nReason = MEOW_CARD_GOLD;
+                o1.nReason = randomMeowCard;
                 o1.nValue = mc.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o1);
-                o2.nReason = MEOW_CARD_GOLD;
+                o2.nReason = randomMeowCard;
                 o2.nValue = mc.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o2);
-                o3.nReason = MEOW_CARD_GOLD;
+                o3.nReason = randomMeowCard;
                 o3.nValue = mc.getValue(indieSpeed, slv);
                 o3.tStart = (int) System.currentTimeMillis();
                 o3.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieSpeed, o3);
-                o4.nReason = MEOW_CARD_GOLD;
+                o4.nReason = randomMeowCard;
                 o4.nValue = mc.getValue(pdd, slv);
                 o4.tStart = (int) System.currentTimeMillis();
                 o4.tTerm = mc.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePDD, o4);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    public int getMeowCardChance() {
-        int rng = new Random().nextInt(100);
-        if (chr.hasSkill(MEOW_CARD_GOLD)) {
+    private int getRandomMeowCard() {
+        int rng = new Random().nextInt((chr.hasSkill(MEOW_CARD_GOLD_SKILL) ? cards.length : cards.length - 1));
+        return cards[rng];
+    }
 
-            if (rng > 0 && rng <= 25) {
-                return MEOW_CARD_RED;
-            } else if (rng > 25 && rng <= 50) {
-                return MEOW_CARD_GREEN;
-            } else if (rng > 50 && rng <= 75) {
-                return MEOW_CARD_BLUE;
-            } else if (rng > 75 && rng <= 100) {
-                return MEOW_CARD_GOLD;
+    private void resetPrevMeowCards() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        for(int cardBuffId : cards) {
+            if(tsm.hasStatBySkillId(cardBuffId)) {
+                tsm.removeStatsBySkill(cardBuffId);
+                tsm.sendResetStatPacket();
             }
-
-        } else {
-
-            if (rng > 0 && rng <= 33) {
-                return MEOW_CARD_RED;
-            } else if (rng > 33 && rng <= 66) {
-                return MEOW_CARD_GREEN;
-            } else if (rng > 66 && rng <= 100) {
-                return MEOW_CARD_BLUE;
-            }
-
         }
-        return 0;
     }
 
-    public void handleKittyBattleSquad() {
+    private void giveKittyBattleSquadBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -567,10 +720,10 @@ public class BeastTamer extends Job {
         o1.tTerm = 0;
         tsm.putCharacterStatValue(IndiePAD, o1);
         tsm.putCharacterStatValue(IndieMAD, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    public void handleKittyTreats() {
+    private void giveKittyTreatsBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -586,10 +739,10 @@ public class BeastTamer extends Job {
         o2.tStart = (int) System.currentTimeMillis();
         o2.tTerm = 0;
         tsm.putCharacterStatValue(IndieMMP, o2);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    public void handleStickyPaws() {
+    private void giveStickyPawsBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -599,10 +752,10 @@ public class BeastTamer extends Job {
         o1.rOption = STICKY_PAWS;
         o1.tOption = 0;
         tsm.putCharacterStatValue(DropRate, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    public void handleCatClaws() {
+    private void giveCatClawsBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -616,10 +769,10 @@ public class BeastTamer extends Job {
         o2.rOption = CAT_CLAWS;
         o2.tOption = 0;
         tsm.putCharacterStatValue(IncCriticalDamMin, o2);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    public void handleMouserInsight() {
+    private void giveMouserInsightBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -629,10 +782,10 @@ public class BeastTamer extends Job {
         o1.rOption = MOUSERS_INSIGHT;
         o1.tOption = 0;
         tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    public void handleFriendsOfArby() {
+    private void giveFriendsOfArbyBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -642,8 +795,61 @@ public class BeastTamer extends Job {
         o1.rOption = FRIENDS_OF_ARBY;
         o1.tOption = 0;
         tsm.putCharacterStatValue(HolySymbol, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
+    private Summon defensiveFormationSummon() {
+        Skill skill = chr.getSkill(DEFENSIVE_FORMATION);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        defensiveFormation = Summon.getSummonBy(c.getChr(), DEFENSIVE_FORMATION, slv);
+        defensiveFormation.setFlyMob(true);
+        defensiveFormation.setSummonTerm(si.getValue(time, slv));
+        defensiveFormation.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal()); // Different MoveAbility?
+        return defensiveFormation;
+    }
 
+    public static void beastTamerRegroup(Char chr) { //Handled in WorldHandler
+        Party party = chr.getParty();
+        if(party != null) {
+            for(PartyMember pm : party.getOnlineMembers()) {
+                Char pmChr = pm.getChr();
+                if(pmChr.getId() != chr.getId() && pmChr.getClient().getChannel() == chr.getClient().getChannel() && pmChr.getLevel() > 9) {
+                    pmChr.warp(chr.getField());
+                    pmChr.write(CField.teleport(chr.getPosition(), pmChr));
+                }
+                pmChr.dispose();
+            }
+        }
+    }
+
+    public static void reviveByBearReborn(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(BEAR_REBORN);
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Bear Reborn.");
+        chr.write(User.effect(Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
+    }
+
+    private boolean isBearMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 1;
+    }
+
+    private boolean isLeopardMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 2;
+    }
+
+    private boolean isHawkMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 3;
+    }
+
+    private boolean isCatMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 4;
+    }
 }

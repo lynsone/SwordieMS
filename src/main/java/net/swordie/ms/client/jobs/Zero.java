@@ -12,6 +12,9 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.life.AffectedArea;
@@ -25,7 +28,6 @@ import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
@@ -297,11 +299,12 @@ public class Zero extends Job {
                 break;
 
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -321,19 +324,19 @@ public class Zero extends Job {
 
         if(getAlphaOrBetaSkill(skillID) == 1) {
             if(hasHitMobs) {
-                handleDoubleTimeAlpha(skillID);
+                incrementDoubleTimeAlpha(skillID);
             }
 
-            handleDivineLeer(attackInfo, skillID);
+            applyDivineLeerOnMob(attackInfo, skillID);
         }
 
         if(getAlphaOrBetaSkill(skillID) == 2) {
             if(hasHitMobs) {
-                handleDoubleTimeBeta(skillID);
+                incrementDoubleTimeBeta(skillID);
             }
 
-            handleCriticalBind(attackInfo, skillID);
-            handleArmorSplit(attackInfo, skillID);
+            applyCriticalBindOnMob(attackInfo, skillID);
+            applyArmorSplitOnMob(attackInfo, skillID);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -370,6 +373,7 @@ public class Zero extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;
@@ -427,9 +431,9 @@ public class Zero extends Job {
         if(tsm.hasStat(ImmuneBarrier)) {
             Option o = tsm.getOption(ImmuneBarrier);
             int maxSoakDamage = o.nOption;
-            int newDamage = hitInfo.HPDamage - maxSoakDamage < 0 ? 0 : hitInfo.HPDamage - maxSoakDamage;
-            o.nOption = maxSoakDamage - (hitInfo.HPDamage - newDamage); // update soak value
-            hitInfo.HPDamage = newDamage;
+            int newDamage = hitInfo.hpDamage - maxSoakDamage < 0 ? 0 : hitInfo.hpDamage - maxSoakDamage;
+            o.nOption = maxSoakDamage - (hitInfo.hpDamage - newDamage); // update soak value
+            hitInfo.hpDamage = newDamage;
             o.tOption = si.getValue(time, slv); //added duration
             tsm.putCharacterStatValue(ImmuneBarrier, o);
             tsm.sendSetStatPacket();
@@ -451,7 +455,7 @@ public class Zero extends Job {
         return chr.getZeroInfo().isZeroBetaState();
     }
 
-    private void handleDivineLeer(AttackInfo ai, int skillID) {
+    private void applyDivineLeerOnMob(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(DIVINE_LEER);
         if (skill == null) {
             return;
@@ -466,7 +470,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleCriticalBind(AttackInfo ai, int skillID) {
+    private void applyCriticalBindOnMob(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(CRITICAL_BIND);
         if (skill == null) {
             return;
@@ -481,9 +485,8 @@ public class Zero extends Job {
                 Option o1 = new Option();
                 o.nOption = 1;
                 o.rOption = CRITICAL_BIND;
-                o.tOption = 4;//    si.getValue(time, slv);
+                o.tOption = 4;
                 mts.addStatOptionsAndBroadcast(MobStat.Freeze, o);
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
                 o1.nOption = si.getValue(SkillStat.x, slv);
                 o1.rOption = skillID;
                 o1.tOption = 4;//   si.getValue(time, slv);
@@ -492,7 +495,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleArmorSplit(AttackInfo ai, int skillID) {
+    private void applyArmorSplitOnMob(AttackInfo ai, int skillID) {
         Skill skill = chr.getSkill(ARMOR_SPLIT);
         if (skill == null) {
             return;
@@ -520,7 +523,7 @@ public class Zero extends Job {
         }
     }
 
-    private void handleDoubleTimeAlpha(int skillID) {
+    private void incrementDoubleTimeAlpha(int skillID) {
         if (chr.hasSkill(DOUBLE_TIME)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
@@ -541,11 +544,11 @@ public class Zero extends Job {
             o.rOption = DOUBLE_TIME_ALPHA;
             o.tOption = 20;
             tsm.putCharacterStatValue(TimeFastABuff, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
-    private void handleDoubleTimeBeta(int skillID) {
+    private void incrementDoubleTimeBeta(int skillID) {
         if (chr.hasSkill(DOUBLE_TIME)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
@@ -566,8 +569,17 @@ public class Zero extends Job {
             o.rOption = DOUBLE_TIME_BETA;
             o.tOption = 20;
             tsm.putCharacterStatValue(TimeFastBBuff, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
+    }
+
+    public static void reviveByRewind(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(REWIND);
+        tsm.sendResetStatPacket();
+        chr.write(User.effect(Effect.skillSpecial(REWIND)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(REWIND)));
     }
 
     @Override

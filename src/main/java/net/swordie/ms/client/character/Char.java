@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.LinkSkill;
@@ -8,10 +9,7 @@ import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.cards.MonsterBookInfo;
 import net.swordie.ms.client.character.damage.DamageCalc;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
-import net.swordie.ms.client.character.info.ExpIncreaseInfo;
-import net.swordie.ms.client.character.info.FarmUserInfo;
-import net.swordie.ms.client.character.info.FreezeHotEventInfo;
-import net.swordie.ms.client.character.info.ZeroInfo;
+import net.swordie.ms.client.character.info.*;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
@@ -31,12 +29,12 @@ import net.swordie.ms.client.friend.FriendRecord;
 import net.swordie.ms.client.friend.FriendshipRingRecord;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.updates.GuildUpdate;
-import net.swordie.ms.client.guild.updates.GuildUpdateMemberLogin;
+import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
@@ -46,23 +44,32 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ChatHandler;
+import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Familiar;
+import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.scripts.ScriptManagerImpl;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.world.Channel;
+import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -70,8 +77,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.FullSoulMP;
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.SoulMP;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
@@ -134,7 +140,7 @@ public class Char {
 	private FuncKeyMap funcKeyMap;
 
 	@JoinColumn(name = "charId")
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<Skill> skills;
 
 	@JoinColumn(name = "ownerID")
@@ -175,6 +181,11 @@ public class Char {
 	@OrderColumn(name = "ord")
 	private int[] hyperrockfields = new int[13];
 
+	@Column(name = "monsterparkcount")
+	private byte monsterParkCount;
+
+	private int partyID = 0; // Just for DB purposes
+
 	@Transient
 	private CharacterPotentialMan potentialMan;
 
@@ -208,8 +219,6 @@ public class Char {
 	private TemporaryStatManager temporaryStatManager;
 	@Transient
 	private Job jobHandler;
-	@Transient
-	private boolean left;
 	@Transient
 	private MarriageRecord marriageRecord;
 	@Transient
@@ -331,6 +340,14 @@ public class Char {
 	// TODO Move this to CharacterStat?
 	@Transient
 	private Map<BaseStat, Long> baseStats = new HashMap<>();
+	@Transient
+	private boolean changingChannel;
+	@Transient
+	private TownPortal townPortal;
+	@Transient
+	private TradeRoom tradeRoom;
+	@Transient
+	private boolean battleRecordOn;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -349,7 +366,7 @@ public class Char {
 		List<Integer> hairEquips = new ArrayList<>();
 		for (int itemId : items) {
 			Equip equip = ItemData.getEquipDeepCopyFromID(itemId, false);
-			if (equip != null) {
+			if (equip != null && ItemConstants.isEquip(itemId)) {
 				hairEquips.add(itemId);
 				if ("Wp".equals(equip.getiSlot())) {
 					if (!equip.isCash()) {
@@ -358,8 +375,6 @@ public class Char {
 						avatarLook.setWeaponStickerId(itemId);
 					}
 				}
-//                equip.setBagIndex(-ItemConstants.getBodyPartFromItem(equip.getItemId(), getAvatarData().getAvatarLook().getGender()));
-//                addItemToInventory(InvType.EQUIPPED, equip);
 			}
 		}
 		avatarLook.setHairEquips(hairEquips);
@@ -402,6 +417,8 @@ public class Char {
 
 				999999999,
 		};
+		monsterParkCount = 0;
+		potentials = new HashSet<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
@@ -410,6 +427,23 @@ public class Char {
 
 	public static Char getFromDBById(int userId) {
 		return (Char) DatabaseManager.getObjFromDB(Char.class, userId);
+	}
+
+	public static Char getFromDBByName(String name) {
+		log.info(String.format("%s: Trying to get Char by name (%s).", LocalDateTime.now(), name));
+		// DAO?
+		Session session = DatabaseManager.getSession();
+		Transaction transaction = session.beginTransaction();
+		Query query = session.createQuery("FROM Char chr WHERE chr.avatarData.characterStat.name = :name");
+		query.setParameter("name", name);
+		List l = ((org.hibernate.query.Query) query).list();
+		Char chr = null;
+		if (l != null && l.size() > 0) {
+			chr = (Char) l.get(0);
+		}
+		transaction.commit();
+		session.close();
+		return chr;
 	}
 
 	public AvatarData getAvatarData() {
@@ -454,14 +488,10 @@ public class Char {
 				write(WvsContext.inventoryOperation(true, false,
 						UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
 			} else {
-				item.setInventoryId(inventory.getId());
 				if (!hasCorrectBagIndex) {
 					item.setBagIndex(inventory.getFirstOpenSlot());
 				}
 				inventory.addItem(item);
-				if (item.getId() == 0) {
-					DatabaseManager.saveToDB(item);
-				}
 				write(WvsContext.inventoryOperation(true, false,
 						ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
 			}
@@ -833,7 +863,7 @@ public class Char {
 				for (Skill skill : getSkills()) {
 					outPacket.encodeInt(skill.getSkillId());
 					outPacket.encodeInt(skill.getCurrentLevel());
-					outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+					outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
 					if (SkillConstants.isSkillNeedMasterLevel(skill.getSkillId())) {
 						outPacket.encodeInt(skill.getMasterLevel());
 					}
@@ -841,7 +871,7 @@ public class Char {
 				for (LinkSkill linkSkill : linkSkills) {
 					outPacket.encodeInt(linkSkill.getLinkSkillID());
 					outPacket.encodeInt(linkSkill.getOwnerID());
-					outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.PERMANENT));
+					outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
 					if (SkillConstants.isSkillNeedMasterLevel(linkSkill.getLinkSkillID())) {
 						outPacket.encodeInt(3); // whatevs
 					}
@@ -1086,7 +1116,7 @@ public class Char {
 		}
 		if (mask.isInMask(DBChar.StolenSkills)) {
 			if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
-				for (int i = 0; i<15; i++) {
+				for (int i = 0; i < 15; i++) {
 					StolenSkill stolenSkill = getStolenSkillByPosition(i);
 					outPacket.encodeInt(stolenSkill == null ? 0 : stolenSkill.getSkillid());
 				}
@@ -1116,7 +1146,12 @@ public class Char {
 			if (JobConstants.isPhantom(getAvatarData().getCharacterStat().getJob())) {
 				for (int i = 1; i <= 5; i++) { //Shifted by +1 to accomodate the Skill Management Tabs
 					ChosenSkill chosenSkill = getChosenSkillByPosition(i);
-					outPacket.encodeInt(chosenSkill == null ? 0 : ( isChosenSkillInStolenSkillList(chosenSkill.getSkillId()) ? chosenSkill.getSkillId() : 0) );
+					outPacket.encodeInt(chosenSkill == null
+							? 0
+							: isChosenSkillInStolenSkillList(chosenSkill.getSkillId())
+								? chosenSkill.getSkillId()
+								: 0
+					);
 				}
 			} else {
 				for (int i = 0; i < 5; i++) {
@@ -1152,7 +1187,6 @@ public class Char {
 			}
 		}
 		outPacket.encodeByte(0); // idk
-//        outPacket.encodeArr(Util.getByteArrayByString("01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 FF FF FF FF 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 00 43 72 65 61 74 69 6E 67 2E 2E 2E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 64 00 00 00 00 80 05 BB 46 E6 17 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 E0 FD 3B 37 4F 01 00 01 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 64 2B 70 84 7A D3 01 64 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));/*
 		if (mask.isInMask(DBChar.Character)) {
 			outPacket.encodeInt(0); // honor level, deprecated
 			outPacket.encodeInt(getHonorExp()); // honor exp
@@ -1265,7 +1299,7 @@ public class Char {
 			outPacket.encodeInt(1);
 			outPacket.encodeInt(0);
 			outPacket.encodeInt(100);
-			outPacket.encodeFT(FileTime.getFileTimeFromType(FileTime.Type.MAX_TIME));
+			outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
 			outPacket.encodeShort(0);
 			outPacket.encodeShort(0);
 		}
@@ -1327,6 +1361,11 @@ public class Char {
 	@Override
 	public boolean equals(Object other) {
 		return other instanceof Char && ((Char) other).getId() == getId();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
 	}
 
 	private String getBlessingOfEmpress() {
@@ -1668,37 +1707,71 @@ public class Char {
 	}
 
 	public void setStat(Stat charStat, int amount) {
+		CharacterStat cs = getAvatarData().getCharacterStat();
 		switch (charStat) {
 			case str:
-				getAvatarData().getCharacterStat().setStr(amount);
+				cs.setStr(amount);
 				break;
 			case dex:
-				getAvatarData().getCharacterStat().setDex(amount);
+				cs.setDex(amount);
 				break;
 			case inte:
-				getAvatarData().getCharacterStat().setInt(amount);
+				cs.setInt(amount);
 				break;
 			case luk:
-				getAvatarData().getCharacterStat().setLuk(amount);
+				cs.setLuk(amount);
 				break;
 			case hp:
-				getAvatarData().getCharacterStat().setHp(amount);
+				cs.setHp(amount);
 				break;
 			case mhp:
-				getAvatarData().getCharacterStat().setMaxHp(amount);
+				cs.setMaxHp(amount);
 				break;
 			case mp:
-				getAvatarData().getCharacterStat().setMp(amount);
+				cs.setMp(amount);
 				break;
 			case mmp:
-				getAvatarData().getCharacterStat().setMaxMp(amount);
+				cs.setMaxMp(amount);
 				break;
 			case ap:
-				getAvatarData().getCharacterStat().setAp(amount);
+				cs.setAp(amount);
 				break;
 			case level:
-				getAvatarData().getCharacterStat().setLevel(amount);
+				cs.setLevel(amount);
 				notifyChanges();
+				break;
+			case skin:
+				cs.setSkin(amount);
+				break;
+			case face:
+				cs.setFace(amount);
+				break;
+			case hair:
+				cs.setHair(amount);
+				break;
+			case pop:
+				cs.setPop(amount);
+				break;
+			case charismaEXP:
+				cs.setCharismaExp(amount);
+				break;
+			case charmEXP:
+				cs.setCharmExp(amount);
+				break;
+			case craftEXP:
+				cs.setCraftExp(amount);
+				break;
+			case insightEXP:
+				cs.setInsightExp(amount);
+				break;
+			case senseEXP:
+				cs.setSenseExp(amount);
+				break;
+			case willEXP:
+				cs.setWillExp(amount);
+				break;
+			case fatigue:
+				cs.setFatigue(amount);
 				break;
 		}
 	}
@@ -1711,7 +1784,10 @@ public class Char {
 			getParty().updateFull();
 		}
 		if (getGuild() != null) {
-			// TODO
+			GuildMember gm = getGuild().getMemberByCharID(getId());
+			gm.setLevel(getLevel());
+			gm.setJob(getJob());
+			getGuild().broadcast(WvsContext.guildResult(GuildResult.changeLevelOrJob(getGuild(), gm)));
 		}
 	}
 
@@ -1743,6 +1819,28 @@ public class Char {
 				return cs.getAp();
 			case level:
 				return cs.getLevel();
+			case skin:
+				return cs.getSkin();
+			case face:
+				return cs.getFace();
+			case hair:
+				return cs.getHair();
+			case pop:
+				return cs.getPop();
+			case charismaEXP:
+				return cs.getCharismaExp();
+			case charmEXP:
+				return cs.getCharmExp();
+			case craftEXP:
+				return cs.getCraftExp();
+			case insightEXP:
+				return cs.getInsightExp();
+			case senseEXP:
+				return cs.getSenseExp();
+			case willEXP:
+				return cs.getWillExp();
+			case fatigue:
+				return cs.getFatigue();
 		}
 		return -1;
 	}
@@ -1762,10 +1860,20 @@ public class Char {
 	 * @param amount the amount of Stat to add
 	 */
 	public void addStatAndSendPacket(Stat charStat, int amount) {
-		addStat(charStat, amount);
+		setStatAndSendPacket(charStat, getStat(charStat) + amount);
+	}
+
+	/**
+	 * Adds a Stat to this Char, and immediately sends the packet to the client notifying the change.
+	 * @param charStat which Stat to change
+	 * @param value the value of Stat to set
+	 */
+	public void setStatAndSendPacket(Stat charStat, int value) {
+		setStat(charStat, value);
 		Map<Stat, Object> stats = new HashMap<>();
 		switch(charStat) {
 			case level:
+			case skin:
 				stats.put(charStat, (byte) getStat(charStat));
 				break;
 			case str:
@@ -1779,6 +1887,8 @@ public class Char {
 			case mhp:
 			case mp:
 			case mmp:
+			case face:
+			case hair:
 				stats.put(charStat, getStat(charStat));
 				break;
 		}
@@ -1872,13 +1982,7 @@ public class Char {
 		int itemID = item.getItemId();
 		getInventoryByType(EQUIPPED).removeItem(item);
 		getInventoryByType(EQUIP).addItem(item);
-		List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-		if (ItemConstants.isWeapon(itemID)) {
-			al.setWeaponId(0);
-		}
-		if (hairEquips.contains(itemID)) {
-			hairEquips.remove((Integer) itemID);
-		}
+		al.removeItem(itemID);
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		if (getTemporaryStatManager().hasStat(SoulMP)) {
@@ -1900,7 +2004,7 @@ public class Char {
 			equip.setTradeBlock(true);
 			equip.setEquipTradeBlock(false);
 			equip.setEquippedDate(FileTime.currentTime());
-			equip.addAttribute(EquipAttribute.UNTRADABLE);
+			equip.addAttribute(EquipAttribute.Untradable);
 		}
 		AvatarLook al = getAvatarData().getAvatarLook();
 		int itemID = item.getItemId();
@@ -1974,12 +2078,8 @@ public class Char {
 		return items.size() > 0 ? items.get(0) : null;
 	}
 
-	public void setLeft(boolean left) {
-		this.left = left;
-	}
-
 	public boolean isLeft() {
-		return left;
+		return moveAction > 0 && (moveAction % 2) == 1;
 	}
 
 	public MarriageRecord getMarriageRecord() {
@@ -2008,9 +2108,11 @@ public class Char {
 					addField(field);
 					res = field;
 				}
+				res.setRuneStone(null);
 				break;
 			case PARTY:
 				res = getParty() != null ? getParty().getOrCreateFieldById(fieldID) : null;
+				res.setRuneStone(null);
 				break;
 			// TODO expedition
 			default:
@@ -2073,6 +2175,9 @@ public class Char {
 		if (toField == null) {
 			return;
 		}
+		if (getScriptManager().isActive(ScriptType.FIELD)) {
+			getScriptManager().stop(ScriptType.FIELD);
+		}
 		TemporaryStatManager tsm = getTemporaryStatManager();
 		for (AffectedArea aa : tsm.getAffectedAreas()) {
 			tsm.removeStatsBySkill(aa.getSkillID());
@@ -2082,14 +2187,13 @@ public class Char {
 		}
 		setField(toField);
 		toField.addChar(this);
-		fixBuggedItems();
 		getAvatarData().getCharacterStat().setPortal(portal.getId());
 		getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
 		if (characterData) {
 			initSoulMP();
 			if (getGuild() != null) {
-				write(WvsContext.guildResult(new GuildUpdate(getGuild())));
+				write(WvsContext.guildResult(GuildResult.loadGuild(getGuild())));
 			}
 			for (Friend f : getFriends()) {
 				f.setFlag(getClient().getWorld().getCharByID(f.getFriendID()) != null
@@ -2108,6 +2212,25 @@ public class Char {
 				write(UserPool.userEnterField(c));
 			}
 		}
+
+		if(tsm.hasStat(IndieEmpty)) {
+			for(Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext();) {
+				Summon summon = iterator.next().summon;
+				if(summon != null) {
+					if (summon.getMoveAbility() == MoveAbility.SHADOW_SERVANT.getVal() ||
+							summon.getMoveAbility() == MoveAbility.FOLLOW.getVal() ||
+							summon.getMoveAbility() == MoveAbility.FLY_AROUND_CHAR.getVal() ||
+							summon.getMoveAbility() == MoveAbility.JAGUAR.getVal()) {
+						summon.setObjectId(getField().getNewObjectID());
+						getField().spawnSummon(summon);
+					} else {
+						iterator.remove();
+					}
+				}
+			}
+		}
+
+
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();
@@ -2120,33 +2243,25 @@ public class Char {
 		if (getActiveFamiliar() != null) {
 			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
 		}
-	}
-
-	/**
-	 * Hacky fix for a bug I can't seem to fix. If having 3 equips in your inventory (x, y, z):
-	 * equip x, equip y, swap x and z, equip x. Upon relogging, x will be in the EQUIP inventory,
-	 * but with InvType EQUIPPED.
-	 * Server side it goes correctly, but when logging out, Hibernate puts x back into the EQUIP
-	 * inventory.
-	 */
-	private void fixBuggedItems() {
-		List<Item> buggedItems = new ArrayList<>();
-		for (Item item : getEquipInventory().getItems()) {
-			if (item.getInvType() == InvType.EQUIPPED) {
-				buggedItems.add(item);
+		if (getParty() != null) {
+			Party party = getParty();
+			for (PartyMember pm : party.getOnlineMembers()) {
+				if (pm != null && pm.getChr() != null && pm.getChr().getField() == getField()) {
+					Char otherChar = pm.getChr();
+					otherChar.write(UserRemote.receiveHP(this));
+					write(UserRemote.receiveHP(otherChar));
+				}
 			}
 		}
-		getEquipInventory().getItems().removeAll(buggedItems);
-		getEquippedInventory().getItems().addAll(buggedItems);
-		buggedItems = new ArrayList<>();
-		for (Item item : getEquippedInventory().getItems()) {
-			if (item.getInvType() == InvType.EQUIP) {
-				buggedItems.add(item);
-			}
+		for (Mob mob : toField.getMobs()) {
+			mob.addObserver(getScriptManager());
 		}
-		getEquippedInventory().getItems().removeAll(buggedItems);
-		getEquipInventory().getItems().addAll(buggedItems);
-
+		if (getFieldInstanceType() == FieldInstanceType.CHANNEL) {
+			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos()));
+		}
+		if (JobConstants.isAngelicBuster(getJob())) {
+            write(UserLocal.setDressChanged(false, true));
+        }
 	}
 
 	/**
@@ -2171,12 +2286,18 @@ public class Char {
 	 * @param eii The info to send to the client
 	 */
 	public void addExp(long amount, ExpIncreaseInfo eii) {
+		if(amount <= 0) {
+			return;
+		}
+		if (getGuild() != null) {
+			getGuild().addCommitmentToChar(this, (int) Math.min(amount, Integer.MAX_VALUE)); // independant of any xp buffs
+		}
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
 		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
-		int level = getStat(Stat.level);
+		int level = getLevel();
 		if (level >= GameConstants.charExp.length - 1) {
 			return;
 		}
@@ -2188,6 +2309,7 @@ public class Char {
 			stats.put(Stat.level, (byte) getStat(Stat.level));
 			getJobHandler().handleLevelUp();
 			level++;
+			getField().broadcastPacket(UserRemote.effect(getId(), Effect.levelUpEffect()));
 			heal(getMaxHP());
 			healMP(getMaxMP());
 		}
@@ -2363,6 +2485,7 @@ public class Char {
 			Item item = drop.getItem();
 			int itemID = item.getItemId();
 			boolean isConsume = false;
+			boolean isRunOnPickUp = false;
 			if (itemID == GameConstants.BLUE_EXP_ORB_ID || itemID == GameConstants.PURPLE_EXP_ORB_ID ||
 					itemID == GameConstants.RED_EXP_ORB_ID) {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
@@ -2377,12 +2500,28 @@ public class Char {
 			if (!ItemConstants.isEquip(itemID)) {
 				ItemInfo ii = ItemData.getItemInfoByID(itemID);
 				isConsume = ii.getSpecStats().getOrDefault(SpecStat.consumeOnPickup, 0) != 0;
+				isRunOnPickUp = ii.getSpecStats().getOrDefault(SpecStat.runOnPickup, 0) != 0;
 			}
 			if (isConsume) {
 				consumeItemOnPickup(item);
 				dispose();
 				return true;
+			} else if (isRunOnPickUp) {
+				String script = String.valueOf(itemID);
+				ItemInfo ii = ItemData.getItemInfoByID(itemID);
+				if(ii.getScript() != null && !"".equals(ii.getScript())) {
+					script = ii.getScript();
+				}
+				getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+				return true;
 			} else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
+				if (item instanceof Equip) {
+					Equip equip = (Equip) item;
+					if (equip.hasAttribute(EquipAttribute.UntradableAfterTransaction)) {
+						equip.removeAttribute(EquipAttribute.UntradableAfterTransaction);
+						equip.addAttribute(EquipAttribute.Untradable);
+					}
+				}
 				addItemToInventory(item);
 				write(WvsContext.dropPickupMessage(item, (short) item.getQuantity()));
 				return true;
@@ -2484,6 +2623,9 @@ public class Char {
 		setStat(Stat.hp, newHP);
 		stats.put(Stat.hp, newHP);
 		write(WvsContext.statChanged(stats));
+		if (getParty() != null) {
+			getParty().broadcast(UserRemote.receiveHP(this), this);
+		}
 	}
 
 	/**
@@ -2517,6 +2659,7 @@ public class Char {
 			inventory.removeItem(item);
 			short bagIndex = (short) item.getBagIndex();
 			if (item.getInvType() == EQUIPPED) {
+				getAvatarData().getAvatarLook().removeItem(item.getItemId());
 				bagIndex = (short) -bagIndex;
 			}
 			write(WvsContext.inventoryOperation(true, false,
@@ -2877,19 +3020,28 @@ public class Char {
 		if (getGuild() != null) {
 			setGuild(getGuild()); // Hack to ensure that all chars have the same instance of a guild
 			Guild g = getGuild();
-			GuildMember gm = g.getMemberByID(getId());
+			GuildMember gm = g.getMemberByCharID(getId());
 			gm.setOnline(online);
 			gm.setChr(online ? this : null);
 			getGuild().broadcast(WvsContext.guildResult(
-					new GuildUpdateMemberLogin(g.getId(), getId(), online, !this.online && online)), this);
+					GuildResult.notifyLoginOrLogout(g, gm, online, !this.online && online)), this);
 		}
 		this.online = online;
 		if (getParty() != null) {
-			party.updatePartyMemberInfoByChr(this);
+			PartyMember pm = getParty().getPartyMemberByID(getId());
+			if (pm != null) {
+				party.updatePartyMemberInfoByChr(this);
+				pm.setChr(online ? this : null);
+			}
 		}
 	}
 
 	public void setParty(Party party) {
+		if (party != null) {
+			setPartyID(party.getId());
+		} else {
+			setPartyID(0);
+		}
 		this.party = party;
 	}
 
@@ -2902,14 +3054,22 @@ public class Char {
 		if (getField().getForcedReturn() != GameConstants.NO_MAP_ID) {
 			setFieldID(getField().getForcedReturn());
 		}
+		if (getTradeRoom() != null) {
+			Char other = getTradeRoom().getOther();
+			getTradeRoom().cancelTrade();
+			other.chatMessage("Your trade partner disconnected.");
+		}
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
 		getField().removeChar(this);
 		getAccount().setCurrentChr(null);
-		DatabaseManager.saveToDB(this);
+		if (!isChangingChannel()) {
+			getClient().getChannelInstance().removeChar(this);
+			getAccount().setLoginState(LoginState.Out);
+		} else {
+			getClient().setChr(null);
+		}
 		DatabaseManager.saveToDB(getAccount());
-		getClient().getChannelInstance().removeChar(this);
-//		getClient().setChr(null);
 	}
 
 	public int getSubJob() {
@@ -2980,6 +3140,11 @@ public class Char {
 		return shop;
 	}
 
+	/**
+	 * Checks if this Char can hold an Item in their inventory, assuming that its quantity is 1.
+	 * @param id the item's itemID
+	 * @return whether or not this Char can hold an item in their inventory
+	 */
 	public boolean canHold(int id) {
 		boolean canHold;
 		if (ItemConstants.isEquip(id)) {  //Equip
@@ -2991,6 +3156,43 @@ public class Char {
 			canHold = (curItem != null && curItem.getQuantity() + 1 < ii.getSlotMax()) || inv.getSlots() > inv.getItems().size();
 		}
 		return canHold;
+	}
+
+	/**
+	 * Recursive function that checks if this Char can hold a list of items in their inventory.
+	 * @param items the list of items this char should be able to hold
+	 * @return whether or not this Char can hold the list of items
+	 */
+	public boolean canHold(List<Item> items) {
+		return canHold(items, deepCopyForInvCheck());
+	}
+
+	private boolean canHold(List<Item> items, Char deepCopiedChar) {
+		// explicitly use a Char param to avoid accidentally adding items
+		if (items.size() == 0) {
+			return true;
+		}
+		Item item = items.get(0);
+		if (canHold(item.getItemId())) {
+			Inventory inv = deepCopiedChar.getInventoryByType(item.getInvType());
+			inv.addItem(item);
+			items.remove(item);
+			return deepCopiedChar.canHold(items, deepCopiedChar);
+		} else {
+			return false;
+		}
+
+	}
+
+	private Char deepCopyForInvCheck() {
+		Char chr = new Char();
+		chr.setEquippedInventory(getEquippedInventory().deepCopy());
+		chr.setEquipInventory(getEquipInventory().deepCopy());
+		chr.setConsumeInventory(getConsumeInventory().deepCopy());
+		chr.setEtcInventory(getEtcInventory().deepCopy());
+		chr.setInstallInventory(getInstallInventory().deepCopy());
+		chr.setCashInventory(getCashInventory().deepCopy());
+		return chr;
 	}
 
 	/**
@@ -3022,9 +3224,6 @@ public class Char {
 	}
 
 	public Account getAccount() {
-		if (account == null) {
-			setAccount(Account.getFromDBById(getAccId()));
-		}
 		return account;
 	}
 
@@ -3160,33 +3359,49 @@ public class Char {
 
 	/**
 	 * Gets the current amount of a given stat the character has. Includes things such as skills, items, etc...
-	 * @param mainStat the requested stat
+	 * @param baseStat the requested stat
 	 * @return the amount of stat
 	 */
-	public int getTotalStat(BaseStat mainStat) {
+	private double getTotalStatAsDouble(BaseStat baseStat) {
 		// TODO cache this completely
-		int stat = 0;
+		double stat = 0;
 		// Stat allocated by sp
-		stat += mainStat.toStat() == null ? 0 : getStat(mainStat.toStat());
+		stat += baseStat.toStat() == null ? 0 : getStat(baseStat.toStat());
 		// Stat gained by passives
-		stat += getBaseStats().getOrDefault(mainStat, 0L);
+		stat += getBaseStats().getOrDefault(baseStat, 0L);
 		// Stat gained by buffs
-		int ctsStat = getTemporaryStatManager().getBaseStats().getOrDefault(mainStat, 0);
+		int ctsStat = getTemporaryStatManager().getBaseStats().getOrDefault(baseStat, 0);
 		stat += ctsStat;
-		// Stat gained by the stat's corresponding rate value
-		if (mainStat.getRateVar() != null) {
-			stat += stat * (getTotalStat(mainStat.getRateVar()) / 100D);
+		// Stat gained by the stat's corresponding "per level" value
+		if (baseStat.getLevelVar() != null) {
+			stat += getTotalStatAsDouble(baseStat.getLevelVar()) * getLevel();
 		}
 		// Stat gained by equips
 		for (Item item : getEquippedInventory().getItems()) {
 			Equip equip = (Equip) item;
-			stat += equip.getBaseStat(mainStat);
+			stat += equip.getBaseStat(baseStat);
+		}
+		// Stat gained by the stat's corresponding rate value
+		if (baseStat.getRateVar() != null) {
+			stat += stat * (getTotalStat(baseStat.getRateVar()) / 100D);
+		}
+		// --- Everything below this doesn't get affected by the rate var
+		// Character potential
+		for (CharacterPotential cp : getPotentials()) {
+			Skill skill = cp.getSkill();
+			SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+			Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
+			stat += stats.getOrDefault(baseStat, 0);
 		}
 		return stat;
 	}
 
+	public int getTotalStat(BaseStat stat) {
+		return (int) getTotalStatAsDouble(stat);
+	}
+
 	/**
-	 * Gets a total list of basic stats that a character has, including skills, items, etc...
+	 * Gets a total list of basic stats that a character has, including from skills, items, etc...
 	 * @return the total list of basic stats
 	 */
 	public Map<BaseStat, Integer> getTotalBasicStats() {
@@ -3536,5 +3751,109 @@ public class Char {
 
 	public void setHyperRockFields(int[] hyperrockfields) {
 		this.hyperrockfields = hyperrockfields;
+	}
+
+	public boolean isChangingChannel() {
+		return changingChannel;
+	}
+
+	public void setChangingChannel(boolean changingChannel) {
+		this.changingChannel = changingChannel;
+	}
+
+	public int getPartyID() {
+		return partyID;
+	}
+
+	public void setPartyID(int partyID) {
+		this.partyID = partyID;
+	}
+
+	public byte getMonsterParkCount() {
+		return monsterParkCount;
+	}
+
+	public void setMonsterParkCount(byte monsterParkCount) {
+		this.monsterParkCount = monsterParkCount;
+	}
+
+	public TownPortal getTownPortal() {
+		return townPortal;
+	}
+
+	public void setTownPortal(TownPortal townPortal) {
+		this.townPortal = townPortal;
+	}
+
+	public TradeRoom getTradeRoom() {
+		return tradeRoom;
+	}
+
+	public void setTradeRoom(TradeRoom tradeRoom) {
+		this.tradeRoom = tradeRoom;
+	}
+
+	public void damage(int damage) {
+		HitInfo hi = new HitInfo();
+		hi.hpDamage = damage;
+		getJobHandler().handleHit(getClient(), hi);
+	}
+
+	public void changeChannel(byte channelId) {
+		changeChannelAndWarp(channelId, getFieldID());
+	}
+
+	public void changeChannelAndWarp(byte channelId, int fieldId) {
+		logout();
+		setChangingChannel(true);
+		Field field = getField();
+		if(getFieldID() != fieldId) {
+			setField(getOrCreateFieldByCurrentInstanceType(fieldId));
+		}
+		getAccount().setLoginState(LoginState.Loading);
+		DatabaseManager.saveToDB(getAccount());
+		int worldID = getClient().getChannelInstance().getWorldId();
+		World world = Server.getInstance().getWorldById(worldID);
+		field.removeChar(this);
+		Channel channel = world.getChannelById(channelId);
+		channel.addClientInTransfer(channelId, getId(), getClient());
+		short port = (short) channel.getPort();
+		write(ClientSocket.migrateCommand(true, port));
+	}
+
+	@Override
+	public String toString() {
+		return "Char{" +
+				"(" + super.toString() +
+				")id=" + id +
+				", accId=" + accId +
+				", name=" + getName() +
+				'}';
+	}
+
+	public void setBattleRecordOn(boolean battleRecordOn) {
+		this.battleRecordOn = battleRecordOn;
+	}
+
+	public boolean isBattleRecordOn() {
+		return battleRecordOn;
+	}
+
+	public void checkAndRemoveExpiredItems() {
+		Inventory[] inventories = new Inventory[]{getEquippedInventory(), getEquipInventory(), getConsumeInventory(),
+			getEtcInventory(), getInstallInventory(), getCashInventory()};
+		Set<Item> expiredItems = new HashSet<>();
+		for (Inventory inv : inventories) {
+			expiredItems.addAll(
+					inv.getItems().stream()
+							.filter(item -> item.getDateExpire().isExpired())
+							.collect(Collectors.toSet())
+			);
+		}
+		List<Integer> expiredItemIDs = expiredItems.stream().map(Item::getItemId).collect(Collectors.toList());
+		write(WvsContext.message(MessageType.GENERAL_ITEM_EXPIRE_MESSAGE, expiredItemIDs));
+		for (Item item : expiredItems) {
+			consumeItem(item);
+		}
 	}
 }

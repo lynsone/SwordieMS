@@ -6,6 +6,7 @@ import java.util.Arrays;
  * Created on 1/9/2018.
  */
 public enum SpecStat {
+    runOnPickup,
     consumeOnPickup,
     hp,
     mp,

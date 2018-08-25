@@ -1,4 +1,5 @@
 def init():
+    sm.setSpeakerID(1064014) # Third Seal Foor
     sm.sendAskYesNo("Would you like to fight Crimson Queen?")
 
 def action(response, answer):

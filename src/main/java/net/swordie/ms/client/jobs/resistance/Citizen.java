@@ -30,6 +30,7 @@ public class Citizen extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
 
     }
 
@@ -42,7 +43,7 @@ public class Citizen extends Job {
     @Override
     public void setCharCreationStats(Char chr) {
         super.setCharCreationStats(chr);
-        chr.getAvatarData().getCharacterStat().setPosMap(310000000);
+        chr.getAvatarData().getCharacterStat().setPosMap(931000000);
     }
 
     @Override
@@ -66,13 +67,8 @@ public class Citizen extends Job {
         chr.addStat(Stat.mhp, 500);
         chr.addStat(Stat.mmp, 500);
         Map<Stat, Object> stats = new HashMap<>();
-        if (chr.getLevel() <= 10) {
-            chr.addStat(Stat.str, 5);
-            stats.put(Stat.str, (short) chr.getStat(Stat.str));
-        } else {
-            chr.addStat(Stat.ap, 5);
-            stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
-        }
+        chr.addStat(Stat.ap, 5);
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
         chr.addSpToJobByCurrentLevel(3);
         stats.put(Stat.mhp, chr.getStat(Stat.mhp));
         stats.put(Stat.mmp, chr.getStat(Stat.mmp));

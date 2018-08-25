@@ -3,25 +3,25 @@ package net.swordie.ms.client.jobs.cygnus;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.enums.TSIndex;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -166,10 +166,11 @@ public class ThunderBreaker extends Job {
                 break;
 
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
-    private void handleLinkMastery(int skillId, TemporaryStatManager tsm, Client c) {
+    private void giveLinkMasteryBuff(int skillId, TemporaryStatManager tsm) {
         Option o = new Option();
         SkillInfo linkInfo = SkillData.getSkillInfoById(15110025);
         if (lastAttackSkill == skillId) {
@@ -180,11 +181,11 @@ public class ThunderBreaker extends Job {
             o.rOption = 15110025;
             o.tOption = 10;
             tsm.putCharacterStatValue(DamR, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
         }
     }
 
-    private void handleLightning(TemporaryStatManager tsm) {
+    private void incrementLightningElemental(TemporaryStatManager tsm) {
         Option o = new Option();
         Skill skill = chr.getSkill(LIGHTNING_ELEMENTAL);
         SkillInfo leInfo = SkillData.getSkillInfoById(skill.getSkillId());
@@ -202,7 +203,7 @@ public class ThunderBreaker extends Job {
         o.rOption = LIGHTNING_ELEMENTAL;
         o.tOption = leInfo.getValue(y, leInfo.getCurrentLevel());
         tsm.putCharacterStatValue(IgnoreTargetDEF, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     private int getChargeProp() {
@@ -246,7 +247,7 @@ public class ThunderBreaker extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -266,12 +267,12 @@ public class ThunderBreaker extends Job {
         int chargeProp = getChargeProp();
         if (tsm.hasStat(CygnusElementSkill)) {
             if (hasHitMobs && Util.succeedProp(chargeProp)) {
-                handleLightning(tsm);
+                incrementLightningElemental(tsm);
             }
         }
         if(chr.hasSkill(LINK_MASTERY)) {
             if (hasHitMobs && skill != null) {
-                handleLinkMastery(skill.getSkillId(), tsm, c);
+                giveLinkMasteryBuff(skill.getSkillId(), tsm);
             }
         }
         Option o1 = new Option();
@@ -287,7 +288,7 @@ public class ThunderBreaker extends Job {
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                 }
                 break;
         }
@@ -297,6 +298,7 @@ public class ThunderBreaker extends Job {
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;

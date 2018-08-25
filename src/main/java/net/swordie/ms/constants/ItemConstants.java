@@ -1,9 +1,7 @@
 package net.swordie.ms.constants;
 
-import net.swordie.ms.client.character.items.Equip;
-import net.swordie.ms.client.character.items.ItemOption;
-import net.swordie.ms.enums.InvType;
-import net.swordie.ms.enums.ItemGrade;
+import net.swordie.ms.client.character.items.*;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
 import org.apache.log4j.LogManager;
@@ -27,14 +25,36 @@ public class ItemConstants {
     public static final int MOB_DEATH_SOUL_MP_COUNT = 150;
     public static final int MOB_CARD_BASE_ID = 2380000;
     public static final int FAMILIAR_PREFIX = 996;
+    public static final int SPELL_TRACE_ID = 4001832;
+    public static final int RAND_CHAOS_MAX = 5;
+    public static final int INC_RAND_CHAOS_MAX = 10;
+
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+
     public static final int THIRD_LINE_CHANCE = 50;
+    public static final int PRIME_LINE_CHANCE = 15;
+
     public static final int RED_CUBE = 5062009;
     public static final int BONUS_POT_CUBE = 5062500;
     public static final int BLACK_CUBE = 5062010;
-    public static int NEBILITE_BASE_ID = 3060000;
+
+    public static final int NEBILITE_BASE_ID = 3060000;
+
+    public static final int HORNTAIL_NECKLACE = 1122000;
+    public static final int CHAOS_HORNTAIL_NECKLACE = 1122076;
+
+    public static final int MAX_HAMMER_SLOTS = 2;
+    public static final int GOLDEN_HAMMER_20 = 2470004;
+    public static final int GOLDEN_HAMMER_50 = 2470001;
+    public static final int GOLDEN_HAMMER_100 = 2470007;
+
     private static final Integer[] soulPotList = new Integer[]{32001, 32002, 32003, 32004, 32005, 32006, 32011, 32012, // flat
             32041, 32042, 32043, 32044, 32045, 32046, 32051, 32052}; // rate
+
+    // Spell tracing
+    private static final int BASE_ST_COST = 30;
+    private static final int INNOCENCE_ST_COST = 1337;
+    private static final int CLEAN_SLATE_ST_COST = 200;
 
     public static int getGenderFromId(int nItemID) {
         int result; // eax
@@ -304,9 +324,25 @@ public class ItemConstants {
         return itemID / 10000 == 135;
     }
 
+    private static boolean isShield(int itemID) {
+        return itemID / 10000 == 109;
+    }
+
     public static boolean isAccessory(int itemID) {
         return (itemID >= 1010000 && itemID < 1040000) || (itemID >= 1122000 && itemID < 1153000) ||
                 (itemID >= 1112000 && itemID < 1113000) || (itemID >= 1670000 && itemID < 1680000);
+    }
+
+    public static boolean isFaceAccessory(int itemID) {
+        return itemID / 10000 == 101;
+    }
+
+    public static boolean isEyeAccessory(int itemID) {
+        return itemID / 10000 == 102;
+    }
+
+    public static boolean isEarrings(int itemID) {
+        return itemID / 10000 == 103;
     }
 
     public static boolean isTop(int itemID) {
@@ -329,84 +365,186 @@ public class ItemConstants {
         return itemID / 10000 == 108;
     }
 
+    public static boolean isCape(int itemID) {
+        return itemID / 10000 == 110;
+    }
+
     public static boolean isArmor(int itemID) {
         return !isAccessory(itemID) && !isWeapon(itemID);
     }
 
-    public static List<ItemOption> getOptionsByEquip(Equip equip, boolean bonus) {
-        int id = equip.getItemId();
-        List<ItemOption> data = ItemData.getItemOptions();
-        for(ItemOption io : data) {
-            // TODO: Debug data, remove once prime line logic is completed (chance for prime/lower tier pot)
-            ItemGrade ioGrade = ItemGrade.getGradeByOption(io.getId());
-            ItemGrade itemGrade = ItemGrade.getGradeByVal(equip.getBaseGrade());
-            boolean jwz = io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade());
-            boolean zwj = io.isBonus() == bonus;
-            int i = 0;
-            i += 3;
+    public static boolean isRing(int itemID) {
+        return itemID >= 1112000 && itemID < 1113000;
+    }
+
+    public static boolean isPendant(int itemID) {
+        return itemID / 10000 == 112;
+    }
+
+    public static boolean isBelt(int itemID) {
+        return itemID / 10000 == 113;
+    }
+
+    public static boolean isMedal(int itemID) {
+        return itemID / 10000 == 114;
+    }
+
+    public static boolean isShoulder(int itemID) {
+        return itemID / 10000 == 115;
+    }
+
+    public static boolean isPocketItem(int itemID) {
+        return itemID / 10000 == 116;
+    }
+
+    public static boolean isCrusaderCodex(int itemID) {
+        return itemID / 10000 == 117;
+    }
+
+    public static boolean isBadge(int itemID) {
+        return itemID / 10000 == 118;
+    }
+
+    public static boolean isEmblem(int itemID) {
+        return itemID / 10000 == 119;
+    }
+
+    public static boolean isTotem(int itemID) {
+        return itemID / 10000 == 120;
+    }
+
+    public static boolean isAndroid(int itemID) {
+        return itemID / 10000 == 166;
+    }
+
+    public static boolean isMechanicalHeart(int itemID) {
+        return itemID / 10000 == 167;
+    }
+
+    public static boolean canEquipTypeHavePotential(int itemid) {
+        return isRing(itemid) ||
+                isPendant(itemid) ||
+                isWeapon(itemid) ||
+                isBelt(itemid) ||
+                isHat(itemid) ||
+                isFaceAccessory(itemid) ||
+                isEyeAccessory(itemid) ||
+                isOverall(itemid) ||
+                isTop(itemid) ||
+                isBottom(itemid) ||
+                isShoe(itemid) ||
+                isEarrings(itemid) ||
+                isShoulder(itemid) ||
+                isGlove(itemid) ||
+                isEmblem(itemid) ||
+                isBadge(itemid) ||
+                isShield(itemid) ||
+                isCape(itemid) ||
+                isMechanicalHeart(itemid);
+    }
+
+    public static boolean canEquipHavePotential(Equip equip) {
+        return !equip.isCash() ||
+                canEquipTypeHavePotential(equip.getItemId()) &&
+                !equip.isNoPotential() &&
+                ItemData.getEquipById(equip.getItemId()).getTuc() >= 1;
+    }
+
+    public static boolean canEquipGoldHammer(Equip equip) {
+        return !(equip.getItemId() == HORNTAIL_NECKLACE || // Horntail Necklace and the Chaos version are the only exceptions that Golden Hammer has.
+                equip.getItemId() == CHAOS_HORNTAIL_NECKLACE ||
+                equip.getIuc() >= MAX_HAMMER_SLOTS ||
+                ItemData.getEquipById(equip.getItemId()).getTuc() <= 0); // No upgrade slots by default
+    }
+
+    public static boolean isGoldHammer(Item item) {
+        return item.getItemId() == GOLDEN_HAMMER_20 ||
+                item.getItemId() == GOLDEN_HAMMER_50 ||
+                item.getItemId() == GOLDEN_HAMMER_100;
+    }
+
+    /**
+     * Gets potential tier for a line.
+     * Accounts prime lines too.
+     * @param line Potential line.
+     * @param grade Our current potential grade.
+     */
+    public static ItemGrade getLineTier(int line, ItemGrade grade) {
+        if (line == 0 || Util.succeedProp(PRIME_LINE_CHANCE)) {
+            return grade;
         }
+
+        return ItemGrade.getOneTierLower(grade.getVal());
+    }
+
+    public static List<ItemOption> getOptionsByEquip(Equip equip, boolean bonus, int line) {
+        int id = equip.getItemId();
+        Collection<ItemOption> data = ItemData.getItemOptions().values();
+        ItemGrade grade = getLineTier(line, ItemGrade.getGradeByVal(bonus ? equip.getBonusGrade() : equip.getBaseGrade()));
+
+        // need a list, as we take a random item from it later on
         List<ItemOption> res = data.stream().filter(
                 io -> io.getOptionType() == 0 &&
-                io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                 .collect(Collectors.toList());
         if (isWeapon(id)) {
             res.addAll(data.stream().filter(
                     io -> io.getOptionType() == 10
-                    &&  io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus
+                    &&  io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus
             ).collect(Collectors.toList()));
         } else {
             res.addAll(data.stream().filter(
                     io -> io.getOptionType() == 11
-                    && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                    && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                     .collect(Collectors.toList()));
             if (isAccessory(id)) {
                 res.addAll(data.stream().filter(
                         io -> io.getOptionType() == 40
-                        && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                        && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                         .collect(Collectors.toList()));
             } else {
                 res.addAll(data.stream().filter(
                         io -> io.getOptionType() == 20
-                        && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                        && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                         .collect(Collectors.toList()));
                 if (isHat(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 51
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isTop(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 52
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isBottom(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 53
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isOverall(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 52
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 53
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isGlove(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 54
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isShoe(id)) {
                     res.addAll(data.stream().filter(
                             io -> io.getOptionType() == 55
-                            && io.hasMatchingGrade(bonus ? equip.getBonusGrade() : equip.getBaseGrade()) && io.isBonus() == bonus)
+                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
             }
@@ -414,9 +552,9 @@ public class ItemConstants {
         return res.stream().filter(io -> io.getReqLevel() <= equip.getrLevel()).collect(Collectors.toList());
     }
 
-    public static List<Integer> getWeightedOptionsByEquip(Equip equip, boolean bonus) {
+    public static List<Integer> getWeightedOptionsByEquip(Equip equip, boolean bonus, int line) {
         List<Integer> res = new ArrayList<>();
-        List<ItemOption> data = getOptionsByEquip(equip, bonus);
+        List<ItemOption> data = getOptionsByEquip(equip, bonus, line);
         for(ItemOption io : data) {
             for (int i = 0; i < io.getWeight(); i++) {
                 res.add(io.getId());
@@ -425,8 +563,8 @@ public class ItemConstants {
         return res;
     }
 
-    public static int getRandomOption(Equip equip, boolean bonus) {
-        List<Integer> data = getWeightedOptionsByEquip(equip, bonus);
+    public static int getRandomOption(Equip equip, boolean bonus, int line) {
+        List<Integer> data = getWeightedOptionsByEquip(equip, bonus, line);
         return data.get(Util.getRandom(data.size()));
     }
 
@@ -820,5 +958,175 @@ public class ItemConstants {
             default:
                 return false;
         }
+    }
+
+    public static boolean isUpgradable(int itemID) {
+        BodyPart bodyPart = BodyPart.getByVal(getBodyPartFromItem(itemID, 0));
+        if (bodyPart == null || itemID / 10000 == 135) { // 135 are secondaries
+            return false;
+        }
+        switch (bodyPart) {
+            case RING1:
+            case RING2:
+            case RING3:
+            case RING4:
+            case PENDANT:
+            case EXT_PENDANT1:
+            case WEAPON:
+            case BELT:
+            case CAP:
+            case FACEACC:
+            case EYEACC:
+            case CLOTHES:
+            case PANTS:
+            case SHOES:
+            case EARACC:
+            case SHOULDER:
+            case GLOVES:
+            case BADGE:
+            case SHIELD:
+            case CAPE:
+            case MACHINEHEART:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static List<ScrollUpgradeInfo> getScrollUpgradeInfosByEquip(Equip equip) {
+        // not the most beautiful way to do this, but I'd like to think that it's pretty easy to understand
+        BodyPart bp = BodyPart.getByVal(ItemConstants.getBodyPartFromItem(equip.getItemId(), 0));
+        List<ScrollUpgradeInfo> scrolls = new ArrayList<>();
+        int rLevel = equip.getrLevel();
+        int rJob = equip.getrJob();
+        Set<EnchantStat> possibleStat = new HashSet<>();
+        int plusFromLevel;
+        int[] chances;
+        int[] attStats = new int[0];
+        int[] stat;
+        int[] armorHp = new int[]{5, 20, 30, 70, 120};
+        int[] armorDef = new int[]{1, 2, 4, 7, 10};
+        boolean armor = false;
+        if (bp == BodyPart.WEAPON) {
+            plusFromLevel = rLevel >= 120 ? 2 : rLevel >= 60 ? 1 : 0;
+            if (rJob == 1) { // warrior
+                possibleStat.add(EnchantStat.PAD);
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.MHP);
+            } else if (rJob == 2) { // mage
+                possibleStat.add(EnchantStat.MAD);
+                possibleStat.add(EnchantStat.INT);
+            } else if (rJob == 3) { // bowman
+                possibleStat.add(EnchantStat.PAD);
+                possibleStat.add(EnchantStat.DEX);
+            } else if (rJob == 4 || rJob == 5) { // thief/pirate
+                possibleStat.add(EnchantStat.PAD);
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.DEX);
+                possibleStat.add(EnchantStat.LUK);
+            } else {
+                possibleStat.add(EnchantStat.PAD);
+                possibleStat.add(EnchantStat.MAD);
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.DEX);
+                possibleStat.add(EnchantStat.INT);
+                possibleStat.add(EnchantStat.LUK);
+                possibleStat.add(EnchantStat.MHP);
+            }
+            chances = new int[]{100, 70, 30, 15};
+            attStats = new int[]{1, 2, 3, 5, 7, 9};
+            stat = new int[]{0, 0, 1, 2, 3, 4};
+        } else if (bp == BodyPart.GLOVES) {
+            plusFromLevel = rLevel <= 70 ? 0 : 1;
+            if (rJob == 2) {
+                possibleStat.add(EnchantStat.MAD);
+            } else {
+                possibleStat.add(EnchantStat.PAD);
+            }
+            possibleStat.add(EnchantStat.PDD);
+            possibleStat.add(EnchantStat.MDD);
+            chances = new int[]{100, 70, 30};
+            attStats = new int[]{0, 1, 2, 3};
+            stat = new int[]{3, 0, 0, 0};
+        } else if (ItemConstants.isAccessory(equip.getItemId())) {
+            plusFromLevel = rLevel >= 120 ? 2 : rLevel >= 60 ? 1 : 0;
+            if (rJob == 1) { // warrior
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.MHP);
+            } else if (rJob == 2) { // mage
+                possibleStat.add(EnchantStat.INT);
+            } else if (rJob == 3) { // bowman
+                possibleStat.add(EnchantStat.DEX);
+            } else if (rJob == 4 || rJob == 5) { // thief/pirate
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.DEX);
+                possibleStat.add(EnchantStat.LUK);
+            } else {
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.DEX);
+                possibleStat.add(EnchantStat.INT);
+                possibleStat.add(EnchantStat.LUK);
+                possibleStat.add(EnchantStat.MHP);
+            }
+            chances = new int[]{100, 70, 30};
+            stat = new int[]{1, 1, 2, 3, 5};
+        } else {
+            armor = true;
+            plusFromLevel = rLevel >= 120 ? 2 : rLevel >= 60 ? 1 : 0;
+            if (rJob == 1) { // warrior
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.MHP);
+            } else if (rJob == 2) { // mage
+                possibleStat.add(EnchantStat.INT);
+            } else if (rJob == 3) { // bowman
+                possibleStat.add(EnchantStat.DEX);
+            } else if (rJob == 4 || rJob == 5) { // thief/pirate
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.DEX);
+                possibleStat.add(EnchantStat.LUK);
+            } else {
+                possibleStat.add(EnchantStat.STR);
+                possibleStat.add(EnchantStat.DEX);
+                possibleStat.add(EnchantStat.INT);
+                possibleStat.add(EnchantStat.LUK);
+                possibleStat.add(EnchantStat.MHP);
+            }
+            chances = new int[]{100, 70, 30};
+            stat = new int[]{1, 2, 3, 5, 7};
+        }
+        for (int i = 0; i < chances.length; i++) { // 4 scroll tiers for weapons
+            int tier = i + plusFromLevel;
+            TreeMap<EnchantStat, Integer> stats = new TreeMap<>();
+            for (EnchantStat es : possibleStat) {
+                int val;
+                if (es.isAttackType()) {
+                    val = attStats[tier];
+                } else if (es.isHpOrMp()){
+                    val = stat[tier] * 50;
+                } else {
+                    val = stat[tier];
+                }
+                if (val != 0) {
+                    stats.put(es, val);
+                }
+            }
+            if (armor) {
+                stats.put(EnchantStat.PDD, armorDef[tier] + stats.getOrDefault(EnchantStat.PDD, 0));
+                stats.put(EnchantStat.MDD, armorDef[tier] + stats.getOrDefault(EnchantStat.MDD, 0));
+                stats.put(EnchantStat.MHP, armorHp[tier] + stats.getOrDefault(EnchantStat.MHP, 0));
+            }
+            String title = chances[i] + "% ";
+            title += bp == BodyPart.WEAPON ? "Attack" : "Stat";
+            ScrollUpgradeInfo sui = new ScrollUpgradeInfo(i, title, SpellTraceScrollType.Normal, 0, stats,
+                    BASE_ST_COST + rLevel * (tier + 1), chances[i]);
+            scrolls.add(sui);
+        }
+        if (equip.hasUsedSlots()) {
+            scrolls.add(new ScrollUpgradeInfo(4, "Innocence Scroll 30%",
+                    SpellTraceScrollType.Innocence, 0, new TreeMap<>(), INNOCENCE_ST_COST, 30));
+            scrolls.add(new ScrollUpgradeInfo(5, "Clean Slate Scroll 5%",
+                    SpellTraceScrollType.CleanSlate, 0, new TreeMap<>(), CLEAN_SLATE_ST_COST, 5));
+        }
+        return scrolls;
     }
 }

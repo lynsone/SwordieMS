@@ -1,5 +1,6 @@
 package net.swordie.ms.client.guild;
 
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.util.FileTime;
 
@@ -10,7 +11,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "guildskill")
-public class GuildSkill {
+public class GuildSkill implements Encodable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

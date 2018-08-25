@@ -14,6 +14,12 @@ import net.swordie.ms.util.Position;
  */
 public class DropPool {
 
+    public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID, DropEnterType dropEnterType) {
+        return DropPool.dropEnterField(drop, dropEnterType, 100, 0, 100,
+                (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
+                (byte) 0, 0, false);
+    }
+
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID) {
         return DropPool.dropEnterField(drop, DropEnterType.NO_ANIMATION, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
@@ -61,7 +67,7 @@ public class DropPool {
         if(!drop.isMoney()) {
             FileTime expireTime = drop.getExpireTime();
             if(expireTime == null) {
-                expireTime = FileTime.getFileTimeFromType(FileTime.Type.PERMANENT);
+                expireTime = FileTime.fromType(FileTime.Type.MAX_TIME);
             }
             outPacket.encodeFT(expireTime);
         }
@@ -79,6 +85,10 @@ public class DropPool {
 
     public static OutPacket dropLeaveField(int dropID, int charID) {
         return dropLeaveField(DropLeaveType.CHAR_PICKUP_1, charID, dropID, (short) 0, 0, 0);
+    }
+
+    public static OutPacket dropExplodeField(int dropID) {
+        return dropLeaveField(DropLeaveType.DELAYED_PICKUP, 0, dropID, (short) 0, 0, 0);
     }
 
     public static OutPacket dropLeaveField(DropLeaveType dropLeaveType, int pickupID, int dropID, short delay, int petID, int key) {

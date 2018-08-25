@@ -10,20 +10,20 @@ import net.swordie.ms.client.character.items.MemorialCubeInfo;
 import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
-import net.swordie.ms.client.guild.result.GuildResultInfo;
+import net.swordie.ms.client.guild.bbs.GuildBBSPacket;
+import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.result.PartyResultInfo;
-import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
-import net.swordie.ms.life.movement.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import org.apache.log4j.LogManager;
@@ -225,122 +225,11 @@ public class WvsContext {
             outPacket.encodeInt(skill.getSkillId());
             outPacket.encodeInt(skill.getCurrentLevel());
             outPacket.encodeInt(skill.getMasterLevel());
-            outPacket.encodeFT(new FileTime(0));
+            outPacket.encodeFT(FileTime.fromType(FileTime.Type.PLAIN_ZERO));
         }
         outPacket.encodeByte(sn);
 
         return outPacket;
-    }
-
-    public static List<Movement> parseMovement(InPacket inPacket) {
-        // Taken from mushy when my IDA wasn't able to show this properly
-        // Made by Maxcloud
-        List<Movement> res = new ArrayList<>();
-        byte size = inPacket.decodeByte();
-        for (int i = 0; i < size; i++) {
-            byte type = inPacket.decodeByte();
-            switch (type) {
-                case 0:
-                case 8:
-                case 15:
-                case 17:
-                case 19:
-                case 67:
-                case 68:
-                case 69:
-                    res.add(new Movement1(inPacket, type));
-                    break;
-                case 1:
-                case 2:
-                case 18:
-                case 21:
-                case 22:
-                case 24:
-                case 62:
-                case 63:
-                case 64:
-                case 65:
-                    res.add(new Movement3(inPacket, type));
-                    break;
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 9:
-                case 10:
-                case 11:
-                case 13:
-                case 26:
-                case 27:
-                case 52:
-                case 53:
-                case 54:
-                case 61:
-                case 76:
-                case 77:
-                case 78:
-                case 80:
-                case 82:
-                    res.add(new Movement5(inPacket, type));
-                    break;
-                case 12:
-                    res.add(new Movement8(inPacket, type));
-                    break;
-                case 14:
-                case 16:
-                    res.add(new Movement6(inPacket, type));
-                    break;
-                case 23:
-                    res.add(new Movement7(inPacket, type));
-                    break;
-                case 29:
-                case 30:
-                case 31:
-                case 32:
-                case 33:
-                case 34:
-                case 35:
-                case 36:
-                case 37:
-                case 38:
-                case 39:
-                case 40:
-                case 41:
-                case 42:
-                case 43:
-                case 44:
-                case 45:
-                case 46:
-                case 47:
-                case 48:
-                case 49:
-                case 50:
-                case 51:
-                case 57:
-                case 58:
-                case 59:
-                case 60:
-                case 70:
-                case 71:
-                case 72:
-                case 74:
-                case 79:
-                case 81:
-                case 83:
-                    res.add(new Movement4(inPacket, type));
-                    break;
-                case 56:
-                case 66:
-                case 85:
-                    res.add(new Movement2(inPacket, type));
-                    break;
-                default:
-                    log.warn(String.format("[WvsContext.parseMovement] The type (%s) is unhandled.", type));
-                    break;
-            }
-        }
-        return res;
     }
 
     public static OutPacket temporaryStatSet(TemporaryStatManager tsm) {
@@ -455,6 +344,16 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket questRecordExMessage(Quest quest) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(QUEST_RECORD_EX_MESSAGE.getVal());
+        outPacket.encodeInt(quest.getQRKey());
+        outPacket.encodeString(quest.getQRValue());
+
+        return outPacket;
+    }
+
     public static OutPacket incExpMessage(ExpIncreaseInfo eii) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
@@ -556,7 +455,7 @@ public class WvsContext {
                 break;
             case INC_COMMITMENT_MESSAGE:
                 outPacket.encodeInt(i);
-                outPacket.encodeByte(type);
+                outPacket.encodeByte(i < 0 ? 1 : i == 0 ? 2 : 0); // gained = 0, lost = 1, cap = 2
                 break;
             case SYSTEM_MESSAGE:
                 outPacket.encodeString(string);
@@ -683,11 +582,18 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket guildResult(GuildResultInfo gri) {
+    public static OutPacket guildResult(GuildResult gri) {
         OutPacket outPacket = new OutPacket(OutHeader.GUILD_RESULT);
 
-        outPacket.encodeByte(gri.getType().getVal());
         gri.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket guildBBSResult(GuildBBSPacket gbp) {
+        OutPacket outPacket = new OutPacket(OutHeader.GUILD_BBS_RESULT);
+
+        outPacket.encode(gbp);
 
         return outPacket;
     }
@@ -869,6 +775,24 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket setAvatarMegaphone(Char chr, int megaItemId, List<String> lineList, boolean whisperIcon) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_AVATAR_MEGAPHONE);
+
+        outPacket.encodeInt(megaItemId); // Avatar Megaphone Item ID
+        outPacket.encodeString(chr.getName());
+
+        for(String line : lineList) {
+            outPacket.encodeString(line);
+        }
+
+        outPacket.encodeInt(chr.getClient().getChannel() - 1);
+        outPacket.encodeByte(whisperIcon);
+
+        chr.getAvatarData().getAvatarLook().encode(outPacket); // encode AvatarLook
+
+        return outPacket;
+    }
+
     public static OutPacket receiveHyperStatSkillResetResult(int charID, boolean exclRequest, boolean success) {
         OutPacket outPacket = new OutPacket(OutHeader.RECEIVE_HYPER_STAT_SKILL_RESET_RESULT);
 
@@ -889,6 +813,96 @@ public class WvsContext {
                 outPacket.encodeInt(fieldid); // Target Field ID
             }
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket monsterCollectionResult(MonsterCollectionResultType mcrt, InvType invType, int fullSlots) {
+        OutPacket outPacket = new OutPacket(OutHeader.MONSTER_COLLECTION_RESULT);
+
+        outPacket.encodeInt(mcrt.ordinal());
+        if (invType != null) {
+            outPacket.encodeInt(invType.getVal());
+        } else {
+            outPacket.encodeInt(0);
+        }
+        outPacket.encodeInt(fullSlots);
+
+        return outPacket;
+    }
+
+    public static OutPacket weatherEffectNotice(WeatherEffNoticeType type, String text, int duration) {
+        OutPacket outPacket = new OutPacket(OutHeader.WEATHER_EFFECT_NOTICE);
+
+        outPacket.encodeString(text); // Text
+        outPacket.encodeInt(type.getVal()); // Weather Notice Type
+        outPacket.encodeInt(duration); // Duration in ms
+        outPacket.encodeByte(1); // Forced Notice
+
+        return outPacket;
+    }
+
+    public static OutPacket resultInstanceTable(String name, int type, int subType, boolean rightResult, int value) {
+        OutPacket outPacket = new OutPacket(OutHeader.RESULT_INSTANCE_TABLE.getValue());
+
+        outPacket.encodeString(name);
+        outPacket.encodeInt(type); // nCount
+        outPacket.encodeInt(subType);
+        outPacket.encodeByte(rightResult);
+        outPacket.encodeInt(value);
+
+        return outPacket;
+    }
+
+    public static OutPacket resultInstanceTable(InstanceTableType ritt, boolean rightResult, int value) {
+        return resultInstanceTable(ritt.getTableName(), ritt.getType(), ritt.getSubType(), rightResult, value);
+    }
+
+    /**
+     * Creates a packet to indicate the golden hammer is finished.
+     *
+     * @param returnResult See below
+     * @param msg
+     *  when returnResult is:
+     *    0 or 1:
+     *      Anything: Golden hammer refinement applied
+     *    2:
+     *      0: Increased available upgrade by 1
+     *      1: Refining using golden hammer failed
+     *    3:
+     *      1: Item is not upgradable
+     *      2: 2 upgrade increases have been used already
+     *      3: You can't vicious hammer non-horntail necklace
+     * @return the created packet
+     */
+    public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, Equip equip) {
+        // Could create an enum for returnResult/msg, but it's not used often enough to warrant this
+        OutPacket outPacket = new OutPacket(OutHeader.GOLD_HAMMER_ITEM_UPGRADE_RESULT);
+
+        outPacket.encodeByte(returnResult);
+        if (returnResult != 1) {
+            outPacket.encodeInt(msg);
+        }
+        outPacket.encodeInt(equip == null ? 0 : equip.getTuc());
+
+        return outPacket;
+    }
+
+    public static OutPacket returnToCharacterSelect() {
+        return new OutPacket(OutHeader.RETURN_TO_CHARACTER_SELECT);
+    }
+
+    public static OutPacket returnToTitle() {
+        return new OutPacket(OutHeader.RETURN_TO_TITLE);
+    }
+
+    public static OutPacket townPortal(TownPortal townPortal) {
+        OutPacket outPacket = new OutPacket(OutHeader.TOWN_PORTAL); // As a response to Enter_TP_Request, creates the Door in the TownField
+
+        outPacket.encodeInt(townPortal.getTownFieldId()); // townFieldId
+        outPacket.encodeInt(townPortal.getFieldFieldId()); // field FieldId
+        outPacket.encodeInt(townPortal.getSkillid()); // Skill Id
+        outPacket.encodePosition(new Position()); // fieldField TownPortal Position
 
         return outPacket;
     }

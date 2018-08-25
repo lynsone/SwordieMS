@@ -3,7 +3,7 @@ package net.swordie.ms.enums;
 /**
  * Created on 1/25/2018.
  */
-public enum EnchantStat{
+public enum EnchantStat implements Comparable<EnchantStat> {
     PAD(0x1),
     MAD(0x2),
     STR(0x4),
@@ -98,4 +98,13 @@ public enum EnchantStat{
                 return null;
         }
     }
+
+    public boolean isAttackType() {
+        return this == PAD || this == MAD;
+    }
+
+    public boolean isHpOrMp() {
+        return this == MHP || this == MMP;
+    }
+
 }

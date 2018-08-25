@@ -1,7 +1,18 @@
 package net.swordie.ms.connection.packet;
 
 
+import net.swordie.ms.client.jobs.adventurer.Thief;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.legend.Evan;
+import net.swordie.ms.client.jobs.legend.Luminous;
+import net.swordie.ms.client.jobs.legend.Shade;
+import net.swordie.ms.client.jobs.nova.AngelicBuster;
+import net.swordie.ms.client.jobs.nova.Kaiser;
+import net.swordie.ms.client.jobs.resistance.BattleMage;
+import net.swordie.ms.client.jobs.resistance.Demon;
+import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.enums.UserEffectType;
 import net.swordie.ms.util.Position;
@@ -29,6 +40,31 @@ public class Effect {
         outPacket.encodeByte(getUserEffectType().getVal());
 
         switch (getUserEffectType()) {
+            case SkillUse:
+            case SkillUseBySummoned:
+                encodeSkillUse(outPacket); // too long to put here
+                break;
+            case SkillAffected:
+                int skillID = getArg1();
+                outPacket.encodeInt(getArg1()); // skill id
+                outPacket.encodeByte(getArg2()); // slv
+                if (skillID == Demon.RAVEN_STORM || skillID == Shade.DEATH_MARK) {
+                    outPacket.encodeInt(getArg3()); // nDelta
+                }
+                break;
+            case SkillSpecial:
+                outPacket.encodeInt(getArg1()); // skill id
+                if(getArg1() == BattleMage.DARK_SHOCK) {
+                    outPacket.encodeByte(getArg2()); // slv
+                    outPacket.encodeByte(getArg3()); // show effect
+                    outPacket.encodePositionInt(new Position(getArg4(), getArg5())); // Origin Position -  arg4 = x, arg5 = y
+                    outPacket.encodePositionInt(new Position(getArg6(), getArg7())); // Destination Position -  arg6 = x, arg7 = y
+                }
+                break;
+            case SkillSpecialAffected:
+                outPacket.encodeInt(getArg1()); // skill id
+                outPacket.encodeByte(getArg2());// slv
+                break;
             case TextEffect:
                 outPacket.encodeString(getString());
                 outPacket.encodeInt(getArg1()); // letter delay
@@ -68,6 +104,15 @@ public class Effect {
             case Resist:
             case LevelUp:
                 break;
+            case EffectUOL:
+                outPacket.encodeString(getString());
+                outPacket.encodeByte(getArg1());
+                outPacket.encodeInt(getArg2());
+                outPacket.encodeInt(getArg3());
+                if (getArg3() == 2) { // item
+                    outPacket.encodeInt(getArg4());
+                }
+                break;
             case LeftMonsterNumber:
                 outPacket.encodeInt(getArg1()); // Number on Arrow
                 break;
@@ -86,6 +131,51 @@ public class Effect {
                 break;
             case IncDecHPEffect:
                 outPacket.encodeByte(getArg1()); // amount being healed     0 = Miss
+                break;
+
+        }
+    }
+
+    private void encodeSkillUse(OutPacket outPacket) {
+        int skillID = getArg1();
+        if (getUserEffectType() == SkillUseBySummoned) {
+            outPacket.encodeInt(getArg4()); // Summon ID
+        }
+        outPacket.encodeInt(skillID); // Skill id
+        outPacket.encodeByte(getArg2()); // slv ?
+        outPacket.encodeByte(getArg3()); // slv ?
+        if (skillID == Evan.DRAGON_FURY) { // Dragon Fury
+            outPacket.encodeByte(getArg5()); // bCreate
+        } else if (skillID == Warrior.FINAL_PACT) {
+            outPacket.encodeByte(getArg5()); // bLoadReincarnationEffect
+        } else if (skillID == Thief.CHAINS_OF_HELL) {
+            outPacket.encodeByte(getArg5()); // bLeft
+            outPacket.encodeInt(getArg6()); // dwMobID
+        } else if (skillID == 3211010 || skillID == 3111010 || skillID == 1100012) { // Hooks (Warrior combo fury/archer skills)
+            outPacket.encodeByte(getArg5()); // bLeft
+            outPacket.encodeInt(getArg6()); // dwMobID
+            outPacket.encodeInt(getArg7()); // nMobPosX
+            outPacket.encodeInt(getArg8()); // nMobPosY
+        } else if (skillID == WildHunter.CALL_OF_THE_HUNTER) {
+            outPacket.encodeByte(getArg5()); // bLeft
+            outPacket.encodeShort(getArg6()); // nPosX
+            outPacket.encodeShort(getArg7()); // nPosY
+        } else if (skillID == WildHunter.CAPTURE) {
+            outPacket.encodeByte(getArg5()); // nType: 0 = Success, 1 = mob hp too high, 2 = mob cannot be captured
+        } else if (skillID == Kaiser.VERTICAL_GRAPPLE || skillID == AngelicBuster.GRAPPLING_HEART) {
+            outPacket.encodeInt(getArg5()); // nStartPosY
+            outPacket.encodeInt(getArg6()); // ptRopeConnectDest.x
+            outPacket.encodeInt(getArg7()); // ptRopeConnectDest.y
+        } else if (skillID == Luminous.FLASH_BLINK || skillID == 15001021 || skillID == Shade.FOX_TROT) { // Flash
+            outPacket.encodeInt(getArg5()); // ptBlinkLightOrigin.x
+            outPacket.encodeInt(getArg6()); // ptBlinkLightOrigin.y
+            outPacket.encodeInt(getArg7()); // ptBlinkLightDest.x
+            outPacket.encodeInt(getArg8()); // ptBlinkLightDest.y
+        } else if (SkillConstants.isSuperNovaSkill(skillID)) {
+            outPacket.encodeInt(getArg5()); // ptStartX
+            outPacket.encodeInt(getArg6()); // ptStartY
+        } else if (SkillConstants.isUnregisteredSkill(skillID)) {
+            outPacket.encodeByte(getArg5()); // bLeft
         }
     }
 
@@ -267,9 +357,219 @@ public class Effect {
         return effect;
     }
 
+    public static Effect skillUse(int skillID, byte slv, int bySummonedID) {
+        Effect effect = new Effect();
 
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
 
+        return effect;
+    }
 
+    public static Effect skillAffected(int skillID, byte slv, int hpGain) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillAffected);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(hpGain);
+
+        return effect;
+    }
+
+    public static Effect skillSpecial(int skillID) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillSpecial);
+        effect.setArg1(skillID);
+
+        return effect;
+    }
+
+    public static Effect skillSpecialAffected(int skillID, byte slv) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillSpecialAffected);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+
+        return effect;
+    }
+
+    public static Effect showDragonFuryEffect(int skillID, byte slv, int bySummonedID, boolean show) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(show ? 1 : 0);
+
+        return effect;
+    }
+
+    public static Effect showFinalPactEffect(int skillID, byte slv, int bySummonedID, boolean show) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(show ? 1 : 0);
+
+        return effect;
+    }
+
+    public static Effect showChainsOfHellEffect(int skillID, byte slv, int bySummonedID, boolean left, int mobId) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+        effect.setArg6(mobId);
+
+        return effect;
+    }
+
+    public static Effect showHookEffect(int skillID, byte slv, int bySummonedID, boolean left, int mobId, int mobPosX, int mobPosY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+        effect.setArg6(mobId);
+        effect.setArg7(mobPosX);
+        effect.setArg8(mobPosY);
+
+        return effect;
+    }
+
+    public static Effect showCallOfTheHunterEffect(int skillID, byte slv, int bySummonedID, boolean left, int mobPosX, int mobPosY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+        effect.setArg6(mobPosX);
+        effect.setArg7(mobPosY);
+
+        return effect;
+    }
+
+    public static Effect showCaptureEffect(int skillID, byte slv, int bySummonedID, int type) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(type); // Type: 0 = Success,  1 = mob hp too high,  2 = mob cannot be captured
+
+        return effect;
+    }
+
+    public static Effect showVerticalGrappleEffect(int skillID, byte slv, int bySummonedID, int startPosY, int ropeConnectDestX, int ropeConnectDestY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(startPosY);
+        effect.setArg6(ropeConnectDestX);
+        effect.setArg7(ropeConnectDestY);
+
+        return effect;
+    }
+
+    public static Effect showFlashBlinkEffect(int skillID, byte slv, int bySummonedID, int blinkOriginX, int blinkOriginY, int blinkDestX, int blinkDestY) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(blinkOriginX);
+        effect.setArg6(blinkOriginY);
+        effect.setArg7(blinkDestX);
+        effect.setArg8(blinkDestY);
+
+        return effect;
+    }
+
+    public static Effect showSuperNovaEffect(int skillID, byte slv, int bySummonedID, int x, int y) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(x);
+        effect.setArg6(y);
+
+        return effect;
+    }
+
+    public static Effect showUnregisteredSkill(int skillID, byte slv, int bySummonedID, boolean left) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(bySummonedID == 0 ? SkillUse : SkillUseBySummoned);
+        effect.setArg4(bySummonedID);
+        effect.setArg1(skillID);
+        effect.setArg2(slv);
+        effect.setArg3(slv);
+        effect.setArg5(left ? 1 : 0);
+
+        return effect;
+    }
+
+    public static Effect showDarkShockSkill(int skillId, byte slv, Position origin, Position dest) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillSpecial);
+        effect.setArg1(skillId);
+        effect.setArg2(slv);
+        effect.setArg3(0); // show effect
+        effect.setArg4(origin.getX());
+        effect.setArg5(origin.getY());
+        effect.setArg6(dest.getX());
+        effect.setArg7(dest.getY());
+
+        return effect;
+    }
+
+    public static Effect effectFromWZ(String effectPath, boolean flip, int delay, int type, int itemID) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(EffectUOL);
+        effect.setString(effectPath);
+        effect.setArg1(flip ? 1 : 0);
+        effect.setArg2(delay);
+        effect.setArg3(type);
+        if (type == 2) {
+            effect.setArg4(itemID);
+        }
+
+        return effect;
+    }
 
     public void setUserEffectType(UserEffectType userEffectType) {
         this.userEffectType = userEffectType;

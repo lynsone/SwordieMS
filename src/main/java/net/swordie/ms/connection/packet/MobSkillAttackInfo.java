@@ -15,7 +15,4 @@ public class MobSkillAttackInfo {
     public short skillID;
     public List<Position> multiTargetForBalls = new ArrayList<>();
     public List<Short> randTimeForAreaAttacks = new ArrayList<>();
-    public Position oldPos;
-    public Position oldVPos;
-    public int encodedGatherDuration;
 }

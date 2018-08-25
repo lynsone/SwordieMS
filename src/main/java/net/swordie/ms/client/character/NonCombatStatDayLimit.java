@@ -38,7 +38,7 @@ public class NonCombatStatDayLimit {
     }
 
     public NonCombatStatDayLimit() {
-        this((short) 0, (short) 0, (byte) 0,(short) 0,(short) 0,(short) 0,(short) 0, FileTime.fromLong(0));
+        this((short) 0, (short) 0, (byte) 0,(short) 0,(short) 0,(short) 0,(short) 0, FileTime.fromType(FileTime.Type.ZERO_TIME));
     }
 
     public short getCharm() {
@@ -105,7 +105,7 @@ public class NonCombatStatDayLimit {
         outPacket.encodeShort(getSense());
         outPacket.encodeShort(getCharm());
         outPacket.encodeByte(getCharmByCashPR());
-        getFtLastUpdateCharmByCashPR().encode(outPacket);
+        outPacket.encodeFT(getFtLastUpdateCharmByCashPR());
     }
 
     public short getCharisma() {

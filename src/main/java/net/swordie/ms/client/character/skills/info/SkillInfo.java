@@ -7,6 +7,7 @@ import net.swordie.ms.enums.Stat;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
+import org.apache.log4j.Logger;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -17,6 +18,8 @@ import java.util.*;
  * Created on 12/20/2017.
  */
 public class SkillInfo {
+    private static final Logger log = Logger.getLogger(SkillInfo.class);
+
     private int skillId;
     private int rootId;
     private int maxLevel;
@@ -29,6 +32,14 @@ public class SkillInfo {
     private boolean massSpell;
     private int type;
     private Set<Integer> psdSkills = new HashSet<>();
+    private String elemAttr;
+    private int hyper;
+    private int hyperstat;
+    private int vehicleId;
+    private int reqTierPoint;
+    private Map<Integer, Integer> reqSkills = new HashMap<>();
+    private boolean notCooltimeReset;
+    private boolean notIncBuffDuration;
 
     public int getSkillId() {
         return skillId;
@@ -82,6 +93,8 @@ public class SkillInfo {
         }
         // Sometimes newlines get taken, just remove those
         value = value.replace("\n", "").replace("\r", "");
+        value = value.replace("\\n", "").replace("\\r", ""); // unluko
+        String original = value;
         if(Util.isNumber(value)) {
             result = Integer.parseInt(value);
         } else {
@@ -89,13 +102,16 @@ public class SkillInfo {
             try {
                 value = value.replace("u", "Math.ceil");
                 value = value.replace("d", "Math.floor");
-                Object res = engine.eval(value.replace("x", slv + ""));
+                String toReplace = value.contains("y") ? "y" : "x";
+                Object res = engine.eval(value.replace(toReplace, slv + ""));
                 if(res instanceof Integer) {
                     result = (Integer) res;
                 } else if(res instanceof Double) {
                     result = ((Double) res).intValue();
                 }
             } catch (ScriptException e) {
+                log.error(String.format("Error when parsing: skill %d, level %d, skill stat %s, tried to eval %s.",
+                        getSkillId(), slv, skillStat, original));
                 e.printStackTrace();
             }
         }
@@ -168,14 +184,6 @@ public class SkillInfo {
         int value = getValue(ss, slv);
         switch (ss) {
             case lv2damX:
-            case lv2dex:
-            case lv2int:
-            case lv2luk:
-            case lv2mad:
-            case lv2mhp:
-            case lv2mmp:
-            case lv2pad:
-            case lv2str:
                 value *= chr.getLevel();
                 break;
             case str2dex:
@@ -224,5 +232,69 @@ public class SkillInfo {
 
     public void setPsdSkills(Set<Integer> psdSkills) {
         this.psdSkills = psdSkills;
+    }
+
+    public String getElemAttr() {
+        return elemAttr;
+    }
+
+    public void setElemAttr(String elemAttr) {
+        this.elemAttr = elemAttr;
+    }
+
+    public void setHyper(int hyper) {
+        this.hyper = hyper;
+    }
+
+    public int getHyper() {
+        return hyper;
+    }
+
+    public void setHyperStat(int hyperstat) {
+        this.hyperstat = hyperstat;
+    }
+
+    public int getHyperStat() {
+        return hyperstat;
+    }
+
+    public int getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(int vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public void setReqTierPoint(int reqTierPoint) {
+        this.reqTierPoint = reqTierPoint;
+    }
+
+    public int getReqTierPoint() {
+        return reqTierPoint;
+    }
+
+    public void addReqSkill(int skillID, int slv) {
+        getReqSkills().put(skillID, slv);
+    }
+
+    public Map<Integer, Integer> getReqSkills() {
+        return reqSkills;
+    }
+
+    public void setNotCooltimeReset(boolean notCooltimeReset) {
+        this.notCooltimeReset = notCooltimeReset;
+    }
+
+    public boolean isNotCooltimeReset() {
+        return notCooltimeReset;
+    }
+
+    public void setNotIncBuffDuration(boolean notIncBuffDuration) {
+        this.notIncBuffDuration = notIncBuffDuration;
+    }
+
+    public boolean isNotIncBuffDuration() {
+        return notIncBuffDuration;
     }
 }

@@ -43,7 +43,7 @@ public class NpcShopDlg {
 		boolean hasQuest = false;
 		outPacket.encodeByte(hasQuest);
 		if (hasQuest) {
-			// just a guess that's this is for quests
+			// just a guess that this is for quests
 			outPacket.encodeInt(0); // questID?
 			outPacket.encodeString(""); // questKey?
 		}

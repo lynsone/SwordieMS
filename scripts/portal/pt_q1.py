@@ -18,7 +18,7 @@ def init():
             sm.dispose()
         else:
             # Ride Vehicle Check
-            if sm.getnOptionByCTS(CharacterTemporaryStat.RideVehicle) == 1932102: # Mini Viking Ship used in Riena Strait
+            if sm.getnOptionByCTS(CharacterTemporaryStat.RideVehicle) == 1930000: # Riena Skiff used in Riena Strait
                 sm.removeCTS(CharacterTemporaryStat.RideVehicle)
 
 

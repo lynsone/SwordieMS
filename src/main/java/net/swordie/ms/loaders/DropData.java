@@ -2,6 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.ServerConstants;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.Util;
@@ -14,6 +15,7 @@ import java.util.*;
  * Created on 2/21/2018.
  */
 public class DropData {
+    private static final Logger log = Logger.getLogger(DropData.class);
 
     private static Map<Integer, Set<DropInfo>> drops = new HashMap<>();
 
@@ -141,11 +143,7 @@ public class DropData {
                 drops = getCachedDropInfoById(mobID);
             } else {
                 // just take global drops otherwise
-                file = new File(String.format("%s/mobDrops/%d.dat", ServerConstants.DAT_DIR, -1));
-                if (file.exists()) {
-                    loadDropsFromFile(file);
-                    drops = getCachedDropInfoById(-1);
-                }
+                drops = getDropInfoByID(-1);
             }
         }
         return drops;
@@ -190,8 +188,11 @@ public class DropData {
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating drop data.");
+        long start = System.currentTimeMillis();
         loadCompleteDropsFromTxt(new File(ServerConstants.RESOURCES_DIR + "/mobDrops.txt"));
         saveDropsToDat(ServerConstants.DAT_DIR + "/mobDrops");
+        log.info(String.format("Completed generating drop data in %dms.", System.currentTimeMillis() - start));
     }
 
     public static void main(String[] args) {

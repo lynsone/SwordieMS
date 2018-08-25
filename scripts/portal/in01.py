@@ -1,5 +1,9 @@
 status = -1
 
+from net.swordie.ms.constants import GameConstants
+from net.swordie.ms.enums import QuestStatus
+from net.swordie.ms.client.character.quest import Quest
+
 if sm.getFieldID() == 863010000:
     # Gollux
     def init():
@@ -35,15 +39,19 @@ elif sm.getFieldID() == 951000000:
     sm.setSpeakerID(9071004)
 
     def init():
-        if sm.getParty() is None or sm.getPartySize() > 1:
-            sm.sendSayOkay("You must be in a party of 1 to enter Monster Park.")
+        if not sm.getParty() is None:
+            sm.sendSayOkay("Please leave your party to enter Monster Park.")
             sm.dispose()
         else:
             if sm.getChr().getLevel() < minLv or sm.getChr().getLevel() > maxLv:
                 sm.sendSayOkay("You need to be between Level "+ str(minLv) +" and "+ str(maxLv) +" to enter.")
                 sm.dispose()
             else:
-                string = "#eToday is #b[Day]#k.\r\nToday's Clear Count #b"+ str(0) +"/7#k (Per Maple account)\r\n\r\nYou have #b"+ str(2) +"#k free clears left for today.\r\n\r\n#n#b"
+                if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
+                    colour = "#r"
+                else:
+                    colour = "#b"
+                string = "#eToday is #b"+ sm.getDay() +"#k.\r\nToday's Clear Count "+ colour +""+ str(sm.getMonsterParkCount()) +"/"+ str(GameConstants.MAX_MONSTER_PARK_RUNS) +"#k (per Maple Character)\r\n\r\nYou have #b"+ str(2) +"#k free clears left for today.\r\n\r\n#n#b"
                 i = 0
                 while i < len(maps):
                     string += "#L"+ str(i) +"#"+ maps[i][0] +"#l\r\n"
@@ -55,15 +63,22 @@ elif sm.getFieldID() == 951000000:
         status += 1
 
         if status == 0:
-            selection = answer
-            sm.sendAskYesNo("#eToday is #b[Day]#k.\r\n\r\n"
-                            "Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
-                            "Clearing the dungeion will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
-                            "Would you like to enter the dungeon?")
+            if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
+                sm.sendSayOkay("I'm sorry, but you've used up all your clears for today.")
+                sm.dispose()
+            else:
+                selection = answer
+                sm.sendAskYesNo("#eToday is #b"+ sm.getDay() +"#k.\r\n\r\n"
+                                "Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
+                                "Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
+                                "Would you like to enter the dungeon?")
+
 
         elif status == 1:
             if response == 1:
-                sm.warpPartyIn(maps[selection][1])
+                sm.warpInstanceIn(maps[selection][1])
+                sm.incrementMonsterParkCount()
+                sm.createQuestWithQRValue(GameConstants.MONSTER_PARK_EXP_QUEST, "0")
             sm.dispose()
 
 
@@ -71,21 +86,13 @@ elif sm.getFieldID() == 951000000:
 else:
 
     field = {
-        220070400 : 922020000,
-        222020400 : 300000100,
-        104020100 : 104020120,
-        100000200 : 100000202, # Henesys Park : Pet-Walking Road
-        130020000 : 913001000,
-        865000000 : 865000002,
-    }
-
-    portal = {
-        220070400 : 0,
-        222020400 : 1,
-        104020100 : 2,
-        100000200 : 5,
-        130020000 : 0,
-        865000000 : 1,
+        220070400 : [922020000, 0],
+        222020400 : [300000100, 1],
+        104020100 : [104020120, 2],
+        100000200 : [100000202, 5], # Henesys Park -> Pet-Walking Road
+        130020000 : [913001000, 0],
+        865000000 : [865000002, 1],
+        252010300 : [925120000, 0], # Golden Temple Training Ground 4 -> SnowFro's Lair
     }
 
     def init():
@@ -103,5 +110,5 @@ else:
             warp = False
 
         if warp:
-            sm.warp(field[fieldID], portal[fieldID])
+            sm.warp(field[fieldID][0], field[fieldID][1])
         sm.dispose()

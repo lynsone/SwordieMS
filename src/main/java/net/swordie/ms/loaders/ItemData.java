@@ -1,14 +1,14 @@
 package net.swordie.ms.loaders;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.util.*;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import net.swordie.ms.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -23,7 +23,8 @@ public class ItemData {
     public static Map<Integer, Equip> equips = new HashMap<>();
     public static Map<Integer, ItemInfo> items = new HashMap<>();
     public static Map<Integer, PetInfo> pets = new HashMap<>();
-    public static List<ItemOption> itemOptions = new ArrayList<>();
+    public static Map<Integer, ItemOption> itemOptions = new HashMap<>();
+    public static Map<Integer, Integer> skillIdByItemId = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
 
@@ -43,35 +44,27 @@ public class ItemData {
             ret.setCuttable((short) -1);
             ret.setItemState((short) ItemState.ENHANCABLE.getVal());
             if (randomizeStats) {
-                EquipBaseStat[] ebsStat = new EquipBaseStat[]{EquipBaseStat.iStr, EquipBaseStat.iInt, EquipBaseStat.iDex,
-                        EquipBaseStat.iLuk, EquipBaseStat.iPAD, EquipBaseStat.iMAD, EquipBaseStat.iMaxHP, EquipBaseStat.iMaxMP,
-                        EquipBaseStat.iPAD, EquipBaseStat.iMAD};
-                for (EquipBaseStat ebs : ebsStat) {
-                    int max = ebs == EquipBaseStat.iPAD || ebs == EquipBaseStat.iMAD ? 5 : 3; // Att +-5, the rest +-3
-                    if (ret.getBaseStat(ebs) > 0) {
-                        int rand = Util.getRandom(max);
-                        rand = new Random().nextBoolean() ? rand : -rand;
-                        int newStat = (int) Math.max(0, ret.getBaseStat(ebs) + rand);
-                        ret.setBaseStat(ebs, newStat);
+                // TODO: flame stats
+
+                if (ItemConstants.canEquipHavePotential(e)) {
+                    ItemGrade grade = ItemGrade.NONE;
+                    if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
+                        grade = ItemGrade.HIDDEN_UNIQUE;
+                    } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
+                        grade = ItemGrade.HIDDEN_EPIC;
+                    } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
+                        grade = ItemGrade.HIDDEN_RARE;
                     }
-                }
-                ItemGrade grade = ItemGrade.NONE;
-                if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
-                    grade = ItemGrade.HIDDEN_UNIQUE;
-                } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
-                    grade = ItemGrade.HIDDEN_EPIC;
-                } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
-                    grade = ItemGrade.HIDDEN_RARE;
-                }
-                if (grade != ItemGrade.NONE) {
-                    ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
+                    if (grade != ItemGrade.NONE) {
+                        ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
+                    }
                 }
             }
         }
         return ret;
     }
 
-    private static Equip getEquipById(int itemId) {
+    public static Equip getEquipById(int itemId) {
         return getEquips().getOrDefault(itemId, getEquipFromFile(itemId));
     }
 
@@ -128,6 +121,7 @@ public class ItemData {
             boolean tradeBlock = dataInputStream.readBoolean();
             boolean equipTradeBlock = dataInputStream.readBoolean();
             boolean fixedPotential = dataInputStream.readBoolean();
+            boolean noPotential = dataInputStream.readBoolean();
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -138,14 +132,14 @@ public class ItemData {
             }
             int fixedGrade = dataInputStream.readInt();
             int specialGrade = dataInputStream.readInt();
-            equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                    null, new FileTime(-1), 0, ruc, (short) 0, iStr, iDex, iInt,
+            equip = new Equip(itemId, -1, -1, FileTime.fromType(FileTime.Type.ZERO_TIME), -1,
+                    null, FileTime.fromType(FileTime.Type.ZERO_TIME), 0, ruc, (short) 0, iStr, iDex, iInt,
                     iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
                     iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
                     (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
                     (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
                     rLuk, rLevel, rJob, rPop, cash,
-                    islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
+                    islot, vslot, fixedGrade, options, specialGrade, fixedPotential, noPotential, tradeBlock, only,
                     notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
             equips.put(equip.getItemId(), equip);
         } catch (IOException e) {
@@ -186,7 +180,7 @@ public class ItemData {
                 dataOutputStream.writeShort(equip.getiJump());
                 dataOutputStream.writeShort(equip.getDamR());
                 dataOutputStream.writeShort(equip.getStatR());
-                dataOutputStream.writeShort(equip.getRuc());
+                dataOutputStream.writeShort(equip.getTuc());
                 dataOutputStream.writeInt(equip.getCharmEXP());
                 dataOutputStream.writeInt(equip.getSetItemID());
                 dataOutputStream.writeInt(equip.getPrice());
@@ -199,6 +193,7 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isTradeBlock());
                 dataOutputStream.writeBoolean(equip.isEquipTradeBlock());
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
+                dataOutputStream.writeBoolean(equip.isNoPotential());
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
@@ -266,6 +261,7 @@ public class ItemData {
                         boolean only = false;
                         boolean tradeBlock = false;
                         boolean fixedPotential = false;
+                        boolean noPotential = false;
                         boolean exItem = false;
                         boolean equipTradeBlock = false;
                         List<Integer> options = new ArrayList<>(7);
@@ -421,6 +417,10 @@ public class ItemData {
                             if (hasfixedPotential) {
                                 fixedPotential = Integer.parseInt(attributes.get("value")) == 1;
                             }
+                            boolean hasNoPotential = attributes.get("name").equalsIgnoreCase("noPotential");
+                            if (hasNoPotential) {
+                                noPotential = Integer.parseInt(attributes.get("value")) == 1;
+                            }
                             boolean hasOptions = attributes.get("name").equalsIgnoreCase("option");
                             if (hasOptions) {
                                 for (Node whichOptionNode : XMLApi.getAllChildren(n)) {
@@ -444,14 +444,14 @@ public class ItemData {
                                 specialGrade = Integer.parseInt(attributes.get("value"));
                             }
                         }
-                        Equip equip = new Equip(itemId, -1, -1, new FileTime(-1), -1,
-                                null, new FileTime(-1), 0, (short) ruc, (short) 0, (short) incStr, (short) incDex, (short) incInt,
+                        Equip equip = new Equip(itemId, -1, -1, FileTime.fromType(FileTime.Type.ZERO_TIME), -1,
+                                null, FileTime.fromType(FileTime.Type.ZERO_TIME), 0, (short) ruc, (short) 0, (short) incStr, (short) incDex, (short) incInt,
                                 (short) incLuk, (short) incMHP, (short) incMMP, (short) incPAD, (short) incMAD, (short) incPDD, (short) incMDD, (short) incACC, (short) incEVA, (short) incCraft,
                                 (short) incSpeed, (short) incJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
                                 (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) damR, (short) statR, (short) 0, (short) 0,
                                 (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) reqStr, (short) reqDex, (short) reqInt,
                                 (short) reqLuk, (short) reqLevel, (short) reqJob, (short) reqPop, cash,
-                                islot, vslot, fixedGrade, options, specialGrade, fixedPotential, tradeBlock, only,
+                                islot, vslot, fixedGrade, options, specialGrade, fixedPotential, noPotential, tradeBlock, only,
                                 notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
                         equips.put(equip.getItemId(), equip);
                     }
@@ -521,6 +521,7 @@ public class ItemData {
             itemInfo.setMasterLv(dataInputStream.readInt());
 
             itemInfo.setMoveTo(dataInputStream.readInt());
+            itemInfo.setSkillId(dataInputStream.readInt());
             getItems().put(itemInfo.getItemId(), itemInfo);
 
         } catch (IOException e) {
@@ -586,6 +587,7 @@ public class ItemData {
                 dataOutputStream.writeInt(ii.getMasterLv());
 
                 dataOutputStream.writeInt(ii.getMoveTo());
+                dataOutputStream.writeInt(ii.getSkillId());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1062,7 +1064,6 @@ public class ItemData {
                                 case "reqCUC":
                                 case "incCraft":
                                 case "reqEquipLevelMin":
-                                case "incRandVol":
                                 case "incPVPDamage":
                                 case "successRates":
                                 case "enchantCategory":
@@ -1159,6 +1160,9 @@ public class ItemData {
                                     break;
                                 case "noNegative":
                                     item.putScrollStat(noNegative, Integer.parseInt(value));
+                                    break;
+                                case "incRandVol":
+                                    item.putScrollStat(incRandVol, Integer.parseInt(value));
                                     break;
                                 case "success":
                                     item.putScrollStat(success, Integer.parseInt(value));
@@ -1344,10 +1348,30 @@ public class ItemData {
                             item.addItemReward(iri);
                         }
                     }
+                    item.setSkillId(getSkillIdByItemId(id));
                     getItems().put(item.getItemId(), item);
                 }
             }
         }
+    }
+
+    public static void loadMountItemsFromFile() {
+        File file = new File(String.format("%s/mountsFromItem.txt", ServerConstants.RESOURCES_DIR));
+        try (Scanner scanner = new Scanner(new FileInputStream(file))) {
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] lineSplit = line.split(" ");
+                int itemId = Integer.parseInt(lineSplit[0]);
+                int skillId = Integer.parseInt(lineSplit[1]);
+                skillIdByItemId.put(itemId, skillId);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int getSkillIdByItemId(int itemId) {
+        return skillIdByItemId.getOrDefault(itemId, 0);
     }
 
     public static Item getDeepCopyByItemInfo(ItemInfo itemInfo) {
@@ -1407,44 +1431,267 @@ public class ItemData {
             ItemOption io = new ItemOption();
             String nodeName = XMLApi.getNamedAttribute(mainNode, "name");
             io.setId(Integer.parseInt(nodeName));
-            int optionType = 0;
-            Node typeNode = XMLApi.getFirstChildByNameBF(mainNode, "optionType");
-            if (typeNode != null) {
-                optionType = Integer.parseInt(XMLApi.getNamedAttribute(typeNode, "value"));
+            Node infoNode = XMLApi.getFirstChildByNameBF(mainNode, "info");
+            if (infoNode != null) {
+                for (Node infoChild : XMLApi.getAllChildren(infoNode)) {
+                    String name = XMLApi.getNamedAttribute(infoChild, "name");
+                    String value = XMLApi.getNamedAttribute(infoChild, "value");
+                    switch (name) {
+                        case "optionType":
+                            io.setOptionType(Integer.parseInt(value));
+                            break;
+                        case "weight":
+                            io.setWeight(Integer.parseInt(value));
+                            break;
+                        case "reqLevel":
+                            io.setReqLevel(Integer.parseInt(value));
+                            break;
+                        case "string":
+                            io.setString(value);
+                            break;
+                    }
+                }
             }
-            int weight = 0;
-            Node weightNode = XMLApi.getFirstChildByNameBF(mainNode, "weight");
-            if (weightNode != null) {
-                weight = Integer.parseInt(XMLApi.getNamedAttribute(weightNode, "value"));
+            Node levelNode = XMLApi.getFirstChildByNameBF(mainNode, "level");
+            if (levelNode != null) {
+                for (Node levelChild : XMLApi.getAllChildren(levelNode)) {
+                    int level = Integer.parseInt(XMLApi.getNamedAttribute(levelChild, "name"));
+                    for (Node levelInfoNode : XMLApi.getAllChildren(levelChild)) {
+                        String name = XMLApi.getNamedAttribute(levelInfoNode, "name");
+                        String stringValue = XMLApi.getNamedAttribute(levelInfoNode, "value");
+                        int value = 0;
+                        if (Util.isNumber(stringValue)) {
+                            value = Integer.parseInt(stringValue);
+                        }
+                        switch (name) {
+                            case "incSTR":
+                                io.addStatValue(level, BaseStat.str, value);
+                                break;
+                            case "incDEX":
+                                io.addStatValue(level, BaseStat.dex, value);
+                                break;
+                            case "incINT":
+                                io.addStatValue(level, BaseStat.inte, value);
+                                break;
+                            case "incLUK":
+                                io.addStatValue(level, BaseStat.luk, value);
+                                break;
+                            case "incMHP":
+                                io.addStatValue(level, BaseStat.mhp, value);
+                                break;
+                            case "incMMP":
+                                io.addStatValue(level, BaseStat.mmp, value);
+                                break;
+                            case "incACC":
+                                io.addStatValue(level, BaseStat.acc, value);
+                                break;
+                            case "incEVA":
+                                io.addStatValue(level, BaseStat.eva, value);
+                                break;
+                            case "incSpeed":
+                                io.addStatValue(level, BaseStat.speed, value);
+                                break;
+                            case "incJump":
+                                io.addStatValue(level, BaseStat.jump, value);
+                                break;
+                            case "incPAD":
+                                io.addStatValue(level, BaseStat.pad, value);
+                                break;
+                            case "incMAD":
+                                io.addStatValue(level, BaseStat.mad, value);
+                                break;
+                            case "incPDD":
+                                io.addStatValue(level, BaseStat.pdd, value);
+                                break;
+                            case "incMDD":
+                                io.addStatValue(level, BaseStat.mdd, value);
+                                break;
+                            case "incCr":
+                                io.addStatValue(level, BaseStat.cr, value);
+                                break;
+                            case "incPADr":
+                                io.addStatValue(level, BaseStat.padR, value);
+                                break;
+                            case "incMADr":
+                                io.addStatValue(level, BaseStat.madR, value);
+                                break;
+                            case "incSTRr":
+                                io.addStatValue(level, BaseStat.strR, value);
+                                break;
+                            case "incDEXr":
+                                io.addStatValue(level, BaseStat.dexR, value);
+                                break;
+                            case "incINTr":
+                                io.addStatValue(level, BaseStat.intR, value);
+                                break;
+                            case "incLUKr":
+                                io.addStatValue(level, BaseStat.lukR, value);
+                                break;
+                            case "ignoreTargetDEF":
+                                io.addStatValue(level, BaseStat.ied, value);
+                                break;
+                            case "boss":
+                                io.addStatValue(level, BaseStat.bd, value);
+                                break;
+                            case "incDAMr":
+                                io.addStatValue(level, BaseStat.fd, value);
+                                break;
+                            case "incAllskill":
+                                io.addStatValue(level, BaseStat.incAllSkill, value);
+                                break;
+                            case "incMHPr":
+                                io.addStatValue(level, BaseStat.mhpR, value);
+                                break;
+                            case "incMMPr":
+                                io.addStatValue(level, BaseStat.mmpR, value);
+                                break;
+                            case "incACCr":
+                                io.addStatValue(level, BaseStat.accR, value);
+                                break;
+                            case "incEVAr":
+                                io.addStatValue(level, BaseStat.evaR, value);
+                                break;
+                            case "incPDDr":
+                                io.addStatValue(level, BaseStat.pddR, value);
+                                break;
+                            case "incMDDr":
+                                io.addStatValue(level, BaseStat.mddR, value);
+                                break;
+                            case "RecoveryHP":
+                                io.addStatValue(level, BaseStat.hpRecovery, value);
+                                break;
+                            case "RecoveryMP":
+                                io.addStatValue(level, BaseStat.mpRecovery, value);
+                                break;
+                            case "incMaxDamage":
+                                io.addStatValue(level, BaseStat.damageOver, value);
+                                break;
+                            case "incSTRlv":
+                                io.addStatValue(level, BaseStat.strLv, value / 10D);
+                                break;
+                            case "incDEXlv":
+                                io.addStatValue(level, BaseStat.dexLv, value / 10D);
+                                break;
+                            case "incINTlv":
+                                io.addStatValue(level, BaseStat.intLv, value / 10D);
+                                break;
+                            case "incLUKlv":
+                                io.addStatValue(level, BaseStat.lukLv, value / 10D);
+                                break;
+                            case "RecoveryUP":
+                                io.addStatValue(level, BaseStat.recoveryUp, value);
+                                break;
+                            case "incTerR":
+                                io.addStatValue(level, BaseStat.ter, value);
+                                break;
+                            case "incAsrR":
+                                io.addStatValue(level, BaseStat.asr, value);
+                                break;
+                            case "incEXPr":
+                                io.addStatValue(level, BaseStat.expR, value);
+                                break;
+                            case "mpconReduce":
+                                io.addStatValue(level, BaseStat.mpconReduce, value);
+                                break;
+                            case "reduceCooltime":
+                                io.addStatValue(level, BaseStat.reduceCooltime, value);
+                                break;
+                            case "incMesoProp":
+                                io.addStatValue(level, BaseStat.mesoR, value);
+                                break;
+                            case "incRewardProp":
+                                io.addStatValue(level, BaseStat.dropR, value);
+                                break;
+                            case "incCriticaldamageMin":
+                                io.addStatValue(level, BaseStat.minCd, value);
+                                break;
+                            case "incCriticaldamageMax":
+                                io.addStatValue(level, BaseStat.maxCd, value);
+                                break;
+                            case "incPADlv":
+                                io.addStatValue(level, BaseStat.padLv, value / 10D);
+                                break;
+                            case "incMADlv":
+                                io.addStatValue(level, BaseStat.madLv, value / 10D);
+                                break;
+                            case "incMHPlv":
+                                io.addStatValue(level, BaseStat.mhpLv, value / 10D);
+                                break;
+                            case "incMMPlv":
+                                io.addStatValue(level, BaseStat.mmpLv, value / 10D);
+                                break;
+                            case "prop":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.prop, value);
+                                break;
+                            case "face":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.face, value);
+                                break;
+                            case "time":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.time, value);
+                                break;
+                            case "HP":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.hpRecoveryOnHit, value);
+                                break;
+                            case "MP":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.mpRecoveryOnHit, value);
+                                break;
+                            case "attackType":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.attackType, value);
+                                break;
+                            case "level":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.level, value);
+                                break;
+                            case "ignoreDAM":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.ignoreDam, value);
+                                break;
+                        }
+                    }
+
+                }
             }
-            int reqLevel = 0;
-            Node reqLevelNode = XMLApi.getFirstChildByNameBF(mainNode, "reqLevel");
-            if (reqLevelNode != null) {
-                reqLevel = Integer.parseInt(XMLApi.getNamedAttribute(reqLevelNode, "value"));
-            }
-            io.setOptionType(optionType);
-            io.setWeight(weight);
-            io.setReqLevel(reqLevel);
-            if (weight == 0) {
+            if (io.getWeight() == 0) {
                 io.setWeight(1);
             }
-            getItemOptions().add(io);
+            getItemOptions().put(io.getId(), io);
         }
     }
 
-    public static List<ItemOption> getItemOptions() {
+    public static Map<Integer, ItemOption> getItemOptions() {
         return itemOptions;
+    }
+
+    public static ItemOption getItemOptionById(int id) {
+        return itemOptions.getOrDefault(id, null);
     }
 
     public static void saveItemOptions(String dir) {
         File file = new File(String.format("%s/itemOptions.dat", dir));
         try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
             dos.writeInt(getItemOptions().size());
-            for (ItemOption io : getItemOptions()) {
+            for (ItemOption io : getItemOptions().values()) {
                 dos.writeInt(io.getId());
                 dos.writeInt(io.getOptionType());
                 dos.writeInt(io.getWeight());
                 dos.writeInt(io.getReqLevel());
+                dos.writeUTF(io.getString());
+                dos.writeShort(io.getStatValuesPerLevel().size());
+                for (Map.Entry<Integer, Map<BaseStat, Double>> entry1 : io.getStatValuesPerLevel().entrySet()) {
+                    dos.writeInt(entry1.getKey());
+                    dos.writeShort(entry1.getValue().size());
+                    for (Map.Entry<BaseStat, Double> entry2 : entry1.getValue().entrySet()) {
+                        dos.writeInt(entry2.getKey().ordinal());
+                        dos.writeDouble(entry2.getValue());
+                    }
+                }
+                dos.writeShort(io.getMiscValuesPerLevel().size());
+                for (Map.Entry<Integer, Map<ItemOption.ItemOptionType, Integer>> entry1 : io.getMiscValuesPerLevel().entrySet()) {
+                    dos.writeInt(entry1.getKey());
+                    dos.writeShort(entry1.getValue().size());
+                    for (Map.Entry<ItemOption.ItemOptionType, Integer> entry2 : entry1.getValue().entrySet()) {
+                        dos.writeInt(entry2.getKey().ordinal());
+                        dos.writeInt(entry2.getValue());
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -1465,7 +1712,24 @@ public class ItemData {
                     io.setOptionType(dis.readInt());
                     io.setWeight(dis.readInt());
                     io.setReqLevel(dis.readInt());
-                    getItemOptions().add(io);
+                    io.setString(dis.readUTF());
+                    short size2 = dis.readShort();
+                    for (int j = 0; j < size2; j++) {
+                        int level = dis.readInt();
+                        short size3 = dis.readShort();
+                        for (int k = 0; k < size3; k++) {
+                            io.addStatValue(level, BaseStat.values()[dis.readInt()], dis.readDouble());
+                        }
+                    }
+                    size2 = dis.readShort();
+                    for (int j = 0; j < size2; j++) {
+                        int level = dis.readInt();
+                        short size3 = dis.readShort();
+                        for (int k = 0; k < size3; k++) {
+                            io.addMiscValue(level, ItemOption.ItemOptionType.values()[dis.readInt()], dis.readInt());
+                        }
+                    }
+                    getItemOptions().put(io.getId(), io);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -1475,6 +1739,9 @@ public class ItemData {
 
     @SuppressWarnings("unused") // Reflection
     public static void generateDatFiles() {
+        log.info("Started generating item data.");
+        long start = System.currentTimeMillis();
+        loadMountItemsFromFile();
         loadEquipsFromWz();
         loadItemsFromWZ();
         loadPetsFromWZ();
@@ -1484,6 +1751,7 @@ public class ItemData {
         saveItems(ServerConstants.DAT_DIR + "/items");
         savePets(ServerConstants.DAT_DIR + "/pets");
         saveItemOptions(ServerConstants.DAT_DIR);
+        log.info(String.format("Completed generating item data in %dms.", System.currentTimeMillis() - start));
     }
 
     public static void main(String[] args) {

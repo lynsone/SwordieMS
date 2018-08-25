@@ -8,11 +8,14 @@ import net.swordie.ms.loaders.NpcData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.world.field.MobGen;
 
-public class Life {
+import java.util.Observable;
+
+public class Life extends Observable {
     private Position position;
-    private int objectId;
-    protected int cy, f, fh, templateId, mobTime, rx0, rx1, type, x, y;
+    private int objectId = -1;
+    protected int cy, flip, fh, templateId, mobTime, rx0, rx1, type, x, y;
     private String lifeType = "";
     private boolean hide;
     private String limitedName = "";
@@ -31,8 +34,8 @@ public class Life {
     private Position homePosition;
     private Position vPosition;
 
-    public Life(int objectId) {
-        this.objectId = objectId;
+    public Life(int templateId) {
+        this.templateId = templateId;
         this.position = new Position(0, 0);
     }
 
@@ -60,12 +63,12 @@ public class Life {
         this.cy = cy;
     }
 
-    public int getF() {
-        return f;
+    public int getFlip() {
+        return flip;
     }
 
-    public void setF(int f) {
-        this.f = f;
+    public void setFlip(int flip) {
+        this.flip = flip;
     }
 
     public int getFh() {
@@ -241,13 +244,13 @@ public class Life {
     }
 
     public Life deepCopy() {
-        Life copy = new Life(getObjectId());
+        Life copy = new Life(getTemplateId());
+        copy.setObjectId(getObjectId());
         copy.setLifeType(getLifeType());
-        copy.setTemplateId(getTemplateId());
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setF(getF());
+        copy.setFlip(getFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -266,10 +269,12 @@ public class Life {
         return copy;
     }
 
-    public Mob createMobFromLife() {
-        Mob mob = null;
+    public MobGen createMobGenFromLife() {
+        MobGen mobGen = null;
         if (getLifeType().equalsIgnoreCase("m")) {
-            mob = MobData.getMobDeepCopyById(getTemplateId());
+            mobGen = new MobGen(0);
+            mobGen.setPosition(getHomePosition().deepCopy());
+            Mob mob = MobData.getMobDeepCopyById(getTemplateId());
             mob.setObjectId(getObjectId());
             mob.setLifeType(getLifeType());
             mob.setTemplateId(getTemplateId());
@@ -278,7 +283,7 @@ public class Life {
             mob.setHomePosition(new Position(getX(), getY()));
             mob.setPosition(new Position(getX(), getY()));
             mob.setMobTime(getMobTime());
-            mob.setF(getF());
+            mob.setFlip(getFlip());
             mob.setHide(isHide());
             mob.setFh(getFh());
             mob.setCy(getCy());
@@ -294,8 +299,9 @@ public class Life {
             mob.setMobTimeOnDie(isMobTimeOnDie());
             mob.setRegenStart(getRegenStart());
             mob.setMobAliveReq(getMobAliveReq());
+            mobGen.setMob(mob);
         }
-        return mob;
+        return mobGen;
     }
 
     @Override
@@ -339,7 +345,7 @@ public class Life {
             npc.setY(getY());
             npc.setPosition(new Position(getX(), getY()));
             npc.setMobTime(getMobTime());
-            npc.setF(getF());
+            npc.setFlip(getFlip());
             npc.setHide(isHide());
             npc.setFh(getFh());
             npc.setCy(getCy());
@@ -371,7 +377,7 @@ public class Life {
     }
 
     public void broadcastSpawnPacket(Char onlyChar) {
-        // Life itself doesn't have a spawn apcket
+        // Life itself doesn't have a spawn packet
     }
 
     public Position getVPosition() {

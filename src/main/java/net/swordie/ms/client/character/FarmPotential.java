@@ -12,7 +12,7 @@ public class FarmPotential {
         outPacket.encodeInt(size);
         for (int i = 0; i < size; i++) {
             outPacket.encodeInt(0); // dwMonsterID
-            outPacket.encodeFT(new FileTime(0)); // potentialExpire
+            outPacket.encodeFT(FileTime.fromType(FileTime.Type.ZERO_TIME)); // potentialExpire
         }
     }
 }

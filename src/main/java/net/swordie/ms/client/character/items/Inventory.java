@@ -20,7 +20,6 @@ public class Inventory {
     private int id;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventoryId")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Item> items;
     @Column(name = "type")
     private InvType type;
@@ -35,6 +34,12 @@ public class Inventory {
         this.type = t;
         items = new ArrayList<>();
         this.slots = (byte) slots;
+    }
+
+    public Inventory deepCopy() {
+        Inventory inventory = new Inventory(getType(), getSlots());
+        inventory.setItems(new ArrayList<>(getItems()));
+        return inventory;
     }
 
     public int getId() {
@@ -54,7 +59,7 @@ public class Inventory {
     }
 
     public void addItem(Item item) {
-        if(getItems().size() <= getSlots()) {
+        if(getItems().size() < getSlots()) {
             getItems().add(item);
             item.setInvType(getType());
             sortItemsByIndex();

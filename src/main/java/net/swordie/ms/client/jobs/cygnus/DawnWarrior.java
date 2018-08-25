@@ -19,7 +19,6 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -211,7 +210,8 @@ public class DawnWarrior extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
+        
     }
 
     private void equinox(TemporaryStatManager tsm ) {
@@ -306,7 +306,7 @@ public class DawnWarrior extends Job {
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -324,7 +324,7 @@ public class DawnWarrior extends Job {
             skillID = skill.getSkillId();
         }
         if(tsm.hasStat(SoulMasterFinal)) {
-            handleSoulElement(attackInfo, slv);
+            applySoulElementOnMob(attackInfo, slv);
         }
 
         equinox(tsm);
@@ -353,23 +353,26 @@ public class DawnWarrior extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void handleSoulElement(AttackInfo attackInfo, byte slv) {
+    private void applySoulElementOnMob(AttackInfo attackInfo, byte slv) {
         Option o1 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(SOUL_ELEMENT);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 MobTemporaryStat mts = mob.getTemporaryStat();
-                o1.nOption = 1;
-                o1.rOption = SOUL_ELEMENT;
-                o1.tOption = si.getValue(subTime, slv);
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                if(!mob.isBoss()) {
+                    o1.nOption = 1;
+                    o1.rOption = SOUL_ELEMENT;
+                    o1.tOption = si.getValue(subTime, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                }
             }
         }
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         Char chr = c.getChr();
         Skill skill = chr.getSkill(skillID);
         SkillInfo si = null;

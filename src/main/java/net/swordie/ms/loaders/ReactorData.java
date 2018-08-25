@@ -188,8 +188,7 @@ public class ReactorData {
     }
 
     public static Reactor getReactorByID(int id) {
-        Reactor r = new Reactor(-1);
-        r.setTemplateId(id);
+        Reactor r = new Reactor(id);
         r.init();
         return r;
     }
@@ -212,8 +211,11 @@ public class ReactorData {
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating reactor data.");
+        long start = System.currentTimeMillis();
         loadReactorsFromWZ();
         saveReactors(String.format("%s/reactors", ServerConstants.WZ_DIR));
+        log.info(String.format("Completed generating reactor data in %dms.", System.currentTimeMillis() - start));
     }
 
     public static void main(String[] args) {

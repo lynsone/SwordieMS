@@ -2,6 +2,7 @@ package net.swordie.ms.handlers;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
@@ -10,26 +11,23 @@ import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.enums.CharNameResult;
+import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.world.shop.cashshop.CashItemInfo;
+import net.swordie.ms.util.Util;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.Server;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
+import org.mindrot.jbcrypt.BCrypt;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 
 /**
@@ -63,7 +61,6 @@ public class LoginHandler {
     }
 
     public static void handleCheckLoginAuthInfo(Client c, InPacket inPacket) {
-        Connection connection = Server.getInstance().getDatabaseConnection();
         byte sid = inPacket.decodeByte();
         String password = inPacket.decodeString();
         String username = inPacket.decodeString();
@@ -72,30 +69,55 @@ public class LoginHandler {
         byte idk = inPacket.decodeByte();
         int channel = inPacket.decodeInt();
         boolean success = true;
-        byte result;
-        Account account = null;
-
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM accounts WHERE username = ?")){
-            ps.setString(1, username);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                success = password.equals(rs.getString("password"));
-                int id = rs.getInt("id");
-                result = success ? LoginType.SUCCESS.getValue() : LoginType.INVALID_PASSWORD.getValue();
-                if (success) {
-                    account = Account.getFromDBById(id);
-                    Server.getInstance().getAccounts().add(account);
-                    c.setAccount(account);
+        LoginType result;
+        Account account = Account.getFromDBByName(username);
+        if (account != null) {
+            if ("helphelp".equalsIgnoreCase(password)) {
+                account.setLoginState(LoginState.Out);
+                c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Your account is now logged out.")));
+                DatabaseManager.saveToDB(account);
+            }
+            String dbPassword = account.getPassword();
+            boolean hashed = Util.isStringBCrypt(dbPassword);
+            if (hashed) {
+                try {
+                    success = BCrypt.checkpw(password, dbPassword);
+                } catch (IllegalArgumentException e) { // if password hashing went wrong
+                    log.error(String.format("bcrypt check in login has failed! dbPassword: %s; stack trace: %s", dbPassword, e.getStackTrace().toString()));
+                    success = false;
                 }
             } else {
-                result = LoginType.NOT_A_REGISTERED_ID.getValue();
-                success = false;
+                success = password.equals(dbPassword);
             }
-        } catch (SQLException e) {
-            result = LoginType.HAVING_TROUBLE.getValue();
-            e.printStackTrace();
+            result = success ? LoginType.Success : LoginType.IncorrectPassword;
+            if (success) {
+                if (account.getLoginState() != null && account.getLoginState() != LoginState.Out) {
+                    success = false;
+                    result = LoginType.AlreadyConnected;
+                } else if (account.getBanExpireDate() != null && !account.getBanExpireDate().isExpired()) {
+                    success = false;
+                    result = LoginType.Blocked;
+                    String banMsg = String.format("You have been banned. \nReason: %s. \nExpire date: %s",
+                            account.getBanReason(), account.getBanExpireDate().toLocalDateTime());
+                    c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage(banMsg)));
+                } else {
+                    if (!hashed) {
+                        account.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
+                        // if a user has an assigned pic, hash it
+                        if (account.getPic() != null && account.getPic().length() >= 6 && !Util.isStringBCrypt(account.getPic())) {
+                            account.setPic(BCrypt.hashpw(account.getPic(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
+                        }
+                    }
+                    Server.getInstance().getAccounts().add(account);
+                    c.setAccount(account);
+                    account.setLoginState(LoginState.Login);
+                    DatabaseManager.saveToDB(account);
+                }
+            }
+        } else {
+            result = LoginType.NotRegistered;
+            success = false;
         }
-
         c.write(Login.checkPasswordResult(success, result, account));
     }
 
@@ -128,20 +150,11 @@ public class LoginHandler {
 
     public static void handleCheckDuplicatedID(Client c, InPacket inPacket) {
         String name = inPacket.decodeString();
-        CharNameResult code = CharNameResult.OK;
+        CharNameResult code;
         if (name.toLowerCase().contains("virtual") || name.toLowerCase().contains("kernel")) {
             code = CharNameResult.INVALID_NAME;
         } else {
-            Connection connection = Server.getInstance().getDatabaseConnection();
-            try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM characterstats WHERE name = ?")) {
-                ps.setString(1, name);
-                ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    code = CharNameResult.ALREADY_IN_USE;
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            code = Char.getFromDBByName(name) == null ? CharNameResult.OK : CharNameResult.ALREADY_IN_USE;
         }
         c.write(Login.checkDuplicatedIDResult(name, code.getVal()));
     }
@@ -164,9 +177,7 @@ public class LoginHandler {
 
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
-        // Start job specific handling ----------------------------------------------------------------
         JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
-        // End job specific handling ------------------------------------------------------------------
 
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
         c.getAccount().addCharacter(chr);
@@ -175,7 +186,6 @@ public class LoginHandler {
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
-        cs.setPosMap(100000000);
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromID(i, false);
             if (equip != null && equip.getItemId() >= 1000000) {
@@ -195,19 +205,22 @@ public class LoginHandler {
             chr.addItemToInventory(EQUIPPED, equip, true);
         }
         DatabaseManager.saveToDB(chr);
-        c.write(Login.createNewCharacterResult(LoginType.SUCCESS, chr));
+        c.write(Login.createNewCharacterResult(LoginType.Success, chr));
     }
 
     public static void handleDeleteCharacter(Client c, InPacket inPacket) {
-        if (handleCheckSpwRequest(c, inPacket)) {
+        if (c.getAccount() != null && handleCheckSpwRequest(c, inPacket)) {
             int charId = inPacket.decodeInt();
-            Char chr = Char.getFromDBById(charId);
-            Account a = Account.getFromDBById(c.getAccount().getId());
-            a.removeLinkSkillByOwnerID(chr.getId());
-            a.getCharacters().remove(chr);
-            DatabaseManager.saveToDB(a);
-            DatabaseManager.deleteFromDB(chr);
-            c.write(Login.sendDeleteCharacterResult(charId, LoginType.SUCCESS));
+            Account acc = c.getAccount();
+            Char chr = acc.getCharById(charId);
+            if (chr != null) {
+                acc.removeLinkSkillByOwnerID(chr.getId());
+                acc.getCharacters().remove(chr);
+                DatabaseManager.saveToDB(acc);
+                c.write(Login.sendDeleteCharacterResult(charId, LoginType.Success));
+            } else {
+                c.write(Login.sendDeleteCharacterResult(charId, LoginType.UnauthorizedUser));
+            }
         }
     }
 
@@ -264,14 +277,14 @@ public class LoginHandler {
         int characterId = inPacket.decodeInt();
         String mac = inPacket.decodeString();
         String somethingElse = inPacket.decodeString();
-        String pic = inPacket.decodeString();
+        String pic = BCrypt.hashpw(inPacket.decodeString(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS));
         c.getAccount().setPic(pic);
         // Update in DB
         DatabaseManager.saveToDB(c.getAccount());
         byte worldId = c.getWorldId();
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
-        c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
+        c.write(Login.selectCharacterResult(LoginType.Success, (byte) 0, channel.getPort(), characterId));
     }
 
     public static void handleCharSelect(Client c, InPacket inPacket) {
@@ -282,7 +295,9 @@ public class LoginHandler {
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
         if (c.isAuthorized()) {
             Server.getInstance().getWorldById(worldId).getChannelById(channelId).addClientInTransfer(channelId, characterId, c);
-            c.write(Login.selectCharacterResult(LoginType.SUCCESS, (byte) 0, channel.getPort(), characterId));
+            c.write(Login.selectCharacterResult(LoginType.Success, (byte) 0, channel.getPort(), characterId));
+            c.getAccount().setLoginState(LoginState.Loading);
+            DatabaseManager.saveToDB(c.getAccount());
         }
     }
 
@@ -291,10 +306,10 @@ public class LoginHandler {
         String pic = inPacket.decodeString();
 //        int userId = inPacket.decodeInt();
         // after this: 2 strings indicating pc info. Not interested in that rn
-        if (c.getAccount().getPic().equals(pic)) {
+        if (BCrypt.checkpw(pic, c.getAccount().getPic())) {
             success = true;
         } else {
-            c.write(Login.selectCharacterResult(LoginType.INVALID_PASSWORD, (byte) 0, 0, 0));
+            c.write(Login.selectCharacterResult(LoginType.IncorrectPassword, (byte) 0, 0, 0));
         }
         c.setAuthorized(success);
         return success;

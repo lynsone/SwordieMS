@@ -1,23 +1,35 @@
 package net.swordie.ms.util;
 
 import io.netty.buffer.ByteBuf;
-import org.hibernate.mapping.Collection;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.text.NumberFormat;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * Created on 2/28/2017.
  */
 public class Util {
+
+    private static Map<Class, Class> boxedToPrimClasses = new HashMap<>();
+    private static Pattern regexPattern = Pattern.compile("^\\$2[a-z]\\$.{56}$");
+
+    static {
+        boxedToPrimClasses.put(Boolean.class, boolean.class);
+        boxedToPrimClasses.put(Byte.class, byte.class);
+        boxedToPrimClasses.put(Short.class, short.class);
+        boxedToPrimClasses.put(Character.class, char.class);
+        boxedToPrimClasses.put(Integer.class, int.class);
+        boxedToPrimClasses.put(Long.class, long.class);
+        boxedToPrimClasses.put(Float.class, float.class);
+        boxedToPrimClasses.put(Double.class, double.class);
+    }
 
     /**
      * Gets a random element from a given List. This is done by utilizing {@link #getRandom(int)}.
@@ -307,5 +319,29 @@ public class Util {
      */
     public static <T> T getFromCollectionWithPred(java.util.Collection<T> collection, Predicate<T> pred) {
         return collection.stream().filter(pred).findAny().orElse(null);
+    }
+
+    /**
+     * Returns a formatted number, using English locale.
+     *
+     * @param number The number to be formatted
+     * @return The formatted number
+     */
+    public static String formatNumber(String number) {
+        return NumberFormat.getInstance(Locale.ENGLISH).format(Long.parseLong(number));
+    }
+
+    public static Class<?> convertBoxedToPrimitiveClass(Class<?> clazz) {
+        return boxedToPrimClasses.getOrDefault(clazz, clazz);
+    }
+
+    /**
+     * Tells us if a string is a BCrypt hash.
+     *
+     * @param password Password to check
+     * @return Boolean value
+     */
+    public static boolean isStringBCrypt(String password) {
+        return regexPattern.matcher(password).matches();
     }
 }

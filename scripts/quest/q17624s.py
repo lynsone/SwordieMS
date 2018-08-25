@@ -10,7 +10,7 @@ def action(response, answer):
     status += 1
 
     if status == 0:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("#b(They seem worried.)#k\r\n"
                     "Morning Leon. Good morning Gilberto.")
 
@@ -19,7 +19,7 @@ def action(response, answer):
         sm.sendNext("Oh, #h0#, my sidekick. You're awake.")
 
     elif status == 2:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("#b(How should I approach this...)#k\r\n"
                     "Did you sleep well Leon? Is something the matter? Gilberto, you look worried as well.")
 
@@ -28,7 +28,7 @@ def action(response, answer):
         sm.sendNext("The Commerci Republic is known for it's commerce. The sea trade is great, but the land trade is weak.")
 
     elif status == 4:
-        sm.setSpeakerID(0) # Has to be Player Avatar
+        sm.setPlayerAsSpeaker() # Has to be Player Avatar
         sm.sendNext("Huh?")
 
     elif status == 5:

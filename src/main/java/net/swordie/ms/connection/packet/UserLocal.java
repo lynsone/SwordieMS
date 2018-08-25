@@ -12,12 +12,11 @@ import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,7 +58,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onRoyalGuardAttack(boolean attack) {
+    public static OutPacket royalGuardAttack(boolean attack) {
         OutPacket outPacket = new OutPacket(OutHeader.ROYAL_GUARD_ATTACK);
 
         outPacket.encodeByte(attack);
@@ -67,7 +66,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onRWMultiChargeCancelRequest(byte unk, int skillID) {
+    public static OutPacket rwMultiChargeCancelRequest(byte unk, int skillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SKILL_USE_RESULT);
 
         outPacket.encodeByte(unk);
@@ -76,7 +75,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onSetOffStateForOffSkill(int skillID) {
+    public static OutPacket setOffStateForOffSkill(int skillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SET_OFF_STATE_FOR_OFF_SKILL);
 
         outPacket.encodeInt(skillID);
@@ -247,6 +246,16 @@ public class UserLocal {
         return outPacket;
     }
 
+    public static OutPacket collectionRecordMessage(int collectionIndex, String value) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(MessageType.COLLECTION_RECORD_MESSAGE.getVal());
+        outPacket.encodeInt(collectionIndex);
+        outPacket.encodeString(value);
+
+        return outPacket;
+    }
+
     public static OutPacket setDead(boolean tremble) {
         OutPacket outPacket = new OutPacket(OutHeader.SET_DEAD);
 
@@ -340,19 +349,34 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket petMove(int id, int petID, int encodedGatherDuration, Position oldPos, Position oldVPos, List<Movement> movements) {
+    public static OutPacket petMove(int id, int petID, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.PET_MOVE);
 
         outPacket.encodeInt(id);
         outPacket.encodeInt(petID);
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
+        outPacket.encode(movementInfo);
+
+        return outPacket;
+    }
+
+    public static OutPacket setDressChanged(boolean on, boolean dressInfinity) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_DRESS_CHANGED);
+
+        outPacket.encodeByte(on);
+        outPacket.encodeByte(dressInfinity);
+
+        return outPacket;
+    }
+
+    public static OutPacket setInGameDirectionMode(boolean lock) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_IN_GAME_DIRECTION_MODE);
+
+        outPacket.encodeByte(lock); // Locks User's UI
+        outPacket.encodeByte(0); // unknown
+        if(lock) {
+            outPacket.encodeByte(0); // unknown | doesn't seemt to be used (?)
+            outPacket.encodeByte(!lock); // showUI
         }
-        outPacket.encodeByte(0);
 
         return outPacket;
     }

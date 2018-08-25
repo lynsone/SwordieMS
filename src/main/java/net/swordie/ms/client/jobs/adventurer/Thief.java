@@ -3,44 +3,45 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.drop.DropInfo;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
-
-//TODO DB - Mirror Image
-
-//nFlipTheCoin = stack icon
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -60,6 +61,7 @@ public class Thief extends Job {
     public static final int CLAW_BOOSTER = 4101003; //Buff
 
     public static final int SHADOW_PARTNER_NL = 4111002; //Buff
+    public static final int EXPERT_THROWING_STAR_HANDLING = 4110012;
     public static final int SHADOW_STARS = 4111009; //Buff
     public static final int DARK_FLARE_NL = 4111007; //Summon
     public static final int SHADOW_WEB = 4111003; //Special Attack (Dot + Bind)
@@ -133,6 +135,7 @@ public class Thief extends Job {
     private int supposedCrit;
     private final int MAX_CRIT = 100;
     private ScheduledFuture critGrowthTimer;
+    public static long lastShadowMelt = Long.MIN_VALUE;
 
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
@@ -208,41 +211,46 @@ public class Thief extends Job {
             skillID = SkillConstants.getActualSkillIDfromSkillID(skill.getSkillId());
         }
         if(hasHitMobs) {
-            //Venom & Toxic Venom Passives
-            handlePassiveDoTSkills(attackInfo);
+            // Venom & Toxic Venom Passives
+            applyPassiveDoTSkillsOnMob(attackInfo);
 
-            //Shadower Hyper
+            // Shadower Hyper
             if(chr.hasSkill(FLIP_THE_COIN)) {
-                handleFlipTheCoinActivation(tsm);
+                activateFlipTheCoin(tsm);
             }
 
-            //Night Lord Hyper
-            handleBleedDart(attackInfo);
+            // Night Lord Hyper
+            applyBleedDartOnMob(attackInfo);
         }
 
         if (JobConstants.isNightLord(chr.getJob())) {
             if(hasHitMobs) {
-                //NightLord's Mark & ForceAtom
+                // NightLord's Mark & ForceAtom
                 if(chr.hasSkill(ASSASSINS_MARK)) {
                     setMarkonMob(attackInfo);
                     handleMark(attackInfo);
                 }
 
+                // Expert Throwing Star Handling
+                procExpertThrowingStar(skillID);
             }
         }
 
 
         if (JobConstants.isShadower(chr.getJob())) {
             if(hasHitMobs) {
-                //Critical Growth & Prime Critical
+                // Critical Growth & Prime Critical
                 if(chr.hasSkill(CRITICAL_GROWTH)) {
                     incrementCritGrowing();
                 }
 
-                //Shadower Instinct
+                // Pick Pocket
+                dropFromPickPocket(attackInfo);
+
+                // Shadower Instinct
                 if (chr.hasSkill(SHADOWER_INSTINCT)) {
                     if (tsm.hasStat(IgnoreMobpdpR)) {
-                        handleShadowerInstinct(skillID, tsm, c);
+                        incrementShadowInstinct(skillID, tsm, c);
                     }
                 }
 
@@ -251,8 +259,8 @@ public class Thief extends Job {
 
         if (JobConstants.isDualBlade(chr.getJob())) {
             if(hasHitMobs) {
-                //Life Drain
-                handleLifeDrain();
+                // Life Drain
+                recoverHPByLifeDrain();
             }
         }
         Option o1 = new Option();
@@ -264,11 +272,21 @@ public class Thief extends Job {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        //mts.addStatOptionsAndBroadcast(MobStat.STEAL, o1); //TODO Steal MobStat
-                        // Unsure
+                        Field field = chr.getField();
+                        int itemId = 2431835;
+                        if(mob.isBoss()) {
+                            itemId = 2431850;
+                        }
+                        Item item = ItemData.getItemDeepCopy(itemId);
+                        Drop drop = new Drop(item.getItemId(), item);
+                        field.drop(drop, mob.getPosition());
+
+                        if(!mob.isBoss()) {
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -276,11 +294,13 @@ public class Thief extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }else{
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
@@ -325,11 +345,13 @@ public class Thief extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -337,17 +359,19 @@ public class Thief extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 o2.nOption = 1;
                 o2.tOption = 3;
                 tsm.putCharacterStatValue(NotDamaged, o2);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case FINAL_CUT:
                 o1.nOption = 1;
@@ -362,7 +386,7 @@ public class Thief extends Job {
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamR, o3);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
         }
 
@@ -407,16 +431,30 @@ public class Thief extends Job {
                     aa2.setMobOrigin((byte) 0);
                     aa2.setPosition(chr.getPosition());
                     aa2.setRect(aa2.getPosition().getRectAround(fci.getRects().get(0)));
-                    if (chr.isLeft()) {
-                        aa2.setFlip(false);
-                    } else {
-                        aa2.setFlip(true);
-                    }
+                    aa2.setFlip(!chr.isLeft());
                     aa2.setDelay((short) 9);
                     chr.getField().spawnAffectedArea(aa2);
                     break;
                 case MESO_EXPLOSION:
-                    handleMesoExplosion();
+                    int i = 0;
+                    Field field = chr.getField();
+                    int rectRange = si.getValue(range, slv);
+                    Rect rect = new Rect(
+                            new Position(
+                                    chr.getPosition().getX() - rectRange,
+                                    chr.getPosition().getY() - rectRange),
+                            new Position(
+                                    chr.getPosition().getX() + rectRange,
+                                    chr.getPosition().getY() + rectRange)
+                    );
+                    List<Drop> dropList = field.getDropsInRect(rect);
+                    for(Drop drop : dropList) {
+                        if(drop.isMoney() && (drop.getOwnerID() == chr.getId()) && i < si.getValue(bulletCount, slv)) {
+                            createMesoExplosionForceAtom(drop);
+                            field.broadcastPacket(DropPool.dropExplodeField(drop.getObjectId()));
+                            i++;
+                        }
+                    }
                     break;
                 case HEROS_WILL_NL:
                 case HEROS_WILL_SHAD:
@@ -429,44 +467,19 @@ public class Thief extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(hitInfo.HPDamage == 0 && hitInfo.MPDamage == 0) {
-            // Dodged
-            if(chr.hasSkill(SHADOW_MELD)) {
-                if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
-                    Skill skill = chr.getSkill(SHADOW_MELD);
-                    byte slv = (byte) skill.getCurrentLevel();
-                    SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                    int dodgeProc = si.getValue(er, slv);
-                    if (Util.succeedProp(dodgeProc)) {
-                        Option o1 = new Option();
-                        Option o2 = new Option();
-                        o1.nOption = 100;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        tsm.putCharacterStatValue(CriticalBuff, o1);
-                        o2.nReason = skill.getSkillId();
-                        o2.nValue = si.getValue(indiePad, slv);
-                        o2.tStart = (int) System.currentTimeMillis();
-                        o2.tTerm = si.getValue(time, slv);
-                        tsm.putCharacterStatValue(IndiePAD, o2); //Indie
-                        c.write(WvsContext.temporaryStatSet(tsm));
-                    }
-                }
-            }
+        if(hitInfo.hpDamage <= 0) {
+            giveShadowMelt(chr);
         }
-
         super.handleHit(c, inPacket, hitInfo);
     }
 
-    private void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+    public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int curTime = (int) System.currentTimeMillis();
         Summon summon;
         Field field;
         switch (skillID) {
@@ -489,10 +502,15 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(DarkSight, o1);
                 break;
             case ASSASSINS_MARK:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(NightLordMark, o1);
+                if (tsm.hasStat(NightLordMark)) {
+                    tsm.removeStatsBySkill(skillID);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 0;
+                    tsm.putCharacterStatValue(NightLordMark, o1);
+                }
                 break;
             case CLAW_BOOSTER:
             case DAGGER_BOOSTER:
@@ -520,7 +538,7 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
             case SHADOW_STARS:
-                o1.nOption = si.getValue(x, slv);
+                o1.nOption = 0;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NoBulletConsume, o1);
@@ -547,15 +565,20 @@ public class Thief extends Job {
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
                 break;
-            case MIRRORED_TARGET: //Special Summon   //TODO Crashes - not 38*
-                summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                field = c.getChr().getField();
-                summon.setFlyMob(false);
-                summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
-                summon.setAssistType((byte) 0);
-                summon.setAttackActive(false);
-                field.spawnSummon(summon);
+            case MIRRORED_TARGET:
+                if(tsm.getOptByCTSAndSkill(ShadowPartner, MIRROR_IMAGE) != null) {
+                    summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+                    field = c.getChr().getField();
+                    summon.setFlyMob(false);
+                    summon.setMoveAction((byte) 0);
+                    summon.setMoveAbility((byte) 0);
+                    summon.setAssistType((byte) 0);
+                    summon.setAttackActive(false);
+                    summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
+                    field.spawnSummon(summon);
+
+                    tsm.removeStatsBySkill(MIRROR_IMAGE);
+                }
                 break;
             case DARK_FLARE_NL:
             case DARK_FLARE_SHAD:
@@ -565,6 +588,13 @@ public class Thief extends Job {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility(MoveAbility.STATIC.getVal());
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
 
             case EPIC_ADVENTURE_DB:
@@ -593,7 +623,7 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(IndiePAD, o2);
                 break;
             case FLIP_THE_COIN:
-                handleFlipTheCoinStacking(tsm, c);
+                incrementFlipTheCoinStack(tsm, c);
                 c.write(WvsContext.flipTheCoinEnabled((byte) 0));
                 break;
             case BLADE_CLONE:
@@ -605,7 +635,6 @@ public class Thief extends Job {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamR, o2);
-                //TODO Final Attack Proc%
                 break;
             case ASURAS_ANGER:
                 o1.nOption = 1;
@@ -614,30 +643,37 @@ public class Thief extends Job {
                 tsm.putCharacterStatValue(Asura, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    private void handleMesoExplosion() { //TODO
+    private void createMesoExplosionForceAtom(Drop drop) {
         Field field = chr.getField();
-        SkillInfo si = SkillData.getSkillInfoById(MESO_EXPLOSION);
-        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        List<Life> lifes = field.getLifesInRect(rect);
-        for(Life life : lifes) {
-            if(life instanceof Mob) {
-                int mobID = ((Mob) life).getRefImgMobID(); //
-                int inc = ForceAtomEnum.FLYING_MESO.getInc();
-                int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        0, 0, (int) System.currentTimeMillis(), 1, 0,
-                        new Position());
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, MESO_EXPLOSION, forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), MESO_EXPLOSION, life.getPosition()));
-            }
+        Rect rect = new Rect(
+                new Position(
+                        chr.getPosition().getX() - 4000,
+                        chr.getPosition().getY() - 4000),
+                new Position(
+                        chr.getPosition().getX() + 4000,
+                        chr.getPosition().getY() + 4000)
+        );
+        List<Mob> mobs = field.getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
         }
+        Mob mob = Util.getRandomFromList(mobs);
+        int inc = ForceAtomEnum.FLYING_MESO.getInc();
+        int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
+        int mobId = mob.getObjectId();
+
+        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 5,
+                0, 0, (int) System.currentTimeMillis(), 1, 0,
+                drop.getPosition());
+        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                true, mobId, MESO_EXPLOSION_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                mob.getPosition(), MESO_EXPLOSION_ATOM, mob.getPosition()));
     }
 
-    private void handleFlipTheCoinStacking(TemporaryStatManager tsm, Client c) {
+    private void incrementFlipTheCoinStack(TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -670,10 +706,10 @@ public class Thief extends Job {
         o3.tStart = (int) System.currentTimeMillis();
         o3.tTerm = FlipTheCoinInfo.getValue(time, 1);
         tsm.putCharacterStatValue(IndieMaxDamageOver, o3);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    private void handleFlipTheCoinActivation(TemporaryStatManager tsm) {    //TODO  Change to proc on Critical Hits
+    private void activateFlipTheCoin(TemporaryStatManager tsm) {    //TODO  Change to proc on Critical Hits
         if(tsm.getOption(FlipTheCoin).nOption < 5) {
             if (Util.succeedProp(50)) { //Proc on Crit<<<
                 c.write(WvsContext.flipTheCoinEnabled((byte) 1));
@@ -726,7 +762,7 @@ public class Thief extends Job {
         return multiplier;
     }
 
-    private void handleShadowerInstinct(int skillId, TemporaryStatManager tsm, Client c) {
+    private void incrementShadowInstinct(int skillId, TemporaryStatManager tsm, Client c) {
         Option o = new Option();
         Option o1 = new Option();
         SkillInfo InstinctInfo = SkillData.getSkillInfoById(SHADOWER_INSTINCT);
@@ -747,11 +783,11 @@ public class Thief extends Job {
         o1.rOption = SHADOWER_INSTINCT;
         o1.tOption = InstinctInfo.getValue(time, slv);
         tsm.putCharacterStatValue(PAD, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
     public boolean isBuff(int skillID) {
-        return Arrays.stream(buffs).anyMatch(b -> b == skillID);
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     @Override
@@ -810,6 +846,9 @@ public class Thief extends Job {
                     MobTemporaryStat mts = mob.getTemporaryStat();
 
                     List<Mob> lifes = chr.getField().getMobsInRect(rect);
+                    if(lifes.size() <= 0) {
+                        return;
+                    }
                     List<Mob> bossLifes = chr.getField().getBossMobsInRect(rect);
                     if(mts.hasBurnFromSkill(getCurMarkLv())) {
                         for (int i = 0; i < 6; i++) {
@@ -873,7 +912,7 @@ public class Thief extends Job {
         return supgrade;
     }
 
-    private void handlePassiveDoTSkills(AttackInfo attackInfo) {
+    private void applyPassiveDoTSkillsOnMob(AttackInfo attackInfo) {
 
         //Night Lord
         if(chr.hasSkill(TOXIC_VENOM_NL)) {
@@ -969,7 +1008,7 @@ public class Thief extends Job {
         }
     }
 
-    private void handleBleedDart(AttackInfo attackInfo) {
+    private void applyBleedDartOnMob(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(BleedingToxin)) {
             Skill skill = chr.getSkill(BLEED_DART);
@@ -981,7 +1020,7 @@ public class Thief extends Job {
         }
     }
 
-    private void handleLifeDrain() {
+    private void recoverHPByLifeDrain() {
         if(chr.hasSkill(LIFE_DRAIN)) {
             Skill skill = chr.getSkill(LIFE_DRAIN);
             byte slv = (byte) skill.getCurrentLevel();
@@ -991,6 +1030,97 @@ public class Thief extends Job {
             if(Util.succeedProp(proc)) {
                 int healamount = (int) ((chr.getMaxHP()) / ((double)100 / amounthealed));
                 chr.heal(healamount);
+            }
+        }
+    }
+
+    private void dropFromPickPocket(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Field field = chr.getField();
+        if(!chr.hasSkill(PICK_POCKET)) {
+            return;
+        }
+        if(tsm.getOptByCTSAndSkill(PickPocket, PICK_POCKET) != null) {
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
+                Skill skill = chr.getSkill(PICK_POCKET);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+                Set<DropInfo> dropInfoSet = new HashSet<>();
+                for (int i = 0; i < slv; i++) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        dropInfoSet.add(new DropInfo(0, 100, 0, 50, 150)); // min 50; max 150;
+                    }
+                }
+                if (dropInfoSet.size() > 0) {
+                    field.drop(dropInfoSet, mob.getPosition(), chr.getId());
+                }
+            }
+        }
+    }
+
+    private void procExpertThrowingStar(int skillId) {
+        if(!chr.hasSkill(EXPERT_THROWING_STAR_HANDLING)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+
+        Skill skill = chr.getSkill(EXPERT_THROWING_STAR_HANDLING);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        int hideIconSkillId = skill.getSkillId() + 100; // there's no Buff Icon
+
+        if(tsm.getOptByCTSAndSkill(IndieDamR, hideIconSkillId) == null) {
+            tsm.removeStatsBySkill(hideIconSkillId);
+            if(Util.succeedProp(si.getValue(prop, slv))) {
+                o.nReason = hideIconSkillId;
+                o.nValue = si.getValue(pdR, slv);
+                o.tStart = (int) System.currentTimeMillis();
+                o.tTerm = 5;
+                tsm.putCharacterStatValue(IndieDamR, o);
+                tsm.sendSetStatPacket();
+            }
+        } else {
+            tsm.removeStatsBySkill(hideIconSkillId);
+            o.nOption = 100;
+            o.rOption = hideIconSkillId;
+            o.tOption = 5;
+            tsm.putCharacterStatValue(CriticalBuff, o);
+            tsm.sendSetStatPacket();
+
+            if(SkillData.getSkillInfoById(skillId) != null) {
+                chr.healMP(SkillData.getSkillInfoById(skillId).getValue(mpCon, slv));
+            }
+
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skill.getSkillId(), slv, 0)));
+            chr.write(User.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
+        }
+    }
+
+    public static void giveShadowMelt(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr.hasSkill(SHADOW_MELD)) {
+            if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
+                Skill skill = chr.getSkill(SHADOW_MELD);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+
+                if(lastShadowMelt + 5000 < System.currentTimeMillis()) {
+                    Option o1 = new Option();
+                    Option o2 = new Option();
+                    o1.nOption = 100;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(CriticalBuff, o1);
+                    o2.nReason = skill.getSkillId();
+                    o2.nValue = si.getValue(indiePad, slv);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndiePAD, o2); //Indie
+                    tsm.sendSetStatPacket();
+                    lastShadowMelt = System.currentTimeMillis();
+                }
             }
         }
     }

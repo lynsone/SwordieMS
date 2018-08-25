@@ -1,5 +1,7 @@
 package net.swordie.ms.client.character.avatar;
 
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
@@ -239,29 +241,29 @@ public class AvatarLook {
         outPacket.encodeByte(isZeroBetaLook()); // ?
         outPacket.encodeInt(getHair());
 
-        for (int i = 1; i < getHairEquips().size(); i++) {
-            int itemId = getHairEquips().get(i);
-            outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
-            outPacket.encodeInt(itemId); // item id
+        for (int itemId : getHairEquips()) {
+            int bodyPart = ItemConstants.getBodyPartFromItem(itemId, getGender());
+            if (bodyPart != 0) {
+                outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
+                outPacket.encodeInt(itemId); // item id
+            }
         }
         outPacket.encodeByte(-1);
-        for (int i = 0; i < getUnseenEquips().size(); i++) {
-            int itemId = getUnseenEquips().get(i);
+        for (int itemId : getUnseenEquips()) {
             outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
             outPacket.encodeInt(itemId);
         }
         outPacket.encodeByte(-1);
-        for (int i = 0; i < getTotems().size(); i++) {
-            int itemId = getTotems().get(i);
+        for (int itemId : getTotems()) {
             outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender()));
             outPacket.encodeInt(itemId);
         }
-        outPacket.encodeByte(-1); //original, testing stuff
+        outPacket.encodeByte(-1);
         outPacket.encodeInt(getWeaponStickerId());
         outPacket.encodeInt(getWeaponId());
         outPacket.encodeInt(getSubWeaponId());
         outPacket.encodeByte(isDrawElfEar());
-        // outPacket.encodeByte(-1); //smth to do with a new class
+
         for (int i = 0; i < 3; i++) {
             if (getPetIDs().size() > i) {
                 outPacket.encodeInt(getPetIDs().get(i)); // always 3
@@ -289,6 +291,77 @@ public class AvatarLook {
         }
         outPacket.encodeByte(getMixedHairColor());
         outPacket.encodeByte(getMixHairPercent());
+    }
+
+    public void encodePackedCharacterLook(OutPacket outPacket, Char chr) {
+        // flawlessy typed over
+        // and let's call it loop unrolling
+        int[] hairEquips = new int[11];
+        for (int i = 0; i < hairEquips.length; i++) {
+             Item item = chr.getEquippedInventory().getItemBySlot((short) i);
+             if (item != null) {
+                 hairEquips[i] = item.getItemId();
+             } else {
+                 hairEquips[i] = -1;
+             }
+        }
+        byte[] data = new byte[24];
+        int weaponID = getWeaponStickerId() != 0 ? getWeaponStickerId() : getWeaponId();
+        int wt = ItemConstants.getWeaponType(weaponID);
+        int faceAcc = 0;
+        if (getDemonSlayerDefFaceAcc() != 0) {
+            faceAcc = getDemonSlayerDefFaceAcc();
+        } else if (getXenonDefFaceAcc() != 0) {
+            faceAcc = getXenonDefFaceAcc();
+        } else if (getBeastTamerDefFaceAcc() != 0) {
+            faceAcc = getBeastTamerDefFaceAcc();
+        }
+        data[0] |= getGender() & 1;
+        data[0] |= (getSkin() & 0xF) << 1;
+        data[0] |= ((getFace() % 1000) & 0x3FF) << 5;
+        data[1] |= (getFace() / 1000 % 10 & 7) << 7;
+        data[2] |= (getFace() / 10000 == 4 ? 1 : 0) << 2;
+        data[2] |= ((getFace() % 1000) & 0x3FF) << 3;
+        data[3] |= (getFace() / 1000 % 10 & 0xF) << 5;
+        data[4] |= ((hairEquips[1] % 1000) & 0x3FF) << 1;
+        data[5] |= (hairEquips[1] / 1000 % 10 & 7) << 3;
+        data[5] |= ((hairEquips[2] % 1000) & 0x3FF) << 6;
+        data[7] |= faceAcc / 1000 % 10 & 3;
+        data[7] |= (hairEquips[3] % 1000) & 0x3FF;
+        data[8] |= (hairEquips[3] / 1000 % 10 & 3) << 4;
+        data[8] |= ((hairEquips[4] % 1000) & 0x3FF) << 6;
+        data[10] |= hairEquips[4] / 1000 % 10 & 3;
+        data[10] |= (hairEquips[5] / 10000 == 105 ? 1 : 0) << 2;
+        data[10] |= ((hairEquips[5] % 1000) & 0x3FF) << 3;
+        data[11] |= ((hairEquips[5] / 1000 % 10) & 0xF) << 5;
+        data[12] |= ((hairEquips[6] % 1000) & 0x3FF) << 1;
+        data[13] |= (hairEquips[6] / 1000 % 10 & 3) << 3;
+        data[13] |= ((hairEquips[7] % 1000) & 0x3FF) << 5;
+        data[14] |= (hairEquips[7] / 1000 % 10 & 3) << 7;
+        data[15] |= ((hairEquips[8] % 1000) & 0x3FF) << 1;
+        data[16] |= (hairEquips[8] / 1000 % 10 & 3) << 3;
+        data[16] |= ((hairEquips[9] % 1000) & 0x3FF) << 5;
+        data[17] |= (hairEquips[9] / 1000 % 10 & 3) << 7;
+        int val = hairEquips[10];
+        if (val / 10000 == 109) {
+            val = 1;
+        } else {
+            val = (val / 10000 != 134 ? 1 : 0) + 2;
+        }
+        data[18] |= (val & 3) << 1;
+        data[19] |= ((hairEquips[10] % 1000) & 0x3FF) << 3;
+        data[19] |= (hairEquips[10] / 1000 % 10 & 0xF) << 5;
+        data[20] |= getWeaponStickerId() / 100000 == 17 ? 2 : 0;
+        data[20] |= ((weaponID % 1000) & 0x3FF) << 2;
+        data[21] |= (weaponID / 1000 % 10 & 3) << 4;
+        data[21] |= (wt & 0x1F) << 6;
+        data[22] |= (isDrawElfEar() ? 1 : 0) << 3;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 7; j >= 0; j--) {
+                // basically encoding 3 sequential longs in little endian
+                outPacket.encodeByte(data[j + i * 8]);
+            }
+        }
     }
 
     public int getHair() {
@@ -358,5 +431,15 @@ public class AvatarLook {
 
     public void setKaiserTailID(int kaiserTailID) {
         this.kaiserTailID = kaiserTailID;
+    }
+
+    public void removeItem(int itemID) {
+        List<Integer> hairEquips = getHairEquips();
+        if (ItemConstants.isWeapon(itemID)) {
+            setWeaponId(0);
+        }
+        if (hairEquips.contains(itemID)) {
+            hairEquips.remove((Integer) itemID);
+        }
     }
 }

@@ -37,6 +37,13 @@ public class SkillData {
                 dataOutputStream.writeBoolean(si.isInvisible());
                 dataOutputStream.writeBoolean(si.isMassSpell());
                 dataOutputStream.writeInt(si.getType());
+                dataOutputStream.writeUTF(si.getElemAttr());
+                dataOutputStream.writeInt(si.getHyper());
+                dataOutputStream.writeInt(si.getHyperStat());
+                dataOutputStream.writeInt(si.getVehicleId());
+                dataOutputStream.writeInt(si.getReqTierPoint());
+                dataOutputStream.writeBoolean(si.isNotCooltimeReset());
+                dataOutputStream.writeBoolean(si.isNotIncBuffDuration());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -56,6 +63,11 @@ public class SkillData {
                 dataOutputStream.writeShort(si.getPsdSkills().size());
                 for (int i : si.getPsdSkills()) {
                     dataOutputStream.writeInt(i);
+                }
+                dataOutputStream.writeShort(si.getReqSkills().size());
+                for (Map.Entry<Integer, Integer> reqSkill : si.getReqSkills().entrySet()) {
+                    dataOutputStream.writeInt(reqSkill.getKey());
+                    dataOutputStream.writeInt(reqSkill.getValue());
                 }
             }
         } catch (IOException e) {
@@ -81,6 +93,13 @@ public class SkillData {
                     skillInfo.setInvisible(dataInputStream.readBoolean());
                     skillInfo.setMassSpell(dataInputStream.readBoolean());
                     skillInfo.setType(dataInputStream.readInt());
+                    skillInfo.setElemAttr(dataInputStream.readUTF());
+                    skillInfo.setHyper(dataInputStream.readInt());
+                    skillInfo.setHyperStat(dataInputStream.readInt());
+                    skillInfo.setVehicleId(dataInputStream.readInt());
+                    skillInfo.setReqTierPoint(dataInputStream.readInt());
+                    skillInfo.setNotCooltimeReset(dataInputStream.readBoolean());
+                    skillInfo.setNotIncBuffDuration(dataInputStream.readBoolean());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -97,6 +116,10 @@ public class SkillData {
                     short psdSize = dataInputStream.readShort();
                     for (int j = 0; j < psdSize; j++) {
                         skillInfo.addPsdSkill(dataInputStream.readInt());
+                    }
+                    short reqSkillSize = dataInputStream.readShort();
+                    for (int j = 0; j < reqSkillSize; j++) {
+                        skillInfo.addReqSkill(dataInputStream.readInt(), dataInputStream.readInt());
                     }
                     getSkillInfos().put(skillInfo.getSkillId(), skillInfo);
                 }
@@ -177,6 +200,46 @@ public class SkillData {
                         if(topPsdSkillNode != null) {
                             for (Node psdSkillNode : XMLApi.getAllChildren(topPsdSkillNode)) {
                                 skill.addPsdSkill(Integer.parseInt(XMLApi.getAttributes(psdSkillNode).get("name")));
+                            }
+                        }
+                        Node elemAttrNode = XMLApi.getFirstChildByNameBF(skillNode, "elemAttr");
+                        if(elemAttrNode != null) {
+                            skill.setElemAttr(XMLApi.getNamedAttribute(elemAttrNode, "value"));
+                        } else {
+                            skill.setElemAttr("");
+                        }
+                        Node hyperNode = XMLApi.getFirstChildByNameBF(skillNode, "hyper");
+                        if(hyperNode != null) {
+                            skill.setHyper(Integer.parseInt(XMLApi.getNamedAttribute(hyperNode, "value")));
+                        }
+                        Node hyperStatNode = XMLApi.getFirstChildByNameBF(skillNode, "hyperStat");
+                        if(hyperStatNode != null) {
+                            skill.setHyperStat(Integer.parseInt(XMLApi.getNamedAttribute(hyperStatNode, "value")));
+                        }
+                        Node vehicle = XMLApi.getFirstChildByNameBF(skillNode, "vehicleID");
+                        int vehicleId = 0;
+                        if(vehicle != null) {
+                            vehicleId = Integer.parseInt(XMLApi.getAttributes(vehicle).get("value"));
+                        }
+                        skill.setVehicleId(vehicleId);
+                        Node notCooltimeResetNode = XMLApi.getFirstChildByNameBF(skillNode, "notCooltimeReset");
+                        if(notCooltimeResetNode != null) {
+                            skill.setNotCooltimeReset(Integer.parseInt(XMLApi.getAttributes(notCooltimeResetNode).get("value")) != 0);
+                        }
+                        Node notIncBuffDurationNode = XMLApi.getFirstChildByNameBF(skillNode, "notIncBuffDuration");
+                        if(notIncBuffDurationNode != null) {
+                            skill.setNotIncBuffDuration(Integer.parseInt(XMLApi.getAttributes(notIncBuffDurationNode).get("value")) != 0);
+                        }
+                        Node reqNode = XMLApi.getFirstChildByNameBF(skillNode, "req");
+                        if (reqNode != null) {
+                            for (Node reqChild : XMLApi.getAllChildren(reqNode)) {
+                                String childName = XMLApi.getNamedAttribute(reqChild, "name");
+                                String childValue = XMLApi.getNamedAttribute(reqChild, "value");
+                                if ("reqTierPoint".equalsIgnoreCase(childName)) {
+                                    skill.setReqTierPoint(Integer.parseInt(childValue));
+                                } else if (Util.isNumber(childName)) {
+                                    skill.addReqSkill(Integer.parseInt(childName), Integer.parseInt(childValue));
+                                }
                             }
                         }
                         // end main level info
@@ -425,7 +488,7 @@ public class SkillData {
                             msi.putMobSkillStat(MobSkillStat.ignoreResist, value);
                             break;
                         case "count":
-                            msi.putMobSkillStat(MobSkillStat.time, value);
+                            msi.putMobSkillStat(MobSkillStat.count, value);
                             break;
                         case "time":
                             msi.putMobSkillStat(MobSkillStat.time, value);
@@ -526,6 +589,28 @@ public class SkillData {
                         case "additionalTime":
                             msi.putMobSkillStat(MobSkillStat.additionalTime, value);
                             break;
+                        case "force":
+                            msi.putMobSkillStat(MobSkillStat.force, value);
+                            break;
+                        case "targetType":
+                            msi.putMobSkillStat(MobSkillStat.targetType, value);
+                            break;
+                        case "forcex":
+                            msi.putMobSkillStat(MobSkillStat.forcex, value);
+                            break;
+                        case "sideAttack":
+                            msi.putMobSkillStat(MobSkillStat.sideAttack, value);
+                            break;
+                        case "afterEffect":
+                        case "rangeGap":
+                            msi.putMobSkillStat(MobSkillStat.rangeGap, value);
+                            break;
+                        case "noGravity":
+                            msi.putMobSkillStat(MobSkillStat.noGravity, value);
+                            break;
+                        case "notDestroyByCollide":
+                            msi.putMobSkillStat(MobSkillStat.notDestroyByCollide, value);
+                            break;
                         case "effect":
                         case "mob":
                         case "mob0":
@@ -568,12 +653,6 @@ public class SkillData {
                         case "addDam":
                         case "special":
                         case "target":
-                        case "force":
-                        case "targetType":
-                        case "forcex":
-                        case "sideAttack":
-                        case "afterEffect":
-                        case "rangeGap":
                         case "fixedPos":
                         case "fixedDir":
                         case "i52":
@@ -589,8 +668,6 @@ public class SkillData {
                         case "bounceBall":
                         case "info2":
                         case "regen":
-                        case "noGravity":
-                        case "notDestroyByCollide":
                         case "kockBackD":
                         case "areaSequenceDelay":
                         case "areaSequenceRandomSplit":
@@ -759,8 +836,11 @@ public class SkillData {
     }
 
     public static void generateDatFiles() {
+        log.info("Started generating mob skill data.");
+        long start = System.currentTimeMillis();
         loadMobSkillsFromWz();
         saveMobSkillsToDat(ServerConstants.DAT_DIR + "/mobSkills");
+        log.info(String.format("Completed generating mob skill data in %dms.", System.currentTimeMillis() - start));
     }
 
     public static void main(String[] args) {
