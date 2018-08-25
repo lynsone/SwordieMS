@@ -5,7 +5,7 @@ def init():
 
 	if fieldID == 105200000:
 		warp = False
-		sm.setSpeakerID(1064013) # Second Seal Door
+		sm.setSpeakerID(1064012) # First Seal Door
 		sm.sendAskYesNo("Would you like to fight Pierre?")
 
 	elif fieldID == 230040410:
