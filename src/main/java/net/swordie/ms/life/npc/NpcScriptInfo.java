@@ -238,12 +238,20 @@ public class NpcScriptInfo {
 	public enum Param {
 		NotCancellable(0x1),
 		PlayerAsSpeaker(0x2),
+		PlayerAsSpeakerNoEndChat(0x3),
 		OverrideSpeakerID(0x4),
 		FlipSpeaker(0x8),
+		FlipSpeakerNoEndChat(0x9),
 		PlayerAsSpeakerFlip(0x10),
-		FancyChat(0x20),
-
-
+		PlayerAsSpeakerFlipNoEndChat(0x11),
+		ZeroChat(0x20), //Zero Chat
+		ZeroChatNoEndChat(0x21),
+		ZeroChatAsPlayer(0x22),
+		ZeroChatAsPlayerNoEndChat(0x23),
+		FlipZeroChat(0x28),
+		FlipZeroChatNoEscape(0x29),
+		FlipZeroChatAsPlayer(0x30),
+		FlipZeroChatAsPlayerNoEscape(0x31),
 		;
 
 		private int val;

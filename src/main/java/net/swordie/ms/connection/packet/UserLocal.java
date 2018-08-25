@@ -34,6 +34,15 @@ public class UserLocal {
         return outPacket;
     }
 
+    public static OutPacket videoByScript(String videoPath, boolean isMuted){
+        OutPacket outPacket = new OutPacket(OutHeader.VIDEO_BY_SCRIPT);
+
+        outPacket.encodeString(videoPath);
+        outPacket.encodeByte(isMuted);
+
+        return outPacket;
+    }
+
     public static OutPacket jaguarActive(boolean active) {
         OutPacket outPacket = new OutPacket(OutHeader.JAGUAR_ACTIVE);
 

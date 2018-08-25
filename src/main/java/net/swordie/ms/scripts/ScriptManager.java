@@ -1238,4 +1238,6 @@ public interface ScriptManager extends Observer {
 	 */
 	ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
 									  int executes, String methodName, Object...args);
+
+	void playVideoByScript(String videoPath);
 }
