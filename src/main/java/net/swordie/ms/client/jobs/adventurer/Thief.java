@@ -17,7 +17,6 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
@@ -469,7 +468,7 @@ public class Thief extends Beginner {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         if(hitInfo.hpDamage <= 0) {
-            giveShadowMelt(chr);
+            giveShadowMelt();
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -1101,7 +1100,7 @@ public class Thief extends Beginner {
         }
     }
 
-    public static void giveShadowMelt(Char chr) {
+    public void giveShadowMelt() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(chr.hasSkill(SHADOW_MELD)) {
             if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
@@ -1125,24 +1124,6 @@ public class Thief extends Beginner {
                     lastShadowMelt = System.currentTimeMillis();
                 }
             }
-        }
-    }
-
-    public static void damageDoneToMirroredTarget(Char chr, Summon summon, int damage) {
-        Skill skill = chr.getSkill(MIRRORED_TARGET);
-        if(skill == null) {
-            return;
-        }
-
-        int summonHP = summon.getHp();
-        int newSummonHP = summonHP - damage;
-
-        if(newSummonHP <= 0) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            chr.getField().broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
-            tsm.removeStatsBySkill(skill.getSkillId());
-        } else {
-            summon.setHp(newSummonHP);
         }
     }
 }

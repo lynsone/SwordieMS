@@ -11,11 +11,13 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
@@ -893,30 +895,12 @@ public class Archer extends Beginner {
 
     public void handleMobDebuffSkill(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(FOCUSED_FURY) && tsm.hasStat(BowMasterConcentration)) {
+        if (chr.hasSkill(FOCUSED_FURY) && tsm.hasStat(BowMasterConcentration)) {
             tsm.removeStatsBySkill(FOCUSED_FURY);
             tsm.sendResetStatPacket();
             chr.write(User.effect(Effect.skillSpecial(FOCUSED_FURY)));
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(FOCUSED_FURY)));
             tsm.removeAllDebuffs();
-        }
-    }
-
-    public static void damageDoneToArrowIllusion(Char chr, Summon summon, int damage) {
-        Skill skill = chr.getSkill(ARROW_ILLUSION);
-        if(skill == null) {
-            return;
-        }
-
-        int summonHP = summon.getHp();
-        int newSummonHP = summonHP - damage;
-
-        if(newSummonHP <= 0) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            chr.getField().broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
-            tsm.removeStatsBySkill(skill.getSkillId());
-        } else {
-            summon.setHp(newSummonHP);
         }
     }
 }

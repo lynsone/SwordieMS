@@ -34,16 +34,21 @@ import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
-import net.swordie.ms.client.jobs.adventurer.*;
+import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
+import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
-import net.swordie.ms.client.jobs.cygnus.WindArcher;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.legend.Luminous;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
-import net.swordie.ms.client.jobs.resistance.*;
+import net.swordie.ms.client.jobs.resistance.BattleMage;
+import net.swordie.ms.client.jobs.resistance.WildHunter;
+import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
+import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -1655,39 +1660,19 @@ public class WorldHandler {
     public static void handleSummonedHit(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
+
         int summonObjId = inPacket.decodeInt();
         byte attackId = inPacket.decodeByte();
         int damage = inPacket.decodeInt();
         int mobTemplateId = inPacket.decodeInt();
         boolean isLeft = inPacket.decodeByte() != 0;
+
         Life life = field.getLifeByObjectID(summonObjId);
         if (life == null || !(life instanceof Summon)) {
             return;
         }
 
-        switch (((Summon) life).getSkillID()) {
-            case Thief.MIRRORED_TARGET:
-                Thief.giveShadowMelt(chr);
-                Thief.damageDoneToMirroredTarget(chr, (Summon) life, damage);
-                break;
-
-            case Archer.ARROW_ILLUSION:
-                Archer.damageDoneToArrowIllusion(chr, (Summon) life, damage);
-                break;
-
-            case WindArcher.EMERALD_DUST:
-                WindArcher.applyEmeraldDustDebuffToMob(chr, (Summon) life, mobTemplateId);
-                // Fallthrough intended
-            case WindArcher.EMERALD_FLOWER:
-                WindArcher.applyEmeraldFlowerDebuffToMob(chr, (Summon) life, mobTemplateId);
-                WindArcher.damageDoneToEmeraldFlower(chr, (Summon) life, damage);
-                break;
-
-            default:
-                chr.chatMessage(String.format("Unhandled HP Summon, id = %d", ((Summon) life).getSkillID()));
-                System.out.println(String.format("Unhandled HP Summon, id = %d", ((Summon) life).getSkillID()));
-                break;
-        }
+        ((Summon) life).damageDoneToSummon(damage, mobTemplateId);
     }
 
     public static void handleUserFlameOrbRequest(Client c, InPacket inPacket) {

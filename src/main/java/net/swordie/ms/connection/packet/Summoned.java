@@ -18,7 +18,7 @@ public class Summoned {
     public static OutPacket summonedAssistAttackRequest(Summon summon) {
         OutPacket outpacket = new OutPacket(OutHeader.SUMMONED_ASSIST_ATTACK_REQUEST);
 
-        outpacket.encodeInt(summon.getCharID());
+        outpacket.encodeInt(summon.getChr().getId());
         outpacket.encodeInt(summon.getObjectId());
 
         return outpacket;
@@ -27,7 +27,7 @@ public class Summoned {
     public static OutPacket summonedSummonAttackActive(Summon summon) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_SUMMON_ATTACK_ACTIVE);
 
-        outPacket.encodeInt(summon.getCharID());
+        outPacket.encodeInt(summon.getChr().getId());
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(summon.isAttackActive());
 
@@ -37,7 +37,7 @@ public class Summoned {
     public static OutPacket summonedSkill(Summon summon, int summonSkillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_SKILL);
 
-        outPacket.encodeInt(summon.getCharID());
+        outPacket.encodeInt(summon.getChr().getId());
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(summonSkillID);
 
@@ -47,7 +47,7 @@ public class Summoned {
     public static OutPacket summonBeholderRevengeAttack(Summon summon, int mob) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_BEHOLDER_REVENGE_ATTACK);
 
-        outPacket.encodeInt(summon.getCharID());//char ID
+        outPacket.encodeInt(summon.getChr().getId());//char ID
         outPacket.encodeInt(summon.getObjectId());//summon
         outPacket.encodeInt(mob);//mob
 
@@ -100,7 +100,7 @@ public class Summoned {
     public static OutPacket summonedRemoved(Summon summon, LeaveType leaveType) {
         OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_REMOVED);
 
-        outPacket.encodeInt(summon.getCharID());
+        outPacket.encodeInt(summon.getChr().getId());
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(leaveType.getVal());
 

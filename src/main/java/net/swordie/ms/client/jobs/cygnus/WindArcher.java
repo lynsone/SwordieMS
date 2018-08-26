@@ -12,11 +12,9 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Summon;
@@ -533,25 +531,7 @@ public class WindArcher extends Noblesse {
         return skill;
     }
 
-    public static void damageDoneToEmeraldFlower(Char chr, Summon summon, int damage) {
-        Skill skill = getEmeraldFlowerSkill(chr);
-        if(skill == null) {
-            return;
-        }
-
-        int summonHP = summon.getHp();
-        int newSummonHP = summonHP - damage;
-
-        if(newSummonHP <= 0) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            chr.getField().broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
-            tsm.removeStatsBySkill(skill.getSkillId());
-        } else {
-            summon.setHp(newSummonHP);
-        }
-    }
-
-    public static void applyEmeraldFlowerDebuffToMob(Char chr, Summon summon, int mobTemplateId) {
+    public void applyEmeraldFlowerDebuffToMob(Summon summon, int mobTemplateId) {
         Skill skill = getEmeraldFlowerSkill(chr);
         if(skill == null) {
             return;
@@ -574,7 +554,7 @@ public class WindArcher extends Noblesse {
         }
     }
 
-    public static void applyEmeraldDustDebuffToMob(Char chr, Summon summon, int mobTemplateId) {
+    public void applyEmeraldDustDebuffToMob(Summon summon, int mobTemplateId) {
         Skill skill = getEmeraldFlowerSkill(chr);
         if(skill == null) {
             return;
