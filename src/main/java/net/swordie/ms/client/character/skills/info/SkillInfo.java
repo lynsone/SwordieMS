@@ -40,6 +40,11 @@ public class SkillInfo {
     private Map<Integer, Integer> reqSkills = new HashMap<>();
     private boolean notCooltimeReset;
     private boolean notIncBuffDuration;
+    private ScriptEngine engine;
+
+    public SkillInfo() {
+        engine = new ScriptEngineManager().getEngineByName("JavaScript");
+    }
 
     public int getSkillId() {
         return skillId;
@@ -98,7 +103,6 @@ public class SkillInfo {
         if(Util.isNumber(value)) {
             result = Integer.parseInt(value);
         } else {
-            ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
             try {
                 value = value.replace("u", "Math.ceil");
                 value = value.replace("d", "Math.floor");

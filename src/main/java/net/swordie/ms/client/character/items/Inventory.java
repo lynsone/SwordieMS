@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.items;
 
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.InvType;
 import org.hibernate.annotations.Cascade;
 
@@ -63,6 +64,9 @@ public class Inventory {
             getItems().add(item);
             item.setInvType(getType());
             sortItemsByIndex();
+            if (item.getId() == 0) { // ensures that each item has a unique id
+                DatabaseManager.saveToDB(this);
+            }
         }
     }
     public void removeItem(Item item) {
