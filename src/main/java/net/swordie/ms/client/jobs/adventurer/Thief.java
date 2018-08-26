@@ -11,14 +11,13 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.client.jobs.cygnus.Noblesse;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
@@ -577,6 +576,8 @@ public class Thief extends Beginner {
                     summon.setAssistType((byte) 0);
                     summon.setAttackActive(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
+                    summon.setMaxHP(si.getValue(x, slv));
+                    summon.setHp(summon.getMaxHP());
                     field.spawnSummon(summon);
 
                     tsm.removeStatsBySkill(MIRROR_IMAGE);
@@ -1124,6 +1125,24 @@ public class Thief extends Beginner {
                     lastShadowMelt = System.currentTimeMillis();
                 }
             }
+        }
+    }
+
+    public static void damageDoneToMirroredTarget(Char chr, Summon summon, int damage) {
+        Skill skill = chr.getSkill(MIRRORED_TARGET);
+        if(skill == null) {
+            return;
+        }
+
+        int summonHP = summon.getHp();
+        int newSummonHP = summonHP - damage;
+
+        if(newSummonHP <= 0) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            chr.getField().broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
+            tsm.removeStatsBySkill(skill.getSkillId());
+        } else {
+            summon.setHp(newSummonHP);
         }
     }
 }
