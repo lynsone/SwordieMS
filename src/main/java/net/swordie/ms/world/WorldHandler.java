@@ -59,10 +59,7 @@ import net.swordie.ms.client.party.request.PartyRequestType;
 import net.swordie.ms.client.party.result.*;
 import net.swordie.ms.client.party.updates.UpdateMemberLoggedIn;
 import net.swordie.ms.client.party.updates.UpdatePartyResult;
-import net.swordie.ms.client.trunk.Trunk;
-import net.swordie.ms.client.trunk.TrunkMsg;
-import net.swordie.ms.client.trunk.TrunkType;
-import net.swordie.ms.client.trunk.TrunkUpdate;
+import net.swordie.ms.client.trunk.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
@@ -2322,9 +2319,12 @@ public class WorldHandler {
     public static void handleUserSelectNpc(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int npcID = inPacket.decodeInt();
-        short idk1 = inPacket.decodeShort();
-        short idk2 = inPacket.decodeShort();
+        Position playerPos = inPacket.decodePosition();
         Npc npc = (Npc) chr.getField().getLifeByObjectID(npcID);
+        if (npc.getTrunkGet() > 0 || npc.getTrunkPut() > 0) {
+            chr.write(CField.trunkDlg(new TrunkOpen(npc.getTemplateId(), chr.getAccount().getTrunk())));
+            return;
+        }
         String script = npc.getScripts().get(0);
         if (script == null) {
             script = String.valueOf(npc.getTemplateId());
