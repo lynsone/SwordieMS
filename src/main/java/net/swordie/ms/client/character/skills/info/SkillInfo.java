@@ -40,11 +40,7 @@ public class SkillInfo {
     private Map<Integer, Integer> reqSkills = new HashMap<>();
     private boolean notCooltimeReset;
     private boolean notIncBuffDuration;
-    private ScriptEngine engine;
-
-    public SkillInfo() {
-        engine = new ScriptEngineManager().getEngineByName("JavaScript");
-    }
+    private static ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
 
     public int getSkillId() {
         return skillId;
