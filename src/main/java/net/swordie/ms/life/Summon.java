@@ -275,7 +275,7 @@ public class Summon extends Life {
         this.hp = hp;
     }
 
-    public void damageDoneToSummon(int damage, int mobTemplateId) {
+    public void onSummonHit(int damage, int mobTemplateId) {
         Char chr = getChr();
         Skill skill = chr.getSkill(getSkillID());
 
@@ -288,7 +288,7 @@ public class Summon extends Life {
 
         switch (getSkillID()) {
             case Thief.MIRRORED_TARGET:
-                ((Thief) chr.getJobHandler()).giveShadowMelt();
+                ((Thief) chr.getJobHandler()).giveShadowMeld();
                 break;
 
             case WindArcher.EMERALD_DUST:
