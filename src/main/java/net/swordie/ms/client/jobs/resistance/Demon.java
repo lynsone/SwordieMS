@@ -732,7 +732,7 @@ public class Demon extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, speed, 5,
                         angle, 50, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, 0));
-                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                chr.write(CField.createForceAtom(true, chr.getId(), mobID, type,
                         true, mobID, 0, forceAtomInfo, new Rect(), 0, 300,
                         mob.getPosition(), 0, mob.getPosition()));
             } else {
@@ -757,7 +757,7 @@ public class Demon extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, speed, 5,
                             angle, 50, (int) System.currentTimeMillis(), 1, 0,
                             new Position(0, 0));
-                    chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                    chr.write(CField.createForceAtom(true, chr.getId(), mobID, type,
                             true, mobID, 0, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), 0, mob.getPosition()));
                 }
