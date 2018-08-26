@@ -64,18 +64,14 @@ public class LoginHandler {
         byte sid = inPacket.decodeByte();
         String password = inPacket.decodeString();
         String username = inPacket.decodeString();
-        long mac = inPacket.decodeLong();
-        int gameRoomClient = inPacket.decodeInt();
-        byte idk = inPacket.decodeByte();
-        int channel = inPacket.decodeInt();
-        boolean success = true;
+        byte[] machineID = inPacket.decodeArr(16);
+        boolean success;
         LoginType result;
         Account account = Account.getFromDBByName(username);
         if (account != null) {
             if ("helphelp".equalsIgnoreCase(password)) {
-                account.setLoginState(LoginState.Out);
+                account.unstuck();
                 c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Your account is now logged out.")));
-                DatabaseManager.saveToDB(account);
             }
             String dbPassword = account.getPassword();
             boolean hashed = Util.isStringBCrypt(dbPassword);
@@ -110,6 +106,7 @@ public class LoginHandler {
                     }
                     Server.getInstance().getAccounts().add(account);
                     c.setAccount(account);
+                    c.setMachineID(machineID);
                     account.setLoginState(LoginState.Login);
                     DatabaseManager.saveToDB(account);
                 }
@@ -273,7 +270,7 @@ public class LoginHandler {
     }
 
     public static void handleCharSelectNoPic(Client c, InPacket inPacket) {
-        inPacket.decodeBytes(2);
+        inPacket.decodeArr(2);
         int characterId = inPacket.decodeInt();
         String mac = inPacket.decodeString();
         String somethingElse = inPacket.decodeString();

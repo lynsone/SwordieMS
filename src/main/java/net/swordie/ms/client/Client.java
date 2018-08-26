@@ -8,6 +8,7 @@ import net.swordie.ms.connection.packet.Login;
 import net.swordie.ms.Server;
 import net.swordie.ms.world.World;
 
+import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,6 +23,7 @@ public class Client extends NettyClient {
 	private byte worldId;
 	private boolean authorized;
 	private Channel channelInstance;
+	private byte[] machineID;
 
 	public Client(io.netty.channel.Channel channel, byte[] sendSeq, byte[] recvSeq) {
 		super(channel, sendSeq, recvSeq);
@@ -90,5 +92,17 @@ public class Client extends NettyClient {
 
 	public World getWorld() {
 		return Server.getInstance().getWorldById(getWorldId());
+	}
+
+	public void setMachineID(byte[] machineID) {
+		this.machineID = machineID;
+	}
+
+	public byte[] getMachineID() {
+		return machineID;
+	}
+
+	public boolean hasCorrectMachineID(byte[] machineID) {
+		return Arrays.equals(machineID, getMachineID());
 	}
 }

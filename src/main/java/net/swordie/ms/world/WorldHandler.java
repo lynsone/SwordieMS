@@ -126,9 +126,14 @@ public class WorldHandler {
     public static void handleCharLogin(Client c, InPacket inPacket) {
         int worldId = inPacket.decodeInt();
         int charId = inPacket.decodeInt();
+        byte[] machineID = inPacket.decodeArr(16);
         Tuple<Byte, Client> info = Server.getInstance().getChannelFromTransfer(charId, worldId);
         byte channel = info.getLeft();
         Client oldClient = info.getRight();
+        if (!oldClient.hasCorrectMachineID(machineID)) {
+            c.write(WvsContext.returnToTitle());
+            return;
+        }
         Account acc = oldClient.getAccount();
         c.setAccount(acc);
         Server.getInstance().getWorldById(worldId).getChannelById(channel).removeClientFromTransfer(charId);
