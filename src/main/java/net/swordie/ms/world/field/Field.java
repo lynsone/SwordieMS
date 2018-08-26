@@ -543,7 +543,7 @@ public class Field {
         for (Reactor reactor : getReactors()) {
             spawnLife(reactor, chr);
         }
-        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && canSpawnRunestone()) {
+        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && canSpawnRunestone() && !isTown()) {
             chr.write(CField.runeStoneAppear(runeStone));
         }
         if (getOpenGates() != null && getOpenGates().size() > 0) {
