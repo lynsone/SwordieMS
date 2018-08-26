@@ -3,36 +3,37 @@ package net.swordie.ms.client.jobs.cygnus;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -60,6 +61,7 @@ public class BlazeWizard extends Noblesse {
 
 
     public static final int IGNITION = 12101024; //Buff
+    public static final int IGNITION_EXPLOSION = 12100029; // Explosion Attack
     public static final int FLASHFIRE = 12101025; //Special Skill
     public static final int WORD_OF_FIRE = 12101023; //Buff
     public static final int CONTROLLED_BURN = 12101022; //Special Skill
@@ -109,7 +111,7 @@ public class BlazeWizard extends Noblesse {
     boolean used;
     Position chrPos;
     int prevmap;
-    private HashMap<Mob,ScheduledFuture> hashMap = new HashMap<>();
+    private HashMap<Mob, ScheduledFuture> hashMap = new HashMap<>();
     private ScheduledFuture schFuture;
     private Summon summonFox;
     private Summon summonLion;
@@ -278,7 +280,9 @@ public class BlazeWizard extends Noblesse {
             skillID = skill.getSkillId();
         }
         if(hasHitMobs) {
-            applyIgniteOnMob(attackInfo);
+            if(attackInfo.skillId != IGNITION_EXPLOSION) {
+                applyIgniteOnMob(attackInfo);
+            }
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -315,7 +319,7 @@ public class BlazeWizard extends Noblesse {
         }
     }
 
-    private void applyIgniteOnMob(AttackInfo attackInfo) {  //TODO only registers Explosion attack if >1 mob is hit
+    private void applyIgniteOnMob(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         if(tsm.hasStat(WizardIgnite)) {
@@ -325,19 +329,22 @@ public class BlazeWizard extends Noblesse {
             for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    //mts.createAndAddBurnedInfo(chr.getId(), skill, 1);
 
+                    mts.createAndAddBurnedInfo(chr, skill, 1); //TODO Fix DoT Stacking
 
                     if(hashMap.get(mob) != null && !hashMap.get(mob).isDone()) {
                         hashMap.get(mob).cancel(true);
+                        hashMap.remove(mob);
                     }
 
                     schFuture = EventManager.addEvent(() ->
-                            c.write(UserLocal.explosionAttack(12100029, mob.getPosition(), mob.getObjectId(), 10)), 10, TimeUnit.SECONDS);
+                            explodeIgnitionOnMob(mob), si.getValue(dotTime, slv), TimeUnit.SECONDS);
 
                     hashMap.put(mob, schFuture);
-
 
                     o.nOption = 1;
                     o.rOption = skill.getSkillId();
@@ -347,6 +354,16 @@ public class BlazeWizard extends Noblesse {
                 }
             }
         }
+    }
+
+    private void explodeIgnitionOnMob(Mob mob) {
+        MobTemporaryStat mts = mob.getTemporaryStat();
+        Mob checkMob = (Mob) chr.getField().getLifeByObjectID(mob.getObjectId());
+        if(checkMob == null) {
+            return;
+        }
+        c.write(UserLocal.explosionAttack(IGNITION_EXPLOSION, mob.getPosition(), mob.getObjectId(), 10));
+        hashMap.remove(mob);
     }
 
     @Override
@@ -441,7 +458,7 @@ public class BlazeWizard extends Noblesse {
             Field field;
             field = c.getChr().getField();
             summon = Summon.getSummonBy(chr, getFlameElement(), slv);
-            summon.setFlyMob(true);
+            summon.setFlyMob(false);
             summon.setAttackActive(false);
             summon.setAssistType((byte) 0);
             field.spawnSummon(summon);

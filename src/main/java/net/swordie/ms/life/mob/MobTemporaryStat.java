@@ -540,9 +540,6 @@ public class MobTemporaryStat {
 
 	public void createAndAddBurnedInfo(Char chr, Skill skill, int max) {
 		int charId = chr.getId();
-		BurnedInfo bu = getBurnedInfos().stream().
-				filter(b -> b.getSkillId() == skill.getId() && b.getCharacterId() == charId)
-				.findFirst().orElse(null);
 		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 		int slv = skill.getCurrentLevel();
 		BurnedInfo bi = new BurnedInfo();
@@ -561,7 +558,7 @@ public class MobTemporaryStat {
 		bi.setDotAnimation(bi.getAttackDelay() + bi.getInterval() + time);
 		bi.setStartTime(Util.getCurrentTime());
 		bi.setLastUpdate(Util.getCurrentTime());
-		if (bu != null) {
+		if (getBurnBySkill(skill.getSkillId()) != null) {
 			removeBurnedInfo(chr, false);
 		}
 		getBurnedInfos().add(bi);
