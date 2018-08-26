@@ -6,8 +6,9 @@ def init():
 
 def action(response, answer):
     if response == 1:
-       sm.warp(130000000)
-       sm.completeQuest(20870)
+        if not sm.getFieldID() == 130000000:
+            sm.warp(130000000)
+        sm.completeQuestNoRewards(20870)
     else:
         sm.sendSayOkay("Okay, maybe next time.")
     sm.dispose()

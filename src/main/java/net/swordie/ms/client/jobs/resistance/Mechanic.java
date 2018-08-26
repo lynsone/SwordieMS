@@ -10,12 +10,13 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
@@ -517,7 +518,7 @@ public class Mechanic extends Citizen {
     }
 
     public static void healFromSupportUnit(Client c, Summon summon) {
-        Char summonOwner = c.getWorld().getCharByID(summon.getCharID());
+        Char summonOwner = summon.getChr();
         if (summonOwner.hasSkill(ENHANCED_SUPPORT_UNIT) || summonOwner.hasSkill(SUPPORT_UNIT_HEX)) {
             SkillInfo si = SkillData.getSkillInfoById(SUPPORT_UNIT_HEX);
             byte slv = (byte) summonOwner.getSkill(SUPPORT_UNIT_HEX).getCurrentLevel();

@@ -11,8 +11,6 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.client.jobs.cygnus.Noblesse;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
@@ -136,7 +134,7 @@ public class Thief extends Beginner {
     private int supposedCrit;
     private final int MAX_CRIT = 100;
     private ScheduledFuture critGrowthTimer;
-    public static long lastShadowMelt = Long.MIN_VALUE;
+    public static long lastShadowMeld = Long.MIN_VALUE;
 
     private int[] addedSkills = new int[] {
             MAPLE_RETURN,
@@ -470,7 +468,7 @@ public class Thief extends Beginner {
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         if(hitInfo.hpDamage <= 0) {
-            giveShadowMelt(chr);
+            giveShadowMeld();
         }
         super.handleHit(c, inPacket, hitInfo);
     }
@@ -577,6 +575,8 @@ public class Thief extends Beginner {
                     summon.setAssistType((byte) 0);
                     summon.setAttackActive(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
+                    summon.setMaxHP(si.getValue(x, slv));
+                    summon.setHp(summon.getMaxHP());
                     field.spawnSummon(summon);
 
                     tsm.removeStatsBySkill(MIRROR_IMAGE);
@@ -1100,7 +1100,7 @@ public class Thief extends Beginner {
         }
     }
 
-    public static void giveShadowMelt(Char chr) {
+    public void giveShadowMeld() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(chr.hasSkill(SHADOW_MELD)) {
             if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
@@ -1108,7 +1108,7 @@ public class Thief extends Beginner {
                 byte slv = (byte) skill.getCurrentLevel();
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 
-                if(lastShadowMelt + 5000 < System.currentTimeMillis()) {
+                if(lastShadowMeld + 5000 < System.currentTimeMillis()) {
                     Option o1 = new Option();
                     Option o2 = new Option();
                     o1.nOption = 100;
@@ -1121,7 +1121,7 @@ public class Thief extends Beginner {
                     o2.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndiePAD, o2); //Indie
                     tsm.sendSetStatPacket();
-                    lastShadowMelt = System.currentTimeMillis();
+                    lastShadowMeld = System.currentTimeMillis();
                 }
             }
         }

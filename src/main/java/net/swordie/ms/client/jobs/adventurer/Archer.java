@@ -10,7 +10,6 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.Effect;
@@ -746,6 +745,8 @@ public class Archer extends Beginner {
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
+                summon.setMaxHP(si.getValue(x, slv));
+                summon.setHp(summon.getMaxHP());
                 field = c.getChr().getField();
                 field.spawnSummon(summon);
 
@@ -894,7 +895,7 @@ public class Archer extends Beginner {
 
     public void handleMobDebuffSkill(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(FOCUSED_FURY) && tsm.hasStat(BowMasterConcentration)) {
+        if (chr.hasSkill(FOCUSED_FURY) && tsm.hasStat(BowMasterConcentration)) {
             tsm.removeStatsBySkill(FOCUSED_FURY);
             tsm.sendResetStatPacket();
             chr.write(User.effect(Effect.skillSpecial(FOCUSED_FURY)));

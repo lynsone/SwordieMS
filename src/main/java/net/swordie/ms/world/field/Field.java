@@ -424,7 +424,7 @@ public class Field {
     public void spawnSummon(Summon summon) {
         Summon oldSummon = (Summon) getLifes().stream()
                 .filter(s -> s instanceof Summon &&
-                        ((Summon) s).getCharID() == summon.getCharID() &&
+                        ((Summon) s).getChr() == summon.getChr() &&
                         ((Summon) s).getSkillID() == summon.getSkillID())
                 .findFirst().orElse(null);
         if (oldSummon != null) {
@@ -502,7 +502,7 @@ public class Field {
         // remove summons of that char & remove field attacks of that char
         List<Integer> removedList = new ArrayList<>();
         for (Life life : getLifes()) {
-            if (life instanceof Summon && ((Summon) life).getCharID() == chr.getId()) {
+            if (life instanceof Summon && ((Summon) life).getChr() == chr) {
                 removedList.add(life.getObjectId());
             } else if (life instanceof FieldAttackObj) {
                 FieldAttackObj fao = (FieldAttackObj) life;

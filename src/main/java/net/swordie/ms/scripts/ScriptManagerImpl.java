@@ -431,9 +431,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
 	}
 
-	public void resetParam() {
-		getNpcScriptInfo().resetParam();
-	}
+
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
 
@@ -854,8 +852,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void setSpeakerID(int templateID) {
 		getNpcScriptInfo().resetParam();
-		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
-	}
+	getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
+}
+
 
 
 
@@ -1497,5 +1496,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		scheduledFutureSet.add(scheduledFuture);
 		eventsByScriptType.put(getLastActiveScriptType(), scheduledFutureSet);
 		return scheduledFuture;
+	}
+	@Override
+	public void playVideoByScript(String videoPath){
+		chr.write(UserLocal.videoByScript(videoPath, false));
 	}
 }

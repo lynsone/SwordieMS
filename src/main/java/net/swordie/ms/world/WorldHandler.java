@@ -34,7 +34,10 @@ import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
-import net.swordie.ms.client.jobs.adventurer.*;
+import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
+import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
@@ -42,7 +45,10 @@ import net.swordie.ms.client.jobs.legend.Luminous;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
-import net.swordie.ms.client.jobs.resistance.*;
+import net.swordie.ms.client.jobs.resistance.BattleMage;
+import net.swordie.ms.client.jobs.resistance.WildHunter;
+import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
+import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -1659,14 +1665,19 @@ public class WorldHandler {
     public static void handleSummonedHit(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
-        int id = inPacket.decodeInt();
-        Life life = field.getLifeByObjectID(id);
+
+        int summonObjId = inPacket.decodeInt();
+        byte attackId = inPacket.decodeByte();
+        int damage = inPacket.decodeInt();
+        int mobTemplateId = inPacket.decodeInt();
+        boolean isLeft = inPacket.decodeByte() != 0;
+
+        Life life = field.getLifeByObjectID(summonObjId);
         if (life == null || !(life instanceof Summon)) {
             return;
         }
-        if(((Summon) life).getSkillID() == Thief.MIRRORED_TARGET) {
-            Thief.giveShadowMelt(chr);
-        }
+
+        ((Summon) life).onHit(damage, mobTemplateId);
     }
 
     public static void handleUserFlameOrbRequest(Client c, InPacket inPacket) {
@@ -2526,7 +2537,7 @@ public class WorldHandler {
                         position = inPacket.decodePosition();
                     }
                     break;
-                case QuestReq_ResignQuest: //Qest forfeit
+                case QuestReq_ResignQuest: //Quest forfeit
                     questID = inPacket.decodeInt();
                     chr.getQuestManager().removeQuest(questID);
                     break;

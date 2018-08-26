@@ -3,33 +3,37 @@ package net.swordie.ms.client.jobs.cygnus;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -47,13 +51,13 @@ public class WindArcher extends Noblesse {
 
     public static final int STORM_ELEMENTAL = 13001022; //Buff
 
-    public static final int TRIFLING_WIND_I = 13101022; //Special Buff (Proc) (ON/OFF) //TODO
+    public static final int TRIFLING_WIND_I = 13101022; //Special Buff (Proc) (ON/OFF)
     public static final int TRIFLING_WIND_ATOM = 13100027;
     public static final int BOW_BOOSTER = 13101023; //Buff
     public static final int SYLVAN_AID = 13101024; //Buff
 
     public static final int TRIFLING_WIND_II = 13110022; //Special Buff Upgrade
-    public static final int ALBATROSS = 13111023; //Buff //TODO new ID upon levelling the 4th Job upgrade
+    public static final int ALBATROSS = 13111023; //Buff
     public static final int EMERALD_FLOWER = 13111024; //Summon (Stationary, No Attack, Aggros)
     public static final int SECOND_WIND = 13110026; //
 
@@ -267,6 +271,10 @@ public class WindArcher extends Noblesse {
                 summon.setPosition(position);
                 summon.setAttackActive(false);
                 summon.setAssistType((byte) 0);
+
+                summon.setMaxHP(si.getValue(x, slv));
+                summon.setHp(summon.getMaxHP());
+
                 field.spawnSummon(summon);
 
                 o1.nReason = skillID;
@@ -430,6 +438,7 @@ public class WindArcher extends Noblesse {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+
         if(hasHitMobs) {
             if(attackInfo.skillId != TRIFLING_WIND_ATOM && attackInfo.skillId != 0 && attackInfo.skillId != STORM_BRINGER) {
                 createStormBringerForceAtom(skillID, slv, attackInfo);
@@ -508,6 +517,64 @@ public class WindArcher extends Noblesse {
 
 
         super.handleHit(c, inPacket, hitInfo);
+    }
+
+    public static Skill getEmeraldFlowerSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(EMERALD_FLOWER)) {
+            skill = chr.getSkill(EMERALD_FLOWER);
+        }
+        if(chr.hasSkill(EMERALD_DUST)) {
+            skill = chr.getSkill(EMERALD_DUST);
+        }
+
+        return skill;
+    }
+
+    public void applyEmeraldFlowerDebuffToMob(Summon summon, int mobTemplateId) {
+        Skill skill = getEmeraldFlowerSkill(chr);
+        if(skill == null) {
+            return;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        List<Mob> mobListWithTemplateId = chr.getField()
+                .getMobsInRect(summon.getPosition().getRectAround(si.getRects().get(0)))
+                .stream()
+                .filter(mob -> mob.getTemplateId() == mobTemplateId)
+                .collect(Collectors.toList());
+        for(Mob mob : mobListWithTemplateId) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            Option o = new Option();
+            o.nOption = si.getValue(z, slv);
+            o.rOption = skill.getSkillId();
+            o.tOption = si.getValue(time, slv);
+            mts.addStatOptionsAndBroadcast(MobStat.Speed, o);
+        }
+    }
+
+    public void applyEmeraldDustDebuffToMob(Summon summon, int mobTemplateId) {
+        Skill skill = getEmeraldFlowerSkill(chr);
+        if(skill == null) {
+            return;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        List<Mob> mobListWithTemplateId = chr.getField()
+                .getMobsInRect(summon.getPosition().getRectAround(si.getRects().get(0)))
+                .stream()
+                .filter(mob -> mob.getTemplateId() == mobTemplateId)
+                .collect(Collectors.toList());
+        for(Mob mob : mobListWithTemplateId) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            Option o = new Option();
+            o.nOption = si.getValue(w, slv);
+            o.rOption = skill.getSkillId();
+            o.tOption = si.getValue(time, slv);
+            mts.addStatOptionsAndBroadcast(MobStat.PDR, o);
+        }
     }
 
     @Override

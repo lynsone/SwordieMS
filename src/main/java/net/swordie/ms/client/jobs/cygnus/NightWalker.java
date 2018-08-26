@@ -11,7 +11,6 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.Summoned;
@@ -237,7 +236,7 @@ public class NightWalker extends Noblesse {
             case SHADOW_ILLUSION:
                 if(chr.getField().getLifes().stream()
                         .anyMatch(l -> l instanceof Summon &&
-                                ((Summon) l).getCharID() == chr.getId() &&
+                                ((Summon) l).getChr() == chr &&
                                 ((Summon) l).getSkillID() == DARK_SERVANT)
                         ) {
                     tsm.removeStatsBySkill(DARK_SERVANT);
