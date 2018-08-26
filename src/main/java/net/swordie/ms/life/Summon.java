@@ -275,7 +275,7 @@ public class Summon extends Life {
         this.hp = hp;
     }
 
-    public void onSummonHit(int damage, int mobTemplateId) {
+    public void onHit(int damage, int mobTemplateId) {
         Char chr = getChr();
         Skill skill = chr.getSkill(getSkillID());
 

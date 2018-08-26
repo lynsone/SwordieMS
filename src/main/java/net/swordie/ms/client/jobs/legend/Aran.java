@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.AffectedArea;
@@ -22,6 +23,7 @@ import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -229,25 +231,39 @@ public class Aran extends Job {
         }
         o.nOption = amount;
         o.rOption = COMBO_ABILITY;
-        o.tOption = 0;
         tsm.putCharacterStatValue(ComboAbilityBuff, o);
         setCombo(amount);
     }
 
-    private void giveAdrenalinRushBuff(int skillId, TemporaryStatManager tsm, Client c) {
-        SkillInfo adrenalinInfo = SkillData.getSkillInfoById(ADRENALINE_RUSH);
+    private void giveAdrenalinRushBuff(TemporaryStatManager tsm) {
+        Skill skill = chr.getSkill(ADRENALINE_RUSH);
+        if(skill == null) {
+            return;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(ADRENALINE_RUSH);
+        byte slv = (byte) skill.getCurrentLevel();
         if (chr.hasSkill(ADRENALINE_RUSH)) {
             Option o = new Option();
             o.nOption = 1;
             o.rOption = ADRENALINE_RUSH;
-            o.tOption = adrenalinInfo.getValue(time, adrenalinInfo.getCurrentLevel());
+            o.tOption = si.getValue(time, slv);
             o.cOption = 1;
             tsm.putCharacterStatValue(AdrenalinBoost, o);
             tsm.sendSetStatPacket();
+            EventManager.addEvent(this::setComboCountAfterAdrenaline, si.getValue(time, slv), TimeUnit.SECONDS);
         }
     }
 
-    private void doSwingStudiesAddAttack(int skillId, TemporaryStatManager tsm, Client c) {
+    private void setComboCountAfterAdrenaline() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        o.nOption = 500;
+        o.rOption = COMBO_ABILITY;
+        tsm.putCharacterStatValue(ComboAbilityBuff, o);
+        setCombo(500);
+    }
+
+    private void doSwingStudiesAddAttack(TemporaryStatManager tsm) {
         Option o = new Option();
         if (chr.hasSkill(21100015)) {
             o.nOption = 1;
@@ -282,21 +298,15 @@ public class Aran extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            incrementComboAbility(tsm, attackInfo);
-            if(chr.hasSkill(21110016)) {
-               if (tsm.getOption(ComboAbilityBuff).nOption > 999) {
-                   if(chr.hasSkill(ADRENALINE_RUSH)) {
-                       tsm.getOption(ComboAbilityBuff).nOption = 1000;
-                       giveAdrenalinRushBuff(skillID, tsm, c);
-                       tsm.sendSetStatPacket();
-                       comboAfterAdrenalin();
-                   }
-               }
+            if(chr.hasSkill(ADRENALINE_RUSH) && tsm.getOption(ComboAbilityBuff).nOption > 999) {
+                giveAdrenalinRushBuff(tsm);
+            } else {
+                incrementComboAbility(tsm, attackInfo);
             }
             aranDrain();
             snowCharge(attackInfo);
         }
-        doSwingStudiesAddAttack(getOriginalSkillByID(skillID), tsm, c);
+        doSwingStudiesAddAttack(tsm);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -455,7 +465,7 @@ public class Aran extends Job {
             switch (skillID) {
                 case ADRENALINE_BURST:
                     tsm.getOption(ComboAbilityBuff).nOption = 1000;
-                    giveAdrenalinRushBuff(skillID, tsm, c);
+                    giveAdrenalinRushBuff(tsm);
                     tsm.sendSetStatPacket();
                     break;
                 case RETURN_TO_RIEN:
@@ -464,11 +474,10 @@ public class Aran extends Job {
                     chr.warp(toField);
                     break;
                 case MAHAS_DOMAIN:
-                    SkillInfo mdi = SkillData.getSkillInfoById(MAHAS_DOMAIN);
                     AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
                     aa.setMobOrigin((byte) 0);
                     aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(mdi.getRects().get(0)));
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
                     chr.getField().spawnAffectedArea(aa);
                     break;
                 case HEROS_WILL_ARAN:

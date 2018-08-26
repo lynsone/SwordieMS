@@ -1672,7 +1672,7 @@ public class WorldHandler {
             return;
         }
 
-        ((Summon) life).onSummonHit(damage, mobTemplateId);
+        ((Summon) life).onHit(damage, mobTemplateId);
     }
 
     public static void handleUserFlameOrbRequest(Client c, InPacket inPacket) {

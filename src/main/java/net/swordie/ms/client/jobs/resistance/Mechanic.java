@@ -518,7 +518,7 @@ public class Mechanic extends Citizen {
     }
 
     public static void healFromSupportUnit(Client c, Summon summon) {
-        Char summonOwner = c.getWorld().getCharByID(summon.getChr().getId());
+        Char summonOwner = summon.getChr();
         if (summonOwner.hasSkill(ENHANCED_SUPPORT_UNIT) || summonOwner.hasSkill(SUPPORT_UNIT_HEX)) {
             SkillInfo si = SkillData.getSkillInfoById(SUPPORT_UNIT_HEX);
             byte slv = (byte) summonOwner.getSkill(SUPPORT_UNIT_HEX).getCurrentLevel();
