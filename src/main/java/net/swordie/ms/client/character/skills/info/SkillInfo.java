@@ -102,7 +102,9 @@ public class SkillInfo {
             try {
                 value = value.replace("u", "Math.ceil");
                 value = value.replace("d", "Math.floor");
-                String toReplace = value.contains("y") ? "y" : "x";
+                String toReplace = value.contains("y") ? "y"
+                        : value.contains("X") ? "X"
+                        : "x";
                 Object res = engine.eval(value.replace(toReplace, slv + ""));
                 if(res instanceof Integer) {
                     result = (Integer) res;
