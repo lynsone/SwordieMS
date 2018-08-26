@@ -36,6 +36,7 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.*;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
+import net.swordie.ms.client.jobs.cygnus.WindArcher;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.legend.Luminous;
@@ -1654,13 +1655,38 @@ public class WorldHandler {
     public static void handleSummonedHit(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
-        int id = inPacket.decodeInt();
-        Life life = field.getLifeByObjectID(id);
+        int summonObjId = inPacket.decodeInt();
+        byte attackId = inPacket.decodeByte();
+        int damage = inPacket.decodeInt();
+        int mobTemplateId = inPacket.decodeInt();
+        boolean isLeft = inPacket.decodeByte() != 0;
+        Life life = field.getLifeByObjectID(summonObjId);
         if (life == null || !(life instanceof Summon)) {
             return;
         }
-        if(((Summon) life).getSkillID() == Thief.MIRRORED_TARGET) {
-            Thief.giveShadowMelt(chr);
+
+        switch (((Summon) life).getSkillID()) {
+            case Thief.MIRRORED_TARGET:
+                Thief.giveShadowMelt(chr);
+                Thief.damageDoneToMirroredTarget(chr, (Summon) life, damage);
+                break;
+
+            case Archer.ARROW_ILLUSION:
+                Archer.damageDoneToArrowIllusion(chr, (Summon) life, damage);
+                break;
+
+            case WindArcher.EMERALD_DUST:
+                WindArcher.applyEmeraldDustDebuffToMob(chr, (Summon) life, mobTemplateId);
+                // Fallthrough intended
+            case WindArcher.EMERALD_FLOWER:
+                WindArcher.applyEmeraldFlowerDebuffToMob(chr, (Summon) life, mobTemplateId);
+                WindArcher.damageDoneToEmeraldFlower(chr, (Summon) life, damage);
+                break;
+
+            default:
+                chr.chatMessage(String.format("Unhandled HP Summon, id = %d", ((Summon) life).getSkillID()));
+                System.out.println(String.format("Unhandled HP Summon, id = %d", ((Summon) life).getSkillID()));
+                break;
         }
     }
 

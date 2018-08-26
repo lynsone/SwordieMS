@@ -143,4 +143,13 @@ public class Summoned {
 
         return outPacket;
     }
+
+    public static OutPacket summonedUpdateHPTag(Summon summon) {
+        OutPacket outPacket = new OutPacket(OutHeader.SUMMONED_UPDATE_HP_TAG);
+
+        outPacket.encodeInt(summon.getObjectId());
+        outPacket.encodeInt(summon.getHp());
+
+        return outPacket;
+    }
 }

@@ -10,15 +10,12 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
-import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
@@ -746,6 +743,8 @@ public class Archer extends Beginner {
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
+                summon.setMaxHP(si.getValue(x, slv));
+                summon.setHp(summon.getMaxHP());
                 field = c.getChr().getField();
                 field.spawnSummon(summon);
 
@@ -900,6 +899,24 @@ public class Archer extends Beginner {
             chr.write(User.effect(Effect.skillSpecial(FOCUSED_FURY)));
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(FOCUSED_FURY)));
             tsm.removeAllDebuffs();
+        }
+    }
+
+    public static void damageDoneToArrowIllusion(Char chr, Summon summon, int damage) {
+        Skill skill = chr.getSkill(ARROW_ILLUSION);
+        if(skill == null) {
+            return;
+        }
+
+        int summonHP = summon.getHp();
+        int newSummonHP = summonHP - damage;
+
+        if(newSummonHP <= 0) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            chr.getField().broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
+            tsm.removeStatsBySkill(skill.getSkillId());
+        } else {
+            summon.setHp(newSummonHP);
         }
     }
 }
