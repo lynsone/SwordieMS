@@ -1107,7 +1107,7 @@ public class SkillConstants {
 
     public static int getTotalHyperStatSpByLevel(short level) {
         int sp = 0;
-        for (int i = 140; i < level; i++) {
+        for (int i = 140; i <= level; i++) {
             sp += getHyperStatSpByLv(level);
         }
         return sp;

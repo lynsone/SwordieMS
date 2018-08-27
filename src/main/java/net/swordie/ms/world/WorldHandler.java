@@ -4745,10 +4745,13 @@ public class WorldHandler {
         int skillID = inPacket.decodeInt();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         if (si == null) {
+            log.error(String.format("Character %d attempted assigning hyper SP to a skill with null skillinfo (%d).", chr.getId(), skillID));
+            chr.dispose();
             return;
         }
         if (si.getHyper() == 0 && si.getHyperStat() == 0) {
-            log.error(String.format("Character %d attempted assigning hyper stat SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            log.error(String.format("Character %d attempted assigning hyper SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            chr.dispose();
             return;
         }
         Skill skill = chr.getSkill(skillID, true);
@@ -4758,6 +4761,9 @@ public class WorldHandler {
                     esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
             int curSp = spSet.getSp();
             if (curSp <= 0 || skill.getCurrentLevel() != 0) {
+                log.error(String.format("Character %d attempted assigning hyper skill SP without having it, or too much. Available SP %d, current %d (%d, job %d)",
+                        chr.getId(), curSp, skill.getCurrentLevel(), skillID, chr.getJob()));
+                chr.dispose();
                 return;
             }
             spSet.addSp(-1);
@@ -4765,11 +4771,17 @@ public class WorldHandler {
             int totalHyperSp = SkillConstants.getTotalHyperStatSpByLevel(chr.getLevel());
             int spentSp = chr.getSpentHyperSp();
             int availableSp = totalHyperSp - spentSp;
-            int neededSp = SkillConstants.getTotalNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
-            if (skill.getCurrentLevel() >= 10 || availableSp < neededSp) {
+            int neededSp = SkillConstants.getNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
+            chr.chatMessage(String.format("total %d spent %d", totalHyperSp, spentSp));
+            if (skill.getCurrentLevel() >= skill.getMaxLevel() || availableSp < neededSp) {
+                log.error(String.format("Character %d attempted assigning too many hyper stat levels. Available SP %d, needed %d, current %d (%d, job %d)",
+                        chr.getId(), availableSp, neededSp, skill.getCurrentLevel(), skillID, chr.getJob()));
+                chr.dispose();
                 return;
             }
         } else { // not hyper stat and not hyper skill
+            log.error(String.format("Character %d attempted assigning hyper stat to an improper skill. (%d, job %d)", chr.getId(), skillID, chr.getJob()));
+            chr.dispose();
             return;
         }
         chr.removeFromBaseStatCache(skill);
