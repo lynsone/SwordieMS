@@ -633,7 +633,8 @@ public class Zero extends Job {
         cs.setMp(100);
         cs.setMaxMp(100);
         cs.setJob(10112);
-        cs.setPosMap(100000000);ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        cs.setPosMap(100000000);
+        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
         SPSet alphaSpSet = esp.getSpSet().get(0);
         SPSet betaSpSet = esp.getSpSet().get(1);
         alphaSpSet.addSp(6);
