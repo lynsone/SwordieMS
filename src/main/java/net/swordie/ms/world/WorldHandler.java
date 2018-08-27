@@ -833,6 +833,12 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
         int amount = inPacket.decodeInt();
+
+        if (amount < 1) {
+            chr.dispose();
+            return;
+        }
+
         Skill skill = chr.getSkill(skillID, true);
         boolean isPassive = SkillConstants.isPassiveSkill(skillID);
         if (isPassive) {
@@ -844,6 +850,7 @@ public class WorldHandler {
         }
         Map<Stat, Object> stats = null;
         if (JobConstants.isExtendSpJob(chr.getJob())) {
+            // TODO: get proper sp for beginner jobs
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
@@ -876,6 +883,9 @@ public class WorldHandler {
                 chr.addToBaseStatCache(skill);
             }
             c.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        } else {
+            log.error(String.format("skill stats are null (%d)", skillID));
+            chr.dispose();
         }
     }
 
@@ -4741,6 +4751,7 @@ public class WorldHandler {
     }
 
     public static void handleUserHyperSkillUpRequest(Char chr, InPacket inPacket) {
+        // TODO: verify hyper skill is of the character's class
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -4772,7 +4783,6 @@ public class WorldHandler {
             int spentSp = chr.getSpentHyperSp();
             int availableSp = totalHyperSp - spentSp;
             int neededSp = SkillConstants.getNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
-            chr.chatMessage(String.format("total %d spent %d", totalHyperSp, spentSp));
             if (skill.getCurrentLevel() >= skill.getMaxLevel() || availableSp < neededSp) {
                 log.error(String.format("Character %d attempted assigning too many hyper stat levels. Available SP %d, needed %d, current %d (%d, job %d)",
                         chr.getId(), availableSp, neededSp, skill.getCurrentLevel(), skillID, chr.getJob()));
