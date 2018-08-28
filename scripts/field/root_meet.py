@@ -6,7 +6,7 @@ def init():
     if sm.hasQuest(30000):
         sm.lockInGameUI(True)
         sm.invokeAfterDelay(23500, "lockInGameUI", False)
-        #sm.completeQuest(30000) # Complete Quest   [Root Abyss] An Urgent Summons
+        sm.completeQuest(30000) # Complete Quest   [Root Abyss] An Urgent Summons
 
 
         sm.showScene("Effect.wz/Direction11", "meet", "Scene0") # Falling
