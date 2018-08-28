@@ -47,6 +47,10 @@ public class FieldEffect {
                 outPacket.encodeString(getString());// Directory to the Effect
                 outPacket.encodeInt(getArg1());     // Delay in ms
                 break;
+            case ScreenEffect:
+                outPacket.encodeString(getString());// Path to the Effect
+                outPacket.encodeInt(getArg1());     // Delay in ms
+                break;
             case BackScreen:
                 outPacket.encodeString(getString());// Directory to the Effect
                 outPacket.encodeInt(getArg1());     // Delay in ms
@@ -97,7 +101,7 @@ public class FieldEffect {
 
     public static FieldEffect getFieldEffectFromWz(String dir, int delay) {
         FieldEffect fieldEffect = new FieldEffect();
-        fieldEffect.setFieldEffectType(FieldEffectType.TopScreenEffect);
+        fieldEffect.setFieldEffectType(FieldEffectType.ScreenEffect);
 
         fieldEffect.setString(dir);
         fieldEffect.setArg1(delay);
@@ -108,6 +112,16 @@ public class FieldEffect {
     public static FieldEffect getFieldBackgroundEffectFromWz(String dir, int delay) {
         FieldEffect fieldEffect = new FieldEffect();
         fieldEffect.setFieldEffectType(FieldEffectType.BackScreen);
+
+        fieldEffect.setString(dir);
+        fieldEffect.setArg1(delay);
+
+        return fieldEffect;
+    }
+
+    public static FieldEffect getOffFieldEffectFromWz(String dir, int delay) {
+        FieldEffect fieldEffect = new FieldEffect();
+        fieldEffect.setFieldEffectType(FieldEffectType.TopScreenEffect);
 
         fieldEffect.setString(dir);
         fieldEffect.setArg1(delay);
