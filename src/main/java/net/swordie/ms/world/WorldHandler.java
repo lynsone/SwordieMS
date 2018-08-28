@@ -4277,7 +4277,7 @@ public class WorldHandler {
         c.getChr().dispose();
     }
 
-    public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) { //TODO  Work in Progress
+    public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) {
         inPacket.decodeInt(); //tick
         short usePosition = inPacket.decodeShort(); //Use Position
         short eqpPosition = inPacket.decodeShort(); //Equip Position
@@ -4287,35 +4287,49 @@ public class WorldHandler {
         Item flame = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(usePosition);
         InvType invType = eqpPosition < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(eqpPosition);
+
         if (flame == null || equip == null) {
             chr.chatMessage(GAME_MESSAGE, "Could not find flame or equip.");
             chr.dispose();
             return;
         }
-        int flameID = flame.getItemId();
-        int max;
-        boolean success = true;
-        switch (flameID) { //TODO   Needs all cases to be added with their correct bonus stats
-            case 2048716: //Powerful Rebirth Flame
-                max = 10; //Not Correct
-                break;
-            default:
-                max = 5; //Not Correct
+
+        if (!ItemConstants.isRebirthFlame(flame)) {
+            chr.chatMessage(GAME_MESSAGE, "This item is not a rebirth flame.");
+            chr.dispose();
+            return;
         }
 
-        for (EquipBaseStat ebs : ScrollStat.getRandStats()) {
-            int cur = (int) equip.getBaseStat(ebs);
-            if (cur == 0) {
-                continue;
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(flame.getItemId()).getScrollStats();
+
+        if (vals.size() > 0) {
+            if (equip.getTuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
+                log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
+                        chr.getId(), equip.getTuc(), equip.getIuc()));
+                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, equip));
+                return;
             }
-            int randStat = Util.getRandom(max);
-            randStat = Util.succeedProp(50) ? -randStat : randStat;
-            equip.addStat(ebs, randStat);
+
+            int reqEquipLevelMax = vals.getOrDefault(ScrollStat.reqEquipLevelMax, 250);
+
+            if (equip.getrLevel() > reqEquipLevelMax) {
+                c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Equipment level does not meet scroll requirements.")));
+                chr.dispose();
+                return;
+            }
+
+            boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
+
+            if (success) {
+                boolean eternalFlame = vals.getOrDefault(ScrollStat.createType, 6) >= 7;
+                equip.randomizeFlameStats(eternalFlame); // Generate high stats if it's an eternal/RED flame only.
+            }
+
+            c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flame.getItemId(), equip.getItemId(), false));
             equip.updateToChar(chr);
+            chr.consumeItem(flame);
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flameID, equip.getItemId(), false));
-        equip.updateToChar(chr);
-        chr.consumeItem(flame);
+
         chr.dispose();
     }
 
