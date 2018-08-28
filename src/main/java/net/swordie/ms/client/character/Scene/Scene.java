@@ -39,7 +39,6 @@ public class Scene {
 
         for (EffectInfo ei : effectInfos) {
 
-            // Because there seem to be some type nulls that are meant to warp you.
             if(ei.getType() == null) {
                 log.error(String.format("Unhandled Scene Type"));
                 continue;

@@ -4,6 +4,7 @@ import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterPark;
+import net.swordie.ms.client.character.Scene.Scene;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
@@ -1437,6 +1438,11 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void showEffect(String dir, int delay) {
 		showEffect(dir, 4, delay);
+	}
+
+	public void showScene(String xmlPath, String sceneName, String sceneNumber) {
+		Scene scene = new Scene(chr, xmlPath, sceneName, sceneNumber);
+		scene.createScene();
 	}
 
 	@Override
