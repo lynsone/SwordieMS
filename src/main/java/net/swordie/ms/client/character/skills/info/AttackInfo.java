@@ -88,4 +88,5 @@ public class AttackInfo {
     public byte byteIdk4;
     public byte byteIdk5;
     public OutHeader attackHeader;
+    public int requestTime;
 }

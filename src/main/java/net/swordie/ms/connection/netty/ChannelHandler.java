@@ -533,6 +533,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case FAMILIAR_ATTACK:
                 WorldHandler.handleFamiliarAttack(chr, inPacket);
                 break;
+            case USER_B2_BODY_REQUEST:
+                WorldHandler.handleB2BodyRequest(chr, inPacket);
+                break;
             case USER_THROW_GRENADE:
                 WorldHandler.handleUserThrowGrenade(chr, inPacket);
                 break;

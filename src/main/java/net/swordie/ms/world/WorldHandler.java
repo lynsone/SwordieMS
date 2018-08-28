@@ -1310,21 +1310,21 @@ public class WorldHandler {
         ai.summon = (Summon) field.getLifeByObjectID(summonedID);
         ai.updateTime = inPacket.decodeInt();
         ai.skillId = inPacket.decodeInt();
-        int zero = inPacket.decodeInt();
+        inPacket.decodeInt(); // hardcoded 0
         byte leftAndAction = inPacket.decodeByte();
         ai.attackActionType = (byte) (leftAndAction & 0x7F);
         ai.left = (byte) (leftAndAction >>> 7) != 0;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (mask >>> 4) & 0xF;
-        byte nul2 = inPacket.decodeByte();
+        inPacket.decodeByte(); // hardcoded 0
         ai.attackAction = inPacket.decodeShort();
         ai.attackCount = inPacket.decodeShort();
         ai.pos = inPacket.decodePosition();
-        int minOne = inPacket.decodeInt();
+        inPacket.decodeInt(); // hardcoded -1
         short idk3 = inPacket.decodeShort();
         int idk4 = inPacket.decodeInt();
-        int zero3 = inPacket.decodeInt();
+        inPacket.decodeInt(); // hardcoded 0
         ai.bulletID = inPacket.decodeInt();
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
@@ -1409,7 +1409,7 @@ public class WorldHandler {
             int idk10 = inPacket.decodeInt();
             short idk11 = inPacket.decodeShort();
         }
-        inPacket.decodeInt(); // crc
+        ai.requestTime = inPacket.decodeInt();
         ai.attackActionType = inPacket.decodeByte();
         if (skillID == 23111001 || skillID == 80001915 || skillID == 36111010) {
             int idk5 = inPacket.decodeInt();
@@ -5400,5 +5400,20 @@ public class WorldHandler {
         } else {
             chr.chatMessage("You do not have that jaguar.");
         }
+    }
+
+    public static void handleB2BodyRequest(Char chr, InPacket inPacket) {
+        short type = inPacket.decodeShort();
+        int ownerCID = inPacket.decodeInt();
+        int bodyIdCounter = inPacket.decodeInt();
+        Position offsetPos = inPacket.decodePosition();
+        int skillID = inPacket.decodeInt();
+        boolean isLeft = inPacket.decodeByte() != 0;
+        inPacket.decodeByte();
+        inPacket.decodeShort();
+        inPacket.decodeShort();
+        inPacket.decodeShort();
+        Position forcedPos = inPacket.decodePositionInt();
+
     }
 }
