@@ -833,6 +833,12 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
         int amount = inPacket.decodeInt();
+
+        if (amount < 1) {
+            chr.dispose();
+            return;
+        }
+
         Skill skill = chr.getSkill(skillID, true);
         boolean isPassive = SkillConstants.isPassiveSkill(skillID);
         if (isPassive) {
@@ -844,6 +850,7 @@ public class WorldHandler {
         }
         Map<Stat, Object> stats = null;
         if (JobConstants.isExtendSpJob(chr.getJob())) {
+            // TODO: get proper sp for beginner jobs
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
@@ -876,6 +883,9 @@ public class WorldHandler {
                 chr.addToBaseStatCache(skill);
             }
             c.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        } else {
+            log.error(String.format("skill stats are null (%d)", skillID));
+            chr.dispose();
         }
     }
 
@@ -4267,7 +4277,7 @@ public class WorldHandler {
         c.getChr().dispose();
     }
 
-    public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) { //TODO  Work in Progress
+    public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) {
         inPacket.decodeInt(); //tick
         short usePosition = inPacket.decodeShort(); //Use Position
         short eqpPosition = inPacket.decodeShort(); //Equip Position
@@ -4277,35 +4287,42 @@ public class WorldHandler {
         Item flame = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(usePosition);
         InvType invType = eqpPosition < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(eqpPosition);
+
         if (flame == null || equip == null) {
             chr.chatMessage(GAME_MESSAGE, "Could not find flame or equip.");
             chr.dispose();
             return;
         }
-        int flameID = flame.getItemId();
-        int max;
-        boolean success = true;
-        switch (flameID) { //TODO   Needs all cases to be added with their correct bonus stats
-            case 2048716: //Powerful Rebirth Flame
-                max = 10; //Not Correct
-                break;
-            default:
-                max = 5; //Not Correct
+
+        if (!ItemConstants.isRebirthFlame(flame)) {
+            chr.chatMessage(GAME_MESSAGE, "This item is not a rebirth flame.");
+            chr.dispose();
+            return;
         }
 
-        for (EquipBaseStat ebs : ScrollStat.getRandStats()) {
-            int cur = (int) equip.getBaseStat(ebs);
-            if (cur == 0) {
-                continue;
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(flame.getItemId()).getScrollStats();
+
+        if (vals.size() > 0) {
+            int reqEquipLevelMax = vals.getOrDefault(ScrollStat.reqEquipLevelMax, 250);
+
+            if (equip.getrLevel() > reqEquipLevelMax) {
+                c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Equipment level does not meet scroll requirements.")));
+                chr.dispose();
+                return;
             }
-            int randStat = Util.getRandom(max);
-            randStat = Util.succeedProp(50) ? -randStat : randStat;
-            equip.addStat(ebs, randStat);
+
+            boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
+
+            if (success) {
+                boolean eternalFlame = vals.getOrDefault(ScrollStat.createType, 6) >= 7;
+                equip.randomizeFlameStats(eternalFlame); // Generate high stats if it's an eternal/RED flame only.
+            }
+
+            c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flame.getItemId(), equip.getItemId(), false));
             equip.updateToChar(chr);
+            chr.consumeItem(flame);
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flameID, equip.getItemId(), false));
-        equip.updateToChar(chr);
-        chr.consumeItem(flame);
+
         chr.dispose();
     }
 
@@ -4741,14 +4758,18 @@ public class WorldHandler {
     }
 
     public static void handleUserHyperSkillUpRequest(Char chr, InPacket inPacket) {
+        // TODO: verify hyper skill is of the character's class
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         if (si == null) {
+            log.error(String.format("Character %d attempted assigning hyper SP to a skill with null skillinfo (%d).", chr.getId(), skillID));
+            chr.dispose();
             return;
         }
         if (si.getHyper() == 0 && si.getHyperStat() == 0) {
-            log.error(String.format("Character %d attempted assigning hyper stat SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            log.error(String.format("Character %d attempted assigning hyper SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            chr.dispose();
             return;
         }
         Skill skill = chr.getSkill(skillID, true);
@@ -4758,6 +4779,9 @@ public class WorldHandler {
                     esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
             int curSp = spSet.getSp();
             if (curSp <= 0 || skill.getCurrentLevel() != 0) {
+                log.error(String.format("Character %d attempted assigning hyper skill SP without having it, or too much. Available SP %d, current %d (%d, job %d)",
+                        chr.getId(), curSp, skill.getCurrentLevel(), skillID, chr.getJob()));
+                chr.dispose();
                 return;
             }
             spSet.addSp(-1);
@@ -4765,11 +4789,16 @@ public class WorldHandler {
             int totalHyperSp = SkillConstants.getTotalHyperStatSpByLevel(chr.getLevel());
             int spentSp = chr.getSpentHyperSp();
             int availableSp = totalHyperSp - spentSp;
-            int neededSp = SkillConstants.getTotalNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
-            if (skill.getCurrentLevel() >= 10 || availableSp < neededSp) {
+            int neededSp = SkillConstants.getNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
+            if (skill.getCurrentLevel() >= skill.getMaxLevel() || availableSp < neededSp) {
+                log.error(String.format("Character %d attempted assigning too many hyper stat levels. Available SP %d, needed %d, current %d (%d, job %d)",
+                        chr.getId(), availableSp, neededSp, skill.getCurrentLevel(), skillID, chr.getJob()));
+                chr.dispose();
                 return;
             }
         } else { // not hyper stat and not hyper skill
+            log.error(String.format("Character %d attempted assigning hyper stat to an improper skill. (%d, job %d)", chr.getId(), skillID, chr.getJob()));
+            chr.dispose();
             return;
         }
         chr.removeFromBaseStatCache(skill);

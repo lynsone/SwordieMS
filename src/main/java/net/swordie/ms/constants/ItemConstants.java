@@ -43,7 +43,7 @@ public class ItemConstants {
     public static final int HORNTAIL_NECKLACE = 1122000;
     public static final int CHAOS_HORNTAIL_NECKLACE = 1122076;
 
-    public static final int MAX_HAMMER_SLOTS = 2;
+    public static final short MAX_HAMMER_SLOTS = 2;
     public static final int GOLDEN_HAMMER_20 = 2470004;
     public static final int GOLDEN_HAMMER_50 = 2470001;
     public static final int GOLDEN_HAMMER_100 = 2470007;
@@ -55,6 +55,11 @@ public class ItemConstants {
     private static final int BASE_ST_COST = 30;
     private static final int INNOCENCE_ST_COST = 1337;
     private static final int CLEAN_SLATE_ST_COST = 200;
+
+    // Flames
+    public static final short MAX_FLAME_LEVEL = 7;
+    public static final short FLAME_STATS = 21;
+    public static final int SCARLET_SHOULDER = 1152155; // The only exception for flames on shoulders.
 
     public static int getGenderFromId(int nItemID) {
         int result; // eax
@@ -444,10 +449,28 @@ public class ItemConstants {
     }
 
     public static boolean canEquipHavePotential(Equip equip) {
-        return !equip.isCash() ||
+        return !equip.isCash() &&
                 canEquipTypeHavePotential(equip.getItemId()) &&
                 !equip.isNoPotential() &&
                 ItemData.getEquipById(equip.getItemId()).getTuc() >= 1;
+    }
+
+    public static boolean canEquipHaveFlame(Equip equip) {
+        return isPendant(equip.getItemId()) ||
+                (isWeapon(equip.getItemId()) && !isSecondary((equip.getItemId())) && !isShield((equip.getItemId()))) ||
+                isBelt(equip.getItemId()) ||
+                isHat(equip.getItemId()) ||
+                isFaceAccessory(equip.getItemId()) ||
+                isEyeAccessory(equip.getItemId()) ||
+                isOverall(equip.getItemId()) ||
+                isTop(equip.getItemId()) ||
+                isBottom(equip.getItemId()) ||
+                isShoe(equip.getItemId()) ||
+                isEarrings(equip.getItemId()) ||
+                equip.getItemId() == SCARLET_SHOULDER ||
+                isGlove(equip.getItemId()) ||
+                isCape(equip.getItemId()) ||
+                isPocketItem(equip.getItemId());
     }
 
     public static boolean canEquipGoldHammer(Equip equip) {
@@ -461,6 +484,10 @@ public class ItemConstants {
         return item.getItemId() == GOLDEN_HAMMER_20 ||
                 item.getItemId() == GOLDEN_HAMMER_50 ||
                 item.getItemId() == GOLDEN_HAMMER_100;
+    }
+
+    public static boolean isRebirthFlame(Item item) {
+        return item.getItemId() >= 2048700 && item.getItemId() < 2048800;
     }
 
     /**
