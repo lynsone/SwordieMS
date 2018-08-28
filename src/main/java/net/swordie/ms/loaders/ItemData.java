@@ -46,9 +46,10 @@ public class ItemData {
             ret.setType(Item.Type.EQUIP);
             ret.setInvType(InvType.EQUIP);
             if (randomizeStats) {
-                // TODO: flame stats
-
-                if (ItemConstants.canEquipHavePotential(e)) {
+                if (ItemConstants.canEquipHaveFlame(ret)) {
+                    ret.randomizeFlameStats(true);
+                }
+                if (ItemConstants.canEquipHavePotential(ret)) {
                     ItemGrade grade = ItemGrade.NONE;
                     if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
                         grade = ItemGrade.HIDDEN_UNIQUE;
@@ -111,6 +112,8 @@ public class ItemData {
             equip.setiJump(dataInputStream.readShort());
             equip.setDamR(dataInputStream.readShort());
             equip.setStatR(dataInputStream.readShort());
+            equip.setBdr(dataInputStream.readShort());
+            equip.setImdr(dataInputStream.readShort());
             equip.setTuc(dataInputStream.readShort());
             equip.setCharmEXP(dataInputStream.readInt());
             equip.setSetItemID(dataInputStream.readInt());
@@ -125,6 +128,7 @@ public class ItemData {
             equip.setEquipTradeBlock(dataInputStream.readBoolean());
             equip.setFixedPotential(dataInputStream.readBoolean());
             equip.setNoPotential(dataInputStream.readBoolean());
+            equip.setBossReward(dataInputStream.readBoolean());
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -175,6 +179,8 @@ public class ItemData {
                 dataOutputStream.writeShort(equip.getiJump());
                 dataOutputStream.writeShort(equip.getDamR());
                 dataOutputStream.writeShort(equip.getStatR());
+                dataOutputStream.writeShort(equip.getBdr());
+                dataOutputStream.writeShort(equip.getImdr());
                 dataOutputStream.writeShort(equip.getTuc());
                 dataOutputStream.writeInt(equip.getCharmEXP());
                 dataOutputStream.writeInt(equip.getSetItemID());
@@ -189,6 +195,7 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isEquipTradeBlock());
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
                 dataOutputStream.writeBoolean(equip.isNoPotential());
+                dataOutputStream.writeBoolean(equip.isBossReward());
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
@@ -242,25 +249,25 @@ public class ItemData {
                                 case "reqSTR":
                                     equip.setrStr(Short.parseShort(value));
                                     break;
-                                case "reqDex":
+                                case "reqDEX":
                                     equip.setrDex(Short.parseShort(value));
                                     break;
-                                case "reqInt":
+                                case "reqINT":
                                     equip.setrInt(Short.parseShort(value));
                                     break;
                                 case "reqPOP":
                                     equip.setrPop(Short.parseShort(value));
                                     break;
-                                case "incStr":
+                                case "incSTR":
                                     equip.setiStr(Short.parseShort(value));
                                     break;
-                                case "incDex":
+                                case "incDEX":
                                     equip.setiDex(Short.parseShort(value));
                                     break;
-                                case "incInt":
+                                case "incINT":
                                     equip.setiInt(Short.parseShort(value));
                                     break;
-                                case "incLuk":
+                                case "incLUK":
                                     equip.setiLuk(Short.parseShort(value));
                                     break;
                                 case "incPDD":
@@ -299,6 +306,12 @@ public class ItemData {
                                 case "statR":
                                     equip.setStatR(Short.parseShort(value));
                                     break;
+                                case "imdR":
+                                    equip.setImdr(Short.parseShort(value));
+                                    break;
+                                case "bdR":
+                                    equip.setBdr(Short.parseShort(value));
+                                    break;
                                 case "tuc":
                                     equip.setTuc(Short.parseShort(value));
                                     break;
@@ -333,7 +346,10 @@ public class ItemData {
                                     equip.setFixedPotential(Integer.parseInt(value)!= 0);
                                     break;
                                 case "noPotential":
-                                    equip.setNoPotential(Integer.parseInt(value)!= 0);
+                                    equip.setNoPotential(Integer.parseInt(value) != 0);
+                                    break;
+                                case "bossReward":
+                                    equip.setBossReward(Integer.parseInt(value) != 0);
                                     break;
                                 case "fixedGrade":
                                     equip.setFixedGrade(Integer.parseInt(value));
@@ -851,7 +867,6 @@ public class ItemData {
 
                                 case "stateChangeItem":
                                 case "direction":
-                                case "reqEquipLevelMax":
                                 case "exGrade":
                                 case "exGradeWeight":
                                 case "effect":
@@ -977,7 +992,6 @@ public class ItemData {
                                 case "additionalSuccess":
                                 case "level":
                                 case "specialItem":
-                                case "createType":
                                 case "exNew":
                                 case "cuttable":
                                 case "setItemCategory":
@@ -1189,6 +1203,12 @@ public class ItemData {
                                     break;
                                 case "linkedID":
                                     item.setLinkedID(Integer.parseInt(value));
+                                    break;
+                                case "reqEquipLevelMax":
+                                    item.putScrollStat(reqEquipLevelMax, Integer.parseInt(value));
+                                    break;
+                                case "createType":
+                                    item.putScrollStat(createType, Integer.parseInt(value));
                                     break;
                                 case "spec":
                                     break;
