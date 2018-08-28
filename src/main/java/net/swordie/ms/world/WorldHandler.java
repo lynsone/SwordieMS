@@ -4303,13 +4303,6 @@ public class WorldHandler {
         Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(flame.getItemId()).getScrollStats();
 
         if (vals.size() > 0) {
-            if (equip.getTuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
-                log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
-                        chr.getId(), equip.getTuc(), equip.getIuc()));
-                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, equip));
-                return;
-            }
-
             int reqEquipLevelMax = vals.getOrDefault(ScrollStat.reqEquipLevelMax, 250);
 
             if (equip.getrLevel() > reqEquipLevelMax) {
