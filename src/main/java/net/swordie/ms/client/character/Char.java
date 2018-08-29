@@ -1491,10 +1491,6 @@ public class Char {
 		return (int) getAvatarData().getCharacterStat().getPosMap();
 	}
 
-	private void setFieldID(long fieldId) {
-		setFieldID((int) fieldId);
-	}
-
 	private void setFieldID(int fieldID) {
 		getAvatarData().getCharacterStat().setPosMap(fieldID);
 	}

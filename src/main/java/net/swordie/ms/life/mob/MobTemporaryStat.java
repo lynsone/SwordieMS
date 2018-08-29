@@ -27,9 +27,9 @@ public class MobTemporaryStat {
 	private String linkTeam;
 	private Comparator<MobStat> mobStatComper = (o1, o2) -> {
 		int res = 0;
-		if (o1.getPosition() < o2.getPosition()) {
+		if (o1.getPos() < o2.getPos()) {
 			res = -1;
-		} else if (o1.getPosition() > o2.getPosition()) {
+		} else if (o1.getPos() > o2.getPos()) {
 			res = 1;
 		} else {
 			if (o1.getVal() < o2.getVal()) {
@@ -318,7 +318,7 @@ public class MobTemporaryStat {
 	private int[] getMaskByCollection(Map<MobStat, Option> map) {
 		int[] res = new int[3];
 		for (MobStat mobStat : map.keySet()) {
-			res[mobStat.getPosition()] |= mobStat.getVal();
+			res[mobStat.getPos()] |= mobStat.getVal();
 //            System.out.println(mobStat);
 		}
 //        System.out.println(String.format("Mob stat mask is %d %d %d, in String format:", res[0], res[1], res[2]));
