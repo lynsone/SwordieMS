@@ -74,7 +74,6 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accID")
     private Set<Char> characters = new HashSet<>();
-    private String lastLoggedIn;
     @Transient
     private Char currentChr;
     private int NXCredit;
@@ -83,8 +82,6 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
-    @Enumerated(EnumType.ORDINAL)
-    private LoginState loginState = LoginState.Out;
     @Convert(converter = FileTimeConverter.class)
     private FileTime banExpireDate;
     private String banReason;
@@ -374,14 +371,6 @@ public class Account {
         }
     }
 
-    public String getLastLoggedIn() {
-        return lastLoggedIn;
-    }
-
-    public void setLastLoggedIn(String lastLoggedIn) {
-        this.lastLoggedIn = lastLoggedIn;
-    }
-
     public Char getCurrentChr() {
         return currentChr;
     }
@@ -517,14 +506,6 @@ public class Account {
         this.monsterCollection = monsterCollection;
     }
 
-    public LoginState getLoginState() {
-        return loginState;
-    }
-
-    public void setLoginState(LoginState loginState) {
-        this.loginState = loginState;
-    }
-
     public FileTime getBanExpireDate() {
         return banExpireDate;
     }
@@ -551,7 +532,7 @@ public class Account {
     }
 
     public void unstuck() {
-        setLoginState(LoginState.Out);
+        Server.getInstance().removeAccount(this);
         DatabaseManager.saveToDB(this);
     }
 }

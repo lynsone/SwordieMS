@@ -3073,7 +3073,7 @@ public class Char {
 		getAccount().setCurrentChr(null);
 		if (!isChangingChannel()) {
 			getClient().getChannelInstance().removeChar(this);
-			getAccount().setLoginState(LoginState.Out);
+			Server.getInstance().removeAccount(getAccount()); // don't unstuck, as that would save the account (twice)
 		} else {
 			getClient().setChr(null);
 		}
@@ -3818,7 +3818,6 @@ public class Char {
 		if(getFieldID() != fieldId) {
 			setField(getOrCreateFieldByCurrentInstanceType(fieldId));
 		}
-		getAccount().setLoginState(LoginState.Loading);
 		DatabaseManager.saveToDB(getAccount());
 		int worldID = getClient().getChannelInstance().getWorldId();
 		World world = Server.getInstance().getWorldById(worldID);

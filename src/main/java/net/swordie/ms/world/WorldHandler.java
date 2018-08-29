@@ -155,8 +155,7 @@ public class WorldHandler {
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
         chr.setOnline(true);
         chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
-        acc.setLoginState(LoginState.Game);
-        acc.setLastLoggedIn(chr.getName());
+        Server.getInstance().addAccount(acc);
         acc.setCurrentChr(chr);
         DatabaseManager.saveToDB(acc);
         Field field = chr.getOrCreateFieldByCurrentInstanceType(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());

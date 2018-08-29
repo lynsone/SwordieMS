@@ -87,7 +87,7 @@ public class LoginHandler {
             }
             result = success ? LoginType.Success : LoginType.IncorrectPassword;
             if (success) {
-                if (account.getLoginState() != null && account.getLoginState() != LoginState.Out) {
+                if (Server.getInstance().isAccountLoggedIn(account)) {
                     success = false;
                     result = LoginType.AlreadyConnected;
                 } else if (account.getBanExpireDate() != null && !account.getBanExpireDate().isExpired()) {
@@ -104,10 +104,9 @@ public class LoginHandler {
                             account.setPic(BCrypt.hashpw(account.getPic(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
                         }
                     }
-                    Server.getInstance().getAccounts().add(account);
+                    Server.getInstance().addAccount(account);
                     c.setAccount(account);
                     c.setMachineID(machineID);
-                    account.setLoginState(LoginState.Login);
                     DatabaseManager.saveToDB(account);
                 }
             }
@@ -293,8 +292,6 @@ public class LoginHandler {
         if (c.isAuthorized()) {
             Server.getInstance().getWorldById(worldId).getChannelById(channelId).addClientInTransfer(channelId, characterId, c);
             c.write(Login.selectCharacterResult(LoginType.Success, (byte) 0, channel.getPort(), characterId));
-            c.getAccount().setLoginState(LoginState.Loading);
-            DatabaseManager.saveToDB(c.getAccount());
         }
     }
 

@@ -36,7 +36,7 @@ public class Server extends Properties {
 	private static final Server server = new Server();
 
 	private List<World> worldList = new ArrayList<>();
-	private List<Account> accounts = new ArrayList<>();
+	private Set<Integer> accounts = new HashSet<>(); // just save the ids, no need to save the references
 	private CashShop cashShop;
 
 	public static Server getInstance() {
@@ -136,10 +136,6 @@ public class Server extends Properties {
 		return DatabaseManager.getSession();
 	}
 
-	public List<Account> getAccounts() {
-		return accounts;
-	}
-
 	public Tuple<Byte, Client> getChannelFromTransfer(int charId, int worldId) {
 		for (Channel c : getWorldById(worldId).getChannels()) {
 			if (c.getTransfers().containsKey(charId)) {
@@ -185,5 +181,17 @@ public class Server extends Properties {
 
 	public CashShop getCashShop() {
 		return this.cashShop;
+	}
+
+	public void addAccount(Account account) {
+		accounts.add(account.getId());
+	}
+
+	public void removeAccount(Account account) {
+		accounts.remove(account.getId());
+	}
+
+	public boolean isAccountLoggedIn(Account account) {
+		return accounts.contains(account.getId());
 	}
 }
