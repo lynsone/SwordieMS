@@ -3300,9 +3300,13 @@ public class Char {
 				.stream()
 				.filter(i -> i instanceof PetItem && ((PetItem) i).getActiveState() > 0)
 				.map(i -> (PetItem) i).collect(Collectors.toList())) {
-			Pet p = pi.createPet(this);
-			addPet(p);
-			getField().broadcastPacket(UserLocal.petActivateChange(getId(), p, true, (byte) 0));
+			Pet p = getPets().stream().filter(pet -> pet.getItem().equals(pi)).findAny().orElse(null);
+			if (p == null) {
+				// only create a new pet if the active state is > 0 (active), but isn't added to our own list yet
+				p = pi.createPet(this);
+				addPet(p);
+			}
+			getField().broadcastPacket(UserLocal.petActivateChange(p, true, (byte) 0));
 		}
 	}
 

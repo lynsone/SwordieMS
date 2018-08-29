@@ -587,4 +587,11 @@ public class Phantom extends Job {
         tsm.putCharacterStatValue(NotDamaged, o);
         tsm.sendSetStatPacket();
     }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.setStolenSkills(new HashSet<>());
+        chr.setChosenSkills(new HashSet<>());
+    }
 }

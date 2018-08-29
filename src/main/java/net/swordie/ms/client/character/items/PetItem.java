@@ -1,9 +1,11 @@
 package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.pet.PetSkill;
+import net.swordie.ms.util.Util;
 import org.apache.log4j.Logger;
 import net.swordie.ms.util.FileTime;
 
@@ -163,7 +165,7 @@ public class PetItem extends Item {
     }
 
     public Pet createPet(Char chr) {
-        Pet pet = new Pet(-1);
+        Pet pet = new Pet(-1, chr.getId());
         pet.setFh(chr.getFoothold());
         pet.setPosition(chr.getPosition());
         pet.setId(getItemId());
@@ -182,6 +184,7 @@ public class PetItem extends Item {
 
     public PetItem deepCopy() {
         PetItem petItem = (PetItem) super.deepCopy();
+
         petItem.setName(getName());
         petItem.setLevel(getLevel());
         petItem.setTameness(getTameness());

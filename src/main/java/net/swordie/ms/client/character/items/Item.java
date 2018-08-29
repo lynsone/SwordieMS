@@ -181,7 +181,7 @@ public class Item implements Serializable, Encodable {
             outPacket.encodeShort(0); // flag
             if (ItemConstants.isThrowingStar(getItemId()) || ItemConstants.isBullet(getItemId()) ||
                     ItemConstants.isFamiliar(getItemId())) {
-                outPacket.encodeLong(id); // is inv id really required?
+                outPacket.encodeLong(getId());
             }
         }
     }

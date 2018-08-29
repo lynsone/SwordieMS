@@ -217,10 +217,10 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket petActivateChange(int charID, Pet pet, boolean active, byte removedReason) {
+    public static OutPacket petActivateChange(Pet pet, boolean active, byte removedReason) {
         OutPacket outPacket = new OutPacket(OutHeader.PET_ACTIVATED);
 
-        outPacket.encodeInt(charID);
+        outPacket.encodeInt(pet.getOwnerID());
         outPacket.encodeInt(pet.getIdx());
         outPacket.encodeByte(active);
         if(active) {

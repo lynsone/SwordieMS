@@ -3627,7 +3627,7 @@ public class WorldHandler {
             Pet pet = petItem.createPet(chr);
             petItem.setActiveState((byte) (pet.getIdx() + 1));
             chr.addPet(pet);
-            c.write(UserLocal.petActivateChange(chr.getId(), pet, true, (byte) 0));
+            c.write(UserLocal.petActivateChange(pet, true, (byte) 0));
         } else {
             Pet pet = chr.getPets()
                     .stream()
@@ -3635,7 +3635,7 @@ public class WorldHandler {
                     .findFirst().orElse(null);
             petItem.setActiveState((byte) 0);
             chr.removePet(pet);
-            c.write(UserLocal.petActivateChange(chr.getId(), pet, false, (byte) 0));
+            c.write(UserLocal.petActivateChange(pet, false, (byte) 0));
         }
 
         c.write(WvsContext.inventoryOperation(true, false,

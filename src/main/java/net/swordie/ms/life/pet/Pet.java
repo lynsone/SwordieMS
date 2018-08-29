@@ -1,6 +1,8 @@
 package net.swordie.ms.life.pet;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.PetItem;
+import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.connection.OutPacket;
 
@@ -9,6 +11,7 @@ import net.swordie.ms.connection.OutPacket;
  */
 public class Pet extends Life {
     private int id;
+    private final int ownerID;
     private int idx;
     private String name;
     private long petLockerSN;
@@ -18,8 +21,9 @@ public class Pet extends Life {
     private boolean reinforced;
     private PetItem item;
 
-    public Pet(int templateId) {
+    public Pet(int templateId, int ownerID) {
         super(templateId);
+        this.ownerID = ownerID;
     }
 
     public int getActiveSkillCoolTime() {
@@ -53,7 +57,6 @@ public class Pet extends Life {
         outPacket.encodeShort(getGiantRate());
         outPacket.encodeByte(isTransformed());
         outPacket.encodeByte(isReinforced());
-
     }
 
     public String getName() {
@@ -110,5 +113,14 @@ public class Pet extends Life {
 
     public PetItem getItem() {
         return item;
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        onlyChar.write(UserLocal.petActivateChange(this, true, (byte) 0));
+    }
+
+    public int getOwnerID() {
+        return ownerID;
     }
 }
