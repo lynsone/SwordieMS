@@ -573,7 +573,7 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
     PartyBooster(496),
     GuidedBullet(497),
     Undead(498),
-    RideVehicleExpire(499),ideVehicleExpire(0x1000, 15),
+    RideVehicleExpire(499),
     ;
 
     private int bitPos;

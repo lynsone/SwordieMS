@@ -137,6 +137,7 @@ public class WorldHandler {
             c.write(WvsContext.returnToTitle());
             return;
         }
+        c.setMachineID(machineID);
         Account acc = oldClient.getAccount();
         c.setAccount(acc);
         Server.getInstance().getWorldById(worldId).getChannelById(channel).removeClientFromTransfer(charId);
