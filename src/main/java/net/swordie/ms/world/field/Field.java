@@ -35,6 +35,7 @@ import net.swordie.ms.util.Rect;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -86,8 +87,8 @@ public class Field {
         this.rect = new Rect();
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
-        this.lifes = Collections.synchronizedList(new ArrayList<>());
-        this.chars = Collections.synchronizedList(new ArrayList<>());
+        this.lifes = new CopyOnWriteArrayList<>();
+        this.chars = new CopyOnWriteArrayList<>();
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
         this.reactors = new HashSet<>();
@@ -1109,7 +1110,7 @@ public class Field {
     }
 
     public boolean canSpawnElite() {
-        return getEliteState() == null || getEliteState() == EliteState.NORMAL && nextEliteSpawnTime < System.currentTimeMillis();
+        return (getEliteState() == null || getEliteState() == EliteState.NORMAL) && getNextEliteSpawnTime() < System.currentTimeMillis();
     }
 
     public int getKilledElites() {
