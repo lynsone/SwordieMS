@@ -7,9 +7,14 @@ import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Thief;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.WindArcher;
+import net.swordie.ms.client.jobs.resistance.Mechanic;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
+import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
@@ -273,6 +278,29 @@ public class Summon extends Life {
 
     public void setHp(int hp) {
         this.hp = hp;
+    }
+
+    public void onSkillUse(int skillId) {
+        switch (skillId) {
+            case Warrior.EVIL_EYE:
+                ((Warrior) chr.getJobHandler()).healByEvilEye();
+                break;
+
+            case Warrior.HEX_OF_THE_EVIL_EYE:
+                ((Warrior) chr.getJobHandler()).giveHexOfTheEvilEyeBuffs();
+                break;
+
+            case Mechanic.SUPPORT_UNIT_HEX:
+            case Mechanic.ENHANCED_SUPPORT_UNIT:
+                ((Mechanic) chr.getJobHandler()).healFromSupportUnit(this);
+                break;
+
+            default:
+                chr.chatMessage(String.format("Unhandled Summon Skill: %d, casted by Summon: %d", skillId, getSkillID()));
+                break;
+        }
+        chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, getObjectId())));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skillID, (byte) 1, getObjectId())));
     }
 
     public void onHit(int damage, int mobTemplateId) {

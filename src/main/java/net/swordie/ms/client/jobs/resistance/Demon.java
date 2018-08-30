@@ -200,6 +200,15 @@ public class Demon extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isDemon(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -224,7 +233,6 @@ public class Demon extends Job {
                     chr.heal(chr.getMaxHP());
                 }
                 break;
-
             case BATTLE_PACT_DA:
             case BATTLE_PACT_DS:
                 o1.nOption = si.getValue(x, slv);
@@ -303,7 +311,6 @@ public class Demon extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-
             case DEMONIC_FORTITUDE_DS:
             case DEMONIC_FORTITUDE_DA:
                 o1.nReason = skillID;
@@ -332,12 +339,33 @@ public class Demon extends Job {
                 tsm.putCharacterStatValue(ShadowPartner, o1);
         }
         tsm.sendSetStatPacket();
-        
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+    public void diabolicRecoveryHPRecovery() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(DiabolikRecovery)) {
+            Skill skill = chr.getSkill(DIABOLIC_RECOVERY);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int recovery = si.getValue(x, slv);
+            int duration = si.getValue(w, slv);
+            chr.heal((int) (chr.getMaxHP() / ((double) 100 / recovery)));
+            diabolicRecoveryTimer = EventManager.addEvent(() -> diabolicRecoveryHPRecovery(), duration, TimeUnit.SECONDS);
+        }
+    }
+
+    public void regenDFInterval() {
+        chr.healMP(10);
+        EventManager.addEvent(() -> regenDFInterval(), 4, TimeUnit.SECONDS);
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -496,7 +524,7 @@ public class Demon extends Job {
                 break;
             case THOUSAND_SWORDS:
                 for(int i = 0; i<5; i++) {
-                    incrementOverloadCount(attackInfo, skillID, tsm, c);
+                    incrementOverloadCount(attackInfo, skillID, tsm);
                 }
                 break;
             case CERBERUS_CHOMP:
@@ -536,7 +564,7 @@ public class Demon extends Job {
             case EXCEED_EXECUTION_3:
             case EXCEED_EXECUTION_4:
             case EXCEED_EXECUTION_PURPLE:
-                incrementOverloadCount(attackInfo, skillID, tsm, c);
+                incrementOverloadCount(attackInfo, skillID, tsm);
                 break;
         }
 
@@ -588,7 +616,7 @@ public class Demon extends Job {
         }
     }
 
-    public void incrementOverloadCount(AttackInfo attackInfo, int skillid, TemporaryStatManager tsm, Client c) {
+    public void incrementOverloadCount(AttackInfo attackInfo, int skillid, TemporaryStatManager tsm) {
         Option o = new Option();
         int amount = 1;
         if (tsm.hasStat(OverloadCount)) {
@@ -619,90 +647,52 @@ public class Demon extends Job {
         return num;
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case NETHER_SHIELD:
-                    createNetherShieldForceAtom();
-                    createNetherShieldForceAtom();
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+    public void lifeSapHealing() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o1 = new Option();
-
-        //Vengeance
-        if(tsm.getOptByCTSAndSkill(PowerGuard, VENGEANCE) != null) {
-            if(hitInfo.hpDamage != 0) {
-                Skill skill = chr.getSkill(VENGEANCE);
-                byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                int mobID = hitInfo.mobID;
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mobID);
-                MobTemporaryStat mts = mob.getTemporaryStat();
-                if (Util.succeedProp(si.getValue(prop, slv))) {
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(subTime, slv);
-                    o1.bOption = 1;
-                    mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
-                }
-            }
-        }
-
-        //Possessed Aegis
-        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
-            // Guarded
-            if(chr.hasSkill(POSSESSED_AEGIS)) {
-                Skill skill = chr.getSkill(POSSESSED_AEGIS);
-                byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                int propz = si.getValue(x, slv);
-                if(Util.succeedProp(propz)) {
-                    int mobID = hitInfo.mobID;
-                    createPossessedAegisFuryForceAtom(mobID);
-                    chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv))));
-                }
-            }
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.DEMON_SLAYER.getJobId() && id <= JobConstants.JobEnum.DEMON_AVENGER4.getJobId();
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        if(chr.hasSkill(INFERNAL_EXCEED)) {
-            Skill skill = chr.getSkill(INFERNAL_EXCEED);
+        if(chr.hasSkill(LIFE_SAP)) {
+            Skill skill = chr.getSkill(LIFE_SAP);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int proc = si.getValue(prop, slv);
+            int amounthealed = si.getValue(x, slv);
+            if(chr.hasSkill(ADVANCED_LIFE_SAP)) {
+                amounthealed = SkillData.getSkillInfoById(ADVANCED_LIFE_SAP).getValue(x, chr.getSkill(ADVANCED_LIFE_SAP).getCurrentLevel());
+            }
+            if(chr.hasSkill(PAIN_DAMPENER)) {
+                amounthealed -= SkillData.getSkillInfoById(PAIN_DAMPENER).getValue(x, chr.getSkill(PAIN_DAMPENER).getCurrentLevel());
+            }
+            int exceedamount = tsm.getOption(OverloadCount).nOption;
+            int exceedpenalty = (int) Math.floor(exceedamount / 5);
+            amounthealed -= exceedpenalty;
             if(Util.succeedProp(proc)) {
-                return INFERNAL_EXCEED;
+                int healamount = (int) ((chr.getMaxHP()) / ((double)100 / amounthealed));
+                chr.heal(healamount);
             }
         }
-        return 0;
+    }
+
+    public void leechAuraHealing(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr.hasSkill(LEECH_AURA)) {
+            if(tsm.getOptByCTSAndSkill(Regen, LEECH_AURA) != null) {
+                Skill skill = chr.getSkill(LEECH_AURA);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                int cd = si.getValue(y, slv) * 1000;
+                if(cd + leechAuraCD < System.currentTimeMillis()) {
+                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        int totaldmg = Arrays.stream(mai.damages).sum();
+                        int hpheal = (int) (totaldmg * ((double) 100 / si.getValue(x, slv)));
+                        if (hpheal >= (chr.getMaxHP() / 4)) {
+                            hpheal = (chr.getMaxHP() / 4);
+                        }
+                        leechAuraCD = System.currentTimeMillis();
+                        chr.heal(hpheal);
+                    }
+                }
+            }
+        }
     }
 
     private void createDemonFuryForceAtom(AttackInfo attackInfo) {
@@ -737,7 +727,7 @@ public class Demon extends Job {
                         mob.getPosition(), 0, mob.getPosition()));
             } else {
 
-            //Attacking with another skill
+                //Attacking with another skill
                 int totaldmg = Arrays.stream(mai.damages).sum();
                 if (totaldmg > mob.getHp()) {
                     int inc = ForceAtomEnum.DEMON_SLAYER_FURY_1.getInc();
@@ -786,71 +776,46 @@ public class Demon extends Job {
         }
     }
 
-    public void regenDFInterval() {
-        chr.healMP(10);
-        EventManager.addEvent(() -> regenDFInterval(), 4, TimeUnit.SECONDS);
-    }
-
-
-    public void leechAuraHealing(AttackInfo attackInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(LEECH_AURA)) {
-            if(tsm.getOptByCTSAndSkill(Regen, LEECH_AURA) != null) {
-                Skill skill = chr.getSkill(LEECH_AURA);
-                byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                int cd = si.getValue(y, slv) * 1000;
-                if(cd + leechAuraCD < System.currentTimeMillis()) {
-                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        int totaldmg = Arrays.stream(mai.damages).sum();
-                        int hpheal = (int) (totaldmg * ((double) 100 / si.getValue(x, slv)));
-                        if (hpheal >= (chr.getMaxHP() / 4)) {
-                            hpheal = (chr.getMaxHP() / 4);
-                        }
-                        leechAuraCD = System.currentTimeMillis();
-                        chr.heal(hpheal);
-                    }
-                }
-            }
-        }
-    }
-
-    public void lifeSapHealing() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(LIFE_SAP)) {
-            Skill skill = chr.getSkill(LIFE_SAP);
+    @Override
+    public int getFinalAttackSkill() {
+        if(chr.hasSkill(INFERNAL_EXCEED)) {
+            Skill skill = chr.getSkill(INFERNAL_EXCEED);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             int proc = si.getValue(prop, slv);
-            int amounthealed = si.getValue(x, slv);
-            if(chr.hasSkill(ADVANCED_LIFE_SAP)) {
-                amounthealed = SkillData.getSkillInfoById(ADVANCED_LIFE_SAP).getValue(x, chr.getSkill(ADVANCED_LIFE_SAP).getCurrentLevel());
-            }
-            if(chr.hasSkill(PAIN_DAMPENER)) {
-                amounthealed -= SkillData.getSkillInfoById(PAIN_DAMPENER).getValue(x, chr.getSkill(PAIN_DAMPENER).getCurrentLevel());
-            }
-            int exceedamount = tsm.getOption(OverloadCount).nOption;
-            int exceedpenalty = (int) Math.floor(exceedamount / 5);
-            amounthealed -= exceedpenalty;
             if(Util.succeedProp(proc)) {
-                int healamount = (int) ((chr.getMaxHP()) / ((double)100 / amounthealed));
-                chr.heal(healamount);
+                return INFERNAL_EXCEED;
             }
         }
+        return 0;
     }
 
 
-    public void diabolicRecoveryHPRecovery() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(tsm.hasStat(DiabolikRecovery)) {
-            Skill skill = chr.getSkill(DIABOLIC_RECOVERY);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int recovery = si.getValue(x, slv);
-            int duration = si.getValue(w, slv);
-            chr.heal((int) (chr.getMaxHP() / ((double) 100 / recovery)));
-            diabolicRecoveryTimer = EventManager.addEvent(() -> diabolicRecoveryHPRecovery(), duration, TimeUnit.SECONDS);
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case NETHER_SHIELD:
+                    createNetherShieldForceAtom();
+                    createNetherShieldForceAtom();
+                    break;
+            }
         }
     }
 
@@ -869,5 +834,54 @@ public class Demon extends Job {
             }
             chr.heal(-skillcost);
         }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+
+        //Vengeance
+        if(tsm.getOptByCTSAndSkill(PowerGuard, VENGEANCE) != null) {
+            if(hitInfo.hpDamage != 0) {
+                Skill skill = chr.getSkill(VENGEANCE);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                int mobID = hitInfo.mobID;
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mobID);
+                if(mob == null) {
+                    return;
+                }
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                if (Util.succeedProp(si.getValue(prop, slv))) {
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(subTime, slv);
+                    o1.bOption = 1;
+                    mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
+                }
+            }
+        }
+
+        //Possessed Aegis
+        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
+            // Guarded
+            if(chr.hasSkill(POSSESSED_AEGIS)) {
+                Skill skill = chr.getSkill(POSSESSED_AEGIS);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                int propz = si.getValue(x, slv);
+                if(Util.succeedProp(propz)) {
+                    int mobID = hitInfo.mobID;
+                    createPossessedAegisFuryForceAtom(mobID);
+                    chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv))));
+                }
+            }
+        }
+        super.handleHit(c, inPacket, hitInfo);
     }
 }

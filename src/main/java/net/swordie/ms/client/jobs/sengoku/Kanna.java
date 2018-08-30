@@ -76,49 +76,13 @@ public class Kanna extends Job {
     }
 
     @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case BINDING_TEMPEST:
-            case VERITABLE_PANDEMONIUM:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    if(!mob.isBoss()) {
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
-                }
-
-                break;
-            case NIMBUS_CURSE:
-                AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, (byte) slv);
-                aa.setMobOrigin((byte) 0);
-                aa.setPosition(chr.getPosition());
-                aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                aa.setDelay((short) 5);
-                chr.getField().spawnAffectedArea(aa);
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isKanna(id);
     }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -177,102 +141,17 @@ public class Kanna extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
+
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case BLOSSOM_BARRIER:
-                case BELLFLOWER_BARRIER:
-                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
-                    aa.setMobOrigin((byte) 0);
-                    aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    aa.setDelay((short) 3);
-                    chr.getField().spawnAffectedArea(aa);
-                    break;
-                case NINE_TAILED_FURY:
-                    o1.nReason = skillID;
-                    o1.nValue = si.getValue(indieDamR, slv);
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    tsm.sendSetStatPacket();
-                    break;
-                case BLOSSOMING_DAWN:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
-
     public void getHakuFollow() {
         //if(chr.hasSkill(HAKU)) {
-            c.write(CField.enterFieldFoxMan(chr));
+        c.write(CField.enterFieldFoxMan(chr));
         //}
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        int foxfires = 6;
-        if (tsm.hasStat(FireBarrier)) {
-            if(foxfires > 1) {
-                foxfires = foxfires - 1;
-                }
-            if(foxfires == 4 || foxfires == 3) {
-                o.nOption = 2;
-                tsm.putCharacterStatValue(FireBarrier, o);
-                tsm.sendSetStatPacket();
-            } else if(foxfires == 2) {
-                o.nOption = 1;
-                tsm.putCharacterStatValue(FireBarrier, o);
-                tsm.sendSetStatPacket();
-            } else if (foxfires == 1) {
-                resetFireBarrier();
-                o.nOption = 0;
-                tsm.putCharacterStatValue(FireBarrier, o);
-                tsm.sendSetStatPacket();
-            }
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    public void resetFireBarrier() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        tsm.removeStat(FireBarrier, false);
-        tsm.sendResetStatPacket();
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isKanna(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
     }
 
     public static void hakuFoxFire(Char chr) {
@@ -318,5 +197,142 @@ public class Kanna extends Job {
         o2.tOption = si.getValue(time, slv);
         tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
         tsm.sendSetStatPacket();
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        int slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case BINDING_TEMPEST:
+            case VERITABLE_PANDEMONIUM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+
+                break;
+            case NIMBUS_CURSE:
+                AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, (byte) slv);
+                aa.setMobOrigin((byte) 0);
+                aa.setPosition(chr.getPosition());
+                aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                aa.setDelay((short) 5);
+                chr.getField().spawnAffectedArea(aa);
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case BLOSSOM_BARRIER:
+                case BELLFLOWER_BARRIER:
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 3);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
+                case NINE_TAILED_FURY:
+                    o1.nReason = skillID;
+                    o1.nValue = si.getValue(indieDamR, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieDamR, o1); //Indie
+                    tsm.sendSetStatPacket();
+                    break;
+                case BLOSSOMING_DAWN:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        int foxfires = 6;
+        if (tsm.hasStat(FireBarrier)) {
+            if(foxfires > 1) {
+                foxfires = foxfires - 1;
+                }
+            if(foxfires == 4 || foxfires == 3) {
+                o.nOption = 2;
+                tsm.putCharacterStatValue(FireBarrier, o);
+                tsm.sendSetStatPacket();
+            } else if(foxfires == 2) {
+                o.nOption = 1;
+                tsm.putCharacterStatValue(FireBarrier, o);
+                tsm.sendSetStatPacket();
+            } else if (foxfires == 1) {
+                resetFireBarrier();
+                o.nOption = 0;
+                tsm.putCharacterStatValue(FireBarrier, o);
+                tsm.sendSetStatPacket();
+            }
+        }
+        super.handleHit(c, inPacket, hitInfo);
+    }
+
+    public void resetFireBarrier() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.removeStat(FireBarrier, false);
+        tsm.sendResetStatPacket();
     }
 }

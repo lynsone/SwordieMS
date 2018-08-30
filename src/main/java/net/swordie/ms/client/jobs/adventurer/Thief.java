@@ -196,282 +196,13 @@ public class Thief extends Beginner {
     }
 
     @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = SkillConstants.getActualSkillIDfromSkillID(skill.getSkillId());
-        }
-        if(hasHitMobs) {
-            // Venom & Toxic Venom Passives
-            applyPassiveDoTSkillsOnMob(attackInfo);
-
-            // Shadower Hyper
-            if(chr.hasSkill(FLIP_THE_COIN)) {
-                activateFlipTheCoin(tsm);
-            }
-
-            // Night Lord Hyper
-            applyBleedDartOnMob(attackInfo);
-        }
-
-        if (JobConstants.isNightLord(chr.getJob())) {
-            if(hasHitMobs) {
-                // NightLord's Mark & ForceAtom
-                if(chr.hasSkill(ASSASSINS_MARK)) {
-                    setMarkonMob(attackInfo);
-                    handleMark(attackInfo);
-                }
-
-                // Expert Throwing Star Handling
-                procExpertThrowingStar(skillID);
-            }
-        }
-
-
-        if (JobConstants.isShadower(chr.getJob())) {
-            if(hasHitMobs) {
-                // Critical Growth & Prime Critical
-                if(chr.hasSkill(CRITICAL_GROWTH)) {
-                    incrementCritGrowing();
-                }
-
-                // Pick Pocket
-                dropFromPickPocket(attackInfo);
-
-                // Shadower Instinct
-                if (chr.hasSkill(SHADOWER_INSTINCT)) {
-                    if (tsm.hasStat(IgnoreMobpdpR)) {
-                        incrementShadowInstinct(skillID, tsm, c);
-                    }
-                }
-
-            }
-        }
-
-        if (JobConstants.isDualBlade(chr.getJob())) {
-            if(hasHitMobs) {
-                // Life Drain
-                recoverHPByLifeDrain();
-            }
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case STEAL:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        Field field = chr.getField();
-                        int itemId = 2431835;
-                        if(mob.isBoss()) {
-                            itemId = 2431850;
-                        }
-                        Item item = ItemData.getItemDeepCopy(itemId);
-                        Drop drop = new Drop(item.getItemId(), item);
-                        field.drop(drop, mob.getPosition());
-
-                        if(!mob.isBoss()) {
-                            o1.nOption = 1;
-                            o1.rOption = skill.getSkillId();
-                            o1.tOption = si.getValue(time, slv);
-                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                        }
-                    }
-                }
-                break;
-            case SHADOW_WEB:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        if(!mob.isBoss()) {
-                            MobTemporaryStat mts = mob.getTemporaryStat();
-                            o1.nOption = 1;
-                            o1.rOption = skill.getSkillId();
-                            o1.tOption = si.getValue(time, slv);
-                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                        }
-                    }else{
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    }
-                }
-                break;
-            case SHOWDOWN:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Showdown, o1);
-                    // Unsure
-                }
-                break;
-            case SUDDEN_RAID_DB:
-            case SUDDEN_RAID_SHAD:
-            case SUDDEN_RAID_NL:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                }
-                break;
-            case FLASHBANG:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(x, slv); //TODO -x?   ("Decreases Acc by 20%", but WzFile has 20 as positive)
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
-                    }
-                }
-                break;
-            case BOOMERANG_STAB:
-            case FLYING_ASSAULTER:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        if(!mob.isBoss()) {
-                            MobTemporaryStat mts = mob.getTemporaryStat();
-                            o1.nOption = 1;
-                            o1.rOption = skill.getSkillId();
-                            o1.tOption = si.getValue(time, slv);
-                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                        }
-                    }
-                }
-                break;
-            case CHAINS_OF_HELL:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        if(!mob.isBoss()) {
-                            MobTemporaryStat mts = mob.getTemporaryStat();
-                            o1.nOption = 1;
-                            o1.rOption = skill.getSkillId();
-                            o1.tOption = si.getValue(time, slv);
-                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                        }
-                    }
-                }
-                o2.nOption = 1;
-                o2.tOption = 3;
-                tsm.putCharacterStatValue(NotDamaged, o2);
-                tsm.sendSetStatPacket();
-                break;
-            case FINAL_CUT:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(FinalCut, o1);
-                o2.nOption = 1;
-                o2.rOption = skillID;
-                o2.tOption = 3;
-                tsm.putCharacterStatValue(NotDamaged, o2);
-                o3.nOption = si.getValue(w, slv);
-                o3.rOption = skillID;
-                o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamR, o3);
-                tsm.sendSetStatPacket();
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isAdventurerThief(id);
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if(skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case MAPLE_RETURN:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case SMOKE_SCREEN:
-                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
-                    aa.setMobOrigin((byte) 0);
-                    aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    aa.setDelay((short) 4);
-                    chr.getField().spawnAffectedArea(aa);
-                    break;
-                case FRAILTY_CURSE:
-                    SkillInfo fci = SkillData.getSkillInfoById(skillID);
-                    int lt1 = si.getValue(lt, slv);
-                    int rb1 = si.getValue(rb, slv);
-                    AffectedArea aa2 = AffectedArea.getPassiveAA(chr, skillID, slv);
-                    aa2.setMobOrigin((byte) 0);
-                    aa2.setPosition(chr.getPosition());
-                    aa2.setRect(aa2.getPosition().getRectAround(fci.getRects().get(0)));
-                    aa2.setFlip(!chr.isLeft());
-                    aa2.setDelay((short) 9);
-                    chr.getField().spawnAffectedArea(aa2);
-                    break;
-                case MESO_EXPLOSION:
-                    int i = 0;
-                    Field field = chr.getField();
-                    int rectRange = si.getValue(range, slv);
-                    Rect rect = new Rect(
-                            new Position(
-                                    chr.getPosition().getX() - rectRange,
-                                    chr.getPosition().getY() - rectRange),
-                            new Position(
-                                    chr.getPosition().getX() + rectRange,
-                                    chr.getPosition().getY() + rectRange)
-                    );
-                    List<Drop> dropList = field.getDropsInRect(rect);
-                    for(Drop drop : dropList) {
-                        if(drop.isMoney() && (drop.getOwnerID() == chr.getId()) && i < si.getValue(bulletCount, slv)) {
-                            createMesoExplosionForceAtom(drop);
-                            field.broadcastPacket(DropPool.dropExplodeField(drop.getObjectId()));
-                            i++;
-                        }
-                    }
-                    break;
-                case HEROS_WILL_NL:
-                case HEROS_WILL_SHAD:
-                case HEROS_WILL_DB:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
 
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        if(hitInfo.hpDamage <= 0) {
-            giveShadowMeld();
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -493,7 +224,7 @@ public class Thief extends Beginner {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Jump, o2);
-                        // SpeedMax?
+                // SpeedMax?
                 break;
             case DARK_SIGHT:
                 o1.nOption = si.getValue(x, slv);
@@ -648,31 +379,8 @@ public class Thief extends Beginner {
         tsm.sendSetStatPacket();
     }
 
-    private void createMesoExplosionForceAtom(Drop drop) {
-        Field field = chr.getField();
-        Rect rect = new Rect(
-                new Position(
-                        chr.getPosition().getX() - 4000,
-                        chr.getPosition().getY() - 4000),
-                new Position(
-                        chr.getPosition().getX() + 4000,
-                        chr.getPosition().getY() + 4000)
-        );
-        List<Mob> mobs = field.getMobsInRect(rect);
-        if(mobs.size() <= 0) {
-            return;
-        }
-        Mob mob = Util.getRandomFromList(mobs);
-        int inc = ForceAtomEnum.FLYING_MESO.getInc();
-        int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
-        int mobId = mob.getObjectId();
-
-        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 5,
-                0, 0, (int) System.currentTimeMillis(), 1, 0,
-                drop.getPosition());
-        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                true, mobId, MESO_EXPLOSION_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                mob.getPosition(), MESO_EXPLOSION_ATOM, mob.getPosition()));
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     private void incrementFlipTheCoinStack(TemporaryStatManager tsm, Client c) {
@@ -788,40 +496,298 @@ public class Thief extends Beginner {
         tsm.sendSetStatPacket();
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        //return id >= JobConstants.JobEnum.THIEF.getJobId() && id <= JobConstants.JobEnum.BLADE_MASTER.getJobId();
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case THIEF:
-            case ASSASSIN:
-            case HERMIT:
-            case NIGHTLORD:
-            case BANDIT:
-            case CHIEFBANDIT:
-            case SHADOWER:
-            case BLADE_RECRUIT:
-            case BLADE_ACOLYTE:
-            case BLADE_SPECIALIST:
-            case BLADE_LORD:
-            case BLADE_MASTER:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
+    public void giveShadowMeld() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(tsm.getOptByCTSAndSkill(WindBreakerFinal, BLADE_CLONE) != null) {
-            return BLADE_CLONE;
+        if(chr.hasSkill(SHADOW_MELD)) {
+            if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
+                Skill skill = chr.getSkill(SHADOW_MELD);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+
+                if(lastShadowMeld + 5000 < System.currentTimeMillis()) {
+                    Option o1 = new Option();
+                    Option o2 = new Option();
+                    o1.nOption = 100;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(CriticalBuff, o1);
+                    o2.nReason = skill.getSkillId();
+                    o2.nValue = si.getValue(indiePad, slv);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndiePAD, o2); //Indie
+                    tsm.sendSetStatPacket();
+                    lastShadowMeld = System.currentTimeMillis();
+                }
+            }
         }
-        return 0;
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = SkillConstants.getActualSkillIDfromSkillID(skill.getSkillId());
+        }
+        if(hasHitMobs) {
+            // Venom & Toxic Venom Passives
+            applyPassiveDoTSkillsOnMob(attackInfo);
+
+            // Shadower Hyper
+            if(chr.hasSkill(FLIP_THE_COIN)) {
+                activateFlipTheCoin(tsm);
+            }
+
+            // Night Lord Hyper
+            applyBleedDartOnMob(attackInfo);
+        }
+
+        if (JobConstants.isNightLord(chr.getJob())) {
+            if(hasHitMobs) {
+                // NightLord's Mark & ForceAtom
+                if(chr.hasSkill(ASSASSINS_MARK)) {
+                    setMarkonMob(attackInfo);
+                    handleMark(attackInfo);
+                }
+
+                // Expert Throwing Star Handling
+                procExpertThrowingStar(skillID);
+            }
+        }
+
+
+        if (JobConstants.isShadower(chr.getJob())) {
+            if(hasHitMobs) {
+                // Critical Growth & Prime Critical
+                if(chr.hasSkill(CRITICAL_GROWTH)) {
+                    incrementCritGrowing();
+                }
+
+                // Pick Pocket
+                dropFromPickPocket(attackInfo);
+
+                // Shadower Instinct
+                if (chr.hasSkill(SHADOWER_INSTINCT)) {
+                    if (tsm.hasStat(IgnoreMobpdpR)) {
+                        incrementShadowInstinct(skillID, tsm, c);
+                    }
+                }
+
+            }
+        }
+
+        if (JobConstants.isDualBlade(chr.getJob())) {
+            if(hasHitMobs) {
+                // Life Drain
+                recoverHPByLifeDrain();
+            }
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case STEAL:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        Field field = chr.getField();
+                        int itemId = 2431835;
+                        if(mob.isBoss()) {
+                            itemId = 2431850;
+                        }
+                        Item item = ItemData.getItemDeepCopy(itemId);
+                        Drop drop = new Drop(item.getItemId(), item);
+                        field.drop(drop, mob.getPosition());
+
+                        if(!mob.isBoss()) {
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                break;
+            case SHADOW_WEB:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }else{
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                    }
+                }
+                break;
+            case SHOWDOWN:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Showdown, o1);
+                    // Unsure
+                }
+                break;
+            case SUDDEN_RAID_DB:
+            case SUDDEN_RAID_SHAD:
+            case SUDDEN_RAID_NL:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                }
+                break;
+            case FLASHBANG:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = -si.getValue(x, slv);
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
+                    }
+                }
+                break;
+            case BOOMERANG_STAB:
+            case FLYING_ASSAULTER:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                break;
+            case CHAINS_OF_HELL:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                o2.nOption = 1;
+                o2.tOption = 3;
+                tsm.putCharacterStatValue(NotDamaged, o2);
+                tsm.sendSetStatPacket();
+                break;
+            case FINAL_CUT:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(FinalCut, o1);
+                o2.nOption = 1;
+                o2.rOption = skillID;
+                o2.tOption = 3;
+                tsm.putCharacterStatValue(NotDamaged, o2);
+                o3.nOption = si.getValue(w, slv);
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DamR, o3);
+                tsm.sendSetStatPacket();
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    private void createMesoExplosionForceAtom(Drop drop) {
+        Field field = chr.getField();
+        Rect rect = new Rect(
+                new Position(
+                        chr.getPosition().getX() - 4000,
+                        chr.getPosition().getY() - 4000),
+                new Position(
+                        chr.getPosition().getX() + 4000,
+                        chr.getPosition().getY() + 4000)
+        );
+        List<Mob> mobs = field.getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
+        }
+        Mob mob = Util.getRandomFromList(mobs);
+        int inc = ForceAtomEnum.FLYING_MESO.getInc();
+        int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
+        int mobId = mob.getObjectId();
+
+        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 5,
+                0, 0, (int) System.currentTimeMillis(), 1, 0,
+                drop.getPosition());
+        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                true, mobId, MESO_EXPLOSION_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                mob.getPosition(), MESO_EXPLOSION_ATOM, mob.getPosition()));
+    }
+
+    private void procExpertThrowingStar(int skillId) {
+        if(!chr.hasSkill(EXPERT_THROWING_STAR_HANDLING)) {
+            return;
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+
+        Skill skill = chr.getSkill(EXPERT_THROWING_STAR_HANDLING);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        int hideIconSkillId = skill.getSkillId() + 100; // there's no Buff Icon
+
+        if(tsm.getOptByCTSAndSkill(IndieDamR, hideIconSkillId) == null) {
+            tsm.removeStatsBySkill(hideIconSkillId);
+            if(Util.succeedProp(si.getValue(prop, slv))) {
+                o.nReason = hideIconSkillId;
+                o.nValue = si.getValue(pdR, slv);
+                o.tStart = (int) System.currentTimeMillis();
+                o.tTerm = 5;
+                tsm.putCharacterStatValue(IndieDamR, o);
+                tsm.sendSetStatPacket();
+            }
+        } else {
+            tsm.removeStatsBySkill(hideIconSkillId);
+            o.nOption = 100;
+            o.rOption = hideIconSkillId;
+            o.tOption = 5;
+            tsm.putCharacterStatValue(CriticalBuff, o);
+            tsm.sendSetStatPacket();
+
+            if(SkillData.getSkillInfoById(skillId) != null) {
+                chr.healMP(SkillData.getSkillInfoById(skillId).getValue(mpCon, slv));
+            }
+
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skill.getSkillId(), slv, 0)));
+            chr.write(User.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
+        }
     }
 
     private void handleMark(AttackInfo attackInfo) {
@@ -1061,69 +1027,101 @@ public class Thief extends Beginner {
         }
     }
 
-    private void procExpertThrowingStar(int skillId) {
-        if(!chr.hasSkill(EXPERT_THROWING_STAR_HANDLING)) {
-            return;
-        }
+    @Override
+    public int getFinalAttackSkill() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
+        if(tsm.getOptByCTSAndSkill(WindBreakerFinal, BLADE_CLONE) != null) {
+            return BLADE_CLONE;
+        }
+        return 0;
+    }
 
-        Skill skill = chr.getSkill(EXPERT_THROWING_STAR_HANDLING);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
-        int hideIconSkillId = skill.getSkillId() + 100; // there's no Buff Icon
 
-        if(tsm.getOptByCTSAndSkill(IndieDamR, hideIconSkillId) == null) {
-            tsm.removeStatsBySkill(hideIconSkillId);
-            if(Util.succeedProp(si.getValue(prop, slv))) {
-                o.nReason = hideIconSkillId;
-                o.nValue = si.getValue(pdR, slv);
-                o.tStart = (int) System.currentTimeMillis();
-                o.tTerm = 5;
-                tsm.putCharacterStatValue(IndieDamR, o);
-                tsm.sendSetStatPacket();
-            }
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
         } else {
-            tsm.removeStatsBySkill(hideIconSkillId);
-            o.nOption = 100;
-            o.rOption = hideIconSkillId;
-            o.tOption = 5;
-            tsm.putCharacterStatValue(CriticalBuff, o);
-            tsm.sendSetStatPacket();
-
-            if(SkillData.getSkillInfoById(skillId) != null) {
-                chr.healMP(SkillData.getSkillInfoById(skillId).getValue(mpCon, slv));
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case MAPLE_RETURN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case SMOKE_SCREEN:
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 4);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
+                case FRAILTY_CURSE:
+                    SkillInfo fci = SkillData.getSkillInfoById(skillID);
+                    int lt1 = si.getValue(lt, slv);
+                    int rb1 = si.getValue(rb, slv);
+                    AffectedArea aa2 = AffectedArea.getPassiveAA(chr, skillID, slv);
+                    aa2.setMobOrigin((byte) 0);
+                    aa2.setPosition(chr.getPosition());
+                    aa2.setRect(aa2.getPosition().getRectAround(fci.getRects().get(0)));
+                    aa2.setFlip(!chr.isLeft());
+                    aa2.setDelay((short) 9);
+                    chr.getField().spawnAffectedArea(aa2);
+                    break;
+                case MESO_EXPLOSION:
+                    int i = 0;
+                    Field field = chr.getField();
+                    int rectRange = si.getValue(range, slv);
+                    Rect rect = new Rect(
+                            new Position(
+                                    chr.getPosition().getX() - rectRange,
+                                    chr.getPosition().getY() - rectRange),
+                            new Position(
+                                    chr.getPosition().getX() + rectRange,
+                                    chr.getPosition().getY() + rectRange)
+                    );
+                    List<Drop> dropList = field.getDropsInRect(rect);
+                    for(Drop drop : dropList) {
+                        if(drop.isMoney() && (drop.getOwnerID() == chr.getId()) && i < si.getValue(bulletCount, slv)) {
+                            createMesoExplosionForceAtom(drop);
+                            field.broadcastPacket(DropPool.dropExplodeField(drop.getObjectId()));
+                            i++;
+                        }
+                    }
+                    break;
+                case HEROS_WILL_NL:
+                case HEROS_WILL_SHAD:
+                case HEROS_WILL_DB:
+                    tsm.removeAllDebuffs();
+                    break;
             }
-
-            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skill.getSkillId(), slv, 0)));
-            chr.write(User.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
         }
     }
 
-    public void giveShadowMeld() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(SHADOW_MELD)) {
-            if(tsm.getOptByCTSAndSkill(IndiePAD, SHADOW_MELD) == null) {
-                Skill skill = chr.getSkill(SHADOW_MELD);
-                byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 
-                if(lastShadowMeld + 5000 < System.currentTimeMillis()) {
-                    Option o1 = new Option();
-                    Option o2 = new Option();
-                    o1.nOption = 100;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(CriticalBuff, o1);
-                    o2.nReason = skill.getSkillId();
-                    o2.nValue = si.getValue(indiePad, slv);
-                    o2.tStart = (int) System.currentTimeMillis();
-                    o2.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndiePAD, o2); //Indie
-                    tsm.sendSetStatPacket();
-                    lastShadowMeld = System.currentTimeMillis();
-                }
-            }
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        if(hitInfo.hpDamage <= 0) {
+            giveShadowMeld();
         }
+        super.handleHit(c, inPacket, hitInfo);
     }
 }

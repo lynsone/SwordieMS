@@ -165,6 +165,15 @@ public class WildHunter extends Citizen {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isWildHunter(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -342,12 +351,15 @@ public class WildHunter extends Citizen {
                 break;
         }
         tsm.sendSetStatPacket();
-        
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -462,6 +474,52 @@ public class WildHunter extends Citizen {
         super.handleAttack(c, attackInfo);
     }
 
+    @Override
+    public int getFinalAttackSkill() {
+        if(Util.succeedProp(getFinalAttackProc())) {
+            int fas = 0;
+            if (chr.hasSkill(FINAL_ATTACK_WH)) {
+                fas = FINAL_ATTACK_WH;
+            }
+            if (chr.hasSkill(ADVANCED_FINAL_ATTACK_WH)) {
+                fas = ADVANCED_FINAL_ATTACK_WH;
+            }
+            return fas;
+        } else {
+            return 0;
+        }
+    }
+
+    private Skill getFinalAtkSkill(Char chr) {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_WH)) {
+            skill = chr.getSkill(FINAL_ATTACK_WH);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_WH)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_WH);
+        }
+        return skill;
+    }
+
+    private int getFinalAttackProc() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.getOptByCTSAndSkill(IndieDamR, SILENT_RAMPAGE) != null) {
+            return 100;
+        }
+        Skill skill = getFinalAtkSkill(chr);
+        if (skill == null) {
+            return 0;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+
+        return proc;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -540,6 +598,10 @@ public class WildHunter extends Citizen {
         }
     }
 
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
@@ -558,53 +620,5 @@ public class WildHunter extends Citizen {
             }
         }
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isWildHunter(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        if(Util.succeedProp(getFinalAttackProc())) {
-            int fas = 0;
-            if (chr.hasSkill(FINAL_ATTACK_WH)) {
-                fas = FINAL_ATTACK_WH;
-            }
-            if (chr.hasSkill(ADVANCED_FINAL_ATTACK_WH)) {
-                fas = ADVANCED_FINAL_ATTACK_WH;
-            }
-            return fas;
-        } else {
-            return 0;
-        }
-    }
-
-    private Skill getFinalAtkSkill(Char chr) {
-        Skill skill = null;
-        if(chr.hasSkill(FINAL_ATTACK_WH)) {
-            skill = chr.getSkill(FINAL_ATTACK_WH);
-        }
-        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_WH)) {
-            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_WH);
-        }
-        return skill;
-    }
-
-    private int getFinalAttackProc() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(tsm.getOptByCTSAndSkill(IndieDamR, SILENT_RAMPAGE) != null) {
-            return 100;
-        }
-        Skill skill = getFinalAtkSkill(chr);
-        if (skill == null) {
-            return 0;
-        }
-         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-        int proc = si.getValue(prop, slv);
-
-        return proc;
     }
 }

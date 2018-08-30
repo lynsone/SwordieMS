@@ -9,22 +9,21 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.util.Position;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.TSIndex;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,10 +32,9 @@ import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
-//nUnityPower is stack icon
 /**
  * Created on 12/14/2017.
  */
@@ -205,7 +203,6 @@ public class Pirate extends Beginner {
     }
 
     private int viperEnergy = 0;
-    private final int MAX_ENERGY = getMaxEnergy();
     private int corsairSummonID = 0;
     private ScheduledFuture stimulatingConversationTimer;
 
@@ -232,6 +229,16 @@ public class Pirate extends Beginner {
             }
         }
     }
+
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isAdventurerPirate(id) ||
+                JobConstants.isJett(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -300,7 +307,8 @@ public class Pirate extends Beginner {
             case LUCK_OF_THE_DIE:
             case LUCK_OF_THE_DIE_DD:
                 int upbound = 6;
-                if((chr.hasSkill(ROLL_OF_THE_DICE_BUCC_DD) && chr.hasSkill(5120044)) || (chr.hasSkill(ROLL_OF_THE_DICE_SAIR_DD) && chr.hasSkill(5220044))) {
+                if((chr.hasSkill(ROLL_OF_THE_DICE_BUCC_DD) && chr.hasSkill(5120044)) ||
+                        (chr.hasSkill(ROLL_OF_THE_DICE_SAIR_DD) && chr.hasSkill(5220044))) {
                     upbound = 7;
                 }
                 int random = new Random().nextInt(upbound)+1;
@@ -393,7 +401,7 @@ public class Pirate extends Beginner {
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ACCR, o3);
                 break;
-            case QUICKDRAW: //TODO Fix (see handler)
+            case QUICKDRAW:
                 o1.nOption = 2;
                 o1.rOption = skillID;
                 o1.tOption = 10;
@@ -604,396 +612,10 @@ public class Pirate extends Beginner {
                 break;
         }
         tsm.sendSetStatPacket();
-        
-    }
-
-    private void activateQuickdraw(AttackInfo attackInfo, TemporaryStatManager tsm, Client c) {
-        Option o = new Option();
-        Option o1 = new Option();
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        SkillInfo quickdrawInfo = SkillData.getSkillInfoById(QUICKDRAW);
-        if (tsm.getOption(QuickDraw).nOption == 2) {    //TODO supposed to be reset upon hitting a mob
-            if(hasHitMobs) {
-                tsm.removeStatsBySkill(QUICKDRAW);
-            }
-        } else {
-            if (Util.succeedProp(quickdrawInfo.getValue(prop, quickdrawInfo.getCurrentLevel()))) {
-                o.nOption = 1;
-                o.rOption = QUICKDRAW;
-                tsm.putCharacterStatValue(QuickDraw, o);
-                tsm.sendSetStatPacket();
-            }
-        }
-    }
-
-    private void applyStunMasteryOnMob(AttackInfo attackInfo) {
-        Option o1 = new Option();
-        SkillInfo si = SkillData.getSkillInfoById(STUN_MASTERY);
-        int slv = si.getCurrentLevel();
-        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            if (Util.succeedProp(si.getValue(subProp, slv))) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                if(!mob.isBoss()) {
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = STUN_MASTERY;
-                    o1.tOption = 3;
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                }
-            }
-        }
-    }
-
-    private void incrementViperEnergy(int increase) {
-        if(chr.hasSkill(ENERGY_CHARGE)) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-            if(getViperEnergy() < getMaxEnergy()) {
-                tsm.setViperEnergyCharge(0);
-                if(getViperEnergy() + increase > getMaxEnergy()) {
-                    setViperEnergy(getMaxEnergy());
-                    tsm.setViperEnergyCharge(1);
-                } else {
-                    setViperEnergy(getViperEnergy() + increase);
-                }
-            } else if(getViperEnergy() >= getMaxEnergy()) {
-                tsm.setViperEnergyCharge(1);
-            }
-            tsb.setNOption(getViperEnergy());
-            tsb.setROption(getChargeIcon());
-            tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
-            tsm.sendSetStatPacket();
-        }
-    }
-
-    private void applyViperEnergyCosts(int skillID) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-        Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skillID);
-
-        if(si.getValue(forceCon, slv) > 0) {
-            int energyCost = si.getValue(forceCon, slv);
-            setViperEnergy(getViperEnergy() - energyCost);
-        }
-        tsb.setNOption(getViperEnergy());
-        tsb.setROption(getChargeIcon());
-        tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
-        tsm.sendSetStatPacket();
-    }
-
-    private int getMaxEnergy() {
-        int maxenergy = 0;
-        if(chr.hasSkill(ENERGY_CHARGE)) {
-            maxenergy = 5000;
-        }
-        if(chr.hasSkill(SUPERCHARGE)) {
-            maxenergy = 10000;
-        }
-        return maxenergy;
-    }
-
-    private int getEnergyincrease() {
-        int interval = 0;
-        if(chr.hasSkill(ENERGY_CHARGE)) {
-            interval = 150;
-        }
-        if(chr.hasSkill(SUPERCHARGE)) {
-            interval = 300;
-        }
-        if(chr.hasSkill(ULTRA_CHARGE)) {
-            interval = 350;
-        }
-        return interval;
-    }
-
-    private int getChargeIcon() {
-        int icon = 0;
-        if(chr.hasSkill(ENERGY_CHARGE)) {
-            icon = ENERGY_CHARGE;
-        }
-        if(chr.hasSkill(SUPERCHARGE)) {
-            icon = SUPERCHARGE;
-        }
-        if(chr.hasSkill(ULTRA_CHARGE)) {
-            icon = ULTRA_CHARGE;
-        }
-        return icon;
-    }
-
-    private void applyPirateRevenge() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = getPirateRevenge();
-        if (skill == null) {
-            return;
-        }
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        int prop = si.getValue(SkillStat.prop, slv);
-        if(Util.succeedProp(prop)) {
-            o1.nOption = si.getValue(y, slv);
-            o1.rOption = getPirateRevenge().getSkillId();
-            o1.tOption = si.getValue(time, slv);
-            tsm.putCharacterStatValue(DamageReduce, o1);
-            o2.nReason = getPirateRevenge().getSkillId();
-            o2.nValue = si.getValue(indieDamR, slv);
-            o2.tStart = (int) System.currentTimeMillis();
-            o2.tTerm = si.getValue(time, slv);
-            tsm.putCharacterStatValue(IndieDamR, o2);
-            tsm.sendSetStatPacket();
-        }
-    }
-
-    private Skill getPirateRevenge() {
-        Skill skill = null;
-        if(chr.hasSkill(PIRATE_REVENGE_SAIR)) {
-            skill = chr.getSkill(PIRATE_REVENGE_SAIR);
-        }
-        if(chr.hasSkill(PIRATE_REVENGE_BUCC)) {
-            skill = chr.getSkill(PIRATE_REVENGE_BUCC);
-        }
-        return skill;
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
-
-    @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-
-        if (JobConstants.isBuccaneer(chr.getJob())) {
-            if(hasHitMobs && attackInfo.skillId != 0) {
-                //Stun Mastery
-                applyStunMasteryOnMob(attackInfo);
-
-                //Viper Energy
-                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy before: "+ getViperEnergy());
-                applyViperEnergyCosts(attackInfo.skillId);
-                incrementViperEnergy(getEnergyincrease());
-                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
-
-            }
-        }
-
-        if (JobConstants.isCorsair(chr.getJob())) {
-            if(hasHitMobs) {
-                //Quickdraw
-                activateQuickdraw(attackInfo, tsm, c);
-            }
-        }
-
-        if (JobConstants.isCannonShooter(chr.getJob())) {
-            if(hasHitMobs) {
-
-            }
-        }
-        //Barrel Roulette
-        applyBarrelRouletteDebuffOnMob(attackInfo);
-
-        if (JobConstants.isJett(chr.getJob())) {
-            if(hasHitMobs) {
-
-            }
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case BLAST_BACK:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(z, slv);
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                    }
-                }
-                break;
-            case MONKEY_WAVE:
-            case STARLINE_TWO:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(hcProp, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        if(!mob.isBoss()) {
-                            MobTemporaryStat mts = mob.getTemporaryStat();
-                            o1.nOption = 1;
-                            o1.rOption = skill.getSkillId();
-                            o1.tOption = si.getValue(hcTime, slv);
-                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                        }
-                    }
-                }
-                break;
-            case POWER_UNITY:
-                powerUnity();
-                break;
-            case PARROTARGETTING:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = si.getValue(x, slv);
-                    o1.rOption = skillID;
-                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
-
-                    GuidedBullet gb = (GuidedBullet) tsm.getTSBByTSIndex(TSIndex.GuidedBullet);
-
-                    if(gb.getMobID() != 0) {
-                        Mob gbMob = (Mob) chr.getField().getLifeByObjectID(gb.getMobID());
-                        if(gbMob != null) {
-                            MobTemporaryStat mobTemporaryStat = gbMob.getTemporaryStat();
-                            if(mobTemporaryStat.hasCurrentMobStatBySkillId(skillID)) {
-                                mobTemporaryStat.removeMobStat(MobStat.AddDamParty, false);
-                            }
-                        }
-                    }
-
-                    gb.setNOption(1);
-                    gb.setROption(skillID);
-                    gb.setMobID(mai.mobId);
-                    gb.setUserID(chr.getId());
-                    tsm.putCharacterStatValue(GuidedBullet, gb.getOption());
-                    tsm.sendSetStatPacket();
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if(skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case TIME_LEAP:
-                    //TODO
-                    break;
-                case MAPLE_RETURN:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case HEROS_WILL_BUCC:
-                case HEROS_WILL_SAIR:
-                case HEROS_WILL_CANNON:
-                case HEROS_WILL_JETT:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        if(chr.hasSkill(PIRATE_REVENGE_BUCC) || chr.hasSkill(PIRATE_REVENGE_SAIR)) {
-            applyPirateRevenge();
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isAdventurerPirate(id) ||
-                JobConstants.isBuccaneer(id) ||
-                JobConstants.isCorsair(id) ||
-                JobConstants.isJett(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(MAJESTIC_PRESENCE)) {
-            return MAJESTIC_PRESENCE;
-        }
-        if(tsm.getOption(Roulette).nOption == 1) {
-            return BARREL_ROULETTE; //TODO
-        }
-        return 0;
-    }
-
-    private void giveBarrelRouletteBuff(int roulette) {   //TODO
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        Skill skill = chr.getSkill(BARREL_ROULETTE);
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        switch (roulette) {
-            case 1: // Extra Attack (Final Attack)
-                //Handled, See Final Attack Handler
-                break;
-            case 2: // Max CritDmg
-                o.nOption = si.getValue(s, slv);
-                o.rOption = 0;
-                o.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IncCriticalDamMin, o);
-                tsm.sendSetStatPacket();
-                break;
-            case 3: // Slow Debuff
-                //Handled, See Attack Handler
-                break;
-            case 4: // DoT
-                //Handled, See Attack Handler
-                break;
-        }
-    }
-
-    private void applyBarrelRouletteDebuffOnMob(AttackInfo attackInfo) {   //TODO
-        if(chr.hasSkill(BARREL_ROULETTE)) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            Option o = new Option();
-            Skill skill = chr.getSkill(BARREL_ROULETTE);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            if(tsm.hasStat(Roulette)) {
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 4) {  //DoT Debuff
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    } else if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 3) {  //Slow Debuff
-                        int slowProc = si.getValue(w, slv);
-                        if (Util.succeedProp(slowProc)) {
-                            o.nOption = 1;
-                            o.rOption = skill.getSkillId();
-                            o.tOption = si.getValue(v, slv);
-                            mts.addStatOptionsAndBroadcast(MobStat.Speed, o);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private void corsairSummons() {
@@ -1104,5 +726,393 @@ public class Pirate extends Beginner {
             chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
             stimulatingConversationTimer = EventManager.addEvent(this::incrementStimulatingConversation, 4, TimeUnit.SECONDS);
         }
+    }
+
+
+    private void giveBarrelRouletteBuff(int roulette) {   //TODO
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(BARREL_ROULETTE);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        switch (roulette) {
+            case 1: // Extra Attack (Final Attack)
+                //Handled, See Final Attack Handler
+                break;
+            case 2: // Max CritDmg
+                o.nOption = si.getValue(s, slv);
+                o.rOption = 0;
+                o.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IncCriticalDamMin, o);
+                tsm.sendSetStatPacket();
+                break;
+            case 3: // Slow Debuff
+                //Handled, See Attack Handler
+                break;
+            case 4: // DoT
+                //Handled, See Attack Handler
+                break;
+        }
+    }
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+
+        if (JobConstants.isBuccaneer(chr.getJob())) {
+            if(hasHitMobs && attackInfo.skillId != 0) {
+                //Stun Mastery
+                applyStunMasteryOnMob(attackInfo);
+
+                //Viper Energy
+                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy before: "+ getViperEnergy());
+                applyViperEnergyCosts(attackInfo.skillId);
+                incrementViperEnergy(getEnergyincrease());
+                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
+
+            }
+        }
+
+        if (JobConstants.isCorsair(chr.getJob())) {
+            if(hasHitMobs) {
+                //Quickdraw
+                activateQuickdraw(attackInfo, tsm);
+            }
+        }
+
+        if (JobConstants.isCannonShooter(chr.getJob())) {
+            if(hasHitMobs) {
+
+            }
+        }
+        //Barrel Roulette
+        applyBarrelRouletteDebuffOnMob(attackInfo);
+
+        if (JobConstants.isJett(chr.getJob())) {
+            if(hasHitMobs) {
+
+            }
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case BLAST_BACK:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = si.getValue(z, slv);
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    }
+                }
+                break;
+            case MONKEY_WAVE:
+            case STARLINE_TWO:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(hcProp, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(hcTime, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                break;
+            case POWER_UNITY:
+                powerUnity();
+                break;
+            case PARROTARGETTING:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+
+                    net.swordie.ms.client.character.skills.GuidedBullet gb = (GuidedBullet) tsm.getTSBByTSIndex(TSIndex.GuidedBullet);
+
+                    if(gb.getMobID() != 0) {
+                        Mob gbMob = (Mob) chr.getField().getLifeByObjectID(gb.getMobID());
+                        if(gbMob != null) {
+                            MobTemporaryStat mobTemporaryStat = gbMob.getTemporaryStat();
+                            if(mobTemporaryStat.hasCurrentMobStatBySkillId(skillID)) {
+                                mobTemporaryStat.removeMobStat(MobStat.AddDamParty, false);
+                            }
+                        }
+                    }
+
+                    gb.setNOption(1);
+                    gb.setROption(skillID);
+                    gb.setMobID(mai.mobId);
+                    gb.setUserID(chr.getId());
+                    tsm.putCharacterStatValue(GuidedBullet, gb.getOption());
+                    tsm.sendSetStatPacket();
+                }
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    private void activateQuickdraw(AttackInfo attackInfo, TemporaryStatManager tsm) {
+        Option o = new Option();
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        SkillInfo quickdrawInfo = SkillData.getSkillInfoById(QUICKDRAW);
+        if (tsm.getOption(QuickDraw).nOption == 2) {
+            if(hasHitMobs) {
+                tsm.removeStatsBySkill(QUICKDRAW);
+            }
+        } else {
+            if (Util.succeedProp(quickdrawInfo.getValue(prop, quickdrawInfo.getCurrentLevel()))) {
+                o.nOption = 1;
+                o.rOption = QUICKDRAW;
+                tsm.putCharacterStatValue(QuickDraw, o);
+                tsm.sendSetStatPacket();
+            }
+        }
+    }
+
+    private void applyStunMasteryOnMob(AttackInfo attackInfo) {
+        Option o1 = new Option();
+        SkillInfo si = SkillData.getSkillInfoById(STUN_MASTERY);
+        int slv = si.getCurrentLevel();
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if (Util.succeedProp(si.getValue(subProp, slv))) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(!mob.isBoss()) {
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = STUN_MASTERY;
+                    o1.tOption = 3;
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                }
+            }
+        }
+    }
+
+    private void incrementViperEnergy(int increase) {
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+            if(getViperEnergy() < getMaxEnergy()) {
+                tsm.setViperEnergyCharge(0);
+                if(getViperEnergy() + increase > getMaxEnergy()) {
+                    setViperEnergy(getMaxEnergy());
+                    tsm.setViperEnergyCharge(1);
+                } else {
+                    setViperEnergy(getViperEnergy() + increase);
+                }
+            } else if(getViperEnergy() >= getMaxEnergy()) {
+                tsm.setViperEnergyCharge(1);
+            }
+            tsb.setNOption(getViperEnergy());
+            tsb.setROption(getChargeIcon());
+            tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    private void applyViperEnergyCosts(int skillID) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
+        Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+
+        if(si.getValue(forceCon, slv) > 0) {
+            int energyCost = si.getValue(forceCon, slv);
+            setViperEnergy(getViperEnergy() - energyCost);
+        }
+        tsb.setNOption(getViperEnergy());
+        tsb.setROption(getChargeIcon());
+        tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+        tsm.sendSetStatPacket();
+    }
+
+    private int getMaxEnergy() {
+        int maxenergy = 0;
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            maxenergy = 5000;
+        }
+        if(chr.hasSkill(SUPERCHARGE)) {
+            maxenergy = 10000;
+        }
+        return maxenergy;
+    }
+
+    private int getEnergyincrease() {
+        int interval = 0;
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            interval = 150;
+        }
+        if(chr.hasSkill(SUPERCHARGE)) {
+            interval = 300;
+        }
+        if(chr.hasSkill(ULTRA_CHARGE)) {
+            interval = 350;
+        }
+        return interval;
+    }
+
+    private int getChargeIcon() {
+        int icon = 0;
+        if(chr.hasSkill(ENERGY_CHARGE)) {
+            icon = ENERGY_CHARGE;
+        }
+        if(chr.hasSkill(SUPERCHARGE)) {
+            icon = SUPERCHARGE;
+        }
+        if(chr.hasSkill(ULTRA_CHARGE)) {
+            icon = ULTRA_CHARGE;
+        }
+        return icon;
+    }
+
+    private void applyBarrelRouletteDebuffOnMob(AttackInfo attackInfo) {   //TODO
+        if(chr.hasSkill(BARREL_ROULETTE)) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Option o = new Option();
+            Skill skill = chr.getSkill(BARREL_ROULETTE);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            if(tsm.hasStat(Roulette)) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 4) {  //DoT Debuff
+                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                    } else if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 3) {  //Slow Debuff
+                        int slowProc = si.getValue(w, slv);
+                        if (Util.succeedProp(slowProc)) {
+                            o.nOption = 1;
+                            o.rOption = skill.getSkillId();
+                            o.tOption = si.getValue(v, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Speed, o);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr.hasSkill(MAJESTIC_PRESENCE)) {
+            return MAJESTIC_PRESENCE;
+        }
+        if(tsm.getOption(Roulette).nOption == 1) {
+            return BARREL_ROULETTE; //TODO
+        }
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case TIME_LEAP:
+                    //TODO
+                    break;
+                case MAPLE_RETURN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case HEROS_WILL_BUCC:
+                case HEROS_WILL_SAIR:
+                case HEROS_WILL_CANNON:
+                case HEROS_WILL_JETT:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        if(chr.hasSkill(PIRATE_REVENGE_BUCC) || chr.hasSkill(PIRATE_REVENGE_SAIR)) {
+            applyPirateRevenge();
+        }
+        super.handleHit(c, inPacket, hitInfo);
+    }
+
+    private void applyPirateRevenge() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = getPirateRevenge();
+        if (skill == null) {
+            return;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        int prop = si.getValue(SkillStat.prop, slv);
+        if(Util.succeedProp(prop)) {
+            o1.nOption = si.getValue(y, slv);
+            o1.rOption = getPirateRevenge().getSkillId();
+            o1.tOption = si.getValue(time, slv);
+            tsm.putCharacterStatValue(DamageReduce, o1);
+            o2.nReason = getPirateRevenge().getSkillId();
+            o2.nValue = si.getValue(indieDamR, slv);
+            o2.tStart = (int) System.currentTimeMillis();
+            o2.tTerm = si.getValue(time, slv);
+            tsm.putCharacterStatValue(IndieDamR, o2);
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    private Skill getPirateRevenge() {
+        Skill skill = null;
+        if(chr.hasSkill(PIRATE_REVENGE_SAIR)) {
+            skill = chr.getSkill(PIRATE_REVENGE_SAIR);
+        }
+        if(chr.hasSkill(PIRATE_REVENGE_BUCC)) {
+            skill = chr.getSkill(PIRATE_REVENGE_BUCC);
+        }
+        return skill;
     }
 }

@@ -106,6 +106,15 @@ public class Luminous extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isLuminous(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -188,7 +197,10 @@ public class Luminous extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
+    }
+
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     private void changeLarknessState(int skillId) {
@@ -200,8 +212,6 @@ public class Luminous extends Job {
             lm.addGauge(2500, true);
         }
     }
-
-
 
     private void giveLunarTideBuff() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -242,49 +252,6 @@ public class Luminous extends Job {
             }
             tsm.sendSetStatPacket();
         }
-    }
-
-    private void incrementDarkCrescendo(TemporaryStatManager tsm) {
-        Option o = new Option();
-        Option o1 = new Option();
-        SkillInfo crescendoInfo = SkillData.getSkillInfoById(DARK_CRESCENDO);
-        Skill skill = chr.getSkill(DARK_CRESCENDO);
-        byte slv = (byte) skill.getCurrentLevel();
-        int amount = 1;
-        if(tsm.hasStat(StackBuff)) {
-            amount = tsm.getOption(StackBuff).mOption;
-            if(amount < getMaxDarkCrescendoStack()) {
-                amount++;
-            }
-        }
-        o.setInMillis(true);
-        o.nOption = 1;
-        o.rOption = DARK_CRESCENDO;
-        o.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
-        o.mOption = amount;
-        tsm.putCharacterStatValue(StackBuff, o);
-        o1.setInMillis(true);
-        o1.nOption = (amount * crescendoInfo.getValue(damR, slv));
-        o1.rOption = DARK_CRESCENDO;
-        o1.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
-        tsm.putCharacterStatValue(DamR, o1);
-        tsm.sendSetStatPacket();
-    }
-
-    private int getCrescendoProp() {
-        Skill skill = null;
-        if (chr.hasSkill(DARK_CRESCENDO)) {
-            skill = chr.getSkill(DARK_CRESCENDO);
-        }
-        return skill == null ? 0 : SkillData.getSkillInfoById(DARK_CRESCENDO).getValue(prop, skill.getCurrentLevel());
-    }
-
-    private int getMaxDarkCrescendoStack() {
-        Skill skill = null;
-        if (chr.hasSkill(DARK_CRESCENDO)) {
-            skill = chr.getSkill(DARK_CRESCENDO);
-        }
-        return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
     public static void changeBlackBlessingCount(Client c, boolean increment) {
@@ -340,9 +307,29 @@ public class Luminous extends Job {
         }
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    public void changeMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        LarknessManager lm = tsm.getLarknessManager();
+        Option o = new Option();
+        o.nOption = 1;
+        o.rOption = lm.isDark() ? ECLIPSE : SUNFIRE;
+        tsm.putCharacterStatValue(Larkness, o);
+        tsm.sendSetStatPacket();
     }
+
+    public int getMoreEquilibriumTime() {
+        int eqTime = 20;
+        SkillInfo eqi = SkillData.getSkillInfoById(DARKNESS_MASTERY);
+        if(chr.hasSkill(DARKNESS_MASTERY)) {
+            eqTime += eqi.getValue(time, eqi.getCurrentLevel());
+            eqTime += 5;
+        }
+        return eqTime;
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -399,6 +386,58 @@ public class Luminous extends Job {
         super.handleAttack(c, attackInfo);
     }
 
+    private void incrementDarkCrescendo(TemporaryStatManager tsm) {
+        Option o = new Option();
+        Option o1 = new Option();
+        SkillInfo crescendoInfo = SkillData.getSkillInfoById(DARK_CRESCENDO);
+        Skill skill = chr.getSkill(DARK_CRESCENDO);
+        byte slv = (byte) skill.getCurrentLevel();
+        int amount = 1;
+        if(tsm.hasStat(StackBuff)) {
+            amount = tsm.getOption(StackBuff).mOption;
+            if(amount < getMaxDarkCrescendoStack()) {
+                amount++;
+            }
+        }
+        o.setInMillis(true);
+        o.nOption = 1;
+        o.rOption = DARK_CRESCENDO;
+        o.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
+        o.mOption = amount;
+        tsm.putCharacterStatValue(StackBuff, o);
+        o1.setInMillis(true);
+        o1.nOption = (amount * crescendoInfo.getValue(damR, slv));
+        o1.rOption = DARK_CRESCENDO;
+        o1.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
+        tsm.putCharacterStatValue(DamR, o1);
+        tsm.sendSetStatPacket();
+    }
+
+    private int getCrescendoProp() {
+        Skill skill = null;
+        if (chr.hasSkill(DARK_CRESCENDO)) {
+            skill = chr.getSkill(DARK_CRESCENDO);
+        }
+        return skill == null ? 0 : SkillData.getSkillInfoById(DARK_CRESCENDO).getValue(prop, skill.getCurrentLevel());
+    }
+
+    private int getMaxDarkCrescendoStack() {
+        Skill skill = null;
+        if (chr.hasSkill(DARK_CRESCENDO)) {
+            skill = chr.getSkill(DARK_CRESCENDO);
+        }
+        return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         super.handleSkill(c, skillID, slv, inPacket);
@@ -437,25 +476,9 @@ public class Luminous extends Job {
         }
     }
 
-    public void changeMode() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        LarknessManager lm = tsm.getLarknessManager();
-        Option o = new Option();
-        o.nOption = 1;
-        o.rOption = lm.isDark() ? ECLIPSE : SUNFIRE;
-        tsm.putCharacterStatValue(Larkness, o);
-        tsm.sendSetStatPacket();
-    }
 
-    public int getMoreEquilibriumTime() {
-        int eqTime = 20;
-        SkillInfo eqi = SkillData.getSkillInfoById(DARKNESS_MASTERY);
-        if(chr.hasSkill(DARKNESS_MASTERY)) {
-            eqTime += eqi.getValue(time, eqi.getCurrentLevel());
-            eqTime += 5;
-        }
-        return eqTime;
-    }
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
@@ -474,26 +497,6 @@ public class Luminous extends Job {
             }
         }
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case LUMINOUS:
-            case LUMINOUS1:
-            case LUMINOUS2:
-            case LUMINOUS3:
-            case LUMINOUS4:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
     }
 
     @Override

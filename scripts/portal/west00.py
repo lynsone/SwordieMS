@@ -1,78 +1,46 @@
+fields = {
+    # fromField : [toField, portal]
+    106030200 : [106030300, 2],
+    401060000 : [401053002, 2],
+    865020000 : [865000000, 10],
+    865020100 : [865020000, 4],
+    863010420 : [863010500, 5],
+    863010500 : [863010320, 1],
+    863010330 : [863010500, 0],
+    101050000 : [101050100, 2],
+    272000000 : [270000000, 6],
+    272000600 : [272000500, 2],
+    272010000 : [272000600, 2],
+    272010200 : [272010100, 2],
+    106030211 : [106030210, 2],
+    130030001 : [130030002, 0],
+    130030002 : [130030003, 0],
+    130030003 : [130030004, 0],
+    130030004 : [130030005, 0],
+    100040000 : [100020200, 6],
+    931000310 : [931000320, 0],
+    910150001 : [910150002, 2], # FFF : Elluel -> FFF : Path of the Glowcaves   *FFF = Frozen Fairy Forest
+    211042402 : [211042300, 0],
+    211042400 : [211042300, 0],
+    211042401 : [211042300, 0],
+
+}
+
+
 def init():
     warp = True
     fieldID = sm.getFieldID()
-    if fieldID == 106030200:
-        map = 106030300
-        portal = 2
-    elif fieldID == 401060000:
-        map = 401053002
-        portal = 2
-    elif fieldID == 865020000:
-        map = 865000000
-        portal = 10
-    elif fieldID == 865020100:
-        map = 865020000
-        portal = 4
-    elif fieldID == 863010420:
-        map = 863010500
-        portal = 5
-    elif fieldID == 863010500:
-        map = 863010320
-        portal = 1
-    elif fieldID == 863010330:
-        map = 863010500
-        portal = 0
-    elif fieldID == 101050000:
-        map = 101050100
-        portal = 2
-    elif fieldID == 272000000:
-        map = 270000000
-        portal = 6
-    elif fieldID == 272000600:
-        map = 272000500
-        portal = 2
-    elif fieldID == 272010000:
-        map = 272000600
-        portal = 2
-    elif fieldID == 272010200:
-        map = 272010100
-        portal = 2
-    elif fieldID == 106030211:
-        map = 106030210
-        portal = 2
-    elif fieldID == 130030001:
-        map = 130030002
-        portal = 0
-    elif fieldID == 130030002:
-        map = 130030003
-        portal = 0
-    elif fieldID == 130030003:
-        map = 130030004
-        portal = 0
-    elif fieldID == 130030004:
-        map = 130030005
-        portal = 0
-    elif fieldID == 100040000:
-        map = 100020200
-        portal = 6
-    elif fieldID == 211042402 or fieldID == 211042400 or fieldID == 211042401:
-        map = 211042300
-        portal = 0
-    elif fieldID == 931000310:
-        map = 931000320
-        portal = 0
 
-    elif fieldID == 350060160: # Black Heaven Core (Lotus Stage 1)
+    if fieldID == 350060160: # Black Heaven Core (Lotus Stage 1)
         warp = False
         sm.teleportInField(2) #portal Id
         sm.dispose()
 
-    else:
+    elif fieldID not in fields:
         sm.chat("(portal) This script (west00.py) is not coded for this map. (ID: " + str(fieldID) + ")")
-        map = sm.getChr().getField().getReturnMap()
-        portal = 0
+        sm.dispose()
         warp = False
 
     if warp:
-        sm.warp(map, portal)
+        sm.warp(fields[fieldID][0], fields[fieldID][1])
         sm.dispose()

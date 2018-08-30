@@ -114,6 +114,22 @@ public class Phantom extends Job {
         stealJobHandlers.add(new Pirate(chr));
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isPhantom(id);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.setStolenSkills(new HashSet<>());
+        chr.setChosenSkills(new HashSet<>());
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -198,10 +214,98 @@ public class Phantom extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
     }
 
-    private void carteForceAtom(AttackInfo attackInfo) {
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+    private void giveJudgmentDrawBuff(int skillId) {
+
+        Skill skill = chr.getSkill(skillId);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        int randomInt = new Random().nextInt((skillId == JUDGMENT_DRAW_1 ? 2 : 5))+1;
+        int xOpt = 0;
+        switch (randomInt) {
+            case 1: // Crit Rate
+                xOpt = si.getValue(v, slv);
+                break;
+            case 2: // Item Drop Rate
+                xOpt = si.getValue(w, slv);
+                break;
+            case 3: // AsrR & TerR
+                xOpt = si.getValue(x, slv);
+                break;
+            case 4: // Defense %
+                xOpt = 10;
+                break;
+            case 5: // Life Drain
+                break;
+        }
+
+        o.nOption = randomInt;
+        o.rOption = skill.getSkillId();
+        o.tOption = si.getValue(time, slv);
+        o.xOption = xOpt;
+        tsm.putCharacterStatValue(Judgement, o);
+        tsm.sendSetStatPacket();
+        //TODO Draw Card Effect
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        for(Job jobHandler : stealJobHandlers) {
+            jobHandler.handleAttack(c, attackInfo);
+        }
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if (hasHitMobs && attackInfo.skillId != CARTE_NOIR && attackInfo.skillId != CARTE_BLANCHE) {
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                cartDeck();
+                createCarteForceAtom(attackInfo);
+            }
+            drainLifeByJudgmentDraw();
+        }
+
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case CARTE_ROSE_FINALE:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
+                    aa.setMobOrigin((byte) 1);
+                    aa.setPosition(mob.getPosition());
+                    aa.setDelay((short) 13);
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    chr.getField().spawnAffectedArea(aa);
+                }
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    private void createCarteForceAtom(AttackInfo attackInfo) {
         if (chr.hasSkill(CARTE_BLANCHE)) {
             SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
             int anglenum = new Random().nextInt(30) + 295;
@@ -235,7 +339,7 @@ public class Phantom extends Job {
         }
     }
 
-    private void carteForceAtomJudgmentDraw() {
+    private void createCarteForceAtomByJudgmentDraw() {
         if (chr.hasSkill(CARTE_BLANCHE)) {
             SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
             Rect rect = new Rect(
@@ -279,54 +383,58 @@ public class Phantom extends Job {
         }
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    private void drainLifeByJudgmentDraw() {
+        if(!chr.hasSkill(JUDGMENT_DRAW_2)) {
+            return;
+        }
+        Skill skill = chr.getSkill(JUDGMENT_DRAW_2);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(Judgement) && tsm.getOption(Judgement).nOption == 5) {
+            int healrate = si.getValue(z, slv);
+            chr.heal((int) (chr.getMaxHP() * ((double) healrate / 100)));
+        }
+    }
+
+    private int getMaxCards() {
+        int num = 0;
+        if (chr.hasSkill(JUDGMENT_DRAW_1)) {
+            num = 20;
+        }
+        if (chr.hasSkill(JUDGMENT_DRAW_2)) {
+            num = 40;
+        }
+        return num;
+    }
+
+    private void resetCardStack() {
+        setCardAmount((byte) 0);
+    }
+
+    public byte getCardAmount() {
+        return cardAmount;
+    }
+
+    public void setCardAmount(byte cardAmount) {
+        this.cardAmount = cardAmount;
+        c.write(UserLocal.incJudgementStack(getCardAmount()));
+    }
+
+    private void cartDeck() {
+        if (getCardAmount() < getMaxCards()) {
+            setCardAmount((byte) (getCardAmount() + 1));
+        }
     }
 
     @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        for(Job jobHandler : stealJobHandlers) {
-            jobHandler.handleAttack(c, attackInfo);
-        }
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        if (hasHitMobs && attackInfo.skillId != CARTE_NOIR && attackInfo.skillId != CARTE_BLANCHE) {
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                cartDeck();
-                carteForceAtom(attackInfo);
-            }
-            drainLifeByJudgmentDraw();
-        }
-
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case CARTE_ROSE_FINALE:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
-                    aa.setMobOrigin((byte) 1);
-                    aa.setPosition(mob.getPosition());
-                    aa.setDelay((short) 13);
-                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    chr.getField().spawnAffectedArea(aa);
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
+    public int getFinalAttackSkill() {
+        return 0;
     }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -359,7 +467,7 @@ public class Phantom extends Job {
                     break;
                 case JUDGMENT_DRAW_1:
                 case JUDGMENT_DRAW_2:
-                    carteForceAtomJudgmentDraw();
+                    createCarteForceAtomByJudgmentDraw();
                     giveJudgmentDrawBuff(skillID);
                     resetCardStack();
                     break;
@@ -367,77 +475,6 @@ public class Phantom extends Job {
                     tsm.removeAllDebuffs();
                     break;
             }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        for(Job jobHandler : stealJobHandlers) {
-            jobHandler.handleHit(c, inPacket, hitInfo);
-        }
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (!chr.hasSkill(VOL_DAME)) {
-            return;
-        }
-        if (tsm.getOptByCTSAndSkill(CharacterTemporaryStat.EVA, VOL_DAME) != null) {
-            Skill skill = chr.getSkill(VOL_DAME);
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int dmgPerc = si.getValue(x, skill.getCurrentLevel());
-            int dmg = hitInfo.hpDamage;
-            hitInfo.hpDamage = dmg - (dmg * (dmgPerc / 100));
-        }
-
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case PHANTOM:
-            case PHANTOM1:
-            case PHANTOM2:
-            case PHANTOM3:
-            case PHANTOM4:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-
-    private int getMaxCards() {
-        int num = 0;
-        if (chr.hasSkill(JUDGMENT_DRAW_1)) {
-            num = 20;
-        }
-        if (chr.hasSkill(JUDGMENT_DRAW_2)) {
-            num = 40;
-        }
-        return num;
-    }
-
-    private void resetCardStack() {
-        setCardAmount((byte) 0);
-    }
-
-    public byte getCardAmount() {
-        return cardAmount;
-    }
-
-    public void setCardAmount(byte cardAmount) {
-        this.cardAmount = cardAmount;
-        c.write(UserLocal.incJudgementStack(getCardAmount()));
-    }
-
-    private void cartDeck() {
-        if (getCardAmount() < getMaxCards()) {
-            setCardAmount((byte) (getCardAmount() + 1));
         }
     }
 
@@ -517,54 +554,28 @@ public class Phantom extends Job {
         tsm.sendSetStatPacket();
     }
 
-    private void giveJudgmentDrawBuff(int skillId) {
 
-        Skill skill = chr.getSkill(skillId);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
 
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        int randomInt = new Random().nextInt((skillId == JUDGMENT_DRAW_1 ? 2 : 5))+1;
-        int xOpt = 0;
-        switch (randomInt) {
-            case 1: // Crit Rate
-                xOpt = si.getValue(v, slv);
-                break;
-            case 2: // Item Drop Rate
-                xOpt = si.getValue(w, slv);
-                break;
-            case 3: // AsrR & TerR
-                xOpt = si.getValue(x, slv);
-                break;
-            case 4: // Defense %
-                xOpt = 10;
-                break;
-            case 5: // Life Drain
-                break;
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        for(Job jobHandler : stealJobHandlers) {
+            jobHandler.handleHit(c, inPacket, hitInfo);
         }
-
-        o.nOption = randomInt;
-        o.rOption = skill.getSkillId();
-        o.tOption = si.getValue(time, slv);
-        o.xOption = xOpt;
-        tsm.putCharacterStatValue(Judgement, o);
-        tsm.sendSetStatPacket();
-        //TODO Draw Card Effect
-    }
-
-    private void drainLifeByJudgmentDraw() {
-        if(!chr.hasSkill(JUDGMENT_DRAW_2)) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (!chr.hasSkill(VOL_DAME)) {
             return;
         }
-        Skill skill = chr.getSkill(JUDGMENT_DRAW_2);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(tsm.hasStat(Judgement) && tsm.getOption(Judgement).nOption == 5) {
-            int healrate = si.getValue(z, slv);
-            chr.heal((int) (chr.getMaxHP() * ((double) healrate / 100)));
+        if (tsm.getOptByCTSAndSkill(CharacterTemporaryStat.EVA, VOL_DAME) != null) {
+            Skill skill = chr.getSkill(VOL_DAME);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int dmgPerc = si.getValue(x, skill.getCurrentLevel());
+            int dmg = hitInfo.hpDamage;
+            hitInfo.hpDamage = dmg - (dmg * (dmgPerc / 100));
         }
+
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     public static void reviveByFinalFeint(Char chr) {
@@ -586,12 +597,5 @@ public class Phantom extends Job {
         o.tStart = si.getValue(y, slv);
         tsm.putCharacterStatValue(NotDamaged, o);
         tsm.sendSetStatPacket();
-    }
-
-    @Override
-    public void setCharCreationStats(Char chr) {
-        super.setCharCreationStats(chr);
-        chr.setStolenSkills(new HashSet<>());
-        chr.setChosenSkills(new HashSet<>());
     }
 }

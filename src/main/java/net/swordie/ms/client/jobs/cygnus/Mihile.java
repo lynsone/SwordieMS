@@ -91,6 +91,15 @@ public class Mihile extends Job {
         super(chr);
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return id == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() || JobConstants.isMihile(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -210,10 +219,13 @@ public class Mihile extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
     }
 
-    private void giveRoyalGuardBuff(TemporaryStatManager tsm, Client c) { //TempStat  Shield Attack is Effect
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+    private void giveRoyalGuardBuff(TemporaryStatManager tsm) { //TempStat  Shield Attack is Effect
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -276,192 +288,6 @@ public class Mihile extends Job {
             pad = 35;
         }
         return pad;
-    }
-
-    private void doRoyalGuardAttack() {
-        c.write(UserLocal.royalGuardAttack(true));
-    }
-
-
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
-
-    @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case FOUR_POINT_ASSAULT:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skillID;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
-                    }
-                }
-                break;
-            case RADIANT_CROSS:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(y, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skillID;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
-                    }
-                }
-                if(chr.hasSkill(RADIANT_CROSS_AA)) {
-                    Field field = chr.getField();
-                    SkillInfo rca = SkillData.getSkillInfoById(RADIANT_CROSS_AA);
-                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
-                    aa.setMobOrigin((byte) 0);
-                    aa.setSkillID(RADIANT_CROSS_AA);
-                    aa.setPosition(chr.getPosition());
-                    Rect rect = aa.getPosition().getRectAround(si.getRects().get(0));
-                    if(!chr.isLeft()) {
-                        rect = rect.horizontalFlipAround(chr.getPosition().getX());
-                    }
-                    aa.setRect(rect);
-                    aa.setFlip(!attackInfo.left);
-                    aa.setDelay((short) 7); //spawn delay
-                    field.spawnAffectedAreaAndRemoveOld(aa);
-                }
-                break;
-            case RADIANT_CROSS_AA:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = si.getValue(x, slv);
-                    o1.rOption = skillID;
-                    o1.tOption = mob.isBoss() ? (si.getValue(time, slv) / 2) : si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
-                }
-                break;
-            case CHARGING_LIGHT:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 10; // Because WzFile doesn't have a variable for it.
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case MAGIC_CRASH:
-                    Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-                    if(!chr.isLeft()) {
-                        rect = rect.moveRight();
-                    }
-                    for(Life life : chr.getField().getLifesInRect(rect)) {
-                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
-                            Mob mob = (Mob) life;
-                            MobTemporaryStat mts = mob.getTemporaryStat();
-                            if(Util.succeedProp(si.getValue(prop, slv))) {
-                                mts.removeBuffs();
-                                o1.nOption = 1;
-                                o1.rOption = skillID;
-                                o1.tOption = si.getValue(time, slv);
-                                mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(RoyalGuardPrepare)) {
-            doRoyalGuardAttack();
-            giveRoyalGuardBuff(tsm, c);
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return id == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() || JobConstants.isMihile(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        if(Util.succeedProp(getFinalAttackProc())) {
-            int fas = 0;
-            if (chr.hasSkill(FINAL_ATTACK_MIHILE)) {
-                fas = FINAL_ATTACK_MIHILE;
-            }
-            if (chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
-                fas = ADVANCED_FINAL_ATTACK_MIHILE;
-            }
-            return fas;
-        } else {
-            return 0;
-        }
-    }
-
-    private Skill getFinalAtkSkill(Char chr) {
-        Skill skill = null;
-        if(chr.hasSkill(FINAL_ATTACK_MIHILE)) {
-            skill = chr.getSkill(FINAL_ATTACK_MIHILE);
-        }
-        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
-            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_MIHILE);
-        }
-        return skill;
-    }
-
-    private int getFinalAttackProc() {
-        Skill skill = getFinalAtkSkill(chr);
-        if (skill == null) {
-            return 0;
-        }
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-
-        return si.getValue(prop, slv);
     }
 
     private void giveSoulLinkBuffs() {
@@ -569,5 +395,181 @@ public class Mihile extends Job {
             chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(s, slv))));
             soulLinkHPRegenTimer = EventManager.addEvent(this::soulLinkHPRegen, delay, TimeUnit.SECONDS);
         }
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        int slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case FOUR_POINT_ASSAULT:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = si.getValue(x, slv);
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
+                    }
+                }
+                break;
+            case RADIANT_CROSS:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(y, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = si.getValue(x, slv);
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
+                    }
+                }
+                if(chr.hasSkill(RADIANT_CROSS_AA)) {
+                    Field field = chr.getField();
+                    SkillInfo rca = SkillData.getSkillInfoById(RADIANT_CROSS_AA);
+                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setSkillID(RADIANT_CROSS_AA);
+                    aa.setPosition(chr.getPosition());
+                    Rect rect = aa.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.horizontalFlipAround(chr.getPosition().getX());
+                    }
+                    aa.setRect(rect);
+                    aa.setFlip(!attackInfo.left);
+                    aa.setDelay((short) 7); //spawn delay
+                    field.spawnAffectedAreaAndRemoveOld(aa);
+                }
+                break;
+            case RADIANT_CROSS_AA:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = mob.isBoss() ? (si.getValue(time, slv) / 2) : si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
+                }
+                break;
+            case CHARGING_LIGHT:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 10; // Because WzFile doesn't have a variable for it.
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+                }
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    private void doRoyalGuardAttack() {
+        c.write(UserLocal.royalGuardAttack(true));
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        Skill skill = getFinalAtkSkill();
+        if(skill != null) {
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            int proc = si.getValue(prop, slv);
+
+            if(Util.succeedProp(proc)) {
+                return skill.getSkillId();
+            }
+        }
+        return 0;
+    }
+
+    private Skill getFinalAtkSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_MIHILE)) {
+            skill = chr.getSkill(FINAL_ATTACK_MIHILE);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_MIHILE);
+        }
+        return skill;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case MAGIC_CRASH:
+                    Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.moveRight();
+                    }
+                    for(Life life : chr.getField().getLifesInRect(rect)) {
+                        if(life instanceof Mob && ((Mob) life).getHp() > 0) {
+                            Mob mob = (Mob) life;
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            if(Util.succeedProp(si.getValue(prop, slv))) {
+                                mts.removeBuffs();
+                                o1.nOption = 1;
+                                o1.rOption = skillID;
+                                o1.tOption = si.getValue(time, slv);
+                                mts.addStatOptionsAndBroadcast(MobStat.MagicCrash, o1);
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStat(RoyalGuardPrepare)) {
+            doRoyalGuardAttack();
+            giveRoyalGuardBuff(tsm);
+        }
+        super.handleHit(c, inPacket, hitInfo);
     }
 }

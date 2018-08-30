@@ -141,6 +141,16 @@ public class Evan extends Job {
         return skillID;
     }
 
+
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isEvan(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -235,12 +245,15 @@ public class Evan extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -311,6 +324,95 @@ public class Evan extends Job {
         }
     }
 
+
+    private void createMagicDebrisForceAtom() {
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(getDebrisSkill());
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
+        List<Mob> lifes =  field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
+        for(int i = 0; i<debrisCount; i++) {
+            c.write(CField.delWreckage(chr));
+            Life life = Util.getRandomFromList(lifes);
+            int mobID = (life).getObjectId(); //
+            int inc = ForceAtomEnum.WRECKAGE.getInc();
+            int type = ForceAtomEnum.WRECKAGE.getForceAtomType();
+            if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
+                inc = ForceAtomEnum.ADV_WRECKAGE.getInc();
+                type = ForceAtomEnum.ADV_WRECKAGE.getForceAtomType();
+            }
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 10,
+                    0, 200, (int) System.currentTimeMillis(), 1, 0,
+                    debrisPos.get(i));
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mobID, getDebrisSkill(), forceAtomInfo, new Rect(), 0, 300,
+                    life.getPosition(), getDebrisSkill(), life.getPosition()));
+        }
+        debrisCount = 0;
+        debrisPos.clear();
+    }
+
+    private int getMaxDebris() {
+        Skill skill = null;
+        if(chr.hasSkill(MAGIC_DEBRIS)) {
+            skill = chr.getSkill(MAGIC_DEBRIS);
+        }
+        if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
+            skill = chr.getSkill(ENHANCED_MAGIC_DEBRIS);
+        }
+        if (skill == null) {
+            return 0;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        return si.getValue(x, slv);
+    }
+
+    private int getDebrisSkill() {
+        int skill = 0;
+        if(chr.hasSkill(MAGIC_DEBRIS)) {
+            skill = MAGIC_DEBRIS;
+        }
+        if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
+            skill = ENHANCED_MAGIC_DEBRIS;
+        }
+        return skill;
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        Skill faSkill = getFinalAtkSkill();
+        if(faSkill != null) {
+            SkillInfo si = SkillData.getSkillInfoById(faSkill.getSkillId());
+            byte slv = (byte) faSkill.getCurrentLevel();
+            int proc = si.getValue(prop, slv);
+            if (Util.succeedProp(proc)) {
+                return faSkill.getSkillId();
+            }
+        }
+        return 0;
+    }
+
+    private Skill getFinalAtkSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(DRAGON_SPARK)) {
+            skill = chr.getSkill(DRAGON_SPARK);
+        }
+        if(chr.hasSkill(ADV_DRAGON_SPARK)) {
+            skill = chr.getSkill(ADV_DRAGON_SPARK);
+        }
+        return skill;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         super.handleSkill(c, skillID, slv, inPacket);
@@ -380,6 +482,10 @@ public class Evan extends Job {
         }
     }
 
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -394,117 +500,5 @@ public class Evan extends Job {
             hitInfo.mpDamage = mpDmg;
         }
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case EVAN_NOOB:
-            case EVAN1:
-            case EVAN2:
-            case EVAN3:
-            case EVAN4:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        if(Util.succeedProp(getFinalAttackProc())) {
-            int fas = 0;
-            if (chr.hasSkill(DRAGON_SPARK)) {
-                fas = DRAGON_SPARK;
-            }
-            if (chr.hasSkill(ADV_DRAGON_SPARK)) {
-                fas = ADV_DRAGON_SPARK;
-            }
-            return fas;
-        } else {
-            return 0;
-        }
-    }
-
-    private Skill getFinalAtkSkill(Char chr) {
-        Skill skill = null;
-        if(chr.hasSkill(DRAGON_SPARK)) {
-            skill = chr.getSkill(DRAGON_SPARK);
-        }
-        if(chr.hasSkill(ADV_DRAGON_SPARK)) {
-            skill = chr.getSkill(ADV_DRAGON_SPARK);
-        }
-        return skill;
-    }
-
-    private int getFinalAttackProc() {
-        Skill skill = getFinalAtkSkill(chr);
-        if(skill != null) {
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-            int proc = si.getValue(prop, slv);
-
-            return proc;
-        }
-        return 0;
-    }
-
-    private void createMagicDebrisForceAtom() {
-        Field field = chr.getField();
-        SkillInfo si = SkillData.getSkillInfoById(getDebrisSkill());
-        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        if(!chr.isLeft()) {
-            rect = rect.moveRight();
-        }
-        List<Mob> lifes =  field.getMobsInRect(rect);
-        if(lifes.size() <= 0) {
-            return;
-        }
-        for(int i = 0; i<debrisCount; i++) {
-            c.write(CField.delWreckage(chr));
-            Life life = Util.getRandomFromList(lifes);
-            int mobID = (life).getObjectId(); //
-            int inc = ForceAtomEnum.WRECKAGE.getInc();
-            int type = ForceAtomEnum.WRECKAGE.getForceAtomType();
-            if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
-                inc = ForceAtomEnum.ADV_WRECKAGE.getInc();
-                type = ForceAtomEnum.ADV_WRECKAGE.getForceAtomType();
-            }
-            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 10,
-                    0, 200, (int) System.currentTimeMillis(), 1, 0,
-                    debrisPos.get(i));
-            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                    true, mobID, getDebrisSkill(), forceAtomInfo, new Rect(), 0, 300,
-                    life.getPosition(), getDebrisSkill(), life.getPosition()));
-        }
-        debrisCount = 0;
-    }
-
-    private int getMaxDebris() {
-        Skill skill = null;
-        if(chr.hasSkill(MAGIC_DEBRIS)) {
-            skill = chr.getSkill(MAGIC_DEBRIS);
-        }
-        if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
-            skill = chr.getSkill(ENHANCED_MAGIC_DEBRIS);
-        }
-        if (skill == null) {
-            return 0;
-        }
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
-        return si.getValue(x, slv);
-    }
-
-    private int getDebrisSkill() {
-        int skill = 0;
-        if(chr.hasSkill(MAGIC_DEBRIS)) {
-            skill = MAGIC_DEBRIS;
-        }
-        if(chr.hasSkill(ENHANCED_MAGIC_DEBRIS)) {
-            skill = ENHANCED_MAGIC_DEBRIS;
-        }
-        return skill;
     }
 }

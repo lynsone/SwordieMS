@@ -144,6 +144,15 @@ public class NightWalker extends Noblesse {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isNightWalker(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -208,7 +217,6 @@ public class NightWalker extends Noblesse {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
-
             case SHADOW_BAT:
                 if(tsm.hasStatBySkillId(skillID)) {
                     tsm.removeStatsBySkill(skillID);
@@ -220,7 +228,6 @@ public class NightWalker extends Noblesse {
                     tsm.putCharacterStatValue(NightWalkerBat, o1);
                 }
                 break;
-
             case GLORY_OF_THE_GUARDIANS_NW:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
@@ -258,7 +265,6 @@ public class NightWalker extends Noblesse {
                     EventManager.addEvent(this::applyDarkServant, si.getValue(time, slv) * 1001, TimeUnit.MILLISECONDS);
                 }
                 break;
-
             case DARK_OMEN:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
@@ -275,11 +281,103 @@ public class NightWalker extends Noblesse {
                 break;
         }
         tsm.sendSetStatPacket();
-        
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+    private void applyDarkServant() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(DARK_SERVANT);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        Option o1 = new Option();
+
+
+        o1.nOption = si.getValue(x, slv);
+        o1.rOption = skill.getSkillId();
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(ShadowServant, o1);
+        tsm.sendSetStatPacket();
+
+        darkServant = Summon.getSummonBy(c.getChr(), skill.getSkillId(), slv);
+        Field field = c.getChr().getField();
+        darkServant.setFlyMob(false);
+        darkServant.setAvatarLook(chr.getAvatarData().getAvatarLook());
+        darkServant.setMoveAbility(MoveAbility.SHADOW_SERVANT.getVal());
+        field.spawnSummon(darkServant);
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            // Handling Shadow Bats
+            if(attackInfo.skillId != SHADOW_BAT_ATOM) {
+                shadowBats(attackInfo);
+            } else {
+                recreateShadowBatForceAtom();
+            }
+
+            // Handling Dark Elemental
+            if(tsm.hasStat(ElementDarkness)) {
+                applyDarkElementalOnMob(attackInfo, slv);
+            }
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        Option o4 = new Option();
+        switch (attackInfo.skillId) {
+            case SHADOW_STITCH:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = (si.getValue(time, slv) + attackInfo.mobAttackInfo.size() > 25 ? 25 : si.getValue(time, slv) + attackInfo.mobAttackInfo.size());
+                    mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
+                }
+                break;
+            case DOMINION:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                o2.nOption = 100;
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(CriticalBuff, o2);
+                o3.nOption = 100;
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Stance, o3);
+                o4.nReason = skillID;
+                o4.nValue = 20;
+                o4.tStart = (int) System.currentTimeMillis();
+                o4.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieDamR, o4);
+                tsm.sendSetStatPacket();
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
     }
 
     // handling Shadow Bats
@@ -435,75 +533,7 @@ public class NightWalker extends Noblesse {
         return bat;
     }
 
-    @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        if(hasHitMobs) {
-            // Handling Shadow Bats
-            if(attackInfo.skillId != SHADOW_BAT_ATOM) {
-                shadowBats(attackInfo);
-            } else {
-                recreateShadowBatForceAtom();
-            }
-
-            // Handling Dark Elemental
-            if(tsm.hasStat(ElementDarkness)) {
-                applyDarkElementalOnMob(attackInfo, slv);
-            }
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        Option o4 = new Option();
-        switch (attackInfo.skillId) {
-            case SHADOW_STITCH:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = (si.getValue(time, slv) + attackInfo.mobAttackInfo.size() > 25 ? 25 : si.getValue(time, slv) + attackInfo.mobAttackInfo.size());
-                    mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
-                }
-                break;
-            case DOMINION:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(NotDamaged, o1);
-                o2.nOption = 100;
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(CriticalBuff, o2);
-                o3.nOption = 100;
-                o3.rOption = skillID;
-                o3.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(Stance, o3);
-                o4.nReason = skillID;
-                o4.nValue = 20;
-                o4.tStart = (int) System.currentTimeMillis();
-                o4.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieDamR, o4);
-                tsm.sendSetStatPacket();
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
     private void applyDarkElementalOnMob(AttackInfo attackInfo, byte slv) {
-
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(tsm.hasStat(ElementDarkness)) {
             Option o1 = new Option();
@@ -588,40 +618,6 @@ public class NightWalker extends Noblesse {
         return prop;
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case IMPERIAL_RECALL:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-
     private void incrementSiphonVitality(TemporaryStatManager tsm) {
         Option o = new Option();
         Option o1 = new Option();
@@ -662,36 +658,50 @@ public class NightWalker extends Noblesse {
         return skill == null ? 0 : SkillData.getSkillInfoById(skill.getSkillId()).getValue(x, skill.getCurrentLevel());
     }
 
-    private void applyDarkServant() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(DARK_SERVANT);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
-        Option o1 = new Option();
-
-
-        o1.nOption = si.getValue(x, slv);
-        o1.rOption = skill.getSkillId();
-        o1.tOption = si.getValue(time, slv);
-        tsm.putCharacterStatValue(ShadowServant, o1);
-        tsm.sendSetStatPacket();
-
-        darkServant = Summon.getSummonBy(c.getChr(), skill.getSkillId(), slv);
-        Field field = c.getChr().getField();
-        darkServant.setFlyMob(false);
-        darkServant.setAvatarLook(chr.getAvatarData().getAvatarLook());
-        darkServant.setMoveAbility(MoveAbility.SHADOW_SERVANT.getVal());
-        field.spawnSummon(darkServant);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isNightWalker(id);
-    }
-
     @Override
     public int getFinalAttackSkill() {
         return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case IMPERIAL_RECALL:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
+        super.handleHit(c, inPacket, hitInfo);
     }
 
     public static void reviveByDarknessAscending(Char chr) {

@@ -32,6 +32,7 @@ field = {
     270000100 : [200090510, 0], # ToT -> Dragon Flight-2nd Map
     211040401 : [211040300, 0], # Hidden Street -> Holy Ground at the Snowfield
     252030000 : [252020700, 0], # Entrance to Ravana's Altar -> Room of Suffering
+    910150002 : [910150003, 0], # Path of the Glowcaves -> Blooming Forest  (Frozen Fairy Forest)
 
 }
 

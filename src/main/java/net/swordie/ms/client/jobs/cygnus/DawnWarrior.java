@@ -3,32 +3,32 @@ package net.swordie.ms.client.jobs.cygnus;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -42,7 +42,6 @@ public class DawnWarrior extends Noblesse {
     public static final int ELEMENTAL_SHIFT = 10001254;
     public static final int ELEMENTAL_SHIFT2 = 10000252;
     public static final int ELEMENTAL_HARMONY_STR = 10000246;
-
 
     public static final int SOUL_ELEMENT = 11001022; //Buff  (Immobility Debuff)
 
@@ -104,6 +103,15 @@ public class DawnWarrior extends Noblesse {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isDawnWarrior(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -117,7 +125,6 @@ public class DawnWarrior extends Noblesse {
         Field field;
         switch (skillID) {
             case SOUL_ELEMENT:
-                //TODO
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
@@ -211,7 +218,74 @@ public class DawnWarrior extends Noblesse {
                 break;
         }
         tsm.sendSetStatPacket();
-        
+    }
+
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+    private void willOfSteel() { //TODO needs to be called
+        if(chr.hasSkill(WILL_OF_STEEL)) {
+            Skill skill = chr.getSkill(WILL_OF_STEEL);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int interval = si.getValue(w, slv);
+            int heal = (int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv)));
+
+            if ((chr.getMaxHP() - chr.getHP()) == 0) {
+                return;
+            }
+            chr.heal(heal);
+        }
+        willOfSteelTimer = EventManager.addEvent(() -> willOfSteel(), 4, TimeUnit.SECONDS);
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if(tsm.hasStat(SoulMasterFinal)) {
+            applySoulElementOnMob(attackInfo, slv);
+        }
+
+        equinox(tsm);
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case IMPALING_RAYS:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
+                        o2.nOption = 1;
+                        o2.rOption = skill.getSkillId();
+                        o2.wOption = 1;
+                        mts.addStatOptionsAndBroadcast(MobStat.SoulExplosion, o2);
+                    }
+                }
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void equinox(TemporaryStatManager tsm ) {
@@ -225,7 +299,7 @@ public class DawnWarrior extends Noblesse {
         Skill skillRS = chr.getSkill(RISING_SUN);
         byte slvRS = (byte) skillRS.getCurrentLevel();
         SkillInfo siRS = SkillData.getSkillInfoById(skillRS.getSkillId());
-        //Falling Moon Skill Ino
+        //Falling Moon Skill Info
         Skill skillFM = chr.getSkill(FALLING_MOON);
         byte slvFM = (byte) skillFM.getCurrentLevel();
         SkillInfo siFM = SkillData.getSkillInfoById(skillFM.getSkillId());
@@ -248,7 +322,7 @@ public class DawnWarrior extends Noblesse {
                 o2.tTerm = 0;
                 tsm.putCharacterStatValue(IndieDamR, o2); //Indie
 
-                o3.nOption = chr.hasSkill(MASTER_OF_THE_SWORD) ? -2 : siRS.getValue(indieBooster, slvRS); //used -2 because WzFiles don't have a specific name for the Booster value
+                o3.nOption = chr.hasSkill(MASTER_OF_THE_SWORD) ? -2 : siRS.getValue(indieBooster, slvRS);
                 o3.rOption = RISING_SUN;
                 o3.tOption = siRS.getValue(time, slvRS);
                 tsm.putCharacterStatValue(HayatoBooster, o3);
@@ -305,54 +379,6 @@ public class DawnWarrior extends Noblesse {
         }
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
-
-    @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        if(tsm.hasStat(SoulMasterFinal)) {
-            applySoulElementOnMob(attackInfo, slv);
-        }
-
-        equinox(tsm);
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case IMPALING_RAYS:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
-                        o2.nOption = 1;
-                        o2.rOption = skill.getSkillId();
-                        o2.wOption = 1;
-                        mts.addStatOptionsAndBroadcast(MobStat.SoulExplosion, o2);
-                    }
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
     private void applySoulElementOnMob(AttackInfo attackInfo, byte slv) {
         Option o1 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(SOUL_ELEMENT);
@@ -369,6 +395,15 @@ public class DawnWarrior extends Noblesse {
             }
         }
     }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -419,35 +454,13 @@ public class DawnWarrior extends Noblesse {
         }
     }
 
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isDawnWarrior(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    private void willOfSteel() { //TODO needs to be called
-        if(chr.hasSkill(WILL_OF_STEEL)) {
-            Skill skill = chr.getSkill(WILL_OF_STEEL);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int interval = si.getValue(w, slv);
-            int heal = (int) (chr.getMaxHP() / ((double) 100 / si.getValue(y, slv)));
-
-            if ((chr.getMaxHP() - chr.getHP()) == 0) {
-                return;
-            }
-            chr.heal(heal);
-        }
-        willOfSteelTimer = EventManager.addEvent(() -> willOfSteel(), 4, TimeUnit.SECONDS);
     }
 }

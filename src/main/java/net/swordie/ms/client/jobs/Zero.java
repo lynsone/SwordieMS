@@ -7,36 +7,38 @@ import net.swordie.ms.client.character.ExtendSP;
 import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
-import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -175,6 +177,84 @@ public class Zero extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isZero(id);
+    }
+
+    private boolean isBeta() {
+        return chr.getZeroInfo().isZeroBetaState();
+    }
+
+    @Override
+    public void handleLevelUp() {
+        short level = chr.getLevel();
+        chr.addStat(Stat.mhp, 500);
+        chr.addStat(Stat.ap, 5);
+        int sp = 3;
+        if (level > 100 && (level % 10) % 3 == 0) {
+            sp = 6; // double sp on levels ending in 3/6/9
+        }
+        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        SPSet alphaSpSet = esp.getSpSet().get(0);
+        SPSet betaSpSet = esp.getSpSet().get(1);
+        alphaSpSet.addSp(sp);
+        betaSpSet.addSp(sp);
+        Map<Stat, Object> stats = new HashMap<>();
+        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+        chr.write(WvsContext.statChanged(stats));
+        byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
+        int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
+        if (linkSkillID != 0 && linkSkillLevel > 0) {
+            Skill skill = chr.getSkill(linkSkillID, true);
+            if (skill.getCurrentLevel() != linkSkillLevel) {
+                chr.addSkill(linkSkillID, linkSkillLevel, 3);
+            }
+        }
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        AvatarLook mainLook = chr.getAvatarData().getAvatarLook();
+        chr.getAvatarData().setZeroAvatarLook(mainLook.deepCopy());
+        AvatarLook zeroLook = chr.getAvatarData().getZeroAvatarLook();
+        mainLook.getHairEquips().remove(new Integer(1562000));
+        zeroLook.getHairEquips().remove(new Integer(1572000));
+        zeroLook.setWeaponId(1562000);
+        zeroLook.setGender(1);
+        zeroLook.setSkin(chr.getAvatarData().getAvatarLook().getSkin());
+        zeroLook.setFace(21290);
+        zeroLook.setHair(37623);
+        zeroLook.setZeroBetaLook(true);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setLevel(100);
+        cs.setStr(518);
+        cs.setHp(5000);
+        cs.setMaxHp(5000);
+        cs.setMp(100);
+        cs.setMaxMp(100);
+        cs.setJob(10112);
+        cs.setPosMap(100000000);
+        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
+        SPSet alphaSpSet = esp.getSpSet().get(0);
+        SPSet betaSpSet = esp.getSpSet().get(1);
+        alphaSpSet.addSp(6);
+        betaSpSet.addSp(6);
+        Map<Stat, Object> stats = new HashMap<>();
+        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+        chr.write(WvsContext.statChanged(stats));
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -187,71 +267,79 @@ public class Zero extends Job {
         Option o7 = new Option();
         switch (skillID) {
             case DIVINE_FORCE:
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(indieAsrR, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = 0;
-                tsm.putCharacterStatValue(IndieAsrR, o1); //Indie
-                o2.nReason = skillID;
-                o2.nValue = si.getValue(indieMad, slv);
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = 0;
-                tsm.putCharacterStatValue(IndieMAD, o2); //Indie
-                o3.nReason = skillID;
-                o3.nValue = si.getValue(indiePad, slv);
-                o3.tStart = (int) System.currentTimeMillis();
-                o3.tTerm = 0;
-                tsm.putCharacterStatValue(IndiePAD, o3); //Indie
-                o4.nReason = skillID;
-                o4.nValue = si.getValue(indieMdd, slv);
-                o4.tStart = (int) System.currentTimeMillis();
-                o4.tTerm = 0;
-                tsm.putCharacterStatValue(IndieMDD, o4); //Indie
-                o5.nReason = skillID;
-                o5.nValue = si.getValue(indiePdd, slv);
-                o5.tStart = (int) System.currentTimeMillis();
-                o5.tTerm = 0;
-                tsm.putCharacterStatValue(IndiePDD, o5); //Indie
-                o6.nReason = skillID;
-                o6.nValue = si.getValue(indieTerR, slv);
-                o6.tStart = (int) System.currentTimeMillis();
-                o6.tTerm = 0;
-                tsm.putCharacterStatValue(IndieTerR, o6); //Indie
-                o7.nOption = 1;
-                o7.rOption = skillID;
-                o7.tOption = 0;
-                tsm.putCharacterStatValue(ZeroAuraStr, o7);
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    o1.nReason = skillID;
+                    o1.nValue = si.getValue(indieAsrR, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = 0;
+                    tsm.putCharacterStatValue(IndieAsrR, o1); //Indie
+                    o2.nReason = skillID;
+                    o2.nValue = si.getValue(indieMad, slv);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = 0;
+                    tsm.putCharacterStatValue(IndieMAD, o2); //Indie
+                    o3.nReason = skillID;
+                    o3.nValue = si.getValue(indiePad, slv);
+                    o3.tStart = (int) System.currentTimeMillis();
+                    o3.tTerm = 0;
+                    tsm.putCharacterStatValue(IndiePAD, o3); //Indie
+                    o4.nReason = skillID;
+                    o4.nValue = si.getValue(indieMdd, slv);
+                    o4.tStart = (int) System.currentTimeMillis();
+                    o4.tTerm = 0;
+                    tsm.putCharacterStatValue(IndieMDD, o4); //Indie
+                    o5.nReason = skillID;
+                    o5.nValue = si.getValue(indiePdd, slv);
+                    o5.tStart = (int) System.currentTimeMillis();
+                    o5.tTerm = 0;
+                    tsm.putCharacterStatValue(IndiePDD, o5); //Indie
+                    o6.nReason = skillID;
+                    o6.nValue = si.getValue(indieTerR, slv);
+                    o6.tStart = (int) System.currentTimeMillis();
+                    o6.tTerm = 0;
+                    tsm.putCharacterStatValue(IndieTerR, o6); //Indie
+                    o7.nOption = 1;
+                    o7.rOption = skillID;
+                    o7.tOption = 0;
+                    tsm.putCharacterStatValue(ZeroAuraStr, o7);
+                }
                 break;
             case DIVINE_SPEED:
-                o1.nReason = skillID;
-                o1.nValue = si.getValue(indieAcc, slv);
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieACC, o1); //Indie
-                o2.nReason = skillID;
-                o2.nValue = si.getValue(indieBooster, slv);
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
-                o3.nReason = skillID;
-                o3.nValue = si.getValue(indieEva, slv);
-                o3.tStart = (int) System.currentTimeMillis();
-                o3.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEVA, o3); //Indie
-                o4.nReason = skillID;
-                o4.nValue = si.getValue(indieJump, slv);
-                o4.tStart = (int) System.currentTimeMillis();
-                o4.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieJump, o4); //Indie
-                o5.nReason = skillID;
-                o5.nValue = si.getValue(indieSpeed, slv);
-                o5.tStart = (int) System.currentTimeMillis();
-                o5.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieSpeed, o5); //Indie
-                o6.nOption = 1;
-                o6.rOption = skillID;
-                o6.tOption = 0;
-                tsm.putCharacterStatValue(ZeroAuraSpd, o6);
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    o1.nReason = skillID;
+                    o1.nValue = si.getValue(indieAcc, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieACC, o1); //Indie
+                    o2.nReason = skillID;
+                    o2.nValue = si.getValue(indieBooster, slv);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieBooster, o2); //Indie
+                    o3.nReason = skillID;
+                    o3.nValue = si.getValue(indieEva, slv);
+                    o3.tStart = (int) System.currentTimeMillis();
+                    o3.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieEVA, o3); //Indie
+                    o4.nReason = skillID;
+                    o4.nValue = si.getValue(indieJump, slv);
+                    o4.tStart = (int) System.currentTimeMillis();
+                    o4.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieJump, o4); //Indie
+                    o5.nReason = skillID;
+                    o5.nValue = si.getValue(indieSpeed, slv);
+                    o5.tStart = (int) System.currentTimeMillis();
+                    o5.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieSpeed, o5); //Indie
+                    o6.nOption = 1;
+                    o6.rOption = skillID;
+                    o6.tOption = 0;
+                    tsm.putCharacterStatValue(ZeroAuraSpd, o6);
+                }
                 break;
             case RHINNES_PROTECTION:
                 o1.nReason = skillID;
@@ -297,15 +385,17 @@ public class Zero extends Job {
                 o2.tTerm = 2400;
                 tsm.putCharacterStatValue(IndieMADR, o2); //Indie
                 break;
-
         }
         tsm.sendSetStatPacket();
-        
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -367,92 +457,7 @@ public class Zero extends Job {
                 break;
 
         }
-
         super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if(skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch(skillID) {
-                case THROWING_WEAPON:
-                case ADVANCED_THROWING_WEAPON:
-                    Summon summon = Summon.getSummonBy(chr, skillID, slv);
-                    summon.setFlyMob(true);
-                    summon.setMoveAbility(MoveAbility.THROW.getVal());
-                    chr.getField().spawnSummon(summon);
-                    break;
-                case TEMPLE_RECALL:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case TIME_DISTORTION:
-                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
-                    aa.setMobOrigin((byte) 0);
-                    aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    aa.setDelay((short) 5);
-                    chr.getField().spawnAffectedArea(aa);
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill immuneBarrier = chr.getSkill(IMMUNE_BARRIER);
-        if(immuneBarrier == null) {
-            return;
-        }
-        byte slv = (byte) immuneBarrier.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(IMMUNE_BARRIER);
-        if(Util.succeedProp(si.getValue(prop, slv))) {
-            Option o = new Option(IMMUNE_BARRIER, slv);
-            int max = (int) (chr.getStat(Stat.mhp) * (si.getValue(x, slv) / 100D));
-            o.nOption = max;
-            o.xOption = max;
-            chr.getTemporaryStatManager().putCharacterStatValue(ImmuneBarrier, o);
-        }
-        if(tsm.hasStat(ImmuneBarrier)) {
-            Option o = tsm.getOption(ImmuneBarrier);
-            int maxSoakDamage = o.nOption;
-            int newDamage = hitInfo.hpDamage - maxSoakDamage < 0 ? 0 : hitInfo.hpDamage - maxSoakDamage;
-            o.nOption = maxSoakDamage - (hitInfo.hpDamage - newDamage); // update soak value
-            hitInfo.hpDamage = newDamage;
-            o.tOption = si.getValue(time, slv); //added duration
-            tsm.putCharacterStatValue(ImmuneBarrier, o);
-            tsm.sendSetStatPacket();
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isZero(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    private boolean isBeta() {
-        return chr.getZeroInfo().isZeroBetaState();
     }
 
     private void applyDivineLeerOnMob(AttackInfo ai, int skillID) {
@@ -573,6 +578,89 @@ public class Zero extends Job {
         }
     }
 
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch(skillID) {
+                case THROWING_WEAPON:
+                case ADVANCED_THROWING_WEAPON:
+                    Summon summon = Summon.getSummonBy(chr, skillID, slv);
+                    summon.setFlyMob(true);
+                    summon.setMoveAbility(MoveAbility.THROW.getVal());
+                    chr.getField().spawnSummon(summon);
+                    break;
+                case TEMPLE_RECALL:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case TIME_DISTORTION:
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 5);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill immuneBarrier = chr.getSkill(IMMUNE_BARRIER);
+        if(immuneBarrier == null) {
+            return;
+        }
+        byte slv = (byte) immuneBarrier.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(IMMUNE_BARRIER);
+        if(Util.succeedProp(si.getValue(prop, slv))) {
+            Option o = new Option(IMMUNE_BARRIER, slv);
+            int max = (int) (chr.getStat(Stat.mhp) * (si.getValue(x, slv) / 100D));
+            o.nOption = max;
+            o.xOption = max;
+            chr.getTemporaryStatManager().putCharacterStatValue(ImmuneBarrier, o);
+        }
+        if(tsm.hasStat(ImmuneBarrier)) {
+            Option o = tsm.getOption(ImmuneBarrier);
+            int maxSoakDamage = o.nOption;
+            int newDamage = hitInfo.hpDamage - maxSoakDamage < 0 ? 0 : hitInfo.hpDamage - maxSoakDamage;
+            o.nOption = maxSoakDamage - (hitInfo.hpDamage - newDamage); // update soak value
+            hitInfo.hpDamage = newDamage;
+            o.tOption = si.getValue(time, slv); //added duration
+            tsm.putCharacterStatValue(ImmuneBarrier, o);
+            tsm.sendSetStatPacket();
+        }
+        super.handleHit(c, inPacket, hitInfo);
+    }
+
     public static void reviveByRewind(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         chr.heal(chr.getMaxHP());
@@ -580,70 +668,5 @@ public class Zero extends Job {
         tsm.sendResetStatPacket();
         chr.write(User.effect(Effect.skillSpecial(REWIND)));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(REWIND)));
-    }
-
-    @Override
-    public void handleLevelUp() {
-        short level = chr.getLevel();
-        chr.addStat(Stat.mhp, 500);
-        chr.addStat(Stat.ap, 5);
-        int sp = 3;
-        if (level > 100 && (level % 10) % 3 == 0) {
-            sp = 6; // double sp on levels ending in 3/6/9
-        }
-        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
-        SPSet alphaSpSet = esp.getSpSet().get(0);
-        SPSet betaSpSet = esp.getSpSet().get(1);
-        alphaSpSet.addSp(sp);
-        betaSpSet.addSp(sp);
-        Map<Stat, Object> stats = new HashMap<>();
-        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
-        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-        chr.write(WvsContext.statChanged(stats));
-        byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
-        int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
-        if (linkSkillID != 0 && linkSkillLevel > 0) {
-            Skill skill = chr.getSkill(linkSkillID, true);
-            if (skill.getCurrentLevel() != linkSkillLevel) {
-                chr.addSkill(linkSkillID, linkSkillLevel, 3);
-            }
-        }
-    }
-
-    @Override
-    public void setCharCreationStats(Char chr) {
-        AvatarLook mainLook = chr.getAvatarData().getAvatarLook();
-        chr.getAvatarData().setZeroAvatarLook(mainLook.deepCopy());
-        AvatarLook zeroLook = chr.getAvatarData().getZeroAvatarLook();
-        mainLook.getHairEquips().remove(new Integer(1562000));
-        zeroLook.getHairEquips().remove(new Integer(1572000));
-        zeroLook.setWeaponId(1562000);
-        zeroLook.setGender(1);
-        zeroLook.setSkin(chr.getAvatarData().getAvatarLook().getSkin());
-        zeroLook.setFace(21290);
-        zeroLook.setHair(37623);
-        zeroLook.setZeroBetaLook(true);
-        CharacterStat cs = chr.getAvatarData().getCharacterStat();
-        cs.setLevel(100);
-        cs.setStr(518);
-        cs.setHp(5000);
-        cs.setMaxHp(5000);
-        cs.setMp(100);
-        cs.setMaxMp(100);
-        cs.setJob(10112);
-        cs.setPosMap(100000000);
-        ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
-        SPSet alphaSpSet = esp.getSpSet().get(0);
-        SPSet betaSpSet = esp.getSpSet().get(1);
-        alphaSpSet.addSp(6);
-        betaSpSet.addSp(6);
-        Map<Stat, Object> stats = new HashMap<>();
-        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
-        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-        chr.write(WvsContext.statChanged(stats));
     }
 }

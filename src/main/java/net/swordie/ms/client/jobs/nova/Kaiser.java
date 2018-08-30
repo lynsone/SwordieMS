@@ -148,6 +148,29 @@ public class Kaiser extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isKaiser(id);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setLevel(10);
+        cs.setJob(6100);
+        cs.setStr(49);
+        Item secondary = ItemData.getItemDeepCopy(1352500);
+        secondary.setBagIndex(10);
+        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
+        chr.setSpToCurrentJob(5);
+        chr.getEquippedInventory().addItem(secondary);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -244,7 +267,6 @@ public class Kaiser extends Job {
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 break;
-
             case TEMPEST_BLADES_FIVE:
                 if(tsm.getOption(StopForceAtomInfo).nOption != 2 && tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
@@ -275,7 +297,6 @@ public class Kaiser extends Job {
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 break;
-
             case FINAL_FORM_THIRD:
                 if(tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
@@ -308,7 +329,6 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(Speed, o5);
                 resetGauge(c, tsm);
                 break;
-
             case FINAL_TRANCE:
             case FINAL_FORM_FOURTH:
                 if(tsm.hasStat(StopForceAtomInfo)) {
@@ -342,7 +362,6 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(Speed, o5);
                 resetGauge(c, tsm);
                 break;
-
             case KAISERS_MAJESTY:
                 o1.nReason = skillID;
                 o1.nValue = -1;
@@ -377,88 +396,107 @@ public class Kaiser extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
-    }
-
-    private void incrementMorphGauge(TemporaryStatManager tsm, int increment) {
-        Option o = new Option();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        Option o4 = new Option();
-        SkillInfo gaugeInfo = SkillData.getSkillInfoById(60000219);
-        int amount = 1;
-        int stage = 0;
-        if(chr.hasSkill(60000219)) {
-            amount = tsm.getOption(SmashStack).nOption;
-                if (amount <= (getKaiserGauge(chr))) {
-                    if(amount + increment > getKaiserGauge(chr)) {
-                        amount = getKaiserGauge(chr);
-                    } else {
-                        amount = tsm.getOption(SmashStack).nOption + increment;
-                    }
-                }
-                if (amount >= gaugeInfo.getValue(s, 1)) {
-                    stage = 1;
-                }
-                if (amount >= (gaugeInfo.getValue(v, 1)) - 1) {
-                    stage = 2;
-                }
-        }
-        o.nOption = amount;
-        o.rOption = 0;
-        o.tOption = 0;
-        tsm.putCharacterStatValue(SmashStack, o);
-        o1.nOption = (stage * gaugeInfo.getValue(prop, 1));
-        o1.rOption = 0;
-        o1.tOption = 0;
-        tsm.putCharacterStatValue(Stance, o1);
-        o2.nOption = (stage * gaugeInfo.getValue(psdJump, 1));
-        o2.rOption = 0;
-        o2.tOption = 0;
-        tsm.putCharacterStatValue(Jump, o2);
-        o3.nOption = (stage * gaugeInfo.getValue(psdSpeed, 1));
-        o3.rOption = 0;
-        o3.tOption = 0;
-        tsm.putCharacterStatValue(Speed, o3);
-        o4.nReason = 0;
-        o4.nValue = (stage * gaugeInfo.getValue(actionSpeed, 1));
-        o4.tStart = (int) System.currentTimeMillis();
-        o4.tTerm = 0;
-        tsm.putCharacterStatValue(IndieBooster, o4); //Indie
-        tsm.sendSetStatPacket();
-    }
-
-    private void resetGauge(Client c, TemporaryStatManager tsm) {
-        tsm.removeStat(SmashStack, false);
-        tsm.sendResetStatPacket();
-    }
-
-    private int getKaiserGauge(Char chr) {
-        int maxGauge;
-        switch (chr.getJob()) {
-            case 6100:
-                maxGauge = SkillData.getSkillInfoById(60000219).getValue(s, 1);
-                break;
-            case 6110:
-                maxGauge = SkillData.getSkillInfoById(60000219).getValue(u, 1);
-                break;
-            case 6111:
-            case 6112:
-                maxGauge = SkillData.getSkillInfoById(60000219).getValue(v, 1);
-                break;
-            default:
-                maxGauge = 0;
-        }
-        return maxGauge;
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-    @Override
+    public void giveRealignAttackBuffs() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        int[] realignattacks = new int[] {
+                REALIGN_ATTACKER_MODE,
+                REALIGN_ATTACKER_MODE_I,
+                REALIGN_ATTACKER_MODE_II,
+                REALIGN_ATTACKER_MODE_III,
+        };
+        int zPadX = 0;
+        int zCr = 0;
+        int zBdR = 0;
+        for (int realignattack : realignattacks) {
+            if (chr.hasSkill(realignattack)) {
+                Skill skill = chr.getSkill(realignattack);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                zPadX += si.getValue(padX, slv);
+                zCr += si.getValue(cr, slv);
+                zBdR += si.getValue(bdR, slv);
+            }
+        }
+        o1.nOption = zPadX;
+        o1.rOption = REALIGN_ATTACKER_MODE;
+        tsm.putCharacterStatValue(PAD, o1);
+        o2.nOption = zCr;
+        o2.rOption = REALIGN_ATTACKER_MODE;
+        tsm.putCharacterStatValue(CriticalBuff, o2);
+        o3.nOption = zBdR;
+        o3.rOption = REALIGN_ATTACKER_MODE;
+        tsm.putCharacterStatValue(HayatoBoss, o3);
+        tsm.sendSetStatPacket();
+    }
 
+    public void giveRealignDefendBuffs() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        int[] realigndefends = new int[] {
+                REALIGN_DEFENDER_MODE,
+                REALIGN_DEFENDER_MODE_I,
+                REALIGN_DEFENDER_MODE_II,
+                REALIGN_DEFENDER_MODE_III,
+        };
+        int zDef = 0;
+        int zAcc = 0;
+        int zMHPR = 0;
+        for (int realigndefend : realigndefends) {
+            if (chr.hasSkill(realigndefend)) {
+                Skill skill = chr.getSkill(realigndefend);
+                byte slv = (byte) skill.getCurrentLevel();
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                zDef += si.getValue(pddX, slv);
+                zAcc += si.getValue(accX, slv);
+                zMHPR += si.getValue(mhpR, slv);
+            }
+        }
+        o1.nOption = zDef;
+        o1.rOption = REALIGN_DEFENDER_MODE;
+        tsm.putCharacterStatValue(PDD, o1);
+        tsm.putCharacterStatValue(MDD, o1);
+        o2.nOption = zAcc;
+        o2.rOption = REALIGN_DEFENDER_MODE;
+        tsm.putCharacterStatValue(ACC, o2);
+        o3.nOption = zMHPR;
+        o3.rOption = REALIGN_DEFENDER_MODE;
+        tsm.putCharacterStatValue(HayatoHPR, o3);
+        tsm.sendSetStatPacket();
+    }
+
+    public static int getTempBladeSkill(Char chr, TemporaryStatManager tsm) {
+        int skill = 0;
+        if(chr.hasSkill(TEMPEST_BLADES_THREE)) {
+            skill = TEMPEST_BLADES_THREE;
+        }
+        if(chr.hasSkill(TEMPEST_BLADES_THREE) && tsm.hasStat(Morph)) {
+            skill = TEMPEST_BLADES_THREE_FF;
+        }
+        if(chr.hasSkill(TEMPEST_BLADES_FIVE)) {
+            skill = TEMPEST_BLADES_FIVE;
+        }
+        if(chr.hasSkill(TEMPEST_BLADES_FIVE) && tsm.hasStat(Morph)) {
+            skill = TEMPEST_BLADES_FIVE_FF;
+        }
+        return skill;
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -632,9 +670,90 @@ public class Kaiser extends Job {
                 }
                 break;
         }
-
         super.handleAttack(c, attackInfo);
     }
+
+    private void incrementMorphGauge(TemporaryStatManager tsm, int increment) {
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        Option o4 = new Option();
+        SkillInfo gaugeInfo = SkillData.getSkillInfoById(60000219);
+        int amount = 1;
+        int stage = 0;
+        if(chr.hasSkill(60000219)) {
+            amount = tsm.getOption(SmashStack).nOption;
+            if (amount <= (getKaiserGauge(chr))) {
+                if(amount + increment > getKaiserGauge(chr)) {
+                    amount = getKaiserGauge(chr);
+                } else {
+                    amount = tsm.getOption(SmashStack).nOption + increment;
+                }
+            }
+            if (amount >= gaugeInfo.getValue(s, 1)) {
+                stage = 1;
+            }
+            if (amount >= (gaugeInfo.getValue(v, 1)) - 1) {
+                stage = 2;
+            }
+        }
+        o.nOption = amount;
+        o.rOption = 0;
+        o.tOption = 0;
+        tsm.putCharacterStatValue(SmashStack, o);
+        o1.nOption = (stage * gaugeInfo.getValue(prop, 1));
+        o1.rOption = 0;
+        o1.tOption = 0;
+        tsm.putCharacterStatValue(Stance, o1);
+        o2.nOption = (stage * gaugeInfo.getValue(psdJump, 1));
+        o2.rOption = 0;
+        o2.tOption = 0;
+        tsm.putCharacterStatValue(Jump, o2);
+        o3.nOption = (stage * gaugeInfo.getValue(psdSpeed, 1));
+        o3.rOption = 0;
+        o3.tOption = 0;
+        tsm.putCharacterStatValue(Speed, o3);
+        o4.nReason = 0;
+        o4.nValue = (stage * gaugeInfo.getValue(actionSpeed, 1));
+        o4.tStart = (int) System.currentTimeMillis();
+        o4.tTerm = 0;
+        tsm.putCharacterStatValue(IndieBooster, o4); //Indie
+        tsm.sendSetStatPacket();
+    }
+
+    private void resetGauge(Client c, TemporaryStatManager tsm) {
+        tsm.removeStat(SmashStack, false);
+        tsm.sendResetStatPacket();
+    }
+
+    private int getKaiserGauge(Char chr) {
+        int maxGauge;
+        switch (chr.getJob()) {
+            case 6100:
+                maxGauge = SkillData.getSkillInfoById(60000219).getValue(s, 1);
+                break;
+            case 6110:
+                maxGauge = SkillData.getSkillInfoById(60000219).getValue(u, 1);
+                break;
+            case 6111:
+            case 6112:
+                maxGauge = SkillData.getSkillInfoById(60000219).getValue(v, 1);
+                break;
+            default:
+                maxGauge = 0;
+        }
+        return maxGauge;
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -661,123 +780,13 @@ public class Kaiser extends Job {
         }
     }
 
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isKaiser(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    public void giveRealignAttackBuffs() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        int[] realignattacks = new int[] {
-                REALIGN_ATTACKER_MODE,
-                REALIGN_ATTACKER_MODE_I,
-                REALIGN_ATTACKER_MODE_II,
-                REALIGN_ATTACKER_MODE_III,
-        };
-        int zPadX = 0;
-        int zCr = 0;
-        int zBdR = 0;
-        for (int realignattack : realignattacks) {
-            if (chr.hasSkill(realignattack)) {
-                Skill skill = chr.getSkill(realignattack);
-                byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                zPadX += si.getValue(padX, slv);
-                zCr += si.getValue(cr, slv);
-                zBdR += si.getValue(bdR, slv);
-            }
-        }
-        o1.nOption = zPadX;
-        o1.rOption = REALIGN_ATTACKER_MODE;
-        tsm.putCharacterStatValue(PAD, o1);
-        o2.nOption = zCr;
-        o2.rOption = REALIGN_ATTACKER_MODE;
-        tsm.putCharacterStatValue(CriticalBuff, o2);
-        o3.nOption = zBdR;
-        o3.rOption = REALIGN_ATTACKER_MODE;
-        tsm.putCharacterStatValue(HayatoBoss, o3);
-        tsm.sendSetStatPacket();
-    }
-
-    public void giveRealignDefendBuffs() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        int[] realigndefends = new int[] {
-                REALIGN_DEFENDER_MODE,
-                REALIGN_DEFENDER_MODE_I,
-                REALIGN_DEFENDER_MODE_II,
-                REALIGN_DEFENDER_MODE_III,
-        };
-        int zDef = 0;
-        int zAcc = 0;
-        int zMHPR = 0;
-        for (int realigndefend : realigndefends) {
-            if (chr.hasSkill(realigndefend)) {
-                Skill skill = chr.getSkill(realigndefend);
-                byte slv = (byte) skill.getCurrentLevel();
-                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-                zDef += si.getValue(pddX, slv);
-                zAcc += si.getValue(accX, slv);
-                zMHPR += si.getValue(mhpR, slv);
-            }
-        }
-        o1.nOption = zDef;
-        o1.rOption = REALIGN_DEFENDER_MODE;
-        tsm.putCharacterStatValue(PDD, o1);
-        tsm.putCharacterStatValue(MDD, o1);
-        o2.nOption = zAcc;
-        o2.rOption = REALIGN_DEFENDER_MODE;
-        tsm.putCharacterStatValue(ACC, o2);
-        o3.nOption = zMHPR;
-        o3.rOption = REALIGN_DEFENDER_MODE;
-        tsm.putCharacterStatValue(HayatoHPR, o3);
-        tsm.sendSetStatPacket();
-    }
-
-    public static int getTempBladeSkill(Char chr, TemporaryStatManager tsm) {
-        int skill = 0;
-        if(chr.hasSkill(TEMPEST_BLADES_THREE)) {
-            skill = TEMPEST_BLADES_THREE;
-        }
-        if(chr.hasSkill(TEMPEST_BLADES_THREE) && tsm.hasStat(Morph)) {
-            skill = TEMPEST_BLADES_THREE_FF;
-        }
-        if(chr.hasSkill(TEMPEST_BLADES_FIVE)) {
-            skill = TEMPEST_BLADES_FIVE;
-        }
-        if(chr.hasSkill(TEMPEST_BLADES_FIVE) && tsm.hasStat(Morph)) {
-            skill = TEMPEST_BLADES_FIVE_FF;
-        }
-        return skill;
-    }
-
-    @Override
-    public void setCharCreationStats(Char chr) {
-        super.setCharCreationStats(chr);
-        CharacterStat cs = chr.getAvatarData().getCharacterStat();
-        cs.setLevel(10);
-        cs.setJob(6100);
-        cs.setStr(49);
-        Item secondary = ItemData.getItemDeepCopy(1352500);
-        secondary.setBagIndex(10);
-        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
-        chr.setSpToCurrentJob(5);
-        chr.getEquippedInventory().addItem(secondary);
     }
 }

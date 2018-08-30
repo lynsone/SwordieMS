@@ -122,6 +122,15 @@ public class Mechanic extends Citizen {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return id >= JobConstants.JobEnum.MECHANIC_1.getJobId() && id <= JobConstants.JobEnum.MECHANIC_4.getJobId();
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -290,12 +299,44 @@ public class Mechanic extends Citizen {
                 break;
         }
         tsm.sendSetStatPacket();
-        
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+    public void healFromSupportUnit(Summon summon) {
+        Char summonOwner = summon.getChr();
+        if (summonOwner.hasSkill(ENHANCED_SUPPORT_UNIT) || summonOwner.hasSkill(SUPPORT_UNIT_HEX)) {
+            SkillInfo si = SkillData.getSkillInfoById(SUPPORT_UNIT_HEX);
+            byte slv = (byte) summonOwner.getSkill(SUPPORT_UNIT_HEX).getCurrentLevel();
+            int healrate = si.getValue(hp, slv);
+            c.getChr().heal((int) (c.getChr().getMaxHP() * ((double) healrate / 100)));
+        }
+    }
+
+    private void spawnBotsNTotsSubSummons(Summon summon) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Position position = summon.getPosition();
+
+        if((tsm.getOptByCTSAndSkill(IndieEmpty, BOTS_N_TOTS) != null) && chr.hasSkill(BOTS_N_TOTS)) {
+            Skill skill = chr.getSkill(BOTS_N_TOTS);
+            byte slv = (byte) skill.getCurrentLevel();
+            Summon subSummon = Summon.getSummonBy(chr, BOTS_N_TOTS_SUB_SUMMON, slv);
+            subSummon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
+            subSummon.setPosition(position);
+            subSummon.setAttackActive(false);
+            subSummon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+
+            chr.getField().spawnAddSummon(subSummon);
+
+            botsNTotsTimer = EventManager.addEvent(() -> spawnBotsNTotsSubSummons(summon), 3, TimeUnit.SECONDS);
+        }
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -330,54 +371,6 @@ public class Mechanic extends Citizen {
         super.handleAttack(c, attackInfo);
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case SECRET_ASSEMBLY:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case OPEN_PORTAL_GX9:
-                    Field field = chr.getField();
-                    int duration = si.getValue(time, slv);
-                    OpenGate openGate = new OpenGate(chr, chr.getPosition(), chr.getParty(), gateId, duration);
-                    if (gateId == 0) {
-                        gateId = 1;
-                    } else if (gateId == 1) {
-                        gateId = 0;
-                    }
-                    openGate.spawnOpenGate(field);
-                    break;
-                case HOMING_BEACON: //4
-                case ADV_HOMING_BEACON: // 4thJob upgrade +5 -> 9
-                    if(tsm.hasStat(Mechanic) && tsm.getOption(Mechanic).nOption <= 0) {
-                        createHumanoidMechRocketForceAtom();
-                    } else if (tsm.hasStat(Mechanic) && tsm.getOption(Mechanic).nOption == 1) {
-                        createTankMechRocketForceAtom();
-                    }
-                    break;
-                case HEROS_WILL_MECH:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
 
     private void createHumanoidMechRocketForceAtom() { // Humanoid Rockets are spread around
         Field field = chr.getField();
@@ -474,25 +467,6 @@ public class Mechanic extends Citizen {
         return forceAtomCount;
     }
 
-    private void spawnBotsNTotsSubSummons(Summon summon) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Position position = summon.getPosition();
-
-        if((tsm.getOptByCTSAndSkill(IndieEmpty, BOTS_N_TOTS) != null) && chr.hasSkill(BOTS_N_TOTS)) {
-            Skill skill = chr.getSkill(BOTS_N_TOTS);
-            byte slv = (byte) skill.getCurrentLevel();
-            Summon subSummon = Summon.getSummonBy(chr, BOTS_N_TOTS_SUB_SUMMON, slv);
-            subSummon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
-            subSummon.setPosition(position);
-            subSummon.setAttackActive(false);
-            subSummon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
-
-            chr.getField().spawnAddSummon(subSummon);
-
-            botsNTotsTimer = EventManager.addEvent(() -> spawnBotsNTotsSubSummons(summon), 3, TimeUnit.SECONDS);
-        }
-    }
-
     private void applySupportUnitDebuffOnMob(int skillId) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(!chr.hasSkill(SUPPORT_UNIT_HEX) || tsm.getOptByCTSAndSkill(IndieEmpty, skillId) == null) {
@@ -517,29 +491,71 @@ public class Mechanic extends Citizen {
         supportUnitTimer = EventManager.addEvent(() -> applySupportUnitDebuffOnMob(skillId), si.getValue(x, slv), TimeUnit.SECONDS);
     }
 
-    public static void healFromSupportUnit(Client c, Summon summon) {
-        Char summonOwner = summon.getChr();
-        if (summonOwner.hasSkill(ENHANCED_SUPPORT_UNIT) || summonOwner.hasSkill(SUPPORT_UNIT_HEX)) {
-            SkillInfo si = SkillData.getSkillInfoById(SUPPORT_UNIT_HEX);
-            byte slv = (byte) summonOwner.getSkill(SUPPORT_UNIT_HEX).getCurrentLevel();
-            int healrate = si.getValue(hp, slv);
-            c.getChr().heal((int) (c.getChr().getMaxHP() * ((double) healrate / 100)));
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case SECRET_ASSEMBLY:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case OPEN_PORTAL_GX9:
+                    Field field = chr.getField();
+                    int duration = si.getValue(time, slv);
+                    OpenGate openGate = new OpenGate(chr, chr.getPosition(), chr.getParty(), gateId, duration);
+                    if (gateId == 0) {
+                        gateId = 1;
+                    } else if (gateId == 1) {
+                        gateId = 0;
+                    }
+                    openGate.spawnOpenGate(field);
+                    break;
+                case HOMING_BEACON: //4
+                case ADV_HOMING_BEACON: // 4thJob upgrade +5 -> 9
+                    if(tsm.hasStat(Mechanic) && tsm.getOption(Mechanic).nOption <= 0) {
+                        createHumanoidMechRocketForceAtom();
+                    } else if (tsm.hasStat(Mechanic) && tsm.getOption(Mechanic).nOption == 1) {
+                        createTankMechRocketForceAtom();
+                    }
+                    break;
+                case HEROS_WILL_MECH:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
         }
     }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.MECHANIC_1.getJobId() && id <= JobConstants.JobEnum.MECHANIC_4.getJobId();
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
     }
 }

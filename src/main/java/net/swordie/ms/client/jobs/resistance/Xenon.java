@@ -128,6 +128,15 @@ public class Xenon extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isXenon(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -236,7 +245,10 @@ public class Xenon extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
+    }
+
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     private void applySupplyCost(int skillID, byte slv, SkillInfo si) {
@@ -262,7 +274,6 @@ public class Xenon extends Job {
         incrementSupply(1);
     }
 
-
     private void incrementSupply(int amount) {
         supply += amount;
         supply = Math.min(MAX_SUPPLY, supply);
@@ -282,9 +293,9 @@ public class Xenon extends Job {
         chr.getTemporaryStatManager().sendSetStatPacket();
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -356,131 +367,6 @@ public class Xenon extends Job {
         }
 
         super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        applySupplyCost(skillID, slv, si);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case EMERGENCY_RESUPPLY:
-                    incrementSupply(si.getValue(x, slv));
-                    break;
-                case TEMPORAL_POD:
-                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
-                    aa.setMobOrigin((byte) 0);
-                    aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    aa.setDelay((short) 4);
-                    chr.getField().spawnAffectedArea(aa);
-                    break;
-                case PROMESSA_ESCAPE:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case PINPOINT_SALVO:
-                    incrementSupply(-1);
-                    createPinPointSalvoForceAtom();
-                    break;
-                case HEROS_WILL_XENON:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        if(chr.hasSkill(HYBRID_DEFENSES)) {
-            Skill skill = chr.getSkill(HYBRID_DEFENSES);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-
-            if (tsm.getOptByCTSAndSkill(StackBuff, HYBRID_DEFENSES) != null) {
-                if (hitInfo.hpDamage > 0) {
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.mOption = hybridDefenseCount;
-                    tsm.putCharacterStatValue(StackBuff, o1);
-                    o2.nOption -= si.getValue(y, slv);
-                    o2.rOption = skill.getSkillId();
-                    tsm.putCharacterStatValue(EVAR, o2);
-
-                    tsm.sendSetStatPacket();
-                } else {
-                    hybridDefenseCount--;
-                    if (hybridDefenseCount <= 0) {
-                        tsm.removeStatsBySkill(HYBRID_DEFENSES);
-                        tsm.sendResetStatPacket();
-                        return;
-                    }
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.mOption = hybridDefenseCount;
-                    tsm.putCharacterStatValue(StackBuff, o1);
-                    o2.nOption -= 0;
-                    o2.rOption = skill.getSkillId();
-                    tsm.putCharacterStatValue(EVAR, o2);
-                    tsm.sendSetStatPacket();
-                }
-
-            }
-        }
-
-        Skill aegis = chr.getSkill(AEGIS_SYSTEM);
-        if (tsm.hasStat(XenonAegisSystem) && aegis != null) {
-            SkillInfo si = SkillData.getSkillInfoById(AEGIS_SYSTEM);
-            byte slv = (byte) aegis.getCurrentLevel();
-            if (Util.succeedProp(si.getValue(prop, slv))) {
-                int mobID = hitInfo.mobID;
-                ForceAtomEnum fae = ForceAtomEnum.XENON_ROCKET_1;
-                int curTime = Util.getCurrentTime();
-                List<ForceAtomInfo> faiList = new ArrayList<>();
-                List<Integer> mobList = new ArrayList<>();
-                Random random = new Random();
-                for (int i = 0; i < si.getValue(x, slv); i++) {
-                    int firstImpact = 5 + random.nextInt(6);
-                    int secondImpact = 5 + random.nextInt(6);
-                    int angle = random.nextInt(180);
-                    ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), firstImpact, secondImpact,
-                            angle, 0, curTime, 0, AEGIS_SYSTEM_ATOM, new Position(0, 0));
-                    faiList.add(fai);
-                    mobList.add(mobID);
-                }
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
-                        mobList, AEGIS_SYSTEM_ATOM, faiList, null, 0, 0,
-                        null, 0, null));
-            }
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isXenon(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
     }
 
     public void applyTriangulationOnMob(AttackInfo attackInfo) {
@@ -571,6 +457,134 @@ public class Xenon extends Job {
             skill = PINPOINT_SALVO_PERFECT_DESIGN;
         }
         return skill;
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        applySupplyCost(skillID, slv, si);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case EMERGENCY_RESUPPLY:
+                    incrementSupply(si.getValue(x, slv));
+                    break;
+                case TEMPORAL_POD:
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 4);
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
+                case PROMESSA_ESCAPE:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case PINPOINT_SALVO:
+                    incrementSupply(-1);
+                    createPinPointSalvoForceAtom();
+                    break;
+                case HEROS_WILL_XENON:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        if(chr.hasSkill(HYBRID_DEFENSES)) {
+            Skill skill = chr.getSkill(HYBRID_DEFENSES);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+
+            if (tsm.getOptByCTSAndSkill(StackBuff, HYBRID_DEFENSES) != null) {
+                if (hitInfo.hpDamage > 0) {
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.mOption = hybridDefenseCount;
+                    tsm.putCharacterStatValue(StackBuff, o1);
+                    o2.nOption -= si.getValue(y, slv);
+                    o2.rOption = skill.getSkillId();
+                    tsm.putCharacterStatValue(EVAR, o2);
+
+                    tsm.sendSetStatPacket();
+                } else {
+                    hybridDefenseCount--;
+                    if (hybridDefenseCount <= 0) {
+                        tsm.removeStatsBySkill(HYBRID_DEFENSES);
+                        tsm.sendResetStatPacket();
+                        return;
+                    }
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.mOption = hybridDefenseCount;
+                    tsm.putCharacterStatValue(StackBuff, o1);
+                    o2.nOption -= 0;
+                    o2.rOption = skill.getSkillId();
+                    tsm.putCharacterStatValue(EVAR, o2);
+                    tsm.sendSetStatPacket();
+                }
+
+            }
+        }
+
+        Skill aegis = chr.getSkill(AEGIS_SYSTEM);
+        if (tsm.hasStat(XenonAegisSystem) && aegis != null) {
+            SkillInfo si = SkillData.getSkillInfoById(AEGIS_SYSTEM);
+            byte slv = (byte) aegis.getCurrentLevel();
+            if (Util.succeedProp(si.getValue(prop, slv))) {
+                int mobID = hitInfo.mobID;
+                ForceAtomEnum fae = ForceAtomEnum.XENON_ROCKET_1;
+                int curTime = Util.getCurrentTime();
+                List<ForceAtomInfo> faiList = new ArrayList<>();
+                List<Integer> mobList = new ArrayList<>();
+                Random random = new Random();
+                for (int i = 0; i < si.getValue(x, slv); i++) {
+                    int firstImpact = 5 + random.nextInt(6);
+                    int secondImpact = 5 + random.nextInt(6);
+                    int angle = random.nextInt(180);
+                    ForceAtomInfo fai = new ForceAtomInfo(1, fae.getInc(), firstImpact, secondImpact,
+                            angle, 0, curTime, 0, AEGIS_SYSTEM_ATOM, new Position(0, 0));
+                    faiList.add(fai);
+                    mobList.add(mobID);
+                }
+                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
+                        mobList, AEGIS_SYSTEM_ATOM, faiList, null, 0, 0,
+                        null, 0, null));
+            }
+        }
+        super.handleHit(c, inPacket, hitInfo);
     }
 }
 

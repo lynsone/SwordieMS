@@ -110,6 +110,24 @@ public class Mercedes extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isMercedes(id);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getAvatarLook().setDrawElfEar(true);
+        Item item = ItemData.getItemDeepCopy(1352000); // Secondary
+        chr.addItemToInventory(item);
+        chr.getAvatarData().getCharacterStat().setPosMap(910150000);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -198,54 +216,54 @@ public class Mercedes extends Job {
                 break;
         }
         tsm.sendSetStatPacket();
-        
-    }
-
-    private void incrementIgnisRoarStackCount(int skillID, TemporaryStatManager tsm, Client c, AttackInfo attackInfo) {
-        if (Arrays.asList(summonAttacks).contains(skillID)) {
-            return;
-        } else {
-            Option o = new Option();
-            Option o1 = new Option();
-            Option o2 = new Option();
-            SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(IGNIS_ROAR);
-            Skill skill = chr.getSkill(IGNIS_ROAR);
-            if (skill == null) {
-                return;
-            }
-            byte slv = (byte) skill.getCurrentLevel();
-            int amount = 1;
-            if(attackInfo.skillId == getFinalAttackSkill()) {
-                return;
-            }
-            if(attackInfo.skillId == lastAttackSkill) {
-                return;
-            }
-            if (tsm.hasStat(IgnisRore)) {
-                if (tsm.hasStat(AddAttackCount)) {
-                    amount = tsm.getOption(AddAttackCount).nOption;
-                    if (amount < ignisRoarInfo.getValue(y, slv)) {
-                        amount++;
-                    }
-                }
-
-                lastAttackSkill = attackInfo.skillId;
-                o.nOption = amount;
-                o.rOption = IGNIS_ROAR;
-                o.tOption = ignisRoarInfo.getValue(subTime, slv);
-                tsm.putCharacterStatValue(AddAttackCount, o);
-                o1.nOption = (amount * ignisRoarInfo.getValue(x, slv));
-                o1.rOption = IGNIS_ROAR;
-                o1.tOption = ignisRoarInfo.getValue(subTime, slv);
-                tsm.putCharacterStatValue(DamR, o1);
-            }
-            tsm.sendSetStatPacket();
-        }
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+    private void summonEleKnights() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        List<Integer> set = new ArrayList<>();
+        set.add(ELEMENTAL_KNIGHTS_BLUE);
+        set.add(ELEMENTAL_KNIGHTS_RED);
+        set.add(ELEMENTAL_KNIGHTS_PURPLE);
+
+        if(eleKnightSummonID != 0) {
+            set.remove((Integer) eleKnightSummonID);
+        }
+        int random = Util.getRandomFromList(set);
+        eleKnightSummonID = random;
+        Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
+        Field field = chr.getField();
+        summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        summon.setSummonTerm(0);
+
+        summonList.add(summon);
+        if(summonList.size() > 2) {
+            c.write(Summoned.summonedRemoved(summonList.get(0), LeaveType.ANIMATION));
+            tsm.removeStatsBySkill(summonList.get(0).getSkillID());
+            summonList.remove(0);
+        }
+
+        field.spawnSummon(summon);
+
+        SkillInfo si = SkillData.getSkillInfoById(ELEMENTAL_KNIGHTS_BLUE);
+        byte slv = (byte) chr.getSkill(ELEMENTAL_KNIGHTS_BLUE).getCurrentLevel();
+
+        o1.nReason = random;
+        o1.nValue = 1;
+        o1.summon = summon;
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IndieEmpty, o1);
+        tsm.sendSetStatPacket();
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -262,7 +280,7 @@ public class Mercedes extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            incrementIgnisRoarStackCount(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c, attackInfo);
+            incrementIgnisRoarStackCount(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -353,9 +371,78 @@ public class Mercedes extends Job {
                 }
                 break;
         }
-
         super.handleAttack(c, attackInfo);
     }
+
+    private void incrementIgnisRoarStackCount(int skillID, TemporaryStatManager tsm, AttackInfo attackInfo) {
+        if (Arrays.asList(summonAttacks).contains(skillID)) {
+            return;
+        } else {
+            Option o = new Option();
+            Option o1 = new Option();
+            SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(IGNIS_ROAR);
+            Skill skill = chr.getSkill(IGNIS_ROAR);
+            if (skill == null) {
+                return;
+            }
+            byte slv = (byte) skill.getCurrentLevel();
+            int amount = 1;
+            if(attackInfo.skillId == getFinalAttackSkill()) {
+                return;
+            }
+            if(attackInfo.skillId == lastAttackSkill) {
+                return;
+            }
+            if (tsm.hasStat(IgnisRore)) {
+                if (tsm.hasStat(AddAttackCount)) {
+                    amount = tsm.getOption(AddAttackCount).nOption;
+                    if (amount < ignisRoarInfo.getValue(y, slv)) {
+                        amount++;
+                    }
+                }
+
+                lastAttackSkill = attackInfo.skillId;
+                o.nOption = amount;
+                o.rOption = IGNIS_ROAR;
+                o.tOption = ignisRoarInfo.getValue(subTime, slv);
+                tsm.putCharacterStatValue(AddAttackCount, o);
+                o1.nOption = (amount * ignisRoarInfo.getValue(x, slv));
+                o1.rOption = IGNIS_ROAR;
+                o1.tOption = ignisRoarInfo.getValue(subTime, slv);
+                tsm.putCharacterStatValue(DamR, o1);
+            }
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        Skill faSkill = getFinalAtkSkill();
+        if(faSkill != null) {
+            SkillInfo si = SkillData.getSkillInfoById(faSkill.getSkillId());
+            byte slv = (byte) faSkill.getCurrentLevel();
+            int proc = si.getValue(prop, slv);
+            if (Util.succeedProp(proc)) {
+                return faSkill.getSkillId();
+            }
+        }
+        return 0;
+    }
+
+    private Skill getFinalAtkSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_DBG)) {
+            skill = chr.getSkill(FINAL_ATTACK_DBG);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
+        }
+        return skill;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -382,101 +469,13 @@ public class Mercedes extends Job {
         }
     }
 
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isMercedes(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        if(Util.succeedProp(getFinalAttackProc())) {
-            int fas = 0;
-            if (chr.hasSkill(FINAL_ATTACK_DBG)) {
-                fas = FINAL_ATTACK_DBG;
-            }
-            if (chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
-                fas = ADVANCED_FINAL_ATTACK;
-            }
-            return fas;
-        } else {
-            return 0;
-        }
-    }
-
-    private Skill getFinalAtkSkill(Char chr) {
-        Skill skill = null;
-        if(chr.hasSkill(FINAL_ATTACK_DBG)) {
-            skill = chr.getSkill(FINAL_ATTACK_DBG);
-        }
-        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
-            skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
-        }
-        return skill;
-    }
-
-    private int getFinalAttackProc() {
-        Skill skill = getFinalAtkSkill(chr);
-        if(skill == null) {
-            return 0;
-        }
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-        int proc = si.getValue(prop, slv);
-
-        return proc;
-    }
-
-    private void summonEleKnights() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o1 = new Option();
-        List<Integer> set = new ArrayList<>();
-        set.add(ELEMENTAL_KNIGHTS_BLUE);
-        set.add(ELEMENTAL_KNIGHTS_RED);
-        set.add(ELEMENTAL_KNIGHTS_PURPLE);
-
-        if(eleKnightSummonID != 0) {
-            set.remove((Integer) eleKnightSummonID);
-        }
-        int random = Util.getRandomFromList(set);
-        eleKnightSummonID = random;
-        Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
-        Field field = chr.getField();
-        summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
-        summon.setSummonTerm(0);
-
-        summonList.add(summon);
-        if(summonList.size() > 2) {
-            c.write(Summoned.summonedRemoved(summonList.get(0), LeaveType.ANIMATION));
-            tsm.removeStatsBySkill(summonList.get(0).getSkillID());
-            summonList.remove(0);
-        }
-
-        field.spawnSummon(summon);
-
-        SkillInfo si = SkillData.getSkillInfoById(ELEMENTAL_KNIGHTS_BLUE);
-        byte slv = (byte) chr.getSkill(ELEMENTAL_KNIGHTS_BLUE).getCurrentLevel();
-
-        o1.nReason = random;
-        o1.nValue = 1;
-        o1.summon = summon;
-        o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = si.getValue(time, slv);
-        tsm.putCharacterStatValue(IndieEmpty, o1);
-        tsm.sendSetStatPacket();
-    }
-
-    @Override
-    public void setCharCreationStats(Char chr) {
-        super.setCharCreationStats(chr);
-        chr.getAvatarData().getAvatarLook().setDrawElfEar(true);
-        Item item = ItemData.getItemDeepCopy(1352000); // Secondary
-        chr.addItemToInventory(item);
-        chr.getAvatarData().getCharacterStat().setPosMap(910150000);
     }
 }

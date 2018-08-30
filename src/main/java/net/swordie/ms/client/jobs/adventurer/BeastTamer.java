@@ -207,6 +207,35 @@ public class BeastTamer extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isBeastTamer(id);
+    }
+
+    private boolean isBearMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 1;
+    }
+
+    private boolean isLeopardMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 2;
+    }
+
+    private boolean isHawkMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 3;
+    }
+
+    private boolean isCatMode() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        return tsm.getOption(BeastMode).nOption == 4;
+    }
+
+
+
+    //  Buff related methods -------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -381,249 +410,6 @@ public class BeastTamer extends Job {
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
-
-    @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-
-        if (isLeopardMode()) { // Leopard
-            if (hasHitMobs) {
-                if(skillID != BRO_ATTACK) {
-                    procBroAttack(attackInfo);
-                }
-            }
-        }
-
-        if (isHawkMode()) { // Hawk
-            if (hasHitMobs) {
-                applyRaptorTalonsOnMob(attackInfo);
-            }
-        }
-
-        if (isCatMode()) { // Cat
-            giveKittyBattleSquadBuff();
-            giveKittyTreatsBuff();
-            giveStickyPawsBuff();
-            giveCatClawsBuff();
-            giveMouserInsightBuff();
-            giveFriendsOfArbyBuff();
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case MAJESTIC_TRUMPET:
-                SkillInfo rca = SkillData.getSkillInfoById(skillID);
-                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
-                aa.setMobOrigin((byte) 0);
-                aa.setSkillID(skillID);
-                int x = chr.getPosition().getX();
-                int y = chr.getPosition().getY() + 41;
-                aa.setPosition(new Position(x, y));
-                aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
-                aa.setDelay((short) 4);
-                chr.getField().spawnAffectedArea(aa);
-                break;
-            case THUNDER_DASH:
-            case ADV_THUNDER_DASH:
-                SkillInfo tdi = SkillData.getSkillInfoById(THUNDER_TRAIL);
-                AffectedArea aa2 = AffectedArea.getAffectedArea(chr, attackInfo);
-                aa2.setMobOrigin((byte) 0);
-                aa2.setSkillID(THUNDER_TRAIL);
-                //int x = chr.getPosition().getX();
-                //int y = chr.getPosition().getY() + 41;
-                //aa.setPosition(new Position(x, y));
-                aa2.setPosition(chr.getPosition());
-                Rect rect = tdi.getRects().get(0);
-                if(!chr.isLeft()) {
-                    rect = rect.moveRight();
-                }
-                aa2.setRect(aa2.getPosition().getRectAround(rect));
-                aa2.setDelay((short) 4);
-                chr.getField().spawnAffectedArea(aa2);
-                break;
-            case PURR_ZONE: //TODO  isn't a AffectedArea, but a 'Special'
-                SkillInfo pz = SkillData.getSkillInfoById(PURR_ZONE);
-                AffectedArea aa3 = AffectedArea.getAffectedArea(chr, attackInfo);
-                aa3.setMobOrigin((byte) 0);
-                aa3.setSkillID(skillID);
-                aa3.setPosition(chr.getPosition());
-                aa3.setRect(aa3.getPosition().getRectAround(pz.getRects().get(0)));
-                aa3.setSlv((byte)skill.getCurrentLevel());
-                chr.getField().spawnAffectedArea(aa3);
-                break;
-            case FIRE_KITTY:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = si.getValue(SkillStat.x, slv);
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            switch (skillID) {
-                case HOMEWARD_BOUND:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case EKA_EXPRESS: //TODO Eka Express Skill
-                    Field townField = FieldData.getFieldById(chr.getField().getReturnMap());
-                    int x = townField.getPortalByName("tp").getX();
-                    int y = townField.getPortalByName("tp").getY();
-                    Position townPosition = new Position(x, y); // Grabs the Portal Co-ordinates for the TownPortalPoint
-                    int duration = si.getValue(time, slv);
-                    if(chr.getTownPortal() != null) {
-                        TownPortal townPortal = chr.getTownPortal();
-                        townPortal.despawnTownPortal();
-                    }
-                    TownPortal townPortal = new TownPortal(chr, townPosition, chr.getPosition(), chr.getField().getReturnMap(), chr.getFieldID(), skillID, duration);
-                    townPortal.spawnTownPortal();
-                    chr.dispose();
-                    break;
-                case MEOW_CURE:
-                    tsm.removeAllDebuffs();
-                    break;
-                case MEOW_HEAL:
-                    chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(hp, slv))));
-                    break;
-                case MEOW_REVIVE:
-                    Party party = chr.getParty();
-                    if(party != null) {
-                        Field field = chr.getField();
-                        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-                        if(!chr.isLeft()) {
-                            rect = rect.moveRight();
-                        }
-                        List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
-                                filter(pml -> pml.getChr().getId() != chr.getId() &&
-                                        pml.getChr().getHP() <= 0).
-                                collect(Collectors.toList());
-
-                        if (eligblePartyMemberList.size() > 0) {
-                            Char randomPartyChr = Util.getRandomFromList(eligblePartyMemberList).getChr();
-                            TemporaryStatManager partyTSM = randomPartyChr.getTemporaryStatManager();
-                            randomPartyChr.heal(randomPartyChr.getMaxHP());
-                            partyTSM.putCharacterStatValue(NotDamaged, o1);
-                            partyTSM.sendSetStatPacket();
-                            randomPartyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
-                            randomPartyChr.getField().broadcastPacket(UserRemote.effect(randomPartyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
-                        }
-                    }
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isBeastTamer(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        fortFollowUpAddAttack++;
-        if (isBearMode() && chr.hasSkill(FORT_FOLLOW_UP) && fortFollowUpAddAttack >= 4) {
-            fortFollowUpAddAttack = 0;
-            return FORT_FOLLOW_UP;
-        }
-
-        return 0;
-    }
-
-    private void procBroAttack(AttackInfo attackInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o1 = new Option();
-        if(tsm.getOptByCTSAndSkill(ACC, BRO_ATTACK) != null) {
-            Summon summon;
-            Field field;
-            Skill skill = chr.getSkill(BRO_ATTACK);
-            if(!chr.hasSkill(BRO_ATTACK)) {
-                return;
-            }
-            SkillInfo si = SkillData.getSkillInfoById(BRO_ATTACK);
-            byte slv = (byte) skill.getCurrentLevel();
-            int summonProp = si.getValue(prop, slv);
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                if (Util.succeedProp(summonProp)) {
-                    summon = Summon.getSummonBy(c.getChr(), BRO_ATTACK, slv);
-                    field = c.getChr().getField();
-                    summon.setFlyMob(false);
-                    summon.setPosition(mob.getPosition());
-                    summon.setSummonTerm(si.getValue(x, slv));
-                    summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
-                    field.spawnAddSummon(summon);
-
-                    o1.nReason = skill.getSkillId();
-                    o1.nValue = 1;
-                    o1.summon = summon;
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieEmpty, o1);
-                    tsm.sendSetStatPacket();
-                }
-            }
-
-        }
-    }
-
-    private void applyRaptorTalonsOnMob(AttackInfo attackInfo) {
-        Option o1 = new Option();
-        if(!chr.hasSkill(RAPTOR_TALONS)) {
-            return;
-        }
-        Skill skill = chr.getSkill(RAPTOR_TALONS);
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) skill.getCurrentLevel();
-        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            if(mob == null) {
-                return;
-            }
-            MobTemporaryStat mts = mob.getTemporaryStat();
-            if (Util.succeedProp(si.getValue(prop, slv))) {
-                mts.createAndAddBurnedInfo(chr, skill, 1);
-            }
-        }
     }
 
     private void giveMeowCard(byte slv) {
@@ -809,6 +595,246 @@ public class BeastTamer extends Job {
         return defensiveFormation;
     }
 
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+
+        if (isLeopardMode()) { // Leopard
+            if (hasHitMobs) {
+                if(skillID != BRO_ATTACK) {
+                    procBroAttack(attackInfo);
+                }
+            }
+        }
+
+        if (isHawkMode()) { // Hawk
+            if (hasHitMobs) {
+                applyRaptorTalonsOnMob(attackInfo);
+            }
+        }
+
+        if (isCatMode()) { // Cat
+            giveKittyBattleSquadBuff();
+            giveKittyTreatsBuff();
+            giveStickyPawsBuff();
+            giveCatClawsBuff();
+            giveMouserInsightBuff();
+            giveFriendsOfArbyBuff();
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case MAJESTIC_TRUMPET:
+                SkillInfo rca = SkillData.getSkillInfoById(skillID);
+                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
+                aa.setMobOrigin((byte) 0);
+                aa.setSkillID(skillID);
+                int x = chr.getPosition().getX();
+                int y = chr.getPosition().getY() + 41;
+                aa.setPosition(new Position(x, y));
+                aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
+                aa.setDelay((short) 4);
+                chr.getField().spawnAffectedArea(aa);
+                break;
+            case THUNDER_DASH:
+            case ADV_THUNDER_DASH:
+                SkillInfo tdi = SkillData.getSkillInfoById(THUNDER_TRAIL);
+                AffectedArea aa2 = AffectedArea.getAffectedArea(chr, attackInfo);
+                aa2.setMobOrigin((byte) 0);
+                aa2.setSkillID(THUNDER_TRAIL);
+                //int x = chr.getPosition().getX();
+                //int y = chr.getPosition().getY() + 41;
+                //aa.setPosition(new Position(x, y));
+                aa2.setPosition(chr.getPosition());
+                Rect rect = tdi.getRects().get(0);
+                if(!chr.isLeft()) {
+                    rect = rect.moveRight();
+                }
+                aa2.setRect(aa2.getPosition().getRectAround(rect));
+                aa2.setDelay((short) 4);
+                chr.getField().spawnAffectedArea(aa2);
+                break;
+            case PURR_ZONE: //TODO  isn't a AffectedArea, but a 'Special'
+                SkillInfo pz = SkillData.getSkillInfoById(PURR_ZONE);
+                AffectedArea aa3 = AffectedArea.getAffectedArea(chr, attackInfo);
+                aa3.setMobOrigin((byte) 0);
+                aa3.setSkillID(skillID);
+                aa3.setPosition(chr.getPosition());
+                aa3.setRect(aa3.getPosition().getRectAround(pz.getRects().get(0)));
+                aa3.setSlv((byte)skill.getCurrentLevel());
+                chr.getField().spawnAffectedArea(aa3);
+                break;
+            case FIRE_KITTY:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(SkillStat.x, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.PDR, o1);
+                }
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    private void procBroAttack(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        if(tsm.getOptByCTSAndSkill(ACC, BRO_ATTACK) != null) {
+            Summon summon;
+            Field field;
+            Skill skill = chr.getSkill(BRO_ATTACK);
+            if(!chr.hasSkill(BRO_ATTACK)) {
+                return;
+            }
+            SkillInfo si = SkillData.getSkillInfoById(BRO_ATTACK);
+            byte slv = (byte) skill.getCurrentLevel();
+            int summonProp = si.getValue(prop, slv);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (Util.succeedProp(summonProp)) {
+                    summon = Summon.getSummonBy(c.getChr(), BRO_ATTACK, slv);
+                    field = c.getChr().getField();
+                    summon.setFlyMob(false);
+                    summon.setPosition(mob.getPosition());
+                    summon.setSummonTerm(si.getValue(x, slv));
+                    summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+                    field.spawnAddSummon(summon);
+
+                    o1.nReason = skill.getSkillId();
+                    o1.nValue = 1;
+                    o1.summon = summon;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieEmpty, o1);
+                    tsm.sendSetStatPacket();
+                }
+            }
+
+        }
+    }
+
+    private void applyRaptorTalonsOnMob(AttackInfo attackInfo) {
+        Option o1 = new Option();
+        if(!chr.hasSkill(RAPTOR_TALONS)) {
+            return;
+        }
+        Skill skill = chr.getSkill(RAPTOR_TALONS);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if(mob == null) {
+                return;
+            }
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            if (Util.succeedProp(si.getValue(prop, slv))) {
+                mts.createAndAddBurnedInfo(chr, skill, 1);
+            }
+        }
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        fortFollowUpAddAttack++;
+        if (isBearMode() && chr.hasSkill(FORT_FOLLOW_UP) && fortFollowUpAddAttack >= 4) {
+            fortFollowUpAddAttack = 0;
+            return FORT_FOLLOW_UP;
+        }
+
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            switch (skillID) {
+                case HOMEWARD_BOUND:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case EKA_EXPRESS: //TODO Eka Express Skill
+                    Field townField = FieldData.getFieldById(chr.getField().getReturnMap());
+                    int x = townField.getPortalByName("tp").getX();
+                    int y = townField.getPortalByName("tp").getY();
+                    Position townPosition = new Position(x, y); // Grabs the Portal Co-ordinates for the TownPortalPoint
+                    int duration = si.getValue(time, slv);
+                    if(chr.getTownPortal() != null) {
+                        TownPortal townPortal = chr.getTownPortal();
+                        townPortal.despawnTownPortal();
+                    }
+                    TownPortal townPortal = new TownPortal(chr, townPosition, chr.getPosition(), chr.getField().getReturnMap(), chr.getFieldID(), skillID, duration);
+                    townPortal.spawnTownPortal();
+                    chr.dispose();
+                    break;
+                case MEOW_CURE:
+                    tsm.removeAllDebuffs();
+                    break;
+                case MEOW_HEAL:
+                    chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(hp, slv))));
+                    break;
+                case MEOW_REVIVE:
+                    Party party = chr.getParty();
+                    if(party != null) {
+                        Field field = chr.getField();
+                        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+                        if(!chr.isLeft()) {
+                            rect = rect.moveRight();
+                        }
+                        List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
+                                filter(pml -> pml.getChr().getId() != chr.getId() &&
+                                        pml.getChr().getHP() <= 0).
+                                collect(Collectors.toList());
+
+                        if (eligblePartyMemberList.size() > 0) {
+                            Char randomPartyChr = Util.getRandomFromList(eligblePartyMemberList).getChr();
+                            TemporaryStatManager partyTSM = randomPartyChr.getTemporaryStatManager();
+                            randomPartyChr.heal(randomPartyChr.getMaxHP());
+                            partyTSM.putCharacterStatValue(NotDamaged, o1);
+                            partyTSM.sendSetStatPacket();
+                            randomPartyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                            randomPartyChr.getField().broadcastPacket(UserRemote.effect(randomPartyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
     public static void beastTamerRegroup(Char chr) { //Handled in WorldHandler
         Party party = chr.getParty();
         if(party != null) {
@@ -823,7 +849,17 @@ public class BeastTamer extends Job {
         }
     }
 
-    public static void reviveByBearReborn(Char chr) {
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
+        super.handleHit(c, inPacket, hitInfo);
+    }
+
+    public static void reviveByBearReborn(Char chr) { // TODO
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         chr.heal(chr.getMaxHP());
         tsm.removeStatsBySkill(BEAR_REBORN);
@@ -833,23 +869,4 @@ public class BeastTamer extends Job {
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
     }
 
-    private boolean isBearMode() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        return tsm.getOption(BeastMode).nOption == 1;
-    }
-
-    private boolean isLeopardMode() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        return tsm.getOption(BeastMode).nOption == 2;
-    }
-
-    private boolean isHawkMode() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        return tsm.getOption(BeastMode).nOption == 3;
-    }
-
-    private boolean isCatMode() {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        return tsm.getOption(BeastMode).nOption == 4;
-    }
 }

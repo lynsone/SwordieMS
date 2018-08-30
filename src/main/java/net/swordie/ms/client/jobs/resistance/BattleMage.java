@@ -9,7 +9,6 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.constants.JobConstants;
@@ -115,12 +114,19 @@ public class BattleMage extends Citizen {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return id >= JobConstants.JobEnum.BATTLE_MAGE_1.getJobId() && id <= JobConstants.JobEnum.BATTLE_MAGE_4.getJobId();
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
-        Summon summon;
-        Field field;
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -275,7 +281,10 @@ public class BattleMage extends Citizen {
                 break;
         }
         tsm.sendSetStatPacket();
+    }
 
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
     public void spawnDeath(int skillID, byte slv) {
@@ -299,6 +308,90 @@ public class BattleMage extends Citizen {
         o1.tTerm = 0; // #time is used for something else
         tsm.putCharacterStatValue(IndieEmpty, o1);
         tsm.sendSetStatPacket();
+    }
+
+    public void removeCondemnationBuff(Summon summon) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(summon != null) {
+            if (tsm.hasStat(BMageDeath)) {
+                tsm.removeStatsBySkill(summon.getSkillID());
+                tsm.sendResetStatPacket();
+            }
+        }
+    }
+
+    public void applyBlueAuraDispel() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(BLUE_AURA);
+        if (chr.hasSkill(32120062)) { //Blue Aura - Dispel Magic
+            if (tsm.getOptByCTSAndSkill(BMageAura, skill.getSkillId()) != null) {
+                tsm.removeAllDebuffs();
+                EventManager.addEvent(this::applyBlueAuraDispel, 5, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if (hasHitMobs) {
+            if(attackInfo.skillId != CONDEMNATION
+                    && attackInfo.skillId != CONDEMNATION_I
+                    && attackInfo.skillId != CONDEMNATION_II
+                    && attackInfo.skillId != CONDEMNATION_III) {
+                incrementCondemnation(attackInfo);
+            }
+            drainAuraActiveHPRecovery(attackInfo);
+            drainAuraPassiveHPRecovery(attackInfo);
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case DARK_CHAIN:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    //if (Util.succeedProp(si.getValue(hcProp, slv))) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                    //}
+                }
+                break;
+            case DARK_GENESIS:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
     }
 
     private void incrementCondemnation(AttackInfo attackInfo) {
@@ -403,126 +496,6 @@ public class BattleMage extends Citizen {
         return skill;
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
-
-    @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        if (hasHitMobs) {
-            if(attackInfo.skillId != CONDEMNATION && attackInfo.skillId != CONDEMNATION_I && attackInfo.skillId != CONDEMNATION_II && attackInfo.skillId != CONDEMNATION_III) {
-                incrementCondemnation(attackInfo);
-            }
-            drainAuraActiveHPRecovery(attackInfo);
-            drainAuraPassiveHPRecovery(attackInfo);
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case DARK_CHAIN:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    //if (Util.succeedProp(si.getValue(hcProp, slv))) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    if(!mob.isBoss()) {
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
-                    //}
-                }
-                break;
-            case DARK_GENESIS:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    if(!mob.isBoss()) {
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case PARTY_SHIELD:
-                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
-                    aa.setMobOrigin((byte) 0);
-                    aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                    aa.setDelay((short) 16);
-                    chr.getField().spawnAffectedArea(aa);
-
-                    break;
-                case SECRET_ASSEMBLY:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case HEROS_WILL_BAM:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.BATTLE_MAGE_1.getJobId() && id <= JobConstants.JobEnum.BATTLE_MAGE_4.getJobId();
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        SkillInfo si = SkillData.getSkillInfoById(DARK_GENESIS_FA);
-        if(chr.getSkill(DARK_GENESIS) != null) {
-            byte slv = (byte) chr.getSkill(DARK_GENESIS).getCurrentLevel();
-            if (Util.succeedProp(si.getValue(prop, slv))) {
-                return DARK_GENESIS_FA;
-            }
-        }
-        return 0;
-    }
 
     private void drainAuraActiveHPRecovery(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -591,24 +564,67 @@ public class BattleMage extends Citizen {
         }
     }
 
-    public void applyBlueAuraDispel() {
+    @Override
+    public int getFinalAttackSkill() {
+        SkillInfo si = SkillData.getSkillInfoById(DARK_GENESIS_FA);
+        if(chr.getSkill(DARK_GENESIS) != null) {
+            byte slv = (byte) chr.getSkill(DARK_GENESIS).getCurrentLevel();
+            if (Util.succeedProp(si.getValue(prop, slv))) {
+                return DARK_GENESIS_FA;
+            }
+        }
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(BLUE_AURA);
-        if (chr.hasSkill(32120062)) { //Blue Aura - Dispel Magic
-            if (tsm.getOptByCTSAndSkill(BMageAura, skill.getSkillId()) != null) {
-                tsm.removeAllDebuffs();
-                EventManager.addEvent(this::applyBlueAuraDispel, 5, TimeUnit.SECONDS);
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case PARTY_SHIELD:
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                    aa.setDelay((short) 16);
+                    chr.getField().spawnAffectedArea(aa);
+
+                    break;
+                case SECRET_ASSEMBLY:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case HEROS_WILL_BAM:
+                    tsm.removeAllDebuffs();
+                    break;
             }
         }
     }
 
-    public static void removeCondemnationBuff(Char chr, Summon summon) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(summon != null) {
-            if (tsm.hasStat(BMageDeath)) {
-                tsm.removeStatsBySkill(summon.getSkillID());
-                tsm.sendResetStatPacket();
-            }
-        }
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        super.handleHit(c, inPacket, hitInfo);
     }
 }

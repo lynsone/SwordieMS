@@ -1617,8 +1617,12 @@ public class WorldHandler {
         if(summon == null) {
             return;
         }
-        if(summon.getSkillID() == BattleMage.CONDEMNATION || summon.getSkillID() == BattleMage.CONDEMNATION_I || summon.getSkillID() == BattleMage.CONDEMNATION_II || summon.getSkillID() == BattleMage.CONDEMNATION_III) {
-            BattleMage.removeCondemnationBuff(chr, summon);
+        if(summon.getSkillID() == BattleMage.CONDEMNATION
+                || summon.getSkillID() == BattleMage.CONDEMNATION_I
+                || summon.getSkillID() == BattleMage.CONDEMNATION_II
+                || summon.getSkillID() == BattleMage.CONDEMNATION_III) {
+
+            ((BattleMage)chr.getJobHandler()).removeCondemnationBuff(summon);
         }
 
         c.getChr().getField().removeLife(id, false);
@@ -3511,29 +3515,16 @@ public class WorldHandler {
     }
 
     public static void handleSummonedSkill(Client c, InPacket inPacket) {
-        int objectID = inPacket.decodeInt();
-        int skillID = inPacket.decodeInt();
-        //5 more bytes, unknown
-
         Char chr = c.getChr();
         Field field = chr.getField();
+
+        int objectID = inPacket.decodeInt();
+        int skillId = inPacket.decodeInt();
+        //5 more bytes, unknown
+
         if(field.getLifeByObjectID(objectID) != null && field.getLifeByObjectID(objectID) instanceof Summon) {
             Summon summon = (Summon) field.getLifeByObjectID(objectID);
-            // Dark Knight - Evil Eye
-            if(skillID == Warrior.EVIL_EYE) {
-                Warrior.EvilEyeHeal(chr);
-            }
-            else if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
-                Warrior.getHexOfTheEvilEyeBuffs(chr);
-            }
-
-            // Mechanic - Support Unit H-EX
-            else if(skillID == net.swordie.ms.client.jobs.resistance.Mechanic.SUPPORT_UNIT_HEX ||
-                    skillID == net.swordie.ms.client.jobs.resistance.Mechanic.ENHANCED_SUPPORT_UNIT) {
-                net.swordie.ms.client.jobs.resistance.Mechanic.healFromSupportUnit(c, summon);
-            }
-            chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, objectID)));
-            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skillID, (byte) 1, objectID)));
+            summon.onSkillUse(skillId);
         }
     }
 
