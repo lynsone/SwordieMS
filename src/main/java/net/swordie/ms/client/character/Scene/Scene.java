@@ -1,4 +1,4 @@
-package net.swordie.ms.client.character.Scene;
+package net.swordie.ms.client.character.scene;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.packet.CField;
@@ -9,8 +9,10 @@ import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import org.apache.log4j.LogManager;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -37,18 +39,20 @@ public class Scene {
     public void createScene() {
         EffectData.getEffectsFromWzPath(this);
 
+        effectInfos = effectInfos.stream().sorted(Comparator.comparingInt(EffectInfo::getZ)).collect(Collectors.toList());
+
         for (EffectInfo ei : effectInfos) {
 
             if(ei.getType() == null) {
-                log.error(String.format("Unhandled Scene Type"));
+                log.error(String.format("Unhandled scene Type"));
                 continue;
             }
 
             int delay = ei.getStart();
-            String path = ei.getVisual();
+            String path = ei.getVisual() + "/0";
             switch (ei.getType()) {
                 case FieldEffect:
-                    chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(path+"/0", delay)));
+                        EventManager.addEvent(() -> chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(path, 0))), delay, TimeUnit.MILLISECONDS); // Delay for getFieldEffFromWz doesn't work
                     break;
 
                 case Warp:

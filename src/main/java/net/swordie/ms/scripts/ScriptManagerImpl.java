@@ -4,7 +4,7 @@ import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterPark;
-import net.swordie.ms.client.character.Scene.Scene;
+import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
@@ -587,7 +587,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void warp(int mid, int pid) {
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(mid);
-		Portal portal = chr.getField().getPortalByID(pid);
+		Portal portal = field.getPortalByID(pid);
 		chr.warp(field, portal);
 	}
 
