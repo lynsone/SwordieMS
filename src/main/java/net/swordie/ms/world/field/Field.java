@@ -30,10 +30,12 @@ import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.scripts.ScriptManager;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
+import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import org.apache.log4j.Logger;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
@@ -577,7 +579,7 @@ public class Field {
         }
     }
 
-    private void broadcast(OutPacket outPacket, Predicate<? super Char> predicate) {
+    private void broadcastPacket(OutPacket outPacket, Predicate<? super Char> predicate) {
         getChars().stream().filter(predicate).forEach(chr -> chr.write(outPacket));
     }
 
@@ -741,13 +743,13 @@ public class Field {
     public synchronized void removeDrop(int dropID, int pickupUserID, boolean fromSchedule, int petID) {
         Life life = getLifeByObjectID(dropID);
         if (life instanceof Drop) {
-            if(pickupUserID != 0) {
-                broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
-            } if (petID != 0) {
-                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.PET_PICKUP, 0, life.getObjectId(),
+            if (petID >= 0) {
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.PET_PICKUP, pickupUserID, life.getObjectId(),
                         (short) 0, petID, 0));
+            } else if (pickupUserID != 0) {
+                broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
             } else {
-                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.FADE, 0, life.getObjectId(),
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.FADE, pickupUserID, life.getObjectId(),
                         (short) 0, 0, 0));
             }
             removeLife(dropID, fromSchedule);
@@ -817,7 +819,7 @@ public class Field {
         if (isTradable) {
             addLife(drop);
             getLifeSchedules().put(drop,
-                    EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
+                    EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, -1),
                             GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
         } else {
             drop.setObjectId(getNewObjectID()); // just so the client sees the drop
@@ -828,7 +830,9 @@ public class Field {
         } else if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
         } else {
-            broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0));
+            for (Char chr : getChars()) {
+                broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0, drop.canBePickedUpBy(chr)));
+            }
         }
 
     }
@@ -860,11 +864,16 @@ public class Field {
             drop.setMoney(dropInfo.getMoney());
         }
         addLife(drop);
+        drop.setExpireTime(FileTime.fromDate(LocalDateTime.now().plusSeconds(GameConstants.DROP_REMOVE_OWNERSHIP_TIME)));
         getLifeSchedules().put(drop,
-                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, 0),
+                EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, -1),
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
-        broadcast(DropPool.dropEnterField(drop, posFrom, posTo, ownerID),
-                (Char chr) -> dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq()));
+        EventManager.addEvent(() -> drop.setOwnerID(0), GameConstants.DROP_REMOVE_OWNERSHIP_TIME, TimeUnit.SECONDS);
+        for (Char chr : getChars()) {
+            if (dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq())) {
+                broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, ownerID, drop.canBePickedUpBy(chr)));
+            }
+        }
     }
 
     /**

@@ -15,8 +15,8 @@ public class Pet extends Life {
     private int idx;
     private String name;
     private long petLockerSN;
-    private int hue;
-    private short giantRate;
+    private int hue = -1;
+    private short giantRate = 100;
     private boolean transformed;
     private boolean reinforced;
     private PetItem item;
@@ -47,7 +47,7 @@ public class Pet extends Life {
     }
 
     public void encode(OutPacket outPacket) {
-        outPacket.encodeInt(getId());
+        outPacket.encodeInt(getTemplateId());
         outPacket.encodeString(getName());
         outPacket.encodeLong(getItem().getId());
         outPacket.encodePosition(getPosition());

@@ -82,6 +82,7 @@ import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.pet.Pet;
+import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
@@ -300,6 +301,7 @@ public class WorldHandler {
             int y = chr.getPosition().getY();
             Foothold fh = chr.getField().findFootHoldBelow(new Position(x, y - GameConstants.DROP_HEIGHT));
             chr.getField().drop(drop, chr.getPosition(), new Position(x, fh.getYFromX(x)));
+            drop.setCanBePickedUpByPet(false);
             if(fullDrop) {
                 c.write(WvsContext.inventoryOperation(true, false, REMOVE,
                         oldPos, newPos, 0, item));
@@ -1775,6 +1777,28 @@ public class WorldHandler {
             World world = c.getWorld();
             world.broadcastPacket(WvsContext.setAvatarMegaphone(chr, itemID, lineList, whisperIcon));
 
+        } else if (itemID / 10000 == 519) {
+            // Pet Skill Items
+            long sn = inPacket.decodeLong();
+            PetSkill ps = ItemConstants.getPetSkillFromID(itemID);
+            if (ps == null) {
+                chr.chatMessage(String.format("Unhandled pet skill item %d", itemID));
+                return;
+            }
+            Item pi = chr.getCashInventory().getItemBySN(sn);
+            if (!(pi instanceof PetItem)) {
+                chr.chatMessage("Could not find that pet.");
+                return;
+            }
+            boolean add = itemID >= 5190014; // add property doesn't include the "Slimming Medicine"
+            PetItem petItem = (PetItem) pi;
+            if (add) {
+                petItem.addPetSkill(ps);
+            } else {
+                petItem.removePetSkill(ps);
+            }
+            petItem.updateToChar(chr);
+            chr.consumeItem(item);
         } else {
 
             Equip medal = (Equip) chr.getEquippedInventory().getFirstItemByBodyPart(BodyPart.MEDAL);
@@ -2383,9 +2407,11 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             Drop drop = (Drop) life;
-            boolean success = chr.addDrop(drop);
+            boolean success = drop.canBePickedUpBy(chr) && chr.addDrop(drop);
             if(success) {
-                field.removeDrop(dropID, chr.getId(), false, 0);
+                field.removeDrop(dropID, chr.getId(), false, -1);
+            } else {
+                chr.dispose();
             }
         }
 
@@ -2432,6 +2458,7 @@ public class WorldHandler {
         if (chr.getMoney() > amount) {
             chr.deductMoney(amount);
             Drop drop = new Drop(-1, amount);
+            drop.setCanBePickedUpByPet(false);
             chr.getField().drop(drop, chr.getPosition());
         }
     }
@@ -4868,7 +4895,7 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             Drop drop = (Drop) life;
-            boolean success = chr.addDrop(drop);
+            boolean success = drop.canBePickedUpByPet() && drop.canBePickedUpBy(chr) && chr.addDrop(drop);
             if(success) {
                 field.removeDrop(dropID, chr.getId(), false, petID);
             }

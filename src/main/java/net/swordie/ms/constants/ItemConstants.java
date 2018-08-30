@@ -2,6 +2,7 @@ package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
 import org.apache.log4j.LogManager;
@@ -456,7 +457,7 @@ public class ItemConstants {
     }
 
     public static boolean canEquipHaveFlame(Equip equip) {
-        return isPendant(equip.getItemId()) ||
+        return !equip.isCash() && (isPendant(equip.getItemId()) ||
                 (isWeapon(equip.getItemId()) && !isSecondary((equip.getItemId())) && !isShield((equip.getItemId()))) ||
                 isBelt(equip.getItemId()) ||
                 isHat(equip.getItemId()) ||
@@ -470,7 +471,7 @@ public class ItemConstants {
                 equip.getItemId() == SCARLET_SHOULDER ||
                 isGlove(equip.getItemId()) ||
                 isCape(equip.getItemId()) ||
-                isPocketItem(equip.getItemId());
+                isPocketItem(equip.getItemId()));
     }
 
     public static boolean canEquipGoldHammer(Equip equip) {
@@ -1155,5 +1156,49 @@ public class ItemConstants {
                     SpellTraceScrollType.CleanSlate, 0, new TreeMap<>(), CLEAN_SLATE_ST_COST, 5));
         }
         return scrolls;
+    }
+
+    public static PetSkill getPetSkillFromID(int itemID) {
+        switch (itemID) {
+            case 5190000:
+                return PetSkill.ITEM_PICKUP;
+            case 5190001:
+                return PetSkill.AUTO_HP;
+            case 5190002:
+                return PetSkill.EXPANDED_AUTO_MOVE;
+            case 5190003:
+                return PetSkill.AUTO_MOVE;
+            case 5190004:
+                return PetSkill.EXPIRED_PICKUP;
+            case 5190005:
+                return PetSkill.IGNORE_ITEM;
+            case 5190006:
+                return PetSkill.AUTO_MP;
+            case 5190007:
+                return PetSkill.RECALL;
+            case 5190008:
+                return PetSkill.AUTO_SPEAKING;
+            case 5190009:
+                return PetSkill.AUTO_ALL_CURE;
+            case 5190010:
+                return PetSkill.AUTO_BUFF;
+            case 5190011:
+                return PetSkill.AUTO_FEED;
+            case 5190012:
+                return PetSkill.FATTEN_UP;
+            case 5190013:
+                return PetSkill.PET_SHOP;
+            case 5190014:
+                return PetSkill.FATTEN_UP;
+            case 5191000:
+                return PetSkill.ITEM_PICKUP;
+            case 5191001:
+                return PetSkill.AUTO_HP;
+            case 5191002:
+                return PetSkill.EXPANDED_AUTO_MOVE;
+            case 5191003:
+                return PetSkill.ITEM_PICKUP;
+        }
+        return null;
     }
 }

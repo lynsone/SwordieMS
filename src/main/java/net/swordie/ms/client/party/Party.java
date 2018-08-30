@@ -332,10 +332,24 @@ public class Party {
                 .mapToInt(PartyMember::getLevel).average().orElse(chr.getLevel());
     }
 
+    /**
+     * Gets a list of party members in the same Field instance as the given Char, excluding the given Char.
+     * @param chr the given Char
+     * @return a set of Characters that are in the same field as the given Char
+     */
     public Set<Char> getPartyMembersInSameField(Char chr) {
         return getOnlineMembers().stream()
                 .filter(pm -> pm.getChr() != null && pm.getChr() != chr && pm.getChr().getField() == chr.getField())
                 .map(PartyMember::getChr)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Checks if this Party has a member with the given character id.
+     * @param charID the charID to look for
+     * @return if the corresponding char is in the party
+     */
+    public boolean hasPartyMember(int charID) {
+        return getPartyMemberByID(charID) != null;
     }
 }

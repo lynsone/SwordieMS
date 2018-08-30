@@ -124,6 +124,10 @@ public class Inventory {
         return getItems().stream().filter(item -> item.getItemId() == itemId).findFirst().orElse(null);
     }
 
+    public Item getItemBySN(long sn) {
+        return getItems().stream().filter(item -> item.getId() == sn).findFirst().orElse(null);
+    }
+
     public boolean containsItem(int itemID) {
         return getItemByItemID(itemID) != null;
     }

@@ -49,14 +49,14 @@ public class PetItem extends Item {
         outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getTameness() + 1);
         outPacket.encodeByte(getRepleteness());
-        outPacket.encodeFT(getDateDead());
+        outPacket.encodeFT(LocalDateTime.now().plusDays(30));
         outPacket.encodeShort(getPetAttribute());
         outPacket.encodeShort(getPetSkill());
         outPacket.encodeInt(getRemainLife());
         outPacket.encodeShort(getAttribute());
         outPacket.encodeByte(getActiveState());
-        outPacket.encodeInt(getAutoBuffSkill());
-        outPacket.encodeInt(getPetHue());
+        outPacket.encodeInt(Thief.HASTE | getAutoBuffSkill());
+        outPacket.encodeInt(-1);
         outPacket.encodeShort(getGiantRate());
     }
 
@@ -165,10 +165,9 @@ public class PetItem extends Item {
     }
 
     public Pet createPet(Char chr) {
-        Pet pet = new Pet(-1, chr.getId());
+        Pet pet = new Pet(getItemId(), chr.getId());
         pet.setFh(chr.getFoothold());
         pet.setPosition(chr.getPosition());
-        pet.setId(getItemId());
         int chosenIdx = chr.getFirstPetIdx();
         if(chosenIdx == -1) {
             log.error("Tried to create a pet while 3 pets already exist.");
@@ -207,6 +206,12 @@ public class PetItem extends Item {
     }
 
     public void removePetSkill(PetSkill petSkill) {
-        setPetSkill(getPetSkill() ^ petSkill.getVal());
+        if (hasPetSkill(petSkill)) {
+            setPetSkill(getPetSkill() ^ petSkill.getVal());
+        }
+    }
+
+    private boolean hasPetSkill(PetSkill petSkill) {
+        return (getPetSkill() & petSkill.getVal()) != 0;
     }
 }
