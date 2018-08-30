@@ -793,7 +793,9 @@ public class SkillConstants {
             case 23111001: // Leap Tornado
             case 23121002: // Spikes Royale
             case 23121052: // Wrath of Enlil
-            case 23120013: // Staggering Strikes
+            case 23120013: // Staggering Strikes (4th Job Upgrade)
+            case 23111000: // Staggering Strikes (3rd Job)
+            case 20021166: // Special Merc Intro Stunning Strike Skill
             case 13101020: // Fairy Spiral
             // AB
             case 60011216: // AB Auto attack

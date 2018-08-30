@@ -1,4 +1,4 @@
-package net.swordie.ms.client.character.Scene;
+package net.swordie.ms.client.character.scene;
 
 import net.swordie.ms.enums.SceneType;
 

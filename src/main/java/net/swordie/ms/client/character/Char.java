@@ -3580,7 +3580,7 @@ public class Char {
 		List<Skill> list = new ArrayList<>();
 		list.add(skill);
 		addSkill(skill);
-		getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+		write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
 	}
 
 	public long getRuneCooldown() {
