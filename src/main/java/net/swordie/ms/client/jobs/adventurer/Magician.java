@@ -1042,7 +1042,7 @@ public class Magician extends Beginner {
         int attackSlv = attackSkill.getCurrentLevel();
         int biDuration = SkillData.getSkillInfoById(attackSkill.getSkillId()).getValue(dotTime, attackSlv);
         MobTemporaryStat mts = mob.getTemporaryStat();
-        mts.createAndAddBurnedInfo(chr, attackSkill, attackSlv);
+        mts.createAndAddBurnedInfo(chr, attackSkill);
         setFerventDrainStack(getFerventDrainStack() + 1);
         updateElementDrain();
         EventManager.addEvent(this::eventSetFerventDrain, biDuration, TimeUnit.SECONDS);

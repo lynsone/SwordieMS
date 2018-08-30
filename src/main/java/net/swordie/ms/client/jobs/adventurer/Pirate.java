@@ -1002,7 +1002,7 @@ public class Pirate extends Beginner {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 4) {  //DoT Debuff
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill);
                     } else if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 3) {  //Slow Debuff
                         int slowProc = si.getValue(w, slv);
                         if (Util.succeedProp(slowProc)) {

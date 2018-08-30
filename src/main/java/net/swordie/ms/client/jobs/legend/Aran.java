@@ -376,7 +376,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
                 }
                 break;
@@ -395,7 +395,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
                 }
                 break;
@@ -414,7 +414,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
                 }
                 break;

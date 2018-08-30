@@ -470,7 +470,7 @@ public class Zero extends Job {
         for (MobAttackInfo mai : ai.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                mob.getTemporaryStat().createAndAddBurnedInfo(chr, skill, 1);
+                mob.getTemporaryStat().createAndAddBurnedInfo(chr, skill);
             }
         }
     }

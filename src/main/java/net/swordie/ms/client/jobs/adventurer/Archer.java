@@ -398,7 +398,7 @@ public class Archer extends Beginner {
                     }
                     break;
                 case 2: // Poison
-                    mts.createAndAddBurnedInfo(chr, skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill);
                     quiverCartridge.decrementAmount();
                     break;
                 case 3: // Magic

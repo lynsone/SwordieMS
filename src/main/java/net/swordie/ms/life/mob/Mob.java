@@ -1426,7 +1426,7 @@ public class Mob extends Life {
 
     public boolean isInfestedByViralSlime() {
         MobTemporaryStat mts = getTemporaryStat();
-        return mts.hasBurnFromSkill(Magician.VIRAL_SLIME);
+        return mts.hasBurnFromSkillAndOwner(Magician.VIRAL_SLIME, 0);
     }
 
     public void spawnEliteVersion() {

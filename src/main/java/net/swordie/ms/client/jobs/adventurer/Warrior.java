@@ -737,7 +737,7 @@ public class Warrior extends Beginner {
                     o1.tOption = si.getValue(time, slv);
                     mts.addStatOptions(MobStat.AddDamParty, o1);
                     if (Util.succeedProp(si.getValue(prop, slv))) {
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill);
                     }
                 }
                 break;
@@ -761,7 +761,7 @@ public class Warrior extends Beginner {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill);
                     }
                 }
                 break;
@@ -791,7 +791,7 @@ public class Warrior extends Beginner {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill);
                     }
                 }
                 break;

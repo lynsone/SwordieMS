@@ -162,6 +162,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (scriptType == ScriptType.NONE) {
 			return;
 		}
+		if (isActive(scriptType)) {
+			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
+							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
+			return;
+		}
 		if (!isField()) {
 			chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));

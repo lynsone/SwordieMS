@@ -636,7 +636,7 @@ public class Thief extends Beginner {
                     }else{
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill);
                     }
                 }
                 break;
@@ -657,7 +657,7 @@ public class Thief extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
+                        mts.createAndAddBurnedInfo(chr, skill);
                 }
                 break;
             case FLASHBANG:
@@ -819,7 +819,7 @@ public class Thief extends Beginner {
                         return;
                     }
                     List<Mob> bossLifes = chr.getField().getBossMobsInRect(rect);
-                    if(mts.hasBurnFromSkill(getCurMarkLv())) {
+                    if(mts.hasBurnFromSkillAndOwner(getCurMarkLv(), chr.getId())) {
                         for (int i = 0; i < 6; i++) {
 
                             Mob life = Util.getRandomFromList(lifes);
@@ -864,7 +864,7 @@ public class Thief extends Beginner {
                 if (Util.succeedProp(markprop)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr, skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
             }
         }
@@ -893,9 +893,7 @@ public class Thief extends Beginner {
                 if(Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(!mts.hasBurnFromSkill(TOXIC_VENOM_NL)) {
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    }
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
             }
         } else if(chr.hasSkill(VENOM_NL)) {
@@ -907,9 +905,7 @@ public class Thief extends Beginner {
                 if (Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(!mts.hasBurnFromSkill(VENOM_NL)) {
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    }
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
             }
         }
@@ -924,9 +920,7 @@ public class Thief extends Beginner {
                 if(Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(!mts.hasBurnFromSkill(TOXIC_VENOM_SHAD)) {
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    }
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
             }
         } else if(chr.hasSkill(VENOM_SHAD)) {
@@ -938,9 +932,7 @@ public class Thief extends Beginner {
                 if (Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(!mts.hasBurnFromSkill(VENOM_SHAD)) {
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    }
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
             }
         }
@@ -955,9 +947,7 @@ public class Thief extends Beginner {
                 if(Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(!mts.hasBurnFromSkill(TOXIC_VENOM_DB)) {
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    }
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
             }
         } else if(chr.hasSkill(VENOM_DB)) {
@@ -969,9 +959,7 @@ public class Thief extends Beginner {
                 if (Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(!mts.hasBurnFromSkill(VENOM_DB)) {
-                        mts.createAndAddBurnedInfo(chr, skill, 1);
-                    }
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
             }
         }
@@ -984,7 +972,7 @@ public class Thief extends Beginner {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                 MobTemporaryStat mts = mob.getTemporaryStat();
-                mts.createAndAddBurnedInfo(chr, skill, 1);
+                mts.createAndAddBurnedInfo(chr, skill);
             }
         }
     }

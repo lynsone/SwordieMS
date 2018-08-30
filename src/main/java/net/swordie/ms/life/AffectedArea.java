@@ -186,8 +186,8 @@ public class AffectedArea extends Life {
             case Magician.POISON_MIST:
             case Archer.FLAME_SURGE:
             case Kanna.NIMBUS_CURSE:
-                if(!mts.hasBurnFromSkill(skillID)) {
-                    mts.createAndAddBurnedInfo(chr, skill, 1);
+                if(!mts.hasBurnFromSkillAndOwner(skillID, getCharID())) {
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
                 break;
             case Shade.SPIRIT_TRAP:

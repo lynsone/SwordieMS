@@ -255,7 +255,7 @@ public class Shade extends Job {
                     o1.rOption = skill.getSkillId();
                     o1.tOption = si.getValue(dotTime, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.DebuffHealing, o1);
-                    mts.createAndAddBurnedInfo(chr, skill, 1);
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
                 break;
             case SOUL_SPLITTER:     // TODO
@@ -380,7 +380,7 @@ public class Shade extends Job {
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
             MobTemporaryStat mts = mob.getTemporaryStat();
-            if(mts.getBurnBySkill(DEATH_MARK) != null) {
+            if(mts.hasBurnFromSkillAndOwner(DEATH_MARK, chr.getId())) {
                 long totaldmg = Arrays.stream(mai.damages).sum();
                 chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
             }

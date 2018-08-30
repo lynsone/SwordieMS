@@ -395,7 +395,7 @@ public class BlazeWizard extends Noblesse {
                     }
                     MobTemporaryStat mts = mob.getTemporaryStat();
 
-                    mts.createAndAddBurnedInfo(chr, skill, 1); //TODO Fix DoT Stacking
+                    mts.createAndAddBurnedInfo(chr, skill);
 
                     if(hashMap.get(mob) != null && !hashMap.get(mob).isDone()) {
                         hashMap.get(mob).cancel(true);
