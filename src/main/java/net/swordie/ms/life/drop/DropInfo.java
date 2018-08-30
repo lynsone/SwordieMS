@@ -1,5 +1,6 @@
 package net.swordie.ms.life.drop;
 
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.util.Util;
 
 /**
@@ -106,7 +107,7 @@ public class DropInfo {
      * @return Whether or not the drop is successful.
      */
     public boolean willDrop() {
-        return Util.succeedProp(getChance(), 1000);
+        return Util.succeedProp(getChance(), GameConstants.MAX_DROP_CHANCE);
     }
 
     public int getMoney() {

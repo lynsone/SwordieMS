@@ -116,7 +116,7 @@ public class BattleMage extends Citizen {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.BATTLE_MAGE_1.getJobId() && id <= JobConstants.JobEnum.BATTLE_MAGE_4.getJobId();
+        return JobConstants.isBattleMage(id);
     }
 
 

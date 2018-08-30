@@ -3,6 +3,7 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -1326,6 +1327,21 @@ public class Warrior extends Beginner {
                     ReviveType.NORMAL.getVal(), 0));
         }
         killCount = 30; //Resetting
+    }
+
+    @Override
+    public void handleLevelUp() {
+        super.handleLevelUp();
+        // hacks to bypass the quest glitch (accept but no packet)
+        short level = chr.getLevel();
+        QuestManager qm = chr.getQuestManager();
+        if (level == 30) {
+            qm.completeQuest(1410);
+        } else if (level == 60) {
+            qm.completeQuest(1430);
+        } else if (level == 100) {
+            qm.completeQuest(1450);
+        }
     }
 }
 

@@ -21,5 +21,4 @@ def action(response, answer):
         sm.completeQuestNoRewards(parentID)
         sm.sendNext("You are now a #b"+ job +"#k.")
         sm.jobAdvance(130) # Page
-        sm.completeQuestNoRewards(1430)
         sm.dispose()

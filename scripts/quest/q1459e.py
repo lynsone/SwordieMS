@@ -8,6 +8,7 @@ def init():
     sm.sendNext("You have returned.")
 
 def action(response, answer):
+    sm.setSpeakerID(2081500) # Samuel
     global status
     status += 1
 

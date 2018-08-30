@@ -2,6 +2,7 @@ package net.swordie.ms.client.jobs.adventurer;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -81,7 +82,7 @@ public class Beginner extends Job {
 
     @Override
     public void handleLevelUp() {
-        if (chr.getLevel() < 10) {
+        if (chr.getLevel() <= 10) {
             chr.addStat(Stat.mhp, 500);
             chr.addStat(Stat.mmp, 500);
             chr.addStat(Stat.str, 5);
@@ -95,5 +96,12 @@ public class Beginner extends Job {
         } else {
             super.handleLevelUp();
         }
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setPosMap(10000); // Maple Road : Maple Tree Hill
     }
 }

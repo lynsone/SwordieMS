@@ -3,6 +3,7 @@ package net.swordie.ms.client.jobs.adventurer;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -1114,5 +1115,20 @@ public class Pirate extends Beginner {
             skill = chr.getSkill(PIRATE_REVENGE_BUCC);
         }
         return skill;
+    }
+
+    @Override
+    public void handleLevelUp() {
+        super.handleLevelUp();
+        // hacks to bypass the quest glitch (accept but no packet)
+        short level = chr.getLevel();
+        QuestManager qm = chr.getQuestManager();
+        if (level == 30) {
+            qm.completeQuest(1424);
+        } else if (level == 60) {
+            qm.completeQuest(1444);
+        } else if (level == 100) {
+            qm.completeQuest(1458);
+        }
     }
 }

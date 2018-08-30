@@ -96,7 +96,7 @@ public class Kinesis extends Job {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return JobConstants.isKenesis(id);
+        return JobConstants.isKinesis(id);
     }
 
     public int getPp() {

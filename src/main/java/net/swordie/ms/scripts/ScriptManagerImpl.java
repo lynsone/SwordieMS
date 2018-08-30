@@ -501,7 +501,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void jobAdvance(short jobID) {
 		setJob(jobID);
 		addAP(5); //Standard added AP upon Job Advancing
-		addSP(3); //Standard added SP upon Job Advancing
+		addSP(5); //Standard added SP upon Job Advancing
 	}
 
 	@Override
@@ -852,12 +852,8 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void setSpeakerID(int templateID) {
-		getNpcScriptInfo().resetParam();
-	getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
-}
-
-
-
+		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
+	}
 
 	// Mob methods
 	@Override

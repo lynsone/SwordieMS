@@ -1,32 +1,32 @@
-#   [Job Advancement] The 5 Paths
+# 1400 - [Job Advancement] The 5 Paths
 
 selections = [
     [# Warrior
-        "mighty Warriors",  # String for in text
+        "Mighty Warrior",  # String for in text
         102000003,          # hideout mapID
         1401                # Quest ID
     ],
 
     [# Magician
-        "wise Magicians",   # String for in text
+        "Wise Magician",   # String for in text
         101000003,          # hideout mapID
         1402                # Quest ID
     ],
 
     [# Archers
-        "accurate Bowmen",  # String for in text
+        "Accurate Bowman",  # String for in text
         100000201,          # hideout mapID
         1403                # Quest ID
     ],
 
     [# Thieves
-        "stealthy Thieves", # String for in text
+        "Stealthy Thieves", # String for in text
         103000003,          # hideout mapID
         1404                # Quest ID
     ],
 
     [# Pirates
-        "flashy Pirates",   # String for in text
+        "Flashy Pirates",   # String for in text
         120000101,          # hideout mapID
         1405                # Quest ID
     ]
@@ -52,7 +52,7 @@ def action(response, answer):
 
     if status == 1:
         status0Selection = answer
-        sm.sendAskYesNo("So you would like to become just like all the "+ selections[status0Selection][0] +" in Maple world?")
+        sm.sendAskYesNo("So you would like to become just like all the "+ selections[status0Selection][0] +"s in the Maple world?")
 
     if status == 2:
         if response == 1:

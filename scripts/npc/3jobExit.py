@@ -5,5 +5,5 @@ def init():
 
 def action(response, answer):
     if response == 1:
-        sm.warpInstanceOut(211040401) # Hidden Street : Holy Ground at the Snowfield
+        sm.warpInstanceOut(211000001) # El Nath : Chief's Residence
     sm.dispose()

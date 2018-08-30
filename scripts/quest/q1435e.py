@@ -21,5 +21,4 @@ def action(response, answer):
         sm.completeQuestNoRewards(parentID)
         sm.sendSayOkay("You are now a #b"+ job +"#k.")
         sm.jobAdvance(211) # Mage FP
-        sm.startQuestNoCheck(1452) # Mage 4th Job Quest
         sm.dispose()

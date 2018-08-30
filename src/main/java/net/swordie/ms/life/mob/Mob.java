@@ -276,7 +276,7 @@ public class Mob extends Life {
             copy.addQuest(i);
         }
         if (copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
-            copy.getDrops().add(new DropInfo(0, 1000, 0,
+            copy.getDrops().add(new DropInfo(0, GameConstants.MAX_DROP_CHANCE, 0,
                     GameConstants.MIN_MONEY_MULT * getForcedMobStat().getLevel(),
                     GameConstants.MAX_MONEY_MULT * getForcedMobStat().getLevel()
                     ));
@@ -1202,7 +1202,14 @@ public class Mob extends Life {
         if (mostDamageChar != null) {
             ownerID = mostDamageChar.getId();
         }
-        getField().drop(getDrops(), getField().getFootholdById(getFh()), getPosition(), ownerID);
+        int fhID = getFh();
+        if (fhID == 0) {
+            Foothold fhBelow = getField().findFootHoldBelow(getPosition());
+            if (fhBelow != null) {
+                fhID = fhBelow.getId();
+            }
+        }
+        getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID);
     }
 
     public Map<Char, Long> getDamageDone() {

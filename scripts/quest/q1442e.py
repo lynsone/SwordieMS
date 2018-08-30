@@ -21,5 +21,4 @@ def action(response, answer):
         sm.completeQuestNoRewards(parentID)
         sm.sendSayOkay("You are now a #b"+ job +"#k.")
         sm.jobAdvance(411) # Hermit
-        sm.startQuestNoCheck(1456) # Thief 4th Job Quest
         sm.dispose()

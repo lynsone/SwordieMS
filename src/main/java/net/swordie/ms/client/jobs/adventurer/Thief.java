@@ -4,6 +4,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -1123,5 +1124,20 @@ public class Thief extends Beginner {
             giveShadowMeld();
         }
         super.handleHit(c, inPacket, hitInfo);
+    }
+
+    @Override
+    public void handleLevelUp() {
+        super.handleLevelUp();
+        // hacks to bypass the quest glitch (accept but no packet)
+        short level = chr.getLevel();
+        QuestManager qm = chr.getQuestManager();
+        if (level == 30) {
+            qm.completeQuest(1421);
+        } else if (level == 60) {
+            qm.completeQuest(1441);
+        } else if (level == 100) {
+            qm.completeQuest(1456);
+        }
     }
 }

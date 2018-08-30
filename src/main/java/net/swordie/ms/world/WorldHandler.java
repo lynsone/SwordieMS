@@ -638,7 +638,7 @@ public class WorldHandler {
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
-        if (chr.checkAndSetSkillCooltime(attackInfo.skillId)) {
+        if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK || chr.checkAndSetSkillCooltime(attackInfo.skillId)) {
             int skillID = attackInfo.skillId;
             byte slv = attackInfo.slv;
             chr.chatMessage(YELLOW, "SkillID: " + skillID);

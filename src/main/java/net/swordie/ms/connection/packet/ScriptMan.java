@@ -19,11 +19,10 @@ public class ScriptMan {
         OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_MESSAGE);
 
         outPacket.encodeByte(nsi.getSpeakerType());
-        outPacket.encodeInt(sm.getParentIDByScriptType(ScriptType.NPC));
         int overrideTemplate = nsi.getOverrideSpeakerTemplateID();
+        outPacket.encodeInt(overrideTemplate != 0 ? overrideTemplate : sm.getParentIDByScriptType(ScriptType.NPC));
         outPacket.encodeByte(overrideTemplate > 0);
         if(overrideTemplate > 0) {
-            nsi.setParam((byte) (nsi.getParam() | 4));
             outPacket.encodeInt(overrideTemplate);
         }
         outPacket.encodeByte(nmt.getVal());

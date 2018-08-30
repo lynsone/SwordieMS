@@ -38,7 +38,7 @@ public class MobGen extends Life {
         mob.setHomePosition(pos.deepCopy());
         field.spawnLife(mob, null);
         mob.broadcastSpawnPacket(null);
-        setNextPossibleSpawnTime(System.currentTimeMillis() + getMob().getMobTime());
+        setNextPossibleSpawnTime(System.currentTimeMillis() + (getMob().getMobTime() * 1000));
         setHasSpawned(true);
     }
 

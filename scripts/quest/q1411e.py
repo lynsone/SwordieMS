@@ -1,4 +1,4 @@
-#   [Job Adv] (Lv.30)   Way of the Fighter
+# 1411 - [Job Adv] (Lv.30) Way of the Fighter
 
 darkMarble = 4031013
 job = "Fighter"
@@ -21,5 +21,4 @@ def action(response, answer):
         sm.completeQuestNoRewards(parentID)
         sm.sendNext("You are now a #b"+ job +"#k.")
         sm.jobAdvance(110) # Fighter
-        sm.completeQuestNoRewards(1430)
         sm.dispose()

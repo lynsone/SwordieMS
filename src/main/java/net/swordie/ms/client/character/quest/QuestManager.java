@@ -16,6 +16,7 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.QuestData;
 import net.swordie.ms.loaders.QuestInfo;
 import net.swordie.ms.util.FileTime;
+import net.swordie.ms.world.field.Field;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -140,6 +141,11 @@ public class QuestManager {
                         }
                     }
                 }
+            }
+            QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
+            if (qi.getTransferField() != 0) {
+                Field field = chr.getOrCreateFieldByCurrentInstanceType(qi.getTransferField());
+                chr.warp(field);
             }
         }
     }

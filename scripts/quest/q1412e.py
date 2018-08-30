@@ -1,4 +1,4 @@
-#   [Job Adv] (Lv.30)   Way of the Page
+# 1412 - [Job Adv] (Lv.30)   Way of the Page
 
 darkMarble = 4031013
 job = "Page"
@@ -21,5 +21,4 @@ def action(response, answer):
         sm.completeQuestNoRewards(parentID)
         sm.sendNext("You are now a #b"+ job +"#k.")
         sm.jobAdvance(120) # Page
-        sm.completeQuestNoRewards(1430)
         sm.dispose()

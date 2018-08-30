@@ -21,5 +21,4 @@ def action(response, answer):
         sm.completeQuestNoRewards(parentID)
         sm.sendNext("You are now a #b"+ job +"#k.")
         sm.jobAdvance(420) # Bandit
-        sm.completeQuestNoRewards(1441) # Chiefs of El Nath (Thief)
         sm.dispose()

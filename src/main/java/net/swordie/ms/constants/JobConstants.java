@@ -1,8 +1,11 @@
 package net.swordie.ms.constants;
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.enums.WeaponType;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -198,6 +201,14 @@ public class JobConstants {
         return (byte) (prefix == 1 ? 2
                         : prefix == 2 ? 1
                         : 3);
+    }
+
+    public static boolean isMechanic(short id) {
+        return id >= JobConstants.JobEnum.MECHANIC_1.getJobId() && id <= JobConstants.JobEnum.MECHANIC_4.getJobId();
+    }
+
+    public static boolean isBattleMage(short id) {
+        return id >= JobConstants.JobEnum.BATTLE_MAGE_1.getJobId() && id <= JobConstants.JobEnum.BATTLE_MAGE_4.getJobId();
     }
 
     public enum JobEnum {
@@ -425,10 +436,276 @@ public class JobConstants {
         public static JobEnum getJobById(short id) {
             return Arrays.stream(values()).filter(j -> j.getJobId() == id).findFirst().orElse(null);
         }
+
+        public Set<WeaponType> getUsingWeapons() {
+            Set<WeaponType> wts = new HashSet<>();
+            switch (this) {
+                case BEGINNER:
+                case WARRIOR:
+                case NOBLESSE:
+                case LEGEND:
+                case CITIZEN:
+                    wts.add(WeaponType.OneHandedSword);
+                    wts.add(WeaponType.OneHandedAxe);
+                    wts.add(WeaponType.OneHandedMace);
+                    wts.add(WeaponType.TwoHandedSword);
+                    wts.add(WeaponType.TwoHandedAxe);
+                    wts.add(WeaponType.TwoHandedMace);
+                    break;
+                case FIGHTER:
+                case CRUSADER:
+                case HERO:
+                    wts.add(WeaponType.OneHandedSword);
+                    wts.add(WeaponType.OneHandedAxe);
+                    wts.add(WeaponType.TwoHandedSword);
+                    wts.add(WeaponType.TwoHandedAxe);
+                    break;
+                case PAGE:
+                case WHITEKNIGHT:
+                case PALADIN:
+                    wts.add(WeaponType.OneHandedSword);
+                    wts.add(WeaponType.OneHandedMace);
+                    wts.add(WeaponType.TwoHandedSword);
+                    wts.add(WeaponType.TwoHandedMace);
+                    break;
+                case SPEARMAN:
+                case DRAGONKNIGHT:
+                case DARKKNIGHT:
+                    wts.add(WeaponType.Spear);
+                    wts.add(WeaponType.Polearm);
+                    break;
+                case MAGICIAN:
+                case FP_WIZARD:
+                case FP_MAGE:
+                case FP_ARCHMAGE:
+                case IL_WIZARD:
+                case IL_MAGE:
+                case IL_ARCHMAGE:
+                case CLERIC:
+                case PRIEST:
+                case BISHOP:
+                case EVAN_NOOB:
+                case EVAN1:
+                case EVAN2:
+                case EVAN3:
+                case EVAN4:
+                case BLAZEWIZARD1:
+                case BLAZEWIZARD2:
+                case BLAZEWIZARD3:
+                case BLAZEWIZARD4:
+                    wts.add(WeaponType.Wand);
+                    wts.add(WeaponType.Staff);
+                    break;
+                case BOWMAN:
+                case HUNTER:
+                case RANGER:
+                case BOWMASTER:
+                case WINDARCHER1:
+                case WINDARCHER2:
+                case WINDARCHER3:
+                case WINDARCHER4:
+                    wts.add(WeaponType.Bow);
+                    break;
+                case CROSSBOWMAN:
+                case SNIPER:
+                case MARKSMAN:
+                case WILD_HUNTER_1:
+                case WILD_HUNTER_2:
+                case WILD_HUNTER_3:
+                case WILD_HUNTER_4:
+                    wts.add(WeaponType.Crossbow);
+                    break;
+                case THIEF:
+                    wts.add(WeaponType.Dagger);
+                    wts.add(WeaponType.Claw);
+                    break;
+                case ASSASSIN:
+                case HERMIT:
+                case NIGHTLORD:
+                case NIGHTWALKER1:
+                case NIGHTWALKER2:
+                case NIGHTWALKER3:
+                case NIGHTWALKER4:
+                    wts.add(WeaponType.Claw);
+                    break;
+                case BANDIT:
+                case CHIEFBANDIT:
+                case SHADOWER:
+                case BLADE_RECRUIT:
+                case BLADE_ACOLYTE:
+                case BLADE_SPECIALIST:
+                case BLADE_LORD:
+                case BLADE_MASTER:
+                    wts.add(WeaponType.Dagger);
+                    break;
+                case PIRATE:
+                    wts.add(WeaponType.Knuckle);
+                    wts.add(WeaponType.Gun);
+                    break;
+                case BRAWLER:
+                case MARAUDER:
+                case BUCCANEER:
+                case SHADE:
+                case SHADE1:
+                case SHADE2:
+                case SHADE3:
+                case SHADE4:
+                case THUNDERBREAKER1:
+                case THUNDERBREAKER2:
+                case THUNDERBREAKER3:
+                case THUNDERBREAKER4:
+                    wts.add(WeaponType.Knuckle);
+                    break;
+                case GUNSLINGER:
+                case OUTLAW:
+                case CORSAIR:
+                case JETT1:
+                case JETT2:
+                case JETT3:
+                case JETT4:
+                case MECHANIC_1:
+                case MECHANIC_2:
+                case MECHANIC_3:
+                case MECHANIC_4:
+                    wts.add(WeaponType.Gun);
+                    break;
+                case PIRATE_CANNONNEER:
+                case CANNONEER:
+                case CANNON_BLASTER:
+                case CANNON_MASTER:
+                    wts.add(WeaponType.HandCannon);
+                    break;
+                case DAWNWARRIOR1:
+                case DAWNWARRIOR2:
+                case DAWNWARRIOR3:
+                case DAWNWARRIOR4:
+                case KAISER:
+                case KAISER1:
+                case KAISER2:
+                case KAISER3:
+                case KAISER4:
+                    wts.add(WeaponType.TwoHandedSword);
+                    break;
+                case ARAN1:
+                case ARAN2:
+                case ARAN3:
+                case ARAN4:
+                    wts.add(WeaponType.Polearm);
+                    break;
+                case MERCEDES:
+                case MERCEDES1:
+                case MERCEDES2:
+                case MERCEDES3:
+                case MERCEDES4:
+                    wts.add(WeaponType.DualBowgun);
+                    break;
+                case PHANTOM:
+                case PHANTOM1:
+                case PHANTOM2:
+                case PHANTOM3:
+                case PHANTOM4:
+                    wts.add(WeaponType.Cane);
+                    break;
+                case LUMINOUS:
+                case LUMINOUS1:
+                case LUMINOUS2:
+                case LUMINOUS3:
+                case LUMINOUS4:
+                    wts.add(WeaponType.ShiningRod);
+                    break;
+                case DEMON_SLAYER:
+                    wts.add(WeaponType.OneHandedAxe);
+                    wts.add(WeaponType.OneHandedMace);
+                    wts.add(WeaponType.Desperado);
+                    break;
+                case DEMON_SLAYER1:
+                case DEMON_SLAYER2:
+                case DEMON_SLAYER3:
+                case DEMON_SLAYER4:
+                    wts.add(WeaponType.OneHandedAxe);
+                    wts.add(WeaponType.OneHandedMace);
+                    break;
+                case DEMON_AVENGER1:
+                case DEMON_AVENGER2:
+                case DEMON_AVENGER3:
+                case DEMON_AVENGER4:
+                    wts.add(WeaponType.Desperado);
+                    break;
+                case BATTLE_MAGE_1:
+                case BATTLE_MAGE_2:
+                case BATTLE_MAGE_3:
+                case BATTLE_MAGE_4:
+                    wts.add(WeaponType.Staff);
+                    break;
+                case BLASTER_1:
+                case BLASTER_2:
+                case BLASTER_3:
+                case BLASTER_4:
+                    wts.add(WeaponType.ArmCannon);
+                    break;
+                case XENON:
+                case XENON1:
+                case XENON2:
+                case XENON3:
+                case XENON4:
+                    wts.add(WeaponType.ChainSword);
+                    break;
+                case HAYATO:
+                case HAYATO1:
+                case HAYATO2:
+                case HAYATO3:
+                case HAYATO4:
+                    wts.add(WeaponType.Katana);
+                    break;
+                case KANNA:
+                case KANNA1:
+                case KANNA2:
+                case KANNA3:
+                case KANNA4:
+                    wts.add(WeaponType.Fan);
+                    break;
+                case NAMELESS_WARDEN:
+                case MIHILE1:
+                case MIHILE2:
+                case MIHILE3:
+                case MIHILE4:
+                    wts.add(WeaponType.OneHandedSword);
+                    break;
+                case ANGELIC_BUSTER:
+                case ANGELIC_BUSTER1:
+                case ANGELIC_BUSTER2:
+                case ANGELIC_BUSTER3:
+                case ANGELIC_BUSTER4:
+                    wts.add(WeaponType.SoulShooter);
+                    break;
+                case ZERO:
+                case ZERO1:
+                case ZERO2:
+                case ZERO3:
+                case ZERO4:
+                    wts.add(WeaponType.LongSword);
+                    wts.add(WeaponType.BigSword);
+                    break;
+                case BEAST_TAMER:
+                case BEAST_TAMER_1:
+                case BEAST_TAMER_2:
+                case BEAST_TAMER_3:
+                case BEAST_TAMER_4:
+                    wts.add(WeaponType.Scepter);
+                    break;
+                case KINESIS_0:
+                case KINESIS_1:
+                case KINESIS_2:
+                case KINESIS_3:
+                case KINESIS_4:
+                    wts.add(WeaponType.PsyLimiter);
+                    break;
+            }
+            return wts;
+        }
     }
 
     public enum LoginJob {
-
         RESISTANCE(0, JobFlag.ENABLED, JobEnum.CITIZEN),
         EXPLORER(1, JobFlag.ENABLED, JobEnum.BEGINNER),
         CYGNUS(2, JobFlag.ENABLED, JobEnum.NOBLESSE),
@@ -603,7 +880,7 @@ public class JobConstants {
         return jobId / 100 == 21 || jobId == 2000;
     }
 
-    public static boolean isKenesis(short jobId) {
+    public static boolean isKinesis(short jobId) {
         return jobId == 14000 || jobId == 14200 || jobId == 14210 || jobId == 14211 || jobId == 14212;
     }
 
@@ -701,8 +978,29 @@ public class JobConstants {
         return result;
     }
 
-    public boolean isZeroJob(int jobId) {
-        return false;
+    public boolean isWarriorEquipJob(short jobID) {
+        return isAdventurerWarrior(jobID) || isPinkBean(jobID) || isDawnWarrior(jobID) || isMihile(jobID) ||
+                isAran(jobID) || isKaiser(jobID) || isBlaster(jobID) || isDemon(jobID) || isHayato(jobID) ||
+                isZero(jobID);
+
+    }
+
+    public boolean isMageEquipJob(short jobID) {
+        return isBeastTamer(jobID) || isKinesis(jobID) || isAdventurerMage(jobID) || isBlazeWizard(jobID) ||
+                isEvan(jobID) || isLuminous(jobID) || isBattleMage(jobID) || isKanna(jobID);
+    }
+
+    public boolean isArcherEquipJob(short jobID) {
+        return isAdventurerArcher(jobID) || isWindArcher(jobID) || isMercedes(jobID) || isWildHunter(jobID);
+    }
+
+    public boolean isThiefEquipJob(short jobID) {
+        return isAdventurerThief(jobID) || isNightWalker(jobID) || isPhantom(jobID) || isXenon(jobID);
+    }
+
+    public boolean isPirateEquipJob(short jobID) {
+        return isAdventurerPirate(jobID) || isThunderBreaker(jobID) || isShade(jobID) || isAngelicBuster(jobID) ||
+                isXenon(jobID) || isMechanic(jobID) || isJett(jobID);
     }
 
 }

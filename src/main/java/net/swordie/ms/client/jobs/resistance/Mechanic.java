@@ -124,7 +124,7 @@ public class Mechanic extends Citizen {
 
     @Override
     public boolean isHandlerOfJob(short id) {
-        return id >= JobConstants.JobEnum.MECHANIC_1.getJobId() && id <= JobConstants.JobEnum.MECHANIC_4.getJobId();
+        return JobConstants.isMechanic(id);
     }
 
 

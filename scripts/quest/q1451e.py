@@ -5,6 +5,7 @@ heroicStar = 4031344
 status = -1
 
 def init():
+    sm.setSpeakerID(2081100) # Gritto
     sm.sendNext("You have returned.")
 
 def action(response, answer):

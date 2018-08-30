@@ -39,6 +39,7 @@ public class GameConstants {
     public static final int DROP_REMOVE_OWNERSHIP_TIME = 30; // 30 sec
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
+    public static final int MAX_DROP_CHANCE = 10000;
 
     // Combo Kill
     public static final int COMBO_KILL_RESET_TIMER = 5; // 5 sec
@@ -328,7 +329,7 @@ public class GameConstants {
             return BaseStat.dex;
         } else if (JobConstants.isBeastTamer(job) || JobConstants.isBlazeWizard(job) || JobConstants.isCleric(job)
                 || JobConstants.isEvan(job) || JobConstants.isIceLightning(job) || JobConstants.isFirePoison(job)
-                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isKenesis(job)
+                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isKinesis(job)
                 || JobConstants.isLuminous(job)) {
             return BaseStat.inte;
         } else if (JobConstants.isAdventurerThief(job) || JobConstants.isNightLord(job) || JobConstants.isShadower(job)
@@ -356,7 +357,7 @@ public class GameConstants {
         if (JobConstants.isBeastTamer(job) || JobConstants.isBlazeWizard(job) || JobConstants.isCleric(job)
                 || JobConstants.isEvan(job) || JobConstants.isIceLightning(job) || JobConstants.isFirePoison(job)
                 || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isBlazeWizard(job)
-                || JobConstants.isKenesis(job) || JobConstants.isLuminous(job)) {
+                || JobConstants.isKinesis(job) || JobConstants.isLuminous(job)) {
             return ItemJob.MAGICIAN;
         }
         if (JobConstants.isAdventurerThief(job) || JobConstants.isNightLord(job) || JobConstants.isShadower(job)
