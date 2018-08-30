@@ -12,6 +12,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.LeaveType;
@@ -87,6 +88,14 @@ public class TemporaryStatManager {
         option.setTimeToMillis();
         if(cts == CombatOrders) {
             chr.setCombatOrders(option.nOption);
+        }
+        if (cts == IndieMaxDamageOver || cts == IndieMaxDamageOverR) {
+            long base = getTotalNOptionOfStat(IndieMaxDamageOver) + (cts == IndieMaxDamageOver ? option.nValue : 0);
+            long rate = getTotalNOptionOfStat(IndieMaxDamageOverR) + (cts == IndieMaxDamageOverR ? option.nValue : 0);
+            if ((GameConstants.DAMAGE_CAP + base) * rate > Integer.MAX_VALUE) {
+                chr.chatMessage("Not adding max damage over, as it would bypass the hard cap of damage.");
+                return;
+            }
         }
         if(!indie) {
             List<Option> optList = new ArrayList<>();
@@ -919,5 +928,13 @@ public class TemporaryStatManager {
 
     public void removeBaseStat(BaseStat bs, int value) {
         addBaseStat(bs, -value);
+    }
+
+    public long getTotalNOptionOfStat(CharacterTemporaryStat cts) {
+        if (cts.isIndie()) {
+            return getOptions(cts).stream().mapToLong(o -> o.nValue).sum();
+        } else {
+            return getOptions(cts).stream().mapToLong(o -> o.nOption).sum();
+        }
     }
 }

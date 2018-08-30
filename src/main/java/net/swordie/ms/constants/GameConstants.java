@@ -22,6 +22,7 @@ public class GameConstants {
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
     public static final int MAX_HP_MP = 500000;
+    public static final long DAMAGE_CAP = 50_000_000;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
