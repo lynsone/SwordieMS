@@ -89,7 +89,7 @@ else:
 		915020000 : [915020001, 2],
 		915020200 : [915020201, 2],
 		240010102 : [915020200, 1],
-		200090510 : [270000100, 2],# Dragon Flight 2nd Map : Temple of Time
+		200090510 : [270000100, 2],# Dragon Flight 2nd Map  ->  Temple of Time
 		310050100 : [931000200, 1],
 		310060221 : [931000300, 0],
 		222020000 : [922030400, 0],
@@ -100,6 +100,7 @@ else:
 		270010400 : [270010500, 0],
 		931000001 : [931000010, 0],
 		252010300 : [252020000, 0],
+		910150001 : [910150004, 0], # FFF : Elluel  ->  FFF : Royal Chamber		(FFF = Frozen Fairy Forest)
 	}
 
 	def init():
@@ -162,6 +163,10 @@ else:
 				sm.chat("You have not completed the appropriate quest to enter here.")
 				sm.dispose()
 
+		elif currentMap == 910150001: # Frozen Fairy Forest : Elluel
+			if not sm.hasQuest(24005): # Cursed Slumber
+				warp = False
+				sm.dispose()
 
 		# Boss Portal
 		elif currentMap == 223030200:

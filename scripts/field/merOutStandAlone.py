@@ -18,7 +18,8 @@ coordinates = [
 ]
 
 def init():
+    sm.giveSkill(20021166, 1) # Give attacking skill
     if sm.hasQuest(24001): # Danika's Request (Mercedes Intro Quest)
         for coordinate in coordinates:
-            sm.spawnMob(SLIME, coordinate[0], coordinate[1], False) # Spawn 10 slimes across the field
+            sm.spawnMob(SLIME, coordinate[0], coordinate[1], False, 5) # Spawn 10 slimes across the field
     sm.dispose()
