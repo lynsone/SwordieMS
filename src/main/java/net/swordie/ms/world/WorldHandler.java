@@ -802,13 +802,14 @@ public class WorldHandler {
     public static void handleUserPortalScriptRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte portalID = inPacket.decodeByte();
-        String script = inPacket.decodeString();
-        Portal portal = chr.getField().getPortalByID(portalID);
+        String portalName = inPacket.decodeString();
+        Portal portal = chr.getField().getPortalByName(portalName);
+        String script = portalName;
         if(portal != null) {
             portalID = (byte) portal.getId();
+            script = portal.getScript();
         }
         chr.getScriptManager().startScript(portalID, script, ScriptType.PORTAL);
-
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
@@ -5462,5 +5463,24 @@ public class WorldHandler {
         inPacket.decodeShort();
         Position forcedPos = inPacket.decodePositionInt();
 
+    }
+
+    public static void handleUserRegisterPetAutoBuffRequest(Char chr, InPacket inPacket) {
+        int petIdx = inPacket.decodeInt();
+        int skillID = inPacket.decodeInt();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        Skill skill = chr.getSkill(skillID);
+        Pet pet = chr.getPetByIdx(petIdx);
+        int coolTime =  si == null ? 0 : si.getValue(SkillStat.cooltime, 1);
+        if (skillID != 0 && (si == null || pet == null || !pet.getItem().hasPetSkill(PetSkill.AUTO_BUFF) ||
+                skill == null || skill.getCurrentLevel() == 0 || coolTime > 0)) {
+            chr.chatMessage("Something went wrong when adding the pet skill.");
+            log.error(String.format("Character %d tried to illegally add a pet skill (skillID = %d, skill = %s, " +
+                    "pet = %s, coolTime = %d)", chr.getId(), skillID, skill, pet, coolTime));
+            chr.dispose();
+            return;
+        }
+        pet.getItem().setAutoBuffSkill(skillID);
+        pet.getItem().updateToChar(chr);
     }
 }

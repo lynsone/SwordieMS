@@ -344,4 +344,13 @@ public class Util {
     public static boolean isStringBCrypt(String password) {
         return regexPattern.matcher(password).matches();
     }
+
+    /**
+     * Returns the long as an int, or Integer.MAX_VALUE if it exceeds the maximum int value.
+     * @param num the number that should be capped at Integer.MAX_VALUE
+     * @return <code>num</code> if the number is small enough, else Integer.MAX_VALUE
+     */
+    public static int maxInt(long num) {
+        return (int) Math.min(Integer.MAX_VALUE, num);
+    }
 }

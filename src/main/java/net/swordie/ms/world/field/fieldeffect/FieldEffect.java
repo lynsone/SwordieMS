@@ -2,6 +2,7 @@ package net.swordie.ms.world.field.fieldeffect;
 
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.util.Util;
 
 /**
  * Created on 3/26/2018.
@@ -89,7 +90,7 @@ public class FieldEffect {
         fieldEffect.setFieldEffectType(FieldEffectType.MobHPTag);
 
         fieldEffect.setArg1(mob.getTemplateId());
-        int maxHP = (int) Math.min(Integer.MAX_VALUE, mob.getMaxHp());
+        int maxHP = Util.maxInt(mob.getMaxHp());
         double ratio = mob.getMaxHp() / (double) Integer.MAX_VALUE;
         fieldEffect.setArg2(ratio > 1 ? (int) (mob.getHp() / ratio) : (int) mob.getHp());
         fieldEffect.setArg3(maxHP);

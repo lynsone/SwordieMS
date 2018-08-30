@@ -106,6 +106,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_PET_FOOD_ITEM_USE_REQUEST:
                 WorldHandler.handleUserPetFoodItemUseRequest(c, inPacket);
                 break;
+            case USER_REGISTER_PET_AUTO_BUFF_REQUEST:
+                WorldHandler.handleUserRegisterPetAutoBuffRequest(chr, inPacket);
+                break;
             case USER_ITEM_SKILL_SOCKET_UPGRADE_ITEM_USE_REQUEST:
                 WorldHandler.handleUserItemSkillSocketUpdateItemUseRequest(c, inPacket);
                 break;

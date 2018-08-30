@@ -3,6 +3,7 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.mob.skill.BurnedInfo;
+import net.swordie.ms.util.Util;
 
 /**
  * Created on 2/10/2018.
@@ -19,7 +20,7 @@ public class BattleRecordMan {
     public static OutPacket dotDamageInfo(BurnedInfo burnedInfo, int count) {
         OutPacket outPacket = new OutPacket(OutHeader.DOT_DAMAGE_INFO.getValue());
 
-        outPacket.encodeInt(burnedInfo.getDamage());
+        outPacket.encodeInt(Util.maxInt(burnedInfo.getDamage()));
         outPacket.encodeInt(count);
 
         outPacket.encodeByte(burnedInfo.getDotTickDamR() > 0);

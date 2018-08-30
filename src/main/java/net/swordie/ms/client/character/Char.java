@@ -58,6 +58,7 @@ import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.Field;
@@ -2283,7 +2284,7 @@ public class Char {
 	public void addExp(long amount) {
 		ExpIncreaseInfo eii = new ExpIncreaseInfo();
 		eii.setLastHit(true);
-		eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, amount));
+		eii.setIncEXP(Util.maxInt(amount));
 		addExp(amount, eii);
 	}
 

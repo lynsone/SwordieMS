@@ -51,9 +51,9 @@ public class PartyDamageInfo {
             exp *= expRate;
             ExpIncreaseInfo eii = new ExpIncreaseInfo();
             if (!damageDone.containsKey(chr)) {
-                eii.setIncEXP((int) Math.min(Integer.MAX_VALUE, exp));
+                eii.setIncEXP(Util.maxInt(exp));
             } else {
-                eii.setPartyBonusExp((int) Math.min(Integer.MAX_VALUE, exp));
+                eii.setPartyBonusExp(Util.maxInt(exp));
             }
             if (exp > 0) {
                 chr.addExp(exp, eii);

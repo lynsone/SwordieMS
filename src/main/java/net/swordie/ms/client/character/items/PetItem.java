@@ -49,14 +49,14 @@ public class PetItem extends Item {
         outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getTameness() + 1);
         outPacket.encodeByte(getRepleteness());
-        outPacket.encodeFT(LocalDateTime.now().plusDays(30));
+        outPacket.encodeFT(getDateDead()); // 0 = no date dead
         outPacket.encodeShort(getPetAttribute());
         outPacket.encodeShort(getPetSkill());
         outPacket.encodeInt(getRemainLife());
         outPacket.encodeShort(getAttribute());
         outPacket.encodeByte(getActiveState());
-        outPacket.encodeInt(Thief.HASTE | getAutoBuffSkill());
-        outPacket.encodeInt(-1);
+        outPacket.encodeInt(getAutoBuffSkill());
+        outPacket.encodeInt(getPetHue());
         outPacket.encodeShort(getGiantRate());
     }
 
@@ -211,7 +211,7 @@ public class PetItem extends Item {
         }
     }
 
-    private boolean hasPetSkill(PetSkill petSkill) {
+    public boolean hasPetSkill(PetSkill petSkill) {
         return (getPetSkill() & petSkill.getVal()) != 0;
     }
 }

@@ -441,6 +441,7 @@ public class AdminCommands {
                 chr.chatMessage(GM_BLUE_CHAT, "Portal Name: " + portal.getName());
                 chr.chatMessage(GM_BLUE_CHAT, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
                 chr.chatMessage(GM_BLUE_CHAT, "Portal target map: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getTargetMapId()));
+                chr.chatMessage(GM_BLUE_CHAT, "Portal script: " + portal.getScript());
                 chr.chatMessage(GM_BLUE_CHAT, ".");
             }
             chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");
