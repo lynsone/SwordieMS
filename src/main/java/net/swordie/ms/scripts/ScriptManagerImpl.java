@@ -434,6 +434,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	// Start of param methods ------------------------------------------------------------------------------------------
 
 	public void setPlayerAsSpeaker() {
+		getNpcScriptInfo().resetParam();
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
 	}
 
@@ -859,6 +860,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void setSpeakerID(int templateID) {
+		getNpcScriptInfo().resetParam();
 		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
 	}
 
