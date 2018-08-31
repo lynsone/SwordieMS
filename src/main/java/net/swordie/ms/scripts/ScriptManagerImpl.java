@@ -4,7 +4,6 @@ import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterPark;
-import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
@@ -12,6 +11,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
@@ -1462,6 +1462,51 @@ public class ScriptManagerImpl implements ScriptManager {
 		tsm.sendSetStatPacket();
 	}
 
+
+
+	// InGameDirectionEvent methods ------------------------------------------------------------------------------------
+
+	@Override
+	public void moveCamera(boolean back, int speed, Position position) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, position)));
+	}
+
+	public void moveCamera(int speed, Position position) {
+		moveCamera(false, speed, position);
+	}
+
+	public void moveCameraBack(int speed) {
+		moveCamera(true, speed, new Position());
+	}
+
+	@Override
+	public void zoomCamera(int inZoomDuration, int scale, Position position) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, position)));
+	}
+
+	@Override
+	public void resetCamera() {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraOnCharacter(0))); // 0 resets the Camera
+	}
+
+	@Override
+	public void forcedMove(boolean left, int distance) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedMove(left, distance)));
+	}
+
+	@Override
+	public void forcedFlip(boolean left) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedFlip(left)));
+	}
+
+	public void showEffect(String path, int duration, Position position) {
+		showEffect(path, duration, position, 0, 0, 0, 0);
+	}
+
+	@Override
+	public void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, int idk1, int idk2) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, position, z, npcIdForExtend, idk1, idk2)));
+	}
 
 
 	// Other methods ---------------------------------------------------------------------------------------------------
