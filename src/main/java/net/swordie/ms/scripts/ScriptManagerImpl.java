@@ -864,6 +864,82 @@ public class ScriptManagerImpl implements ScriptManager {
 		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
 	}
 
+	public void hideNpcByTemplateId(int npcTemplateId, boolean hide) {
+		hideNpcByTemplateId(npcTemplateId, hide, hide);
+	}
+
+	@Override
+	public void hideNpcByTemplateId(int npcTemplateId, boolean hideTemplate, boolean hideNameTag) {
+		Field field = chr.getField();
+		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId);
+		if(npc == null) {
+			log.error(String.format("npc %d is null", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcViewOrHide(npc.getObjectId(), !hideTemplate, !hideNameTag));
+	}
+
+	public void hideNpcByObjectId(int npcObjId, boolean hide) {
+		hideNpcByObjectId(npcObjId, hide, hide);
+	}
+
+	@Override
+	public void hideNpcByObjectId(int npcObjId, boolean hideTemplate, boolean hideNameTag) {
+		Field field = chr.getField();
+		Npc npc = (Npc) field.getLifeByObjectID(npcObjId);
+		if(npc == null) {
+			log.error(String.format("npc %d is null", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcViewOrHide(npc.getObjectId(), !hideTemplate, !hideNameTag));
+	}
+
+	@Override
+	public void forceNpcMoveByTemplateId(int npcTemplateId, boolean left, int distance, int speed) {
+		Field field = chr.getField();
+		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId);
+		if(npc == null) {
+			log.error(String.format("npc %d is null", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceMove(npc.getObjectId(), left, distance, speed));
+	}
+
+	@Override
+	public void forceNpcMoveByObjectId(int npcObjId, boolean left, int distance, int speed) {
+		Field field = chr.getField();
+		Npc npc = (Npc) field.getLifeByObjectID(npcObjId);
+		if(npc == null) {
+			log.error(String.format("npc %d is null", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceMove(npc.getObjectId(), left, distance, speed));
+	}
+
+	@Override
+	public void forceNpcFlipByTemplateId(int npcTemplateId, boolean left) {
+		Field field = chr.getField();
+		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId);
+		if(npc == null) {
+			log.error(String.format("npc %d is null", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceFlip(npc.getObjectId(), left));
+	}
+
+	@Override
+	public void forceNpcFlipByObjectId(int npcObjId, boolean left) {
+		Field field = chr.getField();
+		Npc npc = (Npc) field.getLifeByObjectID(npcObjId);
+		if(npc == null) {
+			log.error(String.format("npc %d is null", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceFlip(npc.getObjectId(), left));
+	}
+
+
+
 	// Mob methods
 	@Override
 	public void spawnMob(int id) {

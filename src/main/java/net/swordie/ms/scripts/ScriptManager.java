@@ -569,6 +569,60 @@ public interface ScriptManager extends Observer {
 	 */
 	void setSpeakerID(int templateID);
 
+	/**
+	 * Hides the specified Npc (specified by Template id)
+	 *
+	 * @param npcTemplateId Template Id of Npc to be hidden
+	 * @param hideTemplate true to hide. false to show
+	 * @param hideNameTag true to hide. false to show
+	 */
+	void hideNpcByTemplateId(int npcTemplateId, boolean hideTemplate, boolean hideNameTag);
+
+	/**
+	 * Hides the specified Npc (specified by Object id)
+	 *
+	 * @param npcObjId Object Id of Npc to be hidden
+	 * @param hideTemplate true to hide. false to show
+	 * @param hideNameTag true to hide. false to show
+	 */
+	void hideNpcByObjectId(int npcObjId, boolean hideTemplate, boolean hideNameTag);
+
+	/**
+	 * Forces the specified Npc (Template Id) to move in the specified direction
+	 *
+	 * @param npcTemplateId Template Id of the Npc to be moved
+	 * @param left if true, Npc moves to the left. if false, Npc moves to the right
+	 * @param distance distance traveled by the Npc
+	 * @param speed speed at which the Npc travels (a number between 10 and 300)
+	 */
+	void forceNpcMoveByTemplateId(int npcTemplateId, boolean left, int distance, int speed);
+
+	/**
+	 * Forces the specified Npc (Object Id) to move in the specified direction
+	 *
+	 * @param npcObjId Object Id of the Npc to be moved
+	 * @param left if true, Npc moves to the left. if false, Npc moves to the right
+	 * @param distance distance traveled by the Npc
+	 * @param speed speed at which the Npc travels (a number between 10 and 300)
+	 */
+	void forceNpcMoveByObjectId(int npcObjId, boolean left, int distance, int speed);
+
+	/**
+	 * Forces the specified Npc (Template Id) to flip
+	 *
+	 * @param npcTemplateId Template Id of the Npc to be flipped
+	 * @param left if true, Npc will face left. if false, Npc will face right
+	 */
+	void forceNpcFlipByTemplateId(int npcTemplateId, boolean left);
+
+	/**
+	 * Forces the specified Npc (Object Id) to flip
+	 *
+	 * @param npcObjId Object Id of the Npc to be flipped
+	 * @param left if true, Npc will face left. if false, Npc will face right
+	 */
+	void forceNpcFlipByObjectId(int npcObjId, boolean left);
+
 
 
 	// Mob methods
