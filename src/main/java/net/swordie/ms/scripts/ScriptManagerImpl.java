@@ -871,7 +871,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void hideNpcByTemplateId(int npcTemplateId, boolean hideTemplate, boolean hideNameTag) {
 		Field field = chr.getField();
-		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId);
+		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId).findAny().orElse(null);
 		if(npc == null) {
 			log.error(String.format("npc %d is null", npcTemplateId));
 			return;
@@ -897,7 +897,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void forceNpcMoveByTemplateId(int npcTemplateId, boolean left, int distance, int speed) {
 		Field field = chr.getField();
-		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId);
+		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId).findAny().orElse(null);
 		if(npc == null) {
 			log.error(String.format("npc %d is null", npcTemplateId));
 			return;
@@ -919,7 +919,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void forceNpcFlipByTemplateId(int npcTemplateId, boolean left) {
 		Field field = chr.getField();
-		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId);
+		Npc npc = (Npc) field.getLifes().stream().filter(l -> l instanceof Npc && l.getTemplateId() == npcTemplateId).findAny().orElse(null);
 		if(npc == null) {
 			log.error(String.format("npc %d is null", npcTemplateId));
 			return;
