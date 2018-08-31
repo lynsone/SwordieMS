@@ -535,8 +535,12 @@ public class Field {
 
     }
 
-    public Life getLifeByObjectID(int mobId) {
-        return getLifes().stream().filter(mob -> mob.getObjectId() == mobId).findFirst().orElse(null);
+    public Life getLifeByObjectID(int objectId) {
+        return getLifes().stream().filter(l -> l.getObjectId() == objectId).findFirst().orElse(null);
+    }
+
+    public Life getLifeByTemplateId(int templateId) {
+        return getLifes().stream().filter(l -> l.getTemplateId() == templateId).findFirst().orElse(null);
     }
 
     public void spawnLifesForChar(Char chr) {
