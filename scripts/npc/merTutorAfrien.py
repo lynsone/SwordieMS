@@ -75,7 +75,5 @@ def action(response, answer):
 
     elif status == 16:
         if response == 1:
-            sm.warp(910150001)
-            sm.dispose()
-        elif response == 0:
-            sm.dispose()
+            sm.warpInstanceIn(910150001, 0)
+        sm.dispose()

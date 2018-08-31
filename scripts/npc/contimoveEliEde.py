@@ -6,4 +6,4 @@ def init():
 def action(response,answer):
     if response == 1:
         sm.warp(map, 0)
-        sm.dispose()
+    sm.dispose()
