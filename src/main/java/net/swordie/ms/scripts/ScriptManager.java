@@ -1234,10 +1234,10 @@ public interface ScriptManager extends Observer {
 	 * @param position Position on the map
 	 * @param z
 	 * @param npcIdForExtend
-	 * @param idk1
+	 * @param onUser if true, the effect will follow the player | if false, the effect will stay static
 	 * @param idk2
 	 */
-	void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, int idk1, int idk2);
+	void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, boolean onUser, int idk2);
 
 
 

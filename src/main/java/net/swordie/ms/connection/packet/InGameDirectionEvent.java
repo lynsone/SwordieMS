@@ -131,7 +131,7 @@ public class InGameDirectionEvent implements Encodable {
     }
 
     public static InGameDirectionEvent effectPlay(String effectUOL, int duration, Position position, int z,
-                                                    int npcIdForExtend, int idk1, int idk2) {
+                                                    int npcIdForExtend, boolean onUser, int idk2) {
         InGameDirectionEvent igdr = new InGameDirectionEvent(InGameDirectionEventType.EffectPlay);
 
         igdr.str = effectUOL;
@@ -139,7 +139,7 @@ public class InGameDirectionEvent implements Encodable {
         igdr.pos = position;
         igdr.arg2 = z;
         igdr.arg3 = npcIdForExtend;
-        igdr.arg4 = idk1;
+        igdr.arg4 = onUser ? 0 : 1;
         igdr.arg5 = idk2;
 
         return igdr;

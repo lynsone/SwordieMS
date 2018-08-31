@@ -1500,13 +1500,18 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void showEffect(String path, int duration, Position position) {
-		showEffect(path, duration, position, 0, 0, 0, 0);
+		showEffect(path, duration, position, 0, 0, true, 0);
 	}
 
 	@Override
-	public void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, int idk1, int idk2) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, position, z, npcIdForExtend, idk1, idk2)));
+	public void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, boolean onUser, int idk2) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, position, z, npcIdForExtend, onUser, idk2)));
 	}
+
+	public void showBalloonMsg(String path, int duration) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(0, -100), 0, 0, true, 0)));
+	}
+
 
 
 	// Other methods ---------------------------------------------------------------------------------------------------
