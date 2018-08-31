@@ -162,11 +162,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (scriptType == ScriptType.NONE) {
 			return;
 		}
-		if (isActive(scriptType)) {
-			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
-							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
-			return;
-		}
+//		if (isActive(scriptType)) {
+//			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
+//							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
+//			return;
+//		}
 		if (!isField()) {
 			chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
@@ -638,6 +638,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void clearPartyInfo(int warpToID) {
+		stopEventsByScriptType(ScriptType.FIELD); // Stops the FixedRate Event from the Field Script
 		if (chr.getParty() != null) {
 			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
 				pm.getChr().setDeathCount(-1);
@@ -665,6 +666,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void warpInstance(int id, boolean in, int portalID) {
+		stopEventsByScriptType(ScriptType.FIELD); // Stops the FixedRate Event from the Field Script
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
 		if (!in) {
 			chr.getFields().clear();
@@ -690,23 +692,23 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public boolean mobsPresentInField() {
-		return mobsPresentInField(chr.getFieldID());
+	public boolean hasMobsInField() {
+		return hasMobsInField(chr.getFieldID());
 	}
 
 	@Override
-	public boolean mobsPresentInField(int fieldid) {
+	public boolean hasMobsInField(int fieldid) {
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldid);
 		return field.getMobs().size() > 0;
 	}
 
 	@Override
-	public int numberMobsInField() {
-		return numberMobsInField(chr.getFieldID());
+	public int getAmountOfMobsInField() {
+		return getAmountOfMobsInField(chr.getFieldID());
 	}
 
 	@Override
-	public int numberMobsInField(int fieldid) {
+	public int getAmountOfMobsInField(int fieldid) {
 		Field field = FieldData.getFieldById(fieldid);
 		return field.getMobs().size();
 	}

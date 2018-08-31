@@ -7,7 +7,7 @@ def init():
     if not sm.getChr().getField().isTown():
         sm.chat("You can only spawn a dummy in a Town Map")
 
-    elif sm.mobsPresentInField():
+    elif sm.hasMobsInField():
         sm.chat("You cannot spawn a dummy whilst there are other monsters or dummies in the map")
 
     else:

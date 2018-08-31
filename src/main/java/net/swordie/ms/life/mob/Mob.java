@@ -1131,10 +1131,10 @@ public class Mob extends Life {
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
             die();
-            if (isBoss()) {
+            if (isBoss() && getHpTagColor() != 0) {
                 getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
             }
-        } else if (isBoss()) {
+        } else if (isBoss() && getHpTagColor() != 0) {
             getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {
             getField().broadcastPacket(MobPool.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));

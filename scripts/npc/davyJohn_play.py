@@ -60,7 +60,7 @@ if sm.getFieldID() == 925100100: # Hidden Street: Through the Head of the Ship!
 
 elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
     def init():
-        if not sm.mobsPresentInField():
+        if not sm.hasMobsInField():
             if not sm.isPartyLeader():
                 sm.sendSayOkay("Please have your party leader speak to me.")
                 sm.dispose()

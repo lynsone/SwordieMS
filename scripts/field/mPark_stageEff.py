@@ -22,4 +22,4 @@ def onMobDeath(mob):
     sm.setQRValue(GameConstants.MONSTER_PARK_EXP_QUEST, str(int(sm.getQRValue(GameConstants.MONSTER_PARK_EXP_QUEST)) + exp))
 
     #displays the EXP message
-    sm.showWeatherNoticeToField("EXP reward "+ sm.formatNumber(sm.getQRValue()) +" earned!", WeatherEffNoticeType.MonsterPark_ExpMsg)
+    sm.showWeatherNoticeToField("EXP reward "+ sm.formatNumber(sm.getQRValue(GameConstants.MONSTER_PARK_EXP_QUEST)) +" earned!", WeatherEffNoticeType.MonsterPark_ExpMsg)

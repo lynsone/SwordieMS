@@ -807,7 +807,7 @@ public class WorldHandler {
         String script = portalName;
         if(portal != null) {
             portalID = (byte) portal.getId();
-            script = portal.getScript();
+            script = "".equals(portal.getScript()) ? portalName : portal.getScript();
         }
         chr.getScriptManager().startScript(portalID, script, ScriptType.PORTAL);
     }

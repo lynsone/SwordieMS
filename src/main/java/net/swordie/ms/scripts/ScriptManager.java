@@ -429,41 +429,41 @@ public interface ScriptManager extends Observer {
 	/**
 	 * Determines if there are mobs present in the {@link Field} linked to the {@link
 	 * ScriptManager}.
-	 * Example: "if(sm.mobsPresentInField()) {}"
+	 * Example: "if(sm.hasMobsInField()) {}"
 	 *
 	 * @return True if there are mobs in the linked {@link Field}.
 	 */
-	boolean mobsPresentInField();
+	boolean hasMobsInField();
 
 	/**
 	 * Determines if there are mobs present in a defined {@link Field}.
-	 * Example: "if(sm.mobsPresentInField(100)) {}"
+	 * Example: "if(sm.hasMobsInField(100)) {}"
 	 *
 	 * @param fieldID
 	 * 		The id of the {@link Field} to receive info from.
 	 *
 	 * @return True if there are mobs in the {@link Field}.
 	 */
-	boolean mobsPresentInField(int fieldID);
+	boolean hasMobsInField(int fieldID);
 
 	/**
 	 * Gets the number of mobs in the {@link Field} linked to the {@link ScriptManager}
-	 * Example: "sm.numberMobsInField()"
+	 * Example: "sm.getAmountOfMobsInField()"
 	 *
 	 * @return The number of mobs in the linked {@link Field}.
 	 */
-	int numberMobsInField();
+	int getAmountOfMobsInField();
 
 	/**
 	 * Gets the number of mobs from a selected {@link Field}.
-	 * Example: "sm.numberMobsInField(100)"
+	 * Example: "sm.getAmountOfMobsInField(100)"
 	 *
 	 * @param fieldID
 	 * 		The fieldID of the {@link Field} to get the number of mobs in.
 	 *
 	 * @return The number of mobs in the selected {@link Field}.
 	 */
-	int numberMobsInField(int fieldID);
+	int getAmountOfMobsInField(int fieldID);
 
 	/**
 	 * Shows an Effect from the directory specified.

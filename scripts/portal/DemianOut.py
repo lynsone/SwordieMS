@@ -1,3 +1,5 @@
+# 350160200 - Portal out damien
+
 def init():
     sm.sendAskYesNo("Are you sure you want to leave?")
 

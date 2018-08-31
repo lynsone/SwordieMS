@@ -1597,4 +1597,31 @@ public class AdminCommands {
         }
     }
 
+    public static class FP extends AdminCommand { // FindPortal
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 1) {
+                chr.chatMessage(GM_BLUE_CHAT, "Invalid args. Use !findportal <id/name>");
+            }
+            Field field = chr.getField();
+            Portal portal;
+            String query = args[1];
+            if (Util.isNumber(query)) {
+                portal = field.getPortalByID(Integer.parseInt(query));
+            } else {
+                portal = field.getPortalByName(query);
+            }
+            if (portal == null) {
+                chr.chatMessage(GM_BLUE_CHAT, "Was not able to find portal " + query);
+                return;
+            }
+            chr.chatMessage(GM_BLUE_CHAT, "Portal Name: " + portal.getName());
+            chr.chatMessage(GM_BLUE_CHAT, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
+            chr.chatMessage(GM_BLUE_CHAT, "Portal target map: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getTargetMapId()));
+            chr.chatMessage(GM_BLUE_CHAT, "Portal position: " + portal.getX() + ", " + portal.getY());
+            chr.chatMessage(GM_BLUE_CHAT, "Portal script: " + portal.getScript());
+            chr.chatMessage(GM_BLUE_CHAT, ".");
+            log.info(portal.getScript());
+        }
+    }
+
 }

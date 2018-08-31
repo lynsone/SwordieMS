@@ -1062,7 +1062,9 @@ public enum InHeader {
                 FAMILIAR_MOVE,
                 PET_MOVE,
                 AUTH_HEARTBEAT,
-                OBTACLE_ATOM_COLLISION
+                OBTACLE_ATOM_COLLISION,
+                USER_HIT,
+                USER_EMOTION
         );
         return spam.contains(inHeaderByOp);
     }
