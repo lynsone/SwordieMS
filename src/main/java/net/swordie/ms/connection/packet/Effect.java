@@ -109,8 +109,8 @@ public class Effect {
                 outPacket.encodeByte(getArg1());
                 outPacket.encodeInt(getArg2());
                 outPacket.encodeInt(getArg3());
-                if (getArg3() == 2) { // item
-                    outPacket.encodeInt(getArg4());
+                if (getArg3() == 2) { // item sound
+                    outPacket.encodeInt(getArg4()); // nItemID
                 }
                 break;
             case LeftMonsterNumber:
@@ -556,13 +556,13 @@ public class Effect {
         return effect;
     }
 
-    public static Effect effectFromWZ(String effectPath, boolean flip, int delay, int type, int itemID) {
+    public static Effect effectFromWZ(String effectPath, boolean flip, int duration, int type, int itemID) {
         Effect effect = new Effect();
 
         effect.setUserEffectType(EffectUOL);
         effect.setString(effectPath);
         effect.setArg1(flip ? 1 : 0);
-        effect.setArg2(delay);
+        effect.setArg2(duration);
         effect.setArg3(type);
         if (type == 2) {
             effect.setArg4(itemID);

@@ -389,4 +389,12 @@ public class UserLocal {
 
         return outPacket;
     }
+
+    public static OutPacket inGameDirectionEvent(InGameDirectionEvent igdr) {
+        OutPacket outPacket = new OutPacket(OutHeader.IN_GAME_DIRECTION_EVENT);
+
+        outPacket.encode(igdr);
+
+        return outPacket;
+    }
 }
