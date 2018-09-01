@@ -1588,6 +1588,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedFlip(left)));
 	}
 
+	@Override
+	public void forceAction(int type, int duration) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedAction(type, duration)));
+	}
+
 	public void showEffect(String path, int duration, int x, int y) {
 		showEffect(path, duration, x, y, 0, 0, true, 0);
 	}
