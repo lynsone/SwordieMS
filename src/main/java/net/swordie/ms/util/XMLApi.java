@@ -143,7 +143,7 @@ public class XMLApi {
      * @return The first occurrence of the given nodeName in the given xmlPath, or null if there is none.
      */
     public static Node getNodeByPath(String xmlPath, String nodeName) {
-        File file = new File(ServerConstants.WZ_DIR+"/"+ xmlPath +".img.xml");
+        File file = new File(ServerConstants.WZ_DIR+"/"+ xmlPath +".xml");
         Document doc = getRoot(file);
         Node node = getAllChildren(doc).get(0);
 
