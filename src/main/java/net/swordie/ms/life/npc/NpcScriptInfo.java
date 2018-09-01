@@ -241,6 +241,10 @@ public class NpcScriptInfo {
 		setColor((byte) 0);
 	}
 
+	public boolean hasParam(Param param) {
+		return (getParam() & param.getVal()) != 0;
+	}
+
 	public enum Param {
 		NotCancellable(0x1),
 		PlayerAsSpeaker(0x2),

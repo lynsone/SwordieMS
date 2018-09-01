@@ -885,8 +885,13 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void setSpeakerID(int templateID) {
-		getNpcScriptInfo().resetParam();
-		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
+		NpcScriptInfo nsi = getNpcScriptInfo();
+		boolean isNotCancellable = nsi.hasParam(NpcScriptInfo.Param.NotCancellable);
+		nsi.resetParam();
+		nsi.setOverrideSpeakerTemplateID(templateID);
+		if (isNotCancellable) {
+			nsi.addParam(NpcScriptInfo.Param.NotCancellable);
+		}
 	}
 
 	public void hideNpcByTemplateId(int npcTemplateId, boolean hide) {
