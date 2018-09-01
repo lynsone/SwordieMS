@@ -919,7 +919,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void forceNpcMoveByTemplateId(int npcTemplateId, boolean left, int distance, int speed) {
+	public void moveNpcByTemplateId(int npcTemplateId, boolean left, int distance, int speed) {
 		Field field = chr.getField();
 		Life life = field.getLifeByTemplateId(npcTemplateId);
 		if(life == null || !(life instanceof Npc)) {
@@ -930,7 +930,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void forceNpcMoveByObjectId(int npcObjId, boolean left, int distance, int speed) {
+	public void moveNpcByObjectId(int npcObjId, boolean left, int distance, int speed) {
 		Field field = chr.getField();
 		Life life = field.getLifeByObjectID(npcObjId);
 		if(life == null || !(life instanceof Npc)) {
@@ -941,7 +941,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void forceNpcFlipByTemplateId(int npcTemplateId, boolean left) {
+	public void flipNpcByTemplateId(int npcTemplateId, boolean left) {
 		Field field = chr.getField();
 		Life life = field.getLifeByTemplateId(npcTemplateId);
 		if(life == null || !(life instanceof Npc)) {
@@ -952,7 +952,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void forceNpcFlipByObjectId(int npcObjId, boolean left) {
+	public void flipNpcByObjectId(int npcObjId, boolean left) {
 		Field field = chr.getField();
 		Life life = field.getLifeByObjectID(npcObjId);
 		if(life == null || !(life instanceof Npc)) {
@@ -960,6 +960,37 @@ public class ScriptManagerImpl implements ScriptManager {
 			return;
 		}
 		chr.write(NpcPool.npcSetForceFlip(life.getObjectId(), left));
+	}
+
+	public void showNpcSpecialActionByTemplateId(int npcTemplateId, String effectName) {
+		showNpcSpecialActionByTemplateId(npcTemplateId, effectName, 0);
+	}
+
+	@Override
+	public void showNpcSpecialActionByTemplateId(int npcTemplateId, String effectName, int duration) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(npcTemplateId);
+		if(life == null || !(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcSetSpecialAction(life.getObjectId(), effectName, duration));
+	}
+
+	public void showNpcSpecialActionByObjectId(int npcObjId, String effectName) {
+		showNpcSpecialActionByObjectId(npcObjId, effectName, 0);
+
+	}
+
+	@Override
+	public void showNpcSpecialActionByObjectId(int npcObjId, String effectName, int duration) {
+		Field field = chr.getField();
+		Life life = field.getLifeByObjectID(npcObjId);
+		if(life == null || !(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcSetSpecialAction(life.getObjectId(), effectName, duration));
 	}
 
 

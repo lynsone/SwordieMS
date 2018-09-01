@@ -26,6 +26,7 @@ public class GameConstants {
 
     // Field
     public static final int NO_MAP_ID = 999999999;
+    public static final int VIDEO_FIELD = 931050990; // Used for Effects and/or Videos
     public static final int DEFAULT_FIELD_MOB_CAPACITY = 25;
     public static final double DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT = 1.5;
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
