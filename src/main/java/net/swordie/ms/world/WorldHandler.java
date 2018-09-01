@@ -3686,11 +3686,12 @@ public class WorldHandler {
         int objID = inPacket.decodeInt();
         int idk = inPacket.decodeInt();
         byte type = inPacket.decodeByte();
-        Reactor reactor = chr.getField().getReactorByObjID(objID);
-        if(reactor == null) {
+        Life life = chr.getField().getLifeByObjectID(objID);
+        if(!(life instanceof Reactor)) {
             log.error("Could not find reactor with objID " + objID);
             return;
         }
+        Reactor reactor = (Reactor) life;
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
@@ -3710,11 +3711,12 @@ public class WorldHandler {
         Char chr = c.getChr();
         int objID = inPacket.decodeInt();
 
-        Reactor reactor = chr.getField().getReactorByObjID(objID);
-        if(reactor == null) {
+        Life life = chr.getField().getLifeByObjectID(objID);
+        if(!(life instanceof Reactor)) {
             log.error("Could not find reactor with objID " + objID);
             return;
         }
+        Reactor reactor = (Reactor) life;
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();

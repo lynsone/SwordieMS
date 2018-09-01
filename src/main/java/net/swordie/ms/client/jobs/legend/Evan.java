@@ -338,7 +338,7 @@ public class Evan extends Job {
         }
         for(int i = 0; i<debrisCount; i++) {
             c.write(CField.delWreckage(chr));
-            Life life = Util.getRandomFromList(lifes);
+            Life life = Util.getRandomFromCollection(lifes);
             int mobID = (life).getObjectId(); //
             int inc = ForceAtomEnum.WRECKAGE.getInc();
             int type = ForceAtomEnum.WRECKAGE.getForceAtomType();

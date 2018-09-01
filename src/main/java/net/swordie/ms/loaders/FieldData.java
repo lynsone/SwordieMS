@@ -93,7 +93,7 @@ public class FieldData {
                         dataOutputStream.writeInt(p.getDelay());
                     }
                     dataOutputStream.writeShort(field.getLifes().size());
-                    for (Life l : field.getLifes()) {
+                    for (Life l : field.getLifes().values()) {
                         dataOutputStream.writeUTF(l.getLifeType());
                         dataOutputStream.writeInt(l.getTemplateId());
                         dataOutputStream.writeInt(l.getX());
@@ -458,7 +458,7 @@ public class FieldData {
                                     log.warn(String.format("Unknown reactor property %s with value %s", name, value));
                             }
                         }
-                        field.addReactor(reactor);
+                        field.addLife(reactor);
                     }
                 }
                 getFields().add(field);
@@ -594,7 +594,7 @@ public class FieldData {
                 r.setFlip(dataInputStream.readInt());
                 r.setName(dataInputStream.readUTF());
                 r.setPhantomForest(dataInputStream.readBoolean());
-                field.addReactor(r);
+                field.addLife(r);
             }
             getFields().add(field);
         } catch (IOException e) {
@@ -646,11 +646,8 @@ public class FieldData {
         for (Portal p : field.getPortals()) {
             copy.addPortal(p.deepCopy());
         }
-        for (Life l : field.getLifes()) {
+        for (Life l : field.getLifes().values()) {
             copy.addLife(l.deepCopy());
-        }
-        for (Reactor r : field.getReactors()) {
-            copy.addReactor(r);
         }
         copy.setObjectIDCounter(field.getNewObjectID());
         copy.setRuneStone(new RuneStone().getRandomRuneStone(copy));
@@ -659,7 +656,7 @@ public class FieldData {
         copy.setVrBottom(field.getVrBottom());
         copy.setVrRight(field.getVrRight());
         copy.startBurningFieldTimer();
-        int mobGens = (int) (copy.getLifes().stream().filter(l -> l instanceof MobGen).count());
+        int mobGens = field.getMobGens().size();
         copy.setFixedMobCapacity((int) (mobGens * GameConstants.DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT));
         copy.generateMobs();
         return copy;

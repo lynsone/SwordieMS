@@ -1046,7 +1046,7 @@ public class Warrior extends Beginner {
                                 collect(Collectors.toList());
                                 
                         if (eligblePartyMemberList.size() > 0) {
-                            Char randomPartyChr = Util.getRandomFromList(eligblePartyMemberList).getChr();
+                            Char randomPartyChr = Util.getRandomFromCollection(eligblePartyMemberList).getChr();
                             TemporaryStatManager partyTSM = randomPartyChr.getTemporaryStatManager();
                             randomPartyChr.heal(randomPartyChr.getMaxHP());
                             partyTSM.putCharacterStatValue(NotDamaged, o1);

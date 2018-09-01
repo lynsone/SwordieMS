@@ -739,7 +739,7 @@ public class Thief extends Beginner {
         if(mobs.size() <= 0) {
             return;
         }
-        Mob mob = Util.getRandomFromList(mobs);
+        Mob mob = Util.getRandomFromCollection(mobs);
         int inc = ForceAtomEnum.FLYING_MESO.getInc();
         int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
         int mobId = mob.getObjectId();
@@ -822,9 +822,9 @@ public class Thief extends Beginner {
                     if(mts.hasBurnFromSkillAndOwner(getCurMarkLv(), chr.getId())) {
                         for (int i = 0; i < 6; i++) {
 
-                            Mob life = Util.getRandomFromList(lifes);
+                            Mob life = Util.getRandomFromCollection(lifes);
                             if(bossLifes.size() > 0) {
-                                life = Util.getRandomFromList(bossLifes);
+                                life = Util.getRandomFromCollection(bossLifes);
                             }
 
 

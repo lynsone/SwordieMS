@@ -582,7 +582,7 @@ public class Demon extends Job {
         if(mobs.size() <= 0) {
             return;
         }
-        Mob mob = Util.getRandomFromList(mobs);
+        Mob mob = Util.getRandomFromCollection(mobs);
         int mobID = mob.getObjectId(); //
         int inc = ForceAtomEnum.NETHER_SHIELD.getInc();
         int type = ForceAtomEnum.NETHER_SHIELD.getForceAtomType();

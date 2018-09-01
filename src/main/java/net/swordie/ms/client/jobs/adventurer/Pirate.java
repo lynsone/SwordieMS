@@ -642,7 +642,7 @@ public class Pirate extends Beginner {
             Skill skill = chr.getSkill(AHOY_MATEYS);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int random = Util.getRandomFromList(set);
+            int random = Util.getRandomFromCollection(set);
             corsairSummonID = random;
             Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
             Field field = chr.getField();

@@ -246,7 +246,7 @@ public class Mercedes extends Job {
         if(eleKnightSummonID != 0) {
             set.remove((Integer) eleKnightSummonID);
         }
-        int random = Util.getRandomFromList(set);
+        int random = Util.getRandomFromCollection(set);
         eleKnightSummonID = random;
         Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
         Field field = chr.getField();

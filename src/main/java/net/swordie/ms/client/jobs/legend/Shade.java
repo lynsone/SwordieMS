@@ -292,7 +292,7 @@ public class Shade extends Job {
             if(mobs.size() <= 0) {
                 return;
             }
-            Mob mob = Util.getRandomFromList(mobs);
+            Mob mob = Util.getRandomFromCollection(mobs);
             int mobID = mob.getObjectId();
 
             int atomid = FOX_SPIRITS_ATOM;

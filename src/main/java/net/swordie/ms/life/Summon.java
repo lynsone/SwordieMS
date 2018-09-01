@@ -218,7 +218,7 @@ public class Summon extends Life {
         Field field = chr.getField();
 
         // Remove both Old Kishins
-        List<Life> oldKishins = field.getLifes().stream()
+        List<Life> oldKishins = field.getLifes().values().stream()
                 .filter(s -> s instanceof Summon &&
                         ((Summon) s).getChr() == chr &&
                         ((Summon) s).getSkillID() == Kanna.KISHIN_SHOUKAN)

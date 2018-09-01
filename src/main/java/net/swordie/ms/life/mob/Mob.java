@@ -1166,7 +1166,7 @@ public class Mob extends Life {
             String msg = null;
             if (field.getKilledElites() >= GameConstants.ELITE_BOSS_REQUIRED_KILLS) {
                 field.setKilledElites(field.getKilledElites() % GameConstants.ELITE_BOSS_REQUIRED_KILLS);
-                int bossTemplate = Util.getRandomFromList(GameConstants.ELITE_BOSS_TEMPLATES);
+                int bossTemplate = Util.getRandomFromCollection(GameConstants.ELITE_BOSS_TEMPLATES);
                 Mob mob = MobData.getMobDeepCopyById(bossTemplate);
                 mob.setEliteType(3);
                 mob.setNotRespawnable(true);
@@ -1437,7 +1437,7 @@ public class Mob extends Life {
         elite.setHomeFoothold(getCurFoodhold().deepCopy());
         elite.setNotRespawnable(true);
         List<Triple<Integer, Double, Double>> eliteInfos = GameConstants.getEliteInfoByMobLevel(elite.getForcedMobStat().getLevel());
-        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromList(eliteInfos);
+        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromCollection(eliteInfos);
         int eliteGrade = eliteInfo.getLeft();
         long newHp = (long) (eliteInfo.getMiddle() * elite.getMaxHp());
         long newExp = (long) (eliteInfo.getRight() * elite.getForcedMobStat().getExp());
@@ -1447,7 +1447,7 @@ public class Mob extends Life {
         List<Tuple<Integer, Integer>> possibleSkills = new ArrayList<>();
         possibleSkillsMap.forEach((k, v) -> possibleSkills.add(new Tuple(k, v)));
         for (int i = 0; i < GameConstants.ELITE_MOB_SKILL_COUNT; i++) {
-            Tuple<Integer, Integer> randomSkill = Util.getRandomFromList(possibleSkills);
+            Tuple<Integer, Integer> randomSkill = Util.getRandomFromCollection(possibleSkills);
             elite.addEliteSkill(randomSkill.getLeft(), randomSkill.getRight());
             possibleSkills.remove(randomSkill);
         }
@@ -1466,7 +1466,7 @@ public class Mob extends Life {
         elite.setHomeFoothold(getCurFoodhold().deepCopy());
         elite.setNotRespawnable(true);
         List<Triple<Integer, Double, Double>> eliteInfos = GameConstants.getEliteInfoByMobLevel(elite.getForcedMobStat().getLevel());
-        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromList(eliteInfos);
+        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromCollection(eliteInfos);
         int eliteGrade = eliteInfo.getLeft();
         long newHp = (long) (eliteInfo.getMiddle() * elite.getMaxHp());
         long newExp = (long) (eliteInfo.getRight() * elite.getForcedMobStat().getExp());
@@ -1476,7 +1476,7 @@ public class Mob extends Life {
         List<Tuple<Integer, Integer>> possibleSkills = new ArrayList<>();
         possibleSkillsMap.forEach((k, v) -> possibleSkills.add(new Tuple(k, v)));
         for (int i = 0; i < GameConstants.ELITE_MOB_SKILL_COUNT; i++) {
-            Tuple<Integer, Integer> randomSkill = Util.getRandomFromList(possibleSkills);
+            Tuple<Integer, Integer> randomSkill = Util.getRandomFromCollection(possibleSkills);
             elite.addEliteSkill(randomSkill.getLeft(), randomSkill.getRight());
             possibleSkills.remove(randomSkill);
         }

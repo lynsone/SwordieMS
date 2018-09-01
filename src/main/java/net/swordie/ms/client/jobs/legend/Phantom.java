@@ -355,7 +355,7 @@ public class Phantom extends Job {
                 chr.dispose();
                 return;
             }
-            Mob mob = Util.getRandomFromList(mobs);
+            Mob mob = Util.getRandomFromCollection(mobs);
 
             for (int i = 0; i < 10; i++) {
                 if (chr.hasSkill(CARTE_NOIR)) {
