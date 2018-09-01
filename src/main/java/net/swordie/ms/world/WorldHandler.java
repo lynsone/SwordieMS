@@ -16,6 +16,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -52,15 +53,7 @@ import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
-import net.swordie.ms.client.party.Party;
-import net.swordie.ms.client.party.PartyMember;
-import net.swordie.ms.client.party.PartyRequestResultType;
-import net.swordie.ms.client.party.request.PartyApplyRequest;
-import net.swordie.ms.client.party.request.PartyJoinRequestBlue;
-import net.swordie.ms.client.party.request.PartyRequestType;
-import net.swordie.ms.client.party.result.*;
-import net.swordie.ms.client.party.updates.UpdateMemberLoggedIn;
-import net.swordie.ms.client.party.updates.UpdatePartyResult;
+import net.swordie.ms.client.party.*;
 import net.swordie.ms.client.trunk.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
@@ -165,6 +158,12 @@ public class WorldHandler {
         if (chr.getHP() <= 0) { // automatically revive when relogging
             chr.heal(chr.getMaxHP() / 2);
         }
+        if (chr.getPartyID() != 0) {
+            Party party = c.getWorld().getPartybyId(chr.getPartyID());
+            if (party == null) {
+                chr.setPartyID(0);
+            }
+        }
         chr.warp(field, true);
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         if(chr.getGuild() != null) {
@@ -180,15 +179,6 @@ public class WorldHandler {
         c.write(WvsContext.macroSysDataInit(chr.getMacros()));
         c.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_SendInfo, null, chr));
         c.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, (byte) 5, chr.getHyperRockFields()));
-        if (chr.getPartyID() != 0) {
-            Party party = c.getWorld().getPartybyId(chr.getPartyID());
-            if (party == null) {
-                chr.setPartyID(0);
-            } else {
-                chr.setParty(party);
-                chr.write(WvsContext.partyResult(new UpdatePartyResult(party)));
-            }
-        }
         acc.getMonsterCollection().init(chr);
         chr.checkAndRemoveExpiredItems();
         chr.initBaseStats();
@@ -2668,76 +2658,62 @@ public class WorldHandler {
     public static void handlePartyRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
-        PartyRequestType prt = PartyRequestType.getByVal(type);
+        PartyType prt = PartyType.getByVal(type);
         Party party = chr.getParty();
         if(prt == null) {
             log.error(String.format("Unknown party request type %d", type));
             return;
         }
         switch(prt) {
-            case Create:
+            case PartyReq_CreateNewParty:
                 boolean appliable = inPacket.decodeByte() != 0;
                 String name = inPacket.decodeString();
                 party = Party.createNewParty(appliable, name, chr.getClient().getWorld());
                 party.addPartyMember(chr);
-                CreatePartyResult cpr = new CreatePartyResult();
-                cpr.party = party;
-                chr.write(WvsContext.partyResult(cpr));
-                party.broadcast(WvsContext.partyResult(new UpdateMemberLoggedIn(chr)));
+                party.broadcast(WvsContext.partyResult(PartyResult.createNewParty(party)));
                 break;
-            case Leave:
+            case PartyReq_WithdrawParty:
                 if(party.hasCharAsLeader(chr)) {
                     party.disband();
                 } else {
-                    LeavePartyResult lpr = new LeavePartyResult();
-                    lpr.partyExists = true;
-                    lpr.wasExpelled = false;
-                    lpr.party = party;
-                    lpr.leaver = party.getPartyMemberByID(chr.getId());
-                    party.broadcast(WvsContext.partyResult(lpr));
-                    party.removePartyMember(lpr.leaver);
+                    PartyMember leaver = party.getPartyMemberByID(chr.getId());
+                    party.broadcast(WvsContext.partyResult(PartyResult.withdrawParty(party, leaver, true, false)));
+                    party.removePartyMember(leaver);
                     party.updateFull();
                 }
                 break;
-            case Invite:
+            case PartyReq_InviteParty:
                 String invitedName = inPacket.decodeString();
                 Char invited = chr.getField().getCharByName(invitedName);
                 if(invited == null) {
                     chr.chatMessage("Could not find that player.");
                     return;
                 }
-                PartyJoinRequestBlue pjrb = new PartyJoinRequestBlue();
                 if(party == null) {
                     party = Party.createNewParty(true, "Party with me!", chr.getClient().getWorld());
                     party.addPartyMember(chr);
-                    cpr = new CreatePartyResult();
-                    cpr.party = party;
-                    chr.write(WvsContext.partyResult(cpr));
+                    chr.write(WvsContext.partyResult(PartyResult.createNewParty(party)));
                 }
-                pjrb.inviter = party.getPartyLeader();
-                pjrb.partyID = party.getId();
+                PartyMember inviter = party.getPartyLeader();
                 if(!invited.isPartyInvitable()) {
                     chr.chatMessage(SystemNotice, String.format("%s is currently not accepting party invites.", invitedName));
                 } else if(invited.getParty() == null) {
-                    invited.write(WvsContext.partyResult(pjrb));
+                    invited.write(WvsContext.partyResult(PartyResult.applyParty(party, inviter)));
                     chr.chatMessage(SystemNotice, String.format("You invited %s to your party.", invitedName));
                 } else {
                     chr.chatMessage(SystemNotice, String.format("%s is already in a party.", invitedName));
                 }
                 break;
-            case Expel:
+            case PartyReq_KickParty:
                 int expelID = inPacket.decodeInt();
                 party.expel(expelID);
                 break;
-            case ChangeLeadership:
+            case PartyReq_ChangePartyBoss:
                 int newLeaderID = inPacket.decodeInt();
                 party.setPartyLeaderID(newLeaderID);
-                LeaderShipTransferResult lstr = new LeaderShipTransferResult();
-                lstr.newLeaderID = newLeaderID;
-                lstr.reasonIsDisconnect = false;
-                party.broadcast(WvsContext.partyResult(lstr));
+                party.broadcast(WvsContext.partyResult(PartyResult.changePartyBoss(party, newLeaderID)));
                 break;
-            case InviteRequest:
+            case PartyReq_ApplyParty:
                 int partyID = inPacket.decodeInt();
                 party = chr.getField().getChars().stream()
                         .filter(ch -> ch.getParty() != null && ch.getParty().getId() == partyID)
@@ -2745,11 +2721,8 @@ public class WorldHandler {
                         .findFirst()
                         .orElse(null);
                 if(party.getApplyingChar() == null) {
-                    PartyApplyRequest par = new PartyApplyRequest();
-                    par.partyID = partyID;
-                    par.applier = chr;
                     party.setApplyingChar(chr);
-                    party.getPartyLeader().getChr().write(WvsContext.partyResult(par));
+                    party.getPartyLeader().getChr().write(WvsContext.partyResult(PartyResult.inviteIntrusion(party, chr)));
                 } else {
                     chr.chatMessage(SystemNotice, "That party already has an applier. Please wait until the applier is accepted or denied.");
                 }
@@ -2764,56 +2737,50 @@ public class WorldHandler {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
         int partyID = inPacket.decodeInt();
-        PartyRequestResultType prrt = PartyRequestResultType.getByVal(type);
-        if(prrt == null) {
+        PartyType pt = PartyType.getByVal(type);
+        if(pt == null) {
             log.error(String.format("Unknown party request result type %d", type));
             return;
         }
-        switch(prrt) {
-            case AcceptPartyInvite:
+        switch(pt) {
+            case PartyRes_ApplyParty_Accepted:
                 Char leader = chr.getField().getChars().stream()
                         .filter(l -> l.getParty() != null
                         && l.getParty().getId() == partyID).findFirst().orElse(null);
                 Party party = leader.getParty();
                 if(!party.isFull()) {
                     party.addPartyMember(chr);
-                    PartyJoinResult pjr = new PartyJoinResult();
-                    pjr.party = party;
-                    pjr.joinerName = chr.getName();
                     for(Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
-                        onChar.write(WvsContext.partyResult(pjr));
+                        onChar.write(WvsContext.partyResult(PartyResult.joinParty(party, chr.getName())));
                         chr.write(UserRemote.receiveHP(onChar));
                     }
                     party.broadcast(UserRemote.receiveHP(chr));
                 } else {
-                    chr.write(WvsContext.partyResult(new PartyMessageResult(PartyResultType.FullPartyMsg)));
+                    chr.write(WvsContext.partyResult(PartyResult.msg(PartyType.PartyRes_JoinParty_AlreadyFull)));
                 }
                 break;
-            case DeclinePartyInvite:
+            case PartyRes_ApplyParty_Rejected:
                 leader = chr.getField().getChars().stream()
                         .filter(l -> l.getParty() != null &&
                         l.getParty().getId() == partyID).findFirst().orElse(null);
                 leader.chatMessage(SystemNotice, String.format("%s has declined your invite.", chr.getName()));
                 break;
-            case AcceptPartyApply:
+            case PartyRes_InviteIntrusion_Accepted:
                 party = chr.getClient().getWorld().getPartybyId(partyID);
                 Char applier = party.getApplyingChar();
                 if(applier.getParty() != null) {
                     party.getPartyLeader().getChr().chatMessage(SystemNotice, String.format("%s is already in a party.", applier.getName()));
                 } else if(!party.isFull()) {
                     party.addPartyMember(applier);
-                    PartyJoinResult pjr = new PartyJoinResult();
-                    pjr.party = party;
-                    pjr.joinerName = applier.getName();
                     for(Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
-                        onChar.write(WvsContext.partyResult(pjr));
+                        onChar.write(WvsContext.partyResult(PartyResult.joinParty(party, applier.getName())));
                     }
                 } else {
-                    applier.write(WvsContext.partyResult(new PartyMessageResult(PartyResultType.FullPartyMsg)));
+                    applier.write(WvsContext.partyResult(PartyResult.msg(PartyType.PartyRes_JoinParty_AlreadyFull)));
                 }
                 party.setApplyingChar(null);
                 break;
-            case DeclinePartyApply:
+            case PartyRes_InviteIntrusion_Rejected:
                 party = chr.getClient().getWorld().getPartybyId(partyID);
                 applier = party.getApplyingChar();
                 if(applier != null) {

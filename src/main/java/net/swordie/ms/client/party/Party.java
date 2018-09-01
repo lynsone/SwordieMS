@@ -1,9 +1,7 @@
 package net.swordie.ms.client.party;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.party.result.LeavePartyResult;
-import net.swordie.ms.client.party.result.PartyJoinResult;
-import net.swordie.ms.client.party.updates.UpdatePartyResult;
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.connection.OutPacket;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Created on 3/19/2018.
  */
-public class Party {
+public class Party implements Encodable {
     private int id;
     private PartyMember[] partyMembers = new PartyMember[6];
     private boolean appliable;
@@ -118,15 +116,17 @@ public class Party {
             setPartyLeaderID(chr.getId());
         }
         PartyMember[] partyMembers = getPartyMembers();
-        PartyJoinResult pjr = new PartyJoinResult();
-        pjr.party = this;
-        pjr.joinerName = chr.getName();
+        boolean added = false;
         for(int i = 0; i < partyMembers.length; i++) {
             if(partyMembers[i] == null) {
                 partyMembers[i] = pm;
                 chr.setParty(this);
+                added = true;
                 break;
             }
+        }
+        if (added) {
+            broadcast(WvsContext.partyResult(PartyResult.joinParty(this, chr.getName())));
         }
     }
 
@@ -154,19 +154,7 @@ public class Party {
     }
 
     public void disband() {
-        LeavePartyResult lpr = new LeavePartyResult();
-        lpr.party = this;
-        lpr.partyExists = false;
-        lpr.leaver = getPartyLeader();
-        for(PartyMember pm : getPartyMembers()) {
-            if(pm == null) {
-                continue;
-            }
-            pm.getChr().setParty(null);
-            if(pm.isOnline()) {
-                pm.getChr().write(WvsContext.partyResult(lpr));
-            }
-        }
+        broadcast(WvsContext.partyResult(PartyResult.withdrawParty(this, getPartyLeader(), false, false)));
         for (int i = 0; i < getPartyMembers().length; i++) {
             getPartyMembers()[i] = null;
         }
@@ -187,11 +175,7 @@ public class Party {
     }
 
     public void updateFull() {
-        for(PartyMember pm : getOnlineMembers()) {
-            UpdatePartyResult upr = new UpdatePartyResult();
-            upr.party = this;
-            pm.getChr().write(WvsContext.partyResult(upr));
-        }
+        broadcast(WvsContext.partyResult(PartyResult.loadParty(this)));
     }
 
     public PartyMember getPartyMemberByID(int charID) {
@@ -224,13 +208,9 @@ public class Party {
     }
 
     public void expel(int expelID) {
-        LeavePartyResult lpr = new LeavePartyResult();
-        lpr.party = this;
-        lpr.leaver = getPartyMemberByID(expelID);
-        lpr.partyExists = true;
-        lpr.wasExpelled = true;
-        broadcast(WvsContext.partyResult(lpr));
-        removePartyMember(lpr.leaver);
+        PartyMember leaver = getPartyMemberByID(expelID);
+        broadcast(WvsContext.partyResult(PartyResult.withdrawParty(this, leaver, true, true)));
+        removePartyMember(leaver);
         updateFull();
     }
 

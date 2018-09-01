@@ -37,9 +37,7 @@ import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
-import net.swordie.ms.client.party.result.PartyResultInfo;
-import net.swordie.ms.client.party.result.PartyResultType;
-import net.swordie.ms.client.party.updates.UpdateMemberLoggedIn;
+import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
@@ -2213,6 +2211,10 @@ public class Char {
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
 		if (characterData) {
 			initSoulMP();
+			Party party = getParty();
+			if (party != null) {
+				write(WvsContext.partyResult(PartyResult.loadParty(party)));
+			}
 			if (getGuild() != null) {
 				write(WvsContext.guildResult(GuildResult.loadGuild(getGuild())));
 				if (getGuild().getAlliance() != null) {
@@ -2267,16 +2269,6 @@ public class Char {
 		}
 		if (getActiveFamiliar() != null) {
 			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
-		}
-		if (getParty() != null) {
-			Party party = getParty();
-			for (PartyMember pm : party.getOnlineMembers()) {
-				if (pm != null && pm.getChr() != null && pm.getChr().getField() == getField()) {
-					Char otherChar = pm.getChr();
-					otherChar.write(UserRemote.receiveHP(this));
-					write(UserRemote.receiveHP(otherChar));
-				}
-			}
 		}
 		for (Mob mob : toField.getMobs()) {
 			mob.addObserver(getScriptManager());
@@ -3063,7 +3055,7 @@ public class Char {
 			if (pm != null) {
 				pm.setChr(online ? this : null);
 				pm.updateInfoByChar(this);
-				getParty().broadcast(WvsContext.partyResult(new UpdateMemberLoggedIn(this)));
+				getParty().broadcast(WvsContext.partyResult(PartyResult.updateShutdownStatus(this)));
 			}
 		}
 	}

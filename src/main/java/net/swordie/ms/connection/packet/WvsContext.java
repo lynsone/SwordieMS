@@ -20,7 +20,7 @@ import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
-import net.swordie.ms.client.party.result.PartyResultInfo;
+import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
@@ -533,11 +533,10 @@ public class WvsContext {
         return new OutPacket(OutHeader.CLEAR_ANNOUNCED_QUEST);
     }
 
-    public static OutPacket partyResult(PartyResultInfo pri) {
+    public static OutPacket partyResult(PartyResult pri) {
         OutPacket outPacket = new OutPacket(OutHeader.PARTY_RESULT);
 
-        outPacket.encodeByte(pri.getType().getVal());
-        pri.encode(outPacket);
+        outPacket.encode(pri);
 
         return outPacket;
     }
