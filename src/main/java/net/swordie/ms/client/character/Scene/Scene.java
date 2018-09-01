@@ -2,11 +2,8 @@ package net.swordie.ms.client.character.scene;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.InGameDirectionEvent;
-import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.EffectData;
-import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import org.apache.log4j.LogManager;
@@ -55,13 +52,14 @@ public class Scene {
             String path = ei.getVisual() + "/0";
             switch (ei.getType()) {
                 case FieldEffect:
-                    if(ei.getX() == 0 && ei.getY() == 0) {
+//                    if(ei.getX() == 0 && ei.getY() == 0) {
                         EventManager.addEvent(() ->
                                 chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(
                                         path,
                                         0
                                 ))), delay, TimeUnit.MILLISECONDS);
-                    } else {
+/*                    } else { // TODO  Still needs some work
+
                         Position position = new Position(ei.getX(), ei.getY());
                         EventManager.addEvent(() ->
                                 chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(
@@ -74,6 +72,7 @@ public class Scene {
                                         0
                                 ))), delay, TimeUnit.MILLISECONDS); // Delay for getFieldEffFromWz doesn't work
                     }
+*/
                     break;
 
                 case Warp:

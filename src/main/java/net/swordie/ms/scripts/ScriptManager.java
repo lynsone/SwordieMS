@@ -2,14 +2,13 @@ package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.party.Party;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
-import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
-import net.swordie.ms.client.party.Party;
 
 import java.util.Observer;
 import java.util.concurrent.ScheduledFuture;
@@ -623,7 +622,7 @@ public interface ScriptManager extends Observer {
 	 * @param distance distance traveled by the Npc
 	 * @param speed speed at which the Npc travels (a number between 10 and 300)
 	 */
-	void forceNpcMoveByTemplateId(int npcTemplateId, boolean left, int distance, int speed);
+	void moveNpcByTemplateId(int npcTemplateId, boolean left, int distance, int speed);
 
 	/**
 	 * Forces the specified Npc (Object Id) to move in the specified direction
@@ -633,7 +632,7 @@ public interface ScriptManager extends Observer {
 	 * @param distance distance traveled by the Npc
 	 * @param speed speed at which the Npc travels (a number between 10 and 300)
 	 */
-	void forceNpcMoveByObjectId(int npcObjId, boolean left, int distance, int speed);
+	void moveNpcByObjectId(int npcObjId, boolean left, int distance, int speed);
 
 	/**
 	 * Forces the specified Npc (Template Id) to flip
@@ -641,7 +640,7 @@ public interface ScriptManager extends Observer {
 	 * @param npcTemplateId Template Id of the Npc to be flipped
 	 * @param left if true, Npc will face left. if false, Npc will face right
 	 */
-	void forceNpcFlipByTemplateId(int npcTemplateId, boolean left);
+	void flipNpcByTemplateId(int npcTemplateId, boolean left);
 
 	/**
 	 * Forces the specified Npc (Object Id) to flip
@@ -649,7 +648,25 @@ public interface ScriptManager extends Observer {
 	 * @param npcObjId Object Id of the Npc to be flipped
 	 * @param left if true, Npc will face left. if false, Npc will face right
 	 */
-	void forceNpcFlipByObjectId(int npcObjId, boolean left);
+	void flipNpcByObjectId(int npcObjId, boolean left);
+
+	/**
+	 * Forces the Npc to use do the specified special action.
+	 *
+	 * @param npcTemplateId Template Id of the Npc to do the Special Action
+	 * @param effectName Effect name to be shown
+	 * @param duration if duration > 0. The Effect will repeat for duration (ms)
+	 */
+	void showNpcSpecialActionByTemplateId(int npcTemplateId, String effectName, int duration);
+
+	/**
+	 * Forces the Npc to use do the specified special action.
+	 *
+	 * @param npcObjId Object Id of the Npc to do the Special Action
+	 * @param effectName Effect name to be shown
+	 * @param duration if duration > 0. The Effect will repeat for duration (ms)
+	 */
+	void showNpcSpecialActionByObjectId(int npcObjId, String effectName, int duration);
 
 
 

@@ -84,4 +84,15 @@ public class NpcPool {
 
 		return outPacket;
 	}
+
+	public static OutPacket npcSetSpecialAction(int npcObjId, String effectName, int duration) {
+		OutPacket outPacket = new OutPacket(OutHeader.NPC_SET_SPECIAL_ACTION);
+
+		outPacket.encodeInt(npcObjId);
+		outPacket.encodeString(effectName);
+		outPacket.encodeInt(duration); // if  duration > 0  -> Repeat Effect lasts: duration
+		outPacket.encodeByte(true); // showLocal
+
+		return outPacket;
+	}
 }
