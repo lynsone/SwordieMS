@@ -13,7 +13,7 @@ import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.UserLocal;
@@ -127,7 +127,7 @@ public class Hayato extends Job {
             case QUICK_DRAW:
                 if(tsm.getOption(HayatoStance).nOption == 0) {
                     if(swordEnergy < 150) {
-                        chr.chatMessage(ChatMsgColour.GAME_MESSAGE, "You need 150 sword energy to switch into quick draw stance.");
+                        chr.chatMessage(ChatType.SystemNotice, "You need 150 sword energy to switch into quick draw stance.");
                         return;
                     } else {
                         swordEnergy -= 150;
@@ -585,7 +585,7 @@ public class Hayato extends Job {
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {

@@ -79,7 +79,7 @@ import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
-import static net.swordie.ms.enums.ChatMsgColour.GAME_MESSAGE;
+import static net.swordie.ms.enums.ChatType.SystemNotice;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
@@ -1955,24 +1955,24 @@ public class Char {
 	public void chatScriptMessage(String msg) { write(User.scriptProgressMessage(msg));}
 
 	/**
-	 * Sends a message to this Char with a default colour {@link ChatMsgColour#GAME_MESSAGE}.
+	 * Sends a message to this Char with a default colour {@link ChatType#SystemNotice}.
 	 *
 	 * @param msg
 	 * 		The message to display.
 	 */
 	public void chatMessage(String msg) {
-		chatMessage(GAME_MESSAGE, msg);
+		chatMessage(SystemNotice, msg);
 	}
 
 	/**
-	 * Sends a message to this Char with a given {@link ChatMsgColour colour}.
+	 * Sends a message to this Char with a given {@link ChatType colour}.
 	 *
 	 * @param clr
 	 * 		The Colour this message should be in.
 	 * @param msg
 	 * 		The message to display.
 	 */
-	public void chatMessage(ChatMsgColour clr, String msg) {
+	public void chatMessage(ChatType clr, String msg) {
 		getClient().write(UserLocal.chatMsg(clr, msg));
 	}
 

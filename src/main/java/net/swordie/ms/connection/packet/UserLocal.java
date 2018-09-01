@@ -5,7 +5,7 @@ import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.enums.StealMemoryType;
 import net.swordie.ms.enums.StylishKillType;
@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class UserLocal {
 
-    public static OutPacket chatMsg(ChatMsgColour colour, String msg) {
+    public static OutPacket chatMsg(ChatType colour, String msg) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT_MSG);
 
         outPacket.encodeShort(colour.getVal());

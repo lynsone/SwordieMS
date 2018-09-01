@@ -64,7 +64,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
-import static net.swordie.ms.enums.ChatMsgColour.*;
+import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.life.npc.NpcMessageType.*;
 
 /**
@@ -168,7 +168,7 @@ public class ScriptManagerImpl implements ScriptManager {
 //			return;
 //		}
 		if (!isField()) {
-			chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
+			chr.chatMessage(Mob, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 		}
 		ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
@@ -207,7 +207,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		boolean exists = new File(dir).exists();
 		if (!exists) {
 			log.error(String.format("[Error] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
-			chr.chatMessage(YELLOW, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
+			chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
 			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
 					scriptType.toString().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
 		}
@@ -366,6 +366,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void sendAskAccept(String text) {
+		sendGeneralSay(text, AskAccept);
+	}
+
+	@Override
 	public void sendAskText(String text, String defaultText, short minLength, short maxLength) {
 		getNpcScriptInfo().setMin(minLength);
 		getNpcScriptInfo().setMax(maxLength);
@@ -434,16 +439,20 @@ public class ScriptManagerImpl implements ScriptManager {
 	// Start of param methods ------------------------------------------------------------------------------------------
 
 	public void setPlayerAsSpeaker() {
-		getNpcScriptInfo().resetParam();
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
 	}
 
+	public void setBoxChat() {
+		getNpcScriptInfo().setColor((byte) 1);
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.BoxChat);
+	}
 
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
 
 	@Override
 	public void dispose() {
+		getNpcScriptInfo().reset();
 		stop(ScriptType.NPC);
 		stop(ScriptType.PORTAL);
 		stop(ScriptType.ITEM);
@@ -1115,12 +1124,12 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void chatRed(String text) {
-		chr.chatMessage(GAME_MESSAGE, text);
+		chr.chatMessage(SystemNotice, text);
 	}
 
 	@Override
 	public void chatBlue(String text) {
-		chr.chatMessage(GAME_NOTICE, text);
+		chr.chatMessage(Notice2, text);
 	}
 
 	@Override

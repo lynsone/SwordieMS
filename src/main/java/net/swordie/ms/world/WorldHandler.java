@@ -111,7 +111,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
-import static net.swordie.ms.enums.ChatMsgColour.*;
+import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.EquipBaseStat.cuc;
 import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
@@ -231,7 +231,7 @@ public class WorldHandler {
                 for (BaseStat bs : sortedList) {
                     sb.append(String.format("%s = %d, ", bs, basicStats.getOrDefault(bs, 0)));
                 }
-                chr.chatMessage(YELLOW, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
+                chr.chatMessage(Mob, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
 
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
@@ -255,10 +255,10 @@ public class WorldHandler {
                 }
             }
             if (!executed) {
-                chr.chatMessage(CYAN, "Unknown command \"" + command + "\"");
+                chr.chatMessage(Expedition, "Unknown command \"" + command + "\"");
             }
         } else {
-            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatType.USER, msg, false, 0, c.getWorldId()));
+            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatUserType.USER, msg, false, 0, c.getWorldId()));
         }
     }
 
@@ -641,7 +641,7 @@ public class WorldHandler {
         if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK || chr.checkAndSetSkillCooltime(attackInfo.skillId)) {
             int skillID = attackInfo.skillId;
             byte slv = attackInfo.slv;
-            chr.chatMessage(YELLOW, "SkillID: " + skillID);
+            chr.chatMessage(Mob, "SkillID: " + skillID);
             Field field = c.getChr().getField();
             Job sourceJobHandler = chr.getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -684,7 +684,7 @@ public class WorldHandler {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
                 if (mob == null) {
-                    chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", skillID, mai.mobId));
+                    chr.chatMessage(ChatType.Expedition, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", skillID, mai.mobId));
                 } else if (mob.getHp() > 0) {
                     long totalDamage = 0;
                     for (int dmg : mai.damages) {
@@ -1009,7 +1009,7 @@ public class WorldHandler {
             mai.hitPartRunTimes = hitPartRunTimes;
             mai.isResWarriorLiftPress = isResWarriorLiftPress;
             ai.mobAttackInfo.add(mai);
-//            c.getChr().chatMessage(YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
+//            c.getChr().chatMessage(Mob, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
 //                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", foreAction = " + foreAction + ", frameIdx = " + frameIdx);
         }
         if (skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
@@ -1229,7 +1229,7 @@ public class WorldHandler {
                     long interval = msi.getSkillStatIntValue(MobSkillStat.interval) * 1000;
                     long nextUseableTime = curTime + interval;
                     mob.putSkillCooldown(skillID, slv, nextUseableTime);
-                    c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID %d (%s), level = %d",
+                    c.getChr().chatMessage(Mob, String.format("Mob did skill with ID %d (%s), level = %d",
                             mobSkill.getSkill(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkill()), mobSkill.getLevel()));
                     mobSkill.handleEffect(mob);
                 }
@@ -1670,7 +1670,7 @@ public class WorldHandler {
         int requestID = inPacket.decodeInt();
         Char requestChar = field.getCharByID(requestID);
         if (requestChar == null) {
-            chr.chatMessage(GAME_MESSAGE, "The character you tried to find could not be found.");
+            chr.chatMessage(SystemNotice, "The character you tried to find could not be found.");
         } else {
             c.write(CField.characterInfo(requestChar));
         }
@@ -1859,7 +1859,7 @@ public class WorldHandler {
                     InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
                     Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
                     if (equip == null) {
-                        chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                        chr.chatMessage(SystemNotice, "Could not find equip.");
                         chr.dispose();
                         return;
                     } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
@@ -1893,7 +1893,7 @@ public class WorldHandler {
                     invType = ePos < 0 ? EQUIPPED : EQUIP;
                     equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
                     if (equip == null) {
-                        chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+                        chr.chatMessage(SystemNotice, "Could not find equip.");
                         return;
                     } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
                         log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
@@ -1973,7 +1973,7 @@ public class WorldHandler {
                     function.updateToChar(chr);
                     break;
                 default:
-                    chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
+                    chr.chatMessage(Mob, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
                     return;
             }
         }
@@ -2004,7 +2004,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             return;
         }
         int scrollID = scroll.getItemId();
@@ -2047,7 +2047,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             return;
         }
         int scrollID = scroll.getItemId();
@@ -2124,7 +2124,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             chr.dispose();
             return;
         } else if (!ItemConstants.canEquipHavePotential(equip)) {
@@ -2174,7 +2174,7 @@ public class WorldHandler {
                     break;
 
                 default:
-                    chr.chatMessage(YELLOW, "Unhandled scroll " + scrollID);
+                    chr.chatMessage(Mob, "Unhandled scroll " + scrollID);
                     chr.dispose();
                     log.error("Unhandled scroll " + scrollID);
                     return;
@@ -2226,7 +2226,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             return;
         }
         int scrollID = scroll.getItemId();
@@ -2259,13 +2259,13 @@ public class WorldHandler {
                     equip.setHiddenOptionBonus(val, 100);
                     break;
                 default:
-                    chr.chatMessage(YELLOW, "Unhandled scroll " + scrollID);
+                    chr.chatMessage(Mob, "Unhandled scroll " + scrollID);
                     break;
             }
         }
-        chr.chatMessage(YELLOW, "Grade = " + equip.getGrade());
+        chr.chatMessage(Mob, "Grade = " + equip.getGrade());
         for (int i = 0; i < 6; i++) {
-            chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
+            chr.chatMessage(Mob, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), false));
         equip.updateToChar(chr);
@@ -2281,7 +2281,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+            chr.chatMessage(SystemNotice, "Could not find equip.");
             return;
         }
         boolean base = equip.getOptionBase(0) < 0;
@@ -2292,9 +2292,9 @@ public class WorldHandler {
         } else {
             equip.releaseOptions(bonus);
         }
-        chr.chatMessage(YELLOW, "Grade = " + equip.getGrade());
+        chr.chatMessage(Mob, "Grade = " + equip.getGrade());
         for (int i = 0; i < 6; i++) {
-            chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
+            chr.chatMessage(Mob, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemReleaseEffect(chr.getId(), ePos, bonus));
         equip.updateToChar(chr);
@@ -2488,7 +2488,7 @@ public class WorldHandler {
                     tsm.removeAllDebuffs();
                     break;
                 default:
-                    chr.chatMessage(YELLOW, String.format("Unhandled stat change item %d", itemID));
+                    chr.chatMessage(Mob, String.format("Unhandled stat change item %d", itemID));
             }
             chr.consumeItem(item);
         }
@@ -2589,7 +2589,7 @@ public class WorldHandler {
             }
         }
         if(questID == 0 || qt == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not start quest.");
+            chr.chatMessage(SystemNotice, "Could not start quest.");
             return;
         }
         switch(qt) {
@@ -2710,12 +2710,12 @@ public class WorldHandler {
                 pjrb.inviter = party.getPartyLeader();
                 pjrb.partyID = party.getId();
                 if(!invited.isPartyInvitable()) {
-                    chr.chatMessage(GAME_MESSAGE, String.format("%s is currently not accepting party invites.", invitedName));
+                    chr.chatMessage(SystemNotice, String.format("%s is currently not accepting party invites.", invitedName));
                 } else if(invited.getParty() == null) {
                     invited.write(WvsContext.partyResult(pjrb));
-                    chr.chatMessage(GAME_MESSAGE, String.format("You invited %s to your party.", invitedName));
+                    chr.chatMessage(SystemNotice, String.format("You invited %s to your party.", invitedName));
                 } else {
-                    chr.chatMessage(GAME_MESSAGE, String.format("%s is already in a party.", invitedName));
+                    chr.chatMessage(SystemNotice, String.format("%s is already in a party.", invitedName));
                 }
                 break;
             case Expel:
@@ -2744,7 +2744,7 @@ public class WorldHandler {
                     party.setApplyingChar(chr);
                     party.getPartyLeader().getChr().write(WvsContext.partyResult(par));
                 } else {
-                    chr.chatMessage(GAME_MESSAGE, "That party already has an applier. Please wait until the applier is accepted or denied.");
+                    chr.chatMessage(SystemNotice, "That party already has an applier. Please wait until the applier is accepted or denied.");
                 }
                 break;
             default:
@@ -2786,13 +2786,13 @@ public class WorldHandler {
                 leader = chr.getField().getChars().stream()
                         .filter(l -> l.getParty() != null &&
                         l.getParty().getId() == partyID).findFirst().orElse(null);
-                leader.chatMessage(GAME_MESSAGE, String.format("%s has declined your invite.", chr.getName()));
+                leader.chatMessage(SystemNotice, String.format("%s has declined your invite.", chr.getName()));
                 break;
             case AcceptPartyApply:
                 party = chr.getClient().getWorld().getPartybyId(partyID);
                 Char applier = party.getApplyingChar();
                 if(applier.getParty() != null) {
-                    party.getPartyLeader().getChr().chatMessage(GAME_MESSAGE, String.format("%s is already in a party.", applier.getName()));
+                    party.getPartyLeader().getChr().chatMessage(SystemNotice, String.format("%s is already in a party.", applier.getName()));
                 } else if(!party.isFull()) {
                     party.addPartyMember(applier);
                     PartyJoinResult pjr = new PartyJoinResult();
@@ -2810,7 +2810,7 @@ public class WorldHandler {
                 party = chr.getClient().getWorld().getPartybyId(partyID);
                 applier = party.getApplyingChar();
                 if(applier != null) {
-                    applier.chatMessage(GAME_MESSAGE, "Your party apply request has been denied.");
+                    applier.chatMessage(SystemNotice, "Your party apply request has been denied.");
                     party.setApplyingChar(null);
                 }
                 break;
@@ -2836,7 +2836,7 @@ public class WorldHandler {
             case 6: // whisper
                 String msg = inPacket.decodeString();
                 dest.write(CField.whisper(chr.getName(), (byte) (c.getChannel() - 1), false, msg, false));
-                chr.chatMessage(WHISPER_GREEN, String.format("%s<< %s", dest.getName(), msg));
+                chr.chatMessage(Whisper, String.format("%s<< %s", dest.getName(), msg));
                 break;
         }
 
@@ -3123,7 +3123,7 @@ public class WorldHandler {
         if (chr.checkAndSetSkillCooltime(skillID)) {
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skillID, slv, 0)));
             log.debug("SkillID: " + skillID);
-            c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+            c.getChr().chatMessage(ChatType.Mob, "SkillID: " + skillID);
             Job sourceJobHandler = c.getChr().getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
             if (si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
@@ -3899,28 +3899,28 @@ public class WorldHandler {
         }
         Skill skill = chr.getSkill(skillid);
         if(skill == null) {
-            chr.chatMessage(GAME_NOTICE, "An error has occured. Mastery Book ID: "+ itemID +",  skill ID: "+ skillid +".");
+            chr.chatMessage(Notice2, "An error has occured. Mastery Book ID: "+ itemID +",  skill ID: "+ skillid +".");
             chr.dispose();
             return;
         }
         if (skillid == 0 || (skill.getMasterLevel() >= masterLevel) || skill.getCurrentLevel() < reqSkillLv) {
-            chr.chatMessage(GAME_MESSAGE, "You cannot use this Mastery Book.");
+            chr.chatMessage(SystemNotice, "You cannot use this Mastery Book.");
             chr.dispose();
             return;
         }
 
         if(skill.getCurrentLevel() > reqSkillLv && skill.getMasterLevel() < masterLevel) {
-            chr.chatMessage(YELLOW, "Success Chance: "+chance+"%.");
+            chr.chatMessage(Mob, "Success Chance: "+chance+"%.");
             if(Util.succeedProp(chance)) {
                 skill.setMasterLevel(masterLevel);
                 List<Skill> list = new ArrayList<>();
                 list.add(skill);
                 chr.addSkill(skill);
                 chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
-                chr.chatMessage(GAME_NOTICE, "[Mastery Book] Item id: " + itemID + "  set Skill id: " + skillid + "'s Master Level to: " + masterLevel + ".");
+                chr.chatMessage(Notice2, "[Mastery Book] Item id: " + itemID + "  set Skill id: " + skillid + "'s Master Level to: " + masterLevel + ".");
             }
             else {
-                chr.chatMessage(GAME_NOTICE, "[Mastery Book] Item id: " + itemID + " was used, however it was unsuccessful.");
+                chr.chatMessage(Notice2, "[Mastery Book] Item id: " + itemID + " was used, however it was unsuccessful.");
             }
             chr.consumeItem(itemID, 1);
         }
@@ -4308,13 +4308,13 @@ public class WorldHandler {
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(eqpPosition);
 
         if (flame == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find flame or equip.");
+            chr.chatMessage(SystemNotice, "Could not find flame or equip.");
             chr.dispose();
             return;
         }
 
         if (!ItemConstants.isRebirthFlame(flame)) {
-            chr.chatMessage(GAME_MESSAGE, "This item is not a rebirth flame.");
+            chr.chatMessage(SystemNotice, "This item is not a rebirth flame.");
             chr.dispose();
             return;
         }

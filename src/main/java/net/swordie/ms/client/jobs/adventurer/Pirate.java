@@ -13,7 +13,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.handlers.EventManager;
@@ -719,12 +719,12 @@ public class Pirate extends Beginner {
         }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(Stimulate)) {
-            chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy before: "+ getViperEnergy());
+            chr.chatMessage(ChatType.Expedition, "Viper Energy before: "+ getViperEnergy());
             Skill skill = chr.getSkill(STIMULATING_CONVERSATION);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             incrementViperEnergy(si.getValue(x, slv));
-            chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
+            chr.chatMessage(ChatType.Expedition, "Viper Energy after: "+ getViperEnergy());
             stimulatingConversationTimer = EventManager.addEvent(this::incrementStimulatingConversation, 4, TimeUnit.SECONDS);
         }
     }
@@ -780,10 +780,10 @@ public class Pirate extends Beginner {
                 applyStunMasteryOnMob(attackInfo);
 
                 //Viper Energy
-                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy before: "+ getViperEnergy());
+                chr.chatMessage(ChatType.Expedition, "Viper Energy before: "+ getViperEnergy());
                 applyViperEnergyCosts(attackInfo.skillId);
                 incrementViperEnergy(getEnergyincrease());
-                chr.chatMessage(ChatMsgColour.CYAN, "Viper Energy after: "+ getViperEnergy());
+                chr.chatMessage(ChatType.Expedition, "Viper Energy after: "+ getViperEnergy());
 
             }
         }
@@ -1042,7 +1042,7 @@ public class Pirate extends Beginner {
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);

@@ -235,6 +235,12 @@ public class NpcScriptInfo {
 		setParam((byte) 0);
 	}
 
+	public void reset() {
+		resetParam();
+		setSpeakerType((byte) 0);
+		setColor((byte) 0);
+	}
+
 	public enum Param {
 		NotCancellable(0x1),
 		PlayerAsSpeaker(0x2),
@@ -244,14 +250,14 @@ public class NpcScriptInfo {
 		FlipSpeakerNoEndChat(0x9),
 		PlayerAsSpeakerFlip(0x10),
 		PlayerAsSpeakerFlipNoEndChat(0x11),
-		ZeroChat(0x20), //Zero Chat
-		ZeroChatNoEndChat(0x21),
-		ZeroChatAsPlayer(0x22),
-		ZeroChatAsPlayerNoEndChat(0x23),
-		FlipZeroChat(0x28),
-		FlipZeroChatNoEscape(0x29),
-		FlipZeroChatAsPlayer(0x30),
-		FlipZeroChatAsPlayerNoEscape(0x31),
+		BoxChat(0x20), //Zero Chat
+		BoxChatNoEndChat(0x21),
+		BoxChatAsPlayer(0x22),
+		BoxChatAsPlayerNoEndChat(0x23),
+		FlipBoxChat(0x28),
+		FlipBoxChatNoEscape(0x29),
+		FlipBoxChatAsPlayer(0x30),
+		FlipBoxChatAsPlayerNoEscape(0x31),
 		;
 
 		private int val;

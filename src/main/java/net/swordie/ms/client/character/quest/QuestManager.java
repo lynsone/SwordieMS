@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.swordie.ms.enums.ChatMsgColour.YELLOW;
+import static net.swordie.ms.enums.ChatType.Mob;
 import static net.swordie.ms.enums.QuestStatus.*;
 
 /**
@@ -128,9 +128,9 @@ public class QuestManager {
             getQuests().put(quest.getQRKey(), quest);
             chr.write(WvsContext.questRecordMessage(quest));
             if(quest.getStatus() == QuestStatus.COMPLETE) {
-                chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
+                chr.chatMessage(Mob, "[Info] Completed quest " + quest.getQRKey());
             } else {
-                chr.chatMessage(YELLOW, "[Info] Accepted quest " + quest.getQRKey());
+                chr.chatMessage(Mob, "[Info] Accepted quest " + quest.getQRKey());
                 if(addRewardsFromWz) {
                     QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
                     if (qi != null) {
@@ -197,7 +197,7 @@ public class QuestManager {
         }
         quest.setStatus(QuestStatus.COMPLETE);
         quest.setCompletedTime(FileTime.currentTime());
-        chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
+        chr.chatMessage(Mob, "[Info] Completed quest " + quest.getQRKey());
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.questCompleteEffect()));
         chr.write(User.effect(Effect.questCompleteEffect()));
         chr.write(WvsContext.questRecordMessage(quest));

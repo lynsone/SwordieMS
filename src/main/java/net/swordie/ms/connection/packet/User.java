@@ -2,7 +2,7 @@ package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.ChatType;
+import net.swordie.ms.enums.ChatUserType;
 import net.swordie.ms.handlers.header.OutHeader;
 
 /**
@@ -10,7 +10,7 @@ import net.swordie.ms.handlers.header.OutHeader;
  */
 public class User {
 
-    public static OutPacket chat(int charID, ChatType type, String msg, boolean onlyBalloon, int idk, int worldID) {
+    public static OutPacket chat(int charID, ChatUserType type, String msg, boolean onlyBalloon, int idk, int worldID) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT);
 
         outPacket.encodeInt(charID);

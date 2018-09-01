@@ -177,7 +177,7 @@ public abstract class Job {
 		if(skill != null) {
 			si = SkillData.getSkillInfoById(skillID);
 		}
-		chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+		chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
 		Summon summon;
 		Field field;
 		if (isBuff(skillID)) {

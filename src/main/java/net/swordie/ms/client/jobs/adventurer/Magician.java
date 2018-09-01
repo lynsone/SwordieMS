@@ -710,7 +710,7 @@ public class Magician extends Beginner {
                     recreateMegiddoFlameForceAtom(skillID, slv, attackInfo);
                 }
             }
-            chr.chatMessage(ChatMsgColour.WHISPER_GREEN, "Elemental Drain Stack: " + getFerventDrainStack());
+            chr.chatMessage(ChatType.Whisper, "Elemental Drain Stack: " + getFerventDrainStack());
         }
         if (JobConstants.isIceLightning(chr.getJob())) {
             if(hasHitMobs) {
@@ -1077,7 +1077,7 @@ public class Magician extends Beginner {
         } else {
             tsm.sendSetStatPacket();
         }
-        chr.chatMessage(ChatMsgColour.WHISPER_GREEN, "Elemental Drain Stack: " + getFerventDrainStack());
+        chr.chatMessage(ChatType.Whisper, "Elemental Drain Stack: " + getFerventDrainStack());
     }
 
     private void applyFreezingCrushOnMob(AttackInfo attackInfo, int skillID) {

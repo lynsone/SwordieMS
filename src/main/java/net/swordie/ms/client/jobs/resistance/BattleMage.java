@@ -13,7 +13,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.AssistType;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
@@ -590,7 +590,7 @@ public class BattleMage extends Citizen {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {

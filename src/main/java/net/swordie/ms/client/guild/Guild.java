@@ -8,7 +8,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 
 import javax.persistence.*;
 import java.util.*;
@@ -414,7 +414,7 @@ public class Guild implements Encodable {
         setPoints(getPoints() + commitment);
         if (getLevel() < GameConstants.MAX_GUILD_LV && getPoints() > GameConstants.getExpRequiredForNextGuildLevel(getLevel())) {
             setLevel(getLevel() + 1);
-            broadcast(UserLocal.chatMsg(ChatMsgColour.GAME_NOTICE, String.format("%s has reached level %d!",
+            broadcast(UserLocal.chatMsg(ChatType.Notice2, String.format("%s has reached level %d!",
                     getName(), getLevel())));
         }
         broadcast(WvsContext.guildResult(GuildResult.setPointAndLevel(this)));

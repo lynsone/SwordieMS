@@ -6,6 +6,7 @@ import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
+import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.party.Party;
@@ -108,6 +109,15 @@ public interface ScriptManager extends Observer {
 	void sendAskYesNo(String text);
 
 	/**
+	 * Sends a message box with accept / decline buttons.<br>
+	 * Example: "sm.sendAskAccept("Do you want to accept my quest?")"
+	 *
+	 * @param text
+	 * 		The text to display inside of the message box.
+	 */
+	void sendAskAccept(String text);
+
+	/**
 	 * Sends a message box asking a user for some text.<br>
 	 * Example: "sm.sendAskText("Please input some text.", "Hello World!", 1, 20)"
 	 *
@@ -207,6 +217,24 @@ public interface ScriptManager extends Observer {
 	 */
 	void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options);
 
+	/**
+	 * Sends a slide window to the client with a given dlgType.
+	 * Example: "sm.sendAskSlideMenu(0)" (for the dimensional portal)
+	 * @param dlgType the dialogue type.
+	 */
+	void sendAskSlideMenu(int dlgType);
+
+	// Start of param methods ------------------------------------------------------------------------------------------
+
+	/**
+	 * Sets the player as the speaker instead of an npc.
+	 */
+	void setPlayerAsSpeaker();
+
+	/**
+	 * Sets the current chat type to be a brown box at the bottom of the screen.
+	 */
+	void setBoxChat();
 
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
