@@ -16,6 +16,8 @@ drop table if exists test;
 drop table if exists skills;
 drop table if exists characters;
 drop table if exists avatardata;
+drop table if exists alliance_gradenames;
+drop table if exists alliances;
 drop table if exists keymaps;
 drop table if exists funckeymap;
 drop table if exists characterstats;
@@ -515,7 +517,24 @@ create table guilds (
     reqlevel int,
     bbsNotice int,
     battleSp int,
+    fk_allianceid int,
     primary key (id)
+);
+
+create table alliances (
+	id int not null auto_increment,
+    name varchar(255),
+    maxmembernum int,
+    notice varchar(255),
+    primary key (id)
+);
+
+create table alliance_gradenames(
+	id int not null auto_increment,
+	gradename varchar(255),
+    allianceid int,
+    primary key (id),
+    foreign key (allianceid) references alliances(id) on delete cascade
 );
 
 create table bbs_records (
@@ -744,7 +763,7 @@ create table monster_collection_rewards (
 
 create table accounts (
 	id int not null auto_increment,
-	username varchar(255),
+	name varchar(255),
 	password varchar(255),
 	pic varchar(255),
 	mac varchar(255),
@@ -813,7 +832,7 @@ create table friends (
 );
 
 
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '0', '111111', '40', '500000');
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '0', '111111', '40', '500000');
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '0', '111111', '40');
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '0', '111111', '40');

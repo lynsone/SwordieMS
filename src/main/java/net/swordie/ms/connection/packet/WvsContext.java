@@ -1,5 +1,6 @@
 package net.swordie.ms.connection.packet;
 
+import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.cards.CharacterCard;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
@@ -586,6 +587,14 @@ public class WvsContext {
         OutPacket outPacket = new OutPacket(OutHeader.GUILD_RESULT);
 
         gri.encode(outPacket);
+
+        return outPacket;
+    }
+
+    public static OutPacket allianceResult(AllianceResult ar) {
+        OutPacket outPacket = new OutPacket(OutHeader.ALLIANCE_RESULT);
+
+        outPacket.encode(ar);
 
         return outPacket;
     }

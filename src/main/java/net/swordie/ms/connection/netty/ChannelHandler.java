@@ -293,6 +293,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case GUILD_REQUEST:
                 WorldHandler.handleGuildRequest(c, inPacket);
                 break;
+            case ALLIANCE_REQUEST:
+                WorldHandler.handleAllianceRequest(chr, inPacket);
+                break;
             case GUILD_BBS:
                 WorldHandler.handleGuildBBS(chr, inPacket);
                 break;

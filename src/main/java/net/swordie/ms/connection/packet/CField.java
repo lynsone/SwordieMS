@@ -279,7 +279,8 @@ public class CField {
         }
         outPacket.encodeByte(0); // size(byte) of productSkill(Professions)(short); stuff like mining, herblore, etc...
         outPacket.encodeString(chr.getGuild() == null ? "-" : chr.getGuild().getName());
-        outPacket.encodeString("Unimpl ally");
+        outPacket.encodeString(chr.getGuild() == null || chr.getGuild().getAlliance() == null ? "-" :
+                chr.getGuild().getAlliance().getName());
         outPacket.encodeByte(-1); // Forced pet IDx
         outPacket.encodeByte(0); // User state (?)
         outPacket.encodeByte(chr.getPets().size() > 0); // pet activated

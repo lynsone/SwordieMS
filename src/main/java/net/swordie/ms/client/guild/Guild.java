@@ -1,5 +1,6 @@
 package net.swordie.ms.client.guild;
 
+import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.guild.bbs.BBSRecord;
 import net.swordie.ms.client.guild.result.GuildResult;
@@ -68,6 +69,8 @@ public class Guild implements Encodable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "bbsNotice")
     private BBSRecord bbsNotice;
+    @Transient
+    private Alliance alliance;
 
     public Guild() {
         setGradeNames(new String[]{"Guild Master", "Junior", "Veteran", "Member", "Newbie"});
@@ -113,7 +116,7 @@ public class Guild implements Encodable {
         outPacket.encodeString(getNotice());
         outPacket.encodeInt(getPoints());
         outPacket.encodeInt(getSeasonPoints());
-        outPacket.encodeInt(0); // nAllianceID
+        outPacket.encodeInt(getAllianceID());
         outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getRank());
         outPacket.encodeInt(getGgp());
@@ -483,5 +486,22 @@ public class Guild implements Encodable {
 
     public GuildSkill getSkillById(int skillID) {
         return getSkills().getOrDefault(skillID, null);
+    }
+
+    public void setAlliance(Alliance alliance) {
+        this.alliance = alliance;
+        setAllianceID(alliance.getId());
+    }
+
+    public Alliance getAlliance() {
+        return alliance;
+    }
+
+    public boolean isGuildMaster(Char chr) {
+        return getLeaderID() == chr.getId();
+    }
+
+    public GuildMember getGuildLeader() {
+        return getMemberByCharID(getLeaderID());
     }
 }

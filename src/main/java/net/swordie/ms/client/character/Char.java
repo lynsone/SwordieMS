@@ -4,6 +4,8 @@ import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.LinkSkill;
+import net.swordie.ms.client.alliance.Alliance;
+import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.avatar.AvatarData;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.cards.MonsterBookInfo;
@@ -35,6 +37,9 @@ import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.client.party.result.PartyResultInfo;
+import net.swordie.ms.client.party.result.PartyResultType;
+import net.swordie.ms.client.party.updates.UpdateMemberLoggedIn;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
@@ -1777,14 +1782,21 @@ public class Char {
 	 * Notifies all groups (such as party, guild) about all your changes, such as level and job.
 	 */
 	private void notifyChanges() {
-		if (getParty() != null) {
-			getParty().updateFull();
+		Party party = getParty();
+		if (party != null) {
+			party.updatePartyMemberInfoByChr(this);
+			party.updateFull();
 		}
-		if (getGuild() != null) {
-			GuildMember gm = getGuild().getMemberByCharID(getId());
+		Guild guild = getGuild();
+		if (guild != null) {
+			GuildMember gm = guild.getMemberByCharID(getId());
 			gm.setLevel(getLevel());
 			gm.setJob(getJob());
-			getGuild().broadcast(WvsContext.guildResult(GuildResult.changeLevelOrJob(getGuild(), gm)));
+			guild.broadcast(WvsContext.guildResult(GuildResult.changeLevelOrJob(guild, gm)));
+			Alliance ally = guild.getAlliance();
+			if (ally != null) {
+				ally.broadcast(WvsContext.allianceResult(AllianceResult.changeLevelOrJob(ally, guild, gm)));
+			}
 		}
 	}
 
@@ -2203,6 +2215,10 @@ public class Char {
 			initSoulMP();
 			if (getGuild() != null) {
 				write(WvsContext.guildResult(GuildResult.loadGuild(getGuild())));
+				if (getGuild().getAlliance() != null) {
+					write(WvsContext.allianceResult(AllianceResult.loadDone(getGuild().getAlliance())));
+					write(WvsContext.allianceResult(AllianceResult.loadGuildDone(getGuild().getAlliance())));
+				}
 			}
 			for (Friend f : getFriends()) {
 				f.setFlag(getClient().getWorld().getCharByID(f.getFriendID()) != null
@@ -3032,15 +3048,22 @@ public class Char {
 			GuildMember gm = g.getMemberByCharID(getId());
 			gm.setOnline(online);
 			gm.setChr(online ? this : null);
-			getGuild().broadcast(WvsContext.guildResult(
-					GuildResult.notifyLoginOrLogout(g, gm, online, !this.online && online)), this);
+			Alliance ally = getGuild().getAlliance();
+			if (ally != null) {
+				ally.broadcast(WvsContext.allianceResult(
+						AllianceResult.notifyLoginOrLogout(ally, g, gm, !this.online && online)), this);
+			} else {
+				getGuild().broadcast(WvsContext.guildResult(
+						GuildResult.notifyLoginOrLogout(g, gm, online, !this.online && online)), this);
+			}
 		}
 		this.online = online;
 		if (getParty() != null) {
 			PartyMember pm = getParty().getPartyMemberByID(getId());
 			if (pm != null) {
-				party.updatePartyMemberInfoByChr(this);
 				pm.setChr(online ? this : null);
+				pm.updateInfoByChar(this);
+				getParty().broadcast(WvsContext.partyResult(new UpdateMemberLoggedIn(this)));
 			}
 		}
 	}
@@ -3867,5 +3890,9 @@ public class Char {
 		for (Item item : expiredItems) {
 			consumeItem(item);
 		}
+	}
+
+	public boolean isGuildLeader() {
+		return getGuild() != null && getGuild().getLeaderID() == getId();
 	}
 }

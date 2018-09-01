@@ -860,6 +860,12 @@ public interface ScriptManager extends Observer {
 	 */
 	void showGuildCreateWindow();
 
+	/**
+	 * Checks if an alliance name is valid.
+	 * Example: "sm.checkAllianceName("Swordie")"
+	 */
+	boolean checkAllianceName(String name);
+
 
 
 	// Chat-related methods --------------------------------------------------------------------------------------------

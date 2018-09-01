@@ -1,29 +1,22 @@
 package net.swordie.ms.client;
 
 import net.swordie.ms.Server;
-import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.FileTimeConverter;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.util.FileTime;
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,7 +31,7 @@ public class Account {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String username;
+    private String name;
     private String password;
     @Column(name = "accountTypeMask")
     private int accountType;
@@ -86,10 +79,10 @@ public class Account {
     private FileTime banExpireDate;
     private String banReason;
 
-    public Account(String username, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
+    public Account(String name, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
                    byte gradeCode, String censoredNxLoginID, int characterSlots, long creationDate) {
-        this.username = username;
+        this.name = name;
         this.password = password;
         this.id = accountId;
         this.pic = pic;
@@ -123,24 +116,11 @@ public class Account {
     }
 
     public static Account getFromDBByName(String name) {
-        log.info(String.format("%s: Trying to get Account by name (%s).", LocalDateTime.now(), name));
-        // DAO?
-        Session session = DatabaseManager.getSession();
-        Transaction transaction = session.beginTransaction();
-        Query query = session.createQuery("FROM Account acc WHERE acc.username = :name");
-        query.setParameter("name", name);
-        List l = ((org.hibernate.query.Query) query).list();
-        Account account = null;
-        if (l != null && l.size() > 0) {
-            account = (Account) l.get(0);
-        }
-        transaction.commit();
-        session.close();
-        return account;
+        return (Account) DatabaseManager.getObjFromDB(Account.class, name);
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
     public String getPassword() {
@@ -219,8 +199,8 @@ public class Account {
         return censoredNxLoginID;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setPassword(String password) {

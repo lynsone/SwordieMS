@@ -1,7 +1,10 @@
 package net.swordie.ms.scripts;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.alliance.Alliance;
+import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterPark;
 import net.swordie.ms.client.character.avatar.AvatarLook;
@@ -16,6 +19,7 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.party.Party;
@@ -40,6 +44,7 @@ import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Foothold;
@@ -248,10 +253,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void handleAction(byte lastType, byte response, int answer) {
-		handleAction(getLastActiveScriptType(), lastType, response, answer);
+		handleAction(getLastActiveScriptType(), lastType, response, answer, null);
 	}
 
-	public void handleAction(ScriptType scriptType, byte lastType, byte response, int answer) {
+	public void handleAction(byte lastType, byte response, String text) {
+		handleAction(getLastActiveScriptType(), lastType, response, 0, text);
+	}
+
+	public void handleAction(ScriptType scriptType, byte lastType, byte response, int answer, String text) {
 		switch (response) {
 			case -1:
 			case 5:
@@ -261,10 +270,18 @@ public class ScriptManagerImpl implements ScriptManager {
 			case 1:
 			case 2:
 				try {
-					if (isActive(scriptType)) {
-						getInvocableByType(scriptType).invokeFunction("action", response, answer);
-					} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
-						getInvocableByType(ScriptType.PORTAL).invokeFunction("action", response, answer);
+					if (text == null) {
+						if (isActive(scriptType)) {
+							getInvocableByType(scriptType).invokeFunction("action", response, answer);
+						} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
+							getInvocableByType(ScriptType.PORTAL).invokeFunction("action", response, answer);
+						}
+					} else {
+						if (isActive(scriptType)) {
+							getInvocableByType(scriptType).invokeFunction("text_answer", text);
+						} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
+							getInvocableByType(ScriptType.PORTAL).invokeFunction("text_answer", text);
+						}
 					}
 				} catch (ScriptException | NoSuchMethodException e) {
 					e.printStackTrace();
@@ -1104,11 +1121,32 @@ public class ScriptManagerImpl implements ScriptManager {
 
 
 
-	// Guild-related methods -------------------------------------------------------------------------------------------
+	// Guild/Alliance related methods -------------------------------------------------------------------------------------------
 
 	@Override
 	public void showGuildCreateWindow() {
 		chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Req_InputGuildName)));
+	}
+
+	@Override
+	public boolean checkAllianceName(String name) {
+		World world = chr.getClient().getWorld();
+		return world.getAlliance(name) == null;
+	}
+
+	public void createAlliance(String name, Char other) {
+		Alliance alliance = new Alliance();
+		alliance.setName(name);
+		alliance.addGuild(chr.getGuild());
+		alliance.addGuild(other.getGuild());
+		GuildMember chrMember = chr.getGuild().getMemberByCharID(chr.getId());
+		chrMember.setAllianceGrade(1);
+		GuildMember otherMember = other.getGuild().getMemberByCharID(other.getId());
+		otherMember.setAllianceGrade(2);
+		DatabaseManager.saveToDB(alliance);
+		chr.getGuild().setAlliance(alliance);
+		other.getGuild().setAlliance(alliance);
+		alliance.broadcast(WvsContext.allianceResult(AllianceResult.createDone(alliance)));
 	}
 
 

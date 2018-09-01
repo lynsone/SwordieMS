@@ -2,6 +2,7 @@ package net.swordie.ms.connection.db;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.LinkSkill;
+import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.avatar.AvatarData;
 import net.swordie.ms.client.character.avatar.AvatarLook;
@@ -116,6 +117,7 @@ public class DatabaseManager {
                 MonsterCollectionMobInfo.class,
                 MonsterCollection.class,
                 MonsterCollectionReward.class,
+                Alliance.class,
 
         };
         for(Class clazz : dbClasses) {
@@ -180,6 +182,25 @@ public class DatabaseManager {
             Transaction t = session.beginTransaction();
             o = session.get(clazz, id);
             t.commit();
+        }
+        return o;
+    }
+
+    public static Object getObjFromDB(Class clazz, String name) {
+        log.info(String.format("%s: Trying to get obj %s with name %s.", LocalDateTime.now(), clazz, name));
+        Object o = null;
+        try(Session session = getSession()) {
+            Transaction transaction = session.beginTransaction();
+            // String.format for query, just to fill in the class
+            // Can't set the FROM clause with a parameter it seems
+            javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE name = :name", clazz.getName()));
+            query.setParameter("name", name);
+            List l = ((org.hibernate.query.Query) query).list();
+            if (l != null && l.size() > 0) {
+                o = l.get(0);
+            }
+            transaction.commit();
+            session.close();
         }
         return o;
     }

@@ -40,6 +40,8 @@ public class GuildMember implements Encodable {
     public GuildMember(Char chr) {
         this.chr = chr;
         updateInfoFromChar(chr);
+        grade = 5;
+        allianceGrade = 5;
     }
 
     public void updateInfoFromChar(Char chr) {

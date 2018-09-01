@@ -3,6 +3,8 @@ package net.swordie.ms.world;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.alliance.Alliance;
+import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
@@ -2380,7 +2382,10 @@ public class WorldHandler {
         byte action = inPacket.decodeByte();
         int answer = 0;
         boolean hasAnswer = false;
-        if (inPacket.getUnreadAmount() >= 4) {
+        String ans = null;
+        if (nmt == NpcMessageType.AskText && action == 1) {
+            ans = inPacket.decodeString();
+        } else if (inPacket.getUnreadAmount() >= 4) {
             answer = inPacket.decodeInt();
             hasAnswer = true;
         }
@@ -2388,13 +2393,15 @@ public class WorldHandler {
             inPacket.decodeByte();
             hasAnswer = inPacket.decodeByte() != 0;
             answer = inPacket.decodeByte();
-        }
-        if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
+        }if (nmt == NpcMessageType.AskText && action != 0) {
+            chr.getScriptManager().handleAction(lastType, action, ans);
+        } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
                 nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
                 nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
             // else -> User pressed escape in a selection (choice) screen
             chr.getScriptManager().handleAction(lastType, action, answer);
         } else {
+            // User pressed escape in a selection (choice) screen
             chr.dispose();
             chr.getScriptManager().dispose();
         }
@@ -3086,6 +3093,101 @@ public class WorldHandler {
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
 
+        }
+    }
+
+    public static void handleAllianceRequest(Char chr, InPacket inPacket) {
+        byte type = inPacket.decodeByte();
+        AllianceType at = AllianceType.getByVal(type);
+        if(at == null) {
+            log.error(String.format("Unknown alliance request %d", type));
+            return;
+        }
+        Guild guild = chr.getGuild();
+        Alliance alliance = guild == null ? null : guild.getAlliance();
+        Char other;
+        Guild otherGuild;
+        World world = chr.getClient().getWorld();
+        GuildMember member = guild == null ? null : chr.getGuild().getMemberByCharID(chr.getId());
+        GuildMember otherMember;
+        if (!chr.isGuildLeader()) {
+            return;
+        }
+        switch (at) {
+            case Req_Withdraw:
+                if (member.getAllianceGrade() == 1) {
+                    if (alliance.getGuilds().size() <= 1) {
+                        alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, guild, false)));
+                        alliance.removeGuild(guild);
+                        DatabaseManager.deleteFromDB(alliance);
+                    } else {
+                        Set<Guild> remainingGuilds = new HashSet<>(alliance.getGuilds());
+                        remainingGuilds.remove(guild);
+                        Guild newLeadingGuild = Util.getRandomFromCollection(remainingGuilds);
+                        otherMember = newLeadingGuild.getGuildLeader();
+                        otherMember.setAllianceGrade(1);
+                        alliance.broadcast(WvsContext.allianceResult(AllianceResult.changeMaster(alliance, member, otherMember)));
+                        alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, guild, false)));
+                        alliance.removeGuild(guild);
+                    }
+                } else {
+                    alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, guild, false)));
+                    alliance.removeGuild(guild);
+                }
+                break;
+            case Req_Invite:
+                String guildName = inPacket.decodeString();
+                otherGuild = world.getGuildByName(guildName);
+                if (otherGuild != null) {
+                    other = world.getCharByID(otherGuild.getLeaderID());
+                    if (other != null) {
+                        if (other.getGuild().getAlliance() == null) {
+                            other.write(WvsContext.allianceResult(AllianceResult.inviteGuild(alliance, member)));
+                        } else {
+                            other.write(WvsContext.allianceResult(AllianceResult.msg(AllianceType.Res_InviteGuild_AlreadyInvited)));
+                        }
+                    } else {
+                        chr.write(WvsContext.allianceResult(AllianceResult.msg(AllianceType.Res_Invite_Failed)));
+                    }
+                } else {
+                    chr.write(WvsContext.allianceResult(AllianceResult.msg(AllianceType.Res_Invite_Failed)));
+                }
+                break;
+            case Req_Load:
+                chr.write(WvsContext.allianceResult(AllianceResult.loadDone(alliance)));
+                chr.write(WvsContext.allianceResult(AllianceResult.loadGuildDone(alliance)));
+                break;
+            case Req_ChangeMaster:
+                other = world.getCharByID(inPacket.decodeInt());
+                if (other != null) {
+                    otherMember = other.getGuild().getMemberByCharID(other.getId());
+                    member.setAllianceGrade(2);
+                    otherMember.setAllianceGrade(1);
+                    alliance.broadcast(WvsContext.allianceResult(AllianceResult.changeMaster(alliance, member, otherMember)));
+                } else {
+                    chr.chatMessage("That character is not online.");
+                }
+                break;
+            case Req_Kick:
+                int otherID = inPacket.decodeInt();
+                int kickedGuildID = inPacket.decodeInt();
+                otherGuild = alliance.getGuildByID(kickedGuildID);
+                if (otherGuild != null) {
+                    alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, otherGuild, true)));
+                    alliance.removeGuild(otherGuild);
+                }
+                break;
+            case Req_SetGradeName:
+                for (int i = 0; i < 5; i++) {
+                    String gradeName = inPacket.decodeString();
+                    if (gradeName.length() >= 4 && gradeName.length() <= 10) {
+                        alliance.getGradeNames().set(i, gradeName);
+                    }
+                }
+                alliance.broadcast(WvsContext.allianceResult(AllianceResult.setGradeName(alliance)));
+                break;
+            default:
+                log.error(String.format("Unhandled alliance request type %s", at.getVal()));
         }
     }
 
