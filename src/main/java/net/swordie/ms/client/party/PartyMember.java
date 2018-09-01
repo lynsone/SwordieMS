@@ -123,6 +123,8 @@ public class PartyMember {
             setLevel(chr.getLevel());
             setChannel(chr.getClient().getChannel());
             setFieldID(chr.getFieldID());
+        } else {
+            setFieldID(0);
         }
     }
 }

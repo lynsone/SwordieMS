@@ -3892,7 +3892,7 @@ public class Char {
 		}
 	}
 
-	public boolean isGuildLeader() {
+	public boolean isGuildMaster() {
 		return getGuild() != null && getGuild().getLeaderID() == getId();
 	}
 }

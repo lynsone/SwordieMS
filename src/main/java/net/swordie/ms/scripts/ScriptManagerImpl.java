@@ -19,6 +19,7 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.guild.result.GuildType;
@@ -1165,6 +1166,12 @@ public class ScriptManagerImpl implements ScriptManager {
 		return world.getAlliance(name) == null;
 	}
 
+	public void incrementMaxGuildMembers(int amount) {
+		Guild guild = chr.getGuild();
+		guild.setMaxMembers(guild.getMaxMembers() + amount);
+		guild.broadcast(WvsContext.guildResult(GuildResult.incMaxMemberNum(guild)));
+	}
+
 	public void createAlliance(String name, Char other) {
 		Alliance alliance = new Alliance();
 		alliance.setName(name);
@@ -1178,6 +1185,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getGuild().setAlliance(alliance);
 		other.getGuild().setAlliance(alliance);
 		alliance.broadcast(WvsContext.allianceResult(AllianceResult.createDone(alliance)));
+		chr.deductMoney(5000000);
 	}
 
 

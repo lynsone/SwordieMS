@@ -145,6 +145,7 @@ public class GameConstants {
     public static final int GUILD_BBS_RECORDS_PER_PAGE = 10;
     public static final int GGP_FOR_SKILL_RESET = 50000;
     public static final int MAX_GUILD_LV = 25;
+    public static final int MAX_GUILD_MEMBERS = 200;
 
     // Monster Collection
     public static final int MOBS_PER_PAGE = 25;

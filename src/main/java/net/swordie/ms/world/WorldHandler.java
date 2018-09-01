@@ -2914,6 +2914,7 @@ public class WorldHandler {
                     DatabaseManager.saveToDB(guild);
                     chr.setGuild(guild);
                     chr.write(WvsContext.guildResult(GuildResult.createNewGuild(guild)));
+                    chr.deductMoney(5000000);
                 } else {
                     chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_CheckGuildName_AlreadyUsed)));
                 }
@@ -3110,7 +3111,7 @@ public class WorldHandler {
         World world = chr.getClient().getWorld();
         GuildMember member = guild == null ? null : chr.getGuild().getMemberByCharID(chr.getId());
         GuildMember otherMember;
-        if (!chr.isGuildLeader()) {
+        if (!chr.isGuildMaster()) {
             return;
         }
         switch (at) {

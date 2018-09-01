@@ -72,6 +72,10 @@ public class GuildResult {
                 outPacket.encodeShort(guild.getMark());
                 outPacket.encodeByte(guild.getMarkColor());
                 break;
+            case Res_IncMaxMemberNum_Done:
+                outPacket.encodeInt(guild.getId());
+                outPacket.encodeInt(guild.getMaxMembers());
+                break;
             case Res_SetMemberGrade_Done:
                 outPacket.encodeInt(guild.getId());
                 outPacket.encodeInt(member.getCharID());
@@ -245,6 +249,12 @@ public class GuildResult {
 
     public static GuildResult setRank(Guild guild) {
         GuildResult gr = new GuildResult(Res_Rank_Reflash);
+        gr.guild = guild;
+        return gr;
+    }
+
+    public static GuildResult incMaxMemberNum(Guild guild) {
+        GuildResult gr = new GuildResult(Res_IncMaxMemberNum_Done);
         gr.guild = guild;
         return gr;
     }
