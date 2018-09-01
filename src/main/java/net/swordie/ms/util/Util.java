@@ -37,11 +37,22 @@ public class Util {
      * @param <T> The type of elements of the list
      * @return A random element from the list, or null if the list is null or empty.
      */
-    public static <T> T getRandomFromList(List<T> list) {
+    public static <T> T getRandomFromCollection(List<T> list) {
         if(list != null && list.size() > 0) {
             return list.get(getRandom(list.size() - 1));
         }
         return null;
+    }
+
+    /**
+     * Gets a random element from a given Collection. This is done by making an array from the Collection and calling
+     * {@link #getRandomFromCollection(List)}
+     * @param coll The collection to select the element from
+     * @param <T> The type of elements of the list
+     * @return A random element from the list, or null if the list is null or empty.
+     */
+    public static <T> T getRandomFromCollection(Collection<T> coll) {
+        return getRandomFromCollection(new ArrayList<>(coll));
     }
 
     /**
@@ -50,7 +61,7 @@ public class Util {
      * @param <T> The type of elements of the list
      * @return A random element from the list, or null if the list is null or empty.
      */
-    public static <T> T getRandomFromList(T[] list) {
+    public static <T> T getRandomFromCollection(T[] list) {
         if(list != null && list.length > 0) {
             return list[getRandom(list.length - 1)];
         }

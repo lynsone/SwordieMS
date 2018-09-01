@@ -646,10 +646,8 @@ public class Kaiser extends Job {
             case INFERNO_BREATH_FINAL_FORM:
                 SkillInfo rca = SkillData.getSkillInfoById(INFERNO_BREATH);
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-
-                    if(chr.getField().getLifes().stream()
-                            .filter(l -> l instanceof AffectedArea &&
-                                    ((AffectedArea) l).getSkillID() == INFERNO_BREATH)
+                    if(chr.getField().getAffectedAreas().stream()
+                            .filter(aa -> aa.getSkillID() == INFERNO_BREATH && aa.getCharID() == chr.getId())
                             .collect(Collectors.toList()).size() > 3) {
                         continue; // to limit the amount of AAs
                     }

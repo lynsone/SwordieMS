@@ -295,7 +295,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 List<Char> chars = mob.getField().getCharsInRect(rect);
-                Char chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                Char chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -314,7 +314,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -333,7 +333,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -352,7 +352,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -371,7 +371,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }

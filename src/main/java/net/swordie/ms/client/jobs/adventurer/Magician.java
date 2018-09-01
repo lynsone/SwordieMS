@@ -913,7 +913,7 @@ public class Magician extends Beginner {
         if(lifes.size() <= 0) {
             return;
         }
-        Mob life = Util.getRandomFromList(lifes);
+        Mob life = Util.getRandomFromCollection(lifes);
         int mobID2 = (life).getObjectId();
         int inc = ForceAtomEnum.DA_ORB.getInc();
         int type = ForceAtomEnum.DA_ORB.getForceAtomType();

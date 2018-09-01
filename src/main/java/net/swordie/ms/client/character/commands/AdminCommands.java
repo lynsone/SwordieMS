@@ -47,16 +47,6 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            Position pos = chr.getPosition().deepCopy();
-            pos.setY(pos.getY());
-            chr.write(UserLocal.setInGameDirectionMode(true));
-            chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay("Effect/Direction8.img/effect/tuto/BalloonMsg0/2", 5000, pos, 0, 0, 0, 0)));
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            chr.write(UserLocal.setInGameDirectionMode(false));
 
         }
     }
@@ -947,7 +937,7 @@ public class AdminCommands {
 
     public static class TestTempStat extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            List<Life> lifes = chr.getField().getLifes();
+            List<Life> lifes = new ArrayList<>(chr.getField().getLifes().values());
             Life l = lifes.get(lifes.size() - 1);
             if (!(l instanceof Mob)) {
                 return;

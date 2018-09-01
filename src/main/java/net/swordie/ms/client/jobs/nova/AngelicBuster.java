@@ -409,9 +409,9 @@ public class AngelicBuster extends Job {
             return;
         }
         List<Mob> bossLifes = field.getBossMobsInRect(rect);
-        Life life = Util.getRandomFromList(lifes);
+        Life life = Util.getRandomFromCollection(lifes);
         if(bossLifes.size() > 0) {
-            life = Util.getRandomFromList(bossLifes);
+            life = Util.getRandomFromCollection(bossLifes);
         }
         int anglenum = new Random().nextInt(10);
         int mobID = life.getObjectId();

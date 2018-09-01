@@ -819,23 +819,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void removeNpc(int npcId) { //TODO Fix
-		List<Life> removeLifeSet = new ArrayList<>();
-		List<Life> lifes = chr.getField().getLifes();
-		if(lifes.size() > 0) {
-			for (Life life : lifes) {
-				if (life instanceof Npc) {
-					if (life.getTemplateId() != npcId) {
-						continue;
-					}
-					removeLifeSet.add(life);
-				}
-			}
-		}
-		//TODO
-		if(removeLifeSet.size()>1) {
-			chr.getField().removeLife(removeLifeSet.get(0).getObjectId());
-		}
+	public void removeNpc(int npcId) {
+		chr.getField().getNpcs().stream()
+				.filter(npc -> npc.getTemplateId() == npcId)
+				.findFirst()
+				.ifPresent(npc -> chr.getField().removeLife(npc));
 	}
 
 	@Override
@@ -987,7 +975,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void removeMobsByTemplateId(int id) {
-		List<Mob> mobList = chr.getField().getMobs();
+		Set<Mob> mobList = new HashSet<>(chr.getField().getMobs()); // copy to prevent CME
 		if (mobList.size() > 0) {
 			for (Mob mob : mobList) {
 				if (mob.getTemplateId() != id) {
@@ -1029,7 +1017,7 @@ public class ScriptManagerImpl implements ScriptManager {
 				.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
 				.findAny().orElse(null);
 		if (reactor != null) {
-			field.removeReactor(reactor);
+			field.removeLife(reactor.getObjectId());
 			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
 		}
 	}
@@ -1040,7 +1028,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		Reactor reactor = ReactorData.getReactorByID(reactorId);
 		Position position = new Position(x, y);
 		reactor.setPosition(position);
-		field.addReactor(reactor);
+		field.addLife(reactor);
 	}
 
 	@Override

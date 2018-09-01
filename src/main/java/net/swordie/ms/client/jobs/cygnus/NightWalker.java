@@ -241,10 +241,9 @@ public class NightWalker extends Noblesse {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
             case SHADOW_ILLUSION:
-                if(chr.getField().getLifes().stream()
-                        .anyMatch(l -> l instanceof Summon &&
-                                ((Summon) l).getChr() == chr &&
-                                ((Summon) l).getSkillID() == DARK_SERVANT)
+                if(chr.getField().getSummons().stream()
+                        .anyMatch(l -> l.getChr() == chr &&
+                                l.getSkillID() == DARK_SERVANT)
                         ) {
                     tsm.removeStatsBySkill(DARK_SERVANT);
                     c.getChr().getField().broadcastPacket(Summoned.summonedRemoved(darkServant, LeaveType.ANIMATION));
@@ -410,7 +409,7 @@ public class NightWalker extends Noblesse {
 
     private void createShadowBatForceAtom(AttackInfo attackInfo) {
         SkillInfo si = SkillData.getSkillInfoById(getBatSkill().getSkillId());
-        Mob mob = (Mob) chr.getField().getLifeByObjectID(Util.getRandomFromList(attackInfo.mobAttackInfo).mobId);
+        Mob mob = (Mob) chr.getField().getLifeByObjectID(Util.getRandomFromCollection(attackInfo.mobAttackInfo).mobId);
 
         if(mob == null) {
             Rect rect = new Rect( // Skill itself doesn't hold any rect info
@@ -424,7 +423,7 @@ public class NightWalker extends Noblesse {
             if(chr.getField().getMobsInRect(rect).size() <= 0) {
                 return;
             }
-            mob = Util.getRandomFromList(chr.getField().getMobsInRect(rect));
+            mob = Util.getRandomFromCollection(chr.getField().getMobsInRect(rect));
         }
         int mobId = mob.getObjectId();
 
@@ -463,7 +462,7 @@ public class NightWalker extends Noblesse {
             if (mobs.size() <= 0) {
                 return;
             }
-            Mob mob = Util.getRandomFromList(mobs);
+            Mob mob = Util.getRandomFromCollection(mobs);
             int mobId = mob.getObjectId();
 
             int inc = ForceAtomEnum.NIGHT_WALKER_FROM_MOB.getInc();

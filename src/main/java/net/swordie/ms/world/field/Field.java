@@ -23,6 +23,7 @@ import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.loaders.MobData;
@@ -37,6 +38,7 @@ import org.apache.log4j.Logger;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +62,7 @@ public class Field {
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
     private Set<Portal> portals;
     private Set<Foothold> footholds;
-    private List<Life> lifes;
+    private Map<Integer, Life> lifes;
     private List<Char> chars;
     private Map<Life, Char> lifeToControllers;
     private Map<Life, ScheduledFuture> lifeSchedules;
@@ -81,7 +83,7 @@ public class Field {
     private boolean kishin;
     private List<OpenGate> openGateList = new ArrayList<>();
     private List<TownPortal> townPortalList = new ArrayList<>();
-    private boolean canSpawnRunestone;
+    private boolean isChannelField;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -89,7 +91,7 @@ public class Field {
         this.rect = new Rect();
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
-        this.lifes = new CopyOnWriteArrayList<>();
+        this.lifes = new ConcurrentHashMap<>();
         this.chars = new CopyOnWriteArrayList<>();
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
@@ -394,7 +396,7 @@ public class Field {
         return fixedMobCapacity;
     }
 
-    public List<Life> getLifes() {
+    public Map<Integer, Life> getLifes() {
         return lifes;
     }
 
@@ -402,8 +404,8 @@ public class Field {
         if (life.getObjectId() < 0) {
             life.setObjectId(getNewObjectID());
         }
-        if (!getLifes().contains(life)) {
-            getLifes().add(life);
+        if (!getLifes().values().contains(life)) {
+            getLifes().put(life.getObjectId(), life);
             life.setField(this);
             if (life instanceof Mob) {
                 if (getScriptManager() != null) {
@@ -421,11 +423,11 @@ public class Field {
         if (life == null) {
             return;
         }
-        getLifes().remove(life);
+        getLifes().remove(life.getObjectId());
     }
 
     public void spawnSummon(Summon summon) {
-        Summon oldSummon = (Summon) getLifes().stream()
+        Summon oldSummon = (Summon) getLifes().values().stream()
                 .filter(s -> s instanceof Summon &&
                         ((Summon) s).getChr() == summon.getChr() &&
                         ((Summon) s).getSkillID() == summon.getSkillID())
@@ -455,8 +457,8 @@ public class Field {
         }
     }
 
-    private void removeLife(Life life) {
-        getLifes().remove(life);
+    public void removeLife(Life life) {
+        getLifes().remove(life.getObjectId());
     }
 
     public Foothold getFootholdById(int fh) {
@@ -504,7 +506,7 @@ public class Field {
         }
         // remove summons of that char & remove field attacks of that char
         List<Integer> removedList = new ArrayList<>();
-        for (Life life : getLifes()) {
+        for (Life life : getLifes().values()) {
             if (life instanceof Summon && ((Summon) life).getChr() == chr) {
                 removedList.add(life.getObjectId());
             } else if (life instanceof FieldAttackObj) {
@@ -531,27 +533,23 @@ public class Field {
         getLifeToControllers().put(life, chr);
     }
 
-    public void changeLifeController(Life life) {
-
-    }
-
     public Life getLifeByObjectID(int objectId) {
-        return getLifes().stream().filter(l -> l.getObjectId() == objectId).findFirst().orElse(null);
+        return getLifes().getOrDefault(objectId, null);
     }
 
     public Life getLifeByTemplateId(int templateId) {
-        return getLifes().stream().filter(l -> l.getTemplateId() == templateId).findFirst().orElse(null);
+        return getLifes().values().stream().filter(l -> l.getTemplateId() == templateId).findFirst().orElse(null);
     }
 
     public void spawnLifesForChar(Char chr) {
-        for (Life life : getLifes()) {
+        for (Life life : getLifes().values()) {
             spawnLife(life, chr);
         }
         for (Reactor reactor : getReactors()) {
             spawnLife(reactor, chr);
         }
-        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && canSpawnRunestone() && !isTown()) {
-            chr.write(CField.runeStoneAppear(runeStone));
+        if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && isChannelField() && !isTown()) {
+            chr.write(CField.runeStoneAppear(getRuneStone()));
         }
         if (getOpenGates() != null && getOpenGates().size() > 0) {
             for (OpenGate openGate : getOpenGates()) {
@@ -603,7 +601,7 @@ public class Field {
     }
 
     public void spawnAffectedAreaAndRemoveOld(AffectedArea aa) {
-        AffectedArea oldAA = (AffectedArea) getLifes().stream()
+        AffectedArea oldAA = (AffectedArea) getLifes().values().stream()
                 .filter(l -> l instanceof AffectedArea &&
                         ((AffectedArea) l).getCharID() == aa.getCharID() &&
                         ((AffectedArea) l).getSkillID() == aa.getSkillID())
@@ -614,12 +612,38 @@ public class Field {
         spawnAffectedArea(aa);
     }
 
-    public List<Mob> getMobs() {
-        return getLifes().stream().filter(life -> life instanceof Mob).map(l -> (Mob) l).collect(Collectors.toList());
+    private <T> Set<T> getLifesByClass(Class clazz) {
+        return (Set<T>) getLifes().values().stream()
+                .filter(l -> l.getClass().equals(clazz))
+                .collect(Collectors.toSet());
     }
 
-    public List<Drop> getDrops() {
-        return getLifes().stream().filter(life -> life instanceof Drop).map(l -> (Drop) l).collect(Collectors.toList());
+    public Set<Mob> getMobs() {
+        return getLifesByClass(Mob.class);
+    }
+
+    public Set<Summon> getSummons() {
+        return getLifesByClass(Summon.class);
+    }
+
+    public Set<Drop> getDrops() {
+        return getLifesByClass(Drop.class);
+    }
+
+    public Set<MobGen> getMobGens() {
+        return getLifesByClass(MobGen.class);
+    }
+
+    public Set<AffectedArea> getAffectedAreas() {
+        return getLifesByClass(AffectedArea.class);
+    }
+
+    public Set<Reactor> getReactors() {
+        return getLifesByClass(Reactor.class);
+    }
+
+    public Set<Npc> getNpcs() {
+        return getLifesByClass(Npc.class);
     }
 
     public void setObjectIDCounter(int idCounter) {
@@ -632,7 +656,7 @@ public class Field {
 
     public List<Life> getLifesInRect(Rect rect) {
         List<Life> lifes = new ArrayList<>();
-        for (Life life : getLifes()) {
+        for (Life life : getLifes().values()) {
             Position position = life.getPosition();
             int x = position.getX();
             int y = position.getY();
@@ -776,10 +800,6 @@ public class Field {
             getLifeSchedules().get(life).cancel(false);
         }
         getLifeSchedules().remove(life);
-    }
-
-    public List<AffectedArea> getAffectedAreas() {
-        return getLifes().stream().filter(life -> life instanceof AffectedArea).map(l -> (AffectedArea) l).collect(Collectors.toList());
     }
 
     public void checkMobInAffectedAreas(Mob mob) {
@@ -968,43 +988,19 @@ public class Field {
     }
 
     public int getAliveMobCount() {
-        return getLifes().stream()
+        // not using getMobs() to only have to iterate `lifes' once
+        return getLifes().values().stream()
                 .filter(life -> life instanceof Mob && ((Mob) life).isAlive())
                 .collect(Collectors.toList())
                 .size();
     }
 
     public int getAliveMobCount(int mobID) {
-        return getLifes().stream()
+        // not using getMobs() to only have to iterate `lifes' once
+        return getLifes().values().stream()
                 .filter(life -> life instanceof Mob && life.getTemplateId() == mobID && ((Mob) life).isAlive())
                 .collect(Collectors.toList())
                 .size();
-    }
-
-    public Set<Reactor> getReactors() {
-        return reactors;
-    }
-
-    public void addReactor(Reactor reactor) {
-        if (reactor.getObjectId() < 0) {
-            reactor.setObjectId(getNewObjectID());
-        }
-        getReactors().add(reactor);
-        reactor.setField(this);
-    }
-
-    public void removeReactor(Reactor reactor) {
-        if(reactor != null) {
-            getReactors().remove(reactor);
-        }
-    }
-
-    public void removeReactorByObjID(int reactorObjID) {
-        removeReactor(getReactorByObjID(reactorObjID));
-    }
-
-    public Reactor getReactorByObjID(int reactorObjID) {
-        return getReactors().stream().filter(r -> r.getObjectId() == reactorObjID).findAny().orElse(null);
     }
 
     public String getFieldScript() {
@@ -1034,7 +1030,7 @@ public class Field {
     }
 
     public void spawnRuneStone() {
-        if(getMobs().size() <= 0 || getBossMobID() != 0 || !canSpawnRunestone()) {
+        if(getMobs().size() <= 0 || getBossMobID() != 0 || !isChannelField()) {
             return;
         }
         if(getRuneStone() == null) {
@@ -1123,7 +1119,9 @@ public class Field {
     }
 
     public boolean canSpawnElite() {
-        return (getEliteState() == null || getEliteState() == EliteState.NORMAL) && getNextEliteSpawnTime() < System.currentTimeMillis();
+        return isChannelField()
+                && (getEliteState() == null || getEliteState() == EliteState.NORMAL)
+                && getNextEliteSpawnTime() < System.currentTimeMillis();
     }
 
     public int getKilledElites() {
@@ -1174,10 +1172,7 @@ public class Field {
     public void generateMobs() {
         if (getChars().size() > 0) {
             int currentMobs = getMobs().size();
-            for (MobGen mg : getLifes().stream()
-                    .filter(l -> l instanceof MobGen)
-                    .map(l -> ((MobGen) l))
-                    .collect(Collectors.toSet())) {
+            for (MobGen mg : getMobGens()) {
                 if (mg.canSpawnOnField(this)) {
                     mg.spawnMob(this);
                     currentMobs++;
@@ -1218,17 +1213,15 @@ public class Field {
     }
 
     public void removeOpenGate(OpenGate openGate) {
-        if (getOpenGates().contains(openGate)) {
-            getOpenGates().remove(openGate);
-        }
+        getOpenGates().remove(openGate);
     }
 
-    public boolean canSpawnRunestone() {
-        return canSpawnRunestone;
+    public boolean isChannelField() {
+        return isChannelField;
     }
 
-    public void setCanSpawnRunestone(boolean canSpawnRunestone) {
-        this.canSpawnRunestone = canSpawnRunestone;
+    public void setChannelField(boolean channelField) {
+        this.isChannelField = channelField;
     }
 
     public List<TownPortal> getTownPortalList() {

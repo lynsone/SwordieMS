@@ -954,7 +954,7 @@ public class ItemConstants {
     }
 
     public static int getRandomSoulOption() {
-        return Util.getRandomFromList(soulPotList);
+        return Util.getRandomFromCollection(soulPotList);
     }
 
     public static int getSoulSkillFromSoulID(int soulID) {

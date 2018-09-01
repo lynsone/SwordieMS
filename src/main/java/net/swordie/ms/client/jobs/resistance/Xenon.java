@@ -430,7 +430,7 @@ public class Xenon extends Job {
         if(mobs.size() <= 0) {
             return;
         }
-        Mob mob = Util.getRandomFromList(mobs);
+        Mob mob = Util.getRandomFromCollection(mobs);
         for(int i = 0; i<4; i++) {
             int anglenum = new Random().nextInt(160) + 20;
             int mobID = mob.getObjectId();

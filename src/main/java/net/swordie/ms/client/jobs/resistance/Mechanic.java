@@ -385,7 +385,7 @@ public class Mechanic extends Citizen {
             return;
         }
         for(int i = 0; i < getHomingBeaconBulletCount(); i++) {
-            Mob mob = Util.getRandomFromList(mobs);
+            Mob mob = Util.getRandomFromCollection(mobs);
             int inc = getHomingBeaconForceAtomEnum().getInc();
             int type = getHomingBeaconForceAtomEnum().getForceAtomType();
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 25,
@@ -409,9 +409,9 @@ public class Mechanic extends Citizen {
         if(field.getMobsInRect(rect).size() <= 0) {
             return;
         }
-        Mob mob = Util.getRandomFromList(field.getMobsInRect(rect));
+        Mob mob = Util.getRandomFromCollection(field.getMobsInRect(rect));
         if(field.getBossMobsInRect(rect).size() > 0) {
-            mob = Util.getRandomFromList(field.getBossMobsInRect(rect));
+            mob = Util.getRandomFromCollection(field.getBossMobsInRect(rect));
         }
 
 
