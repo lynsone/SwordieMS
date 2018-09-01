@@ -1,6 +1,5 @@
 package net.swordie.ms.scripts;
 
-import net.swordie.ms.Server;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.alliance.Alliance;
@@ -455,6 +454,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	// Start of param methods ------------------------------------------------------------------------------------------
+
+	public void resetParam() {
+		getNpcScriptInfo().resetParam();
+	}
+
+	public void removeEscapeButton() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.NotCancellable);
+	}
 
 	public void setPlayerAsSpeaker() {
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
@@ -1586,6 +1593,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void forcedFlip(boolean left) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedFlip(left)));
+	}
+
+	@Override
+	public void forceAction(int type, int duration) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedAction(type, duration)));
 	}
 
 	public void showEffect(String path, int duration, int x, int y) {

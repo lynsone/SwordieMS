@@ -1281,6 +1281,14 @@ public interface ScriptManager extends Observer {
 	void forcedFlip(boolean left);
 
 	/**
+	 * Forces the User to do an action/stance
+	 *
+	 * @param type The Action Done, depending on Type
+	 * @param duration The duration the action is held
+	 */
+	void forceAction(int type, int duration);
+
+	/**
 	 * Shows an Effect from the given path for 'duration' duration at 'position' position. Other variables are not used atm
 	 *
 	 * @param path path to the Effect
