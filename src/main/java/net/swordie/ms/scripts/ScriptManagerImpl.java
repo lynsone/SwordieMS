@@ -805,7 +805,17 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void spawnNpc(int npcId, int x, int y) {
 		Npc npc = NpcData.getNpcDeepCopyById(npcId);
-		npc.setPosition(new Position(x, y));
+		Position position = new Position(x, y);
+		npc.setPosition(position);
+		npc.setCy(y);
+		npc.setRx0(x + 50);
+		npc.setRx1(x - 50);
+		npc.setFh(chr.getField().findFootHoldBelow(new Position(x, y -2)).getId());
+		npc.setNotRespawnable(true);
+		if (npc.getField() == null) {
+			npc.setField(field);
+		}
+
 		chr.getField().spawnLife(npc, chr);
 	}
 
@@ -1467,21 +1477,21 @@ public class ScriptManagerImpl implements ScriptManager {
 	// InGameDirectionEvent methods ------------------------------------------------------------------------------------
 
 	@Override
-	public void moveCamera(boolean back, int speed, Position position) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, position)));
+	public void moveCamera(boolean back, int speed, int x, int y) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
 	}
 
-	public void moveCamera(int speed, Position position) {
-		moveCamera(false, speed, position);
+	public void moveCamera(int speed, int x, int y) {
+		moveCamera(false, speed, x, y);
 	}
 
 	public void moveCameraBack(int speed) {
-		moveCamera(true, speed, new Position());
+		moveCamera(true, speed, 0, 0);
 	}
 
 	@Override
-	public void zoomCamera(int inZoomDuration, int scale, Position position) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, position)));
+	public void zoomCamera(int inZoomDuration, int scale, int x, int y) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, new Position(x, y))));
 	}
 
 	@Override
@@ -1499,13 +1509,13 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedFlip(left)));
 	}
 
-	public void showEffect(String path, int duration, Position position) {
-		showEffect(path, duration, position, 0, 0, true, 0);
+	public void showEffect(String path, int duration, int x, int y) {
+		showEffect(path, duration, x, y, 0, 0, true, 0);
 	}
 
 	@Override
-	public void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, boolean onUser, int idk2) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, position, z, npcIdForExtend, onUser, idk2)));
+	public void showEffect(String path, int duration, int x, int y, int z, int npcIdForExtend, boolean onUser, int idk2) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(x, y), z, npcIdForExtend, onUser, idk2)));
 	}
 
 	public void showBalloonMsg(String path, int duration) {

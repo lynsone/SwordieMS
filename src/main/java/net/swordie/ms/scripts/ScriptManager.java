@@ -1187,10 +1187,11 @@ public interface ScriptManager extends Observer {
 	 * 		if false, it will move the Camera to the given position, at the given speed.
 	 * @param speed
 	 * 		speed of the camera,  in Pixel per second.
-	 * @param position
+	 * @param x x Position
+	 * @param y y Position
 	 * 		Position for the Camera to move to.
 	 */
-	void moveCamera(boolean back, int speed, Position position);
+	void moveCamera(boolean back, int speed, int x, int y);
 
 	/**
 	 * Zooms the Camera in at the given position.
@@ -1201,9 +1202,11 @@ public interface ScriptManager extends Observer {
 	 *
 	 * @param inZoomDuration Time the Zooming takes
 	 * @param scale Zoom Scale
-	 * @param position Screen Center Position
+	 * @param x x Position
+	 * @param y y Position
+	 * 		Screen Center Position
 	 */
-	void zoomCamera(int inZoomDuration, int scale, Position position);
+	void zoomCamera(int inZoomDuration, int scale, int x, int y);
 
 	/**
 	 * Resets the Camera from a still position to following the User again.
@@ -1231,13 +1234,15 @@ public interface ScriptManager extends Observer {
 	 *
 	 * @param path path to the Effect
 	 * @param duration Effect duration
-	 * @param position Position on the map
+	 * @param x y Position
+	 * @param y x Position
+	 * 		Position for the Effect
 	 * @param z
 	 * @param npcIdForExtend
 	 * @param onUser if true, the effect will follow the player | if false, the effect will stay static
 	 * @param idk2
 	 */
-	void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, boolean onUser, int idk2);
+	void showEffect(String path, int duration, int x, int y, int z, int npcIdForExtend, boolean onUser, int idk2);
 
 
 
