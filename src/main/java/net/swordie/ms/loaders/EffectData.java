@@ -1,11 +1,14 @@
 package net.swordie.ms.loaders;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.scene.EffectInfo;
 import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.enums.SceneType;
 import net.swordie.ms.util.XMLApi;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -54,6 +57,36 @@ public class EffectData {
                         ei.setZ(Integer.parseInt(value));
                         break;
                 }
+            }
+
+            if(ei.getVisual() != null) {
+                String effectPath = ei.getVisual().replace("Effect/", "") + "/0";
+                String[] splitEffectPath = effectPath.split("/");
+                String wzDir = ServerConstants.WZ_DIR + "/Effect.wz/" + splitEffectPath[0] + ".xml";
+                File dir = new File(wzDir);
+
+                Document doc = XMLApi.getRoot(dir);
+                Node node = XMLApi.getAllChildren(doc).get(0);
+                for (String indiEffPath : splitEffectPath) {
+                    if (indiEffPath.contains(".img")) {
+                        continue;
+                    }
+                    node = XMLApi.getFirstChildByNameBF(node, indiEffPath);
+                }
+                int duration = 0;
+                for (Node n : XMLApi.getAllChildren(node)) {
+                    for (Node infoNode : XMLApi.getAllChildren(n)) {
+                        Map<String, String> attr = XMLApi.getAttributes(infoNode);
+                        String name = attr.get("name");
+                        String value = attr.get("value");
+                        switch (name) {
+                            case "delay":
+                                duration += Integer.parseInt(value);
+                                break;
+                        }
+                    }
+                }
+                ei.setDuration(duration);
             }
             scene.addEffectInfo(ei);
         }

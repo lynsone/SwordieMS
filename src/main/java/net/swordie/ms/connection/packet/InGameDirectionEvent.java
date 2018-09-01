@@ -131,7 +131,7 @@ public class InGameDirectionEvent implements Encodable {
     }
 
     public static InGameDirectionEvent effectPlay(String effectUOL, int duration, Position position, int z,
-                                                    int npcIdForExtend, int idk1, int idk2) {
+                                                    int npcIdForExtend, boolean onUser, int idk2) {
         InGameDirectionEvent igdr = new InGameDirectionEvent(InGameDirectionEventType.EffectPlay);
 
         igdr.str = effectUOL;
@@ -139,7 +139,7 @@ public class InGameDirectionEvent implements Encodable {
         igdr.pos = position;
         igdr.arg2 = z;
         igdr.arg3 = npcIdForExtend;
-        igdr.arg4 = idk1;
+        igdr.arg4 = onUser ? 0 : 1;
         igdr.arg5 = idk2;
 
         return igdr;
@@ -259,19 +259,19 @@ public class InGameDirectionEvent implements Encodable {
         return new InGameDirectionEvent(InGameDirectionEventType.RemoveAdditionalEffect);
     }
 
-    public static InGameDirectionEvent forcedMove(int dir, int speed) {
+    public static InGameDirectionEvent forcedMove(boolean left, int distance) {
         InGameDirectionEvent igdr = new InGameDirectionEvent(InGameDirectionEventType.ForcedMove);
 
-        igdr.arg1 = dir;
-        igdr.arg2 = speed;
+        igdr.arg1 = left ? 1 : 2; // left = 1, right = 2
+        igdr.arg2 = distance;
 
         return igdr;
     }
 
-    public static InGameDirectionEvent forcedFlip(int forcedFlip) {
+    public static InGameDirectionEvent forcedFlip(boolean left) {
         InGameDirectionEvent igdr = new InGameDirectionEvent(InGameDirectionEventType.ForcedFlip);
 
-        igdr.arg1 = forcedFlip;
+        igdr.arg1 = left ? -1 : 1; // left = -1, right = 1
 
         return igdr;
     }

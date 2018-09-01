@@ -2,5 +2,5 @@
 
 def init():
     sm.lockInGameUI(True)
-    sm.showScene("Effect.wz/Direction5", "mersedesTutorial", "Scene0") # Shows the Mercedes in Ice  scene
+    sm.showScene("Effect.wz/Direction5.img", "mersedesTutorial", "Scene0") # Shows the Mercedes in Ice  scene
     sm.invokeAfterDelay(14000, "showFadeTransition", 0, 500, 500)

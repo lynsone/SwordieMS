@@ -1205,6 +1205,70 @@ public interface ScriptManager extends Observer {
 
 
 
+	// InGameDirectionEvent methods ------------------------------------------------------------------------------------
+
+	/**
+	 * Moves the Client's camera at the given speed towards the given position.
+	 *
+	 * @param back
+	 * 		if true, it will move the Camera to the original position.
+	 * 		if false, it will move the Camera to the given position, at the given speed.
+	 * @param speed
+	 * 		speed of the camera,  in Pixel per second.
+	 * @param position
+	 * 		Position for the Camera to move to.
+	 */
+	void moveCamera(boolean back, int speed, Position position);
+
+	/**
+	 * Zooms the Camera in at the given position.
+	 *
+	 * Scale: 1000 is normal.
+	 * Higher = Zoom In
+	 * Lower = Zoom Out
+	 *
+	 * @param inZoomDuration Time the Zooming takes
+	 * @param scale Zoom Scale
+	 * @param position Screen Center Position
+	 */
+	void zoomCamera(int inZoomDuration, int scale, Position position);
+
+	/**
+	 * Resets the Camera from a still position to following the User again.
+	 *
+	 */
+	void resetCamera();
+
+	/**
+	 * Forces the User to move in the specified direction for the specified distance
+	 *
+	 * @param left Direction the player moves in. True = Left. False = Right
+	 * @param distance Distance to move
+	 */
+	void forcedMove(boolean left, int distance);
+
+	/**
+	 * Forces the User to flip
+	 *
+	 * @param left True = flip Left. False = flip Right
+	 */
+	void forcedFlip(boolean left);
+
+	/**
+	 * Shows an Effect from the given path for 'duration' duration at 'position' position. Other variables are not used atm
+	 *
+	 * @param path path to the Effect
+	 * @param duration Effect duration
+	 * @param position Position on the map
+	 * @param z
+	 * @param npcIdForExtend
+	 * @param onUser if true, the effect will follow the player | if false, the effect will stay static
+	 * @param idk2
+	 */
+	void showEffect(String path, int duration, Position position, int z, int npcIdForExtend, boolean onUser, int idk2);
+
+
+
 	// Other methods ---------------------------------------------------------------------------------------------------
 
 	/**

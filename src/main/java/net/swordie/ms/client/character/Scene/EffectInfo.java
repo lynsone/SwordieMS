@@ -9,6 +9,7 @@ public class EffectInfo {
     private SceneType type;
     private String visual;
     private int start;
+    private int duration;
     private int x;
     private int y;
     private int z;
@@ -39,6 +40,14 @@ public class EffectInfo {
 
     public void setStart(int start) {
         this.start = start;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 
     public int getX() {
