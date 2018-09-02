@@ -1232,6 +1232,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 
+
 	// Inventory-related methods ---------------------------------------------------------------------------------------
 
 	@Override
@@ -1583,6 +1584,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void resetCamera() {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraOnCharacter(0))); // 0 resets the Camera
+	}
+
+	public void setCameraOnNpc(int npcTemplateId) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraOnCharacter(npcTemplateId)));
 	}
 
 	@Override

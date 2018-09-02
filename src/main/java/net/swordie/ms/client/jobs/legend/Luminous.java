@@ -345,7 +345,9 @@ public class Luminous extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        changeLarknessState(skillID);
+        if(chr.getJob() != 2004) { // Beginner Luminous
+            changeLarknessState(skillID);
+        }
         int crescendoProp = getCrescendoProp();
         if (hasHitMobs) {
             if(!tsm.hasStat(Larkness)) {
