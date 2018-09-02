@@ -3887,17 +3887,4 @@ public class Char {
 	public boolean isGuildMaster() {
 		return getGuild() != null && getGuild().getLeaderID() == getId();
 	}
-
-	public boolean isShopNPC(int shopID) {
-		// TODO: Trunks (from wz)
-		NpcShopDlg nsd = NpcData.getShopById(shopID);
-		if (nsd != null) {
-			getScriptManager().stop(ScriptType.NPC); // reset contents before opening shop?
-			setShop(nsd);
-			write(ShopDlg.openShop(0, nsd));
-			chatMessage(ChatType.Mob, String.format("Opening shop %s", shopID));
-			return true;
-		}
-		return false;
-	}
 }

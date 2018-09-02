@@ -2351,16 +2351,28 @@ public class WorldHandler {
         Char chr = c.getChr();
         int npcID = inPacket.decodeInt();
         Position playerPos = inPacket.decodePosition();
-        Npc npc = (Npc) chr.getField().getLifeByObjectID(npcID);
+        Life life = chr.getField().getLifeByObjectID(npcID);
+        if (!(life instanceof Npc)) {
+            chr.chatMessage("Could not find that npc.");
+            return;
+        }
+        Npc npc = (Npc) life;
+        int templateID = npc.getTemplateId();
         if (npc.getTrunkGet() > 0 || npc.getTrunkPut() > 0) {
-            chr.write(CField.trunkDlg(new TrunkOpen(npc.getTemplateId(), chr.getAccount().getTrunk())));
+            chr.write(CField.trunkDlg(new TrunkOpen(templateID, chr.getAccount().getTrunk())));
             return;
         }
         String script = npc.getScripts().get(0);
         if (script == null) {
-            if (!chr.isShopNPC(npc.getTemplateId()))
-                chr.chatMessage(ChatType.Tip, String.format("Unhandled Shop NPC %d", npc.getTemplateId()));
-            return;
+            NpcShopDlg nsd = NpcData.getShopById(templateID);
+            if (nsd != null) {
+                chr.getScriptManager().stop(ScriptType.NPC); // reset contents before opening shop?
+                chr.setShop(nsd);
+                chr.write(ShopDlg.openShop(0, nsd));
+                chr.chatMessage(String.format("Opening shop %s", npc.getTemplateId()));
+            } else {
+                script = String.valueOf(npc.getTemplateId());
+            }
         }
         chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
     }
