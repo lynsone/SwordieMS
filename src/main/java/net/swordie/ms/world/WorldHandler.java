@@ -2368,7 +2368,9 @@ public class WorldHandler {
         }
         String script = npc.getScripts().get(0);
         if (script == null) {
-            script = String.valueOf(npc.getTemplateId());
+            if (!chr.isShopNPC(npc.getTemplateId()))
+                chr.chatMessage(ChatType.Tip, String.format("Unhandled Shop NPC %d", npc.getTemplateId()));
+            return;
         }
         chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
     }
