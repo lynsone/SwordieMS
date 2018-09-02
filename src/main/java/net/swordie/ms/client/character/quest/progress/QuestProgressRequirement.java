@@ -16,6 +16,8 @@ public abstract class QuestProgressRequirement implements DatSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(name = "orderNum")
+    private int order = 99;
 
     /**
      * Returns whether this progress requirement has been completed by the player.
@@ -32,4 +34,12 @@ public abstract class QuestProgressRequirement implements DatSerializable {
     }
 
     public abstract QuestProgressRequirement deepCopy();
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
 }

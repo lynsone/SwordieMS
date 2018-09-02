@@ -173,7 +173,9 @@ public class Quest {
             if (getProgressRequirements() == null) {
                 return "";
             }
-            for(QuestProgressRequirement qpr : getProgressRequirements()) {
+            List<QuestProgressRequirement> requirements = new ArrayList<>(getProgressRequirements());
+            requirements.sort(Comparator.comparingInt(QuestProgressRequirement::getOrder));
+            for(QuestProgressRequirement qpr : requirements) {
                 if(qpr instanceof QuestValueRequirement) {
                     sb.append(Util.leftPaddedString(3, '0', ((QuestValueRequirement) qpr).getValue()));
                 }

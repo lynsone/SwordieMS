@@ -278,6 +278,7 @@ public class QuestData {
                                             qpmr.setRequiredCount(Integer.parseInt(questValue));
                                             break;
                                         case "order":
+                                            qpmr.setOrder(Integer.parseInt(questValue));
                                             break;
                                         default:
                                             log.warn(String.format("(%d) Unk mob name %s with value %s", questID, questName, questValue));
@@ -331,6 +332,10 @@ public class QuestData {
                                             }
                                             break;
                                         case "order":
+                                            if (status != 0) {
+                                                qpir.setOrder(Integer.parseInt(questValue));
+                                            }
+                                            break;
                                         case "secret":
                                             break;
                                         default:

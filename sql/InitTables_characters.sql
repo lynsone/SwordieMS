@@ -126,6 +126,7 @@ create table questlists (
 
 create table questprogressrequirements (
 	id bigint not null auto_increment,
+    orderNum int,
     progresstype varchar(255),
 	questid bigint,
     unitid int,
