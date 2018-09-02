@@ -2931,10 +2931,11 @@ public class WorldHandler {
                     guild = new Guild();
                     guild.setLevel(1);
                     guild.setName(name);
-                    guild.addMember(chr);
-                    guild.setWorldID(chr.getClient().getWorldId());
                     DatabaseManager.saveToDB(guild);
                     chr.setGuild(guild);
+                    guild = chr.getGuild(); // setGuild may change the instance
+                    guild.addMember(chr);
+                    guild.setWorldID(chr.getClient().getWorldId());
                     chr.write(WvsContext.guildResult(GuildResult.createNewGuild(guild)));
                     chr.deductMoney(5000000);
                 } else {
@@ -5082,12 +5083,14 @@ public class WorldHandler {
     }
 
     public static void handleGroupMessage(Char chr, InPacket inPacket) {
-        byte idk1 = inPacket.decodeByte(); // one of these is type (party, guild, etc...)
+        byte type = inPacket.decodeByte(); // party = 1, alliance = 3
         byte idk2 = inPacket.decodeByte();
         int idk3 = inPacket.decodeInt(); // party id?
         String msg = inPacket.decodeString();
-        if (chr.getParty() != null) {
+        if (type == 1 && chr.getParty() != null) {
             chr.getParty().broadcast(CField.groupMessage(GroupMessageType.Party, chr.getName(), msg), chr);
+        } else if (type == 3 && chr.getGuild() != null && chr.getGuild().getAlliance() != null) {
+            chr.getGuild().getAlliance().broadcast(CField.groupMessage(GroupMessageType.Alliance, chr.getName(), msg), chr);
         }
     }
 

@@ -7,9 +7,9 @@ def init():
     if chr.isGuildMaster():
         if guild.getMaxMembers() < GameConstants.MAX_GUILD_MEMBERS:
             sm.sendAskYesNo("Would you like to increase your guild's max capacity? You currently have "
-                            + str(guild.getMaxMembers())) + "members, but I can increase it by 10 for 500 thousand mesos."
+                            + str(guild.getMaxMembers()) + " members, but I can increase it by 10 for 500 thousand mesos.")
 
-    elif not hasGuild:
+    elif guild is None:
         sm.sendAskYesNo("Would you like to create a guild? This will cost 5 million mesos.")
     else:
         sm.sendSayOkay("Hey there, I'm in charge of everything guild related. If you want anything done to your guild, "
@@ -18,7 +18,7 @@ def init():
 
 def action(response, answer):
     global guild
-    if chr.isGuildMaster():
+    if chr.isGuildMaster() and response == 1:
         if sm.getMesos() < 500000:
             sm.sendSayOkay("You do not have enough mesos.")
         else:
