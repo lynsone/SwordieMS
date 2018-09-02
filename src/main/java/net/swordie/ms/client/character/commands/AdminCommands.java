@@ -47,7 +47,28 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
+//            OutPacket outPacket = new OutPacket(OutHeader.MOB_NEXT_ATTACK);
+//
+//            outPacket.encodeInt(1000002);
+//            outPacket.encodeInt(Integer.parseInt(args[1]));
 
+            OutPacket outPacket = new OutPacket(OutHeader.MOB_SET_AFTER_ATTACK);
+
+            outPacket.encodeInt(1000002);
+            outPacket.encodeShort(9);
+            outPacket.encodeInt(21);
+            outPacket.encodeByte(false);
+
+            chr.write(outPacket);
+
+            outPacket = new OutPacket(OutHeader.MOB_SET_AFTER_ATTACK);
+
+            outPacket.encodeInt(1000002);
+            outPacket.encodeShort(10);
+            outPacket.encodeInt(22);
+            outPacket.encodeByte(false);
+
+            chr.write(outPacket);
         }
     }
 
@@ -943,7 +964,7 @@ public class AdminCommands {
                 return;
             }
             Mob mob = (Mob) l;
-            chr.getClient().write(MobPool.mobStatSet(mob, (short) 0));
+            chr.getClient().write(MobPool.statSet(mob, (short) 0));
         }
     }
 

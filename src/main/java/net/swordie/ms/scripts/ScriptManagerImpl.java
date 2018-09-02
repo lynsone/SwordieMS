@@ -1041,7 +1041,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void removeMobByObjId(int id) {
 		chr.getField().removeLife(id);
-		chr.getField().broadcastPacket(MobPool.mobLeaveField(id, DeathType.ANIMATION_DEATH));
+		chr.getField().broadcastPacket(MobPool.leaveField(id, DeathType.ANIMATION_DEATH));
 	}
 
 	@Override

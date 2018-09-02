@@ -88,6 +88,9 @@ public class GameConstants {
     public static final int RED_EXP_ORB_ID = 2023495;
     public static final double RED_EXP_ORB_MULT = 5;
 
+    // Mob
+    public static final int MOB_SKILL_CHANCE = 20;
+
     // Elite mob
     public static final int ELITE_MOB_SKILL_COUNT = 2;
     public static final int ELITE_MOB_RESPAWN_TIME = 120; // seconds

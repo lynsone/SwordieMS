@@ -7,13 +7,13 @@ import net.swordie.ms.life.mob.skill.BurnedInfo;
 import net.swordie.ms.life.mob.skill.MobSkillID;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
-import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Tuple;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.List;
  * Created on 2/28/2018.
  */
 public class MobPool {
-    public static OutPacket mobEnterField(Mob mob, boolean hasBeenInit) {
+    public static OutPacket enterField(Mob mob, boolean hasBeenInit) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_ENTER_FIELD);
 
         outPacket.encodeByte(mob.isSealedInsteadDead());
@@ -104,7 +104,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobChangeController(Mob mob, boolean hasBeenInit, boolean isController) {
+    public static OutPacket changeController(Mob mob, boolean hasBeenInit, boolean isController) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_CHANGE_CONTROLLER);
         outPacket.encodeByte(isController);
         outPacket.encodeInt(mob.getObjectId());
@@ -189,7 +189,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobLeaveField(int id, DeathType deadType){
+    public static OutPacket leaveField(int id, DeathType deadType){
         OutPacket outPacket = new OutPacket(OutHeader.MOB_LEAVE_FIELD);
 
         outPacket.encodeInt(id);
@@ -198,7 +198,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobDamaged(int mobID, long damage, int templateID, byte type, int hp, int maxHp) {
+    public static OutPacket damaged(int mobID, long damage, int templateID, byte type, int hp, int maxHp) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_DAMAGED);
 
         outPacket.encodeInt(mobID);
@@ -213,7 +213,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobHpIndicator(int objectId, byte percDamage) {
+    public static OutPacket hpIndicator(int objectId, byte percDamage) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_HP_INDICATOR);
 
         outPacket.encodeInt(objectId);
@@ -222,7 +222,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobCtrlAck(Mob mob, boolean nextAttackPossible, short mobCtrlSN, int skillID, byte slv, int forcedAttack) {
+    public static OutPacket ctrlAck(Mob mob, boolean nextAttackPossible, short mobCtrlSN, int skillID, byte slv, int forcedAttack) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_CONTROL_ACK);
 
         outPacket.encodeInt(mob.getObjectId());
@@ -236,7 +236,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobCtrlChange(Char chr, Mob mob, boolean isController) {
+    public static OutPacket ctrlChange(Char chr, Mob mob, boolean isController) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_CHANGE_CONTROLLER);
 
         outPacket.encodeByte(isController);
@@ -249,7 +249,7 @@ public class MobPool {
 
     }
 
-    public static OutPacket mobStatSet(Mob mob, short delay) {
+    public static OutPacket statSet(Mob mob, short delay) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_STAT_SET);
         MobTemporaryStat mts = mob.getTemporaryStat();
         boolean hasMovementStat = mts.hasNewMovementAffectingStat();
@@ -264,11 +264,11 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobStatReset(Mob mob, byte byteCalcDamageStatIndex, boolean sn) {
-        return mobStatReset(mob, byteCalcDamageStatIndex, sn, null);
+    public static OutPacket statReset(Mob mob, byte byteCalcDamageStatIndex, boolean sn) {
+        return statReset(mob, byteCalcDamageStatIndex, sn, null);
     }
 
-    public synchronized static OutPacket mobStatReset(Mob mob, byte calcDamageStatIndex, boolean sn, List<BurnedInfo> biList) {
+    public synchronized static OutPacket statReset(Mob mob, byte calcDamageStatIndex, boolean sn, List<BurnedInfo> biList) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_STAT_RESET);
         MobTemporaryStat resetStats = mob.getTemporaryStat();
         int[] mask = resetStats.getRemovedMask();
@@ -299,7 +299,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobSpecialEffectBySkill(Mob mob, int skillID, int charId, short hit) {
+    public static OutPacket specialEffectBySkill(Mob mob, int skillID, int charId, short hit) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_SPECIAL_EFFECT_BY_SKILL);
 
         outPacket.encodeInt(mob.getObjectId());
@@ -310,7 +310,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobAffected(Mob mob, int skillID, int slv, boolean userSkill, short delay) {
+    public static OutPacket affected(Mob mob, int skillID, int slv, boolean userSkill, short delay) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_AFFECTED);
 
         outPacket.encodeInt(mob.getObjectId());
@@ -322,12 +322,12 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobMove(Mob mob, MobSkillAttackInfo msai, MovementInfo movementInfo) {
+    public static OutPacket move(Mob mob, MobSkillAttackInfo msai, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_MOVE);
 
         outPacket.encodeInt(mob.getObjectId());
         outPacket.encodeByte(msai.actionAndDirMask);
-        outPacket.encodeByte(msai.actionAndDir);
+        outPacket.encodeByte(msai.action);
         outPacket.encodeInt(msai.targetInfo);
         outPacket.encodeByte(msai.multiTargetForBalls.size());
         for(Position pos : msai.multiTargetForBalls) {
@@ -406,7 +406,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket mobTeleportRequest(int skillAfter) {
+    public static OutPacket teleportRequest(int skillAfter) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_TELEPORT_REQUEST);
 
         outPacket.encodeByte(skillAfter == 0);
@@ -426,6 +426,42 @@ public class MobPool {
                     outPacket.encodeInt(0); // possible x?
                     break;
             }
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket nextAttack(int forcedAttackIdx) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_NEXT_ATTACK);
+
+        outPacket.encodeInt(forcedAttackIdx);
+
+        return outPacket;
+    }
+
+    public static OutPacket setAfterAttack(int mobID, short afterAttack, int serverAction, boolean left) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_SET_AFTER_ATTACK);
+
+        outPacket.encodeInt(mobID);
+        outPacket.encodeShort(afterAttack);
+        outPacket.encodeInt(serverAction);
+        outPacket.encodeByte(left);
+
+        return outPacket;
+    }
+
+    public static OutPacket setSkillDelay(int mobID, int skillAfter, int skillID, int slv, int sequenceDelay, Rect rect) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_SKILL_DELAY);
+
+        outPacket.encodeInt(mobID);
+        outPacket.encodeInt(skillAfter);
+        outPacket.encodeInt(skillID);
+        outPacket.encodeInt(slv);
+        outPacket.encodeInt(sequenceDelay);
+        if (rect != null) {
+            outPacket.encodeRectInt(rect);
+        } else {
+            outPacket.encodeArr(new byte[16]); // (0,0),(0,0)
         }
 
         return outPacket;

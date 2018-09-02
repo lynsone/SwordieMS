@@ -3,13 +3,8 @@ package net.swordie.ms.life;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.connection.packet.DropPool;
 import net.swordie.ms.connection.packet.FieldAttackObjPool;
-import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Position;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Sjonnie
@@ -28,7 +23,7 @@ public class FieldAttackObj extends Life implements Encodable {
         super(skillID);
         this.ownerID = ownerID;
         setPosition(position);
-        setFlip(flip ? 1 : 0);
+        setFlip(flip);
     }
 
     @Override
@@ -38,7 +33,7 @@ public class FieldAttackObj extends Life implements Encodable {
         outPacket.encodeInt(getOwnerID());
         outPacket.encodeInt(getReserveID());
         outPacket.encodePositionInt(getPosition());
-        outPacket.encodeByte(getFlip());
+        outPacket.encodeByte(isFlip());
     }
 
     public int getOwnerID() {

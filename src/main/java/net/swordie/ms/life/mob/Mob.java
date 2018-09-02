@@ -116,12 +116,15 @@ public class Mob extends Life {
     private Map<Char, Long> damageDone = new HashMap<>();
     private Set<DropInfo> drops = new HashSet<>();
     private List<MobSkill> skills = new ArrayList<>();
+    private List<MobSkill> attacks = new ArrayList<>();
     private Set<Integer> quests = new HashSet<>();
     private Set<Integer> revives = new HashSet<>();
     private Map<Integer, Long> skillCooldowns = new HashMap<>();
     private long nextPossibleSkillTime = 0;
     private List<Tuple<Integer, Integer>> eliteSkills = new ArrayList<>();
     private boolean selfDestruction;
+    private Stack<MobSkill> skillDelays = new Stack<>();
+    private boolean inAttack;
 
     public Mob(int templateId) {
         super(templateId);
@@ -140,7 +143,7 @@ public class Mob extends Life {
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setFlip(getFlip());
+        copy.setFlip(isFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -268,6 +271,9 @@ public class Mob extends Life {
         copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
         for (MobSkill ms : getSkills()) {
             copy.addSkill(ms);
+        }
+        for (MobSkill ms : getAttacks()) {
+            copy.addAttack(ms);
         }
         for (int rev : getRevives()) {
             copy.addRevive(rev);
@@ -1137,13 +1143,13 @@ public class Mob extends Life {
         } else if (isBoss() && getHpTagColor() != 0) {
             getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {
-            getField().broadcastPacket(MobPool.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
+            getField().broadcastPacket(MobPool.hpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }
     }
 
     public void die() {
         Field field = getField();
-        getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH));
+        getField().broadcastPacket(MobPool.leaveField(getObjectId(), DeathType.ANIMATION_DEATH));
         getField().removeLife(getObjectId());
         if(isSplit()) {
             return;
@@ -1290,6 +1296,18 @@ public class Mob extends Life {
         getSkills().add(skill);
     }
 
+    public List<MobSkill> getAttacks() {
+        return attacks;
+    }
+
+    public void addAttack(MobSkill mobSkill) {
+        getAttacks().add(mobSkill);
+    }
+
+    public MobSkill getAttackById(int attackID) {
+        return Util.getFromCollectionWithPred(getAttacks(), att -> att.getSkillSN() == attackID);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Mob) {
@@ -1346,7 +1364,7 @@ public class Mob extends Life {
 
     public void removeSoulSplitLife(Char chr, Mob origin, Mob copy) {
         chr.getField().removeLife(copy.getObjectId());
-        chr.getField().broadcastPacket(MobPool.mobLeaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH));
+        chr.getField().broadcastPacket(MobPool.leaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH));
         origin.setSplit(false);
     }
 
@@ -1369,12 +1387,20 @@ public class Mob extends Life {
         return skillCooldowns;
     }
 
-    public boolean hasSkillOnCooldown(int skillID, int slv) {
-        return System.currentTimeMillis() < getSkillCooldowns().getOrDefault(skillID | (slv << 16), 0L);
+    public boolean hasSkillOffCooldown(int skillID, int slv) {
+        return System.currentTimeMillis() >= getSkillCooldowns().getOrDefault(skillID | (slv << 16), Long.MIN_VALUE);
+    }
+
+    public boolean hasAttackOffCooldown(int attackID) {
+        return System.currentTimeMillis() >= getSkillCooldowns().getOrDefault(-attackID, Long.MIN_VALUE);
     }
 
     public void putSkillCooldown(int skillID, int slv, long nextUseableTime) {
         getSkillCooldowns().put(skillID | (slv << 16), nextUseableTime);
+    }
+
+    public void putAttackOnCooldown(int skillID, int delayForNextAttack) {
+        getSkillCooldowns().put(-skillID, System.currentTimeMillis() + delayForNextAttack);
     }
 
     public boolean hasSkillDelayExpired() {
@@ -1386,7 +1412,7 @@ public class Mob extends Life {
      * @param delay The delay until the next skill can be used
      */
     public void setSkillDelay(long delay) {
-        setNextPossibleSkillTime(getNextPossibleSkillTime() + delay);
+        setNextPossibleSkillTime(System.currentTimeMillis() + delay);
     }
 
     private long getNextPossibleSkillTime() {
@@ -1415,12 +1441,12 @@ public class Mob extends Life {
         Char controller = getField().getLifeToControllers().get(this);
         if (onlyChar == null) {
             for (Char chr : field.getChars()) {
-                chr.write(MobPool.mobEnterField(this, false));
-                chr.write(MobPool.mobChangeController(this, false, controller == chr));
+                chr.write(MobPool.enterField(this, false));
+                chr.write(MobPool.changeController(this, false, controller == chr));
             }
         } else {
-            onlyChar.getClient().write(MobPool.mobEnterField(this, false));
-            onlyChar.getClient().write(MobPool.mobChangeController(this, false, controller == onlyChar));
+            onlyChar.getClient().write(MobPool.enterField(this, false));
+            onlyChar.getClient().write(MobPool.changeController(this, false, controller == onlyChar));
         }
     }
 
@@ -1492,8 +1518,8 @@ public class Mob extends Life {
 
     public void addEliteSkill(int skillID, int skillLevel) {
         MobSkill ms = new MobSkill();
-        ms.setSkillID(-1);
-        ms.setSkill(skillID);
+        ms.setSkillSN(-1);
+        ms.setSkillID(skillID);
         ms.setLevel(skillLevel);
         addSkill(ms);
         getEliteSkills().add(new Tuple<>(skillID, skillID));
@@ -1505,5 +1531,17 @@ public class Mob extends Life {
 
     public boolean isSelfDestruction() {
         return selfDestruction;
+    }
+
+    public Stack<MobSkill> getSkillDelays() {
+        return skillDelays;
+    }
+
+    public boolean isInAttack() {
+        return inAttack;
+    }
+
+    public void setInAttack(boolean inAttack) {
+        this.inAttack = inAttack;
     }
 }

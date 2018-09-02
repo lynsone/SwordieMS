@@ -15,7 +15,8 @@ import java.util.Observable;
 public class Life extends Observable {
     private Position position;
     private int objectId = -1;
-    protected int cy, flip, fh, templateId, mobTime, rx0, rx1, type, x, y;
+    protected int cy, fh, templateId, mobTime, rx0, rx1, type, x, y;
+    protected boolean flip;
     private String lifeType = "";
     private boolean hide;
     private String limitedName = "";
@@ -63,11 +64,11 @@ public class Life extends Observable {
         this.cy = cy;
     }
 
-    public int getFlip() {
+    public boolean isFlip() {
         return flip;
     }
 
-    public void setFlip(int flip) {
+    public void setFlip(boolean flip) {
         this.flip = flip;
     }
 
@@ -250,7 +251,7 @@ public class Life extends Observable {
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setFlip(getFlip());
+        copy.setFlip(isFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -283,7 +284,7 @@ public class Life extends Observable {
             mob.setHomePosition(new Position(getX(), getY()));
             mob.setPosition(new Position(getX(), getY()));
             mob.setMobTime(getMobTime());
-            mob.setFlip(getFlip());
+            mob.setFlip(isFlip());
             mob.setHide(isHide());
             mob.setFh(getFh());
             mob.setCy(getCy());
@@ -345,7 +346,7 @@ public class Life extends Observable {
             npc.setY(getY());
             npc.setPosition(new Position(getX(), getY()));
             npc.setMobTime(getMobTime());
-            npc.setFlip(getFlip());
+            npc.setFlip(isFlip());
             npc.setHide(isHide());
             npc.setFh(getFh());
             npc.setCy(getCy());
@@ -363,6 +364,17 @@ public class Life extends Observable {
             npc.setMobAliveReq(getMobAliveReq());
         }
         return npc;
+    }
+
+    public Reactor createReactorFromLife() {
+        Reactor reactor = null;
+        if ("r".equalsIgnoreCase(getLifeType())) {
+            reactor = new Reactor(getTemplateId());
+            reactor.setFlip(isFlip());
+            reactor.setHomePosition(getHomePosition().deepCopy());
+            reactor.setPosition(getHomePosition().deepCopy());
+        }
+        return reactor;
     }
 
     public void setHomePosition(Position homePosition) {

@@ -150,9 +150,12 @@ public class MobData {
                     dataOutputStream.writeInt(i);
                 }
                 dataOutputStream.writeShort(mob.getSkills().size());
-                for (MobSkill ms : mob.getSkills()) {
+                dataOutputStream.writeShort(mob.getAttacks().size());
+                List<MobSkill> all = mob.getSkills();
+                all.addAll(mob.getAttacks());
+                for (MobSkill ms : all) {
+                    dataOutputStream.writeInt(ms.getSkillSN());
                     dataOutputStream.writeInt(ms.getSkillID());
-                    dataOutputStream.writeInt(ms.getSkill());
                     dataOutputStream.writeByte(ms.getAction());
                     dataOutputStream.writeInt(ms.getLevel());
                     dataOutputStream.writeInt(ms.getEffectAfter());
@@ -281,10 +284,11 @@ public class MobData {
                 mob.addRevive(dataInputStream.readInt());
             }
             short skillSize = dataInputStream.readShort();
-            for (int i = 0; i < skillSize; i++) {
+            short attackSize = dataInputStream.readShort();
+            for (int i = 0; i < skillSize + attackSize; i++) {
                 MobSkill ms = new MobSkill();
+                ms.setSkillSN(dataInputStream.readInt());
                 ms.setSkillID(dataInputStream.readInt());
-                ms.setSkill(dataInputStream.readInt());
                 ms.setAction(dataInputStream.readByte());
                 ms.setLevel(dataInputStream.readInt());
                 ms.setEffectAfter(dataInputStream.readInt());
@@ -308,7 +312,11 @@ public class MobData {
                 ms.setInfo(dataInputStream.readUTF());
                 ms.setText(dataInputStream.readUTF());
                 ms.setSpeak(dataInputStream.readUTF());
-                mob.addSkill(ms);
+                if (i < skillSize) {
+                    mob.addSkill(ms);
+                } else {
+                    mob.addAttack(ms);
+                }
             }
 
             Option pImmuneOpt = new Option();
@@ -631,9 +639,15 @@ public class MobData {
                         }
                         break;
                     case "skill":
+                    case "attack":
+                        boolean attack = "attack".equalsIgnoreCase(name);
                         for (Node skillIDNode : XMLApi.getAllChildren(n)) {
                             MobSkill mobSkill = new MobSkill();
-                            mobSkill.setSkillID(Integer.parseInt(XMLApi.getNamedAttribute(skillIDNode, "name")));
+                            if (!Util.isNumber(XMLApi.getNamedAttribute(skillIDNode, "name"))) {
+                                System.out.println("IDDDDDDDDDDDDDDDD = " + id);
+                                continue;
+                            }
+                            mobSkill.setSkillSN(Integer.parseInt(XMLApi.getNamedAttribute(skillIDNode, "name")));
 //                            Node firstAttackNode = XMLApi.getFirstChildByNameBF(skillIDNode, "firstAttack");
 //                            if(firstAttackNode != null) {
 //                                mob.setFirstAttack(Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")) != 0);
@@ -646,7 +660,7 @@ public class MobData {
                                 String skillNodeValue = XMLApi.getNamedAttribute(skillInfoNode, "value");
                                 switch (skillNodeName) {
                                     case "skill":
-                                        mobSkill.setSkill(Integer.parseInt(skillNodeValue));
+                                        mobSkill.setSkillID(Integer.parseInt(skillNodeValue));
                                         break;
                                     case "action":
                                         mobSkill.setAction(Byte.parseByte(skillNodeValue));
@@ -723,7 +737,11 @@ public class MobData {
                                         log.warn(String.format("Unknown skill node %s with value %s", skillNodeName, skillNodeValue));
                                 }
                             }
-                            mob.addSkill(mobSkill);
+                            if (attack) {
+                                mob.addAttack(mobSkill);
+                            } else {
+                                mob.addSkill(mobSkill);
+                            }
                         }
                         break;
                     case "selfDestruction":
@@ -732,7 +750,6 @@ public class MobData {
                         break;
                     case "speak":
                     case "thumbnail":
-                    case "attack":
                     case "ban":
                     case "default":
                     case "defaultHP":

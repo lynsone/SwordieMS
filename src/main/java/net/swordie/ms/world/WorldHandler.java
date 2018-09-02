@@ -1169,7 +1169,7 @@ public class WorldHandler {
         Field field = chr.getField();
         int mobID = inPacket.decodeInt();
         Mob mob = (Mob) field.getLifeByObjectID(mobID);
-        c.write(MobPool.mobChangeController(mob, true, true));
+        c.write(MobPool.changeController(mob, true, true));
     }
 
     public static void handleMoveMob(Client c, InPacket inPacket) {
@@ -1185,45 +1185,63 @@ public class WorldHandler {
         Char controller = field.getLifeToControllers().get(mob);
         byte idk0 = inPacket.decodeByte(); // check if the templateID / 10000 == 250 or 251. No idea for what it's used
         short moveID = inPacket.decodeShort();
-        byte actionAndDirMask = inPacket.decodeByte();
-        msai.actionAndDirMask = actionAndDirMask;
-        boolean usedSkill = actionAndDirMask != 0;
-        byte actionAndDir = inPacket.decodeByte();
-        msai.actionAndDir = actionAndDir;
-        life.setMoveAction(actionAndDir);
-        int skillID = 0;
+        msai.actionAndDirMask = inPacket.decodeByte();
+        byte action = inPacket.decodeByte();
+        msai.action = (byte) (action >> 1);
+        life.setMoveAction(action);
+        int skillID = msai.action - 30; // thanks yuuroido :D
+        int skillSN = skillID;
         int slv = 0;
         msai.targetInfo = inPacket.decodeInt();
-        if (usedSkill && actionAndDir != -1 && mob.hasSkillDelayExpired()) {
-            MobSkill mobSkill = null;
+        int afterAttack = -1;
+        c.getChr().chatMessage("" + msai.action);
+        boolean didSkill = action != -1;
+        if (didSkill && mob.hasSkillDelayExpired() && !mob.isInAttack()) {
             List<MobSkill> skillList = mob.getSkills();
-            if (skillList.size() > 0) {
-                if (actionAndDir != -1) {
-                    mobSkill = skillList.stream()
-                            .filter(ms -> ms.getSkillID() == actionAndDir
-                                    && !mob.hasSkillOnCooldown(ms.getSkill(), ms.getLevel()))
-                            .findFirst()
-                            .orElse(null);
-                }
+            if (Util.succeedProp(GameConstants.MOB_SKILL_CHANCE)) {
+                MobSkill mobSkill;
+                mobSkill = skillList.stream()
+                        .filter(ms -> ms.getSkillSN() == skillSN
+                                /*&& mob.hasSkillOffCooldown(ms.getSkillID(), ms.getLevel())*/)
+                        .findFirst()
+                        .orElse(null);
                 if (mobSkill == null) {
                     skillList = skillList.stream()
-                            .filter(ms -> !mob.hasSkillOnCooldown(ms.getSkill(), ms.getLevel()))
+                            .filter(ms -> mob.hasSkillOffCooldown(ms.getSkillID(), ms.getLevel()))
                             .collect(Collectors.toList());
                     if (skillList.size() > 0) {
                         mobSkill = skillList.get(Randomizer.nextInt(skillList.size()));
                     }
                 }
-                if (mobSkill != null) {
-                    skillID = mobSkill.getSkill();
+                didSkill = mobSkill != null;
+                if (didSkill) {
+                    didSkill = true;
+                    skillID = mobSkill.getSkillID();
                     slv = mobSkill.getLevel();
                     MobSkillInfo msi = SkillData.getMobSkillInfoByIdAndLevel(skillID, slv);
                     long curTime = System.currentTimeMillis();
                     long interval = msi.getSkillStatIntValue(MobSkillStat.interval) * 1000;
                     long nextUseableTime = curTime + interval;
-                    mob.putSkillCooldown(skillID, slv, nextUseableTime);
                     c.getChr().chatMessage(Mob, String.format("Mob did skill with ID %d (%s), level = %d",
-                            mobSkill.getSkill(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkill()), mobSkill.getLevel()));
-                    mobSkill.handleEffect(mob);
+                            mobSkill.getSkillID(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkillID()), mobSkill.getLevel()));
+                    mob.putSkillCooldown(skillID, slv, nextUseableTime);
+                    if (mobSkill.getSkillAfter() > 0) {
+                        mob.getSkillDelays().push(mobSkill);
+                        mob.setSkillDelay(mobSkill.getSkillAfter());
+                        c.write(MobPool.setSkillDelay(mob.getObjectId(), mobSkill.getSkillAfter(), skillID, slv, 0, null));
+                    } else {
+                        mobSkill.handleEffect(mob);
+                    }
+                }
+            }
+        }
+        if (!didSkill) {
+            // didn't do a skill, so ensure that the attack gets properly formed
+            int attackIdx = skillID + 17;
+            if (mob.hasAttackOffCooldown(attackIdx)) {
+                MobSkill ms = mob.getAttackById(attackIdx);
+                if (ms != null && ms.getAfterAttack() >= 0) {
+                    afterAttack = ms.getAfterAttack();
                 }
             }
         }
@@ -1248,10 +1266,33 @@ public class WorldHandler {
         int hitExpire = inPacket.decodeInt();
         byte idk = inPacket.decodeByte();
         MovementInfo movementInfo = new MovementInfo(inPacket);
-        c.write(MobPool.mobCtrlAck(mob, true, moveID, skillID, (byte) slv, 0));
+        c.write(MobPool.ctrlAck(mob, true, moveID, skillID, (byte) slv, -1));
         movementInfo.applyTo(mob);
+        mob.setInAttack(afterAttack >= 0);
+        if (afterAttack >= 0) {
+            c.write(MobPool.setAfterAttack(mob.getObjectId(), (short) afterAttack, msai.action, action % 2 != 0));
+        }
         field.checkMobInAffectedAreas(mob);
-        field.broadcastPacket(MobPool.mobMove(mob, msai, movementInfo), controller);
+        field.broadcastPacket(MobPool.move(mob, msai, movementInfo), controller);
+    }
+
+    public static void handleMobSkillDelayEnd(Char chr, InPacket inPacket) {
+        Life life = chr.getField().getLifeByObjectID(inPacket.decodeInt());
+        if (!(life instanceof Mob)) {
+            return;
+        }
+        Mob mob = (Mob) life;
+        int skillID = inPacket.decodeInt();
+        int slv = inPacket.decodeInt();
+        int remainCount = 0; // only set in MobDelaySkill::UpdateSequenceMode
+        if (inPacket.decodeByte() != 0) {
+            remainCount = inPacket.decodeInt();
+        }
+        MobSkill expected = mob.getSkillDelays().pop();
+        if (expected.getSkillID() == skillID && expected.getLevel() == slv) {
+            expected.handleEffect(mob);
+        }
+
     }
 
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
@@ -1631,7 +1672,7 @@ public class WorldHandler {
             Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
             if (mob != null) {
 //            mob.damage((long) 133337);
-//            c.write(CField.mobDamaged(mobID, (long) 133337, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
+//            c.write(CField.damaged(mobID, (long) 133337, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
             }
         }
     }
@@ -4343,7 +4384,7 @@ public class WorldHandler {
 
         Skill stolenSkill = SkillData.getSkillDeepCopyById(stealSkillID);
         int stealSkillMaxLv = stolenSkill.getMasterLevel();
-        int stealSkillCurLv = targetChr == null ? stealSkillMaxLv : targetChr.getSkill(stealSkillID).getCurrentLevel(); //TODO this is for testing,  needs to be:    targetChr.getSkill(stealSkillID).getCurrentLevel();
+        int stealSkillCurLv = targetChr == null ? stealSkillMaxLv : targetChr.getSkill(stealSkillID).getCurrentLevel(); //TODO this is for testing,  needs to be:    targetChr.getSkillID(stealSkillID).getCurrentLevel();
 
         if(!add) {
             // /Add Stolen Skill
@@ -4940,7 +4981,7 @@ public class WorldHandler {
         Mob mob = (Mob) field.getLifeByObjectID(mobID);
         if (mob != null && mob.isSelfDestruction()) {
             field.removeLife(mobID);
-            field.broadcastPacket(MobPool.mobLeaveField(mobID, DeathType.ANIMATION_DEATH));
+            field.broadcastPacket(MobPool.leaveField(mobID, DeathType.ANIMATION_DEATH));
         }
     }
 

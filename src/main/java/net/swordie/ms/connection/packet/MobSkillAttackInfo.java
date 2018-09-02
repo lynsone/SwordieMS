@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class MobSkillAttackInfo {
     public byte actionAndDirMask;
-    public byte actionAndDir;
+    public byte action;
     public int targetInfo;
     public short skillID;
     public List<Position> multiTargetForBalls = new ArrayList<>();

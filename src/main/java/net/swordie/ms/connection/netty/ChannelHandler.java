@@ -419,6 +419,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case MOB_APPLY_CTRL:
 //                    WorldHandler.handleMobApplyCtrl(c, inPacket);
                 break;
+            case MOB_SKILL_DELAY_END:
+                WorldHandler.handleMobSkillDelayEnd(chr, inPacket);
+                break;
             case USER_GROWTH_HELPER_REQUEST:
                 WorldHandler.handleUserGrowthRequestHelper(c, inPacket);
                 break;

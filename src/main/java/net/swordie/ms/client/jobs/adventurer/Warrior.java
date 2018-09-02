@@ -700,7 +700,7 @@ public class Warrior extends Beginner {
                             o2.tOption = si.getValue(time, slv);
                             mts.addStatOptions(MobStat.ACC, o2);
                         }
-                        c.write(MobPool.mobStatSet(mob, (short) 0));
+                        c.write(MobPool.statSet(mob, (short) 0));
                     }
                 }
                 break;
@@ -861,7 +861,7 @@ public class Warrior extends Beginner {
                     for (int i = 0; i < mai.damages.length; i++) {
                         dmg += mai.damages[i];
                     }
-                    c.write(MobPool.mobDamaged(mob.getObjectId(), dmg, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
+                    c.write(MobPool.damaged(mob.getObjectId(), dmg, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
                 }
                 break;
             case EVIL_EYE_SHOCK:

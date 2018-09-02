@@ -396,7 +396,7 @@ public class MobTemporaryStat {
 		synchronized (currentStatVals) {
 			getRemovedStatVals().put(mobStat, getCurrentStatVals().get(mobStat));
 			getCurrentStatVals().remove(mobStat);
-			getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false));
+			getMob().getField().broadcastPacket(MobPool.statReset(getMob(), (byte) 1, false));
 			getSchedules().remove(mobStat);
 			if (!fromSchedule && getSchedules().containsKey(mobStat)) {
 				getSchedules().get(mobStat).cancel(true);
@@ -416,7 +416,7 @@ public class MobTemporaryStat {
 			if (getBurnedInfos().size() == 0) {
 				getCurrentStatVals().remove(BurnedInfo);
 			}
-			getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 1, false, biList));
+			getMob().getField().broadcastPacket(MobPool.statReset(getMob(), (byte) 1, false, biList));
 			if (chr.isBattleRecordOn()) {
 				for (net.swordie.ms.life.mob.skill.BurnedInfo bi : biList) {
 					int count = Math.min(bi.getDotCount(), (Util.getCurrentTime() - bi.getStartTime()) / bi.getInterval());
@@ -448,7 +448,7 @@ public class MobTemporaryStat {
 	 */
 	public void addStatOptionsAndBroadcast(MobStat mobStat, Option option) {
 		addStatOptions(mobStat, option);
-		mob.getField().broadcastPacket(MobPool.mobStatSet(getMob(), (short) 0));
+		mob.getField().broadcastPacket(MobPool.statSet(getMob(), (short) 0));
 	}
 
 	/**
@@ -613,7 +613,7 @@ public class MobTemporaryStat {
 		if (hasCurrentMobStat(EVA) && getCurrentOptionsByMobStat(EVA).nOption > 0) {
 			removeMobStat(EVA, false);
 		}
-		getMob().getField().broadcastPacket(MobPool.mobStatReset(getMob(), (byte) 0, false));
+		getMob().getField().broadcastPacket(MobPool.statReset(getMob(), (byte) 0, false));
 	}
 
 	public void removeEverything() {
