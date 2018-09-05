@@ -140,7 +140,7 @@ public class InGameDirectionEvent implements Encodable {
         igdr.arg2 = z;
         igdr.arg3 = npcIdForExtend;
         igdr.arg4 = onUser ? 0 : 1;
-        igdr.arg5 = idk2;
+        igdr.arg5 = idk2; // flip with user
 
         return igdr;
     }

@@ -3,6 +3,7 @@
 ALICIA = 1064002 # npc Id
 status = -1
 def init():
+    sm.removeEscapeButton()
     sm.lockInGameUI(True)
     sm.setSpeakerID(ALICIA)
     sm.showFieldEffect("Map/Effect.img/rootabyss/undo")
@@ -50,4 +51,4 @@ def action(response, answer):
     elif status == 8:
         sm.lockInGameUI(False)
         sm.startQuest(parentID)
-        sm.warp(913080001, 0) # Fake Cutscene Field (Ereve)
+        sm.warpInstanceIn(913080001, 0) # Fake Cutscene Field (Ereve)

@@ -3,6 +3,7 @@
 MYSTERIOUS_GIRL = 1064001 # npc Id
 status = -1
 def init():
+    sm.removeEscapeButton()
     sm.lockInGameUI(True)
     sm.setPlayerAsSpeaker()
     sm.sendNext("We need to find those baddies if we want to get you out of here.")
@@ -44,4 +45,4 @@ def action(response, answer):
     elif status == 7:
         sm.startQuest(parentID)
         sm.lockInGameUI(False)
-        sm.warp(910700300, 0) # Fake Vellum Cave for QuestLine
+        sm.warpInstanceIn(910700300, 0) # Fake Vellum Cave for QuestLine

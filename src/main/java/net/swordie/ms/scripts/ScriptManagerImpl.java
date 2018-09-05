@@ -1565,7 +1565,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void moveCameraBack(int speed) {
-		moveCamera(true, speed, 0, 0);
+		moveCamera(true, speed, chr.getPosition().getX(), chr.getPosition().getY());
 	}
 
 	@Override
@@ -1630,6 +1630,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void showEffect(String path, int duration, int x, int y, int z, int npcIdForExtend, boolean onUser, int idk2) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(x, y), z, npcIdForExtend, onUser, idk2)));
+	}
+
+	public void showEffectOnPosition(String path, int duration, int x, int y) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(x, y), 0, 1, false, 0)));
 	}
 
 	public void showBalloonMsg(String path, int duration) {
