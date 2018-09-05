@@ -65,7 +65,6 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
@@ -1045,21 +1044,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void removeMobsByTemplateId(int id) {
-		Set<Mob> mobList = new HashSet<>(chr.getField().getMobs()); // copy to prevent CME
-		if (mobList.size() > 0) {
-			for (Mob mob : mobList) {
-				if (mob.getTemplateId() != id) {
-					continue;
-				}
-				removeMobByObjId(mob.getObjectId());
-			}
+	public void removeMobByTemplateId(int id) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(id);
+		if(life == null) {
+			log.error(String.format("Could not find Mob by template id %d.", id));
+			return;
 		}
-	}
-
-	@Override
-	public void removeMobsAfterTimer(int templateID, int seconds) {
-		EventManager.addEvent(() -> removeMobsByTemplateId(templateID), seconds, TimeUnit.SECONDS);
+		removeMobByObjId(life.getObjectId());
 	}
 
 	@Override
@@ -1591,6 +1583,17 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void sendDelay(int delay) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
+	}
+
+	@Override
+	public void doEventAndSendDelay(int delay, String methodName, Object...args) {
+		invoke(chr.getScriptManager(), methodName, args);
+		sendDelay(delay);
+	}
+
+	@Override
 	public void forcedMove(boolean left, int distance) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedMove(left, distance)));
 	}
@@ -1601,8 +1604,23 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void forceAction(int type, int duration) {
+	public void forcedAction(int type, int duration) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedAction(type, duration)));
+	}
+
+	@Override
+	public void forcedInput(int type) {
+		ForcedInputType fit = ForcedInputType.getByVal(type);
+		if (fit == null) {
+			log.error(String.format("Unknown Forced Input Type %d", type));
+			return;
+		}
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedInput(type)));
+	}
+
+	@Override
+	public void hideUser(boolean hide) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.vansheeMode(hide)));
 	}
 
 	public void showEffect(String path, int duration, int x, int y) {
@@ -1616,6 +1634,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void showBalloonMsg(String path, int duration) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(0, -100), 0, 0, true, 0)));
+	}
+
+	public void sayMonologue(String text, boolean isEnd) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
 	}
 
 

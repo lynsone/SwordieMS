@@ -144,7 +144,7 @@ def action(response, answer):
         sm.sendNext("Magnus! Y-you destroyed him!")
 
     elif status == 16:
-        sm.forceAction(438, 4500)
+        sm.forcedAction(438, 4500)
         sm.showEffect("Skill/2004.img/skill/20041226/prepare", 540, -50, -15, 0, 0, True, 0)
         sm.invokeAfterDelay(540, "showEffect", "Skill/2004.img/skill/20041226/keydown", 3000, -25, -15, 0, 0, True, 0)
         sm.invokeAfterDelay(300, "showNpcSpecialActionByTemplateId", MAGNUS, "barrier", 3000)
