@@ -58,6 +58,8 @@ public class ItemConstants {
     private static final int CLEAN_SLATE_ST_COST = 200;
 
     // Flames
+    public static final short EQUIP_FLAME_LEVEL_DIVIDER = 40;
+    public static final short EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED = 20;
     public static final short MAX_FLAME_LEVEL = 7;
     public static final short FLAME_STATS = 21;
     public static final int SCARLET_SHOULDER = 1152155; // The only exception for flames on shoulders.

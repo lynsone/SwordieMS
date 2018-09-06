@@ -1646,53 +1646,13 @@ public class Equip extends Item {
     // Flame level used according to the level's equip.
     // Used for STR/DEX/INT/LUK/DEF additions.
     public short getFlameLevelExtended() {
-        if (getrLevel() <= 19) {
-            return 1;
-        } else if (getrLevel() <= 39) {
-            return 2;
-        } else if (getrLevel() <= 59) {
-            return 3;
-        } else if (getrLevel() <= 79) {
-            return 4;
-        } else if (getrLevel() <= 99) {
-            return 5;
-        } else if (getrLevel() <= 119) {
-            return 6;
-        } else if (getrLevel() <= 139) {
-            return 7;
-        } else if (getrLevel() <= 159) {
-            return 8;
-        } else if (getrLevel() <= 179) {
-            return 9;
-        } else if (getrLevel() <= 199) {
-            return 10;
-        } else if (getrLevel() <= 219) {
-            return 11;
-        } else if (getrLevel() <= 239) {
-            return 12;
-        } else {
-            return 13;
-        }
+        return (short) Math.ceil((getrLevel() + 1) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED);
     }
 
     // Flame level used according to the level's equip.
     // Used for secondary stat increasing.
     public short getFlameLevel() {
-        if (getrLevel() <= 39) {
-            return 1;
-        } else if (getrLevel() <= 79) {
-            return 2;
-        } else if (getrLevel() <= 119) {
-            return 3;
-        } else if (getrLevel() <= 159) {
-            return 4;
-        } else if (getrLevel() <= 199) {
-            return 5;
-        } else if (getrLevel() <= 239) {
-            return 6;
-        } else {
-            return 7;
-        }
+        return (short) Math.ceil((getrLevel() + 1) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER);
     }
 
     // Gets ATT bonus by flame tier.
