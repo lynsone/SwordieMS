@@ -758,18 +758,7 @@ public interface ScriptManager extends Observer {
 	 * @param id
 	 * 		The template id of the monster(s).
 	 */
-	void removeMobsByTemplateId(int id);
-
-	/**
-	 * remove the specified monster(s) after the specified seconds.
-	 *
-	 * @param templateID
-	 * 		The template id of the monster(s).
-	 * @param seconds
-	 * 		The amount of time (in seconds) until the specified mobs get removed.
-	 */
-	void removeMobsAfterTimer(int templateID, int seconds);
-
+	void removeMobByTemplateId(int id);
 
 	/**
 	 * Shows the {@link Char}'s HP with the pre-defined template.
@@ -1266,6 +1255,22 @@ public interface ScriptManager extends Observer {
 	void resetCamera();
 
 	/**
+	 * sends a delay to the client, after the delay it'll send a response with which you can run action function in the script
+	 *
+	 * @param delay delay in milliseconds
+	 */
+	void sendDelay(int delay);
+
+	/**
+	 * Does a specified In Game Direction Event and sends a delay 'sendDelay'
+	 *
+	 * @param delay delay in milliseconds
+	 * @param methodName method to be ran
+	 * @param args arguments used in the specified method
+	 */
+	void doEventAndSendDelay(int delay, String methodName, Object...args);
+
+	/**
 	 * Forces the User to move in the specified direction for the specified distance
 	 *
 	 * @param left Direction the player moves in. True = Left. False = Right
@@ -1286,7 +1291,22 @@ public interface ScriptManager extends Observer {
 	 * @param type The Action Done, depending on Type
 	 * @param duration The duration the action is held
 	 */
-	void forceAction(int type, int duration);
+	void forcedAction(int type, int duration);
+
+	/**
+	 * Forces an action by the user, such as jumping
+	 *
+	 * @param type type of action used. refer to: {@link net.swordie.ms.enums.ForcedInputType}
+	 */
+	void forcedInput(int type);
+
+	/**
+	 * Hides the user
+	 *
+	 * @param hide true: hide.  false: show
+	 */
+	void hideUser(boolean hide);
+
 
 	/**
 	 * Shows an Effect from the given path for 'duration' duration at 'position' position. Other variables are not used atm

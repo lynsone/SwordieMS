@@ -3,6 +3,7 @@
 MYSTERIOUS_GIRL = 1064001 # npc Id
 status = -1
 def init():
+    sm.removeEscapeButton()
     sm.lockInGameUI(True)
     sm.setPlayerAsSpeaker()
     sm.sendNext("If you're really the World Tree, can't you just like... magic yourself outta here?")

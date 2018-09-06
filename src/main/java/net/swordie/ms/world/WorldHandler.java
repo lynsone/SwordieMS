@@ -1196,7 +1196,7 @@ public class WorldHandler {
         int slv = 0;
         msai.targetInfo = inPacket.decodeInt();
         int afterAttack = -1;
-        c.getChr().chatMessage("" + msai.action);
+        //c.getChr().chatMessage("" + msai.action);
         boolean didSkill = action != -1;
         if (didSkill && mob.hasSkillDelayExpired() && !mob.isInAttack()) {
             List<MobSkill> skillList = mob.getSkills();
@@ -2426,31 +2426,39 @@ public class WorldHandler {
         NpcMessageType nmt = lastType < NpcMessageType.values().length ?
                 Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
                 NpcMessageType.None;
-        byte action = inPacket.decodeByte();
-        int answer = 0;
-        boolean hasAnswer = false;
-        String ans = null;
-        if (nmt == NpcMessageType.AskText && action == 1) {
-            ans = inPacket.decodeString();
-        } else if (inPacket.getUnreadAmount() >= 4) {
-            answer = inPacket.decodeInt();
-            hasAnswer = true;
-        }
-        if (nmt == NpcMessageType.AskAvatar || nmt == NpcMessageType.AskAvatarZero) {
-            inPacket.decodeByte();
-            hasAnswer = inPacket.decodeByte() != 0;
-            answer = inPacket.decodeByte();
-        }if (nmt == NpcMessageType.AskText && action != 0) {
-            chr.getScriptManager().handleAction(lastType, action, ans);
-        } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
-                nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
-                nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
-            // else -> User pressed escape in a selection (choice) screen
-            chr.getScriptManager().handleAction(lastType, action, answer);
+        if (nmt != NpcMessageType.Monologue) {
+            byte action = inPacket.decodeByte();
+            int answer = 0;
+            boolean hasAnswer = false;
+            String ans = null;
+            if (nmt == NpcMessageType.AskText && action == 1) {
+                ans = inPacket.decodeString();
+            } else if (inPacket.getUnreadAmount() >= 4) {
+                answer = inPacket.decodeInt();
+                hasAnswer = true;
+            }
+            if (nmt == NpcMessageType.AskAvatar || nmt == NpcMessageType.AskAvatarZero) {
+                inPacket.decodeByte();
+                hasAnswer = inPacket.decodeByte() != 0;
+                answer = inPacket.decodeByte();
+            }
+            if (nmt == NpcMessageType.AskText && action != 0) {
+                chr.getScriptManager().handleAction(lastType, action, ans);
+            } else if (nmt == NpcMessageType.InGameDirectionsAnswer) {
+                byte answ = inPacket.decodeByte();
+                chr.getScriptManager().handleAction(lastType, action, answ);
+            } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
+                    nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
+                    nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
+                // else -> User pressed escape in a selection (choice) screen
+                chr.getScriptManager().handleAction(lastType, action, answer);
+            } else {
+                // User pressed escape in a selection (choice) screen
+                chr.dispose();
+                chr.getScriptManager().dispose();
+            }
         } else {
-            // User pressed escape in a selection (choice) screen
-            chr.dispose();
-            chr.getScriptManager().dispose();
+            chr.getScriptManager().handleAction(lastType, (byte) 1, 1); // Doesn't use  response nor answer
         }
     }
 
