@@ -15,6 +15,3 @@ def init():
 
 def action(response, answer):
     sm.warp(MIDSUMMER_NIGHTS_FOREST_ELLINEL_LAKE_SHORE_VER2)
-
-
-#sm.completeQuest(YOU_CAN_DO_IT)
