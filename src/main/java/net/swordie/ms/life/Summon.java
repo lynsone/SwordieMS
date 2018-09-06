@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.WindArcher;
@@ -22,6 +23,7 @@ import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
  * Created on 1/6/2018.
  */
 public class Summon extends Life {
+
+    private static final Logger log = Logger.getLogger(Summon.class);
 
     private Char chr;
     private int skillID;
@@ -48,7 +52,7 @@ public class Summon extends Life {
     private boolean attackActive;
     private short curFoothold;
     private AvatarLook avatarLook;
-    List<Position> teslaCoilPositions = new ArrayList<>();
+    private List<Position> teslaCoilPositions = new ArrayList<>();
     private byte moveAbility;
     private Position[] kishinPositions = new Position[2];
     private int maxHP;
@@ -328,7 +332,7 @@ public class Summon extends Life {
 
             default:
                 chr.chatMessage(String.format("Unhandled HP Summon, id = %d", getSkillID()));
-                System.out.println(String.format("Unhandled HP Summon, id = %d", getSkillID()));
+                log.error(String.format("Unhandled HP Summon, id = %d", getSkillID()));
                 break;
         }
 
@@ -349,5 +353,14 @@ public class Summon extends Life {
             field.addLifeSchedule(this, sf);
         }
         field.broadcastPacket(Summoned.summonedCreated(getChr().getId(), this));
+    }
+
+    @Override
+    public void broadcastLeavePacket() {
+        Field field = getField();
+        if (getSkillID() == Kanna.KISHIN_SHOUKAN || getSkillID() == Job.MONOLITH) {
+            field.setKishin(false);
+        }
+        field.broadcastPacket(Summoned.summonedRemoved(this, LeaveType.ANIMATION));
     }
 }

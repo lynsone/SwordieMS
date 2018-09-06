@@ -103,6 +103,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -149,7 +150,6 @@ public class WorldHandler {
         c.setChr(chr);
         c.getChannelInstance().addChar(chr);
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
-        chr.setOnline(true);
         chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
         Server.getInstance().addAccount(acc);
         acc.setCurrentChr(chr);
@@ -162,6 +162,8 @@ public class WorldHandler {
             Party party = c.getWorld().getPartybyId(chr.getPartyID());
             if (party == null) {
                 chr.setPartyID(0);
+            } else {
+                chr.setParty(party);
             }
         }
         chr.warp(field, true);
@@ -182,6 +184,7 @@ public class WorldHandler {
         acc.getMonsterCollection().init(chr);
         chr.checkAndRemoveExpiredItems();
         chr.initBaseStats();
+        chr.setOnline(true);
     }
 
     public static void handleUserMove(Client c, InPacket inPacket) {
@@ -1475,6 +1478,11 @@ public class WorldHandler {
         if(SkillConstants.needsOneMoreInt(ai.skillId)) {
             inPacket.decodeInt();
         }
+        if (SkillConstants.isFieldAttackObjSkill(ai.skillId)) {
+            inPacket.decodeInt();
+            inPacket.decodeInt();
+            inPacket.decodeInt();
+        }
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             mai.mobId = inPacket.decodeInt();
@@ -1684,14 +1692,20 @@ public class WorldHandler {
         Skill skill = chr.getSkill(skillID);
         if (skill != null && skill.getCurrentLevel() > 0) {
             Field field = chr.getField();
+            Set<FieldAttackObj> currentFaos = field.getFieldAttackObjects();
+            // remove the old arrow platter
+            currentFaos.stream()
+                    .filter(fao -> fao.getOwnerID() == chr.getId() && fao.getTemplateId() == 1)
+                    .findAny().ifPresent(field::removeLife);
             SkillInfo si = SkillData.getSkillInfoById(skillID);
             int slv = skill.getCurrentLevel();
-            FieldAttackObj fao = new FieldAttackObj(skillID, chr.getId(), chr.getPosition().deepCopy(), flip);
+            FieldAttackObj fao = new FieldAttackObj(1, chr.getId(), chr.getPosition().deepCopy(), flip);
             field.spawnLife(fao, chr);
             field.broadcastPacket(FieldAttackObjPool.objCreate(fao), chr);
             ScheduledFuture sf = EventManager.addEvent(() -> field.removeLife(fao.getObjectId(), true),
-                    si.getValue(SkillStat.time, slv));
+                    si.getValue(SkillStat.u, slv), TimeUnit.SECONDS);
             field.addLifeSchedule(fao, sf);
+            field.broadcastPacket(FieldAttackObjPool.setAttack(fao.getObjectId(), 0));
         }
 
     }
@@ -2729,6 +2743,10 @@ public class WorldHandler {
         }
         switch(prt) {
             case PartyReq_CreateNewParty:
+                if (party != null) {
+                    chr.chatMessage("You are already in a party.");
+                    return;
+                }
                 boolean appliable = inPacket.decodeByte() != 0;
                 String name = inPacket.decodeString();
                 party = Party.createNewParty(appliable, name, chr.getClient().getWorld());
@@ -2754,8 +2772,8 @@ public class WorldHandler {
                 }
                 if(party == null) {
                     party = Party.createNewParty(true, "Party with me!", chr.getClient().getWorld());
-                    party.addPartyMember(chr);
                     chr.write(WvsContext.partyResult(PartyResult.createNewParty(party)));
+                    party.addPartyMember(chr);
                 }
                 PartyMember inviter = party.getPartyLeader();
                 if(!invited.isPartyInvitable()) {
@@ -5600,7 +5618,6 @@ public class WorldHandler {
         inPacket.decodeShort();
         inPacket.decodeShort();
         Position forcedPos = inPacket.decodePositionInt();
-
     }
 
     public static void handleUserRegisterPetAutoBuffRequest(Char chr, InPacket inPacket) {

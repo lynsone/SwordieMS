@@ -458,7 +458,7 @@ public class Field {
     }
 
     public void removeLife(Life life) {
-        getLifes().remove(life.getObjectId());
+        removeLife(life.getObjectId(), false);
     }
 
     public Foothold getFootholdById(int fh) {
@@ -561,6 +561,11 @@ public class Field {
                 townPortal.showTownPortal(this);
             }
         }
+        for (Char c : getChars()) {
+            if (!c.equals(chr)) {
+                chr.write(UserPool.userEnterField(c));
+            }
+        }
     }
 
     @Override
@@ -644,6 +649,10 @@ public class Field {
 
     public Set<Npc> getNpcs() {
         return getLifesByClass(Npc.class);
+    }
+
+    public Set<FieldAttackObj> getFieldAttackObjects() {
+        return getLifesByClass(FieldAttackObj.class);
     }
 
     public void setObjectIDCounter(int idCounter) {
@@ -748,24 +757,7 @@ public class Field {
         }
         removeLife(id);
         removeSchedule(life, fromSchedule);
-        if (life instanceof Summon) {
-            Summon summon = (Summon) life;
-            if (summon.getSkillID() == Kanna.KISHIN_SHOUKAN || summon.getSkillID() == Job.MONOLITH) {
-                setKishin(false);
-            }
-            broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
-        } else if (life instanceof AffectedArea) {
-            AffectedArea aa = (AffectedArea) life;
-            broadcastPacket(CField.affectedAreaRemoved(aa, false));
-            for (Char chr : getChars()) {
-                TemporaryStatManager tsm = chr.getTemporaryStatManager();
-                if (tsm.hasAffectedArea(aa)) {
-                    tsm.removeStatsBySkill(aa.getSkillID());
-                }
-            }
-        } else if (life instanceof FieldAttackObj) {
-            broadcastPacket(FieldAttackObjPool.objRemoveByKey(life.getObjectId()));
-        }
+        life.broadcastLeavePacket();
     }
 
     public synchronized void removeDrop(int dropID, int pickupUserID, boolean fromSchedule, int petID) {

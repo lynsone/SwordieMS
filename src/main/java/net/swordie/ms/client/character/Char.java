@@ -1783,7 +1783,7 @@ public class Char {
 		Party party = getParty();
 		if (party != null) {
 			party.updatePartyMemberInfoByChr(this);
-			party.updateFull();
+			party.broadcast(WvsContext.partyResult(PartyResult.userMigration(party)));
 		}
 		Guild guild = getGuild();
 		if (guild != null) {
@@ -2234,11 +2234,6 @@ public class Char {
 			}
 		}
 		toField.spawnLifesForChar(this);
-		for (Char c : toField.getChars()) {
-			if (!c.equals(this)) {
-				write(UserPool.userEnterField(c));
-			}
-		}
 
 		if(tsm.hasStat(IndieEmpty)) {
 			for(Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext();) {
@@ -3046,7 +3041,7 @@ public class Char {
 						AllianceResult.notifyLoginOrLogout(ally, g, gm, !this.online && online)), this);
 			} else {
 				getGuild().broadcast(WvsContext.guildResult(
-						GuildResult.notifyLoginOrLogout(g, gm, online, !this.online && online)), this);
+						GuildResult.notifyLoginOrLogout(g, gm, online, online)), this);
 			}
 		}
 		this.online = online;
@@ -3055,7 +3050,7 @@ public class Char {
 			if (pm != null) {
 				pm.setChr(online ? this : null);
 				pm.updateInfoByChar(this);
-				getParty().broadcast(WvsContext.partyResult(PartyResult.updateShutdownStatus(this)));
+				getParty().updateFull();
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.life.FieldAttackObj;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Portal;
@@ -47,28 +48,7 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-//            OutPacket outPacket = new OutPacket(OutHeader.MOB_NEXT_ATTACK);
-//
-//            outPacket.encodeInt(1000002);
-//            outPacket.encodeInt(Integer.parseInt(args[1]));
 
-            OutPacket outPacket = new OutPacket(OutHeader.MOB_SET_AFTER_ATTACK);
-
-            outPacket.encodeInt(1000002);
-            outPacket.encodeShort(9);
-            outPacket.encodeInt(21);
-            outPacket.encodeByte(false);
-
-            chr.write(outPacket);
-
-            outPacket = new OutPacket(OutHeader.MOB_SET_AFTER_ATTACK);
-
-            outPacket.encodeInt(1000002);
-            outPacket.encodeShort(10);
-            outPacket.encodeInt(22);
-            outPacket.encodeByte(false);
-
-            chr.write(outPacket);
         }
     }
 

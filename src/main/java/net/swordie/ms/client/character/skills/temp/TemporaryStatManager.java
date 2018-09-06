@@ -296,8 +296,8 @@ public class TemporaryStatManager {
         if (hasNewStat(HayatoStance)) {
             outPacket.encodeInt(getOption(HayatoStance).xOption);
         }
-        if (hasNewStat(Unk5)) {
-            outPacket.encodeInt(getOption(Unk5).xOption);
+        if (hasNewStat(Unk460)) {
+            outPacket.encodeInt(getOption(Unk460).xOption);
         }
         outPacket.encodeByte(getDefenseAtt());
         outPacket.encodeByte(getDefenseState());
@@ -483,7 +483,7 @@ public class TemporaryStatManager {
         if (hasNewStat(NewFlying)) {
             outPacket.encodeInt(getOption(NewFlying).xOption);
         }
-        if (hasNewStat(Unk6000)) {
+        if (hasNewStat(Unk485)) {
             /* not exactly 2 bytes:
             c = 0;
             while(true) {
@@ -495,13 +495,13 @@ public class TemporaryStatManager {
                 c += 7;
             }
              */
-            outPacket.encodeByte(getOption(Unk6000).xOption);
-            outPacket.encodeByte(getOption(Unk6000).yOption);
+            outPacket.encodeByte(getOption(Unk485).xOption);
+            outPacket.encodeByte(getOption(Unk485).yOption);
         }
-        if (hasNewStat(Unk7000)) {
-            // 1st byte is normal, 2nd one is like in Unk6000
-            outPacket.encodeByte(getOption(Unk7000).xOption);
-            outPacket.encodeByte(getOption(Unk7000).yOption);
+        if (hasNewStat(Unk486)) {
+            // 1st byte is normal, 2nd one is like in Unk485
+            outPacket.encodeByte(getOption(Unk486).xOption);
+            outPacket.encodeByte(getOption(Unk486).yOption);
         }
         getNewStats().clear();
     }
@@ -543,7 +543,7 @@ public class TemporaryStatManager {
                         break;
                     case BladeStance:
                     case ImmuneBarrier:
-                    case Unk5:
+                    case Unk460:
                         outPacket.encodeInt(o.xOption);
                         break;
                     case FullSoulMP:

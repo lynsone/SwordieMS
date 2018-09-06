@@ -523,48 +523,48 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
     UsingScouter(452),
     RWMovingEvar(453),
     Stigma(454),
-    Unk0(455),
+    Unk455(455),
 
-    Unk1(456),
-    Unk2(457),
-    Unk3(458),
-    Unk4(459),
-    Unk5(460),
+    Unk456(456),
+    Unk457(457),
+    Unk458(458),
+    Unk459(459),
+    Unk460(460),
     HayatoStance(461),
     HayatoStanceBonus(462),
     EyeForEye(463),
 
     WillowDodge(464),
-    Unk20(465),
+    Unk465(465),
     HayatoPAD(466),
     HayatoHPR(467),
     HayatoMPR(468),
     HayatoBooster(469),
-    Unk70(470),
-    Unk80(471),
+    Unk470(470),
+    Unk471(471),
 
     Jinsoku(472),
     HayatoCr(473),
     HakuBlessing(474),
     HayatoBoss(475),
     BattoujutsuAdvance(476),
-    Unk600(477),
-    Unk700(478),
+    Unk477(477),
+    Unk478(478),
     BlackHeartedCurse(479),
 
     BeastMode(480),
     TeamRoar(481),
-    Unk3000(482),
-    Unk4000(483),
-    Unk5000(484),
-    Unk6000(485),
-    Unk7000(486),
-    Unk8000(487),
+    Unk482(482),
+    Unk483(483),
+    Unk484(484),
+    Unk485(485),
+    Unk486(486),
+    Unk487(487),
 
-    Unk10000(488),
-    Unk20000(489),
-    Unk30000(490),
-    Unk40000(491),
+    Unk488(488),
+    Unk489(489),
+    Unk490(490),
+    Unk491(491),
     EnergyCharged(492),
     DashSpeed(493),
     DashJump(494),
@@ -635,9 +635,11 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             AngelicBursterSoulResonance, Fever, IgnisRore, RpSiksin, TeleportMasteryRange, FireBarrier, ChangeFoxMan,
             FixCoolTime, IncMobRateDummy, AdrenalinBoost, AranSmashSwing, AranDrain, AranBoostEndHunt,
             HiddenHyperLinkMaximization, RWCylinder, RWCombination, RWMagnumBlow, RWBarrier, RWBarrierHeal,
-            RWMaximizeCannon, RWOverHeat, RWMovingEvar, Stigma, HayatoStance, HayatoStanceBonus, EyeForEye,
-            WillowDodge, HayatoPAD, HayatoHPR, HayatoMPR, HayatoBooster, Jinsoku, HayatoCr, HakuBlessing,
-            HayatoBoss, BattoujutsuAdvance, BlackHeartedCurse, BeastMode, TeamRoar
+            RWMaximizeCannon, RWOverHeat, RWMovingEvar, Stigma, Unk455, IncMaxDamage, Unk456, Unk457, Unk458, Unk459,
+            Unk460, PyramidFireBuff /*not sure*/, HayatoStance, HayatoBooster, HayatoStanceBonus, WillowDodge, Unk465,
+            HayatoPAD, HayatoHPR, HayatoMPR, Jinsoku, HayatoCr, HakuBlessing, HayatoBoss, BattoujutsuAdvance, Unk477,
+            Unk478, BlackHeartedCurse, EyeForEye, BeastMode, TeamRoar, Unk482, Unk483, Unk487, Unk488, Unk489, Unk490,
+            Unk491
     );
 
     private static final List<CharacterTemporaryStat> REMOTE_ORDER = Arrays.asList(
@@ -660,9 +662,9 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             ImmuneBarrier, FullSoulMP, AntiMagicShellBool, Dance, SpiritGuard, ComboTempest, HalfstatByDebuff,
             ComplusionSlant, JaguarSummoned, BMageAura, DarkLighting, AttackCountX, FireBarrier, KeyDownMoving,
             MichaelSoulLink, KinesisPsychicEnergeShield, BladeStance, Fever, AdrenalinBoost, RWBarrier, RWMagnumBlow,
-            Stigma, Unk1, BeastMode, TeamRoar, HayatoStance, HayatoBooster, HayatoStanceBonus, HayatoPAD, HayatoHPR,
-            HayatoMPR, HayatoCr, HayatoBoss, Stance, BattoujutsuAdvance, Unk700, BlackHeartedCurse, EyeForEye, Unk3,
-            Unk4000, Unk8000, Unk10000, Unk20000, Unk40000, Unk5, PoseTypeBool
+            Stigma, Unk456, BeastMode, TeamRoar, HayatoStance, HayatoBooster, HayatoStanceBonus, HayatoPAD, HayatoHPR,
+            HayatoMPR, HayatoCr, HayatoBoss, Stance, BattoujutsuAdvance, Unk478, BlackHeartedCurse, EyeForEye, Unk458,
+            Unk483, Unk487, Unk488, Unk489, Unk491, Unk460, PoseTypeBool
     );
 
 
@@ -688,7 +690,7 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             case ReturnTeleport:
             case ShadowPartner:
             case IncMaxDamage:
-            case Unk8000:
+            case Unk487:
             case SetBaseDamage:
             case QuiverCatridge:
             case ImmuneBarrier:
@@ -786,9 +788,9 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             case RWBarrier:
             case RWMagnumBlow:
             case HayatoStance:
-            case Unk8000:
-            case Unk10000:
-            case Unk20000:
+            case Unk487:
+            case Unk488:
+            case Unk489:
                 return true;
             default:
                 return false;
@@ -807,7 +809,7 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             case ReturnTeleport:
             case FireBomb:
             case SurplusSupply:
-            case Unk5:
+            case Unk460:
                 return true;
             default:
                 return false;
@@ -840,9 +842,9 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             case RWBarrier:
             case RWMagnumBlow:
             case HayatoStance:
-            case Unk10000:
-            case Unk20000:
-            case Unk5:
+            case Unk488:
+            case Unk489:
+            case Unk460:
                 return true;
             default:
                 return false;
@@ -860,28 +862,30 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
         }
     }
 
-    public static void mainNoMainPls(String[] args) {
-        int a = 0x1eb;
-        int val = 1 << (31 - (a & 0x1f));
-        int pos = a >> 5;
+    public static void main(String[] args) {
+        int a = Stigma.bitPos;
+//        int val = 1 << (31 - (a & 0x1f));
+//        int pos = a >> 5;
+        int val = 0x1000;
+        int pos = 0;
         log.debug(String.format("value 0x%04x, pos %d", val, pos));
         for(CharacterTemporaryStat cts : values()) {
             if(cts.getVal() == val && cts.getPos() == pos) {
                 log.debug("Corresponds to " + cts);
             }
         }
-        for (CharacterTemporaryStat cts : values()) {
-            val = cts.getVal();
-            for (int i = 0; i < 32; i++) {
-                if (1 << i == val) {
-                    val = 31 - i;
-                }
-            }
-            if (val % 8 == 0) {
-                System.out.println();
-            }
-            System.out.println(String.format("%s(%d),", cts.toString(), (cts.getPos() * 32) + val));
-        }
+//        for (CharacterTemporaryStat cts : values()) {
+//            val = cts.getVal();
+//            for (int i = 0; i < 32; i++) {
+//                if (1 << i == val) {
+//                    val = 31 - i;
+//                }
+//            }
+//            if (val % 8 == 0) {
+//                System.out.println();
+//            }
+//            System.out.println(String.format("%s(%d),", cts.toString(), (cts.getPos() * 32) + val));
+//        }
     }
 
     @Override
