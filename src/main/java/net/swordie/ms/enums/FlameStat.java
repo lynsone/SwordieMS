@@ -28,7 +28,8 @@ public enum FlameStat {
     FlameAllStats(17),
     FlameBossDamage(18),
     FlameTotalDamage(19),
-    FlameEquipLevelReduction(20);
+    FlameEquipLevelReduction(20),
+    FLAME_STATS(21);
 
     private int val;
 

@@ -1658,10 +1658,10 @@ public class Equip extends Item {
     // Gets ATT bonus by flame tier.
     public short getATTBonus(short tier) {
         if (ItemConstants.isWeapon(getItemId())) {
-            final double multiplier = 10.25;
+            final double multipliers[] = isBossReward() ? ItemConstants.WEAPON_FLAME_MULTIPLIER_BOSS_WEAPON : ItemConstants.WEAPON_FLAME_MULTIPLIER;
             Equip baseEquip = ItemData.getEquipById(getItemId());
             int att = Math.max(baseEquip.getiPad(), baseEquip.getiMad());
-            return (short) Math.ceil(att * (multiplier * getFlameLevel() * ((double) tier / ItemConstants.MAX_FLAME_LEVEL)) / 100.0);
+            return (short) Math.ceil(att * (multipliers[tier - 1] * getFlameLevel()) / 100.0);
         } else {
             return tier;
         }
@@ -1679,11 +1679,11 @@ public class Equip extends Item {
             return;
         }
 
-        int minTier = isBossReward() || obtained ? 4 : 1;
+        int minTier = isBossReward() || obtained ? 3 : 1;
         int maxTier = isBossReward() || obtained ? 7 : 6;
         int bonusStats = isBossReward() ? 4 : Util.getRandom(1, 4);
         int statsApplied = 0;
-        boolean[] flameApplied = new boolean[ItemConstants.FLAME_STATS];
+        boolean[] flameApplied = new boolean[FlameStat.FLAME_STATS.getVal()];
         while (statsApplied < bonusStats) {
             int stat = Util.getRandom(flameApplied.length - 1);
 
