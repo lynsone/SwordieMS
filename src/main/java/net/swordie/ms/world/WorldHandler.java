@@ -1696,10 +1696,7 @@ public class WorldHandler {
             // remove the old arrow platter
             currentFaos.stream()
                     .filter(fao -> fao.getOwnerID() == chr.getId() && fao.getTemplateId() == 1)
-                    .findAny().ifPresent(fao -> {
-                        field.broadcastPacket(FieldAttackObjPool.objRemoveByKey(fao.getObjectId()));
-                        field.removeLife(fao);
-            });
+                    .findAny().ifPresent(field::removeLife);
             SkillInfo si = SkillData.getSkillInfoById(skillID);
             int slv = skill.getCurrentLevel();
             FieldAttackObj fao = new FieldAttackObj(1, chr.getId(), chr.getPosition().deepCopy(), flip);
