@@ -643,18 +643,7 @@ public class MobData {
                         boolean attack = "attack".equalsIgnoreCase(name);
                         for (Node skillIDNode : XMLApi.getAllChildren(n)) {
                             MobSkill mobSkill = new MobSkill();
-                            if (!Util.isNumber(XMLApi.getNamedAttribute(skillIDNode, "name"))) {
-                                System.out.println("IDDDDDDDDDDDDDDDD = " + id);
-                                continue;
-                            }
                             mobSkill.setSkillSN(Integer.parseInt(XMLApi.getNamedAttribute(skillIDNode, "name")));
-//                            Node firstAttackNode = XMLApi.getFirstChildByNameBF(skillIDNode, "firstAttack");
-//                            if(firstAttackNode != null) {
-//                                mob.setFirstAttack(Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")) != 0);
-//                                if(Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")) > 1) {
-//                                    System.err.printf("Firstattack = %d", Integer.parseInt(XMLApi.getNamedAttribute(firstAttackNode, "value")));
-//                                }
-//                            }
                             for (Node skillInfoNode : XMLApi.getAllChildren(skillIDNode)) {
                                 String skillNodeName = XMLApi.getNamedAttribute(skillInfoNode, "name");
                                 String skillNodeValue = XMLApi.getNamedAttribute(skillInfoNode, "value");

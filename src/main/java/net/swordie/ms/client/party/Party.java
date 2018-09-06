@@ -59,6 +59,7 @@ public class Party implements Encodable {
             outPacket.encodeInt(pm != null ? pm.getCharID() : 0);
         }
         for(PartyMember pm : partyMembers) {
+            System.out.println(pm != null ? pm.getCharName() : "Empty");
             outPacket.encodeString(pm != null ? pm.getCharName() : "", 13);
         }
         for(PartyMember pm : partyMembers) {
@@ -71,14 +72,12 @@ public class Party implements Encodable {
             outPacket.encodeInt(pm != null ? pm.getLevel() : 0);
         }
         for(PartyMember pm : partyMembers) {
-            outPacket.encodeInt(pm != null ? pm.getChannel() - 1 : 0);
+            outPacket.encodeInt(pm != null ? pm.getChannel() - 1 : -1);
         }
         for(PartyMember pm : partyMembers) {
             outPacket.encodeInt(pm != null && pm.isOnline() ? 1 : 0);
         }
-//        for(PartyMember pm : partyMembers) {
-            outPacket.encodeInt(getPartyLeaderID());
-//        }
+        outPacket.encodeInt(getPartyLeaderID());
         // end PARTYMEMBER struct
         for(PartyMember pm : partyMembers) {
             outPacket.encodeInt(pm != null ? pm.getFieldID() : 0);
@@ -150,11 +149,14 @@ public class Party implements Encodable {
     }
 
     public boolean hasCharAsLeader(Char chr) {
-        return getPartyLeader().getChr().equals(chr);
+        return getPartyLeaderID() == chr.getId();
     }
 
     public void disband() {
         broadcast(WvsContext.partyResult(PartyResult.withdrawParty(this, getPartyLeader(), false, false)));
+        for (Char chr : getOnlineChars()) {
+            chr.setParty(null);
+        }
         for (int i = 0; i < getPartyMembers().length; i++) {
             getPartyMembers()[i] = null;
         }
@@ -298,6 +300,7 @@ public class Party implements Encodable {
         if(!isPartyMember(chr)) {
             return;
         }
+        getPartyMemberByID(chr.getId()).updateInfoByChar(chr);
         updateFull();
     }
 

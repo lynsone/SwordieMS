@@ -561,6 +561,11 @@ public class Field {
                 townPortal.showTownPortal(this);
             }
         }
+        for (Char c : getChars()) {
+            if (!c.equals(chr)) {
+                chr.write(UserPool.userEnterField(c));
+            }
+        }
     }
 
     @Override

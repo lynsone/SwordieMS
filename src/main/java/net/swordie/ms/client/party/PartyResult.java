@@ -70,14 +70,18 @@ public class PartyResult implements Encodable {
                 outPacket.encodeString(str); // sJoinerName
                 party.encode(outPacket);
                 break;
-            case PartyRes_UpdateShutdownStatus:
-                outPacket.encodeInt(chr.getId());
-                outPacket.encodeByte(chr.isOnline());
+            case PartyRes_UserMigration:
+                outPacket.encodeInt(party.getId());
+                outPacket.encode(party);
                 break;
             case PartyRes_ChangeLevelOrJob:
                 outPacket.encodeInt(chr.getId());
                 outPacket.encodeInt(chr.getLevel());
                 outPacket.encodeInt(chr.getJob());
+                break;
+            case PartyRes_UpdateShutdownStatus:
+                outPacket.encodeInt(chr.getId());
+                outPacket.encodeByte(chr.isOnline());
                 break;
         }
     }
@@ -145,5 +149,11 @@ public class PartyResult implements Encodable {
 
     public static PartyResult msg(PartyType type) {
         return new PartyResult(type);
+    }
+
+    public static PartyResult userMigration(Party party) {
+        PartyResult pr = new PartyResult(PartyType.PartyRes_UserMigration);
+        pr.party = party;
+        return pr;
     }
 }
