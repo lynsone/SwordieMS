@@ -8,7 +8,6 @@ def init():
     sm.sendAskYesNo("Head back to #b North Forest: Giant Tree#k?")
 
 def action(response, answer):
-
-        if response == 1:
-            sm.warp(MIDSUMMER_NIGHTS_FOREST_PATH_FROM_ELLINEL)
-        sm.dispose()
+    if response == 1:
+        sm.warp(MIDSUMMER_NIGHTS_FOREST_PATH_FROM_ELLINEL)
+    sm.dispose()

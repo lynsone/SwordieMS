@@ -14,7 +14,6 @@ def init():
         sm.dispose()
 
 def action(response, answer):
-
-        if response == 1:
-            sm.warp(MIDSUMMER_NIGHTS_FOREST_PATH_TO_ELLINEL)
-        sm.dispose()
+    if response == 1:
+        sm.warp(MIDSUMMER_NIGHTS_FOREST_PATH_TO_ELLINEL)
+    sm.dispose()
