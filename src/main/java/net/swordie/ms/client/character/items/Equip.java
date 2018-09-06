@@ -1683,7 +1683,7 @@ public class Equip extends Item {
         int maxTier = isBossReward() || obtained ? 7 : 6;
         int bonusStats = isBossReward() ? 4 : Util.getRandom(1, 4);
         int statsApplied = 0;
-        boolean[] flameApplied = new boolean[FlameStat.FLAME_STATS.getVal()];
+        boolean[] flameApplied = new boolean[FlameStat.values().length];
         while (statsApplied < bonusStats) {
             int stat = Util.getRandom(flameApplied.length - 1);
 
