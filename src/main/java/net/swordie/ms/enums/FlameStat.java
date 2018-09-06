@@ -28,8 +28,7 @@ public enum FlameStat {
     FlameAllStats(17),
     FlameBossDamage(18),
     FlameTotalDamage(19),
-    FlameEquipLevelReduction(20),
-    FLAME_STATS(21);
+    FlameEquipLevelReduction(20);
 
     private int val;
 
@@ -42,6 +41,6 @@ public enum FlameStat {
     }
 
     public static FlameStat getByVal(int val) {
-        return Util.getFromCollectionWithPred(Arrays.asList(values()), csat -> csat.getVal() == val);
+        return Util.getFromCollectionWithPred(Arrays.asList(values()), stat -> stat.getVal() == val);
     }
 }
