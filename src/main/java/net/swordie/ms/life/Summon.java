@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.WindArcher;
@@ -352,5 +353,14 @@ public class Summon extends Life {
             field.addLifeSchedule(this, sf);
         }
         field.broadcastPacket(Summoned.summonedCreated(getChr().getId(), this));
+    }
+
+    @Override
+    public void broadcastLeavePacket() {
+        Field field = getField();
+        if (getSkillID() == Kanna.KISHIN_SHOUKAN || getSkillID() == Job.MONOLITH) {
+            field.setKishin(false);
+        }
+        field.broadcastPacket(Summoned.summonedRemoved(this, LeaveType.ANIMATION));
     }
 }

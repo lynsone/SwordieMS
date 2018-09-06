@@ -1,6 +1,7 @@
 package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.loaders.MobData;
@@ -398,5 +399,9 @@ public class Life extends Observable {
 
     public void setvPosition(Position vPosition) {
         this.vPosition = vPosition;
+    }
+
+    public void broadcastLeavePacket() {
+        // Life itself doesn't have a leave packet
     }
 }
