@@ -1646,62 +1646,22 @@ public class Equip extends Item {
     // Flame level used according to the level's equip.
     // Used for STR/DEX/INT/LUK/DEF additions.
     public short getFlameLevelExtended() {
-        if (getrLevel() <= 19) {
-            return 1;
-        } else if (getrLevel() <= 39) {
-            return 2;
-        } else if (getrLevel() <= 59) {
-            return 3;
-        } else if (getrLevel() <= 79) {
-            return 4;
-        } else if (getrLevel() <= 99) {
-            return 5;
-        } else if (getrLevel() <= 119) {
-            return 6;
-        } else if (getrLevel() <= 139) {
-            return 7;
-        } else if (getrLevel() <= 159) {
-            return 8;
-        } else if (getrLevel() <= 179) {
-            return 9;
-        } else if (getrLevel() <= 199) {
-            return 10;
-        } else if (getrLevel() <= 219) {
-            return 11;
-        } else if (getrLevel() <= 239) {
-            return 12;
-        } else {
-            return 13;
-        }
+        return (short) Math.ceil((getrLevel() + 1) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED);
     }
 
     // Flame level used according to the level's equip.
     // Used for secondary stat increasing.
     public short getFlameLevel() {
-        if (getrLevel() <= 39) {
-            return 1;
-        } else if (getrLevel() <= 79) {
-            return 2;
-        } else if (getrLevel() <= 119) {
-            return 3;
-        } else if (getrLevel() <= 159) {
-            return 4;
-        } else if (getrLevel() <= 199) {
-            return 5;
-        } else if (getrLevel() <= 239) {
-            return 6;
-        } else {
-            return 7;
-        }
+        return (short) Math.ceil((getrLevel() + 1) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER);
     }
 
     // Gets ATT bonus by flame tier.
     public short getATTBonus(short tier) {
         if (ItemConstants.isWeapon(getItemId())) {
-            final double multiplier = 10.25;
+            final double multipliers[] = isBossReward() ? ItemConstants.WEAPON_FLAME_MULTIPLIER_BOSS_WEAPON : ItemConstants.WEAPON_FLAME_MULTIPLIER;
             Equip baseEquip = ItemData.getEquipById(getItemId());
             int att = Math.max(baseEquip.getiPad(), baseEquip.getiMad());
-            return (short) Math.ceil(att * (multiplier * getFlameLevel() * ((double) tier / ItemConstants.MAX_FLAME_LEVEL)) / 100.0);
+            return (short) Math.ceil(att * (multipliers[tier - 1] * getFlameLevel()) / 100.0);
         } else {
             return tier;
         }
@@ -1719,11 +1679,11 @@ public class Equip extends Item {
             return;
         }
 
-        int minTier = isBossReward() || obtained ? 4 : 1;
+        int minTier = isBossReward() || obtained ? 3 : 1;
         int maxTier = isBossReward() || obtained ? 7 : 6;
         int bonusStats = isBossReward() ? 4 : Util.getRandom(1, 4);
         int statsApplied = 0;
-        boolean[] flameApplied = new boolean[ItemConstants.FLAME_STATS];
+        boolean[] flameApplied = new boolean[FlameStat.FLAME_STATS.getVal()];
         while (statsApplied < bonusStats) {
             int stat = Util.getRandom(flameApplied.length - 1);
 
