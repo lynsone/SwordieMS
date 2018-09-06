@@ -328,8 +328,20 @@ public class Util {
      * @param <T> The type of the collection's elements
      * @return An element for which the predicate holds, or null if there is none
      */
-    public static <T> T getFromCollectionWithPred(java.util.Collection<T> collection, Predicate<T> pred) {
+    public static <T> T findWithPred(java.util.Collection<T> collection, Predicate<T> pred) {
         return collection.stream().filter(pred).findAny().orElse(null);
+    }
+
+    /**
+     * Gets a single element from an array by using a predicate. Returns a random element if there are multiple
+     * elements for which the predicate holds.
+     * @param arr The array the element should be gathered from
+     * @param pred The predicate that should hold for the element
+     * @param <T> The type of the collection's elements
+     * @return An element for which the predicate holds, or null if there is none
+     */
+    public static <T> T findWithPred(T[] arr, Predicate<T> pred) {
+        return findWithPred(Arrays.asList(arr), pred);
     }
 
     /**

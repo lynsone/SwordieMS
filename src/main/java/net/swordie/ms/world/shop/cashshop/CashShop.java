@@ -246,7 +246,7 @@ public class CashShop {
     }
 
     public CashShopCategory getCategoryByIdx(int idx) {
-        return Util.getFromCollectionWithPred(getCategories(), csi -> csi.getIdx() == idx);
+        return Util.findWithPred(getCategories(), csi -> csi.getIdx() == idx);
     }
 
     public void setCategories(List<CashShopCategory> categories) {
@@ -254,7 +254,7 @@ public class CashShop {
     }
 
     public void addItem(CashShopItem csi) {
-        CashShopCategory csc = Util.getFromCollectionWithPred(getCategories(), cat -> cat.getName().equalsIgnoreCase(csi.getCategory()));
+        CashShopCategory csc = Util.findWithPred(getCategories(), cat -> cat.getName().equalsIgnoreCase(csi.getCategory()));
         csi.setCashShopCategory(csc);
 
         if (!getItems().containsKey(csc)) {

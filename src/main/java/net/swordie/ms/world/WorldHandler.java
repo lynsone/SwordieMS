@@ -1229,7 +1229,7 @@ public class WorldHandler {
                             mobSkill.getSkillID(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkillID()), mobSkill.getLevel()));
                     mob.putSkillCooldown(skillID, slv, nextUseableTime);
                     if (mobSkill.getSkillAfter() > 0) {
-                        mob.getSkillDelays().push(mobSkill);
+                        mob.getSkillDelays().add(mobSkill);
                         mob.setSkillDelay(mobSkill.getSkillAfter());
                         c.write(MobPool.setSkillDelay(mob.getObjectId(), mobSkill.getSkillAfter(), skillID, slv, 0, null));
                     } else {
@@ -1291,9 +1291,10 @@ public class WorldHandler {
         if (inPacket.decodeByte() != 0) {
             remainCount = inPacket.decodeInt();
         }
-        MobSkill expected = mob.getSkillDelays().pop();
-        if (expected.getSkillID() == skillID && expected.getLevel() == slv) {
-            expected.handleEffect(mob);
+        List<MobSkill> delays = mob.getSkillDelays();
+        MobSkill ms = Util.findWithPred(delays, skill -> skill.getSkillID() == skillID && skill.getLevel() == slv);
+        if (ms != null) {
+            ms.handleEffect(mob);
         }
 
     }

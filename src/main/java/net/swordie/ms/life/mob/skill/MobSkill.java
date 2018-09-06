@@ -21,6 +21,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 
 import java.util.List;
+import java.util.Objects;
 
 import static net.swordie.ms.life.mob.skill.MobSkillStat.*;
 
@@ -458,5 +459,20 @@ public class MobSkill {
                 log.warn(String.format("Unhandled mob skillID %s, slv = %d", msID, getLevel()));
                 break;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MobSkill mobSkill = (MobSkill) o;
+        return skillSN == mobSkill.skillSN &&
+                skillID == mobSkill.skillID &&
+                level == mobSkill.level;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(skillSN, skillID, level);
     }
 }
