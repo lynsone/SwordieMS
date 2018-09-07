@@ -615,10 +615,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void lockInGameUI(boolean lock) {
-		chr.write(UserLocal.setInGameDirectionMode(lock));
+		chr.write(UserLocal.setInGameDirectionMode(!lock, true, false));
 	}
 
-        public void curNodeEventEnd(boolean enable) {
+	public void curNodeEventEnd(boolean enable) {
 		chr.write(CField.curNodeEventEnd(enable));
 	}
 

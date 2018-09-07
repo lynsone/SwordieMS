@@ -181,7 +181,6 @@ public class Npc extends Life {
             chr.write(NpcPool.npcLeaveField(this));
             chr.write(NpcPool.npcChangeController(this, false, true));
         }
-        field.removeLife(getObjectId());
     }
     
     public boolean isMove() {
