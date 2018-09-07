@@ -381,7 +381,7 @@ public class UserLocal {
         OutPacket outPacket = new OutPacket(OutHeader.SET_IN_GAME_DIRECTION_MODE);
 
         outPacket.encodeByte(lock); // Locks User's UI
-        outPacket.encodeByte(0); // unknown
+        outPacket.encodeByte(1); // unknown - was 0 from my sniffs it should be 1
         if(lock) {
             outPacket.encodeByte(0); // unknown | doesn't seemt to be used (?)
             outPacket.encodeByte(!lock); // showUI

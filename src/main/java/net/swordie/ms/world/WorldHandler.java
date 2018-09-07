@@ -2444,6 +2444,11 @@ public class WorldHandler {
             int answer = 0;
             boolean hasAnswer = false;
             String ans = null;
+            if (nmt == NpcMessageType.InGameDirectionsAnswer) {
+                byte answ = inPacket.decodeByte();
+                chr.getScriptManager().handleAction(lastType, action, answ);
+                return;
+            }
             if (nmt == NpcMessageType.AskText && action == 1) {
                 ans = inPacket.decodeString();
             } else if (inPacket.getUnreadAmount() >= 4) {
@@ -2457,9 +2462,6 @@ public class WorldHandler {
             }
             if (nmt == NpcMessageType.AskText && action != 0) {
                 chr.getScriptManager().handleAction(lastType, action, ans);
-            } else if (nmt == NpcMessageType.InGameDirectionsAnswer) {
-                byte answ = inPacket.decodeByte();
-                chr.getScriptManager().handleAction(lastType, action, answ);
             } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
                     nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
                     nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
