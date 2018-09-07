@@ -113,6 +113,7 @@ import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.enums.Stat.level;
+import static net.swordie.ms.enums.Stat.pop;
 import static net.swordie.ms.enums.Stat.sp;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
@@ -5703,5 +5704,28 @@ public class WorldHandler {
         }
         pet.getItem().setAutoBuffSkill(skillID);
         pet.getItem().updateToChar(chr);
+    }
+
+    public static void handleUserGivePopularityRequest(Char chr, InPacket inPacket) {
+        int targetChrId = inPacket.decodeInt();
+        boolean increase = inPacket.decodeByte() != 0;
+
+        Field field = chr.getField();
+        Char targetChr = field.getCharByID(targetChrId);
+
+        if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
+
+        } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
+
+        // TODO  Check on Famed Today & Famed Person
+
+        } else {
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
+            targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
+            targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
+        }
     }
 }

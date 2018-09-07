@@ -377,14 +377,14 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket setInGameDirectionMode(boolean showUI, boolean blackFrame, boolean forceMouseOver) {
+    public static OutPacket setInGameDirectionMode(boolean lockUI, boolean blackFrame, boolean forceMouseOver) {
         OutPacket outPacket = new OutPacket(OutHeader.SET_IN_GAME_DIRECTION_MODE);
 
-        outPacket.encodeByte(showUI); // Locks User's UI
+        outPacket.encodeByte(lockUI); // Locks User's UI        - Is 'showUI' in IDA
         outPacket.encodeByte(blackFrame); // Usually 1 in gms? (@aviv)
-        if(showUI) {
+        if(lockUI) {
             outPacket.encodeByte(forceMouseOver);
-            outPacket.encodeByte(!showUI); // showUI
+            outPacket.encodeByte(!lockUI); // showUI
         }
 
         return outPacket;

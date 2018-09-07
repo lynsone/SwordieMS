@@ -4,6 +4,8 @@ import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.InvType;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -96,7 +98,11 @@ public class Inventory {
     }
 
     public void sortItemsByIndex() {
-        getItems().sort(Comparator.comparingInt(Item::getBagIndex));
+        // workaround for sort not being available for CopyOnWriteArrayList
+        List<Item> temp = new ArrayList<>(getItems());
+        temp.sort(Comparator.comparingInt(Item::getBagIndex));
+        getItems().clear();
+        getItems().addAll(temp);
     }
 
     public void setItems(List<Item> items) {
