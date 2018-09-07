@@ -1733,6 +1733,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, placement, 0)));
 	}
 
+        public void avatarOriented(String effectPath) {
+            chr.write(User.effect(Effect.avatarOriented(effectPath)));
+        }
+        
 	public String formatNumber(String number) {
 		return Util.formatNumber(number);
 	}

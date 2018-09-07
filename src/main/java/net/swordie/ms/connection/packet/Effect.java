@@ -132,7 +132,9 @@ public class Effect {
             case IncDecHPEffect:
                 outPacket.encodeByte(getArg1()); // amount being healed     0 = Miss
                 break;
-
+            case AvatarOriented:
+                outPacket.encodeString(getString());
+                break;
         }
     }
 
@@ -571,6 +573,15 @@ public class Effect {
         return effect;
     }
 
+    public static Effect avatarOriented(String effectPath) {
+        Effect effect = new Effect();
+        
+        effect.setUserEffectType(AvatarOriented);
+        effect.setString(effectPath);
+        
+        return effect;
+    }
+    
     public void setUserEffectType(UserEffectType userEffectType) {
         this.userEffectType = userEffectType;
     }
