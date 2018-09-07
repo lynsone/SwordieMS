@@ -19,6 +19,7 @@ import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.LogManager;
 
@@ -865,7 +866,7 @@ public class TemporaryStatManager {
             Option checkOpt = new Option();
             checkOpt.nReason = skillId;
             if (cts.isIndie() && getOptions(cts) != null && getOptions(cts).contains(checkOpt)) {
-                Option o = getOptions(cts).stream().filter(opt -> opt.equals(checkOpt)).findFirst().orElse(null);
+                Option o = Util.findWithPred(getOptions(cts), opt -> opt.equals(checkOpt));
                 if (o == null) {
                     log.error("Found option null, yet the options contained it?");
                 } else {

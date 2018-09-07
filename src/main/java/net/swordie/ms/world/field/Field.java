@@ -34,6 +34,7 @@ import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.Util;
 import org.apache.log4j.Logger;
 
 import java.time.LocalDateTime;
@@ -334,11 +335,11 @@ public class Field {
     }
 
     public Portal getPortalByName(String name) {
-        return getPortals().stream().filter(portal -> portal.getName().equals(name)).findAny().orElse(null);
+        return Util.findWithPred(getPortals(), portal -> portal.getName().equals(name));
     }
 
     public Portal getPortalByID(int id) {
-        return getPortals().stream().filter(portal -> portal.getId() == id).findAny().orElse(null);
+        return Util.findWithPred(getPortals(), portal -> portal.getId() == id);
     }
 
     public RuneStone getRuneStone() {

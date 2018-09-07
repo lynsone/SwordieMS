@@ -34,6 +34,6 @@ public enum CashShopActionType {
     }
 
     public static CashShopActionType getByVal(int val) {
-        return Util.getFromCollectionWithPred(Arrays.asList(values()), csat -> csat.getVal() == val);
+        return Util.findWithPred(Arrays.asList(values()), csat -> csat.getVal() == val);
     }
 }

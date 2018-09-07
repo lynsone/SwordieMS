@@ -174,6 +174,15 @@ public class Npc extends Life {
         }
     }
 
+    @Override
+    public void broadcastLeavePacket() {
+        Field field = getField();
+        for (Char chr : field.getChars()) {
+            chr.write(NpcPool.npcLeaveField(this));
+            chr.write(NpcPool.npcChangeController(this, false, true));
+        }
+    }
+    
     public boolean isMove() {
         return move;
     }
