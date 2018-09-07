@@ -263,6 +263,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case MONSTER_BOOK_MOB_INFO:
                 WorldHandler.handleMonsterBookMobInfo(chr, inPacket);
                 break;
+            case GACHAPON_REQUEST:
+                WorldHandler.handleGachaponRequest(chr, inPacket);
+                break;
             case USER_CONSUME_CASH_ITEM_USE_REQUEST:
                 WorldHandler.handleUserConsumeCashItemUseRequest(c, inPacket);
                 break;

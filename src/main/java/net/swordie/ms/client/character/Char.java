@@ -87,6 +87,7 @@ import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.world.field.FieldInstanceType.CHANNEL;
+import net.swordie.ms.world.gach.GachaponManager;
 
 /**
  * Created on 11/17/2017.
@@ -221,6 +222,8 @@ public class Char {
 	private byte moveAction;
 	@Transient
 	private TemporaryStatManager temporaryStatManager;
+        @Transient
+	private GachaponManager gachaponManager;
 	@Transient
 	private Job jobHandler;
 	@Transient
@@ -398,6 +401,7 @@ public class Char {
 		expConsumeItems = new ArrayList<>();
 		skills = new HashSet<>();
 		temporaryStatManager = new TemporaryStatManager(this);
+                gachaponManager = new GachaponManager();
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
@@ -2049,6 +2053,10 @@ public class Char {
 		this.temporaryStatManager = temporaryStatManager;
 	}
 
+        public GachaponManager getGachaponManager() {
+		return gachaponManager;
+	}
+        
 	public void setId(int id) {
 		this.id = id;
 	}
