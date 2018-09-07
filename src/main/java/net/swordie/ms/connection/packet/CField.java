@@ -100,6 +100,14 @@ public class CField {
                 rect, arriveDir, arriveRange, forcedTargetPos, bulletID, pos);
     }
 
+    public static OutPacket curNodeEventEnd(boolean enable) {
+        OutPacket outPacket = new OutPacket(OutHeader.CUR_NODE_EVENT_END);
+   
+        outPacket.encodeByte(enable);
+        
+        return outPacket;
+    }
+    
     public static OutPacket createForceAtom(boolean byMob, int userOwner, int charID, int forceAtomType, boolean toMob,
                                      List<Integer> targets, int skillID, List<ForceAtomInfo> faiList, Rect rect, int arriveDir, int arriveRange,
                                      Position forcedTargetPos, int bulletID, Position pos) {

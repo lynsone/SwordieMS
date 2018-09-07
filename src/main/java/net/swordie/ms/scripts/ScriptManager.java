@@ -595,7 +595,16 @@ public interface ScriptManager extends Observer {
 	 * @param templateID the speaker's template id
 	 */
 	void setSpeakerID(int templateID);
-
+        
+        /**
+	 * Sets the current speaker type for npc chat.
+	 * Example: "sm.setSpeakerType(4)"
+         * Default type for speaker type is 4
+	 * @param speakerType the speaker type
+	 */
+	void setSpeakerType(byte speakerType);
+        
+        
 	/**
 	 * Hides the specified Npc (specified by Template id)
 	 *

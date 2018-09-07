@@ -37,8 +37,8 @@ public class InGameDirectionEvent implements Encodable {
                 outPacket.encodeString(str); // sEffectUOL
                 outPacket.encodeInt(arg1); // tDuration (0 => take effect's duration)
                 outPacket.encodePositionInt(pos);
-                outPacket.encodeByte(arg2 > 0);
-                if (arg2 > 0) {
+                outPacket.encodeByte(arg2 >= 0);
+                if (arg2 >= 0) {
                     outPacket.encodeInt(arg2); // z
                 }
                 outPacket.encodeByte(arg3 > 0);
@@ -62,6 +62,8 @@ public class InGameDirectionEvent implements Encodable {
                 outPacket.encodeInt(arg2); // nPixelPerSec
                 if (arg1 == 0) {
                     outPacket.encodePositionInt(pos);
+                } else {
+                    outPacket.encodeByte(0);// not sure if really exists but in GMS(v198) there is extra 0 byte
                 }
                 break;
             case CameraOnCharacter:
