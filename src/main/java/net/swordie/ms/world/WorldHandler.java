@@ -5649,7 +5649,6 @@ public class WorldHandler {
 
         Field field = chr.getField();
         Char targetChr = field.getCharByID(targetChrId);
-        CharacterStat targetCS = targetChr.getAvatarData().getCharacterStat();
 
         if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
             chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
@@ -5660,9 +5659,10 @@ public class WorldHandler {
         // TODO  Check on Famed Today & Famed Person
 
         } else {
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
-            chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, targetCS.getPop(), increase));
-            targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, targetCS.getPop(), increase));
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
+            targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
         }
     }
 }
