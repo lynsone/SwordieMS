@@ -23,6 +23,7 @@ public class GameConstants {
     public static final int MAX_PET_AMOUNT = 3;
     public static final int MAX_HP_MP = 500000;
     public static final long DAMAGE_CAP = 50_000_000;
+    public static final int MIN_LEVEL_TO_FAME = 15;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
