@@ -120,9 +120,7 @@ public class Equip extends Item {
     private short fDamage;
     private short fLevel;
 
-    public Equip() {
-        super();
-    }
+    public Equip() { super(); }
 
     public Equip deepCopy() {
         Equip ret = new Equip();
