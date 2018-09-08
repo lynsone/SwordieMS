@@ -209,7 +209,7 @@ public class LoginHandler {
             int charId = inPacket.decodeInt();
             Account acc = c.getAccount();
             Char chr = acc.getCharById(charId);
-            if (chr != null && chr.getAccId() == acc.getId()) {
+            if (chr != null) {
                 acc.removeLinkSkillByOwnerID(chr.getId());
                 acc.getCharacters().remove(chr);
                 DatabaseManager.saveToDB(acc);
