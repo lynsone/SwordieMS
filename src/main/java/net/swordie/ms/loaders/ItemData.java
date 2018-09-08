@@ -50,15 +50,15 @@ public class ItemData {
                     ret.randomizeFlameStats(true);
                 }
                 if (ItemConstants.canEquipHavePotential(ret)) {
-                    ItemGrade grade = ItemGrade.NONE;
+                    ItemGrade grade = ItemGrade.None;
                     if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_UNIQUE;
+                        grade = ItemGrade.HiddenUnique;
                     } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_EPIC;
+                        grade = ItemGrade.HiddenEpic;
                     } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_RARE;
+                        grade = ItemGrade.HiddenRare;
                     }
-                    if (grade != ItemGrade.NONE) {
+                    if (grade != ItemGrade.None) {
                         ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
                     }
                 }
@@ -128,7 +128,7 @@ public class ItemData {
             equip.setEquipTradeBlock(dataInputStream.readBoolean());
             equip.setFixedPotential(dataInputStream.readBoolean());
             equip.setNoPotential(dataInputStream.readBoolean());
-            equip.setBossReward(dataInputStream.readBoolean());
+            equip.setBossReward(dataInputStream.readBoolean() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -195,7 +195,7 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isEquipTradeBlock());
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
                 dataOutputStream.writeBoolean(equip.isNoPotential());
-                dataOutputStream.writeBoolean(equip.isBossReward());
+                dataOutputStream.writeBoolean(equip.isBossReward() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);

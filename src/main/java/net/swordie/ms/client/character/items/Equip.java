@@ -120,9 +120,7 @@ public class Equip extends Item {
     private short fDamage;
     private short fLevel;
 
-    public Equip() {
-        super();
-    }
+    public Equip() { super(); }
 
     public Equip deepCopy() {
         Equip ret = new Equip();
@@ -559,15 +557,11 @@ public class Equip extends Item {
     }
 
     public short getGrade() {
-        ItemGrade ig = ItemGrade.getGradeByVal(Math.min(getBaseGrade(), getBonusGrade()));
-        switch(ig) {
-            case HIDDEN_RARE:
-            case HIDDEN_EPIC:
-            case HIDDEN_UNIQUE:
-            case HIDDEN_LEGENDARY:
-                return ig.getVal();
+        ItemGrade bonusGrade = ItemGrade.getGradeByVal(getBonusGrade());
+        if (bonusGrade.isHidden()) {
+            return ItemGrade.getHiddenBonusGradeByBaseGrade(ItemGrade.getGradeByVal(getBaseGrade())).getVal();
         }
-        return (short) Math.max(getBaseGrade(), getBonusGrade());
+        return getBaseGrade();
     }
 
     public short getBaseGrade() {
@@ -1451,7 +1445,7 @@ public class Equip extends Item {
     /**
      * Resets the potential of this equip's base options. Takes the value of an ItemGrade (1-4), and sets the appropriate values.
      * Also calculates if a third line should be added.
-     * @param val The value of the item's grade (HIDDEN_RARE~HIDDEN_LEGENDARY).getVal().
+     * @param val The value of the item's grade (HiddenRare~HiddenLegendary).getVal().
      * @param thirdLineChance The chance of a third line being added.
      */
     public void setHiddenOptionBase(short val, int thirdLineChance) {

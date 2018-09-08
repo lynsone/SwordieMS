@@ -16,7 +16,6 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
-import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -53,7 +52,10 @@ import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
-import net.swordie.ms.client.party.*;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.client.party.PartyResult;
+import net.swordie.ms.client.party.PartyType;
 import net.swordie.ms.client.trunk.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
@@ -62,6 +64,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
@@ -87,6 +90,9 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.gach.GachaponConstants;
+import net.swordie.ms.world.gach.result.GachaponDlgType;
+import net.swordie.ms.world.gach.result.GachaponResult;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
@@ -101,6 +107,7 @@ import org.hibernate.query.Query;
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -112,9 +119,7 @@ import static net.swordie.ms.enums.EquipBaseStat.cuc;
 import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
-import static net.swordie.ms.enums.Stat.level;
-import static net.swordie.ms.enums.Stat.pop;
-import static net.swordie.ms.enums.Stat.sp;
+import static net.swordie.ms.enums.Stat.*;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
 
@@ -1911,7 +1916,7 @@ public class WorldHandler {
                         chr.chatMessage(SystemNotice, "Could not find equip.");
                         chr.dispose();
                         return;
-                    } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
+                    } else if (equip.getBaseGrade() < ItemGrade.Rare.getVal()) {
                         log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
                         chr.dispose();
                         return;
@@ -1919,7 +1924,7 @@ public class WorldHandler {
                     Equip oldEquip = equip.deepCopy();
                     int tierUpChance = ItemConstants.getTierUpChance(itemID);
                     short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
-                    boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    boolean tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
                     if (tierUp) {
                         hiddenValue++;
                     }
@@ -1944,14 +1949,14 @@ public class WorldHandler {
                     if (equip == null) {
                         chr.chatMessage(SystemNotice, "Could not find equip.");
                         return;
-                    } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
+                    } else if (equip.getBonusGrade() < ItemGrade.Rare.getVal()) {
                         log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
                         chr.dispose();
                         return;
                     }
                     tierUpChance = ItemConstants.getTierUpChance(itemID);
                     hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
-                    tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
                     if (tierUp) {
                         hiddenValue++;
                     }
@@ -2207,18 +2212,18 @@ public class WorldHandler {
                 case 2049417:
                 case 2049418:
                 case 2049419:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049700: // Epic pot
                 case 2049708:
-                    val = ItemGrade.HIDDEN_EPIC.getVal();
+                    val = ItemGrade.HiddenEpic.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049762: // Unique Pot
                 case 2049764:
                 case 2049758:
-                    val = ItemGrade.HIDDEN_UNIQUE.getVal();
+                    val = ItemGrade.HiddenUnique.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
 
@@ -2297,14 +2302,14 @@ public class WorldHandler {
                 case 2048314:
                 case 2048316:
                 case 2048329:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, thirdLineChance);
                     break;
                 case 2048306: // Special Bonus Pot
                 case 2048307:
                 case 2048315:
                 case 2048331:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, 100);
                     break;
                 default:
@@ -3663,11 +3668,18 @@ public class WorldHandler {
     }
 
     public static void handleUserCreateHolidomRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+
         inPacket.decodeInt(); //tick
         inPacket.decodeByte(); //unk
         int skillID = inPacket.decodeInt();
         inPacket.decodeInt(); //unk
 
+        if(field.getAffectedAreas().stream().noneMatch(ss -> ss.getSkillID() == skillID)) {
+            log.error(String.format("Character %d tried to heal from Holy Fountain (%d) whilst there isn't any on the field.", chr.getId(), skillID));
+            return;
+        }
         c.getChr().heal( (int) (c.getChr().getMaxHP() / ((double) 100 / 40)) );
     }
 
@@ -4312,6 +4324,66 @@ public class WorldHandler {
         }
     }
 
+    public static void handleGachaponRequest(Char chr, InPacket inPacket) {
+        // TODO: Handle error messages with popup dialog like GMS.
+        // TODO: Add rewards to gachapon.
+        final int type = inPacket.decodeByte();
+        final GachaponResult result = GachaponResult.getByVal(type);
+
+        if (result == null) {
+            System.out.println("[Gachapon] Found unknown gachapon result " + type);
+            chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+            return;
+        }
+        if (chr == null) {
+            chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+            return;
+        }
+        switch (result) {
+            case SUCCESS:
+                final int ticketID = inPacket.decodeInt();
+                GachaponDlgType dialog = GachaponConstants.getDlgByTicket(ticketID);
+                if (dialog == null || !chr.hasItem(ticketID)) {
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                final int reward = GachaponConstants.getRandomItem(dialog);
+                if (reward == -1) {
+                    chr.chatMessage(ChatType.Mob, "Cannot find reward ID");
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                if (!chr.canHold(reward)) {
+                    chr.chatMessage(ChatType.Mob, "Cannot hold reward ID " + reward);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                Equip equip = ItemData.getEquipDeepCopyFromID(reward, true);
+                if (equip == null) {
+                    Item item = ItemData.getItemDeepCopy(reward, true);
+                    if (item == null) {
+                        chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                        chr.chatMessage(ChatType.Mob, "Item is null" + reward);
+                        return;
+                    }
+                    item.setQuantity(1);
+                    chr.addItemToInventory(item);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.SUCCESS, item, (short) 1));
+                    chr.getGachaponManager().addItem(dialog, item, (short) 1);
+                } else {
+                    chr.addItemToInventory(InvType.EQUIP, equip, false);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.SUCCESS, equip, (short) 1));
+                    chr.getGachaponManager().addItem(dialog, equip, (short) 1);
+                }
+                chr.consumeItem(chr.getCashInventory().getItemByItemID(ticketID));
+                chr.getField().broadcastPacket(User.setGachaponEffect(chr));
+                break;
+            case EXIT:
+                chr.write(GachaponDlg.gachResult(GachaponResult.EXIT));
+                break;
+        }
+    }
+    
     public static void handleUserRequestChangeMobZoneState(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int mobID = inPacket.decodeInt();
@@ -5649,20 +5721,28 @@ public class WorldHandler {
 
         Field field = chr.getField();
         Char targetChr = field.getCharByID(targetChrId);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
 
         if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
             chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
-
+            chr.dispose();
         } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
             chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
-
-        // TODO  Check on Famed Today & Famed Person
-
+            chr.dispose();
+        } else if (!cs.getNextAvailableFameTime().isExpired()) { // Faming whilst Chr already famed within the FameCooldown time
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.AlreadyDoneToday, targetChr, 0, increase));
+            chr.dispose();
+        } else if (targetChrId == chr.getId()) {
+            log.error(String.format("Character %d tried to fame themselves", chr.getId()));
         } else {
-            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
             targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
+            cs.setNextAvailableFameTime(FileTime.fromDate(LocalDateTime.now().plusHours(GameConstants.FAME_COOLDOWN)));
+            if(increase) {
+                Effect.showFameGradeUp(targetChr);
+            }
         }
     }
 }
