@@ -7,6 +7,7 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.util.Util;
+import sun.plugin.com.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,6 +52,15 @@ public class ItemConstants {
 
     private static final Integer[] soulPotList = new Integer[]{32001, 32002, 32003, 32004, 32005, 32006, 32011, 32012, // flat
             32041, 32042, 32043, 32044, 32045, 32046, 32051, 32052}; // rate
+
+    private static final int TUC_IGNORE_ITEMS[] = {
+            1113231, // Master Ring SS
+            1114301, // Reboot Vengeful Ring
+            1114302, // Synergy Ring
+            1114303, // Cosmos Ring
+            1114304, // Reboot Cosmos Ring
+            1114305, // Chaos Ring
+    };
 
     // Spell tracing
     private static final int BASE_ST_COST = 30;
@@ -455,7 +465,7 @@ public class ItemConstants {
         return !equip.isCash() &&
                 canEquipTypeHavePotential(equip.getItemId()) &&
                 !equip.isNoPotential() &&
-                ItemData.getEquipById(equip.getItemId()).getTuc() >= 1;
+                (ItemData.getEquipById(equip.getItemId()).getTuc() >= 1 || isTucIgnoreItem(equip.getItemId()));
     }
 
     public static boolean canEquipHaveFlame(Equip equip) {
@@ -980,9 +990,10 @@ public class ItemConstants {
 
     public static boolean isCollisionLootItem(int itemID) {
         switch (itemID) {
-            case 2023484: // Blue Exp Orb
-            case 2023494: // Purple Exp Orb
-            case 2023495: // Red Exp Orb
+            case 2023484: // Blue
+            case 2023494: // Purple
+            case 2023495: // Red
+            case 2023669: // Gold
                 return true;
 
             default:
@@ -1158,6 +1169,11 @@ public class ItemConstants {
                     SpellTraceScrollType.CleanSlate, 0, new TreeMap<>(), CLEAN_SLATE_ST_COST, 5));
         }
         return scrolls;
+    }
+
+    // is_tuc_ignore_item(int nItemID)
+    public static boolean isTucIgnoreItem(int itemID) {
+        return (isSecondary(itemID) || Arrays.asList(TUC_IGNORE_ITEMS).contains(itemID) || itemID / 10000 == 119 || itemID / 10000 == 135);
     }
 
     public static PetSkill getPetSkillFromID(int itemID) {
