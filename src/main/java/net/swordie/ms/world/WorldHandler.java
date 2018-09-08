@@ -101,6 +101,7 @@ import org.hibernate.query.Query;
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -5649,6 +5650,7 @@ public class WorldHandler {
 
         Field field = chr.getField();
         Char targetChr = field.getCharByID(targetChrId);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
 
         if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
             chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
@@ -5656,13 +5658,15 @@ public class WorldHandler {
         } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
             chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
 
-        // TODO  Check on Famed Today & Famed Person
+        } else if (!cs.getNextAvailableFameTime().isExpired()) {
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.AlreadyDoneToday, targetChr, 0, increase));
 
         } else {
             int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
             chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
             targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
+            cs.setNextAvailableFameTime(FileTime.fromDate(LocalDateTime.now().plusHours(GameConstants.FAME_COOLDOWN)));
         }
     }
 }
