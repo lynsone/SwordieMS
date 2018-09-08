@@ -1910,7 +1910,7 @@ public class WorldHandler {
                         chr.chatMessage(SystemNotice, "Could not find equip.");
                         chr.dispose();
                         return;
-                    } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
+                    } else if (equip.getBaseGrade() < ItemGrade.Rare.getVal()) {
                         log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
                         chr.dispose();
                         return;
@@ -1918,7 +1918,7 @@ public class WorldHandler {
                     Equip oldEquip = equip.deepCopy();
                     int tierUpChance = ItemConstants.getTierUpChance(itemID);
                     short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
-                    boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    boolean tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
                     if (tierUp) {
                         hiddenValue++;
                     }
@@ -1943,14 +1943,14 @@ public class WorldHandler {
                     if (equip == null) {
                         chr.chatMessage(SystemNotice, "Could not find equip.");
                         return;
-                    } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
+                    } else if (equip.getBonusGrade() < ItemGrade.Rare.getVal()) {
                         log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
                         chr.dispose();
                         return;
                     }
                     tierUpChance = ItemConstants.getTierUpChance(itemID);
                     hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
-                    tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
                     if (tierUp) {
                         hiddenValue++;
                     }
@@ -2206,18 +2206,18 @@ public class WorldHandler {
                 case 2049417:
                 case 2049418:
                 case 2049419:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049700: // Epic pot
                 case 2049708:
-                    val = ItemGrade.HIDDEN_EPIC.getVal();
+                    val = ItemGrade.HiddenEpic.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049762: // Unique Pot
                 case 2049764:
                 case 2049758:
-                    val = ItemGrade.HIDDEN_UNIQUE.getVal();
+                    val = ItemGrade.HiddenUnique.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
 
@@ -2296,14 +2296,14 @@ public class WorldHandler {
                 case 2048314:
                 case 2048316:
                 case 2048329:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, thirdLineChance);
                     break;
                 case 2048306: // Special Bonus Pot
                 case 2048307:
                 case 2048315:
                 case 2048331:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, 100);
                     break;
                 default:

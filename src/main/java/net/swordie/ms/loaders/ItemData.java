@@ -50,15 +50,15 @@ public class ItemData {
                     ret.randomizeFlameStats(true);
                 }
                 if (ItemConstants.canEquipHavePotential(ret)) {
-                    ItemGrade grade = ItemGrade.NONE;
+                    ItemGrade grade = ItemGrade.None;
                     if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_UNIQUE;
+                        grade = ItemGrade.HiddenUnique;
                     } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_EPIC;
+                        grade = ItemGrade.HiddenEpic;
                     } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_RARE;
+                        grade = ItemGrade.HiddenRare;
                     }
-                    if (grade != ItemGrade.NONE) {
+                    if (grade != ItemGrade.None) {
                         ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
                     }
                 }
