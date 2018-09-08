@@ -15,7 +15,10 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.DropEnterType;
+import net.swordie.ms.enums.DropLeaveType;
+import net.swordie.ms.enums.EliteState;
+import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
@@ -1076,8 +1079,8 @@ public class Field {
     }
 
     public void startBurningFieldTimer() {
-        if(getMobs().size() > 0 &&
-                getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
+        if(getMobGens().size() > 0
+                && getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
             setBurningFieldLevel(GameConstants.BURNING_FIELD_LEVEL_ON_START);
             EventManager.addFixedRateEvent(this::changeBurningLevel, 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
         }

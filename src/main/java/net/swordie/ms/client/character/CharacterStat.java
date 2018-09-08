@@ -2,6 +2,7 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.client.character.cards.CharacterCard;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.util.SystemTime;
@@ -92,6 +93,8 @@ public class CharacterStat {
     private int honorExp;
     @Transient
     private int wingItem;
+    @Convert(converter = FileTimeConverter.class)
+    private FileTime nextAvailableFameTime;
 
     public CharacterStat() {
         extendSP = new ExtendSP(7);
@@ -100,6 +103,7 @@ public class CharacterStat {
         lastLogout = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
         characterCard = new CharacterCard(0, 0, (byte) 0);
         accountLastLogout = new SystemTime(1970, 1);
+        nextAvailableFameTime = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
         // TODO fill in default vals
     }
 
@@ -646,6 +650,14 @@ public class CharacterStat {
 
     public int getWingItem() {
         return wingItem;
+    }
+
+    public FileTime getNextAvailableFameTime() {
+        return nextAvailableFameTime;
+    }
+
+    public void setNextAvailableFameTime(FileTime nextAvailableFameTime) {
+        this.nextAvailableFameTime = nextAvailableFameTime;
     }
 }
 
