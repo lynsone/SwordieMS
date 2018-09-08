@@ -1195,7 +1195,7 @@ public class ItemConstants {
 
     // is_tuc_ignore_item(int nItemID)
     public static boolean isTucIgnoreItem(int itemID) {
-        return (isSecondary(itemID) || Arrays.asList(TUC_IGNORE_ITEMS).contains(itemID) || itemID / 10000 == 119 || itemID / 10000 == 135);
+        return (isSecondary(itemID) || isEmblem(itemID) || Arrays.asList(TUC_IGNORE_ITEMS).contains(itemID));
     }
 
     public static PetSkill getPetSkillFromID(int itemID) {
