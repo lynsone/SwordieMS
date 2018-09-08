@@ -268,17 +268,14 @@ public class ScriptManagerImpl implements ScriptManager {
 			case 0:
 			case 1:
 			case 2:
-                        case 3:
+			case 3:
 				try {
 					if (text == null) {
-                                            System.out.println("Handling action");
 						if (isActive(scriptType)) {
 							getInvocableByType(scriptType).invokeFunction("action", response, answer);
 						} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
 							getInvocableByType(ScriptType.PORTAL).invokeFunction("action", response, answer);
-						} else if (!isActive(scriptType) && isActive(ScriptType.FIELD)) {
-							getInvocableByType(ScriptType.FIELD).invokeFunction("action", response, answer);
-                                                }
+						}
 					} else {
 						if (isActive(scriptType)) {
 							getInvocableByType(scriptType).invokeFunction("text_answer", text);
