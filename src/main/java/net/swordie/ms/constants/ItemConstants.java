@@ -62,6 +62,28 @@ public class ItemConstants {
             1114305, // Chaos Ring
     };
 
+    public static final int NON_KMS_BOSS_SETS[] = {
+        127, // Amaterasu
+        128, // Oyamatsumi
+        129, // Ame-no-Uzume
+        130, // Tsukuyomi
+        131, // Susano-o
+        315, // Cracked Gollux
+        316, // Solid Gollux
+        317, // Reinforced Gollux
+        318, // Superior Gollux
+        328, // Sweetwater
+    };
+
+    public static final int NON_KMS_BOSS_ITEMS[] = {
+        1032224, // Sweetwater Earrings
+        1022211, // Sweetwater Monocle
+        1012438, // Sweetwater Tattoo
+        1152160, // Sweetwater Shoulder
+        1132247, // Sweetwater Belt
+        1122269, // Sweetwater Pendant
+    };
+
     // Spell tracing
     private static final int BASE_ST_COST = 30;
     private static final int INNOCENCE_ST_COST = 1337;
