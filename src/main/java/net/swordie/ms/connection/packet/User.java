@@ -89,6 +89,14 @@ public class User {
         return outPacket;
     }
 
+    public static OutPacket setGachaponEffect(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.GACHAPON_EFFECT);
+
+        outPacket.encodeInt(chr.getId());
+
+        return outPacket;
+    }
+    
     public static OutPacket scriptProgressMessage(String string) {
         OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_PROGRESS_MESSAGE);
 

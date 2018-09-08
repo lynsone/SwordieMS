@@ -475,7 +475,8 @@ public enum OutHeader {
     REFRESH_NAME_TAG_MARK(577),
     STIGMA_EFFECT(578),
 //    SHOW_POTENTIAL_BLACK_CUBE(529),
-
+    GACHAPON_EFFECT(616),
+    
     // CUser::OnPetPacket
     PET_ACTIVATED(579),
     PET_MOVE(580),
@@ -1016,6 +1017,10 @@ public enum OutHeader {
     SHOP_OPEN(1282),
     SHOP_RESULT(1283),
 
+    // CGachDlg::OnPacket
+    GACH_OPEN(1284),
+    GACH_RESULT(1285),
+    
     // Field_Coordy::OnPacket
     COORDINATION_RUNWAY_AVATAR(1306),
 
