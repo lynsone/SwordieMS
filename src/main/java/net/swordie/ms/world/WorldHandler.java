@@ -16,7 +16,6 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
-import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -53,7 +52,10 @@ import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
-import net.swordie.ms.client.party.*;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.client.party.PartyResult;
+import net.swordie.ms.client.party.PartyType;
 import net.swordie.ms.client.trunk.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
@@ -62,6 +64,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
@@ -87,6 +90,9 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.gach.GachaponConstants;
+import net.swordie.ms.world.gach.result.GachaponDlgType;
+import net.swordie.ms.world.gach.result.GachaponResult;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
@@ -113,14 +119,9 @@ import static net.swordie.ms.enums.EquipBaseStat.cuc;
 import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
-import static net.swordie.ms.enums.Stat.level;
-import static net.swordie.ms.enums.Stat.pop;
-import static net.swordie.ms.enums.Stat.sp;
+import static net.swordie.ms.enums.Stat.*;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
-import net.swordie.ms.world.gach.GachaponConstants;
-import net.swordie.ms.world.gach.result.GachaponDlgType;
-import net.swordie.ms.world.gach.result.GachaponResult;
 
 /**
  * Created on 12/14/2017.
@@ -5717,19 +5718,24 @@ public class WorldHandler {
 
         if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
             chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
-
+            chr.dispose();
         } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
             chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
-
-        } else if (!cs.getNextAvailableFameTime().isExpired()) {
+            chr.dispose();
+        } else if (!cs.getNextAvailableFameTime().isExpired()) { // Faming whilst Chr already famed within the FameCooldown time
             chr.write(WvsContext.givePopularityResult(PopularityResultType.AlreadyDoneToday, targetChr, 0, increase));
-
+            chr.dispose();
+        } else if (targetChrId == chr.getId()) {
+            log.error(String.format("Character %d tried to fame themselves", chr.getId()));
         } else {
-            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
             targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
             cs.setNextAvailableFameTime(FileTime.fromDate(LocalDateTime.now().plusHours(GameConstants.FAME_COOLDOWN)));
+            if(increase) {
+                Effect.showFameGradeUp(targetChr);
+            }
         }
     }
 }
