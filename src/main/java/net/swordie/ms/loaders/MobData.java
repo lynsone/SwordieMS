@@ -642,6 +642,9 @@ public class MobData {
                     case "attack":
                         boolean attack = "attack".equalsIgnoreCase(name);
                         for (Node skillIDNode : XMLApi.getAllChildren(n)) {
+                            if(!Util.isNumber(XMLApi.getNamedAttribute(skillIDNode, "name"))) {
+                                continue;
+                            }
                             MobSkill mobSkill = new MobSkill();
                             mobSkill.setSkillSN(Integer.parseInt(XMLApi.getNamedAttribute(skillIDNode, "name")));
                             for (Node skillInfoNode : XMLApi.getAllChildren(skillIDNode)) {

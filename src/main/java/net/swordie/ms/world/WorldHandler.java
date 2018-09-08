@@ -3668,11 +3668,18 @@ public class WorldHandler {
     }
 
     public static void handleUserCreateHolidomRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+
         inPacket.decodeInt(); //tick
         inPacket.decodeByte(); //unk
         int skillID = inPacket.decodeInt();
         inPacket.decodeInt(); //unk
 
+        if(field.getAffectedAreas().stream().noneMatch(ss -> ss.getSkillID() == skillID)) {
+            log.error(String.format("Character %d tried to heal from Holy Fountain (%d) whilst there isn't any on the field.", chr.getId(), skillID));
+            return;
+        }
         c.getChr().heal( (int) (c.getChr().getMaxHP() / ((double) 100 / 40)) );
     }
 
