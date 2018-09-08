@@ -3890,4 +3890,13 @@ public class Char {
 	public boolean isGuildMaster() {
 		return getGuild() != null && getGuild().getLeaderID() == getId();
 	}
+
+	/**
+	 * Checks if this Char has any of the given quests in progress. Also true if the size of the given set is 0.
+	 * @param quests the set of quest ids to check
+	 * @return whether or not this Char has any of the given quests
+	 */
+	public boolean hasAnyQuestsInProgress(Set<Integer> quests) {
+		return quests.size() == 0 || quests.stream().anyMatch(this::hasQuestInProgress);
+	}
 }

@@ -7,10 +7,8 @@ import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Archer;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
-import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
@@ -868,11 +866,14 @@ public class Field {
         Drop drop = new Drop(-1);
         drop.setPosition(posTo);
         drop.setOwnerID(ownerID);
+        Set<Integer> quests = new HashSet<>();
         if (itemID != 0) {
             item = ItemData.getItemDeepCopy(itemID, true);
             if (item != null) {
                 item.setQuantity(dropInfo.getQuantity());
                 drop.setItem(item);
+                ItemInfo ii = ItemData.getItemInfoByID(itemID);
+                quests = ii.getQuestIDs();
             } else {
                 log.error("Was not able to find the item to drop! id = " + itemID);
                 return;
@@ -887,7 +888,7 @@ public class Field {
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
         EventManager.addEvent(() -> drop.setOwnerID(0), GameConstants.DROP_REMOVE_OWNERSHIP_TIME, TimeUnit.SECONDS);
         for (Char chr : getChars()) {
-            if (dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq())) {
+            if (chr.hasAnyQuestsInProgress(quests)) {
                 broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, ownerID, drop.canBePickedUpBy(chr)));
             }
         }

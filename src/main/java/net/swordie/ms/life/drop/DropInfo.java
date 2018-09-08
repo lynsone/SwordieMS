@@ -9,7 +9,6 @@ import net.swordie.ms.util.Util;
 public class DropInfo {
     private int itemID;
     private int chance; // out of a 1000
-    private int questReq;
     private int money;
     private int minMoney, maxmoney;
     private int minQuant = 1;
@@ -19,27 +18,24 @@ public class DropInfo {
     public DropInfo() {
     }
 
-    public DropInfo(int itemID, int money, int chance, int questReq) {
+    public DropInfo(int itemID, int money, int chance) {
         this.itemID = itemID;
         this.money = money;
         this.chance = chance;
-        this.questReq = questReq;
     }
 
-    public DropInfo(int itemID, int chance, int questReq, int minMoney, int maxmoney) {
+    public DropInfo(int itemID, int chance, int minMoney, int maxmoney) {
         this.itemID = itemID;
         this.chance = chance;
-        this.questReq = questReq;
         this.minMoney = minMoney;
         this.maxmoney = maxmoney;
         generateNextDrop();
     }
 
-    public DropInfo(int itemID, int money, int chance, int questReq, int minQuant, int maxQuant) {
+    public DropInfo(int itemID, int money, int chance, int minQuant, int maxQuant) {
         this.itemID = itemID;
         this.money = money;
         this.chance = chance;
-        this.questReq = questReq;
         this.minQuant = minQuant;
         this.maxQuant = maxQuant;
         generateNextDrop();
@@ -92,14 +88,6 @@ public class DropInfo {
 
     public void setChance(int chance) {
         this.chance = chance;
-    }
-
-    public int getQuestReq() {
-        return questReq;
-    }
-
-    public void setQuestReq(int questReq) {
-        this.questReq = questReq;
     }
 
     /**
