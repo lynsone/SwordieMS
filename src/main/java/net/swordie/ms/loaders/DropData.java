@@ -30,7 +30,7 @@ public class DropData {
             if(rewardNode != null) {
                 for(Node reward : XMLApi.getAllChildren(rewardNode)) {
                     int rewardID = Integer.parseInt(XMLApi.getNamedAttribute(reward, "value"));
-                    DropInfo dropInfo = new DropInfo(rewardID, 0, 100, 0); // default vals, 10% chance to drop
+                    DropInfo dropInfo = new DropInfo(rewardID, 0, 100, 1, 1); // default vals, 1% chance to drop
                     addDrop(mobID, dropInfo);
                 }
             }

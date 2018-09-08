@@ -675,7 +675,7 @@ public class Char {
 		}
 		if (mask.isInMask(DBChar.ItemSlotEquip)) {
 			outPacket.encodeByte(0); // ?
-			List<Item> equippedItems = getEquippedInventory().getItems();
+			List<Item> equippedItems = new ArrayList<>(getEquippedInventory().getItems());
 			equippedItems.sort(Comparator.comparingInt(Item::getBagIndex));
 			// Normal equipped items
 			for (Item item : equippedItems) {

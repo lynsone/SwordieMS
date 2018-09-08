@@ -283,7 +283,7 @@ public class Mob extends Life {
             copy.addQuest(i);
         }
         if (copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
-            copy.getDrops().add(new DropInfo(0, GameConstants.MAX_DROP_CHANCE, 0,
+            copy.getDrops().add(new DropInfo(GameConstants.MAX_DROP_CHANCE,
                     GameConstants.MIN_MONEY_MULT * getForcedMobStat().getLevel(),
                     GameConstants.MAX_MONEY_MULT * getForcedMobStat().getLevel()
                     ));
