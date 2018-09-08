@@ -914,4 +914,31 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket givePopularityResult(PopularityResultType prType, Char targetChr, int newFame, boolean inc) {
+        OutPacket outPacket = new OutPacket(OutHeader.GIVE_POPULARITY_RESULT);
+
+        outPacket.encodeByte(prType.getVal());
+
+        switch (prType) {
+            case Success:
+                outPacket.encodeString(targetChr.getName());
+                outPacket.encodeByte(inc); // true = fame  |  false = defame
+                outPacket.encodeInt(newFame);
+                break;
+
+            case InvalidCharacterId:
+            case LevelLow:
+            case AlreadyDoneToday:
+            case AlreadyDoneTarget:
+                break;
+
+            case Notify:
+                outPacket.encodeString(targetChr.getName());
+                outPacket.encodeByte(inc); // true = fame  |  false = defame
+                break;
+        }
+
+        return outPacket;
+    }
 }

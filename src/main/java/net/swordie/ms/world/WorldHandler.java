@@ -113,9 +113,13 @@ import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.enums.Stat.level;
+import static net.swordie.ms.enums.Stat.pop;
 import static net.swordie.ms.enums.Stat.sp;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
+import net.swordie.ms.world.gach.GachaponConstants;
+import net.swordie.ms.world.gach.result.GachaponDlgType;
+import net.swordie.ms.world.gach.result.GachaponResult;
 
 /**
  * Created on 12/14/2017.
@@ -4311,6 +4315,66 @@ public class WorldHandler {
         }
     }
 
+    public static void handleGachaponRequest(Char chr, InPacket inPacket) {
+        // TODO: Handle error messages with popup dialog like GMS.
+        // TODO: Add rewards to gachapon.
+        final int type = inPacket.decodeByte();
+        final GachaponResult result = GachaponResult.getByVal(type);
+
+        if (result == null) {
+            System.out.println("[Gachapon] Found unknown gachapon result " + type);
+            chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+            return;
+        }
+        if (chr == null) {
+            chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+            return;
+        }
+        switch (result) {
+            case SUCCESS:
+                final int ticketID = inPacket.decodeInt();
+                GachaponDlgType dialog = GachaponConstants.getDlgByTicket(ticketID);
+                if (dialog == null || !chr.hasItem(ticketID)) {
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                final int reward = GachaponConstants.getRandomItem(dialog);
+                if (reward == -1) {
+                    chr.chatMessage(ChatType.Mob, "Cannot find reward ID");
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                if (!chr.canHold(reward)) {
+                    chr.chatMessage(ChatType.Mob, "Cannot hold reward ID " + reward);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                Equip equip = ItemData.getEquipDeepCopyFromID(reward, true);
+                if (equip == null) {
+                    Item item = ItemData.getItemDeepCopy(reward, true);
+                    if (item == null) {
+                        chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                        chr.chatMessage(ChatType.Mob, "Item is null" + reward);
+                        return;
+                    }
+                    item.setQuantity(1);
+                    chr.addItemToInventory(item);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.SUCCESS, item, (short) 1));
+                    chr.getGachaponManager().addItem(dialog, item, (short) 1);
+                } else {
+                    chr.addItemToInventory(InvType.EQUIP, equip, false);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.SUCCESS, equip, (short) 1));
+                    chr.getGachaponManager().addItem(dialog, equip, (short) 1);
+                }
+                chr.consumeItem(chr.getCashInventory().getItemByItemID(ticketID));
+                chr.getField().broadcastPacket(User.setGachaponEffect(chr));
+                break;
+            case EXIT:
+                chr.write(GachaponDlg.gachResult(GachaponResult.EXIT));
+                break;
+        }
+    }
+    
     public static void handleUserRequestChangeMobZoneState(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int mobID = inPacket.decodeInt();
@@ -5640,5 +5704,28 @@ public class WorldHandler {
         }
         pet.getItem().setAutoBuffSkill(skillID);
         pet.getItem().updateToChar(chr);
+    }
+
+    public static void handleUserGivePopularityRequest(Char chr, InPacket inPacket) {
+        int targetChrId = inPacket.decodeInt();
+        boolean increase = inPacket.decodeByte() != 0;
+
+        Field field = chr.getField();
+        Char targetChr = field.getCharByID(targetChrId);
+
+        if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
+
+        } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
+
+        // TODO  Check on Famed Today & Famed Person
+
+        } else {
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
+            targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
+            targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
+        }
     }
 }

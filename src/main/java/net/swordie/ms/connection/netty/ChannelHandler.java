@@ -2,7 +2,6 @@ package net.swordie.ms.connection.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
@@ -262,6 +261,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case MONSTER_BOOK_MOB_INFO:
                 WorldHandler.handleMonsterBookMobInfo(chr, inPacket);
+                break;
+            case GACHAPON_REQUEST:
+                WorldHandler.handleGachaponRequest(chr, inPacket);
                 break;
             case USER_CONSUME_CASH_ITEM_USE_REQUEST:
                 WorldHandler.handleUserConsumeCashItemUseRequest(c, inPacket);
@@ -610,6 +612,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case BEAST_TAMER_REGROUP_REQUEST:
                 WorldHandler.handleBeastTamerRegroupRequest(chr, inPacket);
+                break;
+            case USER_GIVE_POPULARITY_REQUEST:
+                WorldHandler.handleUserGivePopularityRequest(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);
