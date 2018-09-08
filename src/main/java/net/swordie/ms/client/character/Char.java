@@ -67,6 +67,7 @@ import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.gach.GachaponManager;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -87,7 +88,6 @@ import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.world.field.FieldInstanceType.CHANNEL;
-import net.swordie.ms.world.gach.GachaponManager;
 
 /**
  * Created on 11/17/2017.
@@ -676,7 +676,14 @@ public class Char {
 		if (mask.isInMask(DBChar.ItemSlotEquip)) {
 			outPacket.encodeByte(0); // ?
 			List<Item> equippedItems = getEquippedInventory().getItems();
-			equippedItems.sort(Comparator.comparingInt(Item::getBagIndex));
+
+			// workaround for sort not being available for CopyOnWriteArrayList
+			List<Item> temp = new ArrayList<>(equippedItems);
+			temp.sort(Comparator.comparingInt(Item::getBagIndex));
+			equippedItems.clear();
+			equippedItems.addAll(temp);
+					//equippedItems.sort(Comparator.comparingInt(Item::getBagIndex));
+
 			// Normal equipped items
 			for (Item item : equippedItems) {
 				Equip equip = (Equip) item;
