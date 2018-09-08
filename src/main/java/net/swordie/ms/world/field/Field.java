@@ -34,6 +34,7 @@ import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.Util;
 import org.apache.log4j.Logger;
 
 import java.time.LocalDateTime;
@@ -334,11 +335,11 @@ public class Field {
     }
 
     public Portal getPortalByName(String name) {
-        return getPortals().stream().filter(portal -> portal.getName().equals(name)).findAny().orElse(null);
+        return Util.findWithPred(getPortals(), portal -> portal.getName().equals(name));
     }
 
     public Portal getPortalByID(int id) {
-        return getPortals().stream().filter(portal -> portal.getId() == id).findAny().orElse(null);
+        return Util.findWithPred(getPortals(), portal -> portal.getId() == id);
     }
 
     public RuneStone getRuneStone() {
@@ -458,7 +459,7 @@ public class Field {
     }
 
     public void removeLife(Life life) {
-        getLifes().remove(life.getObjectId());
+        removeLife(life.getObjectId(), false);
     }
 
     public Foothold getFootholdById(int fh) {
@@ -651,6 +652,10 @@ public class Field {
         return getLifesByClass(Npc.class);
     }
 
+    public Set<FieldAttackObj> getFieldAttackObjects() {
+        return getLifesByClass(FieldAttackObj.class);
+    }
+
     public void setObjectIDCounter(int idCounter) {
         objectIDCounter = idCounter;
     }
@@ -753,24 +758,7 @@ public class Field {
         }
         removeLife(id);
         removeSchedule(life, fromSchedule);
-        if (life instanceof Summon) {
-            Summon summon = (Summon) life;
-            if (summon.getSkillID() == Kanna.KISHIN_SHOUKAN || summon.getSkillID() == Job.MONOLITH) {
-                setKishin(false);
-            }
-            broadcastPacket(Summoned.summonedRemoved(summon, LeaveType.ANIMATION));
-        } else if (life instanceof AffectedArea) {
-            AffectedArea aa = (AffectedArea) life;
-            broadcastPacket(CField.affectedAreaRemoved(aa, false));
-            for (Char chr : getChars()) {
-                TemporaryStatManager tsm = chr.getTemporaryStatManager();
-                if (tsm.hasAffectedArea(aa)) {
-                    tsm.removeStatsBySkill(aa.getSkillID());
-                }
-            }
-        } else if (life instanceof FieldAttackObj) {
-            broadcastPacket(FieldAttackObjPool.objRemoveByKey(life.getObjectId()));
-        }
+        life.broadcastLeavePacket();
     }
 
     public synchronized void removeDrop(int dropID, int pickupUserID, boolean fromSchedule, int petID) {

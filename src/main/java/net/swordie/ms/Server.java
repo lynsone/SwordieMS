@@ -8,6 +8,7 @@ import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.netty.ChannelAcceptor;
 import net.swordie.ms.connection.netty.ChatAcceptor;
 import net.swordie.ms.connection.netty.LoginAcceptor;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.shop.cashshop.CashShop;
@@ -48,7 +49,7 @@ public class Server extends Properties {
 	}
 
 	public World getWorldById(int id) {
-		return getWorlds().stream().filter(w -> w.getWorldId() == id).findFirst().orElse(null);
+		return Util.findWithPred(getWorlds(), w -> w.getWorldId() == id);
 	}
 
 	private void init(String[] args) {

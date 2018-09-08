@@ -19,8 +19,8 @@ public class FieldAttackObj extends Life implements Encodable {
         super(templateId);
     }
 
-    public FieldAttackObj(int skillID, int ownerID, Position position, boolean flip) {
-        super(skillID);
+    public FieldAttackObj(int templateId, int ownerID, Position position, boolean flip) {
+        super(templateId);
         this.ownerID = ownerID;
         setPosition(position);
         setFlip(flip);
@@ -55,5 +55,10 @@ public class FieldAttackObj extends Life implements Encodable {
     @Override
     public void broadcastSpawnPacket(Char onlyChar) {
         onlyChar.write(FieldAttackObjPool.objCreate(this));
+    }
+
+    @Override
+    public void broadcastLeavePacket() {
+        getField().broadcastPacket(FieldAttackObjPool.objRemoveByKey(this.getObjectId()));
     }
 }

@@ -103,6 +103,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -112,6 +113,7 @@ import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.enums.Stat.level;
+import static net.swordie.ms.enums.Stat.pop;
 import static net.swordie.ms.enums.Stat.sp;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
@@ -1228,7 +1230,7 @@ public class WorldHandler {
                             mobSkill.getSkillID(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkillID()), mobSkill.getLevel()));
                     mob.putSkillCooldown(skillID, slv, nextUseableTime);
                     if (mobSkill.getSkillAfter() > 0) {
-                        mob.getSkillDelays().push(mobSkill);
+                        mob.getSkillDelays().add(mobSkill);
                         mob.setSkillDelay(mobSkill.getSkillAfter());
                         c.write(MobPool.setSkillDelay(mob.getObjectId(), mobSkill.getSkillAfter(), skillID, slv, 0, null));
                     } else {
@@ -1290,9 +1292,10 @@ public class WorldHandler {
         if (inPacket.decodeByte() != 0) {
             remainCount = inPacket.decodeInt();
         }
-        MobSkill expected = mob.getSkillDelays().pop();
-        if (expected.getSkillID() == skillID && expected.getLevel() == slv) {
-            expected.handleEffect(mob);
+        List<MobSkill> delays = mob.getSkillDelays();
+        MobSkill ms = Util.findWithPred(delays, skill -> skill.getSkillID() == skillID && skill.getLevel() == slv);
+        if (ms != null) {
+            ms.handleEffect(mob);
         }
 
     }
@@ -1475,6 +1478,11 @@ public class WorldHandler {
         }
         ai.rect = inPacket.decodeShortRect();
         if(SkillConstants.needsOneMoreInt(ai.skillId)) {
+            inPacket.decodeInt();
+        }
+        if (SkillConstants.isFieldAttackObjSkill(ai.skillId)) {
+            inPacket.decodeInt();
+            inPacket.decodeInt();
             inPacket.decodeInt();
         }
         for (int i = 0; i < ai.mobCount; i++) {
@@ -1686,14 +1694,20 @@ public class WorldHandler {
         Skill skill = chr.getSkill(skillID);
         if (skill != null && skill.getCurrentLevel() > 0) {
             Field field = chr.getField();
+            Set<FieldAttackObj> currentFaos = field.getFieldAttackObjects();
+            // remove the old arrow platter
+            currentFaos.stream()
+                    .filter(fao -> fao.getOwnerID() == chr.getId() && fao.getTemplateId() == 1)
+                    .findAny().ifPresent(field::removeLife);
             SkillInfo si = SkillData.getSkillInfoById(skillID);
             int slv = skill.getCurrentLevel();
-            FieldAttackObj fao = new FieldAttackObj(skillID, chr.getId(), chr.getPosition().deepCopy(), flip);
+            FieldAttackObj fao = new FieldAttackObj(1, chr.getId(), chr.getPosition().deepCopy(), flip);
             field.spawnLife(fao, chr);
             field.broadcastPacket(FieldAttackObjPool.objCreate(fao), chr);
             ScheduledFuture sf = EventManager.addEvent(() -> field.removeLife(fao.getObjectId(), true),
-                    si.getValue(SkillStat.time, slv));
+                    si.getValue(SkillStat.u, slv), TimeUnit.SECONDS);
             field.addLifeSchedule(fao, sf);
+            field.broadcastPacket(FieldAttackObjPool.setAttack(fao.getObjectId(), 0));
         }
 
     }
@@ -2431,6 +2445,11 @@ public class WorldHandler {
             int answer = 0;
             boolean hasAnswer = false;
             String ans = null;
+            if (nmt == NpcMessageType.InGameDirectionsAnswer) {
+                byte answ = inPacket.decodeByte();
+                chr.getScriptManager().handleAction(lastType, action, answ);
+                return;
+            }
             if (nmt == NpcMessageType.AskText && action == 1) {
                 ans = inPacket.decodeString();
             } else if (inPacket.getUnreadAmount() >= 4) {
@@ -2444,9 +2463,6 @@ public class WorldHandler {
             }
             if (nmt == NpcMessageType.AskText && action != 0) {
                 chr.getScriptManager().handleAction(lastType, action, ans);
-            } else if (nmt == NpcMessageType.InGameDirectionsAnswer) {
-                byte answ = inPacket.decodeByte();
-                chr.getScriptManager().handleAction(lastType, action, answ);
             } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
                     nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
                     nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
@@ -5606,7 +5622,6 @@ public class WorldHandler {
         inPacket.decodeShort();
         inPacket.decodeShort();
         Position forcedPos = inPacket.decodePositionInt();
-
     }
 
     public static void handleUserRegisterPetAutoBuffRequest(Char chr, InPacket inPacket) {
@@ -5626,5 +5641,28 @@ public class WorldHandler {
         }
         pet.getItem().setAutoBuffSkill(skillID);
         pet.getItem().updateToChar(chr);
+    }
+
+    public static void handleUserGivePopularityRequest(Char chr, InPacket inPacket) {
+        int targetChrId = inPacket.decodeInt();
+        boolean increase = inPacket.decodeByte() != 0;
+
+        Field field = chr.getField();
+        Char targetChr = field.getCharByID(targetChrId);
+
+        if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
+
+        } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
+
+        // TODO  Check on Famed Today & Famed Person
+
+        } else {
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
+            targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
+            targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
+        }
     }
 }

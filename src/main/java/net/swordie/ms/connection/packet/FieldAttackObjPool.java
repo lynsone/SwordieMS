@@ -25,4 +25,13 @@ public class FieldAttackObjPool {
 
         return outPacket;
     }
+
+    public static OutPacket setAttack(int objectId, int attackIdx) {
+        OutPacket outPacket = new OutPacket(OutHeader.FIELD_ATTACK_SET_ATTACK);
+
+        outPacket.encodeInt(objectId);
+        outPacket.encodeInt(attackIdx);
+
+        return outPacket;
+    }
 }

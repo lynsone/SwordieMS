@@ -2,6 +2,7 @@ package net.swordie.ms.constants;
 
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.WeaponType;
+import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -434,7 +435,7 @@ public class JobConstants {
         }
 
         public static JobEnum getJobById(short id) {
-            return Arrays.stream(values()).filter(j -> j.getJobId() == id).findFirst().orElse(null);
+            return Util.findWithPred(values(), j -> j.getJobId() == id);
         }
 
         public Set<WeaponType> getUsingWeapons() {

@@ -92,7 +92,7 @@ public class SkillConstants {
         return prefix;
     }
 
-    private static boolean isFieldAttackObjSkill(int skillId) {
+    public static boolean isFieldAttackObjSkill(int skillId) {
         if (skillId <= 0) {
             return false;
         }

@@ -41,6 +41,6 @@ public enum FlameStat {
     }
 
     public static FlameStat getByVal(int val) {
-        return Util.getFromCollectionWithPred(Arrays.asList(values()), stat -> stat.getVal() == val);
+        return Util.findWithPred(Arrays.asList(values()), stat -> stat.getVal() == val);
     }
 }

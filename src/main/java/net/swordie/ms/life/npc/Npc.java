@@ -36,7 +36,7 @@ public class Npc extends Life {
         // CNpc::Init
         outPacket.encodePosition(getPosition());
         outPacket.encodeByte(isMove());
-        outPacket.encodeByte(isFlip());
+        outPacket.encodeByte(!isFlip());
         outPacket.encodeShort(getFh());
         outPacket.encodeShort(getRx0()); // rgHorz.low
         outPacket.encodeShort(getRx1()); // rgHorz.high
@@ -174,6 +174,15 @@ public class Npc extends Life {
         }
     }
 
+    @Override
+    public void broadcastLeavePacket() {
+        Field field = getField();
+        for (Char chr : field.getChars()) {
+            chr.write(NpcPool.npcLeaveField(this));
+            chr.write(NpcPool.npcChangeController(this, false, true));
+        }
+    }
+    
     public boolean isMove() {
         return move;
     }

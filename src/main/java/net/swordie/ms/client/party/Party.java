@@ -59,7 +59,6 @@ public class Party implements Encodable {
             outPacket.encodeInt(pm != null ? pm.getCharID() : 0);
         }
         for(PartyMember pm : partyMembers) {
-            System.out.println(pm != null ? pm.getCharName() : "Empty");
             outPacket.encodeString(pm != null ? pm.getCharName() : "", 13);
         }
         for(PartyMember pm : partyMembers) {

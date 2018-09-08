@@ -1,5 +1,7 @@
 package net.swordie.ms.enums;
 
+import net.swordie.ms.util.Util;
+
 import java.util.Arrays;
 
 /**
@@ -22,6 +24,6 @@ public enum SceneType {
     public int getVal() {return val;}
 
     public static SceneType getByVal(int val) {
-        return Arrays.stream(values()).filter(st -> st.getVal() == val).findAny().orElse(null);
+        return Util.findWithPred(values(), st -> st.getVal() == val);
     }
 }

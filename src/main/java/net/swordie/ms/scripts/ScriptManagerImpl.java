@@ -268,13 +268,17 @@ public class ScriptManagerImpl implements ScriptManager {
 			case 0:
 			case 1:
 			case 2:
+                        case 3:
 				try {
 					if (text == null) {
+                                            System.out.println("Handling action");
 						if (isActive(scriptType)) {
 							getInvocableByType(scriptType).invokeFunction("action", response, answer);
 						} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
 							getInvocableByType(ScriptType.PORTAL).invokeFunction("action", response, answer);
-						}
+						} else if (!isActive(scriptType) && isActive(ScriptType.FIELD)) {
+							getInvocableByType(ScriptType.FIELD).invokeFunction("action", response, answer);
+                                                }
 					} else {
 						if (isActive(scriptType)) {
 							getInvocableByType(scriptType).invokeFunction("text_answer", text);
@@ -611,10 +615,12 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void lockInGameUI(boolean lock) {
-		chr.write(UserLocal.setInGameDirectionMode(lock));
+		chr.write(UserLocal.setInGameDirectionMode(lock, true, false));
 	}
 
-
+	public void curNodeEventEnd(boolean enable) {
+		chr.write(CField.curNodeEventEnd(enable));
+	}
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 
@@ -900,6 +906,12 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
+        @Override
+	public void setSpeakerType(byte speakerType) {
+            NpcScriptInfo nsi = getNpcScriptInfo();
+            nsi.setSpeakerType(speakerType);
+        }
+        
 	public void hideNpcByTemplateId(int npcTemplateId, boolean hide) {
 		hideNpcByTemplateId(npcTemplateId, hide, hide);
 	}
@@ -1004,9 +1016,17 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 		chr.write(NpcPool.npcSetSpecialAction(life.getObjectId(), effectName, duration));
 	}
-
-
-
+        
+        public int getNpcObjectIdByTemplateId(int npcTemplateId) {
+            Field field = chr.getField();
+            Life life = field.getLifeByTemplateId(npcTemplateId);
+            if(life == null || !(life instanceof Npc)) {
+                log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+                return 0;
+            }
+            return life.getObjectId();
+        }
+        
 	// Mob methods
 	@Override
 	public void spawnMob(int id) {

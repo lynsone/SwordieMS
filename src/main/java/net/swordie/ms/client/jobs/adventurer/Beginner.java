@@ -102,6 +102,6 @@ public class Beginner extends Job {
     public void setCharCreationStats(Char chr) {
         super.setCharCreationStats(chr);
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
-        cs.setPosMap(10000); // Maple Road : Maple Tree Hill
+        cs.setPosMap(4000011); // Maple Road : Maple Tree Hill
     }
 }

@@ -2,12 +2,13 @@ package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.InvType;
-import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -27,19 +28,19 @@ public class Inventory {
     private byte slots;
 
     public Inventory() {
-        items = new ArrayList<>();
+        items = new CopyOnWriteArrayList<>();
         type = InvType.EQUIP;
     }
 
     public Inventory(InvType t, int slots) {
         this.type = t;
-        items = new ArrayList<>();
+        items = new CopyOnWriteArrayList<>();
         this.slots = (byte) slots;
     }
 
     public Inventory deepCopy() {
         Inventory inventory = new Inventory(getType(), getSlots());
-        inventory.setItems(new ArrayList<>(getItems()));
+        inventory.setItems(new CopyOnWriteArrayList<>(getItems()));
         return inventory;
     }
 
@@ -97,7 +98,11 @@ public class Inventory {
     }
 
     public void sortItemsByIndex() {
-        getItems().sort(Comparator.comparingInt(Item::getBagIndex));
+        // workaround for sort not being available for CopyOnWriteArrayList
+        List<Item> temp = new ArrayList<>(getItems());
+        temp.sort(Comparator.comparingInt(Item::getBagIndex));
+        getItems().clear();
+        getItems().addAll(temp);
     }
 
     public void setItems(List<Item> items) {

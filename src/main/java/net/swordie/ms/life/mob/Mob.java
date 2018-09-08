@@ -30,6 +30,7 @@ import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class Mob extends Life {
@@ -123,7 +124,7 @@ public class Mob extends Life {
     private long nextPossibleSkillTime = 0;
     private List<Tuple<Integer, Integer>> eliteSkills = new ArrayList<>();
     private boolean selfDestruction;
-    private Stack<MobSkill> skillDelays = new Stack<>();
+    private List<MobSkill> skillDelays = new CopyOnWriteArrayList<>();
     private boolean inAttack;
 
     public Mob(int templateId) {
@@ -1305,7 +1306,7 @@ public class Mob extends Life {
     }
 
     public MobSkill getAttackById(int attackID) {
-        return Util.getFromCollectionWithPred(getAttacks(), att -> att.getSkillSN() == attackID);
+        return Util.findWithPred(getAttacks(), att -> att.getSkillSN() == attackID);
     }
 
     @Override
@@ -1533,7 +1534,7 @@ public class Mob extends Life {
         return selfDestruction;
     }
 
-    public Stack<MobSkill> getSkillDelays() {
+    public List<MobSkill> getSkillDelays() {
         return skillDelays;
     }
 

@@ -1064,7 +1064,8 @@ public enum InHeader {
                 AUTH_HEARTBEAT,
                 OBTACLE_ATOM_COLLISION,
                 USER_HIT,
-                USER_EMOTION
+                USER_EMOTION,
+                USER_B2_BODY_REQUEST
         );
         return spam.contains(inHeaderByOp);
     }

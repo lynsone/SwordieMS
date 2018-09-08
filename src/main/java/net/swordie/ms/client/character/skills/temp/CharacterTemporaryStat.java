@@ -635,10 +635,10 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             AngelicBursterSoulResonance, Fever, IgnisRore, RpSiksin, TeleportMasteryRange, FireBarrier, ChangeFoxMan,
             FixCoolTime, IncMobRateDummy, AdrenalinBoost, AranSmashSwing, AranDrain, AranBoostEndHunt,
             HiddenHyperLinkMaximization, RWCylinder, RWCombination, RWMagnumBlow, RWBarrier, RWBarrierHeal,
-            RWMaximizeCannon, RWOverHeat, RWMovingEvar, Stigma, Unk455, IncMaxDamage, Unk456, Unk457, Unk458, Unk459, Unk460,
-            /*??, */HayatoStance, HayatoBooster, HayatoStanceBonus, WillowDodge, Unk465, HayatoPAD, HayatoHPR,
-            HayatoMPR, Jinsoku, HayatoCr, HakuBlessing, HayatoBoss, BattoujutsuAdvance, Unk477, Unk478,
-            BlackHeartedCurse, EyeForEye, BeastMode, TeamRoar, Unk482, Unk483, Unk487, Unk488, Unk489, Unk490,
+            RWMaximizeCannon, RWOverHeat, RWMovingEvar, Stigma, Unk455, IncMaxDamage, Unk456, Unk457, Unk458, Unk459,
+            Unk460, PyramidFireBuff /*not sure*/, HayatoStance, HayatoBooster, HayatoStanceBonus, WillowDodge, Unk465,
+            HayatoPAD, HayatoHPR, HayatoMPR, Jinsoku, HayatoCr, HakuBlessing, HayatoBoss, BattoujutsuAdvance, Unk477,
+            Unk478, BlackHeartedCurse, EyeForEye, BeastMode, TeamRoar, Unk482, Unk483, Unk487, Unk488, Unk489, Unk490,
             Unk491
     );
 
@@ -866,8 +866,8 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
         int a = Stigma.bitPos;
 //        int val = 1 << (31 - (a & 0x1f));
 //        int pos = a >> 5;
-        int val = 0x2000000;
-        int pos = 14;
+        int val = 0x1000;
+        int pos = 0;
         log.debug(String.format("value 0x%04x, pos %d", val, pos));
         for(CharacterTemporaryStat cts : values()) {
             if(cts.getVal() == val && cts.getPos() == pos) {
