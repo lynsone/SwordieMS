@@ -890,7 +890,7 @@ public class JobConstants {
     }
 
     public static boolean isDemon(short jobId) {
-        return jobId / 100 == 31 || jobId == 3001 || jobId / 100 == 36;
+        return jobId / 100 == 31 || jobId == 3001;
     }
 
     public static boolean isBeginnerJob(short jobId) {

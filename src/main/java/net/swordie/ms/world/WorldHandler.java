@@ -72,6 +72,8 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.MobSkillID;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
@@ -1561,6 +1563,10 @@ public class WorldHandler {
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte channelId = (byte) (inPacket.decodeByte() +1);
+
+        Job sourceJobHandler = chr.getJobHandler();
+        sourceJobHandler.handleCancelTimer(chr);
+
         chr.changeChannel(channelId);
     }
 
@@ -3786,7 +3792,15 @@ public class WorldHandler {
             skillID = 65101006; //Lovely Sting Explosion
         }
         Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
-        c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
+        if(mob != null) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            if((mts.hasCurrentMobStat(MobStat.Explosion) && mts.getCurrentOptionsByMobStat(MobStat.Explosion).wOption == chr.getId()) ||
+                    (mts.hasCurrentMobStat(MobStat.SoulExplosion) && mts.getCurrentOptionsByMobStat(MobStat.SoulExplosion).wOption == chr.getId())) {
+                c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
+                mts.removeMobStat(MobStat.Explosion, true);
+                mts.removeMobStat(MobStat.SoulExplosion, true);
+            }
+        }
     }
 
     public static void handleUserActivateEffectItem(Client c, InPacket inPacket) {
