@@ -1,7 +1,7 @@
 # BW - End of Knight-in-Training - Complete
 
 sm.setSpeakerID(1101004)
-    response = sm.sendAskYesNo("You've defeated the 30 Tigurus! I like how hard you work! Are you ready work even harder by "
+response = sm.sendAskYesNo("You've defeated the 30 Tigurus! I like how hard you work! Are you ready work even harder by "
                     "accepting the responsibilities of an official knight?")
 
 if response == 1:

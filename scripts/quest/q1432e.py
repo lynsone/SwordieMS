@@ -11,9 +11,9 @@ else:
     sm.dispose()
 
 
-    sm.consumeItem(blackCharm, 1)
-    sm.completeQuestNoRewards(parentID)
-    sm.sendSayOkay("You are now a #b"+ job +"#k.")
-    sm.jobAdvance(121) # Crusader
-    sm.startQuestNoCheck(1450)
-    sm.dispose()
+sm.consumeItem(blackCharm, 1)
+sm.completeQuestNoRewards(parentID)
+sm.sendSayOkay("You are now a #b"+ job +"#k.")
+sm.jobAdvance(121) # Crusader
+sm.startQuestNoCheck(1450)
+sm.dispose()

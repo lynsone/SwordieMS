@@ -11,8 +11,8 @@ else:
     sm.dispose()
 
 
-    sm.consumeItem(blackCharm, 1)
-    sm.completeQuestNoRewards(parentID)
-    sm.sendSayOkay("You are now a #b"+ job +"#k.")
-    sm.jobAdvance(321) # Sniper
-    sm.dispose()
+sm.consumeItem(blackCharm, 1)
+sm.completeQuestNoRewards(parentID)
+sm.sendSayOkay("You are now a #b"+ job +"#k.")
+sm.jobAdvance(321) # Sniper
+sm.dispose()
