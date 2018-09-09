@@ -2,7 +2,7 @@
 
 victoriaIslandPrice = 800
 
-sm.sendNext("Heading Out? \r\n\r\n#b"
+answer = sm.sendNext("Heading Out? \r\n\r\n#b"
             "#L0##eTheme Dungeon: Riena Strait#n (Price: 0 mesos)\r\n"
             "#L1#Victoria Island (Price: "+ str(victoriaIslandPrice) +" mesos)#l")
 

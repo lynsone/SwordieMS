@@ -8,11 +8,9 @@ for qid in questIDs:
         hasQuest = True
         break
 if hasQuest:
-    response = sm.sendAskYesNo("#b(A mysterious energy surrounds this stone. Do you want to investigate?)")
+    if sm.sendAskYesNo("#b(A mysterious energy surrounds this stone. Do you want to investigate?)"):
+        sm.warpInstanceIn(910540000, 0)
 else:
     sm.sendSayOkay("#b(A mysterious energy surrounds this stone)#k")
     sm.dispose()
 
-if response == 1:
-    sm.warpInstanceIn(910540000, 0)
-sm.dispose()

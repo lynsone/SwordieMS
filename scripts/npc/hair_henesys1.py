@@ -4,7 +4,6 @@
 
 options = []
 
-global options
 al = chr.getAvatarData().getAvatarLook()
 hairColour = al.getHair() % 10
 if al.getGender() == 0: # Male
@@ -12,7 +11,7 @@ if al.getGender() == 0: # Male
 else: # Female
     options = [32360, 34400, 31820, 34270, 31860, 34210, 34250, 34490, 31360]
 options = list(map(lambda x: x + hairColour, options))
-sm.sendAskAvatar("Choose your new hairstyle!", False, False, options)
+answer = sm.sendAskAvatar("Choose your new hairstyle!", False, False, options)
 
 if answer < len(options):
     sm.changeCharacterLook(options[answer])

@@ -19,21 +19,19 @@ stage = int(sm.getQRValue(GameConstants.LORD_PIRATE_QUEST))
 
 
 if sm.getFieldID() == 925100100: # Hidden Street: Through the Head of the Ship!
+    item = 0
+    if stage == 0:
+        item = ROOKIE_PIRATE_MARK
+    elif stage == 1:
+        item = RISING_PIRATE_MARK
+    elif stage == 2:
+        item = VETERAN_PIRATE_MARK
 
-item = 0
-if stage == 0:
-    item = ROOKIE_PIRATE_MARK
-elif stage == 1:
-    item = RISING_PIRATE_MARK
-elif stage == 2:
-    item = VETERAN_PIRATE_MARK
-
-nextItem = 0
-if stage == 0:
-    nextItem = RISING_PIRATE_MARK
-elif stage == 1:
-    nextItem = VETERAN_PIRATE_MARK
-
+    nextItem = 0
+    if stage == 0:
+        nextItem = RISING_PIRATE_MARK
+    elif stage == 1:
+        nextItem = VETERAN_PIRATE_MARK
 
     if sm.isPartyLeader():
         if stage == 3:
@@ -64,33 +62,28 @@ elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
             sm.dispose()
         else:
             sm.sendNext("You have done us a great favour, what ever can we do to repay you?")
+        sm.warpPartyIn(925100700)
+        # For all party members
+        for partyMembers in sm.getParty().getMembers():
+            # Sets the Stage2 progress back to 0
+            sm.setQRValue(partyMembers.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
+
+            # Gives all party members Exp
+            sm.giveExp(sm.getPQExp(partyMembers.getChr()))
+
+            # Checks & deletes all items in the  array: pqItems
+            for item in pqItems:
+                if sm.hasItem(item):
+                    quantity = sm.getQuantityOfItem(item)
+                    sm.consumeItem(item, quantity)
+            sm.dispose()
 
     else:
         sm.sendSayOkay("Please get rid of the Captain!")
         sm.dispose()
 
-    sm.warpPartyIn(925100700)
-
-    # For all party members
-    for partyMembers in sm.getParty().getMembers():
-        # Sets the Stage2 progress back to 0
-        sm.setQRValue(partyMembers.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
-
-        # Gives all party members Exp
-        sm.giveExp(sm.getPQExp(partyMembers.getChr()))
-
-        # Checks & deletes all items in the  array: pqItems
-        for item in pqItems:
-            if sm.hasItem(item):
-                quantity = sm.getQuantityOfItem(item)
-                sm.consumeItem(item, quantity)
-        sm.dispose()
-
-
-
 else:
     response = sm.sendAskYesNo("Are you sure you want to leave?")
-
     if response == 1:
         if not sm.getParty() is None:
             sm.warpPartyOut(910002000)

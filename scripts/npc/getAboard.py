@@ -5,7 +5,6 @@ i = 0
 while i < len(maps):
     list += "\r\n#L" + str(i) + "##m" + str(maps[i]) + "#"
     i += 1
-sm.sendNext(list)
-def action(reponse, answer):
-    sm.warp(maps[answer], 0)
-    sm.dispose()
+answer = sm.sendNext(list)
+sm.warp(maps[answer], 0)
+sm.dispose()

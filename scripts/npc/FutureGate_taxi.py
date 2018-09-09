@@ -6,6 +6,6 @@ i = 0
 while i < len(maps):
     selList += "\r\n#L" + str (i) + "##m" + str (maps[i]) + "##l"
     i += 1
-sm.sendNext(selList)
+answer = sm.sendNext(selList)
 sm.warp(maps[answer], 0)
 sm.dispose()

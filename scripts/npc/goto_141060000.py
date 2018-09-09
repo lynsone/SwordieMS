@@ -10,6 +10,5 @@ portal = {
 141050000 : 0, # Glacier Cutter Base
 }
 
-if response = sm.sendAskYesNo("Navigator, would you like to set sail?"):
-sm.warp(141060000, portal[sm.getFieldID()])
-sm.dispose()
+if sm.sendAskYesNo("Navigator, would you like to set sail?"):
+    sm.warp(141060000, portal[sm.getFieldID()])

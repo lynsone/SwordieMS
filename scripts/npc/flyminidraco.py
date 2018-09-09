@@ -1,5 +1,5 @@
 # Corba (2082003) | Leafre Station
-sm.sendNext("If you had wings, I'm sure you could go there.  "
+answer = sm.sendNext("If you had wings, I'm sure you could go there.  "
             "But, that alone won't be enough.  "
             "If you want to fly though the wind that's sharper than a blade, you'll need tough scales as well.  "
             "I'm the only Halfling left that knows the way back... "

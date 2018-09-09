@@ -2,7 +2,7 @@
 
 from net.swordie.ms.world.gach.result import GachaponDlgType
 
-sm.sendSay("Try out the new and improved Great Gachapierrot! Which service would you like to use ?\r\n#b#L0#Use a Gachapon Ticket.#l\r\n#L1#Use a Chair Gachapon Ticket.#l\r\n#L2#Nebulite Gachapon Ticket Exchange.#l\r\n#L3#Mount Gachapon Ticket Exchange.#l#k\r\n#r#L4#Use a Powergacha Ticket(Event Quest).")
+answer = sm.sendNext("Try out the new and improved Great Gachapierrot! Which service would you like to use ?\r\n#b#L0#Use a Gachapon Ticket.#l\r\n#L1#Use a Chair Gachapon Ticket.#l\r\n#L2#Nebulite Gachapon Ticket Exchange.#l\r\n#L3#Mount Gachapon Ticket Exchange.#l#k\r\n#r#L4#Use a Powergacha Ticket(Event Quest).")
 
 if answer == 0:
     sm.sendGachaponDlg(GachaponDlgType.TOWN)

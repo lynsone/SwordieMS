@@ -16,7 +16,7 @@ while i < len(maps):
     else:
         mapString += "#L"+ str(i) +"##m"+ str(maps[i]) +"##l\r\n"
     i += 1
-sm.sendNext(mapString)
+answer = sm.sendNext(mapString)
 
 sm.warp(maps[answer], 0)
 sm.dispose()

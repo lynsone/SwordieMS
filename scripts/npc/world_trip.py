@@ -5,7 +5,4 @@ if sm.canHold(1452002):
 else:
     sm.sendNext("You CANNOT hold an Equip.")
 
-if response == 1:
-else:
-
 

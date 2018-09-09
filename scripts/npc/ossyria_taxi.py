@@ -1,5 +1,5 @@
 if sm.getFieldID() == 211000000:
-map = [211060000, 211040200, 211041400, 300000100]
+    map = [211060000, 211040200, 211041400, 300000100]
     sm.sendNext("Where would you like to go?"
                 "\r\n#L0#Desolate Moor#l"
                 "\r\n#L1#Ice Valley II#l"
@@ -9,7 +9,7 @@ map = [211060000, 211040200, 211041400, 300000100]
     sm.dispose()
 
 elif sm.getFieldID() == 300000100:
-map = [211000000, 220000000]
+    map = [211000000, 220000000]
     sm.sendNext("Where would you like to go?"
                 "\r\n#L0#El Nath#l"
                 "\r\n#L1#Ludibrium#l")
@@ -17,7 +17,7 @@ map = [211000000, 220000000]
     sm.dispose()
 
 elif sm.getFieldID() == 220000000:
-map = [220050300, 300000100]
+    map = [220050300, 300000100]
     sm.sendNext("Where would you like to go?"
                 "\r\n#L0#Path of Time#l"
                 "\r\n#L1#Small Forest#l")
@@ -26,7 +26,7 @@ map = [220050300, 300000100]
 
 
 elif sm.getFieldID() == 240000000:
-map = [240030000, 240040500]
+    map = [240030000, 240040500]
     sm.sendNext("Where would you like to go?"
                 "\r\n#L0#Entrance to Dragon Forest#l"
                 "\r\n#L1#Entrance to Dragon Nest#l")
@@ -34,7 +34,7 @@ map = [240030000, 240040500]
     sm.dispose()
 
 else:
-currentMap = sm.getFieldID()
+    currentMap = sm.getFieldID()
 
 if currentMap == 220050300:
     map = 220000000
@@ -44,9 +44,7 @@ elif currentMap == 105000000:
     map = 105030000
 elif currentMap == 211060000:
     map = 211000000
-    response = sm.sendAskYesNo("Would you like to go to #m" + str(map) + "m#?")
-
-    if response == 1:
+    if sm.sendAskYesNo("Would you like to go to #m" + str(map) + "m#?"):
         sm.warp(map, 0)
         sm.dispose()
 

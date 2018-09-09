@@ -22,7 +22,7 @@ i = 0
 while i < len(items):
     selStr += "#L"+ str(i) +"##z"+ str(items[i]) +"##l\r\n"
     i += 1
-sm.sendNext(selStr)
+answer = sm.sendNext(selStr)
 
 if not sm.canHold(items[answer]) or sm.getMesos() < mesocost:
     sm.sendSayOkay("I'm sorry, it seems that either you don't have enough money, or you don't have enough space")
