@@ -7,4 +7,3 @@ sm.sendSay("You've kept me waiting, #e#b#h0##k#n. Shame on you! And after I went
 sm.setSpeakerID(9071004)
 sm.sendSay("Ayayaya")
 sm.chat("I have ended")
-sm.dispose()

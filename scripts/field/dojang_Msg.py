@@ -2,5 +2,5 @@
 
 from net.swordie.ms.enums import WeatherEffNoticeType
 
-    sm.showWeatherNotice("If you want to taste the bitterness of defeat, come on in!", WeatherEffNoticeType.MuLungDojo)
-    sm.dispose()
+sm.showWeatherNotice("If you want to taste the bitterness of defeat, come on in!", WeatherEffNoticeType.MuLungDojo)
+sm.dispose()

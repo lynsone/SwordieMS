@@ -22,7 +22,7 @@ else:
     sm.moveCamera(False, 200, 200, 200)
     sm.sendDelay(3000)
 
-    # The delay is for let the Npc move
+    # The delay is for letting the Npc move
     sm.sendDelay(3000)
 
     sm.moveCamera(True, 0, 0, 0)
@@ -35,8 +35,8 @@ else:
     sm.setSpeakerType(3)
     sm.removeEscapeButton()
     sm.setPlayerAsSpeaker()
-    sm.sendNext("Who was that girl? Why did she run away when she saw me?");
-    sm.sendNext("Maybe I'll follow her..");
+    sm.sendNext("Who was that girl? Why did she run away when she saw me?")
+    sm.sendNext("Maybe I'll follow her..")
 
     sm.removeNpc(UNK_NPC)
     sm.completeQuestNoRewards(32202)
