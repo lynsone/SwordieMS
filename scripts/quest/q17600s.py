@@ -5,11 +5,11 @@ response = sm.sendAskYesNo("Ah good, I've managed to reach you. The Empress has 
                 "#b(You will be moved to Ereve if you accept.)")
 
 
-    if response == 1:
-        sm.sendNext("I will be waiting for you.")
-    else:
-        sm.sendSayOkay("Let me know once you are ready.")
-        sm.dispose()
+if response == 1:
+    sm.sendNext("I will be waiting for you.")
+else:
+    sm.sendSayOkay("Let me know once you are ready.")
+    sm.dispose()
 
-    sm.startQuestNoCheck(parentID)
-    sm.warp(130000000, 0)
+sm.startQuestNoCheck(parentID)
+sm.warp(130000000, 0)

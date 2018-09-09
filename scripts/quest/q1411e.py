@@ -11,8 +11,8 @@ else:
     sm.dispose()
 
 
-    sm.consumeItem(darkMarble, 30)
-    sm.completeQuestNoRewards(parentID)
-    sm.sendNext("You are now a #b"+ job +"#k.")
-    sm.jobAdvance(110) # Fighter
-    sm.dispose()
+sm.consumeItem(darkMarble, 30)
+sm.completeQuestNoRewards(parentID)
+sm.sendNext("You are now a #b"+ job +"#k.")
+sm.jobAdvance(110) # Fighter
+sm.dispose()

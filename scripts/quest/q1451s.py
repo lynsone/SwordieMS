@@ -11,14 +11,14 @@ else:
     sm.sendSayOkay("You are not ready yet. Talk to me when you are Level 100.")
 
 
-    sm.sendNext("Bring me one #b#i"+ str(heroicPentagon) +"##z"+ str(heroicPentagon) +"##k and one #b#i"+ str(heroicStar) +"##z"+ str(heroicStar) +"##k. "
-                   "These tokens of heroism can be obtained by defeating #bManon#k and #bGriffey#k.")
+sm.sendNext("Bring me one #b#i"+ str(heroicPentagon) +"##z"+ str(heroicPentagon) +"##k and one #b#i"+ str(heroicStar) +"##z"+ str(heroicStar) +"##k. "
+           "These tokens of heroism can be obtained by defeating #bManon#k and #bGriffey#k.")
 
-        response = sm.sendAskYesNo("Are you ready to take the test?")
+response = sm.sendAskYesNo("Are you ready to take the test?")
 
-        if response == 1:
-            sm.sendSayOkay("I will wait for your arrival.")
-            sm.startQuestNoCheck(parentID)
-        else:
-            sm.sendSayOkay("Talk to me once you feel you are ready.")
-        sm.dispose()
+if response == 1:
+    sm.sendSayOkay("I will wait for your arrival.")
+    sm.startQuestNoCheck(parentID)
+else:
+    sm.sendSayOkay("Talk to me once you feel you are ready.")
+sm.dispose()

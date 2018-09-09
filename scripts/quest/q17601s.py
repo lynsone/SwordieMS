@@ -6,21 +6,21 @@ if not sm.hasQuest(parentID):
     sm.startQuestNoCheck(parentID)
 
 
-    sm.sendNext("Commerci was once a small fishing village, and they had little in the way of dealings with the rest of the world. "
-                "It seems that time has been good to Commerci, as they have begun sending large trading vessels around the globe,"
-                "and have re-branded themselves the #bCommerci Republic#k.")
+sm.sendNext("Commerci was once a small fishing village, and they had little in the way of dealings with the rest of the world. "
+            "It seems that time has been good to Commerci, as they have begun sending large trading vessels around the globe,"
+            "and have re-branded themselves the #bCommerci Republic#k.")
 
-    sm.sendNext("As empress, I fear that such rapid growth from Commerci may have adverse effects on the rest of our world. "
-                "If we can earn their friendship, they may become a powerful ally in time. "
-                "However, if Commerci were to side with Black Mage... they could become a formidable threat.")
+sm.sendNext("As empress, I fear that such rapid growth from Commerci may have adverse effects on the rest of our world. "
+            "If we can earn their friendship, they may become a powerful ally in time. "
+            "However, if Commerci were to side with Black Mage... they could become a formidable threat.")
 
-    response = sm.sendAskYesNo("#h0#, we need your help. Please act as my envoy to Commerci, and bring them a message: "
-                "The kingdom of Ereve seeks a peaceful and mutually beneficial relationship with Commerci. "
-                "Will you please do this for me? Neinheart will explain the mission.")
+response = sm.sendAskYesNo("#h0#, we need your help. Please act as my envoy to Commerci, and bring them a message: "
+            "The kingdom of Ereve seeks a peaceful and mutually beneficial relationship with Commerci. "
+            "Will you please do this for me? Neinheart will explain the mission.")
 
-    if response == 1:
-        sm.sendNext("I know you won't let me down.")
-        sm.completeQuest(parentID)
-    else:
-        sm.sendSayOkay("Please, let me know when you are willing to accept the mission. but make up your mind soon, time is of the essence.")
-    sm.dispose()
+if response == 1:
+    sm.sendNext("I know you won't let me down.")
+    sm.completeQuest(parentID)
+else:
+    sm.sendSayOkay("Please, let me know when you are willing to accept the mission. but make up your mind soon, time is of the essence.")
+sm.dispose()

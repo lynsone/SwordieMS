@@ -37,14 +37,14 @@ sm.setSpeakerID(10301) # Mai
 sm.sendNext("I see you have reached level 10!\r\nIt is time for you to select your future.")
 
 
-    text = "What path do you want to go on?#b"
-    i = 0
-    while i < len(selections):
-        text += "\r\n#L"+ str(i) +"#"+ selections[i][0] +"#l"
-        i += 1
-    sm.sendNext(text)
+text = "What path do you want to go on?#b"
+i = 0
+while i < len(selections):
+    text += "\r\n#L"+ str(i) +"#"+ selections[i][0] +"#l"
+    i += 1
+sm.sendNext(text)
 
 
-    if response == 1:
-        sm.completeQuestNoRewards(parentID)
-    sm.dispose()
+if response == 1:
+    sm.completeQuestNoRewards(parentID)
+sm.dispose()

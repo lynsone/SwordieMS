@@ -8,6 +8,7 @@ response = sm.sendAskYesNo("Hey there!\r\nI have chosen you to be on the Gold Be
                 "\r\n\r\n(accepting will warp you)")
 
 if response == 1:
+    sm.startQuest(parentID)
     sm.completeQuest(parentID)
     sm.warp(mapid, 0)
 sm.dispose()

@@ -8,10 +8,10 @@ sm.sendNext("Maybe we're the lucky ones. "
             "I wonder what kind of world we'll wake up to?")
 
 
-    response = sm.sendAskYesNo("Your Highness, I will dream of a more beautiful world when we awaken...")
+response = sm.sendAskYesNo("Your Highness, I will dream of a more beautiful world when we awaken...")
 
-    if response == 1:
-        sm.completeQuest(parentID)
-        sm.sendSayOkay("I wish you...sweet dreams...")
-        sm.startQuestNoCheck(24005) # Cursed Slumber
-    sm.dispose()
+if response == 1:
+    sm.completeQuest(parentID)
+    sm.sendSayOkay("I wish you...sweet dreams...")
+    sm.startQuestNoCheck(24005) # Cursed Slumber
+sm.dispose()

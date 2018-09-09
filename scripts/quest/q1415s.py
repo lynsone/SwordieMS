@@ -10,18 +10,18 @@ sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
                 "There are many useful skills you can acquire.")
 
 
-    sm.sendNext("Before I teach you the ways of the "+ job +", you will have to accomplish a very difficult test. "
-                    "I will warp you into a special map, in which I require you to defeat #b"+ monster +"#k "
-                    "and return 30 #i"+ str(darkMarble) +"##z"+ str(darkMarble) +"#s to me.")
+sm.sendNext("Before I teach you the ways of the "+ job +", you will have to accomplish a very difficult test. "
+                "I will warp you into a special map, in which I require you to defeat #b"+ monster +"#k "
+                "and return 30 #i"+ str(darkMarble) +"##z"+ str(darkMarble) +"#s to me.")
 
-        response = sm.sendAskYesNo("Once you enter the map, you #rcannot#k return without the #b#t"+ str(darkMarble) +"#s#k, "
-                        "if you die you will lose your experience.\r\n"
-                        "Are you ready?")
+response = sm.sendAskYesNo("Once you enter the map, you #rcannot#k return without the #b#t"+ str(darkMarble) +"#s#k, "
+                "if you die you will lose your experience.\r\n"
+                "Are you ready?")
 
-        if response == 1:
-            sm.warp(910140000, 0) # Magician Test Site
-            sm.startQuestNoCheck(parentID)
-        else:
-            sm.sendSayOkay("You cannot be a Magician forever. You #bwill#k have to face up to the test.\r\n"
-                           "Talk to me when you are ready.")
-        sm.dispose()
+if response == 1:
+    sm.warp(910140000, 0) # Magician Test Site
+    sm.startQuestNoCheck(parentID)
+else:
+    sm.sendSayOkay("You cannot be a Magician forever. You #bwill#k have to face up to the test.\r\n"
+                   "Talk to me when you are ready.")
+sm.dispose()
