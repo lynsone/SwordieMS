@@ -51,7 +51,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendSay(String text);
+	int sendSay(String text);
 
 	/**
 	 * Sends a message box with the next button enabled only.<br>
@@ -60,7 +60,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendNext(String text);
+	int sendNext(String text);
 
 	/**
 	 * Sends a message box with the previous button enabled only.<br>
@@ -69,7 +69,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendPrev(String text);
+	int sendPrev(String text);
 
 	/**
 	 * Sends a message box with the ok button enabled only.<br>
@@ -78,7 +78,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendSayOkay(String text);
+	int sendSayOkay(String text);
 
 	/**
 	 * Sends a message box with the defined image from wz.
@@ -87,7 +87,7 @@ public interface ScriptManager extends Observer {
 	 * @param image
 	 * 		The image to display in the message box.
 	 */
-	void sendSayImage(String image);
+	int sendSayImage(String image);
 
 	/**
 	 * Sends a message box with the defined images from wz.
@@ -96,7 +96,7 @@ public interface ScriptManager extends Observer {
 	 * @param images
 	 * 		The images to display in the message box.
 	 */
-	void sendSayImage(String[] images);
+	int sendSayImage(String[] images);
 
 	/**
 	 * Sends a message box with yes / no buttons.<br>
@@ -105,7 +105,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendAskYesNo(String text);
+	boolean sendAskYesNo(String text);
 
 	/**
 	 * Sends a message box with accept / decline buttons.<br>
@@ -114,7 +114,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendAskAccept(String text);
+	boolean sendAskAccept(String text);
 
 	/**
 	 * Sends a message box asking a user for some text.<br>
@@ -129,7 +129,7 @@ public interface ScriptManager extends Observer {
 	 * @param maxLength
 	 * 		The maximum length of the text. "Hi" would be a length of 2.
 	 */
-	void sendAskText(String text, String defaultText, short minLength, short maxLength);
+	String sendAskText(String text, String defaultText, short minLength, short maxLength);
 
 	/**
 	 * Sends a message box asking a user for a number.
@@ -144,7 +144,7 @@ public interface ScriptManager extends Observer {
 	 * @param max
 	 * 		The maximum number.
 	 */
-	void sendAskNumber(String text, int defaultNum, int min, int max);
+	int sendAskNumber(String text, int defaultNum, int min, int max);
 
 	/**
 	 * Sends a chat window for a quiz.
@@ -165,7 +165,7 @@ public interface ScriptManager extends Observer {
 	 * @param time
 	 * 		The time allowed to answer the question, in seconds.
 	 */
-	void sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time);
+	int sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time);
 
 	/**
 	 * Sends a chat window for an initial speed quiz.
@@ -184,7 +184,7 @@ public interface ScriptManager extends Observer {
 	 * @param time
 	 * 		The remaining amount of time, in seconds.
 	 */
-	void sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time);
+	int sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time);
 
 	/**
 	 * Sends an IC quiz.
@@ -199,7 +199,7 @@ public interface ScriptManager extends Observer {
 	 * @param time
 	 * 		The remaining amount of time, in seconds.
 	 */
-	void sendICQuiz(byte type, String text, String hintText, int time);
+	int sendICQuiz(byte type, String text, String hintText, int time);
 
 	/**
 	 * Sends a chat window with Avatar options (different hairstyles, eyestyles, things like that)
@@ -214,14 +214,14 @@ public interface ScriptManager extends Observer {
 	 * @param options
 	 * 		A list of hair/eye options available to choose
 	 */
-	void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options);
+	int sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options);
 
 	/**
 	 * Sends a slide window to the client with a given dlgType.
 	 * Example: "sm.sendAskSlideMenu(0)" (for the dimensional portal)
 	 * @param dlgType the dialogue type.
 	 */
-	void sendAskSlideMenu(int dlgType);
+	int sendAskSlideMenu(int dlgType);
 
 	// Start of param methods ------------------------------------------------------------------------------------------
 
@@ -1268,7 +1268,7 @@ public interface ScriptManager extends Observer {
 	 *
 	 * @param delay delay in milliseconds
 	 */
-	void sendDelay(int delay);
+	int sendDelay(int delay);
 
 	/**
 	 * Does a specified In Game Direction Event and sends a delay 'sendDelay'

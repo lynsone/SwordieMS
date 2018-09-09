@@ -233,6 +233,13 @@ public class WorldHandler {
                     sb.append(String.format("%s = %d, ", bs, basicStats.getOrDefault(bs, 0)));
                 }
                 chr.chatMessage(Mob, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
+                ScriptManagerImpl smi = chr.getScriptManager();
+                // all but field
+                smi.stop(ScriptType.PORTAL);
+                smi.stop(ScriptType.NPC);
+                smi.stop(ScriptType.REACTOR);
+                smi.stop(ScriptType.QUEST);
+                smi.stop(ScriptType.ITEM);
 
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
@@ -2441,10 +2448,9 @@ public class WorldHandler {
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        ScriptManagerImpl smi = chr.getScriptManager();
         byte lastType = inPacket.decodeByte();
-        NpcMessageType nmt = lastType < NpcMessageType.values().length ?
-                Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
-                NpcMessageType.None;
+        NpcMessageType nmt = smi.getNpcScriptInfo().getMessageType();
         if (nmt != NpcMessageType.Monologue) {
             byte action = inPacket.decodeByte();
             int answer = 0;
@@ -2452,7 +2458,7 @@ public class WorldHandler {
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
-                chr.getScriptManager().handleAction(lastType, action, answ);
+                chr.getScriptManager().handleAction(nmt, action, answ);
                 return;
             }
             if (nmt == NpcMessageType.AskText && action == 1) {
@@ -2467,19 +2473,19 @@ public class WorldHandler {
                 answer = inPacket.decodeByte();
             }
             if (nmt == NpcMessageType.AskText && action != 0) {
-                chr.getScriptManager().handleAction(lastType, action, ans);
+                chr.getScriptManager().handleAction(nmt, action, ans);
             } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
                     nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
                     nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
                 // else -> User pressed escape in a selection (choice) screen
-                chr.getScriptManager().handleAction(lastType, action, answer);
+                chr.getScriptManager().handleAction(nmt, action, answer);
             } else {
                 // User pressed escape in a selection (choice) screen
                 chr.dispose();
                 chr.getScriptManager().dispose();
             }
         } else {
-            chr.getScriptManager().handleAction(lastType, (byte) 1, 1); // Doesn't use  response nor answer
+            chr.getScriptManager().handleAction(nmt, (byte) 1, 1); // Doesn't use  response nor answer
         }
     }
 
