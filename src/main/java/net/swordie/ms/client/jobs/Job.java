@@ -248,6 +248,16 @@ public abstract class Job {
 
 	}
 
+	/**
+	 * Used for Classes that have timers, to cancel the timer after changing channel
+	 *
+	 * @param chr
+	 * 		The Character
+	 */
+	public void handleCancelTimer(Char chr) {
+
+	}
+
 	public void handleJoblessBuff(Client c, InPacket inPacket, int skillID, byte slv) {
 		Char chr = c.getChr();
 		SkillInfo si = SkillData.getSkillInfoById(skillID);
