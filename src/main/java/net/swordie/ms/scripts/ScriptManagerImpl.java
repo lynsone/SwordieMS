@@ -251,6 +251,11 @@ public class ScriptManagerImpl implements ScriptManager {
 				log.error(String.format("Unable to compile script %s!", name));
 				e.printStackTrace();
 			}
+		} finally {
+			if (si.isActive()) {
+				// gracefully stop script if it's still active
+				stop(getLastActiveScriptType());
+			}
 		}
 	}
 
