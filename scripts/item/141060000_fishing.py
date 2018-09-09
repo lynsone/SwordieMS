@@ -13,23 +13,16 @@ else:
 
     if randomInt == 0:  # Big Fish Caught
         sm.sendNext("#bNavigator, You caught #v"+ str(bigfish) +"##t"+ str(bigfish) +"#!")
+        sm.setSpeakerID(1510007) # Nora
+        sm.sendNext("#bGreat job!")
+        sm.giveItem(bigfish)
 
     elif randomInt == 1:# Small Fish Caught
         sm.sendNext("#bYou caught #v"+ str(smallfish) +"##t"+ str(smallfish) +"#...")
+        sm.setSpeakerID(1510007) # Nora
+        sm.sendNext("#bI'm afraid this fish is too small for Barbara\r\n\r\nWe'll set it free.")
 
     elif randomInt == 2:# Nothing Caught
         sm.sendNext("#bYou caught nothing..")
-
-
-sm.setSpeakerID(1510007) # Nora
-
-if randomInt == 0: # Big Fish Caught
-    sm.sendNext("#bGreat job!")
-    sm.giveItem(bigfish)
-
-elif randomInt == 1:# Small Fish Caught
-    sm.sendNext("#bI'm afraid this fish is too small for Barbara\r\n\r\nWe'll set it free.")
-
-elif randomInt == 2:# Nothing Caught
-    sm.sendNext("#bThat's too bad, nothing..\r\n\r\nLet's try again!")
-sm.dispose()
+        sm.setSpeakerID(1510007) # Nora
+        sm.sendNext("#bThat's too bad, nothing..\r\n\r\nLet's try again!")
