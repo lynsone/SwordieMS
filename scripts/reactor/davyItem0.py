@@ -4,10 +4,7 @@ LORD_PIRATE_ENRAGED_KRU = 9300115
 LORD_PIRATE_ENRAGED_CAPTAIN = 9300116
 hitCount = 0
 
-action(0)
-
 def action(type):
-    sm.chat(str(type))
     if type == 0:
         global hitCount
         hitCount += 1
