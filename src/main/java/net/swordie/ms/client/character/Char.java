@@ -675,15 +675,8 @@ public class Char {
 		}
 		if (mask.isInMask(DBChar.ItemSlotEquip)) {
 			outPacket.encodeByte(0); // ?
-			List<Item> equippedItems = getEquippedInventory().getItems();
-
-			// workaround for sort not being available for CopyOnWriteArrayList
-			List<Item> temp = new ArrayList<>(equippedItems);
-			temp.sort(Comparator.comparingInt(Item::getBagIndex));
-			equippedItems.clear();
-			equippedItems.addAll(temp);
-					//equippedItems.sort(Comparator.comparingInt(Item::getBagIndex));
-
+			List<Item> equippedItems = new ArrayList<>(getEquippedInventory().getItems());
+			equippedItems.sort(Comparator.comparingInt(Item::getBagIndex));
 			// Normal equipped items
 			for (Item item : equippedItems) {
 				Equip equip = (Equip) item;

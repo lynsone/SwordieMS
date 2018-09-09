@@ -13,13 +13,12 @@ import net.swordie.ms.handlers.header.OutHeader;
  */
 public class ScriptMan {
 
-    public static OutPacket scriptMessage(ScriptManagerImpl sm, NpcMessageType nmt) {
-        NpcScriptInfo nsi = sm.getNpcScriptInfo();
+    public static OutPacket scriptMessage(NpcScriptInfo nsi, NpcMessageType nmt) {
         OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_MESSAGE);
 
         outPacket.encodeByte(nsi.getSpeakerType());
         int overrideTemplate = nsi.getOverrideSpeakerTemplateID();
-        outPacket.encodeInt(overrideTemplate != 0 ? overrideTemplate : sm.getParentIDByScriptType(ScriptType.NPC));
+        outPacket.encodeInt(overrideTemplate != 0 ? overrideTemplate : nsi.getTemplateID());
         outPacket.encodeByte(overrideTemplate > 0);
         if(overrideTemplate > 0) {
             outPacket.encodeInt(overrideTemplate);

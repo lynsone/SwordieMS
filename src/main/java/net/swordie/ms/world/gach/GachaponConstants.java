@@ -6,44 +6,49 @@ import net.swordie.ms.world.gach.result.GachaponDlgType;
 import java.util.*;
 
 public class GachaponConstants {
-    public static final Map<GachaponDlgType, GachaponInfo> gachaponInfo = new HashMap<>();
+    private static final Map<GachaponDlgType, GachaponInfo> gachaponInfo = new HashMap<>();
+    private static List<GachaponInfo.GachItem> equipments;
+    private static List<GachaponInfo.GachItem> nebulites;
 
     static {
-        initNebulite();
-        initEquipment();
-        initAll();
+        init();
     }
 
-    public static void initAll() {
+    public static Map<GachaponDlgType, GachaponInfo> getGachaponInfo() {
+        return gachaponInfo;
+    }
+
+    public static void init() {
+        initNebulite();
+        initEquipment();
         List<GachaponInfo.GachItem> items;
         // Town Gachapon
-        String[] messages = new String[]{"Swordie Town Gachapon", "Swordie FTW", "FK Nexon"};
+        String[] messages = new String[]{"Swordie Town Gachapon", "Text 1", "Text 2"};
         items = new ArrayList<>(equipments);
         items.addAll(nebulites);
         gachaponInfo.put(GachaponDlgType.TOWN, new GachaponInfo(Arrays.asList(messages), items));
 
         // Nebulite Gachapon
-        messages = new String[]{"Swordie Nebulite Gachapon", "Swordie FTW", "FK Nexon"};
+        messages = new String[]{"Swordie Nebulite Gachapon", "Text 1", "Text 2"};
         items = new ArrayList<>(nebulites);
         gachaponInfo.put(GachaponDlgType.NEBULITE, new GachaponInfo(Arrays.asList(messages), items));
 
         // Chair Gachapon
-        messages = new String[]{"Swordie Chair Gachapon", "Swordie FTW", "FK Nexon"};
+        messages = new String[]{"Swordie Chair Gachapon", "Text 1", "Text 2"};
         items = new ArrayList<>();
         gachaponInfo.put(GachaponDlgType.CHAIR, new GachaponInfo(Arrays.asList(messages), items));
 
         // Mount Gachapon
-        messages = new String[]{"Swordie Mount Gachapon", "Swordie FTW", "FK Nexon"};
+        messages = new String[]{"Swordie Mount Gachapon", "Text 1", "Text 2"};
         items = new ArrayList<>();
         gachaponInfo.put(GachaponDlgType.MOUNT, new GachaponInfo(Arrays.asList(messages), items));
 
         // Special Gachapon
-        messages = new String[]{"Swordie Special Gachapon", "Swordie FTW", "FK Nexon"};
+        messages = new String[]{"Swordie Special Gachapon", "Text 1", "Text 2"};
         items = new ArrayList<>();
         gachaponInfo.put(GachaponDlgType.SPECIAL, new GachaponInfo(Arrays.asList(messages), items));
     }
 
-    private static List<GachaponInfo.GachItem> equipments;
     private static void initEquipment() {
         equipments = new ArrayList<>();
         // Empress Set
@@ -75,7 +80,6 @@ public class GachaponConstants {
         equipments.add(new GachaponInfo.GachItem(1362022, true));
     }
 
-    private static List<GachaponInfo.GachItem> nebulites;
     private static void initNebulite() {
         nebulites = new ArrayList<>();
         nebulites.add(new GachaponInfo.GachItem(3063231, true));
@@ -86,7 +90,7 @@ public class GachaponConstants {
         }
     }
 
-    public static final int getRandomItem(GachaponDlgType dlg) {
+    public static int getRandomItem(GachaponDlgType dlg) {
         GachaponInfo gachapon = gachaponInfo.get(dlg);
         if (gachapon == null) {
             return -1;
@@ -98,7 +102,7 @@ public class GachaponConstants {
         return rewards.get(Randomizer.nextInt(rewards.size())).getItemID();
     }
 
-    public static final GachaponDlgType getDlgByTicket(final int ticketID) {
+    public static GachaponDlgType getDlgByTicket(final int ticketID) {
         switch (ticketID) {
             case 5220000:
                 return GachaponDlgType.TOWN;

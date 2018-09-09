@@ -3,8 +3,7 @@
 PRISON_KEY = 4001528
 hitCount = 0
 
-def init():
-    action(0)
+action(0)
 
 def action(type):
     sm.chat(str(type))

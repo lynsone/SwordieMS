@@ -322,7 +322,7 @@ public class AngelicBuster extends Job {
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
-                    o1.wOption = 1;
+                    o1.wOption = chr.getId();
                     mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
                 }
                 break;

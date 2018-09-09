@@ -278,7 +278,7 @@ public class DawnWarrior extends Noblesse {
                         mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                         o2.nOption = 1;
                         o2.rOption = skill.getSkillId();
-                        o2.wOption = 1;
+                        o2.wOption = chr.getId();
                         mts.addStatOptionsAndBroadcast(MobStat.SoulExplosion, o2);
                     }
                 }

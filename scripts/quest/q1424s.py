@@ -1,2 +1,1 @@
-def init():
-    sm.sendNext("Argh")
+sm.sendNext("Argh")

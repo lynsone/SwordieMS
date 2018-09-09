@@ -28,6 +28,41 @@ public class NpcScriptInfo {
 	private boolean angelicBuster;
 	private boolean zeroBeta;
 	private int dlgType;
+	private int templateID;
+
+	public NpcScriptInfo deepCopy() {
+		NpcScriptInfo nsi = new NpcScriptInfo();
+		if (options != null) {
+			System.arraycopy(options, 0, nsi.options, 0, options.length);
+		}
+		nsi.speakerType = speakerType;
+		nsi.overrideSpeakerTemplateID = overrideSpeakerTemplateID;
+		nsi.param = param;
+		nsi.color = color;
+		nsi.text = text;
+		nsi.messageType = messageType;
+		if (images != null) {
+			System.arraycopy(images, 0, nsi.images, 0, images.length);
+		}
+		nsi.min = min;
+		nsi.max = max;
+		nsi.defaultText = defaultText;
+		nsi.defaultNumber = defaultNumber;
+		nsi.type = type;
+		nsi.time = time;
+		nsi.title = title;
+		nsi.problemText = problemText;
+		nsi.hintText = hintText;
+		nsi.quizType = quizType;
+		nsi.answer = answer;
+		nsi.correctAnswers = correctAnswers;
+		nsi.remaining = remaining;
+		nsi.angelicBuster = angelicBuster;
+		nsi.zeroBeta = zeroBeta;
+		nsi.dlgType = dlgType;
+		nsi.templateID = templateID;
+		return nsi;
+	}
 
 	public byte getSpeakerType() {
 		return speakerType;
@@ -243,6 +278,14 @@ public class NpcScriptInfo {
 
 	public boolean hasParam(Param param) {
 		return (getParam() & param.getVal()) != 0;
+	}
+
+	public int getTemplateID() {
+		return templateID;
+	}
+
+	public void setTemplateID(int templateID) {
+		this.templateID = templateID;
 	}
 
 	public enum Param {

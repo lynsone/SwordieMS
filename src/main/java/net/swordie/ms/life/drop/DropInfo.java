@@ -18,14 +18,7 @@ public class DropInfo {
     public DropInfo() {
     }
 
-    public DropInfo(int itemID, int money, int chance) {
-        this.itemID = itemID;
-        this.money = money;
-        this.chance = chance;
-    }
-
-    public DropInfo(int itemID, int chance, int minMoney, int maxmoney) {
-        this.itemID = itemID;
+    public DropInfo(int chance, int minMoney, int maxmoney) {
         this.chance = chance;
         this.minMoney = minMoney;
         this.maxmoney = maxmoney;

@@ -36,9 +36,9 @@ public class GachaponManager {
     }
 
     public OutPacket encode(GachaponDlgType dlg) {
-        GachaponInfo info = GachaponConstants.gachaponInfo.get(dlg);
+        GachaponInfo info = GachaponConstants.getGachaponInfo().get(dlg);
         if (info == null) {
-            GachaponConstants.initAll();
+            GachaponConstants.init();
         }
         return GachaponDlg.openGach(dlg, info.getMessages(), getRewards(dlg), info.getHotItems());
     }

@@ -2,6 +2,5 @@
 
 from net.swordie.ms.enums import WeatherEffNoticeType
 
-def init():
-    sm.showWeatherNoticeToField("Sshh! You must escape the tower by quietly avoiding the obstacles.", WeatherEffNoticeType.EscapePQ)
-    sm.dispose()
+sm.showWeatherNoticeToField("Sshh! You must escape the tower by quietly avoiding the obstacles.", WeatherEffNoticeType.EscapePQ)
+sm.dispose()

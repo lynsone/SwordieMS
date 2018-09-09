@@ -876,7 +876,9 @@ public class Field {
                 item.setQuantity(dropInfo.getQuantity());
                 drop.setItem(item);
                 ItemInfo ii = ItemData.getItemInfoByID(itemID);
-                quests = ii.getQuestIDs();
+                if (ii != null) {
+                    quests = ii.getQuestIDs();
+                }
             } else {
                 log.error("Was not able to find the item to drop! id = " + itemID);
                 return;

@@ -55,15 +55,18 @@ import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.LogManager;
+import org.python.util.PythonInterpreter;
 
 import javax.script.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
@@ -78,11 +81,12 @@ import static net.swordie.ms.life.npc.NpcMessageType.*;
  */
 public class ScriptManagerImpl implements ScriptManager {
 
-	public static final String SCRIPT_ENGINE_NAME = "python";
-	public static final String SCRIPT_ENGINE_EXTENSION = ".py";
+	private static final String SCRIPT_ENGINE_NAME = "python";
+	private static final String SCRIPT_ENGINE_EXTENSION = ".py";
 	private static final String DEFAULT_SCRIPT = "undefined";
 	public static final String QUEST_START_SCRIPT_END_TAG = "s";
 	public static final String QUEST_COMPLETE_SCRIPT_END_TAG = "e";
+	private static final String INTENDED_NPE_MSG = "Intended NPE by forceful script stop.";
 	private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
 	private Char chr;
@@ -93,7 +97,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	private int returnField = 0;
 	private ScriptType lastActiveScriptType;
 	private Map<ScriptType, Set<ScheduledFuture>> eventsByScriptType = new HashMap<>();
+	private Map<ScriptType, Future> evaluations = new HashMap<>();
 	private Set<ScheduledFuture> scheduledFutureSet;
+	private ScriptMemory memory = new ScriptMemory();
 
 	private ScriptManagerImpl(Char chr, Field field) {
 		this.chr = chr;
@@ -112,8 +118,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		this(null, field);
 	}
 
-	public ScriptEngine getScriptEngineByType(ScriptType scriptType) {
-		return getScriptInfoByType(scriptType).getScriptEngine();
+	private ScriptEngine getScriptEngineByType(ScriptType scriptType) {
+		ScriptInfo si = getScriptInfoByType(scriptType);
+		return si == null ? null : si.getScriptEngine();
 	}
 
 	public ScriptInfo getScriptInfoByType(ScriptType scriptType) {
@@ -166,31 +173,40 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (scriptType == ScriptType.NONE) {
 			return;
 		}
-//		if (isActive(scriptType)) {
-//			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
-//							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
-//			return;
-//		}
+		if (isActive(scriptType)) {
+			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
+							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
+			return;
+		}
 		if (!isField()) {
 			chr.chatMessage(Mob, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 		}
-		ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
-		scriptEngine.put("sm", this);
+		ScriptEngine scriptEngine = getScriptEngineByType(scriptType);
+		if (scriptEngine == null) {
+			scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
+			scriptEngine.put("sm", this);
+			scriptEngine.put("chr", chr);
+		}
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
 		scriptEngine.put("objectID", objID);
-		scriptEngine.put("chr", chr);
 		if (scriptType == ScriptType.QUEST) {
 			scriptEngine.put("startQuest",
 					scriptName.charAt(scriptName.length() - 1) == QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
 		}
 		ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);
+		if (scriptType == ScriptType.NPC) {
+			getNpcScriptInfo().setTemplateID(parentID);
+		}
 		scriptInfo.setObjectID(objID);
 		getScripts().put(scriptType, scriptInfo);
-		Invocable inv = getInvocableFromScriptNameAndType(scriptName, scriptType);
-		getScripts().get(scriptType).setInvocable(inv);
-		EventManager.addEvent(() -> getInvocableByType(scriptType).invokeFunction(initFuncName), 0);
+		ScheduledFuture sf = EventManager.addEvent(() -> startScript(scriptName, scriptType), 0); // makes the script execute async
+		getEvaluations().put(scriptType, sf);
+	}
+
+	public Map<ScriptType, Future> getEvaluations() {
+		return evaluations;
 	}
 
 	public void notifyMobDeath(Mob mob) {
@@ -205,7 +221,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-	private Invocable getInvocableFromScriptNameAndType(String name, ScriptType scriptType) {
+	private void startScript(String name, ScriptType scriptType) {
 		String dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
 				scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
 		boolean exists = new File(dir).exists();
@@ -215,32 +231,48 @@ public class ScriptManagerImpl implements ScriptManager {
 			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
 					scriptType.toString().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
 		}
+		ScriptInfo si = getScriptInfoByType(scriptType);
+		si.setActive(true);
 		CompiledScript cs;
+		getScriptInfoByType(scriptType).setFileDir(dir);
+		StringBuilder script = new StringBuilder();
 		ScriptEngine se = getScriptEngineByType(scriptType);
+		si.setInvocable((Invocable) se);
 		try {
-			dir = Util.readFile(dir, Charset.defaultCharset());
+			script.append(Util.readFile(dir, Charset.defaultCharset()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 		try {
-			cs = ((Compilable) se).compile(dir);
+			cs = ((Compilable) se).compile(script.toString());
 			cs.eval();
 		} catch (ScriptException e) {
-			log.error(String.format("Unable to compile script %s!", name));
-			e.printStackTrace();
+			if (!e.getMessage().contains(INTENDED_NPE_MSG)) {
+				log.error(String.format("Unable to compile script %s!", name));
+				e.printStackTrace();
+			}
+		} finally {
+			if (si.isActive()) {
+				// gracefully stop script if it's still active
+				stop(getLastActiveScriptType());
+			}
 		}
-		return (Invocable) se;
 	}
 
 	public void stop(ScriptType scriptType) {
 		setSpeakerID(0);
-		if (getScriptInfoByType(scriptType) != null) {
-			getScriptInfoByType(scriptType).reset();
-		}
 		if (getLastActiveScriptType() == scriptType) {
 			setLastActiveScriptType(ScriptType.NONE);
 		}
+		ScriptInfo si = getScriptInfoByType(scriptType);
+		if (si != null) {
+			si.reset();
+		}
+		Future f = getEvaluations().getOrDefault(scriptType, null);
+		if (f != null) {
+			f.cancel(true);
+		}
+		getMemory().clear();
 		WvsContext.dispose(chr);
 	}
 
@@ -251,15 +283,15 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-	public void handleAction(byte lastType, byte response, int answer) {
+	public void handleAction(NpcMessageType lastType, byte response, int answer) {
 		handleAction(getLastActiveScriptType(), lastType, response, answer, null);
 	}
 
-	public void handleAction(byte lastType, byte response, String text) {
+	public void handleAction(NpcMessageType lastType, byte response, String text) {
 		handleAction(getLastActiveScriptType(), lastType, response, 0, text);
 	}
 
-	public void handleAction(ScriptType scriptType, byte lastType, byte response, int answer, String text) {
+	public void handleAction(ScriptType scriptType, NpcMessageType lastType, byte response, int answer, String text) {
 		switch (response) {
 			case -1:
 			case 5:
@@ -269,23 +301,31 @@ public class ScriptManagerImpl implements ScriptManager {
 			case 1:
 			case 2:
 			case 3:
-				try {
-					if (text == null) {
-						if (isActive(scriptType)) {
-							getInvocableByType(scriptType).invokeFunction("action", response, answer);
-						} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
-							getInvocableByType(ScriptType.PORTAL).invokeFunction("action", response, answer);
-						}
+				ScriptMemory sm = getMemory();
+				if (lastType.isPrevPossible() && response == 0) {
+					// back button pressed
+					NpcScriptInfo prev = sm.getPreviousScriptInfo();
+					chr.write(ScriptMan.scriptMessage(prev, prev.getMessageType()));
+				} else {
+					if (getMemory().isInMemory()) {
+						NpcScriptInfo next = sm.getNextScriptInfo();
+						chr.write(ScriptMan.scriptMessage(next, next.getMessageType()));
 					} else {
+						ScriptInfo si = getScriptInfoByType(scriptType);
 						if (isActive(scriptType)) {
-							getInvocableByType(scriptType).invokeFunction("text_answer", text);
-						} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
-							getInvocableByType(ScriptType.PORTAL).invokeFunction("text_answer", text);
+							switch (lastType.getResponseType()) {
+								case Response:
+									si.setResponse((int) response);
+									break;
+								case Answer:
+									si.setResponse(answer);
+									break;
+								case Text:
+									si.setResponse(text);
+									break;
+							}
 						}
 					}
-				} catch (ScriptException | NoSuchMethodException e) {
-					e.printStackTrace();
-					stop(scriptType);
 				}
 		}
 	}
@@ -331,8 +371,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	// Start of the sends/asks -----------------------------------------------------------------------------------------
 
 	@Override
-	public void sendSay(String text) {
-		sendGeneralSay(text, Say);
+	public int sendSay(String text) {
+		if (getLastActiveScriptType() == ScriptType.NONE) {
+			return 0;
+		}
+		return sendGeneralSay(text, Say);
 	}
 
 	/**
@@ -341,70 +384,87 @@ public class ScriptManagerImpl implements ScriptManager {
 	 * @param text
 	 * @param nmt
 	 */
-	private void sendGeneralSay(String text, NpcMessageType nmt) {
+	private int sendGeneralSay(String text, NpcMessageType nmt) throws NullPointerException {
 		getNpcScriptInfo().setText(text);
 		if (text.contains("#L")) {
 			nmt = AskMenu;
 		}
 		getNpcScriptInfo().setMessageType(nmt);
-		chr.write(ScriptMan.scriptMessage(this, nmt));
+		chr.write(ScriptMan.scriptMessage(getNpcScriptInfo(), nmt));
+		getMemory().addMemoryInfo(getNpcScriptInfo());
+		Object response = null;
+		if (isActive(getLastActiveScriptType())) {
+			response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		}
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (int) response;
 	}
 
 	@Override
-	public void sendNext(String text) {
-		sendGeneralSay(text, SayNext);
+	public int sendNext(String text) {
+		return sendGeneralSay(text, SayNext);
 	}
 
 	@Override
-	public void sendPrev(String text) {
-		sendGeneralSay(text, SayPrev);
+	public int sendPrev(String text) {
+		return sendGeneralSay(text, SayPrev);
 	}
 
 	@Override
-	public void sendSayOkay(String text) {
-		sendGeneralSay(text, SayOk);
+	public int sendSayOkay(String text) {
+		return sendGeneralSay(text, SayOk);
 	}
 
 	@Override
-	public void sendSayImage(String image) {
-		sendSayImage(new String[]{image});
+	public int sendSayImage(String image) {
+		return sendSayImage(new String[]{image});
 	}
 
 	@Override
-	public void sendSayImage(String[] images) {
+	public int sendSayImage(String[] images) {
 		getNpcScriptInfo().setImages(images);
 		getNpcScriptInfo().setMessageType(SayImage);
-		chr.write(ScriptMan.scriptMessage(this, SayImage));
+		return sendGeneralSay("", SayImage);
 	}
 
 	@Override
-	public void sendAskYesNo(String text) {
-		sendGeneralSay(text, AskYesNo);
+	public boolean sendAskYesNo(String text) {
+		return sendGeneralSay(text, AskYesNo) != 0;
 	}
 
 	@Override
-	public void sendAskAccept(String text) {
-		sendGeneralSay(text, AskAccept);
+	public boolean sendAskAccept(String text) {
+		return sendGeneralSay(text, AskAccept) != 0;
 	}
 
 	@Override
-	public void sendAskText(String text, String defaultText, short minLength, short maxLength) {
+	public String sendAskText(String text, String defaultText, short minLength, short maxLength) throws NullPointerException {
 		getNpcScriptInfo().setMin(minLength);
 		getNpcScriptInfo().setMax(maxLength);
 		getNpcScriptInfo().setDefaultText(defaultText);
-		sendGeneralSay(text, AskText);
+		getNpcScriptInfo().setText(text);
+		getNpcScriptInfo().setMessageType(AskText);
+		chr.write(ScriptMan.scriptMessage(getNpcScriptInfo(), AskText));
+		getMemory().addMemoryInfo(getNpcScriptInfo());
+		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		if (response == null) {
+			throw new NullPointerException("Intended");
+		}
+		return (String) response;
 	}
 
 	@Override
-	public void sendAskNumber(String text, int defaultNum, int min, int max) {
+	public int sendAskNumber(String text, int defaultNum, int min, int max) {
 		getNpcScriptInfo().setDefaultNumber(defaultNum);
 		getNpcScriptInfo().setMin(min);
 		getNpcScriptInfo().setMax(max);
-		sendGeneralSay(text, AskNumber);
+		return sendGeneralSay(text, AskNumber);
 	}
 
 	@Override
-	public void sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time) {
+	public int sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time) {
 		NpcScriptInfo nsi = getNpcScriptInfo();
 		nsi.setType(type);
 		if (type != 1) {
@@ -415,11 +475,11 @@ public class ScriptManagerImpl implements ScriptManager {
 			nsi.setMax(max);
 			nsi.setTime(time);
 		}
-		chr.write(ScriptMan.scriptMessage(this, InitialQuiz));
+		return sendGeneralSay(title, InitialQuiz);
 	}
 
 	@Override
-	public void sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time) {
+	public int sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time) {
 		NpcScriptInfo nsi = getNpcScriptInfo();
 		nsi.setType(type);
 		if (type != 1) {
@@ -429,28 +489,28 @@ public class ScriptManagerImpl implements ScriptManager {
 			nsi.setRemaining(remaining);
 			nsi.setTime(time);
 		}
-		chr.write(ScriptMan.scriptMessage(this, InitialSpeedQuiz));
+		return sendGeneralSay("", InitialSpeedQuiz);
 	}
 
 	@Override
-	public void sendICQuiz(byte type, String text, String hintText, int time) {
+	public int sendICQuiz(byte type, String text, String hintText, int time) {
 		getNpcScriptInfo().setType(type);
 		getNpcScriptInfo().setHintText(hintText);
 		getNpcScriptInfo().setTime(time);
-		sendGeneralSay(text, ICQuiz);
+		return sendGeneralSay(text, ICQuiz);
 	}
 
 	@Override
-	public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options) {
+	public int sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options) {
 		getNpcScriptInfo().setAngelicBuster(angelicBuster);
 		getNpcScriptInfo().setZeroBeta(zeroBeta);
 		getNpcScriptInfo().setOptions(options);
-		sendGeneralSay(text, AskAvatar);
+		return sendGeneralSay(text, AskAvatar);
 	}
 
-	public void sendAskSlideMenu(int dlgType) {
+	public int sendAskSlideMenu(int dlgType) {
 		getNpcScriptInfo().setDlgType(dlgType);
-		chr.write(ScriptMan.scriptMessage(this, AskSlideMenu));
+		return sendGeneralSay("", AskSlideMenu);
 	}
 
 	// Start of param methods ------------------------------------------------------------------------------------------
@@ -478,6 +538,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void dispose() {
 		getNpcScriptInfo().reset();
+		getMemory().clear();
 		stop(ScriptType.NPC);
 		stop(ScriptType.PORTAL);
 		stop(ScriptType.ITEM);
@@ -487,13 +548,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void dispose(ScriptType scriptType) {
+		getMemory().clear();
 		stop(scriptType);
 	}
 
 	public Position getPosition(int objId) {
 		return chr.getField().getLifeByObjectID(objId).getPosition();
 	}
-
 
 
 	// Character Stat-related methods ----------------------------------------------------------------------------------
@@ -1600,8 +1661,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void sendDelay(int delay) {
+	public int sendDelay(int delay) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
+		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (int) response;
 	}
 
 	@Override
@@ -1730,9 +1796,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, placement, 0)));
 	}
 
-        public void avatarOriented(String effectPath) {
-            chr.write(User.effect(Effect.avatarOriented(effectPath)));
-        }
+	public void avatarOriented(String effectPath) {
+		chr.write(User.effect(Effect.avatarOriented(effectPath)));
+	}
         
 	public String formatNumber(String number) {
 		return Util.formatNumber(number);
@@ -1790,5 +1856,22 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void playVideoByScript(String videoPath){
 		chr.write(UserLocal.videoByScript(videoPath, false));
+	}
+
+	public ScriptMemory getMemory() {
+		return memory;
+	}
+
+	public static void main(String[] args) throws Exception {
+		PythonInterpreter pi = new PythonInterpreter();
+		Thread t1 = new Thread(() -> pi.exec("while True: print(str(1))"));
+		t1.start();
+		Thread.sleep(1000);
+		t1.interrupt();
+		PythonInterpreter pi2 = new PythonInterpreter();
+		pi2.cleanup();
+		pi2.exec("while True: print(str(2))");
+
+		pi.cleanup();
 	}
 }
