@@ -4,10 +4,7 @@ LORD_PIRATE_GINSENG_JAR = 9300109
 LORD_PIRATE_BELLFLOWER = 9300110
 hitCount = 0
 
-action(0)
-
 def action(type):
-    sm.chat(str(type))
     if type == 0:
         global hitCount
         hitCount += 1

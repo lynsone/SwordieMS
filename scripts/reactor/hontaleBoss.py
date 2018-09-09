@@ -1,11 +1,9 @@
 hitCount = 0
 
-action(80)
-
 def action(type):
-    sm.chat(str(type))
-    if type == 80:
-        global hitCount
+    global hitCount
+    sm.chat("type = " + str(type) + ", count = " + str(hitCount))
+    if type == 80 or type == 49:
         hitCount += 1
         sm.chat(str(hitCount))
         if hitCount >= 4:
