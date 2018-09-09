@@ -1217,93 +1217,88 @@ costmesoAriantRefine = [
 
 
 if parentID == 1012002:
+    # Vicious | Item Maker
+    selection1 = sm.sendNext("Hello. I am Vicious, retired Sniper. However, I used to be the top student of Athena Pierce. Though I no longer hunt, I can make some archer items that will be useful for you...\r\n#b"
+                    "#L0#Create a bow#l \r\n"
+                    "#L1#Create a crossbow#l \r\n"
+                    "#L2#Create gloves#l \r\n"
+                    "#L3#Upgrade gloves#l \r\n"
+                    "#L4#Create materials#l \r\n"
+                    "#L5#Create arrows#l \r\n"
+                    )
 
-# Vicious | Item Maker
-    sm.sendNext("Hello. I am Vicious, retired Sniper. However, I used to be the top student of Athena Pierce. Though I no longer hunt, I can make some archer items that will be useful for you...\r\n#b"
-                "#L0#Create a bow#l \r\n"
-                "#L1#Create a crossbow#l \r\n"
-                "#L2#Create gloves#l \r\n"
-                "#L3#Upgrade gloves#l \r\n"
-                "#L4#Create materials#l \r\n"
-                "#L5#Create arrows#l \r\n"
-                )
 
-
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsHene[selection1]):
-            if selection1 == 4:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsHene[selection1][i]) + "# " + str(nonEquipSuffixHene[i])
-            else:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsHene[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
-
-        selection2 = answer
-        if selection1 == 4 or selection1 == 5:
-            materialStr = "You want #z" + str(itemsHene[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsHene[selection1]):
+        if selection1 == 4:
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsHene[selection1][i]) + "# " + str(nonEquipSuffixHene[i])
         else:
-            materialStr = "You want a #z" + str(itemsHene[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsHene[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
+
+
+    if selection1 == 4 or selection1 == 5:
+        materialStr = "You want #z" + str(itemsHene[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    else:
+        materialStr = "You want a #z" + str(itemsHene[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costHene[selection1][selection2]):
+        materialStr += "\r\n" + str(costQHene[selection1][selection2][i]) + "x #z" + str(costHene[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoHene[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoHene[selection1][selection2]) + " mesos"
+    if selection1 == 4 or selection1 == 5:
+        materialStr += "\r\n\r\nHow many do you want me to make?"
+        selection3 = sm.sendAskNumber(materialStr, 1, 1, 50)
+    else:
+        response = sm.sendAskYesNo(materialStr)
+
+
+    if response == 1:
+        multiplier = 1
+        if selection1 == 4 or selection1 == 5:
+            multiplier = selection3
+
+        if sm.getMesos() < costmesoHene[selection1][selection2]:
+            sm.sendSayOkay("I'm afraid you cannot afford my services.")
+            sm.dispose()
+
         i = 0
         while i < len(costHene[selection1][selection2]):
-            materialStr += "\r\n" + str(costQHene[selection1][selection2][i]) + "x #z" + str(costHene[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costHene[selection1][selection2][i], (costQHene[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoHene[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoHene[selection1][selection2]) + " mesos"
-        if selection1 == 4 or selection1 == 5:
-            materialStr += "\r\n\r\nHow many do you want me to make?"
-            sm.sendAskNumber(materialStr, 1, 1, 50)
-        else:
-            response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 4 or selection1 == 5:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoHene[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costHene[selection1][selection2]):
-                complete = sm.hasItem(costHene[selection1][selection2][i], (costQHene[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsHene[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costHene[selection1][selection2]):
-                        sm.consumeItem(costHene[selection1][selection2][i], (costQHene[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoHene[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoHene[selection1][selection2] * multiplier))
+                break
 
-                    if itemsHene[selection1][selection2] >= 2060000 and itemsHene[selection1][selection2] <= 2060002:
-                        multiplier2 = 1000 - (itemsHene[selection1][selection2] - 2060000) * 100
-                    elif itemsHene[selection1][selection2] >= 2061000 and itemsHene[selection1][selection2] <= 2061002:
-                        multiplier2 = 1000 - (itemsHene[selection1][selection2] - 2061000) * 100
-                    elif itemsHene[selection1][selection2] == 4003000:
-                        multiplier2 = 15
-                    else:
-                        multiplier2 = 1
-
-                    sm.giveItem(itemsHene[selection1][selection2], (multiplier * multiplier2))
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
+            if sm.canHold(itemsHene[selection1][selection2]) == False:
+                sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costHene[selection1][selection2]):
+                    sm.consumeItem(costHene[selection1][selection2][i], (costQHene[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoHene[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoHene[selection1][selection2] * multiplier))
+
+                if itemsHene[selection1][selection2] >= 2060000 and itemsHene[selection1][selection2] <= 2060002:
+                    multiplier2 = 1000 - (itemsHene[selection1][selection2] - 2060000) * 100
+                elif itemsHene[selection1][selection2] >= 2061000 and itemsHene[selection1][selection2] <= 2061002:
+                    multiplier2 = 1000 - (itemsHene[selection1][selection2] - 2061000) * 100
+                elif itemsHene[selection1][selection2] == 4003000:
+                    multiplier2 = 15
+                else:
+                    multiplier2 = 1
+
+                sm.giveItem(itemsHene[selection1][selection2], (multiplier * multiplier2))
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
         sm.dispose()
 
 
@@ -1311,7 +1306,7 @@ if parentID == 1012002:
 elif parentID == 1022003:
 
 # Mr. Thunder | Repair Durability
-    sm.sendNext("hm? Who might you be? Oh, you've heard about my forging skills? In that case, I'd be glad to process some of your ores... for a fee.#b"
+    selection1 = sm.sendNext("hm? Who might you be? Oh, you've heard about my forging skills? In that case, I'd be glad to process some of your ores... for a fee.#b"
                 "\r\n#L0#Refine a mineral ore#l"
                 "\r\n#L1#Refine a jewel ore#l"
                 "\r\n#L2#Upgrade a helmet#l"
@@ -1319,78 +1314,73 @@ elif parentID == 1022003:
                 )
 
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsPerion[selection1]):
-            listStr += "\r\n#L" + str(i) + "##z" + str(itemsPerion[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsPerion[selection1]):
+        listStr += "\r\n#L" + str(i) + "##z" + str(itemsPerion[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
 
-        selection2 = answer
+    if selection1 == 0 or selection1 == 1:
+        materialStr = "You want #z" + str(itemsPerion[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    else:
+        materialStr = "You want a #z" + str(itemsPerion[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costPerion[selection1][selection2]):
+        materialStr += "\r\n" + str(costQPerion[selection1][selection2][i]) + "x #z" + str(costPerion[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoPerion[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoPerion[selection1][selection2]) + " mesos"
+    if selection1 == 0 or selection1 == 1:
+        materialStr += "\r\n\r\nHow many do you want me to make?"
+        selection3 = sm.sendAskNumber(materialStr, 1, 1, 50)
+    else:
+        response = sm.sendAskYesNo(materialStr)
+
+
+    if response == 1:
+        multiplier = 1
         if selection1 == 0 or selection1 == 1:
-            materialStr = "You want #z" + str(itemsPerion[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
-        else:
-            materialStr = "You want a #z" + str(itemsPerion[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+            multiplier = selection3
+
+        if sm.getMesos() < costmesoPerion[selection1][selection2]:
+            sm.sendSayOkay("I'm afraid you cannot afford my services.")
+            sm.dispose()
+
         i = 0
         while i < len(costPerion[selection1][selection2]):
-            materialStr += "\r\n" + str(costQPerion[selection1][selection2][i]) + "x #z" + str(costPerion[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costPerion[selection1][selection2][i], (costQPerion[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoPerion[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoPerion[selection1][selection2]) + " mesos"
-        if selection1 == 0 or selection1 == 1:
-            materialStr += "\r\n\r\nHow many do you want me to make?"
-            sm.sendAskNumber(materialStr, 1, 1, 50)
-        else:
-            response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 0 or selection1 == 1:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoPerion[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costPerion[selection1][selection2]):
-                complete = sm.hasItem(costPerion[selection1][selection2][i], (costQPerion[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsPerion[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costPerion[selection1][selection2]):
-                        sm.consumeItem(costPerion[selection1][selection2][i], (costQPerion[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoPerion[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoPerion[selection1][selection2] * multiplier))
+                break
 
-
-                    sm.giveItem(itemsPerion[selection1][selection2], multiplier)
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            if sm.canHold(itemsPerion[selection1][selection2]) == False:
+                sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costPerion[selection1][selection2]):
+                    sm.consumeItem(costPerion[selection1][selection2][i], (costQPerion[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoPerion[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoPerion[selection1][selection2] * multiplier))
+
+
+                sm.giveItem(itemsPerion[selection1][selection2], multiplier)
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
+    sm.dispose()
 
 
 
 elif parentID == 1052002:
 
 # JM From Tha Streetz | Item Creator
-    sm.sendNext("Pst... If you have the right goods, I can turn it into something nice...#b"
+    selection1 = sm.sendNext("Pst... If you have the right goods, I can turn it into something nice...#b"
                 "\r\n#L0#Create a glove#l"
                 "\r\n#L1#Upgrade a glove#l"
                 "\r\n#L2#Create a claw#l"
@@ -1399,162 +1389,152 @@ elif parentID == 1052002:
                 )
 
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsKerningItem[selection1]):
-            if selection1 == 4:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsKerningItem[selection1][i]) + "# " + str(nonEquipSuffixKerningItem[i])
-            else:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsKerningItem[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
-
-        selection2 = answer
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsKerningItem[selection1]):
         if selection1 == 4:
-            materialStr = "You want #z" + str(itemsKerningItem[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsKerningItem[selection1][i]) + "# " + str(nonEquipSuffixKerningItem[i])
         else:
-            materialStr = "You want a #z" + str(itemsKerningItem[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsKerningItem[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
+
+    if selection1 == 4:
+        materialStr = "You want #z" + str(itemsKerningItem[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    else:
+        materialStr = "You want a #z" + str(itemsKerningItem[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costKerningItem[selection1][selection2]):
+        materialStr += "\r\n" + str(costQKerningItem[selection1][selection2][i]) + "x #z" + str(costKerningItem[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoKerningItem[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoKerningItem[selection1][selection2]) + " mesos"
+    if selection1 == 4:
+        materialStr += "\r\n\r\nHow many do you want me to make?"
+        selection3 = sm.sendAskNumber(materialStr, 1, 1, 50)
+    else:
+        response = sm.sendAskYesNo(materialStr)
+
+
+    if response == 1:
+        multiplier = 1
+        if selection1 == 4:
+            multiplier = selection3
+
+        if sm.getMesos() < costmesoKerningItem[selection1][selection2]:
+            sm.sendSayOkay("Where's the mesos, man?!")
+            sm.dispose()
+
         i = 0
         while i < len(costKerningItem[selection1][selection2]):
-            materialStr += "\r\n" + str(costQKerningItem[selection1][selection2][i]) + "x #z" + str(costKerningItem[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costKerningItem[selection1][selection2][i], (costQKerningItem[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoKerningItem[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoKerningItem[selection1][selection2]) + " mesos"
-        if selection1 == 4:
-            materialStr += "\r\n\r\nHow many do you want me to make?"
-            sm.sendAskNumber(materialStr, 1, 1, 50)
-        else:
-            response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 4:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoKerningItem[selection1][selection2]:
-                sm.sendSayOkay("Where's the mesos, man?!")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costKerningItem[selection1][selection2]):
-                complete = sm.hasItem(costKerningItem[selection1][selection2][i], (costQKerningItem[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsKerningItem[selection1][selection2]) == False:
-                    sm.sendSayOkay("Make sure you have room in your inventory.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costKerningItem[selection1][selection2]):
-                        sm.consumeItem(costKerningItem[selection1][selection2][i], (costQKerningItem[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoKerningItem[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoKerningItem[selection1][selection2] * multiplier))
+                break
 
-                    multiplier2 = 1
-                    if itemsKerningItem[selection1][selection2] == 4003000:
-                        multiplier2 = 15
-
-                    sm.giveItem(itemsKerningItem[selection1][selection2], (multiplier * multiplier2))
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            if sm.canHold(itemsKerningItem[selection1][selection2]) == False:
+                sm.sendSayOkay("Make sure you have room in your inventory.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costKerningItem[selection1][selection2]):
+                    sm.consumeItem(costKerningItem[selection1][selection2][i], (costQKerningItem[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoKerningItem[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoKerningItem[selection1][selection2] * multiplier))
+
+                multiplier2 = 1
+                if itemsKerningItem[selection1][selection2] == 4003000:
+                    multiplier2 = 15
+
+                sm.giveItem(itemsKerningItem[selection1][selection2], (multiplier * multiplier2))
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
+    sm.dispose()
 
 
 
 elif parentID == 1052003:
 
 # Chris | Ore Refiner
-    sm.sendNext("Yes, I do own this forge. If you're willing to pay, I can offer you some of my services.#b"
+    selection1 = sm.sendNext("Yes, I do own this forge. If you're willing to pay, I can offer you some of my services.#b"
                 "\r\n#L0#Refine a mineral ore#l"
                 "\r\n#L1#Refine a jewel ore#l"
                 "\r\n#L2#Upgrade a claw#l"
                 )
 
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsKerningOre[selection1]):
-            listStr += "\r\n#L" + str(i) + "##z" + str(itemsKerningOre[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsKerningOre[selection1]):
+        listStr += "\r\n#L" + str(i) + "##z" + str(itemsKerningOre[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
 
-        selection2 = answer
+    if selection1 == 0 or selection1 == 1:
+        materialStr = "You want #z" + str(itemsKerningOre[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    else:
+        materialStr = "You want a #z" + str(itemsKerningOre[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costKerningOre[selection1][selection2]):
+        materialStr += "\r\n" + str(costQKerningOre[selection1][selection2][i]) + "x #z" + str(costKerningOre[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoKerningOre[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoKerningOre[selection1][selection2]) + " mesos"
+    if selection1 == 0 or selection1 == 1:
+        materialStr += "\r\n\r\nHow many do you want me to make?"
+        selection3 = sm.sendAskNumber(materialStr, 1, 1, 50)
+    else:
+        response = sm.sendAskYesNo(materialStr)
+
+
+    if response == 1:
+        multiplier = 1
         if selection1 == 0 or selection1 == 1:
-            materialStr = "You want #z" + str(itemsKerningOre[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
-        else:
-            materialStr = "You want a #z" + str(itemsKerningOre[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+            multiplier = selection3
+
+        if sm.getMesos() < costmesoKerningOre[selection1][selection2]:
+            sm.sendSayOkay("I'm afraid you cannot afford my services.")
+            sm.dispose()
+
         i = 0
         while i < len(costKerningOre[selection1][selection2]):
-            materialStr += "\r\n" + str(costQKerningOre[selection1][selection2][i]) + "x #z" + str(costKerningOre[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costKerningOre[selection1][selection2][i], (costQKerningOre[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoKerningOre[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoKerningOre[selection1][selection2]) + " mesos"
-        if selection1 == 0 or selection1 == 1:
-            materialStr += "\r\n\r\nHow many do you want me to make?"
-            sm.sendAskNumber(materialStr, 1, 1, 50)
-        else:
-            response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 0 or selection1 == 1:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoKerningOre[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costKerningOre[selection1][selection2]):
-                complete = sm.hasItem(costKerningOre[selection1][selection2][i], (costQKerningOre[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsKerningOre[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costKerningOre[selection1][selection2]):
-                        sm.consumeItem(costKerningOre[selection1][selection2][i], (costQKerningOre[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoKerningOre[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoKerningOre[selection1][selection2] * multiplier))
+                break
 
-
-                    sm.giveItem(itemsKerningOre[selection1][selection2], multiplier)
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            if sm.canHold(itemsKerningOre[selection1][selection2]) == False:
+                sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costKerningOre[selection1][selection2]):
+                    sm.consumeItem(costKerningOre[selection1][selection2][i], (costQKerningOre[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoKerningOre[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoKerningOre[selection1][selection2] * multiplier))
+
+
+                sm.giveItem(itemsKerningOre[selection1][selection2], multiplier)
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
+    sm.dispose()
 
 
 
 elif parentID == 2020002:
 
 # Gordon | Shoemaker
-    sm.sendNext("Hello there. El Nath winters are incredibly cold, you're going to need a warm pair of shoes to survive.#b"
+    selection1 = sm.sendNext("Hello there. El Nath winters are incredibly cold, you're going to need a warm pair of shoes to survive.#b"
                 "\r\n#L0#Create warrior shoes#l"
                 "\r\n#L1#Create magician shoes#l"
                 "\r\n#L2#Create archer shoes#l"
@@ -1563,63 +1543,56 @@ elif parentID == 2020002:
                 )
 
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsElNathItem[selection1]):
-            listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathItem[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsElNathItem[selection1]):
+        listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathItem[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
 
-        selection2 = answer
-        materialStr = "You want a #z" + str(itemsElNathItem[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    materialStr = "You want a #z" + str(itemsElNathItem[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costElNathItem[selection1][selection2]):
+        materialStr += "\r\n" + str(costQElNathItem[selection1][selection2][i]) + "x #z" + str(costElNathItem[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoElNathItem[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoElNathItem[selection1][selection2]) + " mesos"
+    response = sm.sendAskYesNo(materialStr)
+
+
+    if response == 1:
+        multiplier = 1
+
+        if sm.getMesos() < costmesoElNathItem[selection1][selection2]:
+            sm.sendSayOkay("I'm afraid you cannot afford my services.")
+            sm.dispose()
+
         i = 0
         while i < len(costElNathItem[selection1][selection2]):
-            materialStr += "\r\n" + str(costQElNathItem[selection1][selection2][i]) + "x #z" + str(costElNathItem[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costElNathItem[selection1][selection2][i], (costQElNathItem[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoElNathItem[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoElNathItem[selection1][selection2]) + " mesos"
-        response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 0 or selection1 == 1:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoElNathItem[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costElNathItem[selection1][selection2]):
-                complete = sm.hasItem(costElNathItem[selection1][selection2][i], (costQElNathItem[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsElNathItem[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costElNathItem[selection1][selection2]):
-                        sm.consumeItem(costElNathItem[selection1][selection2][i], (costQElNathItem[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoElNathItem[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoElNathItem[selection1][selection2] * multiplier))
+                break
 
-
-                    sm.giveItem(itemsElNathItem[selection1][selection2], multiplier)
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
+            if sm.canHold(itemsElNathItem[selection1][selection2]) == False:
+                sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costElNathItem[selection1][selection2]):
+                    sm.consumeItem(costElNathItem[selection1][selection2][i], (costQElNathItem[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoElNathItem[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoElNathItem[selection1][selection2] * multiplier))
+
+
+                sm.giveItem(itemsElNathItem[selection1][selection2], multiplier)
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
         sm.dispose()
 
 
@@ -1627,7 +1600,7 @@ elif parentID == 2020002:
 elif parentID == 2020000 or parentID == 2040016:
 
 # Vogen | Refining Expert  &  Pi | Refining Expert
-    sm.sendNext("Hm? Who might you be? Oh, you've heard about my forging skills? In that case, I'd be glad to process some of your ores... for a fee.#b\r\n#b"
+    selection1 = sm.sendNext("Hm? Who might you be? Oh, you've heard about my forging skills? In that case, I'd be glad to process some of your ores... for a fee.#b\r\n#b"
                 "#L0#Refine a mineral ore#l \r\n"
                 "#L1#Refine a jewel ore#l \r\n"
                 "#L2#Refine a rare jewel ore#l \r\n"
@@ -1637,84 +1610,75 @@ elif parentID == 2020000 or parentID == 2040016:
                 )
 
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsElNathRefine[selection1]):
-            if selection1 == 4:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "# " + str(nonEquipSuffixElNathRefine[i])
-            else:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
-
-        selection2 = answer
-        if selection1 == 4 or selection1 == 5:
-            materialStr = "You want #z" + str(itemsElNathRefine[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsElNathRefine[selection1]):
+        if selection1 == 4:
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "# " + str(nonEquipSuffixElNathRefine[i])
         else:
-            materialStr = "You want a #z" + str(itemsElNathRefine[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
-        i = 0
-        while i < len(costElNathRefine[selection1][selection2]):
-            materialStr += "\r\n" + str(costQElNathRefine[selection1][selection2][i]) + "x #z" + str(costElNathRefine[selection1][selection2][i]) + "#"
-            i += 1
-        if costmesoElNathRefine[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoElNathRefine[selection1][selection2]) + " mesos"
-        materialStr += "\r\n\r\nHow many do you want me to make?"
-        sm.sendAskNumber(materialStr, 1, 1, 50)
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
 
-        selection3 = answer
+    if selection1 == 4 or selection1 == 5:
+        materialStr = "You want #z" + str(itemsElNathRefine[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    else:
+        materialStr = "You want a #z" + str(itemsElNathRefine[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costElNathRefine[selection1][selection2]):
+        materialStr += "\r\n" + str(costQElNathRefine[selection1][selection2][i]) + "x #z" + str(costElNathRefine[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoElNathRefine[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoElNathRefine[selection1][selection2]) + " mesos"
+    materialStr += "\r\n\r\nHow many do you want me to make?"
+    selection3 = sm.sendAskNumber(materialStr, 1, 1, 50)
 
-        if response == 1:
-            multiplier = selection3
 
-            if sm.getMesos() < costmesoElNathRefine[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
+    multiplier = selection3
 
+    if sm.getMesos() < costmesoElNathRefine[selection1][selection2]:
+        sm.sendSayOkay("I'm afraid you cannot afford my services.")
+        sm.dispose()
+
+    i = 0
+    while i < len(costElNathRefine[selection1][selection2]):
+        complete = sm.hasItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
+        i += 1
+        if complete == False:
+            break
+
+    if complete == False:
+        sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
+    else:
+        if sm.canHold(itemsElNathRefine[selection1][selection2]) == False:
+            sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+            sm.dispose()
+        else:
             i = 0
             while i < len(costElNathRefine[selection1][selection2]):
-                complete = sm.hasItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
+                sm.consumeItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
                 i += 1
-                if complete == False:
-                    break
+            if costmesoElNathRefine[selection1][selection2] > 0:
+                sm.giveMesos(-(costmesoElNathRefine[selection1][selection2] * multiplier))
 
-            if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
+            if itemsElNathRefine[selection1][selection2] >= 2060000 and itemsElNathRefine[selection1][selection2] <= 2060002:
+                multiplier2 = 1000 - (itemsElNathRefine[selection1][selection2] - 2060000) * 100
+            elif itemsElNathRefine[selection1][selection2] >= 2061000 and itemsElNathRefine[selection1][selection2] <= 2061002:
+                multiplier2 = 1000 - (itemsElNathRefine[selection1][selection2] - 2061000) * 100
+            elif itemsElNathRefine[selection1][selection2] == 4003000:
+                multiplier2 = 15
             else:
-                if sm.canHold(itemsElNathRefine[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costElNathRefine[selection1][selection2]):
-                        sm.consumeItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoElNathRefine[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoElNathRefine[selection1][selection2] * multiplier))
+                multiplier2 = 1
 
-                    if itemsElNathRefine[selection1][selection2] >= 2060000 and itemsElNathRefine[selection1][selection2] <= 2060002:
-                        multiplier2 = 1000 - (itemsElNathRefine[selection1][selection2] - 2060000) * 100
-                    elif itemsElNathRefine[selection1][selection2] >= 2061000 and itemsElNathRefine[selection1][selection2] <= 2061002:
-                        multiplier2 = 1000 - (itemsElNathRefine[selection1][selection2] - 2061000) * 100
-                    elif itemsElNathRefine[selection1][selection2] == 4003000:
-                        multiplier2 = 15
-                    else:
-                        multiplier2 = 1
-
-                    sm.giveItem(itemsElNathRefine[selection1][selection2], (multiplier * multiplier2))
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
-        else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            sm.giveItem(itemsElNathRefine[selection1][selection2], (multiplier * multiplier2))
+            sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
 
 
 
 elif parentID == 2040021:
 
 # Tara | Shoe maker
-    sm.sendNext("Hello, and welcome to the Ludibrium Shoe Store. How can I help you today? #b"
+    selection1 = sm.sendNext("Hello, and welcome to the Ludibrium Shoe Store. How can I help you today? #b"
                 "\r\n#L0#Create warrior shoes#l"
                 "\r\n#L1#Create magician shoes#l"
                 "\r\n#L2#Create archer shoes#l"
@@ -1723,71 +1687,64 @@ elif parentID == 2040021:
                 )
 
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsLudiShoes[selection1]):
-            listStr += "\r\n#L" + str(i) + "##z" + str(itemsLudiShoes[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsLudiShoes[selection1]):
+        listStr += "\r\n#L" + str(i) + "##z" + str(itemsLudiShoes[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
 
-        selection2 = answer
-        materialStr = "You want a #z" + str(itemsLudiShoes[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    materialStr = "You want a #z" + str(itemsLudiShoes[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costLudiShoes[selection1][selection2]):
+        materialStr += "\r\n" + str(costQLudiShoes[selection1][selection2][i]) + "x #z" + str(costLudiShoes[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoLudiShoes[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoLudiShoes[selection1][selection2]) + " mesos"
+    response = sm.sendAskYesNo(materialStr)
+
+
+    if response == 1:
+        multiplier = 1
+
+        if sm.getMesos() < costmesoLudiShoes[selection1][selection2]:
+            sm.sendSayOkay("I'm afraid you cannot afford my services.")
+            sm.dispose()
+
         i = 0
         while i < len(costLudiShoes[selection1][selection2]):
-            materialStr += "\r\n" + str(costQLudiShoes[selection1][selection2][i]) + "x #z" + str(costLudiShoes[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costLudiShoes[selection1][selection2][i], (costQLudiShoes[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoLudiShoes[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoLudiShoes[selection1][selection2]) + " mesos"
-        response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 0 or selection1 == 1:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoLudiShoes[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costLudiShoes[selection1][selection2]):
-                complete = sm.hasItem(costLudiShoes[selection1][selection2][i], (costQLudiShoes[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsLudiShoes[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costLudiShoes[selection1][selection2]):
-                        sm.consumeItem(costLudiShoes[selection1][selection2][i], (costQLudiShoes[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoLudiShoes[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoLudiShoes[selection1][selection2] * multiplier))
+                break
 
-
-                    sm.giveItem(itemsLudiShoes[selection1][selection2], multiplier)
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            if sm.canHold(itemsLudiShoes[selection1][selection2]) == False:
+                sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costLudiShoes[selection1][selection2]):
+                    sm.consumeItem(costLudiShoes[selection1][selection2][i], (costQLudiShoes[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoLudiShoes[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoLudiShoes[selection1][selection2] * multiplier))
+
+
+                sm.giveItem(itemsLudiShoes[selection1][selection2], multiplier)
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
+    sm.dispose()
 
 
 
 elif parentID == 2040020:
 
 # Sarah | Glove maker
-    sm.sendNext("Hello, and welcome to the Ludibrium Glove Store. How can I help you today?#b"
+    selection1 = sm.sendNext("Hello, and welcome to the Ludibrium Glove Store. How can I help you today?#b"
                 "\r\n#L0#Create warrior gloves#l"
                 "\r\n#L1#Create magician gloves#l"
                 "\r\n#L2#Create archer gloves#l"
@@ -1796,71 +1753,64 @@ elif parentID == 2040020:
                 )
 
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsLudiGloves[selection1]):
-            listStr += "\r\n#L" + str(i) + "##z" + str(itemsLudiGloves[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsLudiGloves[selection1]):
+        listStr += "\r\n#L" + str(i) + "##z" + str(itemsLudiGloves[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
 
-        selection2 = answer
-        materialStr = "You want a #z" + str(itemsLudiGloves[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    materialStr = "You want a #z" + str(itemsLudiGloves[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costLudiGloves[selection1][selection2]):
+        materialStr += "\r\n" + str(costQLudiGloves[selection1][selection2][i]) + "x #z" + str(costLudiGloves[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoLudiGloves[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoLudiGloves[selection1][selection2]) + " mesos"
+    response = sm.sendAskYesNo(materialStr)
+
+
+    if response == 1:
+        multiplier = 1
+
+        if sm.getMesos() < costmesoLudiGloves[selection1][selection2]:
+            sm.sendSayOkay("I'm afraid you cannot afford my services.")
+            sm.dispose()
+
         i = 0
         while i < len(costLudiGloves[selection1][selection2]):
-            materialStr += "\r\n" + str(costQLudiGloves[selection1][selection2][i]) + "x #z" + str(costLudiGloves[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costLudiGloves[selection1][selection2][i], (costQLudiGloves[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoLudiGloves[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoLudiGloves[selection1][selection2]) + " mesos"
-        response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 0 or selection1 == 1:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoLudiGloves[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costLudiGloves[selection1][selection2]):
-                complete = sm.hasItem(costLudiGloves[selection1][selection2][i], (costQLudiGloves[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsLudiGloves[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costLudiGloves[selection1][selection2]):
-                        sm.consumeItem(costLudiGloves[selection1][selection2][i], (costQLudiGloves[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoLudiGloves[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoLudiGloves[selection1][selection2] * multiplier))
+                break
 
-
-                    sm.giveItem(itemsLudiGloves[selection1][selection2], multiplier)
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            if sm.canHold(itemsLudiGloves[selection1][selection2]) == False:
+                sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costLudiGloves[selection1][selection2]):
+                    sm.consumeItem(costLudiGloves[selection1][selection2][i], (costQLudiGloves[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoLudiGloves[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoLudiGloves[selection1][selection2] * multiplier))
+
+
+                sm.giveItem(itemsLudiGloves[selection1][selection2], multiplier)
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
+    sm.dispose()
 
 
 
 elif parentID == 1032002:
 
 # Francois | Item Creator
-    sm.sendNext("Welcome to my eco-safe refining operation! What would you like today?#b"
+    selection1 = sm.sendNext("Welcome to my eco-safe refining operation! What would you like today?#b"
                 "\r\n#L0#Create gloves#l"
                 "\r\n#L1#Upgrade gloves#l"
                 "\r\n#L2#Upgrade a hat#l"
@@ -1868,138 +1818,119 @@ elif parentID == 1032002:
                 "\r\n#L4#Create a staff#l"
                 )
 
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsElliniaItem[selection1]):
+        listStr += "\r\n#L" + str(i) + "##z" + str(itemsElliniaItem[selection1][i]) + "#"
+        i += 1
+    sm.sendNext(listStr)
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsElliniaItem[selection1]):
-            listStr += "\r\n#L" + str(i) + "##z" + str(itemsElliniaItem[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
+    selection2 = answer
+    materialStr = "You want a #z" + str(itemsElliniaItem[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costElliniaItem[selection1][selection2]):
+        materialStr += "\r\n" + str(costQElliniaItem[selection1][selection2][i]) + "x #z" + str(costElliniaItem[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoElliniaItem[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoElliniaItem[selection1][selection2]) + " mesos"
+    response = sm.sendAskYesNo(materialStr)
 
-        selection2 = answer
-        materialStr = "You want a #z" + str(itemsElliniaItem[selection1][selection2]) + "#? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    if response == 1:
+        multiplier = 1
+
+        if sm.getMesos() < costmesoElliniaItem[selection1][selection2]:
+            sm.sendSayOkay("I'm afraid you cannot afford my services.")
+            sm.dispose()
+
         i = 0
         while i < len(costElliniaItem[selection1][selection2]):
-            materialStr += "\r\n" + str(costQElliniaItem[selection1][selection2][i]) + "x #z" + str(costElliniaItem[selection1][selection2][i]) + "#"
+            complete = sm.hasItem(costElliniaItem[selection1][selection2][i], (costQElliniaItem[selection1][selection2][i] * multiplier))
             i += 1
-        if costmesoElliniaItem[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoElliniaItem[selection1][selection2]) + " mesos"
-        response = sm.sendAskYesNo(materialStr)
-
-        selection3 = answer
-
-        if response == 1:
-            multiplier = 1
-            if selection1 == 0 or selection1 == 1:
-                multiplier = selection3
-
-            if sm.getMesos() < costmesoElliniaItem[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
-            i = 0
-            while i < len(costElliniaItem[selection1][selection2]):
-                complete = sm.hasItem(costElliniaItem[selection1][selection2][i], (costQElliniaItem[selection1][selection2][i] * multiplier))
-                i += 1
-                if complete == False:
-                    break
-
             if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsElliniaItem[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costElliniaItem[selection1][selection2]):
-                        sm.consumeItem(costElliniaItem[selection1][selection2][i], (costQElliniaItem[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoElliniaItem[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoElliniaItem[selection1][selection2] * multiplier))
+                break
 
-
-                    sm.giveItem(itemsElliniaItem[selection1][selection2], multiplier)
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+        if complete == False:
+            sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
         else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            if sm.canHold(itemsElliniaItem[selection1][selection2]) == False:
+                sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+                sm.dispose()
+            else:
+                i = 0
+                while i < len(costElliniaItem[selection1][selection2]):
+                    sm.consumeItem(costElliniaItem[selection1][selection2][i], (costQElliniaItem[selection1][selection2][i] * multiplier))
+                    i += 1
+                if costmesoElliniaItem[selection1][selection2] > 0:
+                    sm.giveMesos(-(costmesoElliniaItem[selection1][selection2] * multiplier))
+
+
+                sm.giveItem(itemsElliniaItem[selection1][selection2], multiplier)
+                sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
+    else:
+        sm.sendSayOkay("Let me know when you are ready to create something.")
+    sm.dispose()
 
 
 
 elif parentID == 2100001:
 
 # Muhammad | Jewel Refiner
-    sm.sendNext("Are you here to refine the ores of a mineral or a jewel? It doesn't matter how many ores you have, if you don't have them refined by a master like me, then they won't see the light of day. What do you think, do you want to refine them right now?\r\n#b"
+    selection1 = sm.sendNext("Are you here to refine the ores of a mineral or a jewel? It doesn't matter how many ores you have, if you don't have them refined by a master like me, then they won't see the light of day. What do you think, do you want to refine them right now?\r\n#b"
                 "#L0#Refine a mineral ore#l \r\n"
                 "#L1#Refine a jewel ore#l \r\n"
                 "#L2#Refine a crystal ore#l \r\n"
                 )
 
+    listStr = "What item would you like to make? #b"
+    i = 0
+    while i < len(itemsElNathRefine[selection1]):
+        if selection1 == 4:
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "# " + str(nonEquipSuffixElNathRefine[i])
+        else:
+            listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "#"
+        i += 1
+    selection2 = sm.sendNext(listStr)
 
-        selection1 = answer
-        listStr = "What item would you like to make? #b"
-        i = 0
-        while i < len(itemsElNathRefine[selection1]):
-            if selection1 == 4:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "# " + str(nonEquipSuffixElNathRefine[i])
-            else:
-                listStr += "\r\n#L" + str(i) + "##z" + str(itemsElNathRefine[selection1][i]) + "#"
-            i += 1
-        sm.sendNext(listStr)
+    materialStr = "You want #z" + str(itemsElNathRefine[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
+    i = 0
+    while i < len(costElNathRefine[selection1][selection2]):
+        materialStr += "\r\n" + str(costQElNathRefine[selection1][selection2][i]) + "x #z" + str(costElNathRefine[selection1][selection2][i]) + "#"
+        i += 1
+    if costmesoElNathRefine[selection1][selection2] > 0:
+        materialStr += "\r\n#i4031138#" + str(costmesoElNathRefine[selection1][selection2]) + " mesos"
+    materialStr += "\r\n\r\nHow many do you want me to make?"
+    selection3 = sm.sendAskNumber(materialStr, 1, 1, 50)
 
-        selection2 = answer
-        materialStr = "You want #z" + str(itemsElNathRefine[selection1][selection2]) + "#s? \r\nIn that case, I'm going to need specific items from you in order to make it."
-        i = 0
-        while i < len(costElNathRefine[selection1][selection2]):
-            materialStr += "\r\n" + str(costQElNathRefine[selection1][selection2][i]) + "x #z" + str(costElNathRefine[selection1][selection2][i]) + "#"
-            i += 1
-        if costmesoElNathRefine[selection1][selection2] > 0:
-            materialStr += "\r\n#i4031138#" + str(costmesoElNathRefine[selection1][selection2]) + " mesos"
-        materialStr += "\r\n\r\nHow many do you want me to make?"
-        sm.sendAskNumber(materialStr, 1, 1, 50)
 
-        selection3 = answer
+    multiplier = selection3
+    if sm.getMesos() < costmesoElNathRefine[selection1][selection2]:
+        sm.sendSayOkay("I'm afraid you cannot afford my services.")
+        sm.dispose()
 
-        if response == 1:
-            multiplier = selection3
+    i = 0
+    while i < len(costElNathRefine[selection1][selection2]):
+        complete = sm.hasItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
+        i += 1
+        if complete == False:
+            break
 
-            if sm.getMesos() < costmesoElNathRefine[selection1][selection2]:
-                sm.sendSayOkay("I'm afraid you cannot afford my services.")
-                sm.dispose()
-                return
-
+    if complete == False:
+        sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
+    else:
+        if sm.canHold(itemsElNathRefine[selection1][selection2]) == False:
+            sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
+            sm.dispose()
+        else:
             i = 0
             while i < len(costElNathRefine[selection1][selection2]):
-                complete = sm.hasItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
+                sm.consumeItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
                 i += 1
-                if complete == False:
-                    break
+            if costmesoElNathRefine[selection1][selection2] > 0:
+                sm.giveMesos(-(costmesoElNathRefine[selection1][selection2] * multiplier))
 
-            if complete == False:
-                sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
-            else:
-                if sm.canHold(itemsElNathRefine[selection1][selection2]) == False:
-                    sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                    sm.dispose()
-                    return
-                else:
-                    i = 0
-                    while i < len(costElNathRefine[selection1][selection2]):
-                        sm.consumeItem(costElNathRefine[selection1][selection2][i], (costQElNathRefine[selection1][selection2][i] * multiplier))
-                        i += 1
-                    if costmesoElNathRefine[selection1][selection2] > 0:
-                        sm.giveMesos(-(costmesoElNathRefine[selection1][selection2] * multiplier))
-
-                    sm.giveItem(itemsElNathRefine[selection1][selection2], multiplier)
-                    sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
-        else:
-            sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
+            sm.giveItem(itemsElNathRefine[selection1][selection2], multiplier)
+            sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
 
 
 else:
-sm.sendSayOkay("I'm an uncoded NPC, I'm lost. \r\nWhere am I?\r\nI believe my ID is "+str(parentID))
+    sm.sendSayOkay("I'm an uncoded NPC, I'm lost. \r\nWhere am I?\r\nI believe my ID is "+str(parentID))
