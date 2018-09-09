@@ -1,3 +1,2 @@
-def init():
-	sm.warp(224000122, 4)
-	sm.dispose()
+sm.warp(224000122, 4)
+sm.dispose()

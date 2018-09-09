@@ -1,7 +1,6 @@
 from net.swordie.ms.enums import DimensionalPortalType
 
-def init():
-    sm.sendAskSlideMenu(0)
+sm.sendAskSlideMenu(0)
 
 def action(answer, response):
     mapID = DimensionalPortalType.getByVal(response).getMapID()

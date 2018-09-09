@@ -2,7 +2,6 @@
 
 MIDSUMMER_NIGHTS_FOREST_ELLINEL_LAKE_SHORE = 101070000 # MAP ID
 
-def init():
-    sm.invokeAfterDelay(5000, "warp", MIDSUMMER_NIGHTS_FOREST_ELLINEL_LAKE_SHORE, 0)
-    sm.dispose()
+sm.invokeAfterDelay(5000, "warp", MIDSUMMER_NIGHTS_FOREST_ELLINEL_LAKE_SHORE, 0)
+sm.dispose()
 

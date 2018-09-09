@@ -5,11 +5,10 @@ from net.swordie.ms.scripts import ScriptType
 LOTUS = 8240104 # Stage 2
 LOTUS_2 = 8240105 # Stage 3
 
-def init():
-    if sm.getFieldID() == 350060180:
-        sm.showHP(LOTUS)
-    elif sm.getFieldID() == 350060200:
-        sm.showHP(LOTUS_2)
+if sm.getFieldID() == 350060180:
+    sm.showHP(LOTUS)
+elif sm.getFieldID() == 350060200:
+    sm.showHP(LOTUS_2)
 
 def onMobDeath(mob):
     if mob.getTemplateId() == LOTUS:

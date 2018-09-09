@@ -2,8 +2,7 @@
 
 from net.swordie.ms.enums import WeatherEffNoticeType
 
-def init():
-    sm.showWeatherNotice("Vellum is nowhere to be seen. Take a look around the altar.", WeatherEffNoticeType.SnowySnowAndSprinkledFlowerAndSoapBubbles, 10000)
+sm.showWeatherNotice("Vellum is nowhere to be seen. Take a look around the altar.", WeatherEffNoticeType.SnowySnowAndSprinkledFlowerAndSoapBubbles, 10000)
 
 def onMobDeath(mob):
     if mob.getTemplateId() == 9400942 and sm.hasQuest(30012):

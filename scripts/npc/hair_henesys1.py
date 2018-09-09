@@ -4,17 +4,15 @@
 
 options = []
 
-def init():
-    global options
-    al = chr.getAvatarData().getAvatarLook()
-    hairColour = al.getHair() % 10
-    if al.getGender() == 0: # Male
-        options = [33040, 30060, 32350, 33170, 30210, 33100, 30610]
-    else: # Female
-        options = [32360, 34400, 31820, 34270, 31860, 34210, 34250, 34490, 31360]
-    options = list(map(lambda x: x + hairColour, options))
-    sm.sendAskAvatar("Choose your new hairstyle!", False, False, options)
+global options
+al = chr.getAvatarData().getAvatarLook()
+hairColour = al.getHair() % 10
+if al.getGender() == 0: # Male
+    options = [33040, 30060, 32350, 33170, 30210, 33100, 30610]
+else: # Female
+    options = [32360, 34400, 31820, 34270, 31860, 34210, 34250, 34490, 31360]
+options = list(map(lambda x: x + hairColour, options))
+sm.sendAskAvatar("Choose your new hairstyle!", False, False, options)
 
-def action(response, answer):
-    if answer < len(options):
-        sm.changeCharacterLook(options[answer])
+if answer < len(options):
+    sm.changeCharacterLook(options[answer])

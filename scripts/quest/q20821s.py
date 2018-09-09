@@ -1,3 +1,2 @@
 # Start of Knight's Orientation
-def init():
-    sm.warp(130030001)
+sm.warp(130030001)

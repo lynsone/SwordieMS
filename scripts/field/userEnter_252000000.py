@@ -1,4 +1,3 @@
 # Golden Temple | Golden Temple (252000000)
-def init():
-    sm.showFieldEffect("Map/Effect.img/temaD/enter/goldTemple") # Golden Temple Theme Dungeon Effect
-    sm.dispose()
+sm.showFieldEffect("Map/Effect.img/temaD/enter/goldTemple") # Golden Temple Theme Dungeon Effect
+sm.dispose()

@@ -4,11 +4,10 @@ from net.swordie.ms.enums import WeatherEffNoticeType
 
 PRISON_GUARD_ANI = 9300454
 
-def init():
-    stage = sm.getFieldID() % 1000 / 100
+stage = sm.getFieldID() % 1000 / 100
 
-    # Stage 1 is already done on  prisonBreak_1stageEnter
-    if stage == 2:
+# Stage 1 is already done on  prisonBreak_1stageEnter
+if stage == 2:
         sm.showWeatherNoticeToField("You must defeat all the guards. Otherwise, they will call other guard, and that is bad.", WeatherEffNoticeType.EscapePQ)
     elif stage == 3:
         sm.showWeatherNoticeToField("They created a maze to keep people from entering or escaping. You must find the door that leads to the Aerial Prison!", WeatherEffNoticeType.EscapePQ)

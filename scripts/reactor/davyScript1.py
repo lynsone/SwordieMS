@@ -2,8 +2,7 @@
 OLD_METAL_KEY = 4001117
 hitCount = 0
 
-def init():
-    action(0)
+action(0)
 
 def action(type):
     sm.chat(str(type))

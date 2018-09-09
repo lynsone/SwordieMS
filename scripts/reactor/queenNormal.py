@@ -1,8 +1,7 @@
 from net.swordie.ms.enums import WeatherEffNoticeType
 hitCount = 0
 
-def init():
-    action(0)
+action(0)
 
 def action(type):
     sm.chat(str(type))

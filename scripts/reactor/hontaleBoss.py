@@ -1,7 +1,6 @@
 hitCount = 0
 
-def init():
-    action(80)
+action(80)
 
 def action(type):
     sm.chat(str(type))
