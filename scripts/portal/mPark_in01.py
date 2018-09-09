@@ -34,20 +34,16 @@ else:
         while i < len(maps):
             string += "#L"+ str(i) +"#"+ maps[i][0] +"#l\r\n"
             i += 1
-        sm.sendNext(string)
-
-
-    if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
-        sm.sendSayOkay("I'm sorry, but you've used up all your clears for today.")
-        sm.dispose()
-    else:
-        selection = answer
-        response = sm.sendAskYesNo("#eToday is #b"+ sm.getDay() +"#k.\r\n\r\n"
-                        "Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n"
-                        "Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n"
-                        "Would you like to enter the dungeon?")
-    if response == 1:
-        sm.warpInstanceIn(maps[selection][1])
-        sm.incrementMonsterParkCount()
-        sm.createQuestWithQRValue(GameConstants.MONSTER_PARK_EXP_QUEST, "0")
-    sm.dispose()
+        selection = sm.sendNext(string)
+        if sm.getMonsterParkCount() >= GameConstants.MAX_MONSTER_PARK_RUNS:
+            sm.sendSayOkay("I'm sorry, but you've used up all your clears for today.")
+            sm.dispose()
+        else:
+            selection = answer
+            if sm.sendAskYesNo("#eToday is #b"+ sm.getDay() +"#k.\r\n\r\n" +
+                               "Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n" +
+                               "Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n" +
+                               "Would you like to enter the dungeon?"):
+                sm.warpInstanceIn(maps[selection][1])
+                sm.incrementMonsterParkCount()
+                sm.createQuestWithQRValue(GameConstants.MONSTER_PARK_EXP_QUEST, "0")

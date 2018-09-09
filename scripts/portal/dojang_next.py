@@ -6,7 +6,4 @@ elif currentMap / 10000 == 92507 and not currentMap == 925074100:
 
 elif currentMap == 925074100:
     sm.warp(925020003, 1)
-
-else:
-    sm.chat("This portal has not yet been coded  -  (out001)")
 sm.dispose()

@@ -4,9 +4,5 @@ FANZY = 1040002 # NPC ID
 MIDSUMMER_NIGHTS_FOREST_PATH_FROM_ELLINEL = 101074001 # MAP ID
 
 sm.setSpeakerID(FANZY)
-response = sm.sendAskYesNo("Head back to #b North Forest: Giant Tree#k?")
-
-
-    if response == 1:
-        sm.warp(MIDSUMMER_NIGHTS_FOREST_PATH_FROM_ELLINEL)
-    sm.dispose()
+if sm.sendAskYesNo("Head back to #b North Forest: Giant Tree#k?"):
+    sm.warp(MIDSUMMER_NIGHTS_FOREST_PATH_FROM_ELLINEL)
