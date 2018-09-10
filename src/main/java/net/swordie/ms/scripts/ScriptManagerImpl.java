@@ -251,7 +251,7 @@ public class ScriptManagerImpl implements ScriptManager {
 				e.printStackTrace();
 			}
 		} finally {
-			if (si.isActive() && scriptType != ScriptType.REACTOR && scriptType != ScriptType.FIELD) {
+			if (si.isActive() && scriptType != ScriptType.FIELD) {
 				// gracefully stop script if it's still active
 				stop(getLastActiveScriptType());
 			}
