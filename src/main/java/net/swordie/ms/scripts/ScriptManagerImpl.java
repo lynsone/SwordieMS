@@ -544,6 +544,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		stop(ScriptType.QUEST);
 		stop(ScriptType.REACTOR);
 		setLastActiveScriptType(ScriptType.NONE);
+		throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
 	}
 
 	public void dispose(ScriptType scriptType) {
