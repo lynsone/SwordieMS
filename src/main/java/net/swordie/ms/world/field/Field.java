@@ -946,14 +946,6 @@ public class Field {
         int maxX = fh == null ? position.getX() : fh.getX2();
         int diff = 0;
         for (DropInfo dropInfo : dropInfos) {
-
-            // For now..  *50  drop chance for quest items
-            ItemInfo ii = ItemData.getItemInfoByID(dropInfo.getItemID());
-            if(ii != null && ii.getQuestIDs().size() > 0) {
-                dropInfo.setChance(dropInfo.getChance()*50);
-            }
-            //
-
             if (dropInfo.willDrop()) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
                 Position posTo;
