@@ -58,14 +58,13 @@ import org.apache.log4j.LogManager;
 import org.python.util.PythonInterpreter;
 
 import javax.script.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
@@ -173,7 +172,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (scriptType == ScriptType.NONE) {
 			return;
 		}
-		if (isActive(scriptType)) {
+		if (isActive(scriptType) && scriptType != ScriptType.FIELD) { // because Field Scripts don't get disposed.
 			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
 							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
 			return;
