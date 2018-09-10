@@ -85,6 +85,12 @@ public class Reactor extends Life {
         init();
         getField().broadcastPacket(ReactorPool.reactorEnterField(this));
     }
+    
+    @Override
+    public void broadcastLeavePacket() {
+        getField().broadcastPacket(ReactorPool.reactorLeaveField(this));
+    }
+
     public Life deepCopy() {
         Reactor copy = new Reactor(getTemplateId());
         copy.setObjectId(getObjectId());

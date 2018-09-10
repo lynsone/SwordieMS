@@ -8,7 +8,7 @@ if not sm.hasQuestCompleted(20034):
     sm.lockInGameUI(True)  
     sm.chatScript("General Store Yard")
     sm.forcedInput(2)
-    sm.showEffect("Effect/Direction7.img/effect/tuto/step0/4", 2000, 0, -100, -100, 0, False, 0)
+    sm.showBalloonMsg("Effect/Direction7.img/effect/tuto/step0/4", 2000)
     sm.sendDelay(2000)
 
     sm.localEmotion(6, 10000, False)

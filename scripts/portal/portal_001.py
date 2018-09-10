@@ -40,7 +40,7 @@ sm.sendSay("I was just about to clean it up...\r\nSorry, I gotta do what he says
 
 sm.completeQuestNoRewards(20030) # neinheart npc to disappear after completing the quest
 sm.addLevel(1)
-sm.showEffect("Effect/Direction7.img/effect/tuto/step0/4", 2000, 0, -100, -100, 0, False, 0)
+sm.showBalloonMsg("Effect/Direction7.img/effect/tuto/step0/4", 2000)
 sm.localEmotion(6, 2000, False)
 sm.sendDelay(2000)
 

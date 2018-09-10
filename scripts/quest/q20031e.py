@@ -29,7 +29,7 @@ sm.sendNext("Another great day with the old man...")
 
 sm.sendSay("Huh? What's that?")
 
-sm.showEffect("Effect/Direction7.img/effect/tuto/soul/0", 4000, 0, -100, -100, 0, False, 0)
+sm.showBalloonMsg("Effect/Direction7.img/effect/tuto/soul/0", 4000)
 sm.sendDelay(5000)
 
 sm.sendNext("It was like... a small shining light...")
