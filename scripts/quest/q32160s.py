@@ -8,6 +8,7 @@ response = sm.sendAskYesNo("Are you #b#h0##k?\r\n"
                 "(accepting will warp you)")
 
 if response == 1:
+    sm.startQuest(parentID)
     sm.completeQuest(parentID)
     sm.warp(mapid, 0)
 sm.dispose()

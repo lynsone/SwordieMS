@@ -1,7 +1,6 @@
 from net.swordie.ms.enums import WeatherEffNoticeType
-hitCount = 0
 
-def action(type):
+def action(reactor, type):
     if type == 0:
         sm.removeReactor()
         sm.invokeAfterDelay(1500, "spawnMob", 9400942, -200, 440, False)

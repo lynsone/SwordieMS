@@ -3,7 +3,7 @@
 sm.setSpeakerID(1064023) # Cygnus
 sm.sendNext("Ah #b#h0##k you've come! My apologies for bringing you here on such short notice. Tell me, have you heard of the land of Commerci, by any chance?")
 if not sm.hasQuest(parentID):
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 
 
 sm.sendNext("Commerci was once a small fishing village, and they had little in the way of dealings with the rest of the world. "

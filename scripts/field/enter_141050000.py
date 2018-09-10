@@ -1,4 +1,7 @@
 # Glacier Cutter Base | 141050000
-if sm.hasQuest(32187): # [Riena Strait] Glacial Pace
-    sm.completeQuest(32187) # [Riena Strait] Glacial Pace
-sm.dispose()
+
+if sm.hasQuestCompleted(32170):
+    sm.hideNpcByTemplateId(1510007, False)
+
+if sm.hasQuest(32187):
+    sm.completeQuest(32187)

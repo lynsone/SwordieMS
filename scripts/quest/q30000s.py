@@ -44,5 +44,5 @@ sm.sendNext("I will send you to #b#m"+ str(SILENT_SWAMP) +"##k to investigate th
 sm.sendNext("I'll send you to #b#m"+ str(SILENT_SWAMP) +"##k with Shinsoo's power.")
 
 sm.warp(SILENT_SWAMP, 0)
-sm.startQuestNoCheck(parentID)
+sm.startQuest(parentID)
 sm.dispose()

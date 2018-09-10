@@ -7,7 +7,6 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.util.Util;
-import sun.plugin.com.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;

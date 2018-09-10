@@ -251,7 +251,7 @@ public class ScriptManagerImpl implements ScriptManager {
 				e.printStackTrace();
 			}
 		} finally {
-			if (si.isActive() && scriptType != ScriptType.REACTOR && scriptType != ScriptType.FIELD) {
+			if (si.isActive() && scriptType != ScriptType.FIELD) {
 				// gracefully stop script if it's still active
 				stop(getLastActiveScriptType());
 			}
@@ -296,10 +296,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			case 5:
 				stop(scriptType);
 				break;
-			case 0:
-			case 1:
-			case 2:
-			case 3:
+            default:
 				ScriptMemory sm = getMemory();
 				if (lastType.isPrevPossible() && response == 0) {
 					// back button pressed
@@ -536,6 +533,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void dispose() {
+		dispose(true);
+	}
+
+	public void dispose(boolean stop) {
 		getNpcScriptInfo().reset();
 		getMemory().clear();
 		stop(ScriptType.NPC);
@@ -544,6 +545,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		stop(ScriptType.QUEST);
 		stop(ScriptType.REACTOR);
 		setLastActiveScriptType(ScriptType.NONE);
+		if (stop) {
+			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
+		}
 	}
 
 	public void dispose(ScriptType scriptType) {
@@ -674,10 +678,20 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void lockInGameUI(boolean lock) {
 		chr.write(UserLocal.setInGameDirectionMode(lock, true, false));
 	}
-
+        
 	public void curNodeEventEnd(boolean enable) {
 		chr.write(CField.curNodeEventEnd(enable));
 	}
+        
+	public void progressMessageFont(int fontNameType, int fontSize, int fontColorType, int fadeOutDelay, String message) {
+		chr.write(User.progressMessageFont(fontNameType, fontSize, fontColorType, fadeOutDelay, message));
+	}
+
+	public void localEmotion(int emotion, int duration, boolean byItemOption) {
+		chr.write(UserLocal.emotion(emotion, duration, byItemOption));
+	}
+
+
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 
@@ -766,7 +780,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		stopEventsByScriptType(ScriptType.FIELD); // Stops the FixedRate Event from the Field Script
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
 		if (!in) {
-			chr.getFields().clear();
+                    chr.getFields().clear();
 		}
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
 		Portal portal = field.getPortalByID(portalID);
@@ -870,7 +884,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		drop.setItem(ItemData.getItemDeepCopy(itemId));
 		Position position = new Position(x, y);
 		drop.setPosition(position);
-		field.drop(drop, position);
+		field.drop(drop, position, true);
 	}
 
 	@Override
@@ -965,9 +979,9 @@ public class ScriptManagerImpl implements ScriptManager {
 
         @Override
 	public void setSpeakerType(byte speakerType) {
-            NpcScriptInfo nsi = getNpcScriptInfo();
-            nsi.setSpeakerType(speakerType);
-        }
+		NpcScriptInfo nsi = getNpcScriptInfo();
+		nsi.setSpeakerType(speakerType);
+	}
         
 	public void hideNpcByTemplateId(int npcTemplateId, boolean hide) {
 		hideNpcByTemplateId(npcTemplateId, hide, hide);
@@ -1074,16 +1088,18 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(NpcPool.npcSetSpecialAction(life.getObjectId(), effectName, duration));
 	}
         
-        public int getNpcObjectIdByTemplateId(int npcTemplateId) {
-            Field field = chr.getField();
-            Life life = field.getLifeByTemplateId(npcTemplateId);
-            if(life == null || !(life instanceof Npc)) {
-                log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
-                return 0;
-            }
-            return life.getObjectId();
-        }
-        
+	public int getNpcObjectIdByTemplateId(int npcTemplateId) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(npcTemplateId);
+		if(life == null || !(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+			return 0;
+		}
+		return life.getObjectId();
+	}
+
+
+
 	// Mob methods
 	@Override
 	public void spawnMob(int id) {
@@ -1114,6 +1130,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getField().spawnMob(id, x, y, respawnable, hp);
 	}
 
+	public void spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
+		chr.getField().spawnMobWithAppearType(id, x, y, appearType, option);
+	}
+        
 	@Override
 	public void removeMobByObjId(int id) {
 		chr.getField().removeLife(id);
@@ -1153,12 +1173,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void removeReactor() {
 		Field field = chr.getField();
-		Reactor reactor = field.getReactors().stream()
-				.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
-				.findAny().orElse(null);
-		if (reactor != null) {
-			field.removeLife(reactor.getObjectId());
-			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
+		Life life = field.getLifeByObjectID(getObjectIDByScriptType(ScriptType.REACTOR));
+		if (life instanceof Reactor) {
+			field.removeLife(life.getObjectId(), false);
 		}
 	}
 
@@ -1181,6 +1198,33 @@ public class ScriptManagerImpl implements ScriptManager {
 	public int getReactorQuantity() {
 		Field field = chr.getField();
 		return field.getReactors().size();
+	}
+
+
+	public int getReactorState(int reactorId) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(reactorId);
+		if (life != null && life instanceof Reactor) {
+			Reactor reactor = (Reactor) life;
+			return reactor.getState();
+		}
+		return -1;
+	}
+
+	public void increaseReactorState(int reactorId, int stateLength) {
+		chr.getField().increaseReactorState(chr, reactorId, stateLength);
+	}
+
+	public void changeReactorState(int reactorId, byte state, short delay, byte stateLength) {
+		Field field = chr.getField();
+		Reactor reactor = field.getReactors().stream()
+						.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
+						.findAny().orElse(null);
+		if (reactor == null) {
+			return;
+		}
+		reactor.setState(state);
+		chr.write(ReactorPool.reactorChangeState(reactor, delay, stateLength));
 	}
 
 
@@ -1286,6 +1330,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void chatBlue(String text) {
 		chr.chatMessage(Notice2, text);
+	}
+
+	public void systemMessage(String message) {
+		chr.write(WvsContext.message(MessageType.SYSTEM_MESSAGE, 0, message, (byte) 0));
 	}
 
 	@Override
@@ -1409,12 +1457,14 @@ public class ScriptManagerImpl implements ScriptManager {
 		quest.setStatus(QuestStatus.COMPLETE);
 		qm.addQuest(quest);
 		chr.write(WvsContext.questRecordMessage(quest));
+		chr.chatMessage(String.format("Quest %d completed by completeQuestNoRewards", id));
 	}
 
 	@Override
 	public void startQuestNoCheck(int id) {
 		QuestManager qm = chr.getQuestManager();
 		qm.addQuest(QuestData.createQuestFromId(id));
+		chr.chatMessage(String.format("Quest %d started by startQuestNoCheck", id));
 	}
 
 	@Override
@@ -1489,6 +1539,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 	
 
+
 	// Party Quest-related methods -------------------------------------------------------------------------------------
 
 	public void incrementMonsterParkCount() {
@@ -1518,6 +1569,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public long getPQExp(Char chr) {
 		return GameConstants.PARTY_QUEST_EXP_FORMULA(chr);
 	}
+
 
 
 	// Boss-related methods --------------------------------------------------------------------------------------------
@@ -1634,6 +1686,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void moveCamera(boolean back, int speed, int x, int y) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
 	}
 
@@ -1661,6 +1714,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int sendDelay(int delay) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
@@ -1799,6 +1853,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(User.effect(Effect.avatarOriented(effectPath)));
 	}
         
+	public void reservedEffect(String effectPath) {
+		chr.write(User.effect(Effect.reservedEffect(effectPath)));
+	}
+        
 	public String formatNumber(String number) {
 		return Util.formatNumber(number);
 	}
@@ -1856,7 +1914,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void playVideoByScript(String videoPath){
 		chr.write(UserLocal.videoByScript(videoPath, false));
 	}
-
+        
 	public ScriptMemory getMemory() {
 		return memory;
 	}

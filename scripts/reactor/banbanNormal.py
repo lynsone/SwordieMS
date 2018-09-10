@@ -1,6 +1,6 @@
 hitCount = 0
 
-def action(type):
+def action(reactor, type):
     if type == 0:
         # global hitCount
         # hitCount += 1

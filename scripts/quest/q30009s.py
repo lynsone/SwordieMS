@@ -16,5 +16,5 @@ response = sm.sendAskYesNo("The door with the clock on it seems to be the least 
 
 if response == 1:
     sm.sendNext("I know you're strong, but I don't think you can do this alone. Make sure to find an #rally that will help you#k!")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 sm.dispose()

@@ -72,7 +72,6 @@ public class Field {
     private int fixedMobCapacity;
     private int objectIDCounter = 1000000;
     private boolean userFirstEnter = false;
-    private Set<Reactor> reactors;
     private String fieldScript = "";
     private ScriptManagerImpl scriptManagerImpl;
     private RuneStone runeStone;
@@ -97,7 +96,6 @@ public class Field {
         this.chars = new CopyOnWriteArrayList<>();
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
-        this.reactors = new HashSet<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
         startFieldScript();
     }
@@ -815,7 +813,10 @@ public class Field {
             }
         }
     }
-
+    public void drop(Drop drop, Position posFrom, Position posTo) {
+        drop(drop, posFrom, posTo, false);
+    }
+    
     /**
      * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
      * Immediately broadcasts the drop packet.
@@ -823,15 +824,17 @@ public class Field {
      * @param drop    The Drop to drop.
      * @param posFrom The Position that the drop starts off from.
      * @param posTo   The Position where the drop lands.
+     * @param ignoreTradability if the drop should ignore tradability (i.e., untradable items won't disappear)
      */
-    public void drop(Drop drop, Position posFrom, Position posTo) {
+    public void drop(Drop drop, Position posFrom, Position posTo, boolean ignoreTradability) {
         boolean isTradable = true;
         Item item = drop.getItem();
         if (item != null) {
             ItemInfo itemInfo = ItemData.getItemInfoByID(item.getItemId());
             // must be tradable, and if not an equip, not a quest item
-            isTradable = item != null && item.isTradable() && (ItemConstants.isEquip(item.getItemId()) ||
-                    (itemInfo != null && !itemInfo.isQuest()));
+            isTradable = ignoreTradability ||
+                    (item.isTradable() && (ItemConstants.isEquip(item.getItemId()) || itemInfo != null
+                    && !itemInfo.isQuest()));
         }
         drop.setPosition(posTo);
         if (isTradable) {
@@ -910,16 +913,21 @@ public class Field {
         drop(dropInfos, findFootHoldBelow(position), position, ownerID);
     }
 
+    public void drop(Drop drop, Position position) {
+        drop(drop, position, false);
+    }
+    
     /**
      * Drops a {@link Drop} at a given Position. Calculates the Position that the Drop should land at.
      *
      * @param drop     The Drop that should be dropped.
      * @param position The Position it is dropped from.
+     * @param fromReactor if it quest item the item will disapear
      */
-    public void drop(Drop drop, Position position) {
+    public void drop(Drop drop, Position position, boolean fromReactor) {
         int x = position.getX();
         Position posTo = new Position(x, findFootHoldBelow(position).getYFromX(x));
-        drop(drop, position, posTo);
+        drop(drop, position, posTo, fromReactor);
     }
 
     /**
@@ -1010,6 +1018,22 @@ public class Field {
         this.fieldScript = fieldScript;
     }
 
+    public Mob spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
+        Mob mob = MobData.getMobDeepCopyById(id);
+        Position pos = new Position(x, y);
+        mob.setPosition(pos.deepCopy());
+        mob.setPrevPos(pos.deepCopy());
+        mob.setPosition(pos.deepCopy());
+        mob.setNotRespawnable(true);
+        mob.setAppearType((byte) appearType);
+        mob.setOption(option);
+        if (mob.getField() == null) {
+            mob.setField(this);
+        }
+        spawnLife(mob, null);
+        return mob;
+    }
+    
     public Mob spawnMob(int id, int x, int y, boolean respawnable, long hp) {
         Mob mob = MobData.getMobDeepCopyById(id);
         Position pos = new Position(x, y);
@@ -1243,5 +1267,14 @@ public class Field {
 
     public TownPortal getTownPortalByChrId(int chrId) {
         return getTownPortalList().stream().filter(tp -> tp.getChr().getId() == chrId).findAny().orElse(null);
+    }
+    
+    public void increaseReactorState(Char chr, int templateId, int stateLength) {
+        Life life = getLifeByTemplateId(templateId);
+        if (life != null && life instanceof Reactor) {
+            Reactor reactor = (Reactor) life;
+            reactor.increaseState();
+            chr.write(ReactorPool.reactorChangeState(reactor, (short) 0, (byte) stateLength));
+        }
     }
 }

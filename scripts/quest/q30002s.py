@@ -25,7 +25,7 @@ response = sm.sendAskYesNo("#b(She looks lost... maybe I should help her out?)")
 
 if response == 1:
     sm.sendNext("All right, fine. I'll show you how to get out.")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 else:
     sm.dispose()
 

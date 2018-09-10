@@ -17,7 +17,7 @@ response = sm.sendAskYesNo("I've arranged your passage to Commerci. Seek out an 
 
 if response == 1:
     sm.warp(104000000, 0)
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 else:
     sm.sendSayOkay("Let me know once you are ready to depart.")
 sm.dispose()

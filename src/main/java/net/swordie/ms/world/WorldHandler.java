@@ -2457,6 +2457,11 @@ public class WorldHandler {
         ScriptManagerImpl smi = chr.getScriptManager();
         byte lastType = inPacket.decodeByte();
         NpcMessageType nmt = smi.getNpcScriptInfo().getMessageType();
+        if (nmt == null) {
+            nmt = lastType < NpcMessageType.values().length ?
+                Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
+                NpcMessageType.None;
+        }
         if (nmt != NpcMessageType.Monologue) {
             byte action = inPacket.decodeByte();
             int answer = 0;
@@ -2464,6 +2469,9 @@ public class WorldHandler {
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
+                if(action == 3) {   // MoveCamera
+                    return;         // We don't want to use MoveCamera as ways of progressing the script
+                }
                 chr.getScriptManager().handleAction(nmt, action, answ);
                 return;
             }
@@ -2487,8 +2495,7 @@ public class WorldHandler {
                 chr.getScriptManager().handleAction(nmt, action, answer);
             } else {
                 // User pressed escape in a selection (choice) screen
-                chr.dispose();
-                chr.getScriptManager().dispose();
+                chr.getScriptManager().dispose(false);
             }
         } else {
             chr.getScriptManager().handleAction(nmt, (byte) 1, 1); // Doesn't use  response nor answer
@@ -3886,7 +3893,7 @@ public class WorldHandler {
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", type);
+                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", reactor, type);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }

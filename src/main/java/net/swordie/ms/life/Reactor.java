@@ -16,6 +16,7 @@ public class Reactor extends Life {
     private int properEventIdx;
     private int reactorTime;
     private boolean phantomForest;
+    private int hitCount;
 
     public Reactor(int templateId) {
         super(templateId);
@@ -29,6 +30,10 @@ public class Reactor extends Life {
         this.state = state;
     }
 
+    public void increaseState() {
+        this.state++;
+    }
+    
     public String getName() {
         return name;
     }
@@ -93,5 +98,17 @@ public class Reactor extends Life {
         copy.setPosition(getPosition().deepCopy());
         copy.setHomePosition(getPosition().deepCopy());
         return copy;
+    }
+
+    public int getHitCount() {
+        return hitCount;
+    }
+
+    public void setHitCount(int hitCount) {
+        this.hitCount = hitCount;
+    }
+
+    public void incHitCount() {
+        setHitCount(getHitCount() + 1);
     }
 }
