@@ -28,11 +28,20 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.SPSet;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.InstanceTableType;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.util.Randomizer;
 
 /**
  * Created on 12/14/2017.
@@ -571,5 +580,63 @@ public class Mihile extends Job {
             giveRoyalGuardBuff(tsm);
         }
         super.handleHit(c, inPacket, hitInfo);
+    }
+    
+    // Character creation related methods ---------------------------------------------------------------------------------------------
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getCharacterStat().setPosMap(913070000);
+    }
+    
+    @Override
+    public void handleLevelUp() {
+        Map<Stat, Object> stats = new HashMap<>();
+        short level = chr.getLevel();
+        if (chr.getJob() == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId()) {
+            // IDK if the stats goes for every beginner job.
+            chr.addStat(Stat.mhp, 16);
+            chr.addStat(Stat.mmp, 12);
+            chr.addStat(Stat.str, 4);
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            chr.write(WvsContext.statChanged(stats));
+        } else {
+            chr.addStat(Stat.mhp, Randomizer.rand(48, 52));// temp until sniff some levelup information about mihile
+            chr.addStat(Stat.mmp, Randomizer.rand(4, 6));;// temp until sniff some levelup information about mihile
+            chr.addStat(Stat.ap, 5);
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.mmp, chr.getStat(Stat.ap));
+            int sp = SkillConstants.getBaseSpByLevel(level);
+            if ((level % 10) % 3 == 0 && level > 100) {
+                    sp *= 2; // double sp on levels ending in 3/6/9
+            }
+            ExtendSP extendSP = chr.getAvatarData().getCharacterStat().getExtendSP();
+            if (level >= SkillConstants.PASSIVE_HYPER_MIN_LEVEL) {
+                    SPSet spSet = extendSP.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1);
+                    spSet.addSp(1);
+                    chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperPassiveSkill, true, spSet.getSp()));
+            }
+            if (SkillConstants.ACTIVE_HYPER_LEVELS.contains(level)) {
+                    SPSet spSet = extendSP.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
+                    chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperActiveSkill, true, spSet.getSp()));
+                    spSet.addSp(1);
+            }
+            chr.addSpToJobByCurrentLevel(sp);
+            stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
+            byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
+            int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
+            if (linkSkillID != 0 && linkSkillLevel > 0) {
+                    Skill skill = chr.getSkill(linkSkillID, true);
+                    if (skill.getCurrentLevel() != linkSkillLevel) {
+                            chr.addSkill(linkSkillID, linkSkillLevel, 3);
+                    }
+            }
+        }
+        chr.write(WvsContext.statChanged(stats));
+        chr.heal(chr.getMaxHP());
+        chr.healMP(chr.getMaxMP());
     }
 }
