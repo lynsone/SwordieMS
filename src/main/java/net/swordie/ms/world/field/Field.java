@@ -815,7 +815,10 @@ public class Field {
             }
         }
     }
-
+    public void drop(Drop drop, Position posFrom, Position posTo) {
+        drop(drop, posFrom, posTo, false);
+    }
+    
     /**
      * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
      * Immediately broadcasts the drop packet.
@@ -823,8 +826,9 @@ public class Field {
      * @param drop    The Drop to drop.
      * @param posFrom The Position that the drop starts off from.
      * @param posTo   The Position where the drop lands.
+     * @param fromReactor if it quest item the item will disapear
      */
-    public void drop(Drop drop, Position posFrom, Position posTo) {
+    public void drop(Drop drop, Position posFrom, Position posTo, boolean fromReactor) {
         boolean isTradable = true;
         Item item = drop.getItem();
         if (item != null) {
@@ -834,7 +838,7 @@ public class Field {
                     (itemInfo != null && !itemInfo.isQuest()));
         }
         drop.setPosition(posTo);
-        if (isTradable) {
+        if (isTradable || fromReactor) {
             addLife(drop);
             getLifeSchedules().put(drop,
                     EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, -1),
@@ -843,7 +847,7 @@ public class Field {
             drop.setObjectId(getNewObjectID()); // just so the client sees the drop
         }
         // Check for collision items such as exp orbs from combo kills
-        if (!isTradable) {
+        if (!isTradable && !fromReactor) {
             broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FADE_AWAY));
         } else if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
@@ -910,16 +914,21 @@ public class Field {
         drop(dropInfos, findFootHoldBelow(position), position, ownerID);
     }
 
+    public void drop(Drop drop, Position position) {
+        drop(drop, position, false);
+    }
+    
     /**
      * Drops a {@link Drop} at a given Position. Calculates the Position that the Drop should land at.
      *
      * @param drop     The Drop that should be dropped.
      * @param position The Position it is dropped from.
+     * @param fromReactor if it quest item the item will disapear
      */
-    public void drop(Drop drop, Position position) {
+    public void drop(Drop drop, Position position, boolean fromReactor) {
         int x = position.getX();
         Position posTo = new Position(x, findFootHoldBelow(position).getYFromX(x));
-        drop(drop, position, posTo);
+        drop(drop, position, posTo, fromReactor);
     }
 
     /**
@@ -1010,6 +1019,22 @@ public class Field {
         this.fieldScript = fieldScript;
     }
 
+    public Mob spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
+        Mob mob = MobData.getMobDeepCopyById(id);
+        Position pos = new Position(x, y);
+        mob.setPosition(pos.deepCopy());
+        mob.setPrevPos(pos.deepCopy());
+        mob.setPosition(pos.deepCopy());
+        mob.setNotRespawnable(true);
+        mob.setAppearType((byte) appearType);
+        mob.setOption(option);
+        if (mob.getField() == null) {
+            mob.setField(this);
+        }
+        spawnLife(mob, null);
+        return mob;
+    }
+    
     public Mob spawnMob(int id, int x, int y, boolean respawnable, long hp) {
         Mob mob = MobData.getMobDeepCopyById(id);
         Position pos = new Position(x, y);
@@ -1243,5 +1268,14 @@ public class Field {
 
     public TownPortal getTownPortalByChrId(int chrId) {
         return getTownPortalList().stream().filter(tp -> tp.getChr().getId() == chrId).findAny().orElse(null);
+    }
+    
+    public void increaseReactorState(Char chr, int templateId, int stateLength) {
+        Life life = getLifeByTemplateId(templateId);
+        if (life != null && life instanceof Reactor) {
+            Reactor reactor = (Reactor) life;
+            reactor.increaseState();
+            chr.write(ReactorPool.reactorChangeState(reactor, (short) 0, (byte) stateLength));
+        }
     }
 }

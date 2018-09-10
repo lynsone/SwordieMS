@@ -41,17 +41,6 @@ public class User {
         return outPacket;
     }
 
-    public static OutPacket emotion(int charID, int emotion, int duration, boolean byItemOption) {
-        OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
-
-        outPacket.encodeInt(charID);
-        outPacket.encodeInt(emotion);
-        outPacket.encodeInt(duration);
-        outPacket.encodeByte(byItemOption);
-
-        return outPacket;
-    }
-
     public static OutPacket showItemSkillSocketUpgradeEffect(int charID, boolean success) {
         OutPacket outPacket = new OutPacket(OutHeader.SHOW_ITEM_SKILL_SOCKET_UPGRADE_EFFECT);
 
@@ -105,6 +94,18 @@ public class User {
         return outPacket;
     }
 
+    public static OutPacket progressMessageFont(int fontNameType, int fontSize, int fontColorType, int fadeOutDelay, String message) {
+        OutPacket outPacket = new OutPacket(OutHeader.PROGRESS_MESSAGE_FONT);
+        
+        outPacket.encodeInt(fontNameType);
+        outPacket.encodeInt(fontSize);
+        outPacket.encodeInt(fontColorType);
+        outPacket.encodeInt(fadeOutDelay);
+        outPacket.encodeString(message);
+ 
+        return outPacket;
+    }
+    
     public static OutPacket effect(Effect effect) {
         OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
 

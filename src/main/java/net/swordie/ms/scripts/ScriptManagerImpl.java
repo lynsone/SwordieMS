@@ -58,7 +58,8 @@ import org.apache.log4j.LogManager;
 import org.python.util.PythonInterpreter;
 
 import javax.script.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -173,7 +174,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (scriptType == ScriptType.NONE) {
 			return;
 		}
-		if (isActive(scriptType)) {
+		if (isActive(scriptType) && scriptType != ScriptType.FIELD) { // because Field Scripts don't get disposed.
 			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
 							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
 			return;
@@ -675,11 +676,19 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void lockInGameUI(boolean lock) {
 		chr.write(UserLocal.setInGameDirectionMode(lock, true, false));
 	}
-
+        
 	public void curNodeEventEnd(boolean enable) {
 		chr.write(CField.curNodeEventEnd(enable));
 	}
-
+        
+        public void progressMessageFont(int fontNameType, int fontSize, int fontColorType, int fadeOutDelay, String message) {
+            chr.write(User.progressMessageFont(fontNameType, fontSize, fontColorType, fadeOutDelay, message));
+        }
+        
+        public void localEmotion(int emotion, int duration, boolean byItemOption) {
+            chr.write(UserLocal.emotion(emotion, duration, byItemOption));
+        }
+        
 	// Field-related methods -------------------------------------------------------------------------------------------
 
 	@Override
@@ -767,7 +776,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		stopEventsByScriptType(ScriptType.FIELD); // Stops the FixedRate Event from the Field Script
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
 		if (!in) {
-			chr.getFields().clear();
+                    chr.getFields().clear();
 		}
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
 		Portal portal = field.getPortalByID(portalID);
@@ -871,7 +880,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		drop.setItem(ItemData.getItemDeepCopy(itemId));
 		Position position = new Position(x, y);
 		drop.setPosition(position);
-		field.drop(drop, position);
+		field.drop(drop, position, true);
 	}
 
 	@Override
@@ -1115,6 +1124,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getField().spawnMob(id, x, y, respawnable, hp);
 	}
 
+        public void spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
+            chr.getField().spawnMobWithAppearType(id, x, y, appearType, option);
+        }
+        
 	@Override
 	public void removeMobByObjId(int id) {
 		chr.getField().removeLife(id);
@@ -1185,7 +1198,31 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 
-
+        public int getReactorState(int reactorId) {
+            Field field = chr.getField();
+            Life life = field.getLifeByTemplateId(reactorId);
+            if (life != null && life instanceof Reactor) {
+                Reactor reactor = (Reactor) life;
+                return reactor.getState();
+            }
+            return -1;
+        }
+        
+        public void increaseReactorState(int reactorId, int stateLength) {
+            chr.getField().increaseReactorState(chr, reactorId, stateLength);
+        }
+        
+        public void changeReactorState(int reactorId, byte state, short delay, byte stateLength) {
+            Field field = chr.getField();
+            Reactor reactor = field.getReactors().stream()
+                            .filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
+                            .findAny().orElse(null);
+            if (reactor == null) {
+                return;
+            }
+            reactor.setState(state);
+            chr.write(ReactorPool.reactorChangeState(reactor, delay, stateLength));
+        }
 	// Party-related methods -------------------------------------------------------------------------------------------
 
 	@Override
@@ -1800,6 +1837,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(User.effect(Effect.avatarOriented(effectPath)));
 	}
         
+        public void reservedEffect(String effectPath) {
+            chr.write(User.effect(Effect.reservedEffect(effectPath)));
+        }
+        
 	public String formatNumber(String number) {
 		return Util.formatNumber(number);
 	}
@@ -1858,6 +1899,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.videoByScript(videoPath, false));
 	}
 
+        public void systemMessage(String message) {
+            chr.write(WvsContext.message(MessageType.SYSTEM_MESSAGE, 0, message, (byte) 0));
+        }
+        
 	public ScriptMemory getMemory() {
 		return memory;
 	}

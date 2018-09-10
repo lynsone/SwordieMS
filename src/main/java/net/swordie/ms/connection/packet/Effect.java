@@ -137,6 +137,12 @@ public class Effect {
             case AvatarOriented:
                 outPacket.encodeString(getString());
                 break;
+            case ReservedEffect:
+                outPacket.encodeByte(getArg1());
+                outPacket.encodeInt(getArg2());
+                outPacket.encodeInt(getArg3());
+                outPacket.encodeString(getString());
+                break;
         }
     }
 
@@ -587,6 +593,18 @@ public class Effect {
         Effect effect = new Effect();
         
         effect.setUserEffectType(AvatarOriented);
+        effect.setString(effectPath);
+        
+        return effect;
+    }
+    
+    public static Effect reservedEffect(String effectPath) {
+        Effect effect = new Effect();
+        
+        effect.setUserEffectType(ReservedEffect);
+        effect.setArg1(0);// bShow
+        effect.setArg2(0);
+        effect.setArg3(0);
         effect.setString(effectPath);
         
         return effect;

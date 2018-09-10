@@ -29,6 +29,10 @@ public class Reactor extends Life {
         this.state = state;
     }
 
+    public void increaseState() {
+        this.state++;
+    }
+    
     public String getName() {
         return name;
     }
