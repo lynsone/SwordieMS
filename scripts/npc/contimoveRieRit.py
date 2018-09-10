@@ -9,7 +9,7 @@ answer = sm.sendNext("Heading Out? \r\n\r\n#b"
 if answer == 0:
     sm.warp(141000000, 0)
 elif answer == 1:
-    if getMesos() < victoriaIslandPrice:
+    if sm.getMesos() < victoriaIslandPrice:
         sm.sendSayOkay("You will need more money for my services.")
     else:
         sm.deductMesos(800)

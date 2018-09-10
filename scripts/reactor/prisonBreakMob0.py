@@ -4,14 +4,10 @@ PRISON_GUARD_BOAR = 9300452
 PRISON_GUARD_RHINO = 9300453
 PRISON_KEY = 4001528
 
-hitCount = 0
-
-def action(type):
+def action(reactor, type):
     if type == 0:
-        global hitCount
-        hitCount += 1
-        sm.chat(str(hitCount))
-        if hitCount >= 1:
+        reactor.incHitCount()
+        if reactor.getHitCount() >= 1:
             i = 0
             while i < 10:
                 sm.spawnMob(PRISON_GUARD_BOAR, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY(), False)

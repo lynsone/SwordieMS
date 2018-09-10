@@ -1,6 +1,6 @@
 # [Commerci Republic] Gilberto Daniella
 
-sm.startQuestNoCheck(parentID)
+sm.startQuest(parentID)
 sm.setSpeakerID(9390203) # Gilberto Daniella
 sm.sendNext("Time is money, and my time is worth a million mesos a minute. Now, please make an appointment.")
 

@@ -48,5 +48,6 @@ sm.sendNext("But why would you do such a thing despite all the misunderstandings
 sm.setSpeakerID(frostWitchBarbara)
 sm.sendNext("Whew.. That mouth of yours.. How does it help you to talk so much? "
             "If you have time for talking, shut up and do me a favor.")
+sm.startQuest(parentID)
 sm.completeQuest(parentID)
 sm.dispose()

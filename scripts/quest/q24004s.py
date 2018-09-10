@@ -6,7 +6,7 @@ response = sm.sendAskYesNo("#b(You can see the wards to create the seal around E
                 "Activate the seal?)#k")
 
 if response == 1:
-    sm.startQuestNoCheck(parentID)
-    sm.completeQuestNoRewards(parentID)
+    sm.startQuest(parentID)
+    sm.completeQuest(parentID)
     sm.sendSayOkay("#b(The seal is complete, and the town is safe.)")
 sm.dispose()

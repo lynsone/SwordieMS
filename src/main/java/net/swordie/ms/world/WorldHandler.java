@@ -3893,7 +3893,7 @@ public class WorldHandler {
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", type);
+                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", reactor, type);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }

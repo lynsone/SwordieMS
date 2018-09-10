@@ -1,12 +1,9 @@
-hitCount = 0
 
-def action(type):
-    global hitCount
-    sm.chat("type = " + str(type) + ", count = " + str(hitCount))
+def action(reactor, type):
+    sm.chat("type = " + str(type) + ", count = " + str(reactor.getHitCount()))
     if type == 80 or type == 49:
-        hitCount += 1
-        sm.chat(str(hitCount))
-        if hitCount >= 4:
+        reactor.incHitCount()
+        if reactor.getHitCount() >= 4:
             sm.chat("BOOM Horntail spawns")
             sm.spawnMob(8810002, 95, 260, False)
             sm.spawnMob(8810003, 95, 260, False)

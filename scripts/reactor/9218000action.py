@@ -1,14 +1,11 @@
 # Prison Door (9218000) | Used in Escape Party Quest
 
 PRISON_KEY = 4001528
-hitCount = 0
 
-def action(type):
+def action(reactor, type):
     if type == 0:
-        global hitCount
-        hitCount += 1
-        sm.chat(str(hitCount))
-        if hitCount >= 1:
+        reactor.incHitCount()
+        if reactor.getHitCount() >= 1:
             if sm.hasItem(PRISON_KEY):
                 sm.consumeItem(PRISON_KEY)
                 sm.removeReactor()

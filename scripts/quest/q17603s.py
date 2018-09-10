@@ -56,9 +56,9 @@ response = sm.sendAskYesNo("I'll be collectin' on that promise, 'fore long. "
 
 if response == 1:
     sm.warp(865010200, 0)
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
     sm.completeQuest(parentID)
-    sm.startQuestNoCheck(17608) # [Commerci Republic] After a Pleasant Voyage
+    sm.startQuest(17608) # [Commerci Republic] After a Pleasant Voyage
 else:
     sm.sendSayOkay("Dun't yer let a ol' man waiting!")
 sm.dispose()

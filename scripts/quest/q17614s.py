@@ -16,9 +16,10 @@ sm.setSpeakerID(9390202) # Leon Daniella
 response = sm.sendAskYesNo("Yeah! Just go to San Commerci and wait for me. I have a couple of voyages to make, but don't leave until I get back. Promise?")
 
 if response == 1:
-    sm.startQuestNoCheck(parentID)
     sm.sendSayOkay("Okay, go east from the town, follow the coastal road, and you'll get to San Commerci. It's a single road, but I get lost on it all the time. \r\n"
                    "See you in #e#bSan Commerci#k#n. Remember, you promised!")
+    sm.startQuest(parentID)
+    sm.warpInstanceOut(865010200, 0)
 else:
     sm.sendSayOkay("You're not gonna promise your best friend a simple thing?")
 sm.dispose()

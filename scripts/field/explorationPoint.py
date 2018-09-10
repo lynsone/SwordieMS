@@ -5,7 +5,5 @@ if sm.getFieldID() == 105000000 and sm.hasQuest(30004):
     sm.warp(910700200, 0) # Root Abyss Quest Line Map
     sm.completeQuest(30004)
 
-if sm.getFieldID() == 104000000:
+elif sm.getFieldID() == 104000000:
     sm.showEffect("Map/Effect.img/maplemap/enter/104000000")
-    sm.dispose()
-

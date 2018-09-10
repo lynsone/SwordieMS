@@ -1,7 +1,5 @@
 # 141050200 - Riena Strait boss
 
-if sm.checkParty() and sm.getPartySize() == 1:
+if sm.checkParty():
     sm.warpPartyIn(141050300)
-else:
-    sm.sendSayOkay("You have to be in a party of 1 to enter.")
 sm.dispose()

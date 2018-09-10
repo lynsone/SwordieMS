@@ -6,7 +6,7 @@ response = sm.sendAskYesNo("Shall we?")
 if response == 1:
     sm.setPlayerAsSpeaker() # Has to be Player Avatar
     sm.sendNext("#b(I have a bad feeling about this whole thing...)")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 else:
     sm.sendNext("Alright, let me know when you are ready!")
 sm.dispose()
