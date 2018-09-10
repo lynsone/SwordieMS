@@ -2469,6 +2469,9 @@ public class WorldHandler {
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
+                if(action == 3) {   // MoveCamera
+                    return;         // We don't want to use MoveCamera as ways of progressing the script
+                }
                 chr.getScriptManager().handleAction(nmt, action, answ);
                 return;
             }
