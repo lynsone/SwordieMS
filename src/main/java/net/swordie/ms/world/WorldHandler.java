@@ -2492,8 +2492,7 @@ public class WorldHandler {
                 chr.getScriptManager().handleAction(nmt, action, answer);
             } else {
                 // User pressed escape in a selection (choice) screen
-                chr.dispose();
-                chr.getScriptManager().dispose();
+                chr.getScriptManager().dispose(false);
             }
         } else {
             chr.getScriptManager().handleAction(nmt, (byte) 1, 1); // Doesn't use  response nor answer

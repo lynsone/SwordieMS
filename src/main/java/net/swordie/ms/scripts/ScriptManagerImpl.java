@@ -296,10 +296,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			case 5:
 				stop(scriptType);
 				break;
-			case 0:
-			case 1:
-			case 2:
-			case 3:
+            default:
 				ScriptMemory sm = getMemory();
 				if (lastType.isPrevPossible() && response == 0) {
 					// back button pressed
@@ -536,6 +533,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void dispose() {
+		dispose(true);
+	}
+
+	public void dispose(boolean stop) {
 		getNpcScriptInfo().reset();
 		getMemory().clear();
 		stop(ScriptType.NPC);
@@ -544,7 +545,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		stop(ScriptType.QUEST);
 		stop(ScriptType.REACTOR);
 		setLastActiveScriptType(ScriptType.NONE);
-		throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
+		if (stop) {
+			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
+		}
 	}
 
 	public void dispose(ScriptType scriptType) {
@@ -1166,12 +1169,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void removeReactor() {
 		Field field = chr.getField();
-		Reactor reactor = field.getReactors().stream()
-				.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
-				.findAny().orElse(null);
-		if (reactor != null) {
-			field.removeLife(reactor.getObjectId());
-			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
+		Life life = field.getLifeByObjectID(getObjectIDByScriptType(ScriptType.REACTOR));
+		if (life instanceof Reactor) {
+			field.removeLife(life.getObjectId(), false);
 		}
 	}
 

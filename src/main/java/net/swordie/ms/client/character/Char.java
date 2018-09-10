@@ -2219,7 +2219,6 @@ public class Char {
 	 * 		The {@link Portal} where to spawn at.
 	 */
 	public void warp(Field toField, Portal portal, boolean characterData) {
-		getScriptManager().dispose(); // stop all running scripts
 		if (toField == null) {
 			return;
 		}

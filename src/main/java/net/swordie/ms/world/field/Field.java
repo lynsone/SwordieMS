@@ -72,7 +72,6 @@ public class Field {
     private int fixedMobCapacity;
     private int objectIDCounter = 1000000;
     private boolean userFirstEnter = false;
-    private Set<Reactor> reactors;
     private String fieldScript = "";
     private ScriptManagerImpl scriptManagerImpl;
     private RuneStone runeStone;
@@ -97,7 +96,6 @@ public class Field {
         this.chars = new CopyOnWriteArrayList<>();
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
-        this.reactors = new HashSet<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
         startFieldScript();
     }
@@ -826,19 +824,20 @@ public class Field {
      * @param drop    The Drop to drop.
      * @param posFrom The Position that the drop starts off from.
      * @param posTo   The Position where the drop lands.
-     * @param fromReactor if it quest item the item will disapear
+     * @param ignoreTradability if the drop should ignore tradability (i.e., untradable items won't disappear)
      */
-    public void drop(Drop drop, Position posFrom, Position posTo, boolean fromReactor) {
+    public void drop(Drop drop, Position posFrom, Position posTo, boolean ignoreTradability) {
         boolean isTradable = true;
         Item item = drop.getItem();
         if (item != null) {
             ItemInfo itemInfo = ItemData.getItemInfoByID(item.getItemId());
             // must be tradable, and if not an equip, not a quest item
-            isTradable = item != null && item.isTradable() && (ItemConstants.isEquip(item.getItemId()) ||
-                    (itemInfo != null && !itemInfo.isQuest()));
+            isTradable = ignoreTradability ||
+                    (item.isTradable() && (ItemConstants.isEquip(item.getItemId()) || itemInfo != null
+                    && !itemInfo.isQuest()));
         }
         drop.setPosition(posTo);
-        if (isTradable || fromReactor) {
+        if (isTradable) {
             addLife(drop);
             getLifeSchedules().put(drop,
                     EventManager.addEvent(() -> removeDrop(drop.getObjectId(), 0, true, -1),
@@ -847,7 +846,7 @@ public class Field {
             drop.setObjectId(getNewObjectID()); // just so the client sees the drop
         }
         // Check for collision items such as exp orbs from combo kills
-        if (!isTradable && !fromReactor) {
+        if (!isTradable) {
             broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FADE_AWAY));
         } else if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
