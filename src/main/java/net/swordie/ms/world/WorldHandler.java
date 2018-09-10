@@ -2457,6 +2457,11 @@ public class WorldHandler {
         ScriptManagerImpl smi = chr.getScriptManager();
         byte lastType = inPacket.decodeByte();
         NpcMessageType nmt = smi.getNpcScriptInfo().getMessageType();
+        if (nmt == null) {
+            nmt = lastType < NpcMessageType.values().length ?
+                Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
+                NpcMessageType.None;
+        }
         if (nmt != NpcMessageType.Monologue) {
             byte action = inPacket.decodeByte();
             int answer = 0;

@@ -397,4 +397,14 @@ public class UserLocal {
 
         return outPacket;
     }
+    
+    public static OutPacket emotion(int emotion, int duration, boolean byItemOption) {
+        OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
+
+        outPacket.encodeInt(emotion);
+        outPacket.encodeInt(duration);
+        outPacket.encodeByte(byItemOption);
+
+        return outPacket;
+    }
 }

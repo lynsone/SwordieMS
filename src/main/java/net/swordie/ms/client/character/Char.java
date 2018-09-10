@@ -1520,6 +1520,23 @@ public class Char {
 		return field;
 	}
 
+        public void resetStats() {
+            int total = getStat(Stat.str) + getStat(Stat.dex) + getStat(Stat.inte) + getStat(Stat.luk) + getStat(Stat.ap);
+                total -= 16;// 4 str, dex, luk, int
+                setStat(Stat.str, 4);
+                setStat(Stat.dex, 4);
+                setStat(Stat.inte, 4);
+                setStat(Stat.luk, 4);
+                setStat(Stat.ap, total);
+                Map<Stat, Object> stats = new HashMap<>();
+                stats.put(Stat.str, (short) getStat(Stat.str));
+                stats.put(Stat.dex, (short) getStat(Stat.dex));
+                stats.put(Stat.inte, (short) getStat(Stat.inte));
+                stats.put(Stat.luk, (short) getStat(Stat.luk));
+                stats.put(Stat.ap, (short) getStat(Stat.ap));
+                write(WvsContext.statChanged(stats));
+        }
+        
 	/**
 	 * Sets the job of this Char with a given id. Does nothing if the id is invalid.
 	 * If it is valid, will set this Char's job, add all Skills that the job should have by default,
@@ -1538,6 +1555,9 @@ public class Char {
 		skills.forEach(this::addSkill);
 		getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
 		notifyChanges();
+                if (id == 5100) {// should be for all beginner jobs after first advance, for now I am handling after each tutorial I code.
+                    resetStats();
+                }
 	}
 
 	public short getJob() {
@@ -2312,10 +2332,14 @@ public class Char {
 		}
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
-		amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
+                int level = getLevel();
+                if (level < 10) {
+                    amount = amount > Long.MAX_VALUE ? Long.MAX_VALUE : amount;
+                } else {
+                    amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
+                }
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
-		int level = getLevel();
 		if (level >= GameConstants.charExp.length - 1) {
 			return;
 		}
