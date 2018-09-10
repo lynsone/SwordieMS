@@ -512,6 +512,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		return sendGeneralSay("", AskSlideMenu);
 	}
 
+
+
 	// Start of param methods ------------------------------------------------------------------------------------------
 
 	public void resetParam() {
@@ -530,6 +532,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		getNpcScriptInfo().setColor((byte) 1);
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.BoxChat);
 	}
+
 
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
@@ -554,6 +557,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public Position getPosition(int objId) {
 		return chr.getField().getLifeByObjectID(objId).getPosition();
 	}
+
 
 
 	// Character Stat-related methods ----------------------------------------------------------------------------------
@@ -678,6 +682,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void curNodeEventEnd(boolean enable) {
 		chr.write(CField.curNodeEventEnd(enable));
 	}
+
+
 
 	// Field-related methods -------------------------------------------------------------------------------------------
 
@@ -897,6 +903,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	// Life-related methods --------------------------------------------------------------------------------------------
 
 
+
 	// NPC methods
 	@Override
 	public void spawnNpc(int npcId, int x, int y) {
@@ -1083,7 +1090,9 @@ public class ScriptManagerImpl implements ScriptManager {
             }
             return life.getObjectId();
         }
-        
+
+
+
 	// Mob methods
 	@Override
 	public void spawnMob(int id) {
@@ -1487,7 +1496,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	public boolean isComplete(int questID) {
 		return chr.getQuestManager().isComplete(questID);
 	}
-	
+
+
 
 	// Party Quest-related methods -------------------------------------------------------------------------------------
 
@@ -1518,6 +1528,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public long getPQExp(Char chr) {
 		return GameConstants.PARTY_QUEST_EXP_FORMULA(chr);
 	}
+
 
 
 	// Boss-related methods --------------------------------------------------------------------------------------------
@@ -1634,6 +1645,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void moveCamera(boolean back, int speed, int x, int y) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
 	}
 
@@ -1661,6 +1673,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int sendDelay(int delay) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
