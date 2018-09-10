@@ -9,7 +9,7 @@ response = sm.sendAskYesNo("We successfully routed the #o9390808# group, but I d
 
 if response == 1:
     sm.sendNext("#b#o9390811##k group should be in #m865020100#. Let's see who can rout out #b#e30#k#n of them faster again! I'll be waiting in #m865020100#!")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 else:
     sm.sendSayOkay("Oh, I suppose we can rest for a little bit.")
 sm.dispose()

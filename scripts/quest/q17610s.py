@@ -17,7 +17,7 @@ response = sm.sendAskYesNo("Will you really?")
 
 if response == 1:
     sm.sendNext("If you could eliminate 100 #r#o9390807##k, I would be very grateful.")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 else:
     sm.sendSayOkay("Oh, alright.. that's too bad.")
 sm.dispose()

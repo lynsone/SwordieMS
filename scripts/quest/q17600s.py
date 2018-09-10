@@ -13,3 +13,4 @@ else:
 
 sm.startQuestNoCheck(parentID)
 sm.warp(130000000, 0)
+sm.dispose()

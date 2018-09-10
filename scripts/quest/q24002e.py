@@ -13,5 +13,5 @@ response = sm.sendAskYesNo("Your Highness, I will dream of a more beautiful worl
 if response == 1:
     sm.completeQuest(parentID)
     sm.sendSayOkay("I wish you...sweet dreams...")
-    sm.startQuestNoCheck(24005) # Cursed Slumber
+    sm.startQuest(24005) # Cursed Slumber
 sm.dispose()

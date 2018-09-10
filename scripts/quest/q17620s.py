@@ -32,5 +32,5 @@ if response == 1:
     sm.setSpeakerID(9390225) # Tepes
     sm.sendNext("I'll let them know you're on your way. Be polite when you talk to Gilberto. "
                 "He is quite powerful in Commerci.")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 sm.dispose()

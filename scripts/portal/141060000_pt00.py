@@ -6,4 +6,6 @@ if sm.getnOptionByCTS(CharacterTemporaryStat.RideVehicle) == 1930000: # Riena Sk
     sm.removeCTS(CharacterTemporaryStat.RideVehicle)
 
 sm.warp(141000000, 1) # Middle of Strait : Glacial Observatory
+if sm.hasQuestCompleted(32170):
+    sm.hideNpcByTemplateId(1510007, False)
 sm.dispose()

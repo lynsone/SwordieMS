@@ -13,7 +13,7 @@ response = sm.sendAskYesNo("Now, are we ready to hunt some fish?")
 
 if response == 1:
     sm.sendNext("Let's see who's faster!")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 else:
     sm.sendSayOkay("What?.. You're not ready yet?")
 sm.dispose()

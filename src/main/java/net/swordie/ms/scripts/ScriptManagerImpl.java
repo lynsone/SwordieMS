@@ -979,9 +979,9 @@ public class ScriptManagerImpl implements ScriptManager {
 
         @Override
 	public void setSpeakerType(byte speakerType) {
-            NpcScriptInfo nsi = getNpcScriptInfo();
-            nsi.setSpeakerType(speakerType);
-        }
+		NpcScriptInfo nsi = getNpcScriptInfo();
+		nsi.setSpeakerType(speakerType);
+	}
         
 	public void hideNpcByTemplateId(int npcTemplateId, boolean hide) {
 		hideNpcByTemplateId(npcTemplateId, hide, hide);
@@ -1130,9 +1130,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getField().spawnMob(id, x, y, respawnable, hp);
 	}
 
-        public void spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
-            chr.getField().spawnMobWithAppearType(id, x, y, appearType, option);
-        }
+	public void spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
+		chr.getField().spawnMobWithAppearType(id, x, y, appearType, option);
+	}
         
 	@Override
 	public void removeMobByObjId(int id) {
@@ -1457,12 +1457,14 @@ public class ScriptManagerImpl implements ScriptManager {
 		quest.setStatus(QuestStatus.COMPLETE);
 		qm.addQuest(quest);
 		chr.write(WvsContext.questRecordMessage(quest));
+		chr.chatMessage(String.format("Quest %d completed by completeQuestNoRewards", id));
 	}
 
 	@Override
 	public void startQuestNoCheck(int id) {
 		QuestManager qm = chr.getQuestManager();
 		qm.addQuest(QuestData.createQuestFromId(id));
+		chr.chatMessage(String.format("Quest %d started by startQuestNoCheck", id));
 	}
 
 	@Override

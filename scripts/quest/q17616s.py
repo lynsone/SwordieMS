@@ -28,5 +28,5 @@ response = sm.sendAskYesNo("#b(This seems like my chance to get in good with the
 sm.setPlayerAsSpeaker() # Has to be Player Avatar
 if response == 1:
     sm.sendNext("#b(I'll head to the Trading Post to investigate further.)")
-    sm.startQuestNoCheck(parentID)
+    sm.startQuest(parentID)
 sm.dispose()
