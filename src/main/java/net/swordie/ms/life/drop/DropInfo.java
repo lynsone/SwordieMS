@@ -1,6 +1,8 @@
 package net.swordie.ms.life.drop;
 
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.Util;
 
 /**
@@ -88,6 +90,11 @@ public class DropInfo {
      * @return Whether or not the drop is successful.
      */
     public boolean willDrop() {
+        // Added 50x multiplier for the dropping chance if the item is a Quest item.
+        ItemInfo ii = ItemData.getItemInfoByID(getItemID());
+        if (ii != null && ii.getQuestIDs().size() > 0) {
+            return Util.succeedProp(getChance() * 50, GameConstants.MAX_DROP_CHANCE);
+        }
         return Util.succeedProp(getChance(), GameConstants.MAX_DROP_CHANCE);
     }
 
