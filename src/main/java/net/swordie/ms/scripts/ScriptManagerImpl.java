@@ -1039,7 +1039,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void flipNpcByTemplateId(int npcTemplateId, boolean left) {
 		Field field = chr.getField();
 		Life life = field.getLifeByTemplateId(npcTemplateId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
 			return;
 		}
@@ -1050,7 +1050,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void flipNpcByObjectId(int npcObjId, boolean left) {
 		Field field = chr.getField();
 		Life life = field.getLifeByObjectID(npcObjId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
 			return;
 		}
@@ -1065,7 +1065,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void showNpcSpecialActionByTemplateId(int npcTemplateId, String effectName, int duration) {
 		Field field = chr.getField();
 		Life life = field.getLifeByTemplateId(npcTemplateId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
 			return;
 		}
@@ -1081,7 +1081,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void showNpcSpecialActionByObjectId(int npcObjId, String effectName, int duration) {
 		Field field = chr.getField();
 		Life life = field.getLifeByObjectID(npcObjId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
 			return;
 		}
@@ -1091,7 +1091,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public int getNpcObjectIdByTemplateId(int npcTemplateId) {
 		Field field = chr.getField();
 		Life life = field.getLifeByTemplateId(npcTemplateId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
 			return 0;
 		}
