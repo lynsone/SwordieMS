@@ -985,6 +985,16 @@ public interface ScriptManager extends Observer {
 	boolean hasItem(int itemID);
 
 	/**
+	 * Determines if the linked {@link Char} has the specified item equipped.
+	 *
+	 * @param itemID
+	 * 		The ID of the item.
+	 *
+	 * @return True if the character has the item equipped.
+	 */
+	boolean isEquipped(int itemID);
+
+	/**
 	 * Determines if the linked {@link Char} has the specified item with the specified quantity.
 	 * Example: "if(sm.hasItem(100, 3)) {}"
 	 *
