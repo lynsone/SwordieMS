@@ -1,6 +1,8 @@
 package net.swordie.ms.life.drop;
 
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.Util;
 
 /**
@@ -9,7 +11,6 @@ import net.swordie.ms.util.Util;
 public class DropInfo {
     private int itemID;
     private int chance; // out of a 1000
-    private int questReq;
     private int money;
     private int minMoney, maxmoney;
     private int minQuant = 1;
@@ -19,27 +20,17 @@ public class DropInfo {
     public DropInfo() {
     }
 
-    public DropInfo(int itemID, int money, int chance, int questReq) {
-        this.itemID = itemID;
-        this.money = money;
+    public DropInfo(int chance, int minMoney, int maxmoney) {
         this.chance = chance;
-        this.questReq = questReq;
-    }
-
-    public DropInfo(int itemID, int chance, int questReq, int minMoney, int maxmoney) {
-        this.itemID = itemID;
-        this.chance = chance;
-        this.questReq = questReq;
         this.minMoney = minMoney;
         this.maxmoney = maxmoney;
         generateNextDrop();
     }
 
-    public DropInfo(int itemID, int money, int chance, int questReq, int minQuant, int maxQuant) {
+    public DropInfo(int itemID, int money, int chance, int minQuant, int maxQuant) {
         this.itemID = itemID;
         this.money = money;
         this.chance = chance;
-        this.questReq = questReq;
         this.minQuant = minQuant;
         this.maxQuant = maxQuant;
         generateNextDrop();
@@ -94,19 +85,16 @@ public class DropInfo {
         this.chance = chance;
     }
 
-    public int getQuestReq() {
-        return questReq;
-    }
-
-    public void setQuestReq(int questReq) {
-        this.questReq = questReq;
-    }
-
     /**
      * Does an RNG roll to check if this should be dropped.
      * @return Whether or not the drop is successful.
      */
     public boolean willDrop() {
+        // Added 50x multiplier for the dropping chance if the item is a Quest item.
+        ItemInfo ii = ItemData.getItemInfoByID(getItemID());
+        if (ii != null && ii.getQuestIDs().size() > 0) {
+            return Util.succeedProp(getChance() * 50, GameConstants.MAX_DROP_CHANCE);
+        }
         return Util.succeedProp(getChance(), GameConstants.MAX_DROP_CHANCE);
     }
 

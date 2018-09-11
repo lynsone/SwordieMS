@@ -1,2 +1,1 @@
-def init():
-    sm.sendSayOkay("Hey!")
+sm.sendSayOkay("Hey!")

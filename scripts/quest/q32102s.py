@@ -2,58 +2,35 @@
 
 FANZY = 1500010 # NPC ID
 YOU_CAN_DO_IT = 32102 # QUEST ID
-status = -1
 
-def init():
-    sm.setSpeakerID(FANZY)
-    sm.sendNext("Are you asking where we are? Did you follow me without knowing where I was going? This is the forest path to the #b Ellinel Fairy Academy#k.")
+sm.setSpeakerID(FANZY)
+sm.sendNext("Are you asking where we are? Did you follow me without knowing where I was going? This is the forest path to the #b Ellinel Fairy Academy#k.")
 
-def action(response, answer):
-    global status, wasAskAccept
-    if response == 0 and not wasAskAccept:
-        status -= 1
-    else:
-        status += 1
-        wasAskAccept = False
+sm.setPlayerAsSpeaker()
+sm.sendSay("Ellinel Fairy Academy?")
 
-    if status == -1:
-        init()
+sm.setSpeakerID(FANZY)
+sm.sendSay("Yes. #b Ellinel#k is an academy where fairy children learn magic.")
 
-    elif status == 0:
-        sm.setPlayerAsSpeaker()
-        sm.sendSay("Ellinel Fairy Academy?")
+sm.setPlayerAsSpeaker()
+sm.sendSay("But why is it hidden so deep within the forest?")
 
-    elif status == 1:
-        sm.setSpeakerID(FANZY)
-        sm.sendSay("Yes. #b Ellinel#k is an academy where fairy children learn magic.")
+sm.setSpeakerID(FANZY)
+sm.sendSay("Did you know that #bEllinia#k used to be a fairy town? Several hundred years ago, after a war with the Black Mage, humans came in and reclaimed the town and it became the #bEllinia#k we know now.")
 
-    elif status == 2:
-        sm.setPlayerAsSpeaker()
-        sm.sendSay("But why is it hidden so deep within the forest?")
+sm.setPlayerAsSpeaker()
+sm.sendSay("Then that must mean that fairies live outside of Ellinia, too.")
 
-    elif status == 3:
-        sm.setSpeakerID(FANZY)
-        sm.sendSay("Did you know that #bEllinia#k used to be a fairy town? Several hundred years ago, after a war with the Black Mage, humans came in and reclaimed the town and it became the #bEllinia#k we know now.")
+sm.setSpeakerID(FANZY)
+sm.sendSay("Some fairies are okay with humans, but others very much are not. It's the same in the #bEllinel Fairy Academy#k. They don't want to mix with humans, and so they disappeared into the forest. That's why the school is far across the lake.")
 
-    elif status == 4:
-        sm.setPlayerAsSpeaker()
-        sm.sendSay("Then that must mean that fairies live outside of Ellinia, too.")
+sm.setPlayerAsSpeaker()
+sm.sendSay("You think Cootie got captured by human-hating fairies?")
 
-    elif status == 5:
-        sm.setSpeakerID(FANZY)
-        sm.sendSay("Some fairies are okay with humans, but others very much are not. It's the same in the #bEllinel Fairy Academy#k. They don't want to mix with humans, and so they disappeared into the forest. That's why the school is far across the lake.")
+sm.setSpeakerID(FANZY)
+response = sm.sendAskAccept("Most likely. I know I thought about using him as a scratching post a few times. Master #bGrendel#k and I tried to befriend the fairies, but they just weren't listening. I think we should use more... forceful methods.\r\n#b #h ##k, let me ask... are you a good swimmer?")
 
-    elif status == 6:
-        sm.setPlayerAsSpeaker()
-        sm.sendSay("You think Cootie got captured by human-hating fairies?")
-
-    elif status == 7:
-        sm.setSpeakerID(FANZY)
-        sm.sendAskAccept("Most likely. I know I thought about using him as a scratching post a few times. Master #bGrendel#k and I tried to befriend the fairies, but they just weren't listening. I think we should use more... forceful methods.\r\n#b #h ##k, let me ask... are you a good swimmer?")
-        wasAskAccept = True
-
-    elif status == 8:
-        if response == 1:
-            sm.sendNext("Why don't you go for a swim! Show us how brave you are, meow...\r\n#b (Cross the lake to the right.)#k'")
-            sm.startQuestNoCheck(YOU_CAN_DO_IT)
-        sm.dispose()
+if response == 1:
+    sm.sendNext("Why don't you go for a swim! Show us how brave you are, meow...\r\n#b (Cross the lake to the right.)#k'")
+    sm.startQuestNoCheck(YOU_CAN_DO_IT)
+sm.dispose()

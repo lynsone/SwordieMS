@@ -28,11 +28,20 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.SPSet;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.InstanceTableType;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.util.Randomizer;
 
 /**
  * Created on 12/14/2017.
@@ -571,5 +580,35 @@ public class Mihile extends Job {
             giveRoyalGuardBuff(tsm);
         }
         super.handleHit(c, inPacket, hitInfo);
+    }
+    
+    // Character creation related methods ---------------------------------------------------------------------------------------------
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getCharacterStat().setPosMap(913070000);
+    }
+    
+    @Override
+    public void handleLevelUp() {
+        Map<Stat, Object> stats = new HashMap<>();
+        short level = chr.getLevel();
+        if (chr.getJob() == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() && level >= 10) {
+            // IDK if the stats goes for every beginner job.
+            chr.addStat(Stat.mhp, 16);
+            chr.addStat(Stat.mmp, 12);
+            chr.addStat(Stat.str, 4);
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            chr.write(WvsContext.statChanged(stats));
+        } else {
+            chr.addStat(Stat.mhp, Randomizer.rand(48, 52));// temp until sniff some levelup information about mihile
+            chr.addStat(Stat.mmp, Randomizer.rand(4, 6));;// temp until sniff some levelup information about mihile
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        }
+        chr.write(WvsContext.statChanged(stats));
+        super.handleLevelUp();
     }
 }

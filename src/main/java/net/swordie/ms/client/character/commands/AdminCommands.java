@@ -1247,7 +1247,7 @@ public class AdminCommands {
 
     public static class ClearCache extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            chr.getScriptManager().dispose();
+            chr.getScriptManager().dispose(false);
             Server.getInstance().clearCache();
             chr.chatMessage("Cache has been cleared.");
         }

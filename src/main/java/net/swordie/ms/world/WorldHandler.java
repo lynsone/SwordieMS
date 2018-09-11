@@ -16,7 +16,6 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
-import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -53,7 +52,10 @@ import net.swordie.ms.client.jobs.resistance.WildHunter;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
-import net.swordie.ms.client.party.*;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.client.party.PartyResult;
+import net.swordie.ms.client.party.PartyType;
 import net.swordie.ms.client.trunk.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
@@ -62,6 +64,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
@@ -69,6 +72,8 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.MobSkillID;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
@@ -87,6 +92,9 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.gach.GachaponConstants;
+import net.swordie.ms.world.gach.result.GachaponDlgType;
+import net.swordie.ms.world.gach.result.GachaponResult;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
@@ -101,6 +109,7 @@ import org.hibernate.query.Query;
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -112,14 +121,9 @@ import static net.swordie.ms.enums.EquipBaseStat.cuc;
 import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
-import static net.swordie.ms.enums.Stat.level;
-import static net.swordie.ms.enums.Stat.pop;
-import static net.swordie.ms.enums.Stat.sp;
+import static net.swordie.ms.enums.Stat.*;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
-import net.swordie.ms.world.gach.GachaponConstants;
-import net.swordie.ms.world.gach.result.GachaponDlgType;
-import net.swordie.ms.world.gach.result.GachaponResult;
 
 /**
  * Created on 12/14/2017.
@@ -231,6 +235,13 @@ public class WorldHandler {
                     sb.append(String.format("%s = %d, ", bs, basicStats.getOrDefault(bs, 0)));
                 }
                 chr.chatMessage(Mob, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
+                ScriptManagerImpl smi = chr.getScriptManager();
+                // all but field
+                smi.stop(ScriptType.PORTAL);
+                smi.stop(ScriptType.NPC);
+                smi.stop(ScriptType.REACTOR);
+                smi.stop(ScriptType.QUEST);
+                smi.stop(ScriptType.ITEM);
 
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
@@ -1559,6 +1570,10 @@ public class WorldHandler {
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte channelId = (byte) (inPacket.decodeByte() +1);
+
+        Job sourceJobHandler = chr.getJobHandler();
+        sourceJobHandler.handleCancelTimer(chr);
+
         chr.changeChannel(channelId);
     }
 
@@ -1914,7 +1929,7 @@ public class WorldHandler {
                         chr.chatMessage(SystemNotice, "Could not find equip.");
                         chr.dispose();
                         return;
-                    } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
+                    } else if (equip.getBaseGrade() < ItemGrade.Rare.getVal()) {
                         log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
                         chr.dispose();
                         return;
@@ -1922,7 +1937,7 @@ public class WorldHandler {
                     Equip oldEquip = equip.deepCopy();
                     int tierUpChance = ItemConstants.getTierUpChance(itemID);
                     short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
-                    boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    boolean tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
                     if (tierUp) {
                         hiddenValue++;
                     }
@@ -1947,14 +1962,14 @@ public class WorldHandler {
                     if (equip == null) {
                         chr.chatMessage(SystemNotice, "Could not find equip.");
                         return;
-                    } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
+                    } else if (equip.getBonusGrade() < ItemGrade.Rare.getVal()) {
                         log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
                         chr.dispose();
                         return;
                     }
                     tierUpChance = ItemConstants.getTierUpChance(itemID);
                     hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
-                    tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
+                    tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
                     if (tierUp) {
                         hiddenValue++;
                     }
@@ -2210,18 +2225,18 @@ public class WorldHandler {
                 case 2049417:
                 case 2049418:
                 case 2049419:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049700: // Epic pot
                 case 2049708:
-                    val = ItemGrade.HIDDEN_EPIC.getVal();
+                    val = ItemGrade.HiddenEpic.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049762: // Unique Pot
                 case 2049764:
                 case 2049758:
-                    val = ItemGrade.HIDDEN_UNIQUE.getVal();
+                    val = ItemGrade.HiddenUnique.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
 
@@ -2300,14 +2315,14 @@ public class WorldHandler {
                 case 2048314:
                 case 2048316:
                 case 2048329:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, thirdLineChance);
                     break;
                 case 2048306: // Special Bonus Pot
                 case 2048307:
                 case 2048315:
                 case 2048331:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, 100);
                     break;
                 default:
@@ -2439,10 +2454,14 @@ public class WorldHandler {
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        ScriptManagerImpl smi = chr.getScriptManager();
         byte lastType = inPacket.decodeByte();
-        NpcMessageType nmt = lastType < NpcMessageType.values().length ?
+        NpcMessageType nmt = smi.getNpcScriptInfo().getMessageType();
+        if (nmt == null) {
+            nmt = lastType < NpcMessageType.values().length ?
                 Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
                 NpcMessageType.None;
+        }
         if (nmt != NpcMessageType.Monologue) {
             byte action = inPacket.decodeByte();
             int answer = 0;
@@ -2450,7 +2469,10 @@ public class WorldHandler {
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
-                chr.getScriptManager().handleAction(lastType, action, answ);
+                if(action == 3) {   // MoveCamera
+                    return;         // We don't want to use MoveCamera as ways of progressing the script
+                }
+                chr.getScriptManager().handleAction(nmt, action, answ);
                 return;
             }
             if (nmt == NpcMessageType.AskText && action == 1) {
@@ -2465,19 +2487,18 @@ public class WorldHandler {
                 answer = inPacket.decodeByte();
             }
             if (nmt == NpcMessageType.AskText && action != 0) {
-                chr.getScriptManager().handleAction(lastType, action, ans);
+                chr.getScriptManager().handleAction(nmt, action, ans);
             } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
                     nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
                     nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
                 // else -> User pressed escape in a selection (choice) screen
-                chr.getScriptManager().handleAction(lastType, action, answer);
+                chr.getScriptManager().handleAction(nmt, action, answer);
             } else {
                 // User pressed escape in a selection (choice) screen
-                chr.dispose();
-                chr.getScriptManager().dispose();
+                chr.getScriptManager().dispose(false);
             }
         } else {
-            chr.getScriptManager().handleAction(lastType, (byte) 1, 1); // Doesn't use  response nor answer
+            chr.getScriptManager().handleAction(nmt, (byte) 1, 1); // Doesn't use  response nor answer
         }
     }
 
@@ -2729,6 +2750,22 @@ public class WorldHandler {
                 Kanna.hakuBreathUnseen(chr);
                 break;
         }
+    }
+
+    public static void handleDirectionNodeCollision(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        if (chr == null || chr.getField() == null) {
+            return;
+        }
+        Field field = chr.getField();
+        int directionNode = inPacket.decodeInt();
+
+        String script = field.getDirectionInfoScript(directionNode);
+        if (script == null) {
+            return;
+        }
+        log.debug(String.format("Starting direction script %s.", script));
+        chr.getScriptManager().startScript(field.getId(), script, ScriptType.DIRECTION);;
     }
 
     public static void handleUserEmotion(Client c, InPacket inPacket) {
@@ -3666,11 +3703,18 @@ public class WorldHandler {
     }
 
     public static void handleUserCreateHolidomRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+
         inPacket.decodeInt(); //tick
         inPacket.decodeByte(); //unk
         int skillID = inPacket.decodeInt();
         inPacket.decodeInt(); //unk
 
+        if(field.getAffectedAreas().stream().noneMatch(ss -> ss.getSkillID() == skillID)) {
+            log.error(String.format("Character %d tried to heal from Holy Fountain (%d) whilst there isn't any on the field.", chr.getId(), skillID));
+            return;
+        }
         c.getChr().heal( (int) (c.getChr().getMaxHP() / ((double) 100 / 40)) );
     }
 
@@ -3777,7 +3821,15 @@ public class WorldHandler {
             skillID = 65101006; //Lovely Sting Explosion
         }
         Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
-        c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
+        if(mob != null) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            if((mts.hasCurrentMobStat(MobStat.Explosion) && mts.getCurrentOptionsByMobStat(MobStat.Explosion).wOption == chr.getId()) ||
+                    (mts.hasCurrentMobStat(MobStat.SoulExplosion) && mts.getCurrentOptionsByMobStat(MobStat.SoulExplosion).wOption == chr.getId())) {
+                c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
+                mts.removeMobStat(MobStat.Explosion, true);
+                mts.removeMobStat(MobStat.SoulExplosion, true);
+            }
+        }
     }
 
     public static void handleUserActivateEffectItem(Client c, InPacket inPacket) {
@@ -3857,7 +3909,7 @@ public class WorldHandler {
         if(chr.getScriptManager().isActive(ScriptType.REACTOR)
                 && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", type);
+                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", reactor, type);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
@@ -5712,20 +5764,28 @@ public class WorldHandler {
 
         Field field = chr.getField();
         Char targetChr = field.getCharByID(targetChrId);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
 
         if(targetChr == null) { // Faming someone who isn't in the map or doesn't exist
             chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
-
+            chr.dispose();
         } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
             chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
-
-        // TODO  Check on Famed Today & Famed Person
-
+            chr.dispose();
+        } else if (!cs.getNextAvailableFameTime().isExpired()) { // Faming whilst Chr already famed within the FameCooldown time
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.AlreadyDoneToday, targetChr, 0, increase));
+            chr.dispose();
+        } else if (targetChrId == chr.getId()) {
+            log.error(String.format("Character %d tried to fame themselves", chr.getId()));
         } else {
-            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
             chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
             targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
+            cs.setNextAvailableFameTime(FileTime.fromDate(LocalDateTime.now().plusHours(GameConstants.FAME_COOLDOWN)));
+            if(increase) {
+                Effect.showFameGradeUp(targetChr);
+            }
         }
     }
 }

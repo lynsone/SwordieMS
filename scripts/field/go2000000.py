@@ -1,4 +1,3 @@
 # South Perry (2000000)
-def init():
-    sm.showEffect("Map/Effect.img/maplemap/enter/2000000")
-    sm.dispose()
+sm.showEffect("Map/Effect.img/maplemap/enter/2000000")
+sm.dispose()

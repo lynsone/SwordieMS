@@ -1,4 +1,3 @@
 # Portal to Manon
 
-def init():
-    sm.warp(240020401, 3)
+sm.warp(240020401, 3)

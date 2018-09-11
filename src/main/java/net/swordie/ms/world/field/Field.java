@@ -7,17 +7,18 @@ import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Archer;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
-import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.DropEnterType;
+import net.swordie.ms.enums.DropLeaveType;
+import net.swordie.ms.enums.EliteState;
+import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
@@ -71,7 +72,6 @@ public class Field {
     private int fixedMobCapacity;
     private int objectIDCounter = 1000000;
     private boolean userFirstEnter = false;
-    private Set<Reactor> reactors;
     private String fieldScript = "";
     private ScriptManagerImpl scriptManagerImpl;
     private RuneStone runeStone;
@@ -85,6 +85,7 @@ public class Field {
     private List<OpenGate> openGateList = new ArrayList<>();
     private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean isChannelField;
+    private Map<Integer, String> directionInfo;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -96,7 +97,7 @@ public class Field {
         this.chars = new CopyOnWriteArrayList<>();
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
-        this.reactors = new HashSet<>();
+        this.directionInfo = new HashMap<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
         startFieldScript();
     }
@@ -814,7 +815,10 @@ public class Field {
             }
         }
     }
-
+    public void drop(Drop drop, Position posFrom, Position posTo) {
+        drop(drop, posFrom, posTo, false);
+    }
+    
     /**
      * Drops an item to this map, given a {@link Drop}, a starting Position and an ending Position.
      * Immediately broadcasts the drop packet.
@@ -822,15 +826,17 @@ public class Field {
      * @param drop    The Drop to drop.
      * @param posFrom The Position that the drop starts off from.
      * @param posTo   The Position where the drop lands.
+     * @param ignoreTradability if the drop should ignore tradability (i.e., untradable items won't disappear)
      */
-    public void drop(Drop drop, Position posFrom, Position posTo) {
+    public void drop(Drop drop, Position posFrom, Position posTo, boolean ignoreTradability) {
         boolean isTradable = true;
         Item item = drop.getItem();
         if (item != null) {
             ItemInfo itemInfo = ItemData.getItemInfoByID(item.getItemId());
             // must be tradable, and if not an equip, not a quest item
-            isTradable = item != null && item.isTradable() && (ItemConstants.isEquip(item.getItemId()) ||
-                    (itemInfo != null && !itemInfo.isQuest()));
+            isTradable = ignoreTradability ||
+                    (item.isTradable() && (ItemConstants.isEquip(item.getItemId()) || itemInfo != null
+                    && !itemInfo.isQuest()));
         }
         drop.setPosition(posTo);
         if (isTradable) {
@@ -868,11 +874,16 @@ public class Field {
         Drop drop = new Drop(-1);
         drop.setPosition(posTo);
         drop.setOwnerID(ownerID);
+        Set<Integer> quests = new HashSet<>();
         if (itemID != 0) {
             item = ItemData.getItemDeepCopy(itemID, true);
             if (item != null) {
                 item.setQuantity(dropInfo.getQuantity());
                 drop.setItem(item);
+                ItemInfo ii = ItemData.getItemInfoByID(itemID);
+                if (ii != null) {
+                    quests = ii.getQuestIDs();
+                }
             } else {
                 log.error("Was not able to find the item to drop! id = " + itemID);
                 return;
@@ -887,7 +898,7 @@ public class Field {
                         GameConstants.DROP_REMAIN_ON_GROUND_TIME, TimeUnit.SECONDS));
         EventManager.addEvent(() -> drop.setOwnerID(0), GameConstants.DROP_REMOVE_OWNERSHIP_TIME, TimeUnit.SECONDS);
         for (Char chr : getChars()) {
-            if (dropInfo.getQuestReq() == 0 || chr.hasQuestInProgress(dropInfo.getQuestReq())) {
+            if (chr.hasAnyQuestsInProgress(quests)) {
                 broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, ownerID, drop.canBePickedUpBy(chr)));
             }
         }
@@ -904,16 +915,21 @@ public class Field {
         drop(dropInfos, findFootHoldBelow(position), position, ownerID);
     }
 
+    public void drop(Drop drop, Position position) {
+        drop(drop, position, false);
+    }
+    
     /**
      * Drops a {@link Drop} at a given Position. Calculates the Position that the Drop should land at.
      *
      * @param drop     The Drop that should be dropped.
      * @param position The Position it is dropped from.
+     * @param fromReactor if it quest item the item will disapear
      */
-    public void drop(Drop drop, Position position) {
+    public void drop(Drop drop, Position position, boolean fromReactor) {
         int x = position.getX();
         Position posTo = new Position(x, findFootHoldBelow(position).getYFromX(x));
-        drop(drop, position, posTo);
+        drop(drop, position, posTo, fromReactor);
     }
 
     /**
@@ -1004,6 +1020,22 @@ public class Field {
         this.fieldScript = fieldScript;
     }
 
+    public Mob spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
+        Mob mob = MobData.getMobDeepCopyById(id);
+        Position pos = new Position(x, y);
+        mob.setPosition(pos.deepCopy());
+        mob.setPrevPos(pos.deepCopy());
+        mob.setPosition(pos.deepCopy());
+        mob.setNotRespawnable(true);
+        mob.setAppearType((byte) appearType);
+        mob.setOption(option);
+        if (mob.getField() == null) {
+            mob.setField(this);
+        }
+        spawnLife(mob, null);
+        return mob;
+    }
+    
     public Mob spawnMob(int id, int x, int y, boolean respawnable, long hp) {
         Mob mob = MobData.getMobDeepCopyById(id);
         Position pos = new Position(x, y);
@@ -1075,8 +1107,8 @@ public class Field {
     }
 
     public void startBurningFieldTimer() {
-        if(getMobs().size() > 0 &&
-                getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
+        if(getMobGens().size() > 0
+                && getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0) >= GameConstants.BURNING_FIELD_MIN_MOB_LEVEL) {
             setBurningFieldLevel(GameConstants.BURNING_FIELD_LEVEL_ON_START);
             EventManager.addFixedRateEvent(this::changeBurningLevel, 0, GameConstants.BURNING_FIELD_TIMER, TimeUnit.MINUTES); //Every X minutes runs 'changeBurningLevel()'
         }
@@ -1237,5 +1269,30 @@ public class Field {
 
     public TownPortal getTownPortalByChrId(int chrId) {
         return getTownPortalList().stream().filter(tp -> tp.getChr().getId() == chrId).findAny().orElse(null);
+    }
+    
+    public void increaseReactorState(Char chr, int templateId, int stateLength) {
+        Life life = getLifeByTemplateId(templateId);
+        if (life != null && life instanceof Reactor) {
+            Reactor reactor = (Reactor) life;
+            reactor.increaseState();
+            chr.write(ReactorPool.reactorChangeState(reactor, (short) 0, (byte) stateLength));
+        }
+    }
+
+    public Map<Integer, String> getDirectionInfo() {
+        return directionInfo;
+    }
+
+    public void setDirectionInfo(Map<Integer, String> directionInfo) {
+        this.directionInfo = directionInfo;
+    }
+
+    public String getDirectionInfoScript(int node) {
+        return directionInfo.getOrDefault(node, null);
+    }
+
+    public void addDirectionInfo(int node, String script) {
+        directionInfo.put(node, script);
     }
 }

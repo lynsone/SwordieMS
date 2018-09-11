@@ -1,4 +1,3 @@
 # 865000000
-def init():
-    sm.warp(865020000, 1)
-    sm.dispose()
+sm.warp(865020000, 3)
+sm.dispose()

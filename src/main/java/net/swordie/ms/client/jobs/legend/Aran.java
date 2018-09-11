@@ -351,6 +351,9 @@ public class Aran extends Job {
                     int time = 3; //Time value never given, so I decided upon 3 seconds.
                     if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;

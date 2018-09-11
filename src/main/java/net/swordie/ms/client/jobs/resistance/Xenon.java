@@ -121,10 +121,11 @@ public class Xenon extends Job {
                 }
             }
             supplyProp = SkillData.getSkillInfoById(SUPPLY_SURPLUS).getValue(prop, 1);
+
             if(supplyTimer != null && !supplyTimer.isDone()) {
                 supplyTimer.cancel(true);
             }
-            supplyInterval();
+            supplyTimer = EventManager.addFixedRateEvent(this::incrementSupply, 2000, 4000);
         }
     }
 
@@ -270,20 +271,17 @@ public class Xenon extends Job {
         }
     }
 
-    public void incrementSupply() {
+    private void incrementSupply() {
         incrementSupply(1);
     }
 
     private void incrementSupply(int amount) {
-        supply += amount;
-        supply = Math.min(MAX_SUPPLY, supply);
-        updateSupply();
-    }
-
-    public void supplyInterval() {
-        // done this way so we don't have to manually stop the schedule once the chr has logged out
-        incrementSupply();
-        supplyTimer = EventManager.addEvent(this::supplyInterval, 4000);
+        if (supply < 20) {
+            supply = chr.getTemporaryStatManager().getOption(SurplusSupply).nOption;
+            supply += amount;
+            supply = Math.min(MAX_SUPPLY, supply);
+            updateSupply();
+        }
     }
 
     private void updateSupply() {
@@ -291,6 +289,13 @@ public class Xenon extends Job {
         o.nOption = supply;
         chr.getTemporaryStatManager().putCharacterStatValue(SurplusSupply, o);
         chr.getTemporaryStatManager().sendSetStatPacket();
+    }
+
+    @Override
+    public void handleCancelTimer(Char chr) {
+        if(supplyTimer != null) {
+            supplyTimer.cancel(true);
+        }
     }
 
 
@@ -318,7 +323,8 @@ public class Xenon extends Job {
                     attackInfo.skillId != PINPOINT_SALVO &&
                     attackInfo.skillId != PINPOINT_SALVO_REDESIGN_A &&
                     attackInfo.skillId != PINPOINT_SALVO_REDESIGN_B &&
-                    attackInfo.skillId != PINPOINT_SALVO_PERFECT_DESIGN) {
+                    attackInfo.skillId != PINPOINT_SALVO_PERFECT_DESIGN &&
+                    attackInfo.skillId != TRIANGULATION) {
                 incrementSupply();
             }
 
@@ -382,43 +388,31 @@ public class Xenon extends Job {
         int amount = 1;
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            MobTemporaryStat mts = mob.getTemporaryStat();
-
-
-            if(attackInfo.skillId == TRIANGULATION) {
-                if(mts.hasCurrentMobStat(MobStat.Explosion)) {
-                    mts.removeMobStat(MobStat.Explosion, false);
-                    return;
-                }
+            if(mob == null) {
+                continue;
             }
+            MobTemporaryStat mts = mob.getTemporaryStat();
 
             if(Util.succeedProp(proc)) {
                 if (mts.hasCurrentMobStat(MobStat.Explosion)) {
                     amount = mts.getCurrentOptionsByMobStat(MobStat.Explosion).nOption;
                     if (amount <= 3) {
                         amount++;
-                    } else {
-                        mts.removeMobStat(MobStat.Explosion, false);
-                        return;
                     }
                 }
+
                 mts.removeMobStat(MobStat.Explosion, false);
-                //o.nOption = -(si.getValue(x, slv) * amount);
-                //o.rOption = TRIANGULATION;
-                //o.tOption = 0;
-                //mts.addStatOptions(MobStat.ACC, o);
-                //mts.addStatOptions(MobStat.EVA, o);
 
                 o1.nOption = amount;
                 o1.rOption = TRIANGULATION;
                 o1.tOption = 0;
-                o1.wOption = 1;
+                o1.wOption = chr.getId();
                 mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
             }
         }
     }
 
-    private void createPinPointSalvoForceAtom() { //TODO Cost
+    private void createPinPointSalvoForceAtom() {
         Field field = chr.getField();
 
         SkillInfo si = SkillData.getSkillInfoById(PINPOINT_SALVO);
@@ -504,7 +498,9 @@ public class Xenon extends Job {
                     chr.warp(toField);
                     break;
                 case PINPOINT_SALVO:
-                    incrementSupply(-1);
+                    o1.nOption = supply--;
+                    tsm.putCharacterStatValue(SurplusSupply, o1);
+                    updateSupply();
                     createPinPointSalvoForceAtom();
                     break;
                 case HEROS_WILL_XENON:

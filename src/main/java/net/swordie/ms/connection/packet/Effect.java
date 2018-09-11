@@ -1,6 +1,7 @@
 package net.swordie.ms.connection.packet;
 
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.legend.Evan;
@@ -16,6 +17,7 @@ import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.enums.UserEffectType;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.world.field.Field;
 
 import static net.swordie.ms.enums.UserEffectType.*;
 
@@ -133,6 +135,12 @@ public class Effect {
                 outPacket.encodeByte(getArg1()); // amount being healed     0 = Miss
                 break;
             case AvatarOriented:
+                outPacket.encodeString(getString());
+                break;
+            case ReservedEffect:
+                outPacket.encodeByte(getArg1());
+                outPacket.encodeInt(getArg2());
+                outPacket.encodeInt(getArg3());
                 outPacket.encodeString(getString());
                 break;
         }
@@ -359,6 +367,14 @@ public class Effect {
         return effect;
     }
 
+    public static void showFameGradeUp(Char chr) {
+        Field field = chr.getField();
+        chr.write(User.effect(Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/front")));
+        chr.write(User.effect(Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/back")));
+        field.broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/front")));
+        field.broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/back")));
+    }
+
     public static Effect skillUse(int skillID, byte slv, int bySummonedID) {
         Effect effect = new Effect();
 
@@ -577,6 +593,18 @@ public class Effect {
         Effect effect = new Effect();
         
         effect.setUserEffectType(AvatarOriented);
+        effect.setString(effectPath);
+        
+        return effect;
+    }
+    
+    public static Effect reservedEffect(String effectPath) {
+        Effect effect = new Effect();
+        
+        effect.setUserEffectType(ReservedEffect);
+        effect.setArg1(0);// bShow
+        effect.setArg2(0);
+        effect.setArg3(0);
         effect.setString(effectPath);
         
         return effect;

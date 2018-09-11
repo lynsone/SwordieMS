@@ -2,6 +2,8 @@ package net.swordie.ms.client.jobs.resistance;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -9,6 +11,10 @@ import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.enums.InstanceTableType;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.util.Randomizer;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.Life;
@@ -27,9 +33,7 @@ import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -138,15 +142,11 @@ public class Demon extends Job {
 
     private int[] addedSkillsDS = new int[] {
             SECRET_ASSEMBLY,
-            DARK_WINDS,
-            DEMONIC_BLOOD,
             CURSE_OF_FURY,
     };
 
     private int[] addedSkillsDA = new int[] {
             SECRET_ASSEMBLY,
-            DARK_WINDS,
-            DEMONIC_BLOOD,
             EXCEED,
             BLOOD_PACT,
             HYPER_POTION_MASTERY,
@@ -883,5 +883,34 @@ public class Demon extends Job {
             }
         }
         super.handleHit(c, inPacket, hitInfo);
+    }
+
+    // Character creation related methods ---------------------------------------------------------------------------------------------
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getCharacterStat().setPosMap(927000000);
+    }
+
+    @Override
+    public void handleLevelUp() {
+        // MP always 5 in the tutorial. TODO: find where it changes to 30(max cap for first demon job).
+        Map<Stat, Object> stats = new HashMap<>();
+        short level = chr.getLevel();
+        if (chr.getJob() == JobConstants.JobEnum.DEMON_SLAYER.getJobId() && level >= 10) {
+            chr.addStat(Stat.mhp, 56);
+            chr.addStat(Stat.str, level >= 6 ? 4 : 5);
+            if (level >= 6) chr.addStat(Stat.str, 1);
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
+        } else {
+            chr.addStat(Stat.mhp, 56);// temp until sniff some levelup information about mihile
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        }
+        chr.write(WvsContext.statChanged(stats));
+        super.handleLevelUp();
     }
 }

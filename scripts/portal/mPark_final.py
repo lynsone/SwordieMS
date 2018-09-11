@@ -11,28 +11,14 @@ if quest is None:
 quest.setQrValue(str(int(quest.getQRValue())))
 
 
-def init():
-    fieldID = sm.getFieldID()
-    warp = True
+fieldID = sm.getFieldID()
 
-    if fieldID / 1000000 == 952 or fieldID / 1000000 == 953 or fieldID / 1000000 == 954:
-        warp = False
-        sm.setSpeakerID(9071005)
-        sm.sendNext("Did you have a blast in Monster Park? Here's your reward\r\n"
-                    "\r\n"
-                    "#e#bDay-of-the-week reward: #v"+ str(sm.getMPReward()) +"##t"+ str(sm.getMPReward()) +"#\r\n"
-                    "EXP reward: "+ sm.formatNumber(quest.getQRValue()))
-
-
-    else:
-        map = fieldID
-        portal = 0
-
-    if warp:
-        sm.warp(map, portal)
-        sm.dispose()
-
-def action(response, answer):
+if fieldID / 1000000 == 952 or fieldID / 1000000 == 953 or fieldID / 1000000 == 954:
+    sm.setSpeakerID(9071005)
+    sm.sendNext("Did you have a blast in Monster Park? Here's your reward\r\n"
+                "\r\n"
+                "#e#bDay-of-the-week reward: #v"+ str(sm.getMPReward()) +"##t"+ str(sm.getMPReward()) +"#\r\n"
+                "EXP reward: "+ sm.formatNumber(quest.getQRValue()))
     if sm.canHold(sm.getMPReward()):
         #Warp out instance | Monster Park
         sm.warpInstanceOut(951000000) #Monster Park
@@ -40,4 +26,7 @@ def action(response, answer):
         sm.giveItem(sm.getMPReward())
     else:
         sm.sendSayOkay("Please make some space before leaving.")
-    sm.dispose()
+else:
+    sm.chat("This is uncoded for the current map (" + fieldID + ")")
+
+sm.dispose()

@@ -1,8 +1,6 @@
 # 105200310 (+ other RA bosses)
-def init():
-    sm.sendAskYesNo("Would you like to leave?")
+response = sm.sendAskYesNo("Would you like to leave?")
 
-def action(response, answer):
-    if response == 1:
-        sm.warpPartyOut(105200000)
-    sm.dispose()
+if response == 1:
+    sm.warpPartyOut(105200000)
+sm.dispose()

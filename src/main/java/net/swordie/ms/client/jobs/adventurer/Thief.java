@@ -190,7 +190,7 @@ public class Thief extends Beginner {
                 if(critGrowthTimer != null && !critGrowthTimer.isDone()) {
                     critGrowthTimer.cancel(true);
                 }
-                critGrowthTimer = EventManager.addFixedRateEvent(this::incrementCritGrowing, 0, 2000);
+                critGrowthTimer = EventManager.addFixedRateEvent(this::incrementCritGrowing, 2000, 2000);
             }
         }
 
@@ -471,6 +471,13 @@ public class Thief extends Beginner {
             multiplier = 4;
         }
         return multiplier;
+    }
+
+    @Override
+    public void handleCancelTimer(Char chr) {
+        if (critGrowthTimer != null) {
+            critGrowthTimer.cancel(true);
+        }
     }
 
     private void incrementShadowInstinct(int skillId, TemporaryStatManager tsm, Client c) {
@@ -863,6 +870,9 @@ public class Thief extends Beginner {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if (Util.succeedProp(markprop)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }

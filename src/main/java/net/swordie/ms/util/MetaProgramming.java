@@ -1,9 +1,9 @@
 package net.swordie.ms.util;
 
+import net.swordie.ms.ServerConstants;
 import org.apache.log4j.LogManager;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Scanner;
 
 /**
@@ -11,6 +11,75 @@ import java.util.Scanner;
  */
 public class MetaProgramming {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+
+    public static void makeStateless() {
+        String dir = ServerConstants.SCRIPT_DIR;
+        String[] subDirs = new String[]{"field", "item", "npc", "portal", "quest", "reactor"};
+        for (String subDir : subDirs) {
+            File exactDir = new File(dir + "/" + subDir);
+            for (File file : exactDir.listFiles()) {
+                makeStateless(file);
+            }
+        }
+    }
+
+    public static void makeStateless(File file) {
+        File outFile = new File(file.getAbsolutePath().replace("Swordie\\scripts", "Swordie\\stateless"));
+        boolean fromRemoved = true;
+        StringBuilder sb = new StringBuilder();
+        try(Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                int tabs = 0;
+                String line = scanner.nextLine();
+                char[] chars = line.toCharArray();
+                int spaceCount = 0;
+                for (char c : chars) {
+                    if (c == '#') {
+                        break;
+                    }
+                    if (c == '\t') {
+                        tabs++;
+                    } else if (c == ' ') {
+                        spaceCount++;
+                        if (spaceCount == 4) {
+                            spaceCount = 0;
+                            tabs++;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                if (line.contains("status")) {
+                } else if (line.contains("def init") || line.contains("def action(response")) {
+                    fromRemoved = true;
+                }  else {
+                    if (line.contains("def")) {
+                        fromRemoved = false;
+                    }
+                    line = line.replace("\t", "").replace("    ", "");
+                    String newLine = "";
+                    for (int i = 0; i < (fromRemoved ? tabs - 1 : tabs); i++) {
+                        newLine += "    ";
+                    }
+                    newLine += line;
+                    newLine = newLine.replace("sm.sendAskYesNo", "response = sm.sendAskYesNo");
+                    newLine = newLine.replace("sm.sendAskAccept", "response = sm.sendAskAccept");
+//                    System.out.println(newLine + "              (neededtabs = " + neededTabs + ", tabs = " + tabs + ", changedLast = " + changedLast + ", fromRemoved = " + fromRemoved + ")");
+                    sb.append(newLine).append("\r\n");
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try (PrintWriter fos = new PrintWriter(outFile)){
+            fos.write(sb.toString());
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     public static void fixTempStats() {
 //        Invincible(0x10000000, 2),
@@ -161,6 +230,7 @@ public class MetaProgramming {
     }
 
     public static void main(String[] args) {
-        makeHeaders();
+//        makeStateless(new File("D:\\SwordieMS\\Swordie\\old_scripts\\portal\\Resi_tutor11.py"));
+        makeStateless();
     }
 }

@@ -6,6 +6,7 @@ import java.util.Arrays;
  * Created by Asura on 5-9-2018.
  */
 public enum ForcedInputType {
+    Stop(0),
     WalkLeft(1),
     WalkRight(2),
     ClimbUp(3),

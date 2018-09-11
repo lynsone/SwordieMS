@@ -460,6 +460,7 @@ create table characterstats (
     lastlogout bigint,
     gachexp int,
     honorexp int,
+    nextavailablefametime bigint,
     primary key (id),
     foreign key (extendsp) references extendsp(id),
     foreign key (noncombatstatdaylimit) references noncombatstatdaylimit(id),

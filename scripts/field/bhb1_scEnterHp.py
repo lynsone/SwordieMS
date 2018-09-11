@@ -4,8 +4,7 @@ from net.swordie.ms.scripts import ScriptType
 
 BLACK_HEAVEN_CORE = 8240103 # Stage 1
 
-def init():
-    sm.showHP(BLACK_HEAVEN_CORE)
+sm.showHP(BLACK_HEAVEN_CORE)
 
 def onMobDeath(mob):
     if mob.getTemplateId() == BLACK_HEAVEN_CORE:
