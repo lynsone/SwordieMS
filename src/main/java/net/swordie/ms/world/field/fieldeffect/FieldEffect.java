@@ -82,6 +82,10 @@ public class FieldEffect {
             case StageClearExpOnly:
                 outPacket.encodeInt(getArg1());     // Exp Number given
                 break;
+            case PlaySound:
+                outPacket.encodeString(getString());// Sound
+                outPacket.encodeInt(getArg1());// Vol ?
+                break;
         }
     }
 
@@ -183,6 +187,15 @@ public class FieldEffect {
         return fieldEffect;
     }
 
+    public static FieldEffect playSound(String sound, int vol) {
+        FieldEffect fieldEffect = new FieldEffect();
+        fieldEffect.setFieldEffectType(FieldEffectType.PlaySound);
+
+        fieldEffect.setString(sound);
+        fieldEffect.setArg1(vol);
+
+        return fieldEffect;
+    }
 
     public FieldEffectType getFieldEffectType() {
         return fieldEffectType;
