@@ -75,7 +75,7 @@ public class Util {
      * @return The contents of the File as a single String.
      * @throws IOException If the file cannot be found (usually)
      */
-    public static String readFile(String path, Charset encoding) throws IOException {
+    public synchronized static String readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
     }

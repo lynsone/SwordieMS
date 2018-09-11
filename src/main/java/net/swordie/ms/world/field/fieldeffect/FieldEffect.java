@@ -84,7 +84,7 @@ public class FieldEffect {
                 break;
             case PlaySound:
                 outPacket.encodeString(getString());// Sound
-                outPacket.encodeInt(getArg1());// Vol ?
+                outPacket.encodeInt(getArg1());// Volume
                 break;
         }
     }
