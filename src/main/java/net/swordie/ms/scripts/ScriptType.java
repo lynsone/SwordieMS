@@ -10,5 +10,6 @@ public enum ScriptType {
     PORTAL,
     REACTOR,
     ITEM,
-    QUEST
+    QUEST,
+    DIRECTION
 }
