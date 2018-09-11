@@ -1,7 +1,8 @@
 # Limbert's General Store (913070000)
 sm.lockInGameUI(True)
 sm.chatScript("Mr. Limbert's General Store")
-# should be sendDelay(500) but it doesn't work before chat script
+sendDelay(500)
+
 sm.chatScript("Month 3, Day 4")
 sm.sendDelay(1000)
 
