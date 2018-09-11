@@ -894,15 +894,6 @@ public class Demon extends Job {
 
     @Override
     public void handleLevelUp() {
-        // 1~2: HP: 50(not sure) => 106
-        // 2~3: HP: 106 => 162 +56
-        // 3~4: HP: 162 => 218 +56
-        // 4~5: HP: 218 => 274 +56
-        // 5~6: HP: 274 => 330 +56
-        // 6~7: HP: 330 => 386 +56
-        // 7~8: HP: 386 => 442 +56
-        // 8~9: HP: 442 => 498 +56
-        // 10 : HP: 498 => 554 +56
         // MP always 5 in the tutorial. TODO: find where it changes to 30(max cap for first demon job).
         Map<Stat, Object> stats = new HashMap<>();
         short level = chr.getLevel();
@@ -916,38 +907,10 @@ public class Demon extends Job {
             stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
         } else {
             chr.addStat(Stat.mhp, 56);// temp until sniff some levelup information about mihile
-            chr.addStat(Stat.ap, 5);
             stats.put(Stat.mhp, chr.getStat(Stat.mhp));
             stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-            stats.put(Stat.ap, chr.getStat(Stat.ap));
-            int sp = SkillConstants.getBaseSpByLevel(level);
-            if ((level % 10) % 3 == 0 && level > 100) {
-                sp *= 2; // double sp on levels ending in 3/6/9
-            }
-            ExtendSP extendSP = chr.getAvatarData().getCharacterStat().getExtendSP();
-            if (level >= SkillConstants.PASSIVE_HYPER_MIN_LEVEL) {
-                SPSet spSet = extendSP.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1);
-                spSet.addSp(1);
-                chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperPassiveSkill, true, spSet.getSp()));
-            }
-            if (SkillConstants.ACTIVE_HYPER_LEVELS.contains(level)) {
-                SPSet spSet = extendSP.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
-                chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperActiveSkill, true, spSet.getSp()));
-                spSet.addSp(1);
-            }
-            chr.addSpToJobByCurrentLevel(sp);
-            stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-            byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
-            int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
-            if (linkSkillID != 0 && linkSkillLevel > 0) {
-                Skill skill = chr.getSkill(linkSkillID, true);
-                if (skill.getCurrentLevel() != linkSkillLevel) {
-                    chr.addSkill(linkSkillID, linkSkillLevel, 3);
-                }
-            }
         }
         chr.write(WvsContext.statChanged(stats));
-        chr.heal(chr.getMaxHP());
-        chr.healMP(chr.getMaxMP());
+        super.handleLevelUp();
     }
 }

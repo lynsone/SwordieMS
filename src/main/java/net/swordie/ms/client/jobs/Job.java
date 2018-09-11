@@ -599,9 +599,7 @@ public abstract class Job {
 
 	public void handleLevelUp() {
 		short level = chr.getLevel();
-		chr.addStat(Stat.mhp, 500);
-		chr.addStat(Stat.mmp, 500);
-		chr.addStat(Stat.ap, 5);
+		if (level > 10) chr.addStat(Stat.ap, 5);
 		int sp = SkillConstants.getBaseSpByLevel(level);
 		if ((level % 10) % 3 == 0 && level > 100) {
 			sp *= 2; // double sp on levels ending in 3/6/9
@@ -619,8 +617,6 @@ public abstract class Job {
 		}
 		chr.addSpToJobByCurrentLevel(sp);
 		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-		stats.put(Stat.mmp, chr.getStat(Stat.mmp));
 		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
 		chr.write(WvsContext.statChanged(stats));
