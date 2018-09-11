@@ -28,7 +28,7 @@ if sm.sendAskAccept("The choice is yours. Listen to your heart. The voice of des
     sm.startQuestNoCheck(29976)
     sm.completeQuestNoRewards(29976)
     sm.completeQuestNoRewards(20036)
-    sm.warp(913070071, 0)
+    sm.warpInstanceIn(913070071, 0)
 else:
     sm.setSpeakerID(CYGNUS)
     sm.sendNext("Why are you refusing destiny?")

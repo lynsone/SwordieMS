@@ -539,6 +539,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		stop(ScriptType.ITEM);
 		stop(ScriptType.QUEST);
 		stop(ScriptType.REACTOR);
+		stop(ScriptType.DIRECTION);
 		if (stop) {
 			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
 		}

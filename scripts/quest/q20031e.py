@@ -34,5 +34,5 @@ sm.sendDelay(5000)
 
 sm.sendNext("It was like... a small shining light...")
 
-sm.warp(913070002, 0)
+sm.warpInstanceIn(913070002, 0)
 sm.dispose()      
