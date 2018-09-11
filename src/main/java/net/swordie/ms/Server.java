@@ -54,8 +54,6 @@ public class Server extends Properties {
 
 	private void init(String[] args) {
 		log.info("Starting server.");
-		long start = System.currentTimeMillis();
-
 		long startNow = System.currentTimeMillis();
 		DatabaseManager.init();
 		log.info("Loaded Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
@@ -85,8 +83,7 @@ public class Server extends Properties {
 				new Thread(ca).start();
 			}
 		}
-		long end = System.currentTimeMillis();
-		log.info(String.format("Finished loading server in %dms", end - start));
+		log.info(String.format("Finished loading server in %dms", System.currentTimeMillis() - startNow));
 	}
 
 	private void checkAndCreateDat() {
