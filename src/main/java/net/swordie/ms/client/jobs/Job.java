@@ -596,17 +596,6 @@ public abstract class Job {
 		if ((level % 10) % 3 == 0 && level > 100) {
 			sp *= 2; // double sp on levels ending in 3/6/9
 		}
-		ExtendSP extendSP = chr.getAvatarData().getCharacterStat().getExtendSP();
-		if (level >= SkillConstants.PASSIVE_HYPER_MIN_LEVEL) {
-			SPSet spSet = extendSP.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1);
-			spSet.addSp(1);
-			chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperPassiveSkill, true, spSet.getSp()));
-		}
-		if (SkillConstants.ACTIVE_HYPER_LEVELS.contains(level)) {
-			SPSet spSet = extendSP.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
-			chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperActiveSkill, true, spSet.getSp()));
-			spSet.addSp(1);
-		}
 		chr.addSpToJobByCurrentLevel(sp);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.mhp, chr.getStat(Stat.mhp));
