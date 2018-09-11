@@ -9,6 +9,7 @@ import net.swordie.ms.client.character.MonsterPark;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
+import net.swordie.ms.client.character.items.Inventory;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.quest.Quest;
@@ -159,22 +160,17 @@ public class ScriptManagerImpl implements ScriptManager {
 		startScript(parentID, objID, parentID + ".py", scriptType);
 	}
 
-	private void startScript(int parentID, int objID, ScriptType scriptType, String initFuncName) {
-		startScript(parentID, objID, parentID + ".py", scriptType, initFuncName);
-	}
-
 	public void startScript(int parentID, int objID, String scriptName, ScriptType scriptType) {
-		startScript(parentID, objID, scriptName, scriptType, "init");
-	}
-
-	private void startScript(int parentID, int objID, String scriptName, ScriptType scriptType, String initFuncName) {
-		setLastActiveScriptType(scriptType);
-		if (scriptType == ScriptType.NONE) {
+		if (scriptType == ScriptType.NONE || (scriptType == ScriptType.QUEST && !isQuestScriptAllowed())) {
+			log.debug(String.format("Did not allow script %s to go through (type %s)", scriptName, scriptType));
 			return;
 		}
+		setLastActiveScriptType(scriptType);
 		if (isActive(scriptType) && scriptType != ScriptType.FIELD) { // because Field Scripts don't get disposed.
 			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
 							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
+			log.debug(String.format("Could not run script %s because one of the same type is already running (%s, type %s)",
+					scriptName, getScriptInfoByType(scriptType).getScriptName(), scriptType));
 			return;
 		}
 		if (!isField()) {
@@ -204,19 +200,17 @@ public class ScriptManagerImpl implements ScriptManager {
 		getEvaluations().put(scriptType, sf);
 	}
 
+	private boolean isQuestScriptAllowed() {
+		return getLastActiveScriptType() == ScriptType.NONE;
+	}
+
 	public Map<ScriptType, Future> getEvaluations() {
 		return evaluations;
 	}
 
 	public void notifyMobDeath(Mob mob) {
 		if (isActive(ScriptType.FIELD)) {
-			try {
-				getInvocableByType(ScriptType.FIELD).invokeFunction("onMobDeath", mob);
-			} catch (ScriptException e) {
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				// Intended: no method is no problem
-			}
+			getScriptInfoByType(ScriptType.FIELD).setResponse(mob);
 		}
 	}
 
@@ -249,11 +243,12 @@ public class ScriptManagerImpl implements ScriptManager {
 			if (!e.getMessage().contains(INTENDED_NPE_MSG)) {
 				log.error(String.format("Unable to compile script %s!", name));
 				e.printStackTrace();
+				lockInGameUI(false); // so players don't get stuck if a script fails
 			}
 		} finally {
-			if (si.isActive() && scriptType != ScriptType.FIELD) {
-				// gracefully stop script if it's still active
-				stop(getLastActiveScriptType());
+			if (si.isActive() && name.equals(si.getScriptName())) {
+				// gracefully stop script if it's still active with the same script info
+				stop(scriptType);
 			}
 		}
 	}
@@ -544,7 +539,6 @@ public class ScriptManagerImpl implements ScriptManager {
 		stop(ScriptType.ITEM);
 		stop(ScriptType.QUEST);
 		stop(ScriptType.REACTOR);
-		setLastActiveScriptType(ScriptType.NONE);
 		if (stop) {
 			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
 		}
@@ -780,7 +774,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		stopEventsByScriptType(ScriptType.FIELD); // Stops the FixedRate Event from the Field Script
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
 		if (!in) {
-                    chr.getFields().clear();
+			chr.getFields().clear();
 		}
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(id);
 		Portal portal = field.getPortalByID(portalID);
@@ -805,6 +799,33 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public boolean hasMobsInField() {
 		return hasMobsInField(chr.getFieldID());
+	}
+
+	public Mob waitForMobDeath() {
+		Object response = null;
+		if (isActive(ScriptType.FIELD)) {
+			response = getScriptInfoByType(ScriptType.FIELD).awaitResponse();
+		}
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (Mob) response;
+	}
+
+	public Mob waitForMobDeath(int... possibleMobs) {
+		Mob mob = waitForMobDeath();
+		while (true) {
+			if (mob == null) {
+				throw new NullPointerException(INTENDED_NPE_MSG);
+			} else {
+				for (int mobID : possibleMobs) {
+					if (mob.getTemplateId() == mobID) {
+						return mob;
+					}
+				}
+				mob = waitForMobDeath();
+			}
+		}
 	}
 
 	@Override
@@ -1375,6 +1396,26 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void giveItem(int id, int quantity) {
 		chr.addItemToInventory(id, quantity);
+	}
+
+	public void giveAndEquip(int id) {
+		if (!ItemConstants.isEquip(id)) {
+			giveItem(id);
+		}
+		Item equip = ItemData.getItemDeepCopy(id);
+		if (equip == null) {
+			return;
+		}
+		// replace the old equip if there was any
+		Inventory equipInv = chr.getEquipInventory();
+		int bodyPart = ItemConstants.getBodyPartFromItem(id, chr.getAvatarData().getAvatarLook().getGender());
+		Item oldEquip = equipInv.getItemBySlot((short) bodyPart);
+		if (oldEquip != null) {
+			chr.unequip(oldEquip);
+			oldEquip.updateToChar(chr);
+		}
+		chr.equip(equip);
+		oldEquip.updateToChar(chr);
 	}
 
 	@Override

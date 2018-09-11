@@ -7,6 +7,7 @@ import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
 
@@ -461,6 +462,19 @@ public interface ScriptManager extends Observer {
 	 * @return True if there are mobs in the linked {@link Field}.
 	 */
 	boolean hasMobsInField();
+
+	/**
+	 * Waits for a mob to die on the char's current field.
+	 * @return the mob that died
+	 */
+	Mob waitForMobDeath();
+
+	/**
+	 * Waits for a mob with a given ID to die on the char's current field.
+	 * @param possibleMobs the ids the mob can have. If multiple ids are given, this will return when there is a single match
+	 * @return the mob that died
+	 */
+	Mob waitForMobDeath(int... possibleMobs);
 
 	/**
 	 * Determines if there are mobs present in a defined {@link Field}.
@@ -972,6 +986,15 @@ public interface ScriptManager extends Observer {
 	 * 		The quantity of the item.
 	 */
 	void giveItem(int itemID, int quantity);
+
+	/**
+	 * Gives an item to the player, and equips it if the item is an equip. Will put the old equip (if there was any)
+	 * back into the player's inventory.
+	 * Example "sm.giveAndEquip(1302000)"
+	 * @param id
+	 * 		The ID of the item.
+	 */
+	void giveAndEquip(int id);
 
 	/**
 	 * Determines if the linked {@link Char} has the specified item.
