@@ -120,6 +120,11 @@ public class Pet extends Life {
         onlyChar.write(UserLocal.petActivateChange(this, true, (byte) 0));
     }
 
+    @Override
+    public void broadcastLeavePacket() {
+        getField().broadcastPacket(UserLocal.petActivateChange(this, false, (byte) 0));
+    }
+
     public int getOwnerID() {
         return ownerID;
     }

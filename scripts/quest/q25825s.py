@@ -28,16 +28,8 @@ if response == 1:
     sm.addAP(5)
     sm.dispose()
     sm.completeQuest(25825)
-    # Replace the old secondary with the new one
-    equippedInv = chr.getEquippedInventory()
-    oldSecondary = equippedInv.getItemBySlot(10)
-    chr.consumeItem(oldSecondary)
-    secondary = ItemData.getItemDeepCopy(1352602)
-    secondary.setBagIndex(10)
-    chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId())
+    sm.giveAndEquip(1352602) # secondary
     chr.setSpToCurrentJob(5)
-    chr.getEquippedInventory().addItem(secondary)
-    secondary.updateToChar(chr)
     sm.sendNext("Now focus!")
 else:
     sm.sendSayOkay("What happened to wanting more power?")

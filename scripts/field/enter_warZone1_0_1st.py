@@ -23,7 +23,6 @@ sm.spawnMob(2400120, 91, 182, False) #Specter battle hound
 sm.spawnMob(2400120, 1237, 182, False) #Specter battle hound
 sm.spawnMob(2400120, -1581, 182, False) #Specter battle hound
 sm.spawnMob(2400120, -1107, 182, False) #Specter battle hound
-
-def onMobDeath(mob):
-    if sm.getChr().getField().getMobs().size() == 0:
-        sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)
+while sm.hasMobsInField():
+    sm.waitForMobDeath()
+sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)

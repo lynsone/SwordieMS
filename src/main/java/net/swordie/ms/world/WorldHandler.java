@@ -2752,6 +2752,22 @@ public class WorldHandler {
         }
     }
 
+    public static void handleDirectionNodeCollision(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        if (chr == null || chr.getField() == null) {
+            return;
+        }
+        Field field = chr.getField();
+        int directionNode = inPacket.decodeInt();
+
+        String script = field.getDirectionInfoScript(directionNode);
+        if (script == null) {
+            return;
+        }
+        log.debug(String.format("Starting direction script %s.", script));
+        chr.getScriptManager().startScript(field.getId(), script, ScriptType.DIRECTION);;
+    }
+
     public static void handleUserEmotion(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int emotion = inPacket.decodeInt();
