@@ -85,6 +85,7 @@ public class Field {
     private List<OpenGate> openGateList = new ArrayList<>();
     private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean isChannelField;
+    private Map<Integer, String> directionInfo;
 
     public Field(int fieldID, long uniqueId) {
         this.id = fieldID;
@@ -96,6 +97,7 @@ public class Field {
         this.chars = new CopyOnWriteArrayList<>();
         this.lifeToControllers = new HashMap<>();
         this.lifeSchedules = new HashMap<>();
+        this.directionInfo = new HashMap<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
         startFieldScript();
     }
@@ -1276,5 +1278,21 @@ public class Field {
             reactor.increaseState();
             chr.write(ReactorPool.reactorChangeState(reactor, (short) 0, (byte) stateLength));
         }
+    }
+
+    public Map<Integer, String> getDirectionInfo() {
+        return directionInfo;
+    }
+
+    public void setDirectionInfo(Map<Integer, String> directionInfo) {
+        this.directionInfo = directionInfo;
+    }
+
+    public String getDirectionInfoScript(int node) {
+        return directionInfo.getOrDefault(node, null);
+    }
+
+    public void addDirectionInfo(int node, String script) {
+        directionInfo.put(node, script);
     }
 }

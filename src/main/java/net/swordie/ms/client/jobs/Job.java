@@ -644,7 +644,7 @@ public abstract class Job {
 		CharacterStat characterStat = chr.getAvatarData().getCharacterStat();
 		characterStat.setLevel(1);
 		characterStat.setStr(12);
-		characterStat.setDex(4);
+		characterStat.setDex(5);
 		characterStat.setInt(4);
 		characterStat.setLuk(4);
 		characterStat.setHp(50);

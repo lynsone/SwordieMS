@@ -593,7 +593,7 @@ public class Mihile extends Job {
     public void handleLevelUp() {
         Map<Stat, Object> stats = new HashMap<>();
         short level = chr.getLevel();
-        if (chr.getJob() == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId()) {
+        if (chr.getJob() == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() && level >= 10) {
             // IDK if the stats goes for every beginner job.
             chr.addStat(Stat.mhp, 16);
             chr.addStat(Stat.mmp, 12);
