@@ -19,15 +19,16 @@ if sm.sendAskAccept("The choice is yours. Listen to your heart. The voice of des
     sm.giveItem(1142399)# Newborn Light (Medal)
     sm.giveItem(1052444)# Apprentice Knight of Light Robe
     sm.giveItem(1302077)# Beginner Warrior's Sword
-    sm.giveItem(1098000)# Soul Shield of Protection TODO:create function that force equip it.
+    sm.giveAndEquip(1098000)# Soul Shield of Protection
     sm.removeEscapeButton()
     sm.sendNext("You need a name. How about... #b#e'Mihile'#k#n? It means 'Born of Light'? I think it will suit you well, in the end. Let us go to Ereve. A brilliant new life awaits you.")
     sm.addLevel(2)
     sm.setJob(5100)
+    sm.addSP(5)
     sm.startQuestNoCheck(29976)
     sm.completeQuestNoRewards(29976)
     sm.completeQuestNoRewards(20036)
-    sm.warp(913070071, 0)
+    sm.warpInstanceIn(913070071, 0)
 else:
     sm.setSpeakerID(CYGNUS)
     sm.sendNext("Why are you refusing destiny?")

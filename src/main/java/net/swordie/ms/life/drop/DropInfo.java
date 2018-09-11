@@ -91,11 +91,12 @@ public class DropInfo {
      */
     public boolean willDrop() {
         // Added 50x multiplier for the dropping chance if the item is a Quest item.
+        int chance = getChance();
         ItemInfo ii = ItemData.getItemInfoByID(getItemID());
         if (ii != null && ii.getQuestIDs().size() > 0) {
-            return Util.succeedProp(getChance() * 50, GameConstants.MAX_DROP_CHANCE);
+            chance *= 50;
         }
-        return Util.succeedProp(getChance(), GameConstants.MAX_DROP_CHANCE);
+        return Util.succeedProp(chance, GameConstants.MAX_DROP_CHANCE);
     }
 
     public int getMoney() {
