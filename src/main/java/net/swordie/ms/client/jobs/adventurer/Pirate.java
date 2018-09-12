@@ -11,6 +11,9 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatType;
@@ -300,29 +303,58 @@ public class Pirate extends Beginner {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-
             case ROLL_OF_THE_DICE_BUCC:
-            case ROLL_OF_THE_DICE_BUCC_DD:
             case ROLL_OF_THE_DICE_SAIR:
-            case ROLL_OF_THE_DICE_SAIR_DD:
             case LUCK_OF_THE_DIE:
-            case LUCK_OF_THE_DIE_DD:
                 int upbound = 6;
                 if((chr.hasSkill(ROLL_OF_THE_DICE_BUCC_DD) && chr.hasSkill(5120044)) ||
                         (chr.hasSkill(ROLL_OF_THE_DICE_SAIR_DD) && chr.hasSkill(5220044))) {
                     upbound = 7;
                 }
                 int random = new Random().nextInt(upbound)+1;
-                o1.nOption = random;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
+
+                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+
                 if(random < 2) {
                     return;
                 }
+
+                o1.nOption = random;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+
                 tsm.throwDice(random);
                 tsm.putCharacterStatValue(Dice, o1);
                 break;
+            case ROLL_OF_THE_DICE_BUCC_DD:
+            case ROLL_OF_THE_DICE_SAIR_DD:
+            case LUCK_OF_THE_DIE_DD:
+                upbound = 6;
+                if((chr.hasSkill(ROLL_OF_THE_DICE_BUCC_DD) && chr.hasSkill(5120044)) ||
+                        (chr.hasSkill(ROLL_OF_THE_DICE_SAIR_DD) && chr.hasSkill(5220044))) {
+                    upbound = 7;
+                }
 
+                random = new Random().nextInt(upbound)+1;
+                int randomDD = new Random().nextInt(upbound)+1;
+
+                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
+
+                if(random < 2 && randomDD < 2) {
+                    return;
+                }
+
+                o1.nOption = (random * 10) + randomDD; // if rolled: 3 and 5, the DoubleDown nOption = 35
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+
+                tsm.throwDice(random, randomDD);
+                tsm.putCharacterStatValue(Dice, o1);
+                break;
             case MONKEY_MAGIC:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieAcc, slv);

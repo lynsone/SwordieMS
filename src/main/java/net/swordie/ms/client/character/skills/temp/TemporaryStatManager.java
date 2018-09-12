@@ -724,11 +724,21 @@ public class TemporaryStatManager {
     }
 
     public void throwDice(int roll) {
-        int[] array = {0, 0, 30, 20, 15, 20, 30, 20};
+        throwDice(roll, 0);
+    }
+
+    public void throwDice(int roll, int secondRoll) {
+        int[] array = {0, 0, 30, 20, 15, 20, 30, 20}; // Stats for Normal Rolls
+        int[] arrayDD = {0, 0, 40, 30, 25, 30, 40, 30}; // Stats for Double Down Rolls
         for(int i = 0; i < diceOption.length; i++) {
             diceOption[i] = 0;
         }
-        diceOption[roll] = array[roll];
+        if(roll == secondRoll) {
+            diceOption[roll] = arrayDD[roll];
+        } else {
+            diceOption[roll] = array[roll];
+            diceOption[secondRoll] = array[secondRoll];
+        }
         int[] diceinfo = new int[] {
                 diceOption[3],  //nOption 3 (HP)
                 diceOption[3],  //nOption 3 (MP)
@@ -745,11 +755,11 @@ public class TemporaryStatManager {
                 diceOption[5], //nOption 5 (DAMR)
                 0,  //Unknown
                 0,  //Unknown
-                0,  //Unknown
+                0,  // Gives Damage
                 0,  //Unknown
                 diceOption[6], //nOption 6 (EXP)
                 diceOption[7], //nOption 7 (IED)
-                0,  //Unknown
+                0,  // (asrR)
                 0,  //Unknown
                 0,  //Unknown
                 0,

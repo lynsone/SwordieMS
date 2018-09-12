@@ -12,6 +12,9 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
@@ -70,6 +73,7 @@ public class Mechanic extends Citizen {
     public static final int ENHANCED_SUPPORT_UNIT = 35120002;
     public static final int HEROS_WILL_MECH = 35121008;
     public static final int HOMING_BEACON_RESEARCH = 35120017;
+    public static final int ROLL_OF_THE_DICE_DD = 35120014; //Special Buff
 
     public static final int FOR_LIBERTY_MECH = 35121053;
     public static final int FULL_SPREAD = 35121055;
@@ -89,6 +93,7 @@ public class Mechanic extends Citizen {
             PERFECT_ARMOR,
             ROLL_OF_THE_DICE,
             MAPLE_WARRIOR_MECH,
+            ROLL_OF_THE_DICE_DD,
 
             SUPPORT_UNIT_HEX, //Summon
             ENHANCED_SUPPORT_UNIT,
@@ -176,19 +181,44 @@ public class Mechanic extends Citizen {
                 } else {
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = skillID;
-                    o1.tOption = 0; //(ON/OFF)
                     tsm.putCharacterStatValue(PowerGuard, o1);
                 }
                 break;
             case ROLL_OF_THE_DICE:
                 int random = new Random().nextInt(6)+1;
-                o1.nOption = random;
-                o1.rOption = skillID;
-                o1.tOption = si.getValue(time, slv);
+
+                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+
                 if(random < 2) {
                     return;
                 }
+
+                o1.nOption = random;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+
                 tsm.throwDice(random);
+                tsm.putCharacterStatValue(Dice, o1);
+                break;
+            case ROLL_OF_THE_DICE_DD:
+                random = new Random().nextInt(6)+1;
+                int randomDD = new Random().nextInt(6)+1;
+
+                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
+
+                if(random < 2 && randomDD < 2) {
+                    return;
+                }
+
+                o1.nOption = (random * 10) + randomDD; // if rolled: 5 and 7, the DoubleDown nOption = 57
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+
+                tsm.throwDice(random, randomDD);
                 tsm.putCharacterStatValue(Dice, o1);
                 break;
             case MAPLE_WARRIOR_MECH:
