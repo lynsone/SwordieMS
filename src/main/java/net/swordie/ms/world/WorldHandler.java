@@ -143,6 +143,7 @@ public class WorldHandler {
             return;
         }
         c.setMachineID(machineID);
+        c.setOldChannel(oldClient.getOldChannel());
         Account acc = oldClient.getAccount();
         c.setAccount(acc);
         Server.getInstance().getWorldById(worldId).getChannelById(channel).removeClientFromTransfer(charId);
@@ -702,35 +703,11 @@ public class WorldHandler {
                     }
                     mob.damage(chr, totalDamage);
                     if (mob.getHp() < 0) {
-
-                        // Combo Counter per Kill
-                        int newChrComboCount = chr.getComboCounter() + 1;
-                        c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
-                        chr.setComboCounter(newChrComboCount);
-                        chr.comboKillResetTimer();
-
-                        // Exp Orb spawning from Mob every 50 combos
-                        if(chr.getComboCounter() % 50 == 0) {
-                            Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
-                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
-                                item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
-                            }
-                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
-                                item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
-                            }
-                            Drop drop = new Drop(-1, item);
-                            drop.setMobExp(mob.getForcedMobStat().getExp());
-                            chr.getField().drop(drop, mob.getPosition());
-                        }
+                        mob.onKilledByChar(chr);
 
                         // MultiKill +1,  per killed mob
                         multiKillMessage++;
                         mobexp = mob.getForcedMobStat().getExp();
-
-                        // Mage FP skill
-                        if(mob.isInfestedByViralSlime()) {
-                            Magician.infestViralSlime(c, mob);
-                        }
                     }
                 }
             }
@@ -5788,5 +5765,25 @@ public class WorldHandler {
                 Effect.showFameGradeUp(targetChr);
             }
         }
+    }
+
+    public static void handleEnterRandomPortalRequest(Char chr, InPacket inPacket) {
+        int portalObjID = inPacket.decodeInt();
+        Life life = chr.getField().getLifeByObjectID(portalObjID);
+        if (!(life instanceof RandomPortal)) {
+            chr.chatMessage("Could not find that portal.");
+            return;
+        }
+        RandomPortal randomPortal = (RandomPortal) life;
+        if (randomPortal.getCharID() != chr.getId()) {
+            chr.chatMessage("A mysterious force is blocking your way.");
+            chr.dispose();
+            return;
+        }
+        RandomPortal.Type type = randomPortal.getAppearType();
+        String script = type.getScript();
+        chr.getScriptManager().startScript(randomPortal.getAppearType().ordinal(), randomPortal.getObjectId(),
+                script, ScriptType.PORTAL);
+        chr.dispose();
     }
 }

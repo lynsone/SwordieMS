@@ -592,8 +592,7 @@ public class Magician extends Beginner {
         field.spawnAddSummon(viralSlime);
     }
 
-    public static void infestViralSlime(Client c, Mob mob) {
-        Char chr = c.getChr();
+    public static void infestViralSlime(Char chr, Mob mob) {
         if(viralSlimeList.size() < 10) {
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());

@@ -601,7 +601,7 @@ create table familiars (
     familiarid int,
     name varchar(13),
     idk2 boolean,
-    idk3 smallint,
+    fieldID smallint,
     fatigue int,
     idk4 bigint,
     idk5 bigint,

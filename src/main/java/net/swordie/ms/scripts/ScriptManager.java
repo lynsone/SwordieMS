@@ -370,6 +370,13 @@ public interface ScriptManager extends Observer {
 	void warp(int fieldID, int portalID);
 
 	/**
+	 * Changes the channel and warps the given Char to the given field.
+	 * @param channel the channel to change to
+	 * @param fieldID the field id to warp to
+	 */
+	void changeChannelAndWarp(int channel, int fieldID);
+
+	/**
 	 * Teleports {@link Char} to the portal ID specified.
 	 * Example: "sm.teleportToPortal(0)"
 	 *
@@ -1355,7 +1362,30 @@ public interface ScriptManager extends Observer {
 	 */
 	void showEffect(String path, int duration, int x, int y, int z, int npcIdForExtend, boolean onUser, int idk2);
 
+	// Clock methods ---------------------------------------------------------------------------------------------------
 
+	/**
+	 * Shows a timer on top with precision in milliseconds. Will automatically remove itself after the timer has
+	 * expired.
+	 * @param milliseconds the amount of milliseconds the stopwatch should start out with
+	 */
+	void showStopWatch(int milliseconds);
+
+	/**
+	 * Shows a timer on top with precision in minutes/seconds. Will automatically remove itself after the timer has
+	 * expired.
+	 * @param seconds the amount of seconds the stopwatch should start out with
+	 */
+	void showClock(int seconds);
+
+	/**
+	 * Shows a timer on top with precision in hour/minutes/seconds. Will automatically remove itself after the timer
+	 * has expired.
+	 * @param hours the amount of hours the stopwatch should start out with
+	 * @param minutes the amount of minutes the stopwatch should start out with
+	 * @param seconds the amount of seconds the stopwatch should start out with
+	 */
+	void showClock(int hours, int minutes, int seconds);
 
 	// Other methods ---------------------------------------------------------------------------------------------------
 

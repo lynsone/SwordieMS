@@ -2,6 +2,7 @@ package net.swordie.ms.scripts;
 
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.Client;
 import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.Char;
@@ -46,10 +47,7 @@ import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.World;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.FieldInstanceType;
-import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.*;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.field.obtacleatom.ObtacleAtomInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
@@ -63,11 +61,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
@@ -96,9 +96,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	private Map<ScriptType, ScriptInfo> scripts;
 	private int returnField = 0;
 	private ScriptType lastActiveScriptType;
-	private Map<ScriptType, Set<ScheduledFuture>> eventsByScriptType = new HashMap<>();
 	private Map<ScriptType, Future> evaluations = new HashMap<>();
-	private Set<ScheduledFuture> scheduledFutureSet;
+	private Set<ScheduledFuture> events = new HashSet<>();
 	private ScriptMemory memory = new ScriptMemory();
 	private boolean curNodeEventEnd = false;
 
@@ -697,16 +696,22 @@ public class ScriptManagerImpl implements ScriptManager {
 	// Field-related methods -------------------------------------------------------------------------------------------
 
 	@Override
+	public void warp(int id) {
+		Field field = chr.getClient().getChannelInstance().getField(id);
+		chr.warp(field);
+	}
+
+	@Override
 	public void warp(int mid, int pid) {
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(mid);
 		Portal portal = field.getPortalByID(pid);
 		chr.warp(field, portal);
 	}
 
-	@Override
-	public void warp(int id) {
-		Field field = chr.getClient().getChannelInstance().getField(id);
-		chr.warp(field);
+	public void changeChannelAndWarp(int channel, int fieldID) {
+		Client c = chr.getClient();
+		c.setOldChannel(c.getChannel());
+		chr.changeChannelAndWarp((byte) channel, fieldID);
 	}
 
 	@Override
@@ -750,7 +755,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void clearPartyInfo(int warpToID) {
-		stopEventsByScriptType(ScriptType.FIELD); // Stops the FixedRate Event from the Field Script
+		stopEvents(); // Stops the FixedRate Event from the Field Script
 		if (chr.getParty() != null) {
 			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
 				pm.getChr().setDeathCount(-1);
@@ -778,7 +783,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void warpInstance(int id, boolean in, int portalID) {
-		stopEventsByScriptType(ScriptType.FIELD); // Stops the FixedRate Event from the Field Script
+		stopEvents(); // Stops the FixedRate Event from the Field Script
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
 		if (!in) {
 			chr.getFields().clear();
@@ -1670,15 +1675,26 @@ public class ScriptManagerImpl implements ScriptManager {
 		field.broadcastPacket(CField.createObtacle(ObtacleAtomCreateType.NORMAL, obtacleInRowInfo, obtacleRadianInfo, obtacleAtomInfosSet));
 	}
 
-	public void stopEventsByScriptType(ScriptType scriptType) {
-		Set<ScheduledFuture> events = eventsByScriptType.get(scriptType);
-		if (events != null) {
-			events.forEach(st -> st.cancel(true));
-			events.clear();
+	public void stopEvents() {
+		Set<ScheduledFuture> events = getEvents();
+		events.forEach(st -> st.cancel(true));
+		events.clear();
+		Field field;
+		if (chr != null) {
+			field = chr.getField();
+		} else {
+			field = this.field;
 		}
+		field.broadcastPacket(CField.clock(ClockPacket.removeClock()));
 	}
 
+	private Set<ScheduledFuture> getEvents() {
+		return events;
+	}
 
+	public void addEvent(ScheduledFuture event) {
+		getEvents().add(event);
+	}
 
 	// Character Temporary Stat-related methods ------------------------------------------------------------------------
 
@@ -1817,17 +1833,39 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void showEffectOnPosition(String path, int duration, int x, int y) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(x, y), 0, 1, false, 0)));
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
+				new Position(x, y), 0, 1, false, 0)));
 	}
 
 	public void showBalloonMsg(String path, int duration) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(0, -100), 0, 0, true, 0)));
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
+				new Position(0, -100), 0, 0, true, 0)));
 	}
 
 	public void sayMonologue(String text, boolean isEnd) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
 	}
 
+	// Clock methods ---------------------------------------------------------------------------------------------------
+
+	public void showStopWatch(int milliseconds) {
+		chr.write(CField.clock(ClockPacket.stopWatch(milliseconds)));
+		addEvent(EventManager.addEvent(this::removeClock, milliseconds, TimeUnit.MILLISECONDS));
+	}
+
+	public void showClock(int seconds) {
+		chr.write(CField.clock(ClockPacket.secondsClock(seconds)));
+		addEvent(EventManager.addEvent(this::removeClock, seconds, TimeUnit.SECONDS));
+	}
+
+	public void showClock(int hours, int minutes, int seconds) {
+		chr.write(CField.clock(ClockPacket.hmsClock((byte) hours, (byte) minutes, (byte) seconds)));
+		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
+	}
+
+	public void removeClock() {
+		chr.write(CField.clock(ClockPacket.removeClock()));
+	}
 
 
 	// Other methods ---------------------------------------------------------------------------------------------------
@@ -1942,7 +1980,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public ScheduledFuture invokeAfterDelay(long delay, String methodName, Object...args) {
-		return EventManager.addEvent(() -> invoke(this, methodName, args), delay);
+		ScheduledFuture sf =  EventManager.addEvent(() -> invoke(this, methodName, args), delay);
+		addEvent(sf);
+		return sf;
 	}
 
 	public ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
@@ -1955,11 +1995,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			scheduledFuture = EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
 					delayBetweenExecutions, executes);
 		}
-		if (scheduledFutureSet == null) {
-			scheduledFutureSet = new HashSet<>();
-		}
-		scheduledFutureSet.add(scheduledFuture);
-		eventsByScriptType.put(getLastActiveScriptType(), scheduledFutureSet);
+		addEvent(scheduledFuture);
 		return scheduledFuture;
 	}
 	@Override
@@ -1967,20 +2003,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.videoByScript(videoPath, false));
 	}
         
-	public ScriptMemory getMemory() {
+	private ScriptMemory getMemory() {
 		return memory;
-	}
-
-	public static void main(String[] args) throws Exception {
-		PythonInterpreter pi = new PythonInterpreter();
-		Thread t1 = new Thread(() -> pi.exec("while True: print(str(1))"));
-		t1.start();
-		Thread.sleep(1000);
-		t1.interrupt();
-		PythonInterpreter pi2 = new PythonInterpreter();
-		pi2.cleanup();
-		pi2.exec("while True: print(str(2))");
-
-		pi.cleanup();
 	}
 }
