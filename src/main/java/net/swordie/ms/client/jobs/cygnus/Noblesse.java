@@ -36,7 +36,7 @@ public class Noblesse extends Job {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
-                    skill.setCurrentLevel(skill.getMaxLevel());
+                    skill.setCurrentLevel(1);
                     chr.addSkill(skill);
                 }
             }

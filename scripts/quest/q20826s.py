@@ -1,4 +1,7 @@
 # Start of Lesson 1 - Ereve History
+from net.swordie.ms.life.npc.NpcScriptInfo import Param
+scriptInfo = sm.getNpcScriptInfo()
+
 KINU = 1102006
 HAWKEYE = 1101007
 
@@ -17,23 +20,21 @@ sm.sendNext("The knights themselves are gathered into 5 groups, based around the
 "Each group is led by a Chief Knight and... Oh, here is one now. Hello Hawkeye.")
 
 sm.setSpeakerID(HAWKEYE)
-# right side npc
-# enable escape button
+scriptInfo.addParam(Param.OverrideSpeakerID)
 sm.sendNext("Ahoy! I wanted to welcome the new knight in person. "
 "I must give ye my apologies, for I left the muffins I baked ye on my ship.")
 
 sm.setSpeakerID(KINU)
-# left side npc
-sm.removeEscapeButton()
+scriptInfo.removeParam(Param.OverrideSpeakerID)
 sm.sendNext("Hawkeye, this is highly unorthodox!")
 
 sm.setSpeakerID(HAWKEYE)
-# right side npc
+scriptInfo.addParam(Param.OverrideSpeakerID)
 sm.sendSay("Yar, have a heart, Kinu. Don't ye remember yer first day with the knights? "
 "Wasn't it a mite overwhelming without a friend?")
 
 sm.setSpeakerID(KINU)
-# left side npc
+scriptInfo.removeParam(Param.OverrideSpeakerID)
 sm.sendSay("I suppose I could bend the rules this once. #h #, meet Hawkeye, the Chief Knight of Lightning.")
 
 sm.startQuest(parentID)
