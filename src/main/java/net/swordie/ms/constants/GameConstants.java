@@ -67,6 +67,10 @@ public class GameConstants {
     public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
 
+    // Random Portal
+    public static final int RANDOM_PORTAL_SPAWN_CHANCE = 500; // out of a 1000 (50%)
+    public static final int RANDOM_PORTAL_COOLTIME = 15 * 60 * 1000; // 15 minutes
+
     // Rune
     public static final int RUNE_RESPAWN_TIME = 5; // minutes
     public static final int RUNE_COOLDOWN_TIME = 4; // minutes

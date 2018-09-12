@@ -60,7 +60,6 @@ public class Field {
     private int id;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
     private int consumeItemCoolTime, link;
-    private long uniqueId;
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
     private Set<Portal> portals;
     private Set<Foothold> footholds;
@@ -87,9 +86,8 @@ public class Field {
     private boolean isChannelField;
     private Map<Integer, String> directionInfo;
 
-    public Field(int fieldID, long uniqueId) {
+    public Field(int fieldID) {
         this.id = fieldID;
-        this.uniqueId = uniqueId;
         this.rect = new Rect();
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
@@ -161,14 +159,6 @@ public class Field {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public long getUniqueId() {
-        return uniqueId;
-    }
-
-    public void setUniqueId(long uniqueId) {
-        this.uniqueId = uniqueId;
     }
 
     public Set<Portal> getPortals() {

@@ -2,23 +2,24 @@ package net.swordie.ms.life.mob;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyDamageInfo;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.MobPool;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
@@ -1544,5 +1545,46 @@ public class Mob extends Life {
 
     public void setInAttack(boolean inAttack) {
         this.inAttack = inAttack;
+    }
+
+    public void onKilledByChar(Char chr) {
+        Field field = getField();
+        // Combo Counter per Kill
+        int newChrComboCount = chr.getComboCounter() + 1;
+        chr.write(UserLocal.comboCounter((byte) 1, newChrComboCount, getObjectId()));
+        chr.setComboCounter(newChrComboCount);
+        chr.comboKillResetTimer();
+
+        // Exp Orb spawning from Mob every 50 combos
+        if(chr.getComboCounter() % 50 == 0) {
+            Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
+            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
+                item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
+            }
+            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
+                item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
+            }
+            Drop drop = new Drop(-1, item);
+            drop.setMobExp(getForcedMobStat().getExp());
+            chr.getField().drop(drop, getPosition().deepCopy());
+        }
+
+        // Mage FP skill
+        if(isInfestedByViralSlime()) {
+            Magician.infestViralSlime(chr, this);
+        }
+
+        // Random portal spawn
+        if (getField().isChannelField() && chr.getNextRandomPortalTime() <= System.currentTimeMillis()
+                && Util.succeedProp(GameConstants.RANDOM_PORTAL_SPAWN_CHANCE, 1000)) {
+            chr.setNextRandomPortalTime(System.currentTimeMillis() + GameConstants.RANDOM_PORTAL_COOLTIME);
+            // 50% chance for inferno/yellow portal
+            List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
+            Foothold foothold = Util.getRandomFromCollection(listOfFootHolds);
+            Position position = foothold.getRandomPosition();
+            RandomPortal randomPortal = new RandomPortal(RandomPortal.Type.Inferno, position, chr.getId());
+            field.addLife(randomPortal);
+            chr.write(RandomPortalPool.created(randomPortal));
+        }
     }
 }

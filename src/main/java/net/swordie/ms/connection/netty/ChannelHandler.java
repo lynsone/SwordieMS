@@ -9,7 +9,6 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
 import net.swordie.ms.handlers.header.InHeader;
-import net.swordie.ms.world.World;
 import net.swordie.ms.world.WorldHandler;
 import net.swordie.ms.world.shop.cashshop.CashShopHandler;
 import org.apache.log4j.LogManager;
@@ -464,7 +463,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case FOX_MAN_ACTION_SET_USE_REQUEST:
                 WorldHandler.handleFoxManActionSetUseRequest(c, inPacket);
                 break;
-            case DIRECTINODE_COLLISION:
+            case DIRECTION_NODE_COLLISION:
                 WorldHandler.handleDirectionNodeCollision(c, inPacket);
                 break;
             case USER_CREATE_AURA_BY_GRENADE:
@@ -619,6 +618,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_GIVE_POPULARITY_REQUEST:
                 WorldHandler.handleUserGivePopularityRequest(chr, inPacket);
+                break;
+            case ENTER_RANDOM_PORTAL_REQUEST:
+                WorldHandler.handleEnterRandomPortalRequest(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);
