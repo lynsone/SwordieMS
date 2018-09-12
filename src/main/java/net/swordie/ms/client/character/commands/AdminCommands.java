@@ -1621,4 +1621,27 @@ public class AdminCommands {
         }
     }
 
+    public static class showBuffs extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Set<Integer> buffs = new HashSet<>();
+            for (List<Option> options : tsm.getCurrentStats().values()) {
+                for (Option o : options) {
+                    if (o.rOption != 0) {
+                        buffs.add(o.rOption);
+                    } else {
+                        buffs.add(o.nReason);
+                    }
+                }
+            }
+            StringBuilder sb = new StringBuilder("Current buffs: ");
+            for (int id : buffs) {
+                String skillName = StringData.getSkillStringById(id).getName();
+                sb.append(skillName).append(" (").append(id).append("), ");
+            }
+            chr.chatMessage(sb.toString().substring(0, sb.toString().length() - 2));
+        }
+    }
+
 }
