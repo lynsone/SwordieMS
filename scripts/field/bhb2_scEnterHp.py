@@ -10,13 +10,15 @@ if sm.getFieldID() == 350060180:
 elif sm.getFieldID() == 350060200:
     sm.showHP(LOTUS_2)
 
-def onMobDeath(mob):
-    if mob.getTemplateId() == LOTUS:
-        sm.showFieldEffect("Map/Effect2.img/blackHeavenBossDie2") # Shows the Boss Death effect
-        sm.invokeAfterDelay(6500, "warp", 350060200, 0) # Warps player(s) into the next map after 6500ms delay
+mob = waitForMobDeath()
+while mob.getTemplateId() != LOTUS and mob.getTemplateId() != LOTUS_2:
+    mob = waitForMobDeath()
 
-    elif mob.getTemplateId() == LOTUS_2:
-        sm.showFieldEffect("Map/Effect2.img/blackHeavenBossDie3", 4700) # Shows the Boss Death effect
+if mob.getTemplateId() == LOTUS:
+    sm.showFieldEffect("Map/Effect2.img/blackHeavenBossDie2") # Shows the Boss Death effect
+    sm.invokeAfterDelay(6500, "warp", 350060200, 0) # Warps player(s) into the next map after 6500ms delay
 
-    sm.stopEventsByScriptType(ScriptType.FIELD) #Stops the FixedRate Event from the Field Script
-    sm.dispose()
+elif mob.getTemplateId() == LOTUS_2:
+    sm.showFieldEffect("Map/Effect2.img/blackHeavenBossDie3", 4700) # Shows the Boss Death effect
+
+sm.stopEventsByScriptType(ScriptType.FIELD) #Stops the FixedRate Event from the Field Script

@@ -2469,8 +2469,8 @@ public class WorldHandler {
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
-                if(action == 3) {   // MoveCamera
-                    return;         // We don't want to use MoveCamera as ways of progressing the script
+                if(action != 1) {   // SendDelay
+                    return;         // We only want SendDelay as ways to progress the script
                 }
                 chr.getScriptManager().handleAction(nmt, action, answ);
                 return;
@@ -2765,6 +2765,7 @@ public class WorldHandler {
             return;
         }
         log.debug(String.format("Starting direction script %s.", script));
+        chr.getScriptManager().setCurNodeEventEnd(false);
         chr.getScriptManager().startScript(field.getId(), script, ScriptType.DIRECTION);;
     }
 

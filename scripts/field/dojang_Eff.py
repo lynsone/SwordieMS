@@ -96,9 +96,6 @@ sm.showEffectToField(WzConstants.EFFECT_DOJO_STAGE)
 
 sleep(GameConstants.DOJO_SPAWM_BOSS_DELAY)
 sm.spawnMob(bossPerFloor[sm.getFieldID()], 0, 7, False) # Spawns mob based on Field ID
-sm.dispose()
 
-def onMobDeath(mob):
-    if mob.getTemplateId() == bossPerFloor[sm.getFieldID()]:
-        sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)
-    sm.dispose()
+sm.waitForMobDeath(bossPerFloor[sm.getFieldID()])
+sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)

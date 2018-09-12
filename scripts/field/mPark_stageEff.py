@@ -11,9 +11,8 @@ else:
     sm.showEffect("" + WzConstants.EFFECT_MONSTER_PARK_STAGE_NUMBER + "" + str(stage))
     sm.showEffect(WzConstants.EFFECT_MONSTER_PARK_STAGE)
 sm.chatScript("All monsters in the field must be eliminated before you can move to the next stage")
-sm.dispose()
-
-def onMobDeath(mob):
+while sm.hasMobsInField():
+    mob = sm.waitForMobDeath()
     #Exp based on mobTemplateId
     exp = sm.getMPExpByMobId(mob.getTemplateId())
 
@@ -22,3 +21,4 @@ def onMobDeath(mob):
 
     #displays the EXP message
     sm.showWeatherNoticeToField("EXP reward "+ sm.formatNumber(sm.getQRValue(GameConstants.MONSTER_PARK_EXP_QUEST)) +" earned!", WeatherEffNoticeType.MonsterPark_ExpMsg)
+sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)
