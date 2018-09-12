@@ -100,6 +100,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	private Map<ScriptType, Future> evaluations = new HashMap<>();
 	private Set<ScheduledFuture> scheduledFutureSet;
 	private ScriptMemory memory = new ScriptMemory();
+	private boolean curNodeEventEnd = false;
 
 	private ScriptManagerImpl(Char chr, Field field) {
 		this.chr = chr;
@@ -201,7 +202,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	private boolean isQuestScriptAllowed() {
-		return getLastActiveScriptType() == ScriptType.NONE;
+		return getLastActiveScriptType() == ScriptType.NONE && !curNodeEventEnd;
 	}
 
 	public Map<ScriptType, Future> getEvaluations() {
@@ -675,9 +676,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
         
 	public void curNodeEventEnd(boolean enable) {
+		setCurNodeEventEnd(enable);
 		chr.write(CField.curNodeEventEnd(enable));
 	}
-        
+
+	public void setCurNodeEventEnd(boolean curNodeEventEnd) {
+		this.curNodeEventEnd = curNodeEventEnd;
+	}
+
 	public void progressMessageFont(int fontNameType, int fontSize, int fontColorType, int fadeOutDelay, String message) {
 		chr.write(User.progressMessageFont(fontNameType, fontSize, fontColorType, fadeOutDelay, message));
 	}
@@ -1866,6 +1872,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void showClearStageExpWindow(long expGiven) {
 		chr.write(CField.fieldEffect(FieldEffect.showClearStageExpWindow((int) expGiven)));
 		giveExpNoMsg(expGiven);
+	}
+
+	public void playSound(String sound, int vol) {
+		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
 
 	@Override

@@ -2765,6 +2765,7 @@ public class WorldHandler {
             return;
         }
         log.debug(String.format("Starting direction script %s.", script));
+        chr.getScriptManager().setCurNodeEventEnd(false);
         chr.getScriptManager().startScript(field.getId(), script, ScriptType.DIRECTION);;
     }
 
