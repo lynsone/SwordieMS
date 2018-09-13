@@ -331,7 +331,6 @@ public class Summon extends Life {
                 break;
 
             default:
-                chr.chatMessage(String.format("Unhandled HP Summon, id = %d", getSkillID()));
                 log.error(String.format("Unhandled HP Summon, id = %d", getSkillID()));
                 break;
         }

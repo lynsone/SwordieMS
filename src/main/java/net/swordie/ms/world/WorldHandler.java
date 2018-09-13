@@ -1704,7 +1704,7 @@ public class WorldHandler {
             field.addLifeSchedule(fao, sf);
             field.broadcastPacket(FieldAttackObjPool.setAttack(fao.getObjectId(), 0));
         }
-
+        chr.dispose();
     }
 
     public static void handleUserCharacterInfoRequest(Client c, InPacket inPacket) {

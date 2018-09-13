@@ -112,6 +112,7 @@ public class Pirate extends Beginner {
     public static final int PIRATE_SPIRIT = 5321010; //Buff
     public static final int MAPLE_WARRIOR_CANNON = 5321005; //Buff
     public static final int HEROS_WILL_CANNON = 5321006;
+    public static final int MEGA_MONKEY_MAGIC = 5320008;
 
     //Jett
     public static final int GALACTIC_MIGHT = 5081023; //Buff
@@ -148,7 +149,7 @@ public class Pirate extends Beginner {
     private int[] buffs = new int[]{
             DASH,
             KNUCKLE_BOOSTER,
-            ROLL_OF_THE_DICE_BUCC, //TODO
+            ROLL_OF_THE_DICE_BUCC,
             ROLL_OF_THE_DICE_BUCC_DD,
             CROSSBONES,
             SPEED_INFUSION,
@@ -159,7 +160,7 @@ public class Pirate extends Beginner {
             ALL_ABOARD,
             INFINITY_BLAST,
             GUN_BOOSTER,
-            ROLL_OF_THE_DICE_SAIR, //TODO
+            ROLL_OF_THE_DICE_SAIR,
             ROLL_OF_THE_DICE_SAIR_DD,
             OCTO_CANNON,
             QUICKDRAW,
@@ -170,12 +171,13 @@ public class Pirate extends Beginner {
             MONKEY_MAGIC,
             CANNON_BOOSTER,
             BARREL_ROULETTE, //TODO
-            LUCK_OF_THE_DIE, //TODO
+            LUCK_OF_THE_DIE,
             LUCK_OF_THE_DIE_DD,
             ANCHOR_AWEIGH,
             MONKEY_MALITIA,
             PIRATE_SPIRIT,
             MAPLE_WARRIOR_CANNON,
+            MEGA_MONKEY_MAGIC,
 
             GALACTIC_MIGHT,
             BOUNTY_CHASER,
@@ -356,6 +358,7 @@ public class Pirate extends Beginner {
                 tsm.putCharacterStatValue(Dice, o1);
                 break;
             case MONKEY_MAGIC:
+            case MEGA_MONKEY_MAGIC:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieAcc, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -903,6 +906,17 @@ public class Pirate extends Beginner {
                     tsm.sendSetStatPacket();
                 }
                 break;
+            case DRAGON_STRIKE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 10;
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+                }
+                break;
+
         }
 
         super.handleAttack(c, attackInfo);
