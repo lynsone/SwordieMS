@@ -853,7 +853,6 @@ public class Thief extends Beginner {
                                 type = ForceAtomEnum.NIGHTLORD_MARK.getForceAtomType();
                                 atom = NIGHTLORD_MARK_ATOM;
                             }
-                            chr.chatMessage((randomInt+anglez)+"");
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 45, 4,
                                     randomInt+anglez, 170, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
