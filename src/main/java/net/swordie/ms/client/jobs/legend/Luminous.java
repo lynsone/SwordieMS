@@ -178,7 +178,7 @@ public class Luminous extends Job {
                 LarknessManager lm = tsm.getLarknessManager();
                 lm.changeMode();
                 o1.nOption = 1;
-                o1.rOption = EQUILIBRIUM;
+                o1.rOption = skillID;
                 tsm.putCharacterStatValue(Larkness, o1);
                 EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
                 break;
@@ -402,16 +402,11 @@ public class Luminous extends Job {
             }
         }
         o.setInMillis(true);
-        o.nOption = 1;
+        o.nOption = (amount * crescendoInfo.getValue(damR, slv));
         o.rOption = DARK_CRESCENDO;
         o.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
         o.mOption = amount;
         tsm.putCharacterStatValue(StackBuff, o);
-        o1.setInMillis(true);
-        o1.nOption = (amount * crescendoInfo.getValue(damR, slv));
-        o1.rOption = DARK_CRESCENDO;
-        o1.tOption = (int) (darkCrescendoTimer - System.currentTimeMillis());
-        tsm.putCharacterStatValue(DamR, o1);
         tsm.sendSetStatPacket();
     }
 

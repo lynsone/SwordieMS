@@ -793,7 +793,7 @@ public class Thief extends Beginner {
             o.nOption = 100;
             o.rOption = hideIconSkillId;
             o.tOption = 5;
-            tsm.putCharacterStatValue(CriticalBuff, o);
+            tsm.putCharacterStatValue(CriticalGrowing, o);
             tsm.sendSetStatPacket();
 
             if(SkillData.getSkillInfoById(skillId) != null) {
@@ -819,6 +819,9 @@ public class Thief extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     int randomInt = new Random().nextInt((360/getAssassinsMarkStarCount())-1);
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     Rect rect = new Rect(
                             new Position(
                                     mob.getPosition().getX() - 800,
@@ -932,6 +935,9 @@ public class Thief extends Beginner {
             for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if(Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -944,6 +950,9 @@ public class Thief extends Beginner {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if (Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -959,6 +968,9 @@ public class Thief extends Beginner {
             for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if(Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -971,6 +983,9 @@ public class Thief extends Beginner {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if (Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -986,6 +1001,9 @@ public class Thief extends Beginner {
             for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if(Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -998,6 +1016,9 @@ public class Thief extends Beginner {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if (Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -1011,6 +1032,9 @@ public class Thief extends Beginner {
             Skill skill = chr.getSkill(BLEED_DART);
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(mob == null) {
+                    continue;
+                }
                 MobTemporaryStat mts = mob.getTemporaryStat();
                 mts.createAndAddBurnedInfo(chr, skill);
             }
@@ -1040,6 +1064,9 @@ public class Thief extends Beginner {
         if(tsm.getOptByCTSAndSkill(PickPocket, PICK_POCKET) != null) {
             for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
+                if(mob == null) {
+                    continue;
+                }
                 Skill skill = chr.getSkill(PICK_POCKET);
                 SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
                 byte slv = (byte) skill.getCurrentLevel();
