@@ -318,7 +318,7 @@ public class Thief extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 field.spawnSummon(summon);
 
                 o1.nReason = skillID;
@@ -853,13 +853,12 @@ public class Thief extends Beginner {
                                 type = ForceAtomEnum.NIGHTLORD_MARK.getForceAtomType();
                                 atom = NIGHTLORD_MARK_ATOM;
                             }
-                            chr.chatMessage((randomInt+anglez)+"");
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 45, 4,
                                     randomInt+anglez, 170, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
                             chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), life.getObjectId(), type,
                                     true, life.getObjectId(), atom, forceAtomInfo, rect, 0, 300,
-                                    life.getPosition(), atom, life.getPosition()));
+                                    life.getPosition(), chr.getBulletIDForAttack(), life.getPosition()));
                         }
                     }
                 }

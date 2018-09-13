@@ -9,3 +9,4 @@ answer = sm.sendNext("My brother and I have been tracking down the legendary #rI
 if answer == 0:
     chr.setPreviousFieldID(chr.getFieldID())
     sm.changeChannelAndWarp(INFERNO_CHANNEL, INFERNO_FIELD_ID)
+    chr.getField().removeLife(objectID, False)

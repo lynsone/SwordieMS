@@ -407,7 +407,7 @@ public class Warrior extends Beginner {
         evilEye = Summon.getSummonBy(c.getChr(), skillID, slv);
         field = c.getChr().getField();
         evilEye.setFlyMob(true);
-        evilEye.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        evilEye.setMoveAbility(MoveAbility.Fly.getVal());
         evilEye.setAssistType(AssistType.BUFFING.getVal());
         evilEye.setAttackActive(true);
         field.spawnSummon(evilEye);

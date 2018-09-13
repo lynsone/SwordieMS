@@ -2243,10 +2243,10 @@ public class Char {
 			for (Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext(); ) {
 				Summon summon = iterator.next().summon;
 				if (summon != null) {
-					if (summon.getMoveAbility() == MoveAbility.SHADOW_SERVANT.getVal() ||
-							summon.getMoveAbility() == MoveAbility.FOLLOW.getVal() ||
-							summon.getMoveAbility() == MoveAbility.FLY_AROUND_CHAR.getVal() ||
-							summon.getMoveAbility() == MoveAbility.JAGUAR.getVal()) {
+					if (summon.getMoveAbility() == MoveAbility.WalkClone.getVal() ||
+							summon.getMoveAbility() == MoveAbility.Walk.getVal() ||
+							summon.getMoveAbility() == MoveAbility.Fly.getVal() ||
+							summon.getMoveAbility() == MoveAbility.Jaguar.getVal()) {
 						summon.setObjectId(getField().getNewObjectID());
 						getField().spawnSummon(summon);
 					} else {
@@ -3138,7 +3138,7 @@ public class Char {
 		} else {
 			return 0;
 		}
-		Item i = getConsumeInventory().getItems().stream().filter(p).findFirst().orElse(null);
+		Item i = getConsumeInventory().getItems().stream().sorted(Comparator.comparing(Item::getBagIndex)).filter(p).findFirst().orElse(null);
 		return i != null ? i.getItemId() : 0;
 	}
 

@@ -632,7 +632,7 @@ public class Pirate extends Beginner {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
@@ -682,7 +682,7 @@ public class Pirate extends Beginner {
             Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
             Field field = chr.getField();
             summon.setFlyMob(false);
-            summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+            summon.setMoveAbility(MoveAbility.WalkRandom.getVal());
             field.spawnSummon(summon);
 
             o3.nReason = random;
