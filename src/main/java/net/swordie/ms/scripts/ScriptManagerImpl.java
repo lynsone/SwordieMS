@@ -54,14 +54,12 @@ import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.LogManager;
-import org.python.util.PythonInterpreter;
 
 import javax.script.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1884,6 +1882,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
 	}
 
+
+
 	// Clock methods ---------------------------------------------------------------------------------------------------
 
 	public void showStopWatch(int milliseconds) {
@@ -1904,6 +1904,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void removeClock() {
 		chr.write(CField.clock(ClockPacket.removeClock()));
 	}
+
 
 
 	// Other methods ---------------------------------------------------------------------------------------------------

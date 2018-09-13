@@ -70,6 +70,7 @@ public class WindArcher extends Noblesse {
 
     public static final int GLORY_OF_THE_GUARDIANS_WA = 13121053;
     public static final int STORM_BRINGER = 13121054;
+    public static final int MONSOON = 13121052;
 
     private int[] addedSkills = new int[] {
             ELEMENTAL_HARMONY_DEX,
@@ -350,6 +351,13 @@ public class WindArcher extends Noblesse {
         Option o2 = new Option();
         Option o3 = new Option();
         switch (attackInfo.skillId) {
+            case MONSOON:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr, skill);
+                }
+                break;
 
         }
         super.handleAttack(c, attackInfo);

@@ -276,11 +276,10 @@ public class Aran extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            if(chr.hasSkill(ADRENALINE_RUSH) && tsm.getOption(ComboAbilityBuff).nOption > 999) {
+            if(chr.hasSkill(ADRENALINE_RUSH) && tsm.getOption(ComboAbilityBuff).nOption > 999 && !tsm.hasStat(AdrenalinBoost)) {
                 giveAdrenalinRushBuff(tsm);
-            } else {
-                incrementComboAbility(tsm, attackInfo);
             }
+            incrementComboAbility(tsm, attackInfo);
             aranDrain();
             snowCharge(attackInfo);
         }
