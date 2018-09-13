@@ -858,7 +858,7 @@ public class Thief extends Beginner {
                                     new Position());
                             chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), life.getObjectId(), type,
                                     true, life.getObjectId(), atom, forceAtomInfo, rect, 0, 300,
-                                    life.getPosition(), atom, life.getPosition()));
+                                    life.getPosition(), chr.getBulletIDForAttack(), life.getPosition()));
                         }
                     }
                 }

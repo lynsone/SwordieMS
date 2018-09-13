@@ -36,3 +36,4 @@ if answer == 0:
     chr.setPreviousFieldID(chr.getFieldID())
     map = maps[npc][sm.getRandomIntBelow(len(maps[npc]))]
     sm.warpInstanceIn(map)
+    chr.getField().removeLife(objectID, False)

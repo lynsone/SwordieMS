@@ -38,7 +38,6 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
 import net.swordie.ms.client.jobs.adventurer.BeastTamer;
-import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
@@ -355,6 +354,7 @@ public class WorldHandler {
         }
 //        log.debug("Equipped after: " + chr.getEquippedInventory());
 //        log.debug("Equip after: " + chr.getEquipInventory());
+        chr.setBulletIDForAttack(chr.calculateBulletIDForAttack());
     }
 
     public static void handleNonTargetForceAtomAttack(Client c, InPacket inPacket) {
