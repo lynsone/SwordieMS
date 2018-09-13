@@ -5,7 +5,6 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
@@ -119,6 +118,13 @@ public class NightWalker extends Noblesse {
             DARK_OMEN,
             GLORY_OF_THE_GUARDIANS_NW,
             SHADOW_ILLUSION,
+    };
+
+    private int[] darkEleSkills = new int[] {
+            DARK_ELEMENTAL,
+            ADAPTIVE_DARKNESS,
+            ADAPTIVE_DARKNESS_II,
+            ADAPTIVE_DARKNESS_III,
     };
 
     private int[] batSkills = new int[] {
@@ -347,6 +353,9 @@ public class NightWalker extends Noblesse {
             case SHADOW_STITCH:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
@@ -537,13 +546,14 @@ public class NightWalker extends Noblesse {
         if(tsm.hasStat(ElementDarkness)) {
             Option o1 = new Option();
             Option o2 = new Option();
-            Skill skill = chr.getSkill(attackInfo.skillId);
-            int skillID = skill.getSkillId();
             int amount = 1;
-            SkillInfo si = SkillData.getSkillInfoById(DARK_ELEMENTAL);
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Skill skill = chr.getSkill(DARK_ELEMENTAL);
                 if (Util.succeedProp(getDarkEleProp())) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
 
                     if (mts.hasCurrentMobStat(MobStat.ElementDarkness)) {
@@ -568,7 +578,7 @@ public class NightWalker extends Noblesse {
                     o2.tOption = 15; //si.getValue(subTime, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.Blind, o2);  //To Show the Stack Effect
 
-                    //mts.createAndAddBurnedInfo(chr.getId(), skill, 1); //TODO Uncomment gives NPE
+                    mts.createAndAddBurnedInfo(chr, skill);
 
                     //handle Vitality Siphon
                     if (chr.hasSkill(VITALITY_SIPHON)) {
@@ -580,41 +590,39 @@ public class NightWalker extends Noblesse {
     }
 
     private int getMaxDarkEleStack() {
-        int maxStack = 2;
-        if(chr.hasSkill(DARK_ELEMENTAL)) {
-            maxStack = 2;
-        }
-        if(chr.hasSkill(ADAPTIVE_DARKNESS)) {
-            maxStack += 1;
-        }
-        if(chr.hasSkill(ADAPTIVE_DARKNESS_II)) {
-            maxStack += 1;
-        }
-        if(chr.hasSkill(ADAPTIVE_DARKNESS_III)) {
-            maxStack += 1;
+        int maxStack = 0;
+        for(int darkEleSkill : darkEleSkills) {
+            if(chr.hasSkill(darkEleSkill)) {
+                Skill skill = chr.getSkill(darkEleSkill);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+                maxStack += si.getValue(x, slv);
+            }
         }
         return maxStack;
     }
 
+    private Skill getDarkElementalSkill() {
+        Skill skill = null;
+        for(int darkEleSkill : darkEleSkills) {
+            if(chr.hasSkill(darkEleSkill)) {
+                skill = chr.getSkill(darkEleSkill);
+            }
+        }
+        return skill;
+    }
+
     private int getDarkEleProp() {
-        SkillInfo dei = SkillData.getSkillInfoById(DARK_ELEMENTAL);
-        SkillInfo ad1 = SkillData.getSkillInfoById(ADAPTIVE_DARKNESS);
-        SkillInfo ad2 = SkillData.getSkillInfoById(ADAPTIVE_DARKNESS_II);
-        SkillInfo ad3 = SkillData.getSkillInfoById(ADAPTIVE_DARKNESS_III);
-        int prop = dei.getValue(SkillStat.prop, dei.getCurrentLevel());
-        if(chr.hasSkill(DARK_ELEMENTAL)) {
-            prop = dei.getValue(SkillStat.prop, dei.getCurrentLevel());
+        int proc = 0;
+        for(int darkEleSkill : darkEleSkills) {
+            if(chr.hasSkill(darkEleSkill)) {
+                Skill skill = chr.getSkill(darkEleSkill);
+                SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+                byte slv = (byte) skill.getCurrentLevel();
+                proc += si.getValue(prop, slv);
+            }
         }
-        if(chr.hasSkill(ADAPTIVE_DARKNESS)) {
-            prop += ad1.getValue(SkillStat.prop, ad1.getCurrentLevel());
-        }
-        if(chr.hasSkill(ADAPTIVE_DARKNESS_II)) {
-            prop += ad2.getValue(SkillStat.prop, ad1.getCurrentLevel());
-        }
-        if(chr.hasSkill(ADAPTIVE_DARKNESS_III)) {
-            prop += ad3.getValue(SkillStat.prop, ad1.getCurrentLevel());
-        }
-        return prop;
+        return proc;
     }
 
     private void incrementSiphonVitality(TemporaryStatManager tsm) {
@@ -644,7 +652,7 @@ public class NightWalker extends Noblesse {
             o1.nOption = (amount * siphonInfo.getValue(y, slv));
             o1.rOption = VITALITY_SIPHON;
             o1.tOption = siphonInfo.getValue(time, slv);
-            tsm.putCharacterStatValue(MaxHP, o1);
+            tsm.putCharacterStatValue(IncMaxHP, o1);
             tsm.sendSetStatPacket();
         }
     }

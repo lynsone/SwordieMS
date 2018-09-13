@@ -65,9 +65,9 @@ public class Xenon extends Job {
     public static final int PINPOINT_SALVO_REDESIGN_B = 36110012; //Special Attack Upgrade  (Passive Upgrade)
     public static final int TRIANGULATION = 36110005;
 
-    public static final int HYPOGRAM_FIELD_FORCE_FIELD = 36121002;                  //TODO Summon/Area of Effect?
-    public static final int HYPOGRAM_FIELD_PENETRATE = 36121013;                    //TODO Summon/Area of Effect?
-    public static final int HYPOGRAM_FIELD_SUPPORT = 36121014;                      //TODO Summon/Area of Effect?
+    public static final int HYPOGRAM_FIELD_FORCE_FIELD = 36121002;                  //TODO Summon
+    public static final int HYPOGRAM_FIELD_PENETRATE = 36121013;
+    public static final int HYPOGRAM_FIELD_SUPPORT = 36121014;                      //TODO Summon
     public static final int TEMPORAL_POD = 36121007;                                //TODO
     public static final int OOPARTS_CODE = 36121003; //Buff
     public static final int MAPLE_WARRIOR_XENON = 36121008; //Buff
@@ -219,12 +219,11 @@ public class Xenon extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
             case AMARANTH_GENERATOR:
-                if (supply >= 20) {
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(AmaranthGenerator, o1);
-                }
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AmaranthGenerator, o1);
+                incrementSupply(20);
                 break;
 
             case HYPOGRAM_FIELD_FORCE_FIELD:

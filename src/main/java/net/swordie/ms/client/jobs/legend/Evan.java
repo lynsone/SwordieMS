@@ -294,7 +294,6 @@ public class Evan extends Job {
                 }
             }
         }
-        chr.chatMessage("Debris Count: " + debrisCount);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
