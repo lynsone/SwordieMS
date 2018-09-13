@@ -14,6 +14,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatType;
@@ -34,10 +35,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -566,12 +564,14 @@ public class Thief extends Beginner {
             if(hasHitMobs) {
                 // NightLord's Mark & ForceAtom
                 if(chr.hasSkill(ASSASSINS_MARK)) {
-                    setMarkonMob(attackInfo);
                     handleMark(attackInfo);
+                    setMarkonMob(attackInfo);
                 }
 
                 // Expert Throwing Star Handling
-                procExpertThrowingStar(skillID);
+                if(attackInfo.skillId != NIGHTLORD_MARK_ATOM && attackInfo.skillId != ASSASSIN_MARK_ATOM) {
+                    procExpertThrowingStar(skillID);
+                }
             }
         }
 
@@ -584,7 +584,9 @@ public class Thief extends Beginner {
                 }
 
                 // Pick Pocket
-                dropFromPickPocket(attackInfo);
+                if(attackInfo.skillId != MESO_EXPLOSION_ATOM) {
+                    dropFromPickPocket(attackInfo);
+                }
 
                 // Shadower Instinct
                 if (chr.hasSkill(SHADOWER_INSTINCT)) {
@@ -733,14 +735,17 @@ public class Thief extends Beginner {
     }
 
     private void createMesoExplosionForceAtom(Drop drop) {
+        if(!chr.hasSkill(MESO_EXPLOSION)) {
+            return;
+        }
         Field field = chr.getField();
         Rect rect = new Rect(
                 new Position(
-                        chr.getPosition().getX() - 4000,
-                        chr.getPosition().getY() - 4000),
+                        chr.getPosition().getX() - 500,
+                        chr.getPosition().getY() - 500),
                 new Position(
-                        chr.getPosition().getX() + 4000,
-                        chr.getPosition().getY() + 4000)
+                        chr.getPosition().getX() + 500,
+                        chr.getPosition().getY() + 500)
         );
         List<Mob> mobs = field.getMobsInRect(rect);
         if(mobs.size() <= 0) {
@@ -751,9 +756,9 @@ public class Thief extends Beginner {
         int type = ForceAtomEnum.FLYING_MESO.getForceAtomType();
         int mobId = mob.getObjectId();
 
-        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 3, 5,
+        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 2, 3,
                 0, 0, (int) System.currentTimeMillis(), 1, 0,
-                drop.getPosition());
+                new Position());
         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                 true, mobId, MESO_EXPLOSION_ATOM, forceAtomInfo, new Rect(), 0, 300,
                 mob.getPosition(), MESO_EXPLOSION_ATOM, mob.getPosition()));
@@ -772,7 +777,9 @@ public class Thief extends Beginner {
         int hideIconSkillId = skill.getSkillId() + 100; // there's no Buff Icon
 
         if(tsm.getOptByCTSAndSkill(IndieDamR, hideIconSkillId) == null) {
-            tsm.removeStatsBySkill(hideIconSkillId);
+            if(tsm.hasStatBySkillId(hideIconSkillId)) {
+                tsm.removeStatsBySkill(hideIconSkillId);
+            }
             if(Util.succeedProp(si.getValue(prop, slv))) {
                 o.nReason = hideIconSkillId;
                 o.nValue = si.getValue(pdR, slv);
@@ -799,25 +806,26 @@ public class Thief extends Beginner {
     }
 
     private void handleMark(AttackInfo attackInfo) {
+        if(getMarkSkill() == null) {
+            return;
+        }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(ASSASSINS_MARK);
-        SkillInfo si = SkillData.getSkillInfoById(ASSASSINS_MARK);
+        Skill skill = getMarkSkill();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         byte slv = (byte) skill.getCurrentLevel();
-        int skillId = skill.getSkillId();
 
         if(tsm.hasStat(NightLordMark)) {
-
             if (attackInfo.skillId != NIGHTLORD_MARK_ATOM && attackInfo.skillId != ASSASSIN_MARK_ATOM) {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    int randomInt = new Random().nextInt((360/getAssassinsMarkStarCount())-1);
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    int mobID = mai.mobId;
                     Rect rect = new Rect(
                             new Position(
-                                    mob.getPosition().getX() - 1500,
-                                    mob.getPosition().getY() - 1500),
+                                    mob.getPosition().getX() - 800,
+                                    mob.getPosition().getY() - 800),
                             new Position(
-                                    mob.getPosition().getX() + 1500,
-                                    mob.getPosition().getY() + 1500)
+                                    mob.getPosition().getX() + 800,
+                                    mob.getPosition().getY() + 800)
                     );
                     MobTemporaryStat mts = mob.getTemporaryStat();
 
@@ -827,15 +835,14 @@ public class Thief extends Beginner {
                     }
                     List<Mob> bossLifes = chr.getField().getBossMobsInRect(rect);
                     if(mts.hasBurnFromSkillAndOwner(getCurMarkLv(), chr.getId())) {
-                        for (int i = 0; i < 6; i++) {
+                        for (int i = 0; i < getAssassinsMarkStarCount(); i++) {
 
                             Mob life = Util.getRandomFromCollection(lifes);
-                            if(bossLifes.size() > 0) {
+                            if(bossLifes.size() > 0 && Util.succeedProp(65)) {
                                 life = Util.getRandomFromCollection(bossLifes);
                             }
 
-
-                            int anglez = (360 / 6) * i;
+                            int anglez = (360 / getAssassinsMarkStarCount()) * i;
 
                             int inc = ForceAtomEnum.ASSASSIN_MARK.getInc();
                             int type = ForceAtomEnum.ASSASSIN_MARK.getForceAtomType();
@@ -846,9 +853,9 @@ public class Thief extends Beginner {
                                 type = ForceAtomEnum.NIGHTLORD_MARK.getForceAtomType();
                                 atom = NIGHTLORD_MARK_ATOM;
                             }
-
+                            chr.chatMessage((randomInt+anglez)+"");
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 45, 4,
-                                    anglez, 100, (int) System.currentTimeMillis(), 1, 0,
+                                    randomInt+anglez, 170, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
                             chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), life.getObjectId(), type,
                                     true, life.getObjectId(), atom, forceAtomInfo, rect, 0, 300,
@@ -859,6 +866,30 @@ public class Thief extends Beginner {
             }
         }
     }
+
+    private int getAssassinsMarkStarCount() {
+        if(getMarkSkill() != null) {
+            Skill skill = getMarkSkill();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+
+            return si.getValue(bulletCount, slv);
+        }
+        return 0;
+    }
+
+    private Skill getMarkSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(ASSASSINS_MARK)) {
+            skill = chr.getSkill(ASSASSINS_MARK);
+        }
+        if(chr.hasSkill(NIGHT_LORD_MARK)) {
+            skill = chr.getSkill(NIGHT_LORD_MARK);
+        }
+        return skill;
+    }
+
+
 
     private void setMarkonMob(AttackInfo attackInfo) {
         Skill skill = chr.getSkill(getCurMarkLv());
@@ -1016,7 +1047,7 @@ public class Thief extends Beginner {
                 Set<DropInfo> dropInfoSet = new HashSet<>();
                 for (int i = 0; i < slv; i++) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
-                        dropInfoSet.add(new DropInfo(0, 100, 0, 50, 150)); // min 50; max 150;
+                        dropInfoSet.add(new DropInfo(0, 100, GameConstants.MAX_DROP_CHANCE, 50, 150)); // min 50; max 150;
                     }
                 }
                 if (dropInfoSet.size() > 0) {

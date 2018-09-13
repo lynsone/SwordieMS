@@ -3078,6 +3078,7 @@ public class Char {
 		}
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
+		getJobHandler().handleCancelTimer(this);
 		getField().removeChar(this);
 		getAccount().setCurrentChr(null);
 		if (!isChangingChannel()) {

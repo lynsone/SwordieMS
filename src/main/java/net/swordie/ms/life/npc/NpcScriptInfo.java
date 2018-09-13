@@ -297,7 +297,7 @@ public class NpcScriptInfo {
 		FlipSpeakerNoEndChat(0x9),
 		PlayerAsSpeakerFlip(0x10),
 		PlayerAsSpeakerFlipNoEndChat(0x11),
-		BoxChat(0x20), //Zero Chat
+		BoxChat(0x20), // Standard BoxChat if Color = 1  |  Zero BoxChat if Color = 0
 		BoxChatNoEndChat(0x21),
 		BoxChatAsPlayer(0x22),
 		BoxChatAsPlayerNoEndChat(0x23),
