@@ -8,6 +8,7 @@ sm.forcedInput(1)
 sm.sendDelay(30)
 
 sm.forcedInput(0)
+sm.removeEscapeButton()
 sm.setSpeakerID(VON_LEON)
 sm.sendNext("Are all the Commanders here, aside from those away on missions? Good. Let's begin the meeting.")
 
