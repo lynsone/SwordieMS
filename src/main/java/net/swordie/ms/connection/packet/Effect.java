@@ -54,6 +54,13 @@ public class Effect {
                     outPacket.encodeInt(getArg3()); // nDelta
                 }
                 break;
+            case SkillAffected_Select:
+                outPacket.encodeInt(getArg1());
+                outPacket.encodeInt(getArg2());
+                outPacket.encodeInt(getArg3());
+                outPacket.encodeByte(getArg4());
+                outPacket.encodeByte(getArg5());
+                break;
             case SkillSpecial:
                 outPacket.encodeInt(getArg1()); // skill id
                 if(getArg1() == BattleMage.DARK_SHOCK) {
@@ -394,6 +401,19 @@ public class Effect {
         effect.setArg1(skillID);
         effect.setArg2(slv);
         effect.setArg3(hpGain);
+
+        return effect;
+    }
+
+    public static Effect skillAffectedSelect(int skillID, byte slv, int select, boolean special) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillAffected_Select);
+        effect.setArg1(select);
+        effect.setArg2(0); // root Select  -  (?)
+        effect.setArg3(skillID);
+        effect.setArg4(slv);
+        effect.setArg5(special ? 1 : 0);
 
         return effect;
     }

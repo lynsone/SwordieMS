@@ -178,6 +178,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			chr.chatMessage(Mob, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 		}
+		resetParam();
 		ScriptEngine scriptEngine = getScriptEngineByType(scriptType);
 		if (scriptEngine == null) {
 			scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
@@ -505,6 +506,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		return sendGeneralSay("", AskSlideMenu);
 	}
 
+
+
 	// Start of param methods ------------------------------------------------------------------------------------------
 
 	public void resetParam() {
@@ -515,14 +518,49 @@ public class ScriptManagerImpl implements ScriptManager {
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.NotCancellable);
 	}
 
+	public void addEscapeButton() {
+		if(getNpcScriptInfo().hasParam(NpcScriptInfo.Param.NotCancellable)) {
+			getNpcScriptInfo().removeParam(NpcScriptInfo.Param.NotCancellable);
+		}
+	}
+
+	public void flipSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipSpeaker);
+	}
+
+	public void flipDialogue() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.OverrideSpeakerID);
+	}
+
+	public void flipDialoguePlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeakerFlip);
+	}
+
 	public void setPlayerAsSpeaker() {
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
 	}
 
 	public void setBoxChat() {
-		getNpcScriptInfo().setColor((byte) 1);
+		setBoxChat(true);
+	}
+
+	public void setBoxChat(boolean color) { // true = Standard BoxChat  |  false = Zero BoxChat
+		getNpcScriptInfo().setColor((byte) (color ? 1 : 0));
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.BoxChat);
 	}
+
+	public void flipBoxChat() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipBoxChat);
+	}
+
+	public void boxChatPlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.BoxChatAsPlayer);
+	}
+
+	public void flipBoxChatPlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipBoxChatAsPlayer);
+	}
+
 
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
@@ -1005,7 +1043,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-        @Override
+	@Override
 	public void setSpeakerType(byte speakerType) {
 		NpcScriptInfo nsi = getNpcScriptInfo();
 		nsi.setSpeakerType(speakerType);
