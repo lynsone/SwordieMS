@@ -318,7 +318,7 @@ public class Thief extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 field.spawnSummon(summon);
 
                 o1.nReason = skillID;

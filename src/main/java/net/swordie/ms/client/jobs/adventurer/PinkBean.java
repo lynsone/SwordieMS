@@ -163,7 +163,7 @@ public class PinkBean extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
@@ -288,7 +288,7 @@ public class PinkBean extends Job {
                     field = c.getChr().getField();
                     summon.setFlyMob(true);
                     summon.setPosition(mob.getPosition());
-                    summon.setMoveAbility(MoveAbility.FLY_AWAY.getVal());
+                    summon.setMoveAbility(MoveAbility.FlyRandom.getVal());
                     field.spawnAddSummon(summon);
 
                     o1.nReason = GO_MINI_BEANS;

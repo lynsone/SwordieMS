@@ -197,7 +197,7 @@ public abstract class Job {
 					case MONOLITH:
 						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 						field = c.getChr().getField();
-						summon.setMoveAbility(MoveAbility.STATIC.getVal());
+						summon.setMoveAbility(MoveAbility.Stop.getVal());
 						field.spawnSummon(summon);
 						field.setKishin(true);
 						break;

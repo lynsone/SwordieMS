@@ -524,7 +524,7 @@ public class NightWalker extends Noblesse {
     private Summon summonBatAndRegister() {
         Summon bat = Summon.getSummonBy(chr, getBatSkill().getSkillId(), (byte) getBatSkill().getCurrentLevel());
         bat.setFlyMob(true);
-        bat.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        bat.setMoveAbility(MoveAbility.Fly.getVal());
         bat.setAttackActive(false);
         chr.getField().spawnAddSummon(bat);
         bats.add(bat);

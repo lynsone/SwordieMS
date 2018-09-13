@@ -419,7 +419,7 @@ public class Magician extends Beginner {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                summon.setMoveAbility(MoveAbility.Walk.getVal());
                 field.spawnSummon(summon);
 
                 o1.nReason = skillID;
@@ -588,7 +588,7 @@ public class Magician extends Beginner {
         viralSlime.setFlyMob(false);
         viralSlime.setPosition(position);
         viralSlime.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
-        viralSlime.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+        viralSlime.setMoveAbility(MoveAbility.WalkRandom.getVal());
         field.spawnAddSummon(viralSlime);
     }
 

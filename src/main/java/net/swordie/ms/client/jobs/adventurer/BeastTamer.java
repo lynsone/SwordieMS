@@ -282,7 +282,7 @@ public class BeastTamer extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setSummonTerm(si.getValue(time, slv));
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 field.spawnSummon(summon);
 
                 o1.nReason = skillID;
@@ -591,7 +591,7 @@ public class BeastTamer extends Job {
         defensiveFormation = Summon.getSummonBy(c.getChr(), DEFENSIVE_FORMATION, slv);
         defensiveFormation.setFlyMob(true);
         defensiveFormation.setSummonTerm(si.getValue(time, slv));
-        defensiveFormation.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal()); // Different MoveAbility?
+        defensiveFormation.setMoveAbility(MoveAbility.Fly.getVal()); // Different MoveAbility?
         return defensiveFormation;
     }
 
@@ -716,7 +716,7 @@ public class BeastTamer extends Job {
                     summon.setFlyMob(false);
                     summon.setPosition(mob.getPosition());
                     summon.setSummonTerm(si.getValue(x, slv));
-                    summon.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+                    summon.setMoveAbility(MoveAbility.WalkRandom.getVal());
                     field.spawnAddSummon(summon);
 
                     o1.nReason = skill.getSkillId();
