@@ -257,7 +257,7 @@ public class NightWalker extends Noblesse {
                     field = c.getChr().getField();
                     summon.setFlyMob(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
-                    summon.setMoveAbility(MoveAbility.SHADOW_SERVANT.getVal());
+                    summon.setMoveAbility(MoveAbility.WalkClone.getVal());
                     field.spawnSummon(summon);
                 }
                 if(chr.hasSkill(DARK_SERVANT)) {
@@ -304,7 +304,7 @@ public class NightWalker extends Noblesse {
         Field field = c.getChr().getField();
         darkServant.setFlyMob(false);
         darkServant.setAvatarLook(chr.getAvatarData().getAvatarLook());
-        darkServant.setMoveAbility(MoveAbility.SHADOW_SERVANT.getVal());
+        darkServant.setMoveAbility(MoveAbility.WalkClone.getVal());
         field.spawnSummon(darkServant);
     }
 
