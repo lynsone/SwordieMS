@@ -1367,9 +1367,9 @@ public interface ScriptManager extends Observer {
 	/**
 	 * Shows a timer on top with precision in milliseconds. Will automatically remove itself after the timer has
 	 * expired.
-	 * @param milliseconds the amount of milliseconds the stopwatch should start out with
+	 * @param seconds the amount of seconds the stopwatch should start out with
 	 */
-	void createStopWatch(int milliseconds);
+	void createStopWatch(int seconds);
 
 	/**
 	 * Shows a timer on top with precision in minutes/seconds. Will automatically remove itself after the timer has
