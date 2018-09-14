@@ -244,8 +244,11 @@ public class Phantom extends Job {
                 xOpt = 10;
                 break;
             case 5: // Life Drain
+                xOpt = 1;
                 break;
         }
+        chr.write(User.effect(Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
+        chr.write(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
 
         o.nOption = randomInt;
         o.rOption = skill.getSkillId();
@@ -253,7 +256,6 @@ public class Phantom extends Job {
         o.xOption = xOpt;
         tsm.putCharacterStatValue(Judgement, o);
         tsm.sendSetStatPacket();
-        //TODO Draw Card Effect
     }
 
 
@@ -311,6 +313,9 @@ public class Phantom extends Job {
             int anglenum = new Random().nextInt(30) + 295;
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(mob == null) {
+                    continue;
+                }
                 int TW1prop = 100;
                 if (Util.succeedProp(TW1prop)) {
                     if (chr.hasSkill(CARTE_NOIR)) {
@@ -322,7 +327,7 @@ public class Phantom extends Job {
                                 new Position()); //Slightly behind the player
                         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
+                                mob.getPosition(), CARTE_NOIR, mob.getPosition()));
                     } else if (chr.hasSkill(CARTE_BLANCHE)) {
                         int mobID = mai.mobId;
                         int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
@@ -332,7 +337,7 @@ public class Phantom extends Job {
                                 new Position()); //Slightly behind the player
                         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), CARTE_BLANCHE, mob.getPosition())); //TODO NPE on Mille
+                                mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
                     }
                 }
             }

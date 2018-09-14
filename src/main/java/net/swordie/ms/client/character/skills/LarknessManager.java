@@ -131,19 +131,23 @@ public class LarknessManager {
 	public void addGauge(int amount, boolean dark) {
 		int newGauge;
 		if (dark) {
-			newGauge = getDarkGauge() + amount;
-			if (newGauge >= 10000) {
-				newGauge -= 10000;
-				addDarkFeather();
+			if (getDarkFeathers() < 5) {
+				newGauge = getDarkGauge() + amount;
+				if (newGauge >= 10000) {
+					newGauge -= 10000;
+					addDarkFeather();
+				}
+				setDarkGauge(newGauge);
 			}
-			setDarkGauge(newGauge);
 		} else {
-			newGauge = getLightGauge() + amount;
-			if (newGauge >= 10000) {
-				newGauge -= 10000;
-				addLightFeather();
+			if (getLightFeathers() < 5) {
+				newGauge = getLightGauge() + amount;
+				if (newGauge >= 10000) {
+					newGauge -= 10000;
+					addLightFeather();
+				}
+				setLightGauge(newGauge);
 			}
-			setLightGauge(newGauge);
 		}
 		updateInfo();
 	}

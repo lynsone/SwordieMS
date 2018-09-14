@@ -29,6 +29,7 @@ maps = {
 
 rand = sm.getRandomIntBelow(2)
 npc = ids[rand]
+field = chr.getField()
 sm.setSpeakerID(npc)
 sm.sendNext(text[npc])
 answer = sm.sendNext(text2[npc])
@@ -36,3 +37,4 @@ if answer == 0:
     chr.setPreviousFieldID(chr.getFieldID())
     map = maps[npc][sm.getRandomIntBelow(len(maps[npc]))]
     sm.warpInstanceIn(map)
+    field.removeLife(objectID, False)

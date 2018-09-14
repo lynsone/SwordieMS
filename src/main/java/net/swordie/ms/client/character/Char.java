@@ -3138,7 +3138,7 @@ public class Char {
 		} else {
 			return 0;
 		}
-		Item i = getConsumeInventory().getItems().stream().filter(p).findFirst().orElse(null);
+		Item i = getConsumeInventory().getItems().stream().sorted(Comparator.comparing(Item::getBagIndex)).filter(p).findFirst().orElse(null);
 		return i != null ? i.getItemId() : 0;
 	}
 
