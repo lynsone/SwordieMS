@@ -234,6 +234,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			script.append(Util.readFile(dir, Charset.defaultCharset()));
 		} catch (IOException e) {
 			e.printStackTrace();
+			lockInGameUI(false); // so players don't get stuck if a script fails
 		}
 		try {
 			cs = ((Compilable) se).compile(script.toString());
@@ -575,7 +576,6 @@ public class ScriptManagerImpl implements ScriptManager {
 		stop(ScriptType.ITEM);
 		stop(ScriptType.QUEST);
 		stop(ScriptType.REACTOR);
-		stop(ScriptType.DIRECTION);
 		if (stop) {
 			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
 		}
@@ -1854,6 +1854,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedInput(type)));
 	}
 
+	public void patternInputRequest(String pattern, int act, int requestCount, int time) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.patternInputRequest(pattern, act, requestCount, time)));
+	}
+
 	@Override
 	public void hideUser(boolean hide) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.vansheeMode(hide)));
@@ -1871,6 +1875,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void showEffectOnPosition(String path, int duration, int x, int y) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
 				new Position(x, y), 0, 1, false, 0)));
+	}
+
+	public void showBalloonMsgOnNpc(String path, int duration, int templateID) {
+		int objectID = getNpcObjectIdByTemplateId(templateID);
+		if (objectID == 0) return;
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
+				new Position(0, -150), 0, objectID, false, 0)));
 	}
 
 	public void showBalloonMsg(String path, int duration) {
@@ -1985,7 +1996,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
 	}
-        
+
+	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
+		chr.write(User.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));
+	}
+
 	public String formatNumber(String number) {
 		return Util.formatNumber(number);
 	}

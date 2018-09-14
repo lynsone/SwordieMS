@@ -7,7 +7,7 @@ import net.swordie.ms.util.Position;
 
 /**
  * InGameDirectionEvent, for when a client is in InGameDirection mode
- * (by using {@link net.swordie.ms.connection.packet.UserLocal#setInGameDirectionMode(boolean)})
+ * (by using {@link net.swordie.ms.connection.packet.UserLocal(boolean)})
  * @author Sjonnie
  * Created on 8/31/2018.
  */
@@ -37,12 +37,12 @@ public class InGameDirectionEvent implements Encodable {
                 outPacket.encodeString(str); // sEffectUOL
                 outPacket.encodeInt(arg1); // tDuration (0 => take effect's duration)
                 outPacket.encodePositionInt(pos);
-                outPacket.encodeByte(arg2 >= 0);
-                if (arg2 >= 0) {
+                outPacket.encodeByte(arg2 >= -1);
+                if (arg2 >= -1) {
                     outPacket.encodeInt(arg2); // z
                 }
-                outPacket.encodeByte(arg3 > 0);
-                if (arg3 > 0) {
+                outPacket.encodeByte(arg3 >= -1);
+                if (arg3 >= -1) {
                     outPacket.encodeInt(arg3); // dwNpcID (for CNpcPool::GetNpcForExtend)
                 }
                 outPacket.encodeByte(arg4);
