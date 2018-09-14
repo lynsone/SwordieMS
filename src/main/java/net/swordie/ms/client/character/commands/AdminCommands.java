@@ -3,8 +3,11 @@ package net.swordie.ms.client.character.commands;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.damage.DamageSkinSaveData;
+import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
@@ -34,6 +37,7 @@ import net.swordie.ms.util.Util;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static net.swordie.ms.enums.ChatType.*;
@@ -48,6 +52,11 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
+            PetItem item = (PetItem) chr.getCashInventory().getItemBySlot((short) 1);
+            item.setDateExpire(FileTime.fromDate(LocalDateTime.now().plusHours(3)));
+            item.setDateDead(item.getDateExpire());
+            item.updateToChar(chr);
+            System.out.println(item.getDateExpire().toLocalDateTime().toInstant(ZoneOffset.UTC));
         }
     }
 

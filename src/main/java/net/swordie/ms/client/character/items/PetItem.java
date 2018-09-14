@@ -1,16 +1,14 @@
 package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.jobs.adventurer.Thief;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.pet.PetSkill;
-import net.swordie.ms.util.Util;
 import org.apache.log4j.Logger;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * Created on 4/14/2018.
@@ -28,8 +26,7 @@ public class PetItem extends Item {
     private byte repleteness; // hungry thing
     private short petAttribute;
     private int petSkill;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "dateDead")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime dateDead;
     private int remainLife;
     private short attribute;

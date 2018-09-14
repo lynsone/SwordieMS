@@ -23,6 +23,8 @@ public class DamageSkinSaveData {
     private String description;
 
     public DamageSkinSaveData() {
+        this.damageSkinID = -1;
+        this.notSave = true;
     }
 
     public DamageSkinSaveData(int damageSkinID, int itemID, boolean notSave, String description) {
@@ -35,7 +37,7 @@ public class DamageSkinSaveData {
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getDamageSkinID());
         outPacket.encodeInt(getItemID());
-        outPacket.encodeByte(true);
+        outPacket.encodeByte(isNotSave());
         outPacket.encodeString(getDescription());
     }
 
