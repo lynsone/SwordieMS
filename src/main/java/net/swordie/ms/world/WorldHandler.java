@@ -2439,14 +2439,14 @@ public class WorldHandler {
                 Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
                 NpcMessageType.None;
         }
-        if (nmt != NpcMessageType.Monologue) {
+        if (nmt != NpcMessageType.Monologue && nmt != NpcMessageType.AskAngelicBuster) {// angelic buster sent after movie
             byte action = inPacket.decodeByte();
             int answer = 0;
             boolean hasAnswer = false;
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
-                if(action != 1) {   // SendDelay
+                if(action != 1 && action != 2) {   // SendDelay/PatternInputRequest
                     return;         // We only want SendDelay as ways to progress the script
                 }
                 chr.getScriptManager().handleAction(nmt, action, answ);
@@ -2741,9 +2741,8 @@ public class WorldHandler {
         if (script == null) {
             return;
         }
-        log.debug(String.format("Starting direction script %s.", script));
         chr.getScriptManager().setCurNodeEventEnd(false);
-        chr.getScriptManager().startScript(field.getId(), script, ScriptType.DIRECTION);;
+        chr.getScriptManager().startScript(field.getId(), script, ScriptType.FIELD);;
     }
 
     public static void handleUserEmotion(Client c, InPacket inPacket) {

@@ -122,6 +122,12 @@ public class Effect {
                     outPacket.encodeInt(getArg4()); // nItemID
                 }
                 break;
+            case FadeInOut:
+                outPacket.encodeInt(getArg1());// tFadeIn
+                outPacket.encodeInt(getArg2());// tDelay
+                outPacket.encodeInt(getArg3());// tFadeOut
+                outPacket.encodeByte(getArg4()); // nAlpha
+                break;
             case LeftMonsterNumber:
                 outPacket.encodeInt(getArg1()); // Number on Arrow
                 break;
@@ -606,6 +612,17 @@ public class Effect {
             effect.setArg4(itemID);
         }
 
+        return effect;
+    }
+
+    public static Effect fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(FadeInOut);
+        effect.setArg1(fadeIn);
+        effect.setArg2(delay);
+        effect.setArg3(fadeOut);
+        effect.setArg4(alpha);
         return effect;
     }
 

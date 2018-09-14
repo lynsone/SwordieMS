@@ -2,6 +2,7 @@ package net.swordie.ms.client.character;
 
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
@@ -21,12 +22,11 @@ public class NonCombatStatDayLimit {
     private short will;
     private short craft;
     private short sense;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "ftLastUpdateCharmByCashPR")
-    private FileTime ftLastUpdateCharmByCashPR;
+    @Convert(converter = FileTimeConverter.class)
+    private FileTime lastUpdateCharmByCashPR;
     private byte charmByCashPR;
 
-    public NonCombatStatDayLimit(short charisma, short charm, byte charmByCashPR, short insight, short will, short craft, short sense, FileTime ftLastUpdateCharmByCashPR) {
+    public NonCombatStatDayLimit(short charisma, short charm, byte charmByCashPR, short insight, short will, short craft, short sense, FileTime lastUpdateCharmByCashPR) {
         this.charisma = charisma;
         this.charm = charm;
         this.charmByCashPR = charmByCashPR;
@@ -34,7 +34,7 @@ public class NonCombatStatDayLimit {
         this.will = will;
         this.craft = craft;
         this.sense = sense;
-        this.ftLastUpdateCharmByCashPR = ftLastUpdateCharmByCashPR;
+        this.lastUpdateCharmByCashPR = lastUpdateCharmByCashPR;
     }
 
     public NonCombatStatDayLimit() {
@@ -89,12 +89,12 @@ public class NonCombatStatDayLimit {
         this.sense = sense;
     }
 
-    public FileTime getFtLastUpdateCharmByCashPR() {
-        return ftLastUpdateCharmByCashPR;
+    public FileTime getLastUpdateCharmByCashPR() {
+        return lastUpdateCharmByCashPR;
     }
 
-    public void setFtLastUpdateCharmByCashPR(FileTime ftLastUpdateCharmByCashPR) {
-        this.ftLastUpdateCharmByCashPR = ftLastUpdateCharmByCashPR;
+    public void setLastUpdateCharmByCashPR(FileTime lastUpdateCharmByCashPR) {
+        this.lastUpdateCharmByCashPR = lastUpdateCharmByCashPR;
     }
 
     public void encode(OutPacket outPacket) {
@@ -105,7 +105,7 @@ public class NonCombatStatDayLimit {
         outPacket.encodeShort(getSense());
         outPacket.encodeShort(getCharm());
         outPacket.encodeByte(getCharmByCashPR());
-        outPacket.encodeFT(getFtLastUpdateCharmByCashPR());
+        outPacket.encodeFT(getLastUpdateCharmByCashPR());
     }
 
     public short getCharisma() {

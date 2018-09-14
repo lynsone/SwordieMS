@@ -2,6 +2,7 @@ package net.swordie.ms.world.shop.cashshop;
 
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 
@@ -24,6 +25,8 @@ public class CashItemInfo {
     private int commodityID;
     private short quantity;
     private String buyCharacterID;
+
+    @Convert(converter = FileTimeConverter.class)
     private FileTime dateExpire;
     private int paybackRate;
     private double discount;

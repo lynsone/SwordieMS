@@ -85,6 +85,7 @@ public class Field {
     private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean isChannelField;
     private Map<Integer, String> directionInfo;
+    private Clock clock;
 
     public Field(int fieldID) {
         this.id = fieldID;
@@ -552,6 +553,9 @@ public class Field {
             for (TownPortal townPortal : getTownPortalList()) {
                 townPortal.showTownPortal(this);
             }
+        }
+        if (getClock() != null) {
+            getClock().showClock(chr);
         }
         for (Char c : getChars()) {
             if (!c.equals(chr)) {
@@ -1284,5 +1288,13 @@ public class Field {
 
     public void addDirectionInfo(int node, String script) {
         directionInfo.put(node, script);
+    }
+
+    public Clock getClock() {
+        return clock;
+    }
+
+    public void setClock(Clock clock) {
+        this.clock = clock;
     }
 }

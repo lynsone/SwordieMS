@@ -2,6 +2,7 @@ package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.progress.*;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.enums.QuestStatus;
 import org.hibernate.annotations.Cascade;
 import net.swordie.ms.util.FileTime;
@@ -34,8 +35,7 @@ public class Quest {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<QuestProgressRequirement> progressRequirements;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "completedTime")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime completedTime;
 
     @Transient
