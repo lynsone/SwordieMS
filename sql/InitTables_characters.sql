@@ -255,6 +255,7 @@ create table equips (
 	fboss smallint,
 	fdamage smallint,
 	flevel smallint,
+    superioreqp tinyint,
     primary key (itemid),
     foreign key (itemid) references items(id) on delete cascade
 );

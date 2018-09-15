@@ -57,7 +57,6 @@ public class Equip extends Item {
     private short bdr;
     private short imdr;
     private boolean bossReward;
-    @Transient
     private boolean superiorEqp;
     private short damR;
     private short statR;
