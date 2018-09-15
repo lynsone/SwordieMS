@@ -521,7 +521,7 @@ public class WvsContext {
     }
 
     public static OutPacket sortItemResult(byte type) {
-        OutPacket outPacket = new OutPacket(OutHeader.GATHER_ITEM_RESULT);
+        OutPacket outPacket = new OutPacket(OutHeader.SORT_ITEM_RESULT);
 
         outPacket.encodeByte(0); // doesn't get used
         outPacket.encodeByte(type);
