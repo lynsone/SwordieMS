@@ -66,6 +66,8 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
@@ -98,6 +100,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	private Set<ScheduledFuture> events = new HashSet<>();
 	private ScriptMemory memory = new ScriptMemory();
 	private boolean curNodeEventEnd = false;
+	private static final Lock fileReadLock = new ReentrantLock();
 
 	private ScriptManagerImpl(Char chr, Field field) {
 		this.chr = chr;
@@ -231,10 +234,13 @@ public class ScriptManagerImpl implements ScriptManager {
 		ScriptEngine se = getScriptEngineByType(scriptType);
 		si.setInvocable((Invocable) se);
 		try {
+			fileReadLock.lock();
 			script.append(Util.readFile(dir, Charset.defaultCharset()));
 		} catch (IOException e) {
 			e.printStackTrace();
 			lockInGameUI(false); // so players don't get stuck if a script fails
+		} finally {
+			fileReadLock.unlock();
 		}
 		try {
 			cs = ((Compilable) se).compile(script.toString());
@@ -267,7 +273,9 @@ public class ScriptManagerImpl implements ScriptManager {
 			f.cancel(true);
 		}
 		getMemory().clear();
-		WvsContext.dispose(chr);
+		if (chr != null) {
+			WvsContext.dispose(chr);
+		}
 	}
 
 	@Override
