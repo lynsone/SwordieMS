@@ -295,6 +295,61 @@ public interface ScriptManager extends Observer {
 	void setAP(int amount);
 
 	/**
+	 * Sets the STR of {@link Char} to the specified amount.
+	 * Example: "sm.setSTR(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the STR will be set.
+	 */
+	void setSTR(short amount);
+
+	/**
+	 * Sets the INT of {@link Char} to the specified amount.
+	 * Example: "sm.setINT(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the INT will be set.
+	 */
+	void setINT(short amount);
+
+	/**
+	 * Sets the DEX of {@link Char} to the specified amount.
+	 * Example: "sm.setDEX(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the DEX will be set.
+	 */
+	void setDEX(short amount);
+
+	/**
+	 * Sets the LUK of {@link Char} to the specified amount.
+	 * Example: "sm.setLUK(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the LUK will be set.
+	 */
+	void setLUK(short amount);
+
+	/**
+	 * Sets the Max HP of {@link Char} to the specified amount.
+	 * Example: "sm.setMaxHP(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the Max HP will be set.
+	 */
+	void setMaxHP(int amount);
+
+	/**
+	 * Sets the Max MP of {@link Char} to the specified amount.
+	 * Example: "sm.setMaxMP(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the Max MP will be set.
+	 */
+	void setMaxMP(int amount);
+
+
+	/**
 	 * A Combined method, that sets the {@link Char} JobID to the specified job ID
 	 * as well as add 5 AP  and  3 SP.
 	 * Example: "sm.jobAdvance(112)"
@@ -1503,5 +1558,5 @@ public interface ScriptManager extends Observer {
 	ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
 									  int executes, String methodName, Object...args);
 
-	void playVideoByScript(String videoPath);
+	int playVideoByScript(String videoPath);
 }

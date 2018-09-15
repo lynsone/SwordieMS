@@ -18,6 +18,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -47,6 +48,7 @@ public class Phantom extends Job {
     public static final int LOADOUT = 20031208;
     public static final int TO_THE_SKIES = 20031203;
     public static final int DEXTEROUS_TRAINING = 20030206;
+    public static final int GHOSTWALK = 20031211;
 
     public static final int IMPECCABLE_MEMORY_I = 24001001;
 
@@ -124,9 +126,31 @@ public class Phantom extends Job {
         super.setCharCreationStats(chr);
         chr.setStolenSkills(new HashSet<>());
         chr.setChosenSkills(new HashSet<>());
+        chr.getAvatarData().getCharacterStat().setPosMap(915000000);
     }
 
-
+    @Override
+    public void handleLevelUp() {
+        Map<Stat, Object> stats = new HashMap<>();
+        short level = chr.getLevel();
+        if (chr.getJob() == JobConstants.JobEnum.PHANTOM.getJobId() && level >= 10) {
+            chr.addStat(Stat.mhp, 16);
+            chr.addStat(Stat.mmp, 12);
+            chr.addStat(Stat.str, level >= 6 ? 4 : 5);
+            if (level >= 6) chr.addStat(Stat.str, 1);
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
+        } else {
+            chr.addStat(Stat.mhp, 24);// this information is from level 10 to 11
+            chr.addStat(Stat.mmp, 66);// this information is from level 10 to 11
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        }
+        chr.write(WvsContext.statChanged(stats));
+        super.handleLevelUp();
+    }
 
     // Buff related methods --------------------------------------------------------------------------------------------
 
@@ -139,6 +163,12 @@ public class Phantom extends Job {
         Option o3 = new Option();
         Option o4 = new Option();
         switch (skillID) {
+            case GHOSTWALK:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DarkSight, o1);
+                break;
             case CANE_BOOSTER:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
