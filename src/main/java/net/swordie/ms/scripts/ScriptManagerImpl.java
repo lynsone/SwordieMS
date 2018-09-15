@@ -163,7 +163,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void startScript(int parentID, int objID, String scriptName, ScriptType scriptType) {
 		if (scriptType == ScriptType.None || (scriptType == ScriptType.Quest && !isQuestScriptAllowed())) {
-			log.debug(String.format("Did not allow script %s to go through (type %s)", scriptName, scriptType));
+			log.debug(String.format("Did not allow script %s to go through (type %s)  |  Active Script Type: %s", scriptName, scriptType, getLastActiveScriptType()));
 			return;
 		}
 		setLastActiveScriptType(scriptType);
