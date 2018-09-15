@@ -27,9 +27,10 @@ public class World {
     private Map<Integer, Alliance> alliances = new HashMap<>();
     private int partyIDCounter = 1;
     private boolean charCreateBlock;
+    private boolean reboot;
 
     public World(int worldId, String name, int worldState, String worldEventDescription, int worldEventEXP_WSE,
-                 int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet) {
+                 int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet, boolean reboot) {
         this.worldId = worldId;
         this.name = name;
         this.worldState = worldState;
@@ -43,11 +44,12 @@ public class World {
         }
         this.channels = channelList;
         this.starplanet = starplanet;
+        this.reboot = reboot;
     }
 
     public World(int worldId, String name, int amountOfChannels) {
         this(worldId, name, 0, "", 100, 100,
-                0, amountOfChannels, false);
+                0, amountOfChannels, false, false);
     }
 
     public int getWorldId() {
@@ -207,6 +209,14 @@ public class World {
 
     public void setCharCreateBlock(boolean charCreateBlock) {
         this.charCreateBlock = charCreateBlock;
+    }
+
+    public boolean isReboot() {
+        return reboot;
+    }
+
+    public void setReboot(boolean reboot) {
+        this.reboot = reboot;
     }
 
     public boolean isFull() {

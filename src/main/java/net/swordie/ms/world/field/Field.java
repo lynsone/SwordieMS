@@ -854,7 +854,9 @@ public class Field {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
         } else {
             for (Char chr : getChars()) {
-                broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0, drop.canBePickedUpBy(chr)));
+                if (!chr.getClient().getWorld().isReboot() || drop.canBePickedUpBy(chr)) {
+                    broadcastPacket(DropPool.dropEnterField(drop, posFrom, posTo, 0, drop.canBePickedUpBy(chr)));
+                }
             }
         }
 

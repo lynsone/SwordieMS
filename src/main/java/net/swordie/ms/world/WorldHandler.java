@@ -109,15 +109,18 @@ import org.hibernate.query.Query;
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.EquipBaseStat.cuc;
+import static net.swordie.ms.enums.EquipBaseStat.specialAttribute;
 import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
@@ -192,7 +195,7 @@ public class WorldHandler {
         acc.getMonsterCollection().init(chr);
         chr.checkAndRemoveExpiredItems();
         chr.initBaseStats();
-        chr.setOnline(true);
+        chr.setOnline(true); // v195+: respect 'invisible login' setting
     }
 
     public static void handleUserMove(Client c, InPacket inPacket) {
@@ -1956,6 +1959,11 @@ public class WorldHandler {
                     equip.updateToChar(chr);
                     break;
                 case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
+                    if (c.getWorld().isReboot()) {
+                        log.error(String.format("Character %d attempted to use a bonus potential cube in reboot world.", chr.getId()));
+                        chr.dispose();
+                        return;
+                    }
                     ePos = (short) inPacket.decodeInt();
                     invType = ePos < 0 ? EQUIPPED : EQUIP;
                     equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
@@ -2105,6 +2113,11 @@ public class WorldHandler {
 
     public static void handleUserUpgradeItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to scroll in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort(); //Use Position
         short ePos = inPacket.decodeShort(); //Eqp Position
@@ -2285,6 +2298,11 @@ public class WorldHandler {
 
     public static void handleUserAdditionalOptUpgradeItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to use bonus potential in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort();
         short ePos = inPacket.decodeShort();
@@ -2330,10 +2348,6 @@ public class WorldHandler {
                     break;
             }
         }
-        chr.chatMessage(Mob, "Grade = " + equip.getGrade());
-        for (int i = 0; i < 6; i++) {
-            chr.chatMessage(Mob, "Opt " + i + " = " + equip.getOptions().get(i));
-        }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), false));
         equip.updateToChar(chr);
         chr.consumeItem(scroll);
@@ -2358,10 +2372,6 @@ public class WorldHandler {
             equip.releaseOptions(false);
         } else {
             equip.releaseOptions(bonus);
-        }
-        chr.chatMessage(Mob, "Grade = " + equip.getGrade());
-        for (int i = 0; i < 6; i++) {
-            chr.chatMessage(Mob, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemReleaseEffect(chr.getId(), ePos, bonus));
         equip.updateToChar(chr);
@@ -2514,7 +2524,7 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             Drop drop = (Drop) life;
-            boolean success = drop.canBePickedUpBy(chr) && chr.addDrop(drop);
+            boolean success = ((!c.getWorld().isReboot() && drop.getOwnerID() == chr.getId()) || drop.canBePickedUpBy(chr)) && chr.addDrop(drop);
             if(success) {
                 field.removeDrop(dropID, chr.getId(), false, -1);
             } else {
@@ -4053,7 +4063,13 @@ public class WorldHandler {
                 inv = ePos < 0 ? chr.getEquippedInventory() : chr.getEquipInventory();
                 ePos = Math.abs(ePos);
                 equip = (Equip) inv.getItemBySlot((short) ePos);
-                if (equip == null || equip.getTuc() + equip.getIuc() <= 0) { // current + increased (hammer) upgrade count
+                if (c.getWorld().isReboot()) {
+                    log.error(String.format("Character %d attempted to scroll in reboot world (pos %d, itemid %d).",
+                            chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
+                    chr.dispose();
+                    return;
+                }
+                if (equip == null || equip.getTuc() <= 0) {
                     log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.dispose();
@@ -5264,6 +5280,12 @@ public class WorldHandler {
     }
 
     public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
+        if (chr.getClient().getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to hammer in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
+
         final int delay = 2700; // 2.7 sec delay to match golden hammer's animation
 
         inPacket.decodeInt(); // tick
@@ -5408,6 +5430,11 @@ public class WorldHandler {
     }
 
     public static void handleMiniRoom(Char chr, InPacket inPacket) {
+        if (chr.getClient().getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to use trade in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         chr.dispose();
         byte type = inPacket.decodeByte(); // MiniRoom Type value
         MiniRoomType mrt = MiniRoomType.getByVal(type);

@@ -95,6 +95,8 @@ public abstract class Job {
 	public static final int UNDETERRED = 91001023;
 	public static final int FOR_THE_GUILD = 91001024;
 
+	public static final int REBOOT = 80000186;
+	public static final int REBOOT2 = 80000187;
 
 	private int[] buffs = new int[]{
 			LIGHTNING_GOD,
@@ -109,6 +111,14 @@ public abstract class Job {
 	public Job(Char chr) {
 		this.chr = chr;
 		this.c = chr.getClient();
+
+		if (c != null && chr.getId() != 0 && c.getWorld().isReboot()) {
+			if (!chr.hasSkill(REBOOT)) {
+				Skill skill = SkillData.getSkillDeepCopyById(REBOOT);
+				skill.setCurrentLevel(1);
+				chr.addSkill(skill);
+			}
+		}
 	}
 
 	public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -619,6 +629,11 @@ public abstract class Job {
 		}
 		chr.heal(chr.getMaxHP());
 		chr.healMP(chr.getMaxMP());
+		if (c.getWorld().isReboot()) {
+			Skill skill = SkillData.getSkillDeepCopyById(REBOOT2);
+			skill.setCurrentLevel(level);
+			chr.addSkill(skill);
+		}
 	}
 
 	public boolean isBuff(int skillID) {

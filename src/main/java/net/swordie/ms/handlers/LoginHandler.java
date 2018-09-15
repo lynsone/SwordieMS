@@ -141,7 +141,7 @@ public class LoginHandler {
         c.setWorldId(worldId);
         c.setChannel(channel);
 //        c.write(Login.sendAccountInfo(c.getAccount()));
-        c.write(Login.selectWorldResult(c.getAccount(), code, "", false));
+        c.write(Login.selectWorldResult(c.getAccount(), code, Server.getInstance().getWorldById(worldId).isReboot() ? "reboot" : "normal", false));
     }
 
     public static void handleCheckDuplicatedID(Client c, InPacket inPacket) {
