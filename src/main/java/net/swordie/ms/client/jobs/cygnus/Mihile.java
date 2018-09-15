@@ -604,7 +604,7 @@ public class Mihile extends Job {
             chr.write(WvsContext.statChanged(stats));
         } else {
             chr.addStat(Stat.mhp, Randomizer.rand(48, 52));// temp until sniff some levelup information about mihile
-            chr.addStat(Stat.mmp, Randomizer.rand(4, 6));;// temp until sniff some levelup information about mihile
+            chr.addStat(Stat.mmp, Randomizer.rand(4, 6));// temp until sniff some levelup information about mihile
             stats.put(Stat.mhp, chr.getStat(Stat.mhp));
             stats.put(Stat.mmp, chr.getStat(Stat.mmp));
         }

@@ -108,7 +108,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		this.npcScriptInfo = new NpcScriptInfo();
 		this.scripts = new HashMap<>();
 		this.isField = chr == null;
-		this.lastActiveScriptType = ScriptType.NONE;
+		this.lastActiveScriptType = ScriptType.None;
 	}
 
 	public ScriptManagerImpl(Char chr) {
@@ -162,14 +162,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void startScript(int parentID, int objID, String scriptName, ScriptType scriptType) {
-		if (scriptType == ScriptType.NONE || (scriptType == ScriptType.QUEST && !isQuestScriptAllowed())) {
+		if (scriptType == ScriptType.None || (scriptType == ScriptType.Quest && !isQuestScriptAllowed())) {
 			log.debug(String.format("Did not allow script %s to go through (type %s)", scriptName, scriptType));
 			return;
 		}
 		setLastActiveScriptType(scriptType);
-		if (isActive(scriptType) && scriptType != ScriptType.FIELD) { // because Field Scripts don't get disposed.
+		if (isActive(scriptType) && scriptType != ScriptType.Field) { // because Field Scripts don't get disposed.
 			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
-							" is not intended.", scriptType.toString(), getScriptInfoByType(scriptType).getParentID()));
+							" is not intended.", scriptType.getDir(), getScriptInfoByType(scriptType).getParentID()));
 			log.debug(String.format("Could not run script %s because one of the same type is already running (%s, type %s)",
 					scriptName, getScriptInfoByType(scriptType).getScriptName(), scriptType));
 			return;
@@ -188,12 +188,12 @@ public class ScriptManagerImpl implements ScriptManager {
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
 		scriptEngine.put("objectID", objID);
-		if (scriptType == ScriptType.QUEST) {
+		if (scriptType == ScriptType.Quest) {
 			scriptEngine.put("startQuest",
 					scriptName.charAt(scriptName.length() - 1) == QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
 		}
 		ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);
-		if (scriptType == ScriptType.NPC) {
+		if (scriptType == ScriptType.Npc) {
 			getNpcScriptInfo().setTemplateID(parentID);
 		}
 		scriptInfo.setObjectID(objID);
@@ -203,7 +203,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	private boolean isQuestScriptAllowed() {
-		return getLastActiveScriptType() == ScriptType.NONE && !curNodeEventEnd;
+		return getLastActiveScriptType() == ScriptType.None && !curNodeEventEnd;
 	}
 
 	public Map<ScriptType, Future> getEvaluations() {
@@ -211,20 +211,20 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void notifyMobDeath(Mob mob) {
-		if (isActive(ScriptType.FIELD)) {
-			getScriptInfoByType(ScriptType.FIELD).setResponse(mob);
+		if (isActive(ScriptType.Field)) {
+			getScriptInfoByType(ScriptType.Field).setResponse(mob);
 		}
 	}
 
 	private void startScript(String name, ScriptType scriptType) {
 		String dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
-				scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
+				scriptType.getDir().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
 		boolean exists = new File(dir).exists();
 		if (!exists) {
-			log.error(String.format("[Error] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
-			chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
+			log.error(String.format("[Error] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
+			chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
 			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
-					scriptType.toString().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
+					scriptType.getDir().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
 		}
 		ScriptInfo si = getScriptInfoByType(scriptType);
 		si.setActive(true);
@@ -262,7 +262,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void stop(ScriptType scriptType) {
 		setSpeakerID(0);
 		if (getLastActiveScriptType() == scriptType) {
-			setLastActiveScriptType(ScriptType.NONE);
+			setLastActiveScriptType(ScriptType.None);
 		}
 		ScriptInfo si = getScriptInfoByType(scriptType);
 		if (si != null) {
@@ -371,7 +371,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int sendSay(String text) {
-		if (getLastActiveScriptType() == ScriptType.NONE) {
+		if (getLastActiveScriptType() == ScriptType.None) {
 			return 0;
 		}
 		return sendGeneralSay(text, Say);
@@ -579,11 +579,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void dispose(boolean stop) {
 		getNpcScriptInfo().reset();
 		getMemory().clear();
-		stop(ScriptType.NPC);
-		stop(ScriptType.PORTAL);
-		stop(ScriptType.ITEM);
-		stop(ScriptType.QUEST);
-		stop(ScriptType.REACTOR);
+		stop(ScriptType.Npc);
+		stop(ScriptType.Portal);
+		stop(ScriptType.Item);
+		stop(ScriptType.Quest);
+		stop(ScriptType.Reactor);
 		if (stop) {
 			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
 		}
@@ -859,9 +859,11 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public Mob waitForMobDeath() {
 		Object response = null;
-		if (isActive(ScriptType.FIELD)) {
-			response = getScriptInfoByType(ScriptType.FIELD).awaitResponse();
-		}
+		if (isActive(ScriptType.FirstEnterField)) {
+			response = getScriptInfoByType(ScriptType.FirstEnterField).awaitResponse();
+		} else if (isActive(ScriptType.Field)) {
+		    response = getScriptInfoByType(ScriptType.Field).awaitResponse();
+        }
 		if (response == null) {
 			throw new NullPointerException(INTENDED_NPE_MSG);
 		}
@@ -1023,7 +1025,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		} else {
 			script = String.valueOf(npc.getTemplateId());
 		}
-		chr.getScriptManager().startScript(npc.getTemplateId(), npcId, script, ScriptType.NPC);
+		chr.getScriptManager().startScript(npc.getTemplateId(), npcId, script, ScriptType.Npc);
 	}
 
 	@Override
@@ -1250,7 +1252,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void removeReactor() {
 		Field field = chr.getField();
-		Life life = field.getLifeByObjectID(getObjectIDByScriptType(ScriptType.REACTOR));
+		Life life = field.getLifeByObjectID(getObjectIDByScriptType(ScriptType.Reactor));
 		if (life instanceof Reactor) {
 			field.removeLife(life.getObjectId(), false);
 		}
@@ -1295,7 +1297,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void changeReactorState(int reactorId, byte state, short delay, byte stateLength) {
 		Field field = chr.getField();
 		Reactor reactor = field.getReactors().stream()
-						.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
+						.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.Reactor))
 						.findAny().orElse(null);
 		if (reactor == null) {
 			return;
@@ -1905,18 +1907,25 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	// Clock methods ---------------------------------------------------------------------------------------------------
 
-	public void createStopWatch(int seconds) {
-		new Clock(ClockType.StopWatch, chr.getField(), seconds);
+	public Clock createStopWatch(int seconds) {
+		return new Clock(ClockType.StopWatch, chr.getField(), seconds);
 	}
 
-	public void createClock(int seconds) {
-		new Clock(ClockType.SecondsClock, chr.getField(), seconds);
+	public Clock createClock(int seconds) {
+		return new Clock(ClockType.SecondsClock, chr.getField(), seconds);
 	}
 
 	public void createClock(int hours, int minutes, int seconds) {
 		chr.write(CField.clock(ClockPacket.hmsClock((byte) hours, (byte) minutes, (byte) seconds)));
 		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
 	}
+
+	public void createClockForMultiple(int seconds, List<Integer> fieldIDsList) {
+	    for(int fieldID : fieldIDsList) {
+	        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
+	        new Clock(ClockType.SecondsClock, field, seconds);
+        }
+    }
 
 	public void removeClock() {
 		chr.write(CField.clock(ClockPacket.removeClock()));

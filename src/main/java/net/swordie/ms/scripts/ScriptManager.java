@@ -9,6 +9,7 @@ import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.world.field.Clock;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Observer;
@@ -1369,14 +1370,14 @@ public interface ScriptManager extends Observer {
 	 * expired.
 	 * @param seconds the amount of seconds the stopwatch should start out with
 	 */
-	void createStopWatch(int seconds);
+	Clock createStopWatch(int seconds);
 
 	/**
 	 * Shows a timer on top with precision in minutes/seconds. Will automatically remove itself after the timer has
 	 * expired.
 	 * @param seconds the amount of seconds the stopwatch should start out with
 	 */
-	void createClock(int seconds);
+	Clock createClock(int seconds);
 
 	/**
 	 * Shows a timer on top with precision in hour/minutes/seconds. Will automatically remove itself after the timer

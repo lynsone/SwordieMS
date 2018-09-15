@@ -2,4 +2,4 @@
 from net.swordie.ms.scripts import ScriptType
 
 sm.openNpc(1510006)
-sm.dispose(ScriptType.PORTAL)
+sm.dispose(ScriptType.Portal)

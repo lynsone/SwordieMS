@@ -60,6 +60,7 @@ public class WindArcher extends Noblesse {
     public static final int ALBATROSS = 13111023; //Buff
     public static final int EMERALD_FLOWER = 13111024; //Summon (Stationary, No Attack, Aggros)
     public static final int SECOND_WIND = 13110026; //
+    public static final int PINPOINT_PIERCE = 13111021;
 
     public static final int ALBATROSS_MAX = 13120008; //Upgrade on Albatross
     public static final int TRIFLING_WIND_III = 13120003; //Special Buff Upgrade
@@ -358,7 +359,15 @@ public class WindArcher extends Noblesse {
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
                 break;
-
+            case PINPOINT_PIERCE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+                }
+                break;
         }
         super.handleAttack(c, attackInfo);
     }

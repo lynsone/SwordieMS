@@ -237,11 +237,11 @@ public class WorldHandler {
                 chr.chatMessage(Mob, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
                 ScriptManagerImpl smi = chr.getScriptManager();
                 // all but field
-                smi.stop(ScriptType.PORTAL);
-                smi.stop(ScriptType.NPC);
-                smi.stop(ScriptType.REACTOR);
-                smi.stop(ScriptType.QUEST);
-                smi.stop(ScriptType.ITEM);
+                smi.stop(ScriptType.Portal);
+                smi.stop(ScriptType.Npc);
+                smi.stop(ScriptType.Reactor);
+                smi.stop(ScriptType.Quest);
+                smi.stop(ScriptType.Item);
 
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
@@ -741,7 +741,7 @@ public class WorldHandler {
             Field field = chr.getField();
             Portal portal = field.getPortalByName(portalName);
             if (portal.getScript() != null && !portal.getScript().equals("")) {
-                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
+                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.Portal);
             } else {
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
                 if (toField == null) {
@@ -796,7 +796,7 @@ public class WorldHandler {
             portalID = (byte) portal.getId();
             script = "".equals(portal.getScript()) ? portalName : portal.getScript();
         }
-        chr.getScriptManager().startScript(portalID, script, ScriptType.PORTAL);
+        chr.getScriptManager().startScript(portalID, script, ScriptType.Portal);
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
@@ -2418,7 +2418,7 @@ public class WorldHandler {
         if (script == null) {
             NpcShopDlg nsd = NpcData.getShopById(templateID);
             if (nsd != null) {
-                chr.getScriptManager().stop(ScriptType.NPC); // reset contents before opening shop?
+                chr.getScriptManager().stop(ScriptType.Npc); // reset contents before opening shop?
                 chr.setShop(nsd);
                 chr.write(ShopDlg.openShop(0, nsd));
                 chr.chatMessage(String.format("Opening shop %s", npc.getTemplateId()));
@@ -2426,7 +2426,7 @@ public class WorldHandler {
                 script = String.valueOf(npc.getTemplateId());
             }
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.Npc);
     }
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
@@ -2634,7 +2634,7 @@ public class WorldHandler {
         if(ii.getScript() != null && !"".equals(ii.getScript())) {
             script = ii.getScript();
         }
-        chr.getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+        chr.getScriptManager().startScript(itemID, script, ScriptType.Item);
         chr.dispose();
     }
 
@@ -2691,7 +2691,7 @@ public class WorldHandler {
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
             case QuestReq_CompleteScript:
                 qi = QuestData.getQuestInfoById(questID);
@@ -2699,7 +2699,7 @@ public class WorldHandler {
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
         }
     }
@@ -2742,7 +2742,7 @@ public class WorldHandler {
             return;
         }
         chr.getScriptManager().setCurNodeEventEnd(false);
-        chr.getScriptManager().startScript(field.getId(), script, ScriptType.FIELD);;
+        chr.getScriptManager().startScript(field.getId(), script, ScriptType.Field);
     }
 
     public static void handleUserEmotion(Client c, InPacket inPacket) {
@@ -3883,15 +3883,15 @@ public class WorldHandler {
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if(chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", reactor, type);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", reactor, type);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -3911,15 +3911,15 @@ public class WorldHandler {
         if (action.equals("")) {
             action = templateID + "action";
         }
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if(chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", 0);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", 0);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -5331,7 +5331,7 @@ public class WorldHandler {
         if (script == null) {
             script = String.valueOf(npc.getTemplateId());
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.Npc);
 
     }
 
@@ -5782,7 +5782,7 @@ public class WorldHandler {
         RandomPortal.Type type = randomPortal.getAppearType();
         String script = type.getScript();
         chr.getScriptManager().startScript(randomPortal.getAppearType().ordinal(), randomPortal.getObjectId(),
-                script, ScriptType.PORTAL);
+                script, ScriptType.Portal);
         chr.dispose();
     }
 }

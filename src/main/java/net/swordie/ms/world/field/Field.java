@@ -105,7 +105,7 @@ public class Field {
         if(!"".equalsIgnoreCase(script)) {
             scriptManagerImpl = new ScriptManagerImpl(this);
             log.debug(String.format("Starting field script %s.", script));
-            scriptManagerImpl.startScript(getId(), script, ScriptType.FIELD);
+            scriptManagerImpl.startScript(getId(), script, ScriptType.Field);
         }
     }
 
@@ -470,7 +470,7 @@ public class Field {
             getChars().add(chr);
             if(!isUserFirstEnter() && hasUserFirstEnterScript()) {
                 chr.chatMessage("First enter script!");
-                chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FIELD);
+                chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FirstEnterField);
                 setUserFirstEnter(true);
             }
         }
@@ -978,7 +978,7 @@ public class Field {
             return;
         }
         String script = getOnUserEnter();
-        chr.getScriptManager().startScript(getId(), script, ScriptType.FIELD);
+        chr.getScriptManager().startScript(getId(), script, ScriptType.Field);
     }
 
     public boolean isUserFirstEnter() {
