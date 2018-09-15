@@ -669,8 +669,9 @@ public class FieldData {
         copy.startBurningFieldTimer();
         int mobGens = field.getMobGens().size();
         copy.setFixedMobCapacity((int) (mobGens * GameConstants.DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT));
-        copy.generateMobs();
+        copy.generateMobs(true);
         copy.setDirectionInfo(field.getDirectionInfo());
+        copy.startFieldScript();
         return copy;
     }
 

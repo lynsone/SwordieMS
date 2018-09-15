@@ -97,10 +97,9 @@ public class Field {
         this.lifeSchedules = new HashMap<>();
         this.directionInfo = new HashMap<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
-        startFieldScript();
     }
 
-    private void startFieldScript() {
+    public void startFieldScript() {
         String script = getFieldScript();
         if(!"".equalsIgnoreCase(script)) {
             scriptManagerImpl = new ScriptManagerImpl(this);
@@ -1182,10 +1181,11 @@ public class Field {
 
     /**
      * Goes through all MobGens, and spawns a Mob from it if allowed to do so. Only generates when there are Chars
-     * on this Field.
+     * on this Field, or if the field is being initialized.
+     * @param init if this is the first time that this method is called.
      */
-    public void generateMobs() {
-        if (getChars().size() > 0) {
+    public void generateMobs(boolean init) {
+        if (init || getChars().size() > 0) {
             int currentMobs = getMobs().size();
             for (MobGen mg : getMobGens()) {
                 if (mg.canSpawnOnField(this)) {
@@ -1199,7 +1199,7 @@ public class Field {
         }
         // No fixed rate to ensure kishin-ness keeps being checked
         double kishinMultiplier = hasKishin() ? GameConstants.KISHIN_MOB_RATE_MULTIPLIER : 1;
-        EventManager.addEvent(this::generateMobs,
+        EventManager.addEvent(() -> generateMobs(false),
                 (long) (GameConstants.BASE_MOB_RESPAWN_RATE / (getMobRate() * kishinMultiplier)));
     }
 
