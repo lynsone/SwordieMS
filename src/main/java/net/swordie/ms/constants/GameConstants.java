@@ -1,11 +1,14 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
 import net.swordie.ms.enums.QuickMoveType;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
@@ -160,6 +163,7 @@ public class GameConstants {
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
+    private static int[][] enchantSuccessRatesSuperior = new int[15][2];
     private static int[] guildExp = new int[MAX_GUILD_LV];
 
     private static List<QuickMoveInfo> quickMoveInfos;
@@ -167,6 +171,7 @@ public class GameConstants {
     static {
         initCharExp();
         initEnchantRates();
+        initEnchantRatesSuperior();
         initQuickMove();
         initGuildExp();
     }
@@ -252,6 +257,39 @@ public class GameConstants {
         }
     }
 
+    public static int getMaxStars(Equip equip) {
+        int level = equip.getrLevel();
+        if (equip.isSuperiorEqp()) {
+            if (level <= 95) {
+                return 3;
+            } else if (level <= 107) {
+                return 5;
+            } else if (level <= 117) {
+                return 8;
+            } else if (level <= 127) {
+                return 10;
+            } else if (level <= 137) {
+                return 12;
+            } else {
+                return 15;
+            }
+        } else {
+            if (level <= 95) {
+                return 5;
+            } else if (level <= 107) {
+                return 8;
+            } else if (level <= 117) {
+                return 10;
+            } else if (level <= 127) {
+                return ServerConstants.VERSION >= 197 ? 15 : 12;
+            } else if (level <= 137) {
+                return ServerConstants.VERSION >= 197 ? 20 : 13;
+            } else {
+                return ServerConstants.VERSION >= 197 ? 25 : 15;
+            }
+        }
+    }
+
     private static void initEnchantRates() {
         // kms rates: success / destroy
         // out of 1000
@@ -288,6 +326,28 @@ public class GameConstants {
         };
     }
 
+    private static void initEnchantRatesSuperior() {
+        enchantSuccessRatesSuperior = new int[][]{
+                {500, 0},
+                {500, 0},
+                {450, 0},
+                {400, 0},
+                {400, 0},
+
+                {400, 18},
+                {400, 30},
+                {400, 42},
+                {400, 60},
+                {370, 95},
+
+                {350, 130},
+                {350, 162},
+                {30, 485},
+                {20, 490},
+                {10, 500},
+        };
+    }
+
     public static void initGuildExp() {
         guildExp[1] = 15000;
         for (int i = 2; i < guildExp.length; i++) {
@@ -295,8 +355,10 @@ public class GameConstants {
         }
     }
 
-    public static long getEnchantmentMesoCost(int reqLevel, int chuc) {
-        if (chuc < 10) {
+    public static long getEnchantmentMesoCost(int reqLevel, int chuc, boolean superior) {
+        if (superior) {
+            return (long) Math.pow(reqLevel, 3.56);
+        } if (chuc < 10) {
             return (long) (1000 + Math.pow(reqLevel, 3) * (chuc + 1) / 25);
         } else if (chuc < 15) {
             return (long) (1000 + Math.pow(reqLevel, 3) * Math.pow(chuc + 1, 2.7) / 400);
@@ -305,23 +367,146 @@ public class GameConstants {
         }
     }
 
-    public static int getEnchantmentSuccessRate(short chuc) {
+    public static int getEnchantmentSuccessRate(short chuc, boolean superior) {
         if(chuc < 0 || chuc > 24) {
             return 0;
         }
-        return enchantSuccessRates[chuc][0];
+        if (superior) {
+            return enchantSuccessRatesSuperior[chuc][0];
+        } else {
+            return enchantSuccessRates[chuc][0];
+        }
     }
 
-    public static int getEnchantmentDestroyRate(short chuc) {
+    public static int getEnchantmentDestroyRate(short chuc, boolean superior) {
         if(chuc < 0 || chuc > 24) {
             return 0;
         }
-        return enchantSuccessRates[chuc][1];
+        if (superior) {
+            return enchantSuccessRatesSuperior[chuc][1];
+        } else {
+            return enchantSuccessRates[chuc][1];
+        }
     }
 
-    public static int getEnchantmentValByChuc(EnchantStat es, short chuc, int curAmount) {
-        // TODO implement formula for this, depending on stat + weapon type
-        return chuc + 1 + (curAmount / 50);
+    public static int getStatForSuperiorEnhancement(int reqLevel, short chuc) {
+        if (chuc == 0) {
+            return reqLevel < 110 ? 2 : reqLevel < 149 ? 9 : 19;
+        } else if (chuc == 1) {
+            return reqLevel < 110 ? 3 : reqLevel < 149 ? 10 : 20;
+        } else if (chuc == 2) {
+            return reqLevel < 110 ? 5 : reqLevel < 149 ? 12 : 22;
+        } else if (chuc == 3) {
+            return reqLevel < 149 ? 15 : 25;
+        } else if (chuc == 4) {
+            return reqLevel < 149 ? 19 : 29;
+        }
+        return 0;
+    }
+
+    public static int getAttForSuperiorEnhancement(int reqLevel, short chuc) {
+        if (chuc == 5) {
+            return reqLevel < 150 ? 5 : 9;
+        } else if (chuc == 6) {
+            return reqLevel < 150 ? 6 : 10;
+        } else if (chuc == 7) {
+            return reqLevel < 150 ? 7 : 11;
+        } else {
+            return chuc == 8 ? 12 : chuc == 9 ? 13 : chuc == 10 ? 15 : chuc == 11 ? 17 : chuc == 12 ? 19 : chuc == 13 ? 21 : chuc == 14 ? 23 : 0;
+        }
+    }
+
+    // ugliest function in swordie
+    public static int getEquipStatBoost(Equip equip, EnchantStat es, short chuc) {
+        int stat = 0;
+        // hp/mp
+        if (es == EnchantStat.MHP || es == EnchantStat.MMP) {
+            stat += chuc <= 2 ? 5 : chuc <= 4 ? 10 : chuc <= 6 ? 15 : chuc <= 8 ? 20 : chuc <= 14 ? 25 : 0;
+        }
+        int reqLevel = equip.getrLevel();
+        // all stat
+        if (es == EnchantStat.STR || es == EnchantStat.DEX || es == EnchantStat.INT || es == EnchantStat.LUK) {
+            if (chuc <= 4) {
+                stat += 2;
+            } else if (chuc <= 14) {
+                stat += 3;
+            } else if (chuc <= 21) {
+                stat += reqLevel <= 137 ? 7 : reqLevel <= 149 ? 9 : reqLevel <= 159 ? 11 : reqLevel <= 199 ? 13 : 15;
+            }
+        }
+        // att for all equips
+        if ((es == EnchantStat.PAD || es == EnchantStat.MAD) && chuc >= 15) {
+            if (chuc == 15) {
+                stat += reqLevel <= 137 ? 6 : reqLevel <= 149 ? 7 : reqLevel <= 159 ? 8 : reqLevel <= 199 ? 9 : 12;
+            } else if (chuc == 16) {
+                stat += reqLevel <= 137 ? 7 : reqLevel <= 149 ? 8 : reqLevel <= 159 ? 9 : reqLevel <= 199 ? 9 : 13;
+            } else if (chuc == 17) {
+                stat += reqLevel <= 137 ? 7 : reqLevel <= 149 ? 8 : reqLevel <= 159 ? 9 : reqLevel <= 199 ? 10 : 14;
+            } else if (chuc == 18) {
+                stat += reqLevel <= 137 ? 8 : reqLevel <= 149 ? 9 : reqLevel <= 159 ? 10 : reqLevel <= 199 ? 11 : 14;
+            } else if (chuc == 19) {
+                stat += reqLevel <= 137 ? 9 : reqLevel <= 149 ? 10 : reqLevel <= 159 ? 11 : reqLevel <= 199 ? 12 : 15;
+            } else if (chuc == 20) {
+                stat += reqLevel <= 149 ? 11 : reqLevel <= 159 ? 12 : reqLevel <= 199 ? 13 : 16;
+            } else if (chuc == 21) {
+                stat += reqLevel <= 149 ? 12 : reqLevel <= 159 ? 13 : reqLevel <= 199 ? 14 : 17;
+            } else if (chuc == 22) {
+                stat += reqLevel <= 149 ? 17 : reqLevel <= 159 ? 18 : reqLevel <= 199 ? 19 : 21;
+            } else if (chuc == 23) {
+                stat += reqLevel <= 149 ? 19 : reqLevel <= 159 ? 20 : reqLevel <= 199 ? 21 : 23;
+            } else if (chuc == 24) {
+                stat += reqLevel <= 149 ? 21 : reqLevel <= 159 ? 22 : reqLevel <= 199 ? 23 : 25;
+            }
+        }
+        // att gains for weapons
+        if (ItemConstants.isWeapon(equip.getItemId()) && !ItemConstants.isSecondary(equip.getItemId())) {
+            if (chuc <= 14) {
+                if (es == EnchantStat.PAD) {
+                    stat += equip.getiPad() * 0.02;
+                } else if (es == EnchantStat.MAD) {
+                    stat += equip.getiMad() * 0.02;
+                }
+            } else if (es == EnchantStat.PAD || es == EnchantStat.MAD) {
+                stat += chuc == 22 ? 13 : chuc == 23 ? 12 : chuc == 24 ? 11 : 0;
+                if (reqLevel == 200 && chuc == 15) {
+                    stat += 1;
+                }
+            }
+        }
+        // att gain for gloves, enhancements 4/6/8/10 and 12-14
+        if (ItemConstants.isGlove(equip.getItemId()) && (es == EnchantStat.PAD || es == EnchantStat.MAD)) {
+            if ((chuc <= 10 && chuc % 2 == 0) || (chuc >= 12 && chuc <= 14)) {
+                stat += 1;
+            }
+        }
+        // speed/jump for shoes
+        if (ItemConstants.isShoe(equip.getItemId()) && (es == EnchantStat.SPEED || es == EnchantStat.JUMP) && chuc <= 4) {
+            stat += 1;
+        }
+        return stat;
+    }
+
+    public static int getEnchantmentValByChuc(Equip equip, EnchantStat es, short chuc, int curAmount) {
+        if (equip.isCash() || (ItemData.getEquipById(equip.getItemId()).getTuc() <= 0 && !ItemConstants.isTucIgnoreItem(equip.getItemId()))) {
+            return 0;
+        }
+        if (es == EnchantStat.PDD) {
+            return (int) (equip.getiPDD() * (ItemConstants.isOverall(equip.getItemId()) ? 0.10 : 0.05));
+        }
+        if (es == EnchantStat.MDD) {
+            return (int) (equip.getiMDD() * (ItemConstants.isOverall(equip.getItemId()) ? 0.10 : 0.05));
+        }
+        if (!equip.isSuperiorEqp()) {
+            return getEquipStatBoost(equip, es, chuc);
+        } else {
+            if (es == EnchantStat.STR || es == EnchantStat.DEX || es == EnchantStat.INT || es == EnchantStat.LUK) {
+                return getStatForSuperiorEnhancement(equip.getrLevel(), chuc);
+            }
+            if (es == EnchantStat.PAD || es == EnchantStat.MAD) {
+                return getAttForSuperiorEnhancement(equip.getrLevel(), chuc);
+            }
+        }
+        return 0;
     }
 
     public static BaseStat getMainStatForJob(short job) {

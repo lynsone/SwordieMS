@@ -158,6 +158,7 @@ public class WorldHandler {
         }
         chr.setClient(c);
         chr.setAccount(acc);
+        chr.initEquips();
         c.setChr(chr);
         c.getChannelInstance().addChar(chr);
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
@@ -4009,18 +4010,37 @@ public class WorldHandler {
                 break;
             case HyperUpgradeResult:
                 inPacket.decodeInt(); //tick
-                short eqpPos = inPacket.decodeShort();
-                int extraChanceFromMiniGame = inPacket.decodeByte() != 0 ? 50 : 0; // 5% extra chance
-                equip = (Equip) chr.getEquipInventory().getItemBySlot(eqpPos);
-                if(equip == null) {
+                int eqpPos = inPacket.decodeShort();
+                boolean extraChanceFromMiniGame = inPacket.decodeByte() != 0;
+                equip = (Equip) chr.getEquipInventory().getItemBySlot((short) eqpPos);
+                boolean equippedInv = eqpPos < 0;
+                inv = equippedInv ? chr.getEquippedInventory() : chr.getEquipInventory();
+                equip = (Equip) inv.getItemBySlot((short) Math.abs(eqpPos));
+                if (equip == null) {
                     chr.chatMessage("Could not find the given equip.");
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
+                if (!ItemConstants.isUpgradable(equip.getItemId()) ||
+                        (equip.getTuc() != 0 && !c.getWorld().isReboot()) ||
+                        chr.getEquipInventory().getEmptySlots() == 0 ||
+                        equip.getChuc() >= GameConstants.getMaxStars(equip)) {
+                    chr.chatMessage("Equipment cannot be enhanced.");
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
+                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp());
+                if (chr.getMoney() < cost) {
+                    chr.chatMessage("Mesos required: " + NumberFormat.getNumberInstance(Locale.US).format(cost));
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
                 Equip oldEquip = equip.deepCopy();
-                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc());
-                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc()) + extraChanceFromMiniGame;
-                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc());
+                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp());
+                if (extraChanceFromMiniGame) {
+                    successProp *= 1.045;
+                }
+                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp());
                 success = Util.succeedProp(successProp, 1000);
                 boolean boom = false;
                 boolean canDegrade = equip.getChuc() > 5 && equip.getChuc() % 5 != 0;
@@ -4030,6 +4050,17 @@ public class WorldHandler {
                     equip.setChuc((short) 0);
                     equip.addSpecialAttribute(EquipSpecialAttribute.Vestige);
                     boom = true;
+                    if (equippedInv) {
+                        // TODO: properly unequip and assign bag index
+                        chr.unequip(equip);
+                        equip.updateToChar(chr);
+                        c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
+                        if (!equip.isSuperiorEqp()) {
+                            equip.setChuc((short) 12);
+                        } else {
+                            equip.setChuc((short) 0);
+                        }
+                    }
                 } else if (canDegrade){
                     equip.setChuc((short) (equip.getChuc() - 1));
                 }
@@ -4082,17 +4113,19 @@ public class WorldHandler {
                 break;*/
             case HyperUpgradeDisplay:
                 ePos = inPacket.decodeInt();
-                equip = (Equip) chr.getEquipInventory().getItemBySlot((short) ePos);
-                if (equip == null || !ItemConstants.isUpgradable(equip.getItemId())) {
+                inv = ePos < 0 ? chr.getEquippedInventory() : chr.getEquipInventory();
+                ePos = Math.abs(ePos);
+                equip = (Equip) inv.getItemBySlot((short) ePos);
+                if (equip == null || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
                     log.error(String.format("Character %d tried to enchant a non-enchantable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
                 c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
-                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc()),
-                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc()),
-                        GameConstants.getEnchantmentDestroyRate(equip.getChuc()), false));
+                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp()),
+                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp()),
+                        GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp()), false));
                 break;
             case MiniGameDisplay:
                 c.write(CField.miniGameDisplay(eeType));

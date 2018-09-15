@@ -360,11 +360,11 @@ public class ItemConstants {
         return itemID >= 1210000 && itemID < 1600000 || isSecondary(itemID);
     }
 
-    private static boolean isSecondary(int itemID) {
+    public static boolean isSecondary(int itemID) {
         return itemID / 10000 == 135;
     }
 
-    private static boolean isShield(int itemID) {
+    public static boolean isShield(int itemID) {
         return itemID / 10000 == 109;
     }
 
