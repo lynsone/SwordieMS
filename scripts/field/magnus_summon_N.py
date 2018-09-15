@@ -1,6 +1,7 @@
 from net.swordie.ms.constants import BossConstants
 from net.swordie.ms.enums import ObtacleAtomEnum
 
+sm.createClock(BossConstants.MAGNUS_TIME) # 20min
 sm.spawnMob(8880002, 1900, -1347, False)
 
 sm.invokeAtFixedRate(250, BossConstants.MAGNUS_GREEN_ATOM_EXECUTION_DELAY, 0,

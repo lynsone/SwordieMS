@@ -1897,17 +1897,15 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	// Clock methods ---------------------------------------------------------------------------------------------------
 
-	public void showStopWatch(int milliseconds) {
-		chr.write(CField.clock(ClockPacket.stopWatch(milliseconds)));
-		addEvent(EventManager.addEvent(this::removeClock, milliseconds, TimeUnit.MILLISECONDS));
+	public void createStopWatch(int seconds) {
+		new Clock(ClockType.StopWatch, chr.getField(), seconds);
 	}
 
-	public void showClock(int seconds) {
-		chr.write(CField.clock(ClockPacket.secondsClock(seconds)));
-		addEvent(EventManager.addEvent(this::removeClock, seconds, TimeUnit.SECONDS));
+	public void createClock(int seconds) {
+		new Clock(ClockType.SecondsClock, chr.getField(), seconds);
 	}
 
-	public void showClock(int hours, int minutes, int seconds) {
+	public void createClock(int hours, int minutes, int seconds) {
 		chr.write(CField.clock(ClockPacket.hmsClock((byte) hours, (byte) minutes, (byte) seconds)));
 		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
 	}

@@ -39,6 +39,11 @@ public class BossConstants {
 
     //  Magnus ---------------------------------------------------------------------------------------------------------
 
+    //      General
+    public static final int MAGNUS_TIME = 20  *60; // 20 minutes
+    public static final int MAGNUS_DEATHCOUNT = 20; // 20 death count
+
+
     //      Obstacle Atoms
     public static final int MAGNUS_OBSTACLE_ATOM_VELOCITY = 5; // Velocity at which the Obstacle Atoms fall down.
 
