@@ -57,6 +57,7 @@ public class Equip extends Item {
     private short bdr;
     private short imdr;
     private boolean bossReward;
+    private boolean superiorEqp;
     private short damR;
     private short statR;
     private short cuttable;
@@ -163,6 +164,7 @@ public class Equip extends Item {
         ret.bdr = bdr;
         ret.imdr = imdr;
         ret.bossReward = bossReward;
+        ret.superiorEqp = superiorEqp;
         ret.damR = damR;
         ret.statR = statR;
         ret.cuttable = cuttable;
@@ -506,6 +508,14 @@ public class Equip extends Item {
 
     public void setBossReward(boolean bossReward) {
         this.bossReward = bossReward;
+    }
+
+    public boolean isSuperiorEqp() {
+        return superiorEqp;
+    }
+
+    public void setSuperiorEqp(boolean superiorEqp) {
+        this.superiorEqp = superiorEqp;
     }
 
     public short getBdr() {
