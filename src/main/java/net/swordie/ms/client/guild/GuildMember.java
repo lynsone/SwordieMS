@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.MessageType;
@@ -25,8 +26,7 @@ public class GuildMember implements Encodable {
     private int commitment;
     private int dayCommitment;
     private int igp;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "commitmentIncTime")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime commitmentIncTime;
     private String name;
     private int job;

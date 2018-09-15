@@ -283,10 +283,13 @@ public class Warrior extends Beginner {
                 break;
             case EVIL_EYE:
                 spawnEvilEye(skillID, slv);
-                o2.nOption = si.getValue(x, slv);
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(PDD, o2);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = evilEye;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case EVIL_EYE_OF_DOMINATION:
                 if (tsm.hasStat(Beholder)) {
@@ -404,7 +407,7 @@ public class Warrior extends Beginner {
         evilEye = Summon.getSummonBy(c.getChr(), skillID, slv);
         field = c.getChr().getField();
         evilEye.setFlyMob(true);
-        evilEye.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+        evilEye.setMoveAbility(MoveAbility.Fly.getVal());
         evilEye.setAssistType(AssistType.BUFFING.getVal());
         evilEye.setAttackActive(true);
         field.spawnSummon(evilEye);

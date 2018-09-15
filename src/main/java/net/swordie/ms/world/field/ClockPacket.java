@@ -49,6 +49,10 @@ public class ClockPacket {
         return new ClockPacket(ClockType.SecondsClock, seconds);
     }
 
+    public static ClockPacket removeClock() {
+        return new ClockPacket(ClockType.SecondsClock, -1);
+    }
+
     public static ClockPacket templateClock(byte template) {
         return new ClockPacket(ClockType.FromDefault, template);
     }
@@ -64,7 +68,7 @@ public class ClockPacket {
     }
 
     public static ClockPacket stopWatch(int time) {
-        return new ClockPacket(ClockType.StopWatch, time);
+        return new ClockPacket(ClockType.StopWatch, time*1000);
     }
 
     public static ClockPacket pauseTimer(boolean paused, int time) {

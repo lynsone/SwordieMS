@@ -419,7 +419,7 @@ public class Magician extends Beginner {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                summon.setMoveAbility(MoveAbility.Walk.getVal());
                 field.spawnSummon(summon);
 
                 o1.nReason = skillID;
@@ -588,12 +588,11 @@ public class Magician extends Beginner {
         viralSlime.setFlyMob(false);
         viralSlime.setPosition(position);
         viralSlime.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
-        viralSlime.setMoveAbility(MoveAbility.ROAM_AROUND.getVal());
+        viralSlime.setMoveAbility(MoveAbility.WalkRandom.getVal());
         field.spawnAddSummon(viralSlime);
     }
 
-    public static void infestViralSlime(Client c, Mob mob) {
-        Char chr = c.getChr();
+    public static void infestViralSlime(Char chr, Mob mob) {
         if(viralSlimeList.size() < 10) {
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
             summonViralSlime(chr, chr.getSkill(VIRAL_SLIME), mob.getPosition());
@@ -710,7 +709,6 @@ public class Magician extends Beginner {
                     recreateMegiddoFlameForceAtom(skillID, slv, attackInfo);
                 }
             }
-            chr.chatMessage(ChatType.Whisper, "Elemental Drain Stack: " + getFerventDrainStack());
         }
         if (JobConstants.isIceLightning(chr.getJob())) {
             if(hasHitMobs) {
@@ -1077,7 +1075,6 @@ public class Magician extends Beginner {
         } else {
             tsm.sendSetStatPacket();
         }
-        chr.chatMessage(ChatType.Whisper, "Elemental Drain Stack: " + getFerventDrainStack());
     }
 
     private void applyFreezingCrushOnMob(AttackInfo attackInfo, int skillID) {
@@ -1179,7 +1176,7 @@ public class Magician extends Beginner {
                     }
                     o1.nOption = 1;
                     o1.rOption = skillID;
-                    o1.tOption = 1;
+                    o1.tOption = 5;
                     tsm.putCharacterStatValue(NotDamaged, o1);
                     tsm.sendSetStatPacket();
                     break;

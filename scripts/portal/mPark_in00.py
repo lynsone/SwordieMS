@@ -34,7 +34,6 @@ else:
             sm.sendSayOkay("I'm sorry, but you've used up all your clears for today.")
             sm.dispose()
         else:
-            selection = answer
             if sm.sendAskYesNo("#eToday is #b"+ sm.getDay() +"#k.\r\n\r\n" +
                              "Selected Dungeon: #b"+ maps[selection][0] +"#k\r\n" +
                              "Clearing the dungeon will use up #bone of your free clears#k \r\nfor today.\r\n\r\n" +

@@ -54,6 +54,13 @@ public class Effect {
                     outPacket.encodeInt(getArg3()); // nDelta
                 }
                 break;
+            case SkillAffected_Select:
+                outPacket.encodeInt(getArg1());
+                outPacket.encodeInt(getArg2());
+                outPacket.encodeInt(getArg3());
+                outPacket.encodeByte(getArg4());
+                outPacket.encodeByte(getArg5());
+                break;
             case SkillSpecial:
                 outPacket.encodeInt(getArg1()); // skill id
                 if(getArg1() == BattleMage.DARK_SHOCK) {
@@ -114,6 +121,12 @@ public class Effect {
                 if (getArg3() == 2) { // item sound
                     outPacket.encodeInt(getArg4()); // nItemID
                 }
+                break;
+            case FadeInOut:
+                outPacket.encodeInt(getArg1());// tFadeIn
+                outPacket.encodeInt(getArg2());// tDelay
+                outPacket.encodeInt(getArg3());// tFadeOut
+                outPacket.encodeByte(getArg4()); // nAlpha
                 break;
             case LeftMonsterNumber:
                 outPacket.encodeInt(getArg1()); // Number on Arrow
@@ -398,6 +411,19 @@ public class Effect {
         return effect;
     }
 
+    public static Effect skillAffectedSelect(int skillID, byte slv, int select, boolean special) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(SkillAffected_Select);
+        effect.setArg1(select);
+        effect.setArg2(0); // root Select  -  (?)
+        effect.setArg3(skillID);
+        effect.setArg4(slv);
+        effect.setArg5(special ? 1 : 0);
+
+        return effect;
+    }
+
     public static Effect skillSpecial(int skillID) {
         Effect effect = new Effect();
 
@@ -586,6 +612,17 @@ public class Effect {
             effect.setArg4(itemID);
         }
 
+        return effect;
+    }
+
+    public static Effect fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(FadeInOut);
+        effect.setArg1(fadeIn);
+        effect.setArg2(delay);
+        effect.setArg3(fadeOut);
+        effect.setArg4(alpha);
         return effect;
     }
 

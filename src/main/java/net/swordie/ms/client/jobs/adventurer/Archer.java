@@ -202,7 +202,7 @@ public class Archer extends Beginner {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.FLY_AROUND_CHAR.getVal());
+                summon.setMoveAbility(MoveAbility.Fly.getVal());
                 field.spawnSummon(summon);
 
                 o1.nReason = skillID;
@@ -300,7 +300,7 @@ public class Archer extends Beginner {
                 break;
             case ARROW_ILLUSION:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 summon.setMaxHP(si.getValue(x, slv));
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());

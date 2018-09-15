@@ -941,4 +941,23 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket randomPortalNotice(RandomPortal randomPortal) {
+        OutPacket outPacket = new OutPacket(OutHeader.RANDOM_PORTAL_NOTICE);
+
+        outPacket.encodeByte(randomPortal.getAppearType().ordinal());
+        outPacket.encodeInt(randomPortal.getField().getId());
+
+        return outPacket;
+    }
+
+    public static OutPacket randomMissionResult(RandomMissionType type, int arg1, int arg2) {
+        OutPacket outPacket = new OutPacket(OutHeader.RANDOM_MISSION_RESULT);
+
+        outPacket.encodeInt(type.getVal());
+        outPacket.encodeInt(arg1);
+        outPacket.encodeInt(arg2);
+
+        return outPacket;
+    }
 }

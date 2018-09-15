@@ -1,6 +1,7 @@
 package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
@@ -20,8 +21,7 @@ import java.util.*;
 public class Equip extends Item {
     private long serialNumber;
     private String title = "";
-    @JoinColumn(name = "equippedDate")
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Convert(converter = FileTimeConverter.class)
     private FileTime equippedDate = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
     private int prevBonusExpRate;
     private short tuc;

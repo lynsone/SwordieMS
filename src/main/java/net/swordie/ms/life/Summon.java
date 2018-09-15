@@ -237,7 +237,7 @@ public class Summon extends Life {
         Position kishLeftPos = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
         kishinLeft.setPosition(kishLeftPos);
         kishinLeft.setCurFoothold((short) field.findFootHoldBelow(kishLeftPos).getId());
-        kishinLeft.setMoveAbility(MoveAbility.STATIC.getVal());
+        kishinLeft.setMoveAbility(MoveAbility.Stop.getVal());
         kishinLeft.setMoveAction((byte) 0);
         kishinLeft.setKishinPositions(new Position[] {
             new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
@@ -251,7 +251,7 @@ public class Summon extends Life {
         Position kishRightPos = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
         kishinRight.setPosition(kishRightPos);
         kishinRight.setCurFoothold((short) field.findFootHoldBelow(kishRightPos).getId());
-        kishinRight.setMoveAbility(MoveAbility.STATIC.getVal());
+        kishinRight.setMoveAbility(MoveAbility.Stop.getVal());
         kishinRight.setMoveAction((byte) 5);
         kishinLeft.setKishinPositions(new Position[] {
                 new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
@@ -331,7 +331,6 @@ public class Summon extends Life {
                 break;
 
             default:
-                chr.chatMessage(String.format("Unhandled HP Summon, id = %d", getSkillID()));
                 log.error(String.format("Unhandled HP Summon, id = %d", getSkillID()));
                 break;
         }

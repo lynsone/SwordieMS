@@ -190,6 +190,7 @@ public class Char {
 	private byte monsterParkCount;
 
 	private int partyID = 0; // Just for DB purposes
+	private int previousFieldID;
 
 	@Transient
 	private CharacterPotentialMan potentialMan;
@@ -222,7 +223,7 @@ public class Char {
 	private byte moveAction;
 	@Transient
 	private TemporaryStatManager temporaryStatManager;
-        @Transient
+	@Transient
 	private GachaponManager gachaponManager;
 	@Transient
 	private Job jobHandler;
@@ -355,13 +356,15 @@ public class Char {
 	private TradeRoom tradeRoom;
 	@Transient
 	private boolean battleRecordOn;
+	@Transient
+	private long nextRandomPortalTime;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
 	}
 
 	public Char(int accId, String name, int keySettingType, int eventNewCharSaleJob, int job, short curSelectedSubJob,
-	            byte gender, byte skin, int[] items) {
+				byte gender, byte skin, int[] items) {
 		this.accId = accId;
 		avatarData = new AvatarData();
 		avatarData.setAvatarLook(new AvatarLook());
@@ -401,12 +404,12 @@ public class Char {
 		expConsumeItems = new ArrayList<>();
 		skills = new HashSet<>();
 		temporaryStatManager = new TemporaryStatManager(this);
-                gachaponManager = new GachaponManager();
+		gachaponManager = new GachaponManager();
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
 		familiars = new HashSet<>();
-		hyperrockfields = new int[] {
+		hyperrockfields = new int[]{
 				999999999,
 				999999999,
 				999999999,
@@ -558,10 +561,8 @@ public class Char {
 	/**
 	 * Encodes this Char's info inside a given {@link OutPacket}, with given info.
 	 *
-	 * @param outPacket
-	 * 		The OutPacket this method should encode to.
-	 * @param mask
-	 * 		Which info should be encoded.
+	 * @param outPacket The OutPacket this method should encode to.
+	 * @param mask      Which info should be encoded.
 	 */
 	public void encode(OutPacket outPacket, DBChar mask) {
 
@@ -1157,8 +1158,8 @@ public class Char {
 					outPacket.encodeInt(chosenSkill == null
 							? 0
 							: isChosenSkillInStolenSkillList(chosenSkill.getSkillId())
-								? chosenSkill.getSkillId()
-								: 0
+							? chosenSkill.getSkillId()
+							: 0
 					);
 				}
 			} else {
@@ -1520,23 +1521,23 @@ public class Char {
 		return field;
 	}
 
-        public void resetStats() {
-            int total = getStat(Stat.str) + getStat(Stat.dex) + getStat(Stat.inte) + getStat(Stat.luk) + getStat(Stat.ap);
-                total -= 16;// 4 str, dex, luk, int
-                setStat(Stat.str, 4);
-                setStat(Stat.dex, 4);
-                setStat(Stat.inte, 4);
-                setStat(Stat.luk, 4);
-                setStat(Stat.ap, total);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.str, (short) getStat(Stat.str));
-                stats.put(Stat.dex, (short) getStat(Stat.dex));
-                stats.put(Stat.inte, (short) getStat(Stat.inte));
-                stats.put(Stat.luk, (short) getStat(Stat.luk));
-                stats.put(Stat.ap, (short) getStat(Stat.ap));
-                write(WvsContext.statChanged(stats));
-        }
-        
+	public void resetStats() {
+		int total = getStat(Stat.str) + getStat(Stat.dex) + getStat(Stat.inte) + getStat(Stat.luk) + getStat(Stat.ap);
+		total -= 16;// 4 str, dex, luk, int
+		setStat(Stat.str, 4);
+		setStat(Stat.dex, 4);
+		setStat(Stat.inte, 4);
+		setStat(Stat.luk, 4);
+		setStat(Stat.ap, total);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.str, (short) getStat(Stat.str));
+		stats.put(Stat.dex, (short) getStat(Stat.dex));
+		stats.put(Stat.inte, (short) getStat(Stat.inte));
+		stats.put(Stat.luk, (short) getStat(Stat.luk));
+		stats.put(Stat.ap, (short) getStat(Stat.ap));
+		write(WvsContext.statChanged(stats));
+	}
+
 	/**
 	 * Sets the job of this Char with a given id. Does nothing if the id is invalid.
 	 * If it is valid, will set this Char's job, add all Skills that the job should have by default,
@@ -1555,9 +1556,9 @@ public class Char {
 		skills.forEach(this::addSkill);
 		getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
 		notifyChanges();
-                if (id == 5100) {// should be for all beginner jobs after first advance, for now I am handling after each tutorial I code.
-                    resetStats();
-                }
+		if (id == 5100) {// should be for all beginner jobs after first advance, for now I am handling after each tutorial I code.
+			resetStats();
+		}
 	}
 
 	public short getJob() {
@@ -1567,8 +1568,7 @@ public class Char {
 	/**
 	 * Sets the SP to the current job level.
 	 *
-	 * @param num
-	 * 		The new SP amount.
+	 * @param num The new SP amount.
 	 */
 	public void setSpToCurrentJob(int num) {
 		if (JobConstants.isExtendSpJob(getJob())) {
@@ -1578,11 +1578,11 @@ public class Char {
 			getAvatarData().getCharacterStat().setSp(num);
 		}
 	}
+
 	/**
 	 * Sets the SP to the job level according to the current level.
 	 *
-	 * @param num
-	 * 		The amount of SP to add
+	 * @param num The amount of SP to add
 	 */
 	public void addSpToJobByCurrentLevel(int num) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
@@ -1608,8 +1608,7 @@ public class Char {
 	 * Adds a {@link Skill} to this Char. Changes the old Skill if the Char already has a Skill
 	 * with the same id.
 	 *
-	 * @param skill
-	 * 		The Skill this Char should get.
+	 * @param skill The Skill this Char should get.
 	 */
 	public void addSkill(Skill skill) {
 		skill.setCharId(getId());
@@ -1652,6 +1651,7 @@ public class Char {
 
 	/**
 	 * Adds a Skill's info to the current base stat cache.
+	 *
 	 * @param skill The skill to add
 	 */
 	public void addToBaseStatCache(Skill skill) {
@@ -1662,6 +1662,7 @@ public class Char {
 
 	/**
 	 * Removes a Skill's info from the current base stat cache.
+	 *
 	 * @param skill The skill to remove
 	 */
 	public void removeFromBaseStatCache(Skill skill) {
@@ -1673,9 +1674,7 @@ public class Char {
 	/**
 	 * Returns whether or not this Char has a {@link Skill} with a given id.
 	 *
-	 * @param id
-	 * 		The id of the Skill.
-	 *
+	 * @param id The id of the Skill.
 	 * @return Whether or not this Char has a Skill with the given id.
 	 */
 	public boolean hasSkill(int id) {
@@ -1685,9 +1684,7 @@ public class Char {
 	/**
 	 * Gets a {@link Skill} of this Char with a given id.
 	 *
-	 * @param id
-	 * 		The id of the requested Skill.
-	 *
+	 * @param id The id of the requested Skill.
 	 * @return The Skill corresponding to the given id of this Char, or null if there is none.
 	 */
 	public Skill getSkill(int id) {
@@ -1699,11 +1696,8 @@ public class Char {
 	 * if it doesn't exist yet.
 	 * If it is false, will return null if this Char does not have the given Skill.
 	 *
-	 * @param id
-	 * 		The id of the requested Skill.
-	 * @param createIfNull
-	 * 		Whether or not this method should create the Skill if it doesn't exist.
-	 *
+	 * @param id           The id of the requested Skill.
+	 * @param createIfNull Whether or not this method should create the Skill if it doesn't exist.
 	 * @return The Skill that the Char has, or <code>null</code> if there is no such skill and
 	 * <code>createIfNull</code> is false.
 	 */
@@ -1719,9 +1713,7 @@ public class Char {
 	/**
 	 * Creates a new {@link Skill} for this Char.
 	 *
-	 * @param id
-	 * 		The skillID of the Skill to be created.
-	 *
+	 * @param id The skillID of the Skill to be created.
 	 * @return The new Skill.
 	 */
 	private Skill createAndReturnSkill(int id) {
@@ -1824,6 +1816,7 @@ public class Char {
 
 	/**
 	 * Gets a raw Stat from this Char, unaffected by things such as equips and skills.
+	 *
 	 * @param charStat The requested Stat
 	 * @return the requested stat's value
 	 */
@@ -1878,8 +1871,9 @@ public class Char {
 
 	/**
 	 * Adds a Stat to this Char.
+	 *
 	 * @param charStat which Stat to add
-	 * @param amount the amount of Stat to add
+	 * @param amount   the amount of Stat to add
 	 */
 	public void addStat(Stat charStat, int amount) {
 		setStat(charStat, getStat(charStat) + amount);
@@ -1887,8 +1881,9 @@ public class Char {
 
 	/**
 	 * Adds a Stat to this Char, and immediately sends the packet to the client notifying the change.
+	 *
 	 * @param charStat which Stat to change
-	 * @param amount the amount of Stat to add
+	 * @param amount   the amount of Stat to add
 	 */
 	public void addStatAndSendPacket(Stat charStat, int amount) {
 		setStatAndSendPacket(charStat, getStat(charStat) + amount);
@@ -1896,13 +1891,14 @@ public class Char {
 
 	/**
 	 * Adds a Stat to this Char, and immediately sends the packet to the client notifying the change.
+	 *
 	 * @param charStat which Stat to change
-	 * @param value the value of Stat to set
+	 * @param value    the value of Stat to set
 	 */
 	public void setStatAndSendPacket(Stat charStat, int value) {
 		setStat(charStat, value);
 		Map<Stat, Object> stats = new HashMap<>();
-		switch(charStat) {
+		switch (charStat) {
 			case level:
 			case skin:
 				stats.put(charStat, (byte) getStat(charStat));
@@ -1938,8 +1934,7 @@ public class Char {
 	 * Adds a certain amount of money to the current character. Also sends the
 	 * packet to update the client's state.
 	 *
-	 * @param amount
-	 * 		The amount of money to add. May be negative.
+	 * @param amount The amount of money to add. May be negative.
 	 */
 	public void addMoney(long amount) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
@@ -1957,8 +1952,7 @@ public class Char {
 	/**
 	 * The same as addMoney, but negates the amount.
 	 *
-	 * @param amount
-	 * 		The money to deduct. May be negative.
+	 * @param amount The money to deduct. May be negative.
 	 */
 	public void deductMoney(long amount) {
 		addMoney(-amount);
@@ -1983,16 +1977,16 @@ public class Char {
 	/**
 	 * Sends a message to this Char through the ScriptProgress packet.
 	 *
-	 * @param msg
-	 * 		The message to display.
+	 * @param msg The message to display.
 	 */
-	public void chatScriptMessage(String msg) { write(User.scriptProgressMessage(msg));}
+	public void chatScriptMessage(String msg) {
+		write(User.scriptProgressMessage(msg));
+	}
 
 	/**
 	 * Sends a message to this Char with a default colour {@link ChatType#SystemNotice}.
 	 *
-	 * @param msg
-	 * 		The message to display.
+	 * @param msg The message to display.
 	 */
 	public void chatMessage(String msg) {
 		chatMessage(SystemNotice, msg);
@@ -2001,10 +1995,8 @@ public class Char {
 	/**
 	 * Sends a message to this Char with a given {@link ChatType colour}.
 	 *
-	 * @param clr
-	 * 		The Colour this message should be in.
-	 * @param msg
-	 * 		The message to display.
+	 * @param clr The Colour this message should be in.
+	 * @param msg The message to display.
 	 */
 	public void chatMessage(ChatType clr, String msg) {
 		getClient().write(UserLocal.chatMsg(clr, msg));
@@ -2013,8 +2005,7 @@ public class Char {
 	/**
 	 * Unequips an {@link Item}. Ensures that the hairEquips and both inventories get updated.
 	 *
-	 * @param item
-	 * 		The Item to equip.
+	 * @param item The Item to equip.
 	 */
 	public void unequip(Item item) {
 		AvatarLook al = getAvatarData().getAvatarLook();
@@ -2034,8 +2025,7 @@ public class Char {
 	/**
 	 * Equips an {@link Item}. Ensures that the hairEquips and both inventories get updated.
 	 *
-	 * @param item
-	 * 		The Item to equip.
+	 * @param item The Item to equip.
 	 */
 	public void equip(Item item) {
 		Equip equip = (Equip) item;
@@ -2073,10 +2063,10 @@ public class Char {
 		this.temporaryStatManager = temporaryStatManager;
 	}
 
-        public GachaponManager getGachaponManager() {
+	public GachaponManager getGachaponManager() {
 		return gachaponManager;
 	}
-        
+
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -2101,9 +2091,7 @@ public class Char {
 	 * Creates a {@link Rect} with regard to this character. Adds all values to this Char's
 	 * position.
 	 *
-	 * @param rect
-	 * 		The rectangle to use.
-	 *
+	 * @param rect The rectangle to use.
 	 * @return The new rectangle.
 	 */
 	public Rect getRectAround(Rect rect) {
@@ -2115,9 +2103,7 @@ public class Char {
 	/**
 	 * Returns the Equip equipped at a certain {@link BodyPart}.
 	 *
-	 * @param bodyPart
-	 * 		The requested bodyPart.
-	 *
+	 * @param bodyPart The requested bodyPart.
 	 * @return The Equip corresponding to <code>bodyPart</code>. Null if there is none.
 	 */
 	public Item getEquippedItemByBodyPart(BodyPart bodyPart) {
@@ -2173,8 +2159,7 @@ public class Char {
 	 * Warps this character to a given field, at the starting position.
 	 * See {@link #warp(Field, Portal) warp}.
 	 *
-	 * @param toField
-	 * 		The field to warp to.
+	 * @param toField The field to warp to.
 	 */
 	public void warp(Field toField) {
 		warp(toField, toField.getPortalByName("sp"), false);
@@ -2183,10 +2168,8 @@ public class Char {
 	/**
 	 * Warps this Char to a given {@link Field}, with the Field's "sp" portal as spawn position.
 	 *
-	 * @param toField
-	 * 		The Field to warp to.
-	 * @param characterData
-	 * 		Whether or not the character data should be encoded.
+	 * @param toField       The Field to warp to.
+	 * @param characterData Whether or not the character data should be encoded.
 	 */
 	public void warp(Field toField, boolean characterData) {
 		if (toField == null) {
@@ -2198,10 +2181,8 @@ public class Char {
 	/**
 	 * Warps this Char to a given {@link Field} and {@link Portal}. Will not include character data.
 	 *
-	 * @param toField
-	 * 		The Field to warp to.
-	 * @param toPortal
-	 * 		The Portal to spawn at.
+	 * @param toField  The Field to warp to.
+	 * @param toPortal The Portal to spawn at.
 	 */
 	public void warp(Field toField, Portal toPortal) {
 		warp(toField, toPortal, false);
@@ -2213,10 +2194,8 @@ public class Char {
 	 * does.
 	 * Ensures that all Lifes are immediately spawned for the new player.
 	 *
-	 * @param toField
-	 * 		The {@link Field} to warp to.
-	 * @param portal
-	 * 		The {@link Portal} where to spawn at.
+	 * @param toField The {@link Field} to warp to.
+	 * @param portal  The {@link Portal} where to spawn at.
 	 */
 	public void warp(Field toField, Portal portal, boolean characterData) {
 		if (toField == null) {
@@ -2260,14 +2239,14 @@ public class Char {
 		}
 		toField.spawnLifesForChar(this);
 
-		if(tsm.hasStat(IndieEmpty)) {
-			for(Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext();) {
+		if (tsm.hasStat(IndieEmpty)) {
+			for (Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext(); ) {
 				Summon summon = iterator.next().summon;
-				if(summon != null) {
-					if (summon.getMoveAbility() == MoveAbility.SHADOW_SERVANT.getVal() ||
-							summon.getMoveAbility() == MoveAbility.FOLLOW.getVal() ||
-							summon.getMoveAbility() == MoveAbility.FLY_AROUND_CHAR.getVal() ||
-							summon.getMoveAbility() == MoveAbility.JAGUAR.getVal()) {
+				if (summon != null) {
+					if (summon.getMoveAbility() == MoveAbility.WalkClone.getVal() ||
+							summon.getMoveAbility() == MoveAbility.Walk.getVal() ||
+							summon.getMoveAbility() == MoveAbility.Fly.getVal() ||
+							summon.getMoveAbility() == MoveAbility.Jaguar.getVal()) {
 						summon.setObjectId(getField().getNewObjectID());
 						getField().spawnSummon(summon);
 					} else {
@@ -2297,8 +2276,8 @@ public class Char {
 			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos()));
 		}
 		if (JobConstants.isAngelicBuster(getJob())) {
-            write(UserLocal.setDressChanged(false, true));
-        }
+			write(UserLocal.setDressChanged(false, true));
+		}
 	}
 
 	/**
@@ -2306,8 +2285,7 @@ public class Char {
 	 * sends the updated
 	 * stats to the client. Allows multi-leveling.
 	 *
-	 * @param amount
-	 * 		The amount of exp to add.
+	 * @param amount The amount of exp to add.
 	 */
 	public void addExp(long amount) {
 		ExpIncreaseInfo eii = new ExpIncreaseInfo();
@@ -2319,11 +2297,12 @@ public class Char {
 	/**
 	 * Adds exp to this Char. Will calculate the extra exp gained from buffs and the exp rate of the server.
 	 * Also takes an argument to show this info to the client. Will not send anything if this argument (eii) is null.
+	 *
 	 * @param amount The amount of exp to add
-	 * @param eii The info to send to the client
+	 * @param eii    The info to send to the client
 	 */
 	public void addExp(long amount, ExpIncreaseInfo eii) {
-		if(amount <= 0) {
+		if (amount <= 0) {
 			return;
 		}
 		if (getGuild() != null) {
@@ -2331,12 +2310,12 @@ public class Char {
 		}
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
-                int level = getLevel();
-                if (level < 10) {
-                    amount = amount > Long.MAX_VALUE ? Long.MAX_VALUE : amount;
-                } else {
-                    amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
-                }
+		int level = getLevel();
+		if (level < 10) {
+			amount = amount > Long.MAX_VALUE ? Long.MAX_VALUE : amount;
+		} else {
+			amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
+		}
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		if (level >= GameConstants.charExp.length - 1) {
@@ -2368,8 +2347,7 @@ public class Char {
 	 * Immediately checks for level-up possibility, and sends the updated
 	 * stats to the client. Allows multi-leveling.
 	 *
-	 * @param amount
-	 * 		The amount of exp to add.
+	 * @param amount The amount of exp to add.
 	 */
 	public void addExpNoMsg(long amount) {
 		addExp(amount, null);
@@ -2378,8 +2356,7 @@ public class Char {
 	/**
 	 * Writes a packet to this Char's client.
 	 *
-	 * @param outPacket
-	 * 		The OutPacket to write.
+	 * @param outPacket The OutPacket to write.
 	 */
 	public void write(OutPacket outPacket) {
 		if (getClient() != null) {
@@ -2513,8 +2490,7 @@ public class Char {
 	/**
 	 * Adds a {@link Drop} to this Char.
 	 *
-	 * @param drop
-	 * 		The Drop that has been picked up.
+	 * @param drop The Drop that has been picked up.
 	 */
 	public boolean addDrop(Drop drop) {
 		if (drop.isMoney()) {
@@ -2550,10 +2526,10 @@ public class Char {
 			} else if (isRunOnPickUp) {
 				String script = String.valueOf(itemID);
 				ItemInfo ii = ItemData.getItemInfoByID(itemID);
-				if(ii.getScript() != null && !"".equals(ii.getScript())) {
+				if (ii.getScript() != null && !"".equals(ii.getScript())) {
 					script = ii.getScript();
 				}
-				getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+				getScriptManager().startScript(itemID, script, ScriptType.Item);
 				return true;
 			} else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
 				if (item instanceof Equip) {
@@ -2598,9 +2574,7 @@ public class Char {
 	/**
 	 * Checks whether or not this Char has a given quest in progress.
 	 *
-	 * @param questReq
-	 * 		The quest ID of the requested quest.
-	 *
+	 * @param questReq The quest ID of the requested quest.
 	 * @return Whether or not this char is in progress with the quest.
 	 */
 	public boolean hasQuestInProgress(int questReq) {
@@ -2653,8 +2627,7 @@ public class Char {
 	/**
 	 * Heals this Char's HP for a certain amount. Caps off at maximum HP.
 	 *
-	 * @param amount
-	 * 		The amount to heal.
+	 * @param amount The amount to heal.
 	 */
 	public void heal(int amount) {
 		int curHP = getHP();
@@ -2672,8 +2645,7 @@ public class Char {
 	/**
 	 * "Heals" this Char's MP for a certain amount. Caps off at maximum MP.
 	 *
-	 * @param amount
-	 * 		The amount to heal.
+	 * @param amount The amount to heal.
 	 */
 	public void healMP(int amount) {
 		int curMP = getMP();
@@ -2689,8 +2661,7 @@ public class Char {
 	 * Consumes a single {@link Item} from this Char's {@link Inventory}. Will remove the Item if it
 	 * has a quantity of 1.
 	 *
-	 * @param item
-	 * 		The Item to consume, which is currently in the Char's inventory.
+	 * @param item The Item to consume, which is currently in the Char's inventory.
 	 */
 	public void consumeItem(Item item) {
 		Inventory inventory = getInventoryByType(item.getInvType());
@@ -2719,10 +2690,8 @@ public class Char {
 	 * Only works for non-Equip (i.e., type is not EQUIPPED or EQUIP, CASH is fine) items.
 	 * Calls {@link #consumeItem(Item)} if an Item is found.
 	 *
-	 * @param id
-	 * 		The Item's id.
-	 * @param quantity
-	 * 		The amount to consume.
+	 * @param id       The Item's id.
+	 * @param quantity The amount to consume.
 	 */
 	public void consumeItem(int id, int quantity) {
 		Item checkItem = ItemData.getItemDeepCopy(id);
@@ -3109,6 +3078,7 @@ public class Char {
 		}
 		ChatHandler.removeClient(getAccId());
 		setOnline(false);
+		getJobHandler().handleCancelTimer(this);
 		getField().removeChar(this);
 		getAccount().setCurrentChr(null);
 		if (!isChangingChannel()) {
@@ -3168,7 +3138,7 @@ public class Char {
 		} else {
 			return 0;
 		}
-		Item i = getConsumeInventory().getItems().stream().filter(p).findFirst().orElse(null);
+		Item i = getConsumeInventory().getItems().stream().sorted(Comparator.comparing(Item::getBagIndex)).filter(p).findFirst().orElse(null);
 		return i != null ? i.getItemId() : 0;
 	}
 
@@ -3190,6 +3160,7 @@ public class Char {
 
 	/**
 	 * Checks if this Char can hold an Item in their inventory, assuming that its quantity is 1.
+	 *
 	 * @param id the item's itemID
 	 * @return whether or not this Char can hold an item in their inventory
 	 */
@@ -3208,6 +3179,7 @@ public class Char {
 
 	/**
 	 * Recursive function that checks if this Char can hold a list of items in their inventory.
+	 *
 	 * @param items the list of items this char should be able to hold
 	 * @return whether or not this Char can hold the list of items
 	 */
@@ -3316,7 +3288,7 @@ public class Char {
 		// check ida for structure
 		getDamageSkin().encode(outPacket);
 		getPremiumDamageSkin().encode(outPacket);
-		outPacket.encodeShort(getAccount().getDamageSkins().size() + 30); // slotCount
+		outPacket.encodeShort(getAccount().getDamageSkins().size() + 10); // slotCount
 		outPacket.encodeShort(getAccount().getDamageSkins().size());
 		for (DamageSkinSaveData dssd : getAccount().getDamageSkins()) {
 			dssd.encode(outPacket);
@@ -3411,6 +3383,7 @@ public class Char {
 
 	/**
 	 * Gets the current amount of a given stat the character has. Includes things such as skills, items, etc...
+	 *
 	 * @param baseStat the requested stat
 	 * @return the amount of stat
 	 */
@@ -3454,6 +3427,7 @@ public class Char {
 
 	/**
 	 * Gets a total list of basic stats that a character has, including from skills, items, etc...
+	 *
 	 * @return the total list of basic stats
 	 */
 	public Map<BaseStat, Integer> getTotalBasicStats() {
@@ -3466,6 +3440,7 @@ public class Char {
 
 	/**
 	 * Sets whether or not this user has chosen to use up an item to protect their buffs upon next respawn.
+	 *
 	 * @param buffProtector buff protectability
 	 */
 	public void setBuffProtector(boolean buffProtector) {
@@ -3474,6 +3449,7 @@ public class Char {
 
 	/**
 	 * Returns whether this user has chosen to activate a buff protector for their next respawn.
+	 *
 	 * @return buff protectability
 	 */
 	public boolean hasBuffProtector() {
@@ -3482,6 +3458,7 @@ public class Char {
 
 	/**
 	 * Returns the item the user has for protecting buffs.
+	 *
 	 * @return the Item the user has for prtoecting buffs, or null if there is none.
 	 */
 	public Item getBuffProtectorItem() {
@@ -3504,7 +3481,7 @@ public class Char {
 	 * Resets the combo kill's timer. Interrupts the previous timer if there was one.
 	 */
 	public void comboKillResetTimer() {
-		if(comboKillResetTimer != null && !comboKillResetTimer.isDone()) {
+		if (comboKillResetTimer != null && !comboKillResetTimer.isDone()) {
 			comboKillResetTimer.cancel(true);
 		}
 		comboKillResetTimer = EventManager.addEvent(() -> setComboCounter(0), GameConstants.COMBO_KILL_RESET_TIMER, TimeUnit.SECONDS);
@@ -3516,6 +3493,7 @@ public class Char {
 
 	/**
 	 * Checks whether or not a skill is currently on cooldown.
+	 *
 	 * @param skillID the skill's id to check
 	 * @return whether or not a skill is currently on cooldown
 	 */
@@ -3526,6 +3504,7 @@ public class Char {
 	/**
 	 * Checks if a skill is allowed to be cast, according to its cooltime. If it is allowed, it immediately sets
 	 * the cooltime and stores the next moment where the skill is allowed. Skills without cooltime are always allowed.
+	 *
 	 * @param skillID the skill id of the skill to put on cooldown
 	 * @return whether or not the skill was allowed
 	 */
@@ -3544,8 +3523,9 @@ public class Char {
 	/**
 	 * Sets a skill's cooltime according to their property in the WZ files, and stores the moment where the skill
 	 * comes off of cooldown.
+	 *
 	 * @param skillID the skill's id to set
-	 * @param slv the current skill level
+	 * @param slv     the current skill level
 	 */
 	public void setSkillCooldown(int skillID, byte slv) {
 		SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -3553,7 +3533,7 @@ public class Char {
 			int cdInSec = si.getValue(SkillStat.cooltime, slv);
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
 			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
-			if(!hasSkillCDBypass()) {
+			if (!hasSkillCDBypass()) {
 				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
 			}
 		}
@@ -3582,6 +3562,7 @@ public class Char {
 	/**
 	 * Adds honor exp to this Char, and sends a packet to the client with the new honor exp.
 	 * Honor exp added may be negative, but the total honor exp will never go below 0.
+	 *
 	 * @param exp the exp to add (may be negative)
 	 */
 	public void addHonorExp(int exp) {
@@ -3605,9 +3586,10 @@ public class Char {
 
 	/**
 	 * Adds a skill to this Char. If the Char already has this skill, just changes the levels.
-	 * @param skillID the skill's id to add
+	 *
+	 * @param skillID      the skill's id to add
 	 * @param currentLevel the current level of the skill
-	 * @param masterLevel the master level of the skill
+	 * @param masterLevel  the master level of the skill
 	 */
 	public void addSkill(int skillID, int currentLevel, int masterLevel) {
 		Skill skill = SkillData.getSkillDeepCopyById(skillID);
@@ -3699,7 +3681,7 @@ public class Char {
 	}
 
 	public void removeStolenSkill(StolenSkill stolenSkill) {
-		if(stolenSkill != null) {
+		if (stolenSkill != null) {
 			getStolenSkills().remove(stolenSkill);
 		}
 	}
@@ -3726,7 +3708,7 @@ public class Char {
 	}
 
 	public void removeChosenSkill(ChosenSkill chosenSkill) {
-		if(chosenSkill != null) {
+		if (chosenSkill != null) {
 			getChosenSkills().remove(chosenSkill);
 		}
 	}
@@ -3745,7 +3727,8 @@ public class Char {
 
 	/**
 	 * Adds a BaseStat's amount to this Char's BaseStat cache.
-	 * @param bs The BaseStat
+	 *
+	 * @param bs     The BaseStat
 	 * @param amount the amount of BaseStat to add
 	 */
 	public void addBaseStat(BaseStat bs, int amount) {
@@ -3754,7 +3737,8 @@ public class Char {
 
 	/**
 	 * Removes a BaseStat's amount from this Char's BaseStat cache.
-	 * @param bs The BaseStat
+	 *
+	 * @param bs     The BaseStat
 	 * @param amount the amount of BaseStat to remove
 	 */
 	public void removeBaseStat(BaseStat bs, int amount) {
@@ -3859,7 +3843,7 @@ public class Char {
 		logout();
 		setChangingChannel(true);
 		Field field = getField();
-		if(getFieldID() != fieldId) {
+		if (getFieldID() != fieldId) {
 			setField(getOrCreateFieldByCurrentInstanceType(fieldId));
 		}
 		DatabaseManager.saveToDB(getAccount());
@@ -3892,7 +3876,7 @@ public class Char {
 
 	public void checkAndRemoveExpiredItems() {
 		Inventory[] inventories = new Inventory[]{getEquippedInventory(), getEquipInventory(), getConsumeInventory(),
-			getEtcInventory(), getInstallInventory(), getCashInventory()};
+				getEtcInventory(), getInstallInventory(), getCashInventory()};
 		Set<Item> expiredItems = new HashSet<>();
 		for (Inventory inv : inventories) {
 			expiredItems.addAll(
@@ -3914,10 +3898,27 @@ public class Char {
 
 	/**
 	 * Checks if this Char has any of the given quests in progress. Also true if the size of the given set is 0.
+	 *
 	 * @param quests the set of quest ids to check
 	 * @return whether or not this Char has any of the given quests
 	 */
 	public boolean hasAnyQuestsInProgress(Set<Integer> quests) {
 		return quests.size() == 0 || quests.stream().anyMatch(this::hasQuestInProgress);
+	}
+
+	public int getPreviousFieldID() {
+		return previousFieldID == 0 || previousFieldID == 999999999 ? 100000000 : previousFieldID;
+	}
+
+	public void setPreviousFieldID(int previousFieldID) {
+		this.previousFieldID = previousFieldID;
+	}
+
+	public long getNextRandomPortalTime() {
+		return nextRandomPortalTime;
+	}
+
+	public void setNextRandomPortalTime(long nextRandomPortalTime) {
+		this.nextRandomPortalTime = nextRandomPortalTime;
 	}
 }

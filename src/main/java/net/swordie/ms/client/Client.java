@@ -24,6 +24,7 @@ public class Client extends NettyClient {
 	private boolean authorized;
 	private Channel channelInstance;
 	private byte[] machineID;
+	private byte oldChannel;
 
 	public Client(io.netty.channel.Channel channel, byte[] sendSeq, byte[] recvSeq) {
 		super(channel, sendSeq, recvSeq);
@@ -105,4 +106,12 @@ public class Client extends NettyClient {
 	public boolean hasCorrectMachineID(byte[] machineID) {
 		return Arrays.equals(machineID, getMachineID());
 	}
+
+    public void setOldChannel(byte oldChannel) {
+        this.oldChannel = oldChannel;
+    }
+
+    public byte getOldChannel() {
+        return oldChannel;
+    }
 }

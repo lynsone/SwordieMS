@@ -2,43 +2,40 @@ package net.swordie.ms.client.jobs.resistance;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.ExtendSP;
-import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.WvsContext;
-import net.swordie.ms.enums.InstanceTableType;
-import net.swordie.ms.enums.Stat;
-import net.swordie.ms.util.Randomizer;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -172,6 +169,7 @@ public class Demon extends Job {
     };
 
     private long leechAuraCD = Long.MIN_VALUE;
+    private int lastExceedSkill;
     private ScheduledFuture diabolicRecoveryTimer;
 
     public Demon(Char chr) {
@@ -219,19 +217,21 @@ public class Demon extends Job {
         Option o4 = new Option();
         switch (skillID) {
             case OVERLOAD_RELEASE:
-                int overloadcount = tsm.getOption(OverloadCount).nOption;
-                if(overloadcount >= getMaxExceed(chr)) { //20 (or 18 w/Hyper)  overload count  for the buff
-                    o2.nOption = si.getValue(indiePMdR, slv);
-                    o2.rOption = skillID;
-                    o2.tOption = si.getValue(time, slv);
-                    //tsm.putCharacterStatValue(IndiePMdR, o2);
-                    o3.nOption = 1;
-                    o3.rOption = skillID;
-                    o3.tOption = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(ExceedOverload, o3);
-                    resetExceed(c, tsm);
-                    chr.heal(chr.getMaxHP());
-                }
+                int overloadCount = tsm.getOption(OverloadCount).nOption;
+                double overloadRate = (double) overloadCount / getMaxExceed();
+
+                o2.nOption = (int) (overloadRate * si.getValue(indiePMdR, slv));
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndiePMdR, o2);
+
+                o3.nOption = 1;
+                o3.rOption = skillID;
+                o3.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(Exceed, o3);
+
+                resetExceed(tsm);
+                chr.heal((int) (overloadRate * chr.getMaxHP()));
                 break;
             case BATTLE_PACT_DA:
             case BATTLE_PACT_DS:
@@ -484,7 +484,7 @@ public class Demon extends Job {
                     }
                 }
                 break;
-            case DEMON_CRY:
+            case DEMON_CRY:     // TODO  Item Drop & Exp
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     MobTemporaryStat mts = mob.getTemporaryStat();
@@ -523,8 +523,8 @@ public class Demon extends Job {
                 }
                 break;
             case THOUSAND_SWORDS:
-                for(int i = 0; i<5; i++) {
-                    incrementOverloadCount(attackInfo, skillID, tsm);
+                for(int i = 0; i<4; i++) {
+                    incrementOverloadCount(skillID, tsm);
                 }
                 break;
             case CERBERUS_CHOMP:
@@ -564,7 +564,8 @@ public class Demon extends Job {
             case EXCEED_EXECUTION_3:
             case EXCEED_EXECUTION_4:
             case EXCEED_EXECUTION_PURPLE:
-                incrementOverloadCount(attackInfo, skillID, tsm);
+                giveExceedOverload(SkillConstants.getActualSkillIDfromSkillID(attackInfo.skillId));
+                incrementOverloadCount(SkillConstants.getActualSkillIDfromSkillID(attackInfo.skillId), tsm);
                 break;
         }
 
@@ -600,7 +601,7 @@ public class Demon extends Job {
         int anglenum = new Random().nextInt(360);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            int TW1prop = 100;// TODO
+            int TW1prop = 80;
             if (Util.succeedProp(TW1prop)) {
                 int mobID = mai.mobId;
 
@@ -616,30 +617,43 @@ public class Demon extends Job {
         }
     }
 
-    public void incrementOverloadCount(AttackInfo attackInfo, int skillid, TemporaryStatManager tsm) {
+    public void giveExceedOverload(int skillid) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        o.nOption = skillid;
+        o.rOption = skillid;
+        o.tOption = 8;
+        tsm.putCharacterStatValue(ExceedOverload, o);
+        tsm.sendSetStatPacket();
+    }
+
+    public void incrementOverloadCount(int skillid, TemporaryStatManager tsm) {
         Option o = new Option();
         int amount = 1;
         if (tsm.hasStat(OverloadCount)) {
             amount = tsm.getOption(OverloadCount).nOption;
-            if (amount < getMaxExceed(chr)) {
+            if (amount < getMaxExceed()) {
+                if(skillid != lastExceedSkill && lastExceedSkill != 0) {
+                    amount++;
+                }
                 amount++;
             }
         }
+        amount = amount > getMaxExceed() ? getMaxExceed() : amount;
+        lastExceedSkill = skillid;
         o.nOption = amount;
-        o.rOption = 30010230;
+        o.rOption = EXCEED;
         o.tOption = 0;
         tsm.putCharacterStatValue(OverloadCount, o);
         tsm.sendSetStatPacket();
     }
 
-    private void resetExceed(Client c, TemporaryStatManager tsm) {
-        tsm.getOption(OverloadCount).nOption = 1;
-        tsm.removeStat(OverloadCount, false);
-        //tsm.removeStat(IndiePMdR, false);
+    private void resetExceed(TemporaryStatManager tsm) {
+        tsm.removeStatsBySkill(EXCEED);
         tsm.sendResetStatPacket();
     }
 
-    private int getMaxExceed(Char chr) {
+    private int getMaxExceed() {
         int num = 20;
         if(chr.hasSkill(31220044)) { //Hyper Skill Boost [ Reduce Overload ]
             num = 18;

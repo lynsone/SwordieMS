@@ -38,7 +38,6 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
 import net.swordie.ms.client.jobs.adventurer.BeastTamer;
-import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
@@ -146,6 +145,7 @@ public class WorldHandler {
             return;
         }
         c.setMachineID(machineID);
+        c.setOldChannel(oldClient.getOldChannel());
         Account acc = oldClient.getAccount();
         c.setAccount(acc);
         Server.getInstance().getWorldById(worldId).getChannelById(channel).removeClientFromTransfer(charId);
@@ -241,11 +241,11 @@ public class WorldHandler {
                 chr.chatMessage(Mob, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
                 ScriptManagerImpl smi = chr.getScriptManager();
                 // all but field
-                smi.stop(ScriptType.PORTAL);
-                smi.stop(ScriptType.NPC);
-                smi.stop(ScriptType.REACTOR);
-                smi.stop(ScriptType.QUEST);
-                smi.stop(ScriptType.ITEM);
+                smi.stop(ScriptType.Portal);
+                smi.stop(ScriptType.Npc);
+                smi.stop(ScriptType.Reactor);
+                smi.stop(ScriptType.Quest);
+                smi.stop(ScriptType.Item);
 
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
@@ -358,6 +358,7 @@ public class WorldHandler {
         }
 //        log.debug("Equipped after: " + chr.getEquippedInventory());
 //        log.debug("Equip after: " + chr.getEquipInventory());
+        chr.setBulletIDForAttack(chr.calculateBulletIDForAttack());
     }
 
     public static void handleNonTargetForceAtomAttack(Client c, InPacket inPacket) {
@@ -706,35 +707,11 @@ public class WorldHandler {
                     }
                     mob.damage(chr, totalDamage);
                     if (mob.getHp() < 0) {
-
-                        // Combo Counter per Kill
-                        int newChrComboCount = chr.getComboCounter() + 1;
-                        c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
-                        chr.setComboCounter(newChrComboCount);
-                        chr.comboKillResetTimer();
-
-                        // Exp Orb spawning from Mob every 50 combos
-                        if(chr.getComboCounter() % 50 == 0) {
-                            Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
-                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
-                                item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
-                            }
-                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
-                                item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
-                            }
-                            Drop drop = new Drop(-1, item);
-                            drop.setMobExp(mob.getForcedMobStat().getExp());
-                            chr.getField().drop(drop, mob.getPosition());
-                        }
+                        mob.onKilledByChar(chr);
 
                         // MultiKill +1,  per killed mob
                         multiKillMessage++;
                         mobexp = mob.getForcedMobStat().getExp();
-
-                        // Mage FP skill
-                        if(mob.isInfestedByViralSlime()) {
-                            Magician.infestViralSlime(c, mob);
-                        }
                     }
                 }
             }
@@ -768,7 +745,7 @@ public class WorldHandler {
             Field field = chr.getField();
             Portal portal = field.getPortalByName(portalName);
             if (portal.getScript() != null && !portal.getScript().equals("")) {
-                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
+                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.Portal);
             } else {
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
                 if (toField == null) {
@@ -823,7 +800,7 @@ public class WorldHandler {
             portalID = (byte) portal.getId();
             script = "".equals(portal.getScript()) ? portalName : portal.getScript();
         }
-        chr.getScriptManager().startScript(portalID, script, ScriptType.PORTAL);
+        chr.getScriptManager().startScript(portalID, script, ScriptType.Portal);
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
@@ -1731,7 +1708,7 @@ public class WorldHandler {
             field.addLifeSchedule(fao, sf);
             field.broadcastPacket(FieldAttackObjPool.setAttack(fao.getObjectId(), 0));
         }
-
+        chr.dispose();
     }
 
     public static void handleUserCharacterInfoRequest(Client c, InPacket inPacket) {
@@ -2452,7 +2429,7 @@ public class WorldHandler {
         if (script == null) {
             NpcShopDlg nsd = NpcData.getShopById(templateID);
             if (nsd != null) {
-                chr.getScriptManager().stop(ScriptType.NPC); // reset contents before opening shop?
+                chr.getScriptManager().stop(ScriptType.Npc); // reset contents before opening shop?
                 chr.setShop(nsd);
                 chr.write(ShopDlg.openShop(0, nsd));
                 chr.chatMessage(String.format("Opening shop %s", npc.getTemplateId()));
@@ -2460,7 +2437,7 @@ public class WorldHandler {
                 script = String.valueOf(npc.getTemplateId());
             }
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.Npc);
     }
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
@@ -2473,14 +2450,14 @@ public class WorldHandler {
                 Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
                 NpcMessageType.None;
         }
-        if (nmt != NpcMessageType.Monologue) {
+        if (nmt != NpcMessageType.Monologue && nmt != NpcMessageType.AskAngelicBuster) {// angelic buster sent after movie
             byte action = inPacket.decodeByte();
             int answer = 0;
             boolean hasAnswer = false;
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
-                if(action != 1) {   // SendDelay
+                if(action != 1 && action != 2) {   // SendDelay/PatternInputRequest
                     return;         // We only want SendDelay as ways to progress the script
                 }
                 chr.getScriptManager().handleAction(nmt, action, answ);
@@ -2673,7 +2650,7 @@ public class WorldHandler {
         if(ii.getScript() != null && !"".equals(ii.getScript())) {
             script = ii.getScript();
         }
-        chr.getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+        chr.getScriptManager().startScript(itemID, script, ScriptType.Item);
         chr.dispose();
     }
 
@@ -2730,7 +2707,7 @@ public class WorldHandler {
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
             case QuestReq_CompleteScript:
                 qi = QuestData.getQuestInfoById(questID);
@@ -2738,7 +2715,7 @@ public class WorldHandler {
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
         }
     }
@@ -2780,9 +2757,8 @@ public class WorldHandler {
         if (script == null) {
             return;
         }
-        log.debug(String.format("Starting direction script %s.", script));
         chr.getScriptManager().setCurNodeEventEnd(false);
-        chr.getScriptManager().startScript(field.getId(), script, ScriptType.DIRECTION);;
+        chr.getScriptManager().startScript(field.getId(), script, ScriptType.Field);
     }
 
     public static void handleUserEmotion(Client c, InPacket inPacket) {
@@ -3923,15 +3899,15 @@ public class WorldHandler {
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if(chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", reactor, type);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", reactor, type);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -3951,15 +3927,15 @@ public class WorldHandler {
         if (action.equals("")) {
             action = templateID + "action";
         }
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if(chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", 0);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", 0);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -5415,7 +5391,7 @@ public class WorldHandler {
         if (script == null) {
             script = String.valueOf(npc.getTemplateId());
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.Npc);
 
     }
 
@@ -5853,5 +5829,25 @@ public class WorldHandler {
                 Effect.showFameGradeUp(targetChr);
             }
         }
+    }
+
+    public static void handleEnterRandomPortalRequest(Char chr, InPacket inPacket) {
+        int portalObjID = inPacket.decodeInt();
+        Life life = chr.getField().getLifeByObjectID(portalObjID);
+        if (!(life instanceof RandomPortal)) {
+            chr.chatMessage("Could not find that portal.");
+            return;
+        }
+        RandomPortal randomPortal = (RandomPortal) life;
+        if (randomPortal.getCharID() != chr.getId()) {
+            chr.chatMessage("A mysterious force is blocking your way.");
+            chr.dispose();
+            return;
+        }
+        RandomPortal.Type type = randomPortal.getAppearType();
+        String script = type.getScript();
+        chr.getScriptManager().startScript(randomPortal.getAppearType().ordinal(), randomPortal.getObjectId(),
+                script, ScriptType.Portal);
+        chr.dispose();
     }
 }

@@ -724,34 +724,44 @@ public class TemporaryStatManager {
     }
 
     public void throwDice(int roll) {
-        int[] array = {0, 0, 30, 20, 15, 20, 30, 20};
+        throwDice(roll, 0);
+    }
+
+    public void throwDice(int roll, int secondRoll) {
+        int[] array = {0, 0, 30, 20, 15, 20, 30, 20}; // Stats for Normal Rolls
+        int[] arrayDD = {0, 0, 40, 30, 25, 30, 40, 30}; // Stats for Double Down Rolls
         for(int i = 0; i < diceOption.length; i++) {
             diceOption[i] = 0;
         }
-        diceOption[roll] = array[roll];
+        if(roll == secondRoll) {
+            diceOption[roll] = arrayDD[roll];
+        } else {
+            diceOption[roll] = array[roll];
+            diceOption[secondRoll] = array[secondRoll];
+        }
         int[] diceinfo = new int[] {
-                diceOption[3],  //nOption 3 (HP)
-                diceOption[3],  //nOption 3 (MP)
-                diceOption[4],  //nOption 4 (CRIT)
-                0,  //Unknown
-                0,  //Unknown
-                0,  //Unknown
-                0,  //Unknown
-                0,  //Unknown
-                diceOption[2],  //nOption 2 (DEF)
-                0,  //Unknown
-                0,  //Unknown
-                0,  //Unknown
-                diceOption[5], //nOption 5 (DAMR)
-                0,  //Unknown
-                0,  //Unknown
-                0,  //Unknown
-                0,  //Unknown
+                diceOption[3],  //nOption 3 (MHPR)
+                diceOption[3],  //nOption 3 (MMPR)
+                diceOption[4],  //nOption 4 (Cr)
+                0,  // CritDamage Min
+                0,  // ???  ( CritDamage Max (?) )
+                0,  // EVAR
+                0,  // AR
+                0,  // ER
+                diceOption[2],  //nOption 2 (PDDR)
+                diceOption[2],  //nOption 2 (MDDR)
+                0,  // PDR
+                0,  // MDR
+                diceOption[5],  //nOption 5 (PIDR)
+                0,  // PDamR
+                0,  // MDamR
+                0,  // PADR
+                0,  // MADR
                 diceOption[6], //nOption 6 (EXP)
                 diceOption[7], //nOption 7 (IED)
-                0,  //Unknown
-                0,  //Unknown
-                0,  //Unknown
+                0,  // ASRR
+                0,  // TERR
+                0,  // MesoRate
                 0,
         };
         setDiceInfo(diceinfo);

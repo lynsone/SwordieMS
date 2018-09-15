@@ -17,6 +17,7 @@ import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Life;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -198,7 +199,7 @@ public class BlazeWizard extends Noblesse {
 
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
-                summon.setMoveAbility(MoveAbility.FOLLOW.getVal());
+                summon.setMoveAbility(MoveAbility.Walk.getVal());
                 // i have to specify the summon term as the _FOX/LION skills have the time set to 0, making the summon last forever!
                 summon.setSummonTerm(SkillData.getSkillInfoById(FIRES_OF_CREATION).getValue(time, slv));
                 field.spawnSummon(summon);
@@ -419,12 +420,12 @@ public class BlazeWizard extends Noblesse {
 
     private void explodeIgnitionOnMob(Mob mob) {
         MobTemporaryStat mts = mob.getTemporaryStat();
-        Mob checkMob = (Mob) chr.getField().getLifeByObjectID(mob.getObjectId());
-        if(checkMob == null) {
-            return;
-        }
-        c.write(UserLocal.explosionAttack(IGNITION_EXPLOSION, mob.getPosition(), mob.getObjectId(), 10));
         hashMap.remove(mob);
+        Life checkMob = chr.getField().getLifeByObjectID(mob.getObjectId());
+        if(checkMob != null && checkMob instanceof Mob) {
+            c.write(UserLocal.explosionAttack(IGNITION_EXPLOSION, mob.getPosition(), mob.getObjectId(), 10));
+        }
+
     }
 
     @Override

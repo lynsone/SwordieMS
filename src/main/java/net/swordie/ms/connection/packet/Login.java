@@ -86,7 +86,7 @@ public class Login {
             outPacket.encodeInt(-1);
             outPacket.encodeByte(0); // idk
             outPacket.encodeByte(0); // ^
-            outPacket.encodeLong(account.getCreationDate()); // account creation date
+            outPacket.encodeFT(account.getCreationDate());
         } else if (msg == LoginType.Blocked) {
             outPacket.encodeByte(msg.getValue());
             outPacket.encodeByte(0);

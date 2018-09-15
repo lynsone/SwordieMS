@@ -60,7 +60,6 @@ public class Field {
     private int id;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
     private int consumeItemCoolTime, link;
-    private long uniqueId;
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
     private Set<Portal> portals;
     private Set<Foothold> footholds;
@@ -86,10 +85,10 @@ public class Field {
     private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean isChannelField;
     private Map<Integer, String> directionInfo;
+    private Clock clock;
 
-    public Field(int fieldID, long uniqueId) {
+    public Field(int fieldID) {
         this.id = fieldID;
-        this.uniqueId = uniqueId;
         this.rect = new Rect();
         this.portals = new HashSet<>();
         this.footholds = new HashSet<>();
@@ -99,15 +98,14 @@ public class Field {
         this.lifeSchedules = new HashMap<>();
         this.directionInfo = new HashMap<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
-        startFieldScript();
     }
 
-    private void startFieldScript() {
+    public void startFieldScript() {
         String script = getFieldScript();
         if(!"".equalsIgnoreCase(script)) {
             scriptManagerImpl = new ScriptManagerImpl(this);
             log.debug(String.format("Starting field script %s.", script));
-            scriptManagerImpl.startScript(getId(), script, ScriptType.FIELD);
+            scriptManagerImpl.startScript(getId(), script, ScriptType.Field);
         }
     }
 
@@ -161,14 +159,6 @@ public class Field {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public long getUniqueId() {
-        return uniqueId;
-    }
-
-    public void setUniqueId(long uniqueId) {
-        this.uniqueId = uniqueId;
     }
 
     public Set<Portal> getPortals() {
@@ -480,7 +470,7 @@ public class Field {
             getChars().add(chr);
             if(!isUserFirstEnter() && hasUserFirstEnterScript()) {
                 chr.chatMessage("First enter script!");
-                chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FIELD);
+                chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FirstEnterField);
                 setUserFirstEnter(true);
             }
         }
@@ -562,6 +552,9 @@ public class Field {
             for (TownPortal townPortal : getTownPortalList()) {
                 townPortal.showTownPortal(this);
             }
+        }
+        if (getClock() != null) {
+            getClock().showClock(chr);
         }
         for (Char c : getChars()) {
             if (!c.equals(chr)) {
@@ -987,7 +980,7 @@ public class Field {
             return;
         }
         String script = getOnUserEnter();
-        chr.getScriptManager().startScript(getId(), script, ScriptType.FIELD);
+        chr.getScriptManager().startScript(getId(), script, ScriptType.Field);
     }
 
     public boolean isUserFirstEnter() {
@@ -1194,10 +1187,11 @@ public class Field {
 
     /**
      * Goes through all MobGens, and spawns a Mob from it if allowed to do so. Only generates when there are Chars
-     * on this Field.
+     * on this Field, or if the field is being initialized.
+     * @param init if this is the first time that this method is called.
      */
-    public void generateMobs() {
-        if (getChars().size() > 0) {
+    public void generateMobs(boolean init) {
+        if (init || getChars().size() > 0) {
             int currentMobs = getMobs().size();
             for (MobGen mg : getMobGens()) {
                 if (mg.canSpawnOnField(this)) {
@@ -1211,7 +1205,7 @@ public class Field {
         }
         // No fixed rate to ensure kishin-ness keeps being checked
         double kishinMultiplier = hasKishin() ? GameConstants.KISHIN_MOB_RATE_MULTIPLIER : 1;
-        EventManager.addEvent(this::generateMobs,
+        EventManager.addEvent(() -> generateMobs(false),
                 (long) (GameConstants.BASE_MOB_RESPAWN_RATE / (getMobRate() * kishinMultiplier)));
     }
 
@@ -1296,5 +1290,13 @@ public class Field {
 
     public void addDirectionInfo(int node, String script) {
         directionInfo.put(node, script);
+    }
+
+    public Clock getClock() {
+        return clock;
+    }
+
+    public void setClock(Clock clock) {
+        this.clock = clock;
     }
 }

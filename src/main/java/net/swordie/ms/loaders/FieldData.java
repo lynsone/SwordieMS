@@ -142,7 +142,7 @@ public class FieldData {
                     continue;
                 }
                 int id = Integer.parseInt(XMLApi.getAttributes(node).get("name").replace(".img", ""));
-                Field field = new Field(id, -1);
+                Field field = new Field(id);
                 Node infoNode = XMLApi.getFirstChildByNameBF(node, "info");
                 for (Node n : XMLApi.getAllChildren(infoNode)) {
                     Map<String, String> attr = XMLApi.getAttributes(n);
@@ -507,7 +507,7 @@ public class FieldData {
     private static Field readFieldFromFile(File file) {
         Field field = null;
         try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
-            field = new Field(dataInputStream.readInt(), -1);
+            field = new Field(dataInputStream.readInt());
             field.setTown(dataInputStream.readBoolean());
             field.setSwim(dataInputStream.readBoolean());
             field.setReturnMap(dataInputStream.readInt());
@@ -627,7 +627,7 @@ public class FieldData {
         if (field == null) {
             return null;
         }
-        Field copy = new Field(id, -1);
+        Field copy = new Field(id);
         copy.setTown(field.isTown());
         copy.setSwim(field.isSwim());
         copy.setReturnMap(field.getReturnMap());
@@ -669,8 +669,9 @@ public class FieldData {
         copy.startBurningFieldTimer();
         int mobGens = field.getMobGens().size();
         copy.setFixedMobCapacity((int) (mobGens * GameConstants.DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT));
-        copy.generateMobs();
+        copy.generateMobs(true);
         copy.setDirectionInfo(field.getDirectionInfo());
+        copy.startFieldScript();
         return copy;
     }
 

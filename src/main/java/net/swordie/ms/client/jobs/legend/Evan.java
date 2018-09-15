@@ -225,7 +225,7 @@ public class Evan extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 field.spawnSummon(summon);
                 break;
 
@@ -294,7 +294,6 @@ public class Evan extends Job {
                 }
             }
         }
-        chr.chatMessage("Debris Count: " + debrisCount);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
