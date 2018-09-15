@@ -2626,13 +2626,18 @@ public class WorldHandler {
         List<Item> items = inv.getItems();
         items.sort(Comparator.comparingInt(Item::getItemId));
         for (Item item : items) {
-            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
-                    (short) item.getBagIndex(), (short) 0, -1, item));
+            if (item.getBagIndex() != items.indexOf(item) + 1) {
+                chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
+                        (short) item.getBagIndex(), (short) 0, -1, item));
+            }
         }
         for (Item item : items) {
-            item.setBagIndex(items.indexOf(item) + 1);
-            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
-                    (short) item.getBagIndex(), (short) 0, -1, item));
+            int index = items.indexOf(item) + 1;
+            if (item.getBagIndex() != index) {
+                item.setBagIndex(index);
+                chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
+                        (short) item.getBagIndex(), (short) 0, -1, item));
+            }
         }
         c.write(WvsContext.sortItemResult(invType.getVal()));
         chr.dispose();
