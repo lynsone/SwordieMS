@@ -57,8 +57,8 @@ public class Clock {
         }
     }
 
-    public long getRemainingTime() {
-        return (timeInMillis - System.currentTimeMillis()) / 1000;
+    public int getRemainingTime() {
+        return (int) ((timeInMillis - System.currentTimeMillis()) / 1000);
     }
 
     public void removeClock() {

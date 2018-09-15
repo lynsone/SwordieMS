@@ -2529,7 +2529,7 @@ public class Char {
 				if (ii.getScript() != null && !"".equals(ii.getScript())) {
 					script = ii.getScript();
 				}
-				getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+				getScriptManager().startScript(itemID, script, ScriptType.Item);
 				return true;
 			} else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
 				if (item instanceof Equip) {
