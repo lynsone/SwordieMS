@@ -222,9 +222,14 @@ public class ScriptManagerImpl implements ScriptManager {
 		boolean exists = new File(dir).exists();
 		if (!exists) {
 			log.error(String.format("[Error] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
-			chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
+			if(chr != null) {
+				chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
+			}
 			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
 					scriptType.getDir().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
+		}
+		if(chr == null) {
+			return;
 		}
 		ScriptInfo si = getScriptInfoByType(scriptType);
 		si.setActive(true);
@@ -715,7 +720,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void lockInGameUI(boolean lock) {
-		chr.write(UserLocal.setInGameDirectionMode(lock, true, false));
+		lockInGameUI(lock, true);
+	}
+
+	public void lockInGameUI(boolean lock, boolean blackFrame) {
+		chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
 	}
         
 	public void curNodeEventEnd(boolean enable) {

@@ -4,8 +4,6 @@ import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.damage.DamageSkinSaveData;
-import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.PetItem;
@@ -16,6 +14,7 @@ import net.swordie.ms.client.character.skills.StolenSkill;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
@@ -41,6 +40,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
 import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
 
@@ -935,12 +935,26 @@ public class AdminCommands {
             if (args.length < 2) {
                 chr.chatMessage(Notice2, "Needs more args! <id>");
             }
-            Client c = chr.getClient();
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o1 = new Option();
             o1.nOption = morphID;
             o1.rOption = Kaiser.FINAL_TRANCE;
             tsm.putCharacterStatValue(CharacterTemporaryStat.Morph, o1);
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    public static class Mount extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int mountID = Integer.parseInt(args[1]);
+            if (args.length < 2) {
+                chr.chatMessage(Notice2, "Needs more args! <id>");
+            }
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+            tsb.setNOption(mountID);
+            tsb.setROption(Kaiser.FINAL_TRANCE);
+            tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
             tsm.sendSetStatPacket();
         }
     }
