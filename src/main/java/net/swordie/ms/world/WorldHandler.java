@@ -2433,6 +2433,7 @@ public class WorldHandler {
                 chr.setShop(nsd);
                 chr.write(ShopDlg.openShop(0, nsd));
                 chr.chatMessage(String.format("Opening shop %s", npc.getTemplateId()));
+                return;
             } else {
                 script = String.valueOf(npc.getTemplateId());
             }
