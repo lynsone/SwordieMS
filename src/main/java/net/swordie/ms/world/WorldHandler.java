@@ -4017,6 +4017,11 @@ public class WorldHandler {
                     successProp *= 1.045;
                 }
                 int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp());
+                if (equippedInv && destroyProp > 0 && chr.getEquipInventory().getEmptySlots() == 0) {
+                    c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("You do not have enough space in your" +
+                            "equip inventory in case your item gets destroyed.")));
+                    return;
+                }
                 success = Util.succeedProp(successProp, 1000);
                 boolean boom = false;
                 boolean canDegrade = equip.getChuc() > 5 && equip.getChuc() % 5 != 0;
@@ -4027,8 +4032,8 @@ public class WorldHandler {
                     equip.addSpecialAttribute(EquipSpecialAttribute.Vestige);
                     boom = true;
                     if (equippedInv) {
-                        // TODO: properly unequip and assign bag index
                         chr.unequip(equip);
+                        equip.setBagIndex(chr.getEquipInventory().getFirstOpenSlot());
                         equip.updateToChar(chr);
                         c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
                         if (!equip.isSuperiorEqp()) {
