@@ -537,9 +537,6 @@ public class Field {
         for (Life life : getLifes().values()) {
             spawnLife(life, chr);
         }
-        for (Reactor reactor : getReactors()) {
-            spawnLife(reactor, chr);
-        }
         if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && isChannelField() && !isTown()) {
             chr.write(CField.runeStoneAppear(getRuneStone()));
         }

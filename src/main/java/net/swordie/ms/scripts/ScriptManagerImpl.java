@@ -228,9 +228,6 @@ public class ScriptManagerImpl implements ScriptManager {
 			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
 					scriptType.getDir().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
 		}
-		if(chr == null) {
-			return;
-		}
 		ScriptInfo si = getScriptInfoByType(scriptType);
 		si.setActive(true);
 		CompiledScript cs;
@@ -724,7 +721,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void lockInGameUI(boolean lock, boolean blackFrame) {
-		chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
+		if (chr != null) {
+			chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
+		}
 	}
         
 	public void curNodeEventEnd(boolean enable) {
