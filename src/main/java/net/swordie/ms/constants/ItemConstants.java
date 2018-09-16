@@ -555,9 +555,9 @@ public class ItemConstants {
             case AnyEquip:
                 return true;
             case Weapon: // no emblems for nebs here
-                return isWeapon(equipId) || isSecondary(equipId);
+                return isWeapon(equipId) || isShield(equipId);
             case AnyExceptWeapon:
-                return !isWeapon(equipId) && !isSecondary(equipId);
+                return !isWeapon(equipId) && !isShield(equipId);
             case ArmorExceptGlove:
                 return isBelt(equipId) || isHat(equipId) || isOverall(equipId) || isTop(equipId) || isBottom(equipId) || isShoe(equipId) || isCape(equipId);
             case Accessory:
