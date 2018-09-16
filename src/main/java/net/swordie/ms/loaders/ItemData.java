@@ -129,6 +129,7 @@ public class ItemData {
             equip.setFixedPotential(dataInputStream.readBoolean());
             equip.setNoPotential(dataInputStream.readBoolean());
             equip.setBossReward(dataInputStream.readBoolean() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
+            equip.setSuperiorEqp(dataInputStream.readBoolean());
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -196,6 +197,7 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
                 dataOutputStream.writeBoolean(equip.isNoPotential());
                 dataOutputStream.writeBoolean(equip.isBossReward() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
+                dataOutputStream.writeBoolean(equip.isSuperiorEqp());
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
@@ -350,6 +352,9 @@ public class ItemData {
                                     break;
                                 case "bossReward":
                                     equip.setBossReward(Integer.parseInt(value) != 0);
+                                    break;
+                                case "superiorEqp":
+                                    equip.setSuperiorEqp(Integer.parseInt(value) != 0);
                                     break;
                                 case "fixedGrade":
                                     equip.setFixedGrade(Integer.parseInt(value));

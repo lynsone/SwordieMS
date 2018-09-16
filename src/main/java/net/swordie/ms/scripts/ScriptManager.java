@@ -9,6 +9,7 @@ import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.world.field.Clock;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Observer;
@@ -1070,6 +1071,16 @@ public interface ScriptManager extends Observer {
 	boolean hasItem(int itemID);
 
 	/**
+	 * Determines if the linked {@link Char} has the specified item equipped.
+	 *
+	 * @param itemID
+	 * 		The ID of the item.
+	 *
+	 * @return True if the character has the item equipped.
+	 */
+	boolean isEquipped(int itemID);
+
+	/**
 	 * Determines if the linked {@link Char} has the specified item with the specified quantity.
 	 * Example: "if(sm.hasItem(100, 3)) {}"
 	 *
@@ -1422,16 +1433,16 @@ public interface ScriptManager extends Observer {
 	/**
 	 * Shows a timer on top with precision in milliseconds. Will automatically remove itself after the timer has
 	 * expired.
-	 * @param milliseconds the amount of milliseconds the stopwatch should start out with
+	 * @param seconds the amount of seconds the stopwatch should start out with
 	 */
-	void showStopWatch(int milliseconds);
+	Clock createStopWatch(int seconds);
 
 	/**
 	 * Shows a timer on top with precision in minutes/seconds. Will automatically remove itself after the timer has
 	 * expired.
 	 * @param seconds the amount of seconds the stopwatch should start out with
 	 */
-	void showClock(int seconds);
+	Clock createClock(int seconds);
 
 	/**
 	 * Shows a timer on top with precision in hour/minutes/seconds. Will automatically remove itself after the timer
@@ -1440,7 +1451,7 @@ public interface ScriptManager extends Observer {
 	 * @param minutes the amount of minutes the stopwatch should start out with
 	 * @param seconds the amount of seconds the stopwatch should start out with
 	 */
-	void showClock(int hours, int minutes, int seconds);
+	void createClock(int hours, int minutes, int seconds);
 
 	// Other methods ---------------------------------------------------------------------------------------------------
 

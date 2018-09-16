@@ -144,6 +144,14 @@ public class FileTime implements Serializable {
 	}
 
 	/**
+	 * Returns this FileTime as an Instant.
+	 * @return the Instant corresponding to this FileTime
+	 */
+	public Instant toInstant() {
+		return toLocalDateTime().atZone(ZoneId.systemDefault()).toInstant();
+	}
+
+	/**
 	 * Returns the millis since epoch that this FileTime corresponds to.
 	 * @return millis since epoch
 	 */

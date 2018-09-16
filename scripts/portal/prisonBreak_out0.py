@@ -1,7 +1,5 @@
 # 921160700 - Escape! - PQ
-from net.swordie.ms.scripts import ScriptType
 
-sm.stopEventsByScriptType(ScriptType.FIELD) #Stops the FixedRate Event from the Field Script
 if sm.hasMobsInField():
     sm.chat("The portal is not opened.")
 else:

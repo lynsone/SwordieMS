@@ -2529,7 +2529,7 @@ public class Char {
 				if (ii.getScript() != null && !"".equals(ii.getScript())) {
 					script = ii.getScript();
 				}
-				getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+				getScriptManager().startScript(itemID, script, ScriptType.Item);
 				return true;
 			} else if (getInventoryByType(item.getInvType()).canPickUp(item)) {
 				if (item instanceof Equip) {
@@ -3288,7 +3288,7 @@ public class Char {
 		// check ida for structure
 		getDamageSkin().encode(outPacket);
 		getPremiumDamageSkin().encode(outPacket);
-		outPacket.encodeShort(getAccount().getDamageSkins().size() + 30); // slotCount
+		outPacket.encodeShort(getAccount().getDamageSkins().size() + 10); // slotCount
 		outPacket.encodeShort(getAccount().getDamageSkins().size());
 		for (DamageSkinSaveData dssd : getAccount().getDamageSkins()) {
 			dssd.encode(outPacket);

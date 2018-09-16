@@ -223,7 +223,7 @@ public class TemporaryStatManager {
 
     public Option getOption(CharacterTemporaryStat cts) {
         if(hasStat(cts)) {
-            return getCurrentStats().get(cts).get(0) != null ? getCurrentStats().get(cts).get(0) : new Option();
+            return getCurrentStats().get(cts).get(0);
         }
         return new Option();
     }

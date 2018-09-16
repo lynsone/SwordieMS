@@ -108,15 +108,18 @@ import org.hibernate.query.Query;
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.EquipBaseStat.cuc;
+import static net.swordie.ms.enums.EquipBaseStat.specialAttribute;
 import static net.swordie.ms.enums.EquipBaseStat.tuc;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
@@ -155,6 +158,7 @@ public class WorldHandler {
         }
         chr.setClient(c);
         chr.setAccount(acc);
+        chr.initEquips();
         c.setChr(chr);
         c.getChannelInstance().addChar(chr);
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
@@ -192,7 +196,7 @@ public class WorldHandler {
         acc.getMonsterCollection().init(chr);
         chr.checkAndRemoveExpiredItems();
         chr.initBaseStats();
-        chr.setOnline(true);
+        chr.setOnline(true); // v195+: respect 'invisible login' setting
     }
 
     public static void handleUserMove(Client c, InPacket inPacket) {
@@ -237,11 +241,11 @@ public class WorldHandler {
                 chr.chatMessage(Mob, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
                 ScriptManagerImpl smi = chr.getScriptManager();
                 // all but field
-                smi.stop(ScriptType.PORTAL);
-                smi.stop(ScriptType.NPC);
-                smi.stop(ScriptType.REACTOR);
-                smi.stop(ScriptType.QUEST);
-                smi.stop(ScriptType.ITEM);
+                smi.stop(ScriptType.Portal);
+                smi.stop(ScriptType.Npc);
+                smi.stop(ScriptType.Reactor);
+                smi.stop(ScriptType.Quest);
+                smi.stop(ScriptType.Item);
 
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
@@ -741,7 +745,7 @@ public class WorldHandler {
             Field field = chr.getField();
             Portal portal = field.getPortalByName(portalName);
             if (portal.getScript() != null && !portal.getScript().equals("")) {
-                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
+                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.Portal);
             } else {
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
                 if (toField == null) {
@@ -796,7 +800,7 @@ public class WorldHandler {
             portalID = (byte) portal.getId();
             script = "".equals(portal.getScript()) ? portalName : portal.getScript();
         }
-        chr.getScriptManager().startScript(portalID, script, ScriptType.PORTAL);
+        chr.getScriptManager().startScript(portalID, script, ScriptType.Portal);
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
@@ -1933,6 +1937,11 @@ public class WorldHandler {
                     equip.updateToChar(chr);
                     break;
                 case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
+                    if (c.getWorld().isReboot()) {
+                        log.error(String.format("Character %d attempted to use a bonus potential cube in reboot world.", chr.getId()));
+                        chr.dispose();
+                        return;
+                    }
                     ePos = (short) inPacket.decodeInt();
                     invType = ePos < 0 ? EQUIPPED : EQUIP;
                     equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
@@ -2082,6 +2091,11 @@ public class WorldHandler {
 
     public static void handleUserUpgradeItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to scroll in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort(); //Use Position
         short ePos = inPacket.decodeShort(); //Eqp Position
@@ -2262,6 +2276,11 @@ public class WorldHandler {
 
     public static void handleUserAdditionalOptUpgradeItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to use bonus potential in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort();
         short ePos = inPacket.decodeShort();
@@ -2307,10 +2326,6 @@ public class WorldHandler {
                     break;
             }
         }
-        chr.chatMessage(Mob, "Grade = " + equip.getGrade());
-        for (int i = 0; i < 6; i++) {
-            chr.chatMessage(Mob, "Opt " + i + " = " + equip.getOptions().get(i));
-        }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), false));
         equip.updateToChar(chr);
         chr.consumeItem(scroll);
@@ -2335,10 +2350,6 @@ public class WorldHandler {
             equip.releaseOptions(false);
         } else {
             equip.releaseOptions(bonus);
-        }
-        chr.chatMessage(Mob, "Grade = " + equip.getGrade());
-        for (int i = 0; i < 6; i++) {
-            chr.chatMessage(Mob, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemReleaseEffect(chr.getId(), ePos, bonus));
         equip.updateToChar(chr);
@@ -2452,7 +2463,7 @@ public class WorldHandler {
         if (script == null) {
             NpcShopDlg nsd = NpcData.getShopById(templateID);
             if (nsd != null) {
-                chr.getScriptManager().stop(ScriptType.NPC); // reset contents before opening shop?
+                chr.getScriptManager().stop(ScriptType.Npc); // reset contents before opening shop?
                 chr.setShop(nsd);
                 chr.write(ShopDlg.openShop(0, nsd));
                 chr.chatMessage(String.format("Opening shop %s", npc.getTemplateId()));
@@ -2460,7 +2471,7 @@ public class WorldHandler {
                 script = String.valueOf(npc.getTemplateId());
             }
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.Npc);
     }
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
@@ -2525,7 +2536,7 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             Drop drop = (Drop) life;
-            boolean success = drop.canBePickedUpBy(chr) && chr.addDrop(drop);
+            boolean success = ((!c.getWorld().isReboot() && drop.getOwnerID() == chr.getId()) || drop.canBePickedUpBy(chr)) && chr.addDrop(drop);
             if(success) {
                 field.removeDrop(dropID, chr.getId(), false, -1);
             } else {
@@ -2637,13 +2648,18 @@ public class WorldHandler {
         List<Item> items = inv.getItems();
         items.sort(Comparator.comparingInt(Item::getItemId));
         for (Item item : items) {
-            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
-                    (short) item.getBagIndex(), (short) 0, -1, item));
+            if (item.getBagIndex() != items.indexOf(item) + 1) {
+                chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
+                        (short) item.getBagIndex(), (short) 0, -1, item));
+            }
         }
         for (Item item : items) {
-            item.setBagIndex(items.indexOf(item) + 1);
-            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
-                    (short) item.getBagIndex(), (short) 0, -1, item));
+            int index = items.indexOf(item) + 1;
+            if (item.getBagIndex() != index) {
+                item.setBagIndex(index);
+                chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
+                        (short) item.getBagIndex(), (short) 0, -1, item));
+            }
         }
         c.write(WvsContext.sortItemResult(invType.getVal()));
         chr.dispose();
@@ -2668,7 +2684,7 @@ public class WorldHandler {
         if(ii.getScript() != null && !"".equals(ii.getScript())) {
             script = ii.getScript();
         }
-        chr.getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+        chr.getScriptManager().startScript(itemID, script, ScriptType.Item);
         chr.dispose();
     }
 
@@ -2725,7 +2741,7 @@ public class WorldHandler {
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
             case QuestReq_CompleteScript:
                 qi = QuestData.getQuestInfoById(questID);
@@ -2733,7 +2749,7 @@ public class WorldHandler {
                 if(scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
         }
     }
@@ -2776,7 +2792,7 @@ public class WorldHandler {
             return;
         }
         chr.getScriptManager().setCurNodeEventEnd(false);
-        chr.getScriptManager().startScript(field.getId(), script, ScriptType.FIELD);;
+        chr.getScriptManager().startScript(field.getId(), script, ScriptType.Field);
     }
 
     public static void handleUserEmotion(Client c, InPacket inPacket) {
@@ -3917,15 +3933,15 @@ public class WorldHandler {
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if(chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", reactor, type);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", reactor, type);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -3945,15 +3961,15 @@ public class WorldHandler {
         if (action.equals("")) {
             action = templateID + "action";
         }
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if(chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", 0);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", 0);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -4004,18 +4020,42 @@ public class WorldHandler {
                 break;
             case HyperUpgradeResult:
                 inPacket.decodeInt(); //tick
-                short eqpPos = inPacket.decodeShort();
-                int extraChanceFromMiniGame = inPacket.decodeByte() != 0 ? 50 : 0; // 5% extra chance
-                equip = (Equip) chr.getEquipInventory().getItemBySlot(eqpPos);
-                if(equip == null) {
+                int eqpPos = inPacket.decodeShort();
+                boolean extraChanceFromMiniGame = inPacket.decodeByte() != 0;
+                equip = (Equip) chr.getEquipInventory().getItemBySlot((short) eqpPos);
+                boolean equippedInv = eqpPos < 0;
+                inv = equippedInv ? chr.getEquippedInventory() : chr.getEquipInventory();
+                equip = (Equip) inv.getItemBySlot((short) Math.abs(eqpPos));
+                if (equip == null) {
                     chr.chatMessage("Could not find the given equip.");
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
+                if (!ItemConstants.isUpgradable(equip.getItemId()) ||
+                        (equip.getTuc() != 0 && !c.getWorld().isReboot()) ||
+                        chr.getEquipInventory().getEmptySlots() == 0 ||
+                        equip.getChuc() >= GameConstants.getMaxStars(equip)) {
+                    chr.chatMessage("Equipment cannot be enhanced.");
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
+                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp());
+                if (chr.getMoney() < cost) {
+                    chr.chatMessage("Mesos required: " + NumberFormat.getNumberInstance(Locale.US).format(cost));
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
                 Equip oldEquip = equip.deepCopy();
-                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc());
-                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc()) + extraChanceFromMiniGame;
-                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc());
+                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp());
+                if (extraChanceFromMiniGame) {
+                    successProp *= 1.045;
+                }
+                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp());
+                if (equippedInv && destroyProp > 0 && chr.getEquipInventory().getEmptySlots() == 0) {
+                    c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("You do not have enough space in your" +
+                            "equip inventory in case your item gets destroyed.")));
+                    return;
+                }
                 success = Util.succeedProp(successProp, 1000);
                 boolean boom = false;
                 boolean canDegrade = equip.getChuc() > 5 && equip.getChuc() % 5 != 0;
@@ -4025,6 +4065,17 @@ public class WorldHandler {
                     equip.setChuc((short) 0);
                     equip.addSpecialAttribute(EquipSpecialAttribute.Vestige);
                     boom = true;
+                    if (equippedInv) {
+                        chr.unequip(equip);
+                        equip.setBagIndex(chr.getEquipInventory().getFirstOpenSlot());
+                        equip.updateToChar(chr);
+                        c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
+                        if (!equip.isSuperiorEqp()) {
+                            equip.setChuc((short) 12);
+                        } else {
+                            equip.setChuc((short) 0);
+                        }
+                    }
                 } else if (canDegrade){
                     equip.setChuc((short) (equip.getChuc() - 1));
                 }
@@ -4058,7 +4109,13 @@ public class WorldHandler {
                 inv = ePos < 0 ? chr.getEquippedInventory() : chr.getEquipInventory();
                 ePos = Math.abs(ePos);
                 equip = (Equip) inv.getItemBySlot((short) ePos);
-                if (equip == null || equip.getTuc() + equip.getIuc() <= 0) { // current + increased (hammer) upgrade count
+                if (c.getWorld().isReboot()) {
+                    log.error(String.format("Character %d attempted to scroll in reboot world (pos %d, itemid %d).",
+                            chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
+                    chr.dispose();
+                    return;
+                }
+                if (equip == null || equip.getTuc() <= 0) {
                     log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.dispose();
@@ -4071,17 +4128,19 @@ public class WorldHandler {
                 break;*/
             case HyperUpgradeDisplay:
                 ePos = inPacket.decodeInt();
-                equip = (Equip) chr.getEquipInventory().getItemBySlot((short) ePos);
-                if (equip == null || !ItemConstants.isUpgradable(equip.getItemId())) {
+                inv = ePos < 0 ? chr.getEquippedInventory() : chr.getEquipInventory();
+                ePos = Math.abs(ePos);
+                equip = (Equip) inv.getItemBySlot((short) ePos);
+                if (equip == null || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
                     log.error(String.format("Character %d tried to enchant a non-enchantable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
                 c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
-                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc()),
-                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc()),
-                        GameConstants.getEnchantmentDestroyRate(equip.getChuc()), false));
+                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp()),
+                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp()),
+                        GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp()), false));
                 break;
             case MiniGameDisplay:
                 c.write(CField.miniGameDisplay(eeType));
@@ -5269,6 +5328,12 @@ public class WorldHandler {
     }
 
     public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
+        if (chr.getClient().getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to hammer in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
+
         final int delay = 2700; // 2.7 sec delay to match golden hammer's animation
 
         inPacket.decodeInt(); // tick
@@ -5365,7 +5430,7 @@ public class WorldHandler {
         if (script == null) {
             script = String.valueOf(npc.getTemplateId());
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.Npc);
 
     }
 
@@ -5413,6 +5478,11 @@ public class WorldHandler {
     }
 
     public static void handleMiniRoom(Char chr, InPacket inPacket) {
+        if (chr.getClient().getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to use trade in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         chr.dispose();
         byte type = inPacket.decodeByte(); // MiniRoom Type value
         MiniRoomType mrt = MiniRoomType.getByVal(type);
@@ -5816,7 +5886,7 @@ public class WorldHandler {
         RandomPortal.Type type = randomPortal.getAppearType();
         String script = type.getScript();
         chr.getScriptManager().startScript(randomPortal.getAppearType().ordinal(), randomPortal.getObjectId(),
-                script, ScriptType.PORTAL);
+                script, ScriptType.Portal);
         chr.dispose();
     }
 }

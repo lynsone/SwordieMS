@@ -3,6 +3,7 @@ package net.swordie.ms.client.character.items;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.connection.packet.WvsContext;
@@ -32,8 +33,7 @@ public class Item implements Serializable, Encodable {
     protected int itemId;
     protected int bagIndex;
     protected long cashItemSerialNumber;
-    @JoinColumn(name = "dateExpire")
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Convert(converter = FileTimeConverter.class)
     protected FileTime dateExpire = FileTime.fromType(FileTime.Type.MAX_TIME);
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "invType")

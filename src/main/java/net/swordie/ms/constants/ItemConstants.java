@@ -198,6 +198,7 @@ public class ItemConstants {
                 bodyPartList.add(1513);
                 break;
             case 113:
+                bodyPartList.add(22);
                 bodyPartList.add(50);
                 break;
             case 114:
@@ -359,11 +360,11 @@ public class ItemConstants {
         return itemID >= 1210000 && itemID < 1600000 || isSecondary(itemID);
     }
 
-    private static boolean isSecondary(int itemID) {
+    public static boolean isSecondary(int itemID) {
         return itemID / 10000 == 135;
     }
 
-    private static boolean isShield(int itemID) {
+    public static boolean isShield(int itemID) {
         return itemID / 10000 == 109;
     }
 

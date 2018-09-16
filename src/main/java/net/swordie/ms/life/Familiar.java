@@ -1,6 +1,7 @@
 package net.swordie.ms.life;
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
@@ -23,8 +24,7 @@ public class Familiar extends Life {
     private int fatigue;
     private long idk4;
     private long idk5;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "expiredate")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime expiration = FileTime.fromType(FileTime.Type.MAX_TIME);
     private short vitality;
 

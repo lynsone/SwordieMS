@@ -21,13 +21,13 @@ import java.util.Map;
 public class Noblesse extends Job {
 
     public static final int ELEMENTAL_SLASH = 10001244;
-    public static final int ELEMENTAL_SHIFT = 10001254;
-    public static final int CYGNUS_BLESSING = 10001254;
+    public static final int ELEMENTAL_SHIFT_HIGH = 10001253;
+    public static final int ELEMENTAL_SHIFT_FLASH = 10001254;
 
     private int[] addedSkills = {
             ELEMENTAL_SLASH,
-            ELEMENTAL_SHIFT,
-            CYGNUS_BLESSING,
+            ELEMENTAL_SHIFT_HIGH,
+            ELEMENTAL_SHIFT_FLASH,
     };
 
     public Noblesse(Char chr) {
@@ -36,7 +36,7 @@ public class Noblesse extends Job {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
-                    skill.setCurrentLevel(skill.getMasterLevel());
+                    skill.setCurrentLevel(1);
                     chr.addSkill(skill);
                 }
             }

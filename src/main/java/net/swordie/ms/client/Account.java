@@ -49,7 +49,8 @@ public class Account {
     private String censoredNxLoginID;
     private String pic;
     private int characterSlots;
-    private long creationDate;
+    @Convert(converter = FileTimeConverter.class)
+    private FileTime creationDate;
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
@@ -81,7 +82,7 @@ public class Account {
 
     public Account(String name, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
-                   byte gradeCode, String censoredNxLoginID, int characterSlots, long creationDate) {
+                   byte gradeCode, String censoredNxLoginID, int characterSlots, FileTime creationDate) {
         this.name = name;
         this.password = password;
         this.id = accountId;
@@ -109,7 +110,7 @@ public class Account {
     public Account(String id, int accountId) {
         this(id, null, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
                 0, false, (byte) 0, "", 16,
-                System.currentTimeMillis());
+                FileTime.currentTime());
     }
 
     public Account(){
@@ -219,7 +220,7 @@ public class Account {
         return characterSlots;
     }
 
-    public long getCreationDate() {
+    public FileTime getCreationDate() {
         return creationDate;
     }
 
@@ -311,7 +312,7 @@ public class Account {
         this.characterSlots = characterSlots;
     }
 
-    public void setCreationDate(long creationDate) {
+    public void setCreationDate(FileTime creationDate) {
         this.creationDate = creationDate;
     }
 

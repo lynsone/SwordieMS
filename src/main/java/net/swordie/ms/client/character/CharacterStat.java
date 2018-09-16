@@ -74,8 +74,7 @@ public class CharacterStat {
     private int pvpModeType;
     private int eventPoint;
     private int albaActivityID;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "albaStartTime")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime albaStartTime;
     private int albaDuration;
     private int albaSpecialReward;
@@ -86,8 +85,7 @@ public class CharacterStat {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accountLastLogout")
     private SystemTime accountLastLogout;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "lastLogout")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime lastLogout;
     private int gachExp;
     private int honorExp;
