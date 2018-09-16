@@ -1482,6 +1482,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public boolean isEquipped(int id) { return chr.getInventoryByType(InvType.EQUIPPED).getItems().stream().filter(item -> item.getItemId() == id).count() > 0; }
+
+	@Override
 	public boolean hasItem(int id, int quantity) {
 		return getQuantityOfItem(id) >= quantity;
 	}

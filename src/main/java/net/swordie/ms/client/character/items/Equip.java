@@ -57,6 +57,7 @@ public class Equip extends Item {
     private short bdr;
     private short imdr;
     private boolean bossReward;
+    private boolean superiorEqp;
     private short damR;
     private short statR;
     private short cuttable;
@@ -163,6 +164,7 @@ public class Equip extends Item {
         ret.bdr = bdr;
         ret.imdr = imdr;
         ret.bossReward = bossReward;
+        ret.superiorEqp = superiorEqp;
         ret.damR = damR;
         ret.statR = statR;
         ret.cuttable = cuttable;
@@ -506,6 +508,14 @@ public class Equip extends Item {
 
     public void setBossReward(boolean bossReward) {
         this.bossReward = bossReward;
+    }
+
+    public boolean isSuperiorEqp() {
+        return superiorEqp;
+    }
+
+    public void setSuperiorEqp(boolean superiorEqp) {
+        this.superiorEqp = superiorEqp;
     }
 
     public short getBdr() {
@@ -1118,7 +1128,7 @@ public class Equip extends Item {
     private int getStatMask(int pos) {
         int mask = 0;
         for (EquipBaseStat ebs : EquipBaseStat.values()) {
-            if ((getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0) && ebs.getPos() == pos) {
+            if ((getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0 || getEnhancementStat(ebs) != 0) && ebs.getPos() == pos) {
                 mask |= ebs.getVal();
             }
         }
@@ -1324,35 +1334,59 @@ public class Equip extends Item {
     public long getBaseStatFlame(EquipBaseStat equipBaseStat) {
         switch(equipBaseStat){
             case iStr:
-                return getfSTR();
+                return getEnchantStat(EnchantStat.STR);
             case iDex:
-                return getfDEX();
+                return getEnchantStat(EnchantStat.DEX);
             case iInt:
-                return getfINT();
+                return getEnchantStat(EnchantStat.INT);
             case iLuk:
-                return getfLUK();
+                return getEnchantStat(EnchantStat.LUK);
             case iMaxHP:
-                return getfHP();
+                return getEnchantStat(EnchantStat.MHP);
             case iMaxMP:
-                return getfHP();
+                return getEnchantStat(EnchantStat.MMP);
             case iPAD:
-                return getfATT();
+                return getEnchantStat(EnchantStat.PAD);
             case iMAD:
-                return getfMATT();
+                return getEnchantStat(EnchantStat.MAD);
             case iPDD:
-                return getfDEF();
+                return getEnchantStat(EnchantStat.PDD);
             case iMDD:
-                return getfDEF();
+                return getEnchantStat(EnchantStat.MDD);
             case iSpeed:
-                return getfSpeed();
+                return getEnchantStat(EnchantStat.SPEED);
             case iJump:
-                return getfJump();
-            case bdr:
-                return getfBoss();
-            case damR:
-                return getfDamage();
-            case statR:
-                return getfAllStat();
+                return getEnchantStat(EnchantStat.JUMP);
+            default: return 0;
+        }
+    }
+
+    public long getEnhancementStat(EquipBaseStat equipBaseStat) {
+        switch(equipBaseStat){
+            case iStr:
+                return getiStr();
+            case iDex:
+                return getiDex();
+            case iInt:
+                return getiInt();
+            case iLuk:
+                return getiLuk();
+            case iMaxHP:
+                return getiMaxHp();
+            case iMaxMP:
+                return getiMaxMp();
+            case iPAD:
+                return getiPad();
+            case iMAD:
+                return getiMad();
+            case iPDD:
+                return getiPDD();
+            case iMDD:
+                return getiMDD();
+            case iSpeed:
+                return getiSpeed();
+            case iJump:
+                return getiJump();
             default: return 0;
         }
     }
@@ -1394,8 +1428,8 @@ public class Equip extends Item {
         TreeMap<EnchantStat, Integer> res = new TreeMap<>(comparator);
         for(EnchantStat es : EnchantStat.values()) {
             int curAmount = (int) getBaseStat(es.getEquipBaseStat());
-            if(curAmount > 0) {
-                res.put(es, GameConstants.getEnchantmentValByChuc(es, getChuc(), curAmount));
+            if(curAmount > 0 || es == EnchantStat.PAD || es == EnchantStat.MAD || es == EnchantStat.PDD || es == EnchantStat.MDD) {
+                res.put(es, GameConstants.getEnchantmentValByChuc(this, es, getChuc(), curAmount));
             }
         }
         return res;
@@ -1515,7 +1549,7 @@ public class Equip extends Item {
         for (int i = 1; i <= getChuc(); i++) {
             for(EnchantStat es : getHyperUpgradeStats().keySet()) {
                 putEnchantStat(es, getEnchantStats().getOrDefault(es, 0) +
-                        GameConstants.getEnchantmentValByChuc(es, (short) i, (int) getBaseStat(es.getEquipBaseStat())));
+                        GameConstants.getEnchantmentValByChuc(this, es, (short) i, (int) getBaseStat(es.getEquipBaseStat())));
             }
         }
     }

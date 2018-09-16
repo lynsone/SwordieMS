@@ -6,8 +6,7 @@ import net.swordie.ms.constants.JobConstants;
  * Created on 2/18/2017.
  */
 public class ServerConstants {
-
-	public static final String DIR = "C:/Users/Me/Desktop/MapleStory - Server/swordie";
+	public static final String DIR = System.getProperty("user.dir");
 	public static final byte LOCALE = 8;
 	public static final String WZ_DIR = DIR + "/WZ";
 	public static final String DAT_DIR = DIR + "/dat";

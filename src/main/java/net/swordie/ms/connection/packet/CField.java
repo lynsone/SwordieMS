@@ -411,11 +411,9 @@ public class CField {
 
         outPacket.encodeByte(EquipmentEnchantType.ShowHyperUpgradeResult.getVal());
         outPacket.encodeInt(boom ? 2 : succeed ? 1 : canDegrade ? 0 : 3);
-        outPacket.encodeByte(boom);
+        outPacket.encodeByte(0);
         oldEquip.encode(outPacket);
-        if (!boom) { // for now
-            equip.encode(outPacket);
-        }
+        equip.encode(outPacket);
 
         return outPacket;
     }
