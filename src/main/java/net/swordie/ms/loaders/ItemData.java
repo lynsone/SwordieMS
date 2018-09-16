@@ -1215,10 +1215,13 @@ public class ItemData {
                                 case "createType":
                                     item.putScrollStat(createType, Integer.parseInt(value));
                                     break;
+                                case "optionType":
+                                    item.putScrollStat(optionType, Integer.parseInt(value));
+                                    break;
                                 case "spec":
                                     break;
                                 default:
-                                    log.warn(String.format("Unkown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
+                                    log.warn(String.format("Unknown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
                             }
                         }
                     }

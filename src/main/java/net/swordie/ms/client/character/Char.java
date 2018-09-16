@@ -2029,6 +2029,9 @@ public class Char {
 	 */
 	public void equip(Item item) {
 		Equip equip = (Equip) item;
+		if (equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
+			return;
+		}
 		if (equip.isEquipTradeBlock()) {
 			equip.setTradeBlock(true);
 			equip.setEquipTradeBlock(false);

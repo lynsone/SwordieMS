@@ -461,6 +461,10 @@ public class ItemConstants {
         return itemID / 10000 == 167;
     }
 
+    public static boolean isRebirthFlame(int itemId) { return itemId >= 2048700 && itemId < 2048800; }
+
+    public static boolean isNebulite(int itemId) { return itemId / 10000 == 306; }
+
     public static boolean canEquipTypeHavePotential(int itemid) {
         return isRing(itemid) ||
                 isPendant(itemid) ||
@@ -521,10 +525,6 @@ public class ItemConstants {
                 item.getItemId() == GOLDEN_HAMMER_100;
     }
 
-    public static boolean isRebirthFlame(Item item) {
-        return item.getItemId() >= 2048700 && item.getItemId() < 2048800;
-    }
-
     /**
      * Gets potential tier for a line.
      * Accounts prime lines too.
@@ -535,8 +535,46 @@ public class ItemConstants {
         if (line == 0 || Util.succeedProp(PRIME_LINE_CHANCE)) {
             return grade;
         }
-
         return ItemGrade.getOneTierLower(grade.getVal());
+    }
+
+    /**
+     * Determines whether a nebulite can be mounted on an equip.
+     * @param equip Equip item.
+     * @param nebulite The nebulite to mount on the equip.
+     */
+    public static boolean nebuliteFitsEquip(Equip equip, Item nebulite) {
+        int nebuliteId = nebulite.getItemId();
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(nebuliteId).getScrollStats();
+        if (vals.size() == 0) {
+            return false;
+        }
+        ItemOptionType type = ItemOptionType.getByVal(vals.getOrDefault(ScrollStat.optionType, 0));
+        int equipId = equip.getItemId();
+        switch(type) {
+            case AnyEquip:
+                return true;
+            case Weapon: // no emblems for nebs here
+                return isWeapon(equipId) || isSecondary(equipId);
+            case AnyExceptWeapon:
+                return !isWeapon(equipId) && !isSecondary(equipId);
+            case ArmorExceptGlove:
+                return isBelt(equipId) || isHat(equipId) || isOverall(equipId) || isTop(equipId) || isBottom(equipId) || isShoe(equipId) || isCape(equipId);
+            case Accessory:
+                return isRing(equipId) || isPendant(equipId) || isFaceAccessory(equipId) || isEyeAccessory(equipId) || isEarrings(equipId) || isShoulder(equipId);
+            case Hat:
+                return isHat(equipId);
+            case Top:
+                return isTop(equipId) || isOverall(equipId);
+            case Bottom:
+                return isBottom(equipId) || isOverall(equipId);
+            case Glove:
+                return isGlove(equipId);
+            case Shoes:
+                return isShoe(equipId);
+            default:
+                return false;
+        }
     }
 
     public static List<ItemOption> getOptionsByEquip(Equip equip, boolean bonus, int line) {
@@ -546,66 +584,59 @@ public class ItemConstants {
 
         // need a list, as we take a random item from it later on
         List<ItemOption> res = data.stream().filter(
-                io -> io.getOptionType() == 0 &&
+                io -> io.getOptionType() == ItemOptionType.AnyEquip.getVal() &&
                 io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                 .collect(Collectors.toList());
-        if (isWeapon(id)) {
+        if (isWeapon(id) || isShield(id) || isEmblem(id)) {
+            // TODO: block boss% on emblem
             res.addAll(data.stream().filter(
-                    io -> io.getOptionType() == 10
+                    io -> io.getOptionType() == ItemOptionType.Weapon.getVal()
                     &&  io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus
             ).collect(Collectors.toList()));
         } else {
             res.addAll(data.stream().filter(
-                    io -> io.getOptionType() == 11
+                    io -> io.getOptionType() == ItemOptionType.AnyExceptWeapon.getVal()
                     && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                     .collect(Collectors.toList()));
-            if (isAccessory(id)) {
+            if (isRing(id) || isPendant(id) || isFaceAccessory(id) || isEyeAccessory(id) || isEarrings(id)) {
                 res.addAll(data.stream().filter(
-                        io -> io.getOptionType() == 40
+                        io -> io.getOptionType() == ItemOptionType.Accessory.getVal()
                         && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                         .collect(Collectors.toList()));
             } else {
-                res.addAll(data.stream().filter(
-                        io -> io.getOptionType() == 20
-                        && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
-                        .collect(Collectors.toList()));
                 if (isHat(id)) {
                     res.addAll(data.stream().filter(
-                            io -> io.getOptionType() == 51
+                            io -> io.getOptionType() == ItemOptionType.Hat.getVal()
                             && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
-                if (isTop(id)) {
+                if (isTop(id) || isOverall(id)) {
                     res.addAll(data.stream().filter(
-                            io -> io.getOptionType() == 52
+                            io -> io.getOptionType() == ItemOptionType.Top.getVal()
                             && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
-                if (isBottom(id)) {
+                if (isBottom(id) || isOverall(id)) {
                     res.addAll(data.stream().filter(
-                            io -> io.getOptionType() == 53
-                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
-                            .collect(Collectors.toList()));
-                }
-                if (isOverall(id)) {
-                    res.addAll(data.stream().filter(
-                            io -> io.getOptionType() == 52
-                            && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
-                            .collect(Collectors.toList()));
-                    res.addAll(data.stream().filter(
-                            io -> io.getOptionType() == 53
+                            io -> io.getOptionType() == ItemOptionType.Bottom.getVal()
                             && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isGlove(id)) {
                     res.addAll(data.stream().filter(
-                            io -> io.getOptionType() == 54
+                            io -> io.getOptionType() == ItemOptionType.Glove.getVal()
                             && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
+                            .collect(Collectors.toList()));
+                } else {
+                    // gloves are not counted for this one
+                    res.addAll(data.stream().filter(
+                            io -> io.getOptionType() == ItemOptionType.ArmorExceptGlove.getVal()
+                                    && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
                 if (isShoe(id)) {
                     res.addAll(data.stream().filter(
-                            io -> io.getOptionType() == 55
+                            io -> io.getOptionType() == ItemOptionType.Shoes.getVal()
                             && io.hasMatchingGrade(grade.getVal()) && io.isBonus() == bonus)
                             .collect(Collectors.toList()));
                 }
