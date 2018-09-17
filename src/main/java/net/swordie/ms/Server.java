@@ -156,6 +156,9 @@ public class Server extends Properties {
 		QuestData.clear();
 		SkillData.clear();
 		ReactorData.clear();
+		for (World world : getWorlds()) {
+			world.clearCache();
+		}
 	}
 
 	public void initCashShop() {

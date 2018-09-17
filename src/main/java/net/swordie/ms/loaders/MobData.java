@@ -2,6 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.ServerConstants;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.ForcedMobStat;
 import net.swordie.ms.life.mob.Mob;
@@ -45,7 +46,11 @@ public class MobData {
     }
 
     public static Mob getMobById(int id) {
-        return getMobs().getOrDefault(id, loadMobFromFile(id));
+        Mob mob = getMobs().get(id);
+        if (mob == null) {
+            mob = loadMobFromFile(id);
+        }
+        return mob;
     }
 
     public static Mob getMobDeepCopyById(int id) {
@@ -369,6 +374,10 @@ public class MobData {
             mob.setMp(fms.getMaxMP());
             mob.setMaxMp(fms.getMaxMP());
             mob.setDrops(DropData.getDropInfoByID(mob.getTemplateId()));
+            mob.getDrops().add(new DropInfo(GameConstants.MAX_DROP_CHANCE,
+                    GameConstants.MIN_MONEY_MULT * mob.getForcedMobStat().getLevel(),
+                    GameConstants.MAX_MONEY_MULT * mob.getForcedMobStat().getLevel()
+            ));
             for (DropInfo di : mob.getDrops()) {
                 di.generateNextDrop();
             }
@@ -720,7 +729,6 @@ public class MobData {
                                                     break;
                                             }
                                             if (banFieldID != 0) {
-                                                System.out.println("Added " + banFieldID + ", " + banPortal);
                                                 mob.addBanMap(banFieldID, banPortal);
                                             }
                                         }

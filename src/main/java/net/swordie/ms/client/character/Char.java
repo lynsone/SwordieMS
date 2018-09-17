@@ -493,8 +493,6 @@ public class Char {
 		if (item == null) {
 			return;
 		}
-		System.out.println("--------------------------------------------");
-		System.out.println("Adding item: " + item);
 		Inventory inventory = getInventoryByType(type);
 		ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
 		int quantity = item.getQuantity();
@@ -508,14 +506,12 @@ public class Char {
 					rec = true;
 				}
 				existingItem.addQuantity(quantity);
-				System.out.println("Updated quantity: +" + quantity);
 				write(WvsContext.inventoryOperation(true, false,
 						UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
 				Item copy = item.deepCopy();
 				copy.setQuantity(quantity);
 				getQuestManager().handleItemGain(copy); // handle the difference between the old and new quantities
 				if (rec) {
-					System.out.println("Recursively adding item: " + item);
 					addItemToInventory(item);
 				}
 			} else {
@@ -528,10 +524,8 @@ public class Char {
 					quantity = quantity - ii.getSlotMax();
 					itemCopy.setQuantity(quantity);
 					item.setQuantity(ii.getSlotMax());
-					System.out.println("Adding new copy: " + itemCopy);
 					rec = true;
 				}
-				System.out.println("Added item: " + item);
 				inventory.addItem(item);
 				write(WvsContext.inventoryOperation(true, false,
 						ADD, (short) item.getBagIndex(), (byte) -1, 0, item));

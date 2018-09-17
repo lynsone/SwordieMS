@@ -267,4 +267,10 @@ public class World {
         }
         return ally;
     }
+
+    public void clearCache() {
+        for (Channel channel : getChannels()) {
+            channel.clearCache();
+        }
+    }
 }
