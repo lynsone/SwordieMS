@@ -1,7 +1,7 @@
 if (sm.getChr().getJob() == 2003):
     sm.lockInGameUI(True)
     sm.playVideoByScript("phantom.avi")
-    while sm.getChr().getLevel() != 10:
+    while sm.getChr().getLevel() < 10:
         sm.addLevel(1)
 
     sm.setJob(2400)

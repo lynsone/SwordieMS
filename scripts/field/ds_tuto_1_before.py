@@ -1,4 +1,3 @@
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 sm.forcedInput(1)
 sm.sendDelay(30)

@@ -2,7 +2,6 @@ GUARD1 = 2159340
 GUARD2 = 2159341
 J_AGENT = 2159342
 
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 sm.completeQuestNoRewards(23207)
 sm.deleteQuest(23207)

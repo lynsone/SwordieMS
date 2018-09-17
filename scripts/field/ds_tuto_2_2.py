@@ -6,7 +6,6 @@ sm.deleteQuest(23203)
 
 sm.spawnNpc(ARKARIUM, 500, 50)
 sm.showNpcSpecialActionByTemplateId(ARKARIUM, "summon", 0)
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 sm.forcedInput(2)
 sm.sendDelay(30)

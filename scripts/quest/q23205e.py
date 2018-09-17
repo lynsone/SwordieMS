@@ -8,5 +8,4 @@ for i in range(5):
         sm.giveSkill(SKILLS[i], 0)# remove the skill
 sm.removeNpc(ARKARIUM)
 sm.warpInstanceIn(927000070, 0)
-sm.setCurNodeEventEnd(False)
 sm.dispose()
