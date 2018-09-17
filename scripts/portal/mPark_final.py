@@ -24,6 +24,7 @@ if fieldID / 1000000 == 952 or fieldID / 1000000 == 953 or fieldID / 1000000 == 
         sm.warpInstanceOut(951000000) #Monster Park
         sm.giveExp(long(quest.getQRValue()))
         sm.giveItem(sm.getMPReward())
+        sm.stopEvents()
     else:
         sm.sendSayOkay("Please make some space before leaving.")
 else:

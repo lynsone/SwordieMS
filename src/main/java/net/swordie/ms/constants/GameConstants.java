@@ -138,6 +138,8 @@ public class GameConstants {
     // Monster Park
     public static final byte MAX_MONSTER_PARK_RUNS = 7; // Max Monster Park runs per character
     public static final int MONSTER_PARK_EXP_QUEST = 99999; // Quest where the Exp for MP runs gets stored.
+    public static final int MONSTER_PARK_ENTRANCE_CHECK_QUEST = 99997; // Quest where the Number of MP runs are stored
+    public static final int MONSTER_PARK_TIME = 10  *60; // 10minutes
 
     // Lord Pirate Party Quest
     public static final int LORD_PIRATE_QUEST = 99998; // Quest where the NPC state is stored, to close/open portals
