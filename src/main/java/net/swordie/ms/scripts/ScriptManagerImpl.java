@@ -238,7 +238,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			script.append(Util.readFile(dir, Charset.defaultCharset()));
 		} catch (IOException e) {
 			e.printStackTrace();
-			lockInGameUI(false); // so players don't get stuck if a script fails
+			if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
 		} finally {
 			fileReadLock.unlock();
 		}
@@ -249,7 +249,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			if (!e.getMessage().contains(INTENDED_NPE_MSG)) {
 				log.error(String.format("Unable to compile script %s!", name));
 				e.printStackTrace();
-				lockInGameUI(false); // so players don't get stuck if a script fails
+				if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName())) {
@@ -641,6 +641,58 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void setSTR(short amount) {
+		chr.setStat(Stat.str, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.str, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setINT(short amount) {
+		chr.setStat(Stat.inte, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.inte, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setDEX(short amount) {
+		chr.setStat(Stat.dex, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.dex, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setLUK(short amount) {
+		chr.setStat(Stat.luk, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.luk, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setMaxHP(int amount) {
+		chr.setStat(Stat.mhp, amount);
+		chr.setStat(Stat.hp, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mhp, amount);
+		stats.put(Stat.hp, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setMaxMP(int amount) {
+		chr.setStat(Stat.mmp, amount);
+		chr.setStat(Stat.mp, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mmp, amount);
+		stats.put(Stat.mp, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
 	public void jobAdvance(short jobID) {
 		setJob(jobID);
 		addAP(5); //Standard added AP upon Job Advancing
@@ -715,6 +767,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void lockInGameUI(boolean lock) {
+		chr.write(CField.curNodeEventEnd(true));
+		setCurNodeEventEnd(lock);
 		chr.write(UserLocal.setInGameDirectionMode(lock, true, false));
 	}
         
@@ -1230,6 +1284,15 @@ public class ScriptManagerImpl implements ScriptManager {
 		removeMobByObjId(life.getObjectId());
 	}
 
+	public void removeMobFromMapByTemplateId(int id, int fieldId) {
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
+		Life life = field.getLifeByTemplateId(id);
+		if(life == null) {
+			return;
+		}
+		removeMobByObjId(life.getObjectId());
+	}
+
 	@Override
 	public void showHP(int templateID) {
 		chr.getField().getMobs().stream()
@@ -1472,8 +1535,9 @@ public class ScriptManagerImpl implements ScriptManager {
 			chr.unequip(oldEquip);
 			oldEquip.updateToChar(chr);
 		}
+		equip.setBagIndex(bodyPart);
 		chr.equip(equip);
-		oldEquip.updateToChar(chr);
+		equip.updateToChar(chr);
 	}
 
 	@Override
@@ -2070,11 +2134,23 @@ public class ScriptManagerImpl implements ScriptManager {
 		addEvent(scheduledFuture);
 		return scheduledFuture;
 	}
+
 	@Override
-	public void playVideoByScript(String videoPath){
+	public int playVideoByScript(String videoPath) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.CompletedVideo);
 		chr.write(UserLocal.videoByScript(videoPath, false));
+		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (int) response;
 	}
-        
+
+	public void setFuncKeyByScript(boolean add, int action, int key) {
+		chr.write(UserLocal.setFuncKeyByScript(add, action, key));
+		chr.getFuncKeyMap().putKeyBinding(key, add ? (byte) 1 : (byte) 0, action);
+	}
+
 	private ScriptMemory getMemory() {
 		return memory;
 	}
