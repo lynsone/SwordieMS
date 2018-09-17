@@ -18,6 +18,5 @@ elif answer == 1:
                     "2nd - 10th: #i1190500# Tower of Oz Master Emblem\r\n"
                     "11th - 30th: #i1190501# Tower of Oz Expert Emblem\r\n\r\n#n#k"
                     "Usable until next #e#bMonday at midnight#n#k, beginning when you obtain the reward.")
-
 else:
     sm.sendSayOkay("Your deepest floor is #b#e[FLOOR]") # [FLOOR] for now
