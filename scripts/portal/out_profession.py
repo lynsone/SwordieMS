@@ -1,3 +1,6 @@
 # 910001000
-sm.warp(100000000, 19)
-sm.dispose()
+if sm.getReturnField():
+    RETURN_MAP = sm.getReturnField()
+    sm.warp(RETURN_MAP)
+else:
+    sm.warp(100000000, 19)

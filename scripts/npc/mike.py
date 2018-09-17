@@ -1,0 +1,1 @@
+sm.sendSayOkay("Six Path Crossway is just up ahead.")
