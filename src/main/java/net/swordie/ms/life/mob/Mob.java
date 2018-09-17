@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class Mob extends Life {
 
     private boolean sealedInsteadDead, patrolMob;
-    private int option, effectItemID, patrolScopeX1, patrolScopeX2, detectX, senseX, phase, curZoneDataType;
+    private int option, effectItemID, range, detectX, senseX, phase, curZoneDataType;
     private int refImgMobID, lifeReleaseOwnerAID, afterAttack, currentAction, scale, eliteGrade, eliteType, targetUserIdFromServer;
     private long hp;
     private long mp;
@@ -127,6 +127,11 @@ public class Mob extends Life {
     private boolean selfDestruction;
     private List<MobSkill> skillDelays = new CopyOnWriteArrayList<>();
     private boolean inAttack;
+    private boolean isBanMap;
+    private int banType = 1;// default
+    private int banMsgType = 1;// default
+    private String banMsg = "";
+    private List<Tuple<Integer, String>> banMap = new ArrayList<>();// field, portal name
 
     public Mob(int templateId) {
         super(templateId);
@@ -163,11 +168,10 @@ public class Mob extends Life {
         copy.setMobAliveReq(getMobAliveReq());
         // end life
         copy.setSealedInsteadDead(isSealedInsteadDead());
-        copy.setPatrolMob(isPatrolMob());
         copy.setOption(getOption());
         copy.setEffectItemID(getEffectItemID());
-        copy.setPatrolScopeX1(getPatrolScopeX1());
-        copy.setPatrolScopeX2(getPatrolScopeX2());
+        copy.setPatrolMob(isPatrolMob());
+        copy.setRange(getRange());
         copy.setDetectX(getDetectX());
         copy.setSenseX(getSenseX());
         copy.setPhase(getPhase());
@@ -271,6 +275,11 @@ public class Mob extends Life {
         copy.setMp(getMp());
         copy.setMaxMp(getMaxMp());
         copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
+        copy.setBanMap(isBanMap());
+        copy.setBanType(getBanType());
+        copy.setBanMsgType(getBanMsgType());
+        copy.setBanMsg(getBanMsg());
+        copy.setBanMapFields(getBanMapFields());
         for (MobSkill ms : getSkills()) {
             copy.addSkill(ms);
         }
@@ -343,29 +352,11 @@ public class Mob extends Life {
         this.effectItemID = effectItemID;
     }
 
-    public int getPatrolScopeX1() {
-        return patrolScopeX1;
-    }
-
-    public void setPatrolScopeX1(int patrolScopeX1) {
-        this.patrolScopeX1 = patrolScopeX1;
-    }
-
-    public int getPatrolScopeX2() {
-        return patrolScopeX2;
-    }
-
-    public void setPatrolScopeX2(int patrolScopeX2) {
-        this.patrolScopeX2 = patrolScopeX2;
-    }
-
     public int getDetectX() {
         return detectX;
     }
 
-    public void setDetectX(int detectX) {
-        this.detectX = detectX;
-    }
+    public void setDetectX(int detectX) {this.detectX = detectX; }
 
     public int getSenseX() {
         return senseX;
@@ -373,6 +364,14 @@ public class Mob extends Life {
 
     public void setSenseX(int senseX) {
         this.senseX = senseX;
+    }
+
+    public int getRange() {
+        return range;
+    }
+
+    public void setRange(int range) {
+        this.range = range;
     }
 
     public int getPhase() {
@@ -1124,6 +1123,28 @@ public class Mob extends Life {
     }
 
     public void addRevive(int revive) {revives.add(revive);}
+
+    public void setBanMap(boolean isBanMap) { this.isBanMap = isBanMap; }
+
+    public boolean isBanMap() { return isBanMap; }
+
+    public void setBanType(int banType) { this.banType = banType; }
+
+    public int getBanType() { return banType; }
+
+    public void setBanMsgType(int banMsgType) { this.banMsgType = banMsgType; }
+
+    public int getBanMsgType() { return banMsgType; }
+
+    public void setBanMsg(String banMsg) { this.banMsg = banMsg; }
+
+    public String getBanMsg() { return banMsg; }
+
+    public void setBanMapFields(List<Tuple<Integer, String>> banMap) { this.banMap = banMap; }
+
+    public List<Tuple<Integer, String>> getBanMapFields() { return banMap; }
+
+    public void addBanMap(int fieldID, String portal) { this.banMap.add(new Tuple<>(fieldID, portal)); }
 
     /**
      * Damages a mob.

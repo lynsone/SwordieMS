@@ -9,6 +9,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
 import net.swordie.ms.handlers.header.InHeader;
+import net.swordie.ms.world.World;
 import net.swordie.ms.world.WorldHandler;
 import net.swordie.ms.world.shop.cashshop.CashShopHandler;
 import org.apache.log4j.LogManager;
@@ -228,6 +229,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_EMOTION:
                 WorldHandler.handleUserEmotion(c, inPacket);
+                break;
+            case USER_BAN_MAP_BY_MOB:
+                WorldHandler.handleBanMapByMob(c, inPacket);
                 break;
             case USER_SELECT_NPC:
                 WorldHandler.handleUserSelectNpc(c, inPacket);

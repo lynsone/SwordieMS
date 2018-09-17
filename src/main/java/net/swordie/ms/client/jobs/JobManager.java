@@ -72,14 +72,14 @@ public class JobManager {
     }
     public void setDefaultCharStatValues(CharacterStat characterStat) {
         characterStat.setLevel(1);
-        characterStat.setStr(4);
-        characterStat.setDex(4);
+        characterStat.setStr(12);
+        characterStat.setDex(5);
         characterStat.setInt(4);
         characterStat.setLuk(4);
         characterStat.setMaxHp(50);
         characterStat.setHp(50);
-        characterStat.setMaxMp(50);
-        characterStat.setMp(50);
+        characterStat.setMaxMp(5);
+        characterStat.setMp(5);
     }
 
     public static void handleAtt(Client c, AttackInfo attackInfo) {

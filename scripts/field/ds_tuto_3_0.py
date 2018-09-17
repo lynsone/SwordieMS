@@ -1,6 +1,5 @@
 FERDI = 2159311
 
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 
 while sm.getChr().getLevel() != 10:

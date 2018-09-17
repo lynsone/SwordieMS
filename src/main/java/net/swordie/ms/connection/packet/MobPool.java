@@ -52,8 +52,8 @@ public class MobPool {
             outPacket.encodeInt(mob.getHp() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) mob.getHp());
             outPacket.encodeInt(mob.getEffectItemID());
             if(mob.isPatrolMob()) {
-                outPacket.encodeInt(mob.getPatrolScopeX1());
-                outPacket.encodeInt(mob.getPatrolScopeX2());
+                outPacket.encodeInt(mob.getPosition().getX() - mob.getRange());
+                outPacket.encodeInt(mob.getPosition().getX() + mob.getRange());
                 outPacket.encodeInt(mob.getDetectX());
                 outPacket.encodeInt(mob.getSenseX());
             }
@@ -134,8 +134,8 @@ public class MobPool {
                 outPacket.encodeInt(mob.getHp() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) mob.getHp());
                 outPacket.encodeInt(mob.getEffectItemID());
                 if(mob.isPatrolMob()) {
-                    outPacket.encodeInt(mob.getPatrolScopeX1());
-                    outPacket.encodeInt(mob.getPatrolScopeX2());
+                    outPacket.encodeInt(mob.getPosition().getX() - mob.getRange());
+                    outPacket.encodeInt(mob.getPosition().getX() + mob.getRange());
                     outPacket.encodeInt(mob.getDetectX());
                     outPacket.encodeInt(mob.getSenseX());
                 }

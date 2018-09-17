@@ -2,7 +2,6 @@ VON_LEON = 2159310
 ARKARIUM = 2159308
 ORCHID = 2159339
 
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 sm.forcedInput(1)
 sm.sendDelay(30)

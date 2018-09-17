@@ -74,6 +74,11 @@ public class Effect {
                 outPacket.encodeInt(getArg1()); // skill id
                 outPacket.encodeByte(getArg2());// slv
                 break;
+            case Quest:
+                outPacket.encodeByte(1);// Count
+                outPacket.encodeInt(getArg1()); // Item ID
+                outPacket.encodeInt(getArg2()); // Quantity
+                break;
             case TextEffect:
                 outPacket.encodeString(getString());
                 outPacket.encodeInt(getArg1()); // letter delay
@@ -439,6 +444,16 @@ public class Effect {
         effect.setUserEffectType(SkillSpecialAffected);
         effect.setArg1(skillID);
         effect.setArg2(slv);
+
+        return effect;
+    }
+
+    public static Effect gainQuestItem(int itemID, int quantity) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(Quest);
+        effect.setArg1(itemID);
+        effect.setArg2(quantity);
 
         return effect;
     }

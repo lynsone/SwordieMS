@@ -42,7 +42,7 @@ public class NpcScriptInfo {
 		nsi.text = text;
 		nsi.messageType = messageType;
 		if (images != null) {
-			System.arraycopy(images, 0, nsi.images, 0, images.length);
+			nsi.images = images.clone();
 		}
 		nsi.min = min;
 		nsi.max = max;

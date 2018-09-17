@@ -2410,6 +2410,40 @@ public class WorldHandler {
         c.write(BattleRecordMan.serverOnCalcRequestResult(on));
     }
 
+    public static void handleBanMapByMob(Client c, InPacket inPacket) {
+        Field field = c.getChr().getField();
+        int mobID = inPacket.decodeInt();
+        Life life = field.getLifeByTemplateId(mobID);
+        if (!(life instanceof Mob)) {
+            return;
+        }
+        Mob mob = (Mob) life;
+        Char chr = c.getChr();
+        if (mob.isBanMap()) {
+            if (mob.getBanType() == 1) {
+                if (mob.getBanMsgType() == 1) { // found 2 types (1(most of ban types), 2).
+                    String banMsg = mob.getBanMsg();
+                    if (banMsg != null && !banMsg.equals("")) {
+                        chr.write(WvsContext.message(MessageType.SYSTEM_MESSAGE, 0, banMsg, (byte) 0));
+                    }
+                }
+                Tuple<Integer, String> banMapField = mob.getBanMapFields().get(0);
+                if (banMapField != null) {
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(banMapField.getLeft());
+                    if (toField == null) {
+                        return;
+                    }
+                    Portal toPortal = toField.getPortalByName(banMapField.getRight());
+                    if (toPortal == null) {
+                        toPortal = toField.getPortalByName("sp");
+                    }
+
+                    chr.warp(toField, toPortal);
+                }
+            }
+        }
+    }
+
     public static void handleUserSelectNpc(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int npcID = inPacket.decodeInt();
@@ -2451,7 +2485,7 @@ public class WorldHandler {
                 Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
                 NpcMessageType.None;
         }
-        if (nmt != NpcMessageType.Monologue && nmt != NpcMessageType.AskAngelicBuster) {// angelic buster sent after movie
+        if (nmt != NpcMessageType.Monologue) {
             byte action = inPacket.decodeByte();
             int answer = 0;
             boolean hasAnswer = false;

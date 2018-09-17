@@ -7,7 +7,6 @@ VELLUM_STONE = 1064028
 if sm.hasQuest(32202):
     sm.dispose()
 else:
-    sm.curNodeEventEnd(True)
     sm.lockInGameUI(True)
     sm.showFieldEffect("maplemap/enter/10000", 0)
     sm.sendDelay(1000)
