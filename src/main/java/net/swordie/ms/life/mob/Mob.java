@@ -1261,7 +1261,8 @@ public class Mob extends Life {
         Map<Party, PartyDamageInfo> damagePercPerParty = new HashMap<>();
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
-            long appliedExp = (long) (exp * damagePerc);
+            int mobExpRate = chr.getLevel() < 10 ? 1 : GameConstants.MOB_EXP_RATE;
+            long appliedExp = (long) (exp * damagePerc * mobExpRate);
 
             if(getField().getBurningFieldLevel() > 0) {
                 ExpIncreaseInfo eei = new ExpIncreaseInfo();

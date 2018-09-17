@@ -2341,11 +2341,6 @@ public class Char {
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
 		int level = getLevel();
-		if (level < 10) {
-			amount = amount > Long.MAX_VALUE ? Long.MAX_VALUE : amount;
-		} else {
-			amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
-		}
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		if (level >= GameConstants.charExp.length - 1) {

@@ -20,7 +20,7 @@ import java.util.List;
  * Created on 1/23/2018.
  */
 public class GameConstants {
-    public static final int EXP_RATE = 10;
+    public static final int MOB_EXP_RATE = 10;
     public static final long MAX_MONEY = 10_000_000_000L;
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
