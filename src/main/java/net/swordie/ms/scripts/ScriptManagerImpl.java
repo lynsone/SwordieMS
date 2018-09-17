@@ -184,6 +184,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
 			scriptEngine.put("sm", this);
 			scriptEngine.put("chr", chr);
+			scriptEngine.put("field", chr == null ? field : chr.getField());
 		}
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
@@ -212,7 +213,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void notifyMobDeath(Mob mob) {
 		if (isActive(ScriptType.Field)) {
-			getScriptInfoByType(ScriptType.Field).setResponse(mob);
+			getScriptInfoByType(ScriptType.Field).addResponse(mob);
 		}
 	}
 
@@ -316,13 +317,13 @@ public class ScriptManagerImpl implements ScriptManager {
 						if (isActive(scriptType)) {
 							switch (lastType.getResponseType()) {
 								case Response:
-									si.setResponse((int) response);
+									si.addResponse((int) response);
 									break;
 								case Answer:
-									si.setResponse(answer);
+									si.addResponse(answer);
 									break;
 								case Text:
-									si.setResponse(text);
+									si.addResponse(text);
 									break;
 							}
 						}
@@ -2001,8 +2002,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
 	}
 
-	public void createClockForMultiple(int seconds, List<Integer> fieldIDsList) {
-	    for(int fieldID : fieldIDsList) {
+	public void createClockForMultiple(int seconds, int... fieldIDs) {
+	    for(int fieldID : fieldIDs) {
 	        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
 	        new Clock(ClockType.SecondsClock, field, seconds);
         }

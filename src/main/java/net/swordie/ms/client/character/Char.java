@@ -496,8 +496,6 @@ public class Char {
 		if (item == null) {
 			return;
 		}
-		System.out.println("--------------------------------------------");
-		System.out.println("Adding item: " + item);
 		Inventory inventory = getInventoryByType(type);
 		ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
 		int quantity = item.getQuantity();
@@ -511,14 +509,12 @@ public class Char {
 					rec = true;
 				}
 				existingItem.addQuantity(quantity);
-				System.out.println("Updated quantity: +" + quantity);
 				write(WvsContext.inventoryOperation(true, false,
 						UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
 				Item copy = item.deepCopy();
 				copy.setQuantity(quantity);
 				getQuestManager().handleItemGain(copy); // handle the difference between the old and new quantities
 				if (rec) {
-					System.out.println("Recursively adding item: " + item);
 					addItemToInventory(item);
 				}
 			} else {
@@ -531,10 +527,8 @@ public class Char {
 					quantity = quantity - ii.getSlotMax();
 					itemCopy.setQuantity(quantity);
 					item.setQuantity(ii.getSlotMax());
-					System.out.println("Adding new copy: " + itemCopy);
 					rec = true;
 				}
-				System.out.println("Added item: " + item);
 				inventory.addItem(item);
 				write(WvsContext.inventoryOperation(true, false,
 						ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
@@ -2360,11 +2354,6 @@ public class Char {
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
 		int level = getLevel();
-		if (level < 10) {
-			amount = amount > Long.MAX_VALUE ? Long.MAX_VALUE : amount;
-		} else {
-			amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
-		}
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		if (level >= GameConstants.charExp.length - 1) {

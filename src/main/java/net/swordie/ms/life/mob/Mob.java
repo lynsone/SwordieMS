@@ -292,19 +292,10 @@ public class Mob extends Life {
         for (int i : getQuests()) {
             copy.addQuest(i);
         }
-        if (copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
-            copy.getDrops().add(new DropInfo(GameConstants.MAX_DROP_CHANCE,
-                    GameConstants.MIN_MONEY_MULT * getForcedMobStat().getLevel(),
-                    GameConstants.MAX_MONEY_MULT * getForcedMobStat().getLevel()
-                    ));
-        }
         return copy;
     }
 
     public Set<DropInfo> getDrops() {
-        if (drops == null) {
-            drops = new HashSet<>();
-        }
         return drops;
     }
 
@@ -1270,7 +1261,8 @@ public class Mob extends Life {
         Map<Party, PartyDamageInfo> damagePercPerParty = new HashMap<>();
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
-            long appliedExp = (long) (exp * damagePerc);
+            int mobExpRate = chr.getLevel() < 10 ? 1 : GameConstants.MOB_EXP_RATE;
+            long appliedExp = (long) (exp * damagePerc * mobExpRate);
 
             if(getField().getBurningFieldLevel() > 0) {
                 ExpIncreaseInfo eei = new ExpIncreaseInfo();
