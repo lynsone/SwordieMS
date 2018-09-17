@@ -1,7 +1,7 @@
 # Phantom 2nd job adv
 if not sm.hasQuest(25103):
     sm.giveItem(1142376)
-    sm.createQuestWithQRValue(25103, "1")
+    sm.startQuestNoCheck(25103)
     sm.setJob(2410)
     sm.giveSkill(20031209)
     sm.giveSkill(20031260)
