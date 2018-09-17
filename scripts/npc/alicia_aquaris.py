@@ -1,3 +1,5 @@
+# Alicia's Soul | Tower of Oz (992000000)
+
 CLEVER_LADY_HOTLINE = 2432461
 
 answer = sm.sendSay("How may I help you, little one?\r\n\r\n#b"

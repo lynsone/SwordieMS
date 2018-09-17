@@ -1,3 +1,4 @@
+# Tower of Oz Weekly Ranking Bulletin Board | Tower of Oz (992000000)
 from net.swordie.ms.enums import UIType
 
 answer = sm.sendSay("#e[Tower of Oz Ranking Board] #n\r\n#b"
