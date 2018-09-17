@@ -2104,7 +2104,7 @@ public class WorldHandler {
         Item scroll = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(uPos);
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
-        if (scroll == null || equip == null) {
+        if (scroll == null || equip == null || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
             chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             return;
         }
@@ -2467,6 +2467,7 @@ public class WorldHandler {
                 chr.setShop(nsd);
                 chr.write(ShopDlg.openShop(0, nsd));
                 chr.chatMessage(String.format("Opening shop %s", npc.getTemplateId()));
+                return;
             } else {
                 script = String.valueOf(npc.getTemplateId());
             }
@@ -3994,7 +3995,7 @@ public class WorldHandler {
                 pos = (short) Math.abs(pos);
                 Equip equip = (Equip) inv.getItemBySlot(pos);
                 Equip prevEquip = equip.deepCopy();
-                if (equip == null || equip.getTuc() + equip.getIuc() <= 0) { // current + increased (hammer) upgrade count
+                if (equip == null || equip.getTuc() + equip.getIuc() <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
                     log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), pos, equip == null ? 0 : equip.getItemId()));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
@@ -4034,7 +4035,8 @@ public class WorldHandler {
                 if (!ItemConstants.isUpgradable(equip.getItemId()) ||
                         (equip.getTuc() != 0 && !c.getWorld().isReboot()) ||
                         chr.getEquipInventory().getEmptySlots() == 0 ||
-                        equip.getChuc() >= GameConstants.getMaxStars(equip)) {
+                        equip.getChuc() >= GameConstants.getMaxStars(equip) ||
+                        equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
                     chr.chatMessage("Equipment cannot be enhanced.");
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
@@ -4071,7 +4073,7 @@ public class WorldHandler {
                         equip.updateToChar(chr);
                         c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
                         if (!equip.isSuperiorEqp()) {
-                            equip.setChuc((short) 12);
+                            equip.setChuc((short) Math.min(12, equip.getChuc()));
                         } else {
                             equip.setChuc((short) 0);
                         }
@@ -4115,7 +4117,7 @@ public class WorldHandler {
                     chr.dispose();
                     return;
                 }
-                if (equip == null || equip.getTuc() <= 0) {
+                if (equip == null || equip.getTuc() <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
                     log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.dispose();
@@ -4327,7 +4329,7 @@ public class WorldHandler {
         Item item = chr.getInstallInventory().getItemBySlot(nebPos);
         short ePos = inPacket.decodeShort();
         Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-        if(item == null || equip == null || item.getItemId() != nebID) {
+        if(item == null || equip == null || item.getItemId() != nebID || !ItemConstants.isNebulite(item.getItemId())) {
             log.error("Nebulite or equip was not found when inserting.");
             chr.dispose();
             return;
@@ -4338,7 +4340,12 @@ public class WorldHandler {
             chr.dispose();
             return;
         }
-        // TODO: verify that the nebulite can be mounted on this equip. i.e. -cd on hats, DSE on gloves, boss% on weapon/secondary/shield
+        if (!ItemConstants.nebuliteFitsEquip(equip, item)) {
+            log.error(String.format("Character %d attempted to use a nebulite (%d) that doesn't fit an equip (%d).", chr.getId(), item.getItemId(), equip.getItemId()));
+            chr.chatMessage("The nebulite cannot be mounted on this equip.");
+            chr.dispose();
+            return;
+        }
         chr.consumeItem(item);
         equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
         equip.updateToChar(chr);
@@ -4656,7 +4663,7 @@ public class WorldHandler {
             return;
         }
 
-        if (!ItemConstants.isRebirthFlame(flame)) {
+        if (!ItemConstants.isRebirthFlame(flame.getItemId())) {
             chr.chatMessage(SystemNotice, "This item is not a rebirth flame.");
             chr.dispose();
             return;

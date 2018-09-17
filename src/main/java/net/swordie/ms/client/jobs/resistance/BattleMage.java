@@ -3,6 +3,7 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -353,7 +354,8 @@ public class BattleMage extends Citizen {
             if(attackInfo.skillId != CONDEMNATION
                     && attackInfo.skillId != CONDEMNATION_I
                     && attackInfo.skillId != CONDEMNATION_II
-                    && attackInfo.skillId != CONDEMNATION_III) {
+                    && attackInfo.skillId != CONDEMNATION_III
+                    && attackInfo.skillId != RuneStone.LIBERATE_THE_RUNE_OF_THUNDER_2) {
                 incrementCondemnation(attackInfo);
             }
             drainAuraActiveHPRecovery(attackInfo);
