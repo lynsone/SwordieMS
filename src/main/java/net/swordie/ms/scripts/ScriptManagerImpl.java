@@ -590,6 +590,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (stop) {
 			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
 		}
+		setCurNodeEventEnd(false);
 	}
 
 	public void dispose(ScriptType scriptType) {
@@ -675,6 +676,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
+	public void addMaxHP(int amount) {
+		int currentMHP = chr.getAvatarData().getCharacterStat().getMaxHp();
+		setMaxHP(currentMHP + amount);
+	}
+
 	@Override
 	public void setMaxHP(int amount) {
 		chr.setStat(Stat.mhp, amount);
@@ -683,6 +689,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		stats.put(Stat.mhp, amount);
 		stats.put(Stat.hp, amount);
 		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	public void addMaxMP(int amount) {
+		int currentMMP = chr.getAvatarData().getCharacterStat().getMaxMp();
+		setMaxHP(currentMMP + amount);
 	}
 
 	@Override
@@ -777,8 +788,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (chr != null) {
 			if (lock) {
 				chr.write(CField.curNodeEventEnd(true));// should be true when you send lockingameui
-				setCurNodeEventEnd(lock);
 			}
+			setCurNodeEventEnd(lock);
 			chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
 		}
 	}

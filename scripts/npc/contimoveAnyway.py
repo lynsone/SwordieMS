@@ -11,13 +11,13 @@ MAPS = [
 text = "Welcome aboard. Please let me know where you would like to go. #b\r\n\r\n"
 i = 0
 while i < len(MAPS):
-    list += "\r\n#L" + str(i) + "#" + str(MAPS[i][0]) + "#l"
+    text += "\r\n#L" + str(i) + "#" + str(MAPS[i][0]) + "#l"
     i += 1
 
-answer = sm.sendNext(list)
+answer = sm.sendNext(text)
 
-if sm.sendAskYesNo("Would you like to go directly to " + str(MAPS[i][0]) + "?"):
-    sm.createQuestWithQRValue(25010, str(MAPS[i][1]))
+if sm.sendAskYesNo("Would you like to go directly to " + str(MAPS[answer][0]) + "?"):
+    sm.createQuestWithQRValue(25010, str(MAPS[answer][1]))
     sm.warp(150000001, 0)
     sm.dispose()
 else:
