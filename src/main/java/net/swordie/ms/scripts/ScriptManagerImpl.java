@@ -204,7 +204,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	private boolean isQuestScriptAllowed() {
-		return getLastActiveScriptType() == ScriptType.None && !curNodeEventEnd;
+		return getLastActiveScriptType() == ScriptType.None;
 	}
 
 	public Map<ScriptType, Future> getEvaluations() {
