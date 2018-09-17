@@ -1296,11 +1296,15 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void removeMobFromMapByTemplateId(int id, int fieldId) {
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
-		Life life = field.getLifeByTemplateId(id);
-		if(life == null) {
+		if (field == null) {
 			return;
 		}
-		removeMobByObjId(life.getObjectId());
+		List<Mob> mobs = new ArrayList<>(field.getMobs());
+		for (Mob mob : mobs) {
+			if (id == mob.getTemplateId()) {
+				mob.die();
+			}
+		}
 	}
 
 	@Override
@@ -2160,7 +2164,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.setFuncKeyByScript(add, action, key));
 		chr.getFuncKeyMap().putKeyBinding(key, add ? (byte) 1 : (byte) 0, action);
 	}
-        
+
+	public void addPopUpSay(int npcID, int duration, String message, String effect) {
+		chr.write(UserLocal.addPopupSay(npcID, duration, message, effect));
+	}
+
 	private ScriptMemory getMemory() {
 		return memory;
 	}

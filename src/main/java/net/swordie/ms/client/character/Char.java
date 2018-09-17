@@ -64,6 +64,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
+import net.swordie.ms.world.field.Clock;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
@@ -333,6 +334,8 @@ public class Char {
 	private int comboCounter;
 	@Transient
 	private ScheduledFuture comboKillResetTimer;
+	@Transient
+	private ScheduledFuture timeLimitTimer;
 	@Transient
 	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
 	@Transient
@@ -2296,6 +2299,16 @@ public class Char {
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();
+		if (toField.getTimeLimit() > 0) {
+			Field warpTo = getOrCreateFieldByCurrentInstanceType(toField.getReturnMap());
+			if (warpTo != null && toField.getReturnMap() != toField.getId()) {
+				if (timeLimitTimer != null && !timeLimitTimer.isDone()) {
+					timeLimitTimer.cancel(true);
+				}
+				new Clock(ClockType.SecondsClock, getField(), toField.getTimeLimit());
+				timeLimitTimer = EventManager.addEvent(() -> warp(warpTo), toField.getTimeLimit(), TimeUnit.SECONDS);
+			}
+		}
 		if (getDeathCount() > 0) {
 			write(UserLocal.deathCountInfo(getDeathCount()));
 		}

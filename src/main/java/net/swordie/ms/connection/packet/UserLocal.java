@@ -59,6 +59,16 @@ public class UserLocal {
         return outPacket;
     }
 
+    public static OutPacket addPopupSay(int npcID, int duration, String message, String effect) {
+        OutPacket outPacket = new OutPacket(OutHeader.ADD_POPUP_SAY);
+
+        outPacket.encodeInt(npcID);
+        outPacket.encodeInt(duration);
+        outPacket.encodeString(message);
+        outPacket.encodeString(effect);
+        return outPacket;
+    }
+
     public static OutPacket incLarknessReponse(LarknessManager larknessManager) {
         OutPacket outPacket = new OutPacket(OutHeader.INC_LARKNESS_RESPONSE);
 

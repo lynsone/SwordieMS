@@ -145,8 +145,13 @@ public class Phantom extends Job {
             stats.put(Stat.str, (short) chr.getStat(Stat.str));
             stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
         } else {
-            chr.addStat(Stat.mhp, 24);// this information is from level 10 to 11
-            chr.addStat(Stat.mmp, 66);// this information is from level 10 to 11
+            if (level == 11 || level == 12) {
+                chr.addStat(Stat.mhp, level == 12 ? 74 : 24);
+                chr.addStat(Stat.mmp, 66);
+            } else {
+                chr.addStat(Stat.mhp, 24);
+                chr.addStat(Stat.mmp, 16);
+            }
             stats.put(Stat.mhp, chr.getStat(Stat.mhp));
             stats.put(Stat.mmp, chr.getStat(Stat.mmp));
         }
