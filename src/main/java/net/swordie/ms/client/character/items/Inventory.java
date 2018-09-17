@@ -2,6 +2,8 @@ package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.InvType;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -76,12 +78,16 @@ public class Inventory {
     }
 
     public int getFirstOpenSlot() {
-        for (int i = 1; i <= getSlots(); i++) {
-            if(getItemBySlot(i) == null) {
-                return i;
+        int oldIndex = 0;
+        for (Item item : getItems()) {
+            // items are always sorted by bag index
+            if (item.getBagIndex() - oldIndex > 1) {
+                // there's a gap between 2 consecutive items
+                break;
             }
+            oldIndex = item.getBagIndex();
         }
-        return 0;
+        return oldIndex + 1;
     }
 
     public Item getFirstItemByBodyPart(BodyPart bodyPart) {
@@ -127,6 +133,17 @@ public class Inventory {
 
     public Item getItemByItemID(int itemId) {
         return getItems().stream().filter(item -> item.getItemId() == itemId).findFirst().orElse(null);
+    }
+
+    public Item getItemByItemIDAndStackable(int itemId) {
+        ItemInfo ii = ItemData.getItemInfoByID(itemId);
+        if (ii == null) {
+            return getItemByItemID(itemId);
+        }
+        return getItems().stream()
+                .filter(item -> item.getItemId() == itemId && item.getQuantity() < ii.getSlotMax())
+                .findFirst()
+                .orElse(null);
     }
 
     public Item getItemBySN(long sn) {
