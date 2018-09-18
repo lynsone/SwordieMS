@@ -1722,6 +1722,15 @@ public class ScriptManagerImpl implements ScriptManager {
 		quest.setQrValue(qrValue);
 	}
 
+	public void addQRValue(int questId, String qrValue) {
+		String qrVal = getQRValue(questId);
+		if (qrVal.equals("") || qrVal.equals("Quest is Null")) {
+			createQuestWithQRValue(questId, qrValue);
+			return;
+		}
+		setQRValue(questId, qrValue + ";" + qrVal);
+	}
+
 	public boolean isComplete(int questID) {
 		return chr.getQuestManager().isComplete(questID);
 	}
