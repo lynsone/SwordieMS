@@ -1429,6 +1429,16 @@ public class ScriptManagerImpl implements ScriptManager {
 		return res;
 	}
 
+	public List<Char> getOnlinePartyMembers() {
+		Party party = chr.getParty();
+		return party.getOnlineChars();
+	}
+
+	public List<Char> getPartyMembersInSameField(Char chr) {
+		Party party = chr.getParty();
+		return new ArrayList<>(party.getPartyMembersInSameField(chr));
+	}
+
 
 
 	// Guild/Alliance related methods -------------------------------------------------------------------------------------------
