@@ -204,7 +204,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	private boolean isQuestScriptAllowed() {
-		return getLastActiveScriptType() == ScriptType.None && !curNodeEventEnd;
+		return getLastActiveScriptType() == ScriptType.None;
 	}
 
 	public Map<ScriptType, Future> getEvaluations() {
@@ -1998,8 +1998,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
 	}
 
-	public void createClockForMultiple(int seconds, List<Integer> fieldIDsList) {
-	    for(int fieldID : fieldIDsList) {
+	public void createClockForMultiple(int seconds, int... fieldIDs) {
+	    for(int fieldID : fieldIDs) {
 	        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
 	        new Clock(ClockType.SecondsClock, field, seconds);
         }
