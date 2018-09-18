@@ -1,13 +1,15 @@
 package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.quest.progress.*;
+import net.swordie.ms.client.character.quest.progress.QuestProgressItemRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressMobRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressMoneyRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressRequirement;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.enums.QuestStatus;
-import org.hibernate.annotations.Cascade;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.*;
@@ -128,7 +130,9 @@ public class Quest {
                         ((QuestProgressMobRequirement) q).getMobID() == mobID)
                 .findFirst().get();
         // should never return null, as this method should only be called when this quest indeed has this mob
-        qpmr.incCurrentCount(1);
+        if(qpmr.getCurrentCount() < qpmr.getRequiredCount()) {
+            qpmr.incCurrentCount(1);
+        }
     }
 
     @Override
@@ -166,10 +170,8 @@ public class Quest {
             List<QuestProgressMobRequirement> requirements = new ArrayList<>(getMobReqs());
             requirements.sort(Comparator.comparingInt(QuestProgressMobRequirement::getOrder));
             for(QuestProgressMobRequirement qpmr : requirements) {
-                System.out.println(qpmr.getMobID());
                 sb.append(Util.leftPaddedString(3, '0', qpmr.getValue()));
             }
-            System.out.println(sb.toString());
             return sb.toString();
         }
     }

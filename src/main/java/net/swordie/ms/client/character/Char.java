@@ -2735,7 +2735,7 @@ public class Char {
 		return inv.getItems().stream()
 				.filter(i -> i.getItemId() == itemID)
 				.mapToInt(Item::getQuantity)
-				.sum() > count;
+				.sum() >= count;
 	}
 
 	public short getLevel() {
