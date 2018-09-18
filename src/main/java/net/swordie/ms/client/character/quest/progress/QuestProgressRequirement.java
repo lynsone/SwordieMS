@@ -18,7 +18,7 @@ public abstract class QuestProgressRequirement implements DatSerializable {
     private long id;
     // order of encoding for quest record messages
     @Column(name = "orderNum")
-    private int order = 99;
+    private int order = 999;
 
     /**
      * Returns whether this progress requirement has been completed by the player.

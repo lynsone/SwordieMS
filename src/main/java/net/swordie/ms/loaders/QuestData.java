@@ -267,7 +267,8 @@ public class QuestData {
                         case "mob":
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
                                 QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
-                                qpmr.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
+                                // items are always after mobs
+                                qpmr.setOrder(100 + Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -286,27 +287,6 @@ public class QuestData {
                                     }
                                 }
                                 quest.addProgressRequirement(qpmr);
-                            }
-                            break;
-                        case "skill":
-                            for (Node idNode : XMLApi.getAllChildren(infoNode)) {
-                                for (Node questNode : XMLApi.getAllChildren(idNode)) {
-                                    String questName = XMLApi.getNamedAttribute(questNode, "name");
-                                    String questValue = XMLApi.getNamedAttribute(questNode, "value");
-                                    switch (questName) {
-                                        case "id":
-                                            quest.setSkill(Integer.parseInt(questValue));
-                                            break;
-                                        case "order":
-                                        case "acquire":
-                                        case "level":
-                                        case "levelCondition":
-                                            break;
-                                        default:
-                                            log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
-                                            break;
-                                    }
-                                }
                             }
                             break;
                         case "item":
@@ -345,6 +325,27 @@ public class QuestData {
                                     quest.addRequirement(qir);
                                 } else {
                                     quest.addProgressRequirement(qpir);
+                                }
+                            }
+                            break;
+                        case "skill":
+                            for (Node idNode : XMLApi.getAllChildren(infoNode)) {
+                                for (Node questNode : XMLApi.getAllChildren(idNode)) {
+                                    String questName = XMLApi.getNamedAttribute(questNode, "name");
+                                    String questValue = XMLApi.getNamedAttribute(questNode, "value");
+                                    switch (questName) {
+                                        case "id":
+                                            quest.setSkill(Integer.parseInt(questValue));
+                                            break;
+                                        case "order":
+                                        case "acquire":
+                                        case "level":
+                                        case "levelCondition":
+                                            break;
+                                        default:
+                                            log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
+                                            break;
+                                    }
                                 }
                             }
                             break;
