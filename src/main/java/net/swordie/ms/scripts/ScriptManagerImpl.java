@@ -1442,7 +1442,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (party == null) {
 			return new ArrayList<>();
 		}
-		return new ArrayList<>(party.getPartyMembersInSameField(chr));
+		List<Char> list = new ArrayList<>(party.getPartyMembersInSameField(chr));
+		list.add(chr);
+		return new ArrayList<>(list);
 	}
 
 

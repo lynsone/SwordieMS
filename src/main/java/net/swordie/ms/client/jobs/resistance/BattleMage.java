@@ -15,6 +15,7 @@ import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatType;
+import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
@@ -296,7 +297,7 @@ public class BattleMage extends Citizen {
         death = Summon.getSummonBy(c.getChr(), skillID, slv);
         death.setFlyMob(true);
         death.setSummonTerm(0);
-        death.setMoveAction((byte) 0);
+        death.setMoveAbility(MoveAbility.Walk.getVal());
         death.setAssistType(AssistType.MANUAL.getVal());
         death.setAttackActive(false);
         death.setBeforeFirstAttack(false);
@@ -445,7 +446,9 @@ public class BattleMage extends Citizen {
     }
 
     private int doCondemnationAttack(int killCount) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(lastCondemnationAttack + (getCondemnationCooldown() * 1000) < System.currentTimeMillis()) {
+            death = tsm.getOption(IndieEmpty).summon;
             chr.write(Summoned.summonedAssistAttackRequest(death));
             killCount = 0;
 
