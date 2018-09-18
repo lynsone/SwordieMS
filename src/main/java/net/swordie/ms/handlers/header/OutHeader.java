@@ -1127,6 +1127,30 @@ public enum OutHeader {
     SOCKET_CREATE_RESULT(1481),
     ;
 
+
+    private static List<OutHeader> spam = Arrays.asList(
+            ALIVE_REQ,
+            PRIVATE_SERVER_PACKET,
+            MOB_CONTROL_ACK,
+            CHAT_MSG,
+            MOB_HP_INDICATOR,
+            STAT_CHANGED,
+            MOB_CHANGE_CONTROLLER,
+            MOB_MOVE,
+            REMOTE_MOVE,
+            REMOTE_EMOTION,
+            EXCL_REQUEST,
+            NPC_MOVE,
+            DROP_LEAVE_FIELD,
+            TEMPORARY_STAT_RESET,
+            PET_MOVE,
+            NPC_ENTER_FIELD,
+            NPC_CHANGE_CONTROLLER,
+            MOB_ENTER_FIELD,
+            RESULT_INSTANCE_TABLE,
+            CREATE_OBTACLE
+    );
+
     private short value;
 
     OutHeader(int value) {
@@ -1147,28 +1171,6 @@ public enum OutHeader {
     }
 
     public static boolean isSpamHeader(OutHeader outHeader) {
-        List<OutHeader> spam = Arrays.asList(
-                ALIVE_REQ,
-                PRIVATE_SERVER_PACKET,
-                MOB_CONTROL_ACK,
-                CHAT_MSG,
-                MOB_HP_INDICATOR,
-                STAT_CHANGED,
-                MOB_CHANGE_CONTROLLER,
-                MOB_MOVE,
-                REMOTE_MOVE,
-                REMOTE_EMOTION,
-                EXCL_REQUEST,
-                NPC_MOVE,
-                DROP_LEAVE_FIELD,
-                TEMPORARY_STAT_RESET,
-                PET_MOVE,
-                NPC_ENTER_FIELD,
-                NPC_CHANGE_CONTROLLER,
-                MOB_ENTER_FIELD,
-                RESULT_INSTANCE_TABLE,
-                CREATE_OBTACLE
-                );
         return spam.contains(outHeader);
     }
 

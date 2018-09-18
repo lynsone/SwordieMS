@@ -1018,9 +1018,34 @@ public enum InHeader {
     NO(1140),
     ;
 
-    /**
-     * Created on 2/18/2017.
-     */
+    private static List<InHeader> spam = Arrays.asList(
+            UPDATE_CLIENT_ENVIRONMENT,
+            PONG,
+            WVS_SET_UP_STEP,
+            SECURITY_PACKET,
+            PRIVATE_SERVER_PACKET,
+            MOB_MOVE,
+            USER_MOVE,
+            PASSIVESKILL_INFO_UPDATE,
+            USER_CHANGE_STAT_REQUEST,
+            SUMMONED_MOVE,
+            USER_TEMPORARY_STAT_UPDATE_REQUEST,
+            USER_CALC_DAMAGE_STAT_SET_REQUEST,
+            MOB_APPLY_CTRL,
+            USER_REQUEST_INSTANCE_TABLE,
+            USER_QUEST_REQUEST,
+            CHECK_LOGIN_AUTH_INFO,
+            CHECK_SPW_REQUEST,
+            NPC_MOVE,
+            FAMILIAR_MOVE,
+            PET_MOVE,
+            AUTH_HEARTBEAT,
+            OBTACLE_ATOM_COLLISION,
+            USER_HIT,
+            USER_EMOTION,
+            USER_B2_BODY_REQUEST
+    );
+
     private short value;
 
     InHeader(int op) {
@@ -1041,33 +1066,6 @@ public enum InHeader {
     }
 
     public static boolean isSpamHeader(InHeader inHeaderByOp) {
-        List<InHeader> spam = Arrays.asList(
-                UPDATE_CLIENT_ENVIRONMENT,
-                PONG,
-                WVS_SET_UP_STEP,
-                SECURITY_PACKET,
-                PRIVATE_SERVER_PACKET,
-                MOB_MOVE,
-                USER_MOVE,
-                PASSIVESKILL_INFO_UPDATE,
-                USER_CHANGE_STAT_REQUEST,
-                SUMMONED_MOVE,
-                USER_TEMPORARY_STAT_UPDATE_REQUEST,
-                USER_CALC_DAMAGE_STAT_SET_REQUEST,
-                MOB_APPLY_CTRL,
-                USER_REQUEST_INSTANCE_TABLE,
-                USER_QUEST_REQUEST,
-                CHECK_LOGIN_AUTH_INFO,
-                CHECK_SPW_REQUEST,
-                NPC_MOVE,
-                FAMILIAR_MOVE,
-                PET_MOVE,
-                AUTH_HEARTBEAT,
-                OBTACLE_ATOM_COLLISION,
-                USER_HIT,
-                USER_EMOTION,
-                USER_B2_BODY_REQUEST
-        );
         return spam.contains(inHeaderByOp);
     }
 }

@@ -16,6 +16,7 @@ public abstract class QuestProgressRequirement implements DatSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    // order of encoding for quest record messages
     @Column(name = "orderNum")
     private int order = 99;
 
