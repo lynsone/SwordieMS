@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.quest.progress;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.loaders.DatSerializable;
 
 import javax.persistence.*;
@@ -16,8 +17,6 @@ public class QuestProgressLevelRequirement extends QuestProgressRequirement {
 
     @Column(name = "requiredCount")
     private int level;
-    @Column(name = "currentCount")
-    private int curLevel;
 
     public QuestProgressLevelRequirement() {
     }
@@ -27,15 +26,14 @@ public class QuestProgressLevelRequirement extends QuestProgressRequirement {
     }
 
     @Override
-    public boolean isComplete() {
-        return getCurLevel() >= getLevel();
+    public boolean isComplete(Char chr) {
+        return chr.getLevel() >= getLevel();
     }
 
     @Override
     public QuestProgressRequirement deepCopy() {
         QuestProgressLevelRequirement qplr = new QuestProgressLevelRequirement();
         qplr.setLevel(getLevel());
-        qplr.setCurLevel(getCurLevel());
         qplr.setOrder(getOrder());
         return qplr;
     }
@@ -46,14 +44,6 @@ public class QuestProgressLevelRequirement extends QuestProgressRequirement {
 
     public void setLevel(int level) {
         this.level = level;
-    }
-
-    public int getCurLevel() {
-        return curLevel;
-    }
-
-    public void setCurLevel(int curLevel) {
-        this.curLevel = curLevel;
     }
 
     @Override

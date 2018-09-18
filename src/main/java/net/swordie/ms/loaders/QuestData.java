@@ -268,7 +268,7 @@ public class QuestData {
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
                                 QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
                                 // items are always after mobs
-                                qpmr.setOrder(100 + Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
+                                qpmr.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");

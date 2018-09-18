@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.quest.progress;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.loaders.DatSerializable;
 
 import javax.persistence.*;
@@ -24,7 +25,7 @@ public abstract class QuestProgressRequirement implements DatSerializable {
      * Returns whether this progress requirement has been completed by the player.
      * @return Completeness.
      */
-    public abstract boolean isComplete();
+    public abstract boolean isComplete(Char chr);
 
     public long getId() {
         return id;

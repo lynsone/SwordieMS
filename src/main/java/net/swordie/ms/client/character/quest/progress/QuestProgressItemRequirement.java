@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.quest.progress;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.loaders.DatSerializable;
 
 import javax.persistence.*;
@@ -12,15 +13,13 @@ import java.io.IOException;
  */
 @Entity
 @DiscriminatorValue("item")
-public class QuestProgressItemRequirement extends QuestProgressRequirement implements QuestValueRequirement {
+public class QuestProgressItemRequirement extends QuestProgressRequirement {
 
 
     @Column(name = "unitID")
     private int itemID;
     @Column(name = "requiredCount")
     private int requiredCount;
-    @Column(name = "currentCount")
-    private int currentCount;
 
     public QuestProgressItemRequirement() {
     }
@@ -41,24 +40,9 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
         this.requiredCount = requiredCount;
     }
 
-    public void incCurrentCount(int amount) {
-        currentCount += amount;
-        if(currentCount < 0) {
-            currentCount = 0;
-        }
-    }
-
-    public int getCurrentCount() {
-        return currentCount;
-    }
-
-    public void setCurrentCount(int currentCount) {
-        this.currentCount = currentCount;
-    }
-
     @Override
-    public boolean isComplete() {
-        return getCurrentCount() >= getRequiredCount();
+    public boolean isComplete(Char chr) {
+        return chr.hasItemCount(getItemID(), getRequiredCount());
     }
 
     @Override
@@ -66,7 +50,6 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
         QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
         qpir.setItemID(getItemID());
         qpir.setRequiredCount(getRequiredCount());
-        qpir.setCurrentCount(getCurrentCount());
         qpir.setOrder(getOrder());
         return qpir;
     }
@@ -75,6 +58,7 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
     public void write(DataOutputStream dos) throws IOException {
         dos.writeInt(getItemID());
         dos.writeInt(getRequiredCount());
+        dos.writeInt(getOrder());
     }
 
     @Override
@@ -82,15 +66,7 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
         QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
         qpir.setItemID(dis.readInt());
         qpir.setRequiredCount(dis.readInt());
+        qpir.setOrder(dis.readInt());
         return qpir;
-    }
-
-    @Override
-    public String getValue() {
-        return String.valueOf(getCurrentCount());
-    }
-
-    public void addItem(int quantity) {
-        incCurrentCount(quantity);
     }
 }

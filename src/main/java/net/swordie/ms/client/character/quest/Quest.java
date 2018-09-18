@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.quest;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.progress.*;
 import net.swordie.ms.connection.db.FileTimeConverter;
@@ -116,8 +117,8 @@ public class Quest {
         this.completedTime = completedTime;
     }
 
-    public boolean isComplete() {
-        return getProgressRequirements().stream().allMatch(QuestProgressRequirement::isComplete);
+    public boolean isComplete(Char chr) {
+        return getProgressRequirements().stream().allMatch(pr -> pr.isComplete(chr));
     }
 
     public void handleMobKill(int mobID) {
@@ -154,17 +155,6 @@ public class Quest {
                 .findAny().ifPresent(qpmr -> qpmr.addMoney(money));
     }
 
-    public void handleItemGain(Item item) {
-        Set<QuestProgressItemRequirement> qpirs = getProgressRequirements().stream()
-                .filter(q -> q instanceof QuestProgressItemRequirement &&
-                        ((QuestProgressItemRequirement) q).getItemID() == item.getItemId())
-                .map(q -> (QuestProgressItemRequirement) q)
-                .collect(Collectors.toSet());
-        for(QuestProgressItemRequirement qpir : qpirs) {
-            qpir.addItem(item.getQuantity());
-        }
-    }
-
     public String getQRValue() {
         if (qrValue != null && !qrValue.equalsIgnoreCase("")) {
             return qrValue;
@@ -173,13 +163,13 @@ public class Quest {
             if (getProgressRequirements() == null) {
                 return "";
             }
-            List<QuestProgressRequirement> requirements = new ArrayList<>(getProgressRequirements());
-            requirements.sort(Comparator.comparingInt(QuestProgressRequirement::getOrder));
-            for(QuestProgressRequirement qpr : requirements) {
-                if(qpr instanceof QuestValueRequirement) {
-                    sb.append(Util.leftPaddedString(3, '0', ((QuestValueRequirement) qpr).getValue()));
-                }
+            List<QuestProgressMobRequirement> requirements = new ArrayList<>(getMobReqs());
+            requirements.sort(Comparator.comparingInt(QuestProgressMobRequirement::getOrder));
+            for(QuestProgressMobRequirement qpmr : requirements) {
+                System.out.println(qpmr.getMobID());
+                sb.append(Util.leftPaddedString(3, '0', qpmr.getValue()));
             }
+            System.out.println(sb.toString());
             return sb.toString();
         }
     }

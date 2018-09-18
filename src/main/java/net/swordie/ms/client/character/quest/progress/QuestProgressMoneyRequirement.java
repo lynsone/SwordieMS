@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.quest.progress;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.loaders.DatSerializable;
 
 import javax.persistence.*;
@@ -16,8 +17,6 @@ public class QuestProgressMoneyRequirement extends QuestProgressRequirement {
 
     @Column(name = "requiredCount")
     private int money;
-    @Column(name = "currentCount")
-    private int curMoney;
 
     public QuestProgressMoneyRequirement() {
     }
@@ -27,15 +26,14 @@ public class QuestProgressMoneyRequirement extends QuestProgressRequirement {
     }
 
     @Override
-    public boolean isComplete() {
-        return getCurMoney() >= getMoney();
+    public boolean isComplete(Char chr) {
+        return chr.getMoney() >= getMoney();
     }
 
     @Override
     public QuestProgressRequirement deepCopy() {
         QuestProgressMoneyRequirement qpmr = new QuestProgressMoneyRequirement();
         qpmr.setMoney(getMoney());
-        qpmr.setCurMoney(getCurMoney());
         qpmr.setOrder(getOrder());
         return qpmr;
     }
@@ -47,15 +45,6 @@ public class QuestProgressMoneyRequirement extends QuestProgressRequirement {
     public void setMoney(int money) {
         this.money = money;
     }
-
-    public int getCurMoney() {
-        return curMoney;
-    }
-
-    public void setCurMoney(int curMoney) {
-        this.curMoney = curMoney;
-    }
-
     @Override
     public void write(DataOutputStream dos) throws IOException {
         dos.writeInt(getMoney());

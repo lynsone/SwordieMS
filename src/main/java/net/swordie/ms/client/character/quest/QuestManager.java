@@ -106,7 +106,7 @@ public class QuestManager {
      */
     public boolean isComplete(int questID) {
         Quest quest = getQuests().get(questID);
-        return hasQuestInProgress(questID) && quest.isComplete();
+        return hasQuestInProgress(questID) && quest.isComplete(chr);
     }
 
     public void addQuest(Quest quest) {
@@ -213,7 +213,7 @@ public class QuestManager {
     public void handleMobKill(Mob mob) {
         for(int questID : mob.getQuests()) {
             Quest q = getQuests().get(questID);
-            if (q != null && !q.isComplete()) {
+            if (q != null && !q.isComplete(chr)) {
                 q.handleMobKill(mob.getTemplateId());
                 chr.write(WvsContext.questRecordMessage(q));
             }
@@ -224,19 +224,6 @@ public class QuestManager {
         for(Quest q : getQuestsInProgress()) {
             if(q.hasMoneyReq()) {
                 q.addMoney(money);
-                chr.write(WvsContext.questRecordMessage(q));
-            }
-        }
-    }
-
-    public void handleItemGain(Item item) {
-        if(ItemData.getItemInfoByID(item.getItemId()) == null) {
-            return;
-        }
-        for(int questID : ItemData.getItemInfoByID(item.getItemId()).getQuestIDs()) {
-            Quest q = getQuests().get(questID);
-            if (q != null && !q.isComplete()) {
-                q.handleItemGain(item);
                 chr.write(WvsContext.questRecordMessage(q));
             }
         }
