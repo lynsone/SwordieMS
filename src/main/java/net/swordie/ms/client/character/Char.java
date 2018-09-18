@@ -513,7 +513,6 @@ public class Char {
 						UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
 				Item copy = item.deepCopy();
 				copy.setQuantity(quantity);
-				getQuestManager().handleItemGain(copy); // handle the difference between the old and new quantities
 				if (rec) {
 					addItemToInventory(item);
 				}
@@ -532,7 +531,6 @@ public class Char {
 				inventory.addItem(item);
 				write(WvsContext.inventoryOperation(true, false,
 						ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
-				getQuestManager().handleItemGain(item);
 				if (rec) {
 					addItemToInventory(itemCopy);
 				}
@@ -2746,10 +2744,11 @@ public class Char {
 	}
 
 	public boolean hasItemCount(int itemID, int count) {
-		return getInventories().stream().anyMatch(inv -> {
-			Item item = inv.getItemByItemID(itemID);
-			return item != null && item.getQuantity() >= count;
-		});
+		Inventory inv = getInventoryByType(ItemData.getItemDeepCopy(itemID).getInvType());
+		return inv.getItems().stream()
+				.filter(i -> i.getItemId() == itemID)
+				.mapToInt(Item::getQuantity)
+				.sum() >= count;
 	}
 
 	public short getLevel() {

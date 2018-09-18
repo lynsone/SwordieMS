@@ -2735,7 +2735,7 @@ public class WorldHandler {
             case QuestReq_CompleteQuest:
                 if (qm.hasQuestInProgress(questID)) {
                     Quest quest = qm.getQuests().get(questID);
-                    if (quest.isComplete()) {
+                    if (quest.isComplete(chr)) {
                         qm.completeQuest(questID);
                     }
                 }
