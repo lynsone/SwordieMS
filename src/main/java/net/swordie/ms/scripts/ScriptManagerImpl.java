@@ -1430,7 +1430,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public List<Char> getOnlinePartyMembers() {
-		Party party = chr.getParty();
+		Party party = getParty();
 		if (party == null) {
 			return new ArrayList<>();
 		}
@@ -1438,7 +1438,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public List<Char> getPartyMembersInSameField(Char chr) {
-		Party party = chr.getParty();
+		Party party = getParty();
 		if (party == null) {
 			return new ArrayList<>();
 		}
