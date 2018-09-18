@@ -267,6 +267,7 @@ public class QuestData {
                         case "mob":
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
                                 QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
+                                qpmr.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -278,7 +279,6 @@ public class QuestData {
                                             qpmr.setRequiredCount(Integer.parseInt(questValue));
                                             break;
                                         case "order":
-                                            qpmr.setOrder(Integer.parseInt(questValue));
                                             break;
                                         default:
                                             log.warn(String.format("(%d) Unk mob name %s with value %s", questID, questName, questValue));
@@ -313,6 +313,7 @@ public class QuestData {
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
                                 QuestStartItemRequirement qir = new QuestStartItemRequirement();
                                 QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
+                                qpir.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -332,9 +333,6 @@ public class QuestData {
                                             }
                                             break;
                                         case "order":
-                                            if (status != 0) {
-                                                qpir.setOrder(Integer.parseInt(questValue));
-                                            }
                                             break;
                                         case "secret":
                                             break;
