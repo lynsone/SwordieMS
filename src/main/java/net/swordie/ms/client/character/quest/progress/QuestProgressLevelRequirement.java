@@ -36,6 +36,7 @@ public class QuestProgressLevelRequirement extends QuestProgressRequirement {
         QuestProgressLevelRequirement qplr = new QuestProgressLevelRequirement();
         qplr.setLevel(getLevel());
         qplr.setCurLevel(getCurLevel());
+        qplr.setOrder(getOrder());
         return qplr;
     }
 

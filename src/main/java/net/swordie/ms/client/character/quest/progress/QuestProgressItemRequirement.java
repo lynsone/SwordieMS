@@ -67,6 +67,7 @@ public class QuestProgressItemRequirement extends QuestProgressRequirement imple
         qpir.setItemID(getItemID());
         qpir.setRequiredCount(getRequiredCount());
         qpir.setCurrentCount(getCurrentCount());
+        qpir.setOrder(getOrder());
         return qpir;
     }
 

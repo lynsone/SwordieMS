@@ -36,6 +36,7 @@ public class QuestProgressMoneyRequirement extends QuestProgressRequirement {
         QuestProgressMoneyRequirement qpmr = new QuestProgressMoneyRequirement();
         qpmr.setMoney(getMoney());
         qpmr.setCurMoney(getCurMoney());
+        qpmr.setOrder(getOrder());
         return qpmr;
     }
 

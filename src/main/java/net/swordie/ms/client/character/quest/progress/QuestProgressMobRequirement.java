@@ -66,6 +66,7 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
         qpmr.setMobID(getMobID());
         qpmr.setRequiredCount(getRequiredCount());
         qpmr.setCurrentCount(getCurrentCount());
+        qpmr.setOrder(getOrder());
         return qpmr;
     }
 
