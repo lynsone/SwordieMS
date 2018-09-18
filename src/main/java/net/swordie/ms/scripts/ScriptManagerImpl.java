@@ -786,10 +786,6 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void lockInGameUI(boolean lock, boolean blackFrame) {
 		if (chr != null) {
-			if (lock) {
-				chr.write(CField.curNodeEventEnd(true));// should be true when you send lockingameui
-			}
-			setCurNodeEventEnd(lock);
 			chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
 		}
 	}

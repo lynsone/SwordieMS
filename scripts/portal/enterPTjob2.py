@@ -1,5 +1,5 @@
-if field.getMobs().size() == 0:
-    sm.warp(915010001, 1)
-else:
+if sm.hasMobsInField():
     sm.chat("Remove the lock first.")
+else:
+    sm.warp(915010001, 1)
 sm.dispose()

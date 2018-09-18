@@ -9,6 +9,5 @@ if sm.hasQuest(25000):
     sm.removeMobFromMapByTemplateId(GUARD1, 915000300)
     sm.removeMobFromMapByTemplateId(GUARD2, 915000300)
     sm.warpInstanceIn(915000300, 1)
-    sm.dispose()
-else:
-    sm.dispose()
+    
+ sm.dispose()
