@@ -1431,11 +1431,17 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public List<Char> getOnlinePartyMembers() {
 		Party party = chr.getParty();
+		if (party == null) {
+			return new ArrayList<>();
+		}
 		return party.getOnlineChars();
 	}
 
 	public List<Char> getPartyMembersInSameField(Char chr) {
 		Party party = chr.getParty();
+		if (party == null) {
+			return new ArrayList<>();
+		}
 		return new ArrayList<>(party.getPartyMembersInSameField(chr));
 	}
 
