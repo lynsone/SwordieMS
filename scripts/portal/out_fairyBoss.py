@@ -2,7 +2,6 @@
 
 EPHENIAS_HIDING_PLACE = 2133006 # NPC ID
 FAIRY_FOREST_2 = 300030300 # MAP ID
-EPHENIA = 5250007 # MOD ID
 
 if sm.hasMobsInField() is None:
     sm.clearPartyInfo(FAIRY_FOREST_2)
