@@ -1471,6 +1471,11 @@ public class WorldHandler {
     public static void handleUserUpgradeAssistItemUseRequest(Client c, InPacket inPacket) {
 
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to scroll in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort(); //Use Position
         short ePos = inPacket.decodeShort(); //Eqp Position
