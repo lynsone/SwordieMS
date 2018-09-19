@@ -9,3 +9,4 @@ response = sm.sendAskYesNo("Would you like to take the train to " + string + "?"
 
 if response == 1:
     sm.warp(map, 0)
+    sm.dispose()

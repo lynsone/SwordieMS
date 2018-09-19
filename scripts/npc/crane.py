@@ -7,3 +7,4 @@ response = sm.sendAskYesNo("Would you like to go to " + (string))
 
 if response == 1:
     sm.warp(map, 0)
+sm.dispose()

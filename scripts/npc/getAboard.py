@@ -7,3 +7,4 @@ while i < len(maps):
     i += 1
 answer = sm.sendNext(list)
 sm.warp(maps[answer], 0)
+sm.dispose()

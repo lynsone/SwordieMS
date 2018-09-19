@@ -3,3 +3,4 @@ response = sm.sendAskYesNo("Do you want to leave?")
 
 if response == 1:
     sm.warpInstanceOut(951000000)
+sm.dispose()

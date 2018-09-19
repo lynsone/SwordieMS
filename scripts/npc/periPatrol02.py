@@ -8,3 +8,4 @@ if sm.hasQuest(22530):
         sm.sendSayOkay("You examine the sign. Finished the guard's request.")
 else:
     sm.sendSayOkay("It's a sign.")
+sm.dispose()

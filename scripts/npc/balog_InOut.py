@@ -4,3 +4,4 @@ response = sm.sendAskYesNo("If you leave now, you'll have to start over.\r\n"
 
 if response == 1:
     sm.clearPartyInfo(105200000)
+sm.dispose()

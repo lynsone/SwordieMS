@@ -12,4 +12,5 @@ if hasQuest:
         sm.warpInstanceIn(910540000, 0)
 else:
     sm.sendSayOkay("#b(A mysterious energy surrounds this stone)#k")
+    sm.dispose()
 

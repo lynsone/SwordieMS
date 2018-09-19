@@ -92,6 +92,7 @@ if selection == 3:
                 "#btalk, say, chat#k (Level 10 ~ 30)\r\n"
                 "#bcutie#k (Level 10 ~ 30)\r\n"
                 "#bup, stand, rise#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 4:
     sm.sendNext("These are the commands for #rBrown Puppy#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -102,6 +103,7 @@ if selection == 4:
                 "#btalk, say, chat#k (Level 10 ~ 30)\r\n"
                 "#bdown#k (Level 10 ~ 30)\r\n"
                 "#bup, stand, rise#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 5:
     sm.sendNext("These are the commands for #rPink Bunny and White Bunny#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -113,6 +115,7 @@ if selection == 5:
                 "#btalk, say, chat#k (Level 10 ~ 30)\r\n"
                 "#bhug#k (Level 10 ~ 30)\r\n"
                 "#bsleep, sleepy, gotobed#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 6:
     sm.sendNext("These are the commands for #rMini Kargo#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -125,6 +128,7 @@ if selection == 6:
                 "#bthelook, charisma#k (Level 10 ~ 30)\r\n"
                 "#bdown#k (Level 10 ~ 30)\r\n"
                 "#bgoodboy, goodgirl#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 7:
     sm.sendNext("These are the commands for #rRudolph and Dasher#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -139,6 +143,7 @@ if selection == 7:
                 "#blonely, alone#k (Level 11 ~ 30)\r\n"
                 "#bcutie#k (Level 11 ~ 30)\r\n"
                 "#bmush, go#k (Level 21 ~ 30)")
+    sm.dispose()
 if selection == 8:
     sm.sendNext("These are the commands for #rBlack Pig#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -151,6 +156,7 @@ if selection == 8:
                 "#btalk, chat, say#k (Level 10 ~ 30)\r\n"
                 "#bsmile#k (Level 10 ~ 30)\r\n"
                 "#bthelook, charisma#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 9:
     sm.sendNext("These are the commands for #rPanda#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -164,6 +170,7 @@ if selection == 9:
                 "#bletsplay#k (Level 10 ~ 30)\r\n"
                 "#bmeh, bleh#k (Level 10 ~ 30)\r\n"
                 "#bsleep#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 10:
     sm.sendNext("These are the commands for #rHusky#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -176,6 +183,7 @@ if selection == 10:
                 "#bdown#k (Level 10 ~ 30)\r\n"
                 "#btalk, chat, say#k (Level 10 ~ 30)\r\n"
                 "#bup, stand, rise#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 11:
     sm.sendNext("These are the commands for #rDino Boy and Dino Girl#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -188,6 +196,7 @@ if selection == 11:
                 "#btalk, chat, say#k (Level 10 ~ 30)\r\n"
                 "#bcutie#k (Level 10 ~ 30)\r\n"
                 "#bsleep, nap, sleepy#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 12:
     sm.sendNext("These are the commands for #rMonkey#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -201,6 +210,7 @@ if selection == 12:
                 "#bplay#k (Level 10 ~ 30)\r\n"
                 "#bmelong#k (Level 10 ~ 30)\r\n"
                 "#bsleep, gotobed, sleepy#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 13:
     sm.sendNext("These are the commands for #rTurkey#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -213,6 +223,7 @@ if selection == 13:
                 "#byes, goodboy#k (Level 10 ~ 30)\r\n"
                 "#bsleepy, birdnap, doze#k (Level 20 ~ 30)\r\n"
                 "#bbirdeye, thanksgiving, fly, friedbird, imhungry#k (Level 30)")
+    sm.dispose()
 if selection == 14:
     sm.sendNext("These are the commands for #rWhite Tiger#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -225,6 +236,7 @@ if selection == 14:
                 "#btalk, chat, say#k (Level 10 ~ 30)\r\n"
                 "#bactsad, sadlook#k (Level 10 ~ 30)\r\n"
                 "#bwait#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 15:
     sm.sendNext("These are the commands for #rPenguin#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -240,6 +252,7 @@ if selection == 15:
                 "#bkiss, smooch, muah#k (Level 20 ~ 30)\r\n"
                 "#bfly#k (Level 20 ~ 30)\r\n"
                 "#bcute, adorable#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 16:
     sm.sendNext("These are the commands for #rGolden Pig#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -252,6 +265,7 @@ if selection == 16:
                 "#bsleep, sleepy, gotobed#k (Level 21 ~ 30)\r\n"
                 "#bignore / impressed / outofhere#k (Level 21 ~ 30)\r\n"
                 "#broll, showmethemoney#k (Level 21 ~ 30)")
+    sm.dispose()
 if selection == 17:
     sm.sendNext("These are the commands for #rRobot#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -264,6 +278,7 @@ if selection == 17:
                 "#bgood, thelook, charisma#k (Level 11 ~ 30)\r\n"
                 "#bspeack, talk, chat, say#k (Level 11 ~ 30)\r\n"
                 "#bdisguise, change, transform#k (Level 11 ~ 30)")
+    sm.dispose()
 if selection == 18:
     sm.sendNext("These are the commands for #rMini Yeti#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -275,6 +290,7 @@ if selection == 18:
                 "#biloveyou, likeyou, mylove#k (Level 1 ~ 30)\r\n"
                 "#btalk, chat, say#k (Level 11 ~ 30)\r\n"
                 "#bsleep, nap, sleepy, gotobed#k (Level 11 ~ 30)")
+    sm.dispose()
 if selection == 19:
     sm.sendNext("These are the commands for #rJr. Balrog#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -289,6 +305,7 @@ if selection == 19:
                 "#bspeak|talk|chat|say#k (Level 11 ~ 30)\r\n"
                 "#bsleep|nap|sleepy#k (Level 11 ~ 30)\r\n"
                 "#bgas#k (Level 21 ~ 30)")
+    sm.dispose()
 if selection == 20:
     sm.sendNext("These are the commands for #rBaby Dragon#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -298,6 +315,7 @@ if selection == 20:
                 "#bstupid|ihateyou|dummy#k (Level 1 ~ 30)\r\n#bcutie#k (Level 11 ~ 30)\r\n"
                 "#btalk|chat|say#k (Level 11 ~ 30)\r\n"
                 "#bsleep|sleepy|gotobed#k (Level 11 ~ 30)")
+    sm.dispose()
 if selection == 21:
     sm.sendNext("These are the commands for #rGreen/Red/Blue Dragon#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -309,6 +327,7 @@ if selection == 21:
                 "#btalk|chat|say#k (Level 15 ~ 30)\r\n"
                 "#bsleep|sleepy|gotobed#k (Level 15 ~ 30)\r\n"
                 "#bchange#k (Level 21 ~ 30)")
+    sm.dispose()
 if selection == 22:
     sm.sendNext("These are the commands for #rBlack Dragon#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -320,6 +339,7 @@ if selection == 22:
                 "#btalk|chat|say#k (Level 15 ~ 30)\r\n"
                 "#bsleep|sleepy|gotobed#k (Level 15 ~ 30)\r\n"
                 "#bcutie, change#k (Level 21 ~ 30)")
+    sm.dispose()
 if selection == 23:
     sm.sendNext("These are the commands for #rJr. Reaper#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -331,6 +351,7 @@ if selection == 23:
                 "#bsmellmyfeet, rockout, boo#k (Level 1 ~ 30)\r\n"
                 "#btrickortreat#k (Level 1 ~ 30)\r\n"
                 "#bmonstermash#k (Level 1 ~ 30)")
+    sm.dispose()
 if selection == 24:
     sm.sendNext("These are the commands for #rPorcupine#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -342,6 +363,7 @@ if selection == 24:
                 "#bcomb|beach#k (Level 10 ~ 30)\r\n"
                 "#btreeninja#k (Level 20 ~ 30)\r\n"
                 "#bdart#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 25:
     sm.sendNext("These are the commands for #rSnowman#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -353,6 +375,7 @@ if selection == 25:
                 "#bcomb, beach/bad, no, badgirl, badboy#k (Level 1 ~ 30)\r\n"
                 "#btalk, chat, say/sleep, sleepy, gotobed#k (Level 10 ~ 30)\r\n"
                 "#bchang#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 26:
     sm.sendNext("These are the commands for #rSkunk#k. "
                 "The level mentioned next to the command shows the pet level required for it to respond.\r\n"
@@ -363,6 +386,7 @@ if selection == 26:
                 "#bsnuggle/hug, sleep, goodboy#k (Level 1 ~ 30)\r\n"
                 "#bfatty, blind, badbreath#k (Level 10 ~ 30)\r\n"
                 "#bsuitup, bringthefunk#k (Level 20 ~ 30)")
+    sm.dispose()
 if selection == 27:
     sm.sendNext("In order to transfer the pet ability points, closeness and level, "
                 "Pet AP Reset Scroll is required. If you take this\r\n"
@@ -377,3 +401,4 @@ if selection == 27:
             sm.sendSayOkay("Thank you for your purchase.")
             sm.deductMesos(250000)
             sm.giveItem(4160011)
+    sm.dispose()

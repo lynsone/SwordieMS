@@ -12,3 +12,4 @@ portal = {
 
 if sm.sendAskYesNo("Navigator, would you like to set sail?"):
     sm.warp(141060000, portal[sm.getFieldID()])
+    sm.dispose()
