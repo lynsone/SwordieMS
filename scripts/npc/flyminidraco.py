@@ -10,3 +10,4 @@ answer = sm.sendNext("If you had wings, I'm sure you could go there.  "
 if answer == 0:
     sm.warp(200090500)
     sm.useItem(2210016) # Become  Red Flying Draco
+sm.dispose()

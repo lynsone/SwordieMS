@@ -8,3 +8,4 @@ while i < len(maps):
     i += 1
 answer = sm.sendNext(selList)
 sm.warp(maps[answer], 0)
+sm.dispose()

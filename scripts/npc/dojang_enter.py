@@ -30,3 +30,4 @@ else:
 
     if response == 1:
         sm.warpInstanceOut(dojoHall)
+    sm.dispose()

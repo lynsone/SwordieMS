@@ -23,3 +23,4 @@ if answer == 0:
             sm.spawnMob(8800103 + i, -54, 86, False)
 elif answer == 1:
     sm.clearPartyInfo(211042300)
+sm.dispose()
