@@ -36,6 +36,10 @@ public class MobAttackInfo {
     public byte byteIdk5;
     public int psychicLockInfo;
     public byte rocketRushInfo;
+    public byte forceActionAndLeft;
+    public byte calcDamageStatIndexAndDoomed;
+    public int hitPartRunTimesSize;
+    public short magicInfo;
 
     public MobAttackInfo deepCopy() {
         MobAttackInfo mai = new MobAttackInfo();
@@ -43,7 +47,7 @@ public class MobAttackInfo {
         mai.hitAction = hitAction;
         mai.left = left;
         mai.idk3 = idk3;
-        mai.foreAction = foreAction;
+        mai.forceActionAndLeft = forceActionAndLeft;
         mai.frameIdx = frameIdx;
         mai.calcDamageStatIndex = calcDamageStatIndex;
         mai.hitX = hitX;

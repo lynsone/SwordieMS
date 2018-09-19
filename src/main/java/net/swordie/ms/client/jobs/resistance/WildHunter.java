@@ -581,6 +581,7 @@ public class WildHunter extends Citizen {
                         Quest quest = chr.getQuestManager().getQuestById(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID);
                         if (quest == null) {
                             quest = new Quest(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID, QuestStatus.STARTED);
+                            chr.getQuestManager().addQuest(quest);
                         }
                         String key = QuestConstants.getWhStorageQuestValByTemplateID(mob.getTemplateId());
                         if (key != null) {
@@ -588,6 +589,7 @@ public class WildHunter extends Citizen {
                             chr.write(WvsContext.message(MessageType.QUEST_RECORD_EX_MESSAGE,
                                     quest.getQRKey(), quest.getQRValue(), (byte) 0));
                             chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 0)));
+                            WildHunterInfo whi = chr.getWildHunterInfo();
                             mob.die();
                         } else {
                             chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 2)));

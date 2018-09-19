@@ -82,11 +82,13 @@ public class AttackInfo {
     public boolean isDragonAttack;
     public byte mastery;
     public byte actionSpeed;
-    public byte byteIdk1;
+    public byte shootRange;
     public byte byteIdk2;
     public byte byteIdk3;
     public byte byteIdk4;
     public byte byteIdk5;
     public OutHeader attackHeader;
     public int requestTime;
+    public int summonID;
+    public boolean boxAttack;
 }

@@ -1148,7 +1148,10 @@ public enum OutHeader {
             NPC_CHANGE_CONTROLLER,
             MOB_ENTER_FIELD,
             RESULT_INSTANCE_TABLE,
-            CREATE_OBTACLE
+            CREATE_OBTACLE,
+            DROP_ENTER_FIELD,
+            MOB_LEAVE_FIELD,
+            MESSAGE
     );
 
     private short value;
