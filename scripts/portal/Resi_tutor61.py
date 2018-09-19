@@ -29,4 +29,3 @@ sm.setSpeakerID(2159010)
 sm.sendSay("Hold it right there!")
 
 sm.warp(931000021, 1)
-sm.dispose()

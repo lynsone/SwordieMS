@@ -33,4 +33,3 @@ elif "vel00=2" not in sm.getQRValue(23007):
 
     sm.addQRValue(23007, "vel00=2")
     sm.warp(931000011, 0)
-sm.dispose()

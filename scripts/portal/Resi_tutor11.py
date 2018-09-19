@@ -34,5 +34,4 @@ sm.setSpeakerID(ULRIKA_ID)
 sm.sendSay("Don't be a brat, Von. What? Are you scared to hide all by yourself in these big, bad caves? *snicker*\r\n#h0#, since you were late, you're it. Count to 10 and then come find us. No peeking.")
 
 sm.warp(931000001, 1)
-sm.dispose()
 

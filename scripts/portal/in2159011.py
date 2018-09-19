@@ -8,4 +8,3 @@ if "exp1=1" in sm.getQRValue(23007) and "exp2=1" in sm.getQRValue(23007) and "ex
         sm.sendNext("#b(Even Von wouldn't hide here, right?)#k")
 else:
     sm.chat("Find your friends first.")
-sm.dispose()

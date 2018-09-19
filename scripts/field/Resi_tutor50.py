@@ -21,4 +21,3 @@ sm.sendNext("#b(You tried to hit the vat with all your might, but your hand slip
 
 sm.giveExp(60)
 sm.warp(931000013, 0)
-sm.dispose()

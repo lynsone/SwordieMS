@@ -9,4 +9,3 @@ if response == 1:
     sm.startQuestNoCheck(parentID)
     sm.completeQuest(parentID)
     sm.sendSayOkay("#b(The seal is complete, and the town is safe.)")
-sm.dispose()

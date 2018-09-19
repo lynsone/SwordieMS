@@ -28,4 +28,3 @@ sm.sendSay("Huh? Well... Now that you mention it, I do hear something. Yes, I do
 
 # Tremble (FieldEffect here) - (0, 500, 30).
 sm.reservedEffect("Effect/Direction4.img/Resistance/TalkInLab")
-sm.dispose()

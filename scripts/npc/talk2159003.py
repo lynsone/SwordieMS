@@ -7,4 +7,3 @@ if "exp1=1" not in sm.getQRValue(23007):
     sm.addQRValue(23007, "exp1=1")
 else:
     sm.sendNext("Did you find Ulrika and Von yet? Von is really, really good at hiding.")
-sm.dispose()

@@ -16,4 +16,3 @@ sm.setPlayerAsSpeaker()
 sm.sendSay("Then hurry up! Let's go!")
 
 sm.warp(931000020, 1)
-sm.dispose()
