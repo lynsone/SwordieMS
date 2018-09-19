@@ -1,14 +1,14 @@
 package net.swordie.ms.loaders;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.util.*;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import net.swordie.ms.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -23,7 +23,8 @@ public class ItemData {
     public static Map<Integer, Equip> equips = new HashMap<>();
     public static Map<Integer, ItemInfo> items = new HashMap<>();
     public static Map<Integer, PetInfo> pets = new HashMap<>();
-    public static List<ItemOption> itemOptions = new ArrayList<>();
+    public static Map<Integer, ItemOption> itemOptions = new HashMap<>();
+    public static Map<Integer, Integer> skillIdByItemId = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
 
@@ -42,19 +43,22 @@ public class ItemData {
             ret.setQuantity(1);
             ret.setCuttable((short) -1);
             ret.setItemState((short) ItemState.ENHANCABLE.getVal());
+            ret.setType(Item.Type.EQUIP);
+            ret.setInvType(InvType.EQUIP);
             if (randomizeStats) {
-                // TODO: flame stats
-
-                if (ItemConstants.canEquipHavePotential(e)) {
-                    ItemGrade grade = ItemGrade.NONE;
+                if (ItemConstants.canEquipHaveFlame(ret)) {
+                    ret.randomizeFlameStats(true);
+                }
+                if (ItemConstants.canEquipHavePotential(ret)) {
+                    ItemGrade grade = ItemGrade.None;
                     if (Util.succeedProp(GameConstants.RANDOM_EQUIP_UNIQUE_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_UNIQUE;
+                        grade = ItemGrade.HiddenUnique;
                     } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_EPIC_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_EPIC;
+                        grade = ItemGrade.HiddenEpic;
                     } else if (Util.succeedProp(GameConstants.RANDOM_EQUIP_RARE_CHANCE)) {
-                        grade = ItemGrade.HIDDEN_RARE;
+                        grade = ItemGrade.HiddenRare;
                     }
-                    if (grade != ItemGrade.NONE) {
+                    if (grade != ItemGrade.None) {
                         ret.setHiddenOptionBase(grade.getVal(), ItemConstants.THIRD_LINE_CHANCE);
                     }
                 }
@@ -80,47 +84,52 @@ public class ItemData {
     private static Equip readEquipFromFile(File file) {
         Equip equip = null;
         try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
-            int itemId = dataInputStream.readInt();
-            String islot = dataInputStream.readUTF();
-            String vslot = dataInputStream.readUTF();
-            short rJob = dataInputStream.readShort();
-            short rLevel = dataInputStream.readShort();
-            short rStr = dataInputStream.readShort();
-            short rDex = dataInputStream.readShort();
-            short rInt = dataInputStream.readShort();
-            short rLuk = dataInputStream.readShort();
-            short rPop = dataInputStream.readShort();
-            short iStr = dataInputStream.readShort();
-            short iDex = dataInputStream.readShort();
-            short iInt = dataInputStream.readShort();
-            short iLuk = dataInputStream.readShort();
-            short iPDD = dataInputStream.readShort();
-            short iMDD = dataInputStream.readShort();
-            short iMaxHp = dataInputStream.readShort();
-            short iMaxMp = dataInputStream.readShort();
-            short iPad = dataInputStream.readShort();
-            short iMad = dataInputStream.readShort();
-            short iEva = dataInputStream.readShort();
-            short iAcc = dataInputStream.readShort();
-            short iCraft = dataInputStream.readShort();
-            short iSpeed = dataInputStream.readShort();
-            short iJump = dataInputStream.readShort();
-            short damR = dataInputStream.readShort();
-            short statR = dataInputStream.readShort();
-            short ruc = dataInputStream.readShort();
-            int charmEXP = dataInputStream.readInt();
-            int setItemID = dataInputStream.readInt();
-            int price = dataInputStream.readInt();
-            int attackSpeed = dataInputStream.readInt();
-            boolean cash = dataInputStream.readBoolean();
-            boolean expireOnLogout = dataInputStream.readBoolean();
-            boolean exItem = dataInputStream.readBoolean();
-            boolean notSale = dataInputStream.readBoolean();
-            boolean only = dataInputStream.readBoolean();
-            boolean tradeBlock = dataInputStream.readBoolean();
-            boolean equipTradeBlock = dataInputStream.readBoolean();
-            boolean fixedPotential = dataInputStream.readBoolean();
-            boolean noPotential = dataInputStream.readBoolean();
+            equip = new Equip();
+            equip.setItemId(dataInputStream.readInt());
+            equip.setiSlot(dataInputStream.readUTF());
+            equip.setvSlot(dataInputStream.readUTF());
+            equip.setrJob(dataInputStream.readShort());
+            equip.setrLevel(dataInputStream.readShort());
+            equip.setrStr(dataInputStream.readShort());
+            equip.setrDex(dataInputStream.readShort());
+            equip.setrInt(dataInputStream.readShort());
+            equip.setrLuk(dataInputStream.readShort());
+            equip.setrPop(dataInputStream.readShort());
+            equip.setiStr(dataInputStream.readShort());
+            equip.setiDex(dataInputStream.readShort());
+            equip.setiInt(dataInputStream.readShort());
+            equip.setiLuk(dataInputStream.readShort());
+            equip.setiPDD(dataInputStream.readShort());
+            equip.setiMDD(dataInputStream.readShort());
+            equip.setiMaxHp(dataInputStream.readShort());
+            equip.setiMaxMp(dataInputStream.readShort());
+            equip.setiPad(dataInputStream.readShort());
+            equip.setiMad(dataInputStream.readShort());
+            equip.setiEva(dataInputStream.readShort());
+            equip.setiAcc(dataInputStream.readShort());
+            equip.setiCraft(dataInputStream.readShort());
+            equip.setiSpeed(dataInputStream.readShort());
+            equip.setiJump(dataInputStream.readShort());
+            equip.setDamR(dataInputStream.readShort());
+            equip.setStatR(dataInputStream.readShort());
+            equip.setBdr(dataInputStream.readShort());
+            equip.setImdr(dataInputStream.readShort());
+            equip.setTuc(dataInputStream.readShort());
+            equip.setCharmEXP(dataInputStream.readInt());
+            equip.setSetItemID(dataInputStream.readInt());
+            equip.setPrice(dataInputStream.readInt());
+            equip.setAttackSpeed(dataInputStream.readInt());
+            equip.setCash(dataInputStream.readBoolean());
+            equip.setExpireOnLogout(dataInputStream.readBoolean());
+            equip.setExItem(dataInputStream.readBoolean());
+            equip.setNotSale(dataInputStream.readBoolean());
+            equip.setOnly(dataInputStream.readBoolean());
+            equip.setTradeBlock(dataInputStream.readBoolean());
+            equip.setEquipTradeBlock(dataInputStream.readBoolean());
+            equip.setFixedPotential(dataInputStream.readBoolean());
+            equip.setNoPotential(dataInputStream.readBoolean());
+            equip.setBossReward(dataInputStream.readBoolean() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
+            equip.setSuperiorEqp(dataInputStream.readBoolean());
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -129,17 +138,9 @@ public class ItemData {
             for (int i = 0; i < 7 - optionLength; i++) {
                 options.add(0);
             }
-            int fixedGrade = dataInputStream.readInt();
-            int specialGrade = dataInputStream.readInt();
-            equip = new Equip(itemId, -1, -1, FileTime.fromType(FileTime.Type.ZERO_TIME), -1,
-                    null, FileTime.fromType(FileTime.Type.ZERO_TIME), 0, ruc, (short) 0, iStr, iDex, iInt,
-                    iLuk, iMaxHp, iMaxMp, iPad, iMad, iPDD, iMDD, iAcc, iEva, iCraft,
-                    iSpeed, iJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
-                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, damR, statR, (short) 0, (short) 0,
-                    (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, rStr, rDex, rInt,
-                    rLuk, rLevel, rJob, rPop, cash,
-                    islot, vslot, fixedGrade, options, specialGrade, fixedPotential, noPotential, tradeBlock, only,
-                    notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
+            equip.setOptions(options);
+            equip.setFixedGrade(dataInputStream.readInt());
+            equip.setSpecialGrade(dataInputStream.readInt());
             equips.put(equip.getItemId(), equip);
         } catch (IOException e) {
             e.printStackTrace();
@@ -179,7 +180,9 @@ public class ItemData {
                 dataOutputStream.writeShort(equip.getiJump());
                 dataOutputStream.writeShort(equip.getDamR());
                 dataOutputStream.writeShort(equip.getStatR());
-                dataOutputStream.writeShort(equip.getRuc());
+                dataOutputStream.writeShort(equip.getBdr());
+                dataOutputStream.writeShort(equip.getImdr());
+                dataOutputStream.writeShort(equip.getTuc());
                 dataOutputStream.writeInt(equip.getCharmEXP());
                 dataOutputStream.writeInt(equip.getSetItemID());
                 dataOutputStream.writeInt(equip.getPrice());
@@ -193,6 +196,8 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isEquipTradeBlock());
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
                 dataOutputStream.writeBoolean(equip.isNoPotential());
+                dataOutputStream.writeBoolean(equip.isBossReward() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
+                dataOutputStream.writeBoolean(equip.isSuperiorEqp());
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
@@ -214,211 +219,152 @@ public class ItemData {
             File subDir = new File(String.format("%s/%s", wzDir, subMap));
             File[] files = subDir.listFiles();
             for (File file : files) {
-                Document doc = XMLApi.getRoot(file);
-                Node node = doc;
+                Node node = XMLApi.getRoot(file);
                 List<Node> nodes = XMLApi.getAllChildren(node);
                 for (Node mainNode : nodes) {
                     Map<String, String> attributes = XMLApi.getAttributes(mainNode);
-                    String name = attributes.get("name");
-                    int itemId = -1;
-                    if (name != null) {
-                        itemId = Integer.parseInt(attributes.get("name").replace(".img", ""));
-                        String islot = "";
-                        String vslot = "";
-                        int reqJob = 0;
-                        int reqLevel = 0;
-                        int reqStr = 0;
-                        int reqDex = 0;
-                        int reqInt = 0;
-                        int reqLuk = 0;
-                        int incStr = 0;
-                        int incDex = 0;
-                        int incInt = 0;
-                        int incLuk = 0;
-                        int incPDD = 0;
-                        int incMDD = 0;
-                        int incPAD = 0;
-                        int incMAD = 0;
-                        int charmEXP = 0;
-                        int incMHP = 0;
-                        int incMMP = 0;
-                        int incACC = 0;
-                        int incEVA = 0;
-                        int incCraft = 0;
-                        int incSpeed = 0;
-                        int incJump = 0;
-                        int ruc = 0;
-                        int price = 0;
-                        int attackSpeed = 0;
-                        int damR = 0;
-                        int statR = 0;
-                        int reqPop = 0;
-                        int setItemID = 0;
-                        boolean cash = false;
-                        boolean expireOnLogout = false;
-                        boolean notSale = false;
-                        boolean only = false;
-                        boolean tradeBlock = false;
-                        boolean fixedPotential = false;
-                        boolean noPotential = false;
-                        boolean exItem = false;
-                        boolean equipTradeBlock = false;
+                    String mainName = attributes.get("name");
+                    if (mainName != null) {
+                        int itemId = Integer.parseInt(attributes.get("name").replace(".img", ""));
+                        Equip equip = new Equip();
+                        equip.setItemId(itemId);
+                        equip.setInvType(InvType.EQUIP);
+                        equip.setType(Item.Type.EQUIP);
+                        equip.setDateExpire(FileTime.fromType(FileTime.Type.MAX_TIME));
                         List<Integer> options = new ArrayList<>(7);
-                        int fixedGrade = 0;
-                        int specialGrade = 0;
                         for (Node n : XMLApi.getAllChildren(XMLApi.getFirstChildByNameBF(mainNode, "info"))) {
-                            attributes = XMLApi.getAttributes(n);
-                            boolean hasISlot = attributes.get("name").equalsIgnoreCase("islot");
-                            if (hasISlot) {
-                                islot = attributes.get("value");
-                            }
-                            boolean hasVSlot = attributes.get("name").equalsIgnoreCase("vslot");
-                            if (hasVSlot) {
-                                vslot = attributes.get("value");
-                            }
-                            boolean hasReqJob = attributes.get("name").equalsIgnoreCase("reqJob");
-                            if (hasReqJob) {
-                                reqJob = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasReqLevel = attributes.get("name").equalsIgnoreCase("reqLevel");
-                            if (hasReqLevel) {
-                                reqLevel = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasReqStr = attributes.get("name").equalsIgnoreCase("reqSTR");
-                            if (hasReqStr) {
-                                reqStr = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasReqDex = attributes.get("name").equalsIgnoreCase("reqDex");
-                            if (hasReqDex) {
-                                reqDex = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasReqInt = attributes.get("name").equalsIgnoreCase("reqInt");
-                            if (hasReqInt) {
-                                reqInt = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasReqLuk = attributes.get("name").equalsIgnoreCase("reqLuk");
-                            if (hasReqLuk) {
-                                reqLuk = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasreqPOP = attributes.get("name").equalsIgnoreCase("reqPOP");
-                            if (hasreqPOP) {
-                                reqPop = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasIncStr = attributes.get("name").equalsIgnoreCase("incStr");
-                            if (hasIncStr) {
-                                incStr = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincDex = attributes.get("name").equalsIgnoreCase("incDex");
-                            if (hasincDex) {
-                                incDex = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincInt = attributes.get("name").equalsIgnoreCase("incInt");
-                            if (hasincInt) {
-                                incInt = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincLuk = attributes.get("name").equalsIgnoreCase("incLuk");
-                            if (hasincLuk) {
-                                incLuk = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincPDD = attributes.get("name").equalsIgnoreCase("incPDD");
-                            if (hasincPDD) {
-                                incPDD = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincMDD = attributes.get("name").equalsIgnoreCase("incMDD");
-                            if (hasincMDD) {
-                                incMDD = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincMHP = attributes.get("name").equalsIgnoreCase("incMHP");
-                            if (hasincMHP) {
-                                incMHP = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincMMP = attributes.get("name").equalsIgnoreCase("incMMP");
-                            if (hasincMMP) {
-                                incMMP = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincPAD = attributes.get("name").equalsIgnoreCase("incPAD");
-                            if (hasincPAD) {
-                                incPAD = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincMAD = attributes.get("name").equalsIgnoreCase("incMAD");
-                            if (hasincMAD) {
-                                incMAD = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincEVA = attributes.get("name").equalsIgnoreCase("incEVA");
-                            if (hasincEVA) {
-                                incEVA = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincACC = attributes.get("name").equalsIgnoreCase("incACC");
-                            if (hasincACC) {
-                                incACC = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincSpeed = attributes.get("name").equalsIgnoreCase("incSpeed");
-                            if (hasincSpeed) {
-                                incSpeed = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasincJump = attributes.get("name").equalsIgnoreCase("incJump");
-                            if (hasincJump) {
-                                incJump = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasdamR = attributes.get("name").equalsIgnoreCase("damR");
-                            if (hasdamR) {
-                                damR = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasstatR = attributes.get("name").equalsIgnoreCase("statR");
-                            if (hasstatR) {
-                                statR = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasruc = attributes.get("name").equalsIgnoreCase("tuc");
-                            if (hasruc) {
-                                ruc = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hassetItemID = attributes.get("name").equalsIgnoreCase("setItemID");
-                            if (hassetItemID) {
-                                setItemID = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasprice = attributes.get("name").equalsIgnoreCase("price");
-                            if (hasprice) {
-                                price = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasattackSpeed = attributes.get("name").equalsIgnoreCase("attackSpeed");
-                            if (hasattackSpeed) {
-                                attackSpeed = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hascash = attributes.get("name").equalsIgnoreCase("cash");
-                            if (hascash) {
-                                cash = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hasexpireOnLogout = attributes.get("name").equalsIgnoreCase("expireOnLogout");
-                            if (hasexpireOnLogout) {
-                                expireOnLogout = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hasexItem = attributes.get("name").equalsIgnoreCase("exItem");
-                            if (hasexItem) {
-                                exItem = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hasnotSale = attributes.get("name").equalsIgnoreCase("notSale");
-                            if (hasnotSale) {
-                                notSale = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hasonly = attributes.get("name").equalsIgnoreCase("only");
-                            if (hasonly) {
-                                only = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hastradeBlock = attributes.get("name").equalsIgnoreCase("tradeBlock");
-                            if (hastradeBlock) {
-                                tradeBlock = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hasequipTradeBlock = attributes.get("name").equalsIgnoreCase("equipTradeBlock");
-                            if (hasequipTradeBlock) {
-                                equipTradeBlock = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hasfixedPotential = attributes.get("name").equalsIgnoreCase("fixedPotential");
-                            if (hasfixedPotential) {
-                                fixedPotential = Integer.parseInt(attributes.get("value")) == 1;
-                            }
-                            boolean hasNoPotential = attributes.get("name").equalsIgnoreCase("noPotential");
-                            if (hasNoPotential) {
-                                noPotential = Integer.parseInt(attributes.get("value")) == 1;
+                            String name = XMLApi.getNamedAttribute(n, "name");
+                            String value = XMLApi.getNamedAttribute(n, "value");
+                            switch (name) {
+                                case "islot":
+                                    equip.setiSlot(value);
+                                    break;
+                                case "vslot":
+                                    equip.setvSlot(value);
+                                    break;
+                                case "reqJob":
+                                    equip.setrJob(Short.parseShort(value));
+                                    break;
+                                case "reqLevel":
+                                    equip.setrLevel(Short.parseShort(value));
+                                    break;
+                                case "reqSTR":
+                                    equip.setrStr(Short.parseShort(value));
+                                    break;
+                                case "reqDEX":
+                                    equip.setrDex(Short.parseShort(value));
+                                    break;
+                                case "reqINT":
+                                    equip.setrInt(Short.parseShort(value));
+                                    break;
+                                case "reqPOP":
+                                    equip.setrPop(Short.parseShort(value));
+                                    break;
+                                case "incSTR":
+                                    equip.setiStr(Short.parseShort(value));
+                                    break;
+                                case "incDEX":
+                                    equip.setiDex(Short.parseShort(value));
+                                    break;
+                                case "incINT":
+                                    equip.setiInt(Short.parseShort(value));
+                                    break;
+                                case "incLUK":
+                                    equip.setiLuk(Short.parseShort(value));
+                                    break;
+                                case "incPDD":
+                                    equip.setiPDD(Short.parseShort(value));
+                                    break;
+                                case "incMDD":
+                                    equip.setiMDD(Short.parseShort(value));
+                                    break;
+                                case "incMHP":
+                                    equip.setiMaxHp(Short.parseShort(value));
+                                    break;
+                                case "incMMP":
+                                    equip.setiMaxMp(Short.parseShort(value));
+                                    break;
+                                case "incPAD":
+                                    equip.setiPad(Short.parseShort(value));
+                                    break;
+                                case "incMAD":
+                                    equip.setiMad(Short.parseShort(value));
+                                    break;
+                                case "incEVA":
+                                    equip.setiEva(Short.parseShort(value));
+                                    break;
+                                case "incACC":
+                                    equip.setiAcc(Short.parseShort(value));
+                                    break;
+                                case "incSpeed":
+                                    equip.setiSpeed(Short.parseShort(value));
+                                    break;
+                                case "incJump":
+                                    equip.setiJump(Short.parseShort(value));
+                                    break;
+                                case "damR":
+                                    equip.setDamR(Short.parseShort(value));
+                                    break;
+                                case "statR":
+                                    equip.setStatR(Short.parseShort(value));
+                                    break;
+                                case "imdR":
+                                    equip.setImdr(Short.parseShort(value));
+                                    break;
+                                case "bdR":
+                                    equip.setBdr(Short.parseShort(value));
+                                    break;
+                                case "tuc":
+                                    equip.setTuc(Short.parseShort(value));
+                                    break;
+                                case "setItemID":
+                                    equip.setSetItemID(Integer.parseInt(value));
+                                    break;
+                                case "price":
+                                    equip.setPrice(Integer.parseInt(value));
+                                    break;
+                                case "attackSpeed":
+                                    equip.setAttackSpeed(Integer.parseInt(value));
+                                    break;
+                                case "cash":
+                                    equip.setCash(Integer.parseInt(value)!= 0);
+                                    break;
+                                case "expireOnLogout":
+                                    equip.setExpireOnLogout(Integer.parseInt(value)!= 0);
+                                    break;
+                                case "exItem":
+                                    equip.setExItem(Integer.parseInt(value)!= 0);
+                                    break;
+                                case "notSale":
+                                    equip.setNotSale(Integer.parseInt(value)!= 0);
+                                    break;
+                                case "only":
+                                    equip.setOnly(Integer.parseInt(value)!= 0);
+                                    break;
+                                case "tradeBlock":
+                                    equip.setTradeBlock(Integer.parseInt(value)!= 0);
+                                    break;
+                                case "fixedPotential":
+                                    equip.setFixedPotential(Integer.parseInt(value)!= 0);
+                                    break;
+                                case "noPotential":
+                                    equip.setNoPotential(Integer.parseInt(value) != 0);
+                                    break;
+                                case "bossReward":
+                                    equip.setBossReward(Integer.parseInt(value) != 0);
+                                    break;
+                                case "superiorEqp":
+                                    equip.setSuperiorEqp(Integer.parseInt(value) != 0);
+                                    break;
+                                case "fixedGrade":
+                                    equip.setFixedGrade(Integer.parseInt(value));
+                                    break;
+                                case "specialGrade":
+                                    equip.setSpecialGrade(Integer.parseInt(value));
+                                    break;
+                                case "charmEXP":
+                                    equip.setCharmEXP(Integer.parseInt(value));
+                                    break;
                             }
                             boolean hasOptions = attributes.get("name").equalsIgnoreCase("option");
                             if (hasOptions) {
@@ -433,25 +379,8 @@ public class ItemData {
                             for (int i = 0; i < 7 - options.size(); i++) {
                                 options.add(0);
                             }
-
-                            boolean hasfixedGrade = attributes.get("name").equalsIgnoreCase("fixedGrade");
-                            if (hasfixedGrade) {
-                                fixedGrade = Integer.parseInt(attributes.get("value"));
-                            }
-                            boolean hasspecialGrade = attributes.get("name").equalsIgnoreCase("specialGrade");
-                            if (hasspecialGrade) {
-                                specialGrade = Integer.parseInt(attributes.get("value"));
-                            }
+                            equip.setOptions(options);
                         }
-                        Equip equip = new Equip(itemId, -1, -1, FileTime.fromType(FileTime.Type.ZERO_TIME), -1,
-                                null, FileTime.fromType(FileTime.Type.ZERO_TIME), 0, (short) ruc, (short) 0, (short) incStr, (short) incDex, (short) incInt,
-                                (short) incLuk, (short) incMHP, (short) incMMP, (short) incPAD, (short) incMAD, (short) incPDD, (short) incMDD, (short) incACC, (short) incEVA, (short) incCraft,
-                                (short) incSpeed, (short) incJump, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0,
-                                (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) damR, (short) statR, (short) 0, (short) 0,
-                                (short) 0, (short) 0, (short) 0, (short) 0, (short) 0, (short) reqStr, (short) reqDex, (short) reqInt,
-                                (short) reqLuk, (short) reqLevel, (short) reqJob, (short) reqPop, cash,
-                                islot, vslot, fixedGrade, options, specialGrade, fixedPotential, noPotential, tradeBlock, only,
-                                notSale, attackSpeed, price, charmEXP, expireOnLogout, setItemID, exItem, equipTradeBlock, "");
                         equips.put(equip.getItemId(), equip);
                     }
                 }
@@ -520,6 +449,7 @@ public class ItemData {
             itemInfo.setMasterLv(dataInputStream.readInt());
 
             itemInfo.setMoveTo(dataInputStream.readInt());
+            itemInfo.setSkillId(dataInputStream.readInt());
             getItems().put(itemInfo.getItemId(), itemInfo);
 
         } catch (IOException e) {
@@ -585,6 +515,7 @@ public class ItemData {
                 dataOutputStream.writeInt(ii.getMasterLv());
 
                 dataOutputStream.writeInt(ii.getMoveTo());
+                dataOutputStream.writeInt(ii.getSkillId());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -941,7 +872,6 @@ public class ItemData {
 
                                 case "stateChangeItem":
                                 case "direction":
-                                case "reqEquipLevelMax":
                                 case "exGrade":
                                 case "exGradeWeight":
                                 case "effect":
@@ -1061,14 +991,12 @@ public class ItemData {
                                 case "reqCUC":
                                 case "incCraft":
                                 case "reqEquipLevelMin":
-                                case "incRandVol":
                                 case "incPVPDamage":
                                 case "successRates":
                                 case "enchantCategory":
                                 case "additionalSuccess":
                                 case "level":
                                 case "specialItem":
-                                case "createType":
                                 case "exNew":
                                 case "cuttable":
                                 case "setItemCategory":
@@ -1158,6 +1086,9 @@ public class ItemData {
                                     break;
                                 case "noNegative":
                                     item.putScrollStat(noNegative, Integer.parseInt(value));
+                                    break;
+                                case "incRandVol":
+                                    item.putScrollStat(incRandVol, Integer.parseInt(value));
                                     break;
                                 case "success":
                                     item.putScrollStat(success, Integer.parseInt(value));
@@ -1278,10 +1209,19 @@ public class ItemData {
                                 case "linkedID":
                                     item.setLinkedID(Integer.parseInt(value));
                                     break;
+                                case "reqEquipLevelMax":
+                                    item.putScrollStat(reqEquipLevelMax, Integer.parseInt(value));
+                                    break;
+                                case "createType":
+                                    item.putScrollStat(createType, Integer.parseInt(value));
+                                    break;
+                                case "optionType":
+                                    item.putScrollStat(optionType, Integer.parseInt(value));
+                                    break;
                                 case "spec":
                                     break;
                                 default:
-                                    log.warn(String.format("Unkown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
+                                    log.warn(String.format("Unknown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
                             }
                         }
                     }
@@ -1343,10 +1283,30 @@ public class ItemData {
                             item.addItemReward(iri);
                         }
                     }
+                    item.setSkillId(getSkillIdByItemId(id));
                     getItems().put(item.getItemId(), item);
                 }
             }
         }
+    }
+
+    public static void loadMountItemsFromFile() {
+        File file = new File(String.format("%s/mountsFromItem.txt", ServerConstants.RESOURCES_DIR));
+        try (Scanner scanner = new Scanner(new FileInputStream(file))) {
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] lineSplit = line.split(" ");
+                int itemId = Integer.parseInt(lineSplit[0]);
+                int skillId = Integer.parseInt(lineSplit[1]);
+                skillIdByItemId.put(itemId, skillId);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int getSkillIdByItemId(int itemId) {
+        return skillIdByItemId.getOrDefault(itemId, 0);
     }
 
     public static Item getDeepCopyByItemInfo(ItemInfo itemInfo) {
@@ -1406,44 +1366,267 @@ public class ItemData {
             ItemOption io = new ItemOption();
             String nodeName = XMLApi.getNamedAttribute(mainNode, "name");
             io.setId(Integer.parseInt(nodeName));
-            int optionType = 0;
-            Node typeNode = XMLApi.getFirstChildByNameBF(mainNode, "optionType");
-            if (typeNode != null) {
-                optionType = Integer.parseInt(XMLApi.getNamedAttribute(typeNode, "value"));
+            Node infoNode = XMLApi.getFirstChildByNameBF(mainNode, "info");
+            if (infoNode != null) {
+                for (Node infoChild : XMLApi.getAllChildren(infoNode)) {
+                    String name = XMLApi.getNamedAttribute(infoChild, "name");
+                    String value = XMLApi.getNamedAttribute(infoChild, "value");
+                    switch (name) {
+                        case "optionType":
+                            io.setOptionType(Integer.parseInt(value));
+                            break;
+                        case "weight":
+                            io.setWeight(Integer.parseInt(value));
+                            break;
+                        case "reqLevel":
+                            io.setReqLevel(Integer.parseInt(value));
+                            break;
+                        case "string":
+                            io.setString(value);
+                            break;
+                    }
+                }
             }
-            int weight = 0;
-            Node weightNode = XMLApi.getFirstChildByNameBF(mainNode, "weight");
-            if (weightNode != null) {
-                weight = Integer.parseInt(XMLApi.getNamedAttribute(weightNode, "value"));
+            Node levelNode = XMLApi.getFirstChildByNameBF(mainNode, "level");
+            if (levelNode != null) {
+                for (Node levelChild : XMLApi.getAllChildren(levelNode)) {
+                    int level = Integer.parseInt(XMLApi.getNamedAttribute(levelChild, "name"));
+                    for (Node levelInfoNode : XMLApi.getAllChildren(levelChild)) {
+                        String name = XMLApi.getNamedAttribute(levelInfoNode, "name");
+                        String stringValue = XMLApi.getNamedAttribute(levelInfoNode, "value");
+                        int value = 0;
+                        if (Util.isNumber(stringValue)) {
+                            value = Integer.parseInt(stringValue);
+                        }
+                        switch (name) {
+                            case "incSTR":
+                                io.addStatValue(level, BaseStat.str, value);
+                                break;
+                            case "incDEX":
+                                io.addStatValue(level, BaseStat.dex, value);
+                                break;
+                            case "incINT":
+                                io.addStatValue(level, BaseStat.inte, value);
+                                break;
+                            case "incLUK":
+                                io.addStatValue(level, BaseStat.luk, value);
+                                break;
+                            case "incMHP":
+                                io.addStatValue(level, BaseStat.mhp, value);
+                                break;
+                            case "incMMP":
+                                io.addStatValue(level, BaseStat.mmp, value);
+                                break;
+                            case "incACC":
+                                io.addStatValue(level, BaseStat.acc, value);
+                                break;
+                            case "incEVA":
+                                io.addStatValue(level, BaseStat.eva, value);
+                                break;
+                            case "incSpeed":
+                                io.addStatValue(level, BaseStat.speed, value);
+                                break;
+                            case "incJump":
+                                io.addStatValue(level, BaseStat.jump, value);
+                                break;
+                            case "incPAD":
+                                io.addStatValue(level, BaseStat.pad, value);
+                                break;
+                            case "incMAD":
+                                io.addStatValue(level, BaseStat.mad, value);
+                                break;
+                            case "incPDD":
+                                io.addStatValue(level, BaseStat.pdd, value);
+                                break;
+                            case "incMDD":
+                                io.addStatValue(level, BaseStat.mdd, value);
+                                break;
+                            case "incCr":
+                                io.addStatValue(level, BaseStat.cr, value);
+                                break;
+                            case "incPADr":
+                                io.addStatValue(level, BaseStat.padR, value);
+                                break;
+                            case "incMADr":
+                                io.addStatValue(level, BaseStat.madR, value);
+                                break;
+                            case "incSTRr":
+                                io.addStatValue(level, BaseStat.strR, value);
+                                break;
+                            case "incDEXr":
+                                io.addStatValue(level, BaseStat.dexR, value);
+                                break;
+                            case "incINTr":
+                                io.addStatValue(level, BaseStat.intR, value);
+                                break;
+                            case "incLUKr":
+                                io.addStatValue(level, BaseStat.lukR, value);
+                                break;
+                            case "ignoreTargetDEF":
+                                io.addStatValue(level, BaseStat.ied, value);
+                                break;
+                            case "boss":
+                                io.addStatValue(level, BaseStat.bd, value);
+                                break;
+                            case "incDAMr":
+                                io.addStatValue(level, BaseStat.fd, value);
+                                break;
+                            case "incAllskill":
+                                io.addStatValue(level, BaseStat.incAllSkill, value);
+                                break;
+                            case "incMHPr":
+                                io.addStatValue(level, BaseStat.mhpR, value);
+                                break;
+                            case "incMMPr":
+                                io.addStatValue(level, BaseStat.mmpR, value);
+                                break;
+                            case "incACCr":
+                                io.addStatValue(level, BaseStat.accR, value);
+                                break;
+                            case "incEVAr":
+                                io.addStatValue(level, BaseStat.evaR, value);
+                                break;
+                            case "incPDDr":
+                                io.addStatValue(level, BaseStat.pddR, value);
+                                break;
+                            case "incMDDr":
+                                io.addStatValue(level, BaseStat.mddR, value);
+                                break;
+                            case "RecoveryHP":
+                                io.addStatValue(level, BaseStat.hpRecovery, value);
+                                break;
+                            case "RecoveryMP":
+                                io.addStatValue(level, BaseStat.mpRecovery, value);
+                                break;
+                            case "incMaxDamage":
+                                io.addStatValue(level, BaseStat.damageOver, value);
+                                break;
+                            case "incSTRlv":
+                                io.addStatValue(level, BaseStat.strLv, value / 10D);
+                                break;
+                            case "incDEXlv":
+                                io.addStatValue(level, BaseStat.dexLv, value / 10D);
+                                break;
+                            case "incINTlv":
+                                io.addStatValue(level, BaseStat.intLv, value / 10D);
+                                break;
+                            case "incLUKlv":
+                                io.addStatValue(level, BaseStat.lukLv, value / 10D);
+                                break;
+                            case "RecoveryUP":
+                                io.addStatValue(level, BaseStat.recoveryUp, value);
+                                break;
+                            case "incTerR":
+                                io.addStatValue(level, BaseStat.ter, value);
+                                break;
+                            case "incAsrR":
+                                io.addStatValue(level, BaseStat.asr, value);
+                                break;
+                            case "incEXPr":
+                                io.addStatValue(level, BaseStat.expR, value);
+                                break;
+                            case "mpconReduce":
+                                io.addStatValue(level, BaseStat.mpconReduce, value);
+                                break;
+                            case "reduceCooltime":
+                                io.addStatValue(level, BaseStat.reduceCooltime, value);
+                                break;
+                            case "incMesoProp":
+                                io.addStatValue(level, BaseStat.mesoR, value);
+                                break;
+                            case "incRewardProp":
+                                io.addStatValue(level, BaseStat.dropR, value);
+                                break;
+                            case "incCriticaldamageMin":
+                                io.addStatValue(level, BaseStat.minCd, value);
+                                break;
+                            case "incCriticaldamageMax":
+                                io.addStatValue(level, BaseStat.maxCd, value);
+                                break;
+                            case "incPADlv":
+                                io.addStatValue(level, BaseStat.padLv, value / 10D);
+                                break;
+                            case "incMADlv":
+                                io.addStatValue(level, BaseStat.madLv, value / 10D);
+                                break;
+                            case "incMHPlv":
+                                io.addStatValue(level, BaseStat.mhpLv, value / 10D);
+                                break;
+                            case "incMMPlv":
+                                io.addStatValue(level, BaseStat.mmpLv, value / 10D);
+                                break;
+                            case "prop":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.prop, value);
+                                break;
+                            case "face":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.face, value);
+                                break;
+                            case "time":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.time, value);
+                                break;
+                            case "HP":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.hpRecoveryOnHit, value);
+                                break;
+                            case "MP":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.mpRecoveryOnHit, value);
+                                break;
+                            case "attackType":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.attackType, value);
+                                break;
+                            case "level":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.level, value);
+                                break;
+                            case "ignoreDAM":
+                                io.addMiscValue(level, ItemOption.ItemOptionType.ignoreDam, value);
+                                break;
+                        }
+                    }
+
+                }
             }
-            int reqLevel = 0;
-            Node reqLevelNode = XMLApi.getFirstChildByNameBF(mainNode, "reqLevel");
-            if (reqLevelNode != null) {
-                reqLevel = Integer.parseInt(XMLApi.getNamedAttribute(reqLevelNode, "value"));
-            }
-            io.setOptionType(optionType);
-            io.setWeight(weight);
-            io.setReqLevel(reqLevel);
-            if (weight == 0) {
+            if (io.getWeight() == 0) {
                 io.setWeight(1);
             }
-            getItemOptions().add(io);
+            getItemOptions().put(io.getId(), io);
         }
     }
 
-    public static List<ItemOption> getItemOptions() {
+    public static Map<Integer, ItemOption> getItemOptions() {
         return itemOptions;
+    }
+
+    public static ItemOption getItemOptionById(int id) {
+        return itemOptions.getOrDefault(id, null);
     }
 
     public static void saveItemOptions(String dir) {
         File file = new File(String.format("%s/itemOptions.dat", dir));
         try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
             dos.writeInt(getItemOptions().size());
-            for (ItemOption io : getItemOptions()) {
+            for (ItemOption io : getItemOptions().values()) {
                 dos.writeInt(io.getId());
                 dos.writeInt(io.getOptionType());
                 dos.writeInt(io.getWeight());
                 dos.writeInt(io.getReqLevel());
+                dos.writeUTF(io.getString());
+                dos.writeShort(io.getStatValuesPerLevel().size());
+                for (Map.Entry<Integer, Map<BaseStat, Double>> entry1 : io.getStatValuesPerLevel().entrySet()) {
+                    dos.writeInt(entry1.getKey());
+                    dos.writeShort(entry1.getValue().size());
+                    for (Map.Entry<BaseStat, Double> entry2 : entry1.getValue().entrySet()) {
+                        dos.writeInt(entry2.getKey().ordinal());
+                        dos.writeDouble(entry2.getValue());
+                    }
+                }
+                dos.writeShort(io.getMiscValuesPerLevel().size());
+                for (Map.Entry<Integer, Map<ItemOption.ItemOptionType, Integer>> entry1 : io.getMiscValuesPerLevel().entrySet()) {
+                    dos.writeInt(entry1.getKey());
+                    dos.writeShort(entry1.getValue().size());
+                    for (Map.Entry<ItemOption.ItemOptionType, Integer> entry2 : entry1.getValue().entrySet()) {
+                        dos.writeInt(entry2.getKey().ordinal());
+                        dos.writeInt(entry2.getValue());
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -1464,7 +1647,24 @@ public class ItemData {
                     io.setOptionType(dis.readInt());
                     io.setWeight(dis.readInt());
                     io.setReqLevel(dis.readInt());
-                    getItemOptions().add(io);
+                    io.setString(dis.readUTF());
+                    short size2 = dis.readShort();
+                    for (int j = 0; j < size2; j++) {
+                        int level = dis.readInt();
+                        short size3 = dis.readShort();
+                        for (int k = 0; k < size3; k++) {
+                            io.addStatValue(level, BaseStat.values()[dis.readInt()], dis.readDouble());
+                        }
+                    }
+                    size2 = dis.readShort();
+                    for (int j = 0; j < size2; j++) {
+                        int level = dis.readInt();
+                        short size3 = dis.readShort();
+                        for (int k = 0; k < size3; k++) {
+                            io.addMiscValue(level, ItemOption.ItemOptionType.values()[dis.readInt()], dis.readInt());
+                        }
+                    }
+                    getItemOptions().put(io.getId(), io);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -1476,6 +1676,7 @@ public class ItemData {
     public static void generateDatFiles() {
         log.info("Started generating item data.");
         long start = System.currentTimeMillis();
+        loadMountItemsFromFile();
         loadEquipsFromWz();
         loadItemsFromWZ();
         loadPetsFromWZ();

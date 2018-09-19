@@ -1,6 +1,7 @@
 package net.swordie.ms.life.mob;
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.util.Util;
 
 public class ForcedMobStat {
     private long maxHP, maxMP, exp;
@@ -111,9 +112,9 @@ public class ForcedMobStat {
     }
 
     public void encode(OutPacket outPacket) {
-        outPacket.encodeInt((int) Math.min(Integer.MAX_VALUE, getMaxHP()));
-        outPacket.encodeInt((int) Math.min(Integer.MAX_VALUE, getMaxMP()));
-        outPacket.encodeInt((int) Math.min(Integer.MAX_VALUE, getExp()));
+        outPacket.encodeInt(Util.maxInt(getMaxHP()));
+        outPacket.encodeInt(Util.maxInt(getMaxMP()));
+        outPacket.encodeInt(Util.maxInt(getExp()));
         outPacket.encodeInt(getPad());
         outPacket.encodeInt(getMad());
         outPacket.encodeInt(getPdr());

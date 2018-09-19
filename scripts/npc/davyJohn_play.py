@@ -4,10 +4,10 @@ from net.swordie.ms.constants import GameConstants
 from net.swordie.ms.constants import WzConstants
 
 pqItems = [
-    4001117, # Old Metal Key
-    4001120, # Rookie Pirate Mark
-    4001121, # Rising Pirate Mark
-    4001122, # Veteran Pirate Mark
+4001117, # Old Metal Key
+4001120, # Rookie Pirate Mark
+4001121, # Rising Pirate Mark
+4001122, # Veteran Pirate Mark
 ]
 
 ROOKIE_PIRATE_MARK = 4001120 # Stage 0
@@ -19,7 +19,6 @@ stage = int(sm.getQRValue(GameConstants.LORD_PIRATE_QUEST))
 
 
 if sm.getFieldID() == 925100100: # Hidden Street: Through the Head of the Ship!
-
     item = 0
     if stage == 0:
         item = ROOKIE_PIRATE_MARK
@@ -34,46 +33,36 @@ if sm.getFieldID() == 925100100: # Hidden Street: Through the Head of the Ship!
     elif stage == 1:
         nextItem = VETERAN_PIRATE_MARK
 
+    if sm.isPartyLeader():
+        if stage == 3:
+            sm.sendNext("Make your way through the portal on the right")
 
-    def init():
-        if sm.isPartyLeader():
-            if stage == 3:
-                sm.sendNext("Make your way through the portal on the right")
-
-            else:
-                if sm.hasItem(item, count):
-                    if stage == 2:
-                        sm.sendNext("Great you may now continue to the next stage!")
-                        sm.invokeForParty("showEffectToField", WzConstants.EFFECT_CLEAR)
-
-                    else:
-                        sm.sendNext("Alright, next up I need "+ str(count) +" #v"+ str(nextItem) +"##b#t"+ str(nextItem) +"##k.")
-                    sm.consumeItem(item, count)
-                    sm.invokeForParty("setQRValue", GameConstants.LORD_PIRATE_QUEST, str(int(sm.getQRValue(GameConstants.LORD_PIRATE_QUEST)) + 1))
+        else:
+            if sm.hasItem(item, count):
+                if stage == 2:
+                    sm.sendNext("Great you may now continue to the next stage!")
+                    sm.invokeForParty("showEffectToField", WzConstants.EFFECT_CLEAR)
 
                 else:
-                    sm.sendNext("Please bring me "+ str(count) +" #v"+ str(item) +"##b#t"+ str(item) +"##k.")
-        else:
-            sm.sendSayOkay("Please, have your party leader speak to me.")
-        sm.dispose()
+                    sm.sendNext("Alright, next up I need "+ str(count) +" #v"+ str(nextItem) +"##b#t"+ str(nextItem) +"##k.")
+                sm.consumeItem(item, count)
+                sm.invokeForParty("setQRValue", GameConstants.LORD_PIRATE_QUEST, str(int(sm.getQRValue(GameConstants.LORD_PIRATE_QUEST)) + 1))
+
+            else:
+                sm.sendNext("Please bring me "+ str(count) +" #v"+ str(item) +"##b#t"+ str(item) +"##k.")
+    else:
+        sm.sendSayOkay("Please, have your party leader speak to me.")
+    sm.dispose()
 
 
 elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
-    def init():
-        if not sm.mobsPresentInField():
-            if not sm.isPartyLeader():
-                sm.sendSayOkay("Please have your party leader speak to me.")
-                sm.dispose()
-            else:
-                sm.sendNext("You have done us a great favour, what ever can we do to repay you?")
-
-        else:
-            sm.sendSayOkay("Please get rid of the Captain!")
+    if not sm.hasMobsInField():
+        if not sm.isPartyLeader():
+            sm.sendSayOkay("Please have your party leader speak to me.")
             sm.dispose()
-
-    def action(response, answer):
+        else:
+            sm.sendNext("You have done us a great favour, what ever can we do to repay you?")
         sm.warpPartyIn(925100700)
-
         # For all party members
         for partyMembers in sm.getParty().getMembers():
             # Sets the Stage2 progress back to 0
@@ -89,19 +78,18 @@ elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
                     sm.consumeItem(item, quantity)
             sm.dispose()
 
-
+    else:
+        sm.sendSayOkay("Please get rid of the Captain!")
+        sm.dispose()
 
 else:
-    def init():
-        sm.sendAskYesNo("Are you sure you want to leave?")
-
-    def action(response, answer):
-        if response == 1:
-            if not sm.getParty() is None:
-                sm.warpPartyOut(910002000)
-                for partyMembers in sm.getParty().getMembers():
-                    sm.setQRValue(partyMembers.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
-            else:
-                sm.warp(910002000, 0)
-                sm.setQRValue(GameConstants.LORD_PIRATE_QUEST, "0")
-        sm.dispose()
+    response = sm.sendAskYesNo("Are you sure you want to leave?")
+    if response == 1:
+        if not sm.getParty() is None:
+            sm.warpPartyOut(910002000)
+            for partyMembers in sm.getParty().getMembers():
+                sm.setQRValue(partyMembers.getChr(), GameConstants.LORD_PIRATE_QUEST, "0")
+        else:
+            sm.warp(910002000, 0)
+            sm.setQRValue(GameConstants.LORD_PIRATE_QUEST, "0")
+    sm.dispose()

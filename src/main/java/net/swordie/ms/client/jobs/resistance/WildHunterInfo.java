@@ -10,6 +10,10 @@ public class WildHunterInfo {
     private byte idx;
     private byte ridingType;
 
+    public WildHunterInfo() {
+        idx = -1;
+    }
+
     public int[] getCapturedMob() {
         return capturedMob;
     }
@@ -35,8 +39,7 @@ public class WildHunterInfo {
     }
 
     public void encode(OutPacket outPacket) {
-        capturedMob[0] = 9304000;
-        outPacket.encodeByte(10 * 1 + 1);
+        outPacket.encodeByte(10 * (getIdx() + 1));
         for(int mob : getCapturedMob()) {
             outPacket.encodeInt(mob);
         }

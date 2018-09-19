@@ -1,6 +1,8 @@
 package net.swordie.ms.life.pet;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.PetItem;
+import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.connection.OutPacket;
 
@@ -9,17 +11,19 @@ import net.swordie.ms.connection.OutPacket;
  */
 public class Pet extends Life {
     private int id;
+    private final int ownerID;
     private int idx;
     private String name;
     private long petLockerSN;
-    private int hue;
-    private short giantRate;
+    private int hue = -1;
+    private short giantRate = 100;
     private boolean transformed;
     private boolean reinforced;
     private PetItem item;
 
-    public Pet(int templateId) {
+    public Pet(int templateId, int ownerID) {
         super(templateId);
+        this.ownerID = ownerID;
     }
 
     public int getActiveSkillCoolTime() {
@@ -43,7 +47,7 @@ public class Pet extends Life {
     }
 
     public void encode(OutPacket outPacket) {
-        outPacket.encodeInt(getId());
+        outPacket.encodeInt(getTemplateId());
         outPacket.encodeString(getName());
         outPacket.encodeLong(getItem().getId());
         outPacket.encodePosition(getPosition());
@@ -53,7 +57,6 @@ public class Pet extends Life {
         outPacket.encodeShort(getGiantRate());
         outPacket.encodeByte(isTransformed());
         outPacket.encodeByte(isReinforced());
-
     }
 
     public String getName() {
@@ -110,5 +113,19 @@ public class Pet extends Life {
 
     public PetItem getItem() {
         return item;
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        onlyChar.write(UserLocal.petActivateChange(this, true, (byte) 0));
+    }
+
+    @Override
+    public void broadcastLeavePacket() {
+        getField().broadcastPacket(UserLocal.petActivateChange(this, false, (byte) 0));
+    }
+
+    public int getOwnerID() {
+        return ownerID;
     }
 }

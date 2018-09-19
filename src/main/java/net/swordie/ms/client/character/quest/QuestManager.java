@@ -6,6 +6,9 @@ import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionReq
 import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
 import net.swordie.ms.client.character.quest.reward.QuestItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestReward;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.life.mob.Mob;
@@ -13,6 +16,7 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.QuestData;
 import net.swordie.ms.loaders.QuestInfo;
 import net.swordie.ms.util.FileTime;
+import net.swordie.ms.world.field.Field;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -21,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.swordie.ms.enums.ChatMsgColour.YELLOW;
+import static net.swordie.ms.enums.ChatType.Mob;
 import static net.swordie.ms.enums.QuestStatus.*;
 
 /**
@@ -102,7 +106,7 @@ public class QuestManager {
      */
     public boolean isComplete(int questID) {
         Quest quest = getQuests().get(questID);
-        return hasQuestInProgress(questID) && quest.isComplete();
+        return hasQuestInProgress(questID) && quest.isComplete(chr);
     }
 
     public void addQuest(Quest quest) {
@@ -124,17 +128,24 @@ public class QuestManager {
             getQuests().put(quest.getQRKey(), quest);
             chr.write(WvsContext.questRecordMessage(quest));
             if(quest.getStatus() == QuestStatus.COMPLETE) {
-                chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
+                chr.chatMessage(Mob, "[Info] Completed quest " + quest.getQRKey());
             } else {
-                chr.chatMessage(YELLOW, "[Info] Accepted quest " + quest.getQRKey());
+                chr.chatMessage(Mob, "[Info] Accepted quest " + quest.getQRKey());
                 if(addRewardsFromWz) {
                     QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
-                    for (QuestReward qr : qi.getQuestRewards()) {
-                        if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
-                            qr.giveReward(getChr());
+                    if (qi != null) {
+                        for (QuestReward qr : qi.getQuestRewards()) {
+                            if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
+                                qr.giveReward(getChr());
+                            }
                         }
                     }
                 }
+            }
+            QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
+            if (qi != null && qi.getTransferField() != 0) {
+                Field field = chr.getOrCreateFieldByCurrentInstanceType(qi.getTransferField());
+                chr.warp(field);
             }
         }
     }
@@ -155,6 +166,9 @@ public class QuestManager {
      */
     public boolean canStartQuest(int questID) {
         QuestInfo qi = QuestData.getQuestInfoById(questID);
+        if (qi == null) {
+            return true;
+        }
         Set<QuestStartRequirement> questReqs = qi.getQuestStartRequirements().stream()
                 .filter(qsr -> qsr instanceof QuestStartCompletionRequirement)
                 .collect(Collectors.toSet());
@@ -183,11 +197,15 @@ public class QuestManager {
         }
         quest.setStatus(QuestStatus.COMPLETE);
         quest.setCompletedTime(FileTime.currentTime());
-        chr.chatMessage(YELLOW, "[Info] Completed quest " + quest.getQRKey());
+        chr.chatMessage(Mob, "[Info] Completed quest " + quest.getQRKey());
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.questCompleteEffect()));
+        chr.write(User.effect(Effect.questCompleteEffect()));
         chr.write(WvsContext.questRecordMessage(quest));
-        for(QuestReward qr : questInfo.getQuestRewards()) {
-            if (!(qr instanceof QuestItemReward) || ((QuestItemReward) qr).getStatus() != 0) {
-                qr.giveReward(chr);
+        if (questInfo != null) {
+            for (QuestReward qr : questInfo.getQuestRewards()) {
+                if (!(qr instanceof QuestItemReward) || ((QuestItemReward) qr).getStatus() != 0) {
+                    qr.giveReward(chr);
+                }
             }
         }
     }
@@ -195,7 +213,7 @@ public class QuestManager {
     public void handleMobKill(Mob mob) {
         for(int questID : mob.getQuests()) {
             Quest q = getQuests().get(questID);
-            if (q != null && !q.isComplete()) {
+            if (q != null && !q.isComplete(chr)) {
                 q.handleMobKill(mob.getTemplateId());
                 chr.write(WvsContext.questRecordMessage(q));
             }
@@ -206,19 +224,6 @@ public class QuestManager {
         for(Quest q : getQuestsInProgress()) {
             if(q.hasMoneyReq()) {
                 q.addMoney(money);
-                chr.write(WvsContext.questRecordMessage(q));
-            }
-        }
-    }
-
-    public void handleItemGain(Item item) {
-        if(ItemData.getItemInfoByID(item.getItemId()) == null) {
-            return;
-        }
-        for(int questID : ItemData.getItemInfoByID(item.getItemId()).getQuestIDs()) {
-            Quest q = getQuests().get(questID);
-            if (q != null && !q.isComplete()) {
-                q.handleItemGain(item);
                 chr.write(WvsContext.questRecordMessage(q));
             }
         }
@@ -259,5 +264,9 @@ public class QuestManager {
         if (q != null) {
             addQuest(q);
         }
+    }
+
+    public Quest getQuestById(int questID) {
+        return getQuests().getOrDefault(questID, null);
     }
 }

@@ -2,16 +2,28 @@ package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.avatar.AvatarLook;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.jobs.adventurer.Thief;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.cygnus.WindArcher;
+import net.swordie.ms.client.jobs.resistance.Mechanic;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
+import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.Summoned;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +35,9 @@ import java.util.stream.Collectors;
  */
 public class Summon extends Life {
 
-    private int charID;
+    private static final Logger log = Logger.getLogger(Summon.class);
+
+    private Char chr;
     private int skillID;
     private int bulletID;
     private int summonTerm;
@@ -38,7 +52,7 @@ public class Summon extends Life {
     private boolean attackActive;
     private short curFoothold;
     private AvatarLook avatarLook;
-    List<Position> teslaCoilPositions = new ArrayList<>();
+    private List<Position> teslaCoilPositions = new ArrayList<>();
     private byte moveAbility;
     private Position[] kishinPositions = new Position[2];
     private int maxHP;
@@ -48,12 +62,12 @@ public class Summon extends Life {
         super(templateId);
     }
 
-    public int getCharID() {
-        return charID;
+    public Char getChr() {
+        return chr;
     }
 
-    public void setCharID(int charID) {
-        this.charID = charID;
+    public void setChr(Char chr) {
+        this.chr = chr;
     }
 
     public int getSkillID() {
@@ -187,7 +201,7 @@ public class Summon extends Life {
     public static Summon getSummonBy(Char chr, int skillID, byte slv) {
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         Summon summon = new Summon(-1);
-        summon.setCharID(chr.getId());
+        summon.setChr(chr);
         summon.setSkillID(skillID);
         summon.setSlv(slv);
         summon.setSummonTerm(si.getValue(SkillStat.time, slv));
@@ -208,9 +222,9 @@ public class Summon extends Life {
         Field field = chr.getField();
 
         // Remove both Old Kishins
-        List<Life> oldKishins = field.getLifes().stream()
+        List<Life> oldKishins = field.getLifes().values().stream()
                 .filter(s -> s instanceof Summon &&
-                        ((Summon) s).getCharID() == chr.getId() &&
+                        ((Summon) s).getChr() == chr &&
                         ((Summon) s).getSkillID() == Kanna.KISHIN_SHOUKAN)
                 .collect(Collectors.toList());
         for(Life life : oldKishins) {
@@ -223,7 +237,7 @@ public class Summon extends Life {
         Position kishLeftPos = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
         kishinLeft.setPosition(kishLeftPos);
         kishinLeft.setCurFoothold((short) field.findFootHoldBelow(kishLeftPos).getId());
-        kishinLeft.setMoveAbility(MoveAbility.STATIC.getVal());
+        kishinLeft.setMoveAbility(MoveAbility.Stop.getVal());
         kishinLeft.setMoveAction((byte) 0);
         kishinLeft.setKishinPositions(new Position[] {
             new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
@@ -237,7 +251,7 @@ public class Summon extends Life {
         Position kishRightPos = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
         kishinRight.setPosition(kishRightPos);
         kishinRight.setCurFoothold((short) field.findFootHoldBelow(kishRightPos).getId());
-        kishinRight.setMoveAbility(MoveAbility.STATIC.getVal());
+        kishinRight.setMoveAbility(MoveAbility.Stop.getVal());
         kishinRight.setMoveAction((byte) 5);
         kishinLeft.setKishinPositions(new Position[] {
                 new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
@@ -270,6 +284,66 @@ public class Summon extends Life {
         this.hp = hp;
     }
 
+    public void onSkillUse(int skillId) {
+        switch (skillId) {
+            case Warrior.EVIL_EYE:
+                ((Warrior) chr.getJobHandler()).healByEvilEye();
+                break;
+
+            case Warrior.HEX_OF_THE_EVIL_EYE:
+                ((Warrior) chr.getJobHandler()).giveHexOfTheEvilEyeBuffs();
+                break;
+
+            case Mechanic.SUPPORT_UNIT_HEX:
+            case Mechanic.ENHANCED_SUPPORT_UNIT:
+                ((Mechanic) chr.getJobHandler()).healFromSupportUnit(this);
+                break;
+
+            default:
+                chr.chatMessage(String.format("Unhandled Summon Skill: %d, casted by Summon: %d", skillId, getSkillID()));
+                break;
+        }
+        chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, getObjectId())));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skillID, (byte) 1, getObjectId())));
+    }
+
+    public void onHit(int damage, int mobTemplateId) {
+        Char chr = getChr();
+        Skill skill = chr.getSkill(getSkillID());
+
+        if(skill == null) {
+            return;
+        }
+
+        int summonHP = getHp();
+        int newSummonHP = summonHP - damage;
+
+        switch (getSkillID()) {
+            case Thief.MIRRORED_TARGET:
+                ((Thief) chr.getJobHandler()).giveShadowMeld();
+                break;
+
+            case WindArcher.EMERALD_DUST:
+                ((WindArcher) chr.getJobHandler()).applyEmeraldDustDebuffToMob(this, mobTemplateId);
+                // Fallthrough intended
+            case WindArcher.EMERALD_FLOWER:
+                ((WindArcher) chr.getJobHandler()).applyEmeraldFlowerDebuffToMob(this, mobTemplateId);
+                break;
+
+            default:
+                log.error(String.format("Unhandled HP Summon, id = %d", getSkillID()));
+                break;
+        }
+
+        if(newSummonHP <= 0) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            chr.getField().broadcastPacket(Summoned.summonedRemoved(this, LeaveType.ANIMATION));
+            tsm.removeStatsBySkill(skill.getSkillId());
+        } else {
+            setHp(newSummonHP);
+        }
+    }
+
     @Override
     public void broadcastSpawnPacket(Char onlyChar) {
         Field field = getField();
@@ -277,6 +351,15 @@ public class Summon extends Life {
             ScheduledFuture sf = EventManager.addEvent(() -> field.removeLife(getObjectId(), true), getSummonTerm());
             field.addLifeSchedule(this, sf);
         }
-        field.broadcastPacket(Summoned.summonedCreated(getCharID(), this));
+        field.broadcastPacket(Summoned.summonedCreated(getChr().getId(), this));
+    }
+
+    @Override
+    public void broadcastLeavePacket() {
+        Field field = getField();
+        if (getSkillID() == Kanna.KISHIN_SHOUKAN || getSkillID() == Job.MONOLITH) {
+            field.setKishin(false);
+        }
+        field.broadcastPacket(Summoned.summonedRemoved(this, LeaveType.ANIMATION));
     }
 }

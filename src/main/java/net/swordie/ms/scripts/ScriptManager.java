@@ -2,12 +2,15 @@ package net.swordie.ms.scripts;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.party.Party;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.util.Position;
+import net.swordie.ms.world.field.Clock;
 import net.swordie.ms.world.field.Field;
-import net.swordie.ms.client.party.Party;
 
 import java.util.Observer;
 import java.util.concurrent.ScheduledFuture;
@@ -50,7 +53,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendSay(String text);
+	int sendSay(String text);
 
 	/**
 	 * Sends a message box with the next button enabled only.<br>
@@ -59,7 +62,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendNext(String text);
+	int sendNext(String text);
 
 	/**
 	 * Sends a message box with the previous button enabled only.<br>
@@ -68,7 +71,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendPrev(String text);
+	int sendPrev(String text);
 
 	/**
 	 * Sends a message box with the ok button enabled only.<br>
@@ -77,7 +80,7 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendSayOkay(String text);
+	int sendSayOkay(String text);
 
 	/**
 	 * Sends a message box with the defined image from wz.
@@ -86,7 +89,7 @@ public interface ScriptManager extends Observer {
 	 * @param image
 	 * 		The image to display in the message box.
 	 */
-	void sendSayImage(String image);
+	int sendSayImage(String image);
 
 	/**
 	 * Sends a message box with the defined images from wz.
@@ -95,7 +98,7 @@ public interface ScriptManager extends Observer {
 	 * @param images
 	 * 		The images to display in the message box.
 	 */
-	void sendSayImage(String[] images);
+	int sendSayImage(String[] images);
 
 	/**
 	 * Sends a message box with yes / no buttons.<br>
@@ -104,7 +107,16 @@ public interface ScriptManager extends Observer {
 	 * @param text
 	 * 		The text to display inside of the message box.
 	 */
-	void sendAskYesNo(String text);
+	boolean sendAskYesNo(String text);
+
+	/**
+	 * Sends a message box with accept / decline buttons.<br>
+	 * Example: "sm.sendAskAccept("Do you want to accept my quest?")"
+	 *
+	 * @param text
+	 * 		The text to display inside of the message box.
+	 */
+	boolean sendAskAccept(String text);
 
 	/**
 	 * Sends a message box asking a user for some text.<br>
@@ -119,7 +131,7 @@ public interface ScriptManager extends Observer {
 	 * @param maxLength
 	 * 		The maximum length of the text. "Hi" would be a length of 2.
 	 */
-	void sendAskText(String text, String defaultText, short minLength, short maxLength);
+	String sendAskText(String text, String defaultText, short minLength, short maxLength);
 
 	/**
 	 * Sends a message box asking a user for a number.
@@ -134,7 +146,7 @@ public interface ScriptManager extends Observer {
 	 * @param max
 	 * 		The maximum number.
 	 */
-	void sendAskNumber(String text, int defaultNum, int min, int max);
+	int sendAskNumber(String text, int defaultNum, int min, int max);
 
 	/**
 	 * Sends a chat window for a quiz.
@@ -155,7 +167,7 @@ public interface ScriptManager extends Observer {
 	 * @param time
 	 * 		The time allowed to answer the question, in seconds.
 	 */
-	void sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time);
+	int sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time);
 
 	/**
 	 * Sends a chat window for an initial speed quiz.
@@ -174,7 +186,7 @@ public interface ScriptManager extends Observer {
 	 * @param time
 	 * 		The remaining amount of time, in seconds.
 	 */
-	void sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time);
+	int sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time);
 
 	/**
 	 * Sends an IC quiz.
@@ -189,7 +201,7 @@ public interface ScriptManager extends Observer {
 	 * @param time
 	 * 		The remaining amount of time, in seconds.
 	 */
-	void sendICQuiz(byte type, String text, String hintText, int time);
+	int sendICQuiz(byte type, String text, String hintText, int time);
 
 	/**
 	 * Sends a chat window with Avatar options (different hairstyles, eyestyles, things like that)
@@ -204,8 +216,26 @@ public interface ScriptManager extends Observer {
 	 * @param options
 	 * 		A list of hair/eye options available to choose
 	 */
-	void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options);
+	int sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options);
 
+	/**
+	 * Sends a slide window to the client with a given dlgType.
+	 * Example: "sm.sendAskSlideMenu(0)" (for the dimensional portal)
+	 * @param dlgType the dialogue type.
+	 */
+	int sendAskSlideMenu(int dlgType);
+
+	// Start of param methods ------------------------------------------------------------------------------------------
+
+	/**
+	 * Sets the player as the speaker instead of an npc.
+	 */
+	void setPlayerAsSpeaker();
+
+	/**
+	 * Sets the current chat type to be a brown box at the bottom of the screen.
+	 */
+	void setBoxChat();
 
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
@@ -266,6 +296,61 @@ public interface ScriptManager extends Observer {
 	void setAP(int amount);
 
 	/**
+	 * Sets the STR of {@link Char} to the specified amount.
+	 * Example: "sm.setSTR(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the STR will be set.
+	 */
+	void setSTR(short amount);
+
+	/**
+	 * Sets the INT of {@link Char} to the specified amount.
+	 * Example: "sm.setINT(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the INT will be set.
+	 */
+	void setINT(short amount);
+
+	/**
+	 * Sets the DEX of {@link Char} to the specified amount.
+	 * Example: "sm.setDEX(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the DEX will be set.
+	 */
+	void setDEX(short amount);
+
+	/**
+	 * Sets the LUK of {@link Char} to the specified amount.
+	 * Example: "sm.setLUK(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the LUK will be set.
+	 */
+	void setLUK(short amount);
+
+	/**
+	 * Sets the Max HP of {@link Char} to the specified amount.
+	 * Example: "sm.setMaxHP(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the Max HP will be set.
+	 */
+	void setMaxHP(int amount);
+
+	/**
+	 * Sets the Max MP of {@link Char} to the specified amount.
+	 * Example: "sm.setMaxMP(15)"
+	 *
+	 * @param amount
+	 * 		The amount to which the Max MP will be set.
+	 */
+	void setMaxMP(int amount);
+
+
+	/**
 	 * A Combined method, that sets the {@link Char} JobID to the specified job ID
 	 * as well as add 5 AP  and  3 SP.
 	 * Example: "sm.jobAdvance(112)"
@@ -300,6 +385,22 @@ public interface ScriptManager extends Observer {
 	 */
 	void changeCharacterLook(int look);
 
+	/**
+	 * Adds the specified skill to the Char.
+	 *
+	 * @param skillId
+	 * 		The id of the skill
+	 * @param slv
+	 * 		The skill level of the skill
+	 */
+	void giveSkill(int skillId, int slv);
+
+	/**
+	 * Adds a given amount of levels to the Char. Also includes adding AP/SP.
+	 * @param level the amount of levels to give.
+	 */
+	void addLevel(int level);
+
 
 
 	// Field-related methods -------------------------------------------------------------------------------------------
@@ -323,6 +424,13 @@ public interface ScriptManager extends Observer {
 	 * 		The id of the portal.
 	 */
 	void warp(int fieldID, int portalID);
+
+	/**
+	 * Changes the channel and warps the given Char to the given field.
+	 * @param channel the channel to change to
+	 * @param fieldID the field id to warp to
+	 */
+	void changeChannelAndWarp(int channel, int fieldID);
 
 	/**
 	 * Teleports {@link Char} to the portal ID specified.
@@ -412,41 +520,54 @@ public interface ScriptManager extends Observer {
 	/**
 	 * Determines if there are mobs present in the {@link Field} linked to the {@link
 	 * ScriptManager}.
-	 * Example: "if(sm.mobsPresentInField()) {}"
+	 * Example: "if(sm.hasMobsInField()) {}"
 	 *
 	 * @return True if there are mobs in the linked {@link Field}.
 	 */
-	boolean mobsPresentInField();
+	boolean hasMobsInField();
+
+	/**
+	 * Waits for a mob to die on the char's current field.
+	 * @return the mob that died
+	 */
+	Mob waitForMobDeath();
+
+	/**
+	 * Waits for a mob with a given ID to die on the char's current field.
+	 * @param possibleMobs the ids the mob can have. If multiple ids are given, this will return when there is a single match
+	 * @return the mob that died
+	 */
+	Mob waitForMobDeath(int... possibleMobs);
 
 	/**
 	 * Determines if there are mobs present in a defined {@link Field}.
-	 * Example: "if(sm.mobsPresentInField(100)) {}"
+	 * Example: "if(sm.hasMobsInField(100)) {}"
 	 *
 	 * @param fieldID
 	 * 		The id of the {@link Field} to receive info from.
 	 *
 	 * @return True if there are mobs in the {@link Field}.
 	 */
-	boolean mobsPresentInField(int fieldID);
+	boolean hasMobsInField(int fieldID);
 
 	/**
 	 * Gets the number of mobs in the {@link Field} linked to the {@link ScriptManager}
-	 * Example: "sm.numberMobsInField()"
+	 * Example: "sm.getAmountOfMobsInField()"
 	 *
 	 * @return The number of mobs in the linked {@link Field}.
 	 */
-	int numberMobsInField();
+	int getAmountOfMobsInField();
 
 	/**
 	 * Gets the number of mobs from a selected {@link Field}.
-	 * Example: "sm.numberMobsInField(100)"
+	 * Example: "sm.getAmountOfMobsInField(100)"
 	 *
 	 * @param fieldID
 	 * 		The fieldID of the {@link Field} to get the number of mobs in.
 	 *
 	 * @return The number of mobs in the selected {@link Field}.
 	 */
-	int numberMobsInField(int fieldID);
+	int getAmountOfMobsInField(int fieldID);
 
 	/**
 	 * Shows an Effect from the directory specified.
@@ -472,12 +593,22 @@ public interface ScriptManager extends Observer {
 
 
 	/**
-	 * Teleport the player to the specified portal Id's position.
+	 * Teleport the player to a Position in the current field.
 	 *
-	 * @param portalId
-	 * 		The id of the portal to be teleported to.
+	 * @param position
+	 * 		The position to be teleported to.
 	 */
-	void teleportInField(int portalId);
+	void teleportInField(Position position);
+
+	/**
+	 * Teleport the player to a Position in the current field.
+	 *
+	 * @param x
+	 * 		The position's x coordinate to be teleported to.
+	 * @param y
+	 * 		The position's y coordinate to be teleported to.
+	 */
+	void teleportInField(int x, int y);
 
 
 
@@ -541,6 +672,87 @@ public interface ScriptManager extends Observer {
 	 * @param templateID the speaker's template id
 	 */
 	void setSpeakerID(int templateID);
+        
+        /**
+	 * Sets the current speaker type for npc chat.
+	 * Example: "sm.setSpeakerType(4)"
+         * Default type for speaker type is 4
+	 * @param speakerType the speaker type
+	 */
+	void setSpeakerType(byte speakerType);
+        
+        
+	/**
+	 * Hides the specified Npc (specified by Template id)
+	 *
+	 * @param npcTemplateId Template Id of Npc to be hidden
+	 * @param hideTemplate true to hide. false to show
+	 * @param hideNameTag true to hide. false to show
+	 */
+	void hideNpcByTemplateId(int npcTemplateId, boolean hideTemplate, boolean hideNameTag);
+
+	/**
+	 * Hides the specified Npc (specified by Object id)
+	 *
+	 * @param npcObjId Object Id of Npc to be hidden
+	 * @param hideTemplate true to hide. false to show
+	 * @param hideNameTag true to hide. false to show
+	 */
+	void hideNpcByObjectId(int npcObjId, boolean hideTemplate, boolean hideNameTag);
+
+	/**
+	 * Forces the specified Npc (Template Id) to move in the specified direction
+	 *
+	 * @param npcTemplateId Template Id of the Npc to be moved
+	 * @param left if true, Npc moves to the left. if false, Npc moves to the right
+	 * @param distance distance traveled by the Npc
+	 * @param speed speed at which the Npc travels (a number between 10 and 300)
+	 */
+	void moveNpcByTemplateId(int npcTemplateId, boolean left, int distance, int speed);
+
+	/**
+	 * Forces the specified Npc (Object Id) to move in the specified direction
+	 *
+	 * @param npcObjId Object Id of the Npc to be moved
+	 * @param left if true, Npc moves to the left. if false, Npc moves to the right
+	 * @param distance distance traveled by the Npc
+	 * @param speed speed at which the Npc travels (a number between 10 and 300)
+	 */
+	void moveNpcByObjectId(int npcObjId, boolean left, int distance, int speed);
+
+	/**
+	 * Forces the specified Npc (Template Id) to flip
+	 *
+	 * @param npcTemplateId Template Id of the Npc to be flipped
+	 * @param left if true, Npc will face left. if false, Npc will face right
+	 */
+	void flipNpcByTemplateId(int npcTemplateId, boolean left);
+
+	/**
+	 * Forces the specified Npc (Object Id) to flip
+	 *
+	 * @param npcObjId Object Id of the Npc to be flipped
+	 * @param left if true, Npc will face left. if false, Npc will face right
+	 */
+	void flipNpcByObjectId(int npcObjId, boolean left);
+
+	/**
+	 * Forces the Npc to use do the specified special action.
+	 *
+	 * @param npcTemplateId Template Id of the Npc to do the Special Action
+	 * @param effectName Effect name to be shown
+	 * @param duration if duration > 0. The Effect will repeat for duration (ms)
+	 */
+	void showNpcSpecialActionByTemplateId(int npcTemplateId, String effectName, int duration);
+
+	/**
+	 * Forces the Npc to use do the specified special action.
+	 *
+	 * @param npcObjId Object Id of the Npc to do the Special Action
+	 * @param effectName Effect name to be shown
+	 * @param duration if duration > 0. The Effect will repeat for duration (ms)
+	 */
+	void showNpcSpecialActionByObjectId(int npcObjId, String effectName, int duration);
 
 
 
@@ -632,18 +844,7 @@ public interface ScriptManager extends Observer {
 	 * @param id
 	 * 		The template id of the monster(s).
 	 */
-	void removeMobsByTemplateId(int id);
-
-	/**
-	 * remove the specified monster(s) after the specified seconds.
-	 *
-	 * @param templateID
-	 * 		The template id of the monster(s).
-	 * @param seconds
-	 * 		The amount of time (in seconds) until the specified mobs get removed.
-	 */
-	void removeMobsAfterTimer(int templateID, int seconds);
-
+	void removeMobByTemplateId(int id);
 
 	/**
 	 * Shows the {@link Char}'s HP with the pre-defined template.
@@ -751,6 +952,12 @@ public interface ScriptManager extends Observer {
 	 */
 	void showGuildCreateWindow();
 
+	/**
+	 * Checks if an alliance name is valid.
+	 * Example: "sm.checkAllianceName("Swordie")"
+	 */
+	boolean checkAllianceName(String name);
+
 
 
 	// Chat-related methods --------------------------------------------------------------------------------------------
@@ -844,6 +1051,15 @@ public interface ScriptManager extends Observer {
 	void giveItem(int itemID, int quantity);
 
 	/**
+	 * Gives an item to the player, and equips it if the item is an equip. Will put the old equip (if there was any)
+	 * back into the player's inventory.
+	 * Example "sm.giveAndEquip(1302000)"
+	 * @param id
+	 * 		The ID of the item.
+	 */
+	void giveAndEquip(int id);
+
+	/**
 	 * Determines if the linked {@link Char} has the specified item.
 	 * Example: "if(sm.hasItem(100)) {}"
 	 *
@@ -853,6 +1069,16 @@ public interface ScriptManager extends Observer {
 	 * @return True if the link {@link Char} has the item.
 	 */
 	boolean hasItem(int itemID);
+
+	/**
+	 * Determines if the linked {@link Char} has the specified item equipped.
+	 *
+	 * @param itemID
+	 * 		The ID of the item.
+	 *
+	 * @return True if the character has the item equipped.
+	 */
+	boolean isEquipped(int itemID);
 
 	/**
 	 * Determines if the linked {@link Char} has the specified item with the specified quantity.
@@ -1096,6 +1322,137 @@ public interface ScriptManager extends Observer {
 
 
 
+	// InGameDirectionEvent methods ------------------------------------------------------------------------------------
+
+	/**
+	 * Moves the Client's camera at the given speed towards the given position.
+	 *
+	 * @param back
+	 * 		if true, it will move the Camera to the original position.
+	 * 		if false, it will move the Camera to the given position, at the given speed.
+	 * @param speed
+	 * 		speed of the camera,  in Pixel per second.
+	 * @param x x Position
+	 * @param y y Position
+	 * 		Position for the Camera to move to.
+	 */
+	void moveCamera(boolean back, int speed, int x, int y);
+
+	/**
+	 * Zooms the Camera in at the given position.
+	 *
+	 * Scale: 1000 is normal.
+	 * Higher = Zoom In
+	 * Lower = Zoom Out
+	 *
+	 * @param inZoomDuration Time the Zooming takes
+	 * @param scale Zoom Scale
+	 * @param x x Position
+	 * @param y y Position
+	 * 		Screen Center Position
+	 */
+	void zoomCamera(int inZoomDuration, int scale, int x, int y);
+
+	/**
+	 * Resets the Camera from a still position to following the User again.
+	 *
+	 */
+	void resetCamera();
+
+	/**
+	 * sends a delay to the client, after the delay it'll send a response with which you can run action function in the script
+	 *
+	 * @param delay delay in milliseconds
+	 */
+	int sendDelay(int delay);
+
+	/**
+	 * Does a specified In Game Direction Event and sends a delay 'sendDelay'
+	 *
+	 * @param delay delay in milliseconds
+	 * @param methodName method to be ran
+	 * @param args arguments used in the specified method
+	 */
+	void doEventAndSendDelay(int delay, String methodName, Object...args);
+
+	/**
+	 * Forces the User to move in the specified direction for the specified distance
+	 *
+	 * @param left Direction the player moves in. True = Left. False = Right
+	 * @param distance Distance to move
+	 */
+	void forcedMove(boolean left, int distance);
+
+	/**
+	 * Forces the User to flip
+	 *
+	 * @param left True = flip Left. False = flip Right
+	 */
+	void forcedFlip(boolean left);
+
+	/**
+	 * Forces the User to do an action/stance
+	 *
+	 * @param type The Action Done, depending on Type
+	 * @param duration The duration the action is held
+	 */
+	void forcedAction(int type, int duration);
+
+	/**
+	 * Forces an action by the user, such as jumping
+	 *
+	 * @param type type of action used. refer to: {@link net.swordie.ms.enums.ForcedInputType}
+	 */
+	void forcedInput(int type);
+
+	/**
+	 * Hides the user
+	 *
+	 * @param hide true: hide.  false: show
+	 */
+	void hideUser(boolean hide);
+
+
+	/**
+	 * Shows an Effect from the given path for 'duration' duration at 'position' position. Other variables are not used atm
+	 *
+	 * @param path path to the Effect
+	 * @param duration Effect duration
+	 * @param x y Position
+	 * @param y x Position
+	 * 		Position for the Effect
+	 * @param z
+	 * @param npcIdForExtend
+	 * @param onUser if true, the effect will follow the player | if false, the effect will stay static
+	 * @param idk2
+	 */
+	void showEffect(String path, int duration, int x, int y, int z, int npcIdForExtend, boolean onUser, int idk2);
+
+	// Clock methods ---------------------------------------------------------------------------------------------------
+
+	/**
+	 * Shows a timer on top with precision in milliseconds. Will automatically remove itself after the timer has
+	 * expired.
+	 * @param seconds the amount of seconds the stopwatch should start out with
+	 */
+	Clock createStopWatch(int seconds);
+
+	/**
+	 * Shows a timer on top with precision in minutes/seconds. Will automatically remove itself after the timer has
+	 * expired.
+	 * @param seconds the amount of seconds the stopwatch should start out with
+	 */
+	Clock createClock(int seconds);
+
+	/**
+	 * Shows a timer on top with precision in hour/minutes/seconds. Will automatically remove itself after the timer
+	 * has expired.
+	 * @param hours the amount of hours the stopwatch should start out with
+	 * @param minutes the amount of minutes the stopwatch should start out with
+	 * @param seconds the amount of seconds the stopwatch should start out with
+	 */
+	void createClock(int hours, int minutes, int seconds);
+
 	// Other methods ---------------------------------------------------------------------------------------------------
 
 	/**
@@ -1145,10 +1502,13 @@ public interface ScriptManager extends Observer {
 	 * @param dir
 	 * 		The Directory to the Effect.
 	 *
+	 * @param placement
+	 * 		The place where the effect is, goes in types (0 is on character, 3 is on character's feet, 4 is middle of screen)
+	 *
 	 * @param delay
 	 * 		The delay in ms before the effect shows
 	 */
-	void showEffect(String dir, int delay);
+	void showEffect(String dir, int placement, int delay);
 
 	/**
 	 * Gives the user a weather notice with specified variables
@@ -1208,4 +1568,6 @@ public interface ScriptManager extends Observer {
 	 */
 	ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
 									  int executes, String methodName, Object...args);
+
+	int playVideoByScript(String videoPath);
 }

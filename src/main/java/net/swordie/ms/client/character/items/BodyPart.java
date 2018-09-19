@@ -1,5 +1,7 @@
 package net.swordie.ms.client.character.items;
 
+import java.util.Arrays;
+
 /**
  * Created on 1/7/2018.
  */
@@ -26,7 +28,7 @@ public enum BodyPart {
     TAMINGMOB(18),
     SADDLE(19),
     MOBEQUIP(20),
-    MEDAL(21),
+    MEDAL_OLD(21), // ?
     BELT(22),
     SHOULDER(23),
     PETWEAR2(24),
@@ -44,6 +46,7 @@ public enum BodyPart {
     EXT_4(35),
     EXT_5(36),
     EXT_6(37),
+    MEDAL(49), // ?
     BOOK(55),
     STICKER(100),
     BP_END(100),
@@ -119,6 +122,10 @@ public enum BodyPart {
 
     BodyPart(int val) {
         this.val = val;
+    }
+
+    public static BodyPart getByVal(int bodyPartVal) {
+        return Arrays.stream(values()).filter(bp -> bp.getVal() == bodyPartVal).findAny().orElse(null);
     }
 
     public int getVal() {

@@ -58,6 +58,19 @@ public class NpcData {
 					}
 				}
 			}
+			Node infoNode = XMLApi.getFirstChildByNameBF(mainNode, "info");
+			for (Node infoChildNode : XMLApi.getAllChildren(infoNode)) {
+				String name = XMLApi.getNamedAttribute(infoChildNode, "name");
+				String value = XMLApi.getNamedAttribute(infoChildNode, "value");
+				switch (name) {
+					case "trunkGet":
+						npc.setTrunkGet(Integer.parseInt(value));
+						break;
+					case "trunkPut":
+						npc.setTrunkPut(Integer.parseInt(value));
+						break;
+				}
+			}
 			getBaseNpcs().add(npc);
 		}
 	}
@@ -69,6 +82,8 @@ public class NpcData {
 			try(DataOutputStream das = new DataOutputStream(new FileOutputStream(file))) {
 				das.writeInt(npc.getTemplateId());
 				das.writeBoolean(npc.isMove());
+				das.writeInt(npc.getTrunkGet());
+				das.writeInt(npc.getTrunkPut());
 				das.writeShort(npc.getScripts().size());
 				npc.getScripts().forEach((key, val) -> {
 					try {
@@ -104,6 +119,8 @@ public class NpcData {
 		try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
 			Npc npc = new Npc(dis.readInt());
 			npc.setMove(dis.readBoolean());
+			npc.setTrunkGet(dis.readInt());
+			npc.setTrunkPut(dis.readInt());
 			short size = dis.readShort();
 			for (int i = 0; i < size; i++) {
 				int id = dis.readInt();
@@ -150,7 +167,7 @@ public class NpcData {
 				SWEntity itemEntity = itemEntry.getValue();
 				NpcShopItem nsi = new NpcShopItem();
 				for (Map.Entry<String, String> itemProps : itemEntity.getPropertyValues().entrySet()) {
-					String key = itemProps.getKey();
+					String key = itemProps.getKey().toLowerCase();
 					String value = itemProps.getValue();
 					switch (key) {
 						case "loc":

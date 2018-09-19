@@ -1,5 +1,6 @@
 package net.swordie.ms.client;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
@@ -8,11 +9,11 @@ import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.util.FileTime;
+import org.apache.log4j.Logger;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -25,9 +26,12 @@ import java.util.Set;
 @Table(name = "accounts")
 public class Account {
 
+    @Transient
+    private static final Logger log = Logger.getLogger(Account.class);
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String username;
+    private String name;
     private String password;
     @Column(name = "accountTypeMask")
     private int accountType;
@@ -45,7 +49,8 @@ public class Account {
     private String censoredNxLoginID;
     private String pic;
     private int characterSlots;
-    private long creationDate;
+    @Convert(converter = FileTimeConverter.class)
+    private FileTime creationDate;
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
@@ -63,7 +68,6 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accID")
     private Set<Char> characters = new HashSet<>();
-    private String lastLoggedIn;
     @Transient
     private Char currentChr;
     private int NXCredit;
@@ -72,16 +76,14 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
-    @Enumerated(EnumType.ORDINAL)
-    private LoginState loginState = LoginState.Out;
     @Convert(converter = FileTimeConverter.class)
     private FileTime banExpireDate;
     private String banReason;
 
-    public Account(String username, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
+    public Account(String name, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
-                   byte gradeCode, String censoredNxLoginID, int characterSlots, long creationDate) {
-        this.username = username;
+                   byte gradeCode, String censoredNxLoginID, int characterSlots, FileTime creationDate) {
+        this.name = name;
         this.password = password;
         this.id = accountId;
         this.pic = pic;
@@ -108,14 +110,18 @@ public class Account {
     public Account(String id, int accountId) {
         this(id, null, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
                 0, false, (byte) 0, "", 16,
-                System.currentTimeMillis());
+                FileTime.currentTime());
     }
 
     public Account(){
     }
 
-    public String getUsername() {
-        return username;
+    public static Account getFromDBByName(String name) {
+        return (Account) DatabaseManager.getObjFromDB(Account.class, name);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getPassword() {
@@ -194,8 +200,8 @@ public class Account {
         return censoredNxLoginID;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setPassword(String password) {
@@ -214,7 +220,7 @@ public class Account {
         return characterSlots;
     }
 
-    public long getCreationDate() {
+    public FileTime getCreationDate() {
         return creationDate;
     }
 
@@ -306,7 +312,7 @@ public class Account {
         this.characterSlots = characterSlots;
     }
 
-    public void setCreationDate(long creationDate) {
+    public void setCreationDate(FileTime creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -344,14 +350,6 @@ public class Account {
         if(f != null) {
             getFriends().remove(f);
         }
-    }
-
-    public String getLastLoggedIn() {
-        return lastLoggedIn;
-    }
-
-    public void setLastLoggedIn(String lastLoggedIn) {
-        this.lastLoggedIn = lastLoggedIn;
     }
 
     public Char getCurrentChr() {
@@ -489,14 +487,6 @@ public class Account {
         this.monsterCollection = monsterCollection;
     }
 
-    public LoginState getLoginState() {
-        return loginState;
-    }
-
-    public void setLoginState(LoginState loginState) {
-        this.loginState = loginState;
-    }
-
     public FileTime getBanExpireDate() {
         return banExpireDate;
     }
@@ -511,5 +501,19 @@ public class Account {
 
     public void setBanReason(String banReason) {
         this.banReason = banReason;
+    }
+
+    public boolean hasCharacter(int charID) {
+        // doing a .contains on getCharacters() does not work, even if the hashcode is just a hash of the id
+        return getCharById(charID) != null;
+    }
+
+    public Char getCharById(int id) {
+        return getCharacters().stream().filter(charr -> charr.getId() == id).findAny().orElse(null);
+    }
+
+    public void unstuck() {
+        Server.getInstance().removeAccount(this);
+        DatabaseManager.saveToDB(this);
     }
 }

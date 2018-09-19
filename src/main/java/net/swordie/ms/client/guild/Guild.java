@@ -1,7 +1,15 @@
 package net.swordie.ms.client.guild;
 
+import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.guild.bbs.BBSRecord;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.ChatType;
 
 import javax.persistence.*;
 import java.util.*;
@@ -12,7 +20,7 @@ import java.util.stream.Collectors;
  */
 @Entity
 @Table(name = "guilds")
-public class Guild {
+public class Guild implements Encodable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -46,6 +54,7 @@ public class Guild {
     private int joinSetting;
     private int reqLevel;
     // End GUILDSETTING struct
+    private int battleSp;
 
     @ElementCollection
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,10 +62,21 @@ public class Guild {
     @MapKeyColumn(name = "skillID")
     private Map<Integer, GuildSkill> skills = new HashMap<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "guildID")
+    private List<BBSRecord> bbsRecords = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "bbsNotice")
+    private BBSRecord bbsNotice;
+    @Transient
+    private Alliance alliance;
+
     public Guild() {
         setGradeNames(new String[]{"Guild Master", "Junior", "Veteran", "Member", "Newbie"});
         setAppliable(true);
-        setMaxMembers(10);
+        setMaxMembers(50);
+        setLevel(1);
         setName("Default guild");
     }
 
@@ -96,13 +116,14 @@ public class Guild {
         outPacket.encodeString(getNotice());
         outPacket.encodeInt(getPoints());
         outPacket.encodeInt(getSeasonPoints());
+        outPacket.encodeInt(getAllianceID());
         outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getRank());
         outPacket.encodeInt(getGgp());
         outPacket.encodeShort(getSkills().size());
         getSkills().forEach((id, skill) -> {
             outPacket.encodeInt(id);
-            skill.encode(outPacket);
+            outPacket.encode(skill);
         });
         outPacket.encodeByte(isAppliable());
         if(isAppliable()) {
@@ -165,7 +186,7 @@ public class Guild {
     public void setLeader(GuildMember leader) {
         int oldGrade = leader.getGrade();
         if(getLeaderID() != 0) {
-            getMemberByID(getLeaderID()).setGrade(oldGrade);
+            getMemberByCharID(getLeaderID()).setGrade(oldGrade);
         }
         this.leaderID = leader.getCharID();
         leader.setGrade(1);
@@ -175,7 +196,7 @@ public class Guild {
         return getLeaderID() == gm.getCharID();
     }
 
-    public GuildMember getMemberByID(int id) {
+    public GuildMember getMemberByCharID(int id) {
         return getMembers().stream().filter(gm -> gm.getCharID() == id).findAny().orElse(null);
     }
 
@@ -249,6 +270,7 @@ public class Guild {
     }
 
     public void setGradeNames(String[] gradeNames) {
+        getGradeNames().clear();
         for (String gradeName : gradeNames) {
             getGradeNames().add(gradeName);
         }
@@ -372,5 +394,114 @@ public class Guild {
         outPacket.encodeByte(0);
         outPacket.encodeShort(0);
         outPacket.encodeByte(0);
+    }
+
+    /**
+     * Adds a given amount of commitment to the char.
+     * @param chr the char that the commitment should be given to
+     * @param commitment the amount of commitment to add
+     */
+    public void addCommitmentToChar(Char chr, int commitment) {
+        GuildMember gm = getMemberByCharID(chr.getId());
+        if (gm != null && gm.getRemainingDayCommitment() > 0) {
+            int commitmentInc = gm.getDayCommitment() + commitment > GameConstants.MAX_DAY_COMMITMENT
+                    ? GameConstants.MAX_DAY_COMMITMENT - gm.getDayCommitment()
+                    : commitment;
+            gm.addCommitment(commitmentInc);
+            addGgp((int) (commitmentInc * GameConstants.GGP_PER_CONTRIBUTION));
+            addPoints(commitment);
+        }
+    }
+
+    private void addPoints(int commitment) {
+        setPoints(getPoints() + commitment);
+        if (getLevel() < GameConstants.MAX_GUILD_LV && getPoints() > GameConstants.getExpRequiredForNextGuildLevel(getLevel())) {
+            setLevel(getLevel() + 1);
+            broadcast(UserLocal.chatMsg(ChatType.Notice2, String.format("%s has reached level %d!",
+                    getName(), getLevel())));
+        }
+        broadcast(WvsContext.guildResult(GuildResult.setPointAndLevel(this)));
+    }
+
+    private void addGgp(int ggp) {
+        setGgp(getGgp() + ggp);
+        broadcast(WvsContext.guildResult(GuildResult.setGgp(this)));
+    }
+
+    public List<BBSRecord> getBbsRecords() {
+        return bbsRecords;
+    }
+
+    public void setBbsRecords(List<BBSRecord> bbsRecords) {
+        this.bbsRecords = bbsRecords;
+    }
+
+    public void addBbsRecord(BBSRecord record) {
+        getBbsRecords().add(record);
+        record.setIdForBbs(getBbsRecords().size()); // whatevs
+    }
+
+    public BBSRecord getRecordByID(int id) {
+        BBSRecord record;
+        if (id == 0) {
+            record = getBbsNotice();
+        } else {
+            record = getBbsRecords().stream().filter(r -> r.getIdForBbs() == id).findAny().orElse(null);
+        }
+        return record;
+    }
+
+    public void removeRecord(BBSRecord record) {
+        getBbsRecords().remove(record);
+        int i = 1;
+        for (BBSRecord r : getBbsRecords()) {
+            r.setIdForBbs(i++);
+        }
+    }
+
+    public BBSRecord getBbsNotice() {
+        return bbsNotice;
+    }
+
+    public void setBbsNotice(BBSRecord bbsNotice) {
+        this.bbsNotice = bbsNotice;
+    }
+
+    public int getSpentSp() {
+        return getSkills().values().stream().mapToInt(GuildSkill::getLevel).sum();
+    }
+
+    public int getSpentBattleSp() {
+        int spentSp = 0;
+        for (int i = 91001022; i < 91001024; i++) {
+            GuildSkill gs = getSkills().getOrDefault(i, null);
+            spentSp += gs == null ? 0 : gs.getLevel();
+        }
+        return spentSp;
+    }
+
+    public int getBattleSp() {
+        return getLevel() + 4;
+    }
+
+    public GuildSkill getSkillById(int skillID) {
+        return getSkills().getOrDefault(skillID, null);
+    }
+
+    public void setAlliance(Alliance alliance) {
+        this.alliance = alliance;
+        setAllianceID(alliance.getId());
+    }
+
+    public Alliance getAlliance() {
+        return alliance;
+    }
+
+    public boolean isGuildMaster(Char chr) {
+        return getLeaderID() == chr.getId();
+    }
+
+    public GuildMember getGuildLeader() {
+        return getMemberByCharID(getLeaderID());
     }
 }

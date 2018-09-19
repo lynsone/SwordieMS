@@ -9,7 +9,6 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.Logger;
 
-import javax.naming.directory.Attribute;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -36,6 +35,12 @@ public class SkillInfo {
     private String elemAttr;
     private int hyper;
     private int hyperstat;
+    private int vehicleId;
+    private int reqTierPoint;
+    private Map<Integer, Integer> reqSkills = new HashMap<>();
+    private boolean notCooltimeReset;
+    private boolean notIncBuffDuration;
+    private static ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
 
     public int getSkillId() {
         return skillId;
@@ -89,15 +94,17 @@ public class SkillInfo {
         }
         // Sometimes newlines get taken, just remove those
         value = value.replace("\n", "").replace("\r", "");
+        value = value.replace("\\n", "").replace("\\r", ""); // unluko
         String original = value;
         if(Util.isNumber(value)) {
             result = Integer.parseInt(value);
         } else {
-            ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
             try {
                 value = value.replace("u", "Math.ceil");
                 value = value.replace("d", "Math.floor");
-                String toReplace = value.contains("y") ? "y" : "x";
+                String toReplace = value.contains("y") ? "y"
+                        : value.contains("X") ? "X"
+                        : "x";
                 Object res = engine.eval(value.replace(toReplace, slv + ""));
                 if(res instanceof Integer) {
                     result = (Integer) res;
@@ -179,14 +186,6 @@ public class SkillInfo {
         int value = getValue(ss, slv);
         switch (ss) {
             case lv2damX:
-            case lv2dex:
-            case lv2int:
-            case lv2luk:
-            case lv2mad:
-            case lv2mhp:
-            case lv2mmp:
-            case lv2pad:
-            case lv2str:
                 value *= chr.getLevel();
                 break;
             case str2dex:
@@ -259,5 +258,45 @@ public class SkillInfo {
 
     public int getHyperStat() {
         return hyperstat;
+    }
+
+    public int getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(int vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public void setReqTierPoint(int reqTierPoint) {
+        this.reqTierPoint = reqTierPoint;
+    }
+
+    public int getReqTierPoint() {
+        return reqTierPoint;
+    }
+
+    public void addReqSkill(int skillID, int slv) {
+        getReqSkills().put(skillID, slv);
+    }
+
+    public Map<Integer, Integer> getReqSkills() {
+        return reqSkills;
+    }
+
+    public void setNotCooltimeReset(boolean notCooltimeReset) {
+        this.notCooltimeReset = notCooltimeReset;
+    }
+
+    public boolean isNotCooltimeReset() {
+        return notCooltimeReset;
+    }
+
+    public void setNotIncBuffDuration(boolean notIncBuffDuration) {
+        this.notIncBuffDuration = notIncBuffDuration;
+    }
+
+    public boolean isNotIncBuffDuration() {
+        return notIncBuffDuration;
     }
 }

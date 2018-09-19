@@ -3,35 +3,38 @@ package net.swordie.ms.client.jobs.legend;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.ChatType;
+import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -40,7 +43,7 @@ public class Shade extends Job {
     public static final int SPIRIT_BOND_I = 20050285;
     public static final int FOX_TROT = 20051284;
 
-    public static final int FOX_SPIRITS = 25101009; //Buff (ON/OFF)                 //HiddenPossesion TempStat
+    public static final int FOX_SPIRITS = 25101009; //Buff (ON/OFF)
     public static final int FOX_SPIRITS_INIT = 25100009;
     public static final int FOX_SPIRITS_ATOM = 25100010;
     public static final int FOX_SPIRITS_ATOM_2 = 25120115; //Upgrade
@@ -62,6 +65,7 @@ public class Shade extends Job {
 
     public static final int HEROIC_MEMORIES_SH = 25121132;
     public static final int SPIRIT_BOND_MAX = 25121131;
+    public static final int SPIRIT_INCARNATION = 25121030;
 
     private int[] addedSkills = new int[] {
             SPIRIT_BOND_I,
@@ -77,6 +81,8 @@ public class Shade extends Job {
             SPIRIT_BOND_MAX,
     };
 
+    private long spiritWardTimer;
+
     public Shade(Char chr) {
         super(chr);
         if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
@@ -89,6 +95,15 @@ public class Shade extends Job {
             }
         }
     }
+
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isShade(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -117,6 +132,7 @@ public class Shade extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(SpiritGuard, o1);
+                spiritWardTimer = System.currentTimeMillis() + (si.getValue(time, slv) * 1000);
                 break;
             case MAPLE_WARRIOR_SH:
                 o1.nReason = skillID;
@@ -165,29 +181,118 @@ public class Shade extends Job {
                 tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o5);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
+        tsm.sendSetStatPacket();
     }
 
-    private void handleFoxSpirits(int skillID) {    //
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        byte slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = (byte) skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            if(attackInfo.skillId == FOX_SPIRITS_ATOM || attackInfo.skillId == FOX_SPIRITS_ATOM_2) {
+                recreateFoxSpiritForceAtom(attackInfo);
+            }
+            applyWeakenOnMob(attackInfo, slv);
+            deathMarkDoTHeal(attackInfo);
+        }
+
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case GROUND_POUND_FIRST:
+            case GROUND_POUND_SECOND:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = -si.getValue(y, slv);
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                }
+                break;
+            case BOMB_PUNCH_FINAL:
+                SkillInfo bpi = SkillData.getSkillInfoById(BOMB_PUNCH);
+                byte bombPunchslv = (byte) chr.getSkill(BOMB_PUNCH).getCurrentLevel();
+                if (Util.succeedProp(bpi.getValue(prop, bombPunchslv))) {
+                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = BOMB_PUNCH;
+                            o1.tOption = bpi.getValue(time, bombPunchslv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                break;
+            case DEATH_MARK:
+                int healrate = si.getValue(x, slv);
+                chr.heal((int) (chr.getMaxHP() / ((double)100 / healrate)));
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(dotTime, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.DebuffHealing, o1);
+                    mts.createAndAddBurnedInfo(chr, skill);
+                }
+                break;
+            case SOUL_SPLITTER:     // TODO
+                int duration = si.getValue(time, slv); //Split Duration & Timer on when to removeLife
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+
+                    //Spawns soul split mob
+                    if(!mob.isSplit()) {
+                        mob.soulSplitMob(chr, mob, duration, skill);
+                    }
+                }
+                break;
+            case SPIRIT_INCARNATION:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                tsm.sendSetStatPacket();
+                chr.dispose();
+                break;
+        }
+        super.handleAttack(c, attackInfo);
+    }
+
+
+    private void createFoxSpiritForceAtom(int skillID) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(HiddenPossession)) {
-            SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
+            SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS);
             Field field = chr.getField();
-            //Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-
-            Rect rect = new Rect(
-                    new Position(
-                            chr.getPosition().getX() - 750,
-                            chr.getPosition().getY() - 750),
-                    new Position(
-                            chr.getPosition().getX() + 750,
-                            chr.getPosition().getY() + 750)
-            );
-
-            List<Mob> mobs = chr.getField().getBossMobsInRect(rect);
-            Mob mob = Util.getRandomFromList(mobs);
-            int anglenum = 305;// new Random().nextInt(270);
+            Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+            List<Mob> mobs = chr.getField().getMobsInRect(rect);
+            if(mobs.size() <= 0) {
+                return;
+            }
+            Mob mob = Util.getRandomFromCollection(mobs);
             int mobID = mob.getObjectId();
 
             int atomid = FOX_SPIRITS_ATOM;
@@ -200,15 +305,15 @@ public class Shade extends Job {
                 type = ForceAtomEnum.FLAMING_RABBIT_ORB.getForceAtomType();
             }
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 7,
-                    anglenum, 400, (int) System.currentTimeMillis(), 1, 0,
+                    305, 400, (int) System.currentTimeMillis(), 1, 0,
                     new Position(chr.isLeft() ? 0 : -50, -50));
-            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+            field.broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
                     true, mobID, atomid, forceAtomInfo, new Rect(), 0, 300,
                     mob.getPosition(), atomid, mob.getPosition()));
         }
     }
 
-    private void handleFoxSpiritsReCreation(int skillID, byte slv, AttackInfo attackInfo) {
+    private void recreateFoxSpiritForceAtom(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(FOX_SPIRITS_ATOM);
         int anglenum = new Random().nextInt(360);
@@ -240,7 +345,7 @@ public class Shade extends Job {
         }
     }
 
-    public void handleWeaken(AttackInfo attackInfo, byte slv) {
+    public void applyWeakenOnMob(AttackInfo attackInfo, byte slv) {
         if(chr.hasSkill(WEAKEN)) {
             Option o1 = new Option();
             Option o2 = new Option();
@@ -267,90 +372,29 @@ public class Shade extends Job {
         }
     }
 
+    public void deathMarkDoTHeal(AttackInfo attackInfo) {
+        Skill skill = chr.getSkill(DEATH_MARK);
+        byte slv = (byte) skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        int healrate = si.getValue(x, slv);
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            if(mts.hasBurnFromSkillAndOwner(DEATH_MARK, chr.getId())) {
+                long totaldmg = Arrays.stream(mai.damages).sum();
+                chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
+            }
+        }
+    }
 
     @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        byte slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = (byte) skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        if(hasHitMobs) {
-            if(attackInfo.skillId == FOX_SPIRITS_ATOM || attackInfo.skillId == FOX_SPIRITS_ATOM_2) {
-                handleFoxSpiritsReCreation(skillID, slv, attackInfo);
-            }
-            handleWeaken(attackInfo, slv);
-            handleDeathMarkDoTHeal(attackInfo);
-        }
-
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case GROUND_POUND_FIRST:
-            case GROUND_POUND_SECOND:
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = -si.getValue(y, slv);
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                }
-                break;
-            case BOMB_PUNCH_FINAL:
-                SkillInfo bpi = SkillData.getSkillInfoById(BOMB_PUNCH);
-                byte bombPunchslv = (byte) chr.getSkill(BOMB_PUNCH).getCurrentLevel();
-                if (Util.succeedProp(bpi.getValue(prop, bombPunchslv))) {
-                    for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = BOMB_PUNCH;
-                        o1.tOption = bpi.getValue(time, bombPunchslv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
-                }
-                break;
-            case DEATH_MARK:
-                int healrate = si.getValue(x, slv);
-                chr.heal((int) (chr.getMaxHP() / ((double)100 / healrate)));
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(dotTime, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.DebuffHealing, o1);
-                    mts.createAndAddBurnedInfo(chr, skill, 1);
-                }
-                break;
-            case SOUL_SPLITTER:     // TODO
-                int duration = si.getValue(time, slv); //Split Duration & Timer on when to removeLife
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-
-                    //Spawns soul split mob
-                    if(!mob.isSplit()) {
-                        mob.soulSplitMob(chr, mob, duration, skill);
-                    }
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
+    public int getFinalAttackSkill() {
+        return 0;
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -362,7 +406,7 @@ public class Shade extends Job {
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -381,7 +425,7 @@ public class Shade extends Job {
                     break;
                 case FIRE_FOX_SPIRIT_MASTERY:
                 case FOX_SPIRITS_INIT:
-                    handleFoxSpirits(skillID);
+                    createFoxSpiritForceAtom(skillID);
                     break;
                 case HEROS_WILL_SH:
                     tsm.removeAllDebuffs();
@@ -390,58 +434,69 @@ public class Shade extends Job {
         }
     }
 
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
     @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {   //TODO Needs to not Reset the Timer when Hit
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Option o = new Option();
-        if (tsm.hasStat(SpiritGuard)) {
-            if (tsm.getOption(SpiritGuard).nOption == 3) {
-                o.nOption = 2;
-                o.rOption = SPIRIT_WARD;
-                o.tOption = 30;
-                tsm.putCharacterStatValue(SpiritGuard, o);
-                tsm.sendSetStatPacket();
-            } else if (tsm.getOption(SpiritGuard).nOption == 2) {
-                o.nOption = 1;
-                o.rOption = SPIRIT_WARD;
-                o.tOption = 30;
-                tsm.putCharacterStatValue(SpiritGuard, o);
-                tsm.sendSetStatPacket();
-            } else if (tsm.getOption(SpiritGuard).nOption == 1) {
-                resetSpiritGuard();
-            }
+        if(tsm.hasStat(SpiritGuard) && hitInfo.hpDamage > 0) {
+            deductSpiritWard();
+            hitInfo.hpDamage = 0;
+            hitInfo.mpDamage = 0;
         }
         super.handleHit(c, inPacket, hitInfo);
     }
 
-    public void resetSpiritGuard() {
+    private void deductSpiritWard() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        tsm.removeStat(SpiritGuard, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
-    }
+        if(!chr.hasSkill(SPIRIT_WARD)) {
+            return;
+        }
+        Skill skill = chr.getSkill(SPIRIT_WARD);
+        Option o = new Option();
+        if (tsm.hasStat(SpiritGuard)) {
+            int spiritWardCount = tsm.getOption(SpiritGuard).nOption;
 
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isShade(id);
-    }
+            if(spiritWardCount > 0) {
+                spiritWardCount--;
+            }
 
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    public void handleDeathMarkDoTHeal(AttackInfo attackInfo) {
-        Skill skill = chr.getSkill(DEATH_MARK);
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        int healrate = si.getValue(x, slv);
-        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            MobTemporaryStat mts = mob.getTemporaryStat();
-            if(mts.getBurnBySkill(DEATH_MARK) != null) {
-                long totaldmg = Arrays.stream(mai.damages).sum();
-                chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
+            if(spiritWardCount <= 0) {
+                tsm.removeStatsBySkill(skill.getSkillId());
+                tsm.sendResetStatPacket();
+            } else {
+                o.setInMillis(true);
+                o.nOption = spiritWardCount;
+                o.rOption = skill.getSkillId();
+                o.tOption = (int) (spiritWardTimer - System.currentTimeMillis());
+                tsm.putCharacterStatValue(SpiritGuard, o);
+                tsm.sendSetStatPacket();
             }
         }
+    }
+
+    @Override
+    public void handleMobDebuffSkill(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(SpiritGuard)) {
+            tsm.removeAllDebuffs();
+            deductSpiritWard();
+        }
+
+    }
+
+    public static void reviveBySummonOtherSpirit(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(SUMMON_OTHER_SPIRIT);
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Summon Other Spirit.");
+        chr.write(User.effect(Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
+
+        chr.write(User.effect(Effect.skillUse(25111211, (byte) 1, 0)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(25111211, (byte) 1, 0)));
     }
 }

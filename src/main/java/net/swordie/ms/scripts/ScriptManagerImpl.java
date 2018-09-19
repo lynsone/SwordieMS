@@ -2,21 +2,27 @@ package net.swordie.ms.scripts;
 
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.Client;
+import net.swordie.ms.client.alliance.Alliance;
+import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.MonsterPark;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.character.damage.DamageSkinType;
+import net.swordie.ms.client.character.items.Inventory;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.guild.result.GuildMsg;
+import net.swordie.ms.client.guild.Guild;
+import net.swordie.ms.client.guild.GuildMember;
+import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -40,17 +46,14 @@ import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.FieldInstanceType;
-import net.swordie.ms.world.field.Foothold;
-import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.World;
+import net.swordie.ms.world.field.*;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.field.obtacleatom.ObtacleAtomInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.LogManager;
-import org.w3c.dom.CharacterData;
 
 import javax.script.*;
 import java.io.File;
@@ -60,12 +63,15 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
-import static net.swordie.ms.enums.ChatMsgColour.*;
+import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.life.npc.NpcMessageType.*;
 
 /**
@@ -75,11 +81,12 @@ import static net.swordie.ms.life.npc.NpcMessageType.*;
  */
 public class ScriptManagerImpl implements ScriptManager {
 
-	public static final String SCRIPT_ENGINE_NAME = "python";
-	public static final String SCRIPT_ENGINE_EXTENSION = ".py";
+	private static final String SCRIPT_ENGINE_NAME = "python";
+	private static final String SCRIPT_ENGINE_EXTENSION = ".py";
 	private static final String DEFAULT_SCRIPT = "undefined";
 	public static final String QUEST_START_SCRIPT_END_TAG = "s";
 	public static final String QUEST_COMPLETE_SCRIPT_END_TAG = "e";
+	private static final String INTENDED_NPE_MSG = "Intended NPE by forceful script stop.";
 	private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
 	private Char chr;
@@ -89,8 +96,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	private Map<ScriptType, ScriptInfo> scripts;
 	private int returnField = 0;
 	private ScriptType lastActiveScriptType;
-	private Map<ScriptType, Set<ScheduledFuture>> eventsByScriptType = new HashMap<>();
-	private Set<ScheduledFuture> scheduledFutureSet;
+	private Map<ScriptType, Future> evaluations = new HashMap<>();
+	private Set<ScheduledFuture> events = new HashSet<>();
+	private ScriptMemory memory = new ScriptMemory();
+	private boolean curNodeEventEnd = false;
+	private static final Lock fileReadLock = new ReentrantLock();
 
 	private ScriptManagerImpl(Char chr, Field field) {
 		this.chr = chr;
@@ -98,7 +108,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		this.npcScriptInfo = new NpcScriptInfo();
 		this.scripts = new HashMap<>();
 		this.isField = chr == null;
-		this.lastActiveScriptType = ScriptType.NONE;
+		this.lastActiveScriptType = ScriptType.None;
 	}
 
 	public ScriptManagerImpl(Char chr) {
@@ -109,8 +119,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		this(null, field);
 	}
 
-	public ScriptEngine getScriptEngineByType(ScriptType scriptType) {
-		return getScriptInfoByType(scriptType).getScriptEngine();
+	private ScriptEngine getScriptEngineByType(ScriptType scriptType) {
+		ScriptInfo si = getScriptInfoByType(scriptType);
+		return si == null ? null : si.getScriptEngine();
 	}
 
 	public ScriptInfo getScriptInfoByType(ScriptType scriptType) {
@@ -150,90 +161,124 @@ public class ScriptManagerImpl implements ScriptManager {
 		startScript(parentID, objID, parentID + ".py", scriptType);
 	}
 
-	private void startScript(int parentID, int objID, ScriptType scriptType, String initFuncName) {
-		startScript(parentID, objID, parentID + ".py", scriptType, initFuncName);
-	}
-
 	public void startScript(int parentID, int objID, String scriptName, ScriptType scriptType) {
-		startScript(parentID, objID, scriptName, scriptType, "init");
-	}
-
-	private void startScript(int parentID, int objID, String scriptName, ScriptType scriptType, String initFuncName) {
+		if (scriptType == ScriptType.None || (scriptType == ScriptType.Quest && !isQuestScriptAllowed())) {
+			log.debug(String.format("Did not allow script %s to go through (type %s)  |  Active Script Type: %s", scriptName, scriptType, getLastActiveScriptType()));
+			return;
+		}
 		setLastActiveScriptType(scriptType);
-		if (scriptType == ScriptType.NONE) {
+		if (isActive(scriptType) && scriptType != ScriptType.Field) { // because Field Scripts don't get disposed.
+			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
+							" is not intended.", scriptType.getDir(), getScriptInfoByType(scriptType).getParentID()));
+			log.debug(String.format("Could not run script %s because one of the same type is already running (%s, type %s)",
+					scriptName, getScriptInfoByType(scriptType).getScriptName(), scriptType));
 			return;
 		}
 		if (!isField()) {
-			chr.chatMessage(YELLOW, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
+			chr.chatMessage(Mob, String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 		}
-		ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
-		scriptEngine.put("sm", this);
+		resetParam();
+		ScriptEngine scriptEngine = getScriptEngineByType(scriptType);
+		if (scriptEngine == null) {
+			scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
+			scriptEngine.put("sm", this);
+			scriptEngine.put("chr", chr);
+			scriptEngine.put("field", chr == null ? field : chr.getField());
+		}
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
 		scriptEngine.put("objectID", objID);
-		scriptEngine.put("chr", chr);
-		if (scriptType == ScriptType.QUEST) {
+		if (scriptType == ScriptType.Quest) {
 			scriptEngine.put("startQuest",
 					scriptName.charAt(scriptName.length() - 1) == QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
 		}
 		ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);
+		if (scriptType == ScriptType.Npc) {
+			getNpcScriptInfo().setTemplateID(parentID);
+		}
 		scriptInfo.setObjectID(objID);
 		getScripts().put(scriptType, scriptInfo);
-		Invocable inv = getInvocableFromScriptNameAndType(scriptName, scriptType);
-		getScripts().get(scriptType).setInvocable(inv);
-		EventManager.addEvent(() -> getInvocableByType(scriptType).invokeFunction(initFuncName), 0);
+		ScheduledFuture sf = EventManager.addEvent(() -> startScript(scriptName, scriptType), 0); // makes the script execute async
+		getEvaluations().put(scriptType, sf);
+	}
+
+	private boolean isQuestScriptAllowed() {
+		return getLastActiveScriptType() == ScriptType.None;
+	}
+
+	public Map<ScriptType, Future> getEvaluations() {
+		return evaluations;
 	}
 
 	public void notifyMobDeath(Mob mob) {
-		if (isActive(ScriptType.FIELD)) {
-			try {
-				getInvocableByType(ScriptType.FIELD).invokeFunction("onMobDeath", mob);
-			} catch (ScriptException e) {
+		if (isActive(ScriptType.Field)) {
+			getScriptInfoByType(ScriptType.Field).addResponse(mob);
+		}
+	}
+
+	private void startScript(String name, ScriptType scriptType) {
+		String dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
+				scriptType.getDir().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
+		boolean exists = new File(dir).exists();
+		if (!exists) {
+			log.error(String.format("[Error] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
+			if(chr != null) {
+				chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
+			}
+			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
+					scriptType.getDir().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
+		}
+		ScriptInfo si = getScriptInfoByType(scriptType);
+		si.setActive(true);
+		CompiledScript cs;
+		getScriptInfoByType(scriptType).setFileDir(dir);
+		StringBuilder script = new StringBuilder();
+		ScriptEngine se = getScriptEngineByType(scriptType);
+		si.setInvocable((Invocable) se);
+		try {
+			fileReadLock.lock();
+			script.append(Util.readFile(dir, Charset.defaultCharset()));
+		} catch (IOException e) {
+			e.printStackTrace();
+			if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
+		} finally {
+			fileReadLock.unlock();
+		}
+		try {
+			cs = ((Compilable) se).compile(script.toString());
+			cs.eval();
+		} catch (ScriptException e) {
+			if (!e.getMessage().contains(INTENDED_NPE_MSG)) {
+				log.error(String.format("Unable to compile script %s!", name));
 				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				// Intended: no method is no problem
+				if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
+			}
+		} finally {
+			if (si.isActive() && name.equals(si.getScriptName())) {
+				// gracefully stop script if it's still active with the same script info
+				stop(scriptType);
 			}
 		}
 	}
 
-	private Invocable getInvocableFromScriptNameAndType(String name, ScriptType scriptType) {
-		String dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
-				scriptType.toString().toLowerCase(), name, SCRIPT_ENGINE_EXTENSION);
-		boolean exists = new File(dir).exists();
-		if (!exists) {
-			log.error(String.format("[Error] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
-			chr.chatMessage(YELLOW, String.format("[Script] Could not find script %s/%s", scriptType.toString().toLowerCase(), name));
-			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
-					scriptType.toString().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
-		}
-		CompiledScript cs;
-		ScriptEngine se = getScriptEngineByType(scriptType);
-		try {
-			dir = Util.readFile(dir, Charset.defaultCharset());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			cs = ((Compilable) se).compile(dir);
-			cs.eval();
-		} catch (ScriptException e) {
-			log.error(String.format("Unable to compile script %s!", name));
-			e.printStackTrace();
-		}
-		return (Invocable) se;
-	}
-
 	public void stop(ScriptType scriptType) {
 		setSpeakerID(0);
-		if (getScriptInfoByType(scriptType) != null) {
-			getScriptInfoByType(scriptType).reset();
-		}
 		if (getLastActiveScriptType() == scriptType) {
-			setLastActiveScriptType(ScriptType.NONE);
+			setLastActiveScriptType(ScriptType.None);
 		}
-		WvsContext.dispose(chr);
+		ScriptInfo si = getScriptInfoByType(scriptType);
+		if (si != null) {
+			si.reset();
+		}
+		Future f = getEvaluations().getOrDefault(scriptType, null);
+		if (f != null) {
+			f.cancel(true);
+		}
+		getMemory().clear();
+		if (chr != null) {
+			WvsContext.dispose(chr);
+		}
 	}
 
 	@Override
@@ -243,28 +288,46 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-	public void handleAction(byte lastType, byte response, int answer) {
-		handleAction(getLastActiveScriptType(), lastType, response, answer);
+	public void handleAction(NpcMessageType lastType, byte response, int answer) {
+		handleAction(getLastActiveScriptType(), lastType, response, answer, null);
 	}
 
-	public void handleAction(ScriptType scriptType, byte lastType, byte response, int answer) {
+	public void handleAction(NpcMessageType lastType, byte response, String text) {
+		handleAction(getLastActiveScriptType(), lastType, response, 0, text);
+	}
+
+	public void handleAction(ScriptType scriptType, NpcMessageType lastType, byte response, int answer, String text) {
 		switch (response) {
 			case -1:
 			case 5:
 				stop(scriptType);
 				break;
-			case 0:
-			case 1:
-			case 2:
-				try {
-					if (isActive(scriptType)) {
-						getInvocableByType(scriptType).invokeFunction("action", response, answer);
-					} else if (!isActive(scriptType) && isActive(ScriptType.PORTAL)) {
-						getInvocableByType(ScriptType.PORTAL).invokeFunction("action", response, answer);
+            default:
+				ScriptMemory sm = getMemory();
+				if (lastType.isPrevPossible() && response == 0) {
+					// back button pressed
+					NpcScriptInfo prev = sm.getPreviousScriptInfo();
+					chr.write(ScriptMan.scriptMessage(prev, prev.getMessageType()));
+				} else {
+					if (getMemory().isInMemory()) {
+						NpcScriptInfo next = sm.getNextScriptInfo();
+						chr.write(ScriptMan.scriptMessage(next, next.getMessageType()));
+					} else {
+						ScriptInfo si = getScriptInfoByType(scriptType);
+						if (isActive(scriptType)) {
+							switch (lastType.getResponseType()) {
+								case Response:
+									si.addResponse((int) response);
+									break;
+								case Answer:
+									si.addResponse(answer);
+									break;
+								case Text:
+									si.addResponse(text);
+									break;
+							}
+						}
 					}
-				} catch (ScriptException | NoSuchMethodException e) {
-					e.printStackTrace();
-					stop(scriptType);
 				}
 		}
 	}
@@ -310,8 +373,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	// Start of the sends/asks -----------------------------------------------------------------------------------------
 
 	@Override
-	public void sendSay(String text) {
-		sendGeneralSay(text, Say);
+	public int sendSay(String text) {
+		if (getLastActiveScriptType() == ScriptType.None) {
+			return 0;
+		}
+		return sendGeneralSay(text, Say);
 	}
 
 	/**
@@ -320,65 +386,87 @@ public class ScriptManagerImpl implements ScriptManager {
 	 * @param text
 	 * @param nmt
 	 */
-	private void sendGeneralSay(String text, NpcMessageType nmt) {
+	private int sendGeneralSay(String text, NpcMessageType nmt) throws NullPointerException {
 		getNpcScriptInfo().setText(text);
 		if (text.contains("#L")) {
 			nmt = AskMenu;
 		}
 		getNpcScriptInfo().setMessageType(nmt);
-		chr.write(ScriptMan.scriptMessage(this, nmt));
+		chr.write(ScriptMan.scriptMessage(getNpcScriptInfo(), nmt));
+		getMemory().addMemoryInfo(getNpcScriptInfo());
+		Object response = null;
+		if (isActive(getLastActiveScriptType())) {
+			response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		}
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (int) response;
 	}
 
 	@Override
-	public void sendNext(String text) {
-		sendGeneralSay(text, SayNext);
+	public int sendNext(String text) {
+		return sendGeneralSay(text, SayNext);
 	}
 
 	@Override
-	public void sendPrev(String text) {
-		sendGeneralSay(text, SayPrev);
+	public int sendPrev(String text) {
+		return sendGeneralSay(text, SayPrev);
 	}
 
 	@Override
-	public void sendSayOkay(String text) {
-		sendGeneralSay(text, SayOk);
+	public int sendSayOkay(String text) {
+		return sendGeneralSay(text, SayOk);
 	}
 
 	@Override
-	public void sendSayImage(String image) {
-		sendSayImage(new String[]{image});
+	public int sendSayImage(String image) {
+		return sendSayImage(new String[]{image});
 	}
 
 	@Override
-	public void sendSayImage(String[] images) {
+	public int sendSayImage(String[] images) {
 		getNpcScriptInfo().setImages(images);
 		getNpcScriptInfo().setMessageType(SayImage);
-		chr.write(ScriptMan.scriptMessage(this, SayImage));
+		return sendGeneralSay("", SayImage);
 	}
 
 	@Override
-	public void sendAskYesNo(String text) {
-		sendGeneralSay(text, AskYesNo);
+	public boolean sendAskYesNo(String text) {
+		return sendGeneralSay(text, AskYesNo) != 0;
 	}
 
 	@Override
-	public void sendAskText(String text, String defaultText, short minLength, short maxLength) {
+	public boolean sendAskAccept(String text) {
+		return sendGeneralSay(text, AskAccept) != 0;
+	}
+
+	@Override
+	public String sendAskText(String text, String defaultText, short minLength, short maxLength) throws NullPointerException {
 		getNpcScriptInfo().setMin(minLength);
 		getNpcScriptInfo().setMax(maxLength);
 		getNpcScriptInfo().setDefaultText(defaultText);
-		sendGeneralSay(text, AskText);
+		getNpcScriptInfo().setText(text);
+		getNpcScriptInfo().setMessageType(AskText);
+		chr.write(ScriptMan.scriptMessage(getNpcScriptInfo(), AskText));
+		getMemory().addMemoryInfo(getNpcScriptInfo());
+		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		if (response == null) {
+			throw new NullPointerException("Intended");
+		}
+		return (String) response;
 	}
 
 	@Override
-	public void sendAskNumber(String text, int defaultNum, int min, int max) {
+	public int sendAskNumber(String text, int defaultNum, int min, int max) {
 		getNpcScriptInfo().setDefaultNumber(defaultNum);
 		getNpcScriptInfo().setMin(min);
 		getNpcScriptInfo().setMax(max);
-		sendGeneralSay(text, AskNumber);
+		return sendGeneralSay(text, AskNumber);
 	}
 
 	@Override
-	public void sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time) {
+	public int sendInitialQuiz(byte type, String title, String problem, String hint, int min, int max, int time) {
 		NpcScriptInfo nsi = getNpcScriptInfo();
 		nsi.setType(type);
 		if (type != 1) {
@@ -389,11 +477,11 @@ public class ScriptManagerImpl implements ScriptManager {
 			nsi.setMax(max);
 			nsi.setTime(time);
 		}
-		chr.write(ScriptMan.scriptMessage(this, InitialQuiz));
+		return sendGeneralSay(title, InitialQuiz);
 	}
 
 	@Override
-	public void sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time) {
+	public int sendInitialSpeedQuiz(byte type, int quizType, int answer, int correctAnswers, int remaining, int time) {
 		NpcScriptInfo nsi = getNpcScriptInfo();
 		nsi.setType(type);
 		if (type != 1) {
@@ -403,60 +491,115 @@ public class ScriptManagerImpl implements ScriptManager {
 			nsi.setRemaining(remaining);
 			nsi.setTime(time);
 		}
-		chr.write(ScriptMan.scriptMessage(this, InitialSpeedQuiz));
+		return sendGeneralSay("", InitialSpeedQuiz);
 	}
 
 	@Override
-	public void sendICQuiz(byte type, String text, String hintText, int time) {
+	public int sendICQuiz(byte type, String text, String hintText, int time) {
 		getNpcScriptInfo().setType(type);
 		getNpcScriptInfo().setHintText(hintText);
 		getNpcScriptInfo().setTime(time);
-		sendGeneralSay(text, ICQuiz);
+		return sendGeneralSay(text, ICQuiz);
 	}
 
 	@Override
-	public void sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options) {
+	public int sendAskAvatar(String text, boolean angelicBuster, boolean zeroBeta, int... options) {
 		getNpcScriptInfo().setAngelicBuster(angelicBuster);
 		getNpcScriptInfo().setZeroBeta(zeroBeta);
 		getNpcScriptInfo().setOptions(options);
-		sendGeneralSay(text, AskAvatar);
+		return sendGeneralSay(text, AskAvatar);
 	}
 
-	public void sendAskSlideMenu(int dlgType) {
+	public int sendAskSlideMenu(int dlgType) {
 		getNpcScriptInfo().setDlgType(dlgType);
-		chr.write(ScriptMan.scriptMessage(this, AskSlideMenu));
+		return sendGeneralSay("", AskSlideMenu);
 	}
+
+
 
 	// Start of param methods ------------------------------------------------------------------------------------------
-
-	public void setPlayerAsSpeaker() {
-		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
-	}
 
 	public void resetParam() {
 		getNpcScriptInfo().resetParam();
 	}
 
+	public void removeEscapeButton() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.NotCancellable);
+	}
+
+	public void addEscapeButton() {
+		if(getNpcScriptInfo().hasParam(NpcScriptInfo.Param.NotCancellable)) {
+			getNpcScriptInfo().removeParam(NpcScriptInfo.Param.NotCancellable);
+		}
+	}
+
+	public void flipSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipSpeaker);
+	}
+
+	public void flipDialogue() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.OverrideSpeakerID);
+	}
+
+	public void flipDialoguePlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeakerFlip);
+	}
+
+	public void setPlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.PlayerAsSpeaker);
+	}
+
+	public void setBoxChat() {
+		setBoxChat(true);
+	}
+
+	public void setBoxChat(boolean color) { // true = Standard BoxChat  |  false = Zero BoxChat
+		getNpcScriptInfo().setColor((byte) (color ? 1 : 0));
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.BoxChat);
+	}
+
+	public void flipBoxChat() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipBoxChat);
+	}
+
+	public void boxChatPlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.BoxChatAsPlayer);
+	}
+
+	public void flipBoxChatPlayerAsSpeaker() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipBoxChatAsPlayer);
+	}
+
+
+
 	// Start helper methods for scripts --------------------------------------------------------------------------------
 
 	@Override
 	public void dispose() {
-		stop(ScriptType.NPC);
-		stop(ScriptType.PORTAL);
-		stop(ScriptType.ITEM);
-		stop(ScriptType.QUEST);
-		stop(ScriptType.REACTOR);
-		setLastActiveScriptType(ScriptType.NONE);
+		dispose(true);
+	}
+
+	public void dispose(boolean stop) {
+		getNpcScriptInfo().reset();
+		getMemory().clear();
+		stop(ScriptType.Npc);
+		stop(ScriptType.Portal);
+		stop(ScriptType.Item);
+		stop(ScriptType.Quest);
+		stop(ScriptType.Reactor);
+		if (stop) {
+			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
+		}
 	}
 
 	public void dispose(ScriptType scriptType) {
+		getMemory().clear();
 		stop(scriptType);
 	}
 
 	public Position getPosition(int objId) {
 		return chr.getField().getLifeByObjectID(objId).getPosition();
 	}
-
 
 
 	// Character Stat-related methods ----------------------------------------------------------------------------------
@@ -501,10 +644,62 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void setSTR(short amount) {
+		chr.setStat(Stat.str, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.str, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setINT(short amount) {
+		chr.setStat(Stat.inte, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.inte, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setDEX(short amount) {
+		chr.setStat(Stat.dex, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.dex, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setLUK(short amount) {
+		chr.setStat(Stat.luk, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.luk, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setMaxHP(int amount) {
+		chr.setStat(Stat.mhp, amount);
+		chr.setStat(Stat.hp, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mhp, amount);
+		stats.put(Stat.hp, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setMaxMP(int amount) {
+		chr.setStat(Stat.mmp, amount);
+		chr.setStat(Stat.mp, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mmp, amount);
+		stats.put(Stat.mp, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
 	public void jobAdvance(short jobID) {
 		setJob(jobID);
 		addAP(5); //Standard added AP upon Job Advancing
-		addSP(3); //Standard added SP upon Job Advancing
+		addSP(5); //Standard added SP upon Job Advancing
 	}
 
 	@Override
@@ -534,14 +729,80 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-	// Field-related methods -------------------------------------------------------------------------------------------
+	public void giveSkill(int skillId) {
+		giveSkill(skillId, 1);
+	}
 
 	@Override
-	public void warp(int mid, int pid) {
-		Field field = chr.getOrCreateFieldByCurrentInstanceType(mid);
-		Portal portal = chr.getField().getPortalByID(pid);
-		chr.warp(field, portal);
+	public void giveSkill(int skillId, int slv) {
+		chr.addSkill(skillId, slv, slv);
 	}
+
+	public int getSkillByItem() {
+		return getSkillByItem(getParentID());
+	}
+
+	public int getSkillByItem(int itemId) {
+		ItemInfo itemInfo = ItemData.getItemInfoByID(itemId);
+		return itemInfo.getSkillId();
+	}
+
+	public boolean hasSkill(int skillId) {
+		return chr.hasSkill(skillId);
+	}
+
+	public void heal() {
+		chr.heal(chr.getMaxHP());
+		chr.healMP(chr.getMaxMP());
+	}
+
+	public void addLevel(int level) {
+		int curLevel = chr.getLevel();
+		for (int i = curLevel + 1; i <= curLevel + level; i++) {
+			chr.setStat(Stat.level, i);
+			Map<Stat, Object> stats = new HashMap<>();
+			stats.put(Stat.level, (byte) i);
+			stats.put(Stat.exp, (long) 0);
+			chr.getClient().write(WvsContext.statChanged(stats));
+			chr.getJobHandler().handleLevelUp();
+			chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
+		}
+	}
+
+	public void lockInGameUI(boolean lock) {
+		lockInGameUI(lock, true);
+	}
+
+	public void lockInGameUI(boolean lock, boolean blackFrame) {
+		if (chr != null) {
+			if (lock) {
+				chr.write(CField.curNodeEventEnd(true));// should be true when you send lockingameui
+				setCurNodeEventEnd(lock);
+			}
+			chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
+		}
+	}
+
+	public void curNodeEventEnd(boolean enable) {
+		setCurNodeEventEnd(enable);
+		chr.write(CField.curNodeEventEnd(enable));
+	}
+
+	public void setCurNodeEventEnd(boolean curNodeEventEnd) {
+		this.curNodeEventEnd = curNodeEventEnd;
+	}
+
+	public void progressMessageFont(int fontNameType, int fontSize, int fontColorType, int fadeOutDelay, String message) {
+		chr.write(User.progressMessageFont(fontNameType, fontSize, fontColorType, fadeOutDelay, message));
+	}
+
+	public void localEmotion(int emotion, int duration, boolean byItemOption) {
+		chr.write(UserLocal.emotion(emotion, duration, byItemOption));
+	}
+
+
+
+	// Field-related methods -------------------------------------------------------------------------------------------
 
 	@Override
 	public void warp(int id) {
@@ -550,12 +811,16 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void teleportToPortal(int portalId) {
-		Portal portal = chr.getField().getPortalByID(portalId);
-		if (portal != null) {
-			Position position = new Position(portal.getX(), portal.getY());
-			chr.write(CField.teleport(position, chr));
-		}
+	public void warp(int mid, int pid) {
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(mid);
+		Portal portal = field.getPortalByID(pid);
+		chr.warp(field, portal);
+	}
+
+	public void changeChannelAndWarp(int channel, int fieldID) {
+		Client c = chr.getClient();
+		c.setOldChannel(c.getChannel());
+		chr.changeChannelAndWarp((byte) channel, fieldID);
 	}
 
 	@Override
@@ -599,6 +864,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void clearPartyInfo(int warpToID) {
+		stopEvents(); // Stops the FixedRate Event from the Field Script
 		if (chr.getParty() != null) {
 			for (PartyMember pm : chr.getParty().getOnlineMembers()) {
 				pm.getChr().setDeathCount(-1);
@@ -626,6 +892,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void warpInstance(int id, boolean in, int portalID) {
+		stopEvents(); // Stops the FixedRate Event from the Field Script
 		chr.setFieldInstanceType(in ? FieldInstanceType.SOLO : FieldInstanceType.CHANNEL);
 		if (!in) {
 			chr.getFields().clear();
@@ -651,23 +918,52 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public boolean mobsPresentInField() {
-		return mobsPresentInField(chr.getFieldID());
+	public boolean hasMobsInField() {
+		return hasMobsInField(chr.getFieldID());
+	}
+
+	public Mob waitForMobDeath() {
+		Object response = null;
+		if (isActive(ScriptType.FirstEnterField)) {
+			response = getScriptInfoByType(ScriptType.FirstEnterField).awaitResponse();
+		} else if (isActive(ScriptType.Field)) {
+		    response = getScriptInfoByType(ScriptType.Field).awaitResponse();
+        }
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (Mob) response;
+	}
+
+	public Mob waitForMobDeath(int... possibleMobs) {
+		Mob mob = waitForMobDeath();
+		while (true) {
+			if (mob == null) {
+				throw new NullPointerException(INTENDED_NPE_MSG);
+			} else {
+				for (int mobID : possibleMobs) {
+					if (mob.getTemplateId() == mobID) {
+						return mob;
+					}
+				}
+				mob = waitForMobDeath();
+			}
+		}
 	}
 
 	@Override
-	public boolean mobsPresentInField(int fieldid) {
+	public boolean hasMobsInField(int fieldid) {
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldid);
 		return field.getMobs().size() > 0;
 	}
 
 	@Override
-	public int numberMobsInField() {
-		return numberMobsInField(chr.getFieldID());
+	public int getAmountOfMobsInField() {
+		return getAmountOfMobsInField(chr.getFieldID());
 	}
 
 	@Override
-	public int numberMobsInField(int fieldid) {
+	public int getAmountOfMobsInField(int fieldid) {
 		Field field = FieldData.getFieldById(fieldid);
 		return field.getMobs().size();
 	}
@@ -696,8 +992,33 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void showFieldEffect(String dir, int delay) {
+		chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+	}
+
+	public void showFieldEffectToField(String dir) {
+		showFieldEffect(dir, 0);
+	}
+
+	public void showFieldEffectToField(String dir, int delay) {
 		Field field = chr.getField();
 		field.broadcastPacket(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+	}
+
+	public void showFieldBackgroundEffect(String dir) {
+		showFieldBackgroundEffect(dir, 0);
+	}
+
+	public void showFieldBackgroundEffect(String dir, int delay) {
+		Field field = chr.getField();
+		chr.write(CField.fieldEffect(FieldEffect.getFieldBackgroundEffectFromWz(dir, delay)));
+	}
+
+	public void showFadeTransition(int duration, int fadeInTime, int fadeOutTime) {
+		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient2(fadeInTime, duration, fadeOutTime, true)));
+	}
+
+	public void showFade(int duration) {
+		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient(duration)));
 	}
 
 	@Override
@@ -707,15 +1028,25 @@ public class ScriptManagerImpl implements ScriptManager {
 		drop.setItem(ItemData.getItemDeepCopy(itemId));
 		Position position = new Position(x, y);
 		drop.setPosition(position);
-		field.drop(drop, position);
+		field.drop(drop, position, true);
 	}
 
 	@Override
-	public void teleportInField(int portalId) {
-		Field field = chr.getField();
-		Portal portal = field.getPortalByID(portalId);
+	public void teleportInField(Position position) {
+		chr.write(CField.teleport(position, chr));
+	}
+
+	@Override
+	public void teleportInField(int x, int y) {
+		teleportInField(new Position(x, y));
+	}
+
+	@Override
+	public void teleportToPortal(int portalId) {
+		Portal portal = chr.getField().getPortalByID(portalId);
 		if (portal != null) {
-			chr.write(CField.teleport(new Position(portal.getX(), portal.getY()), chr));
+			Position position = new Position(portal.getX(), portal.getY());
+			chr.write(CField.teleport(position, chr));
 		}
 	}
 
@@ -728,27 +1059,26 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void spawnNpc(int npcId, int x, int y) {
 		Npc npc = NpcData.getNpcDeepCopyById(npcId);
+		Position position = new Position(x, y);
+		npc.setPosition(position);
+		npc.setCy(y);
+		npc.setRx0(x + 50);
+		npc.setRx1(x - 50);
+		npc.setFh(chr.getField().findFootHoldBelow(new Position(x, y -2)).getId());
+		npc.setNotRespawnable(true);
+		if (npc.getField() == null) {
+			npc.setField(field);
+		}
+
 		chr.getField().spawnLife(npc, chr);
 	}
 
 	@Override
-	public void removeNpc(int npcId) { //TODO Fix
-		List<Life> removeLifeSet = new ArrayList<>();
-		List<Life> lifes = chr.getField().getLifes();
-		if(lifes.size() > 0) {
-			for (Life life : lifes) {
-				if (life instanceof Npc) {
-					if (life.getTemplateId() != npcId) {
-						continue;
-					}
-					removeLifeSet.add(life);
-				}
-			}
-		}
-		//TODO
-		if(removeLifeSet.size()>1) {
-			chr.getField().removeLife(removeLifeSet.get(0).getObjectId());
-		}
+	public void removeNpc(int npcId) {
+		chr.getField().getNpcs().stream()
+				.filter(npc -> npc.getTemplateId() == npcId)
+				.findFirst()
+				.ifPresent(npc -> chr.getField().removeLife(npc));
 	}
 
 	@Override
@@ -760,7 +1090,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		} else {
 			script = String.valueOf(npc.getTemplateId());
 		}
-		chr.getScriptManager().startScript(npc.getTemplateId(), npcId, script, ScriptType.NPC);
+		chr.getScriptManager().startScript(npc.getTemplateId(), npcId, script, ScriptType.Npc);
 	}
 
 	@Override
@@ -782,8 +1112,134 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void setSpeakerID(int templateID) {
-		getNpcScriptInfo().resetParam();
-		getNpcScriptInfo().setOverrideSpeakerTemplateID(templateID);
+		NpcScriptInfo nsi = getNpcScriptInfo();
+		boolean isNotCancellable = nsi.hasParam(NpcScriptInfo.Param.NotCancellable);
+		nsi.resetParam();
+		nsi.setOverrideSpeakerTemplateID(templateID);
+		if (isNotCancellable) {
+			nsi.addParam(NpcScriptInfo.Param.NotCancellable);
+		}
+	}
+
+	@Override
+	public void setSpeakerType(byte speakerType) {
+		NpcScriptInfo nsi = getNpcScriptInfo();
+		nsi.setSpeakerType(speakerType);
+	}
+        
+	public void hideNpcByTemplateId(int npcTemplateId, boolean hide) {
+		hideNpcByTemplateId(npcTemplateId, hide, hide);
+	}
+
+	@Override
+	public void hideNpcByTemplateId(int npcTemplateId, boolean hideTemplate, boolean hideNameTag) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(npcTemplateId);
+		if(life == null || !(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcViewOrHide(life.getObjectId(), !hideTemplate, !hideNameTag));
+	}
+
+	public void hideNpcByObjectId(int npcObjId, boolean hide) {
+		hideNpcByObjectId(npcObjId, hide, hide);
+	}
+
+	@Override
+	public void hideNpcByObjectId(int npcObjId, boolean hideTemplate, boolean hideNameTag) {
+		Field field = chr.getField();
+		Life life = field.getLifeByObjectID(npcObjId);
+		if(life == null || !(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcViewOrHide(life.getObjectId(), !hideTemplate, !hideNameTag));
+	}
+
+	@Override
+	public void moveNpcByTemplateId(int npcTemplateId, boolean left, int distance, int speed) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(npcTemplateId);
+		if(life == null || !(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceMove(life.getObjectId(), left, distance, speed));
+	}
+
+	@Override
+	public void moveNpcByObjectId(int npcObjId, boolean left, int distance, int speed) {
+		Field field = chr.getField();
+		Life life = field.getLifeByObjectID(npcObjId);
+		if(life == null || !(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceMove(life.getObjectId(), left, distance, speed));
+	}
+
+	@Override
+	public void flipNpcByTemplateId(int npcTemplateId, boolean left) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(npcTemplateId);
+		if(!(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceFlip(life.getObjectId(), left));
+	}
+
+	@Override
+	public void flipNpcByObjectId(int npcObjId, boolean left) {
+		Field field = chr.getField();
+		Life life = field.getLifeByObjectID(npcObjId);
+		if(!(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcSetForceFlip(life.getObjectId(), left));
+	}
+
+	public void showNpcSpecialActionByTemplateId(int npcTemplateId, String effectName) {
+		showNpcSpecialActionByTemplateId(npcTemplateId, effectName, 0);
+	}
+
+	@Override
+	public void showNpcSpecialActionByTemplateId(int npcTemplateId, String effectName, int duration) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(npcTemplateId);
+		if(!(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+			return;
+		}
+		chr.write(NpcPool.npcSetSpecialAction(life.getObjectId(), effectName, duration));
+	}
+
+	public void showNpcSpecialActionByObjectId(int npcObjId, String effectName) {
+		showNpcSpecialActionByObjectId(npcObjId, effectName, 0);
+
+	}
+
+	@Override
+	public void showNpcSpecialActionByObjectId(int npcObjId, String effectName, int duration) {
+		Field field = chr.getField();
+		Life life = field.getLifeByObjectID(npcObjId);
+		if(!(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
+			return;
+		}
+		chr.write(NpcPool.npcSetSpecialAction(life.getObjectId(), effectName, duration));
+	}
+        
+	public int getNpcObjectIdByTemplateId(int npcTemplateId) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(npcTemplateId);
+		if(!(life instanceof Npc)) {
+			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
+			return 0;
+		}
+		return life.getObjectId();
 	}
 
 
@@ -818,28 +1274,34 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getField().spawnMob(id, x, y, respawnable, hp);
 	}
 
+	public void spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
+		chr.getField().spawnMobWithAppearType(id, x, y, appearType, option);
+	}
+        
 	@Override
 	public void removeMobByObjId(int id) {
 		chr.getField().removeLife(id);
-		chr.getField().broadcastPacket(MobPool.mobLeaveField(id, DeathType.ANIMATION_DEATH));
+		chr.getField().broadcastPacket(MobPool.leaveField(id, DeathType.ANIMATION_DEATH));
 	}
 
 	@Override
-	public void removeMobsByTemplateId(int id) {
-		List<Mob> mobList = chr.getField().getMobs();
-		if (mobList.size() > 0) {
-			for (Mob mob : mobList) {
-				if (mob.getTemplateId() != id) {
-					continue;
-				}
-				removeMobByObjId(mob.getObjectId());
-			}
+	public void removeMobByTemplateId(int id) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(id);
+		if(life == null) {
+			log.error(String.format("Could not find Mob by template id %d.", id));
+			return;
 		}
+		removeMobByObjId(life.getObjectId());
 	}
 
-	@Override
-	public void removeMobsAfterTimer(int templateID, int seconds) {
-		EventManager.addEvent(() -> removeMobsByTemplateId(templateID), seconds, TimeUnit.SECONDS);
+	public void removeMobFromMapByTemplateId(int id, int fieldId) {
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
+		Life life = field.getLifeByTemplateId(id);
+		if(life == null) {
+			return;
+		}
+		removeMobByObjId(life.getObjectId());
 	}
 
 	@Override
@@ -864,12 +1326,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void removeReactor() {
 		Field field = chr.getField();
-		Reactor reactor = field.getReactors().stream()
-				.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.REACTOR))
-				.findAny().orElse(null);
-		if (reactor != null) {
-			field.removeReactor(reactor);
-			field.broadcastPacket(ReactorPool.reactorLeaveField(reactor));
+		Life life = field.getLifeByObjectID(getObjectIDByScriptType(ScriptType.Reactor));
+		if (life instanceof Reactor) {
+			field.removeLife(life.getObjectId(), false);
 		}
 	}
 
@@ -879,7 +1338,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		Reactor reactor = ReactorData.getReactorByID(reactorId);
 		Position position = new Position(x, y);
 		reactor.setPosition(position);
-		field.addReactor(reactor);
+		field.addLife(reactor);
 	}
 
 	@Override
@@ -892,6 +1351,33 @@ public class ScriptManagerImpl implements ScriptManager {
 	public int getReactorQuantity() {
 		Field field = chr.getField();
 		return field.getReactors().size();
+	}
+
+
+	public int getReactorState(int reactorId) {
+		Field field = chr.getField();
+		Life life = field.getLifeByTemplateId(reactorId);
+		if (life != null && life instanceof Reactor) {
+			Reactor reactor = (Reactor) life;
+			return reactor.getState();
+		}
+		return -1;
+	}
+
+	public void increaseReactorState(int reactorId, int stateLength) {
+		chr.getField().increaseReactorState(chr, reactorId, stateLength);
+	}
+
+	public void changeReactorState(int reactorId, byte state, short delay, byte stateLength) {
+		Field field = chr.getField();
+		Reactor reactor = field.getReactors().stream()
+						.filter(r -> r.getObjectId() == getObjectIDByScriptType(ScriptType.Reactor))
+						.findAny().orElse(null);
+		if (reactor == null) {
+			return;
+		}
+		reactor.setState(state);
+		chr.write(ReactorPool.reactorChangeState(reactor, delay, stateLength));
 	}
 
 
@@ -943,13 +1429,59 @@ public class ScriptManagerImpl implements ScriptManager {
 		return res;
 	}
 
+	public List<Char> getOnlinePartyMembers() {
+		Party party = getParty();
+		if (party == null) {
+			return new ArrayList<>();
+		}
+		return party.getOnlineChars();
+	}
+
+	public List<Char> getPartyMembersInSameField(Char chr) {
+		Party party = getParty();
+		if (party == null) {
+			return new ArrayList<>();
+		}
+		List<Char> list = new ArrayList<>(party.getPartyMembersInSameField(chr));
+		list.add(chr);
+		return new ArrayList<>(list);
+	}
 
 
-	// Guild-related methods -------------------------------------------------------------------------------------------
+
+	// Guild/Alliance related methods -------------------------------------------------------------------------------------------
 
 	@Override
 	public void showGuildCreateWindow() {
-		chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Req_InputGuildName)));
+		chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Req_InputGuildName)));
+	}
+
+	@Override
+	public boolean checkAllianceName(String name) {
+		World world = chr.getClient().getWorld();
+		return world.getAlliance(name) == null;
+	}
+
+	public void incrementMaxGuildMembers(int amount) {
+		Guild guild = chr.getGuild();
+		guild.setMaxMembers(guild.getMaxMembers() + amount);
+		guild.broadcast(WvsContext.guildResult(GuildResult.incMaxMemberNum(guild)));
+	}
+
+	public void createAlliance(String name, Char other) {
+		Alliance alliance = new Alliance();
+		alliance.setName(name);
+		alliance.addGuild(chr.getGuild());
+		alliance.addGuild(other.getGuild());
+		GuildMember chrMember = chr.getGuild().getMemberByCharID(chr.getId());
+		chrMember.setAllianceGrade(1);
+		GuildMember otherMember = other.getGuild().getMemberByCharID(other.getId());
+		otherMember.setAllianceGrade(2);
+		DatabaseManager.saveToDB(alliance);
+		chr.getGuild().setAlliance(alliance);
+		other.getGuild().setAlliance(alliance);
+		alliance.broadcast(WvsContext.allianceResult(AllianceResult.createDone(alliance)));
+		chr.deductMoney(5000000);
 	}
 
 
@@ -963,12 +1495,16 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void chatRed(String text) {
-		chr.chatMessage(GAME_MESSAGE, text);
+		chr.chatMessage(SystemNotice, text);
 	}
 
 	@Override
 	public void chatBlue(String text) {
-		chr.chatMessage(GAME_NOTICE, text);
+		chr.chatMessage(Notice2, text);
+	}
+
+	public void systemMessage(String message) {
+		chr.write(WvsContext.message(MessageType.SYSTEM_MESSAGE, 0, message, (byte) 0));
 	}
 
 	@Override
@@ -982,6 +1518,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void showWeatherNotice(String text, WeatherEffNoticeType type, int duration) {
 		chr.write(WvsContext.weatherEffectNotice(type, text, duration));
 	}
+
 
 
 	// Inventory-related methods ---------------------------------------------------------------------------------------
@@ -1011,14 +1548,42 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.addItemToInventory(id, quantity);
 	}
 
+	public void giveAndEquip(int id) {
+		if (!ItemConstants.isEquip(id)) {
+			giveItem(id);
+		}
+		Item equip = ItemData.getItemDeepCopy(id);
+		if (equip == null) {
+			return;
+		}
+		// replace the old equip if there was any
+		Inventory equipInv = chr.getEquipInventory();
+		int bodyPart = ItemConstants.getBodyPartFromItem(id, chr.getAvatarData().getAvatarLook().getGender());
+		Item oldEquip = equipInv.getItemBySlot((short) bodyPart);
+		if (oldEquip != null) {
+			chr.unequip(oldEquip);
+			oldEquip.updateToChar(chr);
+		}
+		equip.setBagIndex(bodyPart);
+		chr.equip(equip);
+		equip.updateToChar(chr);
+	}
+
 	@Override
 	public boolean hasItem(int id) {
 		return hasItem(id, 1);
 	}
 
 	@Override
+	public boolean isEquipped(int id) { return chr.getInventoryByType(InvType.EQUIPPED).getItems().stream().filter(item -> item.getItemId() == id).count() > 0; }
+
+	@Override
 	public boolean hasItem(int id, int quantity) {
 		return getQuantityOfItem(id) >= quantity;
+	}
+
+	public void consumeItem() {
+		consumeItem(getParentID());
 	}
 
 	@Override
@@ -1087,12 +1652,14 @@ public class ScriptManagerImpl implements ScriptManager {
 		quest.setStatus(QuestStatus.COMPLETE);
 		qm.addQuest(quest);
 		chr.write(WvsContext.questRecordMessage(quest));
+		chr.chatMessage(String.format("Quest %d completed by completeQuestNoRewards", id));
 	}
 
 	@Override
 	public void startQuestNoCheck(int id) {
 		QuestManager qm = chr.getQuestManager();
 		qm.addQuest(QuestData.createQuestFromId(id));
+		chr.chatMessage(String.format("Quest %d started by startQuestNoCheck", id));
 	}
 
 	@Override
@@ -1167,6 +1734,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 	
 
+
 	// Party Quest-related methods -------------------------------------------------------------------------------------
 
 	public void incrementMonsterParkCount() {
@@ -1196,6 +1764,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public long getPQExp(Char chr) {
 		return GameConstants.PARTY_QUEST_EXP_FORMULA(chr);
 	}
+
 
 
 	// Boss-related methods --------------------------------------------------------------------------------------------
@@ -1248,15 +1817,26 @@ public class ScriptManagerImpl implements ScriptManager {
 		field.broadcastPacket(CField.createObtacle(ObtacleAtomCreateType.NORMAL, obtacleInRowInfo, obtacleRadianInfo, obtacleAtomInfosSet));
 	}
 
-	public void stopEventsByScriptType(ScriptType scriptType) {
-		Set<ScheduledFuture> events = eventsByScriptType.get(scriptType);
-		if (events != null) {
-			events.forEach(st -> st.cancel(true));
-			events.clear();
+	public void stopEvents() {
+		Set<ScheduledFuture> events = getEvents();
+		events.forEach(st -> st.cancel(true));
+		events.clear();
+		Field field;
+		if (chr != null) {
+			field = chr.getField();
+		} else {
+			field = this.field;
 		}
+		field.broadcastPacket(CField.clock(ClockPacket.removeClock()));
 	}
 
+	private Set<ScheduledFuture> getEvents() {
+		return events;
+	}
 
+	public void addEvent(ScheduledFuture event) {
+		getEvents().add(event);
+	}
 
 	// Character Temporary Stat-related methods ------------------------------------------------------------------------
 
@@ -1308,6 +1888,147 @@ public class ScriptManagerImpl implements ScriptManager {
 
 
 
+	// InGameDirectionEvent methods ------------------------------------------------------------------------------------
+
+	@Override
+	public void moveCamera(boolean back, int speed, int x, int y) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
+	}
+
+	public void moveCamera(int speed, int x, int y) {
+		moveCamera(false, speed, x, y);
+	}
+
+	public void moveCameraBack(int speed) {
+		moveCamera(true, speed, chr.getPosition().getX(), chr.getPosition().getY());
+	}
+
+	@Override
+	public void zoomCamera(int inZoomDuration, int scale, int x, int y) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, new Position(x, y))));
+	}
+
+	@Override
+	public void resetCamera() {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraOnCharacter(0))); // 0 resets the Camera
+	}
+
+	public void setCameraOnNpc(int npcTemplateId) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraOnCharacter(npcTemplateId)));
+	}
+
+	@Override
+	public int sendDelay(int delay) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
+		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (int) response;
+	}
+
+	@Override
+	public void doEventAndSendDelay(int delay, String methodName, Object...args) {
+		invoke(chr.getScriptManager(), methodName, args);
+		sendDelay(delay);
+	}
+
+	@Override
+	public void forcedMove(boolean left, int distance) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedMove(left, distance)));
+	}
+
+	@Override
+	public void forcedFlip(boolean left) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedFlip(left)));
+	}
+
+	@Override
+	public void forcedAction(int type, int duration) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedAction(type, duration)));
+	}
+
+	@Override
+	public void forcedInput(int type) {
+		ForcedInputType fit = ForcedInputType.getByVal(type);
+		if (fit == null) {
+			log.error(String.format("Unknown Forced Input Type %d", type));
+			return;
+		}
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.forcedInput(type)));
+	}
+
+	public void patternInputRequest(String pattern, int act, int requestCount, int time) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.patternInputRequest(pattern, act, requestCount, time)));
+	}
+
+	@Override
+	public void hideUser(boolean hide) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.vansheeMode(hide)));
+	}
+
+	public void showEffect(String path, int duration, int x, int y) {
+		showEffect(path, duration, x, y, 0, 0, true, 0);
+	}
+
+	@Override
+	public void showEffect(String path, int duration, int x, int y, int z, int npcIdForExtend, boolean onUser, int idk2) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration, new Position(x, y), z, npcIdForExtend, onUser, idk2)));
+	}
+
+	public void showEffectOnPosition(String path, int duration, int x, int y) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
+				new Position(x, y), 0, 1, false, 0)));
+	}
+
+	public void showBalloonMsgOnNpc(String path, int duration, int templateID) {
+		int objectID = getNpcObjectIdByTemplateId(templateID);
+		if (objectID == 0) return;
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
+				new Position(0, -150), 0, objectID, false, 0)));
+	}
+
+	public void showBalloonMsg(String path, int duration) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
+				new Position(0, -100), 0, 0, true, 0)));
+	}
+
+	public void sayMonologue(String text, boolean isEnd) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
+	}
+
+
+
+	// Clock methods ---------------------------------------------------------------------------------------------------
+
+	public Clock createStopWatch(int seconds) {
+		return new Clock(ClockType.StopWatch, chr.getField(), seconds);
+	}
+
+	public Clock createClock(int seconds) {
+		return new Clock(ClockType.SecondsClock, chr.getField(), seconds);
+	}
+
+	public void createClock(int hours, int minutes, int seconds) {
+		chr.write(CField.clock(ClockPacket.hmsClock((byte) hours, (byte) minutes, (byte) seconds)));
+		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
+	}
+
+	public void createClockForMultiple(int seconds, int... fieldIDs) {
+	    for(int fieldID : fieldIDs) {
+	        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
+	        new Clock(ClockType.SecondsClock, field, seconds);
+        }
+    }
+
+	public void removeClock() {
+		chr.write(CField.clock(ClockPacket.removeClock()));
+	}
+
+
+
 	// Other methods ---------------------------------------------------------------------------------------------------
 
 	@Override
@@ -1352,6 +2073,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		giveExpNoMsg(expGiven);
 	}
 
+	public void playSound(String sound, int vol) {
+		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
+	}
+
 	@Override
 	public int getRandomIntBelow(int upBound) {
 		return new Random().nextInt(upBound);
@@ -1361,9 +2086,30 @@ public class ScriptManagerImpl implements ScriptManager {
 		showEffect(dir, 0);
 	}
 
-	@Override
 	public void showEffect(String dir, int delay) {
-		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
+		showEffect(dir, 4, delay);
+	}
+
+	public void showScene(String xmlPath, String sceneName, String sceneNumber) {
+		Scene scene = new Scene(chr, xmlPath, sceneName, sceneNumber);
+		scene.createScene();
+	}
+
+	@Override
+	public void showEffect(String dir, int placement, int delay) {
+		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, placement, 0)));
+	}
+
+	public void avatarOriented(String effectPath) {
+		chr.write(User.effect(Effect.avatarOriented(effectPath)));
+	}
+        
+	public void reservedEffect(String effectPath) {
+		chr.write(User.effect(Effect.reservedEffect(effectPath)));
+	}
+
+	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
+		chr.write(User.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));
 	}
 
 	public String formatNumber(String number) {
@@ -1399,7 +2145,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public ScheduledFuture invokeAfterDelay(long delay, String methodName, Object...args) {
-		return EventManager.addEvent(() -> invoke(this, methodName, args), delay);
+		ScheduledFuture sf =  EventManager.addEvent(() -> invoke(this, methodName, args), delay);
+		addEvent(sf);
+		return sf;
 	}
 
 	public ScheduledFuture invokeAtFixedRate(long initialDelay, long delayBetweenExecutions,
@@ -1412,11 +2160,27 @@ public class ScriptManagerImpl implements ScriptManager {
 			scheduledFuture = EventManager.addFixedRateEvent(() -> invoke(this, methodName, args), initialDelay,
 					delayBetweenExecutions, executes);
 		}
-		if (scheduledFutureSet == null) {
-			scheduledFutureSet = new HashSet<>();
-		}
-		scheduledFutureSet.add(scheduledFuture);
-		eventsByScriptType.put(getLastActiveScriptType(), scheduledFutureSet);
+		addEvent(scheduledFuture);
 		return scheduledFuture;
+	}
+
+	@Override
+	public int playVideoByScript(String videoPath) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.CompletedVideo);
+		chr.write(UserLocal.videoByScript(videoPath, false));
+		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (int) response;
+	}
+
+	public void setFuncKeyByScript(boolean add, int action, int key) {
+		chr.write(UserLocal.setFuncKeyByScript(add, action, key));
+		chr.getFuncKeyMap().putKeyBinding(key, add ? (byte) 1 : (byte) 0, action);
+	}
+        
+	private ScriptMemory getMemory() {
+		return memory;
 	}
 }

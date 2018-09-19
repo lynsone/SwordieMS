@@ -4,21 +4,19 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.enums.StealMemoryType;
 import net.swordie.ms.enums.StylishKillType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,11 +25,20 @@ import java.util.Set;
  */
 public class UserLocal {
 
-    public static OutPacket chatMsg(ChatMsgColour colour, String msg) {
+    public static OutPacket chatMsg(ChatType colour, String msg) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT_MSG);
 
         outPacket.encodeShort(colour.getVal());
         outPacket.encodeString(msg);
+
+        return outPacket;
+    }
+
+    public static OutPacket videoByScript(String videoPath, boolean isMuted){
+        OutPacket outPacket = new OutPacket(OutHeader.VIDEO_BY_SCRIPT);
+
+        outPacket.encodeString(videoPath);
+        outPacket.encodeByte(isMuted);
 
         return outPacket;
     }
@@ -60,7 +67,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onRoyalGuardAttack(boolean attack) {
+    public static OutPacket royalGuardAttack(boolean attack) {
         OutPacket outPacket = new OutPacket(OutHeader.ROYAL_GUARD_ATTACK);
 
         outPacket.encodeByte(attack);
@@ -68,7 +75,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onRWMultiChargeCancelRequest(byte unk, int skillID) {
+    public static OutPacket rwMultiChargeCancelRequest(byte unk, int skillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SKILL_USE_RESULT);
 
         outPacket.encodeByte(unk);
@@ -77,7 +84,7 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket onSetOffStateForOffSkill(int skillID) {
+    public static OutPacket setOffStateForOffSkill(int skillID) {
         OutPacket outPacket = new OutPacket(OutHeader.SET_OFF_STATE_FOR_OFF_SKILL);
 
         outPacket.encodeInt(skillID);
@@ -172,6 +179,15 @@ public class UserLocal {
         return outPacket;
     }
 
+    public static OutPacket setFuncKeyByScript(boolean add, int action, int key) {
+        OutPacket outPacket = new OutPacket(OutHeader.FUNCKEY_SET_BY_SCRIPT);
+        outPacket.encodeByte(add);
+        outPacket.encodeInt(action);
+        outPacket.encodeInt(key);
+
+        return outPacket;
+    }
+
     public static OutPacket damageSkinSaveResult(DamageSkinType req, DamageSkinType res, Char chr) {
         OutPacket outPacket = new OutPacket(OutHeader.DAMAGE_SKIN_SAVE_RESULT);
 
@@ -210,10 +226,10 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket petActivateChange(int charID, Pet pet, boolean active, byte removedReason) {
+    public static OutPacket petActivateChange(Pet pet, boolean active, byte removedReason) {
         OutPacket outPacket = new OutPacket(OutHeader.PET_ACTIVATED);
 
-        outPacket.encodeInt(charID);
+        outPacket.encodeInt(pet.getOwnerID());
         outPacket.encodeInt(pet.getIdx());
         outPacket.encodeByte(active);
         if(active) {
@@ -351,19 +367,12 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket petMove(int id, int petID, int encodedGatherDuration, Position oldPos, Position oldVPos, List<Movement> movements) {
+    public static OutPacket petMove(int id, int petID, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.PET_MOVE);
 
         outPacket.encodeInt(id);
         outPacket.encodeInt(petID);
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }
@@ -373,6 +382,37 @@ public class UserLocal {
 
         outPacket.encodeByte(on);
         outPacket.encodeByte(dressInfinity);
+
+        return outPacket;
+    }
+
+    public static OutPacket setInGameDirectionMode(boolean lockUI, boolean blackFrame, boolean forceMouseOver) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_IN_GAME_DIRECTION_MODE);
+
+        outPacket.encodeByte(lockUI); // Locks User's UI        - Is 'showUI' in IDA
+        outPacket.encodeByte(blackFrame); // Usually 1 in gms? (@aviv)
+        if(lockUI) {
+            outPacket.encodeByte(forceMouseOver);
+            outPacket.encodeByte(!lockUI); // showUI
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket inGameDirectionEvent(InGameDirectionEvent igdr) {
+        OutPacket outPacket = new OutPacket(OutHeader.IN_GAME_DIRECTION_EVENT);
+
+        outPacket.encode(igdr);
+
+        return outPacket;
+    }
+    
+    public static OutPacket emotion(int emotion, int duration, boolean byItemOption) {
+        OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
+
+        outPacket.encodeInt(emotion);
+        outPacket.encodeInt(duration);
+        outPacket.encodeByte(byItemOption);
 
         return outPacket;
     }

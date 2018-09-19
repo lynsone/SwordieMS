@@ -2,6 +2,5 @@
 
 HALL_TO_INNER_SANCTUM = 610030020
 
-def init():
-    sm.warp(HALL_TO_INNER_SANCTUM)
-    sm.dispose()
+sm.warp(HALL_TO_INNER_SANCTUM)
+sm.dispose()

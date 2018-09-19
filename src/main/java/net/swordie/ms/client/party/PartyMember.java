@@ -9,31 +9,43 @@ public class PartyMember {
     private Char chr;
     private int partyBossCharacterID;
     private TownPortal townPortal;
+    private int charID;
+    private String name;
+    private short job;
+    private short subJob;
+    private int level;
+    private int channel;
+    private int fieldID;
 
     // 4 + 13 + 4 + 4 + 4 + 4 + 4 + 4
 
     public PartyMember(Char chr) {
         this.chr = chr;
+        updateInfoByChar(chr);
     }
 
     public int getCharID() {
-        return chr.getId();
+        return charID;
+    }
+
+    public void setCharID(int charID) {
+        this.charID = charID;
     }
 
     public String getCharName() {
-        return chr.getName();
+        return name;
     }
 
     public short getJob() {
-        return chr.getJob();
+        return job;
     }
 
     public short getSubSob() {
-        return (short) chr.getAvatarData().getCharacterStat().getSubJob();
+        return subJob;
     }
 
     public int getLevel() {
-        return chr.getLevel();
+        return level;
     }
 
     public boolean isOnline() {
@@ -57,11 +69,11 @@ public class PartyMember {
     }
 
     public int getChannel() {
-        return chr.getClient().getChannel();
+        return channel;
     }
 
     public int getFieldID() {
-        return chr.getFieldID();
+        return fieldID;
     }
 
     public TownPortal getTownPortal() {
@@ -75,5 +87,44 @@ public class PartyMember {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof PartyMember && ((PartyMember) obj).getChr().equals(getChr());
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setJob(short job) {
+        this.job = job;
+    }
+
+    public void setSubJob(short subJob) {
+        this.subJob = subJob;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public void setChannel(int channel) {
+        this.channel = channel;
+    }
+
+    public void setFieldID(int fieldID) {
+        this.fieldID = fieldID;
+    }
+
+    public void updateInfoByChar(Char chr) {
+        if (chr != null) {
+            setChr(chr);
+            setCharID(chr.getId());
+            setName(chr.getName());
+            setJob(chr.getJob());
+            setSubJob((short) chr.getSubJob());
+            setLevel(chr.getLevel());
+            setChannel(chr.getClient().getChannel());
+            setFieldID(chr.getFieldID());
+        } else {
+            setFieldID(0);
+        }
     }
 }

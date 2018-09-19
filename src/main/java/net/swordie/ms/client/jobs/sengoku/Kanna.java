@@ -12,9 +12,8 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
@@ -77,47 +76,13 @@ public class Kanna extends Job {
     }
 
     @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case BINDING_TEMPEST:
-            case VERITABLE_PANDEMONIUM:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                }
-
-                break;
-            case NIMBUS_CURSE:
-                AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, (byte) slv);
-                aa.setMobOrigin((byte) 0);
-                aa.setPosition(chr.getPosition());
-                aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-                aa.setDelay((short) 5);
-                chr.getField().spawnAffectedArea(aa);
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isKanna(id);
     }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -175,13 +140,122 @@ public class Kanna extends Job {
                 tsm.putCharacterStatValue(BlackHeartedCurse, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
+        tsm.sendSetStatPacket();
+
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+    public void getHakuFollow() {
+        //if(chr.hasSkill(HAKU)) {
+        c.write(CField.enterFieldFoxMan(chr));
+        //}
+    }
+
+    public static void hakuFoxFire(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(FOXFIRE);
+        int slv = si.getCurrentLevel();
+        Option o1 = new Option();
+
+        o1.nOption = 6;
+        o1.rOption = FOXFIRE;
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(FireBarrier, o1);
+        tsm.sendSetStatPacket();
+    }
+
+    public static void hakuHakuBlessing(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(HAKUS_BLESSING);
+        int slv = si.getCurrentLevel();
+        Option o1 = new Option();
+
+        o1.nReason = HAKUS_BLESSING;
+        o1.nValue = si.getValue(indiePdd, slv);
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IndiePDD, o1);
+        tsm.sendSetStatPacket();
+    }
+
+    public static void hakuBreathUnseen(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(BREATH_UNSEEN);
+        int slv = si.getCurrentLevel();
+        Option o1 = new Option();
+        Option o2 = new Option();
+
+        o1.nOption = si.getValue(prop, slv);
+        o1.rOption = BREATH_UNSEEN;
+        o1.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(Stance, o1);
+        o2.nOption = si.getValue(x, slv);
+        o2.rOption = BREATH_UNSEEN;
+        o2.tOption = si.getValue(time, slv);
+        tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
+        tsm.sendSetStatPacket();
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        int slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case BINDING_TEMPEST:
+            case VERITABLE_PANDEMONIUM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+
+                break;
+            case NIMBUS_CURSE:
+                AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, (byte) slv);
+                aa.setMobOrigin((byte) 0);
+                aa.setPosition(chr.getPosition());
+                aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
+                aa.setDelay((short) 5);
+                chr.getField().spawnAffectedArea(aa);
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -193,7 +267,7 @@ public class Kanna extends Job {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -216,7 +290,7 @@ public class Kanna extends Job {
                     o1.tStart = (int) System.currentTimeMillis();
                     o1.tTerm = si.getValue(time, slv);
                     tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    c.write(WvsContext.temporaryStatSet(tsm));
+                    tsm.sendSetStatPacket();
                     break;
                 case BLOSSOMING_DAWN:
                     tsm.removeAllDebuffs();
@@ -225,11 +299,9 @@ public class Kanna extends Job {
         }
     }
 
-    public void getHakuFollow() {
-        //if(chr.hasSkill(HAKU)) {
-            c.write(CField.enterFieldFoxMan(chr));
-        //}
-    }
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
@@ -261,61 +333,6 @@ public class Kanna extends Job {
     public void resetFireBarrier() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStat(FireBarrier, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isKanna(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    public static void hakuFoxFire(Char chr) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        SkillInfo si = SkillData.getSkillInfoById(FOXFIRE);
-        int slv = si.getCurrentLevel();
-        Option o1 = new Option();
-
-        o1.nOption = 6;
-        o1.rOption = FOXFIRE;
-        o1.tOption = si.getValue(time, slv);
-        tsm.putCharacterStatValue(FireBarrier, o1);
-        chr.write(WvsContext.temporaryStatSet(tsm));
-    }
-
-    public static void hakuHakuBlessing(Char chr) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        SkillInfo si = SkillData.getSkillInfoById(HAKUS_BLESSING);
-        int slv = si.getCurrentLevel();
-        Option o1 = new Option();
-
-        o1.nReason = HAKUS_BLESSING;
-        o1.nValue = si.getValue(indiePdd, slv);
-        o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = si.getValue(time, slv);
-        tsm.putCharacterStatValue(IndiePDD, o1);
-        chr.write(WvsContext.temporaryStatSet(tsm));
-    }
-
-    public static void hakuBreathUnseen(Char chr) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        SkillInfo si = SkillData.getSkillInfoById(BREATH_UNSEEN);
-        int slv = si.getCurrentLevel();
-        Option o1 = new Option();
-        Option o2 = new Option();
-
-        o1.nOption = si.getValue(prop, slv);
-        o1.rOption = BREATH_UNSEEN;
-        o1.tOption = si.getValue(time, slv);
-        tsm.putCharacterStatValue(Stance, o1);
-        o2.nOption = si.getValue(x, slv);
-        o2.rOption = BREATH_UNSEEN;
-        o2.tOption = si.getValue(time, slv);
-        tsm.putCharacterStatValue(IgnoreMobpdpR, o2);
-        chr.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendResetStatPacket();
     }
 }

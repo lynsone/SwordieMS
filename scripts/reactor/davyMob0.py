@@ -2,18 +2,11 @@
 
 LORD_PIRATE_GINSENG_JAR = 9300109
 LORD_PIRATE_BELLFLOWER = 9300110
-hitCount = 0
 
-def init():
-    action(0)
-
-def action(type):
-    sm.chat(str(type))
+def action(reactor, type):
     if type == 0:
-        global hitCount
-        hitCount += 1
-        sm.chat(str(hitCount))
-        if hitCount >= 1:
+        reactor.incHitCount()
+        if reactor.getHitCount() >= 1:
             i = 1
             while i < 5:
                 sm.spawnMob(LORD_PIRATE_GINSENG_JAR, sm.getPosition(objectID).getX(), sm.getPosition(objectID).getY(), False)

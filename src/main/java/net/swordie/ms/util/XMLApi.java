@@ -1,5 +1,6 @@
 package net.swordie.ms.util;
 
+import net.swordie.ms.ServerConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -133,6 +134,20 @@ public class XMLApi {
             }
         }
         return null;
+    }
+
+    /**
+     * Grabs the Node from a specified path.
+     * @param xmlPath The path to the xml file.
+     * @param nodeName The name of the node to be returned.
+     * @return The first occurrence of the given nodeName in the given xmlPath, or null if there is none.
+     */
+    public static Node getNodeByPath(String xmlPath, String nodeName) {
+        File file = new File(ServerConstants.WZ_DIR+"/"+ xmlPath +".xml");
+        Document doc = getRoot(file);
+        Node node = getAllChildren(doc).get(0);
+
+        return getFirstChildByNameBF(node, nodeName);
     }
 
     public static String getNamedAttribute(Node node, String name) {

@@ -2,7 +2,16 @@ package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Zero;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
+import net.swordie.ms.client.jobs.adventurer.Kinesis;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.cygnus.DawnWarrior;
+import net.swordie.ms.client.jobs.legend.Aran;
+import net.swordie.ms.client.jobs.legend.Evan;
+import net.swordie.ms.client.jobs.legend.Phantom;
+import net.swordie.ms.client.jobs.nova.AngelicBuster;
+import net.swordie.ms.client.jobs.resistance.Demon;
 import net.swordie.ms.enums.SkillType;
 import net.swordie.ms.loaders.SkillData;
 import org.apache.log4j.Logger;
@@ -12,7 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static net.swordie.ms.client.jobs.legend.Aran.*;
-import static net.swordie.ms.client.jobs.legend.Mercedes.*;
+import static net.swordie.ms.client.jobs.legend.Mercedes.STAGGERING_STRIKES;
+import static net.swordie.ms.client.jobs.legend.Mercedes.STUNNING_STRIKES;
 import static net.swordie.ms.client.jobs.nova.AngelicBuster.*;
 import static net.swordie.ms.client.jobs.nova.Kaiser.*;
 import static net.swordie.ms.client.jobs.resistance.Blaster.*;
@@ -44,7 +54,8 @@ public class SkillConstants {
             return false;
         }
         int job = getSkillRootFromSkill(skillId);
-        return isAddedSpDualAndZeroSkill(skillId) || JobConstants.getJobLevel((short) job) == 4 && !JobConstants.isZero((short) job);
+        return skillId != 42120024 && !JobConstants.isBeastTamer((short) job)
+                && (isAddedSpDualAndZeroSkill(skillId) || (JobConstants.getJobLevel((short) job) == 4 && !JobConstants.isZero((short) job)));
     }
 
     public static boolean isAddedSpDualAndZeroSkill(int skillId) {
@@ -81,32 +92,31 @@ public class SkillConstants {
         return prefix;
     }
 
-    private static boolean isFieldAttackObjSkill(int skillId) {
-        int v1; // eax
-
-        if (skillId <= 0)
+    public static boolean isFieldAttackObjSkill(int skillId) {
+        if (skillId <= 0) {
             return false;
-        v1 = skillId / 10000;
-        if (skillId / 10000 == 8000)
-            v1 = skillId / 100;
-        return v1 == 9500;
+        }
+        int prefix = skillId / 10000;
+        if (skillId / 10000 == 8000) {
+            prefix = skillId / 100;
+        }
+        return prefix == 9500;
     }
 
     private static boolean isNoviceSkill(int skillId) {
-        int prefix; // eax
-
-        prefix = skillId / 10000;
-        if (skillId / 10000 == 8000)
+        int prefix  = skillId / 10000;
+        if (skillId / 10000 == 8000) {
             prefix = skillId / 100;
+        }
         return JobConstants.isBeginnerJob((short) prefix);
     }
 
     private static boolean isCommonSkill(int skillId) {
-        int prefix; // eax
-        prefix = skillId / 10000;
-        if (skillId / 10000 == 8000)
+        int prefix = skillId / 10000;
+        if (skillId / 10000 == 8000) {
             prefix = skillId / 100;
-        return prefix >= 800000 && prefix <= 800099;
+        }
+        return (prefix >= 800000 && prefix <= 800099) || prefix == 8001;
     }
 
     private static boolean isMakingSkillRecipe(int recipeId) {
@@ -120,52 +130,38 @@ public class SkillConstants {
     }
 
     public static boolean isIgnoreMasterLevel(int skillId) {
-        // is_ignore_master_level(int skillId)
-        if (skillId > 5321004) {
-            if (skillId > 23120011) {
-                if (skillId <= 35054478) {
-                    return skillId == 35054478 || skillId == 23120013 || skillId == 23121008;
-                }
-                if (skillId != 51120000) {
-                    return skillId == 80001913;
-                }
-            } else if (skillId != 23120011) {
-                if (skillId <= 21120021) {
-                    return skillId >= 21120020 || skillId == 5321006 || (skillId - 5321006 == 15799005) ||
-                            (skillId - 5321006 - 15799005 == 3);
-                }
-                if (skillId != 21121008) {
-                    return skillId == 22171069;
-                }
-            }
-            return true;
-        }
-        if (skillId == 5321004)
-            return true;
-        if (skillId > 4210012) {
-            if (skillId > 5220012) {
-                if (skillId != 5220014) {
-                    return skillId == 5320007;
-                }
-            } else if (skillId != 5220012) {
-                if (skillId > 4340012) {
-	                return skillId >= 5120011 && skillId <= 5120012;
-                } else if (skillId != 4340012) {
-                    return skillId == 4340010;
-                }
-            }
-            return true;
-        }
-        if (skillId == 4210012)
-            return true;
-        if (skillId > 2221009) {
-            if (skillId == 2321010 || skillId == 3210015)
+        switch (skillId) {
+            case 1120012:
+            case 1320011:
+            case 2121009:
+            case 2221009:
+            case 2321010:
+            case 3210015:
+            case 4110012:
+            case 4210012:
+            case 4340009:
+            case 5120011:
+            case 5120012:
+            case 5220012:
+            case 5220014:
+            case 5320007:
+            case 5321004:
+            case 5321006:
+            case 21120011:
+            case 21120014:
+            case 21120020:
+            case 21120021:
+            case 22171069:
+            case 23120011:
+            case 23120012:
+            case 23120013:
+            case 23121008:
+            case 33120010:
+            case 35120014:
+            case 80001913:
                 return true;
-            return skillId == 4110012;
-        } else {
-            if (skillId == 2221009 || skillId == 1120012 || skillId == 1320011)
-                return true;
-            return skillId == 2121009;
+            default:
+                return false;
         }
     }
 
@@ -183,13 +179,28 @@ public class SkillConstants {
                 skillId == 3111013 || skillId == 1311011 || skillId == 2221011 || skillId == 2221052 ||
                 skillId == 25121030 || skillId == 27101202 || skillId == 25111005 || skillId == 23121000 ||
                 skillId == 22171083 || skillId == 14121004 || skillId == 13111020 || skillId == 13121001 ||
-                skillId == 14111006 || (skillId >= 80001389 && skillId <= 80001392);
+                skillId == 14111006 || (skillId >= 80001389 && skillId <= 80001392) || skillId == 42121000 ||
+                skillId == 42120003 || skillId == 5700010 || skillId == 5711021 || skillId == 5721001 ||
+                skillId == 5721061 || skillId == 21120018 || skillId == 21120019;
 
     }
 
     public static boolean isEvanForceSkill(int skillId) {
-        return skillId == 22110022 || skillId == 22110023 || skillId == 22141011 || skillId == 22140022 ||
-                skillId == 22171062 || skillId == 80001849;
+        switch (skillId) {
+            case 22140022:
+            case 22111011:
+            case 22111012:
+            case 22110022:
+            case 22110023:
+            case 22111017:
+            case 80001894:
+            case 22171062:
+            case 22171063:
+            case 22141011:
+            case 22141012:
+                return true;
+        }
+        return false;
     }
 
     public static boolean isSuperNovaSkill(int skillID) {
@@ -197,9 +208,32 @@ public class SkillConstants {
     }
 
     public static boolean isRushBombSkill(int skillID) {
-        return skillID == 27121201 || skillID == 101120205 || skillID == 101120200 || skillID == 101120203 ||
-                skillID == 61111218 || skillID == 14111022 || skillID == 22140015 || skillID == 5101012 ||
-                skillID == 22140024 || skillID == 12121001 || skillID == 5101014 || skillID == 2221012;
+        switch (skillID) {
+            case 101120205:
+            case 101120203:
+            case 80011386:
+            case 101120200:
+            case 80011380:
+            case 61111113:
+            case 61111218:
+            case 61111111:
+            case 42120003:
+            case 61111100:
+            case 40021186:
+            case 31201001:
+            case 27121201:
+            case 22140015:
+            case 22140024:
+            case 14111022:
+            case 5101014:
+            case 5301001:
+            case 12121001:
+            case 2221012:
+            case 5101012:
+                return true;
+
+        }
+        return false;
     }
 
     public static boolean isZeroSkill(int skillID) {
@@ -211,8 +245,19 @@ public class SkillConstants {
     }
 
     public static boolean isUsercloneSummonedAbleSkill(int skillID) {
-        return skillID == 14111020 || skillID == 14101019 || (skillID >= 14101019 && skillID <= 14101021) ||
-                     skillID == 14120045 || (skillID >= 14121000 && skillID == 14121002);
+        switch (skillID) {
+            case 14001020:
+            case 14101020:
+            case 14101021:
+            case 14111020:
+            case 14111021:
+            case 14111022:
+            case 14111023:
+            case 14120045:
+            case 14121002:
+                return true;
+        }
+        return false;
     }
 
     public static boolean isNoconsumeUsebulletMeleeAttack(int skillID) {
@@ -783,8 +828,11 @@ public class SkillConstants {
         }
     }
 
-    public static boolean needsOneMoreByte(int skillId) {
+    public static boolean needsOneMoreInt(int skillId) {
+        // Are part of another function
         switch(skillId) {
+            // Ranged
+            // Merc
             case 23100006: // Merc FA
             case 23120012: // Merc Advanced Final Attack
             case 23121000: // Ishtar's Ring
@@ -793,11 +841,17 @@ public class SkillConstants {
             case 23111001: // Leap Tornado
             case 23121002: // Spikes Royale
             case 23121052: // Wrath of Enlil
-            case 23120013: // Staggering Strikes
+            case 23120013: // Staggering Strikes (4th Job Upgrade)
+            case 23111000: // Staggering Strikes (3rd Job)
+            case 20021166: // Special Merc Intro Stunning Strike Skill
             case 13101020: // Fairy Spiral
-
+            // AB
             case 60011216: // AB Auto attack
             case 65001100: // Star Bubble
+
+            // Magic
+            // Kanna
+            case 42121000: // Vanquisher's Charm
                 return true;
             default:
                 return false;
@@ -1103,7 +1157,7 @@ public class SkillConstants {
 
     public static int getTotalHyperStatSpByLevel(short level) {
         int sp = 0;
-        for (int i = 140; i < level; i++) {
+        for (int i = 140; i <= level; i++) {
             sp += getHyperStatSpByLv(level);
         }
         return sp;
@@ -1175,6 +1229,45 @@ public class SkillConstants {
         return prefix != 9500 && skillID / 10000000 == 9;
     }
 
+    public static boolean isHomeTeleportSkill(int skillId) {
+        switch (skillId) {
+            case Warrior.MAPLE_RETURN: // All Adventurers
+            case BeastTamer.HOMEWARD_BOUND:
+            case Kinesis.RETURN_KINESIS:
+            case DawnWarrior.IMPERIAL_RECALL: // All KoC
+            case Aran.RETURN_TO_RIEN:
+            case Evan.BACK_TO_NATURE:
+                // Mercedes
+                // Luminous
+            case Phantom.TO_THE_SKIES:
+                // Shade
+            case AngelicBuster.DAY_DREAMER:
+                // Kaiser
+            case Demon.SECRET_ASSEMBLY: // All Resistance
+                // Hayato
+                // Kanna
+            case Zero.TEMPLE_RECALL:
+
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isArmorPiercingSkill(int skillId) {
+        switch (skillId) {
+            case 3120017:
+            case 95001000:
+            case 3120008:
+            case 3100001:
+            case 3100010:
+                return false;
+
+            default:
+                return true;
+        }
+    }
+
     public static int getBaseSpByLevel(short level) {
         return level > 140 ? 0
                 : level > 130 ? 6
@@ -1189,5 +1282,31 @@ public class SkillConstants {
 
     public static int getTotalActiveHyperSpByLevel(short level) {
         return level < 140 ? 0 : level < 170 ? 1 : level < 200 ? 2 : 3;
+    }
+
+    public static boolean isGuildSkill(int skillID) {
+        int prefix = skillID / 10000;
+        if (prefix == 8000) {
+            prefix = skillID / 100;
+        }
+        return prefix == 9100;
+    }
+
+    public static boolean isGuildContentSkill(int skillID) {
+        return (skillID >= 91000007 && skillID <= 91000015) || (skillID >= 91001016 && skillID <= 91001021);
+    }
+
+    public static boolean isGuildNoblesseSkill(int skillID) {
+        return skillID >= 91001022 && skillID <= 91001024;
+    }
+
+    public static boolean isMultiAttackCooldownSkill(int skillID) {
+        switch (skillID) {
+            case 5311010:
+            case 5711021:
+            case 22171063:
+                return true;
+        }
+        return false;
     }
 }

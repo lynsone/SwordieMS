@@ -4,37 +4,41 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.enums.Stat;
-import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.Effect;
+import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -125,6 +129,29 @@ public class AngelicBuster extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isAngelicBuster(id);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.setStat(Stat.level, 10);
+        chr.setStat(Stat.dex, 49);
+        chr.getAvatarData().getCharacterStat().setPosMap(400000000);
+        chr.getAvatarData().getCharacterStat().setJob(JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId());
+        Item secondary = ItemData.getItemDeepCopy(1352601);
+        secondary.setBagIndex(10);
+        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
+        chr.setSpToCurrentJob(5);
+        chr.getEquippedInventory().addItem(secondary);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -207,95 +234,16 @@ public class AngelicBuster extends Job {
                 tsm.putCharacterStatValue(Stance, o3);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
-    }
-
-    private void soulSeekerExpert(int skillID, byte slv, AttackInfo attackInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (tsm.hasStat(AngelicBursterSoulSeeker)) {
-            SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT);
-            int anglenum;
-            if (new Random().nextBoolean()) {
-                anglenum = 50;
-            } else {
-                anglenum = 130;
-            }
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                int TW1prop = si.getValue(prop, slv);
-                if(attackInfo.skillId == CELESTIAL_ROAR) {
-                    TW1prop += si.getValue(z, slv);
-                }
-                if(tsm.getOptByCTSAndSkill(IndieIgnoreMobpdpR, PRETTY_EXALTATION) != null) {
-                    TW1prop += 15;
-                }
-                if (Util.succeedProp(TW1prop)) {
-                        int mobID = mai.mobId;
-                        int inc = ForceAtomEnum.AB_ORB.getInc();
-                        int type = ForceAtomEnum.AB_ORB.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                                new Position(5, 0)); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                                true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
-                }
-            }
-        }
-    }
-
-    private void handleSoulSeeker() {
-        Field field = chr.getField();
-        SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
-        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        if(!chr.isLeft()) {
-            rect = rect.moveRight();
-        }
-        List<Mob> lifes = field.getMobsInRect(rect);
-        List<Mob> bossLifes = field.getBossMobsInRect(rect);
-        Life life = Util.getRandomFromList(lifes);
-        if(bossLifes.size() > 0) {
-            life = Util.getRandomFromList(bossLifes);
-        }
-        int anglenum = new Random().nextInt(10);
-        int mobID = life.getObjectId();
-        int inc = ForceAtomEnum.AB_ORB.getInc();
-        int type = ForceAtomEnum.AB_ORB.getForceAtomType();
-        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                anglenum, 250, (int) System.currentTimeMillis(), 1, 0,
-                new Position(0, -100));
-        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                life.getPosition(), SOUL_SEEKER_ATOM, life.getPosition()));
-    }
-
-    private void soulSeekerReCreation(AttackInfo attackInfo) {
-        SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
-        Skill skill = chr.getSkill(SOUL_SEEKER);
-        byte slv = (byte) skill.getCurrentLevel();
-        int anglenum = new Random().nextInt(360);
-        int firstimpact = new Random().nextInt(4)+29;
-        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            int TW1prop = si.getValue(s, slv);
-            if (Util.succeedProp(TW1prop)) {
-                int mobID = mai.mobId;
-                int inc = ForceAtomEnum.AB_ORB_RECREATION.getInc();
-                int type = ForceAtomEnum.AB_ORB_RECREATION.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, firstimpact, 2,
-                        anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                        new Position());
-                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
-                        true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
-                        mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
-            }
-        }
+        tsm.sendSetStatPacket();
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -315,7 +263,7 @@ public class AngelicBuster extends Job {
         if(hasHitMobs) {
             //Soul Seeker Recreation
             if (attackInfo.skillId == SOUL_SEEKER_ATOM) {
-                soulSeekerReCreation(attackInfo);
+                recreateSoulSeekerForceAtom(attackInfo);
             }
 
             //Soul Seeker Expert
@@ -334,7 +282,7 @@ public class AngelicBuster extends Job {
                 if(chr.hasSkill(AFFINITY_HEART_IV) && Util.succeedProp(getRechargeProc(attackInfo))) {
                     Skill ah4Skill = chr.getSkill(AFFINITY_HEART_IV);
                     byte ah4LV = (byte) ah4Skill.getCurrentLevel();
-                    SkillInfo ah4SI = SkillData.getSkillInfoById(skill.getSkillId());
+                    SkillInfo ah4SI = SkillData.getSkillInfoById(ah4Skill.getSkillId());
                     if(Util.succeedProp(ah4SI.getValue(x, ah4LV))) {
                         rechargeABSkills();
                         affinityHeartIIIcounter = 0;
@@ -374,7 +322,7 @@ public class AngelicBuster extends Job {
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
-                    o1.wOption = 1;
+                    o1.wOption = chr.getId();
                     mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
                 }
                 break;
@@ -392,11 +340,13 @@ public class AngelicBuster extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -413,54 +363,89 @@ public class AngelicBuster extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
+    private void soulSeekerExpert(int skillID, byte slv, AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if(skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch(skillID) {
-                case SOUL_SEEKER:
-                    handleSoulSeeker();
-                    handleSoulSeeker();
-                    break;
-                case DAY_DREAMER:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case NOVA_TEMPERANCE_AB:
-                    tsm.removeAllDebuffs();
-                    break;
+        if (tsm.hasStat(AngelicBursterSoulSeeker)) {
+            SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT);
+            int anglenum;
+            if (new Random().nextBoolean()) {
+                anglenum = 50;
+            } else {
+                anglenum = 130;
+            }
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                int TW1prop = si.getValue(prop, slv);
+                if(attackInfo.skillId == CELESTIAL_ROAR) {
+                    TW1prop += si.getValue(z, slv);
+                }
+                if(tsm.getOptByCTSAndSkill(IndieIgnoreMobpdpR, PRETTY_EXALTATION) != null) {
+                    TW1prop += 15;
+                }
+                if (Util.succeedProp(TW1prop)) {
+                    int mobID = mai.mobId;
+                    int inc = ForceAtomEnum.AB_ORB.getInc();
+                    int type = ForceAtomEnum.AB_ORB.getForceAtomType();
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                            anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                            new Position(5, 0)); //Slightly behind the player
+                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                            true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                            mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
+                }
             }
         }
     }
 
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
-        super.handleHit(c, inPacket, hitInfo);
+    private void createSoulSeekerForceAtom() {
+        Field field = chr.getField();
+        SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
+        List<Mob> lifes = field.getMobsInRect(rect);
+        if(lifes.size() <= 0) {
+            return;
+        }
+        List<Mob> bossLifes = field.getBossMobsInRect(rect);
+        Life life = Util.getRandomFromCollection(lifes);
+        if(bossLifes.size() > 0) {
+            life = Util.getRandomFromCollection(bossLifes);
+        }
+        int anglenum = new Random().nextInt(10);
+        int mobID = life.getObjectId();
+        int inc = ForceAtomEnum.AB_ORB.getInc();
+        int type = ForceAtomEnum.AB_ORB.getForceAtomType();
+        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                anglenum, 250, (int) System.currentTimeMillis(), 1, 0,
+                new Position(0, -100));
+        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                life.getPosition(), SOUL_SEEKER_ATOM, life.getPosition()));
     }
 
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isAngelicBuster(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
+    private void recreateSoulSeekerForceAtom(AttackInfo attackInfo) {
+        SkillInfo si = SkillData.getSkillInfoById(SOUL_SEEKER);
+        Skill skill = chr.getSkill(SOUL_SEEKER);
+        byte slv = (byte) skill.getCurrentLevel();
+        int anglenum = new Random().nextInt(360);
+        int firstimpact = new Random().nextInt(4)+29;
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            int TW1prop = si.getValue(s, slv);
+            if (Util.succeedProp(TW1prop)) {
+                int mobID = mai.mobId;
+                int inc = ForceAtomEnum.AB_ORB_RECREATION.getInc();
+                int type = ForceAtomEnum.AB_ORB_RECREATION.getForceAtomType();
+                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, firstimpact, 2,
+                        anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                        new Position());
+                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                        true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
+                        mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
+            }
+        }
     }
 
     private int getRechargeProc(AttackInfo attackInfo) {
@@ -550,16 +535,55 @@ public class AngelicBuster extends Job {
     }
 
     @Override
-    public void setCharCreationStats(Char chr) {
-        super.setCharCreationStats(chr);
-        chr.setStat(Stat.level, 10);
-        chr.setStat(Stat.dex, 49);
-        chr.getAvatarData().getCharacterStat().setPosMap(400000000);
-        chr.getAvatarData().getCharacterStat().setJob(JobConstants.JobEnum.ANGELIC_BUSTER1.getJobId());
-        Item secondary = ItemData.getItemDeepCopy(1352601);
-        secondary.setBagIndex(10);
-        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
-        chr.setSpToCurrentJob(5);
-        chr.getEquippedInventory().addItem(secondary);
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch(skillID) {
+                case SOUL_SEEKER:
+                    createSoulSeekerForceAtom();
+                    createSoulSeekerForceAtom();
+                    break;
+                case DAY_DREAMER:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case NOVA_TEMPERANCE_AB:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
+        super.handleHit(c, inPacket, hitInfo);
     }
 }

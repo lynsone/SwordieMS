@@ -3,12 +3,14 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.Stat;
+import net.swordie.ms.loaders.SkillData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,9 +19,30 @@ import java.util.Map;
  * Created on 12/14/2017.
  */
 public class Citizen extends Job {
+    public static final int CRYSTAL_THROW = 30001000;
+    public static final int INFLITRATE = 30001001;
+    public static final int POTION_MASTERY = 30000002;
+
+    private int[] addedSkills = new int[] {
+            CRYSTAL_THROW,
+            INFLITRATE,
+            POTION_MASTERY
+    };
 
     public Citizen(Char chr) {
         super(chr);
+
+        if (chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
+            for (int id : addedSkills) {
+                if (!chr.hasSkill(id)) {
+                    Skill skill = SkillData.getSkillDeepCopyById(id);
+                    skill.setRootId(3000);
+                    skill.setMasterLevel(3);
+                    skill.setMaxLevel(3);
+                    chr.addSkill(skill);
+                }
+            }
+        }
     }
 
     @Override
@@ -36,14 +59,13 @@ public class Citizen extends Job {
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
         super.handleHit(c, inPacket, hitInfo);
     }
 
     @Override
     public void setCharCreationStats(Char chr) {
         super.setCharCreationStats(chr);
-        chr.getAvatarData().getCharacterStat().setPosMap(310000000);
+        chr.getAvatarData().getCharacterStat().setPosMap(931000000);
     }
 
     @Override
@@ -67,13 +89,8 @@ public class Citizen extends Job {
         chr.addStat(Stat.mhp, 500);
         chr.addStat(Stat.mmp, 500);
         Map<Stat, Object> stats = new HashMap<>();
-        if (chr.getLevel() <= 10) {
-            chr.addStat(Stat.str, 5);
-            stats.put(Stat.str, (short) chr.getStat(Stat.str));
-        } else {
-            chr.addStat(Stat.ap, 5);
-            stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
-        }
+        chr.addStat(Stat.ap, 5);
+        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
         chr.addSpToJobByCurrentLevel(3);
         stats.put(Stat.mhp, chr.getStat(Stat.mhp));
         stats.put(Stat.mmp, chr.getStat(Stat.mmp));

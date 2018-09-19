@@ -1,6 +1,7 @@
 package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.loaders.MobData;
@@ -15,7 +16,8 @@ import java.util.Observable;
 public class Life extends Observable {
     private Position position;
     private int objectId = -1;
-    protected int cy, f, fh, templateId, mobTime, rx0, rx1, type, x, y;
+    protected int cy, fh, templateId, mobTime, rx0, rx1, type, x, y;
+    protected boolean flip;
     private String lifeType = "";
     private boolean hide;
     private String limitedName = "";
@@ -63,12 +65,12 @@ public class Life extends Observable {
         this.cy = cy;
     }
 
-    public int getF() {
-        return f;
+    public boolean isFlip() {
+        return flip;
     }
 
-    public void setF(int f) {
-        this.f = f;
+    public void setFlip(boolean flip) {
+        this.flip = flip;
     }
 
     public int getFh() {
@@ -250,7 +252,7 @@ public class Life extends Observable {
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setF(getF());
+        copy.setFlip(isFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -283,7 +285,7 @@ public class Life extends Observable {
             mob.setHomePosition(new Position(getX(), getY()));
             mob.setPosition(new Position(getX(), getY()));
             mob.setMobTime(getMobTime());
-            mob.setF(getF());
+            mob.setFlip(isFlip());
             mob.setHide(isHide());
             mob.setFh(getFh());
             mob.setCy(getCy());
@@ -345,7 +347,7 @@ public class Life extends Observable {
             npc.setY(getY());
             npc.setPosition(new Position(getX(), getY()));
             npc.setMobTime(getMobTime());
-            npc.setF(getF());
+            npc.setFlip(isFlip());
             npc.setHide(isHide());
             npc.setFh(getFh());
             npc.setCy(getCy());
@@ -365,6 +367,17 @@ public class Life extends Observable {
         return npc;
     }
 
+    public Reactor createReactorFromLife() {
+        Reactor reactor = null;
+        if ("r".equalsIgnoreCase(getLifeType())) {
+            reactor = new Reactor(getTemplateId());
+            reactor.setFlip(isFlip());
+            reactor.setHomePosition(getHomePosition().deepCopy());
+            reactor.setPosition(getHomePosition().deepCopy());
+        }
+        return reactor;
+    }
+
     public void setHomePosition(Position homePosition) {
         this.homePosition = homePosition;
     }
@@ -377,7 +390,7 @@ public class Life extends Observable {
     }
 
     public void broadcastSpawnPacket(Char onlyChar) {
-        // Life itself doesn't have a spawn apcket
+        // Life itself doesn't have a spawn packet
     }
 
     public Position getVPosition() {
@@ -386,5 +399,9 @@ public class Life extends Observable {
 
     public void setvPosition(Position vPosition) {
         this.vPosition = vPosition;
+    }
+
+    public void broadcastLeavePacket() {
+        // Life itself doesn't have a leave packet
     }
 }

@@ -65,7 +65,7 @@ public class Login {
             outPacket.encodeByte(LoginType.Success.getValue());
             outPacket.encodeByte(0);
             outPacket.encodeInt(0);
-            outPacket.encodeString(account.getUsername());
+            outPacket.encodeString(account.getName());
             outPacket.encodeInt(account.getId());
             outPacket.encodeByte(account.getGender());
             outPacket.encodeByte(account.getMsg2());
@@ -75,7 +75,7 @@ public class Login {
             if(account.hasCensoredNxLoginID()) {
                 outPacket.encodeString(account.getCensoredNxLoginID());
             }
-            outPacket.encodeString(account.getUsername());
+            outPacket.encodeString(account.getName());
             outPacket.encodeByte(account.getpBlockReason());
             outPacket.encodeByte(0); // idk
             outPacket.encodeLong(account.getChatUnblockDate());
@@ -86,7 +86,7 @@ public class Login {
             outPacket.encodeInt(-1);
             outPacket.encodeByte(0); // idk
             outPacket.encodeByte(0); // ^
-            outPacket.encodeLong(account.getCreationDate()); // account creation date
+            outPacket.encodeFT(account.getCreationDate());
         } else if (msg == LoginType.Blocked) {
             outPacket.encodeByte(msg.getValue());
             outPacket.encodeByte(0);
@@ -167,7 +167,7 @@ public class Login {
         outPacket.encodeInt(account.getVipGrade());
 //        outPacket.encodeInt(account.getAge());
         outPacket.encodeByte(account.getPurchaseExp());
-        outPacket.encodeString(account.getUsername());
+        outPacket.encodeString(account.getName());
         outPacket.encodeByte(account.getnBlockReason());
         outPacket.encodeByte(0); // ?
         outPacket.encodeLong(account.getChatUnblockDate());

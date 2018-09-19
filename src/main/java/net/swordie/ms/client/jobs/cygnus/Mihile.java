@@ -3,30 +3,45 @@ package net.swordie.ms.client.jobs.cygnus;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
+import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.UserLocal;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.ChatType;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import net.swordie.ms.client.character.ExtendSP;
+import net.swordie.ms.client.character.SPSet;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.InstanceTableType;
+import net.swordie.ms.enums.Stat;
+import net.swordie.ms.util.Randomizer;
 
 /**
  * Created on 12/14/2017.
@@ -78,9 +93,21 @@ public class Mihile extends Job {
             SACRED_CUBE,
     };
 
+    private ScheduledFuture soulLinkBuffsTimer;
+    private ScheduledFuture soulLinkHPRegenTimer;
+
     public Mihile(Char chr) {
         super(chr);
     }
+
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return id == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() || JobConstants.isMihile(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -130,37 +157,34 @@ public class Mihile extends Job {
                 tsm.putCharacterStatValue(TerR, o3);
                 break;
             case SOUL_LINK: // (ON/OFF)
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(MichaelSoulLink, o1);
-                o2.nOption = 1;
-                o2.rOption = skillID;
-                o2.tOption = 0;
-                tsm.putCharacterStatValue(BMageAura, o2);
-                // dot = healing duration
-                // indieDamR = dmg% per member
-                // q = receive 20%s of party's dmg which can be nullified with Royal Guard
-                // s = HP% recovery
-                // w = DEF% from enduring Spirit
-                // x = Att/M.att%
-                // y = AsrR
-                // z = 4000
+                if(tsm.hasStatBySkillId(SOUL_LINK)) {
+                    tsm.removeStatsBySkill(SOUL_LINK);
+                    tsm.sendResetStatPacket();
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = SOUL_LINK;
+                    o1.cOption = chr.getId();
+                    tsm.putCharacterStatValue(MichaelSoulLink, o1);
+                }
+                if(soulLinkBuffsTimer != null && !soulLinkBuffsTimer.isDone()) {
+                    soulLinkBuffsTimer.cancel(true);
+                }
+                giveSoulLinkBuffs();
 
-                // TODO
+                if(soulLinkHPRegenTimer != null && !soulLinkHPRegenTimer.isDone()) {
+                    soulLinkHPRegenTimer.cancel(true);
+                }
+                soulLinkHPRegen();
                 break;
-            case ROILING_SOUL: // (ON/OFF)
+            case ROILING_SOUL:
                 o1.nOption = 1;
                 o1.rOption = skillID;
-                o1.tOption = 0;
                 tsm.putCharacterStatValue(Enrage, o1);
                 o2.nOption = si.getValue(x, slv);
                 o2.rOption = skillID;
-                o2.tOption = 0;
                 tsm.putCharacterStatValue(DamR, o2);
                 o3.nOption = si.getValue(y, slv);
                 o3.rOption = skillID;
-                o3.tOption = 0;
                 tsm.putCharacterStatValue(IncCriticalDamMin, o3);
                 break;
             case CALL_OF_CYGNUS_MIHILE:
@@ -170,7 +194,6 @@ public class Mihile extends Job {
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
-
             case QUEEN_OF_TOMORROW:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
@@ -183,7 +206,6 @@ public class Mihile extends Job {
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
-
             case SACRED_CUBE:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
@@ -205,11 +227,14 @@ public class Mihile extends Job {
                 tsm.putCharacterStatValue(DamAbsorbShield, o4);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
+        tsm.sendSetStatPacket();
     }
 
-    private void handleRoyalGuard(TemporaryStatManager tsm, Client c) { //TempStat  Shield Attack is Effect
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+    private void giveRoyalGuardBuff(TemporaryStatManager tsm) { //TempStat  Shield Attack is Effect
         Option o = new Option();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -232,11 +257,12 @@ public class Mihile extends Job {
         o.rOption = ROYAL_GUARD;
         o.tOption = 12;
         tsm.putCharacterStatValue(RoyalGuardState, o);
-        o1.nOption = getRoyalGuardAttPower();
+        o1.nOption = getRoyalGuardAttPower(chr);
         o1.rOption = ROYAL_GUARD;
         o1.tOption = 12;
         tsm.putCharacterStatValue(PAD, o1);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.putCharacterStatValue(MAD, o1);
+        tsm.sendSetStatPacket();
     }
 
     private int royalGuardMaxCounter() {
@@ -250,7 +276,7 @@ public class Mihile extends Job {
         return num;
     }
 
-    private int getRoyalGuardAttPower() {
+    private int getRoyalGuardAttPower(Char chr) {
         int pad = 0;
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         SkillInfo si = SkillData.getSkillInfoById(ROYAL_GUARD);
@@ -273,14 +299,116 @@ public class Mihile extends Job {
         return pad;
     }
 
-    private void handleRoyalGuardAttack() {
-        c.write(UserLocal.onRoyalGuardAttack(true));
+    private void giveSoulLinkBuffs() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(chr != null && chr.hasSkill(SOUL_LINK) && tsm.hasStat(MichaelSoulLink)) {
+            Skill skill = chr.getSkill(SOUL_LINK);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+            if(!chr.isLeft()) {
+                rect = rect.moveRight();
+            }
+            Party party = chr.getParty();
+            int partySize = 0;
+
+
+            // Party Member's buffs
+            if(party != null) {
+
+                for (PartyMember partyMember : party.getOnlineMembers()) {
+                    Char partyChr = partyMember.getChr();
+                    TemporaryStatManager partyTSM = partyChr.getTemporaryStatManager();
+                    int partyChrX = partyChr.getPosition().getX();
+                    int partyChrY = partyChr.getPosition().getY();
+
+                    if(partyChr.getId() == chr.getId() || JobConstants.isMihile(partyChr.getJob())) {   // Mihile doesn't get the PartyMember's Buffs
+                        continue;
+                    }
+
+                    if (partyChrX >= rect.getLeft() && partyChrY >= rect.getTop()       // if  Party Members in Range
+                            && partyChrX <= rect.getRight() && partyChrY <= rect.getBottom()) {
+
+                        Option o1 = new Option();
+                        Option o2 = new Option();
+                        Option o3 = new Option();
+                        Option o4 = new Option();
+
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = 2;
+                        o1.cOption = chr.getId(); // Owner of Soul Link (Mihile's chr Id)
+                        partyTSM.putCharacterStatValue(MichaelSoulLink, o1);
+
+                        if(chr.getSkill(ROYAL_GUARD) != null && tsm.hasStatBySkillId(ROYAL_GUARD) && !partyTSM.hasStatBySkillId(ROYAL_GUARD)) {
+                            o2.nReason = ROYAL_GUARD;
+                            o2.nValue = (int) (getRoyalGuardAttPower(chr) * ((double) si.getValue(x, slv) / 100));
+                            o2.tStart = (int) System.currentTimeMillis();
+                            o2.tTerm = 12;
+                            partyTSM.putCharacterStatValue(IndiePAD, o2);
+                            partyTSM.putCharacterStatValue(IndieMAD, o2);
+                        }
+                        if(chr.getSkill(ENDURING_SPIRIT) != null && tsm.hasStatBySkillId(ENDURING_SPIRIT) && !partyTSM.hasStatBySkillId(ENDURING_SPIRIT)) {
+                            Skill enduringSpirit = chr.getSkill(ENDURING_SPIRIT);
+                            SkillInfo esInfo = SkillData.getSkillInfoById(enduringSpirit.getSkillId());
+                            byte esLevel = (byte) enduringSpirit.getCurrentLevel();
+
+                            // Enduring Spirit - DEF
+                            o3.nReason = ENDURING_SPIRIT;
+                            o3.nValue = (int) (esInfo.getValue(x, esLevel) * ((double) si.getValue(w, slv) / 100));
+                            o3.tStart = (int) System.currentTimeMillis();
+                            o3.tTerm = esInfo.getValue(time, esLevel);
+                            partyTSM.putCharacterStatValue(IndiePDDR, o3);
+                            partyTSM.putCharacterStatValue(IndieMDDR, o3);
+
+                            // Enduring Spirit - AsrR
+                            o4.nReason = ENDURING_SPIRIT;
+                            o4.nValue = (int) (esInfo.getValue(y, esLevel) * ((double) si.getValue(y, slv) / 100));
+                            o4.tStart = (int) System.currentTimeMillis();
+                            o4.tTerm = esInfo.getValue(time, esLevel);
+                            partyTSM.putCharacterStatValue(IndieAsrR, o4);
+                        }
+                        partyTSM.sendSetStatPacket();
+                        partySize++;
+
+                    } else {    // if  Party Members outside Range
+                        partyTSM.removeStatsBySkill(SOUL_LINK);
+                        partyTSM.removeStatsBySkill(ROYAL_GUARD);
+                        partyTSM.removeStatsBySkill(ENDURING_SPIRIT);
+                        partyTSM.sendResetStatPacket();
+                    }
+                }
+            }
+
+            // Mihile's Buffs
+            Option o5 = new Option();
+            o5.nReason = SOUL_LINK + 100; // for invisible Icon
+            o5.nValue = si.getValue(indieDamR, slv) * partySize;
+            o5.tStart = (int) System.currentTimeMillis();
+            tsm.putCharacterStatValue(IndieDamR, o5);
+            tsm.sendSetStatPacket();
+
+            soulLinkBuffsTimer = EventManager.addEvent(this::giveSoulLinkBuffs, 1, TimeUnit.SECONDS);
+        }
+        tsm.removeStatsBySkill(SOUL_LINK+100);
+        tsm.sendResetStatPacket();
+    }
+
+    public void soulLinkHPRegen() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (chr != null && chr.hasSkill(SOUL_LINK) && tsm.hasStat(MichaelSoulLink)) {
+            Skill skill = chr.getSkill(SOUL_LINK);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            int delay = si.getValue(dot, slv);
+            chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(s, slv))));
+            soulLinkHPRegenTimer = EventManager.addEvent(this::soulLinkHPRegen, delay, TimeUnit.SECONDS);
+        }
     }
 
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -306,7 +434,7 @@ public class Mihile extends Job {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skill.getSkillId();
+                        o1.rOption = skillID;
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
                     }
@@ -318,58 +446,86 @@ public class Mihile extends Job {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skill.getSkillId();
+                        o1.rOption = skillID;
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
-
-
                     }
                 }
                 if(chr.hasSkill(RADIANT_CROSS_AA)) {
-                    SkillInfo rca = SkillData.getSkillInfoById(RADIANT_CROSS_AA); //TODO stay forever, need to dissapear after 7s
+                    Field field = chr.getField();
+                    SkillInfo rca = SkillData.getSkillInfoById(RADIANT_CROSS_AA);
                     AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                     aa.setMobOrigin((byte) 0);
                     aa.setSkillID(RADIANT_CROSS_AA);
                     aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
-                    if (chr.isLeft()) {
-                        aa.setFlip(false);
-                    } else {
-                        aa.setFlip(true);
+                    Rect rect = aa.getPosition().getRectAround(si.getRects().get(0));
+                    if(!chr.isLeft()) {
+                        rect = rect.horizontalFlipAround(chr.getPosition().getX());
                     }
+                    aa.setRect(rect);
+                    aa.setFlip(!attackInfo.left);
                     aa.setDelay((short) 7); //spawn delay
-                    chr.getField().spawnAffectedArea(aa);
+                    field.spawnAffectedAreaAndRemoveOld(aa);
                 }
                 break;
             case RADIANT_CROSS_AA:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                MobTemporaryStat mts = mob.getTemporaryStat();
-                    if(mob.isBoss()) {
-                        o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = (si.getValue(time, slv) / 2);
-                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
-                    } else {
-                        o1.nOption = si.getValue(x, slv);
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
-                    }
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    o1.tOption = mob.isBoss() ? (si.getValue(time, slv) / 2) : si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.ACC, o1);
                 }
                 break;
             case CHARGING_LIGHT:
-                o1.nReason = skillID;
-                o1.nValue = 10;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieDamR, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 10; // Because WzFile doesn't have a variable for it.
+                    o1.rOption = skillID;
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+                }
                 break;
         }
 
         super.handleAttack(c, attackInfo);
     }
+
+    private void doRoyalGuardAttack() {
+        c.write(UserLocal.royalGuardAttack(true));
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        Skill skill = getFinalAtkSkill();
+        if(skill != null) {
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            int proc = si.getValue(prop, slv);
+
+            if(Util.succeedProp(proc)) {
+                return skill.getSkillId();
+            }
+        }
+        return 0;
+    }
+
+    private Skill getFinalAtkSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK_MIHILE)) {
+            skill = chr.getSkill(FINAL_ATTACK_MIHILE);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_MIHILE);
+        }
+        return skill;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -381,7 +537,7 @@ public class Mihile extends Job {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -412,56 +568,47 @@ public class Mihile extends Job {
         }
     }
 
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(RoyalGuardPrepare)) {
-            handleRoyalGuardAttack();
-            handleRoyalGuard(tsm, c);
+            doRoyalGuardAttack();
+            giveRoyalGuardBuff(tsm);
         }
         super.handleHit(c, inPacket, hitInfo);
     }
-
+    
+    // Character creation related methods ---------------------------------------------------------------------------------------------
     @Override
-    public boolean isHandlerOfJob(short id) {
-        return id == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() || JobConstants.isMihile(id);
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getCharacterStat().setPosMap(913070000);
     }
-
+    
     @Override
-    public int getFinalAttackSkill() {
-        if(Util.succeedProp(getFinalAttackProc())) {
-            int fas = 0;
-            if (chr.hasSkill(FINAL_ATTACK_MIHILE)) {
-                fas = FINAL_ATTACK_MIHILE;
-            }
-            if (chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
-                fas = ADVANCED_FINAL_ATTACK_MIHILE;
-            }
-            return fas;
+    public void handleLevelUp() {
+        Map<Stat, Object> stats = new HashMap<>();
+        short level = chr.getLevel();
+        if (chr.getJob() == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() && level >= 10) {
+            // IDK if the stats goes for every beginner job.
+            chr.addStat(Stat.mhp, 16);
+            chr.addStat(Stat.mmp, 12);
+            chr.addStat(Stat.str, 4);
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            chr.write(WvsContext.statChanged(stats));
         } else {
-            return 0;
+            chr.addStat(Stat.mhp, Randomizer.rand(48, 52));// temp until sniff some levelup information about mihile
+            chr.addStat(Stat.mmp, Randomizer.rand(4, 6));// temp until sniff some levelup information about mihile
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
         }
-    }
-
-    private Skill getFinalAtkSkill(Char chr) {
-        Skill skill = null;
-        if(chr.hasSkill(FINAL_ATTACK_MIHILE)) {
-            skill = chr.getSkill(FINAL_ATTACK_MIHILE);
-        }
-        if(chr.hasSkill(ADVANCED_FINAL_ATTACK_MIHILE)) {
-            skill = chr.getSkill(ADVANCED_FINAL_ATTACK_MIHILE);
-        }
-        return skill;
-    }
-
-    private int getFinalAttackProc() {
-        Skill skill = getFinalAtkSkill(chr);
-        if (skill == null) {
-            return 0;
-        }
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-
-        return si.getValue(prop, slv);
+        chr.write(WvsContext.statChanged(stats));
+        super.handleLevelUp();
     }
 }

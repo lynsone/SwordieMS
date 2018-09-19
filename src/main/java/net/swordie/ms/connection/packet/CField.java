@@ -6,9 +6,11 @@ import net.swordie.ms.client.character.MarriageRecord;
 import net.swordie.ms.client.character.items.BodyPart;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.PetItem;
+import net.swordie.ms.client.character.items.ScrollUpgradeInfo;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.PsychicArea;
+import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.trunk.TrunkDlg;
@@ -98,6 +100,14 @@ public class CField {
                 rect, arriveDir, arriveRange, forcedTargetPos, bulletID, pos);
     }
 
+    public static OutPacket curNodeEventEnd(boolean enable) {
+        OutPacket outPacket = new OutPacket(OutHeader.CUR_NODE_EVENT_END);
+   
+        outPacket.encodeByte(enable);
+        
+        return outPacket;
+    }
+    
     public static OutPacket createForceAtom(boolean byMob, int userOwner, int charID, int forceAtomType, boolean toMob,
                                      List<Integer> targets, int skillID, List<ForceAtomInfo> faiList, Rect rect, int arriveDir, int arriveRange,
                                      Position forcedTargetPos, int bulletID, Position pos) {
@@ -277,7 +287,8 @@ public class CField {
         }
         outPacket.encodeByte(0); // size(byte) of productSkill(Professions)(short); stuff like mining, herblore, etc...
         outPacket.encodeString(chr.getGuild() == null ? "-" : chr.getGuild().getName());
-        outPacket.encodeString("Unimpl ally");
+        outPacket.encodeString(chr.getGuild() == null || chr.getGuild().getAlliance() == null ? "-" :
+                chr.getGuild().getAlliance().getName());
         outPacket.encodeByte(-1); // Forced pet IDx
         outPacket.encodeByte(0); // User state (?)
         outPacket.encodeByte(chr.getPets().size() > 0); // pet activated
@@ -400,11 +411,9 @@ public class CField {
 
         outPacket.encodeByte(EquipmentEnchantType.ShowHyperUpgradeResult.getVal());
         outPacket.encodeInt(boom ? 2 : succeed ? 1 : canDegrade ? 0 : 3);
-        outPacket.encodeByte(boom);
+        outPacket.encodeByte(0);
         oldEquip.encode(outPacket);
-        if (!boom) { // for now
-            equip.encode(outPacket);
-        }
+        equip.encode(outPacket);
 
         return outPacket;
     }
@@ -418,28 +427,31 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket scrollUpgradeDisplay() {
+    public static OutPacket scrollUpgradeDisplay(boolean feverTime, List<ScrollUpgradeInfo> infos) {
         OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
-        boolean bool = false;
 
         outPacket.encodeByte(EquipmentEnchantType.ScrollUpgradeDisplay.getVal());
-        outPacket.encodeByte(bool); //boolean
-        if(!bool) {
-            //ResetScrollInfo
-            outPacket.encodeByte(true); //while 1,
+        outPacket.encodeByte(feverTime);
 
-            outPacket.encodeInt(2046301); //Scroll Icon ID
-            outPacket.encodeString("AccINT"); //Scroll Name
-            outPacket.encodeInt(2046301); //Scroll Type
-            outPacket.encodeInt(2046301); //Scroll Option
-
-            outPacket.encodeInt(0); //Flag
-            outPacket.encodeInt(0); //Unk0
-
-            outPacket.encodeInt(5); //Cost
-            outPacket.encodeByte(true); //Unk1
-
+        outPacket.encodeByte(infos.size());
+        for (ScrollUpgradeInfo sui : infos) {
+            outPacket.encode(sui);
         }
+
+        return outPacket;
+    }
+
+    public static OutPacket showScrollUpgradeResult(boolean feverAfter, int result, String desc, Equip prevEquip,
+                                                    Equip newEquip) {
+        OutPacket outPacket = new OutPacket(OutHeader.EQUIPMENT_ENCHANT);
+
+        outPacket.encodeByte(EquipmentEnchantType.ShowScrollUpgradeResult.getVal());
+
+        outPacket.encodeByte(feverAfter);
+        outPacket.encodeInt(result);
+        outPacket.encodeString(desc);
+        outPacket.encode(prevEquip);
+        outPacket.encode(newEquip);
 
         return outPacket;
     }
@@ -479,38 +491,16 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket cancelChair(int chrid, int id) {
+    public static OutPacket sitResult(int chrId, int fieldSeatId) {
         OutPacket outPacket = new OutPacket(OutHeader.SIT_RESULT);
 
-        outPacket.encodeInt(chrid);
-        if(id == -1) {
+        outPacket.encodeInt(chrId);
+        if(fieldSeatId == -1) {
             outPacket.encodeByte(0);
         } else {
             outPacket.encodeByte(1);
-            outPacket.encodeShort(id);
+            outPacket.encodeShort(fieldSeatId);
         }
-
-        return outPacket;
-    }
-
-    public static OutPacket showChair(int characterid, int itemid) {
-        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_ACTIVE_PORTABLE_CHAIR);
-
-        outPacket.encodeInt(characterid);
-        outPacket.encodeInt(itemid);
-        int message = 0;
-        outPacket.encodeInt(message);
-        if (message > 0) {
-            outPacket.encodeString("");
-        }
-        int towerChair = 0;
-        outPacket.encodeInt(towerChair);
-        if (towerChair > 0) {
-            outPacket.encodeInt(0);//TowerChairID
-        }
-        outPacket.encodeInt(0);//mesochaircount
-        outPacket.encodeInt(0);//unkGMS
-        outPacket.encodeInt(0);//unkGMS
 
         return outPacket;
     }
@@ -860,6 +850,26 @@ public class CField {
         outPacket.encodeInt(green); // G  out of 100,000 (?)
         outPacket.encodeInt(blue); // B  out of 100,000 (?)
         outPacket.encodeInt(left ? 1 : 0); // bLeft
+
+        return outPacket;
+    }
+
+    public static OutPacket townPortalCreated(TownPortal townPortal, boolean noAnimation) {
+        OutPacket outPacket = new OutPacket(OutHeader.TOWN_PORTAL_CREATED);
+
+        outPacket.encodeByte(noAnimation); // No Animation  (false = Animation : true = No Animation)
+        outPacket.encodeInt(townPortal.getChr().getId());
+        outPacket.encodePosition(townPortal.getFieldPosition()); // as this doesn't need to be initialised yet.
+        outPacket.encodePosition(townPortal.getFieldPosition()); //
+
+        return outPacket;
+    }
+
+    public static OutPacket townPortalRemoved(TownPortal townPortal, boolean animation) {
+        OutPacket outPacket = new OutPacket(OutHeader.TOWN_PORTAL_REMOVED);
+
+        outPacket.encodeByte(animation); // Animation
+        outPacket.encodeInt(townPortal.getChr().getId());
 
         return outPacket;
     }

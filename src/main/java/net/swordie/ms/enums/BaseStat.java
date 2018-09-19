@@ -58,7 +58,12 @@ public enum BaseStat {
     allStatR,
     hpRecovery,
     mpRecovery,
-    ;
+    incAllSkill,
+    strLv,
+    dexLv,
+    intLv,
+    lukLv,
+    recoveryUp, mpconReduce, reduceCooltime, padLv, madLv, mhpLv, mmpLv; // % increase in heal potion use
 
 
     public static BaseStat getFromStat(Stat s) {
@@ -109,7 +114,28 @@ public enum BaseStat {
             default:
                 return null;
         }
+    }
 
+    public BaseStat getLevelVar() {
+        switch(this) {
+            case str:
+                return strLv;
+            case dex:
+                return dexLv;
+            case inte:
+                return intLv;
+            case luk:
+                return lukLv;
+            case pad:
+                return padLv;
+            case mad:
+                return madLv;
+            case mhp:
+                return mhpLv;
+            case mmp:
+                return mmpLv;
+        }
+        return null;
     }
 
     public static Map<BaseStat, Integer> getFromCTS(CharacterTemporaryStat ctsArg, Option o) {

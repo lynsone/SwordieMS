@@ -47,59 +47,55 @@ MuLungDojoF40 = 925074000
 MuLungDojoF41 = 925074100
 
 bossPerFloor = {
-    MuLungDojoF1 : 9305600, # Mano
-    MuLungDojoF2 : 9305601, # Mushmom
-    MuLungDojoF3 : 9305602, # Stumpy
-    MuLungDojoF4 : 9305603, # Blue Mushmom
-    MuLungDojoF5 : 9305604, # Zombie Mushmom
-    MuLungDojoF6 : 9305605, # King Slime
-    MuLungDojoF7 : 9305606, # Dyle
-    MuLungDojoF8 : 9305607, # King Clang
-    MuLungDojoF9 : 9305608, # Faust
-    MuLungDojoF10 : 9305609, # Hilla
-    MuLungDojoF11 : 9305610, # Metal Golem
-    MuLungDojoF12 : 9305611, # Eliza
-    MuLungDojoF13 : 9305612, # Jr. Balrog
-    MuLungDojoF14 : 9305613, # Nine-Tailed Fox
-    MuLungDojoF15 : 9305614, # Deo
-    MuLungDojoF16 : 9305615, # Zeno
-    MuLungDojoF17 : 9305616, # Timer
-    MuLungDojoF18 : 9305617, # Snack Bar
-    MuLungDojoF19 : 9305618, # Tae Roon
-    MuLungDojoF20 : 9305619, # Von Leon
-    MuLungDojoF21 : 9305620, # Papa Pixie
-    MuLungDojoF22 : 9305621, # Alishar
-    MuLungDojoF23 : 9305622, # Lord Pirate
-    MuLungDojoF24 : 9305623, # Deet and Roi
-    MuLungDojoF25 : 9305624, # Frankenroid
-    MuLungDojoF26 : 9305625, # Chimera
-    MuLungDojoF27 : 9305626, # Poison Golem
-    MuLungDojoF28 : 9305627, # King Sage Cat
-    MuLungDojoF29 : 9305628, # Crimson Balrog
-    MuLungDojoF30 : 9305629, # Arkarium
-    MuLungDojoF31 : 9305630, # Manon
-    MuLungDojoF32 : 9305631, # Griffey
-    MuLungDojoF33 : 9305632, # Snowman
-    MuLungDojoF34 : 9305633, # Papulatus
-    MuLungDojoF35 : 9305634, # Ani
-    MuLungDojoF36 : 9305635, # Leviathan
-    MuLungDojoF37 : 9305636, # Dodo
-    MuLungDojoF38 : 9305637, # Lilynouch
-    MuLungDojoF39 : 9305638, # Lyka
-    MuLungDojoF40 : 9305639, # Magnus
-    MuLungDojoF41 : 9305640 # Mu Gong
+MuLungDojoF1 : 9305600, # Mano
+MuLungDojoF2 : 9305601, # Mushmom
+MuLungDojoF3 : 9305602, # Stumpy
+MuLungDojoF4 : 9305603, # Blue Mushmom
+MuLungDojoF5 : 9305604, # Zombie Mushmom
+MuLungDojoF6 : 9305605, # King Slime
+MuLungDojoF7 : 9305606, # Dyle
+MuLungDojoF8 : 9305607, # King Clang
+MuLungDojoF9 : 9305608, # Faust
+MuLungDojoF10 : 9305609, # Hilla
+MuLungDojoF11 : 9305610, # Metal Golem
+MuLungDojoF12 : 9305611, # Eliza
+MuLungDojoF13 : 9305612, # Jr. Balrog
+MuLungDojoF14 : 9305613, # Nine-Tailed Fox
+MuLungDojoF15 : 9305614, # Deo
+MuLungDojoF16 : 9305615, # Zeno
+MuLungDojoF17 : 9305616, # Timer
+MuLungDojoF18 : 9305617, # Snack Bar
+MuLungDojoF19 : 9305618, # Tae Roon
+MuLungDojoF20 : 9305619, # Von Leon
+MuLungDojoF21 : 9305620, # Papa Pixie
+MuLungDojoF22 : 9305621, # Alishar
+MuLungDojoF23 : 9305622, # Lord Pirate
+MuLungDojoF24 : 9305623, # Deet and Roi
+MuLungDojoF25 : 9305624, # Frankenroid
+MuLungDojoF26 : 9305625, # Chimera
+MuLungDojoF27 : 9305626, # Poison Golem
+MuLungDojoF28 : 9305627, # King Sage Cat
+MuLungDojoF29 : 9305628, # Crimson Balrog
+MuLungDojoF30 : 9305629, # Arkarium
+MuLungDojoF31 : 9305630, # Manon
+MuLungDojoF32 : 9305631, # Griffey
+MuLungDojoF33 : 9305632, # Snowman
+MuLungDojoF34 : 9305633, # Papulatus
+MuLungDojoF35 : 9305634, # Ani
+MuLungDojoF36 : 9305635, # Leviathan
+MuLungDojoF37 : 9305636, # Dodo
+MuLungDojoF38 : 9305637, # Lilynouch
+MuLungDojoF39 : 9305638, # Lyka
+MuLungDojoF40 : 9305639, # Magnus
+MuLungDojoF41 : 9305640 # Mu Gong
 }
 
-def init():
-    stage = ((sm.getFieldID() % 10000) / 100)
-    sm.showEffectToField(""+ WzConstants.EFFECT_DOJO_STAGE_NUMBER +""+ str(stage))
-    sm.showEffectToField(WzConstants.EFFECT_DOJO_STAGE)
+stage = ((sm.getFieldID() % 10000) / 100)
+sm.showEffectToField(""+ WzConstants.EFFECT_DOJO_STAGE_NUMBER +""+ str(stage))
+sm.showEffectToField(WzConstants.EFFECT_DOJO_STAGE)
 
-    sleep(GameConstants.DOJO_SPAWM_BOSS_DELAY)
-    sm.spawnMob(bossPerFloor[sm.getFieldID()], 0, 7, False) # Spawns mob based on Field ID
-    sm.dispose()
+sleep(GameConstants.DOJO_SPAWM_BOSS_DELAY)
+sm.spawnMob(bossPerFloor[sm.getFieldID()], 0, 7, False) # Spawns mob based on Field ID
 
-def onMobDeath(mob):
-    if mob.getTemplateId() == bossPerFloor[sm.getFieldID()]:
-        sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)
-    sm.dispose()
+sm.waitForMobDeath(bossPerFloor[sm.getFieldID()])
+sm.showEffectToField(WzConstants.EFFECT_DOJO_CLEAR)

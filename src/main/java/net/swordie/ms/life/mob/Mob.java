@@ -2,26 +2,25 @@ package net.swordie.ms.life.mob;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyDamageInfo;
-import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.MobPool;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
 import net.swordie.ms.life.Life;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.ShootingMoveStat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.MobData;
-import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
@@ -32,12 +31,13 @@ import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class Mob extends Life {
 
     private boolean sealedInsteadDead, patrolMob;
-    private int option, effectItemID, patrolScopeX1, patrolScopeX2, detectX, senseX, phase, curZoneDataType;
+    private int option, effectItemID, range, detectX, senseX, phase, curZoneDataType;
     private int refImgMobID, lifeReleaseOwnerAID, afterAttack, currentAction, scale, eliteGrade, eliteType, targetUserIdFromServer;
     private long hp;
     private long mp;
@@ -118,12 +118,20 @@ public class Mob extends Life {
     private Map<Char, Long> damageDone = new HashMap<>();
     private Set<DropInfo> drops = new HashSet<>();
     private List<MobSkill> skills = new ArrayList<>();
+    private List<MobSkill> attacks = new ArrayList<>();
     private Set<Integer> quests = new HashSet<>();
     private Set<Integer> revives = new HashSet<>();
     private Map<Integer, Long> skillCooldowns = new HashMap<>();
     private long nextPossibleSkillTime = 0;
     private List<Tuple<Integer, Integer>> eliteSkills = new ArrayList<>();
     private boolean selfDestruction;
+    private List<MobSkill> skillDelays = new CopyOnWriteArrayList<>();
+    private boolean inAttack;
+    private boolean isBanMap;
+    private int banType = 1;// default
+    private int banMsgType = 1;// default
+    private String banMsg = "";
+    private List<Tuple<Integer, String>> banMap = new ArrayList<>();// field, portal name
 
     public Mob(int templateId) {
         super(templateId);
@@ -142,7 +150,7 @@ public class Mob extends Life {
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setF(getF());
+        copy.setFlip(isFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -160,11 +168,10 @@ public class Mob extends Life {
         copy.setMobAliveReq(getMobAliveReq());
         // end life
         copy.setSealedInsteadDead(isSealedInsteadDead());
-        copy.setPatrolMob(isPatrolMob());
         copy.setOption(getOption());
         copy.setEffectItemID(getEffectItemID());
-        copy.setPatrolScopeX1(getPatrolScopeX1());
-        copy.setPatrolScopeX2(getPatrolScopeX2());
+        copy.setPatrolMob(isPatrolMob());
+        copy.setRange(getRange());
         copy.setDetectX(getDetectX());
         copy.setSenseX(getSenseX());
         copy.setPhase(getPhase());
@@ -268,8 +275,16 @@ public class Mob extends Life {
         copy.setMp(getMp());
         copy.setMaxMp(getMaxMp());
         copy.setDrops(getDrops()); // doesn't get mutated, so should be fine
+        copy.setBanMap(isBanMap());
+        copy.setBanType(getBanType());
+        copy.setBanMsgType(getBanMsgType());
+        copy.setBanMsg(getBanMsg());
+        copy.setBanMapFields(getBanMapFields());
         for (MobSkill ms : getSkills()) {
             copy.addSkill(ms);
+        }
+        for (MobSkill ms : getAttacks()) {
+            copy.addAttack(ms);
         }
         for (int rev : getRevives()) {
             copy.addRevive(rev);
@@ -277,19 +292,10 @@ public class Mob extends Life {
         for (int i : getQuests()) {
             copy.addQuest(i);
         }
-        if (copy.getDrops().stream().noneMatch(di -> di.getMoney() > 0)) {
-            copy.getDrops().add(new DropInfo(0, 1000, 0,
-                    GameConstants.MIN_MONEY_MULT * getForcedMobStat().getLevel(),
-                    GameConstants.MAX_MONEY_MULT * getForcedMobStat().getLevel()
-                    ));
-        }
         return copy;
     }
 
     public Set<DropInfo> getDrops() {
-        if (drops == null) {
-            drops = new HashSet<>();
-        }
         return drops;
     }
 
@@ -337,29 +343,11 @@ public class Mob extends Life {
         this.effectItemID = effectItemID;
     }
 
-    public int getPatrolScopeX1() {
-        return patrolScopeX1;
-    }
-
-    public void setPatrolScopeX1(int patrolScopeX1) {
-        this.patrolScopeX1 = patrolScopeX1;
-    }
-
-    public int getPatrolScopeX2() {
-        return patrolScopeX2;
-    }
-
-    public void setPatrolScopeX2(int patrolScopeX2) {
-        this.patrolScopeX2 = patrolScopeX2;
-    }
-
     public int getDetectX() {
         return detectX;
     }
 
-    public void setDetectX(int detectX) {
-        this.detectX = detectX;
-    }
+    public void setDetectX(int detectX) {this.detectX = detectX; }
 
     public int getSenseX() {
         return senseX;
@@ -367,6 +355,14 @@ public class Mob extends Life {
 
     public void setSenseX(int senseX) {
         this.senseX = senseX;
+    }
+
+    public int getRange() {
+        return range;
+    }
+
+    public void setRange(int range) {
+        this.range = range;
     }
 
     public int getPhase() {
@@ -1119,6 +1115,28 @@ public class Mob extends Life {
 
     public void addRevive(int revive) {revives.add(revive);}
 
+    public void setBanMap(boolean isBanMap) { this.isBanMap = isBanMap; }
+
+    public boolean isBanMap() { return isBanMap; }
+
+    public void setBanType(int banType) { this.banType = banType; }
+
+    public int getBanType() { return banType; }
+
+    public void setBanMsgType(int banMsgType) { this.banMsgType = banMsgType; }
+
+    public int getBanMsgType() { return banMsgType; }
+
+    public void setBanMsg(String banMsg) { this.banMsg = banMsg; }
+
+    public String getBanMsg() { return banMsg; }
+
+    public void setBanMapFields(List<Tuple<Integer, String>> banMap) { this.banMap = banMap; }
+
+    public List<Tuple<Integer, String>> getBanMapFields() { return banMap; }
+
+    public void addBanMap(int fieldID, String portal) { this.banMap.add(new Tuple<>(fieldID, portal)); }
+
     /**
      * Damages a mob.
      * @param totalDamage the total damage that should be applied to the mob
@@ -1133,19 +1151,19 @@ public class Mob extends Life {
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
             die();
-            if (isBoss()) {
+            if (isBoss() && getHpTagColor() != 0) {
                 getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
             }
-        } else if (isBoss()) {
+        } else if (isBoss() && getHpTagColor() != 0) {
             getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {
-            getField().broadcastPacket(MobPool.mobHpIndicator(getObjectId(), (byte) (percDamage * 100)));
+            getField().broadcastPacket(MobPool.hpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }
     }
 
-    private void die() {
+    public void die() {
         Field field = getField();
-        getField().broadcastPacket(MobPool.mobLeaveField(getObjectId(), DeathType.ANIMATION_DEATH));
+        getField().broadcastPacket(MobPool.leaveField(getObjectId(), DeathType.ANIMATION_DEATH));
         getField().removeLife(getObjectId());
         if(isSplit()) {
             return;
@@ -1168,7 +1186,7 @@ public class Mob extends Life {
             String msg = null;
             if (field.getKilledElites() >= GameConstants.ELITE_BOSS_REQUIRED_KILLS) {
                 field.setKilledElites(field.getKilledElites() % GameConstants.ELITE_BOSS_REQUIRED_KILLS);
-                int bossTemplate = Util.getRandomFromList(GameConstants.ELITE_BOSS_TEMPLATES);
+                int bossTemplate = Util.getRandomFromCollection(GameConstants.ELITE_BOSS_TEMPLATES);
                 Mob mob = MobData.getMobDeepCopyById(bossTemplate);
                 mob.setEliteType(3);
                 mob.setNotRespawnable(true);
@@ -1204,7 +1222,14 @@ public class Mob extends Life {
         if (mostDamageChar != null) {
             ownerID = mostDamageChar.getId();
         }
-        getField().drop(getDrops(), getField().getFootholdById(getFh()), getPosition(), ownerID);
+        int fhID = getFh();
+        if (fhID == 0) {
+            Foothold fhBelow = getField().findFootHoldBelow(getPosition());
+            if (fhBelow != null) {
+                fhID = fhBelow.getId();
+            }
+        }
+        getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID);
     }
 
     public Map<Char, Long> getDamageDone() {
@@ -1236,7 +1261,8 @@ public class Mob extends Life {
         Map<Party, PartyDamageInfo> damagePercPerParty = new HashMap<>();
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
-            long appliedExp = (long) (exp * damagePerc);
+            int mobExpRate = chr.getLevel() < 10 ? 1 : GameConstants.MOB_EXP_RATE;
+            long appliedExp = (long) (exp * damagePerc * mobExpRate);
 
             if(getField().getBurningFieldLevel() > 0) {
                 ExpIncreaseInfo eei = new ExpIncreaseInfo();
@@ -1283,6 +1309,18 @@ public class Mob extends Life {
 
     public void addSkill(MobSkill skill) {
         getSkills().add(skill);
+    }
+
+    public List<MobSkill> getAttacks() {
+        return attacks;
+    }
+
+    public void addAttack(MobSkill mobSkill) {
+        getAttacks().add(mobSkill);
+    }
+
+    public MobSkill getAttackById(int attackID) {
+        return Util.findWithPred(getAttacks(), att -> att.getSkillSN() == attackID);
     }
 
     @Override
@@ -1341,7 +1379,7 @@ public class Mob extends Life {
 
     public void removeSoulSplitLife(Char chr, Mob origin, Mob copy) {
         chr.getField().removeLife(copy.getObjectId());
-        chr.getField().broadcastPacket(MobPool.mobLeaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH));
+        chr.getField().broadcastPacket(MobPool.leaveField(copy.getObjectId(), DeathType.ANIMATION_DEATH));
         origin.setSplit(false);
     }
 
@@ -1364,12 +1402,20 @@ public class Mob extends Life {
         return skillCooldowns;
     }
 
-    public boolean hasSkillOnCooldown(int skillID, int slv) {
-        return System.currentTimeMillis() < getSkillCooldowns().getOrDefault(skillID | (slv << 16), 0L);
+    public boolean hasSkillOffCooldown(int skillID, int slv) {
+        return System.currentTimeMillis() >= getSkillCooldowns().getOrDefault(skillID | (slv << 16), Long.MIN_VALUE);
+    }
+
+    public boolean hasAttackOffCooldown(int attackID) {
+        return System.currentTimeMillis() >= getSkillCooldowns().getOrDefault(-attackID, Long.MIN_VALUE);
     }
 
     public void putSkillCooldown(int skillID, int slv, long nextUseableTime) {
         getSkillCooldowns().put(skillID | (slv << 16), nextUseableTime);
+    }
+
+    public void putAttackOnCooldown(int skillID, int delayForNextAttack) {
+        getSkillCooldowns().put(-skillID, System.currentTimeMillis() + delayForNextAttack);
     }
 
     public boolean hasSkillDelayExpired() {
@@ -1381,7 +1427,7 @@ public class Mob extends Life {
      * @param delay The delay until the next skill can be used
      */
     public void setSkillDelay(long delay) {
-        setNextPossibleSkillTime(getNextPossibleSkillTime() + delay);
+        setNextPossibleSkillTime(System.currentTimeMillis() + delay);
     }
 
     private long getNextPossibleSkillTime() {
@@ -1402,7 +1448,7 @@ public class Mob extends Life {
             fh = field.findFootHoldBelow(pos);
         }
         if (fh == null) {
-            // Some weird edge case where the mob is spawned on some weird foothold
+            // Edge case where the mob is spawned on some weird foothold
             return;
         }
         setHomeFoothold(fh.deepCopy());
@@ -1410,18 +1456,18 @@ public class Mob extends Life {
         Char controller = getField().getLifeToControllers().get(this);
         if (onlyChar == null) {
             for (Char chr : field.getChars()) {
-                chr.write(MobPool.mobEnterField(this, false));
-                chr.write(MobPool.mobChangeController(this, false, controller == chr));
+                chr.write(MobPool.enterField(this, false));
+                chr.write(MobPool.changeController(this, false, controller == chr));
             }
         } else {
-            onlyChar.getClient().write(MobPool.mobEnterField(this, false));
-            onlyChar.getClient().write(MobPool.mobChangeController(this, false, controller == onlyChar));
+            onlyChar.getClient().write(MobPool.enterField(this, false));
+            onlyChar.getClient().write(MobPool.changeController(this, false, controller == onlyChar));
         }
     }
 
     public boolean isInfestedByViralSlime() {
         MobTemporaryStat mts = getTemporaryStat();
-        return mts.hasBurnFromSkill(Magician.VIRAL_SLIME);
+        return mts.hasBurnFromSkillAndOwner(Magician.VIRAL_SLIME, 0);
     }
 
     public void spawnEliteVersion() {
@@ -1432,7 +1478,7 @@ public class Mob extends Life {
         elite.setHomeFoothold(getCurFoodhold().deepCopy());
         elite.setNotRespawnable(true);
         List<Triple<Integer, Double, Double>> eliteInfos = GameConstants.getEliteInfoByMobLevel(elite.getForcedMobStat().getLevel());
-        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromList(eliteInfos);
+        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromCollection(eliteInfos);
         int eliteGrade = eliteInfo.getLeft();
         long newHp = (long) (eliteInfo.getMiddle() * elite.getMaxHp());
         long newExp = (long) (eliteInfo.getRight() * elite.getForcedMobStat().getExp());
@@ -1442,7 +1488,7 @@ public class Mob extends Life {
         List<Tuple<Integer, Integer>> possibleSkills = new ArrayList<>();
         possibleSkillsMap.forEach((k, v) -> possibleSkills.add(new Tuple(k, v)));
         for (int i = 0; i < GameConstants.ELITE_MOB_SKILL_COUNT; i++) {
-            Tuple<Integer, Integer> randomSkill = Util.getRandomFromList(possibleSkills);
+            Tuple<Integer, Integer> randomSkill = Util.getRandomFromCollection(possibleSkills);
             elite.addEliteSkill(randomSkill.getLeft(), randomSkill.getRight());
             possibleSkills.remove(randomSkill);
         }
@@ -1461,7 +1507,7 @@ public class Mob extends Life {
         elite.setHomeFoothold(getCurFoodhold().deepCopy());
         elite.setNotRespawnable(true);
         List<Triple<Integer, Double, Double>> eliteInfos = GameConstants.getEliteInfoByMobLevel(elite.getForcedMobStat().getLevel());
-        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromList(eliteInfos);
+        Triple<Integer, Double, Double> eliteInfo = Util.getRandomFromCollection(eliteInfos);
         int eliteGrade = eliteInfo.getLeft();
         long newHp = (long) (eliteInfo.getMiddle() * elite.getMaxHp());
         long newExp = (long) (eliteInfo.getRight() * elite.getForcedMobStat().getExp());
@@ -1471,7 +1517,7 @@ public class Mob extends Life {
         List<Tuple<Integer, Integer>> possibleSkills = new ArrayList<>();
         possibleSkillsMap.forEach((k, v) -> possibleSkills.add(new Tuple(k, v)));
         for (int i = 0; i < GameConstants.ELITE_MOB_SKILL_COUNT; i++) {
-            Tuple<Integer, Integer> randomSkill = Util.getRandomFromList(possibleSkills);
+            Tuple<Integer, Integer> randomSkill = Util.getRandomFromCollection(possibleSkills);
             elite.addEliteSkill(randomSkill.getLeft(), randomSkill.getRight());
             possibleSkills.remove(randomSkill);
         }
@@ -1487,8 +1533,8 @@ public class Mob extends Life {
 
     public void addEliteSkill(int skillID, int skillLevel) {
         MobSkill ms = new MobSkill();
-        ms.setSkillID(-1);
-        ms.setSkill(skillID);
+        ms.setSkillSN(-1);
+        ms.setSkillID(skillID);
         ms.setLevel(skillLevel);
         addSkill(ms);
         getEliteSkills().add(new Tuple<>(skillID, skillID));
@@ -1500,5 +1546,58 @@ public class Mob extends Life {
 
     public boolean isSelfDestruction() {
         return selfDestruction;
+    }
+
+    public List<MobSkill> getSkillDelays() {
+        return skillDelays;
+    }
+
+    public boolean isInAttack() {
+        return inAttack;
+    }
+
+    public void setInAttack(boolean inAttack) {
+        this.inAttack = inAttack;
+    }
+
+    public void onKilledByChar(Char chr) {
+        Field field = getField();
+        // Combo Counter per Kill
+        int newChrComboCount = chr.getComboCounter() + 1;
+        chr.write(UserLocal.comboCounter((byte) 1, newChrComboCount, getObjectId()));
+        chr.setComboCounter(newChrComboCount);
+        chr.comboKillResetTimer();
+
+        // Exp Orb spawning from Mob every 50 combos
+        if(chr.getComboCounter() % 50 == 0) {
+            Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
+            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
+                item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
+            }
+            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
+                item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
+            }
+            Drop drop = new Drop(-1, item);
+            drop.setMobExp(getForcedMobStat().getExp());
+            chr.getField().drop(drop, getPosition().deepCopy());
+        }
+
+        // Mage FP skill
+        if(isInfestedByViralSlime()) {
+            Magician.infestViralSlime(chr, this);
+        }
+
+        // Random portal spawn
+        if (getField().isChannelField() && chr.getNextRandomPortalTime() <= System.currentTimeMillis()
+                && Util.succeedProp(GameConstants.RANDOM_PORTAL_SPAWN_CHANCE, 1000)) {
+            chr.setNextRandomPortalTime(System.currentTimeMillis() + GameConstants.RANDOM_PORTAL_COOLTIME);
+            // 50% chance for inferno/yellow portal
+            List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
+            Foothold foothold = Util.getRandomFromCollection(listOfFootHolds);
+            Position position = foothold.getRandomPosition();
+            RandomPortal randomPortal = new RandomPortal(RandomPortal.Type.Inferno, position, chr.getId());
+            field.addLife(randomPortal);
+            chr.write(RandomPortalPool.created(randomPortal));
+        }
     }
 }

@@ -13,27 +13,27 @@ public class MonsterPark {
     static {
         mobExpHash = new HashMap<>();
         mobExpHash.put(9800046, 36625); // Roid
-        mobExpHash.put(9801013, 39700); // Neo Huroid
+        mobExpHash.put(9800047, 39700); // Neo Huroid
         mobExpHash.put(9800045, 42875); // Rurumo
-        mobExpHash.put(9801014, 46170); // D. Roy
+        mobExpHash.put(9800049, 46170); // D. Roy
         mobExpHash.put(9800048, 71730); // Security Camera
-        mobExpHash.put(9801015, 97240); // Deet and Roi
+        mobExpHash.put(9800050, 97240); // Deet and Roi
         mobExpHash.put(9800051, 53010); // Mossy Snail
         mobExpHash.put(9800052, 56575); // Tree Rod
         mobExpHash.put(9800053, 60225); // Mossy Mushroom
-        mobExpHash.put(9830000, 63960); // Primitive Boar
-        mobExpHash.put(9801017, 67800); // Stone Bug
-        mobExpHash.put(9300927, 215355); // Super-Charged Poison Golem
+        mobExpHash.put(9800054, 63960); // Primitive Boar
+        mobExpHash.put(9800055, 67800); // Stone Bug
+        mobExpHash.put(9800056, 215355); // Poison Golem
         mobExpHash.put(9800059, 62080); // Wooden Target Dummy
         mobExpHash.put(9800060, 157185); // Bamboo Warrior
         mobExpHash.put(9800061, 67800); // Grizzly
-        mobExpHash.put(9831007, 69730); // Panda
-        mobExpHash.put(9831008, 167105); // Tae Roon
-        mobExpHash.put(9801022, 76285); // Sage Cat
+        mobExpHash.put(9800062, 69730); // Panda
+        mobExpHash.put(9800063, 167105); // Tae Roon
+        mobExpHash.put(9800064, 76285); // Sage Cat
         mobExpHash.put(9800065, 11580135); // King Sage Cat
-        mobExpHash.put(9801023, 241815); // Giant Centipede
+        mobExpHash.put(9800066, 241815); // Giant Centipede
         mobExpHash.put(9800150, 71690); // Ginseng Jar
-        mobExpHash.put(9831001, 76285); // Bellflower Root
+        mobExpHash.put(9800151, 76285); // Bellflower Root
         mobExpHash.put(9800152, 84055); // Mr. Alli
         mobExpHash.put(9800154, 94835); // Kru
         mobExpHash.put(9800153, 193250); // Calico Mack, the Pirate King
@@ -46,40 +46,40 @@ public class MonsterPark {
         mobExpHash.put(9800161, 119250); // Specter Engineer
         mobExpHash.put(9800162, 124500); // Power Specter
         mobExpHash.put(9800163, 355845); // Reaper Specter
-        mobExpHash.put(9810300, 116625); // Harp
+        mobExpHash.put(9800164, 116625); // Harp
         mobExpHash.put(9800165, 121875); // Blood Harp
         mobExpHash.put(9800166, 266880); // Master Harp
         mobExpHash.put(9800167, 127085); // Blue Kentaurus
         mobExpHash.put(9800168, 132225); // Red Kentaurus
         mobExpHash.put(9800170, 288300); // Kentaurus King
         mobExpHash.put(9800169, 137285); // Black Kentaurus
-        mobExpHash.put(9830013, 391440); // Griffey
+        mobExpHash.put(9800171, 391440); // Griffey
         mobExpHash.put(9800067, 129675); // Dark Klock
         mobExpHash.put(9800068, 134775); // Death Teddy
         mobExpHash.put(9800069, 139800); // Phantom Watch
-        mobExpHash.put(9801024, 144785); // Grim Phantom Watch
-        mobExpHash.put(9801025, 155475); // Gatekeeper
-        mobExpHash.put(9801026, 450135); // Thanatos
+        mobExpHash.put(9800070, 144785); // Grim Phantom Watch
+        mobExpHash.put(9800071, 155475); // Gatekeeper
+        mobExpHash.put(9800072, 450135); // Thanatos
         mobExpHash.put(9800172, 142310); // Wild Monkey
         mobExpHash.put(9800173, 150150); // Mama Monkey
-        mobExpHash.put(9830002, 160760); // Mean Mama Monkey
+        mobExpHash.put(9800174, 160760); // Mean Mama Monkey
         mobExpHash.put(9800175, 348625); // SnowFro the Fruitnificent
         mobExpHash.put(9800176, 171260); // Stone Goblin
         mobExpHash.put(9800177, 176435); // Strong Stone Goblin
         mobExpHash.put(9800178, 508515); // Ganapati
         mobExpHash.put(9800073, 191850); // Overlord A
         mobExpHash.put(9800074, 201975); // Afterlord
-        mobExpHash.put(9800077, 445170); // Bergamot (3)
+        mobExpHash.put(9800075, 445170); // Bergamot
         mobExpHash.put(9800078, 211985); // Maverick Type A
         mobExpHash.put(9800079, 216935); // Maverick Type S
         mobExpHash.put(9800080, 221850); // Imperial Guard
         mobExpHash.put(9800081, 226760); // Royal Guard
-        mobExpHash.put(9800084, 662130); // Nibelung (3)
-        mobExpHash.put(9831009, 246110); // Werewolf
-        mobExpHash.put(9831010, 250875); // Lycanthrope
+        mobExpHash.put(9800082, 662130); // Nibelung
+        mobExpHash.put(9800085, 246110); // Werewolf
+        mobExpHash.put(9800086, 250875); // Lycanthrope
         mobExpHash.put(9800087, 260360); // Coolie Zombie
-        mobExpHash.put(9800088, 269735); // Minor Zombie
-        mobExpHash.put(9500138, 279000); // Bain
+        mobExpHash.put(9800088, 269735); // Miner Zombie
+        mobExpHash.put(9800089, 279000); // Fire Poison
         mobExpHash.put(9800090, 595585); // Riche
         mobExpHash.put(9800091, 806925); // Ergoth
         mobExpHash.put(9800092, 269735); // Crocky the Gatekeeper
@@ -89,8 +89,8 @@ public class MonsterPark {
         mobExpHash.put(9800096, 298010); // Grey Vulture
         mobExpHash.put(9800097, 307835); // Castle Golem
         mobExpHash.put(9800098, 317585); // Prison Guard Boar
-        mobExpHash.put(9303078, 943425); // Prison Guard Ani
-        mobExpHash.put(9810305, 298010); // Red Dragon Turtle
+        mobExpHash.put(9800099, 943425); // Prison Guard Ani
+        mobExpHash.put(9800100, 298010); // Red Dragon Turtle
         mobExpHash.put(9800101, 307835); // Dark Cornian
         mobExpHash.put(9800102, 327260); // Red Wyvern
         mobExpHash.put(9800103, 346500); // Blue Wyvern
@@ -101,20 +101,20 @@ public class MonsterPark {
         mobExpHash.put(9800108, 829550); // Dodo
         mobExpHash.put(9800109, 829550); // Lilynouch
         mobExpHash.put(9800110, 375035); // Oblivion Monk Trainee
-        mobExpHash.put(8220041, 385910); // Oblivion Guardian
+        mobExpHash.put(9800111, 385910); // Oblivion Guardian
         mobExpHash.put(9800112, 395855); // Chief Oblivion Guardian
         mobExpHash.put(9800113, 1145830); // Lyka
-        mobExpHash.put(8620013, 385910); // Official Knight A
-        mobExpHash.put(8620014, 390990); // Official Knight B
-        mobExpHash.put(8620015, 396280); // Official Knight C
-        mobExpHash.put(8620016, 404715); // Official Knight D
-        mobExpHash.put(8620017, 412225); // Official Knight E
-        mobExpHash.put(9410201, 1186255); // Mihile
-        mobExpHash.put(9410202, 1186255); // Oz
+        mobExpHash.put(9800114, 385910); // Official Knight A
+        mobExpHash.put(9800115, 390990); // Official Knight B
+        mobExpHash.put(9800116, 396280); // Official Knight C
+        mobExpHash.put(9800117, 404715); // Official Knight D
+        mobExpHash.put(9800118, 412225); // Official Knight E
+        mobExpHash.put(9800119, 1186255); // Mihile
+        mobExpHash.put(9800120, 1186255); // Oz
         mobExpHash.put(9800121, 588495); // Ifrit
-        mobExpHash.put(9410203, 1186255); // Irena
-        mobExpHash.put(9410204, 1186255); // Eckhart
-        mobExpHash.put(9410205, 1186255); // Hawkeye
+        mobExpHash.put(9800122, 1186255); // Irena
+        mobExpHash.put(9800123, 1186255); // Eckhart
+        mobExpHash.put(9800124, 1186255); // Hawkeye
         mobExpHash.put(9800179, 417025); // Swollen Stump
         mobExpHash.put(9800180, 419730); // Pillaging Wild Boar
         mobExpHash.put(9800181, 422225); // Pillaging Fire Boar

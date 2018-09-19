@@ -8,7 +8,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.RuneType;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.mob.Mob;
@@ -87,7 +87,7 @@ public class RuneStone {
         runeStone.setRuneType(RuneType.getByVal((byte) new Random().nextInt(RuneType.values().length)));
 
         List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
-        Foothold foothold = Util.getRandomFromList(listOfFootHolds);
+        Foothold foothold = Util.getRandomFromCollection(listOfFootHolds);
         Position position = foothold.getRandomPosition();
 
         runeStone.setPosition(position);
@@ -257,7 +257,7 @@ public class RuneStone {
             return;
         }
 
-        Mob randomMob = Util.getRandomFromList(chr.getField().getMobs());
+        Mob randomMob = Util.getRandomFromCollection(chr.getField().getMobs());
         chr.write(UserLocal.userRandAreaAttackRequest(randomMob, LIBERATE_THE_RUNE_OF_THUNDER_2));
 
         if(thunderTimer != null && !thunderTimer.isDone()) {
@@ -292,16 +292,16 @@ public class RuneStone {
         Field field = chr.getField();
         int numberOfEliteMobsSpawned = GameConstants.DARKNESS_RUNE_NUMBER_OF_ELITE_MOBS_SPAWNED;
         for(int i = 0; i < numberOfEliteMobsSpawned; i++) {
-            Mob mob = Util.getRandomFromList(field.getMobs());
+            Mob mob = Util.getRandomFromCollection(field.getMobs());
             mob.spawnEliteMobRuneOfDarkness();
         }
     }
 
     private void applyRuneRiches(Char chr) {
-        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been implemented.");
+        chr.chatMessage(ChatType.BlackOnWhite, "This rune's effect has not yet been implemented.");
     }
 
     private void applyRuneSkill(Char chr) {
-        chr.chatMessage(ChatMsgColour.BLACK_ON_WHITE, "This rune's effect has not yet been implemented.");
+        chr.chatMessage(ChatType.BlackOnWhite, "This rune's effect has not yet been implemented.");
     }
 }

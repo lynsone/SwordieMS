@@ -1,16 +1,18 @@
 package net.swordie.ms.client.character.quest;
 
-import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.quest.progress.*;
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.quest.progress.QuestProgressItemRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressMobRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressMoneyRequirement;
+import net.swordie.ms.client.character.quest.progress.QuestProgressRequirement;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.enums.QuestStatus;
-import org.hibernate.annotations.Cascade;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -36,9 +38,11 @@ public class Quest {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<QuestProgressRequirement> progressRequirements;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "completedTime")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime completedTime;
+
+    @Transient
+    private Map<String, String> properties = new HashMap<>();
 
     public Quest() {
         progressRequirements = new ArrayList<>();
@@ -115,8 +119,8 @@ public class Quest {
         this.completedTime = completedTime;
     }
 
-    public boolean isComplete() {
-        return getProgressRequirements().stream().allMatch(QuestProgressRequirement::isComplete);
+    public boolean isComplete(Char chr) {
+        return getProgressRequirements().stream().allMatch(pr -> pr.isComplete(chr));
     }
 
     public void handleMobKill(int mobID) {
@@ -126,7 +130,9 @@ public class Quest {
                         ((QuestProgressMobRequirement) q).getMobID() == mobID)
                 .findFirst().get();
         // should never return null, as this method should only be called when this quest indeed has this mob
-        qpmr.incCurrentCount(1);
+        if(qpmr.getCurrentCount() < qpmr.getRequiredCount()) {
+            qpmr.incCurrentCount(1);
+        }
     }
 
     @Override
@@ -153,26 +159,18 @@ public class Quest {
                 .findAny().ifPresent(qpmr -> qpmr.addMoney(money));
     }
 
-    public void handleItemGain(Item item) {
-        Set<QuestProgressItemRequirement> qpirs = getProgressRequirements().stream()
-                .filter(q -> q instanceof QuestProgressItemRequirement &&
-                        ((QuestProgressItemRequirement) q).getItemID() == item.getItemId())
-                .map(q -> (QuestProgressItemRequirement) q)
-                .collect(Collectors.toSet());
-        for(QuestProgressItemRequirement qpir : qpirs) {
-            qpir.addItem(item.getQuantity());
-        }
-    }
-
     public String getQRValue() {
-        if(qrValue != null && !qrValue.equalsIgnoreCase("")) {
+        if (qrValue != null && !qrValue.equalsIgnoreCase("")) {
             return qrValue;
         } else {
             StringBuilder sb = new StringBuilder();
-            for(QuestProgressRequirement qpr : getProgressRequirements()) {
-                if(qpr instanceof QuestValueRequirement) {
-                    sb.append(Util.leftPaddedString(3, '0', ((QuestValueRequirement) qpr).getValue()));
-                }
+            if (getProgressRequirements() == null) {
+                return "";
+            }
+            List<QuestProgressMobRequirement> requirements = new ArrayList<>(getMobReqs());
+            requirements.sort(Comparator.comparingInt(QuestProgressMobRequirement::getOrder));
+            for(QuestProgressMobRequirement qpmr : requirements) {
+                sb.append(Util.leftPaddedString(3, '0', qpmr.getValue()));
             }
             return sb.toString();
         }
@@ -180,5 +178,37 @@ public class Quest {
 
     public void setQrValue(String qrValue) {
         this.qrValue = qrValue;
+    }
+
+    public void convertQRValueToProperties() {
+        String val = getQRValue();
+        String[] props = val.split(";");
+        for (String prop : props) {
+            String[] keyVal = prop.split("=");
+            if (keyVal.length == 2) {
+                setProperty(keyVal[0], keyVal[1]);
+            }
+        }
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperty(String key, String value) {
+        getProperties().put(key, value);
+        setQRValueToProperties();
+    }
+
+    private void setQRValueToProperties() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : getProperties().entrySet()) {
+            stringBuilder.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
+        }
+        setQrValue(stringBuilder.toString());
+    }
+
+    public String getProperty(String key) {
+        return getProperties().getOrDefault(key, null);
     }
 }

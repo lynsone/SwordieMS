@@ -4,10 +4,17 @@ package net.swordie.ms.client.character.items;
  * Created on 1/25/2018.
  */
 public enum EquipSpecialAttribute {
-    NO_DESTROY_EXCEPT_ENHANCE(0x1),
-    ALWAYS_TIER_UP(0x2),
-    ALWAYS_SCROLL_SUCCEED(0x4),
-    TRACE(0x80)
+    NotDestroy(0x1),
+    GradeUpgrade(0x2),
+    EnchantSuccess(0x4), // scroll always succeed
+    Extended(0x8),
+    OneMeso(0x10),
+    MakingSkillMeister(0x20),
+    MakingSkillMaster(0x40),
+    Vestige(0x80),
+    VestigeBound(0x200),
+    VestigePossibleTrading(0x400),
+    VestigeAppliedAccountShare(0x800),
 
     ;
     private int val;

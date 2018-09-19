@@ -17,31 +17,33 @@ public class DropPool {
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID, DropEnterType dropEnterType) {
         return DropPool.dropEnterField(drop, dropEnterType, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
-                (byte) 0, 0, false);
+                (byte) 0, 0, false, false);
     }
 
-    public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID) {
+    public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID, boolean canBePickedUpByPet) {
         return DropPool.dropEnterField(drop, DropEnterType.NO_ANIMATION, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
-                (byte) 0, 0, false);
+                (byte) 0, 0, false, canBePickedUpByPet);
     }
 
     public static OutPacket dropEnterFieldCollisionPickUp(Drop drop, Position dropPosition, int charID) {
         return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
-                (byte) 0, 1, false);
+                (byte) 0, 1, false, false);
     }
 
-    public static OutPacket dropEnterField(Drop drop, Position dropPositionFrom, Position dropPositionTo, int charID) {
+    public static OutPacket dropEnterField(Drop drop, Position dropPositionFrom, Position dropPositionTo, int charID,
+                                           boolean canBePickedUpByPet) {
         return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
                 (byte) 2, dropPositionTo, charID, dropPositionFrom, 0, true, (short) 0, false,
-                (byte) 0, 0, false);
+                (byte) 0, 0, false, canBePickedUpByPet);
     }
 
     public static OutPacket dropEnterField(Drop drop, DropEnterType dropEnterType, int rand, int dropMotionType,
                                            int dropSpeed, byte ownType, Position dropPos, int sourceID,
                                            Position tempPos, int delay, boolean unkBool, short fallingVY,
-                                           boolean fadeInEffect, byte makeType, int collisionPickup, boolean prepareCollisionPickUp) {
+                                           boolean fadeInEffect, byte makeType, int collisionPickup,
+                                           boolean prepareCollisionPickUp, boolean canBePickedUpByPet) {
         OutPacket outPacket = new OutPacket(OutHeader.DROP_ENTER_FIELD);
 
         outPacket.encodeByte(drop.getDropType().getVal());
@@ -67,11 +69,11 @@ public class DropPool {
         if(!drop.isMoney()) {
             FileTime expireTime = drop.getExpireTime();
             if(expireTime == null) {
-                expireTime = FileTime.fromType(FileTime.Type.PERMANENT);
+                expireTime = FileTime.fromType(FileTime.Type.MAX_TIME);
             }
             outPacket.encodeFT(expireTime);
         }
-        outPacket.encodeByte(drop.isByPet());
+        outPacket.encodeByte(drop.canBePickedUpByPet() && canBePickedUpByPet); // former = general case, latter = specific to a single chr
         outPacket.encodeByte(unkBool);
         outPacket.encodeShort(fallingVY);
         outPacket.encodeByte(fadeInEffect);

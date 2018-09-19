@@ -2,15 +2,17 @@ package net.swordie.ms.life.mob.skill;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.util.Util;
 
 /**
  * Created on 1/4/2018.
  */
 public class BurnedInfo {
-    private int characterId, skillId, damage, interval, end, dotAnimation, dotCount, superPos, attackDelay, dotTickIdx, dotTickDamR;
+    private int characterId, skillId, interval, end, dotAnimation, dotCount, superPos, attackDelay, dotTickIdx, dotTickDamR;
     private int startTime;
     private int lastUpdate;
     private Char chr;
+    private long damage;
 
     public BurnedInfo deepCopy() {
         BurnedInfo copy = new BurnedInfo();
@@ -47,11 +49,11 @@ public class BurnedInfo {
         this.skillId = skillId;
     }
 
-    public int getDamage() {
+    public long getDamage() {
         return damage;
     }
 
-    public void setDamage(int damage) {
+    public void setDamage(long damage) {
         this.damage = damage;
     }
 
@@ -138,7 +140,7 @@ public class BurnedInfo {
     public void encode(OutPacket outPacket) {
         outPacket.encodeInt(getCharacterId());
         outPacket.encodeInt(getSkillId());
-        outPacket.encodeInt(getDamage());
+        outPacket.encodeInt(Util.maxInt(getDamage()));
         outPacket.encodeInt(getInterval());
         outPacket.encodeInt(getEnd());
         outPacket.encodeInt(getDotAnimation());

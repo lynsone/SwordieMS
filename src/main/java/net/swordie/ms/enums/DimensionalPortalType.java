@@ -1,7 +1,5 @@
 package net.swordie.ms.enums;
 
-import net.swordie.ms.util.Util;
-
 import java.util.Arrays;
 
 /**
@@ -36,7 +34,7 @@ public enum DimensionalPortalType {
     PurpleTown3(25, 0, "Purple Town 2"),
     MapleAlliance(26, 913051102, "Maple Alliance"),
     HalloweenGPQ2(27, 0, "HalloweenGPQ2"),
-    GoldenTemple2(28, 809060000, "Golden Temple"),
+    GoldenTemple2(28, 252000000, "Golden Temple"),
     Spiegelmann(29, 0, "Spiegelmann"),
     PvP(30, 0, "Player Versus Player"),
     DontRemember(31, 0, "Don't remember this one"),

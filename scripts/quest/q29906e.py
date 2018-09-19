@@ -1,2 +1,1 @@
-def init():
-    sm.dispose()
+sm.dispose()

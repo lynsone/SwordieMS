@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.quest.progress;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.loaders.DatSerializable;
 
 import javax.persistence.*;
@@ -56,7 +57,7 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
     }
 
     @Override
-    public boolean isComplete() {
+    public boolean isComplete(Char chr) {
         return getCurrentCount() >= getRequiredCount();
     }
 
@@ -66,6 +67,7 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
         qpmr.setMobID(getMobID());
         qpmr.setRequiredCount(getRequiredCount());
         qpmr.setCurrentCount(getCurrentCount());
+        qpmr.setOrder(getOrder());
         return qpmr;
     }
 
@@ -73,6 +75,7 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
     public void write(DataOutputStream dos) throws IOException {
         dos.writeInt(getMobID());
         dos.writeInt(getRequiredCount());
+        dos.writeInt(getOrder());
     }
 
     @Override
@@ -80,6 +83,7 @@ public class QuestProgressMobRequirement extends QuestProgressRequirement implem
         QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
         qpmr.setMobID(dis.readInt());
         qpmr.setRequiredCount(dis.readInt());
+        qpmr.setOrder(dis.readInt());
         return qpmr;
     }
 

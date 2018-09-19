@@ -1,6 +1,8 @@
 package net.swordie.ms.world;
 
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.alliance.Alliance;
+import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.party.Party;
@@ -8,10 +10,7 @@ import net.swordie.ms.ServerStatus;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created on 11/2/2017.
@@ -25,11 +24,13 @@ public class World {
     private List<Channel> channels;
     private Map<Integer, Party> parties = new HashMap<>();
     private Map<Integer, Guild> guilds = new HashMap<>();
+    private Map<Integer, Alliance> alliances = new HashMap<>();
     private int partyIDCounter = 1;
     private boolean charCreateBlock;
+    private boolean reboot;
 
     public World(int worldId, String name, int worldState, String worldEventDescription, int worldEventEXP_WSE,
-                 int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet) {
+                 int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet, boolean reboot) {
         this.worldId = worldId;
         this.name = name;
         this.worldState = worldState;
@@ -43,11 +44,12 @@ public class World {
         }
         this.channels = channelList;
         this.starplanet = starplanet;
+        this.reboot = reboot;
     }
 
     public World(int worldId, String name, int amountOfChannels) {
         this(worldId, name, 0, "", 100, 100,
-                0, amountOfChannels, false);
+                0, amountOfChannels, false, false);
     }
 
     public int getWorldId() {
@@ -148,6 +150,23 @@ public class World {
         if (guild == null) {
             guild = loadGuildFromDB(id);
             getGuilds().put(id, guild);
+            if (guild.getAllianceID() != 0) {
+                guild.setAlliance(getAlliance(guild.getAllianceID()));
+            }
+        }
+        return guild;
+    }
+
+    public Guild getGuildByName(String name) {
+        Guild guild = getGuilds().values().stream().filter(g -> g.getName().equals(name)).findAny().orElse(null);
+        if (guild == null) {
+            guild = (Guild) DatabaseManager.getObjFromDB(Guild.class, name);
+            if (guild != null) {
+                getGuilds().put(guild.getId(), guild);
+                if (guild.getAllianceID() != 0) {
+                    guild.setAlliance(getAlliance(guild.getAllianceID()));
+                }
+            }
         }
         return guild;
     }
@@ -192,6 +211,14 @@ public class World {
         this.charCreateBlock = charCreateBlock;
     }
 
+    public boolean isReboot() {
+        return reboot;
+    }
+
+    public void setReboot(boolean reboot) {
+        this.reboot = reboot;
+    }
+
     public boolean isFull() {
         boolean full = true;
         for (Channel channel : getChannels()) {
@@ -201,5 +228,49 @@ public class World {
             }
         }
         return full;
+    }
+
+    public Map<Integer, Alliance> getAlliances() {
+        return alliances;
+    }
+
+    private void addAlliance(Alliance ally) {
+        getAlliances().put(ally.getId(), ally);
+        // Initialize guilds to be the same instance as the ones we currently have
+        Set<Guild> guilds = new HashSet<>();
+        for (Guild guild : ally.getGuilds()) {
+            Guild ourGuild = getGuildByID(guild.getId());
+            ourGuild.setAlliance(ally);
+            guilds.add(ourGuild);
+        }
+        ally.setGuilds(guilds);
+    }
+
+    public Alliance getAlliance(int id) {
+        Alliance ally = getAlliances().getOrDefault(id, null);
+        if (ally == null) {
+            ally = (Alliance) DatabaseManager.getObjFromDB(Alliance.class, id);
+            if (ally != null) {
+                addAlliance(ally);
+            }
+        }
+        return ally;
+    }
+
+    public Alliance getAlliance(String name) {
+        Alliance ally = getAlliances().values().stream().filter(a -> a.getName().equals(name)).findAny().orElse(null);
+        if (ally == null) {
+            ally = (Alliance) DatabaseManager.getObjFromDB(Alliance.class, name);
+            if (ally != null) {
+                addAlliance(ally);
+            }
+        }
+        return ally;
+    }
+
+    public void clearCache() {
+        for (Channel channel : getChannels()) {
+            channel.clearCache();
+        }
     }
 }

@@ -11,12 +11,12 @@ import net.swordie.ms.connection.packet.ReactorPool;
 public class Reactor extends Life {
 
     private byte state;
-    private boolean flip;
     private String name = "";
     private int ownerID;
     private int properEventIdx;
     private int reactorTime;
     private boolean phantomForest;
+    private int hitCount;
 
     public Reactor(int templateId) {
         super(templateId);
@@ -30,14 +30,10 @@ public class Reactor extends Life {
         this.state = state;
     }
 
-    public boolean isFlip() {
-        return flip;
+    public void increaseState() {
+        this.state++;
     }
-
-    public void setFlip(boolean flip) {
-        this.flip = flip;
-    }
-
+    
     public String getName() {
         return name;
     }
@@ -89,5 +85,36 @@ public class Reactor extends Life {
     public void broadcastSpawnPacket(Char onlyChar) {
         init();
         getField().broadcastPacket(ReactorPool.reactorEnterField(this));
+    }
+    
+    @Override
+    public void broadcastLeavePacket() {
+        getField().broadcastPacket(ReactorPool.reactorLeaveField(this));
+    }
+
+    public Life deepCopy() {
+        Reactor copy = new Reactor(getTemplateId());
+        copy.setObjectId(getObjectId());
+        copy.setLifeType(getLifeType());
+        copy.setX(getX());
+        copy.setY(getY());
+        copy.setMobTime(getMobTime());
+        copy.setFlip(isFlip());
+        copy.setLimitedName(getLimitedName());
+        copy.setPosition(getPosition().deepCopy());
+        copy.setHomePosition(getPosition().deepCopy());
+        return copy;
+    }
+
+    public int getHitCount() {
+        return hitCount;
+    }
+
+    public void setHitCount(int hitCount) {
+        this.hitCount = hitCount;
+    }
+
+    public void incHitCount() {
+        setHitCount(getHitCount() + 1);
     }
 }

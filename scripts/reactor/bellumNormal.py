@@ -1,15 +1,8 @@
-hitCount = 0
+from net.swordie.ms.enums import WeatherEffNoticeType
 
-def init():
-    action(0)
-
-def action(type):
-    sm.chat(str(type))
+def action(reactor, type):
     if type == 0:
-        # global hitCount
-        # hitCount += 1
-        # sm.chat(str(hitCount))
-        # if hitCount >= 1:
-        sm.spawnMob(9400942, -200, 440, False)  # NPE at Foothold
         sm.removeReactor()
+        sm.invokeAfterDelay(1500, "spawnMob", 9400942, -200, 440, False)
+        sm.showWeatherNotice("You ignore my warnings?! I will show you no mercy!", WeatherEffNoticeType.BossVellum, 10000)
         sm.dispose()

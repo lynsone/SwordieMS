@@ -2,653 +2,682 @@ package net.swordie.ms.client.character.skills.temp;
 
 import org.apache.log4j.LogManager;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created on 1/2/2018.
  */
 public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat> {
-    IndiePAD(0x80000000, 0),
-    IndieMAD(0x40000000, 0),
-    IndiePDD(0x20000000, 0),
-    IndieMDD(0x10000000, 0),
-    IndieMHP(0x8000000, 0),
-    IndieMHPR(0x4000000, 0),
-    IndieMMP(0x2000000, 0),
-    IndieMMPR(0x1000000, 0), // 8
+    IndiePAD(0),
+    IndieMAD(1),
+    IndiePDD(2),
+    IndieMDD(3),
+    IndieMHP(4),
+    IndieMHPR(5),
+    IndieMMP(6),
+    IndieMMPR(7),
 
-    IndieACC(0x800000, 0),
-    IndieEVA(0x400000, 0),
-    IndieJump(0x200000, 0),
-    IndieSpeed(0x100000, 0),
-    IndieAllStat(0x80000, 0),
-    IndieDodgeCriticalTime(0x40000, 0),
-    IndieEXP(0x20000, 0),
-    IndieBooster(0x10000, 0), // 16
+    IndieACC(8),
+    IndieEVA(9),
+    IndieJump(10),
+    IndieSpeed(11),
+    IndieAllStat(12),
+    IndieDodgeCriticalTime(13),
+    IndieEXP(14),
+    IndieBooster(15),
 
-    IndieFixedDamageR(0x8000, 0),
-    PyramidStunBuff(0x4000, 0),
-    PyramidFrozenBuff(0x2000, 0),
-    PyramidFireBuff(0x1000, 0),
-    PyramidBonusDamageBuff(0x800, 0),
-    IndieRelaxEXP(0x400, 0),
-    IndieSTR(0x200, 0),
-    IndieDEX(0x100, 0), // 24
+    IndieFixedDamageR(16),
+    PyramidStunBuff(17),
+    PyramidFrozenBuff(18),
+    PyramidFireBuff(19),
+    PyramidBonusDamageBuff(20),
+    IndieRelaxEXP(21),
+    IndieSTR(22),
+    IndieDEX(23),
 
-    IndieINT(0x80, 0),
-    IndieLUK(0x40, 0),
-    IndieDamR(0x20, 0),
-    IndieScriptBuff(0x10, 0),
-    IndieMDF(0x8, 0),
-    IndieMaxDamageOver(0x4, 0),
-    IndieAsrR(0x2, 0),
-    IndieTerR(0x1, 0), // 32
+    IndieINT(24),
+    IndieLUK(25),
+    IndieDamR(26),
+    IndieScriptBuff(27),
+    IndieMDF(28),
+    IndieMaxDamageOver(29),
+    IndieAsrR(30),
+    IndieTerR(31),
 
-    IndieCr(0x80000000, 1),
-    IndiePDDR(0x40000000, 1),
-    IndieCrMax(0x20000000, 1),
-    IndieBDR(0x10000000, 1),
-    IndieStatR(0x8000000, 1),
-    IndieStance(0x4000000, 1),
-    IndieIgnoreMobpdpR(0x2000000, 1),
-    IndieEmpty(0x1000000, 1), // 40
+    IndieCr(32),
+    IndiePDDR(33),
+    IndieCrMax(34),
+    IndieBDR(35),
+    IndieStatR(36),
+    IndieStance(37),
+    IndieIgnoreMobpdpR(38),
+    IndieEmpty(39),
 
-    IndiePADR(0x800000, 1),
-    IndieMADR(0x400000, 1),
-    IndieCrMaxR(0x200000, 1),
-    IndieEVAR(0x100000, 1),
-    IndieMDDR(0x80000, 1),
-    IndieDrainHP(0x40000, 1),
-    IndiePMdR(0x20000, 1),
-    IndieMaxDamageOverR(0x10000, 1), // 48
+    IndiePADR(40),
+    IndieMADR(41),
+    IndieCrMaxR(42),
+    IndieEVAR(43),
+    IndieMDDR(44),
+    IndieDrainHP(45),
+    IndiePMdR(46),
+    IndieMaxDamageOverR(47),
 
-    IndieForceJump(0x8000, 1),
-    IndieForceSpeed(0x4000, 1),
-    IndieQrPointTerm(0x2000, 1),
-    IndieUNK1(0x1000, 1),
-    IndieUNK2(0x800, 1),
-    IndieUNK3(0x400, 1),
-    IndieUNK4(0x200, 1),
-    IndieUNK5(0x100, 1), // 56
+    IndieForceJump(48),
+    IndieForceSpeed(49),
+    IndieQrPointTerm(50),
+    IndieUNK1(51),
+    IndieUNK2(52),
+    IndieUNK3(53),
+    IndieUNK4(54),
+    IndieUNK5(55),
 
-    IndieStatCount(0x80, 1),
-    PAD(0x40, 1),
-    PDD(0x20, 1),
-    MAD(0x10, 1),
-    MDD(0x8, 1),
-    ACC(0x4, 1),
-    EVA(0x2, 1),
-    Craft(0x1, 1), // 64
+    IndieStatCount(56),
+    PAD(57),
+    PDD(58),
+    MAD(59),
+    MDD(60),
+    ACC(61),
+    EVA(62),
+    Craft(63),
 
-    Speed(0x80000000, 2),
-    Jump(0x40000000, 2),
-    MagicGuard(0x20000000, 2),
-    DarkSight(0x10000000, 2),
-    Booster(0x8000000, 2),
-    PowerGuard(0x4000000, 2),
-    MaxHP(0x2000000, 2),
-    MaxMP(0x1000000, 2), // 72
+    Speed(64),
+    Jump(65),
+    MagicGuard(66),
+    DarkSight(67),
+    Booster(68),
+    PowerGuard(69),
+    MaxHP(70),
+    MaxMP(71),
 
-    Invincible(0x800000, 2),
-    SoulArrow(0x400000, 2),
-    Stun(0x200000, 2),
-    Poison(0x100000, 2),
-    Seal(0x80000, 2),
-    Darkness(0x40000, 2),
-    ComboCounter(0x20000, 2),
-    WeaponCharge(0x10000, 2), // 80
+    Invincible(72),
+    SoulArrow(73),
+    Stun(74),
+    Poison(75),
+    Seal(76),
+    Darkness(77),
+    ComboCounter(78),
+    WeaponCharge(79),
 
-    HolySymbol(0x8000, 2),
-    MesoUp(0x4000, 2),
-    ShadowPartner(0x2000, 2),
-    PickPocket(0x1000, 2),
-    MesoGuard(0x800, 2),
-    Thaw(0x400, 2),
-    Weakness(0x200, 2),
-    Curse(0x100, 2),
+    HolySymbol(80),
+    MesoUp(81),
+    ShadowPartner(82),
+    PickPocket(83),
+    MesoGuard(84),
+    Thaw(85),
+    Weakness(86),
+    Curse(87),
 
-    Slow(0x80, 2),
-    Morph(0x40, 2),
-    Regen(0x20, 2),
-    BasicStatUp(0x10, 2),
-    Stance(0x8, 2),
-    SharpEyes(0x4, 2),
-    ManaReflection(0x2, 2),
-    Attract(0x1, 2),
+    Slow(88),
+    Morph(89),
+    Regen(90),
+    BasicStatUp(91),
+    Stance(92),
+    SharpEyes(93),
+    ManaReflection(94),
+    Attract(95),
 
-    NoBulletConsume(0x80000000, 3),
-    Infinity(0x40000000, 3),
-    AdvancedBless(0x20000000, 3),
-    IllusionStep(0x10000000, 3),
-    Blind(0x8000000, 3),
-    Concentration(0x4000000, 3),
-    BanMap(0x2000000, 3),
-    MaxLevelBuff(0x1000000, 3),
+    NoBulletConsume(96),
+    Infinity(97),
+    AdvancedBless(98),
+    IllusionStep(99),
+    Blind(100),
+    Concentration(101),
+    BanMap(102),
+    MaxLevelBuff(103),
 
-    MesoUpByItem(0x800000, 3),
-    Ghost(0x400000, 3),
-    Barrier(0x200000, 3),
-    ReverseInput(0x100000, 3),
-    ItemUpByItem(0x80000, 3),
-    RespectPImmune(0x40000, 3),
-    RespectMImmune(0x20000, 3),
-    DefenseAtt(0x10000, 3),
+    MesoUpByItem(104),
+    Ghost(105),
+    Barrier(106),
+    ReverseInput(107),
+    ItemUpByItem(108),
+    RespectPImmune(109),
+    RespectMImmune(110),
+    DefenseAtt(111),
 
-    DefenseState(0x8000, 3),
-    DojangBerserk(0x4000, 3),
-    DojangInvincible(0x2000, 3),
-    DojangShield(0x1000, 3),
-    SoulMasterFinal(0x800, 3),
-    WindBreakerFinal(0x400, 3),
-    ElementalReset(0x200, 3),
-    HideAttack(0x100, 3),
+    DefenseState(112),
+    DojangBerserk(113),
+    DojangInvincible(114),
+    DojangShield(115),
+    SoulMasterFinal(116),
+    WindBreakerFinal(117),
+    ElementalReset(118),
+    HideAttack(119),
 
-    EventRate(0x80, 3),
-    ComboAbilityBuff(0x40, 3),
-    ComboDrain(0x20, 3),
-    ComboBarrier(0x10, 3),
-    BodyPressure(0x8, 3),
-    RepeatEffect(0x4, 3),
-    ExpBuffRate(0x2, 3),
-    StopPortion(0x1, 3),
+    EventRate(120),
+    ComboAbilityBuff(121),
+    ComboDrain(122),
+    ComboBarrier(123),
+    BodyPressure(124),
+    RepeatEffect(125),
+    ExpBuffRate(126),
+    StopPortion(127),
 
-    StopMotion(0x80000000, 4),
-    Fear(0x40000000, 4),
-    HiddenPieceOn(0x20000000, 4),
-    MagicShield(0x10000000, 4),
-    MagicResistance(0x8000000, 4),
-    SoulStone(0x4000000, 4),
-    Flying(0x2000000, 4),
-    Frozen(0x1000000, 4),
+    StopMotion(128),
+    Fear(129),
+    HiddenPieceOn(130),
+    MagicShield(131),
+    MagicResistance(132),
+    SoulStone(133),
+    Flying(134),
+    Frozen(135),
 
-    AssistCharge(0x800000, 4),
-    Enrage(0x400000, 4),
-    DrawBack(0x200000, 4),
-    NotDamaged(0x100000, 4),
-    FinalCut(0x80000, 4),
-    HowlingAttackDamage(0x40000, 4),
-    BeastFormDamageUp(0x20000, 4),
-    Dance(0x10000, 4),
+    AssistCharge(136),
+    Enrage(137),
+    DrawBack(138),
+    NotDamaged(139),
+    FinalCut(140),
+    HowlingAttackDamage(141),
+    BeastFormDamageUp(142),
+    Dance(143),
 
-    EMHP(0x8000, 4),
-    EMMP(0x4000, 4),
-    EPAD(0x2000, 4),
-    EMAD(0x1000, 4),
-    EPDD(0x800, 4),
-    EMDD(0x400, 4),
-    Guard(0x200, 4),
-    Cyclone(0x100, 4),
+    EMHP(144),
+    EMMP(145),
+    EPAD(146),
+    EMAD(147),
+    EPDD(148),
+    EMDD(149),
+    Guard(150),
+    Cyclone(151),
 
-    HowlingCritical(0x80, 4),
-    HowlingMaxMP(0x40, 4),
-    HowlingDefence(0x20, 4),
-    HowlingEvasion(0x10, 4),
-    Conversion(0x8, 4),
-    Revive(0x4, 4),
-    PinkbeanMinibeenMove(0x2, 4),
-    Sneak(0x1, 4),
+    HowlingCritical(152),
+    HowlingMaxMP(153),
+    HowlingDefence(154),
+    HowlingEvasion(155),
+    Conversion(156),
+    Revive(157),
+    PinkbeanMinibeenMove(158),
+    Sneak(159),
 
-    Mechanic(0x80000000, 5),
-    BeastFormMaxHP(0x40000000, 5),
-    Dice(0x20000000, 5),
-    BlessingArmor(0x10000000, 5),
-    DamR(0x8000000, 5),
-    TeleportMasteryOn(0x4000000, 5),
-    CombatOrders(0x2000000, 5),
-    Beholder(0x1000000, 5),
+    Mechanic(160),
+    BeastFormMaxHP(161),
+    Dice(162),
+    BlessingArmor(163),
+    DamR(164),
+    TeleportMasteryOn(165),
+    CombatOrders(166),
+    Beholder(167),
 
-    DispelItemOption(0x800000, 5),
-    Inflation(0x400000, 5),
-    OnixDivineProtection(0x200000, 5),
-    Web(0x100000, 5),
-    Bless(0x80000, 5),
-    TimeBomb(0x40000, 5),
-    DisOrder(0x20000, 5),
-    Thread(0x10000, 5),
+    DispelItemOption(168),
+    Inflation(169),
+    OnixDivineProtection(170),
+    Web(171),
+    Bless(172),
+    TimeBomb(173),
+    DisOrder(174),
+    Thread(175),
 
-    Team(0x8000, 5),
-    Explosion(0x4000, 5),
-    BuffLimit(0x2000, 5),
-    STR(0x1000, 5),
-    INT(0x800, 5),
-    DEX(0x400, 5),
-    LUK(0x200, 5),
-    DispelItemOptionByField(0x100, 5),
+    Team(176),
+    Explosion(177),
+    BuffLimit(178),
+    STR(179),
+    INT(180),
+    DEX(181),
+    LUK(182),
+    DispelItemOptionByField(183),
 
-    DarkTornado(0x80, 5),
-    PVPDamage(0x40, 5),
-    PvPScoreBonus(0x20, 5),
-    PvPInvincible(0x10, 5),
-    PvPRaceEffect(0x8, 5),
-    WeaknessMdamage(0x4, 5),
-    Frozen2(0x2, 5),
-    PVPDamageSkill(0x1, 5),
+    DarkTornado(184),
+    PVPDamage(185),
+    PvPScoreBonus(186),
+    PvPInvincible(187),
+    PvPRaceEffect(188),
+    WeaknessMdamage(189),
+    Frozen2(190),
+    PVPDamageSkill(191),
 
-    AmplifyDamage(0x80000000, 6),
-    IceKnight(0x40000000, 6),
-    Shock(0x20000000, 6),
-    InfinityForce(0x10000000, 6),
-    IncMaxHP(0x8000000, 6),
-    IncMaxMP(0x4000000, 6),
-    HolyMagicShell(0x2000000, 6),
-    KeyDownTimeIgnore(0x1000000, 6),
+    AmplifyDamage(192),
+    IceKnight(193),
+    Shock(194),
+    InfinityForce(195),
+    IncMaxHP(196),
+    IncMaxMP(197),
+    HolyMagicShell(198),
+    KeyDownTimeIgnore(199),
 
-    ArcaneAim(0x800000, 6),
-    MasterMagicOn(0x400000, 6),
-    AsrR(0x200000, 6),
-    TerR(0x100000, 6),
-    DamAbsorbShield(0x80000, 6),
-    DevilishPower(0x40000, 6),
-    Roulette(0x20000, 6),
-    SpiritLink(0x10000, 6),
+    ArcaneAim(200),
+    MasterMagicOn(201),
+    AsrR(202),
+    TerR(203),
+    DamAbsorbShield(204),
+    DevilishPower(205),
+    Roulette(206),
+    SpiritLink(207),
 
-    AsrRByItem(0x8000, 6),
-    Event(0x4000, 6),
-    CriticalBuff(0x2000, 6),
-    DropRate(0x1000, 6),
-    PlusExpRate(0x800, 6),
-    ItemInvincible(0x400, 6),
-    Awake(0x200, 6),
-    ItemCritical(0x100, 6),
+    AsrRByItem(208),
+    Event(209),
+    CriticalBuff(210),
+    DropRate(211),
+    PlusExpRate(212),
+    ItemInvincible(213),
+    Awake(214),
+    ItemCritical(215),
 
-    ItemEvade(0x80, 6),
-    Event2(0x40, 6),
-    VampiricTouch(0x20, 6),
-    DDR(0x10, 6),
-    IncCriticalDamMin(0x8, 6),
-    IncCriticalDamMax(0x4, 6),
-    IncTerR(0x2, 6),
-    IncAsrR(0x1, 6),
+    ItemEvade(216),
+    Event2(217),
+    VampiricTouch(218),
+    DDR(219),
+    IncCriticalDamMin(220),
+    IncCriticalDamMax(221),
+    IncTerR(222),
+    IncAsrR(223),
 
-    DeathMark(0x80000000, 7),
-    UsefulAdvancedBless(0x40000000, 7),
-    Lapidification(0x20000000, 7),
-    VenomSnake(0x10000000, 7),
-    CarnivalAttack(0x8000000, 7),
-    CarnivalDefence(0x4000000, 7),
-    CarnivalExp(0x2000000, 7),
-    SlowAttack(0x1000000, 7),
+    DeathMark(224),
+    UsefulAdvancedBless(225),
+    Lapidification(226),
+    VenomSnake(227),
+    CarnivalAttack(228),
+    CarnivalDefence(229),
+    CarnivalExp(230),
+    SlowAttack(231),
 
-    PyramidEffect(0x800000, 7),
-    KillingPoint(0x400000, 7),
-    HollowPointBullet(0x200000, 7),
-    KeyDownMoving(0x100000, 7),
-    IgnoreTargetDEF(0x80000, 7),
-    ReviveOnce(0x40000, 7),
-    Invisible(0x20000, 7),
-    EnrageCr(0x10000, 7),
+    PyramidEffect(232),
+    KillingPoint(233),
+    HollowPointBullet(234),
+    KeyDownMoving(235),
+    IgnoreTargetDEF(236),
+    ReviveOnce(237),
+    Invisible(238),
+    EnrageCr(239),
 
-    EnrageCrDamMin(0x8000, 7),
-    Judgement(0x4000, 7),
-    DojangLuckyBonus(0x2000, 7),
-    PainMark(0x1000, 7),
-    Magnet(0x800, 7),
-    MagnetArea(0x400, 7),
-    VampDeath(0x200, 7),
-    BlessingArmorIncPAD(0x100, 7),
+    EnrageCrDamMin(240),
+    Judgement(241),
+    DojangLuckyBonus(242),
+    PainMark(243),
+    Magnet(244),
+    MagnetArea(245),
+    VampDeath(246),
+    BlessingArmorIncPAD(247),
 
-    KeyDownAreaMoving(0x80, 7),
-    Larkness(0x40, 7),
-    StackBuff(0x20, 7),
-    BlessOfDarkness(0x10, 7),
-    AntiMagicShell(0x8, 7),
-    LifeTidal(0x4, 7),
-    HitCriDamR(0x2, 7),
-    SmashStack(0x1, 7),
+    KeyDownAreaMoving(248),
+    Larkness(249),
+    StackBuff(250),
+    BlessOfDarkness(251),
+    AntiMagicShell(252),
+    AntiMagicShellBool(252),
+    LifeTidal(253),
+    HitCriDamR(254),
+    SmashStack(255),
 
-    PartyBarrier(0x80000000, 8),
-    ReshuffleSwitch(0x40000000, 8),
-    SpecialAction(0x20000000, 8),
-    VampDeathSummon(0x10000000, 8),
-    StopForceAtomInfo(0x8000000, 8),
-    SoulGazeCriDamR(0x4000000, 8),
-    SoulRageCount(0x2000000, 8),
-    PowerTransferGauge(0x1000000, 8),
+    PartyBarrier(256),
+    ReshuffleSwitch(257),
+    SpecialAction(258),
+    VampDeathSummon(259),
+    StopForceAtomInfo(260),
+    SoulGazeCriDamR(261),
+    SoulRageCount(262),
+    PowerTransferGauge(263),
 
-    AffinitySlug(0x800000, 8),
-    Trinity(0x400000, 8),
-    IncMaxDamage(0x200000, 8),
-    BossShield(0x100000, 8),
-    MobZoneState(0x80000, 8),
-    GiveMeHeal(0x40000, 8),
-    TouchMe(0x20000, 8),
-    Contagion(0x10000, 8),
+    AffinitySlug(264),
+    Trinity(265),
+    IncMaxDamage(266),
+    BossShield(267),
+    MobZoneState(268),
+    GiveMeHeal(269),
+    TouchMe(270),
+    Contagion(271),
 
-    ComboUnlimited(0x8000, 8),
-    SoulExalt(0x4000, 8),
-    IgnorePCounter(0x2000, 8),
-    IgnoreAllCounter(0x1000, 8),
-    IgnorePImmune(0x800, 8),
-    IgnoreAllImmune(0x400, 8),
-    FinalJudgement(0x200, 8),
-    IceAura(0x100, 8),
+    ComboUnlimited(272),
+    SoulExalt(273),
+    IgnorePCounter(274),
+    IgnoreAllCounter(275),
+    IgnorePImmune(276),
+    IgnoreAllImmune(277),
+    FinalJudgement(278),
+    IceAura(279),
 
-    FireAura(0x80, 8),
-    VengeanceOfAngel(0x40, 8),
-    HeavensDoor(0x20, 8),
-    Preparation(0x10, 8),
-    BullsEye(0x8, 8),
-    IncEffectHPPotion(0x4, 8),
-    IncEffectMPPotion(0x2, 8),
-    BleedingToxin(0x1, 8),
+    FireAura(280),
+    VengeanceOfAngel(281),
+    HeavensDoor(282),
+    Preparation(283),
+    BullsEye(284),
+    IncEffectHPPotion(285),
+    IncEffectMPPotion(286),
+    BleedingToxin(287),
 
-    IgnoreMobDamR(0x80000000, 9),
-    Asura(0x40000000, 9),
-    FlipTheCoin(0x20000000, 9),
-    UnityOfPower(0x10000000, 9),
-    Stimulate(0x8000000, 9),
-    ReturnTeleport(0x4000000, 9),
-    DropRIncrease(0x2000000, 9),
-    IgnoreMobpdpR(0x1000000, 9),
+    IgnoreMobDamR(288),
+    Asura(289),
+    FlipTheCoin(290),
+    UnityOfPower(291),
+    Stimulate(292),
+    ReturnTeleport(293),
+    DropRIncrease(294),
+    IgnoreMobpdpR(295),
 
-    BdR(0x800000, 9),
-    CapDebuff(0x400000, 9),
-    Exceed(0x200000, 9),
-    DiabolikRecovery(0x100000, 9),
-    FinalAttackProp(0x80000, 9),
-    ExceedOverload(0x40000, 9),
-    OverloadCount(0x20000, 9),
-    BuckShot(0x10000, 9),
+    BdR(296),
+    CapDebuff(297),
+    Exceed(298),
+    DiabolikRecovery(299),
+    FinalAttackProp(300),
+    ExceedOverload(301),
+    OverloadCount(302),
+    BuckShot(303),
 
-    FireBomb(0x8000, 9),
-    HalfstatByDebuff(0x4000, 9),
-    SurplusSupply(0x2000, 9),
-    SetBaseDamage(0x1000, 9),
-    EVAR(0x800, 9),
-    NewFlying(0x400, 9),
-    AmaranthGenerator(0x200, 9),
-    OnCapsule(0x100, 9),
+    FireBomb(304),
+    HalfstatByDebuff(305),
+    SurplusSupply(306),
+    SetBaseDamage(307),
+    EVAR(308),
+    NewFlying(309),
+    AmaranthGenerator(310),
+    OnCapsule(311),
 
-    CygnusElementSkill(0x80, 9),
-    StrikerHyperElectric(0x40, 9),
-    EventPointAbsorb(0x20, 9),
-    EventAssemble(0x10, 9),
-    StormBringer(0x8, 9),
-    ACCR(0x4, 9),
-    DEXR(0x2, 9),
-    Albatross(0x1, 9),
+    CygnusElementSkill(312),
+    StrikerHyperElectric(313),
+    EventPointAbsorb(314),
+    EventAssemble(315),
+    StormBringer(316),
+    ACCR(317),
+    DEXR(318),
+    Albatross(319),
 
-    Translucence(0x80000000, 10),
-    PoseType(0x40000000, 10),
-    LightOfSpirit(0x20000000, 10),
-    ElementSoul(0x10000000, 10),
-    GlimmeringTime(0x8000000, 10),
-    TrueSight(0x4000000, 10),
-    SoulExplosion(0x2000000, 10),
-    SoulMP(0x1000000, 10),
+    Translucence(320),
+    PoseType(321),
+    PoseTypeBool(321),
+    LightOfSpirit(322),
+    ElementSoul(323),
+    GlimmeringTime(324),
+    TrueSight(325),
+    SoulExplosion(326),
+    SoulMP(327),
 
-    FullSoulMP(0x800000, 10),
-    SoulSkillDamageUp(0x400000, 10),
-    ElementalCharge(0x200000, 10), // 0x200000
-    Restoration(0x100000, 10),
-    CrossOverChain(0x80000, 10),
-    ChargeBuff(0x40000, 10),
-    Reincarnation(0x20000, 10),
-    KnightsAura(0x10000, 10),
+    FullSoulMP(328),
+    SoulSkillDamageUp(329),
+    ElementalCharge(330),
+    Restoration(331),
+    CrossOverChain(332),
+    ChargeBuff(333),
+    Reincarnation(334),
+    KnightsAura(335),
 
-    ChillingStep(0x8000, 10),
-    DotBasedBuff(0x4000, 10),
-    BlessEnsenble(0x2000, 10),
-    ComboCostInc(0x1000, 10),
-    ExtremeArchery(0x800, 10),
-    NaviFlying(0x400, 10),
-    QuiverCatridge(0x200, 10),
-    AdvancedQuiver(0x100, 10),
+    ChillingStep(336),
+    DotBasedBuff(337),
+    BlessEnsenble(338),
+    ComboCostInc(339),
+    ExtremeArchery(340),
+    NaviFlying(341),
+    QuiverCatridge(342),
+    AdvancedQuiver(343),
 
-    UserControlMob(0x80, 10),
-    ImmuneBarrier(0x40, 10),
-    ArmorPiercing(0x20, 10),
-    ZeroAuraStr(0x10, 10),
-    ZeroAuraSpd(0x8, 10),
-    CriticalGrowing(0x4, 10),
-    QuickDraw(0x2, 10),
-    BowMasterConcentration(0x1, 10),
+    UserControlMob(344),
+    ImmuneBarrier(345),
+    ArmorPiercing(346),
+    ZeroAuraStr(347),
+    ZeroAuraSpd(348),
+    CriticalGrowing(349),
+    QuickDraw(350),
+    BowMasterConcentration(351),
 
-    TimeFastABuff(0x80000000, 11),
-    TimeFastBBuff(0x40000000, 11),
-    GatherDropR(0x20000000, 11),
-    AimBox2D(0x10000000, 11),
-    IncMonsterBattleCaptureRate(0x8000000, 11),
-    CursorSniping(0x4000000, 11),
-    DebuffTolerance(0x2000000, 11),
-    DotHealHPPerSecond(0x1000000, 11),
+    TimeFastABuff(352),
+    TimeFastBBuff(353),
+    GatherDropR(354),
+    AimBox2D(355),
+    IncMonsterBattleCaptureRate(356),
+    CursorSniping(357),
+    DebuffTolerance(358),
+    DotHealHPPerSecond(359),
 
-    SpiritGuard(0x800000, 11),
-    PreReviveOnce(0x400000, 11),
-    SetBaseDamageByBuff(0x200000, 11),
-    LimitMP(0x100000, 11),
-    ReflectDamR(0x80000, 11),
-    ComboTempest(0x40000, 11),
-    MHPCutR(0x20000, 11),
-    MMPCutR(0x10000, 11),
+    SpiritGuard(360),
+    PreReviveOnce(361),
+    SetBaseDamageByBuff(362),
+    LimitMP(363),
+    ReflectDamR(364),
+    ComboTempest(365),
+    MHPCutR(366),
+    MMPCutR(367),
 
-    SelfWeakness(0x8000, 11),
-    ElementDarkness(0x4000, 11),
-    FlareTrick(0x2000, 11),
-    Ember(0x1000, 11),
-    Dominion(0x800, 11),
-    SiphonVitality(0x400, 11),
-    DarknessAscension(0x200, 11),
-    BossWaitingLinesBuff(0x100, 11),
+    SelfWeakness(368),
+    ElementDarkness(369),
+    FlareTrick(370),
+    Ember(371),
+    Dominion(372),
+    SiphonVitality(373),
+    DarknessAscension(374),
+    BossWaitingLinesBuff(375),
 
-    DamageReduce(0x80, 11),
-    ShadowServant(0x40, 11),
-    ShadowIllusion(0x20, 11),
-    KnockBack(0x10, 11),
-    AddAttackCount(0x8, 11),
-    ComplusionSlant(0x4, 11),
-    JaguarSummoned(0x2, 11),
-    JaguarCount(0x1, 11),
+    DamageReduce(376),
+    ShadowServant(377),
+    ShadowIllusion(378),
+    KnockBack(379),
+    AddAttackCount(380),
+    ComplusionSlant(381),
+    JaguarSummoned(382),
+    JaguarCount(383),
 
-    SSFShootingAttack(0x80000000, 12),
-    DevilCry(0x40000000, 12),
-    ShieldAttack(0x20000000, 12),
-    BMageAura(0x10000000, 12),
-    DarkLighting(0x8000000, 12),
-    AttackCountX(0x4000000, 12),
-    BMageDeath(0x2000000, 12),
-    BombTime(0x1000000, 12),
+    SSFShootingAttack(384),
+    DevilCry(385),
+    ShieldAttack(386),
+    BMageAura(387),
+    DarkLighting(388),
+    AttackCountX(389),
+    BMageDeath(390),
+    BombTime(391),
 
-    NoDebuff(0x800000, 12),
-    BattlePvPMikeShield(0x400000, 12),
-    BattlePvPMikeBugle(0x200000, 12),
-    XenonAegisSystem(0x100000, 12),
-    AngelicBursterSoulSeeker(0x80000, 12),
-    HiddenPossession(0x40000, 12),
-    NightWalkerBat(0x20000, 12),
-    NightLordMark(0x10000, 12),
+    NoDebuff(392),
+    BattlePvPMikeShield(393),
+    BattlePvPMikeBugle(394),
+    XenonAegisSystem(395),
+    AngelicBursterSoulSeeker(396),
+    HiddenPossession(397),
+    NightWalkerBat(398),
+    NightLordMark(399),
 
-    WizardIgnite(0x8000, 12),
-    FireBarrier(0x4000, 12),
-    ChangeFoxMan(0x2000, 12),
-    BattlePvPHelenaMark(0x1000, 12),
-    BattlePvPHelenaWindSpirit(0x800, 12),
-    BattlePvPLangEProtection(0x400, 12),
-    BattlePvPLeeMalNyunScaleUp(0x200, 12),
-    BattlePvPRevive(0x100, 12),
+    WizardIgnite(400),
+    FireBarrier(401),
+    ChangeFoxMan(402),
+    BattlePvPHelenaMark(403),
+    BattlePvPHelenaWindSpirit(404),
+    BattlePvPLangEProtection(405),
+    BattlePvPLeeMalNyunScaleUp(406),
+    BattlePvPRevive(407),
 
-    PinkbeanAttackBuff(0x80, 12),
-    PinkbeanRelax(0x40, 12),
-    PinkbeanRollingGrade(0x20, 12),
-    PinkbeanYoYoStack(0x10, 12),
-    RandAreaAttack(0x8, 12),
-    NextAttackEnhance(0x4, 12),
-    AranBeyonderDamAbsorb(0x2, 12),
-    AranCombotempastOption(0x1, 12),
+    PinkbeanAttackBuff(408),
+    PinkbeanRelax(409),
+    PinkbeanRollingGrade(410),
+    PinkbeanYoYoStack(411),
+    RandAreaAttack(412),
+    NextAttackEnhance(413),
+    AranBeyonderDamAbsorb(414),
+    AranCombotempastOption(415),
 
-    NautilusFinalAttack(0x80000000, 13),
-    ViperTimeLeap(0x40000000, 13),
-    RoyalGuardState(0x20000000, 13),
-    RoyalGuardPrepare(0x10000000, 13),
-    MichaelSoulLink(0x8000000, 13),
-    MichaelStanceLink(0x4000000, 13),
-    TriflingWhimOnOff(0x2000000, 13),
-    AddRangeOnOff(0x1000000, 13),
+    NautilusFinalAttack(416),
+    ViperTimeLeap(417),
+    RoyalGuardState(418),
+    RoyalGuardPrepare(419),
+    MichaelSoulLink(420),
+    MichaelStanceLink(421),
+    TriflingWhimOnOff(422),
+    AddRangeOnOff(423),
 
-    KinesisPsychicPoint(0x800000, 13),
-    KinesisPsychicOver(0x400000, 13),
-    KinesisPsychicShield(0x200000, 13),
-    KinesisIncMastery(0x100000, 13),
-    KinesisPsychicEnergeShield(0x80000, 13),
-    BladeStance(0x40000, 13),
-    DebuffActiveSkillHPCon(0x20000, 13),
-    DebuffIncHP(0x10000, 13),
+    KinesisPsychicPoint(424),
+    KinesisPsychicOver(425),
+    KinesisPsychicShield(426),
+    KinesisIncMastery(427),
+    KinesisPsychicEnergeShield(428),
+    BladeStance(429),
+    DebuffActiveSkillHPCon(430),
+    DebuffIncHP(431),
 
-    BowMasterMortalBlow(0x8000, 13),
-    AngelicBursterSoulResonance(0x4000, 13),
-    Fever(0x2000, 13),
-    IgnisRore(0x1000, 13),
-    RpSiksin(0x800, 13),
-    TeleportMasteryRange(0x400, 13),
-    FixCoolTime(0x200, 13),
-    IncMobRateDummy(0x100, 13),
+    BowMasterMortalBlow(432),
+    AngelicBursterSoulResonance(433),
+    Fever(434),
+    IgnisRore(435),
+    RpSiksin(436),
+    TeleportMasteryRange(437),
+    FixCoolTime(438),
+    IncMobRateDummy(439),
 
-    AdrenalinBoost(0x80, 13),
-    AranSmashSwing(0x40, 13),
-    AranDrain(0x20, 13),
-    AranBoostEndHunt(0x10, 13),
-    HiddenHyperLinkMaximization(0x8, 13),
-    RWCylinder(0x4, 13),
-    RWCombination(0x2, 13),
-    RWMagnumBlow(0x1, 13),
+    AdrenalinBoost(440),
+    AranSmashSwing(441),
+    AranDrain(442),
+    AranBoostEndHunt(443),
+    HiddenHyperLinkMaximization(444),
+    RWCylinder(445),
+    RWCombination(446),
+    RWMagnumBlow(447),
 
-    RWBarrier(0x80000000, 14),
-    RWBarrierHeal(0x40000000, 14),
-    RWMaximizeCannon(0x20000000, 14),
-    RWOverHeat(0x10000000, 14),
-    UsingScouter(0x8000000, 14),
-    RWMovingEvar(0x4000000, 14),
-    Stigma(0x2000000, 14),
-    Unk0(0x1000000, 14),
+    RWBarrier(448),
+    RWBarrierHeal(449),
+    RWMaximizeCannon(450),
+    RWOverHeat(451),
+    UsingScouter(452),
+    RWMovingEvar(453),
+    Stigma(454),
+    Unk455(455),
 
-    Unk1(0x800000, 14), // Takes effect of skill
-    Unk2(0x400000, 14),
-    Unk3(0x200000, 14),
-    Unk4(0x100000, 14),
-    Unk5(0x80000, 14), // 38
-    HayatoStance(0x40000, 14),
-    HayatoStanceBonus(0x20000, 14),
-    EyeForEye(0x10000, 14),
+    Unk456(456),
+    Unk457(457),
+    Unk458(458),
+    Unk459(459),
+    Unk460(460),
+    HayatoStance(461),
+    HayatoStanceBonus(462),
+    EyeForEye(463),
 
-    WillowDodge(0x8000, 14),
-    Unk20(0x4000, 14),
-    HayatoPAD(0x2000, 14),
-    HayatoHPR(0x1000, 14),
-    HayatoMPR(0x800, 14),
-    HayatoBooster(0x400, 14),
-    Unk70(0x200, 14), // Not a temp stat? Doesn't give buff
-    Unk80(0x100, 14), // No buff
-    
-    Jinsoku(0x80, 14),
-    HayatoCr(0x40, 14),
-    HakuBlessing(0x20, 14), // Adds range
-    HayatoBoss(0x10, 14), // n% boss att
-    BattoujutsuAdvance(0x8, 14),
-    Unk600(0x4, 14),
-    Unk700(0x2, 14),
-    BlackHeartedCurse(0x1, 14), // Kanna Hyper Shield
+    WillowDodge(464),
+    Unk465(465),
+    HayatoPAD(466),
+    HayatoHPR(467),
+    HayatoMPR(468),
+    HayatoBooster(469),
+    Unk470(470),
+    Unk471(471),
 
-    BeastMode(0x80000000, 15), // BeastModes
-    TeamRoar(0x40000000, 15), // BT Hyper
-    Unk3000(0x20000000, 15),
-    Unk4000(0x10000000, 15),
-    Unk5000(0x8000000, 15),
-    Unk6000(0x4000000, 15),
-    Unk7000(0x2000000, 15),
-    Unk8000(0x1000000, 15), // TableFlip
+    Jinsoku(472),
+    HayatoCr(473),
+    HakuBlessing(474),
+    HayatoBoss(475),
+    BattoujutsuAdvance(476),
+    Unk477(477),
+    Unk478(478),
+    BlackHeartedCurse(479),
 
-    Unk10000(0x800000, 15),
-    Unk20000(0x400000, 15),
-    Unk30000(0x200000, 15),
-    Unk40000(0x100000, 15),
-    EnergyCharged(0x80000, 15),
-    DashSpeed(0x40000, 15),
-    DashJump(0x20000, 15),
-    RideVehicle(0x10000, 15),
-    
-    PartyBooster(0x8000, 15),
-    GuidedBullet(0x4000, 15),
-    Undead(0x2000, 15),
-    RideVehicleExpire(0x1000, 15),
-    
-//    Unk50000(0x80000, 15),
-//    Unk60000(0x40000, 15),
-//    Unk70000(0x20000, 15),
-//    Unk80000(0x10000, 15),
-//
-//    Unk100000(0x8000, 15),
-//    Unk200000(0x4000, 15),
-//    Unk300000(0x2000, 15),
-//    Unk400000(0x1000, 15),
-//    Unk500000(0x800, 15),
-//    Unk600000(0x400, 15),
-//    Unk700000(0x200, 15),
-//    Unk800000(0x100, 15),
-//
-//    Unk1000000(0x80, 15),
-//    Unk2000000(0x40, 15),
-//    Unk3000000(0x20, 15),
-//    Unk4000000(0x10, 15),
-//    Unk5000000(0x8, 15),
-//    Unk6000000(0x4, 15),
-//    Unk7000000(0x2, 15),
-//    Unk8000000(0x1, 15),
-//
-//    Unk10000000(0x80000000, 16),
-//    Unk20000000(0x40000000, 16),
-//    Unk30000000(0x20000000, 16),
-//    Unk40000000(0x10000000, 16),
-//    Unk50000000(0x8000000, 16),
-//    Unk60000000(0x4000000, 16),
-//    Unk70000000(0x2000000, 16),
-//    Unk80000000(0x1000000, 16),
-//
-//    Unk100000000(0x800000, 16),
-//    Unk200000000(0x400000, 16),
-//    Unk300000000(0x200000, 16),
-//    Unk400000000(0x100000, 16),
-//    Unk500000000(0x80000, 16),
-//    Unk600000000(0x40000, 16),
-//    Unk700000000(0x20000, 16),
-//    Unk800000000(0x10000, 16),
-//
-//    Unk1000000000(0x8000, 16),
-//    Unk2000000000(0x4000, 16),
-//    Unk3000000000(0x2000, 16),
-//    Unk4000000000(0x1000, 16),
-//    Unk5000000000(0x800, 16),
-//    Unk6000000000(0x400, 16),
-//    Unk7000000000(0x200, 16),
-//    Unk8000000000(0x100, 16),
-//
-//    Unk10000000000(0x80, 16),
-//    Unk20000000000(0x40, 16),
-//    Unk30000000000(0x20, 16),
-//    Unk40000000000(0x10, 16),
-//    Unk50000000000(0x8, 16),
-//    Unk60000000000(0x4, 16),
-//    Unk70000000000(0x2, 16),
-//    Unk80000000000(0x1, 16),
-//    
-//    EnergyCharged(0x1000000, 14),
-//
-//    DashSpeed(0x800000, 14),
-//    DashJump(0x400000, 14),
-//    RideVehicle(0x200000, 14),
-//    PartyBooster(0x100000, 14),
-//    GuidedBullet(0x80000, 14),
-//    Undead(0x40000, 14),
-//    RideVehicleExpire(0x20000, 14),
+    BeastMode(480),
+    TeamRoar(481),
+    Unk482(482),
+    Unk483(483),
+    Unk484(484),
+    Unk485(485),
+    Unk486(486),
+    Unk487(487),
+
+    Unk488(488),
+    Unk489(489),
+    Unk490(490),
+    Unk491(491),
+    EnergyCharged(492),
+    DashSpeed(493),
+    DashJump(494),
+    RideVehicle(495),
+
+    PartyBooster(496),
+    GuidedBullet(497),
+    Undead(498),
+    RideVehicleExpire(499),
     ;
 
+    private int bitPos;
     private int val;
     private int pos;
     public static final int length = 17;
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
+    private static final List<CharacterTemporaryStat> ORDER = Arrays.asList(
+            STR, INT, DEX, LUK, PAD, PDD, MAD, MDD, ACC, EVA, EVAR, Craft, Speed, Jump, EMHP, EMMP, EPAD, EMAD, EPDD,
+            EMDD, MagicGuard, DarkSight, Booster, PowerGuard, Guard, MaxHP, MaxMP, Invincible, SoulArrow, Stun, Shock,
+            Poison, Seal, Darkness, ComboCounter, WeaponCharge, ElementalCharge, HolySymbol, MesoUp, ShadowPartner,
+            PickPocket, MesoGuard, Thaw, Weakness, WeaknessMdamage, Curse, Slow, TimeBomb, BuffLimit, Team, DisOrder,
+            Thread, Morph, Ghost, Regen, BasicStatUp, Stance, SharpEyes, ManaReflection, Attract, Magnet, MagnetArea,
+            NoBulletConsume, StackBuff, Trinity, Infinity, AdvancedBless, IllusionStep, Blind, Concentration, BanMap,
+            MaxLevelBuff, Barrier, DojangShield, ReverseInput, MesoUpByItem, ItemUpByItem, RespectPImmune,
+            RespectMImmune, DefenseAtt, DefenseState, DojangBerserk, DojangInvincible, SoulMasterFinal,
+            WindBreakerFinal, ElementalReset, HideAttack, EventRate, ComboAbilityBuff, ComboDrain, ComboBarrier,
+            PartyBarrier, BodyPressure, RepeatEffect, ExpBuffRate, StopPortion, StopMotion, Fear, MagicShield,
+            MagicResistance, SoulStone, Flying, NewFlying, NaviFlying, Frozen, Frozen2, Web, Enrage, NotDamaged,
+            FinalCut, HowlingAttackDamage, BeastFormDamageUp, Dance, Cyclone, OnCapsule, HowlingCritical,
+            HowlingMaxMP, HowlingDefence, HowlingEvasion, Conversion, Revive, PinkbeanMinibeenMove, Sneak, Mechanic,
+            DrawBack, BeastFormMaxHP, Dice, BlessingArmor, BlessingArmorIncPAD, DamR, TeleportMasteryOn, CombatOrders,
+            Beholder, DispelItemOption, DispelItemOptionByField, Inflation, OnixDivineProtection, Bless, Explosion,
+            DarkTornado, IncMaxHP, IncMaxMP, PVPDamage, PVPDamageSkill, PvPScoreBonus, PvPInvincible, PvPRaceEffect,
+            IceKnight, HolyMagicShell, InfinityForce, AmplifyDamage, KeyDownTimeIgnore, MasterMagicOn, AsrR,
+            AsrRByItem, TerR, DamAbsorbShield, Roulette, Event, SpiritLink, CriticalBuff, DropRate, PlusExpRate,
+            ItemInvincible, ItemCritical, ItemEvade, Event2, VampiricTouch, DDR, IncCriticalDamMin, IncCriticalDamMax,
+            IncTerR, IncAsrR, DeathMark, PainMark, UsefulAdvancedBless, Lapidification, VampDeath, VampDeathSummon,
+            VenomSnake, CarnivalAttack, CarnivalDefence, CarnivalExp, SlowAttack, PyramidEffect, HollowPointBullet,
+            KeyDownMoving, KeyDownAreaMoving, CygnusElementSkill, IgnoreTargetDEF, Invisible, ReviveOnce,
+            AntiMagicShell, EnrageCr, EnrageCrDamMin, BlessOfDarkness, LifeTidal, Judgement, DojangLuckyBonus,
+            HitCriDamR, Larkness, SmashStack, ReshuffleSwitch, SpecialAction, ArcaneAim, StopForceAtomInfo,
+            SoulGazeCriDamR, SoulRageCount, PowerTransferGauge, AffinitySlug, SoulExalt, HiddenPieceOn,
+            BossShield, MobZoneState, GiveMeHeal, TouchMe, Contagion, ComboUnlimited, IgnorePCounter,
+            IgnoreAllCounter, IgnorePImmune, IgnoreAllImmune, FinalJudgement, KnightsAura, IceAura, FireAura,
+            VengeanceOfAngel, HeavensDoor, Preparation, BullsEye, IncEffectHPPotion, IncEffectMPPotion, SoulMP,
+            FullSoulMP, SoulSkillDamageUp, BleedingToxin, IgnoreMobDamR, Asura, FlipTheCoin, UnityOfPower,
+            Stimulate, ReturnTeleport, CapDebuff, DropRIncrease, IgnoreMobpdpR, BdR, Exceed, DiabolikRecovery,
+            FinalAttackProp, ExceedOverload, DevilishPower, OverloadCount, BuckShot, FireBomb, HalfstatByDebuff,
+            SurplusSupply, SetBaseDamage, AmaranthGenerator, StrikerHyperElectric, EventPointAbsorb, EventAssemble,
+            StormBringer, ACCR, DEXR, Albatross, Translucence, PoseType, LightOfSpirit, ElementSoul, GlimmeringTime,
+            Restoration, ComboCostInc, ChargeBuff, TrueSight, CrossOverChain, ChillingStep, Reincarnation, DotBasedBuff,
+            BlessEnsenble, ExtremeArchery, QuiverCatridge, AdvancedQuiver, UserControlMob, ImmuneBarrier, ArmorPiercing,
+            ZeroAuraStr, ZeroAuraSpd, CriticalGrowing, QuickDraw, BowMasterConcentration, TimeFastABuff, TimeFastBBuff,
+            GatherDropR, AimBox2D, CursorSniping, IncMonsterBattleCaptureRate, DebuffTolerance, DotHealHPPerSecond,
+            SpiritGuard, PreReviveOnce, SetBaseDamageByBuff, LimitMP, ReflectDamR, ComboTempest, MHPCutR, MMPCutR,
+            SelfWeakness, ElementDarkness, FlareTrick, Ember, Dominion, SiphonVitality, DarknessAscension,
+            BossWaitingLinesBuff, DamageReduce, ShadowServant, ShadowIllusion, AddAttackCount, ComplusionSlant,
+            JaguarSummoned, JaguarCount, SSFShootingAttack, DevilCry, ShieldAttack, BMageAura, DarkLighting,
+            AttackCountX, BMageDeath, BombTime, NoDebuff, XenonAegisSystem, AngelicBursterSoulSeeker, HiddenPossession,
+            NightWalkerBat, NightLordMark, WizardIgnite, BattlePvPHelenaMark, BattlePvPHelenaWindSpirit,
+            BattlePvPLangEProtection, BattlePvPLeeMalNyunScaleUp, BattlePvPRevive, PinkbeanAttackBuff, RandAreaAttack,
+            BattlePvPMikeShield, BattlePvPMikeBugle, PinkbeanRelax, PinkbeanYoYoStack, NextAttackEnhance,
+            AranBeyonderDamAbsorb, AranCombotempastOption, NautilusFinalAttack, ViperTimeLeap, RoyalGuardState,
+            RoyalGuardPrepare, MichaelSoulLink, MichaelStanceLink, TriflingWhimOnOff, AddRangeOnOff,
+            KinesisPsychicPoint, KinesisPsychicOver, KinesisPsychicShield, KinesisIncMastery,
+            KinesisPsychicEnergeShield, BladeStance, DebuffActiveSkillHPCon, DebuffIncHP, BowMasterMortalBlow,
+            AngelicBursterSoulResonance, Fever, IgnisRore, RpSiksin, TeleportMasteryRange, FireBarrier, ChangeFoxMan,
+            FixCoolTime, IncMobRateDummy, AdrenalinBoost, AranSmashSwing, AranDrain, AranBoostEndHunt,
+            HiddenHyperLinkMaximization, RWCylinder, RWCombination, RWMagnumBlow, RWBarrier, RWBarrierHeal,
+            RWMaximizeCannon, RWOverHeat, RWMovingEvar, Stigma, Unk455, IncMaxDamage, Unk456, Unk457, Unk458, Unk459,
+            Unk460, PyramidFireBuff /*not sure*/, HayatoStance, HayatoBooster, HayatoStanceBonus, WillowDodge, Unk465,
+            HayatoPAD, HayatoHPR, HayatoMPR, Jinsoku, HayatoCr, HakuBlessing, HayatoBoss, BattoujutsuAdvance, Unk477,
+            Unk478, BlackHeartedCurse, EyeForEye, BeastMode, TeamRoar, Unk482, Unk483, Unk487, Unk488, Unk489, Unk490,
+            Unk491
+    );
+
+    private static final List<CharacterTemporaryStat> REMOTE_ORDER = Arrays.asList(
+            Speed, ComboCounter, WeaponCharge, ElementalCharge, Stun, Shock, Darkness, Seal, Weakness, WeaknessMdamage,
+            Curse, Slow, PvPRaceEffect, IceKnight, TimeBomb, Team, DisOrder, Thread, Poison, ShadowPartner, Morph,
+            Ghost, Attract, Magnet, MagnetArea, NoBulletConsume, BanMap, Barrier, DojangShield, ReverseInput,
+            RespectPImmune, RespectMImmune, DefenseAtt, DefenseState, DojangBerserk, RepeatEffect, StopPortion,
+            StopMotion, Fear, MagicShield, Frozen, Frozen2, Web, DrawBack, FinalCut, Cyclone, OnCapsule, Mechanic,
+            Inflation, Explosion, DarkTornado, AmplifyDamage, HideAttack, DevilishPower, SpiritGuard, Event, Event2,
+            DeathMark, PainMark, Lapidification, VampDeath, VampDeathSummon, VenomSnake, PyramidEffect, KillingPoint,
+            PinkbeanRollingGrade, IgnoreTargetDEF, Invisible, Judgement, KeyDownAreaMoving, StackBuff, BlessOfDarkness,
+            Larkness, ReshuffleSwitch, SpecialAction, StopForceAtomInfo, SoulGazeCriDamR, PowerTransferGauge,
+            AffinitySlug, SoulExalt, HiddenPieceOn, SmashStack, MobZoneState, GiveMeHeal, TouchMe, Contagion,
+            ComboUnlimited, IgnorePCounter, IgnoreAllCounter, IgnorePImmune, IgnoreAllImmune, FinalJudgement,
+            KnightsAura, IceAura, FireAura, HeavensDoor, DamAbsorbShield, AntiMagicShell, NotDamaged, BleedingToxin,
+            WindBreakerFinal, IgnoreMobDamR, Asura, UnityOfPower, Stimulate, ReturnTeleport, CapDebuff, OverloadCount,
+            FireBomb, SurplusSupply, NewFlying, NaviFlying, AmaranthGenerator, CygnusElementSkill, StrikerHyperElectric,
+            EventPointAbsorb, EventAssemble, Albatross, Translucence, PoseType, LightOfSpirit, ElementSoul,
+            GlimmeringTime, Reincarnation, Beholder, QuiverCatridge, ArmorPiercing, ZeroAuraStr, ZeroAuraSpd,
+            ImmuneBarrier, FullSoulMP, AntiMagicShellBool, Dance, SpiritGuard, ComboTempest, HalfstatByDebuff,
+            ComplusionSlant, JaguarSummoned, BMageAura, DarkLighting, AttackCountX, FireBarrier, KeyDownMoving,
+            MichaelSoulLink, KinesisPsychicEnergeShield, BladeStance, Fever, AdrenalinBoost, RWBarrier, RWMagnumBlow,
+            Stigma, Unk456, BeastMode, TeamRoar, HayatoStance, HayatoBooster, HayatoStanceBonus, HayatoPAD, HayatoHPR,
+            HayatoMPR, HayatoCr, HayatoBoss, Stance, BattoujutsuAdvance, Unk478, BlackHeartedCurse, EyeForEye, Unk458,
+            Unk483, Unk487, Unk488, Unk489, Unk491, Unk460, PoseTypeBool
+    );
+
+
+
     CharacterTemporaryStat(int val, int pos) {
         this.val = val;
         this.pos = pos;
+    }
+
+    CharacterTemporaryStat(int bitPos) {
+        this.bitPos = bitPos;
+        this.val = 1 << (31 - bitPos % 32);
+        this.pos = bitPos / 32;
     }
 
     public boolean isEncodeInt() {
@@ -661,7 +690,7 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             case ReturnTeleport:
             case ShadowPartner:
             case IncMaxDamage:
-            case Unk8000:
+            case Unk487:
             case SetBaseDamage:
             case QuiverCatridge:
             case ImmuneBarrier:
@@ -733,16 +762,130 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
         return pos;
     }
 
-    public static void mainNoMainPls(String[] args) {
-        int a = 0x1eb;
-        int val = 1 << (31 - (a & 0x1f));
-        int pos = a >> 5;
+    public int getOrder() {
+        return ORDER.indexOf(this);
+    }
+
+    public int getRemoteOrder() {
+        return REMOTE_ORDER.indexOf(this);
+    }
+
+    public boolean isRemoteEncode4() {
+        switch (this) {
+            case NoBulletConsume:
+            case RespectPImmune:
+            case RespectMImmune:
+            case DefenseAtt:
+            case DefenseState:
+            case MagicShield:
+            case PyramidEffect:
+            case BlessOfDarkness:
+            case ImmuneBarrier:
+            case Dance:
+            case SpiritGuard:
+            case KinesisPsychicEnergeShield:
+            case AdrenalinBoost:
+            case RWBarrier:
+            case RWMagnumBlow:
+            case HayatoStance:
+            case Unk487:
+            case Unk488:
+            case Unk489:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isRemoteEncode1() {
+        switch (this) {
+            case Speed:
+            case Shock:
+            case Team:
+            case Cyclone:
+            case OnCapsule:
+            case KillingPoint:
+            case PinkbeanRollingGrade:
+            case ReturnTeleport:
+            case FireBomb:
+            case SurplusSupply:
+            case Unk460:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isNotEncodeReason() {
+        switch (this) {
+            case Speed:
+            case ElementalCharge:
+            case Shock:
+            case Team:
+            case Ghost:
+            case NoBulletConsume:
+            case RespectPImmune:
+            case RespectMImmune:
+            case DefenseAtt:
+            case DefenseState:
+            case MagicShield:
+            case Cyclone:
+            case OnCapsule:
+            case PyramidEffect:
+            case KillingPoint:
+            case PinkbeanRollingGrade:
+            case StackBuff:
+            case BlessOfDarkness:
+            case SurplusSupply:
+            case ImmuneBarrier:
+            case AdrenalinBoost:
+            case RWBarrier:
+            case RWMagnumBlow:
+            case HayatoStance:
+            case Unk488:
+            case Unk489:
+            case Unk460:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isNotEncodeAnything() {
+        switch (this) {
+            case FullSoulMP:
+            case AntiMagicShellBool:
+            case PoseTypeBool:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        int a = Stigma.bitPos;
+//        int val = 1 << (31 - (a & 0x1f));
+//        int pos = a >> 5;
+        int val = 0x1000;
+        int pos = 0;
         log.debug(String.format("value 0x%04x, pos %d", val, pos));
         for(CharacterTemporaryStat cts : values()) {
             if(cts.getVal() == val && cts.getPos() == pos) {
                 log.debug("Corresponds to " + cts);
             }
         }
+//        for (CharacterTemporaryStat cts : values()) {
+//            val = cts.getVal();
+//            for (int i = 0; i < 32; i++) {
+//                if (1 << i == val) {
+//                    val = 31 - i;
+//                }
+//            }
+//            if (val % 8 == 0) {
+//                System.out.println();
+//            }
+//            System.out.println(String.format("%s(%d),", cts.toString(), (cts.getPos() * 32) + val));
+//        }
     }
 
     @Override
@@ -769,5 +912,9 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
             return 1;
         }
         return 0;
+    }
+
+    public int getBitPos() {
+        return bitPos;
     }
 }

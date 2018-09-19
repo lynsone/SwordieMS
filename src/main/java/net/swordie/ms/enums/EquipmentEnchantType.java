@@ -6,6 +6,7 @@ import java.util.Arrays;
  * Created on 1/25/2018.
  */
 public enum EquipmentEnchantType {
+    ScrollUpgradeRequest(0),
     HyperUpgradeResult(1),
     TransmissionResult(2),
     ScrollUpgradeDisplay(50),

@@ -2,7 +2,7 @@ package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.ChatType;
+import net.swordie.ms.enums.ChatUserType;
 import net.swordie.ms.handlers.header.OutHeader;
 
 /**
@@ -10,7 +10,7 @@ import net.swordie.ms.handlers.header.OutHeader;
  */
 public class User {
 
-    public static OutPacket chat(int charID, ChatType type, String msg, boolean onlyBalloon, int idk, int worldID) {
+    public static OutPacket chat(int charID, ChatUserType type, String msg, boolean onlyBalloon, int idk, int worldID) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT);
 
         outPacket.encodeInt(charID);
@@ -37,17 +37,6 @@ public class User {
 
         outPacket.encodeInt(chr.getId());
         outPacket.encodeInt(chr.getPremiumDamageSkin().getDamageSkinID());
-
-        return outPacket;
-    }
-
-    public static OutPacket emotion(int charID, int emotion, int duration, boolean byItemOption) {
-        OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
-
-        outPacket.encodeInt(charID);
-        outPacket.encodeInt(emotion);
-        outPacket.encodeInt(duration);
-        outPacket.encodeByte(byItemOption);
 
         return outPacket;
     }
@@ -89,6 +78,14 @@ public class User {
         return outPacket;
     }
 
+    public static OutPacket setGachaponEffect(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.GACHAPON_EFFECT);
+
+        outPacket.encodeInt(chr.getId());
+
+        return outPacket;
+    }
+    
     public static OutPacket scriptProgressMessage(String string) {
         OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_PROGRESS_MESSAGE);
 
@@ -97,6 +94,18 @@ public class User {
         return outPacket;
     }
 
+    public static OutPacket progressMessageFont(int fontNameType, int fontSize, int fontColorType, int fadeOutDelay, String message) {
+        OutPacket outPacket = new OutPacket(OutHeader.PROGRESS_MESSAGE_FONT);
+        
+        outPacket.encodeInt(fontNameType);
+        outPacket.encodeInt(fontSize);
+        outPacket.encodeInt(fontColorType);
+        outPacket.encodeInt(fadeOutDelay);
+        outPacket.encodeString(message);
+ 
+        return outPacket;
+    }
+    
     public static OutPacket effect(Effect effect) {
         OutPacket outPacket = new OutPacket(OutHeader.EFFECT);
 

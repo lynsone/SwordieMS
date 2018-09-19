@@ -14,11 +14,10 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -77,6 +76,16 @@ public class PinkBean extends Job {
         }
         //yoyoInterval();
     }
+
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isPinkBean(id);
+    }
+
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -154,7 +163,7 @@ public class PinkBean extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
@@ -193,13 +202,17 @@ public class PinkBean extends Job {
                 tsm.putCharacterStatValue(IndieMADR, o5);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
+        tsm.sendSetStatPacket();
+        
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -217,7 +230,7 @@ public class PinkBean extends Job {
         }
         if(hasHitMobs) {
             if(skillID != MINI_BEANS) {
-                handleGoMiniBeans(attackInfo);
+                summonGoMiniBeans(attackInfo);
             }
         }
         Option o1 = new Option();
@@ -229,6 +242,76 @@ public class PinkBean extends Job {
         super.handleAttack(c, attackInfo);
     }
 
+    private void yoyoIncrement() {
+        incrementYoYoStack(1);
+    }
+
+    private void costYoYo() {
+        Option o = new Option();
+        o.nOption = (yoyo - 1);
+        chr.getTemporaryStatManager().putCharacterStatValue(PinkbeanYoYoStack, o);
+        chr.getTemporaryStatManager().sendSetStatPacket();
+    }
+
+    public void incrementYoYoStack(int amount) {
+        yoyo += amount;
+        yoyo = Math.min(MAX_YOYO_STACK, yoyo);
+        //updateYoYo();
+    }
+
+    public void yoyoInterval() {
+        yoyoIncrement();
+        yoyoStackTimer = EventManager.addEvent(this::yoyoInterval, 1000);
+    }
+/*
+    private void updateYoYo() {
+        Option o = new Option();
+        o.nOption = yoyo;
+        chr.getTemporaryStatManager().putCharacterStatValue(PinkbeanYoYoStack, o);
+        chr.getTemporaryStatManager().sendSetStatPacket();
+    }
+*/
+
+    private void summonGoMiniBeans(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        Field field;
+        Summon summon;
+        if(tsm.hasStat(PinkbeanMinibeenMove)) {
+            SkillInfo miniBeanInfo = SkillData.getSkillInfoById(GO_MINI_BEANS);
+            byte slv = (byte)miniBeanInfo.getCurrentLevel();
+            int minibeanproc = 100;//   miniBeanInfo.getValue(z, miniBeanInfo.getCurrentLevel());
+            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(Util.succeedProp(minibeanproc)) {
+                    summon = Summon.getSummonBy(c.getChr(), MINI_BEANS, slv);
+                    field = c.getChr().getField();
+                    summon.setFlyMob(true);
+                    summon.setPosition(mob.getPosition());
+                    summon.setMoveAbility(MoveAbility.FlyRandom.getVal());
+                    field.spawnAddSummon(summon);
+
+                    o1.nReason = GO_MINI_BEANS;
+                    o1.nValue = 1;
+                    o1.summon = summon;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = miniBeanInfo.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieEmpty, o1);
+                    tsm.sendSetStatPacket();
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         super.handleSkill(c, skillID, slv, inPacket);
@@ -238,7 +321,7 @@ public class PinkBean extends Job {
         if(skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -304,74 +387,11 @@ public class PinkBean extends Job {
         }
     }
 
+
+
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
         super.handleHit(c, inPacket, hitInfo);
     }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isPinkBean(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    private void yoyoIncrement() {
-        incrementYoYoStack(1);
-    }
-
-    private void costYoYo() {
-        Option o = new Option();
-        o.nOption = (yoyo - 1);
-        chr.getTemporaryStatManager().putCharacterStatValue(PinkbeanYoYoStack, o);
-        chr.getTemporaryStatManager().sendSetStatPacket();
-    }
-
-    public void incrementYoYoStack(int amount) {
-        yoyo += amount;
-        yoyo = Math.min(MAX_YOYO_STACK, yoyo);
-        //updateYoYo();
-    }
-
-    public void yoyoInterval() {
-        yoyoIncrement();
-        yoyoStackTimer = EventManager.addEvent(this::yoyoInterval, 1000);
-    }
-/*
-    private void updateYoYo() {
-        Option o = new Option();
-        o.nOption = yoyo;
-        chr.getTemporaryStatManager().putCharacterStatValue(PinkbeanYoYoStack, o);
-        chr.getTemporaryStatManager().sendSetStatPacket();
-    }
-*/
-
-
-
-    private void handleGoMiniBeans(AttackInfo attackInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Field field;
-        Summon summon;
-        if(tsm.hasStat(PinkbeanMinibeenMove)) {
-            SkillInfo miniBeanInfo = SkillData.getSkillInfoById(GO_MINI_BEANS);
-            byte slv = (byte)miniBeanInfo.getCurrentLevel();
-            int minibeanproc = 100;//   miniBeanInfo.getValue(z, miniBeanInfo.getCurrentLevel());
-            for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                if(Util.succeedProp(minibeanproc)) {
-                    summon = Summon.getSummonBy(c.getChr(), MINI_BEANS, slv);
-                    field = c.getChr().getField();
-                    summon.setFlyMob(true);
-                    summon.setPosition(mob.getPosition());
-                    summon.setMoveAbility(MoveAbility.FLY_AWAY.getVal());
-                    field.spawnAddSummon(summon);
-                }
-            }
-        }
-    }
-
 }

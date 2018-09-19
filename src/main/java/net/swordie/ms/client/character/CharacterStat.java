@@ -2,6 +2,8 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.client.character.cards.CharacterCard;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.util.SystemTime;
 
@@ -72,8 +74,7 @@ public class CharacterStat {
     private int pvpModeType;
     private int eventPoint;
     private int albaActivityID;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "albaStartTime")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime albaStartTime;
     private int albaDuration;
     private int albaSpecialReward;
@@ -84,13 +85,14 @@ public class CharacterStat {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accountLastLogout")
     private SystemTime accountLastLogout;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "lastLogout")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime lastLogout;
     private int gachExp;
     private int honorExp;
     @Transient
     private int wingItem;
+    @Convert(converter = FileTimeConverter.class)
+    private FileTime nextAvailableFameTime;
 
     public CharacterStat() {
         extendSP = new ExtendSP(7);
@@ -99,6 +101,7 @@ public class CharacterStat {
         lastLogout = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
         characterCard = new CharacterCard(0, 0, (byte) 0);
         accountLastLogout = new SystemTime(1970, 1);
+        nextAvailableFameTime = FileTime.fromType(FileTime.Type.PLAIN_ZERO);
         // TODO fill in default vals
     }
 
@@ -476,19 +479,19 @@ public class CharacterStat {
     }
 
     public void setHp(int hp) {
-        this.hp = hp;
+        this.hp = Math.min(hp, GameConstants.MAX_HP_MP);
     }
 
     public void setMaxHp(int maxHp) {
-        this.maxHp = maxHp;
+        this.maxHp = Math.min(maxHp, GameConstants.MAX_HP_MP);
     }
 
     public void setMp(int mp) {
-        this.mp = mp;
+        this.mp = Math.min(mp, GameConstants.MAX_HP_MP);
     }
 
     public void setMaxMp(int maxMp) {
-        this.maxMp = maxMp;
+        this.maxMp = Math.min(maxMp, GameConstants.MAX_HP_MP);
     }
 
     public void setAp(int ap) {
@@ -645,6 +648,14 @@ public class CharacterStat {
 
     public int getWingItem() {
         return wingItem;
+    }
+
+    public FileTime getNextAvailableFameTime() {
+        return nextAvailableFameTime;
+    }
+
+    public void setNextAvailableFameTime(FileTime nextAvailableFameTime) {
+        this.nextAvailableFameTime = nextAvailableFameTime;
     }
 }
 

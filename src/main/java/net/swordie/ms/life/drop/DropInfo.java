@@ -1,44 +1,48 @@
 package net.swordie.ms.life.drop;
 
+import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.Util;
+
+import javax.persistence.*;
 
 /**
  * Created on 2/21/2018.
  */
+@Entity
+@Table(name = "mob_drops")
 public class DropInfo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private int itemID;
     private int chance; // out of a 1000
-    private int questReq;
+    @Transient
     private int money;
-    private int minMoney, maxmoney;
+    @Transient
+    private int minMoney;
+    @Transient
+    private int maxmoney;
     private int minQuant = 1;
     private int maxQuant = 1;
+    @Transient
     private int quantity = 1;
 
     public DropInfo() {
     }
 
-    public DropInfo(int itemID, int money, int chance, int questReq) {
-        this.itemID = itemID;
-        this.money = money;
+    public DropInfo(int chance, int minMoney, int maxmoney) {
         this.chance = chance;
-        this.questReq = questReq;
-    }
-
-    public DropInfo(int itemID, int chance, int questReq, int minMoney, int maxmoney) {
-        this.itemID = itemID;
-        this.chance = chance;
-        this.questReq = questReq;
         this.minMoney = minMoney;
         this.maxmoney = maxmoney;
         generateNextDrop();
     }
 
-    public DropInfo(int itemID, int money, int chance, int questReq, int minQuant, int maxQuant) {
+    public DropInfo(int itemID, int money, int chance, int minQuant, int maxQuant) {
         this.itemID = itemID;
         this.money = money;
         this.chance = chance;
-        this.questReq = questReq;
         this.minQuant = minQuant;
         this.maxQuant = maxQuant;
         generateNextDrop();
@@ -68,15 +72,6 @@ public class DropInfo {
         this.maxmoney = maxmoney;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof DropInfo)) {
-            return false;
-        }
-        DropInfo other = (DropInfo) obj;
-        return other.getItemID() == getItemID() && other.getMoney() == getMoney();
-    }
-
     public int getItemID() {
         return itemID;
     }
@@ -93,20 +88,18 @@ public class DropInfo {
         this.chance = chance;
     }
 
-    public int getQuestReq() {
-        return questReq;
-    }
-
-    public void setQuestReq(int questReq) {
-        this.questReq = questReq;
-    }
-
     /**
      * Does an RNG roll to check if this should be dropped.
      * @return Whether or not the drop is successful.
      */
     public boolean willDrop() {
-        return Util.succeedProp(getChance(), 1000);
+        // Added 50x multiplier for the dropping chance if the item is a Quest item.
+        int chance = getChance();
+        ItemInfo ii = ItemData.getItemInfoByID(getItemID());
+        if (ii != null && ii.getQuestIDs().size() > 0) {
+            chance *= 50;
+        }
+        return Util.succeedProp(chance, GameConstants.MAX_DROP_CHANCE);
     }
 
     public int getMoney() {
@@ -152,5 +145,13 @@ public class DropInfo {
         } else {
             return String.format("%d mesos.", getMoney());
         }
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

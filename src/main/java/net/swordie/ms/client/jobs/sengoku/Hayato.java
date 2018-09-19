@@ -13,11 +13,10 @@ import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
@@ -106,6 +105,15 @@ public class Hayato extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isHayato(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -119,7 +127,7 @@ public class Hayato extends Job {
             case QUICK_DRAW:
                 if(tsm.getOption(HayatoStance).nOption == 0) {
                     if(swordEnergy < 150) {
-                        chr.chatMessage(ChatMsgColour.GAME_MESSAGE, "You need 150 sword energy to switch into quick draw stance.");
+                        chr.chatMessage(ChatType.SystemNotice, "You need 150 sword energy to switch into quick draw stance.");
                         return;
                     } else {
                         swordEnergy -= 150;
@@ -135,7 +143,7 @@ public class Hayato extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 tsm.putCharacterStatValue(HayatoStance, o1);
-                handleSwordEnergyLevels();
+                changeHayatoStanceBonus();
                 break;
             case BATTOUJUTSU_ADVANCE:
                 o1.nOption = 1;
@@ -195,10 +203,13 @@ public class Hayato extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
             case EYE_FOR_AN_EYE:
-                o1.nOption = 1;
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(EyeForEye, o1);
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    tsm.putCharacterStatValue(EyeForEye, o1);
+                }
                 break;
             case PRINCESS_VOW_HAYATO:
                 o1.nReason = skillID;
@@ -225,188 +236,23 @@ public class Hayato extends Job {
                 tsm.putCharacterStatValue(TerR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
+        tsm.sendSetStatPacket();
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-    @Override
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        handleSwordEnergy(attackInfo);
-        handleSwordEnergyLevels();
-
-        if(tsm.getOption(HayatoStance).nOption == 1) {
-            resetNormalStanceBonus();
-            handleQuickDrawStanceBonus();
-            handleQuickDrawStunBonus(attackInfo);
-        } else
-        if(tsm.getOption(HayatoStance).nOption == 0) {
-            resetQuickDrawStanceBonus();
-            handleNormalStanceBonus();
-        }
-
-        if(hasHitMobs) {
-            handleDoT(attackInfo);
-            handleWarriorHeart(attackInfo);
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case TORNADO_BLADE:
-            //case TORNADO_BLADE_BATTOUJUTSU:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(subProp, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skill.getSkillId();
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
-                }
-                break;
-            case SUDDEN_STRIKE:
-            //case SUDDEN_STRIKE_BATTOUJUTSU:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = si.getValue(y, slv);
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
-                }
-                break;
-            case SUMMER_RAIN:
-            case HITOKIRI_HUNDRED_STRIKE:
-                if((tsm.getOptByCTSAndSkill(IndieDamR, SUMMER_RAIN) == null) || (tsm.getOptByCTSAndSkill(IndieDamR, HITOKIRI_HUNDRED_STRIKE) == null)) {
-                    o1.nReason = skillID;
-                    o1.nValue = 15;
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = 120;
-                    tsm.putCharacterStatValue(IndieDamR, o1); //Indie
-                    c.write(WvsContext.temporaryStatSet(tsm));
-                    swordEnergy = 0;
-                    c.write(UserLocal.modHayatoCombo(swordEnergy));
-                }
-                break;
-            case HITOKIRI_STRIKE:
-                if(tsm.getOptByCTSAndSkill(IndieCr, HITOKIRI_STRIKE) == null) {
-                    o1.nReason = skillID;
-                    o1.nValue = si.getValue(prop, slv);
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieCr, o1);
-                    c.write(WvsContext.temporaryStatSet(tsm));
-                }
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if(skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch(skillID) {
-                case AKATSUKI_BLOSSOMS:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
-        //Dodge
-        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
-            handleJinsoku();
-            handleWillowDodge();
-        }
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isHayato(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    public void handleSwordEnergy(AttackInfo attackInfo) {
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            int totaldmg = Arrays.stream(mai.damages).sum();
-
-            if(totaldmg >= mob.getHp()) {
-
-                //reward BladeEnergy
-                if(tsm.getOption(HayatoStance).nOption == 0) {
-
-                    //Reward 5 Blade Energy
-                    if(swordEnergy + 5 > 1000) {
-                        swordEnergy = 1000;
-                    } else {
-                        swordEnergy += 5;
-                    }
-                } else if (tsm.getOption(HayatoStance).nOption == 1) {
-
-                    //Reward 2 Blade Energy
-                    if(swordEnergy + 2 > 1000) {
-                        swordEnergy = 1000;
-                    } else {
-                        swordEnergy += 2;
-                    }
-                }
-                c.write(UserLocal.modHayatoCombo(swordEnergy));
-            }
-        }
-    }
-
-    public void handleSwordEnergyLevels() {
+    public void changeHayatoStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         o.nOption = 1;
         o.rOption = tsm.getOption(HayatoStance).nOption == 0 ? NORMAL_STANCE_BONUS : QUICK_DRAW_STANCE_BONUS;
         tsm.putCharacterStatValue(HayatoStanceBonus, o);
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    private void handleQuickDrawStanceBonus() {
+    private void quickDrawStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -449,35 +295,7 @@ public class Hayato extends Job {
         tsm.putCharacterStatValue(HayatoBooster, o3);
     }
 
-    public void handleQuickDrawStunBonus(AttackInfo attackInfo) {
-        Option o = new Option();
-        int stunProc = 30;
-        if(swordEnergy >= 200) {
-            stunProc += 5;
-        }
-        if(swordEnergy >= 400) {
-            stunProc += 5;
-        }
-        if(swordEnergy >= 700) {
-            stunProc += 5;
-        }
-        if(swordEnergy == 1000) {
-            stunProc += 5;
-        }
-
-        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            if(Util.succeedProp(stunProc)) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                MobTemporaryStat mts = mob.getTemporaryStat();
-                o.nOption = 1;
-                o.rOption = QUICK_DRAW;
-                o.tOption = 3;
-                mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
-            }
-        }
-    }
-
-    private void handleNormalStanceBonus() {
+    private void normalStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -531,17 +349,273 @@ public class Hayato extends Job {
     public void resetNormalStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStatsBySkill(NORMAL_STANCE_BONUS);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
     public void resetQuickDrawStanceBonus() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         tsm.removeStatsBySkill(QUICK_DRAW_STANCE_BONUS);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
+        tsm.sendResetStatPacket();
     }
 
 
-    public void handleWillowDodge() {   //TODO
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        int slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        incrementSwordEnergy(attackInfo);
+        changeHayatoStanceBonus();
+
+        if(tsm.getOption(HayatoStance).nOption == 1) {
+            resetNormalStanceBonus();
+            quickDrawStanceBonus();
+            quickDrawStunBonus(attackInfo);
+        } else
+        if(tsm.getOption(HayatoStance).nOption == 0) {
+            resetQuickDrawStanceBonus();
+            normalStanceBonus();
+        }
+
+        if(hasHitMobs) {
+            applyDOTOnMob(attackInfo);
+            warriorHeartHealHP(attackInfo);
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case TORNADO_BLADE:
+            //case TORNADO_BLADE_BATTOUJUTSU:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(subProp, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                break;
+            case SUDDEN_STRIKE:
+            //case SUDDEN_STRIKE_BATTOUJUTSU:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = si.getValue(y, slv);
+                    o1.rOption = skill.getSkillId();
+                    o1.tOption = si.getValue(time, slv);
+                    mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
+                }
+                break;
+            case SUMMER_RAIN:
+            case HITOKIRI_HUNDRED_STRIKE:
+                if((tsm.getOptByCTSAndSkill(IndieDamR, SUMMER_RAIN) == null) || (tsm.getOptByCTSAndSkill(IndieDamR, HITOKIRI_HUNDRED_STRIKE) == null)) {
+                    o1.nReason = skillID;
+                    o1.nValue = 15;
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = 120;
+                    tsm.putCharacterStatValue(IndieDamR, o1); //Indie
+                    tsm.sendSetStatPacket();
+                    swordEnergy = 0;
+                    c.write(UserLocal.modHayatoCombo(swordEnergy));
+                }
+                break;
+            case HITOKIRI_STRIKE:
+                if(tsm.getOptByCTSAndSkill(IndieCr, HITOKIRI_STRIKE) == null) {
+                    o1.nReason = skillID;
+                    o1.nValue = si.getValue(prop, slv);
+                    o1.tStart = (int) System.currentTimeMillis();
+                    o1.tTerm = si.getValue(time, slv);
+                    tsm.putCharacterStatValue(IndieCr, o1);
+                    tsm.sendSetStatPacket();
+                }
+                break;
+        }
+
+        super.handleAttack(c, attackInfo);
+    }
+
+    public void applyDOTOnMob(AttackInfo attackInfo) {
+        if(chr.hasSkill(BLOODLETTER)) {
+            Skill skill = chr.getSkill(BLOODLETTER);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if(Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr, skill);
+                }
+            }
+        } else
+        if(chr.hasSkill(MERCILESS_BLADE)) {
+            Skill skill = chr.getSkill(MERCILESS_BLADE);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                if (Util.succeedProp(proc)) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr, skill);
+                }
+            }
+        }
+    }
+
+    public void warriorHeartHealHP(AttackInfo attackInfo) { //TODO on Crit hit,  proc% to gainHP%
+        if(chr.hasSkill(WARRIOR_HEART)) {
+            Skill skill = chr.getSkill(WARRIOR_HEART);
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int proc = si.getValue(prop, slv);
+            int healrate = si.getValue(x, slv);
+            int healhp = (int) ((chr.getMaxHP() / ((double) 100 / healrate)));
+
+            //Get chance to heal on  #Crit hits
+            if(Util.succeedProp(proc)) {
+                chr.heal(healhp);
+            }
+        }
+    }
+
+    public void quickDrawStunBonus(AttackInfo attackInfo) {
+        Option o = new Option();
+        int stunProc = 30;
+        if(swordEnergy >= 200) {
+            stunProc += 5;
+        }
+        if(swordEnergy >= 400) {
+            stunProc += 5;
+        }
+        if(swordEnergy >= 700) {
+            stunProc += 5;
+        }
+        if(swordEnergy == 1000) {
+            stunProc += 5;
+        }
+
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if(Util.succeedProp(stunProc)) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(mob == null) {
+                    continue;
+                }
+                if(!mob.isBoss()) {
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o.nOption = 1;
+                    o.rOption = QUICK_DRAW;
+                    o.tOption = 3;
+                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o);
+                }
+            }
+        }
+    }
+
+    public void incrementSwordEnergy(AttackInfo attackInfo) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if(mob == null) {
+                continue;
+            }
+            int totaldmg = Arrays.stream(mai.damages).sum();
+
+            if(totaldmg >= mob.getHp()) {
+
+                //reward BladeEnergy
+                if(tsm.getOption(HayatoStance).nOption == 0) {
+
+                    //Reward 5 Blade Energy
+                    if(swordEnergy + 5 > 1000) {
+                        swordEnergy = 1000;
+                    } else {
+                        swordEnergy += 5;
+                    }
+                } else if (tsm.getOption(HayatoStance).nOption == 1) {
+
+                    //Reward 2 Blade Energy
+                    if(swordEnergy + 2 > 1000) {
+                        swordEnergy = 1000;
+                    } else {
+                        swordEnergy += 2;
+                    }
+                }
+                c.write(UserLocal.modHayatoCombo(swordEnergy));
+            }
+        }
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if(skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch(skillID) {
+                case AKATSUKI_BLOSSOMS:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
+        //Dodge
+        if(hitInfo.hpDamage == 0 && hitInfo.mpDamage == 0) {
+            jinsoku();
+            incrementWillowDodge();
+        }
+        super.handleHit(c, inPacket, hitInfo);
+    }
+
+    public void incrementWillowDodge() {   //TODO
         Skill skill = chr.getSkill(WILLOW_DODGE);
         if (skill == null) {
             return;
@@ -562,18 +636,14 @@ public class Hayato extends Job {
         o.rOption = WILLOW_DODGE;
         o.tOption = 20;
         tsm.putCharacterStatValue(WillowDodge, o);
-
         o1.nOption = si.getValue(damR, slv);
         o1.rOption = WILLOW_DODGE;
         o1.tOption = 20;
         tsm.putCharacterStatValue(DamR, o1);
-
-
-
-        c.write(WvsContext.temporaryStatSet(tsm));
+        tsm.sendSetStatPacket();
     }
 
-    public void handleJinsoku() {
+    public void jinsoku() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         if(chr.hasSkill(JINSOKU)) {
@@ -586,52 +656,7 @@ public class Hayato extends Job {
                 o.rOption = skill.getSkillId();
                 o.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(DamageReduce, o);
-                c.write(WvsContext.temporaryStatSet(tsm));
-            }
-        }
-    }
-
-    public void handleDoT(AttackInfo attackInfo) {
-        if(chr.hasSkill(BLOODLETTER)) {
-            Skill skill = chr.getSkill(BLOODLETTER);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int proc = si.getValue(prop, slv);
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                if(Util.succeedProp(proc)) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr, skill, 1);
-                }
-            }
-        } else
-        if(chr.hasSkill(MERCILESS_BLADE)) {
-            Skill skill = chr.getSkill(MERCILESS_BLADE);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int proc = si.getValue(prop, slv);
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                if (Util.succeedProp(proc)) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    mts.createAndAddBurnedInfo(chr, skill, 1);
-                }
-            }
-        }
-    }
-
-    public void handleWarriorHeart(AttackInfo attackInfo) { //TODO on Crit hit,  proc% to gainHP%
-        if(chr.hasSkill(WARRIOR_HEART)) {
-            Skill skill = chr.getSkill(WARRIOR_HEART);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int proc = si.getValue(prop, slv);
-            int healrate = si.getValue(x, slv);
-            int healhp = (int) ((chr.getMaxHP() / ((double) 100 / healrate)));
-
-            //Get chance to heal on  #Crit hits
-            if(Util.succeedProp(proc)) {
-                chr.heal(healhp);
+                tsm.sendSetStatPacket();
             }
         }
     }

@@ -4,14 +4,19 @@ package net.swordie.ms.enums;
  * Created on 1/6/2018.
  */
 public enum MoveAbility {
-    STATIC(0),
-    FOLLOW(1),
-    ROAM_AROUND(2),
-    FLY_AROUND_CHAR(3),
-    FLY_AWAY(4),
-    FLY_AROUND_CHAR_2(5),
-    THROW(6),
-    FIND_NEAREST_MOB(7),
+    Stop(0),
+    Walk(1),
+    WalkRandom(2),
+    Fly(3),
+    FlyRandom(4),
+    Smart(5),
+    FixVMove(6),
+    WalkSmart(7),
+    WalkClone(8),
+    FlyClone(9),
+    WalkHang(10),
+    Jaguar(11),
+    FlyJaguar(12),
 
     ;
 

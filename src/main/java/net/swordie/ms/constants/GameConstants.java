@@ -1,11 +1,14 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
 import net.swordie.ms.enums.ItemJob;
 import net.swordie.ms.enums.QuickMoveType;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
@@ -17,14 +20,18 @@ import java.util.List;
  * Created on 1/23/2018.
  */
 public class GameConstants {
-    public static final int EXP_RATE = 10;
+    public static final int MOB_EXP_RATE = 10;
     public static final long MAX_MONEY = 10_000_000_000L;
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
+    public static final int MAX_HP_MP = 500000;
+    public static final long DAMAGE_CAP = 50_000_000;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
+    public static final int VIDEO_FIELD = 931050990; // Used for Effects and/or Videos
     public static final int DEFAULT_FIELD_MOB_CAPACITY = 25;
+    public static final double DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT = 1.5;
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
     public static final double KISHIN_MOB_MULTIPLIER = 1.7;
     public static final double KISHIN_MOB_RATE_MULTIPLIER = 1.7;
@@ -37,6 +44,7 @@ public class GameConstants {
     public static final int DROP_REMOVE_OWNERSHIP_TIME = 30; // 30 sec
     public static final int MIN_MONEY_MULT = 6;
     public static final int MAX_MONEY_MULT = 9;
+    public static final int MAX_DROP_CHANCE = 10000;
 
     // Combo Kill
     public static final int COMBO_KILL_RESET_TIMER = 5; // 5 sec
@@ -62,6 +70,10 @@ public class GameConstants {
     public static final int RANDOM_EQUIP_EPIC_CHANCE = 3; // out of a 100
     public static final int RANDOM_EQUIP_RARE_CHANCE = 8; // out of a 100
 
+    // Random Portal
+    public static final int RANDOM_PORTAL_SPAWN_CHANCE = 500; // out of a 1000 (50%)
+    public static final int RANDOM_PORTAL_COOLTIME = 15 * 60 * 1000; // 15 minutes
+
     // Rune
     public static final int RUNE_RESPAWN_TIME = 5; // minutes
     public static final int RUNE_COOLDOWN_TIME = 4; // minutes
@@ -82,6 +94,9 @@ public class GameConstants {
     public static final double PURPLE_EXP_ORB_MULT = 3.5;
     public static final int RED_EXP_ORB_ID = 2023495;
     public static final double RED_EXP_ORB_MULT = 5;
+
+    // Mob
+    public static final int MOB_SKILL_CHANCE = 20;
 
     // Elite mob
     public static final int ELITE_MOB_SKILL_COUNT = 2;
@@ -109,8 +124,9 @@ public class GameConstants {
     public static final int MAX_LOCKER_SIZE = 9999;
 
 
-    //     START OF Party Quests
+    // START OF Party Quests
     public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
+
     public static final long PARTY_QUEST_EXP_FORMULA(Char chr) {
         return PARTY_QUEST_GLOBAL_EXP * (1+(chr.getParty().getPartyMembers().length*100 / chr.getParty().getAvgLevel()));
     } // Exp formula for giving Exp from Party Quests
@@ -122,12 +138,30 @@ public class GameConstants {
     // Monster Park
     public static final byte MAX_MONSTER_PARK_RUNS = 7; // Max Monster Park runs per character
     public static final int MONSTER_PARK_EXP_QUEST = 99999; // Quest where the Exp for MP runs gets stored.
+    public static final int MONSTER_PARK_ENTRANCE_CHECK_QUEST = 99997; // Quest where the Number of MP runs are stored
+    public static final int MONSTER_PARK_TIME = 10  *60; // 10minutes
 
     // Lord Pirate Party Quest
     public static final int LORD_PIRATE_QUEST = 99998; // Quest where the NPC state is stored, to close/open portals
 
-    //     END OF Party Quests
+    // END OF Party Quests
 
+    // Trading
+    public static final int MAX_TRADE_ITEMS = 9;
+
+    // Faming
+    public static final int MIN_LEVEL_TO_FAME = 15;
+    public static final int FAME_COOLDOWN = 24; // in hours
+
+    // Guild
+    public static final int MAX_DAY_COMMITMENT = 50000;
+    public static final int SP_PER_GUILD_LEVEL = 2;
+    public static final double GGP_PER_CONTRIBUTION = 0.3;
+    public static final double IGP_PER_CONTRIBUTION = 0.7;
+    public static final int GUILD_BBS_RECORDS_PER_PAGE = 10;
+    public static final int GGP_FOR_SKILL_RESET = 50000;
+    public static final int MAX_GUILD_LV = 25;
+    public static final int MAX_GUILD_MEMBERS = 200;
 
     // Monster Collection
     public static final int MOBS_PER_PAGE = 25;
@@ -135,23 +169,27 @@ public class GameConstants {
 
     public static long[] charExp = new long[251];
     private static int[][] enchantSuccessRates = new int[25][2];
+    private static int[][] enchantSuccessRatesSuperior = new int[15][2];
+    private static int[] guildExp = new int[MAX_GUILD_LV];
 
     private static List<QuickMoveInfo> quickMoveInfos;
 
     static {
         initCharExp();
         initEnchantRates();
+        initEnchantRatesSuperior();
         initQuickMove();
+        initGuildExp();
     }
 
     private static void initQuickMove() {
         quickMoveInfos = new ArrayList<>();
         quickMoveInfos.add(new QuickMoveInfo(0, 9072302, QuickMoveType.Boat, 1, "Warping",
-                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
         quickMoveInfos.add(new QuickMoveInfo(0, 9010022, QuickMoveType.DimensionalPortal, 1, "Dimensional Portal",
-                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
         quickMoveInfos.add(new QuickMoveInfo(0, 9071003, QuickMoveType.MonsterPark, 1, "Monster Park",
-                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.PERMANENT)));
+                FileTime.fromType(FileTime.Type.ZERO_TIME), FileTime.fromType(FileTime.Type.MAX_TIME)));
 
     }
 
@@ -225,6 +263,39 @@ public class GameConstants {
         }
     }
 
+    public static int getMaxStars(Equip equip) {
+        int level = equip.getrLevel();
+        if (equip.isSuperiorEqp()) {
+            if (level <= 95) {
+                return 3;
+            } else if (level <= 107) {
+                return 5;
+            } else if (level <= 117) {
+                return 8;
+            } else if (level <= 127) {
+                return 10;
+            } else if (level <= 137) {
+                return 12;
+            } else {
+                return 15;
+            }
+        } else {
+            if (level <= 95) {
+                return 5;
+            } else if (level <= 107) {
+                return 8;
+            } else if (level <= 117) {
+                return 10;
+            } else if (level <= 127) {
+                return ServerConstants.VERSION >= 197 ? 15 : 12;
+            } else if (level <= 137) {
+                return ServerConstants.VERSION >= 197 ? 20 : 13;
+            } else {
+                return ServerConstants.VERSION >= 197 ? 25 : 15;
+            }
+        }
+    }
+
     private static void initEnchantRates() {
         // kms rates: success / destroy
         // out of 1000
@@ -261,8 +332,39 @@ public class GameConstants {
         };
     }
 
-    public static long getEnchantmentMesoCost(int reqLevel, int chuc) {
-        if (chuc < 10) {
+    private static void initEnchantRatesSuperior() {
+        enchantSuccessRatesSuperior = new int[][]{
+                {500, 0},
+                {500, 0},
+                {450, 0},
+                {400, 0},
+                {400, 0},
+
+                {400, 18},
+                {400, 30},
+                {400, 42},
+                {400, 60},
+                {370, 95},
+
+                {350, 130},
+                {350, 162},
+                {30, 485},
+                {20, 490},
+                {10, 500},
+        };
+    }
+
+    public static void initGuildExp() {
+        guildExp[1] = 15000;
+        for (int i = 2; i < guildExp.length; i++) {
+            guildExp[i] = guildExp[i - 1] + 30000;
+        }
+    }
+
+    public static long getEnchantmentMesoCost(int reqLevel, int chuc, boolean superior) {
+        if (superior) {
+            return (long) Math.pow(reqLevel, 3.56);
+        } if (chuc < 10) {
             return (long) (1000 + Math.pow(reqLevel, 3) * (chuc + 1) / 25);
         } else if (chuc < 15) {
             return (long) (1000 + Math.pow(reqLevel, 3) * Math.pow(chuc + 1, 2.7) / 400);
@@ -271,23 +373,146 @@ public class GameConstants {
         }
     }
 
-    public static int getEnchantmentSuccessRate(short chuc) {
+    public static int getEnchantmentSuccessRate(short chuc, boolean superior) {
         if(chuc < 0 || chuc > 24) {
             return 0;
         }
-        return enchantSuccessRates[chuc][0];
+        if (superior) {
+            return enchantSuccessRatesSuperior[chuc][0];
+        } else {
+            return enchantSuccessRates[chuc][0];
+        }
     }
 
-    public static int getEnchantmentDestroyRate(short chuc) {
+    public static int getEnchantmentDestroyRate(short chuc, boolean superior) {
         if(chuc < 0 || chuc > 24) {
             return 0;
         }
-        return enchantSuccessRates[chuc][1];
+        if (superior) {
+            return enchantSuccessRatesSuperior[chuc][1];
+        } else {
+            return enchantSuccessRates[chuc][1];
+        }
     }
 
-    public static int getEnchantmentValByChuc(EnchantStat es, short chuc, int curAmount) {
-        // TODO implement formula for this, depending on stat + weapon type
-        return chuc + 1 + (curAmount / 50);
+    public static int getStatForSuperiorEnhancement(int reqLevel, short chuc) {
+        if (chuc == 0) {
+            return reqLevel < 110 ? 2 : reqLevel < 149 ? 9 : 19;
+        } else if (chuc == 1) {
+            return reqLevel < 110 ? 3 : reqLevel < 149 ? 10 : 20;
+        } else if (chuc == 2) {
+            return reqLevel < 110 ? 5 : reqLevel < 149 ? 12 : 22;
+        } else if (chuc == 3) {
+            return reqLevel < 149 ? 15 : 25;
+        } else if (chuc == 4) {
+            return reqLevel < 149 ? 19 : 29;
+        }
+        return 0;
+    }
+
+    public static int getAttForSuperiorEnhancement(int reqLevel, short chuc) {
+        if (chuc == 5) {
+            return reqLevel < 150 ? 5 : 9;
+        } else if (chuc == 6) {
+            return reqLevel < 150 ? 6 : 10;
+        } else if (chuc == 7) {
+            return reqLevel < 150 ? 7 : 11;
+        } else {
+            return chuc == 8 ? 12 : chuc == 9 ? 13 : chuc == 10 ? 15 : chuc == 11 ? 17 : chuc == 12 ? 19 : chuc == 13 ? 21 : chuc == 14 ? 23 : 0;
+        }
+    }
+
+    // ugliest function in swordie
+    public static int getEquipStatBoost(Equip equip, EnchantStat es, short chuc) {
+        int stat = 0;
+        // hp/mp
+        if (es == EnchantStat.MHP || es == EnchantStat.MMP) {
+            stat += chuc <= 2 ? 5 : chuc <= 4 ? 10 : chuc <= 6 ? 15 : chuc <= 8 ? 20 : chuc <= 14 ? 25 : 0;
+        }
+        int reqLevel = equip.getrLevel();
+        // all stat
+        if (es == EnchantStat.STR || es == EnchantStat.DEX || es == EnchantStat.INT || es == EnchantStat.LUK) {
+            if (chuc <= 4) {
+                stat += 2;
+            } else if (chuc <= 14) {
+                stat += 3;
+            } else if (chuc <= 21) {
+                stat += reqLevel <= 137 ? 7 : reqLevel <= 149 ? 9 : reqLevel <= 159 ? 11 : reqLevel <= 199 ? 13 : 15;
+            }
+        }
+        // att for all equips
+        if ((es == EnchantStat.PAD || es == EnchantStat.MAD) && chuc >= 15) {
+            if (chuc == 15) {
+                stat += reqLevel <= 137 ? 6 : reqLevel <= 149 ? 7 : reqLevel <= 159 ? 8 : reqLevel <= 199 ? 9 : 12;
+            } else if (chuc == 16) {
+                stat += reqLevel <= 137 ? 7 : reqLevel <= 149 ? 8 : reqLevel <= 159 ? 9 : reqLevel <= 199 ? 9 : 13;
+            } else if (chuc == 17) {
+                stat += reqLevel <= 137 ? 7 : reqLevel <= 149 ? 8 : reqLevel <= 159 ? 9 : reqLevel <= 199 ? 10 : 14;
+            } else if (chuc == 18) {
+                stat += reqLevel <= 137 ? 8 : reqLevel <= 149 ? 9 : reqLevel <= 159 ? 10 : reqLevel <= 199 ? 11 : 14;
+            } else if (chuc == 19) {
+                stat += reqLevel <= 137 ? 9 : reqLevel <= 149 ? 10 : reqLevel <= 159 ? 11 : reqLevel <= 199 ? 12 : 15;
+            } else if (chuc == 20) {
+                stat += reqLevel <= 149 ? 11 : reqLevel <= 159 ? 12 : reqLevel <= 199 ? 13 : 16;
+            } else if (chuc == 21) {
+                stat += reqLevel <= 149 ? 12 : reqLevel <= 159 ? 13 : reqLevel <= 199 ? 14 : 17;
+            } else if (chuc == 22) {
+                stat += reqLevel <= 149 ? 17 : reqLevel <= 159 ? 18 : reqLevel <= 199 ? 19 : 21;
+            } else if (chuc == 23) {
+                stat += reqLevel <= 149 ? 19 : reqLevel <= 159 ? 20 : reqLevel <= 199 ? 21 : 23;
+            } else if (chuc == 24) {
+                stat += reqLevel <= 149 ? 21 : reqLevel <= 159 ? 22 : reqLevel <= 199 ? 23 : 25;
+            }
+        }
+        // att gains for weapons
+        if (ItemConstants.isWeapon(equip.getItemId()) && !ItemConstants.isSecondary(equip.getItemId())) {
+            if (chuc <= 14) {
+                if (es == EnchantStat.PAD) {
+                    stat += equip.getiPad() * 0.02;
+                } else if (es == EnchantStat.MAD) {
+                    stat += equip.getiMad() * 0.02;
+                }
+            } else if (es == EnchantStat.PAD || es == EnchantStat.MAD) {
+                stat += chuc == 22 ? 13 : chuc == 23 ? 12 : chuc == 24 ? 11 : 0;
+                if (reqLevel == 200 && chuc == 15) {
+                    stat += 1;
+                }
+            }
+        }
+        // att gain for gloves, enhancements 4/6/8/10 and 12-14
+        if (ItemConstants.isGlove(equip.getItemId()) && (es == EnchantStat.PAD || es == EnchantStat.MAD)) {
+            if ((chuc <= 10 && chuc % 2 == 0) || (chuc >= 12 && chuc <= 14)) {
+                stat += 1;
+            }
+        }
+        // speed/jump for shoes
+        if (ItemConstants.isShoe(equip.getItemId()) && (es == EnchantStat.SPEED || es == EnchantStat.JUMP) && chuc <= 4) {
+            stat += 1;
+        }
+        return stat;
+    }
+
+    public static int getEnchantmentValByChuc(Equip equip, EnchantStat es, short chuc, int curAmount) {
+        if (equip.isCash() || (ItemData.getEquipById(equip.getItemId()).getTuc() <= 0 && !ItemConstants.isTucIgnoreItem(equip.getItemId()))) {
+            return 0;
+        }
+        if (es == EnchantStat.PDD) {
+            return (int) (equip.getiPDD() * (ItemConstants.isOverall(equip.getItemId()) ? 0.10 : 0.05));
+        }
+        if (es == EnchantStat.MDD) {
+            return (int) (equip.getiMDD() * (ItemConstants.isOverall(equip.getItemId()) ? 0.10 : 0.05));
+        }
+        if (!equip.isSuperiorEqp()) {
+            return getEquipStatBoost(equip, es, chuc);
+        } else {
+            if (es == EnchantStat.STR || es == EnchantStat.DEX || es == EnchantStat.INT || es == EnchantStat.LUK) {
+                return getStatForSuperiorEnhancement(equip.getrLevel(), chuc);
+            }
+            if (es == EnchantStat.PAD || es == EnchantStat.MAD) {
+                return getAttForSuperiorEnhancement(equip.getrLevel(), chuc);
+            }
+        }
+        return 0;
     }
 
     public static BaseStat getMainStatForJob(short job) {
@@ -305,7 +530,7 @@ public class GameConstants {
             return BaseStat.dex;
         } else if (JobConstants.isBeastTamer(job) || JobConstants.isBlazeWizard(job) || JobConstants.isCleric(job)
                 || JobConstants.isEvan(job) || JobConstants.isIceLightning(job) || JobConstants.isFirePoison(job)
-                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isKenesis(job)
+                || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isKinesis(job)
                 || JobConstants.isLuminous(job)) {
             return BaseStat.inte;
         } else if (JobConstants.isAdventurerThief(job) || JobConstants.isNightLord(job) || JobConstants.isShadower(job)
@@ -333,7 +558,7 @@ public class GameConstants {
         if (JobConstants.isBeastTamer(job) || JobConstants.isBlazeWizard(job) || JobConstants.isCleric(job)
                 || JobConstants.isEvan(job) || JobConstants.isIceLightning(job) || JobConstants.isFirePoison(job)
                 || JobConstants.isAdventurerMage(job) || JobConstants.isKanna(job) || JobConstants.isBlazeWizard(job)
-                || JobConstants.isKenesis(job) || JobConstants.isLuminous(job)) {
+                || JobConstants.isKinesis(job) || JobConstants.isLuminous(job)) {
             return ItemJob.MAGICIAN;
         }
         if (JobConstants.isAdventurerThief(job) || JobConstants.isNightLord(job) || JobConstants.isShadower(job)
@@ -431,5 +656,30 @@ public class GameConstants {
                     return 0.15 + attackers * 0.1;
             }
         }
+    }
+
+    public static long applyTax(long money) {
+        // https://gamefaqs.gamespot.com/pc/924697-maplestory/answers/56187-how-many-is-the-tax-on-meso-when-trading
+        if (money >= 100_000_000) {
+            return (long) (money - (money * 0.06));
+        } else if (money >= 25_000_000) {
+            return (long) (money - (money * 0.05));
+        } else if (money >= 10_000_000) {
+            return (long) (money - (money * 0.04));
+        } else if (money >= 5_000_000) {
+            return (long) (money - (money * 0.03));
+        } else if (money >= 1_000_000) {
+            return (long) (money - (money * 0.018));
+        } else if (money >= 100_000) {
+            return (long) (money - (money * 0.008));
+        }
+        return money;
+    }
+
+    public static int getExpRequiredForNextGuildLevel(int curLevel) {
+        if (curLevel >= 25 || curLevel < 0) {
+            return 0;
+        }
+        return guildExp[curLevel];
     }
 }

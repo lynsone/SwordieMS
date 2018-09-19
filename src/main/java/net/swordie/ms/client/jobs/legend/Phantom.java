@@ -14,12 +14,11 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.*;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.UserLocal;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -49,6 +48,7 @@ public class Phantom extends Job {
     public static final int LOADOUT = 20031208;
     public static final int TO_THE_SKIES = 20031203;
     public static final int DEXTEROUS_TRAINING = 20030206;
+    public static final int GHOSTWALK = 20031211;
 
     public static final int IMPECCABLE_MEMORY_I = 24001001;
 
@@ -116,6 +116,46 @@ public class Phantom extends Job {
         stealJobHandlers.add(new Pirate(chr));
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isPhantom(id);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.setStolenSkills(new HashSet<>());
+        chr.setChosenSkills(new HashSet<>());
+        chr.getAvatarData().getCharacterStat().setPosMap(915000000);
+    }
+
+    @Override
+    public void handleLevelUp() {
+        Map<Stat, Object> stats = new HashMap<>();
+        short level = chr.getLevel();
+        if (chr.getJob() == JobConstants.JobEnum.PHANTOM.getJobId() && level >= 10) {
+            chr.addStat(Stat.mhp, 16);
+            chr.addStat(Stat.mmp, 12);
+            chr.addStat(Stat.str, level >= 6 ? 4 : 5);
+            if (level >= 6){
+                chr.addStat(Stat.str, 1);
+            }
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
+        } else {
+            chr.addStat(Stat.mhp, 24);// this information is from level 10 to 11
+            chr.addStat(Stat.mmp, 66);// this information is from level 10 to 11
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        }
+        chr.write(WvsContext.statChanged(stats));
+        super.handleLevelUp();
+    }
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -125,6 +165,12 @@ public class Phantom extends Job {
         Option o3 = new Option();
         Option o4 = new Option();
         switch (skillID) {
+            case GHOSTWALK:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(DarkSight, o1);
+                break;
             case CANE_BOOSTER:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
@@ -132,7 +178,10 @@ public class Phantom extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case FINAL_FEINT:
-                //TODO
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(ReviveOnce, o1);
                 break;
             case BAD_LUCK_WARD:
                 o1.nValue = si.getValue(indieMhpR, slv);
@@ -196,91 +245,54 @@ public class Phantom extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
-    }
-
-    private void carteForceAtom(AttackInfo attackInfo) {
-        if (chr.hasSkill(CARTE_BLANCHE)) {
-            SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
-            int anglenum = new Random().nextInt(30) + 295;
-            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                int TW1prop = 100;//  SkillData.getSkillInfoById(SOUL_SEEKER_EXPERT).getValue(prop, slv);   //TODO Change
-                if (Util.succeedProp(TW1prop)) {
-                    if (chr.hasSkill(CARTE_NOIR)) {
-                        int mobID = mai.mobId;
-                        int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();
-                        int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
-                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                                new Position()); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                                true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
-                    } else if (chr.hasSkill(CARTE_BLANCHE)) {
-                        int mobID = mai.mobId;
-                        int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
-                        int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
-                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                                new Position()); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                                true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
-                                mob.getPosition(), CARTE_BLANCHE, mob.getPosition())); //TODO NPE on Mille
-                    }
-                }
-            }
-        }
-    }
-
-    private void carteForceAtomJudgmentDraw() {
-        if (chr.hasSkill(CARTE_BLANCHE)) {
-            SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
-            Rect rect = new Rect(
-                    new Position(
-                            chr.getPosition().getX() - 450,
-                            chr.getPosition().getY() - 450),
-                    new Position(
-                            chr.getPosition().getX() + 450,
-                            chr.getPosition().getY() + 450)
-            );
-            List<Mob> mobs = chr.getField().getMobsInRect(rect);
-            if (mobs.size() <= 0) {
-                chr.dispose();
-                return;
-            }
-            Mob mob = Util.getRandomFromList(mobs);
-
-            for (int i = 0; i < 10; i++) {
-                if (chr.hasSkill(CARTE_NOIR)) {
-                    int mobID = mob.getObjectId();
-                    int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();
-                    int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
-                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
-                            355 - (10 * i), i * 15, (int) System.currentTimeMillis(), 1, 0,
-                            new Position()); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                            true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
-                            mob.getPosition(), CARTE_NOIR, mob.getPosition())); //TODO NPE on Mille
-                } else if (chr.hasSkill(CARTE_BLANCHE)) {
-                    int mobID = mob.getObjectId();
-                    int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
-                    int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
-                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                            355 - (10 * i), i * 15, (int) System.currentTimeMillis(), 1, 0,
-                            new Position()); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                            true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
-                            mob.getPosition(), CARTE_BLANCHE, mob.getPosition())); //TODO NPE on Mille
-                }
-            }
-        }
+        tsm.sendSetStatPacket();
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
+
+    private void giveJudgmentDrawBuff(int skillId) {
+
+        Skill skill = chr.getSkill(skillId);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        int randomInt = new Random().nextInt((skillId == JUDGMENT_DRAW_1 ? 2 : 5))+1;
+        int xOpt = 0;
+        switch (randomInt) {
+            case 1: // Crit Rate
+                xOpt = si.getValue(v, slv);
+                break;
+            case 2: // Item Drop Rate
+                xOpt = si.getValue(w, slv);
+                break;
+            case 3: // AsrR & TerR
+                xOpt = si.getValue(x, slv);
+                break;
+            case 4: // Defense %
+                xOpt = 10;
+                break;
+            case 5: // Life Drain
+                xOpt = 1;
+                break;
+        }
+        chr.write(User.effect(Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
+        chr.write(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
+
+        o.nOption = randomInt;
+        o.rOption = skill.getSkillId();
+        o.tOption = si.getValue(time, slv);
+        o.xOption = xOpt;
+        tsm.putCharacterStatValue(Judgement, o);
+        tsm.sendSetStatPacket();
+    }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -302,8 +314,9 @@ public class Phantom extends Job {
         if (hasHitMobs && attackInfo.skillId != CARTE_NOIR && attackInfo.skillId != CARTE_BLANCHE) {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 cartDeck();
-                carteForceAtom(attackInfo);
+                createCarteForceAtom(attackInfo);
             }
+            drainLifeByJudgmentDraw();
         }
 
         Option o1 = new Option();
@@ -326,153 +339,100 @@ public class Phantom extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        for(Job jobHandler : stealJobHandlers) {
-            jobHandler.handleSkill(c, skillID, slv, inPacket);
-        }
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case VOL_DAME:
-                    Rect rect = new Rect(   //NPE when using the skill's rect
-                            new Position(
-                                    chr.getPosition().getX() - 250,
-                                    chr.getPosition().getY() - 250),
-                            new Position(
-                                    chr.getPosition().getX() + 250,
-                                    chr.getPosition().getY() + 250)
-                    );
-                    List<Mob> mobs = chr.getField().getMobsInRect(rect);
-                    MobStat buffFromMobStat = MobStat.Mystery; //Needs to be initialised
-                    MobStat[] mobStats = new MobStat[]{ //Ordered from Weakest to Strongest, since  the for loop will save the last MobsStat
-                            PCounter,           //Dmg Reflect 600%
-                            MCounter,           //Dmg Reflect 600%
-                            PImmune,            //Dmg Recv -40%
-                            MImmune,            //Dmg Recv -40%
-                            PowerUp,            //Attack +40
-                            MagicUp,            //Attack +40
-                            MobStat.Invincible, //Invincible for short time
-                    };
-                    for (Mob mob : mobs) {
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        List<MobStat> currentMobStats = Arrays.stream(mobStats).filter(ms -> mts.hasCurrentMobStat(ms)).collect(Collectors.toList());
-                        for (MobStat currentMobStat : currentMobStats) {
-                            if (mts.hasCurrentMobStat(currentMobStat)) {
-                                mts.removeMobStat(currentMobStat, true);
-                                buffFromMobStat = currentMobStat;
-                            }
-                        }
+    private void createCarteForceAtom(AttackInfo attackInfo) {
+        if (chr.hasSkill(CARTE_BLANCHE)) {
+            SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
+            int anglenum = new Random().nextInt(30) + 295;
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(mob == null) {
+                    continue;
+                }
+                int TW1prop = 100;
+                if (Util.succeedProp(TW1prop)) {
+                    if (chr.hasSkill(CARTE_NOIR)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();
+                        int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
+                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position()); //Slightly behind the player
+                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), CARTE_NOIR, mob.getPosition()));
+                    } else if (chr.hasSkill(CARTE_BLANCHE)) {
+                        int mobID = mai.mobId;
+                        int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
+                        int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
+                        ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                                anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                                new Position()); //Slightly behind the player
+                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                                true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
+                                mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
                     }
-                    switch (buffFromMobStat) {
-                        case PCounter:
-                        case MCounter:
-                            o1.nOption = si.getValue(y, slv);
-                            o1.rOption = skillID;
-                            o1.tOption = 30;
-                            tsm.putCharacterStatValue(PowerGuard, o1);
-                            break;
-                        case PImmune:
-                        case MImmune:
-                            o1.nOption = si.getValue(x, slv);
-                            o1.rOption = skillID;
-                            o1.tOption = 30;
-                            tsm.putCharacterStatValue(CharacterTemporaryStat.EVA, o1); //as a check to allow for DmgReduction in the Hit Handler
-                            break;
-                        case PowerUp:
-                        case MagicUp:
-                            o1.nOption = si.getValue(epad, slv);
-                            o1.rOption = skillID;
-                            o1.tOption = 30;
-                            tsm.putCharacterStatValue(CharacterTemporaryStat.PAD, o1);
-                            break;
-                        case Invincible:
-                            o1.nOption = 1;
-                            o1.rOption = skillID;
-                            o1.tOption = 5;
-                            tsm.putCharacterStatValue(NotDamaged, o1);
-                            break;
-                    }
-                    tsm.sendSetStatPacket();
-                    break;
-
-                case IMPECCABLE_MEMORY_I:
-                case IMPECCABLE_MEMORY_II:
-                case IMPECCABLE_MEMORY_III:
-                case IMPECCABLE_MEMORY_IV:
-                    //case IMPECCABLE_MEMORY_H
-                    //TODO
-                    break;
-                case TO_THE_SKIES:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case JUDGMENT_DRAW_1:
-                case JUDGMENT_DRAW_2:
-                    carteForceAtomJudgmentDraw();
-                    resetCardStack();
-                    break;
-                case HEROS_WILL_PH:
-                    tsm.removeAllDebuffs();
-                    break;
+                }
             }
         }
     }
 
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-        for(Job jobHandler : stealJobHandlers) {
-            jobHandler.handleHit(c, inPacket, hitInfo);
+    private void createCarteForceAtomByJudgmentDraw() {
+        if (chr.hasSkill(CARTE_BLANCHE)) {
+            SkillInfo si = SkillData.getSkillInfoById(CARTE_BLANCHE);
+            Rect rect = new Rect(
+                    new Position(
+                            chr.getPosition().getX() - 450,
+                            chr.getPosition().getY() - 450),
+                    new Position(
+                            chr.getPosition().getX() + 450,
+                            chr.getPosition().getY() + 450)
+            );
+            List<Mob> mobs = chr.getField().getMobsInRect(rect);
+            if (mobs.size() <= 0) {
+                chr.dispose();
+                return;
+            }
+            Mob mob = Util.getRandomFromCollection(mobs);
+
+            for (int i = 0; i < 10; i++) {
+                if (chr.hasSkill(CARTE_NOIR)) {
+                    int mobID = mob.getObjectId();
+                    int inc = ForceAtomEnum.PHANTOM_CARD_2.getInc();
+                    int type = ForceAtomEnum.PHANTOM_CARD_2.getForceAtomType();
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
+                            350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
+                            new Position()); //Slightly behind the player
+                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                            true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
+                            mob.getPosition(), CARTE_NOIR, mob.getPosition()));
+                } else if (chr.hasSkill(CARTE_BLANCHE)) {
+                    int mobID = mob.getObjectId();
+                    int inc = ForceAtomEnum.PHANTOM_CARD_1.getInc();
+                    int type = ForceAtomEnum.PHANTOM_CARD_1.getForceAtomType();
+                    ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                            350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
+                            new Position()); //Slightly behind the player
+                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                            true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
+                            mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
+                }
+            }
         }
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if (!chr.hasSkill(VOL_DAME)) {
+    }
+
+    private void drainLifeByJudgmentDraw() {
+        if(!chr.hasSkill(JUDGMENT_DRAW_2)) {
             return;
         }
-        if (tsm.getOptByCTSAndSkill(CharacterTemporaryStat.EVA, VOL_DAME) != null) {
-            Skill skill = chr.getSkill(VOL_DAME);
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            int dmgPerc = si.getValue(x, skill.getCurrentLevel());
-            int dmg = hitInfo.hpDamage;
-            hitInfo.hpDamage = dmg - (dmg * (dmgPerc / 100));
-        }
-
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case PHANTOM:
-            case PHANTOM1:
-            case PHANTOM2:
-            case PHANTOM3:
-            case PHANTOM4:
-                return true;
-            default:
-                return false;
+        Skill skill = chr.getSkill(JUDGMENT_DRAW_2);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if(tsm.hasStat(Judgement) && tsm.getOption(Judgement).nOption == 5) {
+            int healrate = si.getValue(z, slv);
+            chr.heal((int) (chr.getMaxHP() * ((double) healrate / 100)));
         }
     }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
 
     private int getMaxCards() {
         int num = 0;
@@ -502,5 +462,177 @@ public class Phantom extends Job {
         if (getCardAmount() < getMaxCards()) {
             setCardAmount((byte) (getCardAmount() + 1));
         }
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        for(Job jobHandler : stealJobHandlers) {
+            jobHandler.handleSkill(c, skillID, slv, inPacket);
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case VOL_DAME:
+                    stealBuffVolDame();
+                    break;
+                case TO_THE_SKIES:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case JUDGMENT_DRAW_1:
+                case JUDGMENT_DRAW_2:
+                    createCarteForceAtomByJudgmentDraw();
+                    giveJudgmentDrawBuff(skillID);
+                    resetCardStack();
+                    break;
+                case HEROS_WILL_PH:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+    private void stealBuffVolDame() {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+
+        if(!chr.hasSkill(VOL_DAME)) {
+            return;
+        }
+
+        Skill skill = chr.getSkill(VOL_DAME);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        Rect rect = new Rect(   //NPE when using the skill's rect
+                new Position(
+                        chr.getPosition().getX() - 250,
+                        chr.getPosition().getY() - 250),
+                new Position(
+                        chr.getPosition().getX() + 250,
+                        chr.getPosition().getY() + 250)
+        );
+        List<Mob> mobs = chr.getField().getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
+        }
+        MobStat buffFromMobStat = MobStat.Mystery; //Needs to be initialised
+        MobStat[] mobStats = new MobStat[]{ //Ordered from Weakest to Strongest, since  the for loop will save the last MobsStat
+                PCounter,           //Dmg Reflect 600%
+                MCounter,           //Dmg Reflect 600%
+                PImmune,            //Dmg Recv -40%
+                MImmune,            //Dmg Recv -40%
+                PowerUp,            //Attack +40
+                MagicUp,            //Attack +40
+                MobStat.Invincible, //Invincible for short time
+        };
+        for (Mob mob : mobs) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            List<MobStat> currentMobStats = Arrays.stream(mobStats).filter(mts::hasCurrentMobStat).collect(Collectors.toList());
+            for (MobStat currentMobStat : currentMobStats) {
+                if (mts.hasCurrentMobStat(currentMobStat)) {
+                    mts.removeMobStat(currentMobStat, true);
+                    buffFromMobStat = currentMobStat;
+                }
+            }
+        }
+        switch (buffFromMobStat) {
+            case PCounter:
+            case MCounter:
+                o1.nOption = si.getValue(y, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 30;
+                tsm.putCharacterStatValue(PowerGuard, o1);
+                break;
+            case PImmune:
+            case MImmune:
+                o1.nOption = si.getValue(x, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 30;
+                tsm.putCharacterStatValue(CharacterTemporaryStat.EVA, o1); //as a check to allow for DmgReduction in the Hit Handler
+                break;
+            case PowerUp:
+            case MagicUp:
+                o1.nOption = si.getValue(epad, slv);
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 30;
+                tsm.putCharacterStatValue(CharacterTemporaryStat.PAD, o1);
+                break;
+            case Invincible:
+                o1.nOption = 1;
+                o1.rOption = skill.getSkillId();
+                o1.tOption = 5;
+                tsm.putCharacterStatValue(NotDamaged, o1);
+                break;
+        }
+        tsm.sendSetStatPacket();
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+        for(Job jobHandler : stealJobHandlers) {
+            jobHandler.handleHit(c, inPacket, hitInfo);
+        }
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (!chr.hasSkill(VOL_DAME)) {
+            return;
+        }
+        if (tsm.getOptByCTSAndSkill(CharacterTemporaryStat.EVA, VOL_DAME) != null) {
+            Skill skill = chr.getSkill(VOL_DAME);
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int dmgPerc = si.getValue(x, skill.getCurrentLevel());
+            int dmg = hitInfo.hpDamage;
+            hitInfo.hpDamage = dmg - (dmg * (dmgPerc / 100));
+        }
+
+        super.handleHit(c, inPacket, hitInfo);
+    }
+
+    public static void reviveByFinalFeint(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        Skill skill = chr.getSkill(FINAL_FEINT);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        chr.heal(chr.getMaxHP());
+        tsm.removeStatsBySkill(skill.getSkillId());
+        tsm.sendResetStatPacket();
+        chr.chatMessage("You have been revived by Final Feint.");
+        chr.write(User.effect(Effect.skillSpecial(skill.getSkillId())));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(skill.getSkillId())));
+
+        o.nOption = 1;
+        o.rOption = skill.getSkillId();
+        o.tStart = si.getValue(y, slv);
+        tsm.putCharacterStatValue(NotDamaged, o);
+        tsm.sendSetStatPacket();
     }
 }

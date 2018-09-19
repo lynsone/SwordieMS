@@ -1,14 +1,20 @@
 package net.swordie.ms.client.guild;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "guildmembers")
-public class GuildMember {
+public class GuildMember implements Encodable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -20,8 +26,7 @@ public class GuildMember {
     private int commitment;
     private int dayCommitment;
     private int igp;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "commitmentIncTime")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime commitmentIncTime;
     private String name;
     private int job;
@@ -35,6 +40,8 @@ public class GuildMember {
     public GuildMember(Char chr) {
         this.chr = chr;
         updateInfoFromChar(chr);
+        grade = 5;
+        allianceGrade = 5;
     }
 
     public void updateInfoFromChar(Char chr) {
@@ -112,6 +119,27 @@ public class GuildMember {
         outPacket.encodeInt(getDayCommitment());
         outPacket.encodeInt(getIgp());
         outPacket.encodeFT(getCommitmentIncTime());
+    }
+
+    public int getRemainingDayCommitment() {
+        return GameConstants.MAX_DAY_COMMITMENT - getDayCommitment();
+    }
+
+    public void addCommitment(int commitment) {
+        setCommitment(getCommitment() + commitment);
+        setDayCommitment(getDayCommitment() + commitment);
+        addIgp((int) (commitment * GameConstants.IGP_PER_CONTRIBUTION));
+        setCommitmentIncTime(FileTime.currentTime());
+        if (getChr() != null) {
+            Guild g = getChr().getGuild();
+            g.broadcast(WvsContext.guildResult(GuildResult.setMemberCommitment(g, this)));
+            getChr().write(WvsContext.message(MessageType.INC_COMMITMENT_MESSAGE, commitment, "", (byte) 0));
+        }
+
+    }
+
+    private void addIgp(int igp) {
+        setIgp(getIgp() + igp);
     }
 
     @Override

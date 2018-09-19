@@ -1,6 +1,7 @@
 package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.life.pet.PetSkill;
@@ -8,7 +9,6 @@ import org.apache.log4j.Logger;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * Created on 4/14/2018.
@@ -26,8 +26,7 @@ public class PetItem extends Item {
     private byte repleteness; // hungry thing
     private short petAttribute;
     private int petSkill;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "dateDead")
+    @Convert(converter = FileTimeConverter.class)
     private FileTime dateDead;
     private int remainLife;
     private short attribute;
@@ -47,7 +46,7 @@ public class PetItem extends Item {
         outPacket.encodeByte(getLevel());
         outPacket.encodeShort(getTameness() + 1);
         outPacket.encodeByte(getRepleteness());
-        outPacket.encodeFT(getDateDead());
+        outPacket.encodeFT(getDateDead()); // 0 = no date dead
         outPacket.encodeShort(getPetAttribute());
         outPacket.encodeShort(getPetSkill());
         outPacket.encodeInt(getRemainLife());
@@ -163,10 +162,9 @@ public class PetItem extends Item {
     }
 
     public Pet createPet(Char chr) {
-        Pet pet = new Pet(-1);
+        Pet pet = new Pet(getItemId(), chr.getId());
         pet.setFh(chr.getFoothold());
         pet.setPosition(chr.getPosition());
-        pet.setId(getItemId());
         int chosenIdx = chr.getFirstPetIdx();
         if(chosenIdx == -1) {
             log.error("Tried to create a pet while 3 pets already exist.");
@@ -182,6 +180,7 @@ public class PetItem extends Item {
 
     public PetItem deepCopy() {
         PetItem petItem = (PetItem) super.deepCopy();
+
         petItem.setName(getName());
         petItem.setLevel(getLevel());
         petItem.setTameness(getTameness());
@@ -204,6 +203,12 @@ public class PetItem extends Item {
     }
 
     public void removePetSkill(PetSkill petSkill) {
-        setPetSkill(getPetSkill() ^ petSkill.getVal());
+        if (hasPetSkill(petSkill)) {
+            setPetSkill(getPetSkill() ^ petSkill.getVal());
+        }
+    }
+
+    public boolean hasPetSkill(PetSkill petSkill) {
+        return (getPetSkill() & petSkill.getVal()) != 0;
     }
 }

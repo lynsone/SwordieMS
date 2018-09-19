@@ -267,6 +267,8 @@ public class QuestData {
                         case "mob":
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
                                 QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
+                                // items are always after mobs
+                                qpmr.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -287,31 +289,11 @@ public class QuestData {
                                 quest.addProgressRequirement(qpmr);
                             }
                             break;
-                        case "skill":
-                            for (Node idNode : XMLApi.getAllChildren(infoNode)) {
-                                for (Node questNode : XMLApi.getAllChildren(idNode)) {
-                                    String questName = XMLApi.getNamedAttribute(questNode, "name");
-                                    String questValue = XMLApi.getNamedAttribute(questNode, "value");
-                                    switch (questName) {
-                                        case "id":
-                                            quest.setSkill(Integer.parseInt(questValue));
-                                            break;
-                                        case "order":
-                                        case "acquire":
-                                        case "level":
-                                        case "levelCondition":
-                                            break;
-                                        default:
-                                            log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
-                                            break;
-                                    }
-                                }
-                            }
-                            break;
                         case "item":
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
                                 QuestStartItemRequirement qir = new QuestStartItemRequirement();
                                 QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
+                                qpir.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -331,6 +313,7 @@ public class QuestData {
                                             }
                                             break;
                                         case "order":
+                                            break;
                                         case "secret":
                                             break;
                                         default:
@@ -342,6 +325,27 @@ public class QuestData {
                                     quest.addRequirement(qir);
                                 } else {
                                     quest.addProgressRequirement(qpir);
+                                }
+                            }
+                            break;
+                        case "skill":
+                            for (Node idNode : XMLApi.getAllChildren(infoNode)) {
+                                for (Node questNode : XMLApi.getAllChildren(idNode)) {
+                                    String questName = XMLApi.getNamedAttribute(questNode, "name");
+                                    String questValue = XMLApi.getNamedAttribute(questNode, "value");
+                                    switch (questName) {
+                                        case "id":
+                                            quest.setSkill(Integer.parseInt(questValue));
+                                            break;
+                                        case "order":
+                                        case "acquire":
+                                        case "level":
+                                        case "levelCondition":
+                                            break;
+                                        default:
+                                            log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
+                                            break;
+                                    }
                                 }
                             }
                             break;
@@ -633,14 +637,18 @@ public class QuestData {
         QuestInfo qi = getQuestInfoById(questID);
         Quest quest = new Quest();
         quest.setQRKey(questID);
-        if (qi.isAutoComplete()) {
-            quest.setStatus(QuestStatus.STARTED);
+        if (qi != null) {
+            if (qi.isAutoComplete()) {
+                quest.setStatus(QuestStatus.STARTED);
 //            quest.completeQuest(); // TODO check what autocomplete actually means
+            } else {
+                quest.setStatus(QuestStatus.STARTED);
+            }
+            for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
+                quest.addQuestProgressRequirement(qpr.deepCopy());
+            }
         } else {
             quest.setStatus(QuestStatus.STARTED);
-        }
-        for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
-            quest.addQuestProgressRequirement(qpr.deepCopy());
         }
         return quest;
     }

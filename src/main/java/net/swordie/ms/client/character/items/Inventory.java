@@ -1,12 +1,16 @@
 package net.swordie.ms.client.character.items;
 
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.InvType;
-import org.hibernate.annotations.Cascade;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -20,21 +24,26 @@ public class Inventory {
     private int id;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventoryId")
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private List<Item> items;
     @Column(name = "type")
     private InvType type;
     private byte slots;
 
     public Inventory() {
-        items = new ArrayList<>();
+        items = new CopyOnWriteArrayList<>();
         type = InvType.EQUIP;
     }
 
     public Inventory(InvType t, int slots) {
         this.type = t;
-        items = new ArrayList<>();
+        items = new CopyOnWriteArrayList<>();
         this.slots = (byte) slots;
+    }
+
+    public Inventory deepCopy() {
+        Inventory inventory = new Inventory(getType(), getSlots());
+        inventory.setItems(new CopyOnWriteArrayList<>(getItems()));
+        return inventory;
     }
 
     public int getId() {
@@ -54,10 +63,13 @@ public class Inventory {
     }
 
     public void addItem(Item item) {
-        if(getItems().size() <= getSlots()) {
+        if(getItems().size() < getSlots()) {
             getItems().add(item);
             item.setInvType(getType());
             sortItemsByIndex();
+            if (item.getId() == 0) { // ensures that each item has a unique id
+                DatabaseManager.saveToDB(this);
+            }
         }
     }
     public void removeItem(Item item) {
@@ -66,12 +78,16 @@ public class Inventory {
     }
 
     public int getFirstOpenSlot() {
-        for (int i = 1; i <= getSlots(); i++) {
-            if(getItemBySlot(i) == null) {
-                return i;
+        int oldIndex = 0;
+        for (Item item : getItems()) {
+            // items are always sorted by bag index
+            if (item.getBagIndex() - oldIndex > 1) {
+                // there's a gap between 2 consecutive items
+                break;
             }
+            oldIndex = item.getBagIndex();
         }
-        return 0;
+        return oldIndex + 1;
     }
 
     public Item getFirstItemByBodyPart(BodyPart bodyPart) {
@@ -88,7 +104,11 @@ public class Inventory {
     }
 
     public void sortItemsByIndex() {
-        getItems().sort(Comparator.comparingInt(Item::getBagIndex));
+        // workaround for sort not being available for CopyOnWriteArrayList
+        List<Item> temp = new ArrayList<>(getItems());
+        temp.sort(Comparator.comparingInt(Item::getBagIndex));
+        getItems().clear();
+        getItems().addAll(temp);
     }
 
     public void setItems(List<Item> items) {
@@ -113,6 +133,21 @@ public class Inventory {
 
     public Item getItemByItemID(int itemId) {
         return getItems().stream().filter(item -> item.getItemId() == itemId).findFirst().orElse(null);
+    }
+
+    public Item getItemByItemIDAndStackable(int itemId) {
+        ItemInfo ii = ItemData.getItemInfoByID(itemId);
+        if (ii == null) {
+            return getItemByItemID(itemId);
+        }
+        return getItems().stream()
+                .filter(item -> item.getItemId() == itemId && item.getQuantity() < ii.getSlotMax())
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Item getItemBySN(long sn) {
+        return getItems().stream().filter(item -> item.getId() == sn).findFirst().orElse(null);
     }
 
     public boolean containsItem(int itemID) {

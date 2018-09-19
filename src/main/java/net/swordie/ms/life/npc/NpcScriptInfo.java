@@ -28,6 +28,41 @@ public class NpcScriptInfo {
 	private boolean angelicBuster;
 	private boolean zeroBeta;
 	private int dlgType;
+	private int templateID;
+
+	public NpcScriptInfo deepCopy() {
+		NpcScriptInfo nsi = new NpcScriptInfo();
+		if (options != null) {
+			System.arraycopy(options, 0, nsi.options, 0, options.length);
+		}
+		nsi.speakerType = speakerType;
+		nsi.overrideSpeakerTemplateID = overrideSpeakerTemplateID;
+		nsi.param = param;
+		nsi.color = color;
+		nsi.text = text;
+		nsi.messageType = messageType;
+		if (images != null) {
+			nsi.images = images.clone();
+		}
+		nsi.min = min;
+		nsi.max = max;
+		nsi.defaultText = defaultText;
+		nsi.defaultNumber = defaultNumber;
+		nsi.type = type;
+		nsi.time = time;
+		nsi.title = title;
+		nsi.problemText = problemText;
+		nsi.hintText = hintText;
+		nsi.quizType = quizType;
+		nsi.answer = answer;
+		nsi.correctAnswers = correctAnswers;
+		nsi.remaining = remaining;
+		nsi.angelicBuster = angelicBuster;
+		nsi.zeroBeta = zeroBeta;
+		nsi.dlgType = dlgType;
+		nsi.templateID = templateID;
+		return nsi;
+	}
 
 	public byte getSpeakerType() {
 		return speakerType;
@@ -235,15 +270,41 @@ public class NpcScriptInfo {
 		setParam((byte) 0);
 	}
 
+	public void reset() {
+		resetParam();
+		setSpeakerType((byte) 0);
+		setColor((byte) 0);
+	}
+
+	public boolean hasParam(Param param) {
+		return (getParam() & param.getVal()) != 0;
+	}
+
+	public int getTemplateID() {
+		return templateID;
+	}
+
+	public void setTemplateID(int templateID) {
+		this.templateID = templateID;
+	}
+
 	public enum Param {
 		NotCancellable(0x1),
 		PlayerAsSpeaker(0x2),
+		PlayerAsSpeakerNoEndChat(0x3),
 		OverrideSpeakerID(0x4),
 		FlipSpeaker(0x8),
+		FlipSpeakerNoEndChat(0x9),
 		PlayerAsSpeakerFlip(0x10),
-		FancyChat(0x20),
-
-
+		PlayerAsSpeakerFlipNoEndChat(0x11),
+		BoxChat(0x20), // Standard BoxChat if Color = 1  |  Zero BoxChat if Color = 0
+		BoxChatNoEndChat(0x21),
+		BoxChatAsPlayer(0x22),
+		BoxChatAsPlayerNoEndChat(0x23),
+		FlipBoxChat(0x28),
+		FlipBoxChatNoEscape(0x29),
+		FlipBoxChatAsPlayer(0x30),
+		FlipBoxChatAsPlayerNoEscape(0x31),
 		;
 
 		private int val;

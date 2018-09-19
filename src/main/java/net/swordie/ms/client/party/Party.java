@@ -1,9 +1,7 @@
 package net.swordie.ms.client.party;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.party.result.LeavePartyResult;
-import net.swordie.ms.client.party.result.PartyJoinResult;
-import net.swordie.ms.client.party.updates.UpdatePartyResult;
+import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.connection.OutPacket;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Created on 3/19/2018.
  */
-public class Party {
+public class Party implements Encodable {
     private int id;
     private PartyMember[] partyMembers = new PartyMember[6];
     private boolean appliable;
@@ -73,14 +71,12 @@ public class Party {
             outPacket.encodeInt(pm != null ? pm.getLevel() : 0);
         }
         for(PartyMember pm : partyMembers) {
-            outPacket.encodeInt(pm != null ? pm.getChannel() - 1 : 0);
+            outPacket.encodeInt(pm != null ? pm.getChannel() - 1 : -1);
         }
         for(PartyMember pm : partyMembers) {
             outPacket.encodeInt(pm != null && pm.isOnline() ? 1 : 0);
         }
-//        for(PartyMember pm : partyMembers) {
-            outPacket.encodeInt(getPartyLeaderID());
-//        }
+        outPacket.encodeInt(getPartyLeaderID());
         // end PARTYMEMBER struct
         for(PartyMember pm : partyMembers) {
             outPacket.encodeInt(pm != null ? pm.getFieldID() : 0);
@@ -118,15 +114,17 @@ public class Party {
             setPartyLeaderID(chr.getId());
         }
         PartyMember[] partyMembers = getPartyMembers();
-        PartyJoinResult pjr = new PartyJoinResult();
-        pjr.party = this;
-        pjr.joinerName = chr.getName();
+        boolean added = false;
         for(int i = 0; i < partyMembers.length; i++) {
             if(partyMembers[i] == null) {
                 partyMembers[i] = pm;
                 chr.setParty(this);
+                added = true;
                 break;
             }
+        }
+        if (added) {
+            broadcast(WvsContext.partyResult(PartyResult.joinParty(this, chr.getName())));
         }
     }
 
@@ -150,22 +148,13 @@ public class Party {
     }
 
     public boolean hasCharAsLeader(Char chr) {
-        return getPartyLeader().getChr().equals(chr);
+        return getPartyLeaderID() == chr.getId();
     }
 
     public void disband() {
-        LeavePartyResult lpr = new LeavePartyResult();
-        lpr.party = this;
-        lpr.partyExists = false;
-        lpr.leaver = getPartyLeader();
-        for(PartyMember pm : getPartyMembers()) {
-            if(pm == null) {
-                continue;
-            }
-            pm.getChr().setParty(null);
-            if(pm.isOnline()) {
-                pm.getChr().write(WvsContext.partyResult(lpr));
-            }
+        broadcast(WvsContext.partyResult(PartyResult.withdrawParty(this, getPartyLeader(), false, false)));
+        for (Char chr : getOnlineChars()) {
+            chr.setParty(null);
         }
         for (int i = 0; i < getPartyMembers().length; i++) {
             getPartyMembers()[i] = null;
@@ -187,15 +176,11 @@ public class Party {
     }
 
     public void updateFull() {
-        for(PartyMember pm : getOnlineMembers()) {
-            UpdatePartyResult upr = new UpdatePartyResult();
-            upr.party = this;
-            pm.getChr().write(WvsContext.partyResult(upr));
-        }
+        broadcast(WvsContext.partyResult(PartyResult.loadParty(this)));
     }
 
     public PartyMember getPartyMemberByID(int charID) {
-        return Arrays.stream(getPartyMembers()).filter(p -> p != null && p.getChr() != null && p.getCharID() == charID).findFirst().orElse(null);
+        return Arrays.stream(getPartyMembers()).filter(p -> p != null && p.getCharID() == charID).findFirst().orElse(null);
     }
 
     public void broadcast(OutPacket outPacket) {
@@ -224,13 +209,9 @@ public class Party {
     }
 
     public void expel(int expelID) {
-        LeavePartyResult lpr = new LeavePartyResult();
-        lpr.party = this;
-        lpr.leaver = getPartyMemberByID(expelID);
-        lpr.partyExists = true;
-        lpr.wasExpelled = true;
-        broadcast(WvsContext.partyResult(lpr));
-        removePartyMember(lpr.leaver);
+        PartyMember leaver = getPartyMemberByID(expelID);
+        broadcast(WvsContext.partyResult(PartyResult.withdrawParty(this, leaver, true, true)));
+        removePartyMember(leaver);
         updateFull();
     }
 
@@ -318,6 +299,7 @@ public class Party {
         if(!isPartyMember(chr)) {
             return;
         }
+        getPartyMemberByID(chr.getId()).updateInfoByChar(chr);
         updateFull();
     }
 
@@ -332,10 +314,24 @@ public class Party {
                 .mapToInt(PartyMember::getLevel).average().orElse(chr.getLevel());
     }
 
+    /**
+     * Gets a list of party members in the same Field instance as the given Char, excluding the given Char.
+     * @param chr the given Char
+     * @return a set of Characters that are in the same field as the given Char
+     */
     public Set<Char> getPartyMembersInSameField(Char chr) {
         return getOnlineMembers().stream()
                 .filter(pm -> pm.getChr() != null && pm.getChr() != chr && pm.getChr().getField() == chr.getField())
                 .map(PartyMember::getChr)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Checks if this Party has a member with the given character id.
+     * @param charID the charID to look for
+     * @return if the corresponding char is in the party
+     */
+    public boolean hasPartyMember(int charID) {
+        return getPartyMemberByID(charID) != null;
     }
 }

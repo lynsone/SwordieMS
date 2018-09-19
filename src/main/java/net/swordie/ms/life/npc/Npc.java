@@ -24,6 +24,8 @@ public class Npc extends Life {
     private ScreenInfo screenInfo;
     private Map<Integer, String> scripts = new HashMap<>();
     private boolean move;
+    private int trunkGet;
+    private int trunkPut;
 
 
     public Npc(int templateId) {
@@ -34,7 +36,7 @@ public class Npc extends Life {
         // CNpc::Init
         outPacket.encodePosition(getPosition());
         outPacket.encodeByte(isMove());
-        outPacket.encodeByte(getF() == 1 ? 0 : 1);
+        outPacket.encodeByte(!isFlip());
         outPacket.encodeShort(getFh());
         outPacket.encodeShort(getRx0()); // rgHorz.low
         outPacket.encodeShort(getRx1()); // rgHorz.high
@@ -135,7 +137,7 @@ public class Npc extends Life {
         copy.setX(getX());
         copy.setY(getY());
         copy.setMobTime(getMobTime());
-        copy.setF(getF());
+        copy.setFlip(isFlip());
         copy.setHide(isHide());
         copy.setFh(getFh());
         copy.setCy(getCy());
@@ -152,6 +154,8 @@ public class Npc extends Life {
         copy.setRegenStart(getRegenStart());
         copy.setMove(isMove());
         copy.setMobAliveReq(getMobAliveReq());
+        copy.setTrunkGet(getTrunkGet());
+        copy.setTrunkPut(getTrunkPut());
         copy.getScripts().putAll(getScripts());
         return copy;
     }
@@ -170,6 +174,15 @@ public class Npc extends Life {
         }
     }
 
+    @Override
+    public void broadcastLeavePacket() {
+        Field field = getField();
+        for (Char chr : field.getChars()) {
+            chr.write(NpcPool.npcLeaveField(this));
+            chr.write(NpcPool.npcChangeController(this, false, true));
+        }
+    }
+    
     public boolean isMove() {
         return move;
     }
@@ -181,5 +194,21 @@ public class Npc extends Life {
     @Override
     public String toString() {
         return super.toString() + ", Move: " + isMove();
+    }
+
+    public void setTrunkGet(int trunkGet) {
+        this.trunkGet = trunkGet;
+    }
+
+    public int getTrunkGet() {
+        return trunkGet;
+    }
+
+    public void setTrunkPut(int trunkPut) {
+        this.trunkPut = trunkPut;
+    }
+
+    public int getTrunkPut() {
+        return trunkPut;
     }
 }

@@ -14,10 +14,9 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.ChatMsgColour;
+import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
@@ -27,11 +26,13 @@ import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -62,7 +63,7 @@ public class Kaiser extends Job {
     public static final int NOVA_TEMPERANCE_KAISER = 61121015;
 
     public static final int FINAL_TRANCE = 61121053;
-    public static final int KAISERS_MAJESTY = 61121054;
+    public static final int KAISERS_MAJESTY = 61121054; // TODO reset Cooldown
 
 
     //Attacking Skills
@@ -147,6 +148,29 @@ public class Kaiser extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isKaiser(id);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setLevel(10);
+        cs.setJob(6100);
+        cs.setStr(49);
+        Item secondary = ItemData.getItemDeepCopy(1352500);
+        secondary.setBagIndex(10);
+        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
+        chr.setSpToCurrentJob(5);
+        chr.getEquippedInventory().addItem(secondary);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -164,17 +188,26 @@ public class Kaiser extends Job {
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
-                handleRealignAttackSkill();
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    tsm.removeStatsBySkill(REALIGN_DEFENDER_MODE);
+                    giveRealignAttackBuffs();
+                }
                 break;
             case REALIGN_DEFENDER_MODE:
-                handleRealignDefendSkill();
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    tsm.removeStatsBySkill(REALIGN_ATTACKER_MODE);
+                    giveRealignDefendBuffs();
+                }
                 break;
             case BLAZE_ON:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case CURSEBITE:
                 o1.nOption = si.getValue(asrR, slv);
@@ -218,7 +251,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case TEMPEST_BLADES_THREE_FF: //Final Form
                 if(tsm.getOption(StopForceAtomInfo).nOption != 3 && tsm.hasStat(StopForceAtomInfo)) {
@@ -234,9 +266,7 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
-
             case TEMPEST_BLADES_FIVE:
                 if(tsm.getOption(StopForceAtomInfo).nOption != 2 && tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
@@ -251,7 +281,6 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
             case TEMPEST_BLADES_FIVE_FF: //Final Form
                 if(tsm.getOption(StopForceAtomInfo).nOption != 4 && tsm.hasStat(StopForceAtomInfo)) {
@@ -267,9 +296,7 @@ public class Kaiser extends Job {
                 stopForceAtom.setAngleInfo(angles);
                 tsm.setStopForceAtom(stopForceAtom);
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
-                chr.chatMessage(ChatMsgColour.PARTY_PURPLE, "StopForceAtom nOption = " + tsm.getOption(StopForceAtomInfo).nOption);
                 break;
-
             case FINAL_FORM_THIRD:
                 if(tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
@@ -302,7 +329,6 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(Speed, o5);
                 resetGauge(c, tsm);
                 break;
-
             case FINAL_TRANCE:
             case FINAL_FORM_FOURTH:
                 if(tsm.hasStat(StopForceAtomInfo)) {
@@ -336,15 +362,14 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(Speed, o5);
                 resetGauge(c, tsm);
                 break;
-
-            case KAISERS_MAJESTY:   //Lowers Range for w/e reason
+            case KAISERS_MAJESTY:
                 o1.nReason = skillID;
                 o1.nValue = -1;
                 o1.tStart = (int) System.currentTimeMillis();
                 o1.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieBooster, o1);
                 o2.nReason = skillID;
-                o2.nValue = (-1 * si.getValue(indiePad, slv));
+                o2.nValue = si.getValue(indiePad, slv);
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
@@ -356,292 +381,28 @@ public class Kaiser extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
-    }
-
-    private void handleMorphGauge(int skillId, TemporaryStatManager tsm, Client c, int increment) {
-        Option o = new Option();
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        Option o4 = new Option();
-        SkillInfo gaugeInfo = SkillData.getSkillInfoById(60000219);
-        int amount = 1;
-        int stage = 0;
-        if(chr.hasSkill(60000219)) {
-            amount = tsm.getOption(SmashStack).nOption;
-                if (amount <= (getKaiserGauge(chr))) {
-                    if(amount + increment > getKaiserGauge(chr)) {
-                        amount = getKaiserGauge(chr);
-                    } else {
-                        amount = tsm.getOption(SmashStack).nOption + increment;
-                    }
-                }
-                if (amount >= gaugeInfo.getValue(s, 1)) {
-                    stage = 1;
-                }
-                if (amount >= (gaugeInfo.getValue(v, 1)) - 1) {
-                    stage = 2;
-                }
-        }
-        o.nOption = amount;
-        o.rOption = 0;
-        o.tOption = 0;
-        tsm.putCharacterStatValue(SmashStack, o);
-        o1.nOption = (stage * gaugeInfo.getValue(prop, 1));
-        o1.rOption = 0;
-        o1.tOption = 0;
-        tsm.putCharacterStatValue(Stance, o1);
-        o2.nOption = (stage * gaugeInfo.getValue(psdJump, 1));
-        o2.rOption = 0;
-        o2.tOption = 0;
-        tsm.putCharacterStatValue(Jump, o2);
-        o3.nOption = (stage * gaugeInfo.getValue(psdSpeed, 1));
-        o3.rOption = 0;
-        o3.tOption = 0;
-        tsm.putCharacterStatValue(Speed, o3);
-        o4.nReason = 0;
-        o4.nValue = (stage * gaugeInfo.getValue(actionSpeed, 1));
-        o4.tStart = (int) System.currentTimeMillis();
-        o4.tTerm = 0;
-        tsm.putCharacterStatValue(IndieBooster, o4); //Indie
-        c.write(WvsContext.temporaryStatSet(tsm));
-    }
-
-    private void resetGauge(Client c, TemporaryStatManager tsm) {
-        tsm.removeStat(SmashStack, false);
-        c.write(WvsContext.temporaryStatReset(tsm, false));
-    }
-
-    private int getKaiserGauge(Char chr) {
-        int maxGauge;
-        switch (chr.getJob()) {
-            case 6100:
-                maxGauge = SkillData.getSkillInfoById(60000219).getValue(s, 1);
-                break;
-            case 6110:
-                maxGauge = SkillData.getSkillInfoById(60000219).getValue(u, 1);
-                break;
-            case 6111:
-            case 6112:
-                maxGauge = SkillData.getSkillInfoById(60000219).getValue(v, 1);
-                break;
-            default:
-                maxGauge = 0;
-        }
-        return maxGauge;
+        tsm.sendSetStatPacket();
     }
 
     public boolean isBuff(int skillID) {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-    @Override
-
-    public void handleAttack(Client c, AttackInfo attackInfo) {
-        Char chr = c.getChr();
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Skill skill = chr.getSkill(attackInfo.skillId);
-        int skillID = 0;
-        SkillInfo si = null;
-        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
-        int slv = 0;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skill.getSkillId());
-            slv = skill.getCurrentLevel();
-            skillID = skill.getSkillId();
-        }
-        if(hasHitMobs) {
-            handleMorphGauge(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, c,
-                    (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
-        }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
-        switch (attackInfo.skillId) {
-            case PIERCING_BLAZE:
-                SkillInfo pbi = SkillData.getSkillInfoById(PIERCING_BLAZE);
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(pbi.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = pbi.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
-                }
-                break;
-            case PIERCING_BLAZE_FINAL_FORM:
-                SkillInfo pbffi = SkillData.getSkillInfoById(PIERCING_BLAZE_FINAL_FORM);
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = pbffi.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                }
-                break;
-            case WING_BEAT:
-                SkillInfo wbi = SkillData.getSkillInfoById(WING_BEAT);
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(wbi.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = 5;
-                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                    }
-                }
-                break;
-            case WING_BEAT_FINAL_FORM:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = 5;
-                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                }
-                break;
-            case PRESSURE_CHAIN:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = 3;
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                    }
-                }
-                break;
-            case PRESSURE_CHAIN_FINAL_FORM:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = 3;
-                    mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
-                }
-                break;
-            case GIGA_WAVE:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = -30;
-                        o1.rOption = skillID;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                    }
-                }
-                break;
-            case GIGA_WAVE_FINAL_FORM:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = -30;
-                    o1.rOption = GIGA_WAVE;
-                    o1.tOption = 4;
-                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                }
-                break;
-
-            case STONE_DRAGON:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                    }
-                }
-                break;
-            case STONE_DRAGON_FINAL_FORM:
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = skillID;
-                        o1.tOption = si.getValue(time, slv);
-                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
-                    }
-                }
-                break;
-
-            case INFERNO_BREATH:
-            case INFERNO_BREATH_FINAL_FORM:
-                SkillInfo rca = SkillData.getSkillInfoById(INFERNO_BREATH);
-                AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
-                aa.setMobOrigin((byte) 0);
-                aa.setSkillID(INFERNO_BREATH);
-                aa.setPosition(chr.getPosition());
-                aa.setRect(aa.getPosition().getRectAround(rca.getRects().get(0)));
-                aa.setDelay((short) 7); //spawn delay
-                chr.getField().spawnAffectedArea(aa);
-                break;
-        }
-
-        super.handleAttack(c, attackInfo);
-    }
-
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case NOVA_TEMPERANCE_KAISER:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isKaiser(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    public void handleRealignAttackSkill() {
+    public void giveRealignAttackBuffs() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -677,7 +438,7 @@ public class Kaiser extends Job {
         tsm.sendSetStatPacket();
     }
 
-    public void handleRealignDefendSkill() {
+    public void giveRealignDefendBuffs() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o1 = new Option();
         Option o2 = new Option();
@@ -731,17 +492,299 @@ public class Kaiser extends Job {
         return skill;
     }
 
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
+
     @Override
-    public void setCharCreationStats(Char chr) {
-        super.setCharCreationStats(chr);
-        CharacterStat cs = chr.getAvatarData().getCharacterStat();
-        cs.setLevel(10);
-        cs.setJob(6100);
-        cs.setStr(49);
-        Item secondary = ItemData.getItemDeepCopy(1352500);
-        secondary.setBagIndex(10);
-        chr.getAvatarData().getAvatarLook().getHairEquips().add(secondary.getItemId());
-        chr.setSpToCurrentJob(5);
-        chr.getEquippedInventory().addItem(secondary);
+    public void handleAttack(Client c, AttackInfo attackInfo) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(attackInfo.skillId);
+        int skillID = 0;
+        SkillInfo si = null;
+        boolean hasHitMobs = attackInfo.mobAttackInfo.size() > 0;
+        int slv = 0;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skill.getSkillId());
+            slv = skill.getCurrentLevel();
+            skillID = skill.getSkillId();
+        }
+        if(hasHitMobs) {
+            incrementMorphGauge(tsm, (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
+        }
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        switch (attackInfo.skillId) {
+            case PIERCING_BLAZE:
+                SkillInfo pbi = SkillData.getSkillInfoById(PIERCING_BLAZE);
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(pbi.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skillID;
+                            o1.tOption = pbi.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                break;
+            case PIERCING_BLAZE_FINAL_FORM:
+                SkillInfo pbffi = SkillData.getSkillInfoById(PIERCING_BLAZE_FINAL_FORM);
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = pbffi.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+            case WING_BEAT:
+                SkillInfo wbi = SkillData.getSkillInfoById(WING_BEAT);
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(wbi.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = 5;
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    }
+                }
+                break;
+            case WING_BEAT_FINAL_FORM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = 1;
+                    o1.rOption = skillID;
+                    o1.tOption = 5;
+                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                }
+                break;
+            case PRESSURE_CHAIN:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skillID;
+                            o1.tOption = 3;
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                break;
+            case PRESSURE_CHAIN_FINAL_FORM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(!mob.isBoss()) {
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = 3;
+                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                    }
+                }
+                break;
+            case GIGA_WAVE:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = -30;
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    }
+                }
+                break;
+            case GIGA_WAVE_FINAL_FORM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    o1.nOption = -30;
+                    o1.rOption = GIGA_WAVE;
+                    o1.tOption = 4;
+                    mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                }
+                break;
+
+            case STONE_DRAGON:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    }
+                }
+                break;
+            case STONE_DRAGON_FINAL_FORM:
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        MobTemporaryStat mts = mob.getTemporaryStat();
+                        o1.nOption = 1;
+                        o1.rOption = skillID;
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
+                    }
+                }
+                break;
+
+            case INFERNO_BREATH:
+            case INFERNO_BREATH_FINAL_FORM:
+                SkillInfo rca = SkillData.getSkillInfoById(INFERNO_BREATH);
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if(chr.getField().getAffectedAreas().stream()
+                            .filter(aa -> aa.getSkillID() == INFERNO_BREATH && aa.getCharID() == chr.getId())
+                            .collect(Collectors.toList()).size() > 3) {
+                        continue; // to limit the amount of AAs
+                    }
+
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
+                    aa.setDuration(rca.getValue(cooltime, slv) * 1000);
+                    aa.setMobOrigin((byte) 1);
+                    aa.setSkillID(INFERNO_BREATH);
+                    aa.setPosition(mob.getPosition());
+                    Rect rect = rca.getRects().get(0);
+                    if(!attackInfo.left) {
+                        rect = rect.moveRight();
+                    }
+                    aa.setRect(aa.getPosition().getRectAround(rect));
+                    aa.setDelay((short) 7); //spawn delay
+                    chr.getField().spawnAffectedArea(aa);
+                }
+                break;
+        }
+        super.handleAttack(c, attackInfo);
+    }
+
+    private void incrementMorphGauge(TemporaryStatManager tsm, int increment) {
+        Option o = new Option();
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
+        Option o4 = new Option();
+        SkillInfo gaugeInfo = SkillData.getSkillInfoById(60000219);
+        int amount = 1;
+        int stage = 0;
+        if(chr.hasSkill(60000219)) {
+            amount = tsm.getOption(SmashStack).nOption;
+            if (amount <= (getKaiserGauge(chr))) {
+                if(amount + increment > getKaiserGauge(chr)) {
+                    amount = getKaiserGauge(chr);
+                } else {
+                    amount = tsm.getOption(SmashStack).nOption + increment;
+                }
+            }
+            if (amount >= gaugeInfo.getValue(s, 1)) {
+                stage = 1;
+            }
+            if (amount >= (gaugeInfo.getValue(v, 1)) - 1) {
+                stage = 2;
+            }
+        }
+        o.nOption = amount;
+        o.rOption = 0;
+        o.tOption = 0;
+        tsm.putCharacterStatValue(SmashStack, o);
+        o1.nOption = (stage * gaugeInfo.getValue(prop, 1));
+        o1.rOption = 0;
+        o1.tOption = 0;
+        tsm.putCharacterStatValue(Stance, o1);
+        o2.nOption = (stage * gaugeInfo.getValue(psdJump, 1));
+        o2.rOption = 0;
+        o2.tOption = 0;
+        tsm.putCharacterStatValue(Jump, o2);
+        o3.nOption = (stage * gaugeInfo.getValue(psdSpeed, 1));
+        o3.rOption = 0;
+        o3.tOption = 0;
+        tsm.putCharacterStatValue(Speed, o3);
+        o4.nReason = 0;
+        o4.nValue = (stage * gaugeInfo.getValue(actionSpeed, 1));
+        o4.tStart = (int) System.currentTimeMillis();
+        o4.tTerm = 0;
+        tsm.putCharacterStatValue(IndieBooster, o4); //Indie
+        tsm.sendSetStatPacket();
+    }
+
+    private void resetGauge(Client c, TemporaryStatManager tsm) {
+        tsm.removeStat(SmashStack, false);
+        tsm.sendResetStatPacket();
+    }
+
+    private int getKaiserGauge(Char chr) {
+        int maxGauge;
+        switch (chr.getJob()) {
+            case 6100:
+                maxGauge = SkillData.getSkillInfoById(60000219).getValue(s, 1);
+                break;
+            case 6110:
+                maxGauge = SkillData.getSkillInfoById(60000219).getValue(u, 1);
+                break;
+            case 6111:
+            case 6112:
+                maxGauge = SkillData.getSkillInfoById(60000219).getValue(v, 1);
+                break;
+            default:
+                maxGauge = 0;
+        }
+        return maxGauge;
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case NOVA_TEMPERANCE_KAISER:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
+        super.handleHit(c, inPacket, hitInfo);
     }
 }

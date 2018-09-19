@@ -1,50 +1,47 @@
 package net.swordie.ms.client.character.commands;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.quest.Quest;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.StolenSkill;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.guild.Guild;
-import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.result.GuildJoinMsg;
-import net.swordie.ms.client.guild.updates.GuildUpdate;
-import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.util.FileTime;
-import net.swordie.ms.world.field.Field;
-import net.swordie.ms.world.field.Portal;
 import net.swordie.ms.client.jobs.nova.Kaiser;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants.JobEnum;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.Life;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.*;
-import org.apache.log4j.LogManager;
-import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.Server;
+import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+import net.swordie.ms.world.field.Field;
+import net.swordie.ms.world.field.Portal;
+import org.apache.log4j.LogManager;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
-import static net.swordie.ms.enums.ChatMsgColour.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
+import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
 
 /**
@@ -56,26 +53,11 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            OutPacket outPacket = new OutPacket(OutHeader.MESSAGE.getValue());
-
-            outPacket.encodeByte(UserEffectType.SkillUse.getVal());
-
-            outPacket.encodeInt(100402);
-
-//            outPacket.encodeInt(100000);
-            // eX = enabled
-            // 1 mob = 0e0?
-            // an octet per mob. Probably 3 different properties, but can't figure those out atm
-            // <sessionid>=aaab bbcc cddd <repeat>
-//          // example: "0=892892892892892892889289289289289289289289289289";
-             outPacket.encodeString("2=8928928928928928928fffffffffffffffffffffffffffff");
-//             outPacket.encodeString("0=e00000000000000038000000000000000000000000000000");
-//             outPacket.encodeString("2=89289289 28928928 928fffff ffffffff ffffffff ffffffff");
-//             outPacket.encodeString("2=8928928928928920");
-//            chr.write(outPacket);
-
-
-            chr.write(User.effect(Effect.effectFromWZ("Effect/BasicEff.img/monsterCollectionGet", true, 0, 4, 0)));
+            PetItem item = (PetItem) chr.getCashInventory().getItemBySlot((short) 1);
+            item.setDateExpire(FileTime.fromDate(LocalDateTime.now().plusHours(3)));
+            item.setDateDead(item.getDateExpire());
+            item.updateToChar(chr);
+            System.out.println(item.getDateExpire().toLocalDateTime().toInstant(ZoneOffset.UTC));
         }
     }
 
@@ -83,13 +65,13 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
 
-            chr.chatMessage(YELLOW, "------------------------------------------------------------");
+            chr.chatMessage(Mob, "------------------------------------------------------------");
             for (InvType invType : InvType.values()) {
-                chr.chatMessage(YELLOW, invType.toString());
+                chr.chatMessage(Mob, invType.toString());
                 for (Item item : chr.getInventoryByType(invType).getItems()) {
                     item.setInvType(invType);
                     String name = StringData.getItemStringById(item.getItemId());
-                    chr.chatMessage(YELLOW, String.format("%s, %d, %d, %d, %s", name, item.getItemId(), item.getId(),
+                    chr.chatMessage(Mob, String.format("%s, %d, %d, %d, %s", name, item.getItemId(), item.getId(),
                             item.getBagIndex(), item.getInvType().toString()));
                 }
             }
@@ -160,7 +142,7 @@ public class AdminCommands {
 
     public static class CheckID extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            chr.chatMessage(GM_BLUE_CHAT, "your charID = " + chr.getId() + " \r\nYour accID = " + chr.getAccId());
+            chr.chatMessage(SpeakerChannel, "your charID = " + chr.getId() + " \r\nYour accID = " + chr.getAccId());
         }
     }
 
@@ -169,7 +151,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             chr.getStolenSkills().stream().sorted(Comparator.comparing(StolenSkill::getPosition))
                     .forEach(ss ->
-                            chr.chatMessage(BUDDY_ORANGE, "[StolenSkills]  Skill ID: "+ ss.getSkillid() +" on Position: "+ ss.getPosition() +" with Current level: "+ ss.getCurrentlv()));
+                            chr.chatMessage(GroupFriend, "[StolenSkills]  Skill ID: "+ ss.getSkillid() +" on Position: "+ ss.getPosition() +" with Current level: "+ ss.getCurrentlv()));
         }
     }
 
@@ -458,17 +440,18 @@ public class AdminCommands {
                             chr.getPosition().deepCopy().getX() + 30,
                             chr.getPosition().deepCopy().getY() + 30)
             );
-            chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");
-            chr.chatMessage(GM_BLUE_CHAT, "Current Map: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getFieldID()));
-            chr.chatMessage(GM_BLUE_CHAT, "Current ReturnMap: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getField().getReturnMap()));
-            chr.chatMessage(GM_BLUE_CHAT, "");
-            for (Portal portal : chr.getField().getclosestPortal(rect)) {
-                chr.chatMessage(GM_BLUE_CHAT, "Portal Name: " + portal.getName());
-                chr.chatMessage(GM_BLUE_CHAT, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
-                chr.chatMessage(GM_BLUE_CHAT, "Portal target map: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getTargetMapId()));
-                chr.chatMessage(GM_BLUE_CHAT, ".");
+            chr.chatMessage(Normal, "~~~~~~~~~~");
+            chr.chatMessage(SpeakerChannel, "Current Map: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getFieldID()));
+            chr.chatMessage(SpeakerChannel, "Current ReturnMap: " + NumberFormat.getNumberInstance(Locale.US).format(chr.getField().getReturnMap()));
+            chr.chatMessage(SpeakerChannel, "");
+            for (Portal portal : chr.getField().getClosestPortal(rect)) {
+                chr.chatMessage(SpeakerChannel, "Portal Name: " + portal.getName());
+                chr.chatMessage(SpeakerChannel, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
+                chr.chatMessage(SpeakerChannel, "Portal target map: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getTargetMapId()));
+                chr.chatMessage(SpeakerChannel, "Portal script: " + portal.getScript());
+                chr.chatMessage(SpeakerChannel, ".");
             }
-            chr.chatMessage(GENERAL_CHAT_WHITE, "~~~~~~~~~~");
+            chr.chatMessage(Normal, "~~~~~~~~~~");
         }
     }
 
@@ -486,8 +469,8 @@ public class AdminCommands {
             double mpratio = (((double) mp) / mmp) * 100;
             DecimalFormat formatNumbers = new DecimalFormat("##.00");
             NumberFormat addDeci = NumberFormat.getNumberInstance(Locale.US);
-            chr.chatMessage(GAME_NOTICE, "STR: " + addDeci.format(strength) + "  DEX: " + addDeci.format(dexterity) + "  INT: " + addDeci.format(intellect) + "  LUK: " + addDeci.format(luck));
-            chr.chatMessage(GAME_NOTICE, "HP: " + addDeci.format(hp) + " / " + addDeci.format(mhp) + " (" + formatNumbers.format(hpratio) + "%)   MP: " + addDeci.format(mp) + " / " + addDeci.format(mmp) + " (" + formatNumbers.format(mpratio) + "%)");
+            chr.chatMessage(Notice2, "STR: " + addDeci.format(strength) + "  DEX: " + addDeci.format(dexterity) + "  INT: " + addDeci.format(intellect) + "  LUK: " + addDeci.format(luck));
+            chr.chatMessage(Notice2, "HP: " + addDeci.format(hp) + " / " + addDeci.format(mhp) + " (" + formatNumbers.format(hpratio) + "%)   MP: " + addDeci.format(mp) + " / " + addDeci.format(mmp) + " (" + formatNumbers.format(mpratio) + "%)");
         }
     }
 
@@ -586,7 +569,7 @@ public class AdminCommands {
     public static class ProItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
-                chr.chatMessage(GAME_NOTICE, "Needs more args! <id> <Stat> <Attack> <Flame stats>");
+                chr.chatMessage(Notice2, "Needs more args! <id> <Stat> <Attack> <Flame stats>");
                 return;
             }
             int id = Integer.parseInt(args[1]);
@@ -622,7 +605,7 @@ public class AdminCommands {
                 if (equip == null) {
                     Item item = ItemData.getItemDeepCopy(id, true);
                     if (item == null) {
-                        chr.chatMessage(YELLOW, String.format("Could not find an item with id %d", id));
+                        chr.chatMessage(Mob, String.format("Could not find an item with id %d", id));
                         return;
                     }
                     short quant = 1;
@@ -648,7 +631,7 @@ public class AdminCommands {
                 query = new StringBuilder(query.substring(0, query.length() - 1));
                 Map<Integer, String> map = StringData.getItemStringByName(query.toString());
                 if (map.size() == 0) {
-                    chr.chatMessage(YELLOW, "No items found for query " + query);
+                    chr.chatMessage(Mob, "No items found for query " + query);
                 }
                 for (Map.Entry<Integer, String> entry : map.entrySet()) {
                     int id = entry.getKey();
@@ -934,14 +917,14 @@ public class AdminCommands {
             Client c = chr.getClient();
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o1 = new Option();
-            if (tsm.getOption(NotDamaged).nOption == 3) {
-                tsm.removeStat(NotDamaged, false);
-                chr.chatMessage(GAME_NOTICE, "You are no longer invincible.");
+            if (tsm.getOption(CharacterTemporaryStat.NotDamaged).nOption == 3) {
+                tsm.removeStat(CharacterTemporaryStat.NotDamaged, false);
+                chr.chatMessage(Notice2, "You are no longer invincible.");
             } else {
                 o1.nOption = 3;
-                tsm.putCharacterStatValue(NotDamaged, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
-                chr.chatMessage(GAME_NOTICE, "You are invincible.");
+                tsm.putCharacterStatValue(CharacterTemporaryStat.NotDamaged, o1);
+                tsm.sendSetStatPacket();
+                chr.chatMessage(Notice2, "You are invincible.");
             }
         }
     }
@@ -950,27 +933,41 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int morphID = Integer.parseInt(args[1]);
             if (args.length < 2) {
-                chr.chatMessage(GAME_NOTICE, "Needs more args! <id>");
+                chr.chatMessage(Notice2, "Needs more args! <id>");
             }
-            Client c = chr.getClient();
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o1 = new Option();
             o1.nOption = morphID;
             o1.rOption = Kaiser.FINAL_TRANCE;
-            tsm.putCharacterStatValue(Morph, o1);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.putCharacterStatValue(CharacterTemporaryStat.Morph, o1);
+            tsm.sendSetStatPacket();
+        }
+    }
+
+    public static class Mount extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int mountID = Integer.parseInt(args[1]);
+            if (args.length < 2) {
+                chr.chatMessage(Notice2, "Needs more args! <id>");
+            }
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+            tsb.setNOption(mountID);
+            tsb.setROption(Kaiser.FINAL_TRANCE);
+            tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+            tsm.sendSetStatPacket();
         }
     }
 
     public static class TestTempStat extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            List<Life> lifes = chr.getField().getLifes();
+            List<Life> lifes = new ArrayList<>(chr.getField().getLifes().values());
             Life l = lifes.get(lifes.size() - 1);
             if (!(l instanceof Mob)) {
                 return;
             }
             Mob mob = (Mob) l;
-            chr.getClient().write(MobPool.mobStatSet(mob, (short) 0));
+            chr.getClient().write(MobPool.statSet(mob, (short) 0));
         }
     }
 
@@ -981,7 +978,7 @@ public class AdminCommands {
                 if (toField != null) {
                     chr.warp(toField);
                 } else {
-                    chr.chatMessage(GAME_NOTICE, "Could not find a field with id " + args[1]);
+                    chr.chatMessage(Notice2, "Could not find a field with id " + args[1]);
                 }
             } else {
                 chr.chatMessage("Please input a number as first argument.");
@@ -994,7 +991,7 @@ public class AdminCommands {
             int portalID = Integer.parseInt(args[1]);
             Portal portal = chr.getField().getPortalByID(portalID);
             if (portal == null) {
-                chr.chatMessage(GAME_NOTICE, "Portal does not exist.");
+                chr.chatMessage(Notice2, "Portal does not exist.");
                 return;
             }
             Position position = new Position(portal.getX(), portal.getY());
@@ -1026,7 +1023,7 @@ public class AdminCommands {
     public static class GetSkill extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 4) {
-                chr.chatMessage(GAME_NOTICE, "Needs more args! <id> <cur> <max>");
+                chr.chatMessage(Notice2, "Needs more args! <id> <cur> <max>");
                 return;
             }
             int id = Integer.parseInt(args[1]);
@@ -1053,77 +1050,114 @@ public class AdminCommands {
     public static class Lookup extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 3) {
-                chr.chatMessage(GAME_NOTICE, "Needs more args! <what to lookup> <id>");
+                chr.chatMessage(Notice2, "Needs more args! <what to lookup> <id/(part of) name>");
+                chr.chatMessage(Notice2, "Possible lookup types are: item, skill, mob, npc, map");
                 return;
             }
-            String query = "";
+            StringBuilder query = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
-                query += args[i].toLowerCase() + " ";
+                query.append(args[i].toLowerCase()).append(" ");
             }
-            query = query.substring(0, query.length() - 1);
+            query = new StringBuilder(query.substring(0, query.length() - 1));
             chr.chatMessage("Query: " + query);
-            boolean isNumber = Util.isNumber(query);
+            boolean isNumber = Util.isNumber(query.toString());
             if ("skill".equalsIgnoreCase(args[1])) {
                 SkillStringInfo ssi;
                 int id;
                 if (isNumber) {
-                    id = Integer.parseInt(query);
+                    id = Integer.parseInt(query.toString());
                     ssi = StringData.getSkillStringById(id);
                     if (ssi == null) {
-                        chr.chatMessage(YELLOW, "Cannot find skill " + id);
+                        chr.chatMessage(Mob, "Cannot find skill " + id);
                         return;
                     }
                     SkillInfo skillInfo = SkillData.getSkillInfoById(id);
-                    chr.chatMessage(YELLOW, "Name: " + ssi.getName());
-                    chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
-                    chr.chatMessage(YELLOW, "h: " + ssi.getH());
-                    chr.chatMessage(YELLOW, "type: " + skillInfo.getType());
+                    chr.chatMessage(Mob, "Name: " + ssi.getName());
+                    chr.chatMessage(Mob, "Desc: " + ssi.getDesc());
+                    chr.chatMessage(Mob, "h: " + ssi.getH());
+                    chr.chatMessage(Mob, "type: " + skillInfo.getType());
                 } else {
-                    Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query);
+                    Map<Integer, SkillStringInfo> map = StringData.getSkillStringByName(query.toString());
                     if (map.size() == 0) {
-                        chr.chatMessage(YELLOW, "No skills found for query " + query);
+                        chr.chatMessage(Mob, "No skills found for query " + query);
                     }
                     for (Map.Entry<Integer, SkillStringInfo> entry : map.entrySet()) {
                         id = entry.getKey();
                         ssi = entry.getValue();
                         SkillInfo si = SkillData.getSkillInfoById(id);
                         if (si != null) {
-                            chr.chatMessage(YELLOW, "Id: " + id);
-                            chr.chatMessage(YELLOW, "Name: " + ssi.getName());
-                            chr.chatMessage(YELLOW, "Desc: " + ssi.getDesc());
-                            chr.chatMessage(YELLOW, "h: " + ssi.getH());
-                            chr.chatMessage(YELLOW, "type: " + si.getType());
+                            chr.chatMessage(Mob, "Id: " + id);
+                            chr.chatMessage(Mob, "Name: " + ssi.getName());
+                            chr.chatMessage(Mob, "Desc: " + ssi.getDesc());
+                            chr.chatMessage(Mob, "h: " + ssi.getH());
+                            chr.chatMessage(Mob, "type: " + si.getType());
                         }
                     }
                 }
-            } else if ("item".equalsIgnoreCase(args[1])) {
+            } else {
+                String queryType = args[1].toLowerCase();
                 int id;
                 String name;
                 if (isNumber) {
-                    id = Integer.parseInt(query);
-                    name = StringData.getItemStringById(id);
+                    id = Integer.parseInt(query.toString());
+                    switch (queryType) {
+                        case "item":
+                            name = StringData.getItemStringById(id);
+                            break;
+                        case "mob":
+                            name = StringData.getMobStringById(id);
+                            break;
+                        case "npc":
+                            name = StringData.getNpcStringById(id);
+                            break;
+                        case "map":
+                            name = StringData.getMapStringById(id);
+                            break;
+                        default:
+                            chr.chatMessage("Unknown query type " + queryType);
+                            return;
+                    }
                     if (name == null) {
-                        chr.chatMessage(YELLOW, "Cannot find item " + id);
+                        chr.chatMessage(Mob, "Cannot find " + queryType + " " + id);
                         return;
                     }
-                    chr.chatMessage(YELLOW, "Name: " + name);
+                    chr.chatMessage(Mob, "Name: " + name);
                 } else {
-                    Map<Integer, String> map = StringData.getItemStringByName(query);
+                    Map<Integer, String> map;
+                    switch (queryType) {
+                        case "item":
+                            map = StringData.getItemStringByName(query.toString());
+                            break;
+                        case "mob":
+                            map = StringData.getMobStringByName(query.toString());
+                            break;
+                        case "npc":
+                            map = StringData.getNpcStringByName(query.toString());
+                            break;
+                        case "map":
+                            map = StringData.getMapStringByName(query.toString());
+                            break;
+                        default:
+                            chr.chatMessage("Unknown query type " + queryType);
+                            return;
+                    }
                     if (map.size() == 0) {
-                        chr.chatMessage(YELLOW, "No items found for query " + query);
+                        chr.chatMessage(Mob, "No " + queryType + "s found for query " + query);
                     }
                     for (Map.Entry<Integer, String> entry : map.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
-                        Item item = ItemData.getEquipDeepCopyFromID(id, false);
-                        if (item == null) {
-                            item = ItemData.getItemDeepCopy(id);
+                        if (queryType.equalsIgnoreCase("item")) {
+                            Item item = ItemData.getEquipDeepCopyFromID(id, false);
+                            if (item == null) {
+                                item = ItemData.getItemDeepCopy(id);
+                            }
+                            if (item == null) {
+                                continue;
+                            }
                         }
-                        if (item == null) {
-                            continue;
-                        }
-                        chr.chatMessage(YELLOW, "Id: " + id);
-                        chr.chatMessage(YELLOW, "Name: " + name);
+                        chr.chatMessage(Mob, "Id: " + id);
+                        chr.chatMessage(Mob, "Name: " + name);
                     }
                 }
             }
@@ -1214,29 +1248,30 @@ public class AdminCommands {
             gotomaps.put("ra", 105200000);
             gotomaps.put("goldenbeach", 914200000);
             gotomaps.put("ardentmill", 910001000);
+            gotomaps.put("oz", 992000000);
 
             if (args.length == 1) {
-                chr.chatMessage(GAME_NOTICE, "List of locations: " + gotomaps.keySet());
+                chr.chatMessage(Notice2, "List of locations: " + gotomaps.keySet());
             } else if (gotomaps.containsKey(args[1])) {
                 Field toField = chr.getClient().getChannelInstance().getField(gotomaps.get(args[1]));
                 Portal portal = chr.getField().getDefaultPortal();
                 chr.warp(toField, portal);
             } else if (args[1].equals("locations")) {
-                chr.chatMessage(GAME_NOTICE, "Use !goto <location>");
+                chr.chatMessage(Notice2, "Use !goto <location>");
                 StringBuilder sb = new StringBuilder();
                 for (String s : gotomaps.keySet()) {
                     sb.append(s).append(",  ");
                 }
-                chr.chatMessage(GAME_NOTICE, sb.substring(0, sb.length()));
+                chr.chatMessage(Notice2, sb.substring(0, sb.length()));
             } else {
-                chr.chatMessage(GAME_NOTICE, "Map does not exist.");
+                chr.chatMessage(Notice2, "Map does not exist.");
             }
         }
     }
 
     public static class ClearCache extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            chr.getScriptManager().dispose();
+            chr.getScriptManager().dispose(false);
             Server.getInstance().clearCache();
             chr.chatMessage("Cache has been cleared.");
         }
@@ -1248,17 +1283,17 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int mapid = chr.getFieldID();
             if (args.length < 1 && !args[1].equalsIgnoreCase("list")) {
-                chr.chatMessage(BLACK_ON_WHITE, "Incorrect Syntax: !SaveMap <save/go> <key>");
-                chr.chatMessage(BLACK_ON_WHITE, "To see the list of saved maps, use: !SaveMap list");
+                chr.chatMessage(BlackOnWhite, "Incorrect Syntax: !SaveMap <save/go> <key>");
+                chr.chatMessage(BlackOnWhite, "To see the list of saved maps, use: !SaveMap list");
             }
             if (args[1].equalsIgnoreCase("save")) {
                 String key = args[2];
                 quickmaps.put(key, mapid);
-                chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] Map: " + mapid + " has been saved as key '" + key + "'.");
+                chr.chatMessage(BlackOnWhite, "[SaveMap] Map: " + mapid + " has been saved as key '" + key + "'.");
             } else if (args[1].equalsIgnoreCase("go")) {
                 String key = args[2];
                 if (quickmaps.get(key) == null) {
-                    chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] There is no map saved as key '" + args[2] + "'.");
+                    chr.chatMessage(BlackOnWhite, "[SaveMap] There is no map saved as key '" + args[2] + "'.");
                     return;
                 }
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType((quickmaps.get(key)));
@@ -1266,13 +1301,13 @@ public class AdminCommands {
                 chr.warp(toField, portal);
             } else if (args[1].equalsIgnoreCase("list")) {
                 Set keys = quickmaps.keySet();
-                chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] " + quickmaps.size() + " saved maps.");
+                chr.chatMessage(BlackOnWhite, "[SaveMap] " + quickmaps.size() + " saved maps.");
                 for (Object maps : keys) {
-                    chr.chatMessage(BLACK_ON_WHITE, "[SaveMap] Stored map: " + quickmaps.get(maps) + " as '" + maps + "'.");
+                    chr.chatMessage(BlackOnWhite, "[SaveMap] Stored map: " + quickmaps.get(maps) + " as '" + maps + "'.");
                 }
             } else {
-                chr.chatMessage(BLACK_ON_WHITE, "Incorrect Syntax: !SaveMap <save/go> <key>");
-                chr.chatMessage(BLACK_ON_WHITE, "To see the list of saved maps, use: !SaveMap list");
+                chr.chatMessage(BlackOnWhite, "Incorrect Syntax: !SaveMap <save/go> <key>");
+                chr.chatMessage(BlackOnWhite, "To see the list of saved maps, use: !SaveMap list");
             }
         }
     }
@@ -1383,7 +1418,7 @@ public class AdminCommands {
             short startIndex = Short.parseShort(args[1]);
             short endIndex = Short.parseShort(args[2]);
             if (args.length < 2) {
-                chr.chatMessage(GAME_NOTICE, "Syntax Error: !ClearInv [Start Index] [End Index]");
+                chr.chatMessage(Notice2, "Syntax Error: !ClearInv [Start Index] [End Index]");
                 return;
             }
             for (int i = startIndex; i < endIndex; i++) {
@@ -1391,7 +1426,7 @@ public class AdminCommands {
                 chr.getInventoryByType(InvType.EQUIP).removeItem(removeItem);
                 chr.dispose();
             }
-            chr.chatMessage(GAME_NOTICE, "Please change channel, as this Command is still shit right now. ");
+            chr.chatMessage(Notice2, "Please change channel, as this Command is still shit right now. ");
         }
     }
 
@@ -1407,7 +1442,7 @@ public class AdminCommands {
             Mob mob = chr.getField().getMobs().stream().filter(m -> rect.hasPositionInside(m.getPosition())).findFirst().orElse(null);
             Char controller = chr.getField().getLifeToControllers().getOrDefault(mob, null);
             if (mob != null) {
-                chr.chatMessage(GM_BLUE_CHAT, String.format("Mob ID: %s | Template ID: %s | HP: %s/%s | MP: %s/%s | Left: %s | Controller: %s",
+                chr.chatMessage(SpeakerChannel, String.format("Mob ID: %s | Template ID: %s | HP: %s/%s | MP: %s/%s | Left: %s | Controller: %s",
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getObjectId()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getTemplateId()),
                         NumberFormat.getNumberInstance(Locale.US).format(mob.getHp()),
@@ -1419,7 +1454,7 @@ public class AdminCommands {
                         )
                 );
             } else {
-                chr.chatMessage(GM_BLUE_CHAT, "Could not find mob.");
+                chr.chatMessage(SpeakerChannel, "Could not find mob.");
             }
         }
     }
@@ -1442,7 +1477,7 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
             if (args.length < 2) {
-                chr.chatMessage(GM_BLUE_CHAT, "Format: !sethonor <honor exp>");
+                chr.chatMessage(SpeakerChannel, "Format: !sethonor <honor exp>");
                 return;
             }
             int honor = Integer.parseInt(args[1]);
@@ -1455,7 +1490,7 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
             if (args.length < 2) {
-                chr.chatMessage(GM_BLUE_CHAT, "Format: !startquest <quest id>");
+                chr.chatMessage(SpeakerChannel, "Format: !startquest <quest id>");
                 return;
             }
             Quest q = QuestData.createQuestFromId(Integer.parseInt(args[1]));
@@ -1472,10 +1507,10 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             if (!chr.hasSkillCDBypass()) {
                 chr.setSkillCDBypass(true);
-                chr.chatMessage(GAME_NOTICE, "Skill Cooldown bypass: ON");
+                chr.chatMessage(Notice2, "Skill Cooldown bypass: ON");
             } else {
                 chr.setSkillCDBypass(false);
-                chr.chatMessage(GAME_NOTICE, "Skill Cooldown bypass: OFF");
+                chr.chatMessage(Notice2, "Skill Cooldown bypass: OFF");
             }
             chr.dispose();
         }
@@ -1485,7 +1520,7 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            boolean on = tsm.hasStat(IndieMaxDamageOver) && tsm.getOptByCTSAndSkill(IndieMaxDamageOver, 0).nValue != 0;
+            boolean on = tsm.hasStat(CharacterTemporaryStat.IndieMaxDamageOver) && tsm.getOptByCTSAndSkill(CharacterTemporaryStat.IndieMaxDamageOver, 0).nValue != 0;
             Option o = new Option();
             o.nValue = on ? 0 : 1950000000;
             tsm.putCharacterStatValue(CharacterTemporaryStat.IndieMaxDamageOver, o);
@@ -1512,7 +1547,7 @@ public class AdminCommands {
 
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
-                chr.chatMessage(GM_BLUE_CHAT, "Not enough args! Use !ban <name> <amount> <min/hour/day/year> <reason>");
+                chr.chatMessage(SpeakerChannel, "Not enough args! Use !ban <name> <amount> <min/hour/day/year> <reason>");
             }
             String name = args[1];
             int amount = Integer.parseInt(args[2]);
@@ -1524,7 +1559,7 @@ public class AdminCommands {
             String reason = builder.toString();
             reason = reason.substring(0, reason.length() - 1); // gets rid of the last space
             if (reason.length() > 255) {
-                chr.chatMessage(GM_BLUE_CHAT, "That ban reason is too long.");
+                chr.chatMessage(SpeakerChannel, "That ban reason is too long.");
                 return;
             }
             Char banChr = Server.getInstance().getWorldById(chr.getClient().getWorldId()).getCharByName(name);
@@ -1533,7 +1568,7 @@ public class AdminCommands {
                 online = false;
                 banChr = Char.getFromDBByName(name);
                 if (banChr == null) {
-                    chr.chatMessage(GM_BLUE_CHAT, "Could not find that character.");
+                    chr.chatMessage(SpeakerChannel, "Could not find that character.");
                     return;
                 }
             }
@@ -1561,16 +1596,118 @@ public class AdminCommands {
                     banDate = banDate.plusYears(amount);
                     break;
                 default:
-                    chr.chatMessage(GM_BLUE_CHAT, String.format("Unknown date type %s", amountType));
+                    chr.chatMessage(SpeakerChannel, String.format("Unknown date type %s", amountType));
                     break;
             }
             banAccount.setBanExpireDate(FileTime.fromDate(banDate));
             banAccount.setBanReason(reason);
-            chr.chatMessage(GM_BLUE_CHAT, String.format("Character %s has been banned. Expire date: %s", name, banDate));
+            chr.chatMessage(SpeakerChannel, String.format("Character %s has been banned. Expire date: %s", name, banDate));
             if (online) {
                 banChr.write(WvsContext.returnToTitle());
             }
         }
     }
+
+    public static class KillMobs extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+            for (Mob mob : mobs) {
+                mob.die();
+            }
+        }
+    }
+
+    public static class FP extends AdminCommand { // FindPortal
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 1) {
+                chr.chatMessage(SpeakerChannel, "Invalid args. Use !findportal <id/name>");
+            }
+            Field field = chr.getField();
+            Portal portal;
+            String query = args[1];
+            if (Util.isNumber(query)) {
+                portal = field.getPortalByID(Integer.parseInt(query));
+            } else {
+                portal = field.getPortalByName(query);
+            }
+            if (portal == null) {
+                chr.chatMessage(SpeakerChannel, "Was not able to find portal " + query);
+                return;
+            }
+            chr.chatMessage(SpeakerChannel, "Portal Name: " + portal.getName());
+            chr.chatMessage(SpeakerChannel, "Portal ID: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getId()));
+            chr.chatMessage(SpeakerChannel, "Portal target map: " + NumberFormat.getNumberInstance(Locale.US).format(portal.getTargetMapId()));
+            chr.chatMessage(SpeakerChannel, "Portal position: " + portal.getX() + ", " + portal.getY());
+            chr.chatMessage(SpeakerChannel, "Portal script: " + portal.getScript());
+            chr.chatMessage(SpeakerChannel, ".");
+            log.info(portal.getScript());
+        }
+    }
+
+    public static class showBuffs extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            TemporaryStatManager tsm = chr.getTemporaryStatManager();
+            Set<Integer> buffs = new HashSet<>();
+            for (List<Option> options : tsm.getCurrentStats().values()) {
+                for (Option o : options) {
+                    if (o.rOption != 0) {
+                        buffs.add(o.rOption);
+                    } else {
+                        buffs.add(o.nReason);
+                    }
+                }
+            }
+            StringBuilder sb = new StringBuilder("Current buffs: ");
+            for (int id : buffs) {
+                String skillName = StringData.getSkillStringById(id) != null ? StringData.getSkillStringById(id).getName() : "Unknown Skill ID";
+                sb.append(skillName).append(" (").append(id).append("), ");
+            }
+            chr.chatMessage(sb.toString().substring(0, sb.toString().length() - 2));
+        }
+    }
+
+    public static class toHex extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            int arg = Integer.parseInt(args[1]);
+            byte[] arr = new byte[4];
+            arr[0] = (byte) ((arg >> 24) & 0xFF);
+            arr[1] = (byte) ((arg >> 16) & 0xFF);
+            arr[2] = (byte) ((arg >> 8) & 0xFF);
+            arr[3] = (byte) (arg & 0xFF);
+            chr.chatMessage(Util.readableByteArray(arr));
+        }
+    }
+
+    public static class fromHex extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length == 1) {
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i < args.length; i++) {
+                sb.append(args[i].trim());
+            }
+            String s = sb.toString();
+            s = s.replace("|", " ");
+            s = s.replace(" ", "");
+            int len = s.length();
+            int[] arr = new int[len / 2];
+            for (int i = 0; i < len; i += 2) {
+                arr[i / 2] = ((Character.digit(s.charAt(i), 16) << 4)
+                        + Character.digit(s.charAt(i + 1), 16));
+            }
+            int num = 0;
+            for (int i = 0; i < arr.length; i++) {
+                num += arr[i] << (i * 8);
+            }
+            chr.chatMessage("" + num);
+        }
+    }
+
+
 
 }

@@ -3,32 +3,31 @@ package net.swordie.ms.client.jobs.resistance;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Summon;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
-import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.life.mob.MobStat;
-import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.ChatType;
+import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
-import net.swordie.ms.life.Life;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.world.field.Field;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,8 +35,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -66,9 +65,9 @@ public class Xenon extends Job {
     public static final int PINPOINT_SALVO_REDESIGN_B = 36110012; //Special Attack Upgrade  (Passive Upgrade)
     public static final int TRIANGULATION = 36110005;
 
-    public static final int HYPOGRAM_FIELD_FORCE_FIELD = 36121002;                  //TODO Summon/Area of Effect?
-    public static final int HYPOGRAM_FIELD_PENETRATE = 36121013;                    //TODO Summon/Area of Effect?
-    public static final int HYPOGRAM_FIELD_SUPPORT = 36121014;                      //TODO Summon/Area of Effect?
+    public static final int HYPOGRAM_FIELD_FORCE_FIELD = 36121002;                  //TODO Summon
+    public static final int HYPOGRAM_FIELD_PENETRATE = 36121013;
+    public static final int HYPOGRAM_FIELD_SUPPORT = 36121014;                      //TODO Summon
     public static final int TEMPORAL_POD = 36121007;                                //TODO
     public static final int OOPARTS_CODE = 36121003; //Buff
     public static final int MAPLE_WARRIOR_XENON = 36121008; //Buff
@@ -122,12 +121,22 @@ public class Xenon extends Job {
                 }
             }
             supplyProp = SkillData.getSkillInfoById(SUPPLY_SURPLUS).getValue(prop, 1);
+
             if(supplyTimer != null && !supplyTimer.isDone()) {
                 supplyTimer.cancel(true);
             }
-            supplyInterval();
+            supplyTimer = EventManager.addFixedRateEvent(this::incrementSupply, 2000, 4000);
         }
     }
+
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isXenon(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
@@ -210,12 +219,11 @@ public class Xenon extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
             case AMARANTH_GENERATOR:
-                if (supply >= 20) {
-                    o1.nOption = 1;
-                    o1.rOption = skillID;
-                    o1.tOption = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(AmaranthGenerator, o1);
-                }
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(AmaranthGenerator, o1);
+                incrementSupply(20);
                 break;
 
             case HYPOGRAM_FIELD_FORCE_FIELD:
@@ -225,15 +233,25 @@ public class Xenon extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.STATIC.getVal());
+                summon.setMoveAbility(MoveAbility.Stop.getVal());
                 field.spawnSummon(summon);
+
+                o1.nReason = skillID;
+                o1.nValue = 1;
+                o1.summon = summon;
+                o1.tStart = (int) System.currentTimeMillis();
+                o1.tTerm = si.getValue(time, slv);
+                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
+        tsm.sendSetStatPacket();
     }
 
-    private void handleSupplyCost(int skillID, byte slv, SkillInfo si) {
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+    private void applySupplyCost(int skillID, byte slv, SkillInfo si) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if(skillID == PINPOINT_SALVO || skillID == PINPOINT_SALVO_REDESIGN_A || skillID == PINPOINT_SALVO_REDESIGN_B || skillID == PINPOINT_SALVO_PERFECT_DESIGN) {
             return;
@@ -252,21 +270,17 @@ public class Xenon extends Job {
         }
     }
 
-    public void incrementSupply() {
+    private void incrementSupply() {
         incrementSupply(1);
     }
 
-
     private void incrementSupply(int amount) {
-        supply += amount;
-        supply = Math.min(MAX_SUPPLY, supply);
-        updateSupply();
-    }
-
-    public void supplyInterval() {
-        // done this way so we don't have to manually stop the schedule once the chr has logged out
-        incrementSupply();
-        supplyTimer = EventManager.addEvent(this::supplyInterval, 4000);
+        if (supply < 20) {
+            supply = chr.getTemporaryStatManager().getOption(SurplusSupply).nOption;
+            supply += amount;
+            supply = Math.min(MAX_SUPPLY, supply);
+            updateSupply();
+        }
     }
 
     private void updateSupply() {
@@ -276,9 +290,16 @@ public class Xenon extends Job {
         chr.getTemporaryStatManager().sendSetStatPacket();
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    @Override
+    public void handleCancelTimer(Char chr) {
+        if(supplyTimer != null) {
+            supplyTimer.cancel(true);
+        }
     }
+
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -296,14 +317,20 @@ public class Xenon extends Job {
         }
         if (hasHitMobs) {
             //Increment Supply on attack
-            if (Util.succeedProp(supplyProp)) {
+            if (Util.succeedProp(supplyProp) &&
+                    attackInfo.skillId != 0 &&
+                    attackInfo.skillId != PINPOINT_SALVO &&
+                    attackInfo.skillId != PINPOINT_SALVO_REDESIGN_A &&
+                    attackInfo.skillId != PINPOINT_SALVO_REDESIGN_B &&
+                    attackInfo.skillId != PINPOINT_SALVO_PERFECT_DESIGN &&
+                    attackInfo.skillId != TRIANGULATION) {
                 incrementSupply();
             }
 
             //Triangulation
-            handleTriangulation(attackInfo);
+            applyTriangulationOnMob(attackInfo);
         }
-        handleSupplyCost(skillID, (byte) slv, si);
+        applySupplyCost(skillID, (byte) slv, si);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -340,12 +367,99 @@ public class Xenon extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(y, slv);
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
         }
 
         super.handleAttack(c, attackInfo);
     }
+
+    public void applyTriangulationOnMob(AttackInfo attackInfo) {
+        if(!chr.hasSkill(TRIANGULATION)) {
+            return;
+        }
+        Skill skill = chr.getSkill(TRIANGULATION);
+        int slv = skill.getCurrentLevel();
+        SkillInfo si = SkillData.getSkillInfoById(TRIANGULATION);
+        int proc = si.getValue(prop, slv);
+        Option o1 = new Option();
+        Option o = new Option();
+        int amount = 1;
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if(mob == null) {
+                continue;
+            }
+            MobTemporaryStat mts = mob.getTemporaryStat();
+
+            if(Util.succeedProp(proc)) {
+                if (mts.hasCurrentMobStat(MobStat.Explosion)) {
+                    amount = mts.getCurrentOptionsByMobStat(MobStat.Explosion).nOption;
+                    if (amount <= 3) {
+                        amount++;
+                    }
+                }
+
+                mts.removeMobStat(MobStat.Explosion, false);
+
+                o1.nOption = amount;
+                o1.rOption = TRIANGULATION;
+                o1.tOption = 0;
+                o1.wOption = chr.getId();
+                mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
+            }
+        }
+    }
+
+    private void createPinPointSalvoForceAtom() {
+        Field field = chr.getField();
+
+        SkillInfo si = SkillData.getSkillInfoById(PINPOINT_SALVO);
+        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
+        if(!chr.isLeft()) {
+            rect = rect.moveRight();
+        }
+        List<Mob> mobs = field.getMobsInRect(rect);
+        if(mobs.size() <= 0) {
+            return;
+        }
+        Mob mob = Util.getRandomFromCollection(mobs);
+        for(int i = 0; i<4; i++) {
+            int anglenum = new Random().nextInt(160) + 20;
+            int mobID = mob.getObjectId();
+            int inc = ForceAtomEnum.XENON_ROCKET_3.getInc();
+            int type = ForceAtomEnum.XENON_ROCKET_3.getForceAtomType();
+            ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
+                    anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
+                    new Position());
+            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    true, mobID, getPinPointSkill(), forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), 0, mob.getPosition()));
+        }
+    }
+
+    public int getPinPointSkill() {
+        int skill = PINPOINT_SALVO;
+        if(chr.hasSkill(PINPOINT_SALVO_REDESIGN_A)) {
+            skill = PINPOINT_SALVO_REDESIGN_A;
+        }
+        if(chr.hasSkill(PINPOINT_SALVO_REDESIGN_B)) {
+            skill = PINPOINT_SALVO_REDESIGN_B;
+        }
+        if(chr.hasSkill(PINPOINT_SALVO_PERFECT_DESIGN)) {
+            skill = PINPOINT_SALVO_PERFECT_DESIGN;
+        }
+        return skill;
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        return 0;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
@@ -356,9 +470,9 @@ public class Xenon extends Job {
         if (skill != null) {
             si = SkillData.getSkillInfoById(skillID);
         }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        handleSupplyCost(skillID, slv, si);
+        applySupplyCost(skillID, slv, si);
         if (isBuff(skillID)) {
             handleBuff(c, inPacket, skillID, slv);
         } else {
@@ -383,7 +497,10 @@ public class Xenon extends Job {
                     chr.warp(toField);
                     break;
                 case PINPOINT_SALVO:
-                    handlePinPointSalvo();
+                    o1.nOption = supply--;
+                    tsm.putCharacterStatValue(SurplusSupply, o1);
+                    updateSupply();
+                    createPinPointSalvoForceAtom();
                     break;
                 case HEROS_WILL_XENON:
                     tsm.removeAllDebuffs();
@@ -391,6 +508,10 @@ public class Xenon extends Job {
             }
         }
     }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
@@ -459,106 +580,6 @@ public class Xenon extends Job {
             }
         }
         super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        return JobConstants.isXenon(id);
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        return 0;
-    }
-
-    public void handleTriangulation(AttackInfo attackInfo) {
-        if(!chr.hasSkill(TRIANGULATION)) {
-            return;
-        }
-        Skill skill = chr.getSkill(TRIANGULATION);
-        int slv = skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(TRIANGULATION);
-        int proc = si.getValue(prop, slv);
-        Option o1 = new Option();
-        Option o = new Option();
-        int amount = 1;
-        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            MobTemporaryStat mts = mob.getTemporaryStat();
-
-
-            if(attackInfo.skillId == TRIANGULATION) {
-                if(mts.hasCurrentMobStat(MobStat.Explosion)) {
-                    mts.removeMobStat(MobStat.Explosion, false);
-                    return;
-                }
-            }
-
-            if(Util.succeedProp(proc)) {
-                if (mts.hasCurrentMobStat(MobStat.Explosion)) {
-                    amount = mts.getCurrentOptionsByMobStat(MobStat.Explosion).nOption;
-                    if (amount <= 3) {
-                        amount++;
-                    } else {
-                        mts.removeMobStat(MobStat.Explosion, false);
-                        return;
-                    }
-                }
-                mts.removeMobStat(MobStat.Explosion, false);
-                //o.nOption = -(si.getValue(x, slv) * amount);
-                //o.rOption = TRIANGULATION;
-                //o.tOption = 0;
-                //mts.addStatOptions(MobStat.ACC, o);
-                //mts.addStatOptions(MobStat.EVA, o);
-
-                o1.nOption = amount;
-                o1.rOption = TRIANGULATION;
-                o1.tOption = 0;
-                o1.wOption = 1;
-                mts.addStatOptionsAndBroadcast(MobStat.Explosion, o1);
-            }
-        }
-    }
-
-    private void handlePinPointSalvo() { //TODO Cost
-        Field field = chr.getField();
-
-        SkillInfo si = SkillData.getSkillInfoById(PINPOINT_SALVO);
-        Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-        if(!chr.isLeft()) {
-            rect = rect.moveRight();
-        }
-        List<Life> lifes = field.getLifesInRect(rect);
-        //for(Life life : lifes) {
-        Life life = lifes.get(0);
-        if(life instanceof Mob) {
-            for(int i = 0; i<4; i++) {
-                int anglenum = new Random().nextInt(160) + 20;
-                int mobID = ((Mob) life).getRefImgMobID(); //
-                int inc = ForceAtomEnum.XENON_ROCKET_3.getInc();
-                int type = ForceAtomEnum.XENON_ROCKET_3.getForceAtomType();
-                ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
-                        anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
-                        new Position());
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                        true, mobID, getPinPointSkill(), forceAtomInfo, new Rect(), 0, 300,
-                        life.getPosition(), getPinPointSkill(), life.getPosition()));
-            }
-        }
-    }
-
-    public int getPinPointSkill() {
-        int skill = PINPOINT_SALVO;
-        if(chr.hasSkill(PINPOINT_SALVO_REDESIGN_A)) {
-            skill = PINPOINT_SALVO_REDESIGN_A;
-        }
-        if(chr.hasSkill(PINPOINT_SALVO_REDESIGN_B)) {
-            skill = PINPOINT_SALVO_REDESIGN_B;
-        }
-        if(chr.hasSkill(PINPOINT_SALVO_PERFECT_DESIGN)) {
-            skill = PINPOINT_SALVO_PERFECT_DESIGN;
-        }
-        return skill;
     }
 }
 

@@ -8,14 +8,13 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.enums.BaseStat;
-import net.swordie.ms.life.movement.Movement;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AvatarModifiedMask;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.util.Position;
 
-import java.util.List;
 
 /**
  * Created on 2/3/2018.
@@ -30,19 +29,11 @@ public class UserRemote {
         return outPacket;
     }
 
-    public static OutPacket move(Char chr, int encodedGatherDuration, Position oldPos, Position oldVPos,
-                                 List<Movement> movements) {
+    public static OutPacket move(Char chr, MovementInfo movementInfo) {
         OutPacket outPacket = new OutPacket(OutHeader.REMOTE_MOVE);
 
         outPacket.encodeInt(chr.getId());
-        outPacket.encodeInt(encodedGatherDuration);
-        outPacket.encodePosition(oldPos);
-        outPacket.encodePosition(oldVPos);
-        outPacket.encodeByte(movements.size());
-        for(Movement m : movements) {
-            m.encode(outPacket);
-        }
-        outPacket.encodeByte(0);
+        outPacket.encode(movementInfo);
 
         return outPacket;
     }
@@ -93,11 +84,11 @@ public class UserRemote {
         outPacket.encodeByte(ai.buckShot);
         outPacket.encodeInt(ai.option3);
         outPacket.encodeInt(ai.bySummonedID);
-        if((ai.buckShot & 2) != 0) {
+        if ((ai.buckShot & 2) != 0) {
             outPacket.encodeInt(ai.buckShotSkillID);
             outPacket.encodeInt(ai.buckShotSlv);
         }
-        if((ai.buckShot & 8) != 0) {
+        if ((ai.buckShot & 8) != 0) {
             outPacket.encodeByte(ai.psdTargetPlus);
         }
         byte left = (byte) (ai.left ? 1 : 0);
@@ -305,6 +296,62 @@ public class UserRemote {
 
         outPacket.encodeInt(chr.getId());
         outPacket.encodeInt(chr.getAvatarData().getCharacterStat().getWingItem());
+
+        return outPacket;
+    }
+
+    public static OutPacket setTemporaryStat(Char chr, short delay) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_TEMPORARY_STAT);
+
+        outPacket.encodeInt(chr.getId());
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        tsm.encodeForRemote(outPacket, tsm.getNewStats());
+        outPacket.encodeShort(delay);
+
+        return outPacket;
+    }
+
+    public static OutPacket resetTemporaryStat(Char chr) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_RESET_TEMPORARY_STAT);
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+        outPacket.encodeInt(chr.getId());
+        int[] mask = tsm.getMaskByCollection(tsm.getRemovedStats());
+        for (int maskElem : mask) {
+            outPacket.encodeInt(maskElem);
+        }
+        int poseType = 0;
+        if (tsm.hasStat(CharacterTemporaryStat.PoseType)) {
+            poseType = tsm.getOption(CharacterTemporaryStat.PoseType).bOption;
+        }
+        outPacket.encodeByte(poseType);
+        outPacket.encodeByte(false); // if true, show a ride vehicle effect. Why should this be called on reset tho?
+
+        return outPacket;
+    }
+
+    public static OutPacket remoteSetActivePortableChair(int chrId, int itemId, boolean textChair, String text) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SET_ACTIVE_PORTABLE_CHAIR);
+
+        outPacket.encodeInt(chrId);
+
+        outPacket.encodeInt(itemId);
+        outPacket.encodeInt(textChair ? 1 : 0);
+        if (textChair) {
+            outPacket.encodeString(text);
+        }
+
+        int towerChair = 0;
+        outPacket.encodeInt(towerChair);
+        if (towerChair > 0) {
+            outPacket.encodeInt(0);//TowerChairID
+        }
+
+
+        outPacket.encodeInt(0);//mesochaircount
+        outPacket.encodeInt(0);//unkGMS
+        outPacket.encodeInt(0);//unkGMS
 
         return outPacket;
     }

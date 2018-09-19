@@ -14,12 +14,22 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
 import net.swordie.ms.client.jobs.adventurer.Magician;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
+import net.swordie.ms.client.jobs.cygnus.NightWalker;
+import net.swordie.ms.client.jobs.legend.Phantom;
+import net.swordie.ms.client.jobs.legend.Shade;
+import net.swordie.ms.client.party.Party;
+import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.life.AffectedArea;
@@ -36,6 +46,8 @@ import java.util.Map;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import static net.swordie.ms.client.jobs.adventurer.Warrior.PARASHOCK_GUARD;
+import static net.swordie.ms.client.jobs.cygnus.Mihile.*;
 
 
 /**
@@ -79,16 +91,34 @@ public abstract class Job {
 	public static final int DARK_ANGEL = 40011087;
 	public static final int ARCHANGEL = 40011085;
 
+	public static final int BOSS_SLAYERS = 91001022;
+	public static final int UNDETERRED = 91001023;
+	public static final int FOR_THE_GUILD = 91001024;
+
+	public static final int REBOOT = 80000186;
+	public static final int REBOOT2 = 80000187;
+
 	private int[] buffs = new int[]{
 			LIGHTNING_GOD,
 			WHITE_ANGEL,
 			DARK_ANGEL,
-			ARCHANGEL
+			ARCHANGEL,
+			BOSS_SLAYERS,
+			UNDETERRED,
+			FOR_THE_GUILD
 	};
 
 	public Job(Char chr) {
 		this.chr = chr;
 		this.c = chr.getClient();
+
+		if (c != null && chr.getId() != 0 && c.getWorld().isReboot()) {
+			if (!chr.hasSkill(REBOOT)) {
+				Skill skill = SkillData.getSkillDeepCopyById(REBOOT);
+				skill.setCurrentLevel(1);
+				chr.addSkill(skill);
+			}
+		}
 	}
 
 	public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -132,7 +162,7 @@ public abstract class Job {
 				for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
 					Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
 					MobTemporaryStat mts = mob.getTemporaryStat();
-					mts.createAndAddBurnedInfo(chr, skill, 1);
+					mts.createAndAddBurnedInfo(chr, skill);
 				}
 
 				// Buff of the Rune
@@ -152,62 +182,93 @@ public abstract class Job {
 	public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
 		TemporaryStatManager tsm = chr.getTemporaryStatManager();
 		Char chr = c.getChr();
-		Skill skill = chr.getSkill(skillID);
+		Skill skill = SkillData.getSkillDeepCopyById(skillID);
 		SkillInfo si = null;
 		if(skill != null) {
 			si = SkillData.getSkillInfoById(skillID);
 		}
-		chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+		chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
 		Summon summon;
 		Field field;
 		if (isBuff(skillID)) {
-			handleBuff(c, inPacket, skillID, slv);
+			handleJoblessBuff(c, inPacket, skillID, slv);
 		} else {
-			switch (skillID) {
-				case MONOLITH:
-					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-					field = c.getChr().getField();
-					summon.setMoveAbility(MoveAbility.STATIC.getVal());
-					field.spawnSummon(summon);
-					field.setKishin(true);
-					break;
-				case ELEMENTAL_SYLPH:
-				case FLAME_SYLPH:
-				case THUNDER_SYLPH:
-				case ICE_SYLPH:
-				case EARTH_SYLPH:
-				case DARK_SYLPH:
-				case HOLY_SYLPH:
-				case SALAMANDER_SYLPH:
-				case ELECTRON_SYLPH:
-				case UNDINE_SYLPH:
-				case GNOME_SYLPH:
-				case DEVIL_SYLPH:
-				case ANGEL_SYLPH:
+			if(chr.hasSkill(skillID) && si.getVehicleId() > 0) {
+				TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.RideVehicle);
+				if(tsm.hasStat(RideVehicle)) {
+					tsm.removeStat(RideVehicle, false);
+				}
+				tsb.setNOption(si.getVehicleId());
+				tsb.setROption(skillID);
+				tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
+				tsm.sendSetStatPacket();
+			} else {
+				switch (skillID) {
+					case MONOLITH:
+						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+						field = c.getChr().getField();
+						summon.setMoveAbility(MoveAbility.Stop.getVal());
+						field.spawnSummon(summon);
+						field.setKishin(true);
+						break;
+					case ELEMENTAL_SYLPH:
+					case FLAME_SYLPH:
+					case THUNDER_SYLPH:
+					case ICE_SYLPH:
+					case EARTH_SYLPH:
+					case DARK_SYLPH:
+					case HOLY_SYLPH:
+					case SALAMANDER_SYLPH:
+					case ELECTRON_SYLPH:
+					case UNDINE_SYLPH:
+					case GNOME_SYLPH:
+					case DEVIL_SYLPH:
+					case ANGEL_SYLPH:
 
-				case ELEMENTAL_SYLPH_2:
-				case FLAME_SYLPH_2:
-				case THUNDER_SYLPH_2:
-				case ICE_SYLPH_2:
-				case EARTH_SYLPH_2:
-				case DARK_SYLPH_2:
-				case HOLY_SYLPH_2:
-				case SALAMANDER_SYLPH_2:
-				case ELECTRON_SYLPH_2:
-				case UNDINE_SYLPH_2:
-				case GNOME_SYLPH_2:
-				case DEVIL_SYLPH_2:
-				case ANGEL_SYLPH_2:
-					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-					field = c.getChr().getField();
-					field.spawnSummon(summon);
-					break;
+					case ELEMENTAL_SYLPH_2:
+					case FLAME_SYLPH_2:
+					case THUNDER_SYLPH_2:
+					case ICE_SYLPH_2:
+					case EARTH_SYLPH_2:
+					case DARK_SYLPH_2:
+					case HOLY_SYLPH_2:
+					case SALAMANDER_SYLPH_2:
+					case ELECTRON_SYLPH_2:
+					case UNDINE_SYLPH_2:
+					case GNOME_SYLPH_2:
+					case DEVIL_SYLPH_2:
+					case ANGEL_SYLPH_2:
+						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+						field = c.getChr().getField();
+						field.spawnSummon(summon);
+						break;
+				}
 			}
 		}
+	}
+
+	/**
+	 * Gets called when Character receives a debuff from a Mob Skill
+	 *
+	 * @param chr
+	 * 		The Character
+	 */
+
+	public void handleMobDebuffSkill(Char chr) {
 
 	}
 
-	public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
+	/**
+	 * Used for Classes that have timers, to cancel the timer after changing channel
+	 *
+	 * @param chr
+	 * 		The Character
+	 */
+	public void handleCancelTimer(Char chr) {
+
+	}
+
+	public void handleJoblessBuff(Client c, InPacket inPacket, int skillID, byte slv) {
 		Char chr = c.getChr();
 		SkillInfo si = SkillData.getSkillInfoById(skillID);
 		TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
@@ -219,6 +280,7 @@ public abstract class Job {
 		Summon summon;
 		Field field;
 		int curTime = (int) System.currentTimeMillis();
+		boolean sendStat = true;
 		switch (skillID) {
 			case LIGHTNING_GOD:
 				si = SkillData.getSkillInfoById(80010065); // Lightning God Buff (16 w/m att)
@@ -288,8 +350,33 @@ public abstract class Job {
 				field = c.getChr().getField();
 				field.spawnSummon(summon);
 				break;
+			case BOSS_SLAYERS:
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieBDR, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieBDR, o1);
+				break;
+			case UNDETERRED:
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieIgnoreMobpdpR, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieIgnoreMobpdpR, o1);
+				break;
+			case FOR_THE_GUILD:
+				o1.nReason = skillID;
+				o1.nValue = si.getValue(indieDamR, slv);
+				o1.tStart = curTime;
+				o1.tTerm = si.getValue(time, slv);
+				tsm.putCharacterStatValue(IndieDamR, o1);
+				break;
+			default:
+				sendStat = false;
 		}
-		c.write(WvsContext.temporaryStatSet(tsm));
+		if (sendStat) {
+			tsm.sendSetStatPacket();
+		}
 	}
 
 	/**
@@ -336,6 +423,61 @@ public abstract class Job {
 	public void handleHit(Client c, HitInfo hitInfo) {
 		Char chr = c.getChr();
 		hitInfo.hpDamage = Math.max(0, hitInfo.hpDamage); // to prevent -1 (dodges) healing the player.
+
+		if(chr.getStat(Stat.hp) <= hitInfo.hpDamage) {
+			TemporaryStatManager tsm = chr.getTemporaryStatManager();
+
+			// Global Revives ---------------------------------------
+
+			// Global - Door (Bishop)
+			if(tsm.hasStatBySkillId(Magician.HEAVENS_DOOR)) {
+				Magician.reviveByHeavensDoor(chr);
+			}
+
+			// Global - Shade Link Skill (Shade)
+			// TODO
+
+
+
+			// Class Revives ----------------------------------------
+
+			// Dark Knight - Final Pact
+			else if(JobConstants.isDarkKnight(chr.getJob()) && chr.hasSkill(Warrior.FINAL_PACT_INFO) && Warrior.isFinalPactAvailable(chr)) {
+				Warrior.reviveByFinalPact(chr);
+			}
+
+			// Night Walker - Darkness Ascending
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, NightWalker.DARKNESS_ASCENDING) != null ) {
+				NightWalker.reviveByDarknessAscending(chr);
+			}
+
+			// Blaze Wizard - Phoenix Run
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, BlazeWizard.PHOENIX_RUN) != null) {
+				BlazeWizard.reviveByPhoenixRun(chr);
+			}
+
+			// Shade - Summon Other Spirit
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, Shade.SUMMON_OTHER_SPIRIT) != null) {
+				Shade.reviveBySummonOtherSpirit(chr);
+			}
+
+			// Beast Tamer - Bear Reborn		TODO
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, BeastTamer.BEAR_REBORN) != null) {
+				BeastTamer.reviveByBearReborn(chr);
+			}
+
+			// Zero - Rewind
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, Zero.REWIND) != null) {
+				Zero.reviveByRewind(chr);
+			}
+
+			// Phantom - Final Feint
+			else if (tsm.getOptByCTSAndSkill(ReviveOnce, Phantom.FINAL_FEINT) != null) {
+				Phantom.reviveByFinalFeint(chr);
+			}
+
+
+		}
 		int curHP = chr.getStat(Stat.hp);
 		int newHP = curHP - hitInfo.hpDamage;
 		if (newHP <= 0) {
@@ -382,13 +524,61 @@ public abstract class Job {
 	 * 		The hit info that should be altered if necessary
 	 */
 	public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+		Char chr = c.getChr();
 		TemporaryStatManager tsm = chr.getTemporaryStatManager();
-		if (tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
-			if (Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
-				Magician.hmshits++;
-			} else {
-				Magician.hmshits = 0;
-				tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
+
+		// If no job specific skills already nullified the dmg taken
+		if(hitInfo.hpDamage != 0) {
+
+			// Bishop - Holy Magic Shell
+			if (tsm.hasStat(CharacterTemporaryStat.HolyMagicShell)) {
+				if (Magician.hmshits < Magician.getHolyMagicShellMaxGuards(chr)) {
+					Magician.hmshits++;
+				} else {
+					Magician.hmshits = 0;
+					tsm.removeStatsBySkill(Magician.HOLY_MAGIC_SHELL);
+				}
+			}
+
+			// Mihile - Soul Link
+			else if (tsm.hasStat(MichaelSoulLink) && chr.getId() != tsm.getOption(MichaelSoulLink).cOption) {
+				Party party = chr.getParty();
+
+				PartyMember mihileInParty = party.getPartyMemberByID(tsm.getOption(MichaelSoulLink).cOption);
+				if (mihileInParty != null) {
+					Char mihileChr = mihileInParty.getChr();
+					Skill skill = mihileChr.getSkill(SOUL_LINK);
+					SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+					byte slv = (byte) skill.getCurrentLevel();
+
+					int hpDmg = hitInfo.hpDamage;
+					int mihileDmgTaken = (int) (hpDmg * ((double) si.getValue(q, slv) / 100));
+
+					hitInfo.hpDamage = hitInfo.hpDamage - mihileDmgTaken;
+					mihileChr.damage(mihileDmgTaken);
+				} else {
+					tsm.removeStatsBySkill(SOUL_LINK);
+					tsm.removeStatsBySkill(ROYAL_GUARD);
+					tsm.removeStatsBySkill(ENDURING_SPIRIT);
+					tsm.sendResetStatPacket();
+				}
+			}
+
+			// Paladin - Parashock Guard
+			else if (tsm.hasStat(KnightsAura) && chr.getId() != tsm.getOption(KnightsAura).nOption) {
+				Party party = chr.getParty();
+
+				PartyMember paladinInParty = party.getPartyMemberByID(tsm.getOption(KnightsAura).nOption);
+				if (paladinInParty != null) {
+					Char paladinChr = paladinInParty.getChr();
+					Skill skill = paladinChr.getSkill(PARASHOCK_GUARD);
+					SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+					byte slv = (byte) skill.getCurrentLevel();
+
+					int dmgReductionR = si.getValue(y, slv);
+					int dmgReduceAmount = (int) (hitInfo.hpDamage * ((double) dmgReductionR / 100));
+					hitInfo.hpDamage = hitInfo.hpDamage - dmgReduceAmount;
+				}
 			}
 		}
 	}
@@ -419,28 +609,13 @@ public abstract class Job {
 
 	public void handleLevelUp() {
 		short level = chr.getLevel();
-		chr.addStat(Stat.mhp, 500);
-		chr.addStat(Stat.mmp, 500);
-		chr.addStat(Stat.ap, 5);
+		if (level > 10) chr.addStat(Stat.ap, 5);
 		int sp = SkillConstants.getBaseSpByLevel(level);
 		if ((level % 10) % 3 == 0 && level > 100) {
 			sp *= 2; // double sp on levels ending in 3/6/9
 		}
-		ExtendSP extendSP = chr.getAvatarData().getCharacterStat().getExtendSP();
-		if (level >= SkillConstants.PASSIVE_HYPER_MIN_LEVEL) {
-			SPSet spSet = extendSP.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1);
-			spSet.addSp(1);
-			chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperPassiveSkill, true, spSet.getSp()));
-		}
-		if (SkillConstants.ACTIVE_HYPER_LEVELS.contains(level)) {
-			SPSet spSet = extendSP.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
-			chr.write(WvsContext.resultInstanceTable(InstanceTableType.HyperActiveSkill, true, spSet.getSp()));
-			spSet.addSp(1);
-		}
 		chr.addSpToJobByCurrentLevel(sp);
 		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-		stats.put(Stat.mmp, chr.getStat(Stat.mmp));
 		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
 		chr.write(WvsContext.statChanged(stats));
@@ -452,6 +627,13 @@ public abstract class Job {
 				chr.addSkill(linkSkillID, linkSkillLevel, 3);
 			}
 		}
+		chr.heal(chr.getMaxHP());
+		chr.healMP(chr.getMaxMP());
+		if (c.getWorld().isReboot()) {
+			Skill skill = SkillData.getSkillDeepCopyById(REBOOT2);
+			skill.setCurrentLevel(level);
+			chr.addSkill(skill);
+		}
 	}
 
 	public boolean isBuff(int skillID) {
@@ -461,15 +643,16 @@ public abstract class Job {
 	public void setCharCreationStats(Char chr) {
 		CharacterStat characterStat = chr.getAvatarData().getCharacterStat();
 		characterStat.setLevel(1);
-		characterStat.setStr(4);
-		characterStat.setDex(4);
+		characterStat.setStr(12);
+		characterStat.setDex(5);
 		characterStat.setInt(4);
 		characterStat.setLuk(4);
 		characterStat.setHp(50);
 		characterStat.setMaxHp(50);
-		characterStat.setMp(50);
-		characterStat.setMaxMp(50);
-		characterStat.setPosMap(100000000);
+		characterStat.setMp(5);
+		characterStat.setMaxMp(5);
+                
+		characterStat.setPosMap(100000000);// should be handled for eah job not here
 		Item whitePot = ItemData.getItemDeepCopy(2000002);
 		whitePot.setQuantity(100);
 		chr.addItemToInventory(whitePot);

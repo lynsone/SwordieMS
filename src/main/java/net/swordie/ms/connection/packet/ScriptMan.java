@@ -13,17 +13,14 @@ import net.swordie.ms.handlers.header.OutHeader;
  */
 public class ScriptMan {
 
-    public static OutPacket scriptMessage(ScriptManagerImpl sm, NpcMessageType nmt) {
-        NpcScriptInfo nsi = sm.getNpcScriptInfo();
-
+    public static OutPacket scriptMessage(NpcScriptInfo nsi, NpcMessageType nmt) {
         OutPacket outPacket = new OutPacket(OutHeader.SCRIPT_MESSAGE);
 
         outPacket.encodeByte(nsi.getSpeakerType());
-        outPacket.encodeInt(sm.getParentIDByScriptType(ScriptType.NPC));
         int overrideTemplate = nsi.getOverrideSpeakerTemplateID();
+        outPacket.encodeInt(overrideTemplate != 0 ? overrideTemplate : nsi.getTemplateID());
         outPacket.encodeByte(overrideTemplate > 0);
         if(overrideTemplate > 0) {
-            nsi.setParam((byte) (nsi.getParam() | 4));
             outPacket.encodeInt(overrideTemplate);
         }
         outPacket.encodeByte(nmt.getVal());
@@ -44,6 +41,7 @@ public class ScriptMan {
                 outPacket.encodeInt(nmt.getDelay());
                 break;
             case AskMenu:
+            case AskAccept:
             case AskYesNo:
                 if((nsi.getParam() & 4) != 0) {
                     outPacket.encodeInt(nsi.getOverrideSpeakerTemplateID());
@@ -107,8 +105,8 @@ public class ScriptMan {
                 outPacket.encodeByte(nsi.isZeroBeta());
                 outPacket.encodeString(nsi.getText());
                 outPacket.encodeByte(options.length);
-                for (int i = 0; i < options.length; i++) {
-                    outPacket.encodeInt(options[i]);
+                for (int option : options) {
+                    outPacket.encodeInt(option);
                 }
                 break;
             case AskSlideMenu:

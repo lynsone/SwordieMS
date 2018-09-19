@@ -37,11 +37,22 @@ public class Util {
      * @param <T> The type of elements of the list
      * @return A random element from the list, or null if the list is null or empty.
      */
-    public static <T> T getRandomFromList(List<T> list) {
+    public static <T> T getRandomFromCollection(List<T> list) {
         if(list != null && list.size() > 0) {
             return list.get(getRandom(list.size() - 1));
         }
         return null;
+    }
+
+    /**
+     * Gets a random element from a given Collection. This is done by making an array from the Collection and calling
+     * {@link #getRandomFromCollection(List)}
+     * @param coll The collection to select the element from
+     * @param <T> The type of elements of the list
+     * @return A random element from the list, or null if the list is null or empty.
+     */
+    public static <T> T getRandomFromCollection(Collection<T> coll) {
+        return getRandomFromCollection(new ArrayList<>(coll));
     }
 
     /**
@@ -50,7 +61,7 @@ public class Util {
      * @param <T> The type of elements of the list
      * @return A random element from the list, or null if the list is null or empty.
      */
-    public static <T> T getRandomFromList(T[] list) {
+    public static <T> T getRandomFromCollection(T[] list) {
         if(list != null && list.length > 0) {
             return list[getRandom(list.length - 1)];
         }
@@ -317,8 +328,20 @@ public class Util {
      * @param <T> The type of the collection's elements
      * @return An element for which the predicate holds, or null if there is none
      */
-    public static <T> T getFromCollectionWithPred(java.util.Collection<T> collection, Predicate<T> pred) {
+    public static <T> T findWithPred(java.util.Collection<T> collection, Predicate<T> pred) {
         return collection.stream().filter(pred).findAny().orElse(null);
+    }
+
+    /**
+     * Gets a single element from an array by using a predicate. Returns a random element if there are multiple
+     * elements for which the predicate holds.
+     * @param arr The array the element should be gathered from
+     * @param pred The predicate that should hold for the element
+     * @param <T> The type of the collection's elements
+     * @return An element for which the predicate holds, or null if there is none
+     */
+    public static <T> T findWithPred(T[] arr, Predicate<T> pred) {
+        return findWithPred(Arrays.asList(arr), pred);
     }
 
     /**
@@ -343,5 +366,14 @@ public class Util {
      */
     public static boolean isStringBCrypt(String password) {
         return regexPattern.matcher(password).matches();
+    }
+
+    /**
+     * Returns the long as an int, or Integer.MAX_VALUE if it exceeds the maximum int value.
+     * @param num the number that should be capped at Integer.MAX_VALUE
+     * @return <code>num</code> if the number is small enough, else Integer.MAX_VALUE
+     */
+    public static int maxInt(long num) {
+        return (int) Math.min(Integer.MAX_VALUE, num);
     }
 }

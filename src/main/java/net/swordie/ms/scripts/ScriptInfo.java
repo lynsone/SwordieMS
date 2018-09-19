@@ -2,6 +2,10 @@ package net.swordie.ms.scripts;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created on 2/19/2018.
@@ -12,7 +16,11 @@ public class ScriptInfo {
     private int parentID;
     private String scriptName;
     private Invocable invocable;
+    private final Lock lock = new ReentrantLock();
+    private Queue<Object> responses = new LinkedList<>();
     private int objectID;
+    private String fileDir;
+    private boolean isActive;
 
     public ScriptInfo(ScriptType scriptType, ScriptEngine scriptEngine, int parentID, String scriptName) {
         this.scriptType = scriptType;
@@ -70,14 +78,19 @@ public class ScriptInfo {
     }
 
     public boolean isActive() {
-        return getScriptEngine() != null;
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        this.isActive = active;
     }
 
     public void reset() {
-        setScriptEngine(null);
+        addResponse(null);
         setParentID(0);
         setScriptName("");
         setInvocable(null);
+        setActive(false);
     }
 
     public int getObjectID() {
@@ -86,5 +99,37 @@ public class ScriptInfo {
 
     public void setObjectID(int objectID) {
         this.objectID = objectID;
+    }
+
+    public void addResponse(Object response) {
+        if (response == null) {
+            responses.clear();
+        }
+        this.responses.add(response);
+        synchronized (lock) {
+            lock.notifyAll();
+        }
+    }
+
+    public Object awaitResponse() {
+        if (responses.size() > 0) {
+            return responses.poll();
+        }
+        synchronized (lock) {
+            try {
+                lock.wait();
+            } catch (InterruptedException e) {
+                // intended
+            }
+        }
+        return responses.poll();
+    }
+
+    public void setFileDir(String fileDir) {
+        this.fileDir = fileDir;
+    }
+
+    public String getFileDir() {
+        return fileDir;
     }
 }

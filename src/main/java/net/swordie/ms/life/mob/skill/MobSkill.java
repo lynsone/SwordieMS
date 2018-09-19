@@ -21,6 +21,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 
 import java.util.List;
+import java.util.Objects;
 
 import static net.swordie.ms.life.mob.skill.MobSkillStat.*;
 
@@ -29,7 +30,7 @@ import static net.swordie.ms.life.mob.skill.MobSkillStat.*;
  */
 public class MobSkill {
     private static final Logger log = LogManager.getRootLogger();
-    private int skillID;
+    private int skillSN;
     private byte action;
     private int level;
     private int effectAfter;
@@ -47,21 +48,21 @@ public class MobSkill {
     private String info;
     private String text;
     private boolean afterDead;
-    private int afterAttack;
+    private int afterAttack = -1;
     private int afterAttackCount;
     private int castTime;
     private int coolTime;
     private int delay;
     private int useLimit;
     private String speak;
-    private int skill;
+    private int skillID;
 
-    public int getSkillID() {
-        return skillID;
+    public int getSkillSN() {
+        return skillSN;
     }
 
-    public void setSkillID(int skillID) {
-        this.skillID = skillID;
+    public void setSkillSN(int skillSN) {
+        this.skillSN = skillSN;
     }
 
     public byte getAction() {
@@ -256,17 +257,17 @@ public class MobSkill {
         return speak == null ? "" : speak;
     }
 
-    public int getSkill() {
-        return skill;
+    public int getSkillID() {
+        return skillID;
     }
 
-    public void setSkill(int skill) {
-        this.skill = skill;
+    public void setSkillID(int skillID) {
+        this.skillID = skillID;
     }
 
     public void handleEffect(Mob mob) {
         MobTemporaryStat mts = mob.getTemporaryStat();
-        short skill = (short) getSkill();
+        short skill = (short) getSkillID();
         short level = (short) getLevel();
         MobSkillInfo msi = SkillData.getMobSkillInfoByIdAndLevel(skill, level);
         MobSkillID msID = MobSkillID.getMobSkillIDByVal(skill);
@@ -295,7 +296,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 List<Char> chars = mob.getField().getCharsInRect(rect);
-                Char chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                Char chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -314,7 +315,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -333,7 +334,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -352,7 +353,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -371,7 +372,7 @@ public class MobSkill {
                     rect = rect.horizontalFlipAround(mob.getPosition().getX());
                 }
                 chars = mob.getField().getCharsInRect(rect);
-                chr = chars.size() == 0 ? null : Util.getRandomFromList(chars);
+                chr = chars.size() == 0 ? null : Util.getRandomFromCollection(chars);
                 if (chr == null) {
                     return;
                 }
@@ -406,7 +407,7 @@ public class MobSkill {
                             Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
                 } else {
                     // xPos == skillAfter (both x)
-                    mob.getField().getLifeToControllers().get(mob).write(MobPool.mobTeleportRequest(xPos));
+                    mob.getField().getLifeToControllers().get(mob).write(MobPool.teleportRequest(xPos));
                 }
                 break;
             case PM_COUNTER:
@@ -452,11 +453,26 @@ public class MobSkill {
                 // Not needed? Automatically handled well by the controller
                 break;
             case UNK:
-                log.warn(String.format("Unknown mob skill %d, slv = %d", skill, level));
+                log.warn(String.format("Unknown mob skillID %d, slv = %d", skill, level));
                 break;
             default:
-                log.warn(String.format("Unhandled mob skill %s, slv = %d", msID, getLevel()));
+                log.warn(String.format("Unhandled mob skillID %s, slv = %d", msID, getLevel()));
                 break;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MobSkill mobSkill = (MobSkill) o;
+        return skillSN == mobSkill.skillSN &&
+                skillID == mobSkill.skillID &&
+                level == mobSkill.level;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(skillSN, skillID, level);
     }
 }

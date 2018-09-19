@@ -1,6 +1,7 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.runestones.RuneStone;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.world.field.*;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.npc.Npc;
@@ -92,13 +93,13 @@ public class FieldData {
                         dataOutputStream.writeInt(p.getDelay());
                     }
                     dataOutputStream.writeShort(field.getLifes().size());
-                    for (Life l : field.getLifes()) {
+                    for (Life l : field.getLifes().values()) {
                         dataOutputStream.writeUTF(l.getLifeType());
                         dataOutputStream.writeInt(l.getTemplateId());
                         dataOutputStream.writeInt(l.getX());
                         dataOutputStream.writeInt(l.getY());
                         dataOutputStream.writeInt(l.getMobTime());
-                        dataOutputStream.writeInt(l.getF());
+                        dataOutputStream.writeBoolean(l.isFlip());
                         dataOutputStream.writeBoolean(l.isHide());
                         dataOutputStream.writeInt(l.getFh());
                         dataOutputStream.writeInt(l.getCy());
@@ -115,15 +116,10 @@ public class FieldData {
                         dataOutputStream.writeInt(l.getRegenStart());
                         dataOutputStream.writeInt(l.getMobAliveReq());
                     }
-                    dataOutputStream.writeShort(field.getReactors().size());
-                    for (Reactor r : field.getReactors()) {
-                        dataOutputStream.writeInt(r.getTemplateId());
-                        dataOutputStream.writeShort(r.getHomePosition().getX());
-                        dataOutputStream.writeShort(r.getHomePosition().getY());
-                        dataOutputStream.writeInt(r.getReactorTime());
-                        dataOutputStream.writeInt(r.getF());
-                        dataOutputStream.writeUTF(r.getName());
-                        dataOutputStream.writeBoolean(r.isPhantomForest());
+                    dataOutputStream.writeShort(field.getDirectionInfo().size());
+                    for (Map.Entry<Integer, String> direction : field.getDirectionInfo().entrySet()) {
+                        dataOutputStream.writeInt(direction.getKey());
+                        dataOutputStream.writeUTF(direction.getValue());
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -146,7 +142,7 @@ public class FieldData {
                     continue;
                 }
                 int id = Integer.parseInt(XMLApi.getAttributes(node).get("name").replace(".img", ""));
-                Field field = new Field(id, -1);
+                Field field = new Field(id);
                 Node infoNode = XMLApi.getFirstChildByNameBF(node, "info");
                 for (Node n : XMLApi.getAllChildren(infoNode)) {
                     Map<String, String> attr = XMLApi.getAttributes(n);
@@ -358,7 +354,7 @@ public class FieldData {
                                     life.setMobTime(Integer.parseInt(value));
                                     break;
                                 case "f":
-                                    life.setF(Integer.parseInt(value));
+                                    life.setFlip(Integer.parseInt(value) != 0);
                                     break;
                                 case "hide":
                                     life.setHide(Integer.parseInt(value) != 0);
@@ -417,6 +413,7 @@ public class FieldData {
                 if (reactorNode != null) {
                     for (Node reactorIdNode : XMLApi.getAllChildren(reactorNode)) {
                         Reactor reactor = new Reactor(0);
+                        reactor.setLifeType("r");
                         for (Node valNode : XMLApi.getAllChildren(reactorIdNode)) {
                             String name = XMLApi.getNamedAttribute(valNode, "name");
                             String value = XMLApi.getNamedAttribute(valNode, "value");
@@ -431,6 +428,7 @@ public class FieldData {
                                         curPos = new Position();
                                     }
                                     curPos.setX(iVal);
+                                    reactor.setX(iVal);
                                     reactor.setHomePosition(curPos);
                                     break;
                                 case "y":
@@ -439,16 +437,17 @@ public class FieldData {
                                         curPos = new Position();
                                     }
                                     curPos.setY(iVal);
+                                    reactor.setY(iVal);
                                     reactor.setHomePosition(curPos);
                                     break;
                                 case "reactorTime":
-                                    reactor.setReactorTime(iVal);
+                                    reactor.setMobTime(iVal);
                                     break;
                                 case "f":
-                                    reactor.setF(iVal);
+                                    reactor.setFlip(iVal != 0);
                                     break;
                                 case "name":
-                                    reactor.setName(value);
+                                    reactor.setLimitedName(value);
                                     break;
                                 case "phantomForest":
                                     reactor.setPhantomForest(iVal != 0);
@@ -457,7 +456,23 @@ public class FieldData {
                                     log.warn(String.format("Unknown reactor property %s with value %s", name, value));
                             }
                         }
-                        field.addReactor(reactor);
+                        field.addLife(reactor);
+                    }
+                }
+                Node directionInfoNode = XMLApi.getFirstChildByNameBF(node, "directionInfo");
+                if (directionInfoNode != null) {
+                    for (Node idNode : XMLApi.getAllChildren(directionInfoNode)) {
+                        String name = XMLApi.getNamedAttribute(idNode, "name");
+                        for (Node n : XMLApi.getAllChildren(idNode)) {
+                            // there are more values but only the client use it we need only eventQ
+                            if (XMLApi.getNamedAttribute(n, "name").equals("EventQ")) {
+                                for (Node event : XMLApi.getAllChildren(n)) {
+                                    if (XMLApi.getNamedAttribute(event, "name").equals("0")) {
+                                        field.addDirectionInfo(Integer.parseInt(name), XMLApi.getNamedAttribute(event, "value"));
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 getFields().add(field);
@@ -492,7 +507,7 @@ public class FieldData {
     private static Field readFieldFromFile(File file) {
         Field field = null;
         try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
-            field = new Field(dataInputStream.readInt(), -1);
+            field = new Field(dataInputStream.readInt());
             field.setTown(dataInputStream.readBoolean());
             field.setSwim(dataInputStream.readBoolean());
             field.setReturnMap(dataInputStream.readInt());
@@ -559,7 +574,7 @@ public class FieldData {
                 l.setY(dataInputStream.readInt());
                 l.setHomePosition(new Position(l.getX(), l.getY()));
                 l.setMobTime(dataInputStream.readInt());
-                l.setF(dataInputStream.readInt());
+                l.setFlip(dataInputStream.readBoolean());
                 l.setHide(dataInputStream.readBoolean());
                 l.setFh(dataInputStream.readInt());
                 l.setCy(dataInputStream.readInt());
@@ -581,19 +596,16 @@ public class FieldData {
                 } else if ("n".equalsIgnoreCase(l.getLifeType())) {
                     Npc npc = l.createNpcFromLife();
                     field.addLife(npc);
+                } else if ("r".equalsIgnoreCase(l.getLifeType())) {
+                    Reactor reactor = l.createReactorFromLife();
+                    field.addLife(reactor);
                 } else {
                     field.addLife(l);
                 }
             }
-            short reactSize = dataInputStream.readShort();
-            for (int i = 0; i < reactSize; i++) {
-                Reactor r = new Reactor(dataInputStream.readInt());
-                r.setHomePosition(new Position(dataInputStream.readShort(), dataInputStream.readShort()));
-                r.setReactorTime(dataInputStream.readInt());
-                r.setF(dataInputStream.readInt());
-                r.setName(dataInputStream.readUTF());
-                r.setPhantomForest(dataInputStream.readBoolean());
-                field.addReactor(r);
+            short directionSize = dataInputStream.readShort();
+            for (int j = 0; j < directionSize; j++) {
+                field.addDirectionInfo(dataInputStream.readInt(), dataInputStream.readUTF());
             }
             getFields().add(field);
         } catch (IOException e) {
@@ -615,7 +627,7 @@ public class FieldData {
         if (field == null) {
             return null;
         }
-        Field copy = new Field(id, -1);
+        Field copy = new Field(id);
         copy.setTown(field.isTown());
         copy.setSwim(field.isSwim());
         copy.setReturnMap(field.getReturnMap());
@@ -645,11 +657,8 @@ public class FieldData {
         for (Portal p : field.getPortals()) {
             copy.addPortal(p.deepCopy());
         }
-        for (Life l : field.getLifes()) {
+        for (Life l : field.getLifes().values()) {
             copy.addLife(l.deepCopy());
-        }
-        for (Reactor r : field.getReactors()) {
-            copy.addReactor(r);
         }
         copy.setObjectIDCounter(field.getNewObjectID());
         copy.setRuneStone(new RuneStone().getRandomRuneStone(copy));
@@ -658,7 +667,11 @@ public class FieldData {
         copy.setVrBottom(field.getVrBottom());
         copy.setVrRight(field.getVrRight());
         copy.startBurningFieldTimer();
-        copy.generateMobs();
+        int mobGens = field.getMobGens().size();
+        copy.setFixedMobCapacity((int) (mobGens * GameConstants.DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT));
+        copy.generateMobs(true);
+        copy.setDirectionInfo(field.getDirectionInfo());
+        copy.startFieldScript();
         return copy;
     }
 

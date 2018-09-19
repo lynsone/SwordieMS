@@ -28,7 +28,7 @@ public enum InstanceTableType {
     }
 
     public static InstanceTableType getByStr(String requestStr) {
-        return Util.getFromCollectionWithPred(Arrays.asList(values()), itt -> itt.getTableName().equals(requestStr));
+        return Util.findWithPred(Arrays.asList(values()), itt -> itt.getTableName().equals(requestStr));
     }
 
     public String getTableName() {

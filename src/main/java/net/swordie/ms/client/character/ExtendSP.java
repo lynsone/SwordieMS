@@ -1,6 +1,7 @@
 package net.swordie.ms.client.character;
 
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.util.Util;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class ExtendSP {
     }
 
     public int getSpByJobLevel(byte jobLevel) {
-        SPSet spSet = getSpSet().stream().filter(sps -> sps.getJobLevel() == jobLevel).findFirst().orElse(null);
+        SPSet spSet = Util.findWithPred(getSpSet(), sps -> sps.getJobLevel() == jobLevel);
         if(spSet != null) {
             return spSet.getSp();
         }

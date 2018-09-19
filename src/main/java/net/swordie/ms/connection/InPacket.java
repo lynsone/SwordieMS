@@ -65,7 +65,7 @@ public class InPacket extends Packet {
      * @param amount The amount of bytes to read.
      * @return The bytes that have been read.
      */
-    public byte[] decodeBytes(int amount) {
+    public byte[] decodeArr(int amount) {
         byte[] arr = new byte[amount];
         for(int i = 0; i < amount; i++) {
             arr[i] = byteBuf.readByte();
@@ -95,7 +95,7 @@ public class InPacket extends Packet {
      * @return The char array as a String
      */
     public String decodeString(int amount) {
-        byte[] bytes = decodeBytes(amount);
+        byte[] bytes = decodeArr(amount);
         char[] chars = new char[amount];
         for(int i = 0; i < amount; i++) {
             chars[i] = (char) bytes[i];

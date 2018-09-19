@@ -4,17 +4,16 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.connection.crypto.MapleCrypto;
-import net.swordie.ms.connection.db.DatabaseConnection;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.netty.ChannelAcceptor;
 import net.swordie.ms.connection.netty.ChatAcceptor;
 import net.swordie.ms.connection.netty.LoginAcceptor;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.shop.cashshop.CashShop;
 import net.swordie.ms.world.shop.cashshop.CashShopCategory;
 import net.swordie.ms.world.shop.cashshop.CashShopItem;
-import org.apache.log4j.Category;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -24,11 +23,8 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -41,7 +37,7 @@ public class Server extends Properties {
 	private static final Server server = new Server();
 
 	private List<World> worldList = new ArrayList<>();
-	private List<Account> accounts = new ArrayList<>();
+	private Set<Integer> accounts = new HashSet<>(); // just save the ids, no need to save the references
 	private CashShop cashShop;
 
 	public static Server getInstance() {
@@ -53,28 +49,11 @@ public class Server extends Properties {
 	}
 
 	public World getWorldById(int id) {
-		return getWorlds().stream().filter(w -> w.getWorldId() == id).findFirst().orElse(null);
+		return Util.findWithPred(getWorlds(), w -> w.getWorldId() == id);
 	}
 
 	private void init(String[] args) {
 		log.info("Starting server.");
-		long start = System.currentTimeMillis();
-		Properties properties = new Properties();
-		try {
-			properties.load(new FileInputStream("config.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		for (String s : properties.stringPropertyNames()) {
-			System.setProperty(s, properties.getProperty(s));
-		}
-
-		ServerConfig.SQL_SCHEMA = properties.getProperty("SQL_SCHEMA");
-		ServerConfig.SQL_PORT = properties.getProperty("SQL_PORT");
-		ServerConfig.SQL_USERNAME = properties.getProperty("SQL_USERNAME");
-		ServerConfig.SQL_PASSWORD = properties.getProperty("SQL_PASSWORD");
-
-
 		long startNow = System.currentTimeMillis();
 		DatabaseManager.init();
 		log.info("Loaded Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
@@ -85,16 +64,15 @@ public class Server extends Properties {
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
-		StringData.loadItemStrings();
-		StringData.loadSkillStrings();
+		StringData.load();
 
 		MapleCrypto.initialize(ServerConstants.VERSION);
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();
 		worldList.add(new World(1, "Je Moeder", 3));
-		startNow = System.currentTimeMillis();
+		long startCashShop = System.currentTimeMillis();
 		initCashShop();
-		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startNow) + "ms");
+		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startCashShop) + "ms");
 
 		MonsterCollectionData.loadFromSQL();
 
@@ -105,8 +83,7 @@ public class Server extends Properties {
 				new Thread(ca).start();
 			}
 		}
-		long end = System.currentTimeMillis();
-		log.info(String.format("Finished loading server in %dms", end - start));
+		log.info(String.format("Finished loading server in %dms", System.currentTimeMillis() - startNow));
 	}
 
 	private void checkAndCreateDat() {
@@ -152,17 +129,9 @@ public class Server extends Properties {
 		getInstance().init(args);
 	}
 
-	public Connection getDatabaseConnection() {
-		return DatabaseConnection.getConnection();
-	}
-
 	public Session getNewDatabaseSession() {
 		cleanSessions();
 		return DatabaseManager.getSession();
-	}
-
-	public List<Account> getAccounts() {
-		return accounts;
 	}
 
 	public Tuple<Byte, Client> getChannelFromTransfer(int charId, int worldId) {
@@ -187,6 +156,9 @@ public class Server extends Properties {
 		QuestData.clear();
 		SkillData.clear();
 		ReactorData.clear();
+		for (World world : getWorlds()) {
+			world.clearCache();
+		}
 	}
 
 	public void initCashShop() {
@@ -210,5 +182,17 @@ public class Server extends Properties {
 
 	public CashShop getCashShop() {
 		return this.cashShop;
+	}
+
+	public void addAccount(Account account) {
+		accounts.add(account.getId());
+	}
+
+	public void removeAccount(Account account) {
+		accounts.remove(account.getId());
+	}
+
+	public boolean isAccountLoggedIn(Account account) {
+		return accounts.contains(account.getId());
 	}
 }

@@ -3,6 +3,8 @@ package net.swordie.ms.world;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.alliance.Alliance;
+import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
@@ -18,6 +20,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
@@ -25,55 +28,63 @@ import net.swordie.ms.client.friend.FriendType;
 import net.swordie.ms.client.friend.result.*;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.result.*;
-import net.swordie.ms.client.guild.updates.GuildUpdate;
-import net.swordie.ms.client.guild.updates.GuildUpdateGradeNames;
-import net.swordie.ms.client.guild.updates.GuildUpdateMark;
-import net.swordie.ms.client.guild.updates.GuildUpdateMemberGrade;
+import net.swordie.ms.client.guild.GuildSkill;
+import net.swordie.ms.client.guild.bbs.BBSRecord;
+import net.swordie.ms.client.guild.bbs.BBSReply;
+import net.swordie.ms.client.guild.bbs.GuildBBSPacket;
+import net.swordie.ms.client.guild.bbs.GuildBBSType;
+import net.swordie.ms.client.guild.result.GuildResult;
+import net.swordie.ms.client.guild.result.GuildType;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.adventurer.BeastTamer;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
+import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.legend.Luminous;
+import net.swordie.ms.client.jobs.legend.Shade;
+import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
+import net.swordie.ms.client.jobs.resistance.BattleMage;
+import net.swordie.ms.client.jobs.resistance.WildHunter;
+import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
-import net.swordie.ms.client.party.PartyRequestResultType;
-import net.swordie.ms.client.party.request.PartyApplyRequest;
-import net.swordie.ms.client.party.request.PartyJoinRequestBlue;
-import net.swordie.ms.client.party.request.PartyRequestType;
-import net.swordie.ms.client.party.result.*;
-import net.swordie.ms.client.party.updates.UpdateMemberLoggedIn;
-import net.swordie.ms.client.party.updates.UpdatePartyResult;
-import net.swordie.ms.client.trunk.Trunk;
-import net.swordie.ms.client.trunk.TrunkMsg;
-import net.swordie.ms.client.trunk.TrunkType;
-import net.swordie.ms.client.trunk.TrunkUpdate;
+import net.swordie.ms.client.party.PartyResult;
+import net.swordie.ms.client.party.PartyType;
+import net.swordie.ms.client.trunk.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.InvType;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
+import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.skill.MobSkillID;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.life.movement.Movement;
+import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.pet.Pet;
+import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
@@ -83,6 +94,9 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.gach.GachaponConstants;
+import net.swordie.ms.world.gach.result.GachaponDlgType;
+import net.swordie.ms.world.gach.result.GachaponResult;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
@@ -97,19 +111,20 @@ import org.hibernate.query.Query;
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
-import static net.swordie.ms.enums.ChatMsgColour.*;
+import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.EquipBaseStat.cuc;
-import static net.swordie.ms.enums.EquipBaseStat.ruc;
-import static net.swordie.ms.enums.InvType.CONSUME;
-import static net.swordie.ms.enums.InvType.EQUIP;
-import static net.swordie.ms.enums.InvType.EQUIPPED;
+import static net.swordie.ms.enums.EquipBaseStat.tuc;
+import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
-import static net.swordie.ms.enums.Stat.level;
-import static net.swordie.ms.enums.Stat.sp;
+import static net.swordie.ms.enums.Stat.*;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
 
@@ -122,35 +137,51 @@ public class WorldHandler {
     public static void handleCharLogin(Client c, InPacket inPacket) {
         int worldId = inPacket.decodeInt();
         int charId = inPacket.decodeInt();
+        byte[] machineID = inPacket.decodeArr(16);
         Tuple<Byte, Client> info = Server.getInstance().getChannelFromTransfer(charId, worldId);
         byte channel = info.getLeft();
+        Client oldClient = info.getRight();
+        if (!oldClient.hasCorrectMachineID(machineID)) {
+            c.write(WvsContext.returnToTitle());
+            return;
+        }
+        c.setMachineID(machineID);
+        c.setOldChannel(oldClient.getOldChannel());
+        Account acc = oldClient.getAccount();
+        c.setAccount(acc);
         Server.getInstance().getWorldById(worldId).getChannelById(channel).removeClientFromTransfer(charId);
         c.setChannel(channel);
         c.setWorldId((byte) worldId);
         c.setChannelInstance(Server.getInstance().getWorldById(worldId).getChannelById(channel));
-        Char chr = info.getRight().getChr();
+        Char chr = oldClient.getChr();
         if (chr == null || chr.getId() != charId) {
-            chr = Char.getFromDBById(charId);
-            chr.initEquips();
-            chr.initBaseStats();
+            chr = acc.getCharById(charId);
         }
         chr.setClient(c);
+        chr.setAccount(acc);
+        chr.initEquips();
         c.setChr(chr);
         c.getChannelInstance().addChar(chr);
         chr.setJobHandler(JobManager.getJobById(chr.getJob(), chr));
-        chr.setOnline(true);
         chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
-        if(chr.getAccount() != null) {
-            chr.setAccount(Account.getFromDBById(chr.getAccId()));
-        }
-        chr.getAccount().setLoginState(LoginState.Game);
-        chr.getAccount().setLastLoggedIn(chr.getName());
-        chr.getAccount().setCurrentChr(chr);
-        DatabaseManager.saveToDB(chr.getAccount());
+        Server.getInstance().addAccount(acc);
+        acc.setCurrentChr(chr);
+        DatabaseManager.saveToDB(acc);
         Field field = chr.getOrCreateFieldByCurrentInstanceType(chr.getFieldID() <= 0 ? 100000000 : chr.getFieldID());
+        if (chr.getHP() <= 0) { // automatically revive when relogging
+            chr.heal(chr.getMaxHP() / 2);
+        }
+        if (chr.getPartyID() != 0) {
+            Party party = c.getWorld().getPartybyId(chr.getPartyID());
+            if (party == null) {
+                chr.setPartyID(0);
+            } else {
+                chr.setParty(party);
+            }
+        }
         chr.warp(field, true);
         c.write(WvsContext.updateEventNameTag(new int[]{}));
-        if(chr.getGuild() != null) {
+        if (chr.getGuild() != null) {
             chr.setGuild(chr.getClient().getWorld().getGuildByID(chr.getGuild().getId()));
         }
         if (JobConstants.isBeastTamer(chr.getJob())) {
@@ -163,67 +194,36 @@ public class WorldHandler {
         c.write(WvsContext.macroSysDataInit(chr.getMacros()));
         c.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_SendInfo, null, chr));
         c.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, (byte) 5, chr.getHyperRockFields()));
-        if(chr.getQuestManager().hasQuestInProgress(7291)) { // damage skin update
-            c.write(WvsContext.questRecordMessage(chr.getQuestManager().getQuests().get(7291)));
-        }
-        if (chr.getPartyID() != 0) {
-            Party party = c.getWorld().getPartybyId(chr.getPartyID());
-            if (party == null) {
-                chr.setPartyID(0);
-            } else {
-                chr.setParty(party);
-                chr.write(WvsContext.partyResult(new UpdatePartyResult(party)));
-            }
-        }
-        chr.getAccount().getMonsterCollection().init(chr);
+        acc.getMonsterCollection().init(chr);
+        chr.checkAndRemoveExpiredItems();
+        chr.initBaseStats();
+        chr.setOnline(true); // v195+: respect 'invisible login' setting
     }
 
-    public static void handleMove(Client c, InPacket inPacket) {
+    public static void handleUserMove(Client c, InPacket inPacket) {
         // CVecCtrlUser::EndUpdateActive
         byte fieldKey = inPacket.decodeByte();
         inPacket.decodeInt(); // ? something with field
         inPacket.decodeInt(); // tick
         inPacket.decodeByte(); // ? doesn't get set at all
-        // CMovePathCommon::Encode
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
         Char chr = c.getChr();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        for (Movement m : movements) {
-            Position pos = m.getPosition();
-            chr.setOldPosition(chr.getPosition());
-            chr.setPosition(pos);
-            chr.setMoveAction(m.getMoveAction());
-            chr.setLeft(m.getMoveAction() % 2 == 1);
-            chr.setFoothold(m.getFh());
-        }
+        // CMovePathCommon::Encode
+        MovementInfo movementInfo = new MovementInfo(inPacket);
+        movementInfo.applyTo(chr);
         chr.getField().checkCharInAffectedAreas(chr);
-        chr.getField().broadcastPacket(UserRemote.move(chr, encodedGatherDuration, oldPos, oldVPos, movements), chr);
+        chr.getField().broadcastPacket(UserRemote.move(chr, movementInfo), chr);
     }
 
     public static void handleSummonedMove(Char chr, InPacket inPacket) {
         // CVecCtrlSummoned::EndUpdateActive
         int summonID = inPacket.decodeInt();
         Life life = chr.getField().getLifeByObjectID(summonID);
-        if (!(life instanceof Summon)) {
-            return;
+        if (life instanceof Summon) {
+            Summon summon = (Summon) life;
+            MovementInfo movementInfo = new MovementInfo(inPacket);
+            movementInfo.applyTo(summon);
+            chr.getField().broadcastPacket(Summoned.summonedMove(chr.getId(), summonID, movementInfo), chr);
         }
-        Summon summon = (Summon) life;
-        // CMovePathCommon::Encode
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
-        summon.setPosition(oldPos);
-        summon.setvPosition(oldVPos);
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        for (Movement m : movements) {
-            summon.setPosition(m.getPosition());
-            summon.setvPosition(m.getVPosition());
-            summon.setMoveAction(m.getMoveAction());
-            summon.setFh(m.getFh());
-        }
-        chr.getField().broadcastPacket(Summoned.summonedMove(chr.getId(), summonID, encodedGatherDuration, oldPos, oldVPos, movements), chr);
     }
 
     public static void handleUserChat(Client c, InPacket inPacket) {
@@ -235,10 +235,18 @@ public class WorldHandler {
                 WvsContext.dispose(c.getChr());
                 Map<BaseStat, Integer> basicStats = chr.getTotalBasicStats();
                 StringBuilder sb = new StringBuilder();
-                for (BaseStat bs : BaseStat.values()) {
+                List<BaseStat> sortedList = Arrays.stream(BaseStat.values()).sorted(Comparator.comparing(Enum::toString)).collect(Collectors.toList());
+                for (BaseStat bs : sortedList) {
                     sb.append(String.format("%s = %d, ", bs, basicStats.getOrDefault(bs, 0)));
                 }
-                chr.chatMessage(YELLOW, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
+                chr.chatMessage(Mob, String.format("X=%d, Y=%d %n Stats: %s", chr.getPosition().getX(), chr.getPosition().getY(), sb));
+                ScriptManagerImpl smi = chr.getScriptManager();
+                // all but field
+                smi.stop(ScriptType.Portal);
+                smi.stop(ScriptType.Npc);
+                smi.stop(ScriptType.Reactor);
+                smi.stop(ScriptType.Quest);
+                smi.stop(ScriptType.Item);
 
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
@@ -262,10 +270,10 @@ public class WorldHandler {
                 }
             }
             if (!executed) {
-                chr.chatMessage(CYAN, "Unknown command \"" + command + "\"");
+                chr.chatMessage(Expedition, "Unknown command \"" + command + "\"");
             }
         } else {
-            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatType.USER, msg, false, 0, c.getWorldId()));
+            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatUserType.USER, msg, false, 0, c.getWorldId()));
         }
     }
 
@@ -289,7 +297,7 @@ public class WorldHandler {
         if (newPos == 0) { // Drop
             boolean fullDrop;
             Drop drop;
-            if(!item.getInvType().isStackable() || quantity >= item.getQuantity() ||
+            if (!item.getInvType().isStackable() || quantity >= item.getQuantity() ||
                     ItemConstants.isThrowingStar(item.getItemId()) || ItemConstants.isBullet(item.getItemId())) {
                 // Whole item is dropped (equip/stackable items with all their quantity)
                 fullDrop = true;
@@ -308,7 +316,8 @@ public class WorldHandler {
             int y = chr.getPosition().getY();
             Foothold fh = chr.getField().findFootHoldBelow(new Position(x, y - GameConstants.DROP_HEIGHT));
             chr.getField().drop(drop, chr.getPosition(), new Position(x, fh.getYFromX(x)));
-            if(fullDrop) {
+            drop.setCanBePickedUpByPet(false);
+            if (fullDrop) {
                 c.write(WvsContext.inventoryOperation(true, false, REMOVE,
                         oldPos, newPos, 0, item));
             } else {
@@ -339,7 +348,7 @@ public class WorldHandler {
             }
             int afterSizeOn = chr.getEquippedInventory().getItems().size();
             int afterSize = chr.getEquipInventory().getItems().size();
-            if(afterSize + afterSizeOn != beforeSize + beforeSizeOn) {
+            if (afterSize + afterSizeOn != beforeSize + beforeSizeOn) {
                 throw new RuntimeException("Data duplication!");
             }
             c.write(WvsContext.inventoryOperation(true, false, MOVE, oldPos, newPos,
@@ -350,305 +359,42 @@ public class WorldHandler {
         }
 //        log.debug("Equipped after: " + chr.getEquippedInventory());
 //        log.debug("Equip after: " + chr.getEquipInventory());
-    }
-
-    public static void handleNonTargetForceAtomAttack(Client c, InPacket inPacket) {
-        // fu dan, I actually create a different one for this one as well
-        AttackInfo attackInfo = new AttackInfo();
-        attackInfo.attackHeader = OutHeader.REMOTE_MAGIC_ATTACK;
-        int skillID2 = inPacket.decodeInt();
-        int skillCrc2 = inPacket.decodeInt();
-        int ntfaaIdk = inPacket.decodeInt();
-        byte fieldKey = inPacket.decodeByte();
-        byte mask = inPacket.decodeByte();
-        byte hits = (byte) (mask & 0xF);
-        int mobCount = (mask >>> 4) & 0xF;
-        int skillId = inPacket.decodeInt();
-        byte slv = inPacket.decodeByte();
-        inPacket.decodeByte(); // hardcoded 0
-        inPacket.decodeInt(); // crc
-        boolean zeroBeta = false;
-        if (SkillConstants.isZeroSkill(skillId)) {
-            zeroBeta = inPacket.decodeByte() != 0;
-        }
-        inPacket.decodeByte(); // some zero byte
-        inPacket.decodeByte(); // more zero byte
-        short maskie = inPacket.decodeShort();
-        boolean left = ((maskie >> 15) & 1) != 0;
-        short attackAction = (short) (maskie & 0x7FFF);
-        inPacket.decodeInt(); // another crc (GETCRC32Svr<long>(&a[*n], 0x405u))
-        byte attackActionType = inPacket.decodeByte();
-        byte idk0 = 0;
-        if (SkillConstants.isEvanForceSkill(skillId)) {
-            idk0 = inPacket.decodeByte();
-        }
-        byte mask2 = inPacket.decodeByte();
-        byte attackSpeed = (byte) (mask2 & 0xFFFF);
-        byte reduceCount = (byte) (mask2 >>> 4);
-        int psdTargetPlus = inPacket.decodeInt();
-        int id = inPacket.decodeInt();
-        inPacket.decodeInt(); // another zero
-        attackInfo.fieldKey = fieldKey;
-        attackInfo.hits = hits;
-        attackInfo.mobCount = mobCount;
-        attackInfo.skillId = skillId;
-        attackInfo.slv = slv;
-        attackInfo.left = left;
-        attackInfo.attackAction = attackAction;
-        attackInfo.attackActionType = attackActionType;
-        attackInfo.idk0 = idk0;
-        attackInfo.attackSpeed = attackSpeed;
-        attackInfo.reduceCount = reduceCount;
-        attackInfo.psdTargetPlus = psdTargetPlus;
-        attackInfo.someId = id;
-        for (int i = 0; i < mobCount; i++) {
-            MobAttackInfo mai = new MobAttackInfo();
-            int mobId = inPacket.decodeInt();
-            byte idk1 = inPacket.decodeByte();
-            byte idk2 = inPacket.decodeByte();
-            byte idk3 = inPacket.decodeByte();
-            byte idk4 = inPacket.decodeByte();
-            byte idk5 = inPacket.decodeByte();
-            int templateID = inPacket.decodeInt();
-            byte calcDamageStatIndex = inPacket.decodeByte();
-            short rcDstX = inPacket.decodeShort();
-            short rectRight = inPacket.decodeShort();
-            short oldPosX = inPacket.decodeShort(); // ?
-            short oldPosY = inPacket.decodeShort(); // ?
-            short sIdk6 = inPacket.decodeShort(); // ?
-            short size = attackInfo.hits;
-            int[] damages = new int[size];
-            for (int j = 0; j < size; j++) {
-                damages[j] = inPacket.decodeInt();
-            }
-            int mobUpDownYRange = inPacket.decodeInt();
-            inPacket.decodeInt(); // mob crc
-            // Begin PACKETMAKER::MakeAttackInfoPacket
-            byte type = inPacket.decodeByte();
-            String currentAnimationName = "";
-            int animationDeltaL = 0;
-            String[] hitPartRunTimes = new String[0];
-            if (type == 1) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-                int hitPartRunTimesSize = inPacket.decodeInt();
-                hitPartRunTimes = new String[hitPartRunTimesSize];
-                for (int j = 0; j < hitPartRunTimesSize; j++) {
-                    hitPartRunTimes[j] = inPacket.decodeString();
-                }
-            } else if (type == 2) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-            }
-            // End PACKETMAKER::MakeAttackInfoPacket
-            mai.mobId = mobId;
-            mai.hitAction = idk1;
-            mai.left = idk2;
-            mai.idk3 = idk3;
-            mai.foreAction = idk4;
-            mai.frameIdx = idk5;
-            mai.templateID = templateID;
-            mai.calcDamageStatIndex = calcDamageStatIndex;
-            mai.hitX = rcDstX;
-            mai.hitY = rectRight;
-            mai.oldPosX = oldPosX;
-            mai.oldPosY = oldPosY;
-            mai.damages = damages;
-            mai.mobUpDownYRange = mobUpDownYRange;
-            mai.type = type;
-            mai.currentAnimationName = currentAnimationName;
-            mai.animationDeltaL = animationDeltaL;
-            mai.hitPartRunTimes = hitPartRunTimes;
-            attackInfo.mobAttackInfo.add(mai);
-        }
-        Position somePos = inPacket.decodePosition(); // probably start/end position
-        handleAttack(c, attackInfo);
-    }
-
-    public static void handleMagicAttack(Client c, InPacket inPacket) {
-        AttackInfo ai = new AttackInfo();
-        ai.attackHeader = OutHeader.REMOTE_MAGIC_ATTACK;
-        byte fieldKey = inPacket.decodeByte();
-        byte mask = inPacket.decodeByte();
-        byte hits = (byte) (mask & 0xF);
-        int mobCount = (mask >>> 4) & 0xF;
-        int skillId = inPacket.decodeInt();
-        byte slv = inPacket.decodeByte();
-        inPacket.decodeInt(); // crc
-        int keyDown = -1;
-        if (SkillConstants.isKeyDownSkill(skillId)) {
-            keyDown = inPacket.decodeInt();
-        }
-        inPacket.decodeByte(); // some zero byte
-        ai.someMask = inPacket.decodeByte();
-        short maskie = inPacket.decodeShort();
-        boolean left = ((maskie >> 15) & 1) != 0;
-        short attackAction = (short) (maskie & 0x7FFF);
-        inPacket.decodeInt(); // another crc (GETCRC32Svr<long>(&a[*n], 0x405u))
-        byte attackActionType = inPacket.decodeByte();
-        byte idk0 = 0;
-        if (SkillConstants.isEvanForceSkill(skillId)) {
-            idk0 = inPacket.decodeByte();
-        }
-        byte mask2 = inPacket.decodeByte();
-        byte attackSpeed = (byte) (mask2 & 0xFFFF);
-        byte reduceCount = (byte) (mask2 >>> 4);
-        int psdTargetPlus = inPacket.decodeInt();
-        int id = inPacket.decodeInt();
-        ai.fieldKey = fieldKey;
-        ai.hits = hits;
-        ai.mobCount = mobCount;
-        ai.skillId = skillId;
-        ai.slv = slv;
-        ai.keyDown = keyDown;
-        ai.left = left;
-        ai.attackAction = attackAction;
-        ai.attackActionType = attackActionType;
-        ai.idk0 = idk0;
-        ai.attackSpeed = attackSpeed;
-        ai.reduceCount = reduceCount;
-        ai.psdTargetPlus = psdTargetPlus;
-        ai.someId = id;
-        for (int i = 0; i < mobCount; i++) {
-            MobAttackInfo mai = new MobAttackInfo();
-            int mobId = inPacket.decodeInt();
-            byte idk1 = inPacket.decodeByte();
-            byte idk2 = inPacket.decodeByte();
-            byte idk3 = inPacket.decodeByte();
-            byte idk4 = inPacket.decodeByte();
-            byte idk5 = inPacket.decodeByte();
-            int templateID = inPacket.decodeInt();
-            byte calcDamageStatIndex = inPacket.decodeByte();
-            short rcDstX = inPacket.decodeShort();
-            short rectRight = inPacket.decodeShort();
-            short oldPosX = inPacket.decodeShort(); // ?
-            short oldPosY = inPacket.decodeShort(); // ?
-            short hpPerc = inPacket.decodeByte();
-            byte bIdk6;
-            short sIdk6;
-            if (skillId == 80001835) {
-                bIdk6 = inPacket.decodeByte();
-            } else {
-                sIdk6 = inPacket.decodeShort();
-            }
-            short size = ai.hits;
-            int[] damages = new int[size];
-            for (int j = 0; j < size; j++) {
-                damages[j] = inPacket.decodeInt();
-            }
-            int mobUpDownYRange = inPacket.decodeInt();
-            inPacket.decodeInt(); // mob crc
-            // Begin PACKETMAKER::MakeAttackInfoPacket
-            byte type = inPacket.decodeByte();
-            String currentAnimationName = "";
-            int animationDeltaL = 0;
-            String[] hitPartRunTimes = new String[0];
-            if (type == 1) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-                int hitPartRunTimesSize = inPacket.decodeInt();
-                hitPartRunTimes = new String[hitPartRunTimesSize];
-                for (int j = 0; j < hitPartRunTimesSize; j++) {
-                    hitPartRunTimes[j] = inPacket.decodeString();
-                }
-            } else if (type == 2) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-            }
-            // End PACKETMAKER::MakeAttackInfoPacket
-            mai.mobId = mobId;
-            mai.hitAction = idk1; // ?
-            mai.left = idk2; // ?
-            mai.idk3 = idk3; // ?
-            mai.foreAction = idk4;
-            mai.frameIdx = idk5;
-            mai.templateID = templateID;
-            mai.calcDamageStatIndex = calcDamageStatIndex;
-            mai.hitX = rcDstX;
-            mai.hitY = rectRight;
-            mai.oldPosX = oldPosX;
-            mai.oldPosY = oldPosY;
-            mai.hpPerc = hpPerc;
-            mai.damages = damages;
-            mai.mobUpDownYRange = mobUpDownYRange;
-            mai.type = type;
-            mai.currentAnimationName = currentAnimationName;
-            mai.animationDeltaL = animationDeltaL;
-            mai.hitPartRunTimes = hitPartRunTimes;
-            ai.mobAttackInfo.add(mai);
-        }
-        if (skillId > 27111303) {
-            if (skillId == 27121052 || skillId == 80001837) {
-                int x = inPacket.decodeShort();
-                int y = inPacket.decodeShort();
-                ai.x = x;
-                ai.y = y;
-            }
-        } else if (skillId != 32111016) {
-            short forcedX = inPacket.decodeShort();
-            short forcedY = inPacket.decodeShort();
-            boolean dragon = inPacket.decodeByte() != 0;
-            ai.forcedX = forcedX;
-            ai.forcedY = forcedY;
-            if (dragon) {
-                short rcDstRight = inPacket.decodeShort();
-                short rectRight = inPacket.decodeShort();
-                short x = inPacket.decodeShort();
-                short y = inPacket.decodeShort();
-                inPacket.decodeByte(); // always 0
-                inPacket.decodeByte(); // -1
-                inPacket.decodeByte(); // 0
-                ai.rcDstRight = rcDstRight;
-                ai.rectRight = rectRight;
-                ai.x = x;
-                ai.y = y;
-            }
-            if (skillId == 12100029) {
-                int option = inPacket.decodeInt();
-                ai.option = option;
-            } else {
-                switch (skillId) {
-                    case 2121003: // Mist Eruption
-                        byte size = inPacket.decodeByte();
-                        int[] mists = new int[size];
-                        for (int i = 0; i < size; i++) {
-                            mists[i] = inPacket.decodeInt();
-                        }
-                        ai.mists = mists;
-                        break;
-                    case 2111003: // Poison Mist
-                        byte force = inPacket.decodeByte();
-                        short forcedXSh = inPacket.decodeShort();
-                        short forcedYSh = inPacket.decodeShort();
-                        ai.force = force;
-                        ai.forcedXSh = forcedXSh;
-                        ai.forcedYSh = forcedYSh;
-                        break;
-                    case 80001835: // Soul Shear, but unreachable?
-                        byte sizeB = inPacket.decodeByte();
-                        int[] idkArr2 = new int[sizeB];
-                        short[] shortArr2 = new short[sizeB];
-                        for (int i = 0; i < sizeB; i++) {
-                            idkArr2[i] = inPacket.decodeInt();
-                            shortArr2[i] = inPacket.decodeShort();
-                        }
-                        short delay = inPacket.decodeShort();
-                        ai.mists = idkArr2;
-                        ai.shortArr = shortArr2;
-                        ai.delay = delay;
-                }
-            }
-        }
-        handleAttack(c, ai);
+        chr.setBulletIDForAttack(chr.calculateBulletIDForAttack());
     }
 
     private static void handleAttack(Client c, AttackInfo attackInfo) {
         Char chr = c.getChr();
-        if (chr.checkAndSetSkillCooltime(attackInfo.skillId)) {
-            chr.chatMessage(YELLOW, "SkillID: " + attackInfo.skillId);
-            log.debug("SkillID: " + attackInfo.skillId);
+        chr.chatMessage(attackInfo.skillId + "");
+        int skillID = attackInfo.skillId;
+        if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK || chr.checkAndSetSkillCooltime(skillID)
+                || chr.hasSkillCDBypass() || SkillConstants.isMultiAttackCooldownSkill(skillID)) {
+            byte slv = attackInfo.slv;
+            chr.chatMessage(Mob, "SkillID: " + skillID);
             Field field = c.getChr().getField();
-            c.getChr().getJobHandler().handleAttack(c, attackInfo);
+            Job sourceJobHandler = chr.getJobHandler();
+            SkillInfo si = SkillData.getSkillInfoById(skillID);
+            if (si != null && si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
+                Rect r = si.getFirstRect();
+                if (r != null) {
+                    Rect rectAround = chr.getRectAround(r);
+                    for (PartyMember pm : chr.getParty().getOnlineMembers()) {
+                        if (pm.getChr() != null && pm.getChr().getField() == chr.getField()
+                                && rectAround.hasPositionInside(pm.getChr().getPosition())) {
+                            Char ptChr = pm.getChr();
+                            Effect effect = Effect.skillAffected(skillID, slv, 0);
+                            if (ptChr != chr) {  // Caster shouldn't get the Affected Skill Effect
+                                chr.getField().broadcastPacket(
+                                        UserRemote.effect(ptChr.getId(), effect)
+                                        , ptChr);
+                                ptChr.write(User.effect(effect));
+                                sourceJobHandler.handleAttack(c, attackInfo);
+                            }
+
+                        }
+                    }
+                }
+            }
+            sourceJobHandler.handleAttack(c, attackInfo);
             if (attackInfo.attackHeader != null) {
                 switch (attackInfo.attackHeader) {
                     case SUMMONED_ATTACK:
@@ -666,7 +412,7 @@ public class WorldHandler {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
                 if (mob == null) {
-                    chr.chatMessage(ChatMsgColour.CYAN, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", attackInfo.skillId, mai.mobId));
+                    chr.chatMessage(ChatType.Expedition, String.format("Wrong attack info parse (probably)! SkillID = %d, Mob ID = %d", skillID, mai.mobId));
                 } else if (mob.getHp() > 0) {
                     long totalDamage = 0;
                     for (int dmg : mai.damages) {
@@ -674,41 +420,17 @@ public class WorldHandler {
                     }
                     mob.damage(chr, totalDamage);
                     if (mob.getHp() < 0) {
-
-                        // Combo Counter per Kill
-                        int newChrComboCount = chr.getComboCounter() + 1;
-                        c.write(UserLocal.comboCounter((byte) 1, newChrComboCount, mai.mobId));
-                        chr.setComboCounter(newChrComboCount);
-                        chr.comboKillResetTimer();
-
-                        // Exp Orb spawning from Mob every 50 combos
-                        if(chr.getComboCounter() % 50 == 0) {
-                            Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
-                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
-                                item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
-                            }
-                            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
-                                item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
-                            }
-                            Drop drop = new Drop(-1, item);
-                            drop.setMobExp(mob.getForcedMobStat().getExp());
-                            chr.getField().drop(drop, mob.getPosition());
-                        }
+                        mob.onKilledByChar(chr);
 
                         // MultiKill +1,  per killed mob
                         multiKillMessage++;
                         mobexp = mob.getForcedMobStat().getExp();
-
-                        // Mage FP skill
-                        if(mob.isInfestedByViralSlime()) {
-                            Magician.infestViralSlime(c, mob);
-                        }
                     }
                 }
             }
 
             // MultiKill Message Popup & Exp
-            if(multiKillMessage > 2) {
+            if (multiKillMessage > 2) {
                 int bonusExpMultiplier = (multiKillMessage - 2) * 5;
                 long totalBonusExp = (long) (mobexp * (bonusExpMultiplier * GameConstants.MULTI_KILL_BONUS_EXP_MULTIPLIER));
                 chr.write(UserLocal.comboCounter((byte) 0, (int) totalBonusExp, multiKillMessage > 10 ? 10 : multiKillMessage));
@@ -720,7 +442,7 @@ public class WorldHandler {
 
     public static void handleChangeFieldRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        if(inPacket.getUnreadAmount() == 0) {
+        if (inPacket.getUnreadAmount() == 0) {
             // Coming back from the cash shop
 //            chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getFieldID()));
             c.getChannelInstance().addClientInTransfer(c.getChannel(), chr.getId(), c);
@@ -736,7 +458,7 @@ public class WorldHandler {
             Field field = chr.getField();
             Portal portal = field.getPortalByName(portalName);
             if (portal.getScript() != null && !portal.getScript().equals("")) {
-                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.PORTAL);
+                chr.getScriptManager().startScript(portal.getId(), portal.getScript(), ScriptType.Portal);
             } else {
                 Field toField = chr.getOrCreateFieldByCurrentInstanceType(portal.getTargetMapId());
                 if (toField == null) {
@@ -754,7 +476,7 @@ public class WorldHandler {
             byte tarfield = inPacket.decodeByte(); // ?
             byte reviveType = inPacket.decodeByte();
             int returnMap = chr.getField().getReturnMap();
-            switch(reviveType) {
+            switch (reviveType) {
                 // so far only got 0?
             }
             if (!chr.hasBuffProtector()) {
@@ -784,13 +506,14 @@ public class WorldHandler {
     public static void handleUserPortalScriptRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte portalID = inPacket.decodeByte();
-        String script = inPacket.decodeString();
-        Portal portal = chr.getField().getPortalByID(portalID);
-        if(portal != null) {
+        String portalName = inPacket.decodeString();
+        Portal portal = chr.getField().getPortalByName(portalName);
+        String script = portalName;
+        if (portal != null) {
             portalID = (byte) portal.getId();
+            script = "".equals(portal.getScript()) ? portalName : portal.getScript();
         }
-        chr.getScriptManager().startScript(portalID, script, ScriptType.PORTAL);
-
+        chr.getScriptManager().startScript(portalID, script, ScriptType.Portal);
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
@@ -802,7 +525,7 @@ public class WorldHandler {
         Field field = chr.getField();
         Field toField;
 
-        if(itemID != 2030000) {
+        if (itemID != 2030000) {
             toField = chr.getOrCreateFieldByCurrentInstanceType(ii.getMoveTo());
         } else {
             toField = chr.getOrCreateFieldByCurrentInstanceType(field.getReturnMap());
@@ -817,6 +540,12 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
         int amount = inPacket.decodeInt();
+
+        if (amount < 1) {
+            chr.dispose();
+            return;
+        }
+
         Skill skill = chr.getSkill(skillID, true);
         boolean isPassive = SkillConstants.isPassiveSkill(skillID);
         if (isPassive) {
@@ -828,6 +557,7 @@ public class WorldHandler {
         }
         Map<Stat, Object> stats = null;
         if (JobConstants.isExtendSpJob(chr.getJob())) {
+            // TODO: get proper sp for beginner jobs
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
@@ -860,168 +590,10 @@ public class WorldHandler {
                 chr.addToBaseStatCache(skill);
             }
             c.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
-        }
-    }
-
-    public static void handleMeleeAttack(Client c, InPacket inPacket) {
-        AttackInfo ai = new AttackInfo();
-        ai.attackHeader = OutHeader.REMOTE_MELEE_ATTACK;
-        ai.fieldKey = inPacket.decodeByte();
-        byte mask = inPacket.decodeByte();
-        ai.hits = (byte) (mask & 0xF);
-        ai.mobCount = (mask >>> 4) & 0xF;
-        ai.skillId = inPacket.decodeInt();
-        ai.slv = inPacket.decodeByte();
-        ai.addAttackProc = inPacket.decodeByte();
-        inPacket.decodeInt(); // crc
-        int skillID = ai.skillId;
-        if (SkillConstants.isKeyDownSkill(skillID) || SkillConstants.isSuperNovaSkill(skillID)) {
-            ai.keyDown = inPacket.decodeInt();
-        }
-        if (SkillConstants.isRushBombSkill(skillID) || skillID == 5300007 || skillID == 27120211 || skillID == 14111023) {
-            ai.grenadeId = inPacket.decodeInt();
-        }
-        if (SkillConstants.isZeroSkill(skillID)) {
-            ai.zero = inPacket.decodeByte();
-        }
-        if (SkillConstants.isUsercloneSummonedAbleSkill(skillID)) {
-            ai.bySummonedID = inPacket.decodeInt();
-        }
-        ai.buckShot = inPacket.decodeByte();
-        ai.someMask = inPacket.decodeByte();
-        short maskie = inPacket.decodeShort();
-        ai.left = ((maskie >>> 15) & 1) != 0;
-        ai.attackAction = (short) (maskie & 0x7FFF);
-        inPacket.decodeInt(); // crc
-        ai.attackActionType = inPacket.decodeByte();
-        ai.attackSpeed = inPacket.decodeByte();
-        ai.tick = inPacket.decodeInt();
-        ai.ptTarget.setY(inPacket.decodeInt());
-        ai.finalAttackLastSkillID = inPacket.decodeInt();
-        if (ai.finalAttackLastSkillID > 0) {
-            ai.finalAttackByte = inPacket.decodeByte();
-        }
-        if (skillID == 5111009) {
-            ai.ignorePCounter = inPacket.decodeByte() != 0;
-        }
-        /*if ( v1756 )
-          {
-            COutPacket::Encode2(&a, v1747);
-            if ( v674 || is_noconsume_usebullet_melee_attack(v669) )
-              COutPacket::Encode4(&a, v1748);
-          }*/
-        if (skillID == 25111005) {
-            ai.spiritCoreEnhance = inPacket.decodeInt();
-        }
-        if (skillID == 80001762 || skillID == 61111100) {
-            inPacket.decodeInt(); // Encoded as 0
-        }
-        for (int i = 0; i < ai.mobCount; i++) {
-            MobAttackInfo mai = new MobAttackInfo();
-            int mobId = inPacket.decodeInt();
-            byte idk1 = inPacket.decodeByte();
-            byte idk2 = inPacket.decodeByte();
-            byte idk3 = inPacket.decodeByte();
-            byte idk4 = inPacket.decodeByte();
-            byte idk5 = inPacket.decodeByte();
-            int templateID = inPacket.decodeInt();
-            byte calcDamageStatIndex = inPacket.decodeByte();
-            short rcDstX = inPacket.decodeShort();
-            short rectRight = inPacket.decodeShort();
-            short idk6 = inPacket.decodeShort();
-            short oldPosX = inPacket.decodeShort(); // ?
-            short oldPosY = inPacket.decodeShort(); // ?
-            int[] damages = new int[ai.hits];
-            for (int j = 0; j < ai.hits; j++) {
-                damages[j] = inPacket.decodeInt();
-            }
-            int mobUpDownYRange = inPacket.decodeInt();
-            inPacket.decodeInt(); // crc
-            boolean isResWarriorLiftPress = false;
-            if (skillID == 37111005) {
-                isResWarriorLiftPress = inPacket.decodeByte() != 0;
-            }
-            // Begin PACKETMAKER::MakeAttackInfoPacket
-            byte type = inPacket.decodeByte();
-            String currentAnimationName = "";
-            int animationDeltaL = 0;
-            String[] hitPartRunTimes = new String[0];
-            if (type == 1) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-                int hitPartRunTimesSize = inPacket.decodeInt();
-                hitPartRunTimes = new String[hitPartRunTimesSize];
-                for (int j = 0; j < hitPartRunTimesSize; j++) {
-                    hitPartRunTimes[j] = inPacket.decodeString();
-                }
-            } else if (type == 2) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-            }
-            // End PACKETMAKER::MakeAttackInfoPacket
-            mai.mobId = mobId;
-            mai.hitAction = idk1;
-            mai.left = idk2;
-            mai.idk3 = idk3;
-            mai.foreAction = idk4;
-            mai.frameIdx = idk5;
-            mai.templateID = templateID;
-            mai.calcDamageStatIndex = calcDamageStatIndex;
-            mai.hitX = rcDstX;
-            mai.hitY = rectRight;
-            mai.oldPosX = oldPosX;
-            mai.oldPosY = oldPosY;
-            mai.idk6 = idk6;
-            mai.damages = damages;
-            mai.mobUpDownYRange = mobUpDownYRange;
-            mai.type = type;
-            mai.currentAnimationName = currentAnimationName;
-            mai.animationDeltaL = animationDeltaL;
-            mai.hitPartRunTimes = hitPartRunTimes;
-            mai.isResWarriorLiftPress = isResWarriorLiftPress;
-            ai.mobAttackInfo.add(mai);
-//            c.getChr().chatMessage(YELLOW, "atkAction = " + ai.attackAction + ", atkType = " + ai.attackActionType
-//                    + ", atkCount = " + ai.attackCount + ", idk1 = " + idk1 + ", idk2 = " + idk2 + ", idk3 = " + idk3 + ", foreAction = " + foreAction + ", frameIdx = " + frameIdx);
-        }
-        if (skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
-            ai.ptTarget.setX(inPacket.decodeShort());
-            ai.ptTarget.setY(inPacket.decodeShort());
         } else {
-            if (SkillConstants.isSuperNovaSkill(skillID)) {
-                ai.ptAttackRefPoint.setX(inPacket.decodeShort());
-                ai.ptAttackRefPoint.setY(inPacket.decodeShort());
-            }
-            if (skillID == 101000102) {
-                ai.idkPos.setX(inPacket.decodeShort());
-                ai.idkPos.setY(inPacket.decodeShort());
-            }
-            ai.pos.setX(inPacket.decodeShort());
-            ai.pos.setY(inPacket.decodeShort());
-            if (SkillConstants.isAranFallingStopSkill(skillID)) {
-                ai.fh = inPacket.decodeByte();
-            }
-            if (skillID == 21120019 || skillID == 37121052) {
-                ai.teleportPt.setX(inPacket.decodeInt());
-                ai.teleportPt.setY(inPacket.decodeInt());
-            }
-            if (skillID == 61121105 || skillID == 61121222 || skillID == 24121052) {
-                ai.Vx = inPacket.decodeShort();
-                short x, y;
-                for (int i = 0; i < ai.Vx; i++) {
-                    x = inPacket.decodeShort();
-                    y = inPacket.decodeShort();
-                }
-            }
-            if (skillID == 101120104) {
-                // CUser::EncodeAdvancedEarthBreak
-                // TODO
-            }
-            if (skillID == 14111006 && ai.grenadeId != 0) {
-                ai.grenadePos.setX(inPacket.decodeShort());
-                ai.grenadePos.setY(inPacket.decodeShort());
-            }
+            log.error(String.format("skill stats are null (%d)", skillID));
+            chr.dispose();
         }
-        handleAttack(c, ai);
     }
 
     public static void handleBodyAttack(Client c, InPacket inPacket) {
@@ -1148,7 +720,7 @@ public class WorldHandler {
         Field field = chr.getField();
         int mobID = inPacket.decodeInt();
         Mob mob = (Mob) field.getLifeByObjectID(mobID);
-        c.write(MobPool.mobChangeController(mob, true, true));
+        c.write(MobPool.changeController(mob, true, true));
     }
 
     public static void handleMoveMob(Client c, InPacket inPacket) {
@@ -1156,7 +728,7 @@ public class WorldHandler {
         Field field = c.getChr().getField();
         int objectID = inPacket.decodeInt();
         Life life = field.getLifeByObjectID(objectID);
-        if (life == null || !(life instanceof Mob)) {
+        if (!(life instanceof Mob)) {
             return;
         }
         MobSkillAttackInfo msai = new MobSkillAttackInfo();
@@ -1164,45 +736,63 @@ public class WorldHandler {
         Char controller = field.getLifeToControllers().get(mob);
         byte idk0 = inPacket.decodeByte(); // check if the templateID / 10000 == 250 or 251. No idea for what it's used
         short moveID = inPacket.decodeShort();
-        byte actionAndDirMask = inPacket.decodeByte();
-        msai.actionAndDirMask = actionAndDirMask;
-        boolean usedSkill = actionAndDirMask != 0;
-        byte actionAndDir = inPacket.decodeByte();
-        msai.actionAndDir = actionAndDir;
-        life.setMoveAction(actionAndDir);
-        int skillID = 0;
+        msai.actionAndDirMask = inPacket.decodeByte();
+        byte action = inPacket.decodeByte();
+        msai.action = (byte) (action >> 1);
+        life.setMoveAction(action);
+        int skillID = msai.action - 30; // thanks yuuroido :D
+        int skillSN = skillID;
         int slv = 0;
         msai.targetInfo = inPacket.decodeInt();
-        if (usedSkill && /*actionAndDir != -1 && */mob.hasSkillDelayExpired()) {
-            MobSkill mobSkill = null;
+        int afterAttack = -1;
+        //c.getChr().chatMessage("" + msai.action);
+        boolean didSkill = action != -1;
+        if (didSkill && mob.hasSkillDelayExpired() && !mob.isInAttack()) {
             List<MobSkill> skillList = mob.getSkills();
-            if (skillList.size() > 0) {
-                if (actionAndDir != -1) {
-                    mobSkill = skillList.stream()
-                            .filter(ms -> ms.getSkillID() == actionAndDir
-                                    && !mob.hasSkillOnCooldown(ms.getSkill(), ms.getLevel()))
-                            .findFirst()
-                            .orElse(null);
-                }
+            if (Util.succeedProp(GameConstants.MOB_SKILL_CHANCE)) {
+                MobSkill mobSkill;
+                mobSkill = skillList.stream()
+                        .filter(ms -> ms.getSkillSN() == skillSN
+                                /*&& mob.hasSkillOffCooldown(ms.getSkillID(), ms.getLevel())*/)
+                        .findFirst()
+                        .orElse(null);
                 if (mobSkill == null) {
                     skillList = skillList.stream()
-                            .filter(ms -> !mob.hasSkillOnCooldown(ms.getSkill(), ms.getLevel()))
+                            .filter(ms -> mob.hasSkillOffCooldown(ms.getSkillID(), ms.getLevel()))
                             .collect(Collectors.toList());
                     if (skillList.size() > 0) {
                         mobSkill = skillList.get(Randomizer.nextInt(skillList.size()));
                     }
                 }
-                if (mobSkill != null) {
-                    skillID = mobSkill.getSkill();
+                didSkill = mobSkill != null;
+                if (didSkill) {
+                    didSkill = true;
+                    skillID = mobSkill.getSkillID();
                     slv = mobSkill.getLevel();
                     MobSkillInfo msi = SkillData.getMobSkillInfoByIdAndLevel(skillID, slv);
                     long curTime = System.currentTimeMillis();
                     long interval = msi.getSkillStatIntValue(MobSkillStat.interval) * 1000;
                     long nextUseableTime = curTime + interval;
+                    c.getChr().chatMessage(Mob, String.format("Mob did skill with ID %d (%s), level = %d",
+                            mobSkill.getSkillID(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkillID()), mobSkill.getLevel()));
                     mob.putSkillCooldown(skillID, slv, nextUseableTime);
-                    c.getChr().chatMessage(YELLOW, String.format("Mob did skill with ID %d (%s), level = %d",
-                            mobSkill.getSkill(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkill()), mobSkill.getLevel()));
-                    mobSkill.handleEffect(mob);
+                    if (mobSkill.getSkillAfter() > 0) {
+                        mob.getSkillDelays().add(mobSkill);
+                        mob.setSkillDelay(mobSkill.getSkillAfter());
+                        c.write(MobPool.setSkillDelay(mob.getObjectId(), mobSkill.getSkillAfter(), skillID, slv, 0, null));
+                    } else {
+                        mobSkill.handleEffect(mob);
+                    }
+                }
+            }
+        }
+        if (!didSkill) {
+            // didn't do a skill, so ensure that the attack gets properly formed
+            int attackIdx = skillID + 17;
+            if (mob.hasAttackOffCooldown(attackIdx)) {
+                MobSkill ms = mob.getAttackById(attackIdx);
+                if (ms != null && ms.getAfterAttack() >= 0) {
+                    afterAttack = ms.getAfterAttack();
                 }
             }
         }
@@ -1222,29 +812,39 @@ public class WorldHandler {
         boolean targetUserIDFromSvr = (mask & 1) != 0;
         boolean isCheatMobMoveRand = ((mask >> 4) & 1) != 0;
         int hackedCode = inPacket.decodeInt();
-        int moveAction = inPacket.decodeInt(); // not 100% sure
+        int oneTimeActionCS = inPacket.decodeInt();
         int moveActionCS = inPacket.decodeInt();
         int hitExpire = inPacket.decodeInt();
         byte idk = inPacket.decodeByte();
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position pos = inPacket.decodePosition();
-        Position vPos = inPacket.decodePosition();
-        Position oldPos = mob.getPosition();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        if (movements.size() > 0) {
-            c.write(MobPool.mobCtrlAck(mob, true, moveID, skillID, (byte) slv, 0));
-            field.checkMobInAffectedAreas(mob);
-            for (Movement m : movements) {
-                Position p = m.getPosition();
-                mob.setPosition(p);
-                mob.setMoveAction(m.getMoveAction());
-                mob.setFh(m.getFh());
-            }
+        MovementInfo movementInfo = new MovementInfo(inPacket);
+        c.write(MobPool.ctrlAck(mob, true, moveID, skillID, (byte) slv, -1));
+        movementInfo.applyTo(mob);
+        mob.setInAttack(afterAttack >= 0);
+        if (afterAttack >= 0) {
+            c.write(MobPool.setAfterAttack(mob.getObjectId(), (short) afterAttack, msai.action, action % 2 != 0));
         }
-        msai.oldPos = pos;
-        msai.oldVPos = vPos;
-        msai.encodedGatherDuration = encodedGatherDuration;
-        field.broadcastPacket(MobPool.mobMove(mob, msai, movements), controller);
+        field.checkMobInAffectedAreas(mob);
+        field.broadcastPacket(MobPool.move(mob, msai, movementInfo), controller);
+    }
+
+    public static void handleMobSkillDelayEnd(Char chr, InPacket inPacket) {
+        Life life = chr.getField().getLifeByObjectID(inPacket.decodeInt());
+        if (!(life instanceof Mob)) {
+            return;
+        }
+        Mob mob = (Mob) life;
+        int skillID = inPacket.decodeInt();
+        int slv = inPacket.decodeInt();
+        int remainCount = 0; // only set in MobDelaySkill::UpdateSequenceMode
+        if (inPacket.decodeByte() != 0) {
+            remainCount = inPacket.decodeInt();
+        }
+        List<MobSkill> delays = mob.getSkillDelays();
+        MobSkill ms = Util.findWithPred(delays, skill -> skill.getSkillID() == skillID && skill.getLevel() == slv);
+        if (ms != null) {
+            ms.handleEffect(mob);
+        }
+
     }
 
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
@@ -1269,7 +869,15 @@ public class WorldHandler {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         int skillId = inPacket.decodeInt();
         tsm.removeStatsBySkill(skillId);
-        tsm.sendResetStatPacket();
+
+        if (skillId == net.swordie.ms.client.jobs.resistance.Mechanic.HUMANOID_MECH || skillId == net.swordie.ms.client.jobs.resistance.Mechanic.TANK_MECH) {
+            tsm.removeStatsBySkill(skillId + 100); // because of special use
+            tsm.sendResetStatPacket(true);
+        } else {
+            tsm.sendResetStatPacket();
+        }
+
+
         chr.getJobHandler().handleSkillRemove(c, skillId);
     }
 
@@ -1300,21 +908,21 @@ public class WorldHandler {
         ai.summon = (Summon) field.getLifeByObjectID(summonedID);
         ai.updateTime = inPacket.decodeInt();
         ai.skillId = inPacket.decodeInt();
-        int zero = inPacket.decodeInt();
+        inPacket.decodeInt(); // hardcoded 0
         byte leftAndAction = inPacket.decodeByte();
         ai.attackActionType = (byte) (leftAndAction & 0x7F);
         ai.left = (byte) (leftAndAction >>> 7) != 0;
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (mask >>> 4) & 0xF;
-        byte nul2 = inPacket.decodeByte();
+        inPacket.decodeByte(); // hardcoded 0
         ai.attackAction = inPacket.decodeShort();
         ai.attackCount = inPacket.decodeShort();
         ai.pos = inPacket.decodePosition();
-        int minOne = inPacket.decodeInt();
+        inPacket.decodeInt(); // hardcoded -1
         short idk3 = inPacket.decodeShort();
         int idk4 = inPacket.decodeInt();
-        int zero3 = inPacket.decodeInt();
+        inPacket.decodeInt(); // hardcoded 0
         ai.bulletID = inPacket.decodeInt();
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
@@ -1363,148 +971,14 @@ public class WorldHandler {
         handleAttack(c, ai);
     }
 
-    public static void handleShootAttack(Client c, InPacket inPacket) {
-        AttackInfo ai = new AttackInfo();
-        ai.attackHeader = OutHeader.REMOTE_SHOOT_ATTACK;
-        byte nul = inPacket.decodeByte();
-        ai.fieldKey = inPacket.decodeByte();
-        byte mask = inPacket.decodeByte();
-        ai.hits = (byte) (mask & 0xF);
-        ai.mobCount = (mask >>> 4) & 0xF;
-        ai.skillId = inPacket.decodeInt();
-        ai.bulletID = c.getChr().getBulletIDForAttack();
-        ai.slv = inPacket.decodeByte();
-        ai.addAttackProc = inPacket.decodeByte();
-        inPacket.decodeInt(); // crc
-        int skillID = ai.skillId;
-        if (SkillConstants.isKeyDownSkill(skillID) || SkillConstants.isSuperNovaSkill(skillID)) {
-            ai.keyDown = inPacket.decodeInt();
-        }
-        if (SkillConstants.isZeroSkill(skillID)) {
-            ai.zero = inPacket.decodeByte();
-        }
-        if (SkillConstants.isUsercloneSummonedAbleSkill(skillID)) {
-            ai.bySummonedID = inPacket.decodeInt();
-        }
-        ai.buckShot = inPacket.decodeByte();
-        ai.someMask = inPacket.decodeByte();
-        int idk3 = inPacket.decodeInt();
-        ai.isJablin = inPacket.decodeByte() != 0;
-        short maskie = inPacket.decodeShort();
-        ai.left = ((maskie >>> 15) & 1) != 0;
-
-        ai.attackAction = (short) (maskie & 0x7FFF);
-        if (skillID == Archer.ARROW_PLATTER) { // very unsure
-            short idk9 = inPacket.decodeShort();
-            int idk10 = inPacket.decodeInt();
-            short idk11 = inPacket.decodeShort();
-        }
-        inPacket.decodeInt(); // crc
-        ai.attackActionType = inPacket.decodeByte();
-        if (skillID == 23111001 || skillID == 80001915 || skillID == 36111010) {
-            int idk5 = inPacket.decodeInt();
-            int x = inPacket.decodeInt(); // E0 6E 1F 00
-            int y = inPacket.decodeInt();
-        }
-        ai.attackSpeed = inPacket.decodeByte();
-        int idk6 = inPacket.decodeInt();
-        int idk7 = inPacket.decodeInt();
-        short idk8 = inPacket.decodeShort();
-        short idk9 = inPacket.decodeShort();
-        ai.byteIdk1 = inPacket.decodeByte();
-        if (!SkillConstants.isShootSkillNotConsumingBullets(skillID)) {
-            ai.bulletCount = inPacket.decodeInt();
-        }
-        ai.rect = inPacket.decodeShortRect();
-        if(SkillConstants.needsOneMoreByte(ai.skillId)) {
-            inPacket.decodeInt();
-        }
-        for (int i = 0; i < ai.mobCount; i++) {
-            MobAttackInfo mai = new MobAttackInfo();
-            mai.mobId = inPacket.decodeInt();
-            mai.byteIdk1 = inPacket.decodeByte();
-            mai.byteIdk2 = inPacket.decodeByte();
-            mai.byteIdk3 = inPacket.decodeByte();
-            mai.byteIdk4 = inPacket.decodeByte();
-            mai.byteIdk5 = inPacket.decodeByte();
-            mai.templateID = inPacket.decodeInt();
-            mai.calcDamageStatIndex = (byte) (inPacket.decodeByte() & 0x7F);
-            mai.rect = inPacket.decodeShortRect();
-            short idk1 = inPacket.decodeShort();
-            int[] damages = new int[ai.hits];
-            for (int j = 0; j < ai.hits; j++) {
-                damages[j] = inPacket.decodeInt();
-            }
-            mai.damages = damages;
-            mai.mobUpDownYRange = inPacket.decodeInt();
-            inPacket.decodeInt(); // crc
-            // Begin PACKETMAKER::MakeAttackInfoPacket
-            byte type = inPacket.decodeByte();
-            String currentAnimationName = "";
-            int animationDeltaL = 0;
-            String[] hitPartRunTimes = new String[0];
-            if (type == 1) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-                int hitPartRunTimesSize = inPacket.decodeInt();
-                hitPartRunTimes = new String[hitPartRunTimesSize];
-                for (int j = 0; j < hitPartRunTimesSize; j++) {
-                    hitPartRunTimes[j] = inPacket.decodeString();
-                }
-            } else if (type == 2) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-            }
-            // End PACKETMAKER::MakeAttackInfoPacket
-            mai.type = type;
-            mai.currentAnimationName = currentAnimationName;
-            mai.animationDeltaL = animationDeltaL;
-            mai.hitPartRunTimes = hitPartRunTimes;
-            ai.mobAttackInfo.add(mai);
-            if (SkillConstants.isScreenCenterAttackSkill(skillID)) {
-                ai.forcedX = inPacket.decodeShort();
-                ai.forcedY = inPacket.decodeShort();
-            }
-            if (false) {
-                // not called?
-                ai.idkPos = inPacket.decodePosition();
-            }
-            if (SkillConstants.isAranFallingStopSkill(skillID)) {
-                ai.fh = inPacket.decodeByte();
-            }
-            if (skillID > 0) {
-                if (SkillData.getSkillInfoById(skillID).getRootId() / 100 == 33) {
-                    ai.bodyRelMove = inPacket.decodePosition();
-                }
-            }
-            if (SkillConstants.isKeydownSkillRectMoveXY(skillID)) {
-                ai.keyDownRectMoveXY = inPacket.decodePosition();
-            }
-            if (/*skillID == 23121002 ||*/ skillID == 80001914) { // first skill is Spikes Royale, not needed?
-                ai.fh = inPacket.decodeByte();
-            }
-        }
-        handleAttack(c, ai);
-    }
-
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        chr.logout();
-        chr.setChangingChannel(true);
-        if (c.getAccount() != null) {
-            chr.getAccount().setLoginState(LoginState.Loading);
-            DatabaseManager.saveToDB(c.getAccount());
-        }
-        DatabaseManager.saveToDB(chr);
-        int worldID = chr.getClient().getChannelInstance().getWorldId();
-        World world = Server.getInstance().getWorldById(worldID);
-        Field field = chr.getField();
-        field.removeChar(chr);
-        byte channelID = (byte) (inPacket.decodeByte() + 1);
-        Channel channel = world.getChannelById(channelID);
-        channel.addClientInTransfer(channelID, chr.getId(), c);
-        short port = (short) channel.getPort();
-        c.write(ClientSocket.migrateCommand(true, port));
+        byte channelId = (byte) (inPacket.decodeByte() + 1);
+
+        Job sourceJobHandler = chr.getJobHandler();
+        sourceJobHandler.handleCancelTimer(chr);
+
+        chr.changeChannel(channelId);
     }
 
     public static void handleUserChangeStatRequest(Client c, InPacket inPacket) {
@@ -1603,6 +1077,20 @@ public class WorldHandler {
 
     public static void handleSummonedRemove(Client c, InPacket inPacket) {
         int id = inPacket.decodeInt();
+
+        Char chr = c.getChr();
+        Summon summon = (Summon) chr.getField().getLifeByObjectID(id);
+        if (summon == null) {
+            return;
+        }
+        if (summon.getSkillID() == BattleMage.CONDEMNATION
+                || summon.getSkillID() == BattleMage.CONDEMNATION_I
+                || summon.getSkillID() == BattleMage.CONDEMNATION_II
+                || summon.getSkillID() == BattleMage.CONDEMNATION_III) {
+
+            ((BattleMage) chr.getJobHandler()).removeCondemnationBuff(summon);
+        }
+
         c.getChr().getField().removeLife(id, false);
     }
 
@@ -1616,13 +1104,34 @@ public class WorldHandler {
             Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
             if (mob != null) {
 //            mob.damage((long) 133337);
-//            c.write(CField.mobDamaged(mobID, (long) 133337, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
+//            c.write(CField.damaged(mobID, (long) 133337, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
             }
         }
     }
 
-    public static void handleRequestArrowPlatterObj(Client c, InPacket inPacket) {
-        // TODO
+    public static void handleRequestArrowPlatterObj(Char chr, InPacket inPacket) {
+        boolean flip = inPacket.decodeByte() != 0;
+        Position position = inPacket.decodePositionInt(); // ignoring this, we just take the char's info we know
+        int skillID = Archer.ARROW_PLATTER;
+        Skill skill = chr.getSkill(skillID);
+        if (skill != null && skill.getCurrentLevel() > 0) {
+            Field field = chr.getField();
+            Set<FieldAttackObj> currentFaos = field.getFieldAttackObjects();
+            // remove the old arrow platter
+            currentFaos.stream()
+                    .filter(fao -> fao.getOwnerID() == chr.getId() && fao.getTemplateId() == 1)
+                    .findAny().ifPresent(field::removeLife);
+            SkillInfo si = SkillData.getSkillInfoById(skillID);
+            int slv = skill.getCurrentLevel();
+            FieldAttackObj fao = new FieldAttackObj(1, chr.getId(), chr.getPosition().deepCopy(), flip);
+            field.spawnLife(fao, chr);
+            field.broadcastPacket(FieldAttackObjPool.objCreate(fao), chr);
+            ScheduledFuture sf = EventManager.addEvent(() -> field.removeLife(fao.getObjectId(), true),
+                    si.getValue(SkillStat.u, slv), TimeUnit.SECONDS);
+            field.addLifeSchedule(fao, sf);
+            field.broadcastPacket(FieldAttackObjPool.setAttack(fao.getObjectId(), 0));
+        }
+        chr.dispose();
     }
 
     public static void handleUserCharacterInfoRequest(Client c, InPacket inPacket) {
@@ -1632,7 +1141,7 @@ public class WorldHandler {
         int requestID = inPacket.decodeInt();
         Char requestChar = field.getCharByID(requestID);
         if (requestChar == null) {
-            chr.chatMessage(GAME_MESSAGE, "The character you tried to find could not be found.");
+            chr.chatMessage(SystemNotice, "The character you tried to find could not be found.");
         } else {
             c.write(CField.characterInfo(requestChar));
         }
@@ -1641,11 +1150,19 @@ public class WorldHandler {
     public static void handleSummonedHit(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
-        int id = inPacket.decodeInt();
-        Life life = field.getLifeByObjectID(id);
+
+        int summonObjId = inPacket.decodeInt();
+        byte attackId = inPacket.decodeByte();
+        int damage = inPacket.decodeInt();
+        int mobTemplateId = inPacket.decodeInt();
+        boolean isLeft = inPacket.decodeByte() != 0;
+
+        Life life = field.getLifeByObjectID(summonObjId);
         if (life == null || !(life instanceof Summon)) {
             return;
         }
+
+        ((Summon) life).onHit(damage, mobTemplateId);
     }
 
     public static void handleUserFlameOrbRequest(Client c, InPacket inPacket) {
@@ -1724,136 +1241,216 @@ public class WorldHandler {
             // Reward items
             Item reward = itemInfo.getRandomReward();
             chr.addItemToInventory(reward);
-        } else {
-        switch (itemID) {
-            case 5040004: // Hyper Teleport Rock
-                short idk = inPacket.decodeShort();
-                int mapID = inPacket.decodeInt();
-                Field field = chr.getOrCreateFieldByCurrentInstanceType(mapID);
-                chr.warp(field);
-                break;
-            case ItemConstants.RED_CUBE: // Red Cube
-            case ItemConstants.BLACK_CUBE: // Black cube
-                short ePos = (short) inPacket.decodeInt();
-                InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
-                Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
-                if (equip == null) {
-                    chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
-                    chr.dispose();
-                    return;
-                } else if (equip.getBaseGrade() < ItemGrade.RARE.getVal()) {
-                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
-                    chr.dispose();
-                    return;
-                }
-                Equip oldEquip = equip.deepCopy();
-                int tierUpChance = ItemConstants.getTierUpChance(itemID);
-                short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
-                boolean tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
-                if (tierUp) {
-                    hiddenValue++;
-                }
-                equip.setHiddenOptionBase(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
-                equip.releaseOptions(false);
-                if (itemID == ItemConstants.RED_CUBE) {
-                    c.write(CField.redCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
-                    c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
-                } else {
-                    if (chr.getMemorialCubeInfo() == null) {
-                        chr.setMemorialCubeInfo(new MemorialCubeInfo(equip, oldEquip, itemID));
-                    }
-                    chr.getField().broadcastPacket(User.showItemMemorialEffect(chr.getId(), true, itemID));
-                    c.write(WvsContext.blackCubeResult(equip, chr.getMemorialCubeInfo()));
-                }
-                equip.updateToChar(chr);
-                break;
-            case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
-                ePos = (short) inPacket.decodeInt();
-                invType = ePos < 0 ? EQUIPPED : EQUIP;
-                equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
-                if (equip == null) {
-                    chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
-                    return;
-                } else if (equip.getBonusGrade() < ItemGrade.RARE.getVal()) {
-                    log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
-                    chr.dispose();
-                    return;
-                }
-                tierUpChance = ItemConstants.getTierUpChance(itemID);
-                hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
-                tierUp = !(hiddenValue >= ItemGrade.HIDDEN_LEGENDARY.getVal()) && Util.succeedProp(tierUpChance);
-                if (tierUp) {
-                    hiddenValue++;
-                }
-                equip.setHiddenOptionBonus(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
-                equip.releaseOptions(true);
-                c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
-                c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
-                equip.updateToChar(chr);
-                break;
-            case 5750001: // Nebulite Diffuser
-                ePos = inPacket.decodeShort();
-                equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-                if (equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
-                    chr.chatMessage("That item currently does not have an active socket.");
-                    chr.dispose();
-                    return;
-                }
-                equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
-                equip.updateToChar(chr);
-                break;
-            case 5072000: // Super Megaphone
-                String text = inPacket.decodeString();
-                boolean whisperIcon = inPacket.decodeByte() != 0;
-                World world = chr.getClient().getWorld();
-                BroadcastMsg smega = BroadcastMsg.megaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
-                world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                break;
-            case 5076000: // Item Megaphone
-                text = inPacket.decodeString();
-                whisperIcon = inPacket.decodeByte() != 0;
-                boolean eqpSelected = inPacket.decodeByte() != 0;
-                invType = EQUIP;
-                int itemPosition = 0;
-                if (eqpSelected) {
-                    invType = InvType.getInvTypeByVal(inPacket.decodeInt());
-                    itemPosition = inPacket.decodeInt();
-                    if (invType == EQUIP && itemPosition < 0) {
-                        invType = EQUIPPED;
-                    }
-                }
-                Item broadcastedItem = chr.getInventoryByType(invType).getItemBySlot((short) itemPosition);
 
-                world = chr.getClient().getWorld();
-                smega = BroadcastMsg.itemMegaphone(text, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon, eqpSelected, broadcastedItem);
-                world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                break;
-            case 5077000: // Triple Megaphone
-                byte stringListSize = inPacket.decodeByte();
-                List<String> stringList = new ArrayList<>();
-                for (int i = 0; i < stringListSize; i++) {
-                    stringList.add(inPacket.decodeString());
-                }
-                whisperIcon = inPacket.decodeByte() != 0;
+        } else if (itemID / 10000 == 539) {
+            // Avatar Megaphones
+            List<String> lineList = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                String line = inPacket.decodeString();
+                lineList.add(line);
+            }
+            boolean whisperIcon = inPacket.decodeByte() != 0;
+            World world = c.getWorld();
+            world.broadcastPacket(WvsContext.setAvatarMegaphone(chr, itemID, lineList, whisperIcon));
 
-                world = chr.getClient().getWorld();
-                smega = BroadcastMsg.tripleMegaphone(stringList, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
-                world.broadcastPacket(WvsContext.broadcastMsg(smega));
-                break;
-            case 5062405: // Fusion anvil
-                int appearancePos = inPacket.decodeInt();
-                int functionPos = inPacket.decodeInt();
-                Inventory inv = chr.getEquipInventory();
-                Equip appearance = (Equip) inv.getItemBySlot((short) appearancePos);
-                Equip function = (Equip) inv.getItemBySlot((short) functionPos);
-                if (appearance != null && function != null && appearance.getItemId() / 10000 == function.getItemId() / 10000) {
-                    function.getOptions().set(6, appearance.getItemId());
-                }
-                function.updateToChar(chr);
-                break;
-            default:
-                chr.chatMessage(YELLOW, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
+        } else if (itemID / 10000 == 519) {
+            // Pet Skill Items
+            long sn = inPacket.decodeLong();
+            PetSkill ps = ItemConstants.getPetSkillFromID(itemID);
+            if (ps == null) {
+                chr.chatMessage(String.format("Unhandled pet skill item %d", itemID));
                 return;
+            }
+            Item pi = chr.getCashInventory().getItemBySN(sn);
+            if (!(pi instanceof PetItem)) {
+                chr.chatMessage("Could not find that pet.");
+                return;
+            }
+            boolean add = itemID >= 5190014; // add property doesn't include the "Slimming Medicine"
+            PetItem petItem = (PetItem) pi;
+            if (add) {
+                petItem.addPetSkill(ps);
+            } else {
+                petItem.removePetSkill(ps);
+            }
+            petItem.updateToChar(chr);
+            chr.consumeItem(item);
+        } else {
+
+            Equip medal = (Equip) chr.getEquippedInventory().getFirstItemByBodyPart(BodyPart.MEDAL);
+            int medalInt = 0;
+            if (medal != null) {
+                medalInt = (medal.getAnvilId() == 0 ? medal.getItemId() : medal.getAnvilId()); // Check for Anvilled medal
+            }
+            String medalString = (medalInt == 0 ? "" : String.format("<%s> ", StringData.getItemStringById(medalInt)));
+
+            switch (itemID) {
+
+                case 5040004: // Hyper Teleport Rock
+                    short type = inPacket.decodeShort();
+                    if (type == 1) {
+                        int fieldId = inPacket.decodeInt();
+                        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
+                        chr.warp(field);
+                    } else {
+                        String targetName = inPacket.decodeString();
+                        int worldID = chr.getClient().getChannelInstance().getWorldId();
+                        World world = Server.getInstance().getWorldById(worldID);
+                        Char targetChr = world.getCharByName(targetName);
+                        Position targetPosition = targetChr.getPosition();
+
+                        // Target doesn't exist
+                        if (targetChr == null) {
+                            chr.chatMessage(String.format("%s is not online.", targetName));
+
+                            // Target is in an instanced Map
+                        } else if (targetChr.getFieldInstanceType() != FieldInstanceType.CHANNEL) {
+                            chr.chatMessage(String.format("cannot find %s", targetName));
+
+                            // Change channels & warp & teleport
+                        } else if (targetChr.getClient().getChannel() != c.getChannel()) {
+                            int fieldId = targetChr.getFieldID();
+                            chr.changeChannelAndWarp(targetChr.getClient().getChannel(), fieldId);
+
+                            // warp & teleport
+                        } else if (targetChr.getFieldID() != chr.getFieldID()) {
+                            chr.warp(targetChr.getField());
+                            chr.write(CField.teleport(targetPosition, chr));
+
+                            // teleport
+                        } else {
+                            chr.write(CField.teleport(targetPosition, chr));
+                        }
+                    }
+                    break;
+
+                case ItemConstants.RED_CUBE: // Red Cube
+                case ItemConstants.BLACK_CUBE: // Black cube
+                    short ePos = (short) inPacket.decodeInt();
+                    InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
+                    Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
+                    if (equip == null) {
+                        chr.chatMessage(SystemNotice, "Could not find equip.");
+                        chr.dispose();
+                        return;
+                    } else if (equip.getBaseGrade() < ItemGrade.Rare.getVal()) {
+                        log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                        chr.dispose();
+                        return;
+                    }
+                    Equip oldEquip = equip.deepCopy();
+                    int tierUpChance = ItemConstants.getTierUpChance(itemID);
+                    short hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBaseGrade()).getVal();
+                    boolean tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
+                    if (tierUp) {
+                        hiddenValue++;
+                    }
+                    equip.setHiddenOptionBase(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
+                    equip.releaseOptions(false);
+                    if (itemID == ItemConstants.RED_CUBE) {
+                        c.write(CField.redCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
+                        c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
+                    } else {
+                        if (chr.getMemorialCubeInfo() == null) {
+                            chr.setMemorialCubeInfo(new MemorialCubeInfo(equip, oldEquip, itemID));
+                        }
+                        chr.getField().broadcastPacket(User.showItemMemorialEffect(chr.getId(), true, itemID));
+                        c.write(WvsContext.blackCubeResult(equip, chr.getMemorialCubeInfo()));
+                    }
+                    equip.updateToChar(chr);
+                    break;
+                case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
+                    if (c.getWorld().isReboot()) {
+                        log.error(String.format("Character %d attempted to use a bonus potential cube in reboot world.", chr.getId()));
+                        chr.dispose();
+                        return;
+                    }
+                    ePos = (short) inPacket.decodeInt();
+                    invType = ePos < 0 ? EQUIPPED : EQUIP;
+                    equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
+                    if (equip == null) {
+                        chr.chatMessage(SystemNotice, "Could not find equip.");
+                        return;
+                    } else if (equip.getBonusGrade() < ItemGrade.Rare.getVal()) {
+                        log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                        chr.dispose();
+                        return;
+                    }
+                    tierUpChance = ItemConstants.getTierUpChance(itemID);
+                    hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
+                    tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
+                    if (tierUp) {
+                        hiddenValue++;
+                    }
+                    equip.setHiddenOptionBonus(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
+                    equip.releaseOptions(true);
+                    c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
+                    c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
+                    equip.updateToChar(chr);
+                    break;
+                case 5750001: // Nebulite Diffuser
+                    ePos = inPacket.decodeShort();
+                    equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
+                    if (equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
+                        chr.chatMessage("That item currently does not have an active socket.");
+                        chr.dispose();
+                        return;
+                    }
+                    equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+                    equip.updateToChar(chr);
+                    break;
+                case 5072000: // Super Megaphone
+                    String text = inPacket.decodeString();
+                    boolean whisperIcon = inPacket.decodeByte() != 0;
+                    World world = chr.getClient().getWorld();
+                    BroadcastMsg smega = BroadcastMsg.megaphone(String.format("%s%s : %s", medalString, chr.getName(), text), (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
+                    world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                    break;
+                case 5076000: // Item Megaphone
+                    text = inPacket.decodeString();
+                    whisperIcon = inPacket.decodeByte() != 0;
+                    boolean eqpSelected = inPacket.decodeByte() != 0;
+                    invType = EQUIP;
+                    int itemPosition = 0;
+                    if (eqpSelected) {
+                        invType = InvType.getInvTypeByVal(inPacket.decodeInt());
+                        itemPosition = inPacket.decodeInt();
+                        if (invType == EQUIP && itemPosition < 0) {
+                            invType = EQUIPPED;
+                        }
+                    }
+                    Item broadcastedItem = chr.getInventoryByType(invType).getItemBySlot((short) itemPosition);
+
+                    world = chr.getClient().getWorld();
+                    smega = BroadcastMsg.itemMegaphone(String.format("%s%s : %s", medalString, chr.getName(), text), (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon, eqpSelected, broadcastedItem);
+                    world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                    break;
+                case 5077000: // Triple Megaphone
+                    byte stringListSize = inPacket.decodeByte();
+                    List<String> stringList = new ArrayList<>();
+                    for (int i = 0; i < stringListSize; i++) {
+                        stringList.add(String.format("%s%s : %s", medalString, chr.getName(), inPacket.decodeString()));
+                    }
+                    whisperIcon = inPacket.decodeByte() != 0;
+
+                    world = chr.getClient().getWorld();
+                    smega = BroadcastMsg.tripleMegaphone(stringList, (byte) chr.getClient().getChannelInstance().getChannelId(), whisperIcon);
+                    world.broadcastPacket(WvsContext.broadcastMsg(smega));
+                    break;
+                case 5062405: // Fusion anvil
+                    int appearancePos = inPacket.decodeInt();
+                    int functionPos = inPacket.decodeInt();
+                    Inventory inv = chr.getEquipInventory();
+                    Equip appearance = (Equip) inv.getItemBySlot((short) appearancePos);
+                    Equip function = (Equip) inv.getItemBySlot((short) functionPos);
+                    if (appearance != null && function != null && appearance.getItemId() / 10000 == function.getItemId() / 10000) {
+                        function.getOptions().set(6, appearance.getItemId());
+                    }
+                    function.updateToChar(chr);
+                    break;
+                default:
+                    chr.chatMessage(Mob, String.format("Cash item %d is not implemented, notify Sjonnie pls.", itemID));
+                    return;
             }
         }
         if (itemID != 5040004) {
@@ -1883,7 +1480,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             return;
         }
         int scrollID = scroll.getItemId();
@@ -1894,20 +1491,20 @@ public class WorldHandler {
             case 2532003: // Safety Scroll
             case 2532004: // Pet Safety Scroll
             case 2532005: // Safety Scroll
-                equip.addAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION);
+                equip.addAttribute(EquipAttribute.UpgradeCountProtection);
                 break;
             case 2530000: // Lucky Day
             case 2530002: // Lucky Day
             case 2530003: // Pet Lucky Day
             case 2530004: // Lucky Day
             case 2530006: // Pet Lucky Day
-                equip.addAttribute(EquipAttribute.LUCKY_DAY);
+                equip.addAttribute(EquipAttribute.LuckyDay);
                 break;
             case 2531000: // Protection Scroll
             case 2531001:
             case 2531004:
             case 2531005:
-                equip.addAttribute(EquipAttribute.PROTECTION_SCROLL);
+                equip.addAttribute(EquipAttribute.ProtectionScroll);
                 break;
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), true, false, scrollID, equip.getItemId(), false));
@@ -1917,6 +1514,11 @@ public class WorldHandler {
 
     public static void handleUserUpgradeItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to scroll in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort(); //Use Position
         short ePos = inPacket.decodeShort(); //Eqp Position
@@ -1925,8 +1527,8 @@ public class WorldHandler {
         Item scroll = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(uPos);
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
-        if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+        if (scroll == null || equip == null || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             return;
         }
         int scrollID = scroll.getItemId();
@@ -1934,7 +1536,7 @@ public class WorldHandler {
         boolean boom = false;
         Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(scrollID).getScrollStats();
         if (vals.size() > 0) {
-            if (equip.getRuc() <= 0) {
+            if (equip.getTuc() <= 0) {
                 WvsContext.dispose(chr);
                 return;
             }
@@ -1942,18 +1544,10 @@ public class WorldHandler {
             int curse = vals.getOrDefault(ScrollStat.cursed, 0);
             success = Util.succeedProp(chance);
             if (success) {
-                boolean chaos = vals.containsKey(ScrollStat.randStat) || vals.containsKey(ScrollStat.noNegative);
+                boolean chaos = vals.containsKey(ScrollStat.randStat);
                 if (chaos) {
                     boolean noNegative = vals.containsKey(ScrollStat.noNegative);
-                    int max = 5;
-                    switch (scrollID) {
-                        case 2049129: // Chaos Scroll of Goodness
-                        case 2049130:
-                        case 2049131:
-                        case 2049132:
-                            max = 3;
-                            break;
-                    }
+                    int max = vals.containsKey(ScrollStat.incRandVol) ? ItemConstants.RAND_CHAOS_MAX : ItemConstants.INC_RAND_CHAOS_MAX;
                     for (EquipBaseStat ebs : ScrollStat.getRandStats()) {
                         int cur = (int) equip.getBaseStat(ebs);
                         if (cur == 0) {
@@ -1972,26 +1566,26 @@ public class WorldHandler {
                         }
                     }
                 }
-                equip.addStat(ruc, -1);
+                equip.addStat(tuc, -1);
                 equip.addStat(cuc, 1);
             } else {
                 if (curse > 0) {
                     boom = Util.succeedProp(curse);
-                    if (boom && !equip.hasAttribute(EquipAttribute.PROTECTION_SCROLL)) {
+                    if (boom && !equip.hasAttribute(EquipAttribute.ProtectionScroll)) {
                         chr.consumeItem(equip);
                     } else {
                         boom = false;
-                        equip.removeAttribute(EquipAttribute.PROTECTION_SCROLL);
+                        equip.removeAttribute(EquipAttribute.ProtectionScroll);
                     }
                 }
-                if (!equip.hasAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION)) {
-                    equip.addStat(ruc, -1);
+                if (!equip.hasAttribute(EquipAttribute.UpgradeCountProtection)) {
+                    equip.addStat(tuc, -1);
                 } else {
-                    equip.removeAttribute(EquipAttribute.UPGRADE_COUNT_PROTECTION);
+                    equip.removeAttribute(EquipAttribute.UpgradeCountProtection);
                 }
             }
-            if(equip.hasAttribute(EquipAttribute.LUCKY_DAY)) {
-                equip.removeAttribute(EquipAttribute.LUCKY_DAY);
+            if (equip.hasAttribute(EquipAttribute.LuckyDay)) {
+                equip.removeAttribute(EquipAttribute.LuckyDay);
             }
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), boom));
@@ -2011,7 +1605,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             chr.dispose();
             return;
         } else if (!ItemConstants.canEquipHavePotential(equip)) {
@@ -2045,23 +1639,23 @@ public class WorldHandler {
                 case 2049417:
                 case 2049418:
                 case 2049419:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049700: // Epic pot
                 case 2049708:
-                    val = ItemGrade.HIDDEN_EPIC.getVal();
+                    val = ItemGrade.HiddenEpic.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
                 case 2049762: // Unique Pot
                 case 2049764:
                 case 2049758:
-                    val = ItemGrade.HIDDEN_UNIQUE.getVal();
+                    val = ItemGrade.HiddenUnique.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
 
                 default:
-                    chr.chatMessage(YELLOW, "Unhandled scroll " + scrollID);
+                    chr.chatMessage(Mob, "Unhandled scroll " + scrollID);
                     chr.dispose();
                     log.error("Unhandled scroll " + scrollID);
                     return;
@@ -2105,6 +1699,11 @@ public class WorldHandler {
 
     public static void handleUserAdditionalOptUpgradeItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to use bonus potential in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort();
         short ePos = inPacket.decodeShort();
@@ -2113,7 +1712,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (scroll == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find scroll or equip.");
+            chr.chatMessage(SystemNotice, "Could not find scroll or equip.");
             return;
         }
         int scrollID = scroll.getItemId();
@@ -2135,24 +1734,20 @@ public class WorldHandler {
                 case 2048314:
                 case 2048316:
                 case 2048329:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, thirdLineChance);
                     break;
                 case 2048306: // Special Bonus Pot
                 case 2048307:
                 case 2048315:
                 case 2048331:
-                    val = ItemGrade.HIDDEN_RARE.getVal();
+                    val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBonus(val, 100);
                     break;
                 default:
-                    chr.chatMessage(YELLOW, "Unhandled scroll " + scrollID);
+                    chr.chatMessage(Mob, "Unhandled scroll " + scrollID);
                     break;
             }
-        }
-        chr.chatMessage(YELLOW, "Grade = " + equip.getGrade());
-        for (int i = 0; i < 6; i++) {
-            chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), false));
         equip.updateToChar(chr);
@@ -2168,7 +1763,7 @@ public class WorldHandler {
         InvType invType = ePos < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(ePos);
         if (equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find equip.");
+            chr.chatMessage(SystemNotice, "Could not find equip.");
             return;
         }
         boolean base = equip.getOptionBase(0) < 0;
@@ -2178,10 +1773,6 @@ public class WorldHandler {
             equip.releaseOptions(false);
         } else {
             equip.releaseOptions(bonus);
-        }
-        chr.chatMessage(YELLOW, "Grade = " + equip.getGrade());
-        for (int i = 0; i < 6; i++) {
-            chr.chatMessage(YELLOW, "Opt " + i + " = " + equip.getOptions().get(i));
         }
         c.write(CField.showItemReleaseEffect(chr.getId(), ePos, bonus));
         equip.updateToChar(chr);
@@ -2230,7 +1821,7 @@ public class WorldHandler {
     }
 
     public static void handleRequestSetBlessOfDarkness(Client c, InPacket inPacket) {
-        Luminous.handleBlackBlessingIncrease(c);
+        Luminous.changeBlackBlessingCount(c, true); // Increment
     }
 
     public static void handleBattleRecordOnOffRequest(Client c, InPacket inPacket) {
@@ -2238,47 +1829,122 @@ public class WorldHandler {
         boolean on = inPacket.decodeByte() != 0;
         boolean isNew = inPacket.decodeByte() != 0;
         boolean clear = inPacket.decodeByte() != 0;
+        c.getChr().setBattleRecordOn(on);
         c.write(BattleRecordMan.serverOnCalcRequestResult(on));
+    }
+
+    public static void handleBanMapByMob(Client c, InPacket inPacket) {
+        Field field = c.getChr().getField();
+        int mobID = inPacket.decodeInt();
+        Life life = field.getLifeByTemplateId(mobID);
+        if (!(life instanceof Mob)) {
+            return;
+        }
+        Mob mob = (Mob) life;
+        Char chr = c.getChr();
+        if (mob.isBanMap()) {
+            if (mob.getBanType() == 1) {
+                if (mob.getBanMsgType() == 1) { // found 2 types (1(most of ban types), 2).
+                    String banMsg = mob.getBanMsg();
+                    if (banMsg != null && !banMsg.equals("")) {
+                        chr.write(WvsContext.message(MessageType.SYSTEM_MESSAGE, 0, banMsg, (byte) 0));
+                    }
+                }
+                Tuple<Integer, String> banMapField = mob.getBanMapFields().get(0);
+                if (banMapField != null) {
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(banMapField.getLeft());
+                    if (toField == null) {
+                        return;
+                    }
+                    Portal toPortal = toField.getPortalByName(banMapField.getRight());
+                    if (toPortal == null) {
+                        toPortal = toField.getPortalByName("sp");
+                    }
+
+                    chr.warp(toField, toPortal);
+                }
+            }
+        }
     }
 
     public static void handleUserSelectNpc(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int npcID = inPacket.decodeInt();
-        short idk1 = inPacket.decodeShort();
-        short idk2 = inPacket.decodeShort();
-        Npc npc = (Npc) chr.getField().getLifeByObjectID(npcID);
+        Position playerPos = inPacket.decodePosition();
+        Life life = chr.getField().getLifeByObjectID(npcID);
+        if (!(life instanceof Npc)) {
+            chr.chatMessage("Could not find that npc.");
+            return;
+        }
+        Npc npc = (Npc) life;
+        int templateID = npc.getTemplateId();
+        if (npc.getTrunkGet() > 0 || npc.getTrunkPut() > 0) {
+            chr.write(CField.trunkDlg(new TrunkOpen(templateID, chr.getAccount().getTrunk())));
+            return;
+        }
         String script = npc.getScripts().get(0);
         if (script == null) {
-            script = String.valueOf(npc.getTemplateId());
+            NpcShopDlg nsd = NpcData.getShopById(templateID);
+            if (nsd != null) {
+                chr.getScriptManager().stop(ScriptType.Npc); // reset contents before opening shop?
+                chr.setShop(nsd);
+                chr.write(ShopDlg.openShop(0, nsd));
+                chr.chatMessage(String.format("Opening shop %s", npc.getTemplateId()));
+                return;
+            } else {
+                script = String.valueOf(npc.getTemplateId());
+            }
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), npcID, script, ScriptType.Npc);
     }
 
     public static void handleUserScriptMessageAnswer(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        ScriptManagerImpl smi = chr.getScriptManager();
         byte lastType = inPacket.decodeByte();
-        NpcMessageType nmt = lastType < NpcMessageType.values().length ?
-                Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
-                NpcMessageType.None;
-        byte action = inPacket.decodeByte();
-        int answer = 0;
-        boolean hasAnswer = false;
-        if (inPacket.getUnreadAmount() >= 4) {
-            answer = inPacket.decodeInt();
-            hasAnswer = true;
+        NpcMessageType nmt = smi.getNpcScriptInfo().getMessageType();
+        if (nmt == null) {
+            nmt = lastType < NpcMessageType.values().length ?
+                    Arrays.stream(NpcMessageType.values()).filter(n -> n.getVal() == lastType).findAny().orElse(NpcMessageType.None) :
+                    NpcMessageType.None;
         }
-        if (nmt == NpcMessageType.AskAvatar || nmt == NpcMessageType.AskAvatarZero) {
-            inPacket.decodeByte();
-            hasAnswer = inPacket.decodeByte() != 0;
-            answer = inPacket.decodeByte();
-        }
-        if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
-                nmt == NpcMessageType.AskAvatar && nmt == NpcMessageType.AskAvatarZero) || hasAnswer) {
-            // else -> User pressed escape in a selection (choice) screen
-            chr.getScriptManager().handleAction(lastType, action, answer);
+        if (nmt != NpcMessageType.Monologue) {
+            byte action = inPacket.decodeByte();
+            int answer = 0;
+            boolean hasAnswer = false;
+            String ans = null;
+            if (nmt == NpcMessageType.InGameDirectionsAnswer) {
+                byte answ = inPacket.decodeByte();
+                if (action != 1 && action != 2) {   // SendDelay/PatternInputRequest
+                    return;         // We only want SendDelay as ways to progress the script
+                }
+                chr.getScriptManager().handleAction(nmt, action, answ);
+                return;
+            }
+            if (nmt == NpcMessageType.AskText && action == 1) {
+                ans = inPacket.decodeString();
+            } else if (inPacket.getUnreadAmount() >= 4) {
+                answer = inPacket.decodeInt();
+                hasAnswer = true;
+            }
+            if (nmt == NpcMessageType.AskAvatar || nmt == NpcMessageType.AskAvatarZero) {
+                inPacket.decodeByte();
+                hasAnswer = inPacket.decodeByte() != 0;
+                answer = inPacket.decodeByte();
+            }
+            if (nmt == NpcMessageType.AskText && action != 0) {
+                chr.getScriptManager().handleAction(nmt, action, ans);
+            } else if ((nmt != NpcMessageType.AskNumber && nmt != NpcMessageType.AskMenu &&
+                    nmt != NpcMessageType.AskAvatar && nmt != NpcMessageType.AskAvatarZero &&
+                    nmt != NpcMessageType.AskSlideMenu) || hasAnswer) {
+                // else -> User pressed escape in a selection (choice) screen
+                chr.getScriptManager().handleAction(nmt, action, answer);
+            } else {
+                // User pressed escape in a selection (choice) screen
+                chr.getScriptManager().dispose(false);
+            }
         } else {
-            chr.dispose();
-            chr.getScriptManager().dispose();
+            chr.getScriptManager().handleAction(nmt, (byte) 1, 1); // Doesn't use  response nor answer
         }
     }
 
@@ -2294,27 +1960,48 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             Drop drop = (Drop) life;
-            boolean success = chr.addDrop(drop);
-            if(success) {
-                field.removeDrop(dropID, chr.getId(), false, 0);
+            boolean success = ((!c.getWorld().isReboot() && drop.getOwnerID() == chr.getId()) || drop.canBePickedUpBy(chr)) && chr.addDrop(drop);
+            if (success) {
+                field.removeDrop(dropID, chr.getId(), false, -1);
+            } else {
+                chr.dispose();
             }
         }
 
     }
 
-    public static void handleShowChair(Client c, InPacket inPacket) {
-        Char chr = c.getChr();
-        int chrid = chr.getId();
-        int itemid = inPacket.decodeInt();
+    public static void handleUserSitRequest(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        int fieldSeatId = inPacket.decodeShort();
 
-
-        c.write(CField.showChair(chrid, itemid));
-        WvsContext.dispose(chr);
+        chr.setPortableChairID(0);
+        chr.setPortableChairMsg("");
+        chr.write(CField.sitResult(chr.getId(), fieldSeatId));
+        field.broadcastPacket(UserRemote.remoteSetActivePortableChair(chr.getId(), 0, false, ""));
+        chr.dispose();
     }
 
-    public static void handleCancelChair(Client c, InPacket inpacket) {
-        int chrid = c.getChr().getId();
-        c.write(CField.cancelChair(chrid, -1));
+    public static void handleUserPortableChairSitRequest(Char chr, InPacket inpacket) {
+        Field field = chr.getField();
+        int itemId = inpacket.decodeInt(); // item id
+        int pos = inpacket.decodeInt(); // setup position
+        byte chairBag = inpacket.decodeByte(); // is Chair in a bag
+        boolean textChair = inpacket.decodeInt() != 0; // boolean to show text
+        String text = "";
+        if (textChair) {
+            text = inpacket.decodeString(); // text to display
+        }
+
+        // Tower Chair  check & id
+        inpacket.decodeInt(); // encodes 0
+        int unknown = inpacket.decodeInt();
+
+        inpacket.decodeInt(); // Time
+
+        field.broadcastPacket(UserRemote.remoteSetActivePortableChair(chr.getId(), itemId, textChair, text));
+        chr.setPortableChairID(itemId);
+        chr.setPortableChairMsg(text);
+        chr.dispose();
     }
 
     public static void handleUserDropMoneyRequest(Client c, InPacket inPacket) {
@@ -2324,6 +2011,7 @@ public class WorldHandler {
         if (chr.getMoney() > amount) {
             chr.deductMoney(amount);
             Drop drop = new Drop(-1, amount);
+            drop.setCanBePickedUpByPet(false);
             chr.getField().drop(drop, chr.getPosition());
         }
     }
@@ -2343,12 +2031,12 @@ public class WorldHandler {
             ItemBuffs.giveItemBuffsFromItemID(chr, tsm, itemID);
             chr.consumeItem(item);
         } else {
-            switch(itemID) {
+            switch (itemID) {
                 case 2050004: // All cure
                     tsm.removeAllDebuffs();
                     break;
                 default:
-                    chr.chatMessage(YELLOW, String.format("Unhandled stat change item %d", itemID));
+                    chr.chatMessage(Mob, String.format("Unhandled stat change item %d", itemID));
             }
             chr.consumeItem(item);
         }
@@ -2384,13 +2072,18 @@ public class WorldHandler {
         List<Item> items = inv.getItems();
         items.sort(Comparator.comparingInt(Item::getItemId));
         for (Item item : items) {
-            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
-                    (short) item.getBagIndex(), (short) 0, -1, item));
+            if (item.getBagIndex() != items.indexOf(item) + 1) {
+                chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.REMOVE,
+                        (short) item.getBagIndex(), (short) 0, -1, item));
+            }
         }
         for (Item item : items) {
-            item.setBagIndex(items.indexOf(item) + 1);
-            chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
-                    (short) item.getBagIndex(), (short) 0, -1, item));
+            int index = items.indexOf(item) + 1;
+            if (item.getBagIndex() != index) {
+                item.setBagIndex(index);
+                chr.write(WvsContext.inventoryOperation(true, false, InventoryOperation.ADD,
+                        (short) item.getBagIndex(), (short) 0, -1, item));
+            }
         }
         c.write(WvsContext.sortItemResult(invType.getVal()));
         chr.dispose();
@@ -2406,16 +2099,16 @@ public class WorldHandler {
         if (item == null || item.getItemId() != itemID) {
             item = chr.getCashInventory().getItemBySlot(slot);
         }
-        if(item == null || item.getItemId() != itemID) {
+        if (item == null || item.getItemId() != itemID) {
             chr.dispose();
             return;
         }
         String script = String.valueOf(itemID);
         ItemInfo ii = ItemData.getItemInfoByID(itemID);
-        if(ii.getScript() != null && !"".equals(ii.getScript())) {
+        if (ii.getScript() != null && !"".equals(ii.getScript())) {
             script = ii.getScript();
         }
-        chr.getScriptManager().startScript(itemID, script, ScriptType.ITEM);
+        chr.getScriptManager().startScript(itemID, script, ScriptType.Item);
         chr.dispose();
     }
 
@@ -2439,7 +2132,7 @@ public class WorldHandler {
                         position = inPacket.decodePosition();
                     }
                     break;
-                case QuestReq_ResignQuest: //Qest forfeit
+                case QuestReq_ResignQuest: //Quest forfeit
                     questID = inPacket.decodeInt();
                     chr.getQuestManager().removeQuest(questID);
                     break;
@@ -2448,20 +2141,20 @@ public class WorldHandler {
                     break;
             }
         }
-        if(questID == 0 || qt == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not start quest.");
+        if (questID == 0 || qt == null) {
+            chr.chatMessage(SystemNotice, "Could not start quest.");
             return;
         }
-        switch(qt) {
+        switch (qt) {
             case QuestReq_AcceptQuest:
-                if(qm.canStartQuest(questID)) {
+                if (qm.canStartQuest(questID)) {
                     qm.addQuest(QuestData.createQuestFromId(questID));
                 }
                 break;
             case QuestReq_CompleteQuest:
-                if(qm.hasQuestInProgress(questID)) {
+                if (qm.hasQuestInProgress(questID)) {
                     Quest quest = qm.getQuests().get(questID);
-                    if(quest.isComplete()) {
+                    if (quest.isComplete(chr)) {
                         qm.completeQuest(questID);
                     }
                 }
@@ -2469,18 +2162,18 @@ public class WorldHandler {
             case QuestReq_OpeningScript:
                 QuestInfo qi = QuestData.getQuestInfoById(questID);
                 String scriptName = qi.getStartScript();
-                if(scriptName == null || scriptName.equalsIgnoreCase("")) {
+                if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
             case QuestReq_CompleteScript:
                 qi = QuestData.getQuestInfoById(questID);
                 scriptName = qi.getEndScript();
-                if(scriptName == null || scriptName.equalsIgnoreCase("")) {
+                if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
-                chr.getScriptManager().startScript(questID, scriptName, ScriptType.QUEST);
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
         }
     }
@@ -2489,7 +2182,7 @@ public class WorldHandler {
         byte unk = inPacket.decodeByte();
         int skillid = inPacket.decodeInt();
 
-        c.write(UserLocal.onRWMultiChargeCancelRequest(unk, skillid));
+        c.write(UserLocal.rwMultiChargeCancelRequest(unk, skillid));
     }
 
     public static void handleFoxManActionSetUseRequest(Client c, InPacket inPacket) {
@@ -2510,6 +2203,22 @@ public class WorldHandler {
         }
     }
 
+    public static void handleDirectionNodeCollision(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        if (chr == null || chr.getField() == null) {
+            return;
+        }
+        Field field = chr.getField();
+        int directionNode = inPacket.decodeInt();
+
+        String script = field.getDirectionInfoScript(directionNode);
+        if (script == null) {
+            return;
+        }
+        chr.getScriptManager().setCurNodeEventEnd(false);
+        chr.getScriptManager().startScript(field.getId(), script, ScriptType.Field);
+    }
+
     public static void handleUserEmotion(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int emotion = inPacket.decodeInt();
@@ -2521,90 +2230,77 @@ public class WorldHandler {
     public static void handlePartyRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
-        PartyRequestType prt = PartyRequestType.getByVal(type);
+        PartyType prt = PartyType.getByVal(type);
         Party party = chr.getParty();
-        if(prt == null) {
+        if (prt == null) {
             log.error(String.format("Unknown party request type %d", type));
             return;
         }
-        switch(prt) {
-            case Create:
+        switch (prt) {
+            case PartyReq_CreateNewParty:
+                if (party != null) {
+                    chr.chatMessage("You are already in a party.");
+                    return;
+                }
                 boolean appliable = inPacket.decodeByte() != 0;
                 String name = inPacket.decodeString();
                 party = Party.createNewParty(appliable, name, chr.getClient().getWorld());
                 party.addPartyMember(chr);
-                CreatePartyResult cpr = new CreatePartyResult();
-                cpr.party = party;
-                chr.write(WvsContext.partyResult(cpr));
-                party.broadcast(WvsContext.partyResult(new UpdateMemberLoggedIn(chr)));
+                party.broadcast(WvsContext.partyResult(PartyResult.createNewParty(party)));
                 break;
-            case Leave:
-                if(party.hasCharAsLeader(chr)) {
+            case PartyReq_WithdrawParty:
+                if (party.hasCharAsLeader(chr)) {
                     party.disband();
                 } else {
-                    LeavePartyResult lpr = new LeavePartyResult();
-                    lpr.partyExists = true;
-                    lpr.wasExpelled = false;
-                    lpr.party = party;
-                    lpr.leaver = party.getPartyMemberByID(chr.getId());
-                    party.broadcast(WvsContext.partyResult(lpr));
-                    party.removePartyMember(lpr.leaver);
+                    PartyMember leaver = party.getPartyMemberByID(chr.getId());
+                    party.broadcast(WvsContext.partyResult(PartyResult.withdrawParty(party, leaver, true, false)));
+                    party.removePartyMember(leaver);
                     party.updateFull();
                 }
                 break;
-            case Invite:
+            case PartyReq_InviteParty:
                 String invitedName = inPacket.decodeString();
                 Char invited = chr.getField().getCharByName(invitedName);
-                if(invited == null) {
+                if (invited == null) {
                     chr.chatMessage("Could not find that player.");
                     return;
                 }
-                PartyJoinRequestBlue pjrb = new PartyJoinRequestBlue();
-                if(party == null) {
+                if (party == null) {
                     party = Party.createNewParty(true, "Party with me!", chr.getClient().getWorld());
+                    chr.write(WvsContext.partyResult(PartyResult.createNewParty(party)));
                     party.addPartyMember(chr);
-                    cpr = new CreatePartyResult();
-                    cpr.party = party;
-                    chr.write(WvsContext.partyResult(cpr));
                 }
-                pjrb.inviter = party.getPartyLeader();
-                pjrb.partyID = party.getId();
-                if(!invited.isPartyInvitable()) {
-                    chr.chatMessage(GAME_MESSAGE, String.format("%s is currently not accepting party invites.", invitedName));
-                } else if(invited.getParty() == null) {
-                    invited.write(WvsContext.partyResult(pjrb));
-                    chr.chatMessage(GAME_MESSAGE, String.format("You invited %s to your party.", invitedName));
+                PartyMember inviter = party.getPartyLeader();
+                if (!invited.isPartyInvitable()) {
+                    chr.chatMessage(SystemNotice, String.format("%s is currently not accepting party invites.", invitedName));
+                } else if (invited.getParty() == null) {
+                    invited.write(WvsContext.partyResult(PartyResult.applyParty(party, inviter)));
+                    chr.chatMessage(SystemNotice, String.format("You invited %s to your party.", invitedName));
                 } else {
-                    chr.chatMessage(GAME_MESSAGE, String.format("%s is already in a party.", invitedName));
+                    chr.chatMessage(SystemNotice, String.format("%s is already in a party.", invitedName));
                 }
                 break;
-            case Expel:
+            case PartyReq_KickParty:
                 int expelID = inPacket.decodeInt();
                 party.expel(expelID);
                 break;
-            case ChangeLeadership:
+            case PartyReq_ChangePartyBoss:
                 int newLeaderID = inPacket.decodeInt();
                 party.setPartyLeaderID(newLeaderID);
-                LeaderShipTransferResult lstr = new LeaderShipTransferResult();
-                lstr.newLeaderID = newLeaderID;
-                lstr.reasonIsDisconnect = false;
-                party.broadcast(WvsContext.partyResult(lstr));
+                party.broadcast(WvsContext.partyResult(PartyResult.changePartyBoss(party, newLeaderID)));
                 break;
-            case InviteRequest:
+            case PartyReq_ApplyParty:
                 int partyID = inPacket.decodeInt();
                 party = chr.getField().getChars().stream()
                         .filter(ch -> ch.getParty() != null && ch.getParty().getId() == partyID)
                         .map(Char::getParty)
                         .findFirst()
                         .orElse(null);
-                if(party.getApplyingChar() == null) {
-                    PartyApplyRequest par = new PartyApplyRequest();
-                    par.partyID = partyID;
-                    par.applier = chr;
+                if (party.getApplyingChar() == null) {
                     party.setApplyingChar(chr);
-                    party.getPartyLeader().getChr().write(WvsContext.partyResult(par));
+                    party.getPartyLeader().getChr().write(WvsContext.partyResult(PartyResult.inviteIntrusion(party, chr)));
                 } else {
-                    chr.chatMessage(GAME_MESSAGE, "That party already has an applier. Please wait until the applier is accepted or denied.");
+                    chr.chatMessage(SystemNotice, "That party already has an applier. Please wait until the applier is accepted or denied.");
                 }
                 break;
             default:
@@ -2617,60 +2313,54 @@ public class WorldHandler {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
         int partyID = inPacket.decodeInt();
-        PartyRequestResultType prrt = PartyRequestResultType.getByVal(type);
-        if(prrt == null) {
+        PartyType pt = PartyType.getByVal(type);
+        if (pt == null) {
             log.error(String.format("Unknown party request result type %d", type));
             return;
         }
-        switch(prrt) {
-            case AcceptPartyInvite:
+        switch (pt) {
+            case PartyRes_ApplyParty_Accepted:
                 Char leader = chr.getField().getChars().stream()
                         .filter(l -> l.getParty() != null
-                        && l.getParty().getId() == partyID).findFirst().orElse(null);
+                                && l.getParty().getId() == partyID).findFirst().orElse(null);
                 Party party = leader.getParty();
-                if(!party.isFull()) {
+                if (!party.isFull()) {
                     party.addPartyMember(chr);
-                    PartyJoinResult pjr = new PartyJoinResult();
-                    pjr.party = party;
-                    pjr.joinerName = chr.getName();
-                    for(Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
-                        onChar.write(WvsContext.partyResult(pjr));
+                    for (Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
+                        onChar.write(WvsContext.partyResult(PartyResult.joinParty(party, chr.getName())));
                         chr.write(UserRemote.receiveHP(onChar));
                     }
                     party.broadcast(UserRemote.receiveHP(chr));
                 } else {
-                    chr.write(WvsContext.partyResult(new PartyMessageResult(PartyResultType.FullPartyMsg)));
+                    chr.write(WvsContext.partyResult(PartyResult.msg(PartyType.PartyRes_JoinParty_AlreadyFull)));
                 }
                 break;
-            case DeclinePartyInvite:
+            case PartyRes_ApplyParty_Rejected:
                 leader = chr.getField().getChars().stream()
                         .filter(l -> l.getParty() != null &&
-                        l.getParty().getId() == partyID).findFirst().orElse(null);
-                leader.chatMessage(GAME_MESSAGE, String.format("%s has declined your invite.", chr.getName()));
+                                l.getParty().getId() == partyID).findFirst().orElse(null);
+                leader.chatMessage(SystemNotice, String.format("%s has declined your invite.", chr.getName()));
                 break;
-            case AcceptPartyApply:
+            case PartyRes_InviteIntrusion_Accepted:
                 party = chr.getClient().getWorld().getPartybyId(partyID);
                 Char applier = party.getApplyingChar();
-                if(applier.getParty() != null) {
-                    party.getPartyLeader().getChr().chatMessage(GAME_MESSAGE, String.format("%s is already in a party.", applier.getName()));
-                } else if(!party.isFull()) {
+                if (applier.getParty() != null) {
+                    party.getPartyLeader().getChr().chatMessage(SystemNotice, String.format("%s is already in a party.", applier.getName()));
+                } else if (!party.isFull()) {
                     party.addPartyMember(applier);
-                    PartyJoinResult pjr = new PartyJoinResult();
-                    pjr.party = party;
-                    pjr.joinerName = applier.getName();
-                    for(Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
-                        onChar.write(WvsContext.partyResult(pjr));
+                    for (Char onChar : party.getOnlineMembers().stream().map(PartyMember::getChr).collect(Collectors.toList())) {
+                        onChar.write(WvsContext.partyResult(PartyResult.joinParty(party, applier.getName())));
                     }
                 } else {
-                    applier.write(WvsContext.partyResult(new PartyMessageResult(PartyResultType.FullPartyMsg)));
+                    applier.write(WvsContext.partyResult(PartyResult.msg(PartyType.PartyRes_JoinParty_AlreadyFull)));
                 }
                 party.setApplyingChar(null);
                 break;
-            case DeclinePartyApply:
+            case PartyRes_InviteIntrusion_Rejected:
                 party = chr.getClient().getWorld().getPartybyId(partyID);
                 applier = party.getApplyingChar();
-                if(applier != null) {
-                    applier.chatMessage(GAME_MESSAGE, "Your party apply request has been denied.");
+                if (applier != null) {
+                    applier.chatMessage(SystemNotice, "Your party apply request has been denied.");
                     party.setApplyingChar(null);
                 }
                 break;
@@ -2686,17 +2376,17 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         String destName = inPacket.decodeString();
         Char dest = c.getWorld().getCharByName(destName);
-        if(dest == null) {
+        if (dest == null) {
             c.write(CField.whisper(destName, (byte) 0, false, "", true));
             return;
         }
-        switch(type) {
+        switch (type) {
             case 5: // /find command
                 break;
             case 6: // whisper
                 String msg = inPacket.decodeString();
                 dest.write(CField.whisper(chr.getName(), (byte) (c.getChannel() - 1), false, msg, false));
-                chr.chatMessage(WHISPER_GREEN, String.format("%s<< %s", dest.getName(), msg));
+                chr.chatMessage(Whisper, String.format("%s<< %s", dest.getName(), msg));
                 break;
         }
 
@@ -2712,14 +2402,14 @@ public class WorldHandler {
 
     public static void handlePartyCandidateRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        if(chr.getParty() != null) {
+        if (chr.getParty() != null) {
             chr.write(WvsContext.partyCandidateResult(new HashSet<>()));
             return;
         }
         Field field = chr.getField();
         Set<Party> parties = new HashSet<>();
-        for(Char ch : field.getChars()) {
-            if(ch.getParty() != null && ch.getParty().hasCharAsLeader(ch)) {
+        for (Char ch : field.getChars()) {
+            if (ch.getParty() != null && ch.getParty().hasCharAsLeader(ch)) {
                 parties.add(ch.getParty());
             }
         }
@@ -2730,68 +2420,76 @@ public class WorldHandler {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
         GuildType grt = GuildType.getTypeByVal(type);
-        if(grt == null) {
+        if (grt == null) {
             log.error(String.format("Unknown guild request %d", type));
             return;
         }
         Guild guild = chr.getGuild();
-        switch(grt) {
-            case Req_FindGuildByCid: //AcceptJoinRequest:
+        switch (grt) {
+            case Req_FindGuildByCid: // AcceptJoinRequest:
                 int guildID = inPacket.decodeInt();
                 guild = chr.getClient().getWorld().getGuildByID(guildID);
-                if(guild != null && chr.getGuild() == null) {
+                if (guild != null && chr.getGuild() == null) {
                     guild.addMember(chr);
                     guild.broadcast(WvsContext.guildResult(
-                            new GuildJoinMsg(guild.getId(), guild.getMemberByID(chr.getId()))));
-                    chr.write(WvsContext.guildResult(new GuildUpdate(guild)));
+                            GuildResult.joinGuild(guild, guild.getMemberByCharID(chr.getId()))));
+                    chr.write(WvsContext.guildResult(GuildResult.loadGuild(guild)));
                 } else {
-                    chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Res_CreateNewGuild_AlreadyJoined)));
+                    chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_CreateNewGuild_AlreadyJoined)));
                 }
                 break;
             case Req_CheckGuildName:
                 String name = inPacket.decodeString();
                 List<Guild> guilds;
-                try(Session s = Server.getInstance().getNewDatabaseSession()) {
+                try (Session s = Server.getInstance().getNewDatabaseSession()) {
                     Transaction t = s.beginTransaction();
                     Query q = s.createQuery("FROM Guild WHERE name = ?");
                     q.setParameter(0, name);
                     guilds = q.list();
                     t.commit();
                 }
-                if(guilds == null || guilds.size() == 0) {
+                if (guilds == null || guilds.size() == 0) {
                     guild = new Guild();
                     guild.setLevel(1);
                     guild.setName(name);
-                    guild.addMember(chr);
-                    guild.setWorldID(chr.getClient().getWorldId());
                     DatabaseManager.saveToDB(guild);
                     chr.setGuild(guild);
-                    chr.write(WvsContext.guildResult(new GuildCreate(guild)));
+                    guild = chr.getGuild(); // setGuild may change the instance
+                    guild.addMember(chr);
+                    guild.setWorldID(chr.getClient().getWorldId());
+                    chr.write(WvsContext.guildResult(GuildResult.createNewGuild(guild)));
+                    chr.deductMoney(5000000);
                 } else {
-                    chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Res_CheckGuildName_AlreadyUsed)));
+                    chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_CheckGuildName_AlreadyUsed)));
                 }
                 break;
             case Req_InviteGuild:
                 Char invited = chr.getClient().getChannelInstance().getCharByName(inPacket.decodeString());
-                if(invited == null) {
-                    chr.write(WvsContext.guildResult(new GuildMsg(GuildType.Res_JoinGuild_UnknownUser)));
+                if (invited == null) {
+                    chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_JoinGuild_UnknownUser)));
                 } else {
-                    invited.write(WvsContext.guildResult(new GuildJoinRequest(chr)));
+                    invited.write(WvsContext.guildResult(GuildResult.inviteGuild(chr)));
                 }
                 break;
             case Req_WithdrawGuild:
+                if (guild == null) {
+                    return;
+                }
                 name = chr.getName();
-                guild.broadcast(WvsContext.guildResult(new GuildLeaveResult(guild.getId(), chr.getId(), name, false)));
+                guild.broadcast(WvsContext.guildResult(GuildResult.leaveGuild(guild, chr.getId(), name, false)));
                 guild.removeMember(chr);
                 chr.setGuild(null);
                 break;
             case Req_KickGuild:
+                if (guild == null) {
+                    return;
+                }
                 int expelledID = inPacket.decodeInt();
                 String expelledName = inPacket.decodeString();
-                GuildMember gm = guild.getMemberByID(expelledID);
+                GuildMember gm = guild.getMemberByCharID(expelledID);
                 Char expelled = gm.getChr();
-                guild.broadcast(WvsContext.guildResult(new GuildLeaveResult(guild.getId(), expelledID, expelledName, true)));
-                if(expelled == null) {
+                guild.broadcast(WvsContext.guildResult(GuildResult.leaveGuild(guild, expelledID, expelledName, true)));
+                if (expelled == null) {
                     expelled = Char.getFromDBById(expelledID);
                     guild.removeMember(gm);
                     DatabaseManager.saveToDB(expelled);
@@ -2800,34 +2498,241 @@ public class WorldHandler {
                 }
                 break;
             case Req_SetMark:
+                if (guild == null) {
+                    return;
+                }
                 guild.setMarkBg(inPacket.decodeShort());
                 guild.setMarkBgColor(inPacket.decodeByte());
                 guild.setMark(inPacket.decodeShort());
                 guild.setMarkColor(inPacket.decodeByte());
-                chr.write(WvsContext.guildResult(new GuildUpdateMark(guild))); // This doesn't actually update the emblem client side
-                guild.broadcast(WvsContext.guildResult(new GuildUpdate(guild)));
+                chr.write(WvsContext.guildResult(GuildResult.setMark(guild))); // This doesn't actually update the emblem client side
+                guild.broadcast(WvsContext.guildResult(GuildResult.loadGuild(guild)));
                 break;
             case Req_SetGradeName:
+                if (guild == null) {
+                    return;
+                }
                 String[] newNames = new String[guild.getGradeNames().size()];
                 for (int i = 0; i < newNames.length; i++) {
                     newNames[i] = inPacket.decodeString();
                 }
                 guild.setGradeNames(newNames);
-                guild.broadcast(WvsContext.guildResult(new GuildUpdateGradeNames(guild.getId(), newNames)));
+                guild.broadcast(WvsContext.guildResult(GuildResult.setGradeName(guild, newNames)));
                 break;
             case Req_SetMemberGrade:
+                if (guild == null) {
+                    return;
+                }
                 int id = inPacket.decodeInt();
                 byte grade = inPacket.decodeByte();
-                gm = guild.getMemberByID(id);
+                gm = guild.getMemberByCharID(id);
                 gm.setGrade(grade);
-                GuildUpdateMemberGrade gumg = new GuildUpdateMemberGrade();
-                gumg.gm = gm;
-                gumg.guildID = guild.getId();
-                guild.broadcast(WvsContext.guildResult(gumg));
+                guild.broadcast(WvsContext.guildResult(GuildResult.setMemberGrade(guild, gm)));
+                break;
+            case Req_SkillLevelSetUp:
+                if (guild == null) {
+                    return;
+                }
+                int skillID = inPacket.decodeInt();
+                boolean up = inPacket.decodeByte() != 0;
+                if (up) {
+                    if (!SkillConstants.isGuildContentSkill(skillID) && !SkillConstants.isGuildNoblesseSkill(skillID)) {
+                        log.error(String.format("Character %d tried to add an invalid guild skill (%d)", chr.getId(), skillID));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_UseSkill_Err)));
+                        return;
+                    }
+                    int spentSp = guild.getSpentSp();
+                    if (SkillConstants.isGuildContentSkill(skillID)) {
+                        if (spentSp >= guild.getLevel() * 2) {
+                            log.error(String.format("Character %d tried to add a guild skill without enough sp (spent %d, level %d).",
+                                    chr.getId(), spentSp, guild.getLevel()));
+                            chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                            return;
+                        }
+                    } else if (guild.getBattleSp() - guild.getSpentBattleSp() <= 0) { // Noblesse
+                        log.error(String.format("Character %d tried to add a guild battle skill without enough sp (spent %d).",
+                                chr.getId(), guild.getSpentSp()));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    SkillInfo si = SkillData.getSkillInfoById(skillID);
+                    if (spentSp < si.getReqTierPoint()) {
+                        log.error(String.format("Character %d tried to add a guild skill without enough sp spent (spent %d, needed %d).",
+                                chr.getId(), spentSp, si.getReqTierPoint()));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    for (Map.Entry<Integer, Integer> entry : si.getReqSkills().entrySet()) {
+                        int reqSkillID = entry.getKey();
+                        int reqSlv = entry.getValue();
+                        GuildSkill gs = guild.getSkillById(skillID);
+                        if (gs == null || gs.getLevel() < reqSlv) {
+                            log.error(String.format("Character %d tried to add a guild skill without having the required " +
+                                            "skill first (req id %d, needed %d, has %d).",
+                                    chr.getId(), reqSkillID, reqSlv, gs == null ? 0 : gs.getLevel()));
+                            chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                            return;
+                        }
+                    }
+                    GuildSkill skill = guild.getSkillById(skillID);
+                    if (skill == null) {
+                        skill = new GuildSkill();
+                        skill.setBuyCharacterName(chr.getName());
+                        skill.setExtendCharacterName(chr.getName());
+                        skill.setSkillID(skillID);
+                        guild.addGuildSkill(skill);
+                    }
+                    if (skill.getLevel() >= si.getMaxLevel()) {
+                        chr.chatMessage("That skill is already at its max level.");
+                        chr.dispose();
+                        return;
+                    }
+                    skill.setLevel((short) (skill.getLevel() + 1));
+                    guild.broadcast(WvsContext.guildResult(GuildResult.setSkill(guild, skill, chr.getId())));
+                } else {
+                    GuildSkill gs = guild.getSkillById(skillID);
+                    if (gs == null || gs.getLevel() == 0) {
+                        log.error(String.format("Character %d tried to decrement a guild skill without that skill existing (id %d).",
+                                chr.getId(), skillID));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    if (guild.getGgp() < GameConstants.GGP_FOR_SKILL_RESET) {
+                        log.error(String.format("Character %d tried to decrement a guild skill without having enough GGP (needed %d, has %d).",
+                                chr.getId(), GameConstants.GGP_FOR_SKILL_RESET, guild.getGgp()));
+                        chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                        return;
+                    }
+                    guild.setGgp(guild.getGgp() - GameConstants.GGP_FOR_SKILL_RESET);
+                    gs.setLevel((short) (gs.getLevel() - 1));
+                    guild.broadcast(WvsContext.guildResult(GuildResult.setSkill(guild, gs, chr.getId())));
+                    guild.broadcast(WvsContext.guildResult(GuildResult.setGgp(guild)));
+                }
+                break;
+            case Req_BattleSkillOpen:
+                if (guild == null) {
+                    return;
+                }
+                chr.write(WvsContext.guildResult(GuildResult.battleSkillOpen(guild)));
+                break;
+            case Req_UseActiveSkill:
+                skillID = inPacket.decodeInt();
+                // TODO Remove igp
+                long usabletime = chr.getSkillCoolTimes().getOrDefault(skillID, Long.MIN_VALUE);
+                if (usabletime > System.currentTimeMillis() && !chr.hasSkillCDBypass()) {
+                    chr.chatMessage("That skill is still on cooldown.");
+                    return;
+                }
+                GuildSkill gs = guild.getSkillById(skillID);
+                if (gs == null || gs.getLevel() == 0) {
+                    log.error(String.format("Character %d tried to use a guild skill without having it (id %d).",
+                            chr.getId(), skillID));
+                    chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
+                    return;
+                }
+                SkillInfo si = SkillData.getSkillInfoById(skillID);
+                chr.getSkillCoolTimes().put(skillID, System.currentTimeMillis() + 1000 * si.getValue(SkillStat.cooltime, gs.getLevel()));
+                chr.getJobHandler().handleJoblessBuff(c, inPacket, skillID, (byte) gs.getLevel());
                 break;
             default:
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
+
+        }
+    }
+
+    public static void handleAllianceRequest(Char chr, InPacket inPacket) {
+        byte type = inPacket.decodeByte();
+        AllianceType at = AllianceType.getByVal(type);
+        if (at == null) {
+            log.error(String.format("Unknown alliance request %d", type));
+            return;
+        }
+        Guild guild = chr.getGuild();
+        Alliance alliance = guild == null ? null : guild.getAlliance();
+        Char other;
+        Guild otherGuild;
+        World world = chr.getClient().getWorld();
+        GuildMember member = guild == null ? null : chr.getGuild().getMemberByCharID(chr.getId());
+        GuildMember otherMember;
+        if (!chr.isGuildMaster()) {
+            return;
+        }
+        switch (at) {
+            case Req_Withdraw:
+                if (member.getAllianceGrade() == 1) {
+                    if (alliance.getGuilds().size() <= 1) {
+                        alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, guild, false)));
+                        alliance.removeGuild(guild);
+                        DatabaseManager.deleteFromDB(alliance);
+                    } else {
+                        Set<Guild> remainingGuilds = new HashSet<>(alliance.getGuilds());
+                        remainingGuilds.remove(guild);
+                        Guild newLeadingGuild = Util.getRandomFromCollection(remainingGuilds);
+                        otherMember = newLeadingGuild.getGuildLeader();
+                        otherMember.setAllianceGrade(1);
+                        alliance.broadcast(WvsContext.allianceResult(AllianceResult.changeMaster(alliance, member, otherMember)));
+                        alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, guild, false)));
+                        alliance.removeGuild(guild);
+                    }
+                } else {
+                    alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, guild, false)));
+                    alliance.removeGuild(guild);
+                }
+                break;
+            case Req_Invite:
+                String guildName = inPacket.decodeString();
+                otherGuild = world.getGuildByName(guildName);
+                if (otherGuild != null) {
+                    other = world.getCharByID(otherGuild.getLeaderID());
+                    if (other != null) {
+                        if (other.getGuild().getAlliance() == null) {
+                            other.write(WvsContext.allianceResult(AllianceResult.inviteGuild(alliance, member)));
+                        } else {
+                            other.write(WvsContext.allianceResult(AllianceResult.msg(AllianceType.Res_InviteGuild_AlreadyInvited)));
+                        }
+                    } else {
+                        chr.write(WvsContext.allianceResult(AllianceResult.msg(AllianceType.Res_Invite_Failed)));
+                    }
+                } else {
+                    chr.write(WvsContext.allianceResult(AllianceResult.msg(AllianceType.Res_Invite_Failed)));
+                }
+                break;
+            case Req_Load:
+                chr.write(WvsContext.allianceResult(AllianceResult.loadDone(alliance)));
+                chr.write(WvsContext.allianceResult(AllianceResult.loadGuildDone(alliance)));
+                break;
+            case Req_ChangeMaster:
+                other = world.getCharByID(inPacket.decodeInt());
+                if (other != null) {
+                    otherMember = other.getGuild().getMemberByCharID(other.getId());
+                    member.setAllianceGrade(2);
+                    otherMember.setAllianceGrade(1);
+                    alliance.broadcast(WvsContext.allianceResult(AllianceResult.changeMaster(alliance, member, otherMember)));
+                } else {
+                    chr.chatMessage("That character is not online.");
+                }
+                break;
+            case Req_Kick:
+                int otherID = inPacket.decodeInt();
+                int kickedGuildID = inPacket.decodeInt();
+                otherGuild = alliance.getGuildByID(kickedGuildID);
+                if (otherGuild != null) {
+                    alliance.broadcast(WvsContext.allianceResult(AllianceResult.withdraw(alliance, otherGuild, true)));
+                    alliance.removeGuild(otherGuild);
+                }
+                break;
+            case Req_SetGradeName:
+                for (int i = 0; i < 5; i++) {
+                    String gradeName = inPacket.decodeString();
+                    if (gradeName.length() >= 4 && gradeName.length() <= 10) {
+                        alliance.getGradeNames().set(i, gradeName);
+                    }
+                }
+                alliance.broadcast(WvsContext.allianceResult(AllianceResult.setGradeName(alliance)));
+                break;
+            default:
+                log.error(String.format("Unhandled alliance request type %s", at.getVal()));
         }
     }
 
@@ -2862,10 +2767,10 @@ public class WorldHandler {
         inPacket.decodeInt(); // crc
         int skillID = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
-        if (chr.checkAndSetSkillCooltime(skillID)) {
+        if (chr.checkAndSetSkillCooltime(skillID) || chr.hasSkillCDBypass()) {
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skillID, slv, 0)));
             log.debug("SkillID: " + skillID);
-            c.getChr().chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
+            c.getChr().chatMessage(ChatType.Mob, "SkillID: " + skillID);
             Job sourceJobHandler = c.getChr().getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
             if (si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
@@ -2878,10 +2783,12 @@ public class WorldHandler {
                                 && rectAround.hasPositionInside(pm.getChr().getPosition())) {
                             Char ptChr = pm.getChr();
                             Effect effect = Effect.skillAffected(skillID, slv, 0);
-                            chr.getField().broadcastPacket(
-                                    UserRemote.effect(ptChr.getId(), effect)
-                                    , ptChr);
-                            ptChr.write(User.effect(effect));
+                            if (ptChr != chr) { // Caster shouldn't get the Affected Skill Effect
+                                chr.getField().broadcastPacket(
+                                        UserRemote.effect(ptChr.getId(), effect)
+                                        , ptChr);
+                                ptChr.write(User.effect(effect));
+                            }
                             sourceJobHandler.handleSkill(pm.getChr().getClient(), skillID, slv, inPacket);
                         }
                     }
@@ -2897,21 +2804,21 @@ public class WorldHandler {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
         ShopRequestType shr = ShopRequestType.getByVal(type);
-        if(shr == null) {
+        if (shr == null) {
             log.error(String.format("Unhandled shop request type %d", type));
         }
         NpcShopDlg nsd = chr.getShop();
-        if(nsd == null) {
+        if (nsd == null) {
             chr.chatMessage("You are currently not in a shop.");
             return;
         }
-        switch(shr) {
+        switch (shr) {
             case BUY:
                 short itemIndex = inPacket.decodeShort();
                 int itemID = inPacket.decodeInt();
                 short quantity = inPacket.decodeShort();
                 NpcShopItem nsi = nsd.getItemByIndex(itemIndex);
-                if(nsi == null || nsi.getItemID() != itemID) {
+                if (nsi == null || nsi.getItemID() != itemID) {
                     chr.chatMessage("The server's item at that position was different than the client's.");
                     log.warn(String.format("Possible hack: expected shop itemID %d, got %d (chr %d)", nsi.getItemID(), itemID, chr.getId()));
                     return;
@@ -2945,13 +2852,13 @@ public class WorldHandler {
             case RECHARGE:
                 short slot = inPacket.decodeShort();
                 item = chr.getConsumeInventory().getItemBySlot(slot);
-                if(item == null || !ItemConstants.isRechargable(item.getItemId())) {
+                if (item == null || !ItemConstants.isRechargable(item.getItemId())) {
                     chr.chatMessage(String.format("Was not able to find a rechargable item at position %d.", slot));
                     return;
                 }
                 ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
                 long cost = ii.getSlotMax() - item.getQuantity();
-                if(chr.getMoney() < cost) {
+                if (chr.getMoney() < cost) {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
                     return;
                 }
@@ -2967,11 +2874,11 @@ public class WorldHandler {
                 quantity = inPacket.decodeShort();
                 InvType it = ItemConstants.getInvTypeByItemID(itemID);
                 item = chr.getInventoryByType(it).getItemBySlot(slot);
-                if(item == null || item.getItemId() != itemID) {
+                if (item == null || item.getItemId() != itemID) {
                     chr.chatMessage("Could not find that item.");
                     return;
                 }
-                if(ItemConstants.isEquip(itemID)) {
+                if (ItemConstants.isEquip(itemID)) {
                     cost = ((Equip) item).getPrice();
                 } else {
                     cost = ItemData.getItemInfoByID(itemID).getPrice() * quantity;
@@ -2997,17 +2904,17 @@ public class WorldHandler {
         Char chr = c.getChr();
         byte type = inPacket.decodeByte();
         FriendType ft = Arrays.stream(FriendType.values()).filter(f -> f.getVal() == type).findFirst().orElse(null);
-        if(ft == null) {
+        if (ft == null) {
             chr.chatMessage("Unknown friend request type.");
             log.error(String.format("Unknown friend request type %d", type));
             return;
         }
         Char other;
-        switch(ft) {
+        switch (ft) {
             case FriendReq_SetFriend:
                 String name = inPacket.decodeString();
                 other = c.getWorld().getCharByName(name);
-                if(other == null) {
+                if (other == null) {
                     c.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_UnknownUser)));
                     return;
                 }
@@ -3015,9 +2922,9 @@ public class WorldHandler {
                 String memo = inPacket.decodeString();
                 boolean account = inPacket.decodeByte() != 0;
                 String nick = "";
-                if(account) {
+                if (account) {
                     nick = inPacket.decodeString();
-                    if(nick.equalsIgnoreCase("")) {
+                    if (nick.equalsIgnoreCase("")) {
                         nick = name;
                     }
                 }
@@ -3027,7 +2934,7 @@ public class WorldHandler {
                 friend.setMemo(memo);
                 friend.setName(name);
                 friend.setFriendAccountID(other.getAccId());
-                if(account) {
+                if (account) {
                     friend.setNickname(nick);
                     friend.setFlag(FriendFlag.AccountFriendOffline);
                     chr.getAccount().addFriend(friend);
@@ -3040,7 +2947,7 @@ public class WorldHandler {
                 otherFriend.setName(chr.getName());
                 otherFriend.setFriendAccountID(chr.getAccId());
                 otherFriend.setGroup("Default Group");
-                if(account) {
+                if (account) {
                     otherFriend.setNickname(chr.getName());
                     otherFriend.setFlag(FriendFlag.AccountFriendRequest);
                     other.getAccount().addFriend(otherFriend);
@@ -3057,17 +2964,17 @@ public class WorldHandler {
                 int friendID = inPacket.decodeInt();
                 boolean online = true;
                 Char requestor = c.getWorld().getCharByID(friendID);
-                if(requestor == null) {
+                if (requestor == null) {
                     requestor = Char.getFromDBById(friendID);
                     online = false;
-                    if(requestor == null) {
+                    if (requestor == null) {
                         c.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_UnknownUser)));
                         return;
                     }
                 }
                 friend = chr.getFriendByCharID(friendID);
                 friend.setFlag(online ? FriendFlag.AccountFriendOnline : FriendFlag.AccountFriendOffline);
-                if(online) {
+                if (online) {
                     friend.setChannelID(requestor.getClient().getChannel());
                     otherFriend = requestor.getFriendByCharID(chr.getId());
                     otherFriend.setChannelID(c.getChannel());
@@ -3076,7 +2983,7 @@ public class WorldHandler {
                     requestor.chatMessage(String.format("%s has accepted your friend request!", chr.getName()));
                 }
                 c.write(WvsContext.friendResult(new UpdateFriendResult(friend)));
-                if(!online) {
+                if (!online) {
                     DatabaseManager.saveToDB(requestor);
                 }
                 break;
@@ -3085,7 +2992,7 @@ public class WorldHandler {
                 Account accountRef = c.getWorld().getAccountByID(accountID);
                 Account myAcc = chr.getAccount();
                 online = true;
-                if(accountRef == null) {
+                if (accountRef == null) {
                     online = false;
                     accountRef = Account.getFromDBById(accountID);
                     if (accountRef == null) {
@@ -3098,7 +3005,7 @@ public class WorldHandler {
                 otherFriend = accountRef.getFriendByAccID(myAcc.getId());
                 otherFriend.setFlag(FriendFlag.AccountFriendOnline);
                 otherFriend.setChannelID(chr.getClient().getChannel());
-                if(online) {
+                if (online) {
                     requestor = accountRef.getCurrentChr();
                     friend.setChannelID(requestor.getClient().getChannel());
                     requestor.chatMessage(String.format("%s has accepted your account friend request!", chr.getName()));
@@ -3111,21 +3018,21 @@ public class WorldHandler {
             case FriendReq_DeleteFriend:
                 friendID = inPacket.decodeInt();
                 friend = chr.getFriendByCharID(friendID);
-                if(friend == null) {
+                if (friend == null) {
                     chr.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_UnknownUser)));
                     return;
                 }
                 other = c.getWorld().getCharByID(friendID);
                 online = true;
-                if(other == null) {
+                if (other == null) {
                     online = false;
                     other = Char.getFromDBById(friendID);
                 }
                 otherFriend = other == null ? null : other.getFriendByCharID(chr.getId());
-                if(other != null) {
+                if (other != null) {
                     other.removeFriend(otherFriend);
                 }
-                if(online) {
+                if (online) {
                     other.write(WvsContext.friendResult(new RemoveFriendResult(otherFriend)));
                 }
                 other.removeFriendByID(chr.getId());
@@ -3138,21 +3045,21 @@ public class WorldHandler {
                 int accID = inPacket.decodeInt();
                 accountRef = chr.getAccount();
                 friend = accountRef.getFriendByAccID(accID);
-                if(friend == null) {
+                if (friend == null) {
                     chr.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_UnknownUser)));
                     return;
                 }
                 online = true;
                 Account otherAccount = c.getWorld().getAccountByID(accID);
                 otherFriend = otherAccount.getFriendByAccID(chr.getAccId());
-                if(otherAccount == null) {
+                if (otherAccount == null) {
                     otherAccount = Account.getFromDBById(accID);
                     online = false;
                 }
-                if(otherAccount != null) {
+                if (otherAccount != null) {
                     otherAccount.removeFriend(otherFriend);
                 }
-                if(online) {
+                if (online) {
                     otherAccount.getCurrentChr().write(WvsContext.friendResult(new RemoveFriendResult(otherFriend)));
                 }
                 accountRef.removeFriend(friend);
@@ -3163,16 +3070,16 @@ public class WorldHandler {
             case FriendReq_RefuseFriend:
                 friendID = inPacket.decodeInt();
                 friend = chr.getFriendByCharID(friendID);
-                if(friend == null) {
+                if (friend == null) {
                     chr.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_UnknownUser)));
                     return;
                 }
                 chr.write(WvsContext.friendResult(new RemoveFriendResult(friend)));
                 chr.removeFriend(friend);
                 other = c.getWorld().getCharByID(friendID);
-                if(other == null) {
+                if (other == null) {
                     other = Char.getFromDBById(friendID);
-                    if(other == null) {
+                    if (other == null) {
                         return;
                     }
                     other.removeFriendByID(chr.getId());
@@ -3186,16 +3093,16 @@ public class WorldHandler {
                 accID = inPacket.decodeInt();
                 accountRef = chr.getAccount();
                 friend = accountRef.getFriendByAccID(accID);
-                if(friend == null) {
+                if (friend == null) {
                     chr.write(WvsContext.friendResult(new FriendResultMsg(FriendType.FriendRes_SetFriend_UnknownUser)));
                     return;
                 }
                 chr.write(WvsContext.friendResult(new RemoveFriendResult(friend)));
                 accountRef.removeFriend(friend);
                 otherAccount = c.getWorld().getAccountByID(accID);
-                if(otherAccount == null) {
+                if (otherAccount == null) {
                     otherAccount = Account.getFromDBById(accID);
-                    if(otherAccount == null) {
+                    if (otherAccount == null) {
                         return;
                     }
                     otherAccount.removeFriend(accID);
@@ -3209,7 +3116,7 @@ public class WorldHandler {
             case FriendReq_ModifyAccountFriendGroup:
                 accID = inPacket.decodeInt();
                 friend = chr.getAccount().getFriendByAccID(accID);
-                if(friend != null) {
+                if (friend != null) {
                     friend.setGroup(inPacket.decodeString());
                     chr.write(WvsContext.friendResult(new UpdateFriendResult(friend)));
                 }
@@ -3247,27 +3154,32 @@ public class WorldHandler {
     }
 
     public static void handleUserCreateHolidomRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+
         inPacket.decodeInt(); //tick
         inPacket.decodeByte(); //unk
         int skillID = inPacket.decodeInt();
         inPacket.decodeInt(); //unk
 
-        c.getChr().heal( (int) (c.getChr().getMaxHP() / ((double) 100 / 40)) );
+        if (field.getAffectedAreas().stream().noneMatch(ss -> ss.getSkillID() == skillID)) {
+            log.error(String.format("Character %d tried to heal from Holy Fountain (%d) whilst there isn't any on the field.", chr.getId(), skillID));
+            return;
+        }
+        c.getChr().heal((int) (c.getChr().getMaxHP() / ((double) 100 / 40)));
     }
 
     public static void handleSummonedSkill(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        Field field = chr.getField();
+
         int objectID = inPacket.decodeInt();
-        int skillID = inPacket.decodeInt();
+        int skillId = inPacket.decodeInt();
         //5 more bytes, unknown
 
-
-        Char chr = c.getChr();
-
-        if(skillID == Warrior.EVIL_EYE) {
-            chr.heal(20);
-        }
-        if(skillID == Warrior.HEX_OF_THE_EVIL_EYE) {
-            Warrior.handleHexOfTheEvilEye(chr);
+        if (field.getLifeByObjectID(objectID) != null && field.getLifeByObjectID(objectID) instanceof Summon) {
+            Summon summon = (Summon) field.getLifeByObjectID(objectID);
+            summon.onSkillUse(skillId);
         }
     }
 
@@ -3276,16 +3188,16 @@ public class WorldHandler {
         Trunk trunk = chr.getAccount().getTrunk();
         byte req = inPacket.decodeByte();
         TrunkType trunkType = TrunkType.getByVal(req);
-        if(trunkType == null) {
+        if (trunkType == null) {
             log.error(String.format("Unknown trunk request type %d.", req));
             return;
         }
-        switch(trunkType) {
+        switch (trunkType) {
             case TrunkReq_Money:
                 long reqMoney = inPacket.decodeLong();
                 boolean put = reqMoney < 0;
                 long curMoney = chr.getMoney();
-                if(put) {
+                if (put) {
                     reqMoney = -reqMoney;
                     if (reqMoney > curMoney && trunk.canAddMoney(reqMoney)) {
                         chr.write(CField.trunkDlg(new TrunkMsg(TrunkType.TrunkRes_PutNoMoney)));
@@ -3295,7 +3207,7 @@ public class WorldHandler {
                     chr.deductMoney(reqMoney);
                     chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_MoneySuccess, trunk)));
                 } else {
-                    if(reqMoney <= trunk.getMoney() && chr.canAddMoney(reqMoney)) {
+                    if (reqMoney <= trunk.getMoney() && chr.canAddMoney(reqMoney)) {
                         trunk.addMoney(-reqMoney);
                         chr.addMoney(reqMoney);
                         chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_MoneySuccess, trunk)));
@@ -3306,9 +3218,9 @@ public class WorldHandler {
                 break;
             case TrunkReq_GetItem:
                 short pos = (short) (inPacket.decodeShort() - 1);
-                if(pos >= 0 && pos < trunk.getItems().size()) {
+                if (pos >= 0 && pos < trunk.getItems().size()) {
                     Item getItem = trunk.getItems().get(pos);
-                    if(chr.getInventoryByType(getItem.getInvType()).canPickUp(getItem)) {
+                    if (chr.getInventoryByType(getItem.getInvType()).canPickUp(getItem)) {
                         trunk.removeItem(getItem);
                         chr.addItemToInventory(getItem);
                         chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_GetSuccess, trunk)));
@@ -3325,7 +3237,7 @@ public class WorldHandler {
                 short quantity = inPacket.decodeShort();
                 InvType invType = ItemConstants.getInvTypeByItemID(itemID);
                 Item item = chr.getInventoryByType(invType).getItemBySlot(slot);
-                if(item != null && quantity > 0 && item.getQuantity() >= quantity && item.getItemId() == itemID) {
+                if (item != null && quantity > 0 && item.getQuantity() >= quantity && item.getItemId() == itemID) {
                     chr.consumeItem(itemID, quantity);
                     trunk.addItem(item, quantity);
                     chr.write(CField.trunkDlg(new TrunkUpdate(TrunkType.TrunkRes_PutSuccess, trunk)));
@@ -3350,17 +3262,25 @@ public class WorldHandler {
         int charID = inPacket.decodeInt();
         int skillID = inPacket.decodeInt(); //tick
         Char chr = c.getChr();
-        if(JobConstants.isXenon(chr.getJob())) {
+        if (JobConstants.isXenon(chr.getJob())) {
             skillID = Xenon.TRIANGULATION;
         }
-        if(JobConstants.isDawnWarrior(chr.getJob())) {
+        if (JobConstants.isDawnWarrior(chr.getJob())) {
             skillID = 11121013;
         }
-        if(JobConstants.isAngelicBuster(chr.getId())) {
+        if (JobConstants.isAngelicBuster(chr.getId())) {
             skillID = 65101006; //Lovely Sting Explosion
         }
         Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
-        c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
+        if (mob != null) {
+            MobTemporaryStat mts = mob.getTemporaryStat();
+            if ((mts.hasCurrentMobStat(MobStat.Explosion) && mts.getCurrentOptionsByMobStat(MobStat.Explosion).wOption == chr.getId()) ||
+                    (mts.hasCurrentMobStat(MobStat.SoulExplosion) && mts.getCurrentOptionsByMobStat(MobStat.SoulExplosion).wOption == chr.getId())) {
+                c.write(UserLocal.explosionAttack(skillID, mob.getPosition(), mobID, 1));
+                mts.removeMobStat(MobStat.Explosion, true);
+                mts.removeMobStat(MobStat.SoulExplosion, true);
+            }
+        }
     }
 
     public static void handleUserActivateEffectItem(Client c, InPacket inPacket) {
@@ -3373,22 +3293,22 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         short slot = inPacket.decodeShort();
         Item item = chr.getCashInventory().getItemBySlot(slot);
-        if(!(item instanceof PetItem)) {
+        if (!(item instanceof PetItem)) {
             item = chr.getConsumeInventory().getItemBySlot(slot);
         }
         // Two of the same condition, as item had to be re-assigned
-        if(!(item instanceof PetItem)) {
+        if (!(item instanceof PetItem)) {
             chr.chatMessage(String.format("Could not find a pet on that slot (slot %s).", slot));
         }
         PetItem petItem = (PetItem) item;
-        if(petItem.getActiveState() == 0) {
-            if(chr.getPets().size() >= GameConstants.MAX_PET_AMOUNT) {
+        if (petItem.getActiveState() == 0) {
+            if (chr.getPets().size() >= GameConstants.MAX_PET_AMOUNT) {
                 return;
             }
             Pet pet = petItem.createPet(chr);
             petItem.setActiveState((byte) (pet.getIdx() + 1));
             chr.addPet(pet);
-            c.write(UserLocal.petActivateChange(chr.getId(), pet, true, (byte) 0));
+            c.write(UserLocal.petActivateChange(pet, true, (byte) 0));
         } else {
             Pet pet = chr.getPets()
                     .stream()
@@ -3396,7 +3316,7 @@ public class WorldHandler {
                     .findFirst().orElse(null);
             petItem.setActiveState((byte) 0);
             chr.removePet(pet);
-            c.write(UserLocal.petActivateChange(chr.getId(), pet, false, (byte) 0));
+            c.write(UserLocal.petActivateChange(pet, false, (byte) 0));
         }
 
         c.write(WvsContext.inventoryOperation(true, false,
@@ -3411,9 +3331,9 @@ public class WorldHandler {
         int itemID = inPacket.decodeInt();
         // TODO check properly for items here
         Item item = chr.getConsumeInventory().getItemBySlot(slot);
-        if(item != null) {
+        if (item != null) {
             chr.consumeItem(item);
-            for(Pet pet : chr.getPets()) {
+            for (Pet pet : chr.getPets()) {
                 PetItem pi = pet.getItem();
                 // max repleteness is 100
                 pi.setRepleteness((byte) (Math.min(100, pi.getRepleteness() + 30)));
@@ -3428,23 +3348,24 @@ public class WorldHandler {
         int objID = inPacket.decodeInt();
         int idk = inPacket.decodeInt();
         byte type = inPacket.decodeByte();
-        Reactor reactor = chr.getField().getReactorByObjID(objID);
-        if(reactor == null) {
+        Life life = chr.getField().getLifeByObjectID(objID);
+        if (!(life instanceof Reactor)) {
             log.error("Could not find reactor with objID " + objID);
             return;
         }
+        Reactor reactor = (Reactor) life;
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if (chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", type);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", reactor, type);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -3452,26 +3373,27 @@ public class WorldHandler {
         Char chr = c.getChr();
         int objID = inPacket.decodeInt();
 
-        Reactor reactor = chr.getField().getReactorByObjID(objID);
-        if(reactor == null) {
+        Life life = chr.getField().getLifeByObjectID(objID);
+        if (!(life instanceof Reactor)) {
             log.error("Could not find reactor with objID " + objID);
             return;
         }
+        Reactor reactor = (Reactor) life;
         int templateID = reactor.getTemplateId();
         ReactorInfo ri = ReactorData.getReactorInfoByID(templateID);
         String action = ri.getAction();
         if (action.equals("")) {
             action = templateID + "action";
         }
-        if(chr.getScriptManager().isActive(ScriptType.REACTOR)
-                && chr.getScriptManager().getParentIDByScriptType(ScriptType.REACTOR) == templateID) {
+        if (chr.getScriptManager().isActive(ScriptType.Reactor)
+                && chr.getScriptManager().getParentIDByScriptType(ScriptType.Reactor) == templateID) {
             try {
-                chr.getScriptManager().getInvocableByType(ScriptType.REACTOR).invokeFunction("action", 0);
+                chr.getScriptManager().getInvocableByType(ScriptType.Reactor).invokeFunction("action", 0);
             } catch (ScriptException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
         } else {
-            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.REACTOR);
+            chr.getScriptManager().startScript(templateID, objID, action, ScriptType.Reactor);
         }
     }
 
@@ -3481,37 +3403,105 @@ public class WorldHandler {
         Char chr = c.getChr();
         EquipmentEnchantType eeType = EquipmentEnchantType.getByVal(equipmentEnchantType);
 
-        if(eeType == null) {
+        if (eeType == null) {
             log.error(String.format("Unknown enchant UI request %d", equipmentEnchantType));
             chr.write(CField.showUnknownEnchantFailResult((byte) 0));
             return;
         }
 
         switch (eeType) {
+            case ScrollUpgradeRequest:
+                inPacket.decodeInt();// tick
+                short pos = inPacket.decodeShort();
+                int scrollID = inPacket.decodeInt();
+                Inventory inv = pos < 0 ? chr.getEquippedInventory() : chr.getEquipInventory();
+                pos = (short) Math.abs(pos);
+                Equip equip = (Equip) inv.getItemBySlot(pos);
+                Equip prevEquip = equip.deepCopy();
+                if (equip == null || equip.getTuc() + equip.getIuc() <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
+                    log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
+                            chr.getId(), pos, equip == null ? 0 : equip.getItemId()));
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
+                List<ScrollUpgradeInfo> suis = ItemConstants.getScrollUpgradeInfosByEquip(equip);
+                if (scrollID < 0 || scrollID >= suis.size()) {
+                    log.error(String.format("Characer %d tried to spell trace scroll with an invalid scoll ID (%d, " +
+                            "itemID %d).", chr.getId(), scrollID, equip.getItemId()));
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
+                ScrollUpgradeInfo sui = suis.get(scrollID);
+                chr.consumeItem(ItemConstants.SPELL_TRACE_ID, sui.getCost());
+                boolean success = sui.applyTo(equip);
+                String desc = success ? "Your item has been upgraded." : "Your upgrade has failed.";
+                chr.write(CField.showScrollUpgradeResult(false, success ? 1 : 0, desc, prevEquip, equip));
+                equip.updateToChar(chr);
+                if (equip.getTuc() + equip.getIuc() > 0) {
+                    suis = ItemConstants.getScrollUpgradeInfosByEquip(equip);
+                    c.write(CField.scrollUpgradeDisplay(false, suis));
+                }
+                break;
             case HyperUpgradeResult:
                 inPacket.decodeInt(); //tick
-                short eqpPos = inPacket.decodeShort();
-                int extraChanceFromMiniGame = inPacket.decodeByte() != 0 ? 50 : 0; // 5% extra chance
-                Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(eqpPos);
-                if(equip == null) {
+                int eqpPos = inPacket.decodeShort();
+                boolean extraChanceFromMiniGame = inPacket.decodeByte() != 0;
+                equip = (Equip) chr.getEquipInventory().getItemBySlot((short) eqpPos);
+                boolean equippedInv = eqpPos < 0;
+                inv = equippedInv ? chr.getEquippedInventory() : chr.getEquipInventory();
+                equip = (Equip) inv.getItemBySlot((short) Math.abs(eqpPos));
+                if (equip == null) {
                     chr.chatMessage("Could not find the given equip.");
-                    chr.dispose();
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
+                if (!ItemConstants.isUpgradable(equip.getItemId()) ||
+                        (equip.getTuc() != 0 && !c.getWorld().isReboot()) ||
+                        chr.getEquipInventory().getEmptySlots() == 0 ||
+                        equip.getChuc() >= GameConstants.getMaxStars(equip) ||
+                        equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
+                    chr.chatMessage("Equipment cannot be enhanced.");
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
+                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp());
+                if (chr.getMoney() < cost) {
+                    chr.chatMessage("Mesos required: " + NumberFormat.getNumberInstance(Locale.US).format(cost));
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
                 Equip oldEquip = equip.deepCopy();
-                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc());
-                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc()) + extraChanceFromMiniGame;
-                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc());
-                boolean success = Util.succeedProp(successProp, 1000);
+                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp());
+                if (extraChanceFromMiniGame) {
+                    successProp *= 1.045;
+                }
+                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp());
+                if (equippedInv && destroyProp > 0 && chr.getEquipInventory().getEmptySlots() == 0) {
+                    c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("You do not have enough space in your" +
+                            "equip inventory in case your item gets destroyed.")));
+                    return;
+                }
+                success = Util.succeedProp(successProp, 1000);
                 boolean boom = false;
                 boolean canDegrade = equip.getChuc() > 5 && equip.getChuc() % 5 != 0;
-                if(success) {
+                if (success) {
                     equip.setChuc((short) (equip.getChuc() + 1));
-                } else if (Util.succeedProp(destroyProp, 1000)){
+                } else if (Util.succeedProp(destroyProp, 1000)) {
                     equip.setChuc((short) 0);
-                    equip.addSpecialAttribute(EquipSpecialAttribute.TRACE);
+                    equip.addSpecialAttribute(EquipSpecialAttribute.Vestige);
                     boom = true;
-                } else if (canDegrade){
+                    if (equippedInv) {
+                        chr.unequip(equip);
+                        equip.setBagIndex(chr.getEquipInventory().getFirstOpenSlot());
+                        equip.updateToChar(chr);
+                        c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
+                        if (!equip.isSuperiorEqp()) {
+                            equip.setChuc((short) Math.min(12, equip.getChuc()));
+                        } else {
+                            equip.setChuc((short) 0);
+                        }
+                    }
+                } else if (canDegrade) {
                     equip.setChuc((short) (equip.getChuc() - 1));
                 }
                 chr.deductMoney(cost);
@@ -3528,34 +3518,60 @@ public class WorldHandler {
                 Equip fromEq = (Equip) chr.getEquipInventory().getItemBySlot(fromPos);
                 Equip toEq = (Equip) chr.getEquipInventory().getItemBySlot(toPos);
                 if (fromEq == null || toEq == null || fromEq.getItemId() != toEq.getItemId() ||
-                        !fromEq.hasSpecialAttribute(EquipSpecialAttribute.TRACE)) {
+                        !fromEq.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
                     log.error(String.format("Equip transmission failed: from = %s, to = %s", fromEq, toEq));
                     c.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
-                fromEq.removeSpecialAttribute(EquipSpecialAttribute.TRACE);
+                fromEq.removeSpecialAttribute(EquipSpecialAttribute.Vestige);
                 fromEq.setChuc((short) 0);
                 chr.consumeItem(toEq);
                 fromEq.updateToChar(chr);
                 c.write(CField.showTranmissionResult(fromEq, toEq));
                 break;
             case ScrollUpgradeDisplay:
-                c.write(CField.scrollUpgradeDisplay());
+                int ePos = inPacket.decodeInt();
+                inv = ePos < 0 ? chr.getEquippedInventory() : chr.getEquipInventory();
+                ePos = Math.abs(ePos);
+                equip = (Equip) inv.getItemBySlot((short) ePos);
+                if (c.getWorld().isReboot()) {
+                    log.error(String.format("Character %d attempted to scroll in reboot world (pos %d, itemid %d).",
+                            chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
+                    chr.dispose();
+                    return;
+                }
+                if (equip == null || equip.getTuc() <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
+                    log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
+                            chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
+                    chr.dispose();
+                    return;
+                }
+                suis = ItemConstants.getScrollUpgradeInfosByEquip(equip);
+                c.write(CField.scrollUpgradeDisplay(false, suis));
                 break;
             /*case ScrollTimerEffective:
                 break;*/
             case HyperUpgradeDisplay:
-                int ePos = inPacket.decodeInt();
-                equip = (Equip) chr.getEquipInventory().getItemBySlot((short) ePos);
+                ePos = inPacket.decodeInt();
+                inv = ePos < 0 ? chr.getEquippedInventory() : chr.getEquipInventory();
+                ePos = Math.abs(ePos);
+                equip = (Equip) inv.getItemBySlot((short) ePos);
+                if (equip == null || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
+                    log.error(String.format("Character %d tried to enchant a non-enchantable equip (pos %d, itemid %d).",
+                            chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
+                    chr.write(CField.showUnknownEnchantFailResult((byte) 0));
+                    return;
+                }
                 c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
-                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc()),
-                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc()),
-                        GameConstants.getEnchantmentDestroyRate(equip.getChuc()), false));
+                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp()),
+                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp()),
+                        GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp()), false));
                 break;
             case MiniGameDisplay:
                 c.write(CField.miniGameDisplay(eeType));
                 break;
             //case ShowScrollUpgradeResult:
+            case ScrollTimerEffective:
             case ShowHyperUpgradeResult:
                 break;
             /*
@@ -3565,6 +3581,7 @@ public class WorldHandler {
                 break;*/
             default:
                 log.debug("Unhandled Equipment Enchant Type: " + eeType);
+                chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                 break;
         }
     }
@@ -3582,36 +3599,35 @@ public class WorldHandler {
         Map<ScrollStat, Integer> vals = ii.getScrollStats();
         int chance = vals.getOrDefault(ScrollStat.success, 100);
 
-        for(int skill : ii.getSkills()) {
-            if(chr.hasSkill(skill)) {
+        for (int skill : ii.getSkills()) {
+            if (chr.hasSkill(skill)) {
                 skillid = skill;
                 break;
             }
         }
         Skill skill = chr.getSkill(skillid);
-        if(skill == null) {
-            chr.chatMessage(GAME_NOTICE, "An error has occured. Mastery Book ID: "+ itemID +",  skill ID: "+ skillid +".");
+        if (skill == null) {
+            chr.chatMessage(Notice2, "An error has occured. Mastery Book ID: " + itemID + ",  skill ID: " + skillid + ".");
             chr.dispose();
             return;
         }
         if (skillid == 0 || (skill.getMasterLevel() >= masterLevel) || skill.getCurrentLevel() < reqSkillLv) {
-            chr.chatMessage(GAME_MESSAGE, "You cannot use this Mastery Book.");
+            chr.chatMessage(SystemNotice, "You cannot use this Mastery Book.");
             chr.dispose();
             return;
         }
 
-        if(skill.getCurrentLevel() > reqSkillLv && skill.getMasterLevel() < masterLevel) {
-            chr.chatMessage(YELLOW, "Success Chance: "+chance+"%.");
-            if(Util.succeedProp(chance)) {
+        if (skill.getCurrentLevel() > reqSkillLv && skill.getMasterLevel() < masterLevel) {
+            chr.chatMessage(Mob, "Success Chance: " + chance + "%.");
+            if (Util.succeedProp(chance)) {
                 skill.setMasterLevel(masterLevel);
                 List<Skill> list = new ArrayList<>();
                 list.add(skill);
                 chr.addSkill(skill);
                 chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
-                chr.chatMessage(GAME_NOTICE, "[Mastery Book] Item id: " + itemID + "  set Skill id: " + skillid + "'s Master Level to: " + masterLevel + ".");
-            }
-            else {
-                chr.chatMessage(GAME_NOTICE, "[Mastery Book] Item id: " + itemID + " was used, however it was unsuccessful.");
+                chr.chatMessage(Notice2, "[Mastery Book] Item id: " + itemID + "  set Skill id: " + skillid + "'s Master Level to: " + masterLevel + ".");
+            } else {
+                chr.chatMessage(Notice2, "[Mastery Book] Item id: " + itemID + " was used, however it was unsuccessful.");
             }
             chr.consumeItem(itemID, 1);
         }
@@ -3664,8 +3680,8 @@ public class WorldHandler {
                     0, 10 * i, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                    true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
-                    mob.getPosition(), Kaiser.getTempBladeSkill(chr, tsm), mob.getPosition()));
+                    true, mob.getObjectId(), Kaiser.TEMPEST_BLADES_FIVE_FF, forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), Kaiser.TEMPEST_BLADES_FIVE_FF, mob.getPosition()));
 
             lastMobID = mobid;
         }
@@ -3696,12 +3712,12 @@ public class WorldHandler {
                     0, 12 * i, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
             chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                    true, mob.getObjectId(), Kaiser.getTempBladeSkill(chr, tsm), forceAtomInfo, new Rect(), 0, 300,
-                    mob.getPosition(), Kaiser.getTempBladeSkill(chr, tsm), mob.getPosition()));
+                    true, mob.getObjectId(), Kaiser.TEMPEST_BLADES_FIVE_FF, forceAtomInfo, new Rect(), 0, 300,
+                    mob.getPosition(), Kaiser.TEMPEST_BLADES_FIVE_FF, mob.getPosition()));
         }
 
         tsm.removeStat(StopForceAtomInfo, false);
-        c.write(WvsContext.temporaryStatReset(tsm, true));
+        tsm.sendResetStatPacket();
     }
 
     public static void handleSocketCreateRequest(Client c, InPacket inPacket) {
@@ -3712,12 +3728,12 @@ public class WorldHandler {
         short ePos = inPacket.decodeShort();
         Item item = chr.getConsumeInventory().getItemBySlot(uPos);
         Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-        if(equip == null || item == null || item.getItemId() != itemID) {
+        if (equip == null || item == null || item.getItemId() != itemID) {
             log.error("Unknown equip or mismatching use items.");
             return;
         }
         boolean success = true;
-        if(equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
+        if (equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
             chr.consumeItem(item);
             equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
         } else {
@@ -3735,18 +3751,23 @@ public class WorldHandler {
         Item item = chr.getInstallInventory().getItemBySlot(nebPos);
         short ePos = inPacket.decodeShort();
         Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-        if(item == null || equip == null || item.getItemId() != nebID) {
+        if (item == null || equip == null || item.getItemId() != nebID || !ItemConstants.isNebulite(item.getItemId())) {
             log.error("Nebulite or equip was not found when inserting.");
             chr.dispose();
             return;
         }
-        if(equip.getSockets()[0] != ItemConstants.EMPTY_SOCKET_ID) {
+        if (equip.getSockets()[0] != ItemConstants.EMPTY_SOCKET_ID) {
             log.error("Tried to Nebulite an item without an empty socket.");
             chr.chatMessage("You can only insert a Nebulite into empty socket slots.");
             chr.dispose();
             return;
         }
-        // TODO: verify that the nebulite can be mounted on this equip. i.e. -cd on hats, DSE on gloves, boss% on weapon/secondary/shield
+        if (!ItemConstants.nebuliteFitsEquip(equip, item)) {
+            log.error(String.format("Character %d attempted to use a nebulite (%d) that doesn't fit an equip (%d).", chr.getId(), item.getItemId(), equip.getItemId()));
+            chr.chatMessage("The nebulite cannot be mounted on this equip.");
+            chr.dispose();
+            return;
+        }
         chr.consumeItem(item);
         equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
         equip.updateToChar(chr);
@@ -3759,14 +3780,14 @@ public class WorldHandler {
         short ePos = inPacket.decodeShort();
         Item item = chr.getConsumeInventory().getItemBySlot(uPos);
         Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-        if(item == null || equip == null || !ItemConstants.isWeapon(equip.getItemId()) ||
+        if (item == null || equip == null || !ItemConstants.isWeapon(equip.getItemId()) ||
                 !ItemConstants.isSoulEnchanter(item.getItemId()) || equip.getrLevel() < ItemConstants.MIN_LEVEL_FOR_SOUL_SOCKET) {
             chr.dispose();
             return;
         }
         int successProp = ItemData.getItemInfoByID(item.getItemId()).getScrollStats().get(ScrollStat.success);
         boolean success = Util.succeedProp(successProp);
-        if(success) {
+        if (success) {
             equip.setSoulSocketId((short) (item.getItemId() % ItemConstants.SOUL_ENCHANTER_BASE_ID));
             equip.updateToChar(chr);
         }
@@ -3781,7 +3802,7 @@ public class WorldHandler {
         short ePos = inPacket.decodeShort();
         Item item = chr.getConsumeInventory().getItemBySlot(uPos);
         Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-        if(item == null || equip == null || !ItemConstants.isWeapon(equip.getItemId()) ||
+        if (item == null || equip == null || !ItemConstants.isWeapon(equip.getItemId()) ||
                 !ItemConstants.isSoul(item.getItemId()) || equip.getSoulSocketId() == 0) {
             chr.dispose();
             return;
@@ -3845,6 +3866,66 @@ public class WorldHandler {
         }
     }
 
+    public static void handleGachaponRequest(Char chr, InPacket inPacket) {
+        // TODO: Handle error messages with popup dialog like GMS.
+        // TODO: Add rewards to gachapon.
+        final int type = inPacket.decodeByte();
+        final GachaponResult result = GachaponResult.getByVal(type);
+
+        if (result == null) {
+            log.error("[Gachapon] Found unknown gachapon result " + type);
+            chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+            return;
+        }
+        if (chr == null) {
+            chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+            return;
+        }
+        switch (result) {
+            case SUCCESS:
+                final int ticketID = inPacket.decodeInt();
+                GachaponDlgType dialog = GachaponConstants.getDlgByTicket(ticketID);
+                if (dialog == null || !chr.hasItem(ticketID)) {
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                final int reward = GachaponConstants.getRandomItem(dialog);
+                if (reward == -1) {
+                    chr.chatMessage(ChatType.Mob, "Cannot find reward ID");
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                if (!chr.canHold(reward)) {
+                    chr.chatMessage(ChatType.Mob, "Cannot hold reward ID " + reward);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                    return;
+                }
+                Equip equip = ItemData.getEquipDeepCopyFromID(reward, true);
+                if (equip == null) {
+                    Item item = ItemData.getItemDeepCopy(reward, true);
+                    if (item == null) {
+                        chr.write(GachaponDlg.gachResult(GachaponResult.ERROR));
+                        chr.chatMessage(ChatType.Mob, "Item is null" + reward);
+                        return;
+                    }
+                    item.setQuantity(1);
+                    chr.addItemToInventory(item);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.SUCCESS, item, (short) 1));
+                    chr.getGachaponManager().addItem(dialog, item, (short) 1);
+                } else {
+                    chr.addItemToInventory(InvType.EQUIP, equip, false);
+                    chr.write(GachaponDlg.gachResult(GachaponResult.SUCCESS, equip, (short) 1));
+                    chr.getGachaponManager().addItem(dialog, equip, (short) 1);
+                }
+                chr.consumeItem(chr.getCashInventory().getItemByItemID(ticketID));
+                chr.getField().broadcastPacket(User.setGachaponEffect(chr));
+                break;
+            case EXIT:
+                chr.write(GachaponDlg.gachResult(GachaponResult.EXIT));
+                break;
+        }
+    }
+
     public static void handleUserRequestChangeMobZoneState(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int mobID = inPacket.decodeInt();
@@ -3883,20 +3964,14 @@ public class WorldHandler {
         byte chatIdx = inPacket.decodeByte();
         int duration = inPacket.decodeInt();
         Life life = chr.getField().getLifeByObjectID(objectID);
-        if (life instanceof Npc && ((Npc) life).isMove()){
+        if (life instanceof Npc && ((Npc) life).isMove()) {
             Npc npc = (Npc) chr.getField().getLifeByObjectID(objectID);
             boolean move = npc.isMove();
-            Position oldPos = npc.getPosition();
-            Position oldVPos = npc.getVPosition();
-            int encodedGatherDuration = 0;
-            List<Movement> movements = new ArrayList<>();
+            MovementInfo movementInfo = new MovementInfo(npc.getPosition(), npc.getVPosition());
             byte keyPadState = 0;
             if (move) {
-                encodedGatherDuration = inPacket.decodeInt();
-                oldPos = inPacket.decodePosition();
-                oldVPos = inPacket.decodePosition();
-                movements = WvsContext.parseMovement(inPacket);
-                for (Movement m : movements) {
+                movementInfo.decode(inPacket);
+                for (Movement m : movementInfo.getMovements()) {
                     Position pos = m.getPosition();
                     Position vPos = m.getVPosition();
                     if (pos != null) {
@@ -3908,10 +3983,12 @@ public class WorldHandler {
                     npc.setMoveAction(m.getMoveAction());
                     npc.setFh(m.getFh());
                 }
-                keyPadState = inPacket.decodeByte();
+                if (inPacket.getUnreadAmount() > 0) {
+                    keyPadState = inPacket.decodeByte(); // not always encoded?
+                }
             }
-            chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move, oldPos,
-                    oldVPos, encodedGatherDuration, movements, keyPadState));
+            chr.getField().broadcastPacket(NpcPool.npcMove(objectID, oneTimeAction, chatIdx, duration, move,
+                    movementInfo, keyPadState));
         }
     }
 
@@ -3952,19 +4029,19 @@ public class WorldHandler {
 
         Skill stolenSkill = SkillData.getSkillDeepCopyById(stealSkillID);
         int stealSkillMaxLv = stolenSkill.getMasterLevel();
-        int stealSkillCurLv = targetChr == null ? stealSkillMaxLv : targetChr.getSkill(stealSkillID).getCurrentLevel(); //TODO this is for testing,  needs to be:    targetChr.getSkill(stealSkillID).getCurrentLevel();
+        int stealSkillCurLv = targetChr == null ? stealSkillMaxLv : targetChr.getSkill(stealSkillID).getCurrentLevel(); //TODO this is for testing,  needs to be:    targetChr.getSkillID(stealSkillID).getCurrentLevel();
 
-        if(!add) {
+        if (!add) {
             // /Add Stolen Skill
 
-            if(chr.getStolenSkillBySkillId(stealSkillID) != null) {
+            if (chr.getStolenSkillBySkillId(stealSkillID) != null) {
                 chr.chatMessage("You already have this stolen skill.");
                 chr.dispose();
                 return;
             }
 
             int position = StolenSkill.getFirstEmptyPosition(chr, stealSkillID);
-            if(position == -1) {
+            if (position == -1) {
                 chr.chatMessage("Could not continue with stealing skills due to an unknown error.");
                 chr.dispose();
                 return;
@@ -3991,7 +4068,7 @@ public class WorldHandler {
         c.getChr().dispose();
     }
 
-    public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) { //TODO  Work in Progress
+    public static void handleUserExItemUpgradeItemUseRequest(Client c, InPacket inPacket) {
         inPacket.decodeInt(); //tick
         short usePosition = inPacket.decodeShort(); //Use Position
         short eqpPosition = inPacket.decodeShort(); //Equip Position
@@ -4001,35 +4078,42 @@ public class WorldHandler {
         Item flame = chr.getInventoryByType(InvType.CONSUME).getItemBySlot(usePosition);
         InvType invType = eqpPosition < 0 ? EQUIPPED : EQUIP;
         Equip equip = (Equip) chr.getInventoryByType(invType).getItemBySlot(eqpPosition);
+
         if (flame == null || equip == null) {
-            chr.chatMessage(GAME_MESSAGE, "Could not find flame or equip.");
+            chr.chatMessage(SystemNotice, "Could not find flame or equip.");
             chr.dispose();
             return;
         }
-        int flameID = flame.getItemId();
-        int max;
-        boolean success = true;
-        switch (flameID) { //TODO   Needs all cases to be added with their correct bonus stats
-            case 2048716: //Powerful Rebirth Flame
-                max = 10; //Not Correct
-                break;
-            default:
-                max = 5; //Not Correct
+
+        if (!ItemConstants.isRebirthFlame(flame.getItemId())) {
+            chr.chatMessage(SystemNotice, "This item is not a rebirth flame.");
+            chr.dispose();
+            return;
         }
 
-        for (EquipBaseStat ebs : ScrollStat.getRandStats()) {
-            int cur = (int) equip.getBaseStat(ebs);
-            if (cur == 0) {
-                continue;
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(flame.getItemId()).getScrollStats();
+
+        if (vals.size() > 0) {
+            int reqEquipLevelMax = vals.getOrDefault(ScrollStat.reqEquipLevelMax, 250);
+
+            if (equip.getrLevel() > reqEquipLevelMax) {
+                c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Equipment level does not meet scroll requirements.")));
+                chr.dispose();
+                return;
             }
-            int randStat = Util.getRandom(max);
-            randStat = Util.succeedProp(50) ? -randStat : randStat;
-            equip.addStat(ebs, randStat);
+
+            boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
+
+            if (success) {
+                boolean eternalFlame = vals.getOrDefault(ScrollStat.createType, 6) >= 7;
+                equip.randomizeFlameStats(eternalFlame); // Generate high stats if it's an eternal/RED flame only.
+            }
+
+            c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flame.getItemId(), equip.getItemId(), false));
             equip.updateToChar(chr);
+            chr.consumeItem(flame);
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, flameID, equip.getItemId(), false));
-        equip.updateToChar(chr);
-        chr.consumeItem(flame);
+
         chr.dispose();
     }
 
@@ -4070,7 +4154,7 @@ public class WorldHandler {
             grade--;
         }
         // set new potentials that weren't locked
-        for(CharacterPotential cp : chr.getPotentials()) {
+        for (CharacterPotential cp : chr.getPotentials()) {
             cp.setGrade(grade);
             if (!lockedLines.contains((int) cp.getKey())) {
                 cpm.addPotential(cpm.generateRandomPotential(cp.getKey()));
@@ -4098,7 +4182,7 @@ public class WorldHandler {
         int minLevel = chr.getField().getMobs().stream().mapToInt(m -> m.getForcedMobStat().getLevel()).min().orElse(0);
 
         // User is on RuneStone Cooldown
-        if((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) < System.currentTimeMillis()) {
+        if ((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) < System.currentTimeMillis()) {
 
             // Rune is too strong for user
             if (minLevel > c.getChr().getStat(level)) {
@@ -4111,10 +4195,10 @@ public class WorldHandler {
         } else {
             long minutes = (((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) - System.currentTimeMillis()) / 60000);
             long seconds = (((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) - System.currentTimeMillis()) / 1000);
-            chr.chatScriptMessage("You cannot use another Rune for "+
+            chr.chatScriptMessage("You cannot use another Rune for " +
                     (minutes > 0 ?
-                            minutes  +" minute"+  (minutes > 1 ? "s" : "")  +" and "+  (seconds - (minutes*60))  +" second"+  ((seconds - (minutes*60)) > 1 ? "s" : "")  +""  :
-                            seconds  +" second"+  (seconds > 1 ? "s" : "")
+                            minutes + " minute" + (minutes > 1 ? "s" : "") + " and " + (seconds - (minutes * 60)) + " second" + ((seconds - (minutes * 60)) > 1 ? "s" : "") + "" :
+                            seconds + " second" + (seconds > 1 ? "s" : "")
                     ));
         }
         chr.dispose();
@@ -4123,7 +4207,7 @@ public class WorldHandler {
     public static void handleRuneStoneSkillRequest(Client c, InPacket inPacket) {
         boolean success = inPacket.decodeByte() != 0; //Successfully done the Arrow Shit for runes
 
-        if(success) {
+        if (success) {
             RuneStone runeStone = c.getChr().getField().getRuneStone();
 
             c.getChr().getField().useRuneStone(c, runeStone);
@@ -4186,7 +4270,7 @@ public class WorldHandler {
         Familiar familiar = chr.getFamiliarByID(familiarID);
         boolean showInfo = true;
         if (familiar == null) {
-            familiar = new Familiar(0, familiarID, "Familiar", FileTime.fromType(FileTime.Type.PERMANENT), (short) 1);
+            familiar = new Familiar(0, familiarID, "Familiar", FileTime.fromType(FileTime.Type.MAX_TIME), (short) 1);
             showInfo = false;
             chr.addFamiliar(familiar);
         } else {
@@ -4231,11 +4315,12 @@ public class WorldHandler {
     public static void handleFamiliarMove(Char chr, InPacket inPacket) {
         inPacket.decodeByte(); // ?
         inPacket.decodeInt(); // familiar id
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        chr.getField().broadcastPacket(CFamiliar.familiarMove(chr.getId(), encodedGatherDuration, oldPos, oldVPos, movements) ,chr);
+        Life life = chr.getActiveFamiliar();
+        if (life instanceof Familiar) {
+            MovementInfo movementInfo = new MovementInfo(inPacket);
+            movementInfo.applyTo(life);
+            chr.getField().broadcastPacket(CFamiliar.familiarMove(chr.getId(), movementInfo), chr);
+        }
     }
 
     public static void handleFamiliarAttack(Char chr, InPacket inPacket) {
@@ -4308,15 +4393,34 @@ public class WorldHandler {
         chr.getField().broadcastPacket(UserRemote.destroyGrenade(chr.getId(), grenadeID), chr);
     }
 
-    public static void handleUserAreaDotAttack(Char chr, InPacket inPacket) {
-        // ez copy paste (with some differences) from melee attack
+    public static void handleAttack(Char chr, InPacket inPacket, InHeader header) {
         AttackInfo ai = new AttackInfo();
+        switch (header) {
+            case USER_MELEE_ATTACK:
+                ai.attackHeader = OutHeader.REMOTE_MELEE_ATTACK;
+                break;
+            case USER_SHOOT_ATTACK:
+                ai.boxAttack = inPacket.decodeByte() != 0; // hardcoded 0
+                ai.attackHeader = OutHeader.REMOTE_SHOOT_ATTACK;
+                break;
+            case USER_NON_TARGET_FORCE_ATOM_ATTACK:
+                inPacket.decodeArr(12); // id/crc/something else
+            case USER_MAGIC_ATTACK:
+                ai.attackHeader = OutHeader.REMOTE_MAGIC_ATTACK;
+                break;
+
+        }
+        ai.bulletID = chr.getBulletIDForAttack();
         ai.fieldKey = inPacket.decodeByte();
         byte mask = inPacket.decodeByte();
         ai.hits = (byte) (mask & 0xF);
         ai.mobCount = (mask >>> 4) & 0xF;
         ai.skillId = inPacket.decodeInt();
         ai.slv = inPacket.decodeByte();
+        if (header == InHeader.USER_MELEE_ATTACK || header == InHeader.USER_SHOOT_ATTACK
+                || header == InHeader.USER_NON_TARGET_FORCE_ATOM_ATTACK) {
+            ai.addAttackProc = inPacket.decodeByte();
+        }
         inPacket.decodeInt(); // crc
         int skillID = ai.skillId;
         if (SkillConstants.isKeyDownSkill(skillID) || SkillConstants.isSuperNovaSkill(skillID)) {
@@ -4333,17 +4437,65 @@ public class WorldHandler {
         }
         ai.buckShot = inPacket.decodeByte();
         ai.someMask = inPacket.decodeByte();
+        if (header == InHeader.USER_SHOOT_ATTACK) {
+            int idk3 = inPacket.decodeInt();
+            ai.isJablin = inPacket.decodeByte() != 0;
+            if (ai.boxAttack) {
+                int boxIdk1 = inPacket.decodeInt();
+                short boxIdk2 = inPacket.decodeShort();
+                short boxIdk3 = inPacket.decodeShort();
+            }
+        }
         short maskie = inPacket.decodeShort();
         ai.left = ((maskie >>> 15) & 1) != 0;
         ai.attackAction = (short) (maskie & 0x7FFF);
-        inPacket.decodeInt(); // crc
+        if (skillID == Archer.ARROW_PLATTER) { // very unsure
+            short idk9 = inPacket.decodeShort();
+            int idk10 = inPacket.decodeInt();
+            short idk11 = inPacket.decodeShort();
+        }
+        ai.requestTime = inPacket.decodeInt();
         ai.attackActionType = inPacket.decodeByte();
+        if (skillID == 23111001 || skillID == 80001915 || skillID == 36111010) {
+            int idk5 = inPacket.decodeInt();
+            int x = inPacket.decodeInt(); // E0 6E 1F 00
+            int y = inPacket.decodeInt();
+        }
+        if (SkillConstants.isEvanForceSkill(skillID)) {
+            ai.idk0 = inPacket.decodeByte();
+        }
         ai.attackSpeed = inPacket.decodeByte();
         ai.tick = inPacket.decodeInt();
-        ai.ptTarget.setY(inPacket.decodeInt());
-        ai.finalAttackLastSkillID = inPacket.decodeInt();
-        if (ai.finalAttackLastSkillID > 0) {
-            ai.finalAttackByte = inPacket.decodeByte();
+        if (header != InHeader.USER_MAGIC_ATTACK && header != InHeader.USER_NON_TARGET_FORCE_ATOM_ATTACK) {
+            int bulletSlot = inPacket.decodeInt();
+        }
+        if (header == InHeader.USER_MELEE_ATTACK) {
+            ai.finalAttackLastSkillID = inPacket.decodeInt();
+            if (ai.finalAttackLastSkillID > 0) {
+                ai.finalAttackByte = inPacket.decodeByte();
+            }
+        } else if (header == InHeader.USER_MAGIC_ATTACK || header == InHeader.USER_NON_TARGET_FORCE_ATOM_ATTACK) {
+            int idk = inPacket.decodeInt();
+        } else {
+            short idk8 = inPacket.decodeShort();
+            short idk9 = inPacket.decodeShort();
+        }
+        if (header == InHeader.USER_NON_TARGET_FORCE_ATOM_ATTACK) {
+            inPacket.decodeInt(); // hardcoded 0
+        }
+        if (header == InHeader.USER_SHOOT_ATTACK) {
+            // this looks correct in ida, but completely wrong when comparing it to the actual packet
+//            ai.shootRange = inPacket.decodeByte();
+//            if (!SkillConstants.isShootSkillNotConsumingBullets(skillID)
+//                    || chr.getTemporaryStatManager().hasStat(CharacterTemporaryStat.SoulArrow)) {
+//                ai.bulletCount = inPacket.decodeInt();
+//            }
+            int bulletSlot = inPacket.decodeInt();
+            byte idk = inPacket.decodeByte();
+            if (bulletSlot == 0 && (ai.buckShot & 0x40) != 0) {
+                int maybeID = inPacket.decodeInt();
+            }
+            ai.rect = inPacket.decodeShortRect();
         }
         if (skillID == 5111009) {
             ai.ignorePCounter = inPacket.decodeByte() != 0;
@@ -4357,91 +4509,148 @@ public class WorldHandler {
         if (skillID == 25111005) {
             ai.spiritCoreEnhance = inPacket.decodeInt();
         }
+        if (SkillConstants.isFieldAttackObjSkill(ai.skillId)) {
+            inPacket.decodeInt();
+            inPacket.decodeInt();
+            inPacket.decodeInt();
+        }
+        if (SkillConstants.needsOneMoreInt(ai.skillId)) {
+            inPacket.decodeInt();
+        }
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
-            int mobId = inPacket.decodeInt();
-            byte hitAction = inPacket.decodeByte();
-            byte left = inPacket.decodeByte();
-            byte idk3 = inPacket.decodeByte();
-            byte foreActionAndLeft = inPacket.decodeByte();
-            byte frameIdx = inPacket.decodeByte();
-            int templateID = inPacket.decodeInt();
-            byte calcDamageStatIndexAndDoomed = inPacket.decodeByte();
-            short hitX = inPacket.decodeShort();
-            short hitY = inPacket.decodeShort();
-            short idk6 = inPacket.decodeShort();
-            short oldPosX = inPacket.decodeShort(); // ?
-            short oldPosY = inPacket.decodeShort(); // ?
-            int[] damages = new int[ai.hits];
-            for (int j = 0; j < ai.hits; j++) {
-                damages[j] = inPacket.decodeInt();
+            mai.mobId = inPacket.decodeInt();
+            mai.hitAction = inPacket.decodeByte();
+            mai.left = inPacket.decodeByte();
+            mai.idk3 = inPacket.decodeByte();
+            mai.forceActionAndLeft = inPacket.decodeByte();
+            mai.frameIdx = inPacket.decodeByte();
+            mai.templateID = inPacket.decodeInt();
+            mai.calcDamageStatIndexAndDoomed = inPacket.decodeByte(); // 1st bit for bDoomed, rest for calcDamageStatIndex
+            mai.hitX = inPacket.decodeShort();
+            mai.hitY = inPacket.decodeShort();
+            mai.oldPosX = inPacket.decodeShort(); // ?
+            mai.oldPosY = inPacket.decodeShort(); // ?
+            if (header == InHeader.USER_MAGIC_ATTACK) {
+                mai.hpPerc = inPacket.decodeByte();
+                if (skillID == 80001835) {
+                    mai.magicInfo = (short) inPacket.decodeByte();
+                } else {
+                    mai.magicInfo = inPacket.decodeShort();
+                }
+            } else {
+                mai.idk6 = inPacket.decodeShort();
             }
-            int mobUpDownYRange = inPacket.decodeInt();
+            mai.damages = new int[ai.hits];
+            for (int j = 0; j < ai.hits; j++) {
+                mai.damages[j] = inPacket.decodeInt();
+            }
+            mai.mobUpDownYRange = inPacket.decodeInt();
             inPacket.decodeInt(); // crc
-            boolean isResWarriorLiftPress = false;
             if (skillID == 37111005) {
-                isResWarriorLiftPress = inPacket.decodeByte() != 0;
+                mai.isResWarriorLiftPress = inPacket.decodeByte() != 0;
             }
             // Begin PACKETMAKER::MakeAttackInfoPacket
-            byte type = inPacket.decodeByte();
-            String currentAnimationName = "";
-            int animationDeltaL = 0;
-            String[] hitPartRunTimes = new String[0];
-            if (type == 1) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
-                int hitPartRunTimesSize = inPacket.decodeInt();
-                hitPartRunTimes = new String[hitPartRunTimesSize];
-                for (int j = 0; j < hitPartRunTimesSize; j++) {
-                    hitPartRunTimes[j] = inPacket.decodeString();
+            mai.type = inPacket.decodeByte();
+            mai.currentAnimationName = "";
+            if (mai.type == 1) {
+                mai.currentAnimationName = inPacket.decodeString();
+                mai.animationDeltaL = inPacket.decodeInt();
+                mai.hitPartRunTimesSize = inPacket.decodeInt();
+                mai.hitPartRunTimes = new String[mai.hitPartRunTimesSize];
+                for (int j = 0; j < mai.hitPartRunTimesSize; j++) {
+                    mai.hitPartRunTimes[j] = inPacket.decodeString();
                 }
-            } else if (type == 2) {
-                currentAnimationName = inPacket.decodeString();
-                animationDeltaL = inPacket.decodeInt();
+            } else if (mai.type == 2) {
+                mai.currentAnimationName = inPacket.decodeString();
+                mai.animationDeltaL = inPacket.decodeInt();
             }
             // End PACKETMAKER::MakeAttackInfoPacket
-            mai.mobId = mobId;
-            mai.hitAction = hitAction;
-            mai.left = left; // not left? TODO check
-            mai.idk3 = idk3;
-            mai.foreAction = foreActionAndLeft;
-            mai.frameIdx = frameIdx;
-            mai.templateID = templateID;
-            mai.calcDamageStatIndex = calcDamageStatIndexAndDoomed; // 1st bit for bDoomed, rest for calcDamageStatIndex
-            mai.hitX = hitX;
-            mai.hitY = hitY;
-            mai.oldPosX = oldPosX;
-            mai.oldPosY = oldPosY;
-            mai.idk6 = idk6;
-            mai.damages = damages;
-            mai.mobUpDownYRange = mobUpDownYRange;
-            mai.type = type;
-            mai.currentAnimationName = currentAnimationName;
-            mai.animationDeltaL = animationDeltaL;
-            mai.hitPartRunTimes = hitPartRunTimes;
-            mai.isResWarriorLiftPress = isResWarriorLiftPress;
             ai.mobAttackInfo.add(mai);
         }
         if (skillID == 61121052 || skillID == 36121052 || SkillConstants.isScreenCenterAttackSkill(skillID)) {
             ai.ptTarget.setX(inPacket.decodeShort());
             ai.ptTarget.setY(inPacket.decodeShort());
         } else {
+            if (skillID == 27121052 || skillID == 80001837) {
+                ai.x = inPacket.decodeShort();
+                ai.y = inPacket.decodeShort();
+            }
+            if (header == InHeader.USER_MAGIC_ATTACK && skillID != 3211016) {
+                short forcedX = inPacket.decodeShort();
+                short forcedY = inPacket.decodeShort();
+                boolean dragon = inPacket.decodeByte() != 0;
+                ai.forcedX = forcedX;
+                ai.forcedY = forcedY;
+                if (dragon) {
+                    short rcDstRight = inPacket.decodeShort();
+                    short rectRight = inPacket.decodeShort();
+                    short x = inPacket.decodeShort();
+                    short y = inPacket.decodeShort();
+                    inPacket.decodeByte(); // always 0
+                    inPacket.decodeByte(); // -1
+                    inPacket.decodeByte(); // 0
+                    ai.rcDstRight = rcDstRight;
+                    ai.rectRight = rectRight;
+                    ai.x = x;
+                    ai.y = y;
+                }
+            }
+            if (skillID == BlazeWizard.IGNITION_EXPLOSION) {
+                ai.option = inPacket.decodeInt();
+            }
+            if (skillID == Magician.MIST_ERUPTION) {
+                byte size = inPacket.decodeByte();
+                int[] mists = new int[size];
+                for (int i = 0; i < size; i++) {
+                    mists[i] = inPacket.decodeInt();
+                }
+                ai.mists = mists;
+            }
+            if (skillID == Magician.POISON_MIST) {
+                byte force = inPacket.decodeByte();
+                short forcedXSh = inPacket.decodeShort();
+                short forcedYSh = inPacket.decodeShort();
+                ai.force = force;
+                ai.forcedXSh = forcedXSh;
+                ai.forcedYSh = forcedYSh;
+            }
+            if (skillID == 80001835) { // Soul Shear
+                byte sizeB = inPacket.decodeByte();
+                int[] idkArr2 = new int[sizeB];
+                short[] shortArr2 = new short[sizeB];
+                for (int i = 0; i < sizeB; i++) {
+                    idkArr2[i] = inPacket.decodeInt();
+                    shortArr2[i] = inPacket.decodeShort();
+                }
+                short delay = inPacket.decodeShort();
+                ai.mists = idkArr2;
+                ai.shortArr = shortArr2;
+                ai.delay = delay;
+            }
             if (SkillConstants.isSuperNovaSkill(skillID)) {
                 ai.ptAttackRefPoint.setX(inPacket.decodeShort());
                 ai.ptAttackRefPoint.setY(inPacket.decodeShort());
             }
-            if (skillID == 101000102) {
-                ai.idkPos.setX(inPacket.decodeShort());
-                ai.idkPos.setY(inPacket.decodeShort());
+            if (skillID == 101000102) { // Air Riot
+                ai.idkPos = inPacket.decodePosition();
             }
-            ai.pos.setX(inPacket.decodeShort());
-            ai.pos.setY(inPacket.decodeShort());
+            if (header == InHeader.USER_AREA_DOT_ATTACK) {
+                ai.pos.setX(inPacket.decodeShort());
+                ai.pos.setY(inPacket.decodeShort());
+            }
             if (SkillConstants.isAranFallingStopSkill(skillID)) {
                 ai.fh = inPacket.decodeByte();
+            }
+            if (header == InHeader.USER_SHOOT_ATTACK && skillID / 1000000 == 33) {
+                ai.bodyRelMove = inPacket.decodePosition();
             }
             if (skillID == 21120019 || skillID == 37121052) {
                 ai.teleportPt.setX(inPacket.decodeInt());
                 ai.teleportPt.setY(inPacket.decodeInt());
+            }
+            if (header == InHeader.USER_SHOOT_ATTACK && SkillConstants.isKeydownSkillRectMoveXY(skillID)) {
+                ai.keyDownRectMoveXY = inPacket.decodePosition();
             }
             if (skillID == 61121105 || skillID == 61121222 || skillID == 24121052) {
                 ai.Vx = inPacket.decodeShort();
@@ -4459,19 +4668,26 @@ public class WorldHandler {
                 ai.grenadePos.setX(inPacket.decodeShort());
                 ai.grenadePos.setY(inPacket.decodeShort());
             }
+            if (/*skillID == 23121002 ||*/ skillID == 80001914) { // first skill is Spikes Royale, not needed?
+                ai.fh = inPacket.decodeByte();
+            }
         }
         handleAttack(chr.getClient(), ai);
     }
 
     public static void handleUserHyperSkillUpRequest(Char chr, InPacket inPacket) {
+        // TODO: verify hyper skill is of the character's class
         inPacket.decodeInt(); // tick
         int skillID = inPacket.decodeInt();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         if (si == null) {
+            log.error(String.format("Character %d attempted assigning hyper SP to a skill with null skillinfo (%d).", chr.getId(), skillID));
+            chr.dispose();
             return;
         }
         if (si.getHyper() == 0 && si.getHyperStat() == 0) {
-            log.error(String.format("Character %d attempted assigning hyper stat SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            log.error(String.format("Character %d attempted assigning hyper SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
+            chr.dispose();
             return;
         }
         Skill skill = chr.getSkill(skillID, true);
@@ -4481,6 +4697,9 @@ public class WorldHandler {
                     esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
             int curSp = spSet.getSp();
             if (curSp <= 0 || skill.getCurrentLevel() != 0) {
+                log.error(String.format("Character %d attempted assigning hyper skill SP without having it, or too much. Available SP %d, current %d (%d, job %d)",
+                        chr.getId(), curSp, skill.getCurrentLevel(), skillID, chr.getJob()));
+                chr.dispose();
                 return;
             }
             spSet.addSp(-1);
@@ -4488,11 +4707,16 @@ public class WorldHandler {
             int totalHyperSp = SkillConstants.getTotalHyperStatSpByLevel(chr.getLevel());
             int spentSp = chr.getSpentHyperSp();
             int availableSp = totalHyperSp - spentSp;
-            int neededSp = SkillConstants.getTotalNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
-            if (skill.getCurrentLevel() >= 10 || availableSp < neededSp) {
+            int neededSp = SkillConstants.getNeededSpForHyperStatSkill(skill.getCurrentLevel() + 1);
+            if (skill.getCurrentLevel() >= skill.getMaxLevel() || availableSp < neededSp) {
+                log.error(String.format("Character %d attempted assigning too many hyper stat levels. Available SP %d, needed %d, current %d (%d, job %d)",
+                        chr.getId(), availableSp, neededSp, skill.getCurrentLevel(), skillID, chr.getJob()));
+                chr.dispose();
                 return;
             }
         } else { // not hyper stat and not hyper skill
+            log.error(String.format("Character %d attempted assigning hyper stat to an improper skill. (%d, job %d)", chr.getId(), skillID, chr.getJob()));
+            chr.dispose();
             return;
         }
         chr.removeFromBaseStatCache(skill);
@@ -4529,7 +4753,7 @@ public class WorldHandler {
         Mob mob = (Mob) field.getLifeByObjectID(mobID);
         if (mob != null && mob.isSelfDestruction()) {
             field.removeLife(mobID);
-            field.broadcastPacket(MobPool.mobLeaveField(mobID, DeathType.ANIMATION_DEATH));
+            field.broadcastPacket(MobPool.leaveField(mobID, DeathType.ANIMATION_DEATH));
         }
     }
 
@@ -4543,19 +4767,12 @@ public class WorldHandler {
     public static void handlePetMove(Char chr, InPacket inPacket) {
         int petID = inPacket.decodeInt();
         inPacket.decodeByte(); // ?
-        int encodedGatherDuration = inPacket.decodeInt();
-        Position oldPos = inPacket.decodePosition();
-        Position oldVPos = inPacket.decodePosition();
-        List<Movement> movements = WvsContext.parseMovement(inPacket);
-        for (Movement m : movements) {
-            Position pos = m.getPosition();
-            chr.setOldPosition(chr.getPosition());
-            chr.setPosition(pos);
-            chr.setMoveAction(m.getMoveAction());
-            chr.setLeft(m.getMoveAction() % 2 == 1);
-            chr.setFoothold(m.getFh());
+        MovementInfo movementInfo = new MovementInfo(inPacket);
+        Pet pet = chr.getPetByIdx(petID);
+        if (pet != null) {
+            movementInfo.applyTo(pet);
+            chr.getField().broadcastPacket(UserLocal.petMove(chr.getId(), petID, movementInfo), chr);
         }
-        chr.getField().broadcastPacket(UserLocal.petMove(chr.getId(), petID, encodedGatherDuration, oldPos, oldVPos, movements), chr);
     }
 
     public static void handlePetDropPickUpRequest(Char chr, InPacket inPacket) {
@@ -4569,8 +4786,8 @@ public class WorldHandler {
         Life life = field.getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             Drop drop = (Drop) life;
-            boolean success = chr.addDrop(drop);
-            if(success) {
+            boolean success = drop.canBePickedUpByPet() && drop.canBePickedUpBy(chr) && chr.addDrop(drop);
+            if (success) {
                 field.removeDrop(dropID, chr.getId(), false, petID);
             }
         }
@@ -4589,7 +4806,7 @@ public class WorldHandler {
 
 
         MapTransferType mapTransferType = MapTransferType.getByVal(mtType);
-        switch (mapTransferType){
+        switch (mapTransferType) {
             case DeleteListRecv: //Delete request that's received
                 int targetFieldID = inPacket.decodeInt();
                 HyperTPRock.removeFieldId(chr, targetFieldID);
@@ -4628,7 +4845,7 @@ public class WorldHandler {
                 chr.addItemToInventory(item);
                 mcs.setRewardClaimed(true);
                 chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
-            } else if (mcs != null && mcs.isRewardClaimed()){
+            } else if (mcs != null && mcs.isRewardClaimed()) {
                 chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.AlreadyClaimedReward, null, 0));
             } else {
                 chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CompleteCollectionBeforeClaim, null, 0));
@@ -4637,12 +4854,14 @@ public class WorldHandler {
     }
 
     public static void handleGroupMessage(Char chr, InPacket inPacket) {
-        byte idk1 = inPacket.decodeByte(); // one of these is type (party, guild, etc...)
+        byte type = inPacket.decodeByte(); // party = 1, alliance = 3
         byte idk2 = inPacket.decodeByte();
         int idk3 = inPacket.decodeInt(); // party id?
         String msg = inPacket.decodeString();
-        if (chr.getParty() != null) {
+        if (type == 1 && chr.getParty() != null) {
             chr.getParty().broadcast(CField.groupMessage(GroupMessageType.Party, chr.getName(), msg), chr);
+        } else if (type == 3 && chr.getGuild() != null && chr.getGuild().getAlliance() != null) {
+            chr.getGuild().getAlliance().broadcast(CField.groupMessage(GroupMessageType.Alliance, chr.getName(), msg), chr);
         }
     }
 
@@ -4665,6 +4884,12 @@ public class WorldHandler {
     }
 
     public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
+        if (chr.getClient().getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to hammer in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
+
         final int delay = 2700; // 2.7 sec delay to match golden hammer's animation
 
         inPacket.decodeInt(); // tick
@@ -4674,38 +4899,38 @@ public class WorldHandler {
         int ePos = inPacket.decodeInt(); // equip slot
 
         EventManager.addEvent(() -> {
-            Equip equip = (Equip)chr.getInventoryByType(EQUIP).getItemBySlot((short)ePos);
-            Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short)iPos);
+            Equip equip = (Equip) chr.getInventoryByType(EQUIP).getItemBySlot((short) ePos);
+            Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short) iPos);
 
             if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
                     hammer == null || !ItemConstants.isGoldHammer(hammer)) {
                 log.error(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
                         chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
-                chr.write(WvsContext.goldHammerItemUpgradeResult((byte)3, 1, equip));
+                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, equip));
                 return;
             }
 
             Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(hammer.getItemId()).getScrollStats();
 
             if (vals.size() > 0) {
-                if (equip.getRuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
+                if (equip.getTuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
                     log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
-                            chr.getId(), equip.getRuc(), equip.getIuc()));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)3, 2, equip));
+                            chr.getId(), equip.getTuc(), equip.getIuc()));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, equip));
                     return;
                 }
 
                 boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
 
                 if (success) {
-                    equip.setIuc((short)(equip.getIuc() + 1)); // +1 hammer used
-                    equip.setRuc((short)(equip.getRuc() + 1)); // +1 upgrades available
+                    equip.setIuc((short) (equip.getIuc() + 1)); // +1 hammer used
+                    equip.setTuc((short) (equip.getTuc() + 1)); // +1 upgrades available
                     equip.updateToChar(chr);
                     chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)2, 0, equip));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, equip));
                 } else {
                     chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte)2, 1, equip));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 1, equip));
                 }
 
                 chr.consumeItem(hammer.getItemId(), 1);
@@ -4761,7 +4986,7 @@ public class WorldHandler {
         if (script == null) {
             script = String.valueOf(npc.getTemplateId());
         }
-        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.NPC);
+        chr.getScriptManager().startScript(npc.getTemplateId(), templateID, script, ScriptType.Npc);
 
     }
 
@@ -4776,5 +5001,448 @@ public class WorldHandler {
     public static void handleUserSetDressChangedRequest(Char chr, InPacket inPacket) {
         boolean on = inPacket.decodeByte() != 0;
 //        chr.write(UserLocal.setDressChanged(on, true)); // causes client to send this packet again
+    }
+
+    public static void handleEnterTownPortalRequest(Char chr, InPacket inPacket) {
+        int chrId = inPacket.decodeInt(); // Char id
+        boolean town = inPacket.decodeByte() != 0;
+
+        Field field = chr.getField();
+        TownPortal townPortal = field.getTownPortalByChrId(chrId);
+        if (townPortal != null) {       // TODO Using teleports, as grabbing the TownPortalPoint portal id is not working
+            if (town) {
+                // townField -> fieldField
+                Field fieldField = townPortal.getChannel().getField(townPortal.getFieldFieldId());
+
+                chr.warp(fieldField); // Back to the original Door
+                chr.write(CField.teleport(townPortal.getFieldPosition(), chr)); // Teleports player to the position of the TownPortal
+            } else {
+                // fieldField -> townField
+                Field returnField = townPortal.getChannel().getField(townPortal.getTownFieldId()); // Initialise the Town Map,
+
+                chr.warp(returnField); // warp Char
+                chr.write(CField.teleport(townPortal.getTownPosition(), chr));
+                if (returnField.getTownPortalByChrId(chrId) == null) { // So that every re-enter into the TownField doesn't spawn another TownPortal
+                    returnField.broadcastPacket(WvsContext.townPortal(townPortal)); // create the TownPortal
+                    returnField.addTownPortal(townPortal);
+                }
+            }
+        } else {
+            chr.dispose();
+            log.warn("Character {" + chrId + "} tried entering a Town Portal in field {" + field.getId() + "} which does not exist."); // Potential Hacking Log
+        }
+    }
+
+    public static void handleMiniRoom(Char chr, InPacket inPacket) {
+        if (chr.getClient().getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to use trade in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
+        chr.dispose();
+        byte type = inPacket.decodeByte(); // MiniRoom Type value
+        MiniRoomType mrt = MiniRoomType.getByVal(type);
+        if (mrt == null) {
+            log.error(String.format("Unknown miniroom type %d", type));
+            return;
+        }
+        TradeRoom tradeRoom = chr.getTradeRoom();
+        switch (mrt) {
+            case PlaceItem:
+            case PlaceItem_2:
+            case PlaceItem_3:
+            case PlaceItem_4:
+                byte invType = inPacket.decodeByte();
+                short bagIndex = inPacket.decodeShort();
+                short quantity = inPacket.decodeShort();
+                byte tradeSlot = inPacket.decodeByte(); // trade window slot number
+
+                Item item = chr.getInventoryByType(InvType.getInvTypeByVal(invType)).getItemBySlot(bagIndex);
+                if (item.getQuantity() < quantity) {
+                    log.warn(String.format("Character {%d} tried to trade an item {%d} with a higher quantity {%s} than the item has {%d}.", chr.getId(), item.getItemId(), quantity, item.getQuantity()));
+                    return;
+                }
+                if (!item.isTradable()) {
+                    log.warn(String.format("Character {%d} tried to trade an item {%d} whilst it was trade blocked.", chr.getId(), item.getItemId()));
+                    return;
+                }
+                if (chr.getTradeRoom() == null) {
+                    chr.chatMessage("You are currently not trading.");
+                    return;
+                }
+                Item offer = ItemData.getItemDeepCopy(item.getItemId());
+                offer.setQuantity(quantity);
+                if (tradeRoom.canAddItem(chr)) {
+                    int consumed = quantity > item.getQuantity() ? 0 : item.getQuantity() - quantity;
+                    item.setQuantity(consumed + 1); // +1 because 1 gets consumed by consumeItem(item)
+                    chr.consumeItem(item);
+                    tradeRoom.addItem(chr, tradeSlot, offer);
+                }
+                Char other = tradeRoom.getOtherChar(chr);
+                chr.write(MiniroomPacket.putItem(0, tradeSlot, offer));
+                other.write(MiniroomPacket.putItem(1, tradeSlot, offer));
+
+                break;
+            case SetMesos:
+            case SetMesos_2:
+            case SetMesos_3:
+            case SetMesos_4:
+                long money = inPacket.decodeLong();
+                if (tradeRoom == null) {
+                    chr.chatMessage("You are currently not trading.");
+                    return;
+                }
+                if (money < 0 || money > chr.getMoney()) {
+                    log.error(String.format("Character %d tried to add an invalid amount of mesos(%d, own money: %d)",
+                            chr.getId(), money, chr.getMoney()));
+                    return;
+                }
+                chr.deductMoney(money);
+                chr.addMoney(tradeRoom.getMoney(chr));
+                tradeRoom.putMoney(chr, money);
+                other = tradeRoom.getOtherChar(chr);
+                chr.write(MiniroomPacket.putMoney(0, money));
+                other.write(MiniroomPacket.putMoney(1, money));
+                break;
+            case Trade:
+            case TradeConfirm:
+            case TradeConfirm2:
+            case TradeConfirm3:
+                other = tradeRoom.getOtherChar(chr);
+                other.write(MiniroomPacket.tradeConfirm());
+                if (tradeRoom.hasConfirmed(other)) {
+                    boolean success = tradeRoom.completeTrade();
+                    if (success) {
+                        chr.write(MiniroomPacket.tradeComplete());
+                        other.write(MiniroomPacket.tradeComplete());
+                    } else {
+                        tradeRoom.cancelTrade();
+                        tradeRoom.getChr().write(MiniroomPacket.cancelTrade());
+                        tradeRoom.getOther().write(MiniroomPacket.cancelTrade());
+                    }
+                    chr.setTradeRoom(null);
+                    other.setTradeRoom(null);
+                } else {
+                    tradeRoom.addConfirmedPlayer(chr);
+                }
+                break;
+            case Chat:
+                inPacket.decodeInt(); // tick
+                String msg = inPacket.decodeString();
+                if (tradeRoom == null) {
+                    chr.chatMessage("You are currently not in a room.");
+                    return;
+                }
+                // this is kinda weird atm, so no different colours
+                String msgWithName = String.format("%s : %s", chr.getName(), msg);
+                chr.write(MiniroomPacket.chat(1, msgWithName));
+                tradeRoom.getOtherChar(chr).write(MiniroomPacket.chat(0, msgWithName));
+                break;
+            case Accept:
+                if (tradeRoom == null) {
+                    chr.chatMessage("Your trade partner cancelled the trade.");
+                    return;
+                }
+                chr.write(MiniroomPacket.enterTrade(tradeRoom, chr));
+                other = tradeRoom.getOtherChar(chr); // initiator
+                other.write(MiniroomPacket.enterTrade(tradeRoom, other));
+
+                // Start Custom ----------------------------------------------------------------------------------------
+                String[] inventoryNames = new String[]{
+                        "eqp",
+                        "use",
+                        "etc",
+                        "setup",
+                        "cash",
+                };
+                for (String invName : inventoryNames) {
+                    chr.write(MiniroomPacket.chat(1, String.format("%s has %d free %s slots", other.getName(), other.getInventoryByType(InvType.getInvTypeByString(invName)).getEmptySlots(), invName)));
+                    other.write(MiniroomPacket.chat(1, String.format("%s has %d free %s slots", chr.getName(), chr.getInventoryByType(InvType.getInvTypeByString(invName)).getEmptySlots(), invName)));
+                }
+                // End Custom ------------------------------------------------------------------------------------------
+
+                break;
+            case TradeInviteRequest:
+                int charID = inPacket.decodeInt();
+                other = chr.getField().getCharByID(charID);
+                if (other == null) {
+                    chr.chatMessage("Could not find that player.");
+                    return;
+                }
+                if (other.getTradeRoom() != null) {
+                    chr.chatMessage("That player is already trading.");
+                    return;
+                }
+                other.write(MiniroomPacket.tradeInvite(chr));
+                tradeRoom = new TradeRoom(chr, other);
+                chr.setTradeRoom(tradeRoom);
+                other.setTradeRoom(tradeRoom);
+                break;
+            case InviteResultStatic: // always decline?
+                if (tradeRoom != null) {
+                    other = tradeRoom.getOtherChar(chr);
+                    other.chatMessage(String.format("%s has declined your trade invite.", chr.getName()));
+                    other.setTradeRoom(null);
+                }
+                chr.setTradeRoom(null);
+                break;
+            case ExitTrade:
+                if (tradeRoom != null) {
+                    tradeRoom.cancelTrade();
+                    tradeRoom.getOtherChar(chr).write(MiniroomPacket.cancelTrade());
+                }
+                break;
+            case TradeConfirmRemoteResponse:
+                // just an ack by the client?
+                break;
+            default:
+                log.error(String.format("Unhandled miniroom type %s", mrt));
+        }
+    }
+
+    public static void handleUserEffectLocal(Char chr, InPacket inPacket) {
+        int skillId = inPacket.decodeInt();
+        byte slv = inPacket.decodeByte();
+        byte sendLocal = inPacket.decodeByte();
+
+        int chrId = chr.getId();
+        Field field = chr.getField();
+
+        if (!chr.hasSkill(skillId)) {
+            log.warn(String.format("Character {%d} tried to use a skill {%d} they do not have.", chrId, skillId));
+        }
+
+
+        if (skillId == Evan.DRAGON_FURY) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showDragonFuryEffect(skillId, slv, 0, true)));
+
+        } else if (skillId == Warrior.FINAL_PACT) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showFinalPactEffect(skillId, slv, 0, true)));
+
+        } else if (skillId == WildHunter.CALL_OF_THE_HUNTER) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showCallOfTheHunterEffect(skillId, slv, 0, chr.isLeft(), chr.getPosition().getX(), chr.getPosition().getY())));
+
+        } else if (skillId == Kaiser.VERTICAL_GRAPPLE || skillId == AngelicBuster.GRAPPLING_HEART) { // 'Grappling Hook' Skills
+            int chrPositionY = inPacket.decodeInt();
+            Position ropeConnectDest = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showVerticalGrappleEffect(skillId, slv, 0, chrPositionY, ropeConnectDest.getX(), ropeConnectDest.getY())));
+
+        } else if (skillId == 15001021/*TB  Flash*/ || skillId == Shade.FOX_TROT) { // 'Flash' Skills
+            Position origin = inPacket.decodePositionInt();
+            Position dest = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showFlashBlinkEffect(skillId, slv, 0, origin.getX(), origin.getY(), dest.getX(), dest.getY())));
+
+        } else if (SkillConstants.isSuperNovaSkill(skillId)) { // 'SuperNova' Skills
+            Position chrPosition = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showSuperNovaEffect(skillId, slv, 0, chrPosition.getX(), chrPosition.getY())));
+
+        } else if (SkillConstants.isUnregisteredSkill(skillId)) { // 'Unregistered' Skills
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showUnregisteredSkill(skillId, slv, 0, chr.isLeft())));
+
+        } else if (SkillConstants.isHomeTeleportSkill(skillId)) {
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.skillUse(skillId, slv, 0)));
+
+        } else if (skillId == BattleMage.DARK_SHOCK) {
+            Position origin = inPacket.decodePositionInt();
+            Position dest = inPacket.decodePositionInt();
+            field.broadcastPacket(UserRemote.effect(chrId, Effect.showDarkShockSkill(skillId, slv, origin, dest)));
+
+        } else {
+            log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));
+            chr.chatMessage(String.format("Unhandled Remote Effect Skill:  id = %d", skillId));
+        }
+    }
+
+    public static void handleGuildBBS(Char chr, InPacket inPacket) {
+        Guild guild = chr.getGuild();
+        if (guild == null) {
+            return;
+        }
+        byte val = inPacket.decodeByte();
+        GuildBBSType type = GuildBBSType.getByValue(val);
+        if (type == null) {
+            log.error(String.format("Unknown guild bbs type %s", val));
+            return;
+        }
+        switch (type) {
+            case Req_CreateRecord:
+                inPacket.decodeByte(); // 0?
+                boolean notice = inPacket.decodeByte() != 0;
+                String subject = inPacket.decodeString();
+                String msg = inPacket.decodeString();
+                int icon = inPacket.decodeInt();
+                BBSRecord record = new BBSRecord(chr.getId(), subject, msg, FileTime.currentTime(), icon);
+                if (notice) {
+                    guild.setBbsNotice(record);
+                } else {
+                    guild.addBbsRecord(record);
+                }
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+                break;
+            case Req_DeleteRecord:
+                int id = inPacket.decodeInt();
+                record = guild.getRecordByID(id);
+                if (record != null && chr.getId() == record.getCreatorID()) {
+                    guild.removeRecord(record);
+                }
+                break;
+            case Req_LoadPages:
+                int page = inPacket.decodeInt();
+                List<BBSRecord> records = guild.getBbsRecords();
+                final int PAGE_SIZE = GameConstants.GUILD_BBS_RECORDS_PER_PAGE;
+                if (page != 0 && page * PAGE_SIZE >= records.size()) {
+                    chr.chatMessage("No more BBS records to show.");
+                    return;
+                }
+                // select all records that are on the requested page
+                int start = page * PAGE_SIZE;
+                int end = start + PAGE_SIZE >= records.size() ? records.size() : start + PAGE_SIZE;
+                List<BBSRecord> pageRecords = records.subList(start, end);
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadPages(guild.getBbsNotice(), records.size(), pageRecords)));
+                break;
+            case Req_LoadRecord:
+                id = inPacket.decodeInt();
+                record = guild.getRecordByID(id);
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+                break;
+            case Req_CreateReply:
+                id = inPacket.decodeInt();
+                msg = inPacket.decodeString();
+                record = guild.getRecordByID(id);
+                if (record != null) {
+                    BBSReply reply = new BBSReply(chr.getId(), FileTime.currentTime(), msg);
+                    record.addReply(reply);
+                }
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+                break;
+            case Req_DeleteReply:
+                id = inPacket.decodeInt();
+                int replyId = inPacket.decodeInt();
+                record = guild.getRecordByID(id);
+                if (record != null) {
+                    BBSReply reply = record.getReplyById(replyId);
+                    record.removeReply(reply);
+                }
+                chr.write(WvsContext.guildBBSResult(GuildBBSPacket.loadRecord(record)));
+            default:
+                log.error(String.format("Unhandled guild bbs type %s", type));
+
+        }
+    }
+
+    public static void handleBeastTamerRegroupRequest(Char chr, InPacket inPacket) {
+        byte unk = inPacket.decodeByte();
+        int skillId = inPacket.decodeInt();
+
+        if (skillId == BeastTamer.REGROUP) {
+            BeastTamer.beastTamerRegroup(chr);
+        } else {
+            log.error(String.format("Unhandled Beast Tamer Request %d", skillId));
+            chr.chatMessage(String.format("Unhandled Beast Tamer Request %d", skillId));
+        }
+    }
+
+    public static void handleUserJaguarChangeRequest(Char chr, InPacket inPacket) {
+        final int questID = QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID;
+        Quest quest = chr.getQuestManager().getQuestById(questID);
+        if (quest == null) {
+            return;
+        }
+        quest.convertQRValueToProperties();
+        int fromID = inPacket.decodeInt();
+        int toID = inPacket.decodeInt();
+        String value = quest.getProperty("" + (toID + 1));
+        if (value != null) {
+            WildHunterInfo whi = chr.getWildHunterInfo();
+            whi.setIdx((byte) toID);
+            whi.setRidingType((byte) toID);
+            chr.write(WvsContext.wildHunterInfo(whi));
+        } else {
+            chr.chatMessage("You do not have that jaguar.");
+        }
+    }
+
+    public static void handleB2BodyRequest(Char chr, InPacket inPacket) {
+        short type = inPacket.decodeShort();
+        int ownerCID = inPacket.decodeInt();
+        int bodyIdCounter = inPacket.decodeInt();
+        Position offsetPos = inPacket.decodePosition();
+        int skillID = inPacket.decodeInt();
+        boolean isLeft = inPacket.decodeByte() != 0;
+        inPacket.decodeByte();
+        inPacket.decodeShort();
+        inPacket.decodeShort();
+        inPacket.decodeShort();
+        Position forcedPos = inPacket.decodePositionInt();
+    }
+
+    public static void handleUserRegisterPetAutoBuffRequest(Char chr, InPacket inPacket) {
+        int petIdx = inPacket.decodeInt();
+        int skillID = inPacket.decodeInt();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        Skill skill = chr.getSkill(skillID);
+        Pet pet = chr.getPetByIdx(petIdx);
+        int coolTime = si == null ? 0 : si.getValue(SkillStat.cooltime, 1);
+        if (skillID != 0 && (si == null || pet == null || !pet.getItem().hasPetSkill(PetSkill.AUTO_BUFF) ||
+                skill == null || skill.getCurrentLevel() == 0 || coolTime > 0)) {
+            chr.chatMessage("Something went wrong when adding the pet skill.");
+            log.error(String.format("Character %d tried to illegally add a pet skill (skillID = %d, skill = %s, " +
+                    "pet = %s, coolTime = %d)", chr.getId(), skillID, skill, pet, coolTime));
+            chr.dispose();
+            return;
+        }
+        pet.getItem().setAutoBuffSkill(skillID);
+        pet.getItem().updateToChar(chr);
+    }
+
+    public static void handleUserGivePopularityRequest(Char chr, InPacket inPacket) {
+        int targetChrId = inPacket.decodeInt();
+        boolean increase = inPacket.decodeByte() != 0;
+
+        Field field = chr.getField();
+        Char targetChr = field.getCharByID(targetChrId);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+
+        if (targetChr == null) { // Faming someone who isn't in the map or doesn't exist
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.InvalidCharacterId, targetChr, 0, increase));
+            chr.dispose();
+        } else if (chr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME || targetChr.getLevel() < GameConstants.MIN_LEVEL_TO_FAME) { // Chr or TargetChr is too low level
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.LevelLow, targetChr, 0, increase));
+            chr.dispose();
+        } else if (!cs.getNextAvailableFameTime().isExpired()) { // Faming whilst Chr already famed within the FameCooldown time
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.AlreadyDoneToday, targetChr, 0, increase));
+            chr.dispose();
+        } else if (targetChrId == chr.getId()) {
+            log.error(String.format("Character %d tried to fame themselves", chr.getId()));
+        } else {
+            targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
+            int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
+            chr.write(WvsContext.givePopularityResult(PopularityResultType.Success, targetChr, curPop, increase));
+            targetChr.write(WvsContext.givePopularityResult(PopularityResultType.Notify, chr, curPop, increase));
+            cs.setNextAvailableFameTime(FileTime.fromDate(LocalDateTime.now().plusHours(GameConstants.FAME_COOLDOWN)));
+            if (increase) {
+                Effect.showFameGradeUp(targetChr);
+            }
+        }
+    }
+
+    public static void handleEnterRandomPortalRequest(Char chr, InPacket inPacket) {
+        int portalObjID = inPacket.decodeInt();
+        Life life = chr.getField().getLifeByObjectID(portalObjID);
+        if (!(life instanceof RandomPortal)) {
+            chr.chatMessage("Could not find that portal.");
+            return;
+        }
+        RandomPortal randomPortal = (RandomPortal) life;
+        if (randomPortal.getCharID() != chr.getId()) {
+            chr.chatMessage("A mysterious force is blocking your way.");
+            chr.dispose();
+            return;
+        }
+        RandomPortal.Type type = randomPortal.getAppearType();
+        String script = type.getScript();
+        chr.getScriptManager().startScript(randomPortal.getAppearType().ordinal(), randomPortal.getObjectId(),
+                script, ScriptType.Portal);
+        chr.dispose();
     }
 }

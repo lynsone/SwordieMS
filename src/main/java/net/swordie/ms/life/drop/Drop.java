@@ -4,9 +4,12 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropType;
 import net.swordie.ms.connection.packet.DropPool;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.life.Life;
 
@@ -22,8 +25,8 @@ public class Drop extends Life {
     private DropType dropType;
     private int ownerID;
     private boolean explosiveDrop;
+    private boolean canBePickedUpByPet = true;
     private FileTime expireTime;
-    private boolean byPet;
     private long mobExp;
 
     public Drop(int templateId) {
@@ -98,14 +101,6 @@ public class Drop extends Life {
         this.expireTime = expireTime;
     }
 
-    public boolean isByPet() {
-        return byPet;
-    }
-
-    public void setByPet(boolean byPet) {
-        this.byPet = byPet;
-    }
-
     public byte getItemGrade() {
         byte res = 0;
         if(getItem() != null && getItem() instanceof Equip) {
@@ -116,8 +111,17 @@ public class Drop extends Life {
 
     @Override
     public void broadcastSpawnPacket(Char onlyChar) {
-        onlyChar.write(DropPool.dropEnterField(this, getPosition(), getOwnerID()));
-        EventManager.addEvent(() -> setOwnerID(0), GameConstants.DROP_REMOVE_OWNERSHIP_TIME, TimeUnit.SECONDS);
+        Item item = getItem();
+        ItemInfo ii = null;
+        if (item != null) {
+            ii = ItemData.getItemInfoByID(item.getItemId());
+        }
+        boolean canSpawn = isMoney()
+                || (item != null && ItemConstants.isEquip(item.getItemId()))
+                || (ii != null && onlyChar.hasAnyQuestsInProgress(ii.getQuestIDs()));
+        if (canSpawn) {
+            onlyChar.write(DropPool.dropEnterField(this, getPosition(), getOwnerID(), canBePickedUpBy(onlyChar)));
+        }
     }
 
     public void setMobExp(long mobExp) {
@@ -126,5 +130,20 @@ public class Drop extends Life {
 
     public long getMobExp() {
         return mobExp;
+    }
+
+    public boolean canBePickedUpBy(Char chr) {
+        int owner = getOwnerID();
+        return owner == chr.getId() ||
+                (chr.getParty() != null && chr.getParty().hasPartyMember(owner))
+                || owner == 0;
+    }
+
+    public boolean canBePickedUpByPet() {
+        return canBePickedUpByPet;
+    }
+
+    public void setCanBePickedUpByPet(boolean canBePickedUpByPet) {
+        this.canBePickedUpByPet = canBePickedUpByPet;
     }
 }

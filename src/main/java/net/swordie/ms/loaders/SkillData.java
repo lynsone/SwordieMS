@@ -40,6 +40,10 @@ public class SkillData {
                 dataOutputStream.writeUTF(si.getElemAttr());
                 dataOutputStream.writeInt(si.getHyper());
                 dataOutputStream.writeInt(si.getHyperStat());
+                dataOutputStream.writeInt(si.getVehicleId());
+                dataOutputStream.writeInt(si.getReqTierPoint());
+                dataOutputStream.writeBoolean(si.isNotCooltimeReset());
+                dataOutputStream.writeBoolean(si.isNotIncBuffDuration());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -59,6 +63,11 @@ public class SkillData {
                 dataOutputStream.writeShort(si.getPsdSkills().size());
                 for (int i : si.getPsdSkills()) {
                     dataOutputStream.writeInt(i);
+                }
+                dataOutputStream.writeShort(si.getReqSkills().size());
+                for (Map.Entry<Integer, Integer> reqSkill : si.getReqSkills().entrySet()) {
+                    dataOutputStream.writeInt(reqSkill.getKey());
+                    dataOutputStream.writeInt(reqSkill.getValue());
                 }
             }
         } catch (IOException e) {
@@ -87,6 +96,10 @@ public class SkillData {
                     skillInfo.setElemAttr(dataInputStream.readUTF());
                     skillInfo.setHyper(dataInputStream.readInt());
                     skillInfo.setHyperStat(dataInputStream.readInt());
+                    skillInfo.setVehicleId(dataInputStream.readInt());
+                    skillInfo.setReqTierPoint(dataInputStream.readInt());
+                    skillInfo.setNotCooltimeReset(dataInputStream.readBoolean());
+                    skillInfo.setNotIncBuffDuration(dataInputStream.readBoolean());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -103,6 +116,10 @@ public class SkillData {
                     short psdSize = dataInputStream.readShort();
                     for (int j = 0; j < psdSize; j++) {
                         skillInfo.addPsdSkill(dataInputStream.readInt());
+                    }
+                    short reqSkillSize = dataInputStream.readShort();
+                    for (int j = 0; j < reqSkillSize; j++) {
+                        skillInfo.addReqSkill(dataInputStream.readInt(), dataInputStream.readInt());
                     }
                     getSkillInfos().put(skillInfo.getSkillId(), skillInfo);
                 }
@@ -198,6 +215,32 @@ public class SkillData {
                         Node hyperStatNode = XMLApi.getFirstChildByNameBF(skillNode, "hyperStat");
                         if(hyperStatNode != null) {
                             skill.setHyperStat(Integer.parseInt(XMLApi.getNamedAttribute(hyperStatNode, "value")));
+                        }
+                        Node vehicle = XMLApi.getFirstChildByNameBF(skillNode, "vehicleID");
+                        int vehicleId = 0;
+                        if(vehicle != null) {
+                            vehicleId = Integer.parseInt(XMLApi.getAttributes(vehicle).get("value"));
+                        }
+                        skill.setVehicleId(vehicleId);
+                        Node notCooltimeResetNode = XMLApi.getFirstChildByNameBF(skillNode, "notCooltimeReset");
+                        if(notCooltimeResetNode != null) {
+                            skill.setNotCooltimeReset(Integer.parseInt(XMLApi.getAttributes(notCooltimeResetNode).get("value")) != 0);
+                        }
+                        Node notIncBuffDurationNode = XMLApi.getFirstChildByNameBF(skillNode, "notIncBuffDuration");
+                        if(notIncBuffDurationNode != null) {
+                            skill.setNotIncBuffDuration(Integer.parseInt(XMLApi.getAttributes(notIncBuffDurationNode).get("value")) != 0);
+                        }
+                        Node reqNode = XMLApi.getFirstChildByNameBF(skillNode, "req");
+                        if (reqNode != null) {
+                            for (Node reqChild : XMLApi.getAllChildren(reqNode)) {
+                                String childName = XMLApi.getNamedAttribute(reqChild, "name");
+                                String childValue = XMLApi.getNamedAttribute(reqChild, "value");
+                                if ("reqTierPoint".equalsIgnoreCase(childName)) {
+                                    skill.setReqTierPoint(Integer.parseInt(childValue));
+                                } else if (Util.isNumber(childName)) {
+                                    skill.addReqSkill(Integer.parseInt(childName), Integer.parseInt(childValue));
+                                }
+                            }
                         }
                         // end main level info
                         // start "common" level info

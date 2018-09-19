@@ -52,6 +52,10 @@ public enum InvType {
             case "setup":
                 res = INSTALL;
                 break;
+            case "eqp":
+            case "equip":
+                res = EQUIP;
+                break;
         }
         return res;
     }

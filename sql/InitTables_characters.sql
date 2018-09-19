@@ -16,6 +16,8 @@ drop table if exists test;
 drop table if exists skills;
 drop table if exists characters;
 drop table if exists avatardata;
+drop table if exists alliance_gradenames;
+drop table if exists alliances;
 drop table if exists keymaps;
 drop table if exists funckeymap;
 drop table if exists characterstats;
@@ -43,6 +45,8 @@ drop table if exists questprogressmobrequirements;
 drop table if exists questlists;
 drop table if exists questmanagers;
 drop table if exists quests;
+drop table if exists bbs_replies;
+drop table if exists bbs_records;
 drop table if exists guildrequestors;
 drop table if exists gradenames;
 drop table if exists guildmembers;
@@ -54,19 +58,11 @@ drop table if exists monsterbookcards;
 drop table if exists monsterbookinfos;
 drop table if exists trunks;
 drop table if exists cashiteminfos;
-drop table if exists filetimes;
 
 create table trunks(
 	id int not null auto_increment,
     slotcount tinyint,
     money bigint,
-    primary key (id)
-);
-
-create table filetimes (
-	id bigint not null auto_increment,
-    lowdatetime int,
-    highdatetime int,
     primary key (id)
 );
 
@@ -79,7 +75,7 @@ create table cashiteminfos(
     commodityid int,
     quantity smallint,
     buycharacterid varchar(255),
-    dateexpire bigint,
+    dateexpire datetime(3),
     paybackrate int,
     discount double,
     orderno int,
@@ -91,8 +87,7 @@ create table cashiteminfos(
     grade int,
     trunkid int,
     position int,
-    primary key (id),
-    foreign key (dateexpire) references filetimes(id)
+    primary key (id)
 );
 
 create table quests (
@@ -100,9 +95,8 @@ create table quests (
     qrkey int,
     qrvalue varchar(255),
     status int,
-    completedtime bigint,
-	primary key (id),
-    foreign key (completedtime) references filetimes(id)
+    completedtime datetime(3),
+	primary key (id)
 );
 
 create table questmanagers (
@@ -122,6 +116,7 @@ create table questlists (
 
 create table questprogressrequirements (
 	id bigint not null auto_increment,
+    orderNum int,
     progresstype varchar(255),
 	questid bigint,
     unitid int,
@@ -145,7 +140,7 @@ create table items (
     itemid int,
     bagindex int,
     cashitemserialnumber bigint,
-    dateexpire bigint,
+    dateexpire datetime(3),
     invtype int,
     type int,
     iscash boolean,
@@ -162,7 +157,7 @@ create table petitems (
     repleteness tinyint,
     petattribute smallint,
     petskill int,
-    datedead bigint,
+    datedead datetime(3),
     remainlife int,
     attribute smallint,
     activestate tinyint,
@@ -170,17 +165,16 @@ create table petitems (
     pethue int,
     giantrate smallint,
     primary key (itemid),
-    foreign key (itemid) references items(id) on delete cascade,
-    foreign key (datedead) references filetimes(id)
+    foreign key (itemid) references items(id) on delete cascade
 );
 
 create table equips (
 	serialnumber bigint,
     itemid bigint,
     title varchar(255),
-    equippeddate bigint,
+    equippeddate datetime(3),
     prevbonusexprate int,
-    ruc smallint,
+    tuc smallint,
     cuc smallint,
     istr smallint,
     idex smallint,
@@ -236,7 +230,6 @@ create table equips (
     notsale boolean,
     attackspeed int,
     price int,
-    tuc int,
     charmexp int,
     expireonlogout boolean,
     setitemid int,
@@ -246,9 +239,25 @@ create table equips (
     vslot varchar(255),
     fixedgrade int,
     nopotential tinyint,
+    bossreward tinyint,
+    fstr smallint,
+	fdex smallint,
+	fint smallint,
+	fluk smallint,
+	fatt smallint,
+	fmatt smallint,
+	fdef smallint,
+	fhp smallint,
+	fmp smallint,
+	fspeed smallint,
+	fjump smallint,
+	fallstat smallint,
+	fboss smallint,
+	fdamage smallint,
+	flevel smallint,
+    superioreqp tinyint,
     primary key (itemid),
-    foreign key (itemid) references items(id) on delete cascade,
-    foreign key (equippeddate) references filetimes(id)
+    foreign key (itemid) references items(id) on delete cascade
 );
 
 create table options (
@@ -367,10 +376,9 @@ create table noncombatstatdaylimit (
     will smallint,
     craft smallint,
     sense smallint,
-    ftlastupdatecharmbycashpr bigint,
+    lastupdatecharmbycashpr datetime(3),
     charmbycashpr tinyint,
-    primary key (id),
-    foreign key (ftlastupdatecharmbycashpr) references filetimes(id)
+    primary key (id)
 );
 
 create table charactercards (
@@ -431,22 +439,21 @@ create table characterstats (
     pvpmodetype int,
     eventpoint int,
     albaactivityid int,
-    albastarttime bigint,
+    albastarttime datetime(3),
     albaduration int,
     albaspecialreward int,
     burning boolean,
     charactercard int,
     accountlastlogout int,
-    lastlogout bigint,
+    lastlogout datetime(3),
     gachexp int,
     honorexp int,
+    nextavailablefametime datetime(3),
     primary key (id),
     foreign key (extendsp) references extendsp(id),
     foreign key (noncombatstatdaylimit) references noncombatstatdaylimit(id),
-    foreign key (albastarttime) references filetimes(id),
     foreign key (charactercard) references charactercards(id),
-    foreign key (accountlastlogout) references systemtimes(id),
-    foreign key (lastlogout) references filetimes(id)
+    foreign key (accountlastlogout) references systemtimes(id)
 );
 
 create table avatardata (
@@ -496,7 +503,49 @@ create table guilds (
     appliable boolean,
     joinsetting int,
     reqlevel int,
+    bbsNotice int,
+    battleSp int,
+    fk_allianceid int,
     primary key (id)
+);
+
+create table alliances (
+	id int not null auto_increment,
+    name varchar(255),
+    maxmembernum int,
+    notice varchar(255),
+    primary key (id)
+);
+
+create table alliance_gradenames(
+	id int not null auto_increment,
+	gradename varchar(255),
+    allianceid int,
+    primary key (id),
+    foreign key (allianceid) references alliances(id) on delete cascade
+);
+
+create table bbs_records (
+	id int not null auto_increment,
+    idforbbs int,
+    creatorid int,
+    subject varchar(255),
+    msg text,
+    creationdate datetime(3),
+    icon int,
+    guildid int,
+    primary key (id)
+);
+
+create table bbs_replies (
+	id int not null auto_increment,
+    idforreply int,
+    creatorid int,
+    creationdate bigint,
+    msg text,
+    recordid int,
+    primary key (id),
+    foreign key (recordid) references bbs_records(id) on delete cascade
 );
 
 create table characters (
@@ -516,7 +565,8 @@ create table characters (
     rewardPoints int,
     monsterbook int,
     partyid int,
-    monsterparkcount tinyint,
+    monsterparkcount tinyint default 0,
+    previousFieldID bigint,
 	primary key (id),
     foreign key (avatardata) references avatardata(id),
     foreign key (equippedinventory) references inventories(id),
@@ -542,7 +592,7 @@ create table familiars (
     fatigue int,
     idk4 bigint,
     idk5 bigint,
-    expiredate int,
+    expiration datetime(3),
     vitality smallint,
     primary key (id),
     foreign key (charid) references characters(id) on delete cascade
@@ -591,11 +641,10 @@ create table guildskill (
 	id int not null auto_increment,
     skillid int,
     level int,
-    expiredate bigint,
+    expiredate datetime(3),
     buycharactername varchar(255),
     extendcharactername varchar(255),
-    primary key (id),
-    foreign key (expiredate) references filetimes(id) on delete cascade
+    primary key (id)
 );
 
 create table guildskills (
@@ -618,14 +667,13 @@ create table guildmembers (
     commitment int,
     daycommitment int,
     igp int,
-    commitmentinctime bigint,
+    commitmentinctime datetime(3),
     name varchar(255),
     job int,
     level int,
     loggedin boolean,
 	primary key (id),
-    foreign key (guildid) references guilds(id),
-    foreign key (commitmentinctime) references filetimes(id) on delete cascade
+    foreign key (guildid) references guilds(id)
 );
 
 create table guildrequestors (
@@ -702,7 +750,7 @@ create table monster_collection_rewards (
 
 create table accounts (
 	id int not null auto_increment,
-	username varchar(255),
+	name varchar(255),
 	password varchar(255),
 	pic varchar(255),
 	mac varchar(255),
@@ -720,15 +768,13 @@ create table accounts (
 	gradecode tinyint default 0,
 	censorednxloginid varchar(255),
 	characterslots int default 4,
-	creationdate long,
-    lastloggedin varchar(255),
+	creationdate datetime(3),
     trunkid int,
     nxCredit int default 0,
     maplePoints int default 0,
     nxPrepaid int default 0,
     monstercollectionid int,
-    loginState int,
-    banExpireDate bigint,
+    banExpireDate datetime(3),
     banReason varchar(255),
 	primary key (id),
     foreign key (trunkid) references trunks(id),
@@ -773,7 +819,7 @@ create table friends (
 );
 
 
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '0', '111111', '40', '500000');
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '0', '111111', '40', '500000');
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '0', '111111', '40');
-insert into `accounts` (`username`, `password`, `gmlevel`, `chatunblockdate`, `creationdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '111111', '40');

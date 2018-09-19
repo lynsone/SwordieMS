@@ -3,28 +3,31 @@ package net.swordie.ms.client.jobs.legend;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
-import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.ChatType;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatMsgColour;
 import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
-import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.client.character.skills.SkillStat.*;
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 
 /**
  * Created on 12/14/2017.
@@ -143,6 +146,15 @@ public class Aran extends Job {
         }
     }
 
+    @Override
+    public boolean isHandlerOfJob(short id) {
+        return JobConstants.isAran(id);
+    }
+
+
+
+    // Buff related methods --------------------------------------------------------------------------------------------
+
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
         Char chr = c.getChr();
         SkillInfo si = SkillData.getSkillInfoById(skillID);
@@ -158,22 +170,28 @@ public class Aran extends Job {
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
             case BODY_PRESSURE:
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(BodyPressure, o1);
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    tsm.putCharacterStatValue(BodyPressure, o1);
+                }
                 break;
             case DRAIN:
-                o1.nOption = si.getValue(x, slv);
-                o1.rOption = skillID;
-                o1.tOption = 0;
-                tsm.putCharacterStatValue(AranDrain, o1);
+                if(tsm.hasStatBySkillId(skillID)) {
+                    tsm.removeStatsBySkill(skillID);
+                } else {
+                    o1.nOption = si.getValue(x, slv);
+                    o1.rOption = skillID;
+                    tsm.putCharacterStatValue(AranDrain, o1);
+                }
                 break;
             case SNOW_CHARGE:
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(WeaponCharge, o1); //TODO  Finish gives slow debuff to mobs and half duration to bosses
+                tsm.putCharacterStatValue(WeaponCharge, o1);
                 break;
             case MAHA_BLESSING:
                 o1.nReason = skillID;
@@ -208,54 +226,29 @@ public class Aran extends Job {
                 tsm.putCharacterStatValue(IndieMaxDamageOverR, o2);
                 break;
         }
-        c.write(WvsContext.temporaryStatSet(tsm));
-        super.handleBuff(c, inPacket, skillID, slv);
+        tsm.sendSetStatPacket();
     }
 
-    private void handleComboAbility(TemporaryStatManager tsm, AttackInfo attackInfo) {
-        Option o = new Option();
-        SkillInfo comboInfo = SkillData.getSkillInfoById(COMBO_ABILITY);
-        int amount = 1;
-        if(!chr.hasSkill(COMBO_ABILITY)) {
+    public boolean isBuff(int skillID) {
+        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
+    }
+
+    private void giveAdrenalinRushBuff(TemporaryStatManager tsm) {
+        Skill skill = chr.getSkill(ADRENALINE_RUSH);
+        if(skill == null) {
             return;
         }
-        if(tsm.hasStat(ComboAbilityBuff)) {
-            amount = tsm.getOption(ComboAbilityBuff).nOption;
-            if (amount < comboInfo.getValue(s2, chr.getSkill(COMBO_ABILITY).getCurrentLevel())) {
-                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    amount++;
-                }
-            }
-
-        }
-        o.nOption = amount;
-        o.rOption = COMBO_ABILITY;
-        o.tOption = 0;
-        tsm.putCharacterStatValue(ComboAbilityBuff, o);
-        setCombo(amount);
-    }
-
-    private void handleAdrenalinRush(int skillId, TemporaryStatManager tsm, Client c) {
-        SkillInfo adrenalinInfo = SkillData.getSkillInfoById(ADRENALINE_RUSH);
+        SkillInfo si = SkillData.getSkillInfoById(ADRENALINE_RUSH);
+        byte slv = (byte) skill.getCurrentLevel();
         if (chr.hasSkill(ADRENALINE_RUSH)) {
             Option o = new Option();
             o.nOption = 1;
             o.rOption = ADRENALINE_RUSH;
-            o.tOption = adrenalinInfo.getValue(time, adrenalinInfo.getCurrentLevel());
+            o.tOption = si.getValue(time, slv);
             o.cOption = 1;
             tsm.putCharacterStatValue(AdrenalinBoost, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
-        }
-    }
-
-    private void handleSwingStudies(int skillId, TemporaryStatManager tsm, Client c) {
-        Option o = new Option();
-        if (chr.hasSkill(21100015)) {
-            o.nOption = 1;
-            o.rOption = 21100015;
-            o.tOption = 5;
-            tsm.putCharacterStatValue(NextAttackEnhance, o);
-            c.write(WvsContext.temporaryStatSet(tsm));
+            tsm.sendSetStatPacket();
+            EventManager.addEvent(this::setComboCountAfterAdrenaline, si.getValue(time, slv), TimeUnit.SECONDS);
         }
     }
 
@@ -264,9 +257,9 @@ public class Aran extends Job {
         tsm.getOption(ComboAbilityBuff).nOption = 500;
     }
 
-    public boolean isBuff(int skillID) {
-        return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
-    }
+
+
+    // Attack related methods ------------------------------------------------------------------------------------------
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
@@ -283,21 +276,14 @@ public class Aran extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            handleComboAbility(tsm, attackInfo);
-            if(chr.hasSkill(21110016)) {
-               if (tsm.getOption(ComboAbilityBuff).nOption > 999) {
-                   if(chr.hasSkill(ADRENALINE_RUSH)) {
-                       tsm.getOption(ComboAbilityBuff).nOption = 1000;
-                       handleAdrenalinRush(skillID, tsm, c);
-                       c.write(WvsContext.temporaryStatSet(tsm));
-                       comboAfterAdrenalin();
-                   }
-               }
+            if(chr.hasSkill(ADRENALINE_RUSH) && tsm.getOption(ComboAbilityBuff).nOption > 999 && !tsm.hasStat(AdrenalinBoost)) {
+                giveAdrenalinRushBuff(tsm);
             }
+            incrementComboAbility(tsm, attackInfo);
             aranDrain();
             snowCharge(attackInfo);
         }
-        handleSwingStudies(getOriginalSkillByID(skillID), tsm, c);
+        doSwingStudiesAddAttack(tsm);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -308,7 +294,7 @@ public class Aran extends Job {
                 o1.rOption = skillID;
                 o1.tOption = t;
                 tsm.putCharacterStatValue(AranBoostEndHunt, o1);
-                c.write(WvsContext.temporaryStatSet(tsm));
+                tsm.sendSetStatPacket();
                 break;
             case FINAL_CHARGE_COMBO: //TODO  Leaves an ice trail behind that freezes enemies
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -316,11 +302,13 @@ public class Aran extends Job {
                     int hcTime = 10; //hcTime is defined yet still gives NPEs
                     if (Util.succeedProp(hcProp)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = getOriginalSkillByID(skillID);
-                        o1.tOption = hcTime;
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = getOriginalSkillByID(skillID);
+                            o1.tOption = hcTime;
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -330,11 +318,13 @@ public class Aran extends Job {
                     int time = 3; //Time value never given, so I decided upon 3 seconds.
                     if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = getOriginalSkillByID(skillID);
-                        o1.tOption = time;
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = getOriginalSkillByID(skillID);
+                            o1.tOption = time;
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -344,11 +334,13 @@ public class Aran extends Job {
                     int time = 3; //Time value never given, so I decided upon 3 seconds.
                     if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = getOriginalSkillByID(skillID);
-                        o1.tOption = time;
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = getOriginalSkillByID(skillID);
+                            o1.tOption = time;
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -358,11 +350,16 @@ public class Aran extends Job {
                     int time = 3; //Time value never given, so I decided upon 3 seconds.
                     if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        o1.nOption = 1;
-                        o1.rOption = getOriginalSkillByID(skillID);
-                        o1.tOption = time;
-                        mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        if(mob == null) {
+                            continue;
+                        }
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = getOriginalSkillByID(skillID);
+                            o1.tOption = time;
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
                     }
                 }
                 break;
@@ -381,7 +378,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
                 }
                 break;
@@ -400,7 +397,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
                 }
                 break;
@@ -419,7 +416,7 @@ public class Aran extends Job {
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill, 1);
+                        mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
                 }
                 break;
@@ -428,106 +425,46 @@ public class Aran extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    @Override
-    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
-        super.handleSkill(c, skillID, slv, inPacket);
-        Char chr = c.getChr();
-        Skill skill = chr.getSkill(skillID);
+    private void incrementComboAbility(TemporaryStatManager tsm, AttackInfo attackInfo) {
+        Option o = new Option();
+        SkillInfo comboInfo = SkillData.getSkillInfoById(COMBO_ABILITY);
+        int amount = 1;
+        if(!chr.hasSkill(COMBO_ABILITY)) {
+            return;
+        }
+        if(tsm.hasStat(ComboAbilityBuff)) {
+            amount = tsm.getOption(ComboAbilityBuff).nOption;
+            if (amount < comboInfo.getValue(s2, chr.getSkill(COMBO_ABILITY).getCurrentLevel())) {
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    amount++;
+                }
+            }
+
+        }
+        o.nOption = amount;
+        o.rOption = COMBO_ABILITY;
+        tsm.putCharacterStatValue(ComboAbilityBuff, o);
+        setCombo(amount);
+    }
+
+    private void setComboCountAfterAdrenaline() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        SkillInfo si = null;
-        if (skill != null) {
-            si = SkillData.getSkillInfoById(skillID);
-        }
-        chr.chatMessage(ChatMsgColour.YELLOW, "SkillID: " + skillID);
-        if (isBuff(skillID)) {
-            handleBuff(c, inPacket, skillID, slv);
-        } else {
-            Option o1 = new Option();
-            Option o2 = new Option();
-            Option o3 = new Option();
-            switch (skillID) {
-                case ADRENALINE_BURST:
-                    tsm.getOption(ComboAbilityBuff).nOption = 1000;
-                    handleAdrenalinRush(skillID, tsm, c);
-                    c.write(WvsContext.temporaryStatSet(tsm));
-                    break;
-                case RETURN_TO_RIEN:
-                    o1.nValue = si.getValue(x, slv);
-                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
-                    chr.warp(toField);
-                    break;
-                case MAHAS_DOMAIN:
-                    SkillInfo mdi = SkillData.getSkillInfoById(MAHAS_DOMAIN);
-                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
-                    aa.setMobOrigin((byte) 0);
-                    aa.setPosition(chr.getPosition());
-                    aa.setRect(aa.getPosition().getRectAround(mdi.getRects().get(0)));
-                    chr.getField().spawnAffectedArea(aa);
-                    break;
-                case HEROS_WILL_ARAN:
-                    tsm.removeAllDebuffs();
-                    break;
-            }
-        }
+        Option o = new Option();
+        o.nOption = 500;
+        o.rOption = COMBO_ABILITY;
+        tsm.putCharacterStatValue(ComboAbilityBuff, o);
+        setCombo(500);
     }
 
-    @Override
-    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
-        super.handleHit(c, inPacket, hitInfo);
-    }
-
-    @Override
-    public boolean isHandlerOfJob(short id) {
-        JobConstants.JobEnum job = JobConstants.JobEnum.getJobById(id);
-        switch (job) {
-            case LEGEND:
-            case ARAN1:
-            case ARAN2:
-            case ARAN3:
-            case ARAN4:
-                return true;
-            default:
-                return false;
+    private void doSwingStudiesAddAttack(TemporaryStatManager tsm) {
+        Option o = new Option();
+        if (chr.hasSkill(21100015)) {
+            o.nOption = 1;
+            o.rOption = 21100015;
+            o.tOption = 5;
+            tsm.putCharacterStatValue(NextAttackEnhance, o);
+            tsm.sendSetStatPacket();
         }
-    }
-
-    @Override
-    public int getFinalAttackSkill() {
-        if(Util.succeedProp(getFinalAttackProc())) {
-            int fas = 0;
-            if (chr.hasSkill(FINAL_ATTACK)) {
-                fas = FINAL_ATTACK;
-            }
-            if (chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
-                fas = ADVANCED_FINAL_ATTACK;
-            }
-            return fas;
-        } else {
-            return 0;
-        }
-    }
-
-    private Skill getFinalAtkSkill(Char chr) {
-        Skill skill = null;
-        if(chr.hasSkill(FINAL_ATTACK)) {
-            skill = chr.getSkill(FINAL_ATTACK);
-        }
-        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
-            skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
-        }
-        return skill;
-    }
-
-    private int getFinalAttackProc() {
-        Skill skill = getFinalAtkSkill(chr);
-        if (skill == null) {
-            return 0;
-        }
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        byte slv = (byte) chr.getSkill(skill.getSkillId()).getCurrentLevel();
-
-        return si.getValue(prop, slv);
     }
 
     public int getCombo() {
@@ -565,13 +502,106 @@ public class Aran extends Job {
         if(tsm.getOptByCTSAndSkill(WeaponCharge, SNOW_CHARGE) != null) {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if(mob == null) {
+                    continue;
+                }
                 MobTemporaryStat mts = mob.getTemporaryStat();
-                o1.nOption = - si.getValue(q, slv);
+                o1.nOption = (mob.isBoss() ? -(si.getValue(q, slv) / 2) : - si.getValue(q, slv));
                 o1.rOption = skill.getSkillId();
                 o1.tOption = si.getValue(y, slv);
                 o1.mOption = 1;
                 mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
             }
         }
+    }
+
+    @Override
+    public int getFinalAttackSkill() {
+        Skill skill = getFinalAtkSkill();
+        if (skill != null) {
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+            int proc = si.getValue(prop, slv);
+
+            if (Util.succeedProp(proc)) {
+                int fas = 0;
+                if (chr.hasSkill(FINAL_ATTACK)) {
+                    fas = FINAL_ATTACK;
+                }
+                if (chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+                    fas = ADVANCED_FINAL_ATTACK;
+                }
+                return fas;
+            }
+        }
+        return 0;
+    }
+
+    private Skill getFinalAtkSkill() {
+        Skill skill = null;
+        if(chr.hasSkill(FINAL_ATTACK)) {
+            skill = chr.getSkill(FINAL_ATTACK);
+        }
+        if(chr.hasSkill(ADVANCED_FINAL_ATTACK)) {
+            skill = chr.getSkill(ADVANCED_FINAL_ATTACK);
+        }
+        return skill;
+    }
+
+
+
+    // Skill related methods -------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
+        super.handleSkill(c, skillID, slv, inPacket);
+        Char chr = c.getChr();
+        Skill skill = chr.getSkill(skillID);
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = null;
+        if (skill != null) {
+            si = SkillData.getSkillInfoById(skillID);
+        }
+        chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
+        if (isBuff(skillID)) {
+            handleBuff(c, inPacket, skillID, slv);
+        } else {
+            Option o1 = new Option();
+            Option o2 = new Option();
+            Option o3 = new Option();
+            switch (skillID) {
+                case ADRENALINE_BURST:
+                    tsm.getOption(ComboAbilityBuff).nOption = 1000;
+                    giveAdrenalinRushBuff(tsm);
+                    tsm.sendSetStatPacket();
+                    break;
+                case RETURN_TO_RIEN:
+                    o1.nValue = si.getValue(x, slv);
+                    Field toField = chr.getOrCreateFieldByCurrentInstanceType(o1.nValue);
+                    chr.warp(toField);
+                    break;
+                case MAHAS_DOMAIN:
+                    SkillInfo mdi = SkillData.getSkillInfoById(MAHAS_DOMAIN);
+                    AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
+                    aa.setMobOrigin((byte) 0);
+                    aa.setPosition(chr.getPosition());
+                    aa.setRect(aa.getPosition().getRectAround(mdi.getRects().get(0)));
+                    chr.getField().spawnAffectedArea(aa);
+                    break;
+                case HEROS_WILL_ARAN:
+                    tsm.removeAllDebuffs();
+                    break;
+            }
+        }
+    }
+
+
+
+    // Hit related methods ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
+
+        super.handleHit(c, inPacket, hitInfo);
     }
 }
