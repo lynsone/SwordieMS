@@ -1,5 +1,7 @@
 # Portal for entering Ephenia
 
+nameList = []
+
 EPHENIAS_HIDING_PLACE = 2133006 # NPC ID
 QUEENS_HIDING_PLACE = 300030310 # MAP ID
 FAIRY_FOREST_2 = 300030300 # MAP ID 2
@@ -19,6 +21,7 @@ if response == 1:
             partysm = partyChr.getScriptManager()
             if not partysm.hasQuest(LADY_OF_THE_CORRUPTED_FOREST) and not partysm.hasQuestCompleted(LADY_OF_THE_CORRUPTED_FOREST):
                 chrHasQuest = False
+                nameList.append(partyChr.getName())
                 break
 
         if chrHasQuest:
@@ -28,8 +31,12 @@ if response == 1:
                 partysm = partyChr.getScriptManager()
                 partysm.invokeAfterDelay(time * 1000, "clearPartyInfo", FAIRY_FOREST_2)
         else:
-            sm.sendSayOkay("You may not approach the Queen's Hiding Place. "
-                           "Some of your party members have not completed the fairy elimination quest.")
+            text = ("You may not approach the Queen's Hiding Place. "
+                    "Some of your party members have not completed the fairy elimination quest.\r\n\r\n"
+                    "#bThese people don't meet the requirements:#k \r\n")
+            for i in nameList:
+                text += "#r" + i + "#k\r\n"
+            sm.sendSayOkay(text)
 
     else:
         sm.sendSayOkay("You may enter in a party.")
