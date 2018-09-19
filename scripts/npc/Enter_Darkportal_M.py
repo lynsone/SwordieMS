@@ -8,4 +8,3 @@ if sm.hasQuest(quest):
         sm.warp(mapid, 0)
 else:
     sm.sendSayOkay("#b(A strange doorway)")
-    sm.dispose()

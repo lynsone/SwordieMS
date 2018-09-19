@@ -5,4 +5,3 @@ response = sm.sendAskSlideMenu(0)
 mapID = DimensionalPortalType.getByVal(response).getMapID()
 if mapID != 0:
     sm.warp(mapID)
-sm.dispose()

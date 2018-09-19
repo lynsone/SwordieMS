@@ -11,7 +11,6 @@ if sm.isPartyLeader():
 
 else:
     sm.sendSayOkay("Please have your party leader talk to me.")
-    sm.dispose()
 
 if sm.checkParty():
 
@@ -22,4 +21,3 @@ if sm.checkParty():
             sm.consumeItem(item, quantity)
 
     sm.warpPartyIn(921160100) # Escape! - PQ  first map
-sm.dispose()

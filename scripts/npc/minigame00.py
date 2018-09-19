@@ -30,4 +30,3 @@ else:
     sm.sendSayOkay("Great Choice! Here you go")
     sm.deductMesos(mesocost)
     sm.giveItem(items[answer])
-sm.dispose()

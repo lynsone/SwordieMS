@@ -401,4 +401,3 @@ if selection == 27:
             sm.sendSayOkay("Thank you for your purchase.")
             sm.deductMesos(250000)
             sm.giveItem(4160011)
-    sm.dispose()

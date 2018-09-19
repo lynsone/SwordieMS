@@ -3,4 +3,4 @@ if sm.hasQuestCompleted(2973): # [Gold Beach] Going Tribal  : This is where Tofu
     sm.sendSayOkay("Thank you for your help.")
 else:
     sm.sendSayOkay("Me Tofu. My tribe UgaUga own this Gold Beach.")
-sm.dispose()
+
