@@ -1263,7 +1263,6 @@ if parentID == 1012002:
 
         if sm.getMesos() < costmesoHene[selection1][selection2]:
             sm.sendSayOkay("I'm afraid you cannot afford my services.")
-            sm.dispose()
 
         i = 0
         while i < len(costHene[selection1][selection2]):
@@ -1277,7 +1276,6 @@ if parentID == 1012002:
         else:
             if sm.canHold(itemsHene[selection1][selection2]) == False:
                 sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costHene[selection1][selection2]):
@@ -1299,7 +1297,6 @@ if parentID == 1012002:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
 
 
 
@@ -1345,7 +1342,6 @@ elif parentID == 1022003:
 
         if sm.getMesos() < costmesoPerion[selection1][selection2]:
             sm.sendSayOkay("I'm afraid you cannot afford my services.")
-            sm.dispose()
 
         i = 0
         while i < len(costPerion[selection1][selection2]):
@@ -1359,7 +1355,6 @@ elif parentID == 1022003:
         else:
             if sm.canHold(itemsPerion[selection1][selection2]) == False:
                 sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costPerion[selection1][selection2]):
@@ -1373,7 +1368,6 @@ elif parentID == 1022003:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-    sm.dispose()
 
 
 
@@ -1423,7 +1417,6 @@ elif parentID == 1052002:
 
         if sm.getMesos() < costmesoKerningItem[selection1][selection2]:
             sm.sendSayOkay("Where's the mesos, man?!")
-            sm.dispose()
 
         i = 0
         while i < len(costKerningItem[selection1][selection2]):
@@ -1437,7 +1430,6 @@ elif parentID == 1052002:
         else:
             if sm.canHold(itemsKerningItem[selection1][selection2]) == False:
                 sm.sendSayOkay("Make sure you have room in your inventory.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costKerningItem[selection1][selection2]):
@@ -1454,7 +1446,6 @@ elif parentID == 1052002:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-    sm.dispose()
 
 
 
@@ -1499,7 +1490,6 @@ elif parentID == 1052003:
 
         if sm.getMesos() < costmesoKerningOre[selection1][selection2]:
             sm.sendSayOkay("I'm afraid you cannot afford my services.")
-            sm.dispose()
 
         i = 0
         while i < len(costKerningOre[selection1][selection2]):
@@ -1513,7 +1503,6 @@ elif parentID == 1052003:
         else:
             if sm.canHold(itemsKerningOre[selection1][selection2]) == False:
                 sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costKerningOre[selection1][selection2]):
@@ -1527,7 +1516,6 @@ elif parentID == 1052003:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-    sm.dispose()
 
 
 
@@ -1565,7 +1553,6 @@ elif parentID == 2020002:
 
         if sm.getMesos() < costmesoElNathItem[selection1][selection2]:
             sm.sendSayOkay("I'm afraid you cannot afford my services.")
-            sm.dispose()
 
         i = 0
         while i < len(costElNathItem[selection1][selection2]):
@@ -1579,7 +1566,6 @@ elif parentID == 2020002:
         else:
             if sm.canHold(itemsElNathItem[selection1][selection2]) == False:
                 sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costElNathItem[selection1][selection2]):
@@ -1593,7 +1579,6 @@ elif parentID == 2020002:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-        sm.dispose()
 
 
 
@@ -1638,7 +1623,6 @@ elif parentID == 2020000 or parentID == 2040016:
 
     if sm.getMesos() < costmesoElNathRefine[selection1][selection2]:
         sm.sendSayOkay("I'm afraid you cannot afford my services.")
-        sm.dispose()
 
     i = 0
     while i < len(costElNathRefine[selection1][selection2]):
@@ -1652,7 +1636,6 @@ elif parentID == 2020000 or parentID == 2040016:
     else:
         if sm.canHold(itemsElNathRefine[selection1][selection2]) == False:
             sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-            sm.dispose()
         else:
             i = 0
             while i < len(costElNathRefine[selection1][selection2]):
@@ -1709,7 +1692,6 @@ elif parentID == 2040021:
 
         if sm.getMesos() < costmesoLudiShoes[selection1][selection2]:
             sm.sendSayOkay("I'm afraid you cannot afford my services.")
-            sm.dispose()
 
         i = 0
         while i < len(costLudiShoes[selection1][selection2]):
@@ -1723,7 +1705,6 @@ elif parentID == 2040021:
         else:
             if sm.canHold(itemsLudiShoes[selection1][selection2]) == False:
                 sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costLudiShoes[selection1][selection2]):
@@ -1737,7 +1718,6 @@ elif parentID == 2040021:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-    sm.dispose()
 
 
 
@@ -1775,7 +1755,6 @@ elif parentID == 2040020:
 
         if sm.getMesos() < costmesoLudiGloves[selection1][selection2]:
             sm.sendSayOkay("I'm afraid you cannot afford my services.")
-            sm.dispose()
 
         i = 0
         while i < len(costLudiGloves[selection1][selection2]):
@@ -1789,7 +1768,6 @@ elif parentID == 2040020:
         else:
             if sm.canHold(itemsLudiGloves[selection1][selection2]) == False:
                 sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costLudiGloves[selection1][selection2]):
@@ -1803,7 +1781,6 @@ elif parentID == 2040020:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-    sm.dispose()
 
 
 
@@ -1840,7 +1817,6 @@ elif parentID == 1032002:
 
         if sm.getMesos() < costmesoElliniaItem[selection1][selection2]:
             sm.sendSayOkay("I'm afraid you cannot afford my services.")
-            sm.dispose()
 
         i = 0
         while i < len(costElliniaItem[selection1][selection2]):
@@ -1854,7 +1830,6 @@ elif parentID == 1032002:
         else:
             if sm.canHold(itemsElliniaItem[selection1][selection2]) == False:
                 sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-                sm.dispose()
             else:
                 i = 0
                 while i < len(costElliniaItem[selection1][selection2]):
@@ -1868,7 +1843,6 @@ elif parentID == 1032002:
                 sm.sendSayOkay("A perfect item, as usual. Come and see me if you need anything else.")
     else:
         sm.sendSayOkay("Let me know when you are ready to create something.")
-    sm.dispose()
 
 
 
@@ -1905,7 +1879,6 @@ elif parentID == 2100001:
     multiplier = selection3
     if sm.getMesos() < costmesoElNathRefine[selection1][selection2]:
         sm.sendSayOkay("I'm afraid you cannot afford my services.")
-        sm.dispose()
 
     i = 0
     while i < len(costElNathRefine[selection1][selection2]):
@@ -1918,8 +1891,7 @@ elif parentID == 2100001:
         sm.sendSayOkay("Surely you, of all people, would understand the value of having quality items? I can't do that without the items I require.")
     else:
         if sm.canHold(itemsElNathRefine[selection1][selection2]) == False:
-            sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")
-            sm.dispose()
+            sm.sendSayOkay("Please make sure you have room in your inventory, and talk to me again.")            
         else:
             i = 0
             while i < len(costElNathRefine[selection1][selection2]):

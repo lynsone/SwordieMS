@@ -35,4 +35,3 @@ if not sm.hasMobsInField():
     sm.startQuestNoCheck(32194) # Seems to be a quest needed  'in progress'  to make nora appear in other maps
     sm.warpInstanceOut(141010000,0) # Ice Station 1
     sm.hideNpcByTemplateId(1510007, False)
-    sm.dispose()

@@ -15,4 +15,3 @@ if response == 1:
     elif sm.checkParty():
         sm.setPartyDeathCount(20)
         sm.warpPartyIn(fields[sm.getFieldID()])
-sm.dispose()
