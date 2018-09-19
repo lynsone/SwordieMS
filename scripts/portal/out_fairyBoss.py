@@ -3,7 +3,7 @@
 EPHENIAS_HIDING_PLACE = 2133006 # NPC ID
 FAIRY_FOREST_2 = 300030300 # MAP ID
 
-if sm.hasMobsInField() is None:
+if not sm.hasMobsInField():
     sm.clearPartyInfo(FAIRY_FOREST_2)
 else:
     sm.setSpeakerID(EPHENIAS_HIDING_PLACE)
