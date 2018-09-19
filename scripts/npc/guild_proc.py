@@ -23,4 +23,3 @@ elif guild is None:
 else:
     sm.sendSayOkay("Hey there, I'm in charge of everything guild related. If you want anything done to your guild, "
                    "you can ask your guild master to come to me.")
-    sm.dispose()

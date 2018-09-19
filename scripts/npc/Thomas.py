@@ -13,4 +13,3 @@ else:
             sm.warp(100000000, 0)
     else:
         sm.sendSayOkay("Ok, feel free to hang around until you're ready to go!")
-    sm.dispose()
