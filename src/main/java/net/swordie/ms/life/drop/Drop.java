@@ -4,9 +4,12 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropType;
 import net.swordie.ms.connection.packet.DropPool;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.life.Life;
 
@@ -108,7 +111,17 @@ public class Drop extends Life {
 
     @Override
     public void broadcastSpawnPacket(Char onlyChar) {
-        onlyChar.write(DropPool.dropEnterField(this, getPosition(), getOwnerID(), canBePickedUpBy(onlyChar)));
+        Item item = getItem();
+        ItemInfo ii = null;
+        if (item != null) {
+            ii = ItemData.getItemInfoByID(item.getItemId());
+        }
+        boolean canSpawn = isMoney()
+                || (item != null && ItemConstants.isEquip(item.getItemId()))
+                || (ii != null && onlyChar.hasAnyQuestsInProgress(ii.getQuestIDs()));
+        if (canSpawn) {
+            onlyChar.write(DropPool.dropEnterField(this, getPosition(), getOwnerID(), canBePickedUpBy(onlyChar)));
+        }
     }
 
     public void setMobExp(long mobExp) {

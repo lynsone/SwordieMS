@@ -4,7 +4,6 @@
 MASTEMA = 2159307
 SKILLS = [30011109, 30010110, 30010185]
 
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 for i in range(3):
     if not sm.hasSkill(SKILLS[i]):

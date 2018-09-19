@@ -2,7 +2,8 @@ package net.swordie.ms.scripts;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptException;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,7 +17,7 @@ public class ScriptInfo {
     private String scriptName;
     private Invocable invocable;
     private final Lock lock = new ReentrantLock();
-    private Object response;
+    private Queue<Object> responses = new LinkedList<>();
     private int objectID;
     private String fileDir;
     private boolean isActive;
@@ -85,7 +86,7 @@ public class ScriptInfo {
     }
 
     public void reset() {
-        setResponse(null);
+        addResponse(null);
         setParentID(0);
         setScriptName("");
         setInvocable(null);
@@ -100,14 +101,20 @@ public class ScriptInfo {
         this.objectID = objectID;
     }
 
-    public void setResponse(Object response) {
-        this.response = response;
+    public void addResponse(Object response) {
+        if (response == null) {
+            responses.clear();
+        }
+        this.responses.add(response);
         synchronized (lock) {
             lock.notifyAll();
         }
     }
 
     public Object awaitResponse() {
+        if (responses.size() > 0) {
+            return responses.poll();
+        }
         synchronized (lock) {
             try {
                 lock.wait();
@@ -115,7 +122,7 @@ public class ScriptInfo {
                 // intended
             }
         }
-        return response;
+        return responses.poll();
     }
 
     public void setFileDir(String fileDir) {

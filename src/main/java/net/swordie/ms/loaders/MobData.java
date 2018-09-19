@@ -2,11 +2,13 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.ServerConstants;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.ForcedMobStat;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.skill.MobSkill;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -44,7 +46,11 @@ public class MobData {
     }
 
     public static Mob getMobById(int id) {
-        return getMobs().getOrDefault(id, loadMobFromFile(id));
+        Mob mob = getMobs().get(id);
+        if (mob == null) {
+            mob = loadMobFromFile(id);
+        }
+        return mob;
     }
 
     public static Mob getMobDeepCopyById(int id) {
@@ -141,6 +147,23 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getSealedCooltime());
                 dataOutputStream.writeInt(mob.getWillEXP());
                 dataOutputStream.writeUTF(mob.getFixedMoveDir());
+                dataOutputStream.writeBoolean(mob.isBanMap());
+                if (mob.isBanMap()) {
+                    dataOutputStream.writeInt(mob.getBanType());
+                    dataOutputStream.writeInt(mob.getBanMsgType());
+                    dataOutputStream.writeUTF(mob.getBanMsg());
+                    dataOutputStream.writeShort(mob.getBanMapFields().size());
+                    for (Tuple<Integer, String> banMap : mob.getBanMapFields()) {
+                        dataOutputStream.writeInt(banMap.getLeft());
+                        dataOutputStream.writeUTF(banMap.getRight());
+                    }
+                }
+                dataOutputStream.writeBoolean(mob.isPatrolMob());
+                if (mob.isPatrolMob()) {
+                    dataOutputStream.writeInt(mob.getRange());
+                    dataOutputStream.writeInt(mob.getDetectX());
+                    dataOutputStream.writeInt(mob.getSenseX());
+                }
                 dataOutputStream.writeShort(mob.getQuests().size());
                 for (int i : mob.getQuests()) {
                     dataOutputStream.writeInt(i);
@@ -275,6 +298,24 @@ public class MobData {
             mob.setSealedCooltime(dataInputStream.readInt());
             mob.setWillEXP(dataInputStream.readInt());
             mob.setFixedMoveDir(dataInputStream.readUTF());
+            boolean banMap = dataInputStream.readBoolean();
+            if (banMap) {
+                mob.setBanMap(true);
+                mob.setBanType(dataInputStream.readInt());
+                mob.setBanMsgType(dataInputStream.readInt());
+                mob.setBanMsg(dataInputStream.readUTF());
+                short size = dataInputStream.readShort();
+                for (int i = 0; i < size; i++) {
+                    mob.addBanMap(dataInputStream.readInt(), dataInputStream.readUTF());
+                }
+            }
+            boolean patrolMob = dataInputStream.readBoolean();
+            if (patrolMob) {
+                mob.setPatrolMob(true);
+                mob.setRange(dataInputStream.readInt());
+                mob.setDetectX(dataInputStream.readInt());
+                mob.setSenseX(dataInputStream.readInt());
+            }
             short size = dataInputStream.readShort();
             for (int i = 0; i < size; i++) {
                 mob.addQuest(dataInputStream.readInt());
@@ -333,6 +374,10 @@ public class MobData {
             mob.setMp(fms.getMaxMP());
             mob.setMaxMp(fms.getMaxMP());
             mob.setDrops(DropData.getDropInfoByID(mob.getTemplateId()));
+            mob.getDrops().add(new DropInfo(GameConstants.MAX_DROP_CHANCE,
+                    GameConstants.MIN_MONEY_MULT * mob.getForcedMobStat().getLevel(),
+                    GameConstants.MAX_MONEY_MULT * mob.getForcedMobStat().getLevel()
+            ));
             for (DropInfo di : mob.getDrops()) {
                 di.generateNextDrop();
             }
@@ -632,6 +677,65 @@ public class MobData {
                         break;
                     case "patrol":
                         mob.setPatrolMob(true);
+                        for (Node patrolNode : XMLApi.getAllChildren(n)) {
+                            String patrolNodeName = XMLApi.getNamedAttribute(patrolNode, "name");
+                            String patrolNodeValue = XMLApi.getNamedAttribute(patrolNode, "value");
+                            switch (patrolNodeName) {
+                                case "range":
+                                    mob.setRange(Integer.parseInt(patrolNodeValue));
+                                    break;
+                                case "detectX":
+                                    mob.setDetectX(Integer.parseInt(patrolNodeValue));
+                                    break;
+                                case "senseX":
+                                    mob.setSenseX(Integer.parseInt(patrolNodeValue));
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    case "ban":
+                        mob.setBanMap(true);
+                        for (Node banNode : XMLApi.getAllChildren(n)) {
+                            String banNodeName = XMLApi.getNamedAttribute(banNode, "name");
+                            String banNodeValue = XMLApi.getNamedAttribute(banNode, "value");
+                            switch (banNodeName) {
+                                case "banType":
+                                    mob.setBanType(Integer.parseInt(banNodeValue));
+                                    break;
+                                case "banMsgType":
+                                    mob.setBanMsgType(Integer.parseInt(banNodeValue));
+                                    break;
+                                case "banMsg":
+                                    mob.setBanMsg(banNodeValue);
+                                    break;
+                                case "banMap":
+                                    for (Node banMaps : XMLApi.getAllChildren(banNode)) {
+                                        int banFieldID = 0;
+                                        String banPortal = "";
+                                        for (Node banMap : XMLApi.getAllChildren(banMaps)) {
+                                            String banMapName = XMLApi.getNamedAttribute(banMap, "name");
+                                            String banMapValue = XMLApi.getNamedAttribute(banMap, "value");
+                                            switch (banMapName) {
+                                                case "field":
+                                                    banFieldID = Integer.parseInt(banMapValue);
+                                                    break;
+                                                case "portal":
+                                                    banPortal = banMapValue;
+                                                    break;
+                                                default:
+                                                    log.warn(String.format("Unknown ban map node %s with value %s", banMapName, banMapValue));
+                                                    break;
+                                            }
+                                            if (banFieldID != 0) {
+                                                mob.addBanMap(banFieldID, banPortal);
+                                            }
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
                         break;
                     case "revive":
                         for (Node reviveNode : XMLApi.getAllChildren(n)) {
@@ -742,7 +846,6 @@ public class MobData {
                         break;
                     case "speak":
                     case "thumbnail":
-                    case "ban":
                     case "default":
                     case "defaultHP":
                     case "defaultMP":

@@ -179,6 +179,15 @@ public class UserLocal {
         return outPacket;
     }
 
+    public static OutPacket setFuncKeyByScript(boolean add, int action, int key) {
+        OutPacket outPacket = new OutPacket(OutHeader.FUNCKEY_SET_BY_SCRIPT);
+        outPacket.encodeByte(add);
+        outPacket.encodeInt(action);
+        outPacket.encodeInt(key);
+
+        return outPacket;
+    }
+
     public static OutPacket damageSkinSaveResult(DamageSkinType req, DamageSkinType res, Char chr) {
         OutPacket outPacket = new OutPacket(OutHeader.DAMAGE_SKIN_SAVE_RESULT);
 

@@ -9,10 +9,8 @@ import net.swordie.ms.loaders.FieldData;
 import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created on 11/2/2017.
@@ -21,7 +19,7 @@ public class Channel {
     //CHANNELITEM struct
     private int port;
     private String name;
-    private int gaugePx, worldId, channelId;
+    private int worldId, channelId;
     private boolean adultChannel;
     private List<Field> fields;
     private Map<Integer, Tuple<Byte, Client>> transfers;
@@ -34,7 +32,7 @@ public class Channel {
         this.channelId = channelId;
         this.adultChannel = adultChannel;
         this.port = ServerConstants.LOGIN_PORT + 100 + channelId;
-        this.fields = new ArrayList<>();
+        this.fields = new CopyOnWriteArrayList<>();
         this.transfers = new HashMap<>();
     }
 
@@ -48,7 +46,7 @@ public class Channel {
         this.channelId = channelId;
         this.adultChannel = false;
         this.port = ServerConstants.LOGIN_PORT + 100 + channelId;
-        this.fields = new ArrayList<>();
+        this.fields = new CopyOnWriteArrayList<>();
         this.transfers = new HashMap<>();
     }
 
@@ -155,5 +153,16 @@ public class Channel {
         for(Char chr : getChars().values()) {
             chr.write(outPacket);
         }
+    }
+
+    public void clearCache() {
+        Set<Field> toRemove = new HashSet<>();
+        for (Field field : getFields()) {
+            if (field.getChars().size() == 0 && field.getDrops().size() == 0) {
+                toRemove.add(field);
+            }
+        }
+        getFields().removeAll(toRemove);
+
     }
 }

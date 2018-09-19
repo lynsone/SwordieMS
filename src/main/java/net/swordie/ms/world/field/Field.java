@@ -72,7 +72,7 @@ public class Field {
     private int objectIDCounter = 1000000;
     private boolean userFirstEnter = false;
     private String fieldScript = "";
-    private ScriptManagerImpl scriptManagerImpl;
+    private ScriptManagerImpl scriptManagerImpl = new ScriptManagerImpl(this);
     private RuneStone runeStone;
     private ScheduledFuture runeStoneHordesTimer;
     private int burningFieldLevel;
@@ -103,7 +103,6 @@ public class Field {
     public void startFieldScript() {
         String script = getFieldScript();
         if(!"".equalsIgnoreCase(script)) {
-            scriptManagerImpl = new ScriptManagerImpl(this);
             log.debug(String.format("Starting field script %s.", script));
             scriptManagerImpl.startScript(getId(), script, ScriptType.Field);
         }
@@ -537,9 +536,6 @@ public class Field {
         for (Life life : getLifes().values()) {
             spawnLife(life, chr);
         }
-        for (Reactor reactor : getReactors()) {
-            spawnLife(reactor, chr);
-        }
         if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && isChannelField() && !isTown()) {
             chr.write(CField.runeStoneAppear(getRuneStone()));
         }
@@ -876,7 +872,7 @@ public class Field {
                 item.setQuantity(dropInfo.getQuantity());
                 drop.setItem(item);
                 ItemInfo ii = ItemData.getItemInfoByID(itemID);
-                if (ii != null) {
+                if (ii != null && ii.isQuest()) {
                     quests = ii.getQuestIDs();
                 }
             } else {

@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.quest.progress;
 
+import net.swordie.ms.client.character.Char;
 import net.swordie.ms.loaders.DatSerializable;
 
 import javax.persistence.*;
@@ -16,14 +17,15 @@ public abstract class QuestProgressRequirement implements DatSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    // order of encoding for quest record messages
     @Column(name = "orderNum")
-    private int order = 99;
+    private int order = 999;
 
     /**
      * Returns whether this progress requirement has been completed by the player.
      * @return Completeness.
      */
-    public abstract boolean isComplete();
+    public abstract boolean isComplete(Char chr);
 
     public long getId() {
         return id;

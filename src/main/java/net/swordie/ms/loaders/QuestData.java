@@ -267,6 +267,8 @@ public class QuestData {
                         case "mob":
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
                                 QuestProgressMobRequirement qpmr = new QuestProgressMobRequirement();
+                                // items are always after mobs
+                                qpmr.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -278,7 +280,6 @@ public class QuestData {
                                             qpmr.setRequiredCount(Integer.parseInt(questValue));
                                             break;
                                         case "order":
-                                            qpmr.setOrder(Integer.parseInt(questValue));
                                             break;
                                         default:
                                             log.warn(String.format("(%d) Unk mob name %s with value %s", questID, questName, questValue));
@@ -286,6 +287,45 @@ public class QuestData {
                                     }
                                 }
                                 quest.addProgressRequirement(qpmr);
+                            }
+                            break;
+                        case "item":
+                            for (Node idNode : XMLApi.getAllChildren(infoNode)) {
+                                QuestStartItemRequirement qir = new QuestStartItemRequirement();
+                                QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
+                                qpir.setOrder(Integer.parseInt(XMLApi.getNamedAttribute(idNode, "name")));
+                                for (Node questNode : XMLApi.getAllChildren(idNode)) {
+                                    String questName = XMLApi.getNamedAttribute(questNode, "name");
+                                    String questValue = XMLApi.getNamedAttribute(questNode, "value");
+                                    switch (questName) {
+                                        case "id":
+                                            if (status == 0) {
+                                                qir.setId(Integer.parseInt(questValue));
+                                            } else {
+                                                qpir.setItemID(Integer.parseInt(questValue));
+                                            }
+                                            break;
+                                        case "count":
+                                            if (status == 0) {
+                                                qir.setQuantity(Integer.parseInt(questValue));
+                                            } else {
+                                                qpir.setRequiredCount(Integer.parseInt(questValue));
+                                            }
+                                            break;
+                                        case "order":
+                                            break;
+                                        case "secret":
+                                            break;
+                                        default:
+                                            log.warn(String.format("(%d) Unk item name %s with value %s", questID, questName, questValue));
+                                            break;
+                                    }
+                                }
+                                if (status == 0) {
+                                    quest.addRequirement(qir);
+                                } else {
+                                    quest.addProgressRequirement(qpir);
+                                }
                             }
                             break;
                         case "skill":
@@ -306,47 +346,6 @@ public class QuestData {
                                             log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
-                                }
-                            }
-                            break;
-                        case "item":
-                            for (Node idNode : XMLApi.getAllChildren(infoNode)) {
-                                QuestStartItemRequirement qir = new QuestStartItemRequirement();
-                                QuestProgressItemRequirement qpir = new QuestProgressItemRequirement();
-                                for (Node questNode : XMLApi.getAllChildren(idNode)) {
-                                    String questName = XMLApi.getNamedAttribute(questNode, "name");
-                                    String questValue = XMLApi.getNamedAttribute(questNode, "value");
-                                    switch (questName) {
-                                        case "id":
-                                            if (status == 0) {
-                                                qir.setId(Integer.parseInt(questValue));
-                                            } else {
-                                                qpir.setItemID(Integer.parseInt(questValue));
-                                            }
-                                            break;
-                                        case "count":
-                                            if (status == 0) {
-                                                qir.setQuantity(Integer.parseInt(questValue));
-                                            } else {
-                                                qpir.setRequiredCount(Integer.parseInt(questValue));
-                                            }
-                                            break;
-                                        case "order":
-                                            if (status != 0) {
-                                                qpir.setOrder(Integer.parseInt(questValue));
-                                            }
-                                            break;
-                                        case "secret":
-                                            break;
-                                        default:
-                                            log.warn(String.format("(%d) Unk item name %s with value %s", questID, questName, questValue));
-                                            break;
-                                    }
-                                }
-                                if (status == 0) {
-                                    quest.addRequirement(qir);
-                                } else {
-                                    quest.addProgressRequirement(qpir);
                                 }
                             }
                             break;

@@ -32,6 +32,7 @@ import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Familiar;
+import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.loaders.MonsterCollectionData;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionGroupRewardInfo;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
@@ -118,7 +119,7 @@ public class DatabaseManager {
                 MonsterCollection.class,
                 MonsterCollectionReward.class,
                 Alliance.class,
-
+                DropInfo.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);

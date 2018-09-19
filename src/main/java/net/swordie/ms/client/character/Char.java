@@ -490,21 +490,47 @@ public class Char {
 	}
 
 	public void addItemToInventory(InvType type, Item item, boolean hasCorrectBagIndex) {
-		getQuestManager().handleItemGain(item);
+		if (item == null) {
+			return;
+		}
 		Inventory inventory = getInventoryByType(type);
+		ItemInfo ii = ItemData.getItemInfoByID(item.getItemId());
+		int quantity = item.getQuantity();
 		if (inventory != null) {
-			Item existingItem = inventory.getItemByItemID(item.getItemId());
-			if (existingItem != null && existingItem.getInvType().isStackable()) {
-				existingItem.addQuantity(item.getQuantity());
+			Item existingItem = inventory.getItemByItemIDAndStackable(item.getItemId());
+			boolean rec = false;
+			if (existingItem != null && existingItem.getInvType().isStackable() && existingItem.getQuantity() < ii.getSlotMax()) {
+				if (quantity + existingItem.getQuantity() > ii.getSlotMax()) {
+					quantity = ii.getSlotMax() - existingItem.getQuantity();
+					item.setQuantity(item.getQuantity() - quantity);
+					rec = true;
+				}
+				existingItem.addQuantity(quantity);
 				write(WvsContext.inventoryOperation(true, false,
 						UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
+				Item copy = item.deepCopy();
+				copy.setQuantity(quantity);
+				if (rec) {
+					addItemToInventory(item);
+				}
 			} else {
 				if (!hasCorrectBagIndex) {
 					item.setBagIndex(inventory.getFirstOpenSlot());
 				}
+				Item itemCopy = null;
+				if (item.getInvType().isStackable() && ii != null && item.getQuantity() > ii.getSlotMax()) {
+					itemCopy = item.deepCopy();
+					quantity = quantity - ii.getSlotMax();
+					itemCopy.setQuantity(quantity);
+					item.setQuantity(ii.getSlotMax());
+					rec = true;
+				}
 				inventory.addItem(item);
 				write(WvsContext.inventoryOperation(true, false,
 						ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+				if (rec) {
+					addItemToInventory(itemCopy);
+				}
 			}
 			setBulletIDForAttack(calculateBulletIDForAttack());
 		}
@@ -2259,7 +2285,6 @@ public class Char {
 			}
 		}
 
-
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();
@@ -2314,11 +2339,6 @@ public class Char {
 		int expFromExpR = (int) (amount * (getTotalStat(BaseStat.expR) / 100D));
 		amount += expFromExpR;
 		int level = getLevel();
-		if (level < 10) {
-			amount = amount > Long.MAX_VALUE ? Long.MAX_VALUE : amount;
-		} else {
-			amount = amount > Long.MAX_VALUE / GameConstants.EXP_RATE ? Long.MAX_VALUE : amount * GameConstants.EXP_RATE * 10;
-		}
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		long curExp = cs.getExp();
 		if (level >= GameConstants.charExp.length - 1) {
@@ -2711,10 +2731,11 @@ public class Char {
 	}
 
 	public boolean hasItemCount(int itemID, int count) {
-		return getInventories().stream().anyMatch(inv -> {
-			Item item = inv.getItemByItemID(itemID);
-			return item != null && item.getQuantity() >= count;
-		});
+		Inventory inv = getInventoryByType(ItemData.getItemDeepCopy(itemID).getInvType());
+		return inv.getItems().stream()
+				.filter(i -> i.getItemId() == itemID)
+				.mapToInt(Item::getQuantity)
+				.sum() >= count;
 	}
 
 	public short getLevel() {

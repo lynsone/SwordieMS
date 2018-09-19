@@ -5,16 +5,28 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.Util;
 
+import javax.persistence.*;
+
 /**
  * Created on 2/21/2018.
  */
+@Entity
+@Table(name = "mob_drops")
 public class DropInfo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private int itemID;
     private int chance; // out of a 1000
+    @Transient
     private int money;
-    private int minMoney, maxmoney;
+    @Transient
+    private int minMoney;
+    @Transient
+    private int maxmoney;
     private int minQuant = 1;
     private int maxQuant = 1;
+    @Transient
     private int quantity = 1;
 
     public DropInfo() {
@@ -58,15 +70,6 @@ public class DropInfo {
 
     public void setMaxmoney(int maxmoney) {
         this.maxmoney = maxmoney;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof DropInfo)) {
-            return false;
-        }
-        DropInfo other = (DropInfo) obj;
-        return other.getItemID() == getItemID() && other.getMoney() == getMoney();
     }
 
     public int getItemID() {
@@ -142,5 +145,13 @@ public class DropInfo {
         } else {
             return String.format("%d mesos.", getMoney());
         }
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

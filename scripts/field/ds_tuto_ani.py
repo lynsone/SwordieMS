@@ -1,4 +1,3 @@
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 sm.playVideoByScript("DemonSlayer1.avi")# DemonSlayer2.avi for female
 

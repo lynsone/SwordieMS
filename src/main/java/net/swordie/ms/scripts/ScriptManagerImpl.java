@@ -184,6 +184,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
 			scriptEngine.put("sm", this);
 			scriptEngine.put("chr", chr);
+			scriptEngine.put("field", chr == null ? field : chr.getField());
 		}
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
@@ -203,7 +204,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	private boolean isQuestScriptAllowed() {
-		return getLastActiveScriptType() == ScriptType.None && !curNodeEventEnd;
+		return getLastActiveScriptType() == ScriptType.None;
 	}
 
 	public Map<ScriptType, Future> getEvaluations() {
@@ -212,7 +213,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void notifyMobDeath(Mob mob) {
 		if (isActive(ScriptType.Field)) {
-			getScriptInfoByType(ScriptType.Field).setResponse(mob);
+			getScriptInfoByType(ScriptType.Field).addResponse(mob);
 		}
 	}
 
@@ -222,7 +223,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		boolean exists = new File(dir).exists();
 		if (!exists) {
 			log.error(String.format("[Error] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
-			chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
+			if(chr != null) {
+				chr.chatMessage(Mob, String.format("[Script] Could not find script %s/%s", scriptType.getDir().toLowerCase(), name));
+			}
 			dir = String.format("%s/%s/%s%s", ServerConstants.SCRIPT_DIR,
 					scriptType.getDir().toLowerCase(), DEFAULT_SCRIPT, SCRIPT_ENGINE_EXTENSION);
 		}
@@ -238,7 +241,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			script.append(Util.readFile(dir, Charset.defaultCharset()));
 		} catch (IOException e) {
 			e.printStackTrace();
-			lockInGameUI(false); // so players don't get stuck if a script fails
+			if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
 		} finally {
 			fileReadLock.unlock();
 		}
@@ -249,7 +252,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			if (!e.getMessage().contains(INTENDED_NPE_MSG)) {
 				log.error(String.format("Unable to compile script %s!", name));
 				e.printStackTrace();
-				lockInGameUI(false); // so players don't get stuck if a script fails
+				if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName())) {
@@ -314,13 +317,13 @@ public class ScriptManagerImpl implements ScriptManager {
 						if (isActive(scriptType)) {
 							switch (lastType.getResponseType()) {
 								case Response:
-									si.setResponse((int) response);
+									si.addResponse((int) response);
 									break;
 								case Answer:
-									si.setResponse(answer);
+									si.addResponse(answer);
 									break;
 								case Text:
-									si.setResponse(text);
+									si.addResponse(text);
 									break;
 							}
 						}
@@ -641,6 +644,58 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void setSTR(short amount) {
+		chr.setStat(Stat.str, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.str, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setINT(short amount) {
+		chr.setStat(Stat.inte, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.inte, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setDEX(short amount) {
+		chr.setStat(Stat.dex, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.dex, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setLUK(short amount) {
+		chr.setStat(Stat.luk, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.luk, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setMaxHP(int amount) {
+		chr.setStat(Stat.mhp, amount);
+		chr.setStat(Stat.hp, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mhp, amount);
+		stats.put(Stat.hp, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
+	public void setMaxMP(int amount) {
+		chr.setStat(Stat.mmp, amount);
+		chr.setStat(Stat.mp, amount);
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.mmp, amount);
+		stats.put(Stat.mp, amount);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
 	public void jobAdvance(short jobID) {
 		setJob(jobID);
 		addAP(5); //Standard added AP upon Job Advancing
@@ -715,9 +770,19 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void lockInGameUI(boolean lock) {
-		chr.write(UserLocal.setInGameDirectionMode(lock, true, false));
+		lockInGameUI(lock, true);
 	}
-        
+
+	public void lockInGameUI(boolean lock, boolean blackFrame) {
+		if (chr != null) {
+			if (lock) {
+				chr.write(CField.curNodeEventEnd(true));// should be true when you send lockingameui
+				setCurNodeEventEnd(lock);
+			}
+			chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
+		}
+	}
+
 	public void curNodeEventEnd(boolean enable) {
 		setCurNodeEventEnd(enable);
 		chr.write(CField.curNodeEventEnd(enable));
@@ -1230,6 +1295,15 @@ public class ScriptManagerImpl implements ScriptManager {
 		removeMobByObjId(life.getObjectId());
 	}
 
+	public void removeMobFromMapByTemplateId(int id, int fieldId) {
+		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
+		Life life = field.getLifeByTemplateId(id);
+		if(life == null) {
+			return;
+		}
+		removeMobByObjId(life.getObjectId());
+	}
+
 	@Override
 	public void showHP(int templateID) {
 		chr.getField().getMobs().stream()
@@ -1355,6 +1429,24 @@ public class ScriptManagerImpl implements ScriptManager {
 		return res;
 	}
 
+	public List<Char> getOnlinePartyMembers() {
+		Party party = getParty();
+		if (party == null) {
+			return new ArrayList<>();
+		}
+		return party.getOnlineChars();
+	}
+
+	public List<Char> getPartyMembersInSameField(Char chr) {
+		Party party = getParty();
+		if (party == null) {
+			return new ArrayList<>();
+		}
+		List<Char> list = new ArrayList<>(party.getPartyMembersInSameField(chr));
+		list.add(chr);
+		return new ArrayList<>(list);
+	}
+
 
 
 	// Guild/Alliance related methods -------------------------------------------------------------------------------------------
@@ -1472,8 +1564,9 @@ public class ScriptManagerImpl implements ScriptManager {
 			chr.unequip(oldEquip);
 			oldEquip.updateToChar(chr);
 		}
+		equip.setBagIndex(bodyPart);
 		chr.equip(equip);
-		oldEquip.updateToChar(chr);
+		equip.updateToChar(chr);
 	}
 
 	@Override
@@ -1923,8 +2016,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
 	}
 
-	public void createClockForMultiple(int seconds, List<Integer> fieldIDsList) {
-	    for(int fieldID : fieldIDsList) {
+	public void createClockForMultiple(int seconds, int... fieldIDs) {
+	    for(int fieldID : fieldIDs) {
 	        Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
 	        new Clock(ClockType.SecondsClock, field, seconds);
         }
@@ -2070,9 +2163,21 @@ public class ScriptManagerImpl implements ScriptManager {
 		addEvent(scheduledFuture);
 		return scheduledFuture;
 	}
+
 	@Override
-	public void playVideoByScript(String videoPath){
+	public int playVideoByScript(String videoPath) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.CompletedVideo);
 		chr.write(UserLocal.videoByScript(videoPath, false));
+		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+		if (response == null) {
+			throw new NullPointerException(INTENDED_NPE_MSG);
+		}
+		return (int) response;
+	}
+
+	public void setFuncKeyByScript(boolean add, int action, int key) {
+		chr.write(UserLocal.setFuncKeyByScript(add, action, key));
+		chr.getFuncKeyMap().putKeyBinding(key, add ? (byte) 1 : (byte) 0, action);
 	}
         
 	private ScriptMemory getMemory() {

@@ -70,9 +70,9 @@ public class Server extends Properties {
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();
 		worldList.add(new World(1, "Je Moeder", 3));
-		startNow = System.currentTimeMillis();
+		long startCashShop = System.currentTimeMillis();
 		initCashShop();
-		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startNow) + "ms");
+		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startCashShop) + "ms");
 
 		MonsterCollectionData.loadFromSQL();
 
@@ -156,6 +156,9 @@ public class Server extends Properties {
 		QuestData.clear();
 		SkillData.clear();
 		ReactorData.clear();
+		for (World world : getWorlds()) {
+			world.clearCache();
+		}
 	}
 
 	public void initCashShop() {

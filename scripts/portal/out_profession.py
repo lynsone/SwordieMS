@@ -1,3 +1,5 @@
 # 910001000
-sm.warp(100000000, 19)
-sm.dispose()
+if not sm.getReturnField() is None:
+    sm.warp(sm.getReturnField())
+else:
+    sm.warp(100000000, 19)

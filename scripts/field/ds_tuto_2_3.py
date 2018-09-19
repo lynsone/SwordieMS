@@ -1,4 +1,3 @@
-sm.curNodeEventEnd(True)
 sm.lockInGameUI(True)
 
 sm.showFieldEffect("demonSlayer/whiteOut", 0)
