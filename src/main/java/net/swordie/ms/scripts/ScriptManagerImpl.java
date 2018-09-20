@@ -49,6 +49,7 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.*;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
+import net.swordie.ms.world.field.fieldeffect.GreyFieldType;
 import net.swordie.ms.world.field.obtacleatom.ObtacleAtomInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleInRowInfo;
 import net.swordie.ms.world.field.obtacleatom.ObtacleRadianInfo;
@@ -570,6 +571,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipBoxChatAsPlayer);
 	}
 
+	public void flipBoxChatPlayerNoEscape() {
+		getNpcScriptInfo().addParam(NpcScriptInfo.Param.FlipBoxChatAsPlayerNoEscape);
+	}
+
 
 
 	// Start helper methods for scripts --------------------------------------------------------------------------------
@@ -806,8 +811,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void warp(int id) {
-		Field field = chr.getClient().getChannelInstance().getField(id);
-		chr.warp(field);
+		warp(id, 0);
 	}
 
 	@Override
@@ -1019,6 +1023,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void showFade(int duration) {
 		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient(duration)));
+	}
+
+	public void setFieldColour(GreyFieldType colorFieldType, short red, short green, short blue, int time) {
+		chr.write(CField.fieldEffect(FieldEffect.setFieldColor(colorFieldType, red, green, blue, time)));
 	}
 
 	@Override
