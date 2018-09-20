@@ -2022,8 +2022,14 @@ public class ScriptManagerImpl implements ScriptManager {
 				new Position(0, -100), 0, 0, true, 0)));
 	}
 
-	public void sayMonologue(String text, boolean isEnd) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
+	public int sayMonologue(String text, boolean isEnd) {
+        getNpcScriptInfo().setMessageType(NpcMessageType.Monologue);
+        chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
+        Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+        if (response == null) {
+            throw new NullPointerException(INTENDED_NPE_MSG);
+        }
+        return (int) response;
 	}
 
 

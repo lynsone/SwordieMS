@@ -22,4 +22,3 @@ sm.setSpeakerID(1102112)
 sm.sendSay("Yer right, Mihile. We've got to get goin', #h0#. Keep up with yer trainin'.")
 
 sm.completeQuest(20835)
-sm.dispose()

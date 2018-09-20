@@ -23,4 +23,3 @@ sm.sendSay("Yeah, um, I'm sorry. Who are you again? You don't look like much of 
 sm.sendSay("My name is...")
 
 sm.startQuest(20834)
-sm.dispose()

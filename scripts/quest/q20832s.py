@@ -24,4 +24,3 @@ sm.sendSay("#h0#! Do not move from that spot! I will return shortly.")
 
 sm.startQuest(20832)
 sm.completeQuest(20832)
-sm.dispose()

@@ -7,7 +7,5 @@ if sm.sendAskYesNo("Chin up! No slouching! I'm going to whip you into shape!"):
         sm.spawnMob(9300730, -364, -7, False)
     sm.playSound("Aran/balloon", 100)
     sm.avatarOriented("UI/tutorial.img/4")
-    sm.dispose()
 else:
     sm.sendNext("What, you too good to fight?!")
-    sm.dispose()

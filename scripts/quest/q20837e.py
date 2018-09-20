@@ -6,4 +6,3 @@ sm.sendSay("I supposed you're about ready to become a Knight-in-Training. I'll s
 
 sm.completeQuest(20837)
 sm.warp(130030106, 0)
-sm.dispose()

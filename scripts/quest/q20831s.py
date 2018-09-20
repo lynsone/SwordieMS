@@ -8,4 +8,3 @@ if sm.sendAskYesNo("Did you enjoy the drink? You better have! It is the special 
     sm.playSound("Aran/balloon", 100)
 else:
     sm.sendNext("What? Your failure is my failure as a teacher, and I never fail!")
-    sm.dispose()

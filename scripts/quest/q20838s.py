@@ -7,4 +7,3 @@ sm.sendSay("It's easy, easy, easy! See those boxes? Break them! Then defeat the 
 sm.sendSay("Just use #bregular attacks to break the boxes#k! Then use #bskills to defeat the monsters#k! I need 3 Proof of Exam items!")
 sm.startQuest(20838)
 sm.avatarOriented("UI/tutorial.img/9")
-sm.dispose()

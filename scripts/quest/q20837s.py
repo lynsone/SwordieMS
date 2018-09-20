@@ -8,4 +8,3 @@ sm.startQuest(20837)
 for i in range(5):
     sm.spawnMob(9300731, -364, -6, False)
 sm.avatarOriented("UI/tutorial.img/8")
-sm.dispose()

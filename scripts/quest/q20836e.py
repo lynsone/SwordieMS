@@ -7,4 +7,3 @@ sm.sendSay("Skill attacks! They dish out the pain! Open your Skill window by pre
 sm.completeQuest(20836)
 sm.playSound("Aran/balloon", 100)
 sm.avatarOriented("UI/tutorial.img/7")
-sm.dispose()

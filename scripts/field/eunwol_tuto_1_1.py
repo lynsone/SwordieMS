@@ -2,14 +2,13 @@
 PHANTOM = 2159439
 LUMINOUS = 2159467
 
-sm.lockInGameUI(True, False)
 sm.forcedInput(0)
 sm.sendDelay(500)
 
 sm.hideUser(True)
 sm.sendDelay(1000)
 
-ms.moveCamera(False, 100, 1000, 18)
+sm.moveCamera(False, 100, 1000, 18)
 
 sm.sendDelay(191)
 

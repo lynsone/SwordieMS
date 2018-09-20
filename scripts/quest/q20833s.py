@@ -15,4 +15,3 @@ sm.sendSay("OMIGOODNESS! I can understand birds! I must be some sort of superher
 
 sm.createQuestWithQRValue(20833, "gardenIn")# must be sent this qr value
 sm.warp(130030104, 0)
-sm.dispose()

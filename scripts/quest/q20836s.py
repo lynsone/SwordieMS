@@ -5,4 +5,3 @@ sm.sendNext("THERE YOU ARE! I told you not to move! You're going to pay for that
 
 sm.startQuest(20836)
 sm.warp(130030105, 0)
-sm.dispose()
