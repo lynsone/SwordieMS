@@ -20,7 +20,6 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
-import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
@@ -120,8 +119,7 @@ import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.enums.ChatType.*;
-import static net.swordie.ms.enums.EquipBaseStat.cuc;
-import static net.swordie.ms.enums.EquipBaseStat.tuc;
+import static net.swordie.ms.enums.EquipBaseStat.*;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
 import static net.swordie.ms.enums.Stat.*;
@@ -333,6 +331,8 @@ public class WorldHandler {
             int beforeSizeOn = chr.getEquippedInventory().getItems().size();
             int beforeSize = chr.getEquipInventory().getItems().size();
             if (invType == EQUIP && invTypeFrom != invTypeTo) {
+                // TODO: verify job (see item.RequiredJob), level, stat, unique equip requirements
+                // before we allow the player to equip this
                 if (invTypeFrom == EQUIPPED) {
                     chr.unequip(item);
                 } else {
@@ -1471,6 +1471,11 @@ public class WorldHandler {
     public static void handleUserUpgradeAssistItemUseRequest(Client c, InPacket inPacket) {
 
         Char chr = c.getChr();
+        if (c.getWorld().isReboot()) {
+            log.error(String.format("Character %d attempted to scroll in reboot world.", chr.getId()));
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short uPos = inPacket.decodeShort(); //Use Position
         short ePos = inPacket.decodeShort(); //Eqp Position
@@ -1536,7 +1541,7 @@ public class WorldHandler {
         boolean boom = false;
         Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(scrollID).getScrollStats();
         if (vals.size() > 0) {
-            if (equip.getTuc() <= 0) {
+            if (equip.getBaseStat(tuc) <= 0) {
                 WvsContext.dispose(chr);
                 return;
             }
@@ -1575,24 +1580,25 @@ public class WorldHandler {
                         chr.consumeItem(equip);
                     } else {
                         boom = false;
-                        equip.removeAttribute(EquipAttribute.ProtectionScroll);
                     }
                 }
                 if (!equip.hasAttribute(EquipAttribute.UpgradeCountProtection)) {
                     equip.addStat(tuc, -1);
-                } else {
-                    equip.removeAttribute(EquipAttribute.UpgradeCountProtection);
                 }
             }
-            if (equip.hasAttribute(EquipAttribute.LuckyDay)) {
-                equip.removeAttribute(EquipAttribute.LuckyDay);
+            equip.removeAttribute(EquipAttribute.ProtectionScroll);
+            equip.removeAttribute(EquipAttribute.LuckyDay);
+            equip.removeAttribute(EquipAttribute.UpgradeCountProtection);
+            c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), boom));
+            if (!boom) {
+                equip.recalcEnchantmentStats();
+                equip.updateToChar(chr);
             }
+            chr.consumeItem(scroll);
+        } else {
+            chr.chatMessage("Could not find scroll data.");
+            chr.dispose();
         }
-        c.write(CField.showItemUpgradeEffect(chr.getId(), success, false, scrollID, equip.getItemId(), boom));
-        if (!boom) {
-            equip.updateToChar(chr);
-        }
-        chr.consumeItem(scroll);
     }
 
     public static void handleUserItemOptionUpgradeItemUseRequest(Client c, InPacket inPacket) {
@@ -3418,7 +3424,7 @@ public class WorldHandler {
                 pos = (short) Math.abs(pos);
                 Equip equip = (Equip) inv.getItemBySlot(pos);
                 Equip prevEquip = equip.deepCopy();
-                if (equip == null || equip.getTuc() + equip.getIuc() <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
+                if (equip == null || equip.getBaseStat(tuc) <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
                     log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), pos, equip == null ? 0 : equip.getItemId()));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
@@ -3434,10 +3440,11 @@ public class WorldHandler {
                 ScrollUpgradeInfo sui = suis.get(scrollID);
                 chr.consumeItem(ItemConstants.SPELL_TRACE_ID, sui.getCost());
                 boolean success = sui.applyTo(equip);
+                equip.recalcEnchantmentStats();
                 String desc = success ? "Your item has been upgraded." : "Your upgrade has failed.";
                 chr.write(CField.showScrollUpgradeResult(false, success ? 1 : 0, desc, prevEquip, equip));
                 equip.updateToChar(chr);
-                if (equip.getTuc() + equip.getIuc() > 0) {
+                if (equip.getBaseStat(tuc) > 0) {
                     suis = ItemConstants.getScrollUpgradeInfosByEquip(equip);
                     c.write(CField.scrollUpgradeDisplay(false, suis));
                 }
@@ -3456,7 +3463,7 @@ public class WorldHandler {
                     return;
                 }
                 if (!ItemConstants.isUpgradable(equip.getItemId()) ||
-                        (equip.getTuc() != 0 && !c.getWorld().isReboot()) ||
+                        (equip.getBaseStat(tuc) != 0 && !c.getWorld().isReboot()) ||
                         chr.getEquipInventory().getEmptySlots() == 0 ||
                         equip.getChuc() >= GameConstants.getMaxStars(equip) ||
                         equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
@@ -3471,21 +3478,22 @@ public class WorldHandler {
                     return;
                 }
                 Equip oldEquip = equip.deepCopy();
-                int successProp = GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp());
+                int successProp = GameConstants.getEnchantmentSuccessRate(equip);
                 if (extraChanceFromMiniGame) {
                     successProp *= 1.045;
                 }
-                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp());
+                int destroyProp = GameConstants.getEnchantmentDestroyRate(equip);
                 if (equippedInv && destroyProp > 0 && chr.getEquipInventory().getEmptySlots() == 0) {
-                    c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("You do not have enough space in your" +
+                    c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("You do not have enough space in your " +
                             "equip inventory in case your item gets destroyed.")));
                     return;
                 }
                 success = Util.succeedProp(successProp, 1000);
                 boolean boom = false;
-                boolean canDegrade = equip.getChuc() > 5 && equip.getChuc() % 5 != 0;
+                boolean canDegrade = equip.isSuperiorEqp() ? equip.getChuc() > 0 : equip.getChuc() > 5 && equip.getChuc() % 5 != 0;
                 if (success) {
                     equip.setChuc((short) (equip.getChuc() + 1));
+                    equip.setDropStreak(0);
                 } else if (Util.succeedProp(destroyProp, 1000)) {
                     equip.setChuc((short) 0);
                     equip.addSpecialAttribute(EquipSpecialAttribute.Vestige);
@@ -3503,6 +3511,7 @@ public class WorldHandler {
                     }
                 } else if (canDegrade) {
                     equip.setChuc((short) (equip.getChuc() - 1));
+                    equip.setDropStreak(equip.getDropStreak() + 1);
                 }
                 chr.deductMoney(cost);
                 equip.recalcEnchantmentStats();
@@ -3540,8 +3549,8 @@ public class WorldHandler {
                     chr.dispose();
                     return;
                 }
-                if (equip == null || equip.getTuc() <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
-                    log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
+                if (equip == null || equip.getBaseStat(tuc) <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
+                    log.error(String.format("Character %d tried to scroll a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.dispose();
                     return;
@@ -3564,8 +3573,8 @@ public class WorldHandler {
                 }
                 c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
                         GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp()),
-                        0, GameConstants.getEnchantmentSuccessRate(equip.getChuc(), equip.isSuperiorEqp()),
-                        GameConstants.getEnchantmentDestroyRate(equip.getChuc(), equip.isSuperiorEqp()), false));
+                        0, GameConstants.getEnchantmentSuccessRate(equip),
+                        GameConstants.getEnchantmentDestroyRate(equip), equip.getDropStreak() >= 2));
                 break;
             case MiniGameDisplay:
                 c.write(CField.miniGameDisplay(eeType));
@@ -4185,7 +4194,7 @@ public class WorldHandler {
         if ((c.getChr().getRuneCooldown() + (GameConstants.RUNE_COOLDOWN_TIME * 60000)) < System.currentTimeMillis()) {
 
             // Rune is too strong for user
-            if (minLevel > c.getChr().getStat(level)) {
+            if (minLevel > c.getChr().getStat(Stat.level)) {
                 c.write(CField.runeStoneUseAck(4));
                 return;
             }
@@ -4906,31 +4915,31 @@ public class WorldHandler {
                     hammer == null || !ItemConstants.isGoldHammer(hammer)) {
                 log.error(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
                         chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
-                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, equip));
+                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, 0));
                 return;
             }
 
             Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(hammer.getItemId()).getScrollStats();
 
             if (vals.size() > 0) {
-                if (equip.getTuc() <= 0 || equip.getIuc() >= ItemConstants.MAX_HAMMER_SLOTS) {
+                if (equip.getBaseStat(iuc) >= ItemConstants.MAX_HAMMER_SLOTS) {
                     log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
-                            chr.getId(), equip.getTuc(), equip.getIuc()));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, equip));
+                            chr.getId(), equip == null ? 0 : equip.getItemId()));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, 0));
                     return;
                 }
 
                 boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
 
                 if (success) {
-                    equip.setIuc((short) (equip.getIuc() + 1)); // +1 hammer used
-                    equip.setTuc((short) (equip.getTuc() + 1)); // +1 upgrades available
+                    equip.addStat(iuc, 1); // +1 hammer used
+                    equip.addStat(tuc, 1); // +1 upgrades available
                     equip.updateToChar(chr);
                     chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, equip));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, ItemConstants.MAX_HAMMER_SLOTS - (int) equip.getBaseStat(tuc)));
                 } else {
                     chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 1, equip));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 1, 0));
                 }
 
                 chr.consumeItem(hammer.getItemId(), 1);
