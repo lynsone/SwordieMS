@@ -1133,13 +1133,13 @@ public class Equip extends Item {
     }
 
     private boolean hasStat(EquipBaseStat ebs) {
-        return getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0;
+        return getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0 || getEnhancementStat(ebs) != 0;
     }
 
     private int getStatMask(int pos) {
         int mask = 0;
         for (EquipBaseStat ebs : EquipBaseStat.values()) {
-            if ((getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0 || getEnhancementStat(ebs) != 0) && ebs.getPos() == pos) {
+            if (hasStat(ebs) && ebs.getPos() == pos) {
                 mask |= ebs.getVal();
             }
         }
@@ -1369,6 +1369,12 @@ public class Equip extends Item {
                 return getfJump();
             case statR:
                 return getfAllStat();
+            case bdr:
+                return getfBoss();
+            case damR:
+                return getfDamage();
+            case iIncReq:
+                return getfLevel();
             default: return 0;
         }
     }
