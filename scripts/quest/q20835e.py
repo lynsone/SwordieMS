@@ -21,4 +21,4 @@ sm.sendSay("I hate to break up the party, but we have a meeting to get to. Sorry
 sm.setSpeakerID(1102112)
 sm.sendSay("Yer right, Mihile. We've got to get goin', #h0#. Keep up with yer trainin'.")
 
-sm.completeQuest(20835)
+sm.completeQuest(parentID)

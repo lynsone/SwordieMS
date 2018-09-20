@@ -19,4 +19,4 @@ sm.sendSay("It was lovely to meet you, #h0#. I sincerely hope that you become a 
 sm.setSpeakerID(1102107)
 sm.sendSay("I have my doubts. Not even promoted to knight-in-training and already nosing about the Empress's quarters for no good reason. Unacceptable!")
 
-sm.startQuest(20835)
+sm.startQuest(parentID)
