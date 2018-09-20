@@ -1334,29 +1334,30 @@ public class Equip extends Item {
     public long getBaseStatFlame(EquipBaseStat equipBaseStat) {
         switch(equipBaseStat){
             case iStr:
-                return getEnchantStat(EnchantStat.STR);
+                return getfSTR();
             case iDex:
-                return getEnchantStat(EnchantStat.DEX);
+                return getfDEX();
             case iInt:
-                return getEnchantStat(EnchantStat.INT);
+                return getfINT();
             case iLuk:
-                return getEnchantStat(EnchantStat.LUK);
+                return getfLUK();
             case iMaxHP:
-                return getEnchantStat(EnchantStat.MHP);
+                return getfHP();
             case iMaxMP:
-                return getEnchantStat(EnchantStat.MMP);
+                return getfMP();
             case iPAD:
-                return getEnchantStat(EnchantStat.PAD);
+                return getfATT();
             case iMAD:
-                return getEnchantStat(EnchantStat.MAD);
+                return getfMATT();
             case iPDD:
-                return getEnchantStat(EnchantStat.PDD);
             case iMDD:
-                return getEnchantStat(EnchantStat.MDD);
+                return getfDEF();
             case iSpeed:
-                return getEnchantStat(EnchantStat.SPEED);
+                return getfSpeed();
             case iJump:
-                return getEnchantStat(EnchantStat.JUMP);
+                return getfJump();
+            case statR:
+                return getfAllStat();
             default: return 0;
         }
     }
