@@ -58,6 +58,7 @@ elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
     if not sm.hasMobsInField():
         if not sm.isPartyLeader():
             sm.sendSayOkay("Please have your party leader speak to me.")
+            sm.dispose()
         else:
             sm.sendNext("You have done us a great favour, what ever can we do to repay you?")
         sm.warpPartyIn(925100700)

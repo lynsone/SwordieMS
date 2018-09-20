@@ -11,6 +11,7 @@ if sm.isPartyLeader():
 
 else:
     sm.sendSayOkay("Please have your party leader talk to me.")
+    sm.dispose()
 
 if sm.checkParty():
 
