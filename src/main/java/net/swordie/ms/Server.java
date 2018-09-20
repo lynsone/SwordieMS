@@ -53,7 +53,7 @@ public class Server extends Properties {
 	}
 
 	private void init(String[] args) {
-	    log.info("Starting server.");
+		log.info("Starting server.");
 		long startNow = System.currentTimeMillis();
 		DatabaseManager.init();
 		log.info("Loaded Hibernate in " + (System.currentTimeMillis() - startNow) + "ms");
