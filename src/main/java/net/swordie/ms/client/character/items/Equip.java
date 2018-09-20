@@ -1558,7 +1558,7 @@ public class Equip extends Item {
 
     public void recalcEnchantmentStats() {
         getEnchantStats().clear();
-        for (int i = 1; i <= getChuc(); i++) {
+        for (int i = 0; i < getChuc(); i++) {
             for(EnchantStat es : getHyperUpgradeStats().keySet()) {
                 putEnchantStat(es, getEnchantStats().getOrDefault(es, 0) +
                         GameConstants.getEnchantmentValByChuc(this, es, (short) i, (int) getBaseStat(es.getEquipBaseStat())));
