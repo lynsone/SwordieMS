@@ -15,10 +15,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.enums.DropEnterType;
-import net.swordie.ms.enums.DropLeaveType;
-import net.swordie.ms.enums.EliteState;
-import net.swordie.ms.enums.TextEffectType;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
@@ -58,6 +55,7 @@ public class Field {
     private int vrTop, vrLeft, vrBottom, vrRight;
     private double mobRate;
     private int id;
+    private FieldType fieldType;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
     private int consumeItemCoolTime, link;
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
@@ -160,6 +158,10 @@ public class Field {
         this.id = id;
     }
 
+    public FieldType getFieldType() { return fieldType; }
+
+    public void setFieldType(FieldType fieldType) { this.fieldType = fieldType; }
+    
     public Set<Portal> getPortals() {
         return portals;
     }

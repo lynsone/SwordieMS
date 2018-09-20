@@ -39,4 +39,3 @@ sm.showFieldEffect("demonSlayer/text6", 0)
 sm.sendDelay(500)
 
 sm.showFieldEffect("demonSlayer/text7", 0)
-sm.dispose()

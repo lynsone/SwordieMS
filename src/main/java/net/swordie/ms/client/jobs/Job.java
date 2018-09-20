@@ -634,26 +634,40 @@ public abstract class Job {
 			skill.setCurrentLevel(level);
 			chr.addSkill(skill);
 		}
-		if (level == 10) {
-			String message = "#b[Guide] 1st Job Advancement#k\r\n\r\n";
-			message += "You've reached level 10, and are ready for your #b[1st Job Advancement]#k!\r\n\r\n";
-			message += "Complete the #r[Job Advancement]#k quest and unlock your 1st job advancement!\r\n";
-			chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
-		} else if (level == 20) {
-			String message = "#b[Guide] Upgrade#k\r\n\r\n";
-			message += "You've reached level 20, and can now use #b[Scroll Enhancement]#k!\r\n\r\n";
-			message += "Accept the quest #bDo You Know About Scroll Enhancements?#k from the Quest Notifier!\r\n";
-			chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
-		} else if (level == 30) {
-			String message = "#b[Guide] 2nd Job Advancement#k\r\n\r\n";
-			message += "You've reached level 30, and are ready for your #b[2nd Job Advancement]#k!\r\n\r\n";
-			message += "Complete the #r[Job Advancement]#k quest to unlock your 2nd job advancement!\r\n";
-			chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
+		switch (level) {
+			case 10: {
+				String message = "#b[Guide] 1st Job Advancement#k\r\n\r\n";
+				message += "You've reached level 10, and are ready for your #b[1st Job Advancement]#k!\r\n\r\n";
+				message += "Complete the #r[Job Advancement]#k quest and unlock your 1st job advancement!\r\n";
+				chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
+				break;
+			}
+			case 20: {
+				String message = "#b[Guide] Upgrade#k\r\n\r\n";
+				message += "You've reached level 20, and can now use #b[Scroll Enhancement]#k!\r\n\r\n";
+				message += "Accept the quest #bDo You Know About Scroll Enhancements?#k from the Quest Notifier!\r\n";
+				chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
+				break;
+			}
+			case 30: {
+				String message = "#b[Guide] 2nd Job Advancement#k\r\n\r\n";
+				message += "You've reached level 30, and are ready for your #b[2nd Job Advancement]#k!\r\n\r\n";
+				message += "Complete the #r[Job Advancement]#k quest to unlock your 2nd job advancement!\r\n";
+				chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
 
-			message = "#b[Guide] Ability#k\r\n\r\n";
-			message += "You've reached level 30 and can now unlock #b[Abilities]#k!\r\n\r\n";
-			message += "Accept the quest #bFirst Ability - The Eye Opener#k from the Quest Notifier!\r\n";
-			chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
+				message = "#b[Guide] Ability#k\r\n\r\n";
+				message += "You've reached level 30 and can now unlock #b[Abilities]#k!\r\n\r\n";
+				message += "Accept the quest #bFirst Ability - The Eye Opener#k from the Quest Notifier!\r\n";
+				chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
+				break;
+			}
+			case 31: {
+				String message = "#b[Guide] Traits#k\r\n\r\n";
+				message += "From level 30 and can now unlock #b[Traits]#k!\r\n\r\n";
+				message += "Open your #bProfession UI (Default Hotkey: B)#k and check your #b[Traits]#k!\r\n";
+				chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
+				break;
+			}
 		}
 	}
 

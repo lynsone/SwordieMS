@@ -26,5 +26,3 @@ for i in range(5):
     if not sm.hasSkill(SKILLS[i]):
         sm.giveSkill(SKILLS[i])
 
-sm.dispose()
-

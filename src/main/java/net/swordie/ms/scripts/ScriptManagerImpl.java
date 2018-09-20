@@ -2010,6 +2010,13 @@ public class ScriptManagerImpl implements ScriptManager {
 				new Position(0, -150), 0, objectID, false, 0)));
 	}
 
+	public void showNpcEffectOnPosition(String path, int x, int y, int templateID) {
+		int objectID = getNpcObjectIdByTemplateId(templateID);
+		if (objectID == 0) return;
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, 0,
+				new Position(x, y), 0, objectID, false, 0)));
+	}
+
 	public void showBalloonMsg(String path, int duration) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
 				new Position(0, -100), 0, 0, true, 0)));
@@ -2096,6 +2103,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void playSound(String sound, int vol) {
 		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
+
+	public void blind(int enable, int x, int color, int time) { chr.write(CField.fieldEffect(FieldEffect.blind(enable, x, color, 0, 0, time))); }
 
 	@Override
 	public int getRandomIntBelow(int upBound) {
