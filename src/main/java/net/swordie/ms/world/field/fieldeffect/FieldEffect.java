@@ -56,6 +56,14 @@ public class FieldEffect {
                 outPacket.encodeString(getString());// Directory to the Effect
                 outPacket.encodeInt(getArg1());     // Delay in ms
                 break;
+            case Blind:
+                outPacket.encodeByte(getArg1());
+                outPacket.encodeShort(getArg2());
+                outPacket.encodeShort(getArg3());
+                outPacket.encodeShort(getArg4());
+                outPacket.encodeShort(getArg5());
+                outPacket.encodeInt(getArg6());
+                break;
             case SetGrey:
                 outPacket.encodeShort(getArg1());   // GreyField Type
                 outPacket.encodeByte(getArg2());    // boolean: ON/OFF
@@ -193,6 +201,20 @@ public class FieldEffect {
 
         fieldEffect.setString(sound);
         fieldEffect.setArg1(vol);
+
+        return fieldEffect;
+    }
+
+    public static FieldEffect blind(int enable, int x, int color, int unk1, int unk2, int time) {
+        FieldEffect fieldEffect = new FieldEffect();
+        fieldEffect.setFieldEffectType(FieldEffectType.Blind);
+
+        fieldEffect.setArg1(enable);
+        fieldEffect.setArg2(x);
+        fieldEffect.setArg3(color);
+        fieldEffect.setArg4(unk1);
+        fieldEffect.setArg5(unk2);
+        fieldEffect.setArg6(time);
 
         return fieldEffect;
     }

@@ -10,4 +10,3 @@ sm.showFieldEffect("demonSlayer/text9", 0)
 sm.sendDelay(3000)
 
 sm.warpInstanceIn(927000010, 1)
-sm.dispose()

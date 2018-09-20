@@ -71,4 +71,3 @@ sm.sendNext("(Your loyalty means so much to me, #p2151009#. Thank you.)")
 
 sm.forcedInput(2)
 sm.curNodeEventEnd(True)
-sm.dispose()

@@ -590,6 +590,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		if (stop) {
 			throw new NullPointerException(INTENDED_NPE_MSG); // makes the underlying script stop
 		}
+		setCurNodeEventEnd(false);
 	}
 
 	public void dispose(ScriptType scriptType) {
@@ -675,6 +676,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
+	public void addMaxHP(int amount) {
+		int currentMHP = chr.getAvatarData().getCharacterStat().getMaxHp();
+		setMaxHP(currentMHP + amount);
+	}
+
 	@Override
 	public void setMaxHP(int amount) {
 		chr.setStat(Stat.mhp, amount);
@@ -683,6 +689,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		stats.put(Stat.mhp, amount);
 		stats.put(Stat.hp, amount);
 		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	public void addMaxMP(int amount) {
+		int currentMMP = chr.getAvatarData().getCharacterStat().getMaxMp();
+		setMaxHP(currentMMP + amount);
 	}
 
 	@Override
@@ -775,10 +786,6 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void lockInGameUI(boolean lock, boolean blackFrame) {
 		if (chr != null) {
-			if (lock) {
-				chr.write(CField.curNodeEventEnd(true));// should be true when you send lockingameui
-				setCurNodeEventEnd(lock);
-			}
 			chr.write(UserLocal.setInGameDirectionMode(lock, blackFrame, false));
 		}
 	}
@@ -1297,11 +1304,15 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void removeMobFromMapByTemplateId(int id, int fieldId) {
 		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
-		Life life = field.getLifeByTemplateId(id);
-		if(life == null) {
+		if (field == null) {
 			return;
 		}
-		removeMobByObjId(life.getObjectId());
+		List<Mob> mobs = new ArrayList<>(field.getMobs());
+		for (Mob mob : mobs) {
+			if (id == mob.getTemplateId()) {
+				mob.die();
+			}
+		}
 	}
 
 	@Override
@@ -1729,6 +1740,15 @@ public class ScriptManagerImpl implements ScriptManager {
 		quest.setQrValue(qrValue);
 	}
 
+	public void addQRValue(int questId, String qrValue) {
+		String qrVal = getQRValue(questId);
+		if (qrVal.equals("") || qrVal.equals("Quest is Null")) {
+			createQuestWithQRValue(questId, qrValue);
+			return;
+		}
+		setQRValue(questId, qrValue + ";" + qrVal);
+	}
+
 	public boolean isComplete(int questID) {
 		return chr.getQuestManager().isComplete(questID);
 	}
@@ -1990,13 +2010,26 @@ public class ScriptManagerImpl implements ScriptManager {
 				new Position(0, -150), 0, objectID, false, 0)));
 	}
 
+	public void showNpcEffectOnPosition(String path, int x, int y, int templateID) {
+		int objectID = getNpcObjectIdByTemplateId(templateID);
+		if (objectID == 0) return;
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, 0,
+				new Position(x, y), 0, objectID, false, 0)));
+	}
+
 	public void showBalloonMsg(String path, int duration) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
 				new Position(0, -100), 0, 0, true, 0)));
 	}
 
-	public void sayMonologue(String text, boolean isEnd) {
-		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
+	public int sayMonologue(String text, boolean isEnd) {
+        getNpcScriptInfo().setMessageType(NpcMessageType.Monologue);
+        chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.monologue(text, isEnd)));
+        Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+        if (response == null) {
+            throw new NullPointerException(INTENDED_NPE_MSG);
+        }
+        return (int) response;
 	}
 
 
@@ -2076,6 +2109,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void playSound(String sound, int vol) {
 		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
+
+	public void blind(int enable, int x, int color, int time) { chr.write(CField.fieldEffect(FieldEffect.blind(enable, x, color, 0, 0, time))); }
 
 	@Override
 	public int getRandomIntBelow(int upBound) {
@@ -2179,7 +2214,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.setFuncKeyByScript(add, action, key));
 		chr.getFuncKeyMap().putKeyBinding(key, add ? (byte) 1 : (byte) 0, action);
 	}
-        
+
+	public void addPopUpSay(int npcID, int duration, String message, String effect) {
+		chr.write(UserLocal.addPopupSay(npcID, duration, message, effect));
+	}
+
 	private ScriptMemory getMemory() {
 		return memory;
 	}

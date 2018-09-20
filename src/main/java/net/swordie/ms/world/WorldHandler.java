@@ -495,7 +495,11 @@ public class WorldHandler {
                 if (chr.getParty() != null) {
                     chr.getParty().clearFieldInstances(0);
                 } else {
-                    chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getField().getForcedReturn()));
+                    if (targetField != -1) {// TODO: Add checks for that.
+                        chr.warp(chr.getOrCreateFieldByCurrentInstanceType(targetField));
+                    } else {
+                        chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getField().getForcedReturn()));
+                    }
                 }
             }
             chr.heal(chr.getMaxHP());
