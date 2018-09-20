@@ -180,13 +180,27 @@ public class SkillConstants {
                 skillId == 25121030 || skillId == 27101202 || skillId == 25111005 || skillId == 23121000 ||
                 skillId == 22171083 || skillId == 14121004 || skillId == 13111020 || skillId == 13121001 ||
                 skillId == 14111006 || (skillId >= 80001389 && skillId <= 80001392) || skillId == 42121000 ||
-                skillId == 42120003;
+                skillId == 42120003 || skillId == 5700010 || skillId == 5711021 || skillId == 5721001 ||
+                skillId == 5721061 || skillId == 21120018 || skillId == 21120019;
 
     }
 
     public static boolean isEvanForceSkill(int skillId) {
-        return skillId == 22110022 || skillId == 22110023 || skillId == 22141011 || skillId == 22140022 ||
-                skillId == 22171062 || skillId == 80001849;
+        switch (skillId) {
+            case 22140022:
+            case 22111011:
+            case 22111012:
+            case 22110022:
+            case 22110023:
+            case 22111017:
+            case 80001894:
+            case 22171062:
+            case 22171063:
+            case 22141011:
+            case 22141012:
+                return true;
+        }
+        return false;
     }
 
     public static boolean isSuperNovaSkill(int skillID) {
@@ -194,9 +208,32 @@ public class SkillConstants {
     }
 
     public static boolean isRushBombSkill(int skillID) {
-        return skillID == 27121201 || skillID == 101120205 || skillID == 101120200 || skillID == 101120203 ||
-                skillID == 61111218 || skillID == 14111022 || skillID == 22140015 || skillID == 5101012 ||
-                skillID == 22140024 || skillID == 12121001 || skillID == 5101014 || skillID == 2221012;
+        switch (skillID) {
+            case 101120205:
+            case 101120203:
+            case 80011386:
+            case 101120200:
+            case 80011380:
+            case 61111113:
+            case 61111218:
+            case 61111111:
+            case 42120003:
+            case 61111100:
+            case 40021186:
+            case 31201001:
+            case 27121201:
+            case 22140015:
+            case 22140024:
+            case 14111022:
+            case 5101014:
+            case 5301001:
+            case 12121001:
+            case 2221012:
+            case 5101012:
+                return true;
+
+        }
+        return false;
     }
 
     public static boolean isZeroSkill(int skillID) {
@@ -208,8 +245,19 @@ public class SkillConstants {
     }
 
     public static boolean isUsercloneSummonedAbleSkill(int skillID) {
-        return skillID == 14111020 || skillID == 14101019 || (skillID >= 14101019 && skillID <= 14101021) ||
-                     skillID == 14120045 || (skillID >= 14121000 && skillID == 14121002);
+        switch (skillID) {
+            case 14001020:
+            case 14101020:
+            case 14101021:
+            case 14111020:
+            case 14111021:
+            case 14111022:
+            case 14111023:
+            case 14120045:
+            case 14121002:
+                return true;
+        }
+        return false;
     }
 
     public static boolean isNoconsumeUsebulletMeleeAttack(int skillID) {
@@ -1250,5 +1298,15 @@ public class SkillConstants {
 
     public static boolean isGuildNoblesseSkill(int skillID) {
         return skillID >= 91001022 && skillID <= 91001024;
+    }
+
+    public static boolean isMultiAttackCooldownSkill(int skillID) {
+        switch (skillID) {
+            case 5311010:
+            case 5711021:
+            case 22171063:
+                return true;
+        }
+        return false;
     }
 }

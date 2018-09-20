@@ -5,11 +5,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
 import net.swordie.ms.handlers.header.InHeader;
-import net.swordie.ms.world.World;
 import net.swordie.ms.world.WorldHandler;
 import net.swordie.ms.world.shop.cashshop.CashShopHandler;
 import org.apache.log4j.LogManager;
@@ -230,6 +230,16 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_EMOTION:
                 WorldHandler.handleUserEmotion(c, inPacket);
                 break;
+            case USER_MELEE_ATTACK:
+            case USER_SHOOT_ATTACK:
+            case USER_MAGIC_ATTACK:
+            case USER_NON_TARGET_FORCE_ATOM_ATTACK:
+            case USER_AREA_DOT_ATTACK:
+                WorldHandler.handleAttack(chr, inPacket, opHeader);
+                break;
+            case SUMMONED_ATTACK:
+                WorldHandler.handleSummonedAttack(c, inPacket);
+                break;
             case USER_BAN_MAP_BY_MOB:
                 WorldHandler.handleBanMapByMob(c, inPacket);
                 break;
@@ -323,9 +333,6 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case SUMMONED_REMOVE:
                 WorldHandler.handleSummonedRemove(c, inPacket);
                 break;
-            case SUMMONED_ATTACK:
-                WorldHandler.handleSummonedAttack(c, inPacket);
-                break;
             case SUMMONED_HIT:
                 WorldHandler.handleSummonedHit(c, inPacket);
                 break;
@@ -349,18 +356,6 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_HYPER_SKILL_UP_REQUEST:
                 WorldHandler.handleUserHyperSkillUpRequest(chr, inPacket);
-                break;
-            case USER_MELEE_ATTACK:
-                WorldHandler.handleMeleeAttack(c, inPacket);
-                break;
-            case USER_SHOOT_ATTACK:
-                WorldHandler.handleShootAttack(c, inPacket);
-                break;
-            case USER_MAGIC_ATTACK:
-                WorldHandler.handleMagicAttack(c, inPacket);
-                break;
-            case USER_NON_TARGET_FORCE_ATOM_ATTACK:
-                WorldHandler.handleNonTargetForceAtomAttack(c, inPacket);
                 break;
             case USER_BODY_ATTACK:
                 WorldHandler.handleBodyAttack(c, inPacket);
@@ -565,9 +560,6 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_DESTROY_GRENADE:
                 WorldHandler.handleUserDestroyGrenade(chr, inPacket);
-                break;
-            case USER_AREA_DOT_ATTACK:
-                WorldHandler.handleUserAreaDotAttack(chr, inPacket);
                 break;
             case USER_HYPER_STAT_SKILL_UP_REQUEST:
                 WorldHandler.handleUserHyperSkillUpRequest(chr, inPacket);
