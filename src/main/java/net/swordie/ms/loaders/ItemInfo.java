@@ -15,7 +15,7 @@ public class ItemInfo {
     private InvType invType;
     private boolean cash;
     private int price;
-    private int slotMax = 1;
+    private int slotMax = 200;
     private boolean tradeBlock;
     private boolean notSale;
     private String path = "";
