@@ -214,6 +214,7 @@ public class ItemConstants {
                 bodyPartList.add(55);
                 break;
             case 118:
+                bodyPartList.add(29);
                 bodyPartList.add(56);
                 break;
             case 119:
