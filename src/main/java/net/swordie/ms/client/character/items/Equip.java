@@ -1133,7 +1133,7 @@ public class Equip extends Item {
     }
 
     private boolean hasStat(EquipBaseStat ebs) {
-        return getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0 || getEnhancementStat(ebs) != 0;
+        return getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0 || getEnchantmentStat(ebs) != 0;
     }
 
     private int getStatMask(int pos) {
@@ -1379,32 +1379,32 @@ public class Equip extends Item {
         }
     }
 
-    public long getEnhancementStat(EquipBaseStat equipBaseStat) {
+    public long getEnchantmentStat(EquipBaseStat equipBaseStat) {
         switch(equipBaseStat){
             case iStr:
-                return getiStr();
+                return getEnchantStat(EnchantStat.STR);
             case iDex:
-                return getiDex();
+                return getEnchantStat(EnchantStat.DEX);
             case iInt:
-                return getiInt();
+                return getEnchantStat(EnchantStat.INT);
             case iLuk:
-                return getiLuk();
+                return getEnchantStat(EnchantStat.LUK);
             case iMaxHP:
-                return getiMaxHp();
+                return getEnchantStat(EnchantStat.MHP);
             case iMaxMP:
-                return getiMaxMp();
+                return getEnchantStat(EnchantStat.MMP);
             case iPAD:
-                return getiPad();
+                return getEnchantStat(EnchantStat.PAD);
             case iMAD:
-                return getiMad();
+                return getEnchantStat(EnchantStat.MAD);
             case iPDD:
-                return getiPDD();
+                return getEnchantStat(EnchantStat.PDD);
             case iMDD:
-                return getiMDD();
+                return getEnchantStat(EnchantStat.MDD);
             case iSpeed:
-                return getiSpeed();
+                return getEnchantStat(EnchantStat.SPEED);
             case iJump:
-                return getiJump();
+                return getEnchantStat(EnchantStat.JUMP);
             default: return 0;
         }
     }
