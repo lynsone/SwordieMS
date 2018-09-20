@@ -22,6 +22,7 @@ import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -881,9 +882,10 @@ public class WvsContext {
      *      1: Item is not upgradable
      *      2: 2 upgrade increases have been used already
      *      3: You can't vicious hammer non-horntail necklace
+     * @param upgradesLeft amount of upgrades left. NOTE: ((v9 >> 8) & 0xFF) - v9 + 2) (where v9 = upgradesLeft)
      * @return the created packet
      */
-    public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, Equip equip) {
+    public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, int upgradesLeft) {
         // Could create an enum for returnResult/msg, but it's not used often enough to warrant this
         OutPacket outPacket = new OutPacket(OutHeader.GOLD_HAMMER_ITEM_UPGRADE_RESULT);
 
@@ -891,7 +893,7 @@ public class WvsContext {
         if (returnResult != 1) {
             outPacket.encodeInt(msg);
         }
-        outPacket.encodeInt(equip == null ? 0 : equip.getTuc());
+        outPacket.encodeInt(upgradesLeft);
 
         return outPacket;
     }

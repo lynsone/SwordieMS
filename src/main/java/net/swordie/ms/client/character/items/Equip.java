@@ -102,6 +102,8 @@ public class Equip extends Item {
     @Column(name = "socketID")
     @OrderColumn(name = "ord")
     private short[] sockets = new short[3];
+    @Transient
+    private int dropStreak = 0;
 
     // flame stats
     // TODO: refactor these to be in a different table
@@ -222,6 +224,7 @@ public class Equip extends Item {
         ret.fBoss = fBoss;
         ret.fDamage = fDamage;
         ret.fLevel = fLevel;
+        ret.dropStreak = dropStreak;
         return ret;
     }
 
@@ -962,6 +965,14 @@ public class Equip extends Item {
         this.fLevel = 0;
     }
 
+    public int getDropStreak() {
+        return dropStreak;
+    }
+
+    public void setDropStreak(int dropStreak) {
+        this.dropStreak = dropStreak;
+    }
+
     public void encode(OutPacket outPacket) {
         // GW_ItemSlotBase
         super.encode(outPacket);
@@ -1122,13 +1133,13 @@ public class Equip extends Item {
     }
 
     private boolean hasStat(EquipBaseStat ebs) {
-        return getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0;
+        return getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0 || getEnchantmentStat(ebs) != 0;
     }
 
     private int getStatMask(int pos) {
         int mask = 0;
         for (EquipBaseStat ebs : EquipBaseStat.values()) {
-            if ((getBaseStat(ebs) != 0 || getBaseStatFlame(ebs) != 0 || getEnhancementStat(ebs) != 0) && ebs.getPos() == pos) {
+            if (hasStat(ebs) && ebs.getPos() == pos) {
                 mask |= ebs.getVal();
             }
         }
@@ -1334,6 +1345,43 @@ public class Equip extends Item {
     public long getBaseStatFlame(EquipBaseStat equipBaseStat) {
         switch(equipBaseStat){
             case iStr:
+                return getfSTR();
+            case iDex:
+                return getfDEX();
+            case iInt:
+                return getfINT();
+            case iLuk:
+                return getfLUK();
+            case iMaxHP:
+                return getfHP();
+            case iMaxMP:
+                return getfMP();
+            case iPAD:
+                return getfATT();
+            case iMAD:
+                return getfMATT();
+            case iPDD:
+            case iMDD:
+                return getfDEF();
+            case iSpeed:
+                return getfSpeed();
+            case iJump:
+                return getfJump();
+            case statR:
+                return getfAllStat();
+            case bdr:
+                return getfBoss();
+            case damR:
+                return getfDamage();
+            case iIncReq:
+                return getfLevel();
+            default: return 0;
+        }
+    }
+
+    public long getEnchantmentStat(EquipBaseStat equipBaseStat) {
+        switch(equipBaseStat){
+            case iStr:
                 return getEnchantStat(EnchantStat.STR);
             case iDex:
                 return getEnchantStat(EnchantStat.DEX);
@@ -1357,36 +1405,6 @@ public class Equip extends Item {
                 return getEnchantStat(EnchantStat.SPEED);
             case iJump:
                 return getEnchantStat(EnchantStat.JUMP);
-            default: return 0;
-        }
-    }
-
-    public long getEnhancementStat(EquipBaseStat equipBaseStat) {
-        switch(equipBaseStat){
-            case iStr:
-                return getiStr();
-            case iDex:
-                return getiDex();
-            case iInt:
-                return getiInt();
-            case iLuk:
-                return getiLuk();
-            case iMaxHP:
-                return getiMaxHp();
-            case iMaxMP:
-                return getiMaxMp();
-            case iPAD:
-                return getiPad();
-            case iMAD:
-                return getiMad();
-            case iPDD:
-                return getiPDD();
-            case iMDD:
-                return getiMDD();
-            case iSpeed:
-                return getiSpeed();
-            case iJump:
-                return getiJump();
             default: return 0;
         }
     }
@@ -1546,7 +1564,7 @@ public class Equip extends Item {
 
     public void recalcEnchantmentStats() {
         getEnchantStats().clear();
-        for (int i = 1; i <= getChuc(); i++) {
+        for (int i = 0; i < getChuc(); i++) {
             for(EnchantStat es : getHyperUpgradeStats().keySet()) {
                 putEnchantStat(es, getEnchantStats().getOrDefault(es, 0) +
                         GameConstants.getEnchantmentValByChuc(this, es, (short) i, (int) getBaseStat(es.getEquipBaseStat())));

@@ -1415,18 +1415,17 @@ public class AdminCommands {
 
     public static class ClearInv extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            short startIndex = Short.parseShort(args[1]);
-            short endIndex = Short.parseShort(args[2]);
             if (args.length < 2) {
                 chr.chatMessage(Notice2, "Syntax Error: !ClearInv [Start Index] [End Index]");
                 return;
             }
+            short startIndex = Short.parseShort(args[1]);
+            short endIndex = Short.parseShort(args[2]);
             for (int i = startIndex; i < endIndex; i++) {
                 Item removeItem = chr.getInventoryByType(InvType.EQUIP).getItemBySlot((short) i);
-                chr.getInventoryByType(InvType.EQUIP).removeItem(removeItem);
-                chr.dispose();
+                chr.consumeItem(removeItem);
             }
-            chr.chatMessage(Notice2, "Please change channel, as this Command is still shit right now. ");
+            chr.dispose();
         }
     }
 
