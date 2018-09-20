@@ -119,4 +119,3 @@ sm.sendDelay(1500)
 
 sm.removeNpc(J_AGENT)
 sm.warpInstanceIn(931050030, 0)
-sm.dispose()

@@ -2,6 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.FieldType;
 import net.swordie.ms.world.field.*;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.npc.Npc;
@@ -37,6 +38,7 @@ public class FieldData {
                 File file = new File(String.format("%s/%d.dat", dir, field.getId()));
                 try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
                     dataOutputStream.writeInt(field.getId());
+                    dataOutputStream.writeInt(field.getFieldType().getVal());
                     dataOutputStream.writeBoolean(field.isTown());
                     dataOutputStream.writeBoolean(field.isSwim());
                     dataOutputStream.writeInt(field.getReturnMap());
@@ -227,7 +229,22 @@ public class FieldData {
                         case "VRRight":
                             field.setVrRight(Integer.parseInt(value));
                             break;
+                        case "fieldType":
+                            if (value.equals("")) {
+                                field.setFieldType(FieldType.DEAFULT);
+                            } else {
+                                FieldType fieldType = FieldType.getByVal(Integer.parseInt(value));
+                                if (fieldType == null) {
+                                    field.setFieldType(FieldType.DEAFULT);
+                                    break;
+                                }
+                                field.setFieldType(fieldType);
+                            }
+                            break;
                     }
+                }
+                if (field.getFieldType() == null) {
+                    field.setFieldType(FieldType.DEAFULT);
                 }
                 Node fhNode = XMLApi.getFirstChildByNameBF(node, "foothold");
                 if (fhNode != null) {
@@ -402,7 +419,7 @@ public class FieldData {
                                     life.setMobAliveReq(Integer.parseInt(value));
                                     break;
                                 default:
-                                    log.warn("unknown life property " + name + " with value " + value);
+                                    //log.warn("unknown life property " + name + " with value " + value);
                                     break;
                             }
                         }
@@ -508,6 +525,7 @@ public class FieldData {
         Field field = null;
         try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             field = new Field(dataInputStream.readInt());
+            field.setFieldType(FieldType.getByVal(dataInputStream.readInt()));
             field.setTown(dataInputStream.readBoolean());
             field.setSwim(dataInputStream.readBoolean());
             field.setReturnMap(dataInputStream.readInt());
@@ -628,6 +646,7 @@ public class FieldData {
             return null;
         }
         Field copy = new Field(id);
+        copy.setFieldType(field.getFieldType());
         copy.setTown(field.isTown());
         copy.setSwim(field.isSwim());
         copy.setReturnMap(field.getReturnMap());

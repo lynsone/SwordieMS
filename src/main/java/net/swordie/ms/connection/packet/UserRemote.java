@@ -84,11 +84,11 @@ public class UserRemote {
         outPacket.encodeByte(ai.buckShot);
         outPacket.encodeInt(ai.option3);
         outPacket.encodeInt(ai.bySummonedID);
-        if((ai.buckShot & 2) != 0) {
+        if ((ai.buckShot & 2) != 0) {
             outPacket.encodeInt(ai.buckShotSkillID);
             outPacket.encodeInt(ai.buckShotSlv);
         }
-        if((ai.buckShot & 8) != 0) {
+        if ((ai.buckShot & 8) != 0) {
             outPacket.encodeByte(ai.psdTargetPlus);
         }
         byte left = (byte) (ai.left ? 1 : 0);

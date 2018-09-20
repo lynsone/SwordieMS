@@ -104,5 +104,3 @@ sm.setSpeakerID(ARKARIUM)
 sm.sendSay("Hold it right there! No matter how favored you are by the Black Mage, you follow orders. No one has dismissed you yet. Sit down. THAT is an order.")
 
 sm.forcedInput(2)
-
-sm.dispose()

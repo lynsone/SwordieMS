@@ -12,13 +12,11 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
-import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -29,9 +27,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -68,8 +64,6 @@ public class Shade extends Job {
     public static final int SPIRIT_INCARNATION = 25121030;
 
     private int[] addedSkills = new int[] {
-            SPIRIT_BOND_I,
-            FOX_TROT,
     };
 
     private final int[] buffs = new int[]{
@@ -498,5 +492,41 @@ public class Shade extends Job {
 
         chr.write(User.effect(Effect.skillUse(25111211, (byte) 1, 0)));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(25111211, (byte) 1, 0)));
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getCharacterStat().setPosMap(927030050);
+    }
+
+    @Override
+    public void handleLevelUp() {
+        Map<Stat, Object> stats = new HashMap<>();
+        short level = chr.getLevel();
+        if (chr.getJob() == JobConstants.JobEnum.SHADE.getJobId() && level >= 10) {
+            chr.addStat(Stat.mhp, 16);
+            chr.addStat(Stat.mmp, 12);
+            chr.addStat(Stat.str, level >= 6 ? 4 : 5);
+            if (level >= 6){
+                chr.addStat(Stat.str, 1);
+            }
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+            stats.put(Stat.str, (short) chr.getStat(Stat.str));
+            stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
+        } else {
+            if (level == 11 || level == 12) {
+                chr.addStat(Stat.mhp, level == 12 ? 74 : 24);
+                chr.addStat(Stat.mmp, 66);
+            } else {
+                chr.addStat(Stat.mhp, 24);
+                chr.addStat(Stat.mmp, 16);
+            }
+            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
+            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
+        }
+        chr.write(WvsContext.statChanged(stats));
+        super.handleLevelUp();
     }
 }

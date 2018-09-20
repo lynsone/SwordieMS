@@ -1415,18 +1415,17 @@ public class AdminCommands {
 
     public static class ClearInv extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            short startIndex = Short.parseShort(args[1]);
-            short endIndex = Short.parseShort(args[2]);
             if (args.length < 2) {
                 chr.chatMessage(Notice2, "Syntax Error: !ClearInv [Start Index] [End Index]");
                 return;
             }
+            short startIndex = Short.parseShort(args[1]);
+            short endIndex = Short.parseShort(args[2]);
             for (int i = startIndex; i < endIndex; i++) {
                 Item removeItem = chr.getInventoryByType(InvType.EQUIP).getItemBySlot((short) i);
-                chr.getInventoryByType(InvType.EQUIP).removeItem(removeItem);
-                chr.dispose();
+                chr.consumeItem(removeItem);
             }
-            chr.chatMessage(Notice2, "Please change channel, as this Command is still shit right now. ");
+            chr.dispose();
         }
     }
 
@@ -1667,5 +1666,47 @@ public class AdminCommands {
             chr.chatMessage(sb.toString().substring(0, sb.toString().length() - 2));
         }
     }
+
+    public static class toHex extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            int arg = Integer.parseInt(args[1]);
+            byte[] arr = new byte[4];
+            arr[0] = (byte) ((arg >> 24) & 0xFF);
+            arr[1] = (byte) ((arg >> 16) & 0xFF);
+            arr[2] = (byte) ((arg >> 8) & 0xFF);
+            arr[3] = (byte) (arg & 0xFF);
+            chr.chatMessage(Util.readableByteArray(arr));
+        }
+    }
+
+    public static class fromHex extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            if (args.length == 1) {
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 1; i < args.length; i++) {
+                sb.append(args[i].trim());
+            }
+            String s = sb.toString();
+            s = s.replace("|", " ");
+            s = s.replace(" ", "");
+            int len = s.length();
+            int[] arr = new int[len / 2];
+            for (int i = 0; i < len; i += 2) {
+                arr[i / 2] = ((Character.digit(s.charAt(i), 16) << 4)
+                        + Character.digit(s.charAt(i + 1), 16));
+            }
+            int num = 0;
+            for (int i = 0; i < arr.length; i++) {
+                num += arr[i] << (i * 8);
+            }
+            chr.chatMessage("" + num);
+        }
+    }
+
+
 
 }

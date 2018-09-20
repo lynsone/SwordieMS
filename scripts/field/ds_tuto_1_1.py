@@ -9,4 +9,3 @@ sm.sendSay("You're not even listening. Feh. Say...didn't you once mention that y
 
 sm.curNodeEventEnd(True)
 sm.warpInstanceIn(924020010, 0)
-sm.dispose()

@@ -987,7 +987,6 @@ public class ItemData {
                                 case "preventslip":
                                 case "recover":
                                 case "warmsupport":
-                                case "randstat":
                                 case "reqCUC":
                                 case "incCraft":
                                 case "reqEquipLevelMin":
@@ -1146,6 +1145,7 @@ public class ItemData {
                                 case "randOption":
                                     item.putScrollStat(randOption, Integer.parseInt(value));
                                     break;
+                                case "randstat":
                                 case "randStat":
                                     item.putScrollStat(randStat, Integer.parseInt(value));
                                     break;

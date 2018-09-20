@@ -20,7 +20,7 @@ public enum FieldEffectType {
     TopScreenEffect(13),
     ScreenEffect(14),
     ScreenFloatingEffect(15),
-    CreateWindowMaybeidk(16),
+    Blind(16),
     SetGrey(17),
     OnOffLayer(18),
     OverlapScreen(19),

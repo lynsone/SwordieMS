@@ -214,6 +214,7 @@ public class ItemConstants {
                 bodyPartList.add(55);
                 break;
             case 118:
+                bodyPartList.add(29);
                 bodyPartList.add(56);
                 break;
             case 119:
@@ -555,9 +556,9 @@ public class ItemConstants {
             case AnyEquip:
                 return true;
             case Weapon: // no emblems for nebs here
-                return isWeapon(equipId) || isSecondary(equipId);
+                return isWeapon(equipId) || isShield(equipId);
             case AnyExceptWeapon:
-                return !isWeapon(equipId) && !isSecondary(equipId);
+                return !isWeapon(equipId) && !isShield(equipId);
             case ArmorExceptGlove:
                 return isBelt(equipId) || isHat(equipId) || isOverall(equipId) || isTop(equipId) || isBottom(equipId) || isShoe(equipId) || isCape(equipId);
             case Accessory:
@@ -1103,17 +1104,17 @@ public class ItemConstants {
         boolean armor = false;
         if (bp == BodyPart.WEAPON) {
             plusFromLevel = rLevel >= 120 ? 2 : rLevel >= 60 ? 1 : 0;
-            if (rJob == 1) { // warrior
+            if ((rJob & RequiredJob.Warrior.getVal()) > 0) { // warrior
                 possibleStat.add(EnchantStat.PAD);
                 possibleStat.add(EnchantStat.STR);
                 possibleStat.add(EnchantStat.MHP);
-            } else if (rJob == 2) { // mage
+            } else if ((rJob & RequiredJob.Magician.getVal()) > 0) { // mage
                 possibleStat.add(EnchantStat.MAD);
                 possibleStat.add(EnchantStat.INT);
-            } else if (rJob == 3) { // bowman
+            } else if ((rJob & RequiredJob.Bowman.getVal()) > 0) { // bowman
                 possibleStat.add(EnchantStat.PAD);
                 possibleStat.add(EnchantStat.DEX);
-            } else if (rJob == 4 || rJob == 5) { // thief/pirate
+            } else if ((rJob & RequiredJob.Thief.getVal()) > 0 || (rJob & RequiredJob.Pirate.getVal()) > 0) { // thief/pirate
                 possibleStat.add(EnchantStat.PAD);
                 possibleStat.add(EnchantStat.STR);
                 possibleStat.add(EnchantStat.DEX);
@@ -1132,7 +1133,7 @@ public class ItemConstants {
             stat = new int[]{0, 0, 1, 2, 3, 4};
         } else if (bp == BodyPart.GLOVES) {
             plusFromLevel = rLevel <= 70 ? 0 : 1;
-            if (rJob == 2) {
+            if ((rJob & RequiredJob.Magician.getVal()) > 0) {
                 possibleStat.add(EnchantStat.MAD);
             } else {
                 possibleStat.add(EnchantStat.PAD);
@@ -1144,14 +1145,14 @@ public class ItemConstants {
             stat = new int[]{3, 0, 0, 0};
         } else if (ItemConstants.isAccessory(equip.getItemId())) {
             plusFromLevel = rLevel >= 120 ? 2 : rLevel >= 60 ? 1 : 0;
-            if (rJob == 1) { // warrior
+            if ((rJob & RequiredJob.Warrior.getVal()) > 0) { // warrior
                 possibleStat.add(EnchantStat.STR);
                 possibleStat.add(EnchantStat.MHP);
-            } else if (rJob == 2) { // mage
+            } else if ((rJob & RequiredJob.Magician.getVal()) > 0) { // mage
                 possibleStat.add(EnchantStat.INT);
-            } else if (rJob == 3) { // bowman
+            } else if ((rJob & RequiredJob.Bowman.getVal()) > 0) { // bowman
                 possibleStat.add(EnchantStat.DEX);
-            } else if (rJob == 4 || rJob == 5) { // thief/pirate
+            } else if ((rJob & RequiredJob.Thief.getVal()) > 0 || (rJob & RequiredJob.Pirate.getVal()) > 0) { // thief/pirate
                 possibleStat.add(EnchantStat.STR);
                 possibleStat.add(EnchantStat.DEX);
                 possibleStat.add(EnchantStat.LUK);
@@ -1167,14 +1168,14 @@ public class ItemConstants {
         } else {
             armor = true;
             plusFromLevel = rLevel >= 120 ? 2 : rLevel >= 60 ? 1 : 0;
-            if (rJob == 1) { // warrior
+            if ((rJob & RequiredJob.Warrior.getVal()) > 0) { // warrior
                 possibleStat.add(EnchantStat.STR);
                 possibleStat.add(EnchantStat.MHP);
-            } else if (rJob == 2) { // mage
+            } else if ((rJob & RequiredJob.Magician.getVal()) > 0) { // mage
                 possibleStat.add(EnchantStat.INT);
-            } else if (rJob == 3) { // bowman
+            } else if ((rJob & RequiredJob.Bowman.getVal()) > 0) { // bowman
                 possibleStat.add(EnchantStat.DEX);
-            } else if (rJob == 4 || rJob == 5) { // thief/pirate
+            } else if ((rJob & RequiredJob.Thief.getVal()) > 0 || (rJob & RequiredJob.Pirate.getVal()) > 0) { // thief/pirate
                 possibleStat.add(EnchantStat.STR);
                 possibleStat.add(EnchantStat.DEX);
                 possibleStat.add(EnchantStat.LUK);
