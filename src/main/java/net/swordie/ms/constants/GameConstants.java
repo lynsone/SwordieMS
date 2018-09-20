@@ -373,22 +373,28 @@ public class GameConstants {
         }
     }
 
-    public static int getEnchantmentSuccessRate(short chuc, boolean superior) {
+    public static int getEnchantmentSuccessRate(Equip equip) {
+        if (equip.getDropStreak() >= 2) {
+            return 1000;
+        }
+        int chuc = equip.getChuc();
         if(chuc < 0 || chuc > 24) {
             return 0;
-        }
-        if (superior) {
+        } else if (equip.isSuperiorEqp()) {
             return enchantSuccessRatesSuperior[chuc][0];
         } else {
             return enchantSuccessRates[chuc][0];
         }
     }
 
-    public static int getEnchantmentDestroyRate(short chuc, boolean superior) {
-        if(chuc < 0 || chuc > 24) {
+    public static int getEnchantmentDestroyRate(Equip equip) {
+        if (equip.getDropStreak() >= 2) {
             return 0;
         }
-        if (superior) {
+        int chuc = equip.getChuc();
+        if(chuc < 0 || chuc > 24) {
+            return 0;
+        } else if (equip.isSuperiorEqp()) {
             return enchantSuccessRatesSuperior[chuc][1];
         } else {
             return enchantSuccessRates[chuc][1];

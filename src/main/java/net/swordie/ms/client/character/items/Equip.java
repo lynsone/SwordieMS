@@ -102,6 +102,8 @@ public class Equip extends Item {
     @Column(name = "socketID")
     @OrderColumn(name = "ord")
     private short[] sockets = new short[3];
+    @Transient
+    private int dropStreak = 0;
 
     // flame stats
     // TODO: refactor these to be in a different table
@@ -222,6 +224,7 @@ public class Equip extends Item {
         ret.fBoss = fBoss;
         ret.fDamage = fDamage;
         ret.fLevel = fLevel;
+        ret.dropStreak = dropStreak;
         return ret;
     }
 
@@ -960,6 +963,14 @@ public class Equip extends Item {
         this.fBoss = 0;
         this.fDamage = 0;
         this.fLevel = 0;
+    }
+
+    public int getDropStreak() {
+        return dropStreak;
+    }
+
+    public void setDropStreak(int dropStreak) {
+        this.dropStreak = dropStreak;
     }
 
     public void encode(OutPacket outPacket) {
