@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class GameConstants {
     public static final int MOB_EXP_RATE = 10;
-    public static final long MAX_MONEY = 10_000_000_000L;
+    public static final long MAX_MONEY = 9_999_999_999L;
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
     public static final int MAX_HP_MP = 500000;
