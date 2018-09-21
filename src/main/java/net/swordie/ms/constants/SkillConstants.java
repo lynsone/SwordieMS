@@ -828,36 +828,6 @@ public class SkillConstants {
         }
     }
 
-    public static boolean needsOneMoreInt(int skillId) {
-        // Are part of another function
-        switch(skillId) {
-            // Ranged
-            // Merc
-            case 23100006: // Merc FA
-            case 23120012: // Merc Advanced Final Attack
-            case 23121000: // Ishtar's Ring
-            case 23101000: // Piercing Storm
-            case 23001000: // Swift Dual Shot
-            case 23111001: // Leap Tornado
-            case 23121002: // Spikes Royale
-            case 23121052: // Wrath of Enlil
-            case 23120013: // Staggering Strikes (4th Job Upgrade)
-            case 23111000: // Staggering Strikes (3rd Job)
-            case 20021166: // Special Merc Intro Stunning Strike Skill
-            case 13101020: // Fairy Spiral
-            // AB
-            case 60011216: // AB Auto attack
-            case 65001100: // Star Bubble
-
-            // Magic
-            // Kanna
-            case 42121000: // Vanquisher's Charm
-                return true;
-            default:
-                return false;
-        }
-    }
-
     public static boolean isStealableSkill(int skillID) {
         // TODO
         return false;

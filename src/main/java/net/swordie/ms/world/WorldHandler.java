@@ -4527,9 +4527,6 @@ public class WorldHandler {
             inPacket.decodeInt();
             inPacket.decodeInt();
         }
-        if (SkillConstants.needsOneMoreInt(ai.skillId)) {
-            inPacket.decodeInt();
-        }
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
             mai.mobId = inPacket.decodeInt();
