@@ -81,18 +81,4 @@ public class Noblesse extends Job {
         super.setCharCreationStats(chr);
         chr.getAvatarData().getCharacterStat().setPosMap(130030000);
     }
-
-    @Override
-    public void handleLevelUp() {
-        chr.addStat(Stat.mhp, 500);
-        chr.addStat(Stat.mmp, 500);
-        chr.addStat(Stat.str, 5);
-        chr.addSpToJobByCurrentLevel(3);
-        Map<Stat, Object> stats = new HashMap<>();
-        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-        stats.put(Stat.str, (short) chr.getStat(Stat.str));
-        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-        chr.write(WvsContext.statChanged(stats));
-    }
 }
