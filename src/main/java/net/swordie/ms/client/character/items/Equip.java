@@ -1501,6 +1501,12 @@ public class Equip extends Item {
         return data.get(Util.getRandom(data.size() - 1));
     }
 
+    // required level for players to equip this
+    public int getRequiredLevel() {
+        // the highest of them as negative values won't work as intended
+        return Math.max(0, getrLevel() + getiIncReq() - (getiReduceReq() + getfLevel()));
+    }
+
     /**
      * Resets the potential of this equip's base options. Takes the value of an ItemGrade (1-4), and sets the appropriate values.
      * Also calculates if a third line should be added.
