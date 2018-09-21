@@ -1230,6 +1230,18 @@ public class ItemData {
                             }
                         }
                     }
+                    Node socket = XMLApi.getFirstChildByNameBF(mainNode, "socket");
+                    if (socket != null) {
+                        for (Node socketNode : XMLApi.getAllChildren(socket)) {
+                            String name = XMLApi.getNamedAttribute(socketNode, "name");
+                            String value = XMLApi.getNamedAttribute(socketNode, "value");
+                            switch (name) {
+                                case "optionType":
+                                    item.putScrollStat(optionType, Integer.parseInt(value));
+                                    break;
+                            }
+                        }
+                    }
                     Node spec = XMLApi.getFirstChildByNameBF(mainNode, "spec");
                     if (spec != null) {
                         for (Node specNode : XMLApi.getAllChildren(spec)) {

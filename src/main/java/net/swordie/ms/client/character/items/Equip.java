@@ -1058,8 +1058,8 @@ public class Equip extends Item {
         }
         if(hasStat(EquipBaseStat.iReduceReq)) {
             byte bLevel = (byte) (getiReduceReq() + getfLevel());
-            if (getrLevel() - bLevel < 0) {
-                bLevel = (byte) getrLevel();
+            if (getrLevel() + getiIncReq() - bLevel < 0) {
+                bLevel = (byte) (getrLevel() + getiIncReq());
             }
             outPacket.encodeByte(bLevel);
         }
@@ -1601,7 +1601,7 @@ public class Equip extends Item {
         double res = 0;
         for (int i = 0; i < getOptions().size() - 1; i++) { // last one is anvil => skipped
             int id = getOptions().get(i);
-            int level = getrLevel() / 10;
+            int level = (getrLevel() + getiIncReq()) / 10;
             ItemOption io = ItemData.getItemOptionById(id);
             if (io != null) {
                 Map<BaseStat, Double> valMap = io.getStatValuesByLevel(level);
@@ -1699,13 +1699,13 @@ public class Equip extends Item {
     // Flame level used according to the level's equip.
     // Used for STR/DEX/INT/LUK/DEF additions.
     public short getFlameLevelExtended() {
-        return (short) Math.ceil((getrLevel() + 1.0) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED);
+        return (short) Math.ceil((getrLevel() + getiIncReq() + 1.0) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED);
     }
 
     // Flame level used according to the level's equip.
     // Used for secondary stat increasing.
     public short getFlameLevel() {
-        return (short) Math.ceil((getrLevel() + 1.0) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER);
+        return (short) Math.ceil((getrLevel() + getiIncReq() + 1.0) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER);
     }
 
     // Gets ATT bonus by flame tier.
@@ -1743,7 +1743,7 @@ public class Equip extends Item {
             // keep rolling so we don't apply the same bonus stat twice
             if (flameApplied[stat] ||
                 // no -level flames on equips that will overflow
-                (FlameStat.getByVal(stat) == FlameStat.FlameEquipLevelReduction && getrLevel() < 5) ||
+                (FlameStat.getByVal(stat) == FlameStat.FlameEquipLevelReduction && getrLevel() + getiIncReq() < 5) ||
                 // don't roll boss/td lines on armors
                 ((FlameStat.getByVal(stat) == FlameStat.FlameBossDamage || FlameStat.getByVal(stat) == FlameStat.FlameTotalDamage) && !ItemConstants.isWeapon(getItemId()))) {
                 continue;
@@ -1800,10 +1800,10 @@ public class Equip extends Item {
                     setfDEF(getfDEF() + iAddedStatExtended);
                     break;
                 case FlameHP:
-                    setfHP(getfHP() + (getrLevel() / 10) * 30 * flameTier);
+                    setfHP(getfHP() + ((getrLevel() + getiIncReq()) / 10) * 30 * flameTier);
                     break;
                 case FlameMP:
-                    setfMP(getfMP() + (getrLevel() / 10) * 30 * flameTier);
+                    setfMP(getfMP() + ((getrLevel() + getiIncReq()) / 10) * 30 * flameTier);
                     break;
                 case FlameSpeed:
                     setfSpeed(getfSpeed() + flameTier);
