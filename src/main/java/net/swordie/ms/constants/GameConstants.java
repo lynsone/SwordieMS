@@ -290,7 +290,7 @@ public class GameConstants {
     }
 
     public static int getMaxStars(Equip equip) {
-        int level = equip.getrLevel();
+        int level = equip.getrLevel() + equip.getiIncReq();
         if (equip.isSuperiorEqp()) {
             if (level <= 95) {
                 return 3;
@@ -461,7 +461,7 @@ public class GameConstants {
         if (es == EnchantStat.MHP || es == EnchantStat.MMP) {
             stat += chuc <= 2 ? 5 : chuc <= 4 ? 10 : chuc <= 6 ? 15 : chuc <= 8 ? 20 : chuc <= 14 ? 25 : 0;
         }
-        int reqLevel = equip.getrLevel();
+        int reqLevel = equip.getrLevel() + equip.getiIncReq();
         // all stat
         if (es == EnchantStat.STR || es == EnchantStat.DEX || es == EnchantStat.INT || es == EnchantStat.LUK) {
             if (chuc <= 4) {
@@ -538,10 +538,10 @@ public class GameConstants {
             return getEquipStatBoost(equip, es, chuc);
         } else {
             if (es == EnchantStat.STR || es == EnchantStat.DEX || es == EnchantStat.INT || es == EnchantStat.LUK) {
-                return getStatForSuperiorEnhancement(equip.getrLevel(), chuc);
+                return getStatForSuperiorEnhancement(equip.getrLevel() + equip.getiIncReq(), chuc);
             }
             if (es == EnchantStat.PAD || es == EnchantStat.MAD) {
-                return getAttForSuperiorEnhancement(equip.getrLevel(), chuc);
+                return getAttForSuperiorEnhancement(equip.getrLevel() + equip.getiIncReq(), chuc);
             }
         }
         return 0;

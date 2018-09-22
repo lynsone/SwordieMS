@@ -130,6 +130,7 @@ public class ItemData {
             equip.setNoPotential(dataInputStream.readBoolean());
             equip.setBossReward(dataInputStream.readBoolean() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
             equip.setSuperiorEqp(dataInputStream.readBoolean());
+            equip.setiReduceReq(dataInputStream.readShort());
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -198,6 +199,7 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isNoPotential());
                 dataOutputStream.writeBoolean(equip.isBossReward() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
                 dataOutputStream.writeBoolean(equip.isSuperiorEqp());
+                dataOutputStream.writeShort(equip.getiReduceReq());
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
@@ -355,6 +357,9 @@ public class ItemData {
                                     break;
                                 case "superiorEqp":
                                     equip.setSuperiorEqp(Integer.parseInt(value) != 0);
+                                    break;
+                                case "reduceReq":
+                                    equip.setiReduceReq(Short.parseShort(value));
                                     break;
                                 case "fixedGrade":
                                     equip.setFixedGrade(Integer.parseInt(value));
@@ -1222,6 +1227,18 @@ public class ItemData {
                                     break;
                                 default:
                                     log.warn(String.format("Unknown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
+                            }
+                        }
+                    }
+                    Node socket = XMLApi.getFirstChildByNameBF(mainNode, "socket");
+                    if (socket != null) {
+                        for (Node socketNode : XMLApi.getAllChildren(socket)) {
+                            String name = XMLApi.getNamedAttribute(socketNode, "name");
+                            String value = XMLApi.getNamedAttribute(socketNode, "value");
+                            switch (name) {
+                                case "optionType":
+                                    item.putScrollStat(optionType, Integer.parseInt(value));
+                                    break;
                             }
                         }
                     }

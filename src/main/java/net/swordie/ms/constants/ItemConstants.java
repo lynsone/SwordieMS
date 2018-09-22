@@ -643,7 +643,7 @@ public class ItemConstants {
                 }
             }
         }
-        return res.stream().filter(io -> io.getReqLevel() <= equip.getrLevel()).collect(Collectors.toList());
+        return res.stream().filter(io -> io.getReqLevel() <= equip.getrLevel() + equip.getiIncReq()).collect(Collectors.toList());
     }
 
     public static List<Integer> getWeightedOptionsByEquip(Equip equip, boolean bonus, int line) {
@@ -1092,7 +1092,7 @@ public class ItemConstants {
         // not the most beautiful way to do this, but I'd like to think that it's pretty easy to understand
         BodyPart bp = BodyPart.getByVal(ItemConstants.getBodyPartFromItem(equip.getItemId(), 0));
         List<ScrollUpgradeInfo> scrolls = new ArrayList<>();
-        int rLevel = equip.getrLevel();
+        int rLevel = equip.getrLevel() + equip.getiIncReq();
         int rJob = equip.getrJob();
         Set<EnchantStat> possibleStat = new HashSet<>();
         int plusFromLevel;
