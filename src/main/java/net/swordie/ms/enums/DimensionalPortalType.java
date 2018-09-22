@@ -45,7 +45,7 @@ public enum DimensionalPortalType {
     GoldGuestHouse(36, 0, "Gold Guest House"),
     TangyoonCooking(37, 0, "Tangyoon Cooking"),
     CrimsonwoodKeep(38, 610030010, "Crimsonwood Keep"),
-    GrandAthanaeum(39, 0, "The Grand Athanaeum"),
+    GrandAthanaeum(39, 302000000, "The Grand Athanaeum"),
     SpecialMission(40, 0, "Special Mission"),
     PartyQuestHub(41, 910002000, "Party Quest Hub"), // Spiegelmann's quest house
     RootAbyss(42, 910700200, "Root Abyss"),

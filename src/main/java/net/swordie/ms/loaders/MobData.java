@@ -147,6 +147,7 @@ public class MobData {
                 dataOutputStream.writeInt(mob.getSealedCooltime());
                 dataOutputStream.writeInt(mob.getWillEXP());
                 dataOutputStream.writeUTF(mob.getFixedMoveDir());
+                dataOutputStream.writeBoolean(mob.isEscortMob());
                 dataOutputStream.writeBoolean(mob.isBanMap());
                 if (mob.isBanMap()) {
                     dataOutputStream.writeInt(mob.getBanType());
@@ -298,6 +299,7 @@ public class MobData {
             mob.setSealedCooltime(dataInputStream.readInt());
             mob.setWillEXP(dataInputStream.readInt());
             mob.setFixedMoveDir(dataInputStream.readUTF());
+            mob.setEscortMob(dataInputStream.readBoolean());
             boolean banMap = dataInputStream.readBoolean();
             if (banMap) {
                 mob.setBanMap(true);
@@ -844,6 +846,9 @@ public class MobData {
                         // TODO Maybe more info?
                         mob.setSelfDestruction(true);
                         break;
+                    case "escort":
+                        mob.setEscortMob(Integer.parseInt(value) != 0);
+                        break;
                     case "speak":
                     case "thumbnail":
                     case "default":
@@ -856,7 +861,6 @@ public class MobData {
                     case "changeImg":
                     case "showNotRemoteDam":
                     case "buff":
-                    case "escort":
                     case "damagedBySelectedMob":
                     case "damagedByMob":
                     case "getCP":

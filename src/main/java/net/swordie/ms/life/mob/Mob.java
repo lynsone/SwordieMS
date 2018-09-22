@@ -132,6 +132,8 @@ public class Mob extends Life {
     private int banMsgType = 1;// default
     private String banMsg = "";
     private List<Tuple<Integer, String>> banMap = new ArrayList<>();// field, portal name
+    private boolean isEscortMob = false;
+    private List<EscortDest> escortDest = new ArrayList<>();
 
     public Mob(int templateId) {
         super(templateId);
@@ -292,6 +294,7 @@ public class Mob extends Life {
         for (int i : getQuests()) {
             copy.addQuest(i);
         }
+        copy.setEscortMob(isEscortMob());
         return copy;
     }
 
@@ -1599,5 +1602,37 @@ public class Mob extends Life {
             field.addLife(randomPortal);
             chr.write(RandomPortalPool.created(randomPortal));
         }
+    }
+
+    public boolean isEscortMob() {
+        return isEscortMob;
+    }
+
+    public void setEscortMob(boolean isEscortMob) {
+        this.isEscortMob = isEscortMob;
+    }
+
+    public List<EscortDest> getEscortDest() {
+        return escortDest;
+    }
+
+    public void addEscortDest(int destPosX, int destPosY, int attr) {
+        addEscortDest(destPosX, destPosY, attr, 0, 0);
+    }
+
+    public void addEscortDest(int destPosX, int destPosY, int attr, int mass, int stopDuration) {
+        escortDest.add(new EscortDest(destPosX, destPosY, attr, mass, stopDuration));
+    }
+
+    public void clearEscortDest() {
+        escortDest = new ArrayList<>();
+    }
+
+    public void escortFullPath(int oldAttr) {
+        getField().broadcastPacket(MobPool.escortFullPath(this, oldAttr));
+    }
+
+    public boolean isFinishedEscort() {
+        return escortDest.size() == 0;
     }
 }

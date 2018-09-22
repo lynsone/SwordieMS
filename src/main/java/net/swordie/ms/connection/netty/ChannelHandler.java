@@ -10,6 +10,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
 import net.swordie.ms.handlers.header.InHeader;
+import net.swordie.ms.world.World;
 import net.swordie.ms.world.WorldHandler;
 import net.swordie.ms.world.shop.cashshop.CashShopHandler;
 import org.apache.log4j.LogManager;
@@ -617,6 +618,15 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case ENTER_RANDOM_PORTAL_REQUEST:
                 WorldHandler.handleEnterRandomPortalRequest(chr, inPacket);
+                break;
+            case LIBRARY_START_SCRIPT:
+                WorldHandler.handleLibraryStartScript(chr, inPacket);
+                break;
+            case MOB_REQUEST_ESCORT_INFO:
+                WorldHandler.handleMobRequestEscortInfo(chr, inPacket);
+                break;
+            case MOB_ESCORT_COLLISION:
+                WorldHandler.handleMobEscortCollision(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);
