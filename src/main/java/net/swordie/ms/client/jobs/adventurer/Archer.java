@@ -175,7 +175,7 @@ public class Archer extends Beginner {
                 o2.rOption = skillID;
                 o2.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(EPAD, o2);
-                o3.nOption = 1; //si.getValue(x, slv);
+                o3.nOption = si.getValue(x, slv);
                 o3.rOption = skillID;
                 o3.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NoBulletConsume, o3);

@@ -268,7 +268,7 @@ public class Thief extends Beginner {
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
             case SHADOW_STARS:
-                o1.nOption = 0;
+                o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NoBulletConsume, o1);

@@ -252,7 +252,7 @@ public class WildHunter extends Citizen {
                 }
                 break;
             case SOUL_ARROW_CROSSBOW:
-                o1.nOption = 10; //si.getValue(x, slv);
+                o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(SoulArrow, o1);
