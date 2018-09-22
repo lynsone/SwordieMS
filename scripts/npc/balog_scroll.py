@@ -19,7 +19,7 @@ balrogLeather = 4001261
 if sm.hasItem(balrogLeather):
     sm.sendNext("Hello #h0#. I see you have #c"+ str(balrogLeather) +"# Piece"+ ("s" if sm.getQuantityOfItem(balrogLeather) > 1 else "") +" of Balrog Leather, interested in exchanging those for items?")
 else:
-    sm.sendNext("Hello #h0#. I can exchange #z"+str(balrogLeather)+"# for items")
+    sm.sendNext("Hello #h0#. I can exchange #z"+str(balrogLeather)+"#for items")
 
 
 selString = "Alright, this is what I can offer you\r\n#b"
@@ -40,4 +40,3 @@ else:
     sm.giveItem(items[selection], quantity)
     sm.consumeItem(balrogLeather, quantity)
     sm.sendSayOkay("Thank you for your redemption")
-sm.dispose()

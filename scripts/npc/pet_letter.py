@@ -11,7 +11,6 @@ else:
     sm.sendSayOkay("My brother told me to take care of the pet obstacle course, "
                    "but ... since I'm so far away from him, I can't help but wanting to goof around ...hehe, "
                    "since I don't see him in sight, might as well just chill for a few minutes.")
-    sm.dispose()
 
 # Pet Closeness Gained
 sm.dispose()

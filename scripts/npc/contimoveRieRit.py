@@ -14,4 +14,3 @@ elif answer == 1:
     else:
         sm.deductMesos(800)
         sm.warp(104000000, 0)
-sm.dispose()

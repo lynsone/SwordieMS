@@ -14,4 +14,3 @@ else:
         sm.sendNext("Is this a letter? Must be held together by all the dust...\r\n From 'Chromile'... It doesn't say who it's for... Maybe Limbert will want it.")
     else:
         sm.sendNext("This has gotta be the box...")
-    sm.dispose()
