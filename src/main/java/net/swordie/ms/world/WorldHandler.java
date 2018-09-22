@@ -5514,6 +5514,7 @@ public class WorldHandler {
                             quest.getQRKey(), quest.getQRValue(), (byte) 0));
                 }
             }
+            mob.setCurrentDestIndex(collision);
             if (collision ==  mob.getEscortDest().size()) {
                 mob.clearEscortDest();// finished escort
             }

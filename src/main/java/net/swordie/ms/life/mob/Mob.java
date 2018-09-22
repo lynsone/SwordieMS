@@ -134,6 +134,8 @@ public class Mob extends Life {
     private List<Tuple<Integer, String>> banMap = new ArrayList<>();// field, portal name
     private boolean isEscortMob = false;
     private List<EscortDest> escortDest = new ArrayList<>();
+    private int currentDestIndex = 0;
+    private int escortStopDuration = 0;
 
     public Mob(int templateId) {
         super(templateId);
@@ -1624,12 +1626,28 @@ public class Mob extends Life {
         escortDest.add(new EscortDest(destPosX, destPosY, attr, mass, stopDuration));
     }
 
+    public int getCurrentDestIndex() {
+        return currentDestIndex;
+    }
+
+    public void setCurrentDestIndex(int currentDestIndex) {
+        this.currentDestIndex = currentDestIndex;
+    }
+
+    public int getEscortStopDuration() {
+        return escortStopDuration;
+    }
+
+    public void setEscortStopDuration(int escortStopDuration) {
+        this.escortStopDuration = escortStopDuration;
+    }
+
     public void clearEscortDest() {
         escortDest = new ArrayList<>();
     }
 
     public void escortFullPath(int oldAttr) {
-        getField().broadcastPacket(MobPool.escortFullPath(this, oldAttr));
+        getField().broadcastPacket(MobPool.escortFullPath(this, oldAttr, false));
     }
 
     public boolean isFinishedEscort() {

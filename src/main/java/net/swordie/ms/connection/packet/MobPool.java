@@ -466,7 +466,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket escortFullPath(Mob mob, int oldAttr) {
+    public static OutPacket escortFullPath(Mob mob, int oldAttr, boolean stopEscort) {
         OutPacket outPacket = new OutPacket(OutHeader.ESCORT_FULL_PATH);
 
         outPacket.encodeInt(mob.getObjectId());
@@ -483,9 +483,13 @@ public class MobPool {
                 outPacket.encodeInt(escortDest.getStopDuration());
             }
         }
-        outPacket.encodeInt(0);// nCurrentDestIndex
-        outPacket.encodeByte(0);// bool => int nStopDuration - stop the escort after nStopDuration.
-        outPacket.encodeByte(0);// bool => stop the escort.
+        outPacket.encodeInt(mob.getCurrentDestIndex());
+        int stopDuration = mob.getEscortStopDuration();
+        outPacket.encodeByte(stopDuration > 0);
+        if (stopDuration > 0) {
+            outPacket.encodeInt(stopDuration);
+        }
+        outPacket.encodeByte(stopEscort);
         return outPacket;
     }
 }
