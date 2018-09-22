@@ -3,6 +3,7 @@ package net.swordie.ms.constants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
+import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
@@ -173,7 +174,35 @@ public class GameConstants {
     private static int[] guildExp = new int[MAX_GUILD_LV];
 
     private static List<QuickMoveInfo> quickMoveInfos;
-
+    public static int[][][] INC_HP_MP = {
+            // first array = per job
+            // then a list of tuples (minHP, maxHP, minMP, maxMP, randMP)
+            // 1st value is for levelup, 2nd for assigning sp
+                    {{12, 16}, {0, 10}, {12, 0}, {8, 12}, {0, 6}, {8, 15}},// 0
+                    {{64, 68}, {0, 4}, {6, 0}, {50, 54}, {0, 2}, {4, 15}},// 1
+                    {{10, 14}, {0, 22}, {24, 0}, {6, 10}, {0, 18}, {20, 15}},// 2
+                    {{20, 24}, {0, 14}, {16, 0}, {16, 20}, {0, 10}, {12, 15}},// 3
+                    {{20, 24}, {0, 14}, {16, 0}, {16, 20}, {0, 10}, {12, 15}},// 4
+                    {{22, 26}, {0, 18}, {22, 0}, {18, 20}, {0, 14}, {16, 15}},// 5
+                    {{25, 29}, {0, 18}, {22, 0}, {28, 30}, {0, 14}, {16, 15}},// 6
+                    {{20, 24}, {0, 14}, {16, 20}, {16, 20}, {0, 10}, {12, 15}},// 7
+                    {{44, 48}, {0, 4}, {8, 0}, {30, 34}, {0, 2}, {4, 15}},// 8 - Aran
+                    {{16, 20}, {0, 35}, {39, 0}, {12, 16}, {0, 21}, {25, 15}},// 9 - Evan
+                    {{20, 24}, {0, 14}, {16, 0}, {16, 20}, {0, 10}, {12, 15}},// 10 - Mercedes
+                    {{16, 20}, {0, 198}, {200, 0}, {12, 16}, {0, 21}, {25, 15}},// 11 - Luminous
+                    {{34, 38}, {0, 22}, {24, 0}, {20, 24}, {0, 18}, {20, 15}},// 12 - Kinesis/BAM
+                    {{20, 24}, {0, 14}, {16, 0}, {16, 20}, {0, 10}, {12, 15}},// 13 - Phantom
+                    {{22, 26}, {0, 18}, {22, 0}, {18, 20}, {0, 14}, {16, 15}},// 14 - Mechanic
+                    {{52, 56}, {0, 0}, {0, 0}, {38, 40}, {0, 0}, {0, 0}},// 15 - Demon Slayer
+                    {{28, 32}, {0, 0}, {0, 0}, {24, 26}, {0, 0}, {0, 0}},// 16 - Angelic Buster
+                    {{30, 30}, {0, 0}, {0, 0}, {30, 30}, {0, 0}, {0, 0}},// 17 - Demon Avanger.
+                    {{20, 24}, {0, 14}, {16, 0}, {16, 20}, {0, 10}, {12, 15}},// 18 - Xenon
+                    {{64, 68}, {0, 0}, {0, 0}, {50, 54}, {0, 0}, {0, 0}},// 19 - Zero
+                    {{44, 48}, {0, 18}, {22, 0}, {30, 34}, {0, 14}, {16, 15}},// 20 - Jett
+                    {{37, 41}, {0, 22}, {24, 0}, {28, 30}, {0, 18}, {20, 0}},// 21 - Cannon
+                    {{44, 48}, {0, 4}, {8, 20}, {34, 38}, {0, 2}, {4, 15}},// 22 - Hayato
+                    {{40, 44}, {0, 0}, {0, 0}, {28, 32}, {0, 0}, {0, 0}},// 23 - Kanna
+            };
     static {
         initCharExp();
         initEnchantRates();
@@ -687,5 +716,57 @@ public class GameConstants {
             return 0;
         }
         return guildExp[curLevel];
+    }
+
+    public static int[][] getIncValArray(int job) {
+        int jobRace = job / 1000;
+        int jobCategory = JobConstants.getJobCategory((short) job);
+        if (jobCategory <= 9) {
+            if (job / 10 == 53 || job == 501) {
+                return INC_HP_MP[21];
+            }
+            if (JobConstants.isLuminous((short) job)) {
+                return INC_HP_MP[11];
+            }
+            if (jobRace == 2) {
+                switch (jobCategory) {
+                    case 1:// Aran
+                        return INC_HP_MP[8];
+                    case 2:// Evan
+                        return INC_HP_MP[9];
+                    case 3:// Mercedes
+                        return INC_HP_MP[10];
+                    case 4:// Phantom
+                        return INC_HP_MP[13];
+                }
+            }
+            if (JobConstants.isBattleMage((short) job) || JobConstants.isKinesis((short) job)) {
+                return INC_HP_MP[12];
+            } else if (JobConstants.isWildHunter((short) job)) {
+                return INC_HP_MP[3];// can use default ? :/
+            } else if (JobConstants.isMechanic((short) job)) {
+                return INC_HP_MP[14];
+            } else if (JobConstants.isDemonSlayer((short) job)) {
+                return INC_HP_MP[15];
+            } else if (JobConstants.isAngelicBuster((short) job)) {
+                return INC_HP_MP[16];
+            } else if (JobConstants.isDemonAvenger((short) job)) {
+                return INC_HP_MP[17];
+            } else if (JobConstants.isXenon((short) job)) {
+                return INC_HP_MP[18];
+            } else if (JobConstants.isZero((short) job) || JobConstants.isBlaster((short) job)) {
+                return INC_HP_MP[19];
+            } else if (JobConstants.isJett((short) job)) {
+                return INC_HP_MP[20];
+            } else if (JobConstants.isBeastTamer((short) job)) {
+                return INC_HP_MP[21];
+            } else if (JobConstants.isHayato((short) job)) {
+                return INC_HP_MP[22];
+            } else if (JobConstants.isKanna((short) job)) {
+                return INC_HP_MP[23];
+            }
+            return INC_HP_MP[jobCategory];
+        }
+        return null;// something wrong.
     }
 }

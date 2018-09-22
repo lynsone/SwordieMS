@@ -161,6 +161,10 @@ public class Effect {
                 outPacket.encodeInt(getArg3());
                 outPacket.encodeString(getString());
                 break;
+            case PlayExclSoundWithDownBGM:
+                outPacket.encodeString(getString());
+                outPacket.encodeInt(getArg1());
+                break;
         }
     }
 
@@ -661,7 +665,17 @@ public class Effect {
         
         return effect;
     }
-    
+
+    public static Effect playExclSoundWithDownBGM(String soundPath, int volume) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(PlayExclSoundWithDownBGM);
+        effect.setString(soundPath);
+        effect.setArg1(volume);
+
+        return effect;
+    }
+
     public void setUserEffectType(UserEffectType userEffectType) {
         this.userEffectType = userEffectType;
     }

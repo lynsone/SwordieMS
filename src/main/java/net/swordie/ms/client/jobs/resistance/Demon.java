@@ -934,26 +934,4 @@ public class Demon extends Job {
         super.setCharCreationStats(chr);
         chr.getAvatarData().getCharacterStat().setPosMap(927000000);
     }
-
-    @Override
-    public void handleLevelUp() {
-        // MP always 5 in the tutorial. TODO: find where it changes to 30(max cap for first demon job).
-        Map<Stat, Object> stats = new HashMap<>();
-        short level = chr.getLevel();
-        if (chr.getJob() == JobConstants.JobEnum.DEMON_SLAYER.getJobId() && level >= 10) {
-            chr.addStat(Stat.mhp, 56);
-            chr.addStat(Stat.str, level >= 6 ? 4 : 5);
-            if (level >= 6) chr.addStat(Stat.str, 1);
-            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-            stats.put(Stat.str, (short) chr.getStat(Stat.str));
-            stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
-        } else {
-            chr.addStat(Stat.mhp, 56);// temp until sniff some levelup information about mihile
-            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-        }
-        chr.write(WvsContext.statChanged(stats));
-        super.handleLevelUp();
-    }
 }

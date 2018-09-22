@@ -72,6 +72,7 @@ import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
+import net.swordie.ms.life.mob.EscortDest;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
@@ -93,6 +94,7 @@ import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.gach.GachaponConstants;
 import net.swordie.ms.world.gach.result.GachaponDlgType;
 import net.swordie.ms.world.gach.result.GachaponResult;
@@ -5444,5 +5446,78 @@ public class WorldHandler {
         chr.getScriptManager().startScript(randomPortal.getAppearType().ordinal(), randomPortal.getObjectId(),
                 script, ScriptType.Portal);
         chr.dispose();
+    }
+
+    public static void handleLibraryStartScript(Char chr, InPacket inPacket) {
+        int bookId = inPacket.decodeByte();
+        if (chr.getQuestManager().hasQuestCompleted(32662)) {
+            int questID = QuestConstants.DIMENSION_LIBRARY + bookId;
+            chr.getScriptManager().startScript(questID, "q" + Integer.toString(questID) + "s", ScriptType.Quest);
+        }
+    }
+
+    public static void handleMobRequestEscortInfo(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        int objectID = inPacket.decodeInt();
+        Life life = field.getLifeByObjectID(objectID);
+        if (!(life instanceof Mob)) {
+            return;
+        }
+        Mob mob = (Mob) life;
+        if (mob.isEscortMob()) {
+
+            // [Grand Athenaeum] Ariant : Escort Hatsar's Servant
+            if (mob.getTemplateId() == 8230000) {
+                mob.addEscortDest(-1616, 233, -1);
+                mob.addEscortDest(1898, 233, 0);
+                mob.escortFullPath(-1);
+                chr.write(CField.removeBlowWeather());
+                chr.write(CField.blowWeather(5120118, "I'm glad you're here, " + chr.getName() + "! Please get rid of these pesky things."));
+            }
+        }
+    }
+
+    public static void handleMobEscortCollision(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        int objectID = inPacket.decodeInt();
+        Life life = field.getLifeByObjectID(objectID);
+        if (!(life instanceof Mob)) {
+            return;
+        }
+        Mob mob = (Mob) life;
+        int collision = inPacket.decodeInt();
+
+        EscortDest escortDest = mob.getEscortDest().get(collision - 1);
+        if (escortDest != null) {
+            // mob movement don't updating mob position so I disabled it until it will.
+            /*if (escortDest.getDestPos().getX() != mob.getPosition().getX() || escortDest.getDestPos().getY() != mob.getPosition().getY()) {
+                return;
+            }*/
+
+            // [Grand Athenaeum] Ariant : Escort Hatsar's Servant
+            if (mob.getTemplateId() == 8230000) {
+                if (collision == 1) {
+                    chr.write(CField.removeBlowWeather());
+                    chr.write(CField.blowWeather(5120118, "I'm glad you're here, " + chr.getName() + "! Please get rid of these pesky things."));
+                } else if (collision == 2) {
+                    chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz("quest/party/clear", 0)));
+                    chr.write(CField.fieldEffect(FieldEffect.playSound("Party1/Clear", 100)));
+                    chr.write(CField.removeBlowWeather());
+                    chr.write(CField.blowWeather(5120118, "Looks like we all arrived in one piece. Now, get out of here before those pesky things start bothering you again."));
+                    Quest quest = chr.getQuestManager().getQuestById(32628);
+                    if (quest == null) {
+                        quest = new Quest(32628, QuestStatus.STARTED);
+                        chr.getQuestManager().addQuest(quest);
+                    }
+                    quest.setProperty("guard1", "1");// needed to complete quest
+                    chr.write(WvsContext.message(MessageType.QUEST_RECORD_EX_MESSAGE,
+                            quest.getQRKey(), quest.getQRValue(), (byte) 0));
+                }
+            }
+            mob.setCurrentDestIndex(collision);
+            if (collision ==  mob.getEscortDest().size()) {
+                mob.clearEscortDest();// finished escort
+            }
+        }
     }
 }

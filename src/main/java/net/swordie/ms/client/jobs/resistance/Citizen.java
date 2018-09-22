@@ -82,19 +82,4 @@ public class Citizen extends Job {
     public boolean isBuff(int skillID) {
         return false;
     }
-
-
-    @Override
-    public void handleLevelUp() {
-        chr.addStat(Stat.mhp, 500);
-        chr.addStat(Stat.mmp, 500);
-        Map<Stat, Object> stats = new HashMap<>();
-        chr.addStat(Stat.ap, 5);
-        stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
-        chr.addSpToJobByCurrentLevel(3);
-        stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-        stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-        stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-        chr.write(WvsContext.statChanged(stats));
-    }
 }

@@ -15,7 +15,6 @@ import net.swordie.ms.loaders.MobSkillInfo;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Tuple;
-
 import java.util.List;
 
 /**
@@ -464,6 +463,33 @@ public class MobPool {
             outPacket.encodeArr(new byte[16]); // (0,0),(0,0)
         }
 
+        return outPacket;
+    }
+
+    public static OutPacket escortFullPath(Mob mob, int oldAttr, boolean stopEscort) {
+        OutPacket outPacket = new OutPacket(OutHeader.ESCORT_FULL_PATH);
+
+        outPacket.encodeInt(mob.getObjectId());
+        outPacket.encodeInt(mob.getEscortDest().size());
+        outPacket.encodeShort(mob.getPosition().getX());
+        outPacket.encodeShort(oldAttr);
+        outPacket.encodeInt(mob.getPosition().getY());
+        for (EscortDest escortDest : mob.getEscortDest()) {
+            outPacket.encodeShort(escortDest.getDestPos().getX());
+            outPacket.encodeShort(escortDest.getAttr());
+            outPacket.encodeInt(escortDest.getDestPos().getY());
+            outPacket.encodeInt(escortDest.getMass());
+            if (escortDest.getMass() == 2) {
+                outPacket.encodeInt(escortDest.getStopDuration());
+            }
+        }
+        outPacket.encodeInt(mob.getCurrentDestIndex());
+        int stopDuration = mob.getEscortStopDuration();
+        outPacket.encodeByte(stopDuration > 0);
+        if (stopDuration > 0) {
+            outPacket.encodeInt(stopDuration);
+        }
+        outPacket.encodeByte(stopEscort);
         return outPacket;
     }
 }
