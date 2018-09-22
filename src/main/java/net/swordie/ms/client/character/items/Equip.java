@@ -48,7 +48,7 @@ public class Equip extends Item {
     private short durability;
     private short iuc;
     private short iPvpDamage;
-    private short iReduceReq;
+    private byte iReduceReq;
     private short specialAttribute;
     private short durabilityMax;
     private short iIncReq;
@@ -121,7 +121,7 @@ public class Equip extends Item {
     private short fAllStat;
     private short fBoss;
     private short fDamage;
-    private short fLevel;
+    private byte fLevel;
 
     public Equip() { super(); }
 
@@ -443,12 +443,12 @@ public class Equip extends Item {
         this.iPvpDamage = iPvpDamage;
     }
 
-    public short getiReduceReq() {
+    public byte getiReduceReq() {
         return iReduceReq;
     }
 
     public void setiReduceReq(short iReduceReq) {
-        this.iReduceReq = iReduceReq;
+        this.iReduceReq = (byte) iReduceReq;
     }
 
     public short getSpecialAttribute() {
@@ -939,12 +939,12 @@ public class Equip extends Item {
         this.fDamage = (short) fDamage;
     }
 
-    public short getfLevel() {
+    public byte getfLevel() {
         return fLevel;
     }
 
     public void setfLevel(int fLevel) {
-        this.fLevel = (short) fLevel;
+        this.fLevel = (byte) fLevel;
     }
 
     public void resetFlameStats() {
@@ -1056,6 +1056,13 @@ public class Equip extends Item {
         if(hasStat(EquipBaseStat.iPvpDamage)) {
             outPacket.encodeShort(getiPvpDamage());
         }
+        if(hasStat(EquipBaseStat.iReduceReq)) {
+            byte bLevel = (byte) (getiReduceReq() + getfLevel());
+            if (getrLevel() + getiIncReq() - bLevel < 0) {
+                bLevel = (byte) (getrLevel() + getiIncReq());
+            }
+            outPacket.encodeByte(bLevel);
+        }
         if(hasStat(EquipBaseStat.specialAttribute)) {
             outPacket.encodeShort(getSpecialAttribute());
         }
@@ -1063,7 +1070,7 @@ public class Equip extends Item {
             outPacket.encodeInt(getDurabilityMax());
         }
         if(hasStat(EquipBaseStat.iIncReq)) {
-            outPacket.encodeByte(getrLevel() + getfLevel());
+            outPacket.encodeByte(getiIncReq());
         }
         if(hasStat(EquipBaseStat.growthEnchant)) {
             outPacket.encodeByte(getGrowthEnchant()); // ygg
@@ -1221,7 +1228,7 @@ public class Equip extends Item {
                 setiPvpDamage((short) amount);
                 break;
             case iReduceReq:
-                setiReduceReq((short) amount);
+                setiReduceReq((byte) amount);
                 break;
             case specialAttribute:
                 setSpecialAttribute((short) amount);
@@ -1373,7 +1380,7 @@ public class Equip extends Item {
                 return getfBoss();
             case damR:
                 return getfDamage();
-            case iIncReq:
+            case iReduceReq:
                 return getfLevel();
             default: return 0;
         }
@@ -1494,6 +1501,12 @@ public class Equip extends Item {
         return data.get(Util.getRandom(data.size() - 1));
     }
 
+    // required level for players to equip this
+    public int getRequiredLevel() {
+        // the highest of them as negative values won't work as intended
+        return Math.max(0, getrLevel() + getiIncReq() - (getiReduceReq() + getfLevel()));
+    }
+
     /**
      * Resets the potential of this equip's base options. Takes the value of an ItemGrade (1-4), and sets the appropriate values.
      * Also calculates if a third line should be added.
@@ -1594,7 +1607,7 @@ public class Equip extends Item {
         double res = 0;
         for (int i = 0; i < getOptions().size() - 1; i++) { // last one is anvil => skipped
             int id = getOptions().get(i);
-            int level = getrLevel() / 10;
+            int level = (getrLevel() + getiIncReq()) / 10;
             ItemOption io = ItemData.getItemOptionById(id);
             if (io != null) {
                 Map<BaseStat, Double> valMap = io.getStatValuesByLevel(level);
@@ -1692,13 +1705,13 @@ public class Equip extends Item {
     // Flame level used according to the level's equip.
     // Used for STR/DEX/INT/LUK/DEF additions.
     public short getFlameLevelExtended() {
-        return (short) Math.ceil((getrLevel() + 1) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED);
+        return (short) Math.ceil((getrLevel() + getiIncReq() + 1.0) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED);
     }
 
     // Flame level used according to the level's equip.
     // Used for secondary stat increasing.
     public short getFlameLevel() {
-        return (short) Math.ceil((getrLevel() + 1) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER);
+        return (short) Math.ceil((getrLevel() + getiIncReq() + 1.0) / ItemConstants.EQUIP_FLAME_LEVEL_DIVIDER);
     }
 
     // Gets ATT bonus by flame tier.
@@ -1735,7 +1748,9 @@ public class Equip extends Item {
 
             // keep rolling so we don't apply the same bonus stat twice
             if (flameApplied[stat] ||
-            // don't roll boss/td lines on armors
+                // no -level flames on equips that will overflow
+                (FlameStat.getByVal(stat) == FlameStat.FlameEquipLevelReduction && getrLevel() + getiIncReq() < 5) ||
+                // don't roll boss/td lines on armors
                 ((FlameStat.getByVal(stat) == FlameStat.FlameBossDamage || FlameStat.getByVal(stat) == FlameStat.FlameTotalDamage) && !ItemConstants.isWeapon(getItemId()))) {
                 continue;
             }
@@ -1791,10 +1806,10 @@ public class Equip extends Item {
                     setfDEF(getfDEF() + iAddedStatExtended);
                     break;
                 case FlameHP:
-                    setfHP(getfHP() + (getrLevel() / 10) * 30 * flameTier);
+                    setfHP(getfHP() + ((getrLevel() + getiIncReq()) / 10) * 30 * flameTier);
                     break;
                 case FlameMP:
-                    setfMP(getfMP() + (getrLevel() / 10) * 30 * flameTier);
+                    setfMP(getfMP() + ((getrLevel() + getiIncReq()) / 10) * 30 * flameTier);
                     break;
                 case FlameSpeed:
                     setfSpeed(getfSpeed() + flameTier);
@@ -1812,7 +1827,7 @@ public class Equip extends Item {
                     setfDamage(getfDamage() + flameTier);
                     break;
                 case FlameEquipLevelReduction:
-                    setfLevel(getfLevel() + (-5 * flameTier));
+                    setfLevel(getfLevel() + (5 * flameTier));
                     break;
             }
 

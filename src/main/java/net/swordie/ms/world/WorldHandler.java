@@ -3475,7 +3475,7 @@ public class WorldHandler {
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
-                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp());
+                long cost = GameConstants.getEnchantmentMesoCost(equip.getrLevel() + equip.getiIncReq(), equip.getChuc(), equip.isSuperiorEqp());
                 if (chr.getMoney() < cost) {
                     chr.chatMessage("Mesos required: " + NumberFormat.getNumberInstance(Locale.US).format(cost));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
@@ -3576,7 +3576,7 @@ public class WorldHandler {
                     return;
                 }
                 c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
-                        GameConstants.getEnchantmentMesoCost(equip.getrLevel(), equip.getChuc(), equip.isSuperiorEqp()),
+                        GameConstants.getEnchantmentMesoCost(equip.getrLevel() + equip.getiIncReq(), equip.getChuc(), equip.isSuperiorEqp()),
                         0, GameConstants.getEnchantmentSuccessRate(equip),
                         GameConstants.getEnchantmentDestroyRate(equip), equip.getDropStreak() >= 2));
                 break;
@@ -3794,7 +3794,7 @@ public class WorldHandler {
         Item item = chr.getConsumeInventory().getItemBySlot(uPos);
         Equip equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
         if (item == null || equip == null || !ItemConstants.isWeapon(equip.getItemId()) ||
-                !ItemConstants.isSoulEnchanter(item.getItemId()) || equip.getrLevel() < ItemConstants.MIN_LEVEL_FOR_SOUL_SOCKET) {
+                !ItemConstants.isSoulEnchanter(item.getItemId()) || equip.getrLevel() + equip.getiIncReq() < ItemConstants.MIN_LEVEL_FOR_SOUL_SOCKET) {
             chr.dispose();
             return;
         }
@@ -4109,7 +4109,7 @@ public class WorldHandler {
         if (vals.size() > 0) {
             int reqEquipLevelMax = vals.getOrDefault(ScrollStat.reqEquipLevelMax, 250);
 
-            if (equip.getrLevel() > reqEquipLevelMax) {
+            if (equip.getrLevel() + equip.getiIncReq() > reqEquipLevelMax) {
                 c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Equipment level does not meet scroll requirements.")));
                 chr.dispose();
                 return;
@@ -4927,7 +4927,7 @@ public class WorldHandler {
                     equip.addStat(tuc, 1); // +1 upgrades available
                     equip.updateToChar(chr);
                     chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, ItemConstants.MAX_HAMMER_SLOTS - (int) equip.getBaseStat(tuc)));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, ItemConstants.MAX_HAMMER_SLOTS - (int) equip.getBaseStat(iuc)));
                 } else {
                     chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
                     chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 1, 0));
