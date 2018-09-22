@@ -8,4 +8,3 @@ if response == 1:
         sm.sendSayOkay("Please make more space in your ETC inventory.")
 else:
     sm.sendSayOkay("Okay, maybe another time.")
-sm.dispose()

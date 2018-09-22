@@ -6,11 +6,10 @@ else:
     response = sm.sendAskYesNo("I can take you to back Henesys. Are you ready to go?")
 
 
-    if response == 1:
-        if sm.getFieldID() == 100000000:
-            sm.warp(680000000, 0)
-        else:
-            sm.warp(100000000, 0)
+if response == 1:
+    if sm.getFieldID() == 100000000:
+        sm.warp(680000000, 0)
     else:
-        sm.sendSayOkay("Ok, feel free to hang around until you're ready to go!")
-    sm.dispose()
+        sm.warp(100000000, 0)
+else:
+    sm.sendSayOkay("Ok, feel free to hang around until you're ready to go!")
