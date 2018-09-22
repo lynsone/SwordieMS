@@ -12,6 +12,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
@@ -68,6 +69,8 @@ public class WindArcher extends Noblesse {
     public static final int TOUCH_OF_THE_WIND = 13121004; //Buff
     public static final int CALL_OF_CYGNUS_WA = 13121000; //Buff
     public static final int EMERALD_DUST = 13120007;
+    public static final int SPIRALING_VORTEX = 13121002;
+    public static final int SPIRALING_VORTEX_EXPLOSION = 13121009;
 
     public static final int GLORY_OF_THE_GUARDIANS_WA = 13121053;
     public static final int STORM_BRINGER = 13121054;
@@ -355,6 +358,9 @@ public class WindArcher extends Noblesse {
             case MONSOON:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -362,11 +368,25 @@ public class WindArcher extends Noblesse {
             case PINPOINT_PIERCE:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = skillID;
                     mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
                 }
+                break;
+            case SPIRALING_VORTEX:
+                List<MobAttackInfo> mai = attackInfo.mobAttackInfo;
+                if(attackInfo.mobAttackInfo.size() <= 0) {
+                    return;
+                }
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(Util.getRandomFromCollection(mai).mobId);
+                if (mob == null) {
+                    return;
+                }
+                chr.getField().broadcastPacket(UserLocal.explosionAttack(SPIRALING_VORTEX_EXPLOSION, mob.getPosition(), mob.getObjectId(), 1));
                 break;
         }
         super.handleAttack(c, attackInfo);
@@ -391,6 +411,9 @@ public class WindArcher extends Noblesse {
                     continue;
                 }
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 int TW2subprop = getTriflingWindSubProp();
                 int TW1prop = getTriflingWindProp();
                 if (Util.succeedProp(TW1prop)) {
@@ -426,6 +449,9 @@ public class WindArcher extends Noblesse {
             SkillInfo si = SkillData.getSkillInfoById(STORM_BRINGER);
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 int ranY = new Random().nextInt(150) -100;
                 int hyperprop = si.getValue(prop, 1);
                 if (Util.succeedProp(hyperprop)) {

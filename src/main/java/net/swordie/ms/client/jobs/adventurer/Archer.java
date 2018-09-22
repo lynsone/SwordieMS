@@ -387,6 +387,9 @@ public class Archer extends Beginner {
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             MobTemporaryStat mts = mob.getTemporaryStat();
             int mobId = mai.mobId;
             switch (quiverCartridge.getType()) {
@@ -549,6 +552,9 @@ public class Archer extends Beginner {
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -563,6 +569,9 @@ public class Archer extends Beginner {
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -577,6 +586,9 @@ public class Archer extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     aa.setMobOrigin((byte) 0);
                     int x = mob.getX();
                     int y = mob.getY();
@@ -588,6 +600,9 @@ public class Archer extends Beginner {
             case BINDING_SHOT: // TODO  HP Recovery
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(s, slv);
                     o1.rOption = skillID;
@@ -599,6 +614,9 @@ public class Archer extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if(Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         if(mob.isBoss()) {
                             o1.nOption = si.getValue(x, slv);
@@ -616,6 +634,9 @@ public class Archer extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if(Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -629,6 +650,9 @@ public class Archer extends Beginner {
             case FREEZER:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skillID;
@@ -658,6 +682,9 @@ public class Archer extends Beginner {
         int pdr = 0;
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             pdr = mob.getForcedMobStat().getPdr();
         }
 

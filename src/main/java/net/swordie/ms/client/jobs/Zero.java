@@ -436,6 +436,9 @@ public class Zero extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skillID;
@@ -470,6 +473,9 @@ public class Zero extends Job {
         for (MobAttackInfo mai : ai.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 mob.getTemporaryStat().createAndAddBurnedInfo(chr, skill);
             }
         }
@@ -485,6 +491,9 @@ public class Zero extends Job {
         for (MobAttackInfo mai : ai.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 MobTemporaryStat mts = mob.getTemporaryStat();
                 Option o = new Option();
                 Option o1 = new Option();
@@ -511,6 +520,9 @@ public class Zero extends Job {
         for (MobAttackInfo mai : ai.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(prop, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 MobTemporaryStat mts = mob.getTemporaryStat();
                 Option o = new Option();
                 if (mts.hasCurrentMobStat(MobStat.MultiPMDR)) {

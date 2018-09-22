@@ -319,6 +319,9 @@ public class AngelicBuster extends Job {
             case LOVELY_STING:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
@@ -329,6 +332,9 @@ public class AngelicBuster extends Job {
             case FINALE_RIBBON:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
@@ -340,6 +346,9 @@ public class AngelicBuster extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -354,6 +363,9 @@ public class AngelicBuster extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
 
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.removeMobStat(MobStat.Explosion, false);
                 }
@@ -375,6 +387,9 @@ public class AngelicBuster extends Job {
             }
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 int TW1prop = si.getValue(prop, slv);
                 if(attackInfo.skillId == CELESTIAL_ROAR) {
                     TW1prop += si.getValue(z, slv);
@@ -433,6 +448,9 @@ public class AngelicBuster extends Job {
         int firstimpact = new Random().nextInt(4)+29;
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             int TW1prop = si.getValue(s, slv);
             if (Util.succeedProp(TW1prop)) {
                 int mobID = mai.mobId;
@@ -474,6 +492,9 @@ public class AngelicBuster extends Job {
         }
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             if(affinityHeartIIcounter >= 10) {
                 rechargeABSkills();
                 affinityHeartIIcounter = 0;

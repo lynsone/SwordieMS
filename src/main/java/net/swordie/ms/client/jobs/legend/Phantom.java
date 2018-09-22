@@ -331,6 +331,9 @@ public class Phantom extends Job {
             case CARTE_ROSE_FINALE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                     aa.setMobOrigin((byte) 1);
                     aa.setPosition(mob.getPosition());

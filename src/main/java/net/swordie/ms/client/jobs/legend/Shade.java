@@ -216,6 +216,9 @@ public class Shade extends Job {
             case GROUND_POUND_SECOND:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = -si.getValue(y, slv);
                     o1.rOption = skill.getSkillId();
@@ -229,6 +232,9 @@ public class Shade extends Job {
                 if (Util.succeedProp(bpi.getValue(prop, bombPunchslv))) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if(mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -244,6 +250,9 @@ public class Shade extends Job {
                 chr.heal((int) (chr.getMaxHP() / ((double)100 / healrate)));
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
@@ -256,6 +265,9 @@ public class Shade extends Job {
                 int duration = si.getValue(time, slv); //Split Duration & Timer on when to removeLife
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
 
                     //Spawns soul split mob
                     if(!mob.isSplit()) {
@@ -313,6 +325,9 @@ public class Shade extends Job {
         int anglenum = new Random().nextInt(360);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             int TW1prop = 70;  // Recreation %
             if (Util.succeedProp(TW1prop)) {
                 int mobID = mai.mobId;
@@ -348,6 +363,9 @@ public class Shade extends Job {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = WEAKEN;
@@ -373,6 +391,9 @@ public class Shade extends Job {
         int healrate = si.getValue(x, slv);
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             MobTemporaryStat mts = mob.getTemporaryStat();
             if(mts.hasBurnFromSkillAndOwner(DEATH_MARK, chr.getId())) {
                 long totaldmg = Arrays.stream(mai.damages).sum();

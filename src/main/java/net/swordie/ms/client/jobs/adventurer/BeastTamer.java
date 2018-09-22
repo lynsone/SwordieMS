@@ -683,6 +683,9 @@ public class BeastTamer extends Job {
             case FIRE_KITTY:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(SkillStat.x, slv);
                     o1.rOption = skillID;
@@ -710,6 +713,9 @@ public class BeastTamer extends Job {
             int summonProp = si.getValue(prop, slv);
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 if (Util.succeedProp(summonProp)) {
                     summon = Summon.getSummonBy(c.getChr(), BRO_ATTACK, slv);
                     field = c.getChr().getField();

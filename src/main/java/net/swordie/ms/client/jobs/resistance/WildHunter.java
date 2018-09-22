@@ -389,6 +389,9 @@ public class WildHunter extends Citizen {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         int amount = 0;
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         if(mts.hasCurrentMobStat(MobStat.JaguarBleeding)) {
                             amount = mts.getCurrentOptionsByMobStat(MobStat.JaguarBleeding).nOption;
@@ -406,6 +409,9 @@ public class WildHunter extends Citizen {
                         }
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -420,6 +426,9 @@ public class WildHunter extends Citizen {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -435,6 +444,9 @@ public class WildHunter extends Citizen {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         int amount = 0;
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         if(mts.hasCurrentMobStat(MobStat.JaguarBleeding)) {
                             amount = mts.getCurrentOptionsByMobStat(MobStat.JaguarBleeding).nOption;
@@ -452,6 +464,9 @@ public class WildHunter extends Citizen {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         int amount = 0;
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         if(mts.hasCurrentMobStat(MobStat.JaguarBleeding)) {
                             amount = mts.getCurrentOptionsByMobStat(MobStat.JaguarBleeding).nOption;

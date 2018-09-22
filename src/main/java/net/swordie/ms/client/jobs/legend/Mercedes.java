@@ -324,6 +324,9 @@ public class Mercedes extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if(Util.succeedProp(procc)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -338,6 +341,9 @@ public class Mercedes extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if(Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = si.getValue(x, slv);
                         o1.rOption = skill.getSkillId();
@@ -349,6 +355,9 @@ public class Mercedes extends Job {
             case SPIKES_ROYALE:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = - si.getValue(x, slv);
                     o1.rOption = skill.getSkillId();
@@ -360,6 +369,9 @@ public class Mercedes extends Job {
             case LIGHTNING_EDGE:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = skill.getSkillId();
@@ -371,6 +383,9 @@ public class Mercedes extends Job {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if(Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
@@ -382,6 +397,9 @@ public class Mercedes extends Job {
             case ELEMENTAL_KNIGHTS_RED:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }

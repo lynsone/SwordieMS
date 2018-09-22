@@ -370,6 +370,9 @@ public class BattleMage extends Citizen {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     //if (Util.succeedProp(si.getValue(hcProp, slv))) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -383,6 +386,9 @@ public class BattleMage extends Citizen {
             case DARK_GENESIS:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -531,6 +537,9 @@ public class BattleMage extends Citizen {
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             int totaldmg = Arrays.stream(mai.damages).sum();
             if(mob == null) {
                 return;
