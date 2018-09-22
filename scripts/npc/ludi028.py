@@ -20,5 +20,5 @@ if selection == 0:
                            "so go through the obstacles with your pet, go to the very top, and then talk to Trainer Neru to give him the letter. "
                            "It won't be hard if you pay attention to your pet while going through obstacles. "
                            "Good luck!")
-if selection == 1:
+elif selection == 1:
     sm.sendSayOkay("Hey, are you sure you've met #bMar the Fairy#k? Don't lie to me if you've never met her before because it's obvious. That wasn't even a good lie!!")
