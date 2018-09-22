@@ -630,15 +630,9 @@ public abstract class Job {
 
 		int[][] incVal = GameConstants.getIncValArray(chr.getJob());
 		if (incVal != null) {
-			if (level == 12) {
-				chr.addStat(Stat.mhp, 50);
-			}
 			chr.addStat(Stat.mhp, incVal[0][1]);
 			stats.put(Stat.mhp, chr.getMaxHP());
 			if (!JobConstants.isNoManaJob(chr.getJob())) {
-				if (level == 11 || level == 12) {
-					chr.addStat(Stat.mmp, 50);
-				}
 				chr.addStat(Stat.mmp, incVal[3][0]);
 				stats.put(Stat.mmp, chr.getMaxMP());
 			}
