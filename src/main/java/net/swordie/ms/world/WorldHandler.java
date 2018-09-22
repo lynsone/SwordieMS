@@ -4462,11 +4462,6 @@ public class WorldHandler {
         short maskie = inPacket.decodeShort();
         ai.left = ((maskie >>> 15) & 1) != 0;
         ai.attackAction = (short) (maskie & 0x7FFF);
-        if (skillID == Archer.ARROW_PLATTER) { // very unsure
-            short idk9 = inPacket.decodeShort();
-            int idk10 = inPacket.decodeInt();
-            short idk11 = inPacket.decodeShort();
-        }
         ai.requestTime = inPacket.decodeInt();
         ai.attackActionType = inPacket.decodeByte();
         if (skillID == 23111001 || skillID == 80001915 || skillID == 36111010) {
@@ -4505,7 +4500,7 @@ public class WorldHandler {
 //            }
             int bulletSlot = inPacket.decodeInt();
             byte idk = inPacket.decodeByte();
-            if (bulletSlot == 0 && (ai.buckShot & 0x40) != 0) {
+            if ((bulletSlot == 0 || idk == 0) && (ai.buckShot & 0x40) != 0 && !SkillConstants.isFieldAttackObjSkill(skillID)) {
                 int maybeID = inPacket.decodeInt();
             }
             ai.rect = inPacket.decodeShortRect();
@@ -4521,11 +4516,6 @@ public class WorldHandler {
           }*/
         if (skillID == 25111005) {
             ai.spiritCoreEnhance = inPacket.decodeInt();
-        }
-        if (SkillConstants.isFieldAttackObjSkill(ai.skillId)) {
-            inPacket.decodeInt();
-            inPacket.decodeInt();
-            inPacket.decodeInt();
         }
         for (int i = 0; i < ai.mobCount; i++) {
             MobAttackInfo mai = new MobAttackInfo();
