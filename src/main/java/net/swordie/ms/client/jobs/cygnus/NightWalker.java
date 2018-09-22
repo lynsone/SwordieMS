@@ -449,7 +449,7 @@ public class NightWalker extends Noblesse {
                 new Position());
 
         chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
-                true, mobId, SHADOW_BAT, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
+                true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
                 mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));
     }
 
