@@ -29,6 +29,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
@@ -618,7 +619,6 @@ public abstract class Job {
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-		chr.write(WvsContext.statChanged(stats));
 		byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
 		int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
 		if (linkSkillID != 0 && linkSkillLevel > 0) {
@@ -627,8 +627,22 @@ public abstract class Job {
 				chr.addSkill(linkSkillID, linkSkillLevel, 3);
 			}
 		}
+
+		int[][] incVal = GameConstants.getIncValArray(chr.getJob());
+		if (incVal != null) {
+			chr.addStat(Stat.mhp, incVal[0][1]);
+			stats.put(Stat.mhp, chr.getMaxHP());
+			if (!JobConstants.isNoManaJob(chr.getJob())) {
+				chr.addStat(Stat.mmp, incVal[3][0]);
+				stats.put(Stat.mmp, chr.getMaxMP());
+			}
+		} else {
+			chr.chatMessage("Unhandled HP/MP job " + chr.getJob());
+		}
+		chr.write(WvsContext.statChanged(stats));
 		chr.heal(chr.getMaxHP());
 		chr.healMP(chr.getMaxMP());
+
 		if (c.getWorld().isReboot()) {
 			Skill skill = SkillData.getSkillDeepCopyById(REBOOT2);
 			skill.setCurrentLevel(level);

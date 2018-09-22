@@ -631,6 +631,21 @@ public class CField {
         return outPacket;
     }
 
+    public static OutPacket removeBlowWeather() {
+        return blowWeather(0, null);
+    }
+
+    public static OutPacket blowWeather(int itemID, String message) {
+        OutPacket outPacket = new OutPacket(OutHeader.BLOW_WEATHER);
+
+        outPacket.encodeInt(itemID);
+        if (itemID > 0) {
+            outPacket.encodeString(message);
+            outPacket.encodeByte(0);// boolean if true send PackedCharacterLook
+        }
+        return outPacket;
+    }
+
     public static OutPacket trunkDlg(TrunkDlg trunkDlg) {
         OutPacket outPacket = new OutPacket(OutHeader.TRUNK_DLG);
 

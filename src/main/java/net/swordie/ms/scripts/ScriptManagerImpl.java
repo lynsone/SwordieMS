@@ -242,7 +242,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			script.append(Util.readFile(dir, Charset.defaultCharset()));
 		} catch (IOException e) {
 			e.printStackTrace();
-			if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
+			lockInGameUI(false); // so players don't get stuck if a script fails
 		} finally {
 			fileReadLock.unlock();
 		}
@@ -253,7 +253,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			if (!e.getMessage().contains(INTENDED_NPE_MSG)) {
 				log.error(String.format("Unable to compile script %s!", name));
 				e.printStackTrace();
-				if (curNodeEventEnd) lockInGameUI(false); // so players don't get stuck if a script fails
+				lockInGameUI(false); // so players don't get stuck if a script fails
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName())) {
@@ -1310,18 +1310,20 @@ public class ScriptManagerImpl implements ScriptManager {
 		removeMobByObjId(life.getObjectId());
 	}
 
-	public void removeMobFromMapByTemplateId(int id, int fieldId) {
-		Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
-		if (field == null) {
-			return;
-		}
-		List<Mob> mobs = new ArrayList<>(field.getMobs());
-		for (Mob mob : mobs) {
-			if (id == mob.getTemplateId()) {
-				mob.die();
-			}
-		}
-	}
+    public boolean isFinishedEscort(int templateID) {
+        Field field = chr.getField();
+        Life life = field.getLifeByTemplateId(templateID);
+        if(!(life instanceof Mob)) {
+            WvsContext.dispose(chr);
+            return false;
+        }
+        Mob mob = (Mob) life;
+        boolean finished = mob.isFinishedEscort();
+        if (!finished) {
+            WvsContext.dispose(chr);
+        }
+        return finished;
+    }
 
 	@Override
 	public void showHP(int templateID) {
@@ -2114,6 +2116,15 @@ public class ScriptManagerImpl implements ScriptManager {
 		giveExpNoMsg(expGiven);
 	}
 
+	public void removeBlowWeather() {
+	    chr.write(CField.removeBlowWeather());
+    }
+
+	public void blowWeather(int itemID, String message) {
+        removeBlowWeather();// removing old one if exists.
+	    chr.write(CField.blowWeather(itemID, message));
+    }
+
 	public void playSound(String sound, int vol) {
 		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
@@ -2150,6 +2161,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
 	}
+
+	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(User.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
 
 	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
 		chr.write(User.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));

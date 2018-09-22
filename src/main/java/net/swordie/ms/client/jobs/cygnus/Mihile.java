@@ -588,27 +588,4 @@ public class Mihile extends Job {
         super.setCharCreationStats(chr);
         chr.getAvatarData().getCharacterStat().setPosMap(913070000);
     }
-    
-    @Override
-    public void handleLevelUp() {
-        Map<Stat, Object> stats = new HashMap<>();
-        short level = chr.getLevel();
-        if (chr.getJob() == JobConstants.JobEnum.NAMELESS_WARDEN.getJobId() && level >= 10) {
-            // IDK if the stats goes for every beginner job.
-            chr.addStat(Stat.mhp, 16);
-            chr.addStat(Stat.mmp, 12);
-            chr.addStat(Stat.str, 4);
-            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-            stats.put(Stat.str, (short) chr.getStat(Stat.str));
-            chr.write(WvsContext.statChanged(stats));
-        } else {
-            chr.addStat(Stat.mhp, Randomizer.rand(48, 52));// temp until sniff some levelup information about mihile
-            chr.addStat(Stat.mmp, Randomizer.rand(4, 6));// temp until sniff some levelup information about mihile
-            stats.put(Stat.mhp, chr.getStat(Stat.mhp));
-            stats.put(Stat.mmp, chr.getStat(Stat.mmp));
-        }
-        chr.write(WvsContext.statChanged(stats));
-        super.handleLevelUp();
-    }
 }

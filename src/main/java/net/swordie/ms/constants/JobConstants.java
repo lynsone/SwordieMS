@@ -979,6 +979,10 @@ public class JobConstants {
         return result;
     }
 
+    public static boolean isNoManaJob(short job) {
+        return isDemon(job) || isAngelicBuster(job) || isZero(job) || isKinesis(job);
+    }
+
     public boolean isWarriorEquipJob(short jobID) {
         return isAdventurerWarrior(jobID) || isPinkBean(jobID) || isDawnWarrior(jobID) || isMihile(jobID) ||
                 isAran(jobID) || isKaiser(jobID) || isBlaster(jobID) || isDemon(jobID) || isHayato(jobID) ||
