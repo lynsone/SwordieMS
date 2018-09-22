@@ -253,8 +253,9 @@ public class SkillConstants {
             case 14111021:
             case 14111022:
             case 14111023:
-            case 14120045:
+            case 14121001:
             case 14121002:
+            case 14120045:
                 return true;
         }
         return false;
