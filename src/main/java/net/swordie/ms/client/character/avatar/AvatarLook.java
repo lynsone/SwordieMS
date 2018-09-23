@@ -238,13 +238,13 @@ public class AvatarLook {
         outPacket.encodeByte(getSkin());
         outPacket.encodeInt(getFace());
         outPacket.encodeInt(getJob());
-        outPacket.encodeByte(isZeroBetaLook()); // ?
+        outPacket.encodeByte(0); // ignored
         outPacket.encodeInt(getHair());
 
         for (int itemId : getHairEquips()) {
             int bodyPart = ItemConstants.getBodyPartFromItem(itemId, getGender());
             if (bodyPart != 0) {
-                outPacket.encodeByte(ItemConstants.getBodyPartFromItem(itemId, getGender())); // body part
+                outPacket.encodeByte(bodyPart); // body part
                 outPacket.encodeInt(itemId); // item id
             }
         }

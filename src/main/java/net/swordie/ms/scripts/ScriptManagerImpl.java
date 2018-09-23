@@ -200,16 +200,11 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 		scriptInfo.setObjectID(objID);
 		getScripts().put(scriptType, scriptInfo);
-		ScheduledFuture sf = EventManager.addEvent(() -> startScript(scriptName, scriptType), 0); // makes the script execute async
-		getEvaluations().put(scriptType, sf);
+		EventManager.addEvent(() -> startScript(scriptName, scriptType), 0); // makes the script execute async
 	}
 
 	private boolean isQuestScriptAllowed() {
 		return getLastActiveScriptType() == ScriptType.None;
-	}
-
-	public Map<ScriptType, Future> getEvaluations() {
-		return evaluations;
 	}
 
 	public void notifyMobDeath(Mob mob) {
@@ -271,10 +266,6 @@ public class ScriptManagerImpl implements ScriptManager {
 		ScriptInfo si = getScriptInfoByType(scriptType);
 		if (si != null) {
 			si.reset();
-		}
-		Future f = getEvaluations().getOrDefault(scriptType, null);
-		if (f != null) {
-			f.cancel(true);
 		}
 		getMemory().clear();
 		if (chr != null) {
