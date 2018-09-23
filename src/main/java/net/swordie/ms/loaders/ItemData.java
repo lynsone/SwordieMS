@@ -42,7 +42,7 @@ public class ItemData {
         if (ret != null) {
             ret.setQuantity(1);
             ret.setCuttable((short) -1);
-            ret.setItemState((short) ItemState.ENHANCABLE.getVal());
+            ret.setItemState((short) ItemState.AmazingHyperUpgradeChecked.getVal());
             ret.setType(Item.Type.EQUIP);
             ret.setInvType(InvType.EQUIP);
             if (randomizeStats) {
