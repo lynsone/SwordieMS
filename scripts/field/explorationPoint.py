@@ -7,3 +7,6 @@ if sm.getFieldID() == 105000000 and sm.hasQuest(30004):
 
 elif sm.getFieldID() == 104000000:
     sm.showEffect("Map/Effect.img/maplemap/enter/104000000")
+
+elif sm.getFieldID() == 220080000 and sm.hasQuest(1662):
+    sm.chatScript("Enter papulatus.")

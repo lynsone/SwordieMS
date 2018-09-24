@@ -3,6 +3,6 @@
 medal = 1142246
 
 if sm.canHold(medal):
-    sm.startQuestNoCheck(parentID)
-    sm.completeQuestNoRewards(parentID)
-sm.dispose()
+    sm.chatScript("You have earned a new medal.")
+    sm.startQuest(parentID)
+    sm.completeQuest(parentID)

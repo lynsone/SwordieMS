@@ -210,6 +210,9 @@ public class QuestData {
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
+                                    if (XMLApi.getFirstChildByNameBF(questNode, "state") == null) {
+                                        qcr.setQuestStatus((byte) -1);
+                                    }
                                     switch (questName) {
                                         case "id":
                                             qcr.setQuestID(Integer.parseInt(questValue));
@@ -224,7 +227,9 @@ public class QuestData {
                                             break;
                                     }
                                 }
-                                quest.addRequirement(qcr);
+                                if (qcr.getQuestStatus() != -1) {
+                                    quest.addRequirement(qcr);
+                                }
                             }
                             break;
                         case "pet":
