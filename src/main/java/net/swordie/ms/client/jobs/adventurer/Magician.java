@@ -729,6 +729,9 @@ public class Magician extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         fpBurnedInfo(mob, skill);
                     }
@@ -748,6 +751,9 @@ public class Magician extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -762,6 +768,9 @@ public class Magician extends Beginner {
             case FLAME_HAZE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -786,12 +795,18 @@ public class Magician extends Beginner {
             case IFRIT:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     fpBurnedInfo(mob, skill);
                 }
                 break;
             case PARALYZE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -807,6 +822,9 @@ public class Magician extends Beginner {
             case GLACIER_CHAIN:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 5;
                     o1.rOption = skillID;
@@ -820,6 +838,9 @@ public class Magician extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -839,6 +860,9 @@ public class Magician extends Beginner {
             case BAHAMUT:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 25;
                     o1.rOption = skillID;
@@ -884,12 +908,18 @@ public class Magician extends Beginner {
                 Skill megSkill = chr.getSkill(MEGIDDO_FLAME);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     fpBurnedInfo(mob, megSkill);
                 }
                 break;
             case VIRAL_SLIME:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     fpBurnedInfo(mob, skill);
                     EventManager.addEvent(() -> c.write(Summoned.summonedRemoved(viralSlime, LeaveType.NO_ANIMATION)), 800, TimeUnit.MILLISECONDS);
                     viralSlimeList.add(viralSlime);
@@ -928,6 +958,9 @@ public class Magician extends Beginner {
         int anglenum = new Random().nextInt(360);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             int TW1prop = 85;//
             if (Util.succeedProp(TW1prop)) {
                 int mobID = mai.mobId;
@@ -1004,6 +1037,9 @@ public class Magician extends Beginner {
             byte slv = (byte) skill.getCurrentLevel();
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 if (Util.succeedProp(igniteInfo.getValue(prop, slv))) {
                     AffectedArea aa = AffectedArea.getPassiveAA(chr, IGNITE, (byte) 10);
                     aa.setMobOrigin((byte) 1);
@@ -1084,6 +1120,9 @@ public class Magician extends Beginner {
         Option o1 = new Option();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             MobTemporaryStat mts = mob.getTemporaryStat();
             int counter = 1;
             if(mts.hasCurrentMobStat(MobStat.Speed)) {

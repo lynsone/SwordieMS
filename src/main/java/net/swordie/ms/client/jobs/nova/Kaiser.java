@@ -522,6 +522,9 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(pbi.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -536,6 +539,9 @@ public class Kaiser extends Job {
                 SkillInfo pbffi = SkillData.getSkillInfoById(PIERCING_BLAZE_FINAL_FORM);
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -550,6 +556,9 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(wbi.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skillID;
@@ -561,6 +570,9 @@ public class Kaiser extends Job {
             case WING_BEAT_FINAL_FORM:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if(mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skillID;
@@ -572,6 +584,9 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -585,6 +600,9 @@ public class Kaiser extends Job {
             case PRESSURE_CHAIN_FINAL_FORM:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -598,6 +616,9 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = -30;
                         o1.rOption = skillID;
@@ -609,6 +630,9 @@ public class Kaiser extends Job {
             case GIGA_WAVE_FINAL_FORM:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = -30;
                     o1.rOption = GIGA_WAVE;
@@ -621,6 +645,9 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skillID;
@@ -633,6 +660,9 @@ public class Kaiser extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skillID;
@@ -653,6 +683,9 @@ public class Kaiser extends Job {
                     }
 
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     AffectedArea aa = AffectedArea.getAffectedArea(chr, attackInfo);
                     aa.setDuration(rca.getValue(cooltime, slv) * 1000);
                     aa.setMobOrigin((byte) 1);

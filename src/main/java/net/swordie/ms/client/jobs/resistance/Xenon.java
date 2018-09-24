@@ -338,6 +338,9 @@ public class Xenon extends Job {
             case ENTANGLISH_LASH:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
@@ -350,6 +353,9 @@ public class Xenon extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = - si.getValue(x, slv);
                         o1.rOption = skillID;

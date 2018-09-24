@@ -302,6 +302,9 @@ public class Aran extends Job {
                     int hcTime = 10; //hcTime is defined yet still gives NPEs
                     if (Util.succeedProp(hcProp)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -318,6 +321,9 @@ public class Aran extends Job {
                     int time = 3; //Time value never given, so I decided upon 3 seconds.
                     if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -334,6 +340,9 @@ public class Aran extends Job {
                     int time = 3; //Time value never given, so I decided upon 3 seconds.
                     if (Util.succeedProp(prop)) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -365,18 +374,20 @@ public class Aran extends Job {
                 break;
             case JUDGEMENT_DRAW_COMBO_DOWN:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     int hcProp = 5; //hcProp is defined yet still gives NPEs
                     int hcTime = 2; //hcTime is defined yet still gives NPE
                     Skill judgementDrawSkill = chr.getSkill(JUDGEMENT_DRAW);
                     if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = getOriginalSkillByID(skillID);
                         o1.tOption = hcTime;    //si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                     } else {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
@@ -384,18 +395,20 @@ public class Aran extends Job {
                 break;
             case JUDGEMENT_DRAW_COMBO_LEFT:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     int hcProp = 5; //hcProp is defined yet still gives NPE
                     int hcTime = 2; //hcTime is defined yet still gives NPE
                     Skill judgementDrawSkill = chr.getSkill(JUDGEMENT_DRAW);
                     if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = getOriginalSkillByID(skillID);
                         o1.tOption = hcTime;    //si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                     } else {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }
@@ -403,18 +416,20 @@ public class Aran extends Job {
                 break;
             case JUDGEMENT_DRAW_COMBO_RIGHT:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     int hcProp = 5; //hcProp is defined yet still gives NPEs
                     int hcTime = 2; //hcTime is defined yet still gives NPE
                     Skill judgementDrawSkill = chr.getSkill(JUDGEMENT_DRAW);
                     if(Util.succeedProp(hcProp/*si.getValue(hcProp, slv)*/)) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = getOriginalSkillByID(skillID);
                         o1.tOption = hcTime;    //si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Freeze, o1);
                     } else {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr, judgementDrawSkill);
                     }

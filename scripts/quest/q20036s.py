@@ -25,6 +25,7 @@ if sm.sendAskAccept("The choice is yours. Listen to your heart. The voice of des
     sm.addLevel(2)
     sm.setJob(5100)
     sm.addSP(5)
+    sm.addAP(40)
     sm.startQuestNoCheck(29976)
     sm.completeQuestNoRewards(29976)
     sm.completeQuestNoRewards(20036)

@@ -396,6 +396,9 @@ public class NightWalker extends Noblesse {
         }
         for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             MobTemporaryStat mts = mob.getTemporaryStat();
             // Remove Bats & Create ForceAtom
             if (bats.size() > 0) {

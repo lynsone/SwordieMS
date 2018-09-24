@@ -23,4 +23,3 @@ while i < len(maps):
 answer = sm.sendNext(mapString)
 
 sm.warp(maps[answer], 0)
-sm.dispose()

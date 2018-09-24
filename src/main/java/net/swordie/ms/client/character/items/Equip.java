@@ -1749,9 +1749,9 @@ public class Equip extends Item {
             // keep rolling so we don't apply the same bonus stat twice
             if (flameApplied[stat] ||
                 // no -level flames on equips that will overflow
-                (FlameStat.getByVal(stat) == FlameStat.FlameEquipLevelReduction && getrLevel() + getiIncReq() < 5) ||
+                (FlameStat.getByVal(stat) == FlameStat.LevelReduction && getrLevel() + getiIncReq() < 5) ||
                 // don't roll boss/td lines on armors
-                ((FlameStat.getByVal(stat) == FlameStat.FlameBossDamage || FlameStat.getByVal(stat) == FlameStat.FlameTotalDamage) && !ItemConstants.isWeapon(getItemId()))) {
+                ((FlameStat.getByVal(stat) == FlameStat.BossDamage || FlameStat.getByVal(stat) == FlameStat.Damage) && !ItemConstants.isWeapon(getItemId()))) {
                 continue;
             }
 
@@ -1760,73 +1760,73 @@ public class Equip extends Item {
             int iAddedStatExtended = flameTier * getFlameLevelExtended();
 
             switch (FlameStat.getByVal(stat)) {
-                case FlameSTR:
+                case STR:
                     setfSTR(getfSTR() + iAddedStatExtended);
                     break;
-                case FlameDEX:
+                case DEX:
                     setfDEX(getfDEX() + iAddedStatExtended);
                     break;
-                case FlameINT:
+                case INT:
                     setfINT(getfINT() + iAddedStatExtended);
                     break;
-                case FlameLUK:
+                case LUK:
                     setfLUK(getfLUK() + iAddedStatExtended);
                     break;
-                case FlameSTRDEX:
+                case STRDEX:
                     setfSTR(getfSTR() + iAddedStat);
                     setfDEX(getfDEX() + iAddedStat);
                     break;
-                case FlameSTRINT:
+                case STRINT:
                     setfSTR(getfSTR() + iAddedStat);
                     setfINT(getfINT() + iAddedStat);
                     break;
-                case FlameSTRLUK:
+                case STRLUK:
                     setfSTR(getfSTR() + iAddedStat);
                     setfLUK(getfLUK() + iAddedStat);
                     break;
-                case FlameDEXINT:
+                case DEXINT:
                     setfDEX(getfDEX() + iAddedStat);
                     setfINT(getfINT() + iAddedStat);
                     break;
-                case FlameDEXLUK:
+                case DEXLUK:
                     setfDEX(getfDEX() + iAddedStat);
                     setfLUK(getfLUK() + iAddedStat);
                     break;
-                case FlameINTLUK:
+                case INTLUK:
                     setfINT(getfINT() + iAddedStat);
                     setfLUK(getfLUK() + iAddedStat);
                     break;
-                case FlameATT:
+                case Attack:
                     setfATT(getfATT() + getATTBonus(flameTier));
                     break;
-                case FlameMATT:
+                case MagicAttack:
                     setfMATT(getfMATT() + getATTBonus(flameTier));
                     break;
-                case FlameDEF:
+                case Defense:
                     setfDEF(getfDEF() + iAddedStatExtended);
                     break;
-                case FlameHP:
+                case MaxHP:
                     setfHP(getfHP() + ((getrLevel() + getiIncReq()) / 10) * 30 * flameTier);
                     break;
-                case FlameMP:
+                case MaxMP:
                     setfMP(getfMP() + ((getrLevel() + getiIncReq()) / 10) * 30 * flameTier);
                     break;
-                case FlameSpeed:
+                case Speed:
                     setfSpeed(getfSpeed() + flameTier);
                     break;
-                case FlameJump:
+                case Jump:
                     setfJump(getfJump() + flameTier);
                     break;
-                case FlameAllStats:
+                case AllStats:
                     setfAllStat(getfAllStat() + flameTier);
                     break;
-                case FlameBossDamage:
+                case BossDamage:
                     setfBoss(getfBoss() + flameTier * 2);
                     break;
-                case FlameTotalDamage:
+                case Damage:
                     setfDamage(getfDamage() + flameTier);
                     break;
-                case FlameEquipLevelReduction:
+                case LevelReduction:
                     setfLevel(getfLevel() + (5 * flameTier));
                     break;
             }

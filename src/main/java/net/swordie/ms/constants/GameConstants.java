@@ -175,6 +175,9 @@ public class GameConstants {
 
     private static List<QuickMoveInfo> quickMoveInfos;
     public static int[][][] INC_HP_MP = {
+            // first array = per job
+            // then a list of tuples (minHP, maxHP, minMP, maxMP, randMP)
+            // 1st value is for levelup, 2nd for assigning sp
                     {{12, 16}, {0, 10}, {12, 0}, {8, 12}, {0, 6}, {8, 15}},// 0
                     {{64, 68}, {0, 4}, {6, 0}, {50, 54}, {0, 2}, {4, 15}},// 1
                     {{10, 14}, {0, 22}, {24, 0}, {6, 10}, {0, 18}, {20, 15}},// 2

@@ -22,4 +22,3 @@ if sm.checkParty():
             sm.consumeItem(item, quantity)
 
     sm.warpPartyIn(921160100) # Escape! - PQ  first map
-sm.dispose()

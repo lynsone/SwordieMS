@@ -664,6 +664,9 @@ public class Warrior extends Beginner {
             case COMBO_FURY:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if (Util.succeedProp(si.getValue(prop, skill.getCurrentLevel()))) {
                         if (!mob.isBoss()) {
@@ -691,6 +694,9 @@ public class Warrior extends Beginner {
                     lastPanicHit = System.currentTimeMillis();
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         lastPanicHit = System.currentTimeMillis();
                         o1.nOption = si.getValue(z, slv);
@@ -714,6 +720,9 @@ public class Warrior extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     removeCombo(chr, 1);
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if (mob.isBoss()) {
                         o1.nOption = si.getValue(x, slv);
@@ -734,6 +743,9 @@ public class Warrior extends Beginner {
                 }
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(y, slv);
                     o1.rOption = skillID;
@@ -748,6 +760,9 @@ public class Warrior extends Beginner {
                 if (Util.succeedProp(si.getValue(prop, slv))) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -763,6 +778,9 @@ public class Warrior extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr, skill);
                     }
@@ -773,6 +791,9 @@ public class Warrior extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.tOption = si.getValue(time, slv);
                         mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
@@ -784,6 +805,9 @@ public class Warrior extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -793,6 +817,9 @@ public class Warrior extends Beginner {
                         }
                     } else {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr, skill);
                     }
@@ -802,6 +829,9 @@ public class Warrior extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
@@ -836,6 +866,9 @@ public class Warrior extends Beginner {
             case SMITE_SHIELD:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
@@ -846,6 +879,9 @@ public class Warrior extends Beginner {
             case SPEAR_SWEEP:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -860,6 +896,9 @@ public class Warrior extends Beginner {
             case FINAL_ATTACK_PAGE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     long dmg = 0;
                     for (int i = 0; i < mai.damages.length; i++) {
                         dmg += mai.damages[i];
@@ -871,6 +910,9 @@ public class Warrior extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;

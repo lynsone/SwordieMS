@@ -52,7 +52,6 @@ if sm.getFieldID() == 925100100: # Hidden Street: Through the Head of the Ship!
                 sm.sendNext("Please bring me "+ str(count) +" #v"+ str(item) +"##b#t"+ str(item) +"##k.")
     else:
         sm.sendSayOkay("Please, have your party leader speak to me.")
-    sm.dispose()
 
 
 elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
@@ -76,11 +75,9 @@ elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
                 if sm.hasItem(item):
                     quantity = sm.getQuantityOfItem(item)
                     sm.consumeItem(item, quantity)
-            sm.dispose()
 
     else:
         sm.sendSayOkay("Please get rid of the Captain!")
-        sm.dispose()
 
 else:
     response = sm.sendAskYesNo("Are you sure you want to leave?")
@@ -92,4 +89,3 @@ else:
         else:
             sm.warp(910002000, 0)
             sm.setQRValue(GameConstants.LORD_PIRATE_QUEST, "0")
-    sm.dispose()

@@ -285,6 +285,9 @@ public class Evan extends Job {
                 if(attackInfo.skillId != MAGIC_DEBRIS && attackInfo.skillId != ENHANCED_MAGIC_DEBRIS) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(debrisCount < getMaxDebris()) {
                             debrisPos.put(debrisCount, mob.getPosition());
                             debrisCount++;

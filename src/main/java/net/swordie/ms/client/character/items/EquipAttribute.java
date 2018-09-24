@@ -18,9 +18,8 @@ public enum EquipAttribute {
     TradedOnceWithinAccount(0x1000),
     UpgradeCountProtection(0x2000),
     ScrollProtection(0x4000),
-    ReturnScroll(0x8000),
+    ReturnScroll(0x8000);
 
-    ;
     private int val;
 
     EquipAttribute(int val) {

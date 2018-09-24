@@ -9,7 +9,6 @@ if selection == 0:
     if sm.hasItem(4031035):
         sm.sendNext("Jump over obstacles with your pet, and take that letter to my brother Trainer Frod. "
                     "Give him the letter and something good is going to happen to your pet.")
-        sm.dispose()
     else:
         if sm.sendAskYesNo("This is the road where you can go take a walk with your pet. "
                     "You can just walk around with it, or you can train your pet to go through the obstacles here. "
@@ -24,4 +23,3 @@ if selection == 0:
 
 if selection == 1:
     sm.sendSayOkay("Hey, are you sure you've met #bMar the Fairy#k? Don't lie to me if you've never met her before because it's obvious. That wasn't even a good lie!!")
-    sm.dispose()

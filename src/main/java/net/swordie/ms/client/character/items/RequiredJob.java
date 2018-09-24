@@ -5,11 +5,11 @@ package net.swordie.ms.client.character.items;
  */
 public enum RequiredJob {
     AnyJob(0),
-    Warrior(1),
-    Magician(2),
-    Bowman(4),
-    Thief(8),
-    Pirate(16);
+    Warrior(0x1),
+    Magician(0x2),
+    Bowman(0x4),
+    Thief(0x8),
+    Pirate(0x10);
 
     private int val;
 

@@ -268,7 +268,7 @@ public class Thief extends Beginner {
                 tsm.putCharacterStatValue(IndieStatR, o1); //Indie
                 break;
             case SHADOW_STARS:
-                o1.nOption = 0;
+                o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(NoBulletConsume, o1);
@@ -612,6 +612,9 @@ public class Thief extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         Field field = chr.getField();
                         int itemId = 2431835;
@@ -633,8 +636,11 @@ public class Thief extends Beginner {
                 break;
             case SHADOW_WEB:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     if (Util.succeedProp(si.getValue(prop, slv))) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -643,7 +649,6 @@ public class Thief extends Beginner {
                             mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
                         }
                     }else{
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         mts.createAndAddBurnedInfo(chr, skill);
                     }
@@ -652,6 +657,9 @@ public class Thief extends Beginner {
             case SHOWDOWN:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
                     o1.rOption = skill.getSkillId();
@@ -664,15 +672,21 @@ public class Thief extends Beginner {
             case SUDDEN_RAID_SHAD:
             case SUDDEN_RAID_NL:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                        MobTemporaryStat mts = mob.getTemporaryStat();
-                        mts.createAndAddBurnedInfo(chr, skill);
+                    Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
+                    MobTemporaryStat mts = mob.getTemporaryStat();
+                    mts.createAndAddBurnedInfo(chr, skill);
                 }
                 break;
             case FLASHBANG:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = -si.getValue(x, slv);
                         o1.rOption = skill.getSkillId();
@@ -686,6 +700,9 @@ public class Thief extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -700,6 +717,9 @@ public class Thief extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;

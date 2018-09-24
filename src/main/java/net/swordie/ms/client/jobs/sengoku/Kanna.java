@@ -225,6 +225,9 @@ public class Kanna extends Job {
             case VERITABLE_PANDEMONIUM:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;

@@ -283,6 +283,9 @@ public class PinkBean extends Job {
             int minibeanproc = 100;//   miniBeanInfo.getValue(z, miniBeanInfo.getCurrentLevel());
             for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 if(Util.succeedProp(minibeanproc)) {
                     summon = Summon.getSummonBy(c.getChr(), MINI_BEANS, slv);
                     field = c.getChr().getField();

@@ -980,7 +980,7 @@ public class JobConstants {
     }
 
     public static boolean isNoManaJob(short job) {
-        return isDemon(job) || isAngelicBuster(job) || isZero(job) || isKinesis(job);
+        return isDemon(job) || isAngelicBuster(job) || isZero(job) || isKinesis(job) || isKanna(job);
     }
 
     public boolean isWarriorEquipJob(short jobID) {

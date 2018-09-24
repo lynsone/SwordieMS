@@ -428,6 +428,9 @@ public class Demon extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -441,6 +444,9 @@ public class Demon extends Job {
             case BLOOD_PRISON:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -453,6 +459,9 @@ public class Demon extends Job {
             case SHIELD_CHARGE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     if(!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
@@ -465,6 +474,9 @@ public class Demon extends Job {
             case CARRION_BREATH: //DoT
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
@@ -472,6 +484,9 @@ public class Demon extends Job {
             case BINDING_DARKNESS: //stun + DoT
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if(!mob.isBoss()) {
                         o1.nOption = 1;
@@ -487,6 +502,9 @@ public class Demon extends Job {
             case DEMON_CRY:     // TODO  Item Drop & Exp
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = -si.getValue(y, slv);
                     o1.rOption = skill.getSkillId();
@@ -504,6 +522,9 @@ public class Demon extends Job {
             case DEMON_IMPACT:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = -20;
                     o1.rOption = skill.getSkillId();
@@ -514,6 +535,9 @@ public class Demon extends Job {
             case NETHER_SLICE:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = skill.getSkillId();
@@ -601,6 +625,9 @@ public class Demon extends Job {
         int anglenum = new Random().nextInt(360);
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             int TW1prop = 80;
             if (Util.succeedProp(TW1prop)) {
                 int mobID = mai.mobId;
@@ -695,7 +722,6 @@ public class Demon extends Job {
                 int cd = si.getValue(y, slv) * 1000;
                 if(cd + leechAuraCD < System.currentTimeMillis()) {
                     for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                         int totaldmg = Arrays.stream(mai.damages).sum();
                         int hpheal = (int) (totaldmg * ((double) 100 / si.getValue(x, slv)));
                         if (hpheal >= (chr.getMaxHP() / 4)) {
@@ -713,6 +739,9 @@ public class Demon extends Job {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+            if (mob == null) {
+                continue;
+            }
             int mobID = mai.mobId;
             int angle = new Random().nextInt(40)+30;
             int speed = new Random().nextInt(31)+29;

@@ -402,6 +402,9 @@ public class Hayato extends Job {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(subProp, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -416,6 +419,9 @@ public class Hayato extends Job {
             //case SUDDEN_STRIKE_BATTOUJUTSU:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(y, slv);
                     o1.rOption = skill.getSkillId();
@@ -476,6 +482,9 @@ public class Hayato extends Job {
             for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                 if (Util.succeedProp(proc)) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     mts.createAndAddBurnedInfo(chr, skill);
                 }

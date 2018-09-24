@@ -4,7 +4,9 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.skills.GuidedBullet;
 import net.swordie.ms.client.character.skills.*;
+import net.swordie.ms.client.character.skills.PartyBooster;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
@@ -15,7 +17,6 @@ import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.TSIndex;
@@ -199,16 +200,6 @@ public class Pirate extends Beginner {
             ROLLING_RAINBOW,
     };
 
-
-    public int getViperEnergy() {
-        return viperEnergy;
-    }
-
-    public void setViperEnergy(int viperEnergy) {
-        this.viperEnergy = viperEnergy;
-    }
-
-    private int viperEnergy = 0;
     private int corsairSummonID = 0;
     private ScheduledFuture stimulatingConversationTimer;
 
@@ -221,16 +212,6 @@ public class Pirate extends Beginner {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
                     skill.setCurrentLevel(skill.getMasterLevel());
                     chr.addSkill(skill);
-                }
-            }
-            if (JobConstants.isBuccaneer(chr.getJob())) {
-                if (chr.hasSkill(ENERGY_CHARGE)) {
-                    TemporaryStatManager tsm = chr.getTemporaryStatManager();
-                    TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-                    tsb.setNOption(viperEnergy);
-                    tsb.setROption(0);
-                    tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
-                    tsm.sendSetStatPacket();
                 }
             }
         }
@@ -754,12 +735,10 @@ public class Pirate extends Beginner {
         }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         if (tsm.hasStat(Stimulate)) {
-            chr.chatMessage(ChatType.Expedition, "Viper Energy before: "+ getViperEnergy());
             Skill skill = chr.getSkill(STIMULATING_CONVERSATION);
             byte slv = (byte) skill.getCurrentLevel();
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            incrementViperEnergy(si.getValue(x, slv));
-            chr.chatMessage(ChatType.Expedition, "Viper Energy after: "+ getViperEnergy());
+            updateViperEnergy(tsm.getOption(EnergyCharged).nOption + si.getValue(x, slv));
             stimulatingConversationTimer = EventManager.addEvent(this::incrementStimulatingConversation, 4, TimeUnit.SECONDS);
         }
     }
@@ -815,11 +794,7 @@ public class Pirate extends Beginner {
                 applyStunMasteryOnMob(attackInfo);
 
                 //Viper Energy
-                chr.chatMessage(ChatType.Expedition, "Viper Energy before: "+ getViperEnergy());
-                applyViperEnergyCosts(attackInfo.skillId);
-                incrementViperEnergy(getEnergyincrease());
-                chr.chatMessage(ChatType.Expedition, "Viper Energy after: "+ getViperEnergy());
-
+                changeViperEnergy(attackInfo.skillId);
             }
         }
 
@@ -832,11 +807,10 @@ public class Pirate extends Beginner {
 
         if (JobConstants.isCannonShooter(chr.getJob())) {
             if(hasHitMobs) {
-
+                //Barrel Roulette
+                applyBarrelRouletteDebuffOnMob(attackInfo);
             }
         }
-        //Barrel Roulette
-        applyBarrelRouletteDebuffOnMob(attackInfo);
 
         if (JobConstants.isJett(chr.getJob())) {
             if(hasHitMobs) {
@@ -851,6 +825,9 @@ public class Pirate extends Beginner {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = si.getValue(z, slv);
                         o1.rOption = skill.getSkillId();
@@ -864,6 +841,9 @@ public class Pirate extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(hcProp, slv))) {
                         Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
                         if(!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
@@ -881,6 +861,9 @@ public class Pirate extends Beginner {
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
 
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = si.getValue(x, slv);
                     o1.rOption = skillID;
@@ -909,6 +892,9 @@ public class Pirate extends Beginner {
             case DRAGON_STRIKE:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 10;
                     o1.rOption = skillID;
@@ -947,6 +933,9 @@ public class Pirate extends Beginner {
         for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             if (Util.succeedProp(si.getValue(subProp, slv))) {
                 Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
                 if(!mob.isBoss()) {
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     o1.nOption = 1;
@@ -958,82 +947,78 @@ public class Pirate extends Beginner {
         }
     }
 
-    private void incrementViperEnergy(int increase) {
-        if(chr.hasSkill(ENERGY_CHARGE)) {
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-            if(getViperEnergy() < getMaxEnergy()) {
-                tsm.setViperEnergyCharge(0);
-                if(getViperEnergy() + increase > getMaxEnergy()) {
-                    setViperEnergy(getMaxEnergy());
-                    tsm.setViperEnergyCharge(1);
-                } else {
-                    setViperEnergy(getViperEnergy() + increase);
+    private void changeViperEnergy(int skillId) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int energy = getEnergyIncrement();
+        if(tsm.getViperEnergyCharge() == 0) {
+            if (tsm.hasStat(EnergyCharged)) {
+                energy = tsm.getOption(EnergyCharged).nOption;
+                if (energy < getMaximumEnergy()) {
+                    energy += getEnergyIncrement();
                 }
-            } else if(getViperEnergy() >= getMaxEnergy()) {
-                tsm.setViperEnergyCharge(1);
+                if (energy > getMaximumEnergy()) {
+                    energy = getMaximumEnergy();
+                }
             }
-            tsb.setNOption(getViperEnergy());
-            tsb.setROption(getChargeIcon());
-            tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
-            tsm.sendSetStatPacket();
+            chr.write(User.effect(Effect.skillAffected(getViperEnergySkill().getSkillId(), (byte) 1, 0)));
+            chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(getViperEnergySkill().getSkillId(), (byte) 1, 0)));
+        } else {
+            energy = deductViperEnergyCost(skillId);
         }
+        updateViperEnergy(energy);
     }
 
-    private void applyViperEnergyCosts(int skillID) {
+    private int deductViperEnergyCost(int skillId) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int energy = tsm.getOption(EnergyCharged).nOption;
+        SkillInfo si = SkillData.getSkillInfoById(skillId);
+        energy = energy - si.getValue(forceCon, 1);
+
+        return energy;
+    }
+
+    private void updateViperEnergy(int energy) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.EnergyCharged);
-        Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skillID);
-
-        if(si.getValue(forceCon, slv) > 0) {
-            int energyCost = si.getValue(forceCon, slv);
-            setViperEnergy(getViperEnergy() - energyCost);
-        }
-        tsb.setNOption(getViperEnergy());
-        tsb.setROption(getChargeIcon());
+        tsb.setNOption(energy < 0 ? 0 : (energy > getMaximumEnergy() ? getMaximumEnergy() : energy));
+        tsb.setROption(0);
         tsm.putCharacterStatValue(EnergyCharged, tsb.getOption());
+        if(energy >= getMaximumEnergy()) {
+            tsm.setViperEnergyCharge(getViperEnergySkill().getSkillId());
+        } else if (energy <= 0) {
+            tsm.setViperEnergyCharge(0);
+        }
         tsm.sendSetStatPacket();
     }
 
-    private int getMaxEnergy() {
-        int maxenergy = 0;
-        if(chr.hasSkill(ENERGY_CHARGE)) {
-            maxenergy = 5000;
-        }
-        if(chr.hasSkill(SUPERCHARGE)) {
-            maxenergy = 10000;
-        }
-        return maxenergy;
+    private int getEnergyIncrement() {
+        Skill skill = getViperEnergySkill();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        return si.getValue(x, slv);
     }
 
-    private int getEnergyincrease() {
-        int interval = 0;
-        if(chr.hasSkill(ENERGY_CHARGE)) {
-            interval = 150;
-        }
-        if(chr.hasSkill(SUPERCHARGE)) {
-            interval = 300;
-        }
-        if(chr.hasSkill(ULTRA_CHARGE)) {
-            interval = 350;
-        }
-        return interval;
+    private int getMaximumEnergy() {
+        Skill skill = getViperEnergySkill();
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        return si.getValue(z, slv);
     }
 
-    private int getChargeIcon() {
-        int icon = 0;
+    private Skill getViperEnergySkill() {
+        Skill skill = null;
         if(chr.hasSkill(ENERGY_CHARGE)) {
-            icon = ENERGY_CHARGE;
+            skill = chr.getSkill(ENERGY_CHARGE);
         }
         if(chr.hasSkill(SUPERCHARGE)) {
-            icon = SUPERCHARGE;
+            skill = chr.getSkill(SUPERCHARGE);
         }
         if(chr.hasSkill(ULTRA_CHARGE)) {
-            icon = ULTRA_CHARGE;
+            skill = chr.getSkill(ULTRA_CHARGE);
         }
-        return icon;
+        return skill;
     }
 
     private void applyBarrelRouletteDebuffOnMob(AttackInfo attackInfo) {   //TODO
@@ -1046,6 +1031,9 @@ public class Pirate extends Beginner {
             if(tsm.hasStat(Roulette)) {
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                    if (mob == null) {
+                        continue;
+                    }
                     MobTemporaryStat mts = mob.getTemporaryStat();
                     if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 4) {  //DoT Debuff
                         mts.createAndAddBurnedInfo(chr, skill);
