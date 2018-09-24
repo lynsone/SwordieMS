@@ -1927,7 +1927,7 @@ public class WorldHandler {
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
                 byte answ = inPacket.decodeByte();
-                if (action != 1 && action != 2) {   // SendDelay/PatternInputRequest
+                if (action != 1 && action != 2 && action != 3) {   // SendDelay/PatternInputRequest
                     return;         // We only want SendDelay as ways to progress the script
                 }
                 chr.getScriptManager().handleAction(nmt, action, answ);
