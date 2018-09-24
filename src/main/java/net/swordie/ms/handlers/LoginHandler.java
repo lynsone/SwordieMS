@@ -17,7 +17,6 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.enums.CharNameResult;
-import net.swordie.ms.enums.LoginState;
 import net.swordie.ms.enums.LoginType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.loaders.ItemData;
@@ -192,7 +191,7 @@ public class LoginHandler {
         }
         Equip codex = ItemData.getEquipDeepCopyFromID(1172000, false);
         codex.setInvType(EQUIPPED);
-        codex.setBagIndex(BodyPart.BOOK.getVal());
+        codex.setBagIndex(BodyPart.MonsterBook.getVal());
         chr.addItemToInventory(EQUIPPED, codex, true);
         if(curSelectedRace == 15) { // Zero hack for adding 2nd weapon (removing it in hairequips for zero look)
             Equip equip = ItemData.getEquipDeepCopyFromID(1562000, false);

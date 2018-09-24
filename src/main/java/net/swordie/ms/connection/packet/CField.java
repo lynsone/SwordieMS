@@ -183,7 +183,7 @@ public class CField {
                                                int userRequestTime, boolean left, Position base) {
         OutPacket outPacket = new OutPacket(OutHeader.FINAL_ATTACK_REQUEST);
 
-        int wt = ItemConstants.getWeaponType(chr.getEquippedItemByBodyPart(BodyPart.WEAPON).getItemId());
+        int wt = ItemConstants.getWeaponType(chr.getEquippedItemByBodyPart(BodyPart.Weapon).getItemId());
 
         outPacket.encodeInt(skillID);
         outPacket.encodeInt(finalSkillID);
@@ -309,7 +309,7 @@ public class CField {
 
         outPacket.encodeByte(0); // old Wish list
         // MedalAchievementInfo::Decode
-        Equip medal = (Equip) chr.getEquippedItemByBodyPart(BodyPart.MEDAL);
+        Equip medal = (Equip) chr.getEquippedItemByBodyPart(BodyPart.Medal);
         outPacket.encodeInt(medal == null ? 0 : medal.getItemId());
         outPacket.encodeShort(0); // medal size
         // for each medal, encode int (itemID) and complete time (FT)

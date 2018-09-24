@@ -902,10 +902,10 @@ public class TemporaryStatManager {
             putCharacterStatValue(SoulMP, o);
             if (o.nOption >= ItemConstants.MAX_SOUL_CAPACITY && !hasStat(FullSoulMP)) {
                 Option o2 = new Option();
-                o2.rOption = ItemConstants.getSoulSkillFromSoulID(((Equip) chr.getEquippedItemByBodyPart(BodyPart.WEAPON)).getSoulOptionId());
+                o2.rOption = ItemConstants.getSoulSkillFromSoulID(((Equip) chr.getEquippedItemByBodyPart(BodyPart.Weapon)).getSoulOptionId());
                 if (o2.rOption == 0) {
                     chr.chatMessage(String.format("Unknown corresponding skill for soul socket id %d!",
-                            ((Equip) chr.getEquippedItemByBodyPart(BodyPart.WEAPON)).getSoulOptionId()));
+                            ((Equip) chr.getEquippedItemByBodyPart(BodyPart.Weapon)).getSoulOptionId()));
                 }
                 o2.nOption = ItemConstants.MAX_SOUL_CAPACITY;
                 o2.xOption = ItemConstants.MAX_SOUL_CAPACITY;

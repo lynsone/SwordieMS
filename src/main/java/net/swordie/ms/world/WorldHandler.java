@@ -1283,7 +1283,7 @@ public class WorldHandler {
             chr.consumeItem(item);
         } else {
 
-            Equip medal = (Equip) chr.getEquippedInventory().getFirstItemByBodyPart(BodyPart.MEDAL);
+            Equip medal = (Equip) chr.getEquippedInventory().getFirstItemByBodyPart(BodyPart.Medal);
             int medalInt = 0;
             if (medal != null) {
                 medalInt = (medal.getAnvilId() == 0 ? medal.getItemId() : medal.getAnvilId()); // Check for Anvilled medal
@@ -3846,7 +3846,7 @@ public class WorldHandler {
             o.nOption = tsm.getOption(SoulMP).nOption;
             o.xOption = tsm.getOption(SoulMP).xOption;
             o.rOption = ItemConstants.getSoulSkillFromSoulID(
-                    ((Equip) chr.getEquippedItemByBodyPart(BodyPart.WEAPON)).getSoulOptionId()
+                    ((Equip) chr.getEquippedItemByBodyPart(BodyPart.Weapon)).getSoulOptionId()
             );
             tsm.putCharacterStatValue(FullSoulMP, o);
             tsm.sendSetStatPacket();

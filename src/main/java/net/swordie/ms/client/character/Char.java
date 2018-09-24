@@ -707,7 +707,7 @@ public class Char {
 			// Normal equipped items
 			for (Item item : equippedItems) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() > BP_BASE.getVal() && item.getBagIndex() < BP_END.getVal()) {
+				if (item.getBagIndex() > BPBase.getVal() && item.getBagIndex() < BPEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -716,7 +716,7 @@ public class Char {
 			// Cash equipped items
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= CBP_BASE.getVal() && item.getBagIndex() <= CBP_END.getVal()) {
+				if (item.getBagIndex() >= CBPBase.getVal() && item.getBagIndex() <= CBPEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex() - 100);
 					equip.encode(outPacket);
 				}
@@ -732,7 +732,7 @@ public class Char {
 			// NonBPEquip::Decode (Evan)
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= EVAN_BASE.getVal() && item.getBagIndex() < EVAN_END.getVal()) {
+				if (item.getBagIndex() >= EvanBase.getVal() && item.getBagIndex() < EvanEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -742,7 +742,7 @@ public class Char {
 			// >= 20k < 200024?
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= MECH_BASE.getVal() && item.getBagIndex() < MECH_END.getVal()) {
+				if (item.getBagIndex() >= MechBase.getVal() && item.getBagIndex() < MechEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -760,7 +760,7 @@ public class Char {
 			// Android
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= AP_BASE.getVal() && item.getBagIndex() <= AP_END.getVal()) {
+				if (item.getBagIndex() >= APBase.getVal() && item.getBagIndex() <= APEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -769,7 +769,7 @@ public class Char {
 			// Angelic Buster
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= DU_BASE.getVal() && item.getBagIndex() < DU_END.getVal()) {
+				if (item.getBagIndex() >= DUBase.getVal() && item.getBagIndex() < DUEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -778,7 +778,7 @@ public class Char {
 			// Bits
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= BITS_BASE.getVal() && item.getBagIndex() < BITS_END.getVal()) {
+				if (item.getBagIndex() >= BitsBase.getVal() && item.getBagIndex() < BitsEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -787,7 +787,7 @@ public class Char {
 			// Zero
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= ZERO_BASE.getVal() && item.getBagIndex() < ZERO_END.getVal()) {
+				if (item.getBagIndex() >= ZeroBase.getVal() && item.getBagIndex() < ZeroEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -796,7 +796,7 @@ public class Char {
 			// Totems
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= TOTEM_BASE.getVal() && item.getBagIndex() < TOTEM_END.getVal()) {
+				if (item.getBagIndex() >= TotemBase.getVal() && item.getBagIndex() < TotemEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -805,7 +805,7 @@ public class Char {
 			// Maybe zero beta cash?
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= MBP_BASE.getVal() && item.getBagIndex() < MBP_END.getVal()) {
+				if (item.getBagIndex() >= MBPBase.getVal() && item.getBagIndex() < MBPEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -814,7 +814,7 @@ public class Char {
 			// Haku
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= FP_START.getVal() && item.getBagIndex() < FP_END.getVal()) {
+				if (item.getBagIndex() >= HakuStart.getVal() && item.getBagIndex() < HakuEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -3154,7 +3154,7 @@ public class Char {
 	}
 
 	public int calculateBulletIDForAttack() {
-		Item weapon = getEquippedInventory().getFirstItemByBodyPart(BodyPart.WEAPON);
+		Item weapon = getEquippedInventory().getFirstItemByBodyPart(BodyPart.Weapon);
 		if (weapon == null) {
 			return 0;
 		}
@@ -3388,7 +3388,7 @@ public class Char {
 	}
 
 	public void initSoulMP() {
-		Equip weapon = (Equip) getEquippedItemByBodyPart(WEAPON);
+		Equip weapon = (Equip) getEquippedItemByBodyPart(Weapon);
 		TemporaryStatManager tsm = getTemporaryStatManager();
 		if (weapon != null && weapon.getSoulSocketId() != 0 && !tsm.hasStat(SoulMP)) {
 			Option o = new Option();

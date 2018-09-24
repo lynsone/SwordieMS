@@ -50,7 +50,7 @@ public class DamageCalc {
 
     public long calcPDamageForPvM(int skillID, byte slv) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        int weaponType = ItemConstants.getWeaponType(chr.getEquippedItemByBodyPart(BodyPart.WEAPON).getItemId());
+        int weaponType = ItemConstants.getWeaponType(chr.getEquippedItemByBodyPart(BodyPart.Weapon).getItemId());
         SkillInfo si = SkillData.getSkillInfoById(skillID);
         double mult = (si == null ? 100 : si.getValue(SkillStat.damage, slv)) / 100D;
         mult = mult == 0 ? si.getValue(SkillStat.dot, slv) / 100D : mult;
