@@ -17,7 +17,7 @@ if sm.hasQuest(30006):
 else:
     sm.dispose()
 
-
+    sm.lockInGameUI(True)
     sm.setPlayerAsSpeaker()
     sm.sendNext("What.. is this place?")
 
@@ -25,7 +25,6 @@ else:
     sm.sendDelay(3000)
 
     sm.moveCamera(200, 667, 443)
-    sm.sendDelay(3000)
 
     sm.setSpeakerID(VELLUM)
     sm.sendNext("Foolish creature! You dare challenge #rhis#k will?!")

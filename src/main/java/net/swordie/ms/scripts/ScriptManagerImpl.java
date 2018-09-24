@@ -252,8 +252,15 @@ public class ScriptManagerImpl implements ScriptManager {
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName())) {
-				// gracefully stop script if it's still active with the same script info
-				stop(scriptType);
+			    if (scriptType == ScriptType.Field) {
+			        // check for map cuz there are maps that uses the same script.
+			        if (chr.getFieldID() == si.getParentID()) {
+                        stop(scriptType);
+                    }
+                } else {
+                    // gracefully stop script if it's still active with the same script info
+                    stop(scriptType);
+                }
 			}
 		}
 	}
@@ -1912,9 +1919,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	// InGameDirectionEvent methods ------------------------------------------------------------------------------------
 
 	@Override
-	public void moveCamera(boolean back, int speed, int x, int y) {
+	public int moveCamera(boolean back, int speed, int x, int y) {
 		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
+        Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+        if (response == null) {
+            throw new NullPointerException(INTENDED_NPE_MSG);
+        }
+		return (int) response;
 	}
 
 	public void moveCamera(int speed, int x, int y) {
@@ -1926,8 +1938,14 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void zoomCamera(int inZoomDuration, int scale, int x, int y) {
+	public int zoomCamera(int inZoomDuration, int scale, int x, int y) {
+		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, new Position(x, y))));
+        Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
+        if (response == null) {
+            throw new NullPointerException(INTENDED_NPE_MSG);
+        }
+		return (int) response;
 	}
 
 	@Override

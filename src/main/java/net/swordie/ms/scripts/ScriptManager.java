@@ -1336,7 +1336,7 @@ public interface ScriptManager extends Observer {
 	 * @param y y Position
 	 * 		Position for the Camera to move to.
 	 */
-	void moveCamera(boolean back, int speed, int x, int y);
+	int moveCamera(boolean back, int speed, int x, int y);
 
 	/**
 	 * Zooms the Camera in at the given position.
@@ -1351,7 +1351,7 @@ public interface ScriptManager extends Observer {
 	 * @param y y Position
 	 * 		Screen Center Position
 	 */
-	void zoomCamera(int inZoomDuration, int scale, int x, int y);
+	int zoomCamera(int inZoomDuration, int scale, int x, int y);
 
 	/**
 	 * Resets the Camera from a still position to following the User again.

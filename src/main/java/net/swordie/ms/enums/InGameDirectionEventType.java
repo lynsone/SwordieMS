@@ -10,9 +10,9 @@ public enum InGameDirectionEventType {
     EffectPlay(2),
     ForcedInput(3),
     PatternInputRequest(4),
-    CameraMove(5),
+    CameraMove(5),// automated send delay
     CameraOnCharacter(6),
-    CameraZoom(7),
+    CameraZoom(7),// automated send delay
     CameraReleaseFromUserPoint(8),
     VansheeMode(9),
     FaceOff(10),

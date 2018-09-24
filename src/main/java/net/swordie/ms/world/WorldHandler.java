@@ -1926,11 +1926,20 @@ public class WorldHandler {
             boolean hasAnswer = false;
             String ans = null;
             if (nmt == NpcMessageType.InGameDirectionsAnswer) {
-                byte answ = inPacket.decodeByte();
-                if (action != 1 && action != 2) {   // SendDelay/PatternInputRequest
-                    return;         // We only want SendDelay as ways to progress the script
+                InGameDirectionAsk answerType = InGameDirectionAsk.getByVal(action);
+                if (answerType == null || answerType == InGameDirectionAsk.NOT) {
+                    return;
                 }
-                chr.getScriptManager().handleAction(nmt, action, answ);
+                boolean success = inPacket.decodeByte() == 1;// bSuccess
+                int answerVal = 0;
+                if (success) {
+                    if (answerType == InGameDirectionAsk.CAMERA_MOVE_TIME) {
+                        answerVal = inPacket.decodeInt();
+                        chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(answerVal)));
+                        return;
+                    }
+                    chr.getScriptManager().handleAction(nmt, (byte) answerType.getVal(), answerVal);
+                }
                 return;
             }
             if (nmt == NpcMessageType.AskText && action == 1) {

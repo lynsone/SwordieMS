@@ -19,14 +19,11 @@ else:
 
     sm.moveNpcByTemplateId(UNK_NPC, False, 1000, 100)
     sm.moveCamera(False, 200, 200, 200)
-    sm.sendDelay(3000)
 
     # The delay is for letting the Npc move
     sm.sendDelay(3000)
 
     sm.moveCamera(True, 0, 0, 0)
-
-    sm.sendDelay(0)
 
     sm.sendDelay(900)
 
