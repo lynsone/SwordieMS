@@ -10,6 +10,6 @@ if sm.hasQuest(AN_URGENT_SUMMONS):
     sm.removeEscapeButton()
     sm.sendNext("Oh, there's a new area.")
 
-    sm.moveCameraBack(20000)
+    sm.moveCameraBack(200)
 
     sm.lockInGameUI(False)

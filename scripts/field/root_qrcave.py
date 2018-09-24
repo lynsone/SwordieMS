@@ -17,7 +17,7 @@ if sm.hasQuest(30006):
 else:
     sm.dispose()
 
-
+    sm.lockInGameUI(True)
     sm.setPlayerAsSpeaker()
     sm.sendNext("What.. is this place?")
 
