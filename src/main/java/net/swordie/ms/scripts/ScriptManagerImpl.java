@@ -1158,7 +1158,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void hideNpcByObjectId(int npcObjId, boolean hideTemplate, boolean hideNameTag) {
 		Field field = chr.getField();
 		Life life = field.getLifeByObjectID(npcObjId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
 			return;
 		}
@@ -1169,7 +1169,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void moveNpcByTemplateId(int npcTemplateId, boolean left, int distance, int speed) {
 		Field field = chr.getField();
 		Life life = field.getLifeByTemplateId(npcTemplateId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcTemplateId));
 			return;
 		}
@@ -1180,7 +1180,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void moveNpcByObjectId(int npcObjId, boolean left, int distance, int speed) {
 		Field field = chr.getField();
 		Life life = field.getLifeByObjectID(npcObjId);
-		if(life == null || !(life instanceof Npc)) {
+		if(!(life instanceof Npc)) {
 			log.error(String.format("npc %d is null or not an instance of Npc", npcObjId));
 			return;
 		}

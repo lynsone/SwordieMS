@@ -6,7 +6,7 @@ import java.util.Arrays;
  * Created on 1/26/2018.
  */
 public enum ItemGrade {
-    LegendaryBonusHidden(20),
+    LegendaryBonusHidden(-12),
     UniqueBonusHidden(-13),
     EpicBonusHidden(-14),
     RareBonusHidden(-15),
