@@ -252,8 +252,15 @@ public class ScriptManagerImpl implements ScriptManager {
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName())) {
-				// gracefully stop script if it's still active with the same script info
-				stop(scriptType);
+			    if (scriptType == ScriptType.Field) {
+			        // check for map cuz there are maps that uses the same script.
+			        if (chr.getFieldID() == si.getParentID()) {
+                        stop(scriptType);
+                    }
+                } else {
+                    // gracefully stop script if it's still active with the same script info
+                    stop(scriptType);
+                }
 			}
 		}
 	}
