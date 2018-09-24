@@ -217,7 +217,8 @@ public class QuestData {
                                         case "order":
                                             break;
                                         case "state":
-                                            break; // state var is always 2 (completion)
+                                            qcr.setQuestStatus(Byte.parseByte(questValue));
+                                            break;
                                         default:
                                             log.warn(String.format("(%d) Unk quest name %s with value %s", questID, questName, questValue));
                                             break;
