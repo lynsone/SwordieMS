@@ -3,7 +3,7 @@ PHANTOM = 2159439
 LUMINOUS = 2159467
 
 sm.lockInGameUI(True, False)
-sm.curNodeEventEnd(True)
+#sm.curNodeEventEnd(True)
 sm.hideUser(True)
 sm.forcedInput(0)
 

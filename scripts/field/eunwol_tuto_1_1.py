@@ -10,8 +10,6 @@ sm.sendDelay(1000)
 
 sm.moveCamera(False, 100, 1000, 18)
 
-sm.sendDelay(191)
-
 sm.removeEscapeButton()
 sm.setSpeakerID(PHANTOM)
 sm.sendNext("Don't waste your time moping around up here, staring into the distance. It's not as romantic as it seems...")

@@ -16,7 +16,6 @@ sm.forcedMove(True, 300)
 sm.sendDelay(3000)
 
 sm.moveCamera(300, -550, 330)
-sm.sendDelay(3000)
 
 sm.setBoxChat()
 sm.flipBoxChat()
@@ -28,7 +27,6 @@ sm.setBoxChat()
 sm.sendNext("Chop, chop, chop, chop. Thinking deep thoughts. Chop, chop, chop, chop.")
 
 sm.moveCameraBack(700)
-sm.sendDelay(1000)
 
 sm.forcedMove(True, 850)
 sm.sendDelay(5000)
@@ -60,7 +58,6 @@ sm.showNpcSpecialActionByTemplateId(KINDLY_WOODCUTTER, "special", 120000)
 sm.setFieldColour(GreyFieldType.Field, 100, 100, 100, 4000)
 sm.setCameraOnNpc(KINDLY_WOODCUTTER)
 sm.zoomCamera(4000, 2500, -480, 330)
-sm.sendDelay(5000)
 
 sm.sendNext("Does she know where I am? Is she here?! Oh please oh please oh no no no no no!")
 

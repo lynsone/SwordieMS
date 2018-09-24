@@ -21,7 +21,6 @@ if chr.getJob() == 2005:
     sm.sendSay("Hah, true that. You know they'd take you apart if they heard you say that. Oh, look, another round of monsters coming.")
 
     ms.moveCamera(False, 200, 1100, 66)
-    sm.sendDelay(1364)
 
     sm.spawnNpc(VOID_PRIEST, 770, 50)
     sm.showNpcSpecialActionByTemplateId(VOID_PRIEST, "summon")
@@ -36,14 +35,12 @@ if chr.getJob() == 2005:
     sm.sendDelay(300)
 
     ms.moveCamera(True, 200, 0, 0)
-    sm.sendDelay(1364)
 
     sm.flipDialoguePlayerAsSpeaker()
     sm.sendNext("Here, I'll take care of them.")
 
     sm.forcedInput(1)
     ms.moveCamera(False, 180, 1100, 66)
-    sm.sendDelay(500)
 
     sm.forcedInput(0)
     sm.sendDelay(500)
@@ -83,7 +80,6 @@ if chr.getJob() == 2005:
 
     sm.forcedInput(2)
     ms.moveCamera(True, 200, 0, 0)
-    sm.sendDelay(30)
 
     sm.forcedInput(0)
     sm.sendDelay(500)

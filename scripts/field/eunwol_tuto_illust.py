@@ -9,6 +9,7 @@ if sm.hasQuest(38900):
     sm.sendDelay(3500)
 
     sm.warpInstanceIn(927030020, 0)
+    sm.dispose()
 else:
     sm.sayMonologue("\r\n\r\nA great darkness is covering Maple World.", False)
     sm.sayMonologue("\r\nThe Black Mage wishes to dominate Maple World with overwhelming darkness.", False)
@@ -22,4 +23,4 @@ else:
     sm.reservedEffect("Effect/Direction8.img/lightningTutorial/Scene0")
     sm.sendDelay(3300)
 
-    sm.warpInstanceIn(927030000, 0)
+    sm.warp(927030000, 0)

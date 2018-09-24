@@ -25,7 +25,6 @@ else:
     sm.sendDelay(3000)
 
     sm.moveCamera(200, 667, 443)
-    sm.sendDelay(3000)
 
     sm.setSpeakerID(VELLUM)
     sm.sendNext("Foolish creature! You dare challenge #rhis#k will?!")

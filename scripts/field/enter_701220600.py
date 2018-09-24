@@ -27,7 +27,6 @@ sm.forcedMove(False, 400)
 sm.sendDelay(800)
 
 sm.moveCamera(300, 0, chr.getPosition().getY())
-sm.sendDelay(2000)
 
 sm.sendNext("Chief Priest!")
 sm.sendDelay(200)
