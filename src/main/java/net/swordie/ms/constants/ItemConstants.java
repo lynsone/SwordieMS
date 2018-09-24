@@ -98,7 +98,7 @@ public class ItemConstants {
     public static int getGenderFromId(int nItemID) {
         int result; // eax
 
-        if (nItemID / 1000000 != 1 && nItemID / 10000 != 254 || nItemID / 10000 == 119 || nItemID / 10000 == 168)
+        if (nItemID / 1000000 != 1 && getItemPrefix(nItemID) != 254 || getItemPrefix(nItemID) == 119 || getItemPrefix(nItemID) == 168)
             return 2;
         switch (nItemID / 1000 % 10) {
             case 0:
@@ -121,188 +121,169 @@ public class ItemConstants {
 
     public static List<Integer> getBodyPartArrayFromItem(int itemID, int genderArg) {
         int gender = getGenderFromId(itemID);
-        int prefix = itemID / 10000;
+        EquipPrefix prefix = EquipPrefix.getByVal(getItemPrefix(itemID));
         List<Integer> bodyPartList = new ArrayList<>();
-        if (prefix != 119 && prefix != 168) {
-            if (gender != 2 && genderArg != 2 && gender != genderArg) {
-                return bodyPartList;
-            }
+        if (prefix != EquipPrefix.Emblem && prefix != EquipPrefix.Bit &&
+                gender != 2 && genderArg != 2 && gender != genderArg) {
+            return bodyPartList;
         }
         switch (prefix) {
-            case 100:
-                bodyPartList.add(1);
-                bodyPartList.add(1200);
-                bodyPartList.add(1300);
-                bodyPartList.add(1501);
+            case Hat:
+                bodyPartList.add(BodyPart.Hat.getVal());
+                bodyPartList.add(BodyPart.EvanHat.getVal());
+                bodyPartList.add(BodyPart.APHat.getVal());
+                bodyPartList.add(BodyPart.DUHat.getVal());
+                bodyPartList.add(BodyPart.ZeroHat.getVal());
                 break;
-            case 101:
-                bodyPartList.add(2);
-                bodyPartList.add(1202);
-                bodyPartList.add(1302);
-                bodyPartList.add(1502);
+            case FaceAccessory:
+                bodyPartList.add(BodyPart.FaceAccessory.getVal());
+                bodyPartList.add(BodyPart.APFaceAccessory.getVal());
+                bodyPartList.add(BodyPart.DUFaceAccessory.getVal());
+                bodyPartList.add(BodyPart.ZeroFaceAccessory.getVal());
                 break;
-            case 102:
-                bodyPartList.add(3);
-                bodyPartList.add(1500);
+            case EyeAccessory:
+                bodyPartList.add(BodyPart.EyeAccessory.getVal());
+                bodyPartList.add(BodyPart.ZeroEyeAccessory.getVal());
                 break;
-            case 103:
-                bodyPartList.add(4);
-                bodyPartList.add(1503);
+            case Earrings:
+                bodyPartList.add(BodyPart.Earrings.getVal());
+                bodyPartList.add(BodyPart.ZeroEarrings.getVal());
                 break;
-            case 104:
-            case 105:
-                bodyPartList.add(5);
-                bodyPartList.add(1203);
-                bodyPartList.add(1505);
+            case Top:
+            case Overall:
+                bodyPartList.add(BodyPart.Top.getVal());
+                bodyPartList.add(BodyPart.APTop.getVal());
+                bodyPartList.add(BodyPart.DUTop.getVal());
+                bodyPartList.add(BodyPart.ZeroTop.getVal());
                 break;
-            case 106:
-                bodyPartList.add(6);
-                bodyPartList.add(1204);
-                bodyPartList.add(1505);
+            case Bottom:
+                bodyPartList.add(BodyPart.Bottom.getVal());
+                bodyPartList.add(BodyPart.APBottom.getVal());
+                bodyPartList.add(BodyPart.ZeroBottom.getVal());
                 break;
-            case 107:
-                bodyPartList.add(7);
-                bodyPartList.add(1205);
-                bodyPartList.add(1509);
+            case Shoes:
+                bodyPartList.add(BodyPart.Shoes.getVal());
+                bodyPartList.add(BodyPart.APShoes.getVal());
+                bodyPartList.add(BodyPart.ZeroShoes.getVal());
                 break;
-            case 108:
-                bodyPartList.add(8);
-                bodyPartList.add(1206);
-                bodyPartList.add(1304);
-                bodyPartList.add(1506);
+            case Gloves:
+                bodyPartList.add(BodyPart.Gloves.getVal());
+                bodyPartList.add(BodyPart.APGloves.getVal());
+                bodyPartList.add(BodyPart.DUGloves.getVal());
+                bodyPartList.add(BodyPart.ZeroGloves.getVal());
                 break;
-            case 109:
-            case 134:
-            case 135:
-            case 156:
-                bodyPartList.add(10);
+            case Shield:
+            case Katara:
+            case SecondaryWeapon:
+            case Lapis:
+                bodyPartList.add(BodyPart.Shield.getVal());
                 break;
-            case 110:
-                bodyPartList.add(9);
-                bodyPartList.add(1201);
-                bodyPartList.add(1301);
-                bodyPartList.add(1504);
+            case Cape:
+                bodyPartList.add(BodyPart.Cape.getVal());
+                bodyPartList.add(BodyPart.APCape.getVal());
+                bodyPartList.add(BodyPart.DUCape.getVal());
+                bodyPartList.add(BodyPart.ZeroCape.getVal());
                 break;
-            case 111:
-                bodyPartList.add(12);
-                bodyPartList.add(13);
-                bodyPartList.add(15);
-                bodyPartList.add(16);
-                bodyPartList.add(1510);
-                bodyPartList.add(1511);
+            case Ring:
+                bodyPartList.add(BodyPart.Ring1.getVal());
+                bodyPartList.add(BodyPart.Ring2.getVal());
+                bodyPartList.add(BodyPart.Ring3.getVal());
+                bodyPartList.add(BodyPart.Ring4.getVal());
+                bodyPartList.add(BodyPart.ZeroRing1.getVal());
+                bodyPartList.add(BodyPart.ZeroRing2.getVal());
                 break;
-            case 112:
-                bodyPartList.add(17);
-                bodyPartList.add(65);
-                bodyPartList.add(1512);
-                bodyPartList.add(1513);
+            case Pendant:
+                bodyPartList.add(BodyPart.Pendant.getVal());
+                bodyPartList.add(BodyPart.ExtendedPendant.getVal());
                 break;
-            case 113:
-                bodyPartList.add(22);
-                bodyPartList.add(50);
+            case Belt:
+                bodyPartList.add(BodyPart.Belt.getVal());
                 break;
-            case 114:
-                bodyPartList.add(49);
+            case Medal:
+                bodyPartList.add(BodyPart.Medal.getVal());
                 break;
-            case 115:
-                bodyPartList.add(51);
+            case Shoulder:
+                bodyPartList.add(BodyPart.Shoulder.getVal());
                 break;
-            case 116:
-                bodyPartList.add(52);
+            case PocketItem:
+                bodyPartList.add(BodyPart.PocketItem.getVal());
                 break;
-            case 117:
-                bodyPartList.add(55);
+            case MonsterBook:
+                bodyPartList.add(BodyPart.MonsterBook.getVal());
                 break;
-            case 118:
-                bodyPartList.add(29);
-                bodyPartList.add(56);
+            case Badge:
+                bodyPartList.add(BodyPart.Badge.getVal());
                 break;
-            case 119:
-                bodyPartList.add(61);
+            case Emblem:
+                bodyPartList.add(BodyPart.Emblem.getVal());
                 break;
-            case 120:
-                bodyPartList.add(5000);
-                bodyPartList.add(5001);
-                bodyPartList.add(5002);
+            case Totem:
+                bodyPartList.add(BodyPart.Totem1.getVal());
+                bodyPartList.add(BodyPart.Totem2.getVal());
+                bodyPartList.add(BodyPart.Totem3.getVal());
                 break;
-            case 161:
-                bodyPartList.add(1100);
+            case MachineEngine:
+                bodyPartList.add(BodyPart.MachineEngine.getVal());
                 break;
-            case 162:
-                bodyPartList.add(1101);
+            case MachineArm:
+                bodyPartList.add(BodyPart.MachineArm.getVal());
                 break;
-            case 163:
-                bodyPartList.add(1102);
+            case MachineLeg:
+                bodyPartList.add(BodyPart.MachineLeg.getVal());
                 break;
-            case 164:
-                bodyPartList.add(1103);
+            case MachineFrame:
+                bodyPartList.add(BodyPart.MachineFrame.getVal());
                 break;
-            case 165:
-                bodyPartList.add(1104);
+            case MachineTransistor:
+                bodyPartList.add(BodyPart.MachineTransistor.getVal());
                 break;
-            case 166:
-                bodyPartList.add(53);
+            case Android:
+                bodyPartList.add(BodyPart.Android.getVal());
                 break;
-            case 167:
-                bodyPartList.add(54);
-                bodyPartList.add(61);
+            case MechanicalHeart:
+                bodyPartList.add(BodyPart.MechanicalHeart.getVal());
                 break;
-            case 168:
-                for (int id = 1400; id < 1425; id++) {
+            case Bit:
+                for (int id = BodyPart.BitsBase.getVal(); id <= BodyPart.BitsEnd.getVal(); id++) {
                     bodyPartList.add(id);
                 }
                 break;
-            case 180:
-                bodyPartList.add(14);
-                bodyPartList.add(30);
-                bodyPartList.add(38);
+            case PetWear:
+                bodyPartList.add(BodyPart.PetWear1.getVal());
+                bodyPartList.add(BodyPart.PetWear2.getVal());
+                bodyPartList.add(BodyPart.PetWear3.getVal());
                 break;
-            case 184:
-                bodyPartList.add(5100);
+            // case 184: // unknown, equip names are untranslated and google search results in hekaton screenshots
+            // case 185:
+            // case 186:
+            // case 187:
+            // case 188:
+            // case 189:
+            case TamingMob:
+                bodyPartList.add(BodyPart.TamingMob.getVal());
                 break;
-            case 185:
-                bodyPartList.add(5102);
+            case Saddle:
+                bodyPartList.add(BodyPart.Saddle.getVal());
                 break;
-            case 186:
-                bodyPartList.add(5103);
+            case EvanHat:
+                bodyPartList.add(BodyPart.EvanHat.getVal());
                 break;
-            case 187:
-                bodyPartList.add(5104);
+            case EvanPendant:
+                bodyPartList.add(BodyPart.EvanPendant.getVal());
                 break;
-            case 188:
-                bodyPartList.add(5101);
+            case EvanWing:
+                bodyPartList.add(BodyPart.EvanWing.getVal());
                 break;
-            case 189:
-                bodyPartList.add(5105);
-                break;
-            case 190:
-                bodyPartList.add(18);
-                break;
-            case 191:
-                bodyPartList.add(19);
-                break;
-            case 192:
-                bodyPartList.add(20);
-                break;
-            case 194:
-                bodyPartList.add(1000);
-                break;
-            case 195:
-                bodyPartList.add(1001);
-                break;
-            case 196:
-                bodyPartList.add(1002);
-                break;
-            case 197:
-                bodyPartList.add(1003);
+            case EvanShoes:
+                bodyPartList.add(BodyPart.EvanShoes.getVal());
                 break;
             default:
                 if (ItemConstants.isLongOrBigSword(itemID) || ItemConstants.isWeapon(itemID)) {
-                    bodyPartList.add(11);
+                    bodyPartList.add(BodyPart.Weapon.getVal());
                     if(ItemConstants.isFan(itemID)) {
-                        bodyPartList.add(5200);
+                        bodyPartList.add(BodyPart.HakuFan.getVal());
                     } else {
-                        bodyPartList.add(1507);
+                        bodyPartList.add(BodyPart.ZeroWeapon.getVal());
                     }
                 } else {
                     log.debug("Unknown type? id = " + itemID);
@@ -312,21 +293,23 @@ public class ItemConstants {
         return bodyPartList;
     }
 
+    private static int getItemPrefix(int nItemID) {
+        return nItemID / 10000;
+    }
+
     private static boolean isLongOrBigSword(int nItemID) {
-        int prefix = nItemID / 10000;
-        return prefix % 100 == 56 || prefix % 100 == 57;
+        return getItemPrefix(nItemID) == EquipPrefix.Lapis.getVal() || getItemPrefix(nItemID) == EquipPrefix.Lazuli.getVal();
     }
 
     private static boolean isFan(int nItemID) {
-        int prefix = nItemID / 10000;
-        return prefix % 100 == 55;
+        return getItemPrefix(nItemID) == EquipPrefix.Fan.getVal();
     }
 
     public static int getWeaponType(int itemID) {
         if (itemID / 1000000 != 1) {
             return 0;
         }
-        return itemID / 10000 % 100;
+        return getItemPrefix(itemID) % 100;
     }
 
     public static boolean isThrowingItem(int itemID) {
@@ -334,11 +317,11 @@ public class ItemConstants {
     }
 
     public static boolean isThrowingStar(int itemID) {
-        return itemID / 10000 == 207;
+        return getItemPrefix(itemID) == 207;
     }
 
     public static boolean isBullet(int itemID) {
-        return itemID / 10000 == 233;
+        return getItemPrefix(itemID) == 233;
     }
 
     public static boolean isBowArrow(int itemID) {
@@ -346,7 +329,7 @@ public class ItemConstants {
     }
 
     public static boolean isFamiliar(int itemID) {
-        return itemID / 10000 == 287;
+        return getItemPrefix(itemID) == 287;
     }
 
     public static boolean isEnhancementScroll(int scrollID) {
@@ -354,19 +337,19 @@ public class ItemConstants {
     }
 
     public static boolean isHat(int itemID) {
-        return itemID / 10000 == 100;
+        return getItemPrefix(itemID) == EquipPrefix.Hat.getVal();
     }
 
     public static boolean isWeapon(int itemID) {
-        return itemID >= 1210000 && itemID < 1600000 || isSecondary(itemID);
+        return itemID >= 1210000 && itemID < 1600000;
     }
 
     public static boolean isSecondary(int itemID) {
-        return itemID / 10000 == 135;
+        return getItemPrefix(itemID) == EquipPrefix.SecondaryWeapon.getVal();
     }
 
     public static boolean isShield(int itemID) {
-        return itemID / 10000 == 109;
+        return getItemPrefix(itemID) == EquipPrefix.Shield.getVal();
     }
 
     public static boolean isAccessory(int itemID) {
@@ -375,39 +358,39 @@ public class ItemConstants {
     }
 
     public static boolean isFaceAccessory(int itemID) {
-        return itemID / 10000 == 101;
+        return getItemPrefix(itemID) == EquipPrefix.FaceAccessory.getVal();
     }
 
     public static boolean isEyeAccessory(int itemID) {
-        return itemID / 10000 == 102;
+        return getItemPrefix(itemID) == EquipPrefix.EyeAccessory.getVal();
     }
 
     public static boolean isEarrings(int itemID) {
-        return itemID / 10000 == 103;
+        return getItemPrefix(itemID) == EquipPrefix.Earrings.getVal();
     }
 
     public static boolean isTop(int itemID) {
-        return itemID / 10000 == 104;
+        return getItemPrefix(itemID) == EquipPrefix.Top.getVal();
     }
 
     public static boolean isOverall(int itemID) {
-        return itemID / 10000 == 105;
+        return getItemPrefix(itemID) == EquipPrefix.Overall.getVal();
     }
 
     public static boolean isBottom(int itemID) {
-        return itemID / 10000 == 106;
+        return getItemPrefix(itemID) == EquipPrefix.Bottom.getVal();
     }
 
     public static boolean isShoe(int itemID) {
-        return itemID / 10000 == 107;
+        return getItemPrefix(itemID) == EquipPrefix.Shoes.getVal();
     }
 
     public static boolean isGlove(int itemID) {
-        return itemID / 10000 == 108;
+        return getItemPrefix(itemID) == EquipPrefix.Gloves.getVal();
     }
 
     public static boolean isCape(int itemID) {
-        return itemID / 10000 == 110;
+        return getItemPrefix(itemID) == EquipPrefix.Cape.getVal();
     }
 
     public static boolean isArmor(int itemID) {
@@ -415,56 +398,56 @@ public class ItemConstants {
     }
 
     public static boolean isRing(int itemID) {
-        return itemID >= 1112000 && itemID < 1113000;
+        return getItemPrefix(itemID) == EquipPrefix.Ring.getVal();
     }
 
     public static boolean isPendant(int itemID) {
-        return itemID / 10000 == 112;
+        return getItemPrefix(itemID) == EquipPrefix.Pendant.getVal();
     }
 
     public static boolean isBelt(int itemID) {
-        return itemID / 10000 == 113;
+        return getItemPrefix(itemID) == EquipPrefix.Belt.getVal();
     }
 
     public static boolean isMedal(int itemID) {
-        return itemID / 10000 == 114;
+        return getItemPrefix(itemID) == EquipPrefix.Medal.getVal();
     }
 
     public static boolean isShoulder(int itemID) {
-        return itemID / 10000 == 115;
+        return getItemPrefix(itemID) == EquipPrefix.Shoulder.getVal();
     }
 
     public static boolean isPocketItem(int itemID) {
-        return itemID / 10000 == 116;
+        return getItemPrefix(itemID) == EquipPrefix.PocketItem.getVal();
     }
 
-    public static boolean isCrusaderCodex(int itemID) {
-        return itemID / 10000 == 117;
+    public static boolean isMonsterBook(int itemID) {
+        return getItemPrefix(itemID) == EquipPrefix.MonsterBook.getVal();
     }
 
     public static boolean isBadge(int itemID) {
-        return itemID / 10000 == 118;
+        return getItemPrefix(itemID) == EquipPrefix.Badge.getVal();
     }
 
     public static boolean isEmblem(int itemID) {
-        return itemID / 10000 == 119;
+        return getItemPrefix(itemID) == EquipPrefix.Emblem.getVal();
     }
 
     public static boolean isTotem(int itemID) {
-        return itemID / 10000 == 120;
+        return getItemPrefix(itemID) == EquipPrefix.Totem.getVal();
     }
 
     public static boolean isAndroid(int itemID) {
-        return itemID / 10000 == 166;
+        return getItemPrefix(itemID) == EquipPrefix.Android.getVal();
     }
 
     public static boolean isMechanicalHeart(int itemID) {
-        return itemID / 10000 == 167;
+        return getItemPrefix(itemID) == EquipPrefix.MechanicalHeart.getVal();
     }
 
     public static boolean isRebirthFlame(int itemId) { return itemId >= 2048700 && itemId < 2048800; }
 
-    public static boolean isNebulite(int itemId) { return itemId / 10000 == 306; }
+    public static boolean isNebulite(int itemId) { return getItemPrefix(itemId) == 306; }
 
     public static boolean canEquipTypeHavePotential(int itemid) {
         return isRing(itemid) ||
@@ -681,19 +664,19 @@ public class ItemConstants {
     }
 
     public static boolean isClaw(int id) {
-        return id / 10000 == 147;
+        return getItemPrefix(id) == 147;
     }
 
     public static boolean isBow(int id) {
-        return id / 10000 == 145;
+        return getItemPrefix(id) == 145;
     }
 
     public static boolean isXBow(int id) {
-        return id / 10000 == 146;
+        return getItemPrefix(id) == 146;
     }
 
     public static boolean isGun(int id) {
-        return id / 10000 == 149;
+        return getItemPrefix(id) == 149;
     }
 
     public static boolean isXBowArrow(int id) {
@@ -996,11 +979,11 @@ public class ItemConstants {
     }
 
     public static boolean isMasteryBook(int itemId) {
-        return itemId / 10000 == 229;
+        return getItemPrefix(itemId) == 229;
     }
 
     public static boolean isPet(int itemId) {
-        return itemId / 10000 == 500;
+        return getItemPrefix(itemId) == 500;
     }
 
     public static boolean isSoulEnchanter(int itemID) {
@@ -1039,7 +1022,7 @@ public class ItemConstants {
     }
 
     public static boolean isMobCard(int itemID) {
-        return itemID / 10000 == 238;
+        return getItemPrefix(itemID) == 238;
     }
 
     public static boolean isCollisionLootItem(int itemID) {
@@ -1057,31 +1040,31 @@ public class ItemConstants {
 
     public static boolean isUpgradable(int itemID) {
         BodyPart bodyPart = BodyPart.getByVal(getBodyPartFromItem(itemID, 0));
-        if (bodyPart == null || itemID / 10000 == 135) { // 135 are secondaries
+        if (bodyPart == null || getItemPrefix(itemID) == EquipPrefix.SecondaryWeapon.getVal()) {
             return false;
         }
         switch (bodyPart) {
-            case RING1:
-            case RING2:
-            case RING3:
-            case RING4:
-            case PENDANT:
-            case EXT_PENDANT1:
-            case WEAPON:
-            case BELT:
-            case CAP:
-            case FACEACC:
-            case EYEACC:
-            case CLOTHES:
-            case PANTS:
-            case SHOES:
-            case EARACC:
-            case SHOULDER:
-            case GLOVES:
-            case BADGE:
-            case SHIELD:
-            case CAPE:
-            case MACHINEHEART:
+            case Ring1:
+            case Ring2:
+            case Ring3:
+            case Ring4:
+            case Pendant:
+            case ExtendedPendant:
+            case Weapon:
+            case Belt:
+            case Hat:
+            case FaceAccessory:
+            case EyeAccessory:
+            case Top:
+            case Bottom:
+            case Shoes:
+            case Earrings:
+            case Shoulder:
+            case Gloves:
+            case Badge:
+            case Shield:
+            case Cape:
+            case MechanicalHeart:
                 return true;
             default:
                 return false;
@@ -1102,7 +1085,7 @@ public class ItemConstants {
         int[] armorHp = new int[]{5, 20, 30, 70, 120};
         int[] armorDef = new int[]{1, 2, 4, 7, 10};
         boolean armor = false;
-        if (bp == BodyPart.WEAPON) {
+        if (bp == BodyPart.Weapon) {
             plusFromLevel = rLevel >= 120 ? 2 : rLevel >= 60 ? 1 : 0;
             if ((rJob & RequiredJob.Warrior.getVal()) > 0) { // warrior
                 possibleStat.add(EnchantStat.PAD);
@@ -1131,7 +1114,7 @@ public class ItemConstants {
             chances = new int[]{100, 70, 30, 15};
             attStats = new int[]{1, 2, 3, 5, 7, 9};
             stat = new int[]{0, 0, 1, 2, 3, 4};
-        } else if (bp == BodyPart.GLOVES) {
+        } else if (bp == BodyPart.Gloves) {
             plusFromLevel = rLevel <= 70 ? 0 : 1;
             if ((rJob & RequiredJob.Magician.getVal()) > 0) {
                 possibleStat.add(EnchantStat.MAD);
@@ -1211,7 +1194,7 @@ public class ItemConstants {
                 stats.put(EnchantStat.MHP, armorHp[tier] + stats.getOrDefault(EnchantStat.MHP, 0));
             }
             String title = chances[i] + "% ";
-            title += bp == BodyPart.WEAPON ? "Attack" : "Stat";
+            title += bp == BodyPart.Weapon ? "Attack" : "Stat";
             ScrollUpgradeInfo sui = new ScrollUpgradeInfo(i, title, SpellTraceScrollType.Normal, 0, stats,
                     BASE_ST_COST + rLevel * (tier + 1), chances[i]);
             scrolls.add(sui);
