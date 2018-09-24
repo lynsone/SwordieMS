@@ -100,7 +100,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	private Map<ScriptType, Future> evaluations = new HashMap<>();
 	private Set<ScheduledFuture> events = new HashSet<>();
 	private ScriptMemory memory = new ScriptMemory();
-	private boolean curNodeEventEnd = false;
+	private boolean curNodeEventEnd;
 	private static final Lock fileReadLock = new ReentrantLock();
 
 	private ScriptManagerImpl(Char chr, Field field) {
@@ -207,7 +207,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		return getLastActiveScriptType() == ScriptType.None;
 	}
 
-	public void notifyMobDeath(Mob mob) {
+	private void notifyMobDeath(Mob mob) {
 		if (isActive(ScriptType.Field)) {
 			getScriptInfoByType(ScriptType.Field).addResponse(mob);
 		}
@@ -251,16 +251,11 @@ public class ScriptManagerImpl implements ScriptManager {
 				lockInGameUI(false); // so players don't get stuck if a script fails
 			}
 		} finally {
-			if (si.isActive() && name.equals(si.getScriptName())) {
-			    if (scriptType == ScriptType.Field) {
-			        // check for map cuz there are maps that uses the same script.
-			        if (chr.getFieldID() == si.getParentID()) {
-                        stop(scriptType);
-                    }
-                } else {
-                    // gracefully stop script if it's still active with the same script info
-                    stop(scriptType);
-                }
+			if (si.isActive() && name.equals(si.getScriptName()) &&
+                    (scriptType != ScriptType.Field || chr.getFieldID() == si.getParentID())) {
+                // gracefully stop script if it's still active with the same script info (scriptName, or scriptName +
+                // current chr fieldID == fieldscript's fieldID if scriptType == Field).
+                stop(scriptType);
 			}
 		}
 	}
@@ -1139,7 +1134,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		NpcScriptInfo nsi = getNpcScriptInfo();
 		nsi.setSpeakerType(speakerType);
 	}
-        
+
 	public void hideNpcByTemplateId(int npcTemplateId, boolean hide) {
 		hideNpcByTemplateId(npcTemplateId, hide, hide);
 	}
@@ -1244,7 +1239,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 		chr.write(NpcPool.npcSetSpecialAction(life.getObjectId(), effectName, duration));
 	}
-        
+
 	public int getNpcObjectIdByTemplateId(int npcTemplateId) {
 		Field field = chr.getField();
 		Life life = field.getLifeByTemplateId(npcTemplateId);
@@ -1290,7 +1285,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void spawnMobWithAppearType(int id, int x, int y, int appearType, int option) {
 		chr.getField().spawnMobWithAppearType(id, x, y, appearType, option);
 	}
-        
+
 	@Override
 	public void removeMobByObjId(int id) {
 		chr.getField().removeLife(id);
@@ -1760,7 +1755,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public boolean isComplete(int questID) {
 		return chr.getQuestManager().isComplete(questID);
 	}
-	
+
 
 
 	// Party Quest-related methods -------------------------------------------------------------------------------------
@@ -2166,7 +2161,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void avatarOriented(String effectPath) {
 		chr.write(User.effect(Effect.avatarOriented(effectPath)));
 	}
-        
+
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
 	}
