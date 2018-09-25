@@ -1761,6 +1761,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void updateQRValue(int questId) {
 		Quest quest = chr.getQuestManager().getQuests().get(questId);
+		if (quest == null) {
+			log.error(String.format("The user does not have the quest %d.", questId));
+			return;
+		}
 		chr.write(WvsContext.questRecordExMessage(quest));
 	}
 
