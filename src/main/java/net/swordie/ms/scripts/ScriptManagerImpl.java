@@ -168,7 +168,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			return;
 		}
 		setLastActiveScriptType(scriptType);
-		if (isActive(scriptType) && scriptType != ScriptType.Field) { // because Field Scripts don't get disposed.
+		if (isActive(scriptType) && (scriptType != ScriptType.Field && scriptType != ScriptType.FirstEnterField)) { // because Field Scripts don't get disposed.
 			chr.chatMessage(String.format("Already running a script of the same type (%s, id %d)! Type @check if this" +
 							" is not intended.", scriptType.getDir(), getScriptInfoByType(scriptType).getParentID()));
 			log.debug(String.format("Could not run script %s because one of the same type is already running (%s, type %s)",
@@ -252,7 +252,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName()) &&
-                    (scriptType != ScriptType.Field || chr.getFieldID() == si.getParentID())) {
+                    ((scriptType != ScriptType.Field && scriptType != ScriptType.FirstEnterField) || chr.getFieldID() == si.getParentID())) {
                 // gracefully stop script if it's still active with the same script info (scriptName, or scriptName +
                 // current chr fieldID == fieldscript's fieldID if scriptType == Field).
                 stop(scriptType);
@@ -1707,6 +1707,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			qm.addCustomQuest(quest);
 		}
 		quest.setQrValue(qrValue);
+		updateQRValue(questId);
 	}
 
 	public void deleteQuest(int questId) {
@@ -1741,6 +1742,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void setQRValue(Char character, int questId, String qrValue) {
 		Quest quest = chr.getQuestManager().getQuests().get(questId);
 		quest.setQrValue(qrValue);
+		updateQRValue(questId);
 	}
 
 	public void addQRValue(int questId, String qrValue) {
@@ -1750,10 +1752,16 @@ public class ScriptManagerImpl implements ScriptManager {
 			return;
 		}
 		setQRValue(questId, qrValue + ";" + qrVal);
+		updateQRValue(questId);
 	}
 
 	public boolean isComplete(int questID) {
 		return chr.getQuestManager().isComplete(questID);
+	}
+
+	public void updateQRValue(int questId) {
+		Quest quest = chr.getQuestManager().getQuests().get(questId);
+		chr.write(WvsContext.questRecordExMessage(quest));
 	}
 
 
