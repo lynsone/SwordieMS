@@ -7,6 +7,3 @@ sm.warp(141000000, 1) # Middle of Strait : Glacial Observatory
 if sm.getnOptionByCTS(CharacterTemporaryStat.RideVehicle) == 1930000: # Riena Skiff used in Riena Strait
     sm.removeCTS(CharacterTemporaryStat.RideVehicle)
 
-if sm.hasQuestCompleted(32170):
-    sm.hideNpcByTemplateId(1510007, False)
-sm.dispose()
