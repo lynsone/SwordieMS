@@ -1,4 +1,5 @@
 # [Silent Crusade] A Cry for Help
+from net.swordie.ms.constants import QuestConstants
 
 JAKE = 1052006
 SUBWAY_TRANSTICKET = 2030028
@@ -19,6 +20,10 @@ if response == 1:
     sm.giveItem(SUBWAY_TRANSTICKET)
     sm.startQuest(parentID)
     sm.showFieldEffect("Map/Effect.img/crossHunter/chapter/start1")
+    sm.createQuestWithQRValue(QuestConstants.SILENT_CRUSADE_WANTED_TAB_1, "")
+    sm.createQuestWithQRValue(QuestConstants.SILENT_CRUSADE_WANTED_TAB_2, "")
+    sm.createQuestWithQRValue(QuestConstants.SILENT_CRUSADE_WANTED_TAB_3, "")
+    sm.createQuestWithQRValue(QuestConstants.SILENT_CRUSADE_WANTED_TAB_4, "")
 
 else:
     sm.sendSayOkay("Really Nigga?")
