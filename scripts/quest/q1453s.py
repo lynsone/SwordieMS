@@ -16,7 +16,7 @@ sm.sendNext("Bring me one #b#i"+ str(heroicPentagon) +"##z"+ str(heroicPentagon)
 
 response = sm.sendAskYesNo("Are you ready to take the test?")
 
-if response == 1:
+if response:
     sm.sendSayOkay("I will wait for your arrival.")
     sm.startQuestNoCheck(parentID)
 else:

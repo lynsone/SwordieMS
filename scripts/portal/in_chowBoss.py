@@ -12,7 +12,7 @@ if sm.hasQuest(BOULDER_MOUNTAIN_MENACE) or sm.hasQuestCompleted(BOULDER_MOUNTAIN
     response = sm.sendAskYesNo("You sense something inside the dark cave. "
                                "Do you want to enter?")
 
-    if response == 1:
+    if response:
         sm.warpInstanceIn(DEEP_INSIDE_THE_CAVE)
         sm.createClock(time)
         sm.invokeAfterDelay(time * 1000, "chatRed", "Leaving the cave...")

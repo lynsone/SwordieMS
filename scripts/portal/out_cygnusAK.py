@@ -2,6 +2,6 @@
 
 response = sm.sendAskYesNo("Would you like to leave?")
 
-if response == 1:
+if response:
     sm.clearPartyInfo(272030300)
 sm.dispose()

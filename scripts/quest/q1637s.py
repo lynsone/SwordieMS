@@ -10,7 +10,7 @@ sm.sendNext("The Mystic Gates are connected to the Black Mage somehow. I'm sure 
 
 response = sm.sendAskYesNo("All right! I'll send you straight to Edelstein!")
 
-if response == 1:
+if response:
     sm.warp(310000000)
     sm.startQuest(parentID)
 

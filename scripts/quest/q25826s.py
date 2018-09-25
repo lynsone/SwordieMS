@@ -36,7 +36,7 @@ sm.sendNext("I really don't know about this...")
 
 sm.setSpeakerID(ESKALADE_NPC_ID)
 response = sm.sendAskYesNo("You have to make sacrifices to be a hero! Don't you want that?")
-if response == 1:
+if response:
     sm.setPlayerAsSpeaker()
     sm.setJob(6511)
     sm.addSP(5)

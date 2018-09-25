@@ -2,7 +2,7 @@
 
 response = sm.sendAskYesNo("So you want to become a Bowman?")
 
-if response == 1:
+if response:
     sm.completeQuestNoRewards(parentID)
     sm.jobAdvance(300) # Archer
     sm.addSP(5)

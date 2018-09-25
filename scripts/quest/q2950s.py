@@ -7,7 +7,7 @@ response = sm.sendAskYesNo("Hey there!\r\nI have chosen you to be on the Gold Be
                 "I'll get my personal plane to pick you up and take you there!"
                 "\r\n\r\n(accepting will warp you)")
 
-if response == 1:
+if response:
     sm.startQuest(parentID)
     sm.completeQuest(parentID)
     sm.warp(mapid, 0)

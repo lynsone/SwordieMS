@@ -3,7 +3,7 @@
 sm.setSpeakerID(9390203) # Gilberto Daniella
 response = sm.sendAskYesNo("Are you curious about the Delfino?")
 
-if response == 1:
+if response:
     sm.sendNext("We lived a good life alongside the Delfinos. "
                 "Most of our merchants rarely interacted with them, but there was no hostility.")
 else:

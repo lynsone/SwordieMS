@@ -2,7 +2,7 @@
 # 863010000 - Gollux
 response = sm.sendAskYesNo("Would you like to battle Gollux?")
 
-if response == 1:
+if response:
     if sm.getParty() is None:
         sm.sendSayOkay("Please create a party before going in.")
     elif not sm.isPartyLeader():

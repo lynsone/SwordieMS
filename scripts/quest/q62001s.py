@@ -19,6 +19,6 @@ sm.sendNext("I've sent several messages tot he Shaolin Temple. "
 response = sm.sendAskYesNo("That is why I sent for you... "
                 "Will you retrieve my messages from the bandits and deliver them to my old friend, the #r#p"+ str(WISE_CHIEF_PRIEST) +"##k of Shaolin Temple?")
 
-if response == 1:
+if response:
     sm.sendNext("Thank you. I will be here meditating until you return with good news.")
     sm.startQuest(parentID)

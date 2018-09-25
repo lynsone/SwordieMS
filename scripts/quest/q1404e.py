@@ -3,7 +3,7 @@ from net.swordie.ms.enums import Stat
 
 response = sm.sendAskYesNo("So you want to become a Thief?")
 
-if response == 1:
+if response:
     sm.completeQuestNoRewards(parentID)
     sm.jobAdvance(400) # Thief
     sm.getChr().addStatAndSendPacket(Stat.str, -40)

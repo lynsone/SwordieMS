@@ -43,6 +43,6 @@ elif currentMap == 105000000:
     map = 105030000
 elif currentMap == 211060000:
     map = 211000000
-result = sm.sendAskYesNo("Would you like to go to #m" + str(map) + "m#?")
-if result == 1:
+response = sm.sendAskYesNo("Would you like to go to #m" + str(map) + "m#?")
+if response:
     sm.warp(map, 0)

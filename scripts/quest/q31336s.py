@@ -22,7 +22,7 @@ response = sm.sendAskYesNo("Your job's simple enough. I keep the motor running, 
                 "Don't worry about messing up, just trust your instincts. "
                 "You think you can handle that?")
 
-if response == 1:
+if response:
     sm.sendNext("That's right! Let's do this!")
     sm.startQuest(parentID)
     sm.warpInstanceIn(240090800) # Kupo's Ride  The Road Up

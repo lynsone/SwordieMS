@@ -15,7 +15,7 @@ sm.sendNext("Berry did suggest I visit.")
 sm.setSpeakerID(9390202) # Leon Daniella
 response = sm.sendAskYesNo("Yeah! Just go to San Commerci and wait for me. I have a couple of voyages to make, but don't leave until I get back. Promise?")
 
-if response == 1:
+if response:
     sm.sendSayOkay("Okay, go east from the town, follow the coastal road, and you'll get to San Commerci. It's a single road, but I get lost on it all the time. \r\n"
                    "See you in #e#bSan Commerci#k#n. Remember, you promised!")
     sm.startQuest(parentID)

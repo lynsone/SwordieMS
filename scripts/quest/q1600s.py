@@ -7,7 +7,7 @@ SUBWAY_TRANSTICKET = 2030028
 sm.setSpeakerID(JAKE)
 response = sm.sendAskYesNo("Somebody! Anybody! Help!")
 
-if response == 1:
+if response:
     sm.sendNext("A lady followed a bunch of creeps into the Subway. They looked really dangerous. "
                 "Can you head into the #bSubway Construction Site#k and make sure she's okay?")
 

@@ -22,7 +22,7 @@ sm.sendNext("Our first contract was guided by fate! This one has to come from th
 sm.sendNext("That sounds weird. Is it gonna make everything more pink again?")
 response = sm.sendAskYesNo("Probably, but you can deal! Now focus on my exceedingly attractive voice, okay? Just really "
                 "listen to the timbre.")
-if response == 1:
+if response:
     sm.sendSayOkay("I'm tougher than all the rest!")
 else:
     sm.dispose()

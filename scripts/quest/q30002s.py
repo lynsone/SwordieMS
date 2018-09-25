@@ -23,7 +23,7 @@ sm.sendNext("Wha- Where are you going?!")
 
 response = sm.sendAskYesNo("#b(She looks lost... maybe I should help her out?)")
 
-if response == 1:
+if response:
     sm.sendNext("All right, fine. I'll show you how to get out.")
     sm.startQuest(parentID)
 else:

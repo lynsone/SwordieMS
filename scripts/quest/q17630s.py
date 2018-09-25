@@ -27,7 +27,7 @@ sm.sendNext("Wrongdoing? What did we do?")
 sm.setSpeakerID(9390208) # Riverson
 response = sm.sendAskYesNo("No play coy! You know what you did! No more talk, prepare for PAIN!")
 
-if response == 1:
+if response:
     sm.startQuest(parentID)
     sm.completeQuest(parentID)
     sm.completeQuest(17631) # Finish a cutscene quest

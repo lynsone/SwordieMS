@@ -7,6 +7,6 @@ sm.sendNext("I've heard reports of a Mystic Gate near Nihal Desert. Meet #bLora#
 
 response = sm.sendAskYesNo("Please go now.")
 
-if response == 1:
+if response:
     sm.sendNext("Good luck, young Crusader!")
     sm.startQuest(parentID)

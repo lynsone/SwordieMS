@@ -1,5 +1,5 @@
 # Amon - (Easy/Chaos) Zakum's Altar
-sm.sendSay("#L0#I want you to spawn Zakum for me.#l\r\n#L1#I want to leave.\r\n#l#L2#Nevermind.#l")
+answer = sm.sendSay("#L0#I want you to spawn Zakum for me.#l\r\n#L1#I want to leave.\r\n#l#L2#Nevermind.#l")
 
 if answer == 0:
     fieldID = sm.getFieldID()

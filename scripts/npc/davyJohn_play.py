@@ -81,7 +81,7 @@ elif sm.getFieldID() == 925100500: # Hidden Street: The Captain's Dignity
 
 else:
     response = sm.sendAskYesNo("Are you sure you want to leave?")
-    if response == 1:
+    if response:
         if not sm.getParty() is None:
             sm.warpPartyOut(910002000)
             for partyMembers in sm.getParty().getMembers():

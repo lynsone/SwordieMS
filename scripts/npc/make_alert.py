@@ -1256,7 +1256,7 @@ if parentID == 1012002:
         response = sm.sendAskYesNo(materialStr)
 
 
-    if response == 1:
+    if response:
         multiplier = 1
         if selection1 == 4 or selection1 == 5:
             multiplier = selection3
@@ -1338,7 +1338,7 @@ elif parentID == 1022003:
         response = sm.sendAskYesNo(materialStr)
 
 
-    if response == 1:
+    if response:
         multiplier = 1
         if selection1 == 0 or selection1 == 1:
             multiplier = selection3
@@ -1416,7 +1416,7 @@ elif parentID == 1052002:
         response = sm.sendAskYesNo(materialStr)
 
 
-    if response == 1:
+    if response:
         multiplier = 1
         if selection1 == 4:
             multiplier = selection3
@@ -1492,7 +1492,7 @@ elif parentID == 1052003:
         response = sm.sendAskYesNo(materialStr)
 
 
-    if response == 1:
+    if response:
         multiplier = 1
         if selection1 == 0 or selection1 == 1:
             multiplier = selection3
@@ -1560,7 +1560,7 @@ elif parentID == 2020002:
     response = sm.sendAskYesNo(materialStr)
 
 
-    if response == 1:
+    if response:
         multiplier = 1
 
         if sm.getMesos() < costmesoElNathItem[selection1][selection2]:
@@ -1704,7 +1704,7 @@ elif parentID == 2040021:
     response = sm.sendAskYesNo(materialStr)
 
 
-    if response == 1:
+    if response:
         multiplier = 1
 
         if sm.getMesos() < costmesoLudiShoes[selection1][selection2]:
@@ -1770,7 +1770,7 @@ elif parentID == 2040020:
     response = sm.sendAskYesNo(materialStr)
 
 
-    if response == 1:
+    if response:
         multiplier = 1
 
         if sm.getMesos() < costmesoLudiGloves[selection1][selection2]:
@@ -1835,7 +1835,7 @@ elif parentID == 1032002:
         materialStr += "\r\n#i4031138#" + str(costmesoElliniaItem[selection1][selection2]) + " mesos"
     response = sm.sendAskYesNo(materialStr)
 
-    if response == 1:
+    if response:
         multiplier = 1
 
         if sm.getMesos() < costmesoElliniaItem[selection1][selection2]:

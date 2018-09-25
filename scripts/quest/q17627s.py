@@ -7,7 +7,7 @@ response = sm.sendAskYesNo("We successfully routed the #o9390808# group, but I d
                 "It seems like there are other groups around. "
                 "You're going to help again, right?")
 
-if response == 1:
+if response:
     sm.sendNext("#b#o9390811##k group should be in #m865020100#. Let's see who can rout out #b#e30#k#n of them faster again! I'll be waiting in #m865020100#!")
     sm.startQuest(parentID)
 else:

@@ -2,7 +2,7 @@ sm.setSpeakerID(1064012) # First Seal Door
 response = sm.sendAskYesNo("Would you like to fight Pierre?")
 
 
-if response == 1:
+if response:
     if sm.getParty() is None:
         sm.sendSayOkay("Please create a party before going in.")
     elif not sm.isPartyLeader():

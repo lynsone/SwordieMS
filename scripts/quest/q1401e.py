@@ -3,7 +3,7 @@
 sm.setSpeakerID(10202) # Dances with Balrog
 response = sm.sendAskYesNo("So you want to become a Warrior?")
 
-if response == 1:
+if response:
     sm.completeQuestNoRewards(parentID)
     sm.jobAdvance(100)
     sm.sendSayOkay("You are now a #bWarrior#k.")

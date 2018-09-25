@@ -5,7 +5,7 @@ FirstBossMap = 350060160
 sm.setSpeakerID(1540496) # Lotus Hologram
 response = sm.sendAskYesNo("Are you sure you want to battle me?")
 
-if response == 1:
+if response:
     if sm.checkParty():
         sm.warpPartyIn(FirstBossMap)
 sm.dispose()

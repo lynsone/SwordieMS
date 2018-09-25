@@ -17,7 +17,7 @@ response = sm.sendAskYesNo("Once you enter the map, you #rcannot#k return withou
                    "if you die you will lose your experience.\r\n"
                    "Are you ready?")
 
-if response == 1:
+if response:
     sm.warp(910070000, 0) # Archer Test Site
     sm.startQuestNoCheck(parentID)
 else:

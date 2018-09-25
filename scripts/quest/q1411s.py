@@ -15,7 +15,7 @@ sm.sendNext("Before I teach you the ways of the "+ job +", you will have to acco
 response = sm.sendAskYesNo("Once you enter the map, you #rcannot#k return without the #b#t"+ str(darkMarble) +"#s#k, if you die you will lose your experience.\r\n"
                "Are you ready?")
 
-if response == 1:
+if response:
     sm.warp(910230000, 0)
     sm.startQuestNoCheck(parentID)
 else:

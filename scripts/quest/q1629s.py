@@ -11,7 +11,7 @@ response = sm.sendAskYesNo("Just like in Magatia, Mystic Gates have been popping
                            "We need to handle this fast, and you're just the person to lead the charge. "
                            "Ready to begin?")
 
-if response == 1:
+if response:
     sm.sendNext("The Mystic Gate near the Herb area is really making a mess of things. Head over to the #r#m"+ str(CRANKY_FOREST) +"##k and do something about it.")
     sm.showFieldEffect("Map/Effect.img/crossHunter/chapter/start2")
     sm.startQuest(parentID)

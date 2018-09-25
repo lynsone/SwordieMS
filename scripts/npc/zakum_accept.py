@@ -7,7 +7,7 @@ fields = {
 response = sm.sendAskYesNo("Are you sure you want to go in?")
 
 
-if response == 1:
+if response:
     if sm.getParty() is None:
         sm.sendSayOkay("Please create a party before going in.")
     elif not sm.isPartyLeader():

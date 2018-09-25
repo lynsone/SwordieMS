@@ -32,7 +32,7 @@ if not sm.getFieldID() in maps:
     sm.sendSayOkay("Sorry I haven't been coded for this map yet. please notify the admins")
     sm.dispose()
 
-if response == 1:
+if response:
     sm.warpInstanceIn(maps[sm.getFieldID()], 0)
     sm.createClock(time)
     sm.invokeAfterDelay(time*1000, "warpInstanceOut", map, 0)

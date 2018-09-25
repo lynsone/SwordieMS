@@ -30,5 +30,5 @@ if not sm.getFieldID() in maps:
     sm.sendSayOkay("Sorry I haven't been coded for this map yet")
     sm.dispose()
 
-if response == 1:
+if response:
     sm.warpInstanceOut(maps[sm.getFieldID()], 0)

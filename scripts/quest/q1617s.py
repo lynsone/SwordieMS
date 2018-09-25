@@ -8,7 +8,7 @@ response = sm.sendAskYesNo("Yes, yes, I'm sure you're eager to know all about ou
                            "But first thing's first! I must test your aptitude. "
                            "Are you ready to join the Silent Crusade? Well, are you?")
 
-if response == 1:
+if response:
     sm.sendNext("We shall see. Your test is simple enough: Defeat my puppy, Coco. Shall we begin?")
 
     sm.warpInstanceIn(931050510)

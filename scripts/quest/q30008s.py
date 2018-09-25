@@ -24,7 +24,7 @@ response = sm.sendAskYesNo("We will handle them, as we have handled their kind i
             "I believe you have it in you to take the lead in battle. "
             "You will have our full support.")
 
-if response == 1:
+if response:
     sm.sendNext("Good! I'm always glad to see a solder that isn't afraid of resigning to the history books. "
                 "Return to the World Tree and do what you must to bring it back here.")
 else:

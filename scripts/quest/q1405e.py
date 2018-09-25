@@ -2,7 +2,7 @@
 
 response = sm.sendAskYesNo("So you want to become a Pirate?")
 
-if response == 1:
+if response:
     sm.completeQuestNoRewards(parentID)
     sm.setJob(500) # Pirate
     sm.addSP(5)

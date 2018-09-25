@@ -42,9 +42,9 @@ i = 0
 while i < len(selections):
     text += "\r\n#L"+ str(i) +"#"+ selections[i][0] +"#l"
     i += 1
-sm.sendNext(text)
+response = sm.sendNext(text)
 
 
-if response == 1:
+if response:
     sm.completeQuestNoRewards(parentID)
 sm.dispose()

@@ -6,7 +6,7 @@ else:
     response = sm.sendAskYesNo("I can take you to back Henesys. Are you ready to go?")
 
 
-if response == 1:
+if response:
     if sm.getFieldID() == 100000000:
         sm.warp(680000000, 0)
     else:

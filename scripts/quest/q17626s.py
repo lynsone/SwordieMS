@@ -11,7 +11,7 @@ sm.sendNext("You must really have a way with words, like me. I'm glad you made i
 
 response = sm.sendAskYesNo("Now, are we ready to hunt some fish?")
 
-if response == 1:
+if response:
     sm.sendNext("Let's see who's faster!")
     sm.startQuest(parentID)
 else:

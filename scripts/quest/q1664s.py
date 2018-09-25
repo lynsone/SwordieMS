@@ -15,7 +15,7 @@ sm.sendSay("From #b#p"+ str(LORA) +"##k at the #r#m"+ str(DANGEROUS_CAVE) +"##k.
 sm.setPlayerAsSpeaker()
 response = sm.sendAskAccept("Something super urgent has come up. What to do, what to do?")
 
-if response == 1:
+if response:
     sm.sendNext("The ticket's in here. Use it to visit #p"+ str(LORA) +"#.")
 
     if not sm.canHold(TICKET):

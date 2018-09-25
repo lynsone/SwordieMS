@@ -16,7 +16,7 @@ sm.sendSay("When times like these come around, I pray to the great spirit Guwaru
 
 response = sm.sendAskYesNo("We halflingers are kin to the sky, wind and forest. We know a few tricks to contact the great spirits. if you'd like, I could arrange a meeting right now.")
 
-if response == 1:
+if response:
     sm.sendNext("All right then. Clear your noodle, focus on my topknot, and let's contact a spirit! Listen carefully...")
 
     sm.setSpeakerID(GUWARU)

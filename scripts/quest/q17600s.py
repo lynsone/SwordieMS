@@ -5,7 +5,7 @@ response = sm.sendAskYesNo("Ah good, I've managed to reach you. The Empress has 
                 "#b(You will be moved to Ereve if you accept.)")
 
 
-if response == 1:
+if response:
     sm.sendNext("I will be waiting for you.")
 else:
     sm.sendSayOkay("Let me know once you are ready.")

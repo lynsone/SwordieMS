@@ -35,7 +35,7 @@ sm.setSpeakerID(GOBLIN_DEMON)
 sm.setBoxChat()
 response = sm.sendAskYesNo("How is that a good idea? Haven't you heard a word I've been saying?")
 
-if response == 1:
+if response:
     sm.flipBoxChat()
     sm.flipBoxChatPlayerAsSpeaker()
     sm.sendNext("You've got to live, breathe, and think human. Then you'll understand us. Trust me. I'm going to go to ask #p"+ str(DABAO) +"# at #m"+ str(MAHAVIRA_HALL) +"# to make you that mask.")

@@ -10,7 +10,7 @@ sm.sendSay("I don't really have time to go into further detail, but we need your
 
 response = sm.sendAskYesNo("Please protect as may soldiers as you can! If you succeed, please go to the #b#m401000001##k and speak with both #b#p3001001##k and #b#p3001000##k. I wish you luck, Maple Warrior! \r\n \r\n #b(#ePress Accept to move automatically. You will have to forfeit the quest and restart if you fail.#n)#k")
 
-if response == 1:
+if response:
     sm.setFlippedPlayerAsSpeaker()
     sm.sendNext("I'm ready to enter the Heliseum Reclamation HQ and hunt down my enemies.")
 elif response == 0:

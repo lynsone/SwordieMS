@@ -20,7 +20,7 @@ sm.setSpeakerID(NINE_TAILED_FOX)
 sm.setBoxChat()
 response = sm.sendAskYesNo("First, you must promise not to judge me...")
 
-if response == 1:
+if response:
 
     sm.sendNext("My tale is one of woe and #rforbidden love#k. The rest of my kind would never understand but...")
 

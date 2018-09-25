@@ -23,7 +23,7 @@ sm.sendNext("Do you think you can #rfind the #t"+ str(KID_SHOES) +"##k and retur
 
 response = sm.sendAskYesNo("Will you help me?")
 
-if response == 1:
+if response:
     sm.sendNext("I'm sure you'll find the #b#t"+ str(KID_SHOES) +"##k at #r#m"+ str(PATH_OF_STONE_3) +"##k.")
     sm.startQuest(parentID)
 

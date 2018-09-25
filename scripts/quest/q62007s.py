@@ -31,7 +31,7 @@ sm.sendNext("We can't. He left a long time ago to train and has never returned. 
 
 response = sm.sendAskYesNo("Can I entrust you with the task of searching for that book, #h0#?")
 
-if response == 1:
+if response:
     sm.sendNext("The #v"+ str(BOOK_OF_DEMONS) +"##b#t"+ str(BOOK_OF_DEMONS) +"##k must hold some clue about how to get rid of the demons. "
                 "Locate that book as soon as possible. The fate of the entire world is at stake!")
 

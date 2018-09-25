@@ -32,7 +32,7 @@ sm.sendNext("Temporarily transform into a demon and investigate #m"+ str(SUTRA_5
 
 response = sm.sendAskYesNo("Ready to go?")
 
-if response == 1:
+if response:
     sm.sendNext("Good luck, friend.")
     sm.startQuest(parentID)
     sm.warpInstanceIn(701220310)

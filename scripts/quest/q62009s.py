@@ -29,7 +29,7 @@ sm.sendNext("#bAnd then the demons came back. You know, in a way, the demons hav
 response = sm.sendAskYesNo("They say #bMonk Laomo#k had a secret library...\r\n"
                            "You know, I do recall seeing something strange while cleaning #r#m"+ str(SUTRA_5_6F) +"# Maybe you should investigate")
 
-if response == 1:
+if response:
     sm.sendNext("Getting to the 6th floor might be tough. "
                 "Why don't you clear out "
                 "100 #o"+ str(MINI_BRONZE_MARTIAL_ARTIST) +"# monsters and "

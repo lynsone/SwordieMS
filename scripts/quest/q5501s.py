@@ -18,7 +18,7 @@ else:
     response = sm.sendAskYesNo("I can send you there now if you want. "
                                "Are you prepared?")
 
-    if response == 1:
+    if response:
         sm.sendNext("Since you last fought, Curbrock has learned a few new tricks.")
 
         sm.sendSay("His Seal spell will stop you from using your skills.")

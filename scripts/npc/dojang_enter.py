@@ -28,5 +28,5 @@ if sm.getFieldID() == dojoHall:
 else:
     response = sm.sendAskYesNo("Are you giving up already?")
 
-    if response == 1:
+    if response:
         sm.warpInstanceOut(dojoHall)

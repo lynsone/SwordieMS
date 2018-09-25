@@ -1,4 +1,4 @@
 response = sm.sendAskYesNo("Would you like to enter?")
 
-if response == 1:
+if response:
     sm.warp(807300100, 0)

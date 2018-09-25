@@ -20,7 +20,7 @@ else:
 
     response = sm.sendAskYesNo("Then, are you ready to defeat #rCurbrock right away?#k")
 
-    if response == 1:
+    if response:
         sm.sendNext("Curbrock will only fall to your strongest attack. "
                     "Good luck!")
 

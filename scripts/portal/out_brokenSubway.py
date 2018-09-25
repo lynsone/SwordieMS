@@ -7,5 +7,5 @@ else:
     sm.setSpeakerID(STARLING)
     response = sm.sendAskYesNo("Excuse me? \r\nAre you just going to leave me?")
 
-    if response == 1:
+    if response:
         sm.warpInstanceOut(103020000, 2)

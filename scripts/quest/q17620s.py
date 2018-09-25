@@ -28,7 +28,7 @@ sm.setSpeakerID(9390225) # Tepes
 response = sm.sendAskYesNo("To get to the Daniella merchant Union Office, head east from this spot, past the town fountain. "
                 "It's the white building with golden ornamentation.")
 
-if response == 1:
+if response:
     sm.setSpeakerID(9390225) # Tepes
     sm.sendNext("I'll let them know you're on your way. Be polite when you talk to Gilberto. "
                 "He is quite powerful in Commerci.")

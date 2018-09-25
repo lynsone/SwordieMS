@@ -2,7 +2,7 @@
 
 response = sm.sendAskYesNo("#h #, could you spare me a moment? I received a request for help, and i can't think of anyone better than you.")
 
-if response == 1:
+if response:
     sm.sendNext("There has been an incident at the #b Ellinel Fairy Academy#k. A human magician has trespassed in the sacred halls of the fairy school.")
 else:
     sm.dispose();
@@ -11,7 +11,7 @@ sm.sendNext("I don't know all the details, but i know our relationship with the 
 
 response = sm.sendAskYesNo("Fanzy will take you into the land of the fairies. I can send you to him directly, if you'd like")
 
-if response == 1:
+if response:
     sm.startQuestNoCheck(32151)
     sm.warp(101030000)
     sm.dispose()

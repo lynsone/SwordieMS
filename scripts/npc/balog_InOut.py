@@ -2,5 +2,5 @@
 response = sm.sendAskYesNo("If you leave now, you'll have to start over.\r\n"
                 "Are you sure you want to leave?")
 
-if response == 1:
+if response:
     sm.clearPartyInfo(105200000)

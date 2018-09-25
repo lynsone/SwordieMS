@@ -1,4 +1,4 @@
 response = sm.sendAskYesNo("Would you like to go Veritas?")
 
-if response == 1:
+if response:
     sm.warp(230050000,1)

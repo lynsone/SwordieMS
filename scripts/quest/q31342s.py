@@ -9,7 +9,7 @@ sm.sendNext("Okay, are you set to go? We're going to take the elevator up the si
 
 response = sm.sendAskYesNo("Are you ready?")
 
-if response == 1:
+if response:
     sm.warpInstanceIn(240091600)
     sm.startQuest(parentID)
     sm.createStopWatch(TIME)

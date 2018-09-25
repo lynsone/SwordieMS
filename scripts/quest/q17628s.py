@@ -3,7 +3,7 @@
 sm.setSpeakerID(9390256) # Leon Daniella
 response = sm.sendAskYesNo("Shall we?")
 
-if response == 1:
+if response:
     sm.setPlayerAsSpeaker() # Has to be Player Avatar
     sm.sendNext("#b(I have a bad feeling about this whole thing...)")
     sm.startQuest(parentID)

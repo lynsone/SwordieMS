@@ -18,7 +18,7 @@ response = sm.sendAskYesNo("#h0#, we need your help. Please act as my envoy to C
             "The kingdom of Ereve seeks a peaceful and mutually beneficial relationship with Commerci. "
             "Will you please do this for me? Neinheart will explain the mission.")
 
-if response == 1:
+if response:
     sm.sendNext("I know you won't let me down.")
     sm.completeQuest(parentID)
 else:

@@ -9,5 +9,5 @@ else:
     sm.setSpeakerID(EPHENIAS_HIDING_PLACE)
     response = sm.sendAskYesNo("Are you sure you want to leave?")
 
-    if response == 1:
+    if response:
         sm.clearPartyInfo(FAIRY_FOREST_2)

@@ -17,7 +17,7 @@ response = sm.sendAskYesNo("Don't act so surprised! "
                 "What kind of chief would I be if I held them back?\r\n"
                 "If you'd like, I can send you to their camp right away.")
 
-if response == 1:
+if response:
     sm.sendNext("That's the spirit. Do an old-timer a favour and check on my villagers for me.")
     sm.completeQuest(parentID)
     sm.warp(240090000) # Stone Colossus Exploration Site

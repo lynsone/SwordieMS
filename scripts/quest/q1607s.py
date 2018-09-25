@@ -17,7 +17,7 @@ sm.sendSay("Yeah, I saw it when I was fighting the Commander Skeleton in the Pro
 sm.setSpeakerID(STARLING)
 response = sm.sendAskYesNo("Really? I'd love to see it! Mind showing me where it is?")
 
-if response == 1:
+if response:
     sm.sendNext("All right! To the Prohibited Area!")
 
     sm.sendNext("Let's move")

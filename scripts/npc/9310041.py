@@ -44,7 +44,7 @@ if sm.hasQuest(62001):
         response = sm.sendAskYesNo("That's what the last guy said, before he burst into flames and tried to eat my robe. "
                     "If you REALLY want to enter the temple to talk to The #b#p"+ str(WISE_CHIEF_PRIEST) +"##k, you're going to have to prove you're human.")
 
-        if response == 1:
+        if response:
             sm.sendNext("Then defeat 100 Censers and bring me the Prayer Beads they stole. "
                         "I'll be able to tell if you're human because they glow when humans hold them.")
             sm.startQuestNoCheck(NOT_A_DEMON) # [Shaolin Temple] Not a demon

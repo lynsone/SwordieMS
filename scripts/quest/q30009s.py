@@ -14,7 +14,7 @@ sm.sendNext("I've been trapped in here since they arrived. I don't know anything
 
 response = sm.sendAskYesNo("The door with the clock on it seems to be the least threatening. Maybe that should be your first stop.")
 
-if response == 1:
+if response:
     sm.sendNext("I know you're strong, but I don't think you can do this alone. Make sure to find an #rally that will help you#k!")
     sm.startQuest(parentID)
 sm.dispose()

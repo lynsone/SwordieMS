@@ -6,5 +6,5 @@ MIDSUMMER_NIGHTS_FOREST_PATH_FROM_ELLINEL = 101074001 # MAP ID
 sm.setSpeakerID(FANZY)
 
 response = sm.sendAskYesNo("Head back to #bNorth Forest: Giant Tree#k?")
-if response == 1:
+if response:
     sm.warp(MIDSUMMER_NIGHTS_FOREST_PATH_FROM_ELLINEL)

@@ -9,7 +9,7 @@ sm.sendNext("The only odd thing about it was...")
 sm.setPlayerAsSpeaker()
 response = sm.sendAskYesNo("#b(Aha! I knew there had to be something!)")
 
-if response == 1:
+if response:
     sm.setPlayerAsSpeaker()
     sm.sendNext("Yes?")
 

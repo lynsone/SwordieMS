@@ -30,7 +30,7 @@ response = sm.sendAskYesNo("You can move and let me sweep! Oh, fine. "
             "Why don't you get me some #v"+ str(ANTIDOTE) +"# #b#t"+ str(ANTIDOTE) +"##k from the General Store? Take your time, "
             "and make sure you don't track mud on your way back!")
 
-if response == 1:
+if response:
     sm.sendNext("Why are you still here? I can't sweep with you here! Go get me 1 #v"+ str(ANTIDOTE) +"# #b#t"+ str(ANTIDOTE) +"##k")
     sm.startQuestNoCheck(parentID)
 else:

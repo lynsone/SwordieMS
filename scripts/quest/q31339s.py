@@ -9,7 +9,7 @@ TIME = 20
 sm.setSpeakerID(KUPO)
 response = sm.sendAskYesNo("Okay. We're all fueled up! Ready to head out now?")
 
-if response == 1:
+if response:
     sm.startQuest(parentID)
     sm.warpInstanceIn(240090800, 0) # Kupo's Ride  The Road Up
     sm.rideVehicle(KUPOS_RIDE)

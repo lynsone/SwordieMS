@@ -20,7 +20,7 @@ sm.sendNext("Try it out at #b#m"+ str(PATH_OF_STONE) +"##k.")
 response = sm.sendAskYesNo("#b#m"+ str(PATH_OF_STONE) +"##k was once a sacred spot where we performed holy rituals. "
                 "Now it's become a playground for demons. Spritz my potion there to get rid of them.")
 
-if response == 1:
+if response:
     sm.flipBoxChat()
     sm.flipBoxChatPlayerAsSpeaker()
     sm.sendNext("Uh, will there be any side effects?")

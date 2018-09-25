@@ -5,7 +5,7 @@ sm.sendSay("Still, they are only guards. It should not prove too difficult for a
 sm.sendSay("The Lumiere will remain here until you return. Do not concern yourself with the pursuit. We'll keep the engine running.")
 
 response = sm.sendAskAccept("It is time for you to make your decision. Are you ready to infiltrate #m130000000#?")
-if response == 1:
+if response:
     sm.startQuestNoCheck(25000)
     sm.sendSayOkay("I wish you luck.")
 else:

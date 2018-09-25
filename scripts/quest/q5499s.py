@@ -29,7 +29,7 @@ else:
                     "#b(You'll be teleported to the Curbrock's Hideout if you accept.#k "
                     "#bForfeit and reaccept the quest to start again.)#k")
 
-    if response == 1:
+    if response:
         sm.sendNext("Remember, Curbrock is deadly. "
                     "You must run away if you meet him!")
 

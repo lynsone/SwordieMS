@@ -8,7 +8,7 @@ NORTH_FOREST_GIANT_TREE = 101030000 # MAP ID
 sm.setSpeakerID(IRENA)
 response = sm.sendAskAccept("#h #, could you spare me a moment? I received a request for help, and i can't think of anyone better than you.")
 
-if response == 1:
+if response:
     sm.sendNext("There has been an incident at the #b Ellinel Fairy Academy#k. A human magician has trespassed in the sacred halls of the fairy school.")
 else:
     sm.dispose()
@@ -17,7 +17,7 @@ sm.sendNext("I don't know all the details, but I know our relationship with the 
 
 response = sm.sendAskYesNo("Fanzy will take you into the land of the fairies. I can send you to him directly, if you'd like.")
 
-if response == 1:
+if response:
     sm.startQuestNoCheck(THEME_DUNGEON_ELLINEL_FAIRY_ACADEMY)
     sm.completeQuestNoRewards(parentID)
     sm.warp(NORTH_FOREST_GIANT_TREE)

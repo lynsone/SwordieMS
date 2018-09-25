@@ -54,7 +54,7 @@ response = sm.sendAskYesNo("I'll be collectin' on that promise, 'fore long. "
             "\r\nReady to set sail?\r\n"
             "#b(You will be moved to Commerci if you accept.)")
 
-if response == 1:
+if response:
     sm.warp(865010200, 0)
     sm.startQuest(parentID)
     sm.completeQuest(parentID)

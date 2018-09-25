@@ -15,7 +15,7 @@ response = sm.sendAskYesNo("I've arranged your passage to Commerci. Seek out an 
                 "Let me know when you are ready to depart for Lith Harbor. "
                 "\r\n#b(You will be moved to Lith Harbor if you accept.)#k")
 
-if response == 1:
+if response:
     sm.warp(104000000, 0)
     sm.startQuest(parentID)
 else:

@@ -5,7 +5,7 @@ response = sm.sendAskYesNo("#b(You can see the wards to create the seal around E
                 "Speaking the magic word will finisht eh spell, cutting the village off from the outside world for at least 100 years. \r\n"
                 "Activate the seal?)#k")
 
-if response == 1:
+if response:
     sm.startQuestNoCheck(parentID)
     sm.completeQuest(parentID)
     sm.sendSayOkay("#b(The seal is complete, and the town is safe.)")

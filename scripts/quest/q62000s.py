@@ -16,7 +16,7 @@ sm.sendNext("I hope this finds you well, #h0#. "
 
 response = sm.sendAskYesNo("The details are sensitive. I would like to discuss them in person. Will you join me at #b#m"+ str(MOUNT_SONG_HAMLET) +"##k?")
 
-if response == 1:
+if response:
     sm.sendNext("Thank you. I await you at #b#m"+ str(MOUNT_SONG_HAMLET) +"##k.")
     sm.warp(MOUNT_SONG_HAMLET)
     sm.startQuest(parentID)

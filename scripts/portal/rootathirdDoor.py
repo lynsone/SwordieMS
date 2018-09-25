@@ -1,7 +1,7 @@
 sm.setSpeakerID(1064014) # Third Seal Foor
 response = sm.sendAskYesNo("Would you like to fight Crimson Queen?")
 
-if response == 1:
+if response:
     if sm.getParty() is None:
         sm.sendSayOkay("Please create a party before going in.")
     elif not sm.isPartyLeader():

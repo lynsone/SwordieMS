@@ -14,7 +14,7 @@ response = sm.sendAskYesNo("This is Ephenia's Hideout.\r\n"
                 "If you haven't gotten permission, you shouldn't be here.\r\n"
                 "Enter anyway?")
 
-if response == 1:
+if response:
     chrHasQuest = True
     if not sm.getParty() is None:
         for partyChr in sm.getPartyMembersInSameField(chr):
