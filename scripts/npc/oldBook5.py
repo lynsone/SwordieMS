@@ -10,19 +10,22 @@ if sm.hasQuestCompleted(3034): # The Book of Ancient is Back
     if response:
         answer = sm.sendAskNumber("Okay, so how many do you want me to make?", 1, 1, 100)
 
+        totalCost = answer * mesos
+        totalQty = answer * 10
+
         if not sm.canHold(4005004): # Not enough space
             sm.sendSayOkay("Please make some more space in your inventory.")
 
-        elif sm.getMesos() < answer * mesos: # Too little mesos
+        elif sm.getMesos() < totalCost: # Too little mesos
             sm.sendSayOkay("I'm sorry, but I am NOT doing this for free.")
 
-        elif not sm.hasItem(4004004, answer * 10): # Does not have enough Dark Crystal Ores, TODO: check if this looks right (for 5 DC you need 50 DCO?)
+        elif not sm.hasItem(4004004, totalQty): # Does not have enough Dark Crystal Ores, TODO: check if this looks right (for 5 DC you need 50 DCO?)
             sm.sendSayOkay("I need that ore to refine the Crystal. No exceptions..")
 
         else:   # can afford & can hold
-            sm.consumeItem(4004004, answer * 10)
+            sm.consumeItem(4004004, totalQty)
             sm.giveItem(4005004, answer)
-            sm.deductMesos(answer * mesos)
+            sm.deductMesos(totalCost)
             sm.sendSayOkay("Use it wisely.")
 else:
     sm.sendSayOkay("Go away, I'm trying to meditate.")
