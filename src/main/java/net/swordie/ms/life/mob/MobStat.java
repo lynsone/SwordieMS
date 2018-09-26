@@ -77,7 +77,6 @@ public enum MobStat {
     BahamutLightElemAddDam(64),
     BossPropPlus(65),
     MultiDamSkill(66),
-    //  -Unknown START-
     RWLiftPress(67),
     RWChoppingHammer(68),
     TimeBomb(69),
@@ -86,7 +85,6 @@ public enum MobStat {
 
     Unknown1(72),
     Unknown2(73),
-    //  -Unknown END-
     Invincible(74),
     Explosion(75),
     HangOver(76),

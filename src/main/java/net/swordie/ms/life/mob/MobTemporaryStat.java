@@ -183,11 +183,11 @@ public class MobTemporaryStat {
 			}
 			if (hasNewMobStat(PCounter)) {
 				outPacket.encodeInt(getNewOptionsByMobStat(PCounter).mOption); // nCounterProb
-				outPacket.encodeInt(getNewOptionsByMobStat(PCounter).bOption); // bCounterDelay
+				outPacket.encodeByte(getNewOptionsByMobStat(PCounter).bOption); // bCounterDelay
 				outPacket.encodeInt(getNewOptionsByMobStat(PCounter).nReason); // nAggroRank
 			} else if (hasNewMobStat(MCounter)) {
 				outPacket.encodeInt(getNewOptionsByMobStat(MCounter).mOption); // nCounterProb
-				outPacket.encodeInt(getNewOptionsByMobStat(MCounter).bOption); // bCounterDelay
+				outPacket.encodeByte(getNewOptionsByMobStat(MCounter).bOption); // bCounterDelay
 				outPacket.encodeInt(getNewOptionsByMobStat(MCounter).nReason); // nAggroRank
 			}
 			if (hasNewMobStat(Fatality)) {
@@ -320,14 +320,11 @@ public class MobTemporaryStat {
 		int[] res = new int[3];
 		for (MobStat mobStat : map.keySet()) {
 			res[mobStat.getPos()] |= mobStat.getVal();
-//            System.out.println(mobStat);
 		}
-//        System.out.println(String.format("Mob stat mask is %d %d %d, in String format:", res[0], res[1], res[2]));
 		OutPacket outPacket = new OutPacket();
 		for (int i = 0; i < res.length; i++) {
 			outPacket.encodeInt(res[i]);
 		}
-//        System.out.println(Util.readableByteArray(outPacket.getData()));
 		return res;
 	}
 
