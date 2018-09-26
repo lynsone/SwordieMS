@@ -2,11 +2,11 @@
 KIKU = 1102000
 sm.setSpeakerID(KIKU)
 
-result = sm.sendAskYesNo("I don't know if they told you during the orientation, but we're here to fight the Black Mage. "
+response = sm.sendAskYesNo("I don't know if they told you during the orientation, but we're here to fight the Black Mage. "
 "Right now, you're not fit to fight a black mop. I'm gonna fix that.\r\n"
 "You ready for some action?")
 
-if not result:
+if not response:
 	sm.sendSayOkay("You listening? Pay attention!")
 	sm.dispose()
 

@@ -1267,19 +1267,29 @@ public class Mob extends Life {
         for (Char chr : getDamageDone().keySet()) {
             double damagePerc = getDamageDone().get(chr) / (double) totalDamage;
             int mobExpRate = chr.getLevel() < 10 ? 1 : GameConstants.MOB_EXP_RATE;
-            long appliedExp = (long) (exp * damagePerc * mobExpRate);
+            long appliedExpPre = (long) (exp * damagePerc * mobExpRate);
+            long appliedExpPost = appliedExpPre;
+            ExpIncreaseInfo eei = new ExpIncreaseInfo();
 
+            // Burning Field
             if(getField().getBurningFieldLevel() > 0) {
-                ExpIncreaseInfo eei = new ExpIncreaseInfo();
-                int burningFieldBonusExp = (int) (appliedExp * getField().getBonusExpByBurningFieldLevel()  /  100);
+                int burningFieldBonusExp = (int) (appliedExpPre * getField().getBonusExpByBurningFieldLevel() / 100);
                 eei.setRestFieldBonusExp(burningFieldBonusExp);
                 eei.setRestFieldExpRate(getField().getBonusExpByBurningFieldLevel());
-                eei.setLastHit(true);
-                eei.setIncEXP((int) appliedExp);
-                chr.addExp((appliedExp + burningFieldBonusExp), eei);
-            } else {
-                chr.addExp(appliedExp);
+                appliedExpPost += burningFieldBonusExp;
             }
+
+            // + Exp% MobStats
+            if(getTemporaryStat().hasCurrentMobStat(MobStat.Treasure) && getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption > 0) { // xOption for Exp%
+                int expIncrease = getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption;
+                long mobStatBonusExp = ((appliedExpPre * expIncrease) / 100);
+                eei.setBaseAddExp((int) mobStatBonusExp);
+                appliedExpPost += mobStatBonusExp;
+            }
+
+            eei.setLastHit(true);
+            eei.setIncEXP((int) appliedExpPre);
+            chr.addExp(appliedExpPost, eei);
 
             Party party = chr.getParty();
             if (party != null) {

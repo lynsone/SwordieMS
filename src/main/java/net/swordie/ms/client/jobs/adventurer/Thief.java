@@ -661,11 +661,18 @@ public class Thief extends Beginner {
                         continue;
                     }
                     MobTemporaryStat mts = mob.getTemporaryStat();
-                    o1.nOption = 1;
-                    o1.rOption = skill.getSkillId();
-                    o1.tOption = si.getValue(time, slv);
-                    mts.addStatOptionsAndBroadcast(MobStat.Showdown, o1);
-                    // Unsure
+                    if(!mob.isBoss()) {
+                        o1.nOption = 1;
+                        o1.rOption = skill.getSkillId();
+                        o1.tOption = si.getValue(time, slv);
+                        mts.addStatOptionsAndBroadcast(MobStat.Showdown, o1);
+                    }
+                    o2.nOption = 1;
+                    o2.rOption = skillID;
+                    o2.tOption = si.getValue(time, slv);
+                    o2.xOption = si.getValue(x, slv); // Exp
+                    o2.yOption = si.getValue(x, slv); // Item Drop
+                    mts.addStatOptionsAndBroadcast(MobStat.Treasure, o2);
                 }
                 break;
             case SUDDEN_RAID_DB:

@@ -3,10 +3,10 @@ KINU = 1102006
 
 sm.setSpeakerID(KINU)
 
-result = sm.sendAskYesNo("I am Kinu. I will get you up to speed on Ereve's history. "
+response = sm.sendAskYesNo("I am Kinu. I will get you up to speed on Ereve's history. "
 "Now, go on and sit! I teach best when my students are shorter than me!")
 
-if not result:
+if not response:
 	sm.sendNext("Why are you still standing? That is not what a well-behaved student would do.")
 	sm.dispose()
 
