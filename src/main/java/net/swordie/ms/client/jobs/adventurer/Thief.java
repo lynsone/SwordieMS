@@ -670,8 +670,8 @@ public class Thief extends Beginner {
                     o2.nOption = 1;
                     o2.rOption = skillID;
                     o2.tOption = si.getValue(time, slv);
-                    o2.xOption = si.getValue(x, slv); // Exp
-                    o2.yOption = si.getValue(x, slv); // Item Drop
+                    o2.xOption = (mob.isBoss() ? si.getValue(x, slv)/2 : si.getValue(x, slv)); // Exp
+                    o2.yOption = (mob.isBoss() ? si.getValue(x, slv)/2 : si.getValue(x, slv)); // Item Drop
                     mts.addStatOptionsAndBroadcast(MobStat.Treasure, o2);
                 }
                 break;

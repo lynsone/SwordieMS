@@ -13,12 +13,10 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
-import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
@@ -30,7 +28,9 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -499,7 +499,7 @@ public class Demon extends Job {
                     }
                 }
                 break;
-            case DEMON_CRY:     // TODO  Item Drop & Exp
+            case DEMON_CRY:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     if (mob == null) {
@@ -517,6 +517,12 @@ public class Demon extends Job {
                     o2.rOption = skill.getSkillId();
                     o2.tOption = si.getValue(time, slv);
                     mts.addStatOptionsAndBroadcast(MobStat.ACC, o2);
+                    o3.nOption = 1;
+                    o3.rOption = skillID;
+                    o3.tOption = si.getValue(time, slv);
+                    o3.xOption = si.getValue(w, slv); // exp
+                    o3.yOption = si.getValue(w, slv); // dropRate
+                    mts.addStatOptionsAndBroadcast(MobStat.Treasure, o3);
                 }
                 break;
             case DEMON_IMPACT:
