@@ -2029,11 +2029,14 @@ public class ScriptManagerImpl implements ScriptManager {
 				new Position(x, y), 0, 1, false, 0)));
 	}
 
-	public void showBalloonMsgOnNpc(String path, int duration, int templateID) {
+	public void showBalloonMsgOnNpc(String path, int duration, int x, int y, int templateID) {
 		int objectID = getNpcObjectIdByTemplateId(templateID);
 		if (objectID == 0) return;
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
-				new Position(0, -150), 0, objectID, false, 0)));
+				new Position(x, y), 0, objectID, false, 0)));
+	}
+	public void showBalloonMsgOnNpc(String path, int duration, int templateID) {
+		showBalloonMsgOnNpc(path, duration, 0, -100, templateID);
 	}
 
 	public void showNpcEffectOnPosition(String path, int x, int y, int templateID) {
@@ -2254,6 +2257,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void addPopUpSay(int npcID, int duration, String message, String effect) {
 		chr.write(UserLocal.addPopupSay(npcID, duration, message, effect));
+	}
+
+	public void moveParticleEff(String type, int startX, int startY, int endX, int endY, int moveTime, int totalCount, int oneSprayMin, int oneSprayMax) {
+		chr.write(UserLocal.moveParticleEff(type, new Position(startX, startY), new Position(endX, endY), moveTime, totalCount, oneSprayMin, oneSprayMax));
 	}
 
 	private ScriptMemory getMemory() {

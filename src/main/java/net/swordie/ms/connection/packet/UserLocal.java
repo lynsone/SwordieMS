@@ -416,7 +416,7 @@ public class UserLocal {
 
         return outPacket;
     }
-    
+
     public static OutPacket emotion(int emotion, int duration, boolean byItemOption) {
         OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
 
@@ -424,6 +424,19 @@ public class UserLocal {
         outPacket.encodeInt(duration);
         outPacket.encodeByte(byItemOption);
 
+        return outPacket;
+    }
+
+    public static OutPacket moveParticleEff(String type, Position startPoint, Position endPoint, int moveTime, int totalCount, int oneSprayMin, int oneSprayMax) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOVE_PARTICLE_EFF);
+
+        outPacket.encodeString(type);
+        outPacket.encodePosition(startPoint);
+        outPacket.encodePosition(endPoint);
+        outPacket.encodeShort(moveTime);
+        outPacket.encodeShort(totalCount);
+        outPacket.encodeShort(oneSprayMin);
+        outPacket.encodeShort(oneSprayMax);
         return outPacket;
     }
 }
