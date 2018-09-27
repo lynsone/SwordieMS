@@ -252,7 +252,8 @@ public class ScriptManagerImpl implements ScriptManager {
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName()) &&
-                    ((scriptType != ScriptType.Field && scriptType != ScriptType.FirstEnterField) || chr.getFieldID() == si.getParentID())) {
+                    ((scriptType != ScriptType.Field && scriptType != ScriptType.FirstEnterField)
+							|| (chr != null && chr.getFieldID() == si.getParentID()))) {
                 // gracefully stop script if it's still active with the same script info (scriptName, or scriptName +
                 // current chr fieldID == fieldscript's fieldID if scriptType == Field).
                 stop(scriptType);
