@@ -1,0 +1,5 @@
+# 4998 | Ending Script
+
+sm.setSpeakerID(9201091)
+sm.sendNext("Wear this hat proudly; it'll bring Versalmas Cheer to others when they see it! Now you can bring me presents in batches #b30, 40, 60, or 90!#k Like I said before, you get different rewards at different tiers; and the more presents you bring at one time, the better the rewards! Please remember that you can only redeem a total of #b100 Presents#k per day. And if you bring me #b100 presents#k, I'll give you a #bVersalmas Cactus#k of your very own!")
+sm.sendSayOkay("In addition, let's show Maple Claws the spirit of some friendly competition as well! For each #b10 presents#k you collect for me, I'll reward you with #b1 Orb of Versalmas Cheer#k, in addition to your regular reward. So if you redeem 60 presents, you'll get your reward plus #b6 Orbs of Versalmas Cheer#k! The more presents you return, the more Versalmas Cheer we'll create in this world. If we create more #dVersalmas Cheer#k than #bMaplemas Spirit#k this year, I promise to reward every player who has chosen Versalmas with something special at the event end! So find those presents for me, and hold on to those #bOrbs#k!")

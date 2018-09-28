@@ -1,0 +1,7 @@
+# 3120 | Starting Script
+
+sm.setSpeakerID(2020009)
+sm.sendNext("Very well. I will tell you. Rex was once a human... a famous hunter, actually. He battled all sorts of evil in El Nath. That got him the attention of an evil organization called the Tarheeds. \r\nThe Tarheeds were a menace that terrorized all of El Nath. One day, while Rex was out hunting, they attacked Rex's house and murdered his wife.\r\n\r\n")
+sm.sendSay("Rex vowed vengeance and stormed into the Tarheed base... alone. He couldn't take them all at once, and he barely escaped with his life. After that, he disappeared. Many years later, Hoblins appeared in El Nath. They attacked the Tarheeds and took their place. Rex was their leader.")
+sm.sendSay("No one knows how he became a Hoblin. All we know was that he'd lost all his humanity. He was full of hatred, and after he destroyed the Tarheeds, his next target was all of El Nath. The other Elders and I joined forces with Adventurers and fought a difficult battle. We won, but lost countless friends in the process. We sealed Rex in an ancient glacier by #bHeinrich#k, the great magician. Rex is as good as dead now.")
+sm.sendSayOkay("And that is the end of it. Now go tell Shammos to calm down and keep quiet. I don't want him stirring people up with needless fear. Also, if I were you, I wouldn't trust everything Shammos says. There's a reason he's locked up like that...")

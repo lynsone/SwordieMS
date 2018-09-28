@@ -5,12 +5,10 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.LoginHandler;
 import net.swordie.ms.handlers.header.InHeader;
-import net.swordie.ms.world.World;
 import net.swordie.ms.world.WorldHandler;
 import net.swordie.ms.world.shop.cashshop.CashShopHandler;
 import org.apache.log4j.LogManager;
@@ -630,6 +628,12 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case MOB_ESCORT_COLLISION:
                 WorldHandler.handleMobEscortCollision(chr, inPacket);
+                break;
+            case CROSS_HUNTER_COMPLETE_REQUEST:
+                WorldHandler.handleCrossHunterCompleteRequest(chr, inPacket);
+                break;
+            case CROSS_HUNTER_SHOP_REQUEST:
+                WorldHandler.handleCrossHunterShopRequest(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);

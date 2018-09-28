@@ -239,11 +239,11 @@ public class Item implements Serializable, Encodable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Item item = (Item) o;
-        return id == item.id;
+        return id == item.id && item.id == item.itemId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, itemId);
     }
 }
