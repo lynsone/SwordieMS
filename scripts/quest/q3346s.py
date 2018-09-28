@@ -1,0 +1,8 @@
+# 3346 | Starting Script
+
+sm.setSpeakerID(2111027)
+sm.sendNext("#m261000000# is a town that was established over a lab of the Black Magician, who brought darkness to the whole continent of Ossyria. I am not saying it's literally built over the lab. I'm saying that all alchemy-related studies in #m261000000# are... based on the studies of the Black Magician.")
+sm.sendSay("Of course, that doesn't mean they are working on evil spells like the Black Magician. They were just referencing the Black Magician's work purely from an academic standpoint. Even with that, after a while, almost all remnants of the Black Magician disappeared.")
+sm.sendSay("Even with all that, it doesn't change the fact that #m261000000# is based on Black Magician. You may not be aware of it, since it hasn't been too long since you first got to Ossyria, but... Ossyria still has a number of forces that oppose the Black Magician.")
+sm.sendSay("Imagine if they find out about the history of #m261000000# and its origin... The reputation of #m261000000#, a respected alchemist town that heavily affects Ossyria as a whole with their contributions, will go down the drain. That's why the presidents of the Societies in #m261000000# have been adamant about keeping all this quiet.")
+sm.sendSayOkay("But nowadays, I am not sure if this should be kept secret any longer. Look at #p2111002#, a bright alchemist with a great future. His only sin was dedicating his whole life to the studies and researches... and when he became too close to the truth, he became a martyr instead. The truth must be told... to make sure his name emerges clean and free of rumors and scandals, if nothing else...")

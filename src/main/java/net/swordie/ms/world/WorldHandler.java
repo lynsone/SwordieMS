@@ -2171,6 +2171,8 @@ public class WorldHandler {
                 if (qm.canStartQuest(questID)) {
                     qm.addQuest(QuestData.createQuestFromId(questID));
                 }
+                chr.chatMessage(String.format("Starting Client Script Quest %d", questID));
+                chr.getScriptManager().startScript(questID, "q"+questID+"s", ScriptType.Quest);
                 break;
             case QuestReq_CompleteQuest:
                 if (qm.hasQuestInProgress(questID)) {
@@ -2179,6 +2181,8 @@ public class WorldHandler {
                         qm.completeQuest(questID);
                     }
                 }
+                chr.chatMessage(String.format("Starting Client Script Quest %d", questID));
+                chr.getScriptManager().startScript(questID, "q"+questID+"e", ScriptType.Quest);
                 break;
             case QuestReq_OpeningScript:
                 QuestInfo qi = QuestData.getQuestInfoById(questID);
