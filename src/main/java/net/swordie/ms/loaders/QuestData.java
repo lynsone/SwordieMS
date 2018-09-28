@@ -159,7 +159,6 @@ public class QuestData {
                         case "dayN":
                         case "anotherUserCheckType":
                         case "anotherUserCheck":
-                        case "npcSpeech":
                         case "userInteract":
                         case "petRecallLimit":
                         case "pettamenessmin":
@@ -350,6 +349,25 @@ public class QuestData {
                                             break;
                                         default:
                                             log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
+                                            break;
+                                    }
+                                }
+                            }
+                            break;
+                        case "npcSpeech":
+                            for (Node idNode : XMLApi.getAllChildren(infoNode)) {
+                                for (Node questNode : XMLApi.getAllChildren(idNode)) {
+                                    String questName = XMLApi.getNamedAttribute(questNode, "name");
+                                    String questValue = XMLApi.getNamedAttribute(questNode, "value");
+                                    switch (questName) {
+                                        case "script":
+                                            quest.addSpeech(questValue);
+                                            break;
+                                        case "id":
+                                        case "order":
+                                            break;
+                                        default:
+                                            log.warn(String.format("(%d) Unk npc speech name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
                                 }
@@ -553,6 +571,10 @@ public class QuestData {
                 for (int i : qi.getScenarios()) {
                     dos.writeInt(i);
                 }
+                dos.writeShort(qi.getSpeech().size());
+                for (String i : qi.getSpeech()) {
+                    dos.writeUTF(i);
+                }
                 dos.writeInt(qi.getMobDropMeso());
                 dos.writeInt(qi.getMorph());
                 dos.writeBoolean(qi.isSecret());
@@ -624,6 +646,10 @@ public class QuestData {
             size = dis.readShort();
             for (int i = 0; i < size; i++) {
                 qi.addScenario(dis.readInt());
+            }
+            size = dis.readShort();
+            for (int i = 0; i < size; i++) {
+                qi.addSpeech(dis.readUTF());
             }
             qi.setMobDropMeso(dis.readInt());
             qi.setMorph(dis.readInt());

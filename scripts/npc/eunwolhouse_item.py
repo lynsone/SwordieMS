@@ -1,0 +1,8 @@
+sm.flipDialoguePlayerAsSpeaker()
+sm.sendNext("What...is this? They wrapped something in this leaf. It's quite heavy and warm. Maybe a little wet, too. Something's dripping from it. Wait, this mushy texture... Is this...?")
+sm.sendSay("Did they seriously give me #rraw liver#k? This is my special gift? Right, something about #rbeast livers#k being the best...")
+sm.sendSay("Well... People eat raw fish, so maybe this isn't all that bad. I can eat this... I can... Ugh, why do my tastebuds have to put up with this?")
+sm.giveExp(1200)
+sm.completeQuest(38008)
+sm.startQuest(38009)
+sm.completeQuest(38009)

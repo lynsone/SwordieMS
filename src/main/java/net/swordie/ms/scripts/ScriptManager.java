@@ -266,7 +266,7 @@ public interface ScriptManager extends Observer {
 	 * @param amount
 	 * 		The amount of Skill Points added.
 	 */
-	void addSP(int amount);
+	void addSP(int amount, boolean jobAdv);
 
 	/**
 	 * Sets the Skill Points of {@link Char} to the specified amount.

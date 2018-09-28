@@ -386,18 +386,20 @@ public class Shade extends Job {
 
     public void deathMarkDoTHeal(AttackInfo attackInfo) {
         Skill skill = chr.getSkill(DEATH_MARK);
-        byte slv = (byte) skill.getCurrentLevel();
-        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        int healrate = si.getValue(x, slv);
-        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-            Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-            if (mob == null) {
-                continue;
-            }
-            MobTemporaryStat mts = mob.getTemporaryStat();
-            if(mts.hasBurnFromSkillAndOwner(DEATH_MARK, chr.getId())) {
-                long totaldmg = Arrays.stream(mai.damages).sum();
-                chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
+        if (skill != null) {
+            byte slv = (byte) skill.getCurrentLevel();
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            int healrate = si.getValue(x, slv);
+            for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                if (mts.hasBurnFromSkillAndOwner(DEATH_MARK, chr.getId())) {
+                    long totaldmg = Arrays.stream(mai.damages).sum();
+                    chr.heal((int) (chr.getMaxHP() / ((double) 100 / healrate)));
+                }
             }
         }
     }
