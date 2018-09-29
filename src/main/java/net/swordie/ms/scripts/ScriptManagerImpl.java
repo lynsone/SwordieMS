@@ -1029,6 +1029,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(CField.fieldEffect(FieldEffect.setFieldColor(colorFieldType, red, green, blue, time)));
 	}
 
+	public void setFieldGrey(GreyFieldType colorFieldType, boolean show) {
+		chr.write(CField.fieldEffect(FieldEffect.setFieldGrey(colorFieldType, show)));
+	}
+
 	@Override
 	public void dropItem(int itemId, int x, int y) {
 		Field field = chr.getField();
