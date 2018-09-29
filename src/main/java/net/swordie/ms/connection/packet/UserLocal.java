@@ -5,10 +5,7 @@ import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.ChatType;
-import net.swordie.ms.enums.MessageType;
-import net.swordie.ms.enums.StealMemoryType;
-import net.swordie.ms.enums.StylishKillType;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
@@ -416,7 +413,7 @@ public class UserLocal {
 
         return outPacket;
     }
-
+    
     public static OutPacket emotion(int emotion, int duration, boolean byItemOption) {
         OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
 
@@ -427,16 +424,16 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket moveParticleEff(String type, Position startPoint, Position endPoint, int moveTime, int totalCount, int oneSprayMin, int oneSprayMax) {
-        OutPacket outPacket = new OutPacket(OutHeader.MOVE_PARTICLE_EFF);
+    public static OutPacket questResult(QuestType type, int questID, int npcTemplateID, int secondQuestID, boolean startNavigation) {
+        OutPacket outPacket = new OutPacket(OutHeader.QUEST_RESULT);
 
-        outPacket.encodeString(type);
-        outPacket.encodePosition(startPoint);
-        outPacket.encodePosition(endPoint);
-        outPacket.encodeShort(moveTime);
-        outPacket.encodeShort(totalCount);
-        outPacket.encodeShort(oneSprayMin);
-        outPacket.encodeShort(oneSprayMax);
+        outPacket.encodeByte(type.getVal());
+        outPacket.encodeInt(questID);
+        outPacket.encodeInt(npcTemplateID);
+
+        outPacket.encodeInt(secondQuestID); // starts a second quest
+        outPacket.encodeByte(startNavigation);
+
         return outPacket;
     }
 }
