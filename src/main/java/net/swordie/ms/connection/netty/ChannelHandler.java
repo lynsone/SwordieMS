@@ -299,6 +299,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_QUEST_REQUEST:
                 WorldHandler.handleUserQuestRequest(c, inPacket);
                 break;
+            case USER_COMPLETE_NPC_SPEECH:
+                WorldHandler.handleUserCompleteNpcSpeech(c, inPacket);
+                break;
             case ZERO_TAG:
                 WorldHandler.handleZeroTag(c, inPacket);
                 break;

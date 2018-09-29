@@ -2,9 +2,9 @@
 ARAN = 2159441
 
 if chr.getJob() == 2005:
-    VOID_PRIEST = 2159442# 136269999
-    VOID_PRIEST_2 = 2159443# 136270000
-    VOID_PRIEST_3 = 2159443# 136270255
+    VOID_PRIEST = 2159442
+    VOID_PRIEST_2 = 2159443
+    VOID_PRIEST_3 = 2159444
 
     sm.lockInGameUI(True, False)
     sm.hideUser(False)

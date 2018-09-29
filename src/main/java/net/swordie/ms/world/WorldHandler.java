@@ -2216,6 +2216,39 @@ public class WorldHandler {
             chr.write(UserLocal.questResult(QuestType.QuestRes_Act_Success, questID, npcTemplateID, 0, false));
         }
     }
+    public static void handleUserCompleteNpcSpeech(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        QuestManager qm = chr.getQuestManager();
+        int questID = inPacket.decodeInt();
+        int npcTemplateID = inPacket.decodeInt();
+        int speech = inPacket.decodeByte();
+
+        int objectID = inPacket.decodeInt();
+        Life life = chr.getField().getLifeByObjectID(objectID);
+        if (!(life instanceof Npc)) {
+            chr.chatMessage("Could not find that npc.");
+            return;
+        }
+        if (qm.hasQuestInProgress(questID)) {
+            QuestInfo qi = QuestData.getQuestInfoById(questID);
+            String scriptName = qi.getSpeech().get(speech-1);
+            if (scriptName == null || scriptName.equalsIgnoreCase("")) {
+                chr.chatMessage("Could not find that speech - quest id " + questID + ", speech " + speech);
+            }
+            if (scriptName.contains("NpcSpeech=")) {
+                if (scriptName.endsWith("/")) {
+                    scriptName = scriptName.substring(0, scriptName.length()-1);
+                }
+                Quest quest = chr.getQuestManager().getQuests().get(questID);
+                if (quest != null) {
+                    quest.setQrValue(scriptName);
+                    chr.write(WvsContext.questRecordExMessage(quest));
+                }
+            } else {
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
+            }
+        }
+    }
 
     public static void handleRWMultiChargeCancelRequest(Client c, InPacket inPacket) {
         byte unk = inPacket.decodeByte();
@@ -5275,7 +5308,6 @@ public class WorldHandler {
             Position origin = inPacket.decodePositionInt();
             Position dest = inPacket.decodePositionInt();
             field.broadcastPacket(UserRemote.effect(chrId, Effect.showDarkShockSkill(skillId, slv, origin, dest)));
-
         } else {
             log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));
             chr.chatMessage(String.format("Unhandled Remote Effect Skill:  id = %d", skillId));
