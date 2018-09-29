@@ -28,6 +28,7 @@ sm.sendNext("...Wow. Kid has some nerve dragging me to her town then to head off
 
 sm.chatScript("Press the left and right keys to move.")
 sm.removeNpc(MOONBEAM)
-# quest EX without string info 38000
-sm.startQuest(38000)
+sm.createQuestWithQRValue(38000, "")
+sm.levelUntil(10)
+
 sm.lockInGameUI(False)

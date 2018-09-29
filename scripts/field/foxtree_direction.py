@@ -50,7 +50,6 @@ if sm.hasQuest(38004):
 
     sm.lockInGameUI(False)
     sm.warp(410000002, 0)
-    sm.dispose()
 elif sm.hasQuest(38011):
     sm.lockInGameUI(True)
     sm.spawnNpc(MOONBEAM, 204, -135)
@@ -120,4 +119,3 @@ elif sm.hasQuest(38011):
 
     sm.lockInGameUI(False)
     sm.warp(410000002, 0)
-    sm.dispose()

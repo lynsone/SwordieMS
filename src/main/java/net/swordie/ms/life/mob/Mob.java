@@ -1156,6 +1156,9 @@ public class Mob extends Life {
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
             die();
+            if (damageDealer.hasQuestInProgress(38022) && getTemplateId() == 9300811) {
+                damageDealer.getScriptManager().setQRValue(38022, "clear", false);
+            }
             if (isBoss() && getHpTagColor() != 0) {
                 getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
             }

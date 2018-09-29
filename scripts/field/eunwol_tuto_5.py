@@ -27,7 +27,7 @@ sm.sendDelay(600)
 sm.hideUser(True)
 sm.sendDelay(1000)
 
-sm.showEffect("Effect/Direction15.img/effect/story/BalloonMsg0/3", 0, 200, -320, 0, 0, True, 0)
+sm.showBalloonMsg("Effect/Direction15.img/effect/story/BalloonMsg0/3", 0)
 sm.startQuest(38900)
 sm.createQuestWithQRValue(38900, "1")
 sm.sendDelay(2000)

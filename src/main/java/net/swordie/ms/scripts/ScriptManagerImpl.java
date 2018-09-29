@@ -685,8 +685,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void addMaxHP(int amount) {
-		int currentMHP = chr.getAvatarData().getCharacterStat().getMaxHp();
-		setMaxHP(currentMHP + amount);
+		chr.addStatAndSendPacket(Stat.mhp, amount);
 	}
 
 	@Override
@@ -700,8 +699,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void addMaxMP(int amount) {
-		int currentMMP = chr.getAvatarData().getCharacterStat().getMaxMp();
-		setMaxHP(currentMMP + amount);
+		chr.addStatAndSendPacket(Stat.mmp, amount);
 	}
 
 	@Override
@@ -2085,7 +2083,9 @@ public class ScriptManagerImpl implements ScriptManager {
         return (int) response;
 	}
 
-
+	public void avatarLookSet(int[] equipIDs) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.avatarLookSet(equipIDs)));
+	}
 
 	// Clock methods ---------------------------------------------------------------------------------------------------
 
@@ -2206,6 +2206,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
 	}
 
+	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(User.effect(Effect.reservedEffectRepeat(effectPath, start))); }
+
+	public void reservedEffectRepeat(String effectPath) { reservedEffectRepeat(effectPath, true); }
+
 	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(User.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
 
 	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
@@ -2286,6 +2290,17 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void moveParticleEff(String type, int startX, int startY, int endX, int endY, int moveTime, int totalCount, int oneSprayMin, int oneSprayMax) {
 		chr.write(UserLocal.moveParticleEff(type, new Position(startX, startY), new Position(endX, endY), moveTime, totalCount, oneSprayMin, oneSprayMax));
+	}
+
+	public void levelUntil(int toLevel) {
+		short level = chr.getLevel();
+		if (level >= toLevel) {
+		    return;
+        }
+		while (level < toLevel) {
+			addLevel(1);
+			level++;
+		}
 	}
 
 	private ScriptMemory getMemory() {

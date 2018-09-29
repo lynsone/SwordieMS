@@ -54,8 +54,7 @@ if "2" in sm.getQRValue(38900):
 elif "1" in sm.getQRValue(38900):
     sm.forcedInput(4)
     sm.sendDelay(2000)
-
-    sm.showEffect("Effect/Direction5.img/effect/mercedesInIce/merBalloon/0", 0, 20, -80, -2, -2, False, 0)
+    sm.showBalloonMsg("Effect/Direction5.img/effect/mercedesInIce/merBalloon/0", 0)
     sm.sendDelay(3000)
 
     sm.forcedInput(3)

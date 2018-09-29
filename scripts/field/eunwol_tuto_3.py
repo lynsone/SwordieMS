@@ -76,10 +76,10 @@ sm.sendDelay(500)
 sm.moveNpcByTemplateId(LUMINOUS, True, 180, 100)
 sm.sendDelay(2000)
 
-sm.showEffect("Effect/Direction15.img/effect/story/BalloonMsg0/0", 0, 410, -210, 0, 0, True, 0)
+sm.showBalloonMsg("Effect/Direction15.img/effect/story/BalloonMsg0/0", 0)
 sm.sendDelay(2500)
 
-sm.showEffect("Effect/Direction15.img/effect/story/BalloonMsg0/1", 0, 410, -180, 0, 0, True, 0)
+sm.showBalloonMsg("Effect/Direction15.img/effect/story/BalloonMsg0/1", 0)
 sm.sendDelay(2000)
 
 sm.showBalloonMsgOnNpc("Effect/Direction15.img/effect/story/BalloonMsg0/2", 0, LUMINOUS)

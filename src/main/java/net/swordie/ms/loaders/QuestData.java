@@ -355,7 +355,10 @@ public class QuestData {
                             }
                             break;
                         case "npcSpeech":
+                            String speechValue = "NpcSpeech=";
                             for (Node idNode : XMLApi.getAllChildren(infoNode)) {
+                                boolean hasSpeech = false;
+                                int templateID = 0, order = 0;
                                 for (Node questNode : XMLApi.getAllChildren(idNode)) {
                                     String questName = XMLApi.getNamedAttribute(questNode, "name");
                                     String questValue = XMLApi.getNamedAttribute(questNode, "value");
@@ -363,13 +366,23 @@ public class QuestData {
                                         case "script":
                                             quest.addSpeech(questValue);
                                             break;
+                                        case "speech":
+                                            hasSpeech = true;
+                                            break;
                                         case "id":
+                                            templateID = Integer.parseInt(questValue);
+                                            break;
                                         case "order":
+                                            order = Integer.parseInt(questValue);
                                             break;
                                         default:
                                             log.warn(String.format("(%d) Unk npc speech name %s with value %s", questID, questName, questValue));
                                             break;
                                     }
+                                }
+                                if (hasSpeech && templateID != 0) {
+                                    speechValue += templateID + "" + order + "/";
+                                    quest.addSpeech(speechValue);
                                 }
                             }
                             break;

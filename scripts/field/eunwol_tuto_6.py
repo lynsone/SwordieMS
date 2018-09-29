@@ -62,9 +62,7 @@ elif "1" in sm.getQRValue(38900):
 
     sm.showFieldEffect("Map/Effect2.img/eunwol/meetfox")
     sm.sendDelay(3200)
-
-    while chr.getLevel() != 10:
-        sm.addLevel(1)
+    sm.levelUntil(10)
 
     sm.hideUser(False)
     sm.warp(940200010, 0)

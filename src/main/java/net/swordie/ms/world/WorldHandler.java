@@ -2221,7 +2221,18 @@ public class WorldHandler {
             if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                 chr.chatMessage("Could not find that speech - quest id " + questID + ", speech " + speech);
             }
-            chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
+            if (scriptName.contains("NpcSpeech=")) {
+                if (scriptName.endsWith("/")) {
+                    scriptName = scriptName.substring(0, scriptName.length()-1);
+                }
+                Quest quest = chr.getQuestManager().getQuests().get(questID);
+                if (quest != null) {
+                    quest.setQrValue(scriptName);
+                    chr.write(WvsContext.questRecordExMessage(quest));
+                }
+            } else {
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
+            }
         }
     }
 
@@ -5283,11 +5294,6 @@ public class WorldHandler {
             Position origin = inPacket.decodePositionInt();
             Position dest = inPacket.decodePositionInt();
             field.broadcastPacket(UserRemote.effect(chrId, Effect.showDarkShockSkill(skillId, slv, origin, dest)));
-        } else if (skillId == Shade.FOX_TROT) {
-            if (chr.hasQuestInProgress(38997)) {
-
-                chr.getScriptManager().startScript(38997, "q38997e", ScriptType.Quest);
-            }
         } else {
             log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));
             chr.chatMessage(String.format("Unhandled Remote Effect Skill:  id = %d", skillId));

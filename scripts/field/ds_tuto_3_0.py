@@ -1,9 +1,7 @@
 FERDI = 2159311
 
 sm.lockInGameUI(True)
-
-while sm.getChr().getLevel() != 10:
-    sm.addLevel(1)
+sm.levelUntil(10)
 
 sm.sendDelay(3000)
 
