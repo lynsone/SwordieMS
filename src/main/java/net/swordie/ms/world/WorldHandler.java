@@ -2141,6 +2141,7 @@ public class WorldHandler {
         int npcTemplateID = 0;
         Position position = null;
         QuestType qt = QuestType.getQTFromByte(type);
+        boolean success = false;
         if (qt != null) {
             switch (qt) {
                 case QuestReq_AcceptQuest: // Quest start
@@ -2157,19 +2158,24 @@ public class WorldHandler {
                     questID = inPacket.decodeInt();
                     chr.getQuestManager().removeQuest(questID);
                     break;
+                case QuestReq_LaterStep:
+                    questID = inPacket.decodeInt();
+                    break;
                 default:
                     log.error(String.format("Unhandled quest request %s!", qt));
                     break;
             }
         }
         if (questID == 0 || qt == null) {
-            chr.chatMessage(SystemNotice, "Could not start quest.");
+            chr.chatMessage(String.format("Could not find quest %d.", questID));
             return;
         }
+        QuestInfo qi = QuestData.getQuestInfoById(questID);
         switch (qt) {
             case QuestReq_AcceptQuest:
                 if (qm.canStartQuest(questID)) {
                     qm.addQuest(QuestData.createQuestFromId(questID));
+                    success = true;
                 }
                 break;
             case QuestReq_CompleteQuest:
@@ -2177,11 +2183,11 @@ public class WorldHandler {
                     Quest quest = qm.getQuests().get(questID);
                     if (quest.isComplete(chr)) {
                         qm.completeQuest(questID);
+                        success = true;
                     }
                 }
                 break;
             case QuestReq_OpeningScript:
-                QuestInfo qi = QuestData.getQuestInfoById(questID);
                 String scriptName = qi.getStartScript();
                 if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
@@ -2189,13 +2195,21 @@ public class WorldHandler {
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
             case QuestReq_CompleteScript:
-                qi = QuestData.getQuestInfoById(questID);
                 scriptName = qi.getEndScript();
                 if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
+            case QuestReq_LaterStep:
+                if (qi != null && qi.getTransferField() != 0) {
+                    Field field = chr.getOrCreateFieldByCurrentInstanceType(qi.getTransferField());
+                    chr.warp(field);
+                }
+                break;
+        }
+        if (success) {
+            chr.write(UserLocal.questResult(QuestType.QuestRes_Act_Success, questID, npcTemplateID, 0, false));
         }
     }
 

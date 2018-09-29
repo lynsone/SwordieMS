@@ -5,10 +5,7 @@ import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.enums.ChatType;
-import net.swordie.ms.enums.MessageType;
-import net.swordie.ms.enums.StealMemoryType;
-import net.swordie.ms.enums.StylishKillType;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
@@ -423,6 +420,19 @@ public class UserLocal {
         outPacket.encodeInt(emotion);
         outPacket.encodeInt(duration);
         outPacket.encodeByte(byItemOption);
+
+        return outPacket;
+    }
+
+    public static OutPacket questResult(QuestType type, int questID, int npcTemplateID, int secondQuestID, boolean startNavigation) {
+        OutPacket outPacket = new OutPacket(OutHeader.QUEST_RESULT);
+
+        outPacket.encodeByte(type.getVal());
+        outPacket.encodeInt(questID);
+        outPacket.encodeInt(npcTemplateID);
+
+        outPacket.encodeInt(secondQuestID); // starts a second quest
+        outPacket.encodeByte(startNavigation);
 
         return outPacket;
     }

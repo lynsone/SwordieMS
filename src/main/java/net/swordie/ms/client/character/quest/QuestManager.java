@@ -142,11 +142,6 @@ public class QuestManager {
                     }
                 }
             }
-            QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
-            if (qi != null && qi.getTransferField() != 0) {
-                Field field = chr.getOrCreateFieldByCurrentInstanceType(qi.getTransferField());
-                chr.warp(field);
-            }
         }
     }
 

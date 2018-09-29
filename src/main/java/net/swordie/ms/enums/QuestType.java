@@ -13,6 +13,7 @@ public enum QuestType {
     QuestReq_OpeningScript(4),
     QuestReq_CompleteScript(5),
     QuestReq_LaterStep(6),
+
     QuestRes_Start_QuestTimer(7),
     QuestRes_End_QuestTimer(8),
     QuestRes_Start_TimeKeepQuestTimer(9),
