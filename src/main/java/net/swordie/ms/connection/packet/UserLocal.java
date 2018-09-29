@@ -436,4 +436,13 @@ public class UserLocal {
 
         return outPacket;
     }
+
+    public static OutPacket medalReissueResult(MedalReissueResultType medalReissueResultType, int itemId) {
+        OutPacket outPacket = new OutPacket(OutHeader.MEDAL_REISSUE_RESULT);
+
+        outPacket.encodeByte(medalReissueResultType.getVal());
+        outPacket.encodeInt(itemId);
+
+        return outPacket;
+    }
 }
