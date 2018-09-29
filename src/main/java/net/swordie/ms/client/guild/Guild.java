@@ -64,7 +64,7 @@ public class Guild implements Encodable {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "guildID")
-    private List<BBSRecord> bbsRecords = new ArrayList<>();
+    private Set<BBSRecord> bbsRecords = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "bbsNotice")
@@ -428,11 +428,11 @@ public class Guild implements Encodable {
         broadcast(WvsContext.guildResult(GuildResult.setGgp(this)));
     }
 
-    public List<BBSRecord> getBbsRecords() {
+    public Set<BBSRecord> getBbsRecords() {
         return bbsRecords;
     }
 
-    public void setBbsRecords(List<BBSRecord> bbsRecords) {
+    public void setBbsRecords(Set<BBSRecord> bbsRecords) {
         this.bbsRecords = bbsRecords;
     }
 

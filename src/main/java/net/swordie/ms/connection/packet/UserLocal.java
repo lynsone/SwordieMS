@@ -437,16 +437,12 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket moveParticleEff(String type, Position startPoint, Position endPoint, int moveTime, int totalCount, int oneSprayMin, int oneSprayMax) {
-        OutPacket outPacket = new OutPacket(OutHeader.MOVE_PARTICLE_EFF);
+    public static OutPacket medalReissueResult(MedalReissueResultType medalReissueResultType, int itemId) {
+        OutPacket outPacket = new OutPacket(OutHeader.MEDAL_REISSUE_RESULT);
 
-        outPacket.encodeString(type);
-        outPacket.encodePosition(startPoint);
-        outPacket.encodePosition(endPoint);
-        outPacket.encodeShort(moveTime);
-        outPacket.encodeShort(totalCount);
-        outPacket.encodeShort(oneSprayMin);
-        outPacket.encodeShort(oneSprayMax);
+        outPacket.encodeByte(medalReissueResultType.getVal());
+        outPacket.encodeInt(itemId);
+
         return outPacket;
     }
 }
