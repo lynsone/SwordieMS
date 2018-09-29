@@ -167,6 +167,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_SKILL_CANCEL_REQUEST:
                 WorldHandler.handleTemporaryStatResetRequest(c, inPacket);
                 break;
+            case USER_SKILL_PREPARE_REQUEST:
+                WorldHandler.handleUserSkillPrepareRequest(chr, inPacket);
+                break;
             case PONG:
                 LoginHandler.handlePong(c, inPacket);
                 break;
@@ -631,6 +634,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case CROSS_HUNTER_SHOP_REQUEST:
                 WorldHandler.handleCrossHunterShopRequest(chr, inPacket);
+                break;
+            case USER_MEDAL_REISSUE_REQUEST:
+                WorldHandler.handleUserMedalReissueRequest(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);
