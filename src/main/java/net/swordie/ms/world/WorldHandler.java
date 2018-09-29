@@ -108,6 +108,7 @@ import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.python.google.common.collect.Comparators;
 
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
@@ -135,7 +136,7 @@ import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
 public class WorldHandler {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
-    public static void handleCharLogin(Client c, InPacket inPacket) {
+    public static void handleMigrateIn(Client c, InPacket inPacket) {
         int worldId = inPacket.decodeInt();
         int charId = inPacket.decodeInt();
         byte[] machineID = inPacket.decodeArr(16);
@@ -5349,7 +5350,10 @@ public class WorldHandler {
                 break;
             case Req_LoadPages:
                 int page = inPacket.decodeInt();
-                List<BBSRecord> records = guild.getBbsRecords();
+                List<BBSRecord> records = guild.getBbsRecords()
+                        .stream()
+                        .sorted(Comparator.comparingInt(BBSRecord::getIdForBbs))
+                        .collect(Collectors.toList());
                 final int PAGE_SIZE = GameConstants.GUILD_BBS_RECORDS_PER_PAGE;
                 if (page != 0 && page * PAGE_SIZE >= records.size()) {
                     chr.chatMessage("No more BBS records to show.");

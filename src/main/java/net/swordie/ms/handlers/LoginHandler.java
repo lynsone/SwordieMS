@@ -154,7 +154,7 @@ public class LoginHandler {
         c.write(Login.checkDuplicatedIDResult(name, code.getVal()));
     }
 
-    public static void handleCreateCharacter(Client c, InPacket inPacket) {
+    public static void handleCreateNewCharacter(Client c, InPacket inPacket) {
         String name = inPacket.decodeString();
         int keySettingType = inPacket.decodeInt();
         int eventNewCharSaleJob = inPacket.decodeInt();

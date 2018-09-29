@@ -197,7 +197,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 LoginHandler.handleCheckDuplicatedID(c, inPacket);
                 break;
             case CREATE_NEW_CHARACTER:
-                LoginHandler.handleCreateCharacter(c, inPacket);
+                LoginHandler.handleCreateNewCharacter(c, inPacket);
                 break;
             case DELETE_CHARACTER:
                 LoginHandler.handleDeleteCharacter(c, inPacket);
@@ -224,7 +224,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case AUTH_HEARTBEAT:
                 break;
             case MIGRATE_IN:
-                WorldHandler.handleCharLogin(c, inPacket);
+                WorldHandler.handleMigrateIn(c, inPacket);
                 break;
             case USER_HIT:
                 c.getChr().getJobHandler().handleHit(c, inPacket);
