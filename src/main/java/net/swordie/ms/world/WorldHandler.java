@@ -2171,6 +2171,8 @@ public class WorldHandler {
                 if (qm.canStartQuest(questID)) {
                     qm.addQuest(QuestData.createQuestFromId(questID));
                 }
+                chr.chatMessage(String.format("Starting Client Script Quest %d", questID));
+                chr.getScriptManager().startScript(questID, "q"+questID+"s", ScriptType.Quest);
                 break;
             case QuestReq_CompleteQuest:
                 if (qm.hasQuestInProgress(questID)) {
@@ -2179,6 +2181,8 @@ public class WorldHandler {
                         qm.completeQuest(questID);
                     }
                 }
+                chr.chatMessage(String.format("Starting Client Script Quest %d", questID));
+                chr.getScriptManager().startScript(questID, "q"+questID+"e", ScriptType.Quest);
                 break;
             case QuestReq_OpeningScript:
                 QuestInfo qi = QuestData.getQuestInfoById(questID);
@@ -5528,5 +5532,76 @@ public class WorldHandler {
                 mob.clearEscortDest();// finished escort
             }
         }
+    }
+
+    public static void handleCrossHunterCompleteRequest(Char chr, InPacket inPacket) {
+        short tab = inPacket.decodeShort();
+        HashMap<Item, Integer> itemMap = new HashMap<>();
+
+        if (chr.getScriptManager().getQRValue(QuestConstants.SILENT_CRUSADE_WANTED_TAB_1 + tab).contains("r=1")) {
+            log.error(String.format("Character %d tried to complete Silent Crusade Chapter %d, whilst already having claimed the reward.", chr.getId(), tab + 1));
+            chr.dispose();
+            return;
+        }
+
+        switch (tab) {
+            case 0: // Chapter 1
+                itemMap.put(ItemData.getItemDeepCopy(3700031), 1);  // Apprentice Hunter
+                itemMap.put(ItemData.getItemDeepCopy(4310029), 10); // Crusader Coins  x10
+                break;
+            case 1: // Chapter 2
+                itemMap.put(ItemData.getItemDeepCopy(3700032), 1);  // Capable Hunter
+                itemMap.put(ItemData.getItemDeepCopy(4001832), 100);// Spell Traces  x100
+                itemMap.put(ItemData.getItemDeepCopy(4310029), 15); // Crusader Coins  x15
+                break;
+            case 2: // Chapter 3
+                itemMap.put(ItemData.getItemDeepCopy(3700033), 1);  // Veteran Hunter
+                itemMap.put(ItemData.getItemDeepCopy(2430668), 1);  // Silent Crusade Mastery Book
+                itemMap.put(ItemData.getItemDeepCopy(4310029), 20); // Crusader Coins  x20
+                break;
+            case 3: // Chapter 4
+                itemMap.put(ItemData.getItemDeepCopy(3700034), 1);  // Superior Hunter
+                itemMap.put(ItemData.getItemDeepCopy(4001832), 500);// Spell Traces  x500
+                itemMap.put(ItemData.getItemDeepCopy(4310029), 30); // Crusader Coins  x30
+                break;
+        }
+
+        if(!chr.canHold(new ArrayList<>(itemMap.keySet()))) {
+            chr.chatMessage("Please make some space in your inventory.");
+            chr.dispose();
+            return;
+        }
+
+        chr.getScriptManager().setQRValue(QuestConstants.SILENT_CRUSADE_WANTED_TAB_1 + tab, "r=1");
+        for (Map.Entry<Item, Integer> entry : itemMap.entrySet()) {
+            Item item = entry.getKey();
+            item.setQuantity(entry.getValue());
+            chr.addItemToInventory(item);
+        }
+        chr.dispose();
+    }
+
+    public static void handleCrossHunterShopRequest(Char chr, InPacket inPacket) {
+        short itemIndexInShop = inPacket.decodeShort();
+        int itemId = inPacket.decodeInt();
+        short itemQuantity = inPacket.decodeShort();
+
+        int crusaderCoin = 4310029;
+        List<Integer> coinCostList = Arrays.asList(50, 40, 60, 255, 170, 85, 170, 85, 10);
+
+        if (!chr.hasItemCount(crusaderCoin, (coinCostList.get(itemIndexInShop)) * itemQuantity)) {
+            chr.chatMessage("You don't have enough Crusader Coins.");
+            chr.dispose();
+            return;
+        }
+        if (!chr.canHold(itemId)) {
+            chr.chatMessage("You don't have any inventory space.");
+            chr.dispose();
+            return;
+        }
+
+        chr.consumeItem(crusaderCoin, coinCostList.get(itemIndexInShop));
+        chr.addItemToInventory(itemId, itemQuantity);
+        chr.dispose();
     }
 }

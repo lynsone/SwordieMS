@@ -1,0 +1,5 @@
+# 4963 | Starting Script
+
+sm.setSpeakerID(9201003)
+sm.sendNext("Wonderful! I just need one of each of the following: #b#t2020029##k for the Creamed Corn, a can of #b#t2022262##k, #b#t2022261##k--I've already got the mushrooms, a #b#t2022263##k, and a tin of #b#t2022264##k to top it off. In return, for being such a good child, I'll give you an #b#t4031529##k! You can use it to visit the vendors in #bHenesys, Amoria, and New Leaf City#k and obtain a #bNexon Game Card#k for those games you love so much!")
+sm.sendSayOkay("I know it's a lot, dearie... I would tell you to go to the market but apparently all the stores have been cleaned out! I heard from Grandma Benson that it looks like those crazy Turkeys armed themselves this year. Apparently they robbed all the markets of all the items for Thanksgiving fixins'. Unbelievable! What are those Turkeys thinking and what is this world coming to? Well... I would try hunting these and you should be able to get back the things I need. Maybe you can even bring back an extra turkey... wouldn't that be something! Hurry back so I can start cooking soon!")

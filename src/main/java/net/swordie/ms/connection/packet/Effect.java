@@ -425,7 +425,7 @@ public class Effect {
 
         effect.setUserEffectType(SkillAffected_Select);
         effect.setArg1(select);
-        effect.setArg2(0); // root Select  -  (?)
+        effect.setArg2(-1); // root Select  -  (?)
         effect.setArg3(skillID);
         effect.setArg4(slv);
         effect.setArg5(special ? 1 : 0);

@@ -51,20 +51,20 @@ public class Pirate extends Beginner {
 
 
     //Buccaneer
-    public static final int TORNADO_UPPERCUT = 5101012; //Special Attack TODO (Uses Force)
+    public static final int TORNADO_UPPERCUT = 5101012; //Special Attack
     public static final int KNUCKLE_BOOSTER = 5101006; //Buff
-    public static final int ENERGY_CHARGE = 5100015; //Energy Gauge TODO fix system
+    public static final int ENERGY_CHARGE = 5100015; //Energy Gauge
 
     public static final int ROLL_OF_THE_DICE_BUCC = 5111007; //Buff
-    public static final int ENERGY_BURST = 5111002; //Special Attack  TODO (Uses Force)
-    public static final int STATIC_THUMPER = 5111012; //Special Attack TODO (Uses Force)
+    public static final int ENERGY_BURST = 5111002; //Special Attack
+    public static final int STATIC_THUMPER = 5111012; //Special Attack
     public static final int STUN_MASTERY = 5110000;
     public static final int SUPERCHARGE = 5110014;
 
-    public static final int OCTOPUNCH = 5121007; //Special Attack  TODO (Uses Force)
+    public static final int OCTOPUNCH = 5121007; //Special Attack
     public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack / Buff TODO Special Buff
-    public static final int DRAGON_STRIKE = 5121001; //Special Attack  TODO (Uses Force)
-    public static final int BUCCANEER_BLAST = 5121016; //Special Attack   TODO (Uses Force)
+    public static final int DRAGON_STRIKE = 5121001; //Special Attack
+    public static final int BUCCANEER_BLAST = 5121016; //Special Attack
     public static final int CROSSBONES = 5121015; //Buff
     public static final int SPEED_INFUSION = 5121009; //Buff
     public static final int TIME_LEAP = 5121010; //Special Move / Buff
@@ -313,6 +313,7 @@ public class Pirate extends Beginner {
             case ROLL_OF_THE_DICE_BUCC_DD:
             case ROLL_OF_THE_DICE_SAIR_DD:
             case LUCK_OF_THE_DIE_DD:
+                boolean isCharged = tsm.getViperEnergyCharge() > 0;
                 upbound = 6;
                 if((chr.hasSkill(ROLL_OF_THE_DICE_BUCC_DD) && chr.hasSkill(5120044)) ||
                         (chr.hasSkill(ROLL_OF_THE_DICE_SAIR_DD) && chr.hasSkill(5220044))) {
@@ -322,10 +323,10 @@ public class Pirate extends Beginner {
                 random = new Random().nextInt(upbound)+1;
                 int randomDD = new Random().nextInt(upbound)+1;
 
-                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
-                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
-                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
-                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
+                chr.write(User.effect(Effect.skillAffectedSelect(skillID, slv, random, false)));
+                chr.write(User.effect(Effect.skillAffectedSelect(skillID, slv, randomDD, true)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffectedSelect(skillID, slv, random, false)));
+                chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffectedSelect(skillID, slv, randomDD, true)));
 
                 if(random < 2 && randomDD < 2) {
                     return;
@@ -337,6 +338,9 @@ public class Pirate extends Beginner {
 
                 tsm.throwDice(random, randomDD);
                 tsm.putCharacterStatValue(Dice, o1);
+                if(isCharged) {
+                    updateViperEnergy(tsm.getOption(EnergyCharged).nOption);
+                }
                 break;
             case MONKEY_MAGIC:
             case MEGA_MONKEY_MAGIC:
@@ -750,6 +754,7 @@ public class Pirate extends Beginner {
         Skill skill = chr.getSkill(BARREL_ROULETTE);
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        chr.write(User.effect(Effect.skillAffectedSelect(BARREL_ROULETTE, slv, roulette, false)));
         switch (roulette) {
             case 1: // Extra Attack (Final Attack)
                 //Handled, See Final Attack Handler
@@ -787,39 +792,52 @@ public class Pirate extends Beginner {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-
+        Option o1 = new Option();
+        Option o2 = new Option();
+        Option o3 = new Option();
         if (JobConstants.isBuccaneer(chr.getJob())) {
             if(hasHitMobs && attackInfo.skillId != 0) {
-                //Stun Mastery
+                // Stun Mastery
                 applyStunMasteryOnMob(attackInfo);
 
-                //Viper Energy
+                // Viper Energy
                 changeViperEnergy(attackInfo.skillId);
             }
         }
 
         if (JobConstants.isCorsair(chr.getJob())) {
             if(hasHitMobs) {
-                //Quickdraw
+                // Quickdraw
                 activateQuickdraw(attackInfo, tsm);
             }
         }
 
         if (JobConstants.isCannonShooter(chr.getJob())) {
             if(hasHitMobs) {
-                //Barrel Roulette
+                // Barrel Roulette
                 applyBarrelRouletteDebuffOnMob(attackInfo);
+
+                // Monkey Wave Ignore KeyDown Time
+                if(chr.hasSkill(MONKEY_WAVE)) {
+                    Skill mwskill = chr.getSkill(MONKEY_WAVE);
+                    SkillInfo mwsi = SkillData.getSkillInfoById(MONKEY_WAVE);
+                    byte mwslv = (byte) mwskill.getCurrentLevel();
+                    if (Util.succeedProp(mwsi.getValue(w, mwslv)) && !(tsm.getOption(KeyDownTimeIgnore).nOption > 0) && attackInfo.skillId != 5310008) {
+                        o1.nOption = 1;
+                        o1.rOption = 5310008;
+                        o1.tOption = 15; // doesn't have an assigned skillStat
+                        tsm.putCharacterStatValue(KeyDownTimeIgnore, o1);
+                        tsm.sendSetStatPacket();
+                    }
+                }
             }
         }
-
         if (JobConstants.isJett(chr.getJob())) {
             if(hasHitMobs) {
 
             }
         }
-        Option o1 = new Option();
-        Option o2 = new Option();
-        Option o3 = new Option();
+
         switch (attackInfo.skillId) {
             case BLAST_BACK:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -837,6 +855,32 @@ public class Pirate extends Beginner {
                 }
                 break;
             case MONKEY_WAVE:
+                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (Util.succeedProp(si.getValue(prop, slv))) {
+                        Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
+                        if (mob == null) {
+                            continue;
+                        }
+                        if(!mob.isBoss()) {
+                            MobTemporaryStat mts = mob.getTemporaryStat();
+                            o1.nOption = 1;
+                            o1.rOption = skill.getSkillId();
+                            o1.tOption = si.getValue(time, slv);
+                            mts.addStatOptionsAndBroadcast(MobStat.Stun, o1);
+                        }
+                    }
+                }
+                if(tsm.hasStat(KeyDownTimeIgnore) && tsm.getOption(KeyDownTimeIgnore).nOption > 0) {
+                    tsm.removeStatsBySkill(5310008);
+                    tsm.removeStat(KeyDownTimeIgnore, true);
+                    tsm.sendResetStatPacket();
+                }
+                o2.nOption = si.getValue(x, slv);
+                o2.rOption = skillID;
+                o2.tOption = si.getValue(subTime, slv);
+                tsm.putCharacterStatValue(IncCriticalDamMax, o2);
+                tsm.sendSetStatPacket();
+                break;
             case STARLINE_TWO:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(hcProp, slv))) {
@@ -1021,7 +1065,7 @@ public class Pirate extends Beginner {
         return skill;
     }
 
-    private void applyBarrelRouletteDebuffOnMob(AttackInfo attackInfo) {   //TODO
+    private void applyBarrelRouletteDebuffOnMob(AttackInfo attackInfo) {
         if(chr.hasSkill(BARREL_ROULETTE)) {
             TemporaryStatManager tsm = chr.getTemporaryStatManager();
             Option o = new Option();
@@ -1040,7 +1084,7 @@ public class Pirate extends Beginner {
                     } else if (tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 3) {  //Slow Debuff
                         int slowProc = si.getValue(w, slv);
                         if (Util.succeedProp(slowProc)) {
-                            o.nOption = 1;
+                            o.nOption = -20;
                             o.rOption = skill.getSkillId();
                             o.tOption = si.getValue(v, slv);
                             mts.addStatOptionsAndBroadcast(MobStat.Speed, o);
@@ -1054,11 +1098,12 @@ public class Pirate extends Beginner {
     @Override
     public int getFinalAttackSkill() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(MAJESTIC_PRESENCE)) {
-            return MAJESTIC_PRESENCE;
+        SkillInfo si = SkillData.getSkillInfoById(BARREL_ROULETTE);
+        if(tsm.hasStat(Roulette) && tsm.getOption(Roulette).nOption == 1 && Util.succeedProp(si.getValue(z, chr.getSkill(BARREL_ROULETTE).getCurrentLevel()))) {
+            return 5310008;
         }
-        if(tsm.getOption(Roulette).nOption == 1) {
-            return BARREL_ROULETTE; //TODO
+        else if(chr.hasSkill(MAJESTIC_PRESENCE)) {
+            return MAJESTIC_PRESENCE;
         }
         return 0;
     }
