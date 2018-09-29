@@ -1,0 +1,6 @@
+# 6410 | Starting Script
+
+sm.setSpeakerID(1092008)
+sm.sendNext("Thanks. I need to rescue 'Delli' right now, can you help me? Delli is a monster who was with Rolonay at Mu Lung. I'm sure you've noticed it by now that Rolonay wasn't a person, no? The disguise wasn't very well-done, so... it's not hard to tell.")
+sm.sendSay("The best way to describe Rolonay and Delli is that... unlike other monsters, they are more 'aware' of things. In the beginning, monsters and humans didn't hate one another. They coexisted peacefully. It wasn't until one day when the monsters collectively got swept away by the evil powers that engulfed the world, and turned against humans. Not so for Rolonay and Delli, though. They tried to lead their fellow stricken monsters back to normal.")
+sm.sendSayOkay("During those tough times, Rolonay was put in a dangerous situation, and I wound up saving him, bring him to The Nautilus. We also tried to bring Delli along with us, but she refused, so we left her there at Mu Lung. Unfortunately, we received a word that she has been captured by the mosnters there. We have no idea where she is trapped, so... I'll scour the northern part of Mu Lung, and you'll scour the bottom half. I'll take you there with me right now.")

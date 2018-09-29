@@ -208,7 +208,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	private void notifyMobDeath(Mob mob) {
-		if (isActive(ScriptType.Field)) {
+		if (isActive(ScriptType.FirstEnterField)) {
+			getScriptInfoByType(ScriptType.FirstEnterField).addResponse(mob);
+		} else if (isActive(ScriptType.Field)) {
 			getScriptInfoByType(ScriptType.Field).addResponse(mob);
 		}
 	}
