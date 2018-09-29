@@ -1,7 +1,0 @@
-# 6014 | Starting Script
-
-sm.setSpeakerID(2110003)
-sm.sendNext("O, okay... first, open your M, Maker skill window, and... you'll no, notice that the ma, materials for the Mo, Monster Cr, Crystal are not listed. That's be, because... there are so ma, many materials out th, there... that can ma, make the Mo, Monster Cry, Crystal...")
-sm.sendSay("Mo...Monster Crystals are ma, made... using the dr, droppings from the mo, monster... and it doesn't ma, matter what kind of dr, drops you're using... ju, just ...#r100 of the same kind#k is all th, that's needed to ma, make the Mo...Monster Crystal.\E, Every once in a while, you, you'll run into... a number of items... th, that you can't use to ma, make a Monster Crystal... bu, but mo, most of them can be u, used to make one...")
-sm.sendSay("The qu, quality of the Mo, Monster Crystal differs... ba, based on the ma, materials you use to ma, make it... and ba, basically... #rthe hi, higher the level of the mo, monster... the hi, higher the level of Mo, Monster Crystal... you can ma, make...#k \n\nAnd... ev, every once in a while, you'll make a hi, highly-concentrated Mo, Monster Crystal... and that all de, depends on... how good you f, feel that d, day...")
-sm.sendSayOkay("Okay... no, now... let's ma, make one, shall we? Ju, just follow my instruc...tions and ma, make #bone #t4260000##k... I ha, have a feeling yo, you will do just fi, fine...")

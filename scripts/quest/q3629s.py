@@ -1,7 +1,0 @@
-# 3629 | Starting Script
-
-sm.setSpeakerID(2071008)
-sm.sendNext("My mother leaves home early in the morning to sell rice cake all day, but I'm terribly worried right now because she hasn't come home for days. Last night, however, I heard my mother arrive home and ask me to open the door. When I looked through the window, however, I did not see my mother's hand; rather, it was a furry, hairy paw of a tiger dressed up as my mother!")
-sm.sendSay("My sister and I delayed as much time as we possibly could by asking questions on everything, all the way until the early morning. When the morning came, the tiger realized our plan and decided to abandon its plan to act like our mother. The tiger left, but not before threatening us that it'll come back tonight to have us as its dinner.")
-sm.sendSay("I have talked to numerous people in this town about this, but they all seemed to be deathly afraid of tigers. My sister and I have had trouble falling asleep because of the tigers, but last night, when we finally fell asleep, the God of Providence appeared in our dreams and told us how to escape the tigers in detail.")
-sm.sendSayOkay("But in order to escape that way, I'll need #b20 #t4031268#s#k and #b1 #t4031269##k, and I can't get them in town. Since you're fully on board to help me out, I'd really like you to get those items for me. I heard that #t4031268# can be found through #r#o5100003##k in Black Mountain, and #t4031269# can be found through #r#o2230106##k.")
