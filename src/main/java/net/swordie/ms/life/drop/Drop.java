@@ -3,17 +3,13 @@ package net.swordie.ms.life.drop;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DropType;
 import net.swordie.ms.connection.packet.DropPool;
-import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.life.Life;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created on 2/21/2018.
@@ -44,14 +40,14 @@ public class Drop extends Life {
     public Drop(int templateId, Item item) {
         super(templateId);
         this.item = item;
-        dropType = DropType.ITEM;
+        dropType = DropType.Item;
         expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
     public Drop(int templateId, int money) {
         super(templateId);
         this.money = money;
-        dropType = DropType.MONEY;
+        dropType = DropType.Mesos;
         expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
@@ -61,7 +57,7 @@ public class Drop extends Life {
 
     public void setItem(Item item) {
         this.item = item;
-        setDropType(DropType.ITEM);
+        setDropType(DropType.Item);
     }
 
     public int getMoney() {
@@ -70,11 +66,11 @@ public class Drop extends Life {
 
     public void setMoney(int money) {
         this.money = money;
-        setDropType(DropType.MONEY);
+        setDropType(DropType.Mesos);
     }
 
     public boolean isMoney() {
-        return getDropType() == DropType.MONEY;
+        return getDropType() == DropType.Mesos;
     }
 
     public int getOwnerID() {

@@ -54,11 +54,10 @@ public enum DimensionalPortalType {
     MonsterPark(45, 951000000, "Monster Park"),
     WeirdMob(46, 0, "Weird Mob"),
     Ursus(47, 0, "Ursus"),
-    Cygnus(48, 0, "Cygnus Empress"),
-    HeroesOfMaple(49, 0, "Heroes of Maple"),
-    Maplerunner(50, 0, "Maplerunner"),
+    Cygnus(49, 0, "Cygnus Empress"),
+    HeroesOfMaple(50, 0, "Heroes of Maple"),
+    Maplerunner(51, 0, "Maplerunner");
 
-    ;
     private int val;
     private int mapID;
     private String desc;

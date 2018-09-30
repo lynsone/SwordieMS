@@ -28,8 +28,7 @@ public enum BroadcastMsgType {
     Yellow(21), // Holds item info
     Yellow_2(22),
     MegaphoneNoMessage(23),
-    BalloonMessage(24), // TODO   Contains PackedCharLook
-    ;
+    BalloonMessage(24); // TODO   Contains PackedCharLook
 
     private byte val;
 

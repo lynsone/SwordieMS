@@ -18,8 +18,8 @@ public enum EquipmentEnchantType {
     ShowScrollVestigeCompensationResult(102),
     ShowTransmissionResult(103),
     ShowUnknownFailResult(104),
-    Unk(105),
-    ;
+    Unk(105);
+
     private byte val;
 
     EquipmentEnchantType(int val) {

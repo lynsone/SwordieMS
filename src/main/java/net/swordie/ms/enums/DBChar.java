@@ -5,7 +5,6 @@ package net.swordie.ms.enums;
  * @author Five
  */
 public enum DBChar {
-
     Character(0x1),
     Money(0x2),
     ItemSlotEquip(0x4),
@@ -57,8 +56,8 @@ public enum DBChar {
     MonsterBattleInfo(0x800000000000L),
     SoulCollection(0x1000000000000L),
     All(0xFFFFFFFFFFFFFFFFL),
-    ItemSlot(0x7C),
-    ;
+    ItemSlot(0x7C);
+
     public long uFlag;
 
     DBChar(long uFlag) {
