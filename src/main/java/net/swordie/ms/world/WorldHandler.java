@@ -1936,15 +1936,12 @@ public class WorldHandler {
                     return;
                 }
                 boolean success = inPacket.decodeByte() == 1;// bSuccess
-                int answerVal = 0;
-                if (success) {
-                    if (answerType == InGameDirectionAsk.CAMERA_MOVE_TIME) {
-                        answerVal = inPacket.decodeInt();
-                        chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(answerVal)));
-                        return;
-                    }
-                    chr.getScriptManager().handleAction(nmt, (byte) answerType.getVal(), answerVal);
+                if (answerType == InGameDirectionAsk.CAMERA_MOVE_TIME && success) {
+                    int answerVal = inPacket.decodeInt();
+                    chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(answerVal)));
+                    return;
                 }
+                chr.getScriptManager().handleAction(nmt, (byte) 1, answerType.getVal());
                 return;
             }
             if (nmt == NpcMessageType.AskText && action == 1) {

@@ -122,6 +122,13 @@ public class ScriptMan {
                 outPacket.encodeString(sb.toString());
                 outPacket.encodeInt(0);
                 break;
+            case AskSelectMenu:
+                outPacket.encodeInt(nsi.getDlgType());
+                if (nsi.getDlgType() <= 0 || nsi.getDlgType() == 1) {
+                    outPacket.encodeInt(nsi.getDefaultSelect());
+                    outPacket.encodeInt(0);
+                }
+                break;
         }
         if ((nsi.getParam() & 4) != 0) {
             nsi.setParam((byte) (nsi.getParam() ^ 4));

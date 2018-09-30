@@ -26,7 +26,7 @@ public enum NpcMessageType {
     AskSlideMenu(18, ResponseType.Answer),
     InGameDirectionsAnswer(19, ResponseType.Response),
     CompletedVideo(20, ResponseType.Response),
-    AskSelectMenu(21, ResponseType.Answer),
+    AskSelectMenu(23, ResponseType.Answer),
     AskAngelicBuster(22, ResponseType.Answer),
     SayIllustration(23, ResponseType.Answer),
     SayDualIllustration(24, ResponseType.Answer),

@@ -512,6 +512,13 @@ public class ScriptManagerImpl implements ScriptManager {
 		return sendGeneralSay("", AskSlideMenu);
 	}
 
+	public int sendAskSelectMenu(int dlgType, int defaultSelect) {
+		// Dialog Type 0 = Luminous (Dark/Light)
+		// Dialog Type 1 = Demon (DA/DS)
+		getNpcScriptInfo().setDlgType(dlgType);
+		getNpcScriptInfo().setDefaultSelect(defaultSelect);
+		return sendGeneralSay("", AskSelectMenu);
+	}
 
 
 	// Start of param methods ------------------------------------------------------------------------------------------
@@ -750,10 +757,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		giveSkill(skillId, 1);
 	}
 
+	public void giveSkill(int skillId, int slv) { giveSkill(skillId, slv, slv); }
+
 	@Override
-	public void giveSkill(int skillId, int slv) {
-		chr.addSkill(skillId, slv, slv);
-	}
+	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
 
 	public int getSkillByItem() {
 		return getSkillByItem(getParentID());
