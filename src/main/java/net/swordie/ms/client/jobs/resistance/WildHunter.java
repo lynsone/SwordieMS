@@ -203,7 +203,7 @@ public class WildHunter extends Citizen {
                 summon.setSummonTerm(0);
 
                 summon.setMoveAbility(MoveAbility.Jaguar.getVal());
-                summon.setAssistType(AssistType.ATTACKING.getVal());
+                summon.setAssistType(AssistType.Attacking.getVal());
                 summon.setAttackActive(true);
 
                 field = c.getChr().getField();
@@ -595,7 +595,7 @@ public class WildHunter extends Citizen {
                         }
                         Quest quest = chr.getQuestManager().getQuestById(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID);
                         if (quest == null) {
-                            quest = new Quest(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID, QuestStatus.STARTED);
+                            quest = new Quest(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID, QuestStatus.Started);
                             chr.getQuestManager().addQuest(quest);
                         }
                         String key = QuestConstants.getWhStorageQuestValByTemplateID(mob.getTemplateId());

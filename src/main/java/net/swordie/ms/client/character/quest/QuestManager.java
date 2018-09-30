@@ -1,7 +1,6 @@
 package net.swordie.ms.client.character.quest;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
 import net.swordie.ms.client.character.quest.reward.QuestItemReward;
@@ -12,7 +11,6 @@ import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.QuestData;
 import net.swordie.ms.loaders.QuestInfo;
 import net.swordie.ms.util.FileTime;
@@ -66,12 +64,12 @@ public class QuestManager {
     }
 
     public Set<Quest> getCompletedQuests() {
-        return getQuests().entrySet().stream().filter(entry -> entry.getValue().getStatus() == COMPLETE).
+        return getQuests().entrySet().stream().filter(entry -> entry.getValue().getStatus() == Completed).
                 map(Map.Entry::getValue).collect(Collectors.toSet());
     }
 
     public Set<Quest> getQuestsInProgress() {
-        return getQuests().entrySet().stream().filter(entry -> entry.getValue().getStatus() == STARTED).
+        return getQuests().entrySet().stream().filter(entry -> entry.getValue().getStatus() == Started).
                 map(Map.Entry::getValue).collect(Collectors.toSet());
     }
 
@@ -85,7 +83,7 @@ public class QuestManager {
 
     public boolean hasQuestInProgress(int questID) {
         Quest quest = getQuests().get(questID);
-        return quest != null && quest.getStatus() == STARTED;
+        return quest != null && quest.getStatus() == Started;
     }
 
     /**
@@ -95,7 +93,7 @@ public class QuestManager {
      */
     public boolean hasQuestCompleted(int questID) {
         Quest quest = getQuests().get(questID);
-        return quest != null && quest.getStatus() == COMPLETE;
+        return quest != null && quest.getStatus() == Completed;
     }
 
     /**
@@ -127,7 +125,7 @@ public class QuestManager {
         if(!getQuests().containsKey(quest.getQRKey())) {
             getQuests().put(quest.getQRKey(), quest);
             chr.write(WvsContext.questRecordMessage(quest));
-            if(quest.getStatus() == QuestStatus.COMPLETE) {
+            if(quest.getStatus() == QuestStatus.Completed) {
                 chr.chatMessage(Mob, "[Info] Completed quest " + quest.getQRKey());
             } else {
                 chr.chatMessage(Mob, "[Info] Accepted quest " + quest.getQRKey());
@@ -190,7 +188,7 @@ public class QuestManager {
             quest = QuestData.createQuestFromId(questID);
             addQuest(quest);
         }
-        quest.setStatus(QuestStatus.COMPLETE);
+        quest.setStatus(QuestStatus.Completed);
         quest.setCompletedTime(FileTime.currentTime());
         chr.chatMessage(Mob, "[Info] Completed quest " + quest.getQRKey());
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.questCompleteEffect()));
@@ -244,7 +242,7 @@ public class QuestManager {
     public void removeQuest(int questID) {
         Quest q = getQuests().get(questID);
         if(q != null) {
-            q.setStatus(NOT_STARTED);
+            q.setStatus(NotStarted);
             getQuests().remove(questID);
             chr.write(WvsContext.questRecordMessage(q));
         }
