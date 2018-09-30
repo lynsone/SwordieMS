@@ -4,8 +4,8 @@ package net.swordie.ms.enums;
  * Created on 1/6/2018.
  */
 public enum EnterType {
-    NO_ANIMATION(0),
-    ANIMATION(1);
+    NoAnimation(0),
+    Animation(1);
 
     private byte val;
 

@@ -22,7 +22,6 @@ import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -332,13 +331,13 @@ public class WvsContext {
         outPacket.encodeByte(state.getVal());
 
         switch(state) {
-            case NOT_STARTED:
+            case NotStarted:
                 outPacket.encodeByte(0); // If quest is completed, but should never be true?
                 break;
-            case STARTED:
+            case Started:
                 outPacket.encodeString(quest.getQRValue());
                 break;
-            case COMPLETE:
+            case Completed:
                 outPacket.encodeFT(quest.getCompletedTime());
                 break;
         }

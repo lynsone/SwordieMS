@@ -147,9 +147,9 @@ public class LoginHandler {
         String name = inPacket.decodeString();
         CharNameResult code;
         if (name.toLowerCase().contains("virtual") || name.toLowerCase().contains("kernel")) {
-            code = CharNameResult.INVALID_NAME;
+            code = CharNameResult.Unavailable_Invalid;
         } else {
-            code = Char.getFromDBByName(name) == null ? CharNameResult.OK : CharNameResult.ALREADY_IN_USE;
+            code = Char.getFromDBByName(name) == null ? CharNameResult.Available : CharNameResult.Unavailable_InUse;
         }
         c.write(Login.checkDuplicatedIDResult(name, code.getVal()));
     }

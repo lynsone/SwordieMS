@@ -468,9 +468,17 @@ public class QuestData {
         for (Node questIDNode : XMLApi.getAllChildren(mainNode)) {
             int id = Integer.parseInt(XMLApi.getNamedAttribute(questIDNode, "name"));
             QuestInfo quest = getQuestInfo(id);
-            Node autoCompleteNode = XMLApi.getFirstChildByNameBF(questIDNode, "autoComplete");
-            if (autoCompleteNode != null) {
-                quest.setAutoComplete(Integer.parseInt(XMLApi.getNamedAttribute(autoCompleteNode, "value")) == 1);
+            for (Node questInfoNode : XMLApi.getAllChildren(questIDNode)) {
+                String name = XMLApi.getNamedAttribute(questInfoNode, "name");
+                String value = XMLApi.getNamedAttribute(questInfoNode, "value");
+                switch (name) {
+                    case "autoComplete":
+                        quest.setAutoComplete(Integer.parseInt(value) == 1);
+                        break;
+                    case "viewMedalItem":
+                        quest.setMedalItemId(Integer.parseInt(value));
+                        break;
+                }
             }
         }
     }
@@ -594,6 +602,7 @@ public class QuestData {
                 dos.writeInt(qi.getTransferField());
                 dos.writeInt(qi.getNextQuest());
                 dos.writeBoolean(qi.isAutoComplete());
+                dos.writeInt(qi.getMedalItemId());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -670,6 +679,7 @@ public class QuestData {
             qi.setTransferField(dis.readInt());
             qi.setNextQuest(dis.readInt());
             qi.setAutoComplete(dis.readBoolean());
+            qi.setMedalItemId(dis.readInt());
             getBaseQuests().add(qi);
         } catch (IOException e) {
             log.error(String.format("IOException when loading %d", qi.getQuestID()));
@@ -684,16 +694,16 @@ public class QuestData {
         quest.setQRKey(questID);
         if (qi != null) {
             if (qi.isAutoComplete()) {
-                quest.setStatus(QuestStatus.STARTED);
+                quest.setStatus(QuestStatus.Started);
 //            quest.completeQuest(); // TODO check what autocomplete actually means
             } else {
-                quest.setStatus(QuestStatus.STARTED);
+                quest.setStatus(QuestStatus.Started);
             }
             for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
                 quest.addQuestProgressRequirement(qpr.deepCopy());
             }
         } else {
-            quest.setStatus(QuestStatus.STARTED);
+            quest.setStatus(QuestStatus.Started);
         }
         return quest;
     }

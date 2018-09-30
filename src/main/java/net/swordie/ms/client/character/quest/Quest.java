@@ -111,7 +111,7 @@ public class Quest {
     }
 
     public void completeQuest() {
-        setStatus(QuestStatus.COMPLETE);
+        setStatus(QuestStatus.Completed);
         setCompletedTime(FileTime.currentTime());
     }
 
