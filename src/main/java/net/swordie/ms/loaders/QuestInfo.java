@@ -43,6 +43,7 @@ public class QuestInfo {
     private int transferField;
     private int nextQuest;
     private boolean autoComplete;
+    private int medalItemId;
 
     public Set<QuestReward> getQuestRewards() {
         return questRewards;
@@ -290,5 +291,13 @@ public class QuestInfo {
 
     public boolean isAutoComplete() {
         return autoComplete;
+    }
+
+    public int getMedalItemId() {
+        return medalItemId;
+    }
+
+    public void setMedalItemId(int medalItem) {
+        this.medalItemId = medalItem;
     }
 }
