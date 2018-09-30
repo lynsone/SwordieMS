@@ -1929,7 +1929,7 @@ public class WorldHandler {
             int answer = 0;
             boolean hasAnswer = false;
             String ans = null;
-            if (nmt == NpcMessageType.InGameDirectionsAnswer) {
+            if (nmt == NpcMessageType.AskIngameDirection) {
                 InGameDirectionAsk answerType = InGameDirectionAsk.getByVal(action);
                 if (answerType == null || answerType == InGameDirectionAsk.NOT) {
                     return;

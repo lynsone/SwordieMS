@@ -1956,7 +1956,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int moveCamera(boolean back, int speed, int x, int y) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
         Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
         if (response == null) {
@@ -1975,7 +1975,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int zoomCamera(int inZoomDuration, int scale, int x, int y) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, new Position(x, y))));
         Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
         if (response == null) {
@@ -1995,7 +1995,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int sendDelay(int delay) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
@@ -2277,7 +2277,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int playVideoByScript(String videoPath) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.CompletedVideo);
+		getNpcScriptInfo().setMessageType(NpcMessageType.PlayMovieClip);
 		chr.write(UserLocal.videoByScript(videoPath, false));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
