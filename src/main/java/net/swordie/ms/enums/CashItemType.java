@@ -313,9 +313,7 @@ public enum CashItemType {
     FailReason_Reissuing(90),
     FailReason_NotExist(91),
     FailReason_NotAvailableLockerTransfer(92),
-    FailReason_DormancyAccount(93),
-
-    ;
+    FailReason_DormancyAccount(93);
 
     private int val;
 

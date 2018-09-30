@@ -28,8 +28,7 @@ public enum ExpIncreaseInfoFlags {
     UserHPRateBonusExp(0x800000),
     FieldValueBonusExp(0x1000000),
     MobKillBonusExp(0x2000000),
-    LiveEventBonusExp(0x4000000),
-    ;
+    LiveEventBonusExp(0x4000000);
 
     private int val;
 

@@ -273,7 +273,7 @@ public class WorldHandler {
                 chr.chatMessage(Expedition, "Unknown command \"" + command + "\"");
             }
         } else {
-            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatUserType.USER, msg, false, 0, c.getWorldId()));
+            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatUserType.User, msg, false, 0, c.getWorldId()));
         }
     }
 
@@ -4163,9 +4163,9 @@ public class WorldHandler {
         boolean gradeDown = !locked && Util.succeedProp(GameConstants.BASE_CHAR_POT_DOWN_RATE);
         byte grade = cpm.getGrade();
         // update grades
-        if (grade < CharPotGrade.LEGENDARY.ordinal() && gradeUp) {
+        if (grade < CharPotGrade.Legendary.ordinal() && gradeUp) {
             grade++;
-        } else if (grade > CharPotGrade.RARE.ordinal() && gradeDown) {
+        } else if (grade > CharPotGrade.Rare.ordinal() && gradeDown) {
             grade--;
         }
         // set new potentials that weren't locked
@@ -5506,7 +5506,7 @@ public class WorldHandler {
                     chr.write(CField.blowWeather(5120118, "Looks like we all arrived in one piece. Now, get out of here before those pesky things start bothering you again."));
                     Quest quest = chr.getQuestManager().getQuestById(32628);
                     if (quest == null) {
-                        quest = new Quest(32628, QuestStatus.STARTED);
+                        quest = new Quest(32628, QuestStatus.Started);
                         chr.getQuestManager().addQuest(quest);
                     }
                     quest.setProperty("guard1", "1");// needed to complete quest

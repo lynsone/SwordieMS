@@ -803,7 +803,7 @@ public class CField {
 
         outPacket.encodeInt(eliteState.getVal()); // elite state
         outPacket.encodeInt(notShowPopup ? 1 : 0); // ?
-        if (eliteState == EliteState.ELITE_BOSS) {
+        if (eliteState == EliteState.EliteBoss) {
             outPacket.encodeString(bgm); // bgm
         } else {
             outPacket.encodeString(propSpecialEliteEffect);

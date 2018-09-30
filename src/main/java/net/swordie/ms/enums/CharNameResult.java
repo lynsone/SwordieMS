@@ -4,11 +4,10 @@ package net.swordie.ms.enums;
  * Created on 11/17/2017.
  */
 public enum CharNameResult {
-    OK(0),
-    ALREADY_IN_USE(1),
-    INVALID_NAME(2),
-    UNAVAILABLE_DUE_TO_ITEM_PURCHASE(3)
-    ;
+    Available(0),
+    Unavailable_InUse(1),
+    Unavailable_Invalid(2),
+    Unavailable_CashItem(3);
 
     private byte val;
 

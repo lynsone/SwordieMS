@@ -1661,7 +1661,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			quest = QuestData.createQuestFromId(id);
 		}
 		quest.setCompletedTime(FileTime.currentTime());
-		quest.setStatus(QuestStatus.COMPLETE);
+		quest.setStatus(QuestStatus.Completed);
 		qm.addQuest(quest);
 		chr.write(WvsContext.questRecordMessage(quest));
 		chr.chatMessage(String.format("Quest %d completed by completeQuestNoRewards", id));
@@ -1700,7 +1700,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		QuestManager qm = character.getQuestManager();
 		Quest quest = qm.getQuests().get(questId);
 		if (quest == null) {
-			quest = new Quest(questId, QuestStatus.STARTED);
+			quest = new Quest(questId, QuestStatus.Started);
 			quest.setQrValue(qrValue);
 			qm.addCustomQuest(quest);
 		}
@@ -2080,7 +2080,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			QuestManager qm = chr.getQuestManager();
 			Quest q = qm.getQuests().getOrDefault(7291, null);
 			if (q == null) {
-				q = new Quest(7291, QuestStatus.STARTED);
+				q = new Quest(7291, QuestStatus.Started);
 				qm.addQuest(q);
 			}
 			DamageSkinSaveData dssd = DamageSkinSaveData.getByItemID(itemID);

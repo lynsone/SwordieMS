@@ -56,9 +56,8 @@ public enum DimensionalPortalType {
     Ursus(47, 0, "Ursus"),
     Cygnus(49, 0, "Cygnus Empress"),
     HeroesOfMaple(50, 0, "Heroes of Maple"),
-    Maplerunner(51, 0, "Maplerunner"),
+    Maplerunner(51, 0, "Maplerunner");
 
-    ;
     private int val;
     private int mapID;
     private String desc;

@@ -639,16 +639,16 @@ public class QuestData {
         quest.setQRKey(questID);
         if (qi != null) {
             if (qi.isAutoComplete()) {
-                quest.setStatus(QuestStatus.STARTED);
+                quest.setStatus(QuestStatus.Started);
 //            quest.completeQuest(); // TODO check what autocomplete actually means
             } else {
-                quest.setStatus(QuestStatus.STARTED);
+                quest.setStatus(QuestStatus.Started);
             }
             for (QuestProgressRequirement qpr : qi.getQuestProgressRequirements()) {
                 quest.addQuestProgressRequirement(qpr.deepCopy());
             }
         } else {
-            quest.setStatus(QuestStatus.STARTED);
+            quest.setStatus(QuestStatus.Started);
         }
         return quest;
     }

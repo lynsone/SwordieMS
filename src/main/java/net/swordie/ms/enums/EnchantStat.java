@@ -17,8 +17,8 @@ public enum EnchantStat implements Comparable<EnchantStat> {
     ACC(0x400),
     EVA(0x800),
     JUMP(0x1000),
-    SPEED(0x2000),
-    ;
+    SPEED(0x2000);
+    
     private int val;
 
     EnchantStat(int val) {
