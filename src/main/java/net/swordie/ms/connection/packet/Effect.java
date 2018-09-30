@@ -165,6 +165,16 @@ public class Effect {
                 outPacket.encodeString(getString());
                 outPacket.encodeInt(getArg1());
                 break;
+            case ReservedEffectRepeat:
+                outPacket.encodeString(getString());// effect
+                outPacket.encodeByte(1);
+                outPacket.encodeByte(getArg1());
+                if (getArg1() == 1) {
+                    outPacket.encodeByte(1);
+                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(0);
+                }
+                break;
         }
     }
 
@@ -653,16 +663,25 @@ public class Effect {
         
         return effect;
     }
-    
+
     public static Effect reservedEffect(String effectPath) {
         Effect effect = new Effect();
-        
+
         effect.setUserEffectType(ReservedEffect);
         effect.setArg1(0);// bShow
         effect.setArg2(0);
         effect.setArg3(0);
         effect.setString(effectPath);
-        
+
+        return effect;
+    }
+
+    public static Effect reservedEffectRepeat(String effectPath, boolean start) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(ReservedEffectRepeat);
+        effect.setString(effectPath);
+        effect.setArg1(start ? 1 : 0);
         return effect;
     }
 

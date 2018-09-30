@@ -355,4 +355,29 @@ public class UserRemote {
 
         return outPacket;
     }
+
+    public static OutPacket skillPrepare(Char chr, int skillId, byte slv) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SKILL_PREPARE);
+
+        outPacket.encodeInt(chr.getId());
+
+        outPacket.encodeInt(skillId);
+        outPacket.encodeByte(slv);
+
+        outPacket.encodeShort(0); // unknown
+
+        outPacket.encodeByte(7); // action Speed
+        outPacket.encodePosition(chr.getPosition());
+
+        return outPacket;
+    }
+
+    public static OutPacket skillCancel(int chrId, int skillId) {
+        OutPacket outPacket = new OutPacket(OutHeader.REMOTE_SKILL_CANCEL);
+
+        outPacket.encodeInt(chrId);
+        outPacket.encodeInt(skillId);
+
+        return outPacket;
+    }
 }

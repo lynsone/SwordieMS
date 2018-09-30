@@ -9,5 +9,5 @@ sm.sendDelay(1000)
 sm.sayMonologue("\r\n\r\n\r\nAran felt uneasy.", False)
 sm.sayMonologue("\r\n\r\nSomething made her think that perhaps this was the last time she would see her friend. Was it intuition? Or maybe an omen.", True)
 
-sm.startQuest(38900)
+sm.createQuestWithQRValue(38900, "1")
 sm.warp(927030050, 0)

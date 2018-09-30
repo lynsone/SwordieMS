@@ -36,6 +36,7 @@ public class QuestInfo {
     private boolean autoStart;
     private int deathCount;
     private List<Integer> scenarios = new ArrayList<>();
+    private List<String> speech = new ArrayList<>();
     private int mobDropMeso;
     private int morph;
     private boolean secret;
@@ -217,6 +218,18 @@ public class QuestInfo {
 
     public int getDeathCount() {
         return deathCount;
+    }
+
+    public void addSpeech(String script) {
+        getSpeech().add(script);
+    }
+
+    public List<String> getSpeech() {
+        return speech;
+    }
+
+    public void setSpeech(List<String> speech) {
+        this.speech = speech;
     }
 
     public void addScenario(int value) {

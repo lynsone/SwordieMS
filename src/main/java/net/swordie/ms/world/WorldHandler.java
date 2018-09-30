@@ -63,8 +63,8 @@ import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.enums.EquipBaseStat;
 import net.swordie.ms.enums.InvType;
-import net.swordie.ms.enums.Stat;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.handlers.PsychicLock;
@@ -108,6 +108,7 @@ import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.python.google.common.collect.Comparators;
 
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
@@ -124,7 +125,8 @@ import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.EquipBaseStat.*;
 import static net.swordie.ms.enums.InvType.*;
 import static net.swordie.ms.enums.InventoryOperation.*;
-import static net.swordie.ms.enums.Stat.*;
+import static net.swordie.ms.enums.Stat.pop;
+import static net.swordie.ms.enums.Stat.sp;
 import static net.swordie.ms.enums.StealMemoryType.REMOVE_STEAL_MEMORY;
 import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
 
@@ -134,7 +136,7 @@ import static net.swordie.ms.enums.StealMemoryType.STEAL_SKILL;
 public class WorldHandler {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
-    public static void handleCharLogin(Client c, InPacket inPacket) {
+    public static void handleMigrateIn(Client c, InPacket inPacket) {
         int worldId = inPacket.decodeInt();
         int charId = inPacket.decodeInt();
         byte[] machineID = inPacket.decodeArr(16);
@@ -876,13 +878,16 @@ public class WorldHandler {
         int skillId = inPacket.decodeInt();
         tsm.removeStatsBySkill(skillId);
 
+        if(SkillConstants.isKeyDownSkill(skillId)) {
+            chr.getField().broadcastPacket(UserRemote.skillCancel(chr.getId(), skillId), chr);
+        }
+
         if (skillId == net.swordie.ms.client.jobs.resistance.Mechanic.HUMANOID_MECH || skillId == net.swordie.ms.client.jobs.resistance.Mechanic.TANK_MECH) {
             tsm.removeStatsBySkill(skillId + 100); // because of special use
             tsm.sendResetStatPacket(true);
         } else {
             tsm.sendResetStatPacket();
         }
-
 
         chr.getJobHandler().handleSkillRemove(c, skillId);
     }
@@ -2141,6 +2146,7 @@ public class WorldHandler {
         int npcTemplateID = 0;
         Position position = null;
         QuestType qt = QuestType.getQTFromByte(type);
+        boolean success = false;
         if (qt != null) {
             switch (qt) {
                 case QuestReq_AcceptQuest: // Quest start
@@ -2157,35 +2163,36 @@ public class WorldHandler {
                     questID = inPacket.decodeInt();
                     chr.getQuestManager().removeQuest(questID);
                     break;
+                case QuestReq_LaterStep:
+                    questID = inPacket.decodeInt();
+                    break;
                 default:
                     log.error(String.format("Unhandled quest request %s!", qt));
                     break;
             }
         }
         if (questID == 0 || qt == null) {
-            chr.chatMessage(SystemNotice, "Could not start quest.");
+            chr.chatMessage(String.format("Could not find quest %d.", questID));
             return;
         }
+        QuestInfo qi = QuestData.getQuestInfoById(questID);
         switch (qt) {
             case QuestReq_AcceptQuest:
                 if (qm.canStartQuest(questID)) {
                     qm.addQuest(QuestData.createQuestFromId(questID));
+                    success = true;
                 }
-                chr.chatMessage(String.format("Starting Client Script Quest %d", questID));
-                chr.getScriptManager().startScript(questID, "q"+questID+"s", ScriptType.Quest);
                 break;
             case QuestReq_CompleteQuest:
                 if (qm.hasQuestInProgress(questID)) {
                     Quest quest = qm.getQuests().get(questID);
                     if (quest.isComplete(chr)) {
                         qm.completeQuest(questID);
+                        success = true;
                     }
                 }
-                chr.chatMessage(String.format("Starting Client Script Quest %d", questID));
-                chr.getScriptManager().startScript(questID, "q"+questID+"e", ScriptType.Quest);
                 break;
             case QuestReq_OpeningScript:
-                QuestInfo qi = QuestData.getQuestInfoById(questID);
                 String scriptName = qi.getStartScript();
                 if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_START_SCRIPT_END_TAG);
@@ -2193,13 +2200,54 @@ public class WorldHandler {
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
             case QuestReq_CompleteScript:
-                qi = QuestData.getQuestInfoById(questID);
                 scriptName = qi.getEndScript();
                 if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                     scriptName = String.format("%d%s", questID, ScriptManagerImpl.QUEST_COMPLETE_SCRIPT_END_TAG);
                 }
                 chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
                 break;
+            case QuestReq_LaterStep:
+                if (qi != null && qi.getTransferField() != 0) {
+                    Field field = chr.getOrCreateFieldByCurrentInstanceType(qi.getTransferField());
+                    chr.warp(field);
+                }
+                break;
+        }
+        if (success) {
+            chr.write(UserLocal.questResult(QuestType.QuestRes_Act_Success, questID, npcTemplateID, 0, false));
+        }
+    }
+    public static void handleUserCompleteNpcSpeech(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        QuestManager qm = chr.getQuestManager();
+        int questID = inPacket.decodeInt();
+        int npcTemplateID = inPacket.decodeInt();
+        int speech = inPacket.decodeByte();
+
+        int objectID = inPacket.decodeInt();
+        Life life = chr.getField().getLifeByObjectID(objectID);
+        if (!(life instanceof Npc)) {
+            chr.chatMessage("Could not find that npc.");
+            return;
+        }
+        if (qm.hasQuestInProgress(questID)) {
+            QuestInfo qi = QuestData.getQuestInfoById(questID);
+            String scriptName = qi.getSpeech().get(speech-1);
+            if (scriptName == null || scriptName.equalsIgnoreCase("")) {
+                chr.chatMessage("Could not find that speech - quest id " + questID + ", speech " + speech);
+            }
+            if (scriptName.contains("NpcSpeech=")) {
+                if (scriptName.endsWith("/")) {
+                    scriptName = scriptName.substring(0, scriptName.length()-1);
+                }
+                Quest quest = chr.getQuestManager().getQuests().get(questID);
+                if (quest != null) {
+                    quest.setQrValue(scriptName);
+                    chr.write(WvsContext.questRecordExMessage(quest));
+                }
+            } else {
+                chr.getScriptManager().startScript(questID, scriptName, ScriptType.Quest);
+            }
         }
     }
 
@@ -5261,7 +5309,6 @@ public class WorldHandler {
             Position origin = inPacket.decodePositionInt();
             Position dest = inPacket.decodePositionInt();
             field.broadcastPacket(UserRemote.effect(chrId, Effect.showDarkShockSkill(skillId, slv, origin, dest)));
-
         } else {
             log.error(String.format("Unhandled Remote Effect Skill id %d", skillId));
             chr.chatMessage(String.format("Unhandled Remote Effect Skill:  id = %d", skillId));
@@ -5303,7 +5350,10 @@ public class WorldHandler {
                 break;
             case Req_LoadPages:
                 int page = inPacket.decodeInt();
-                List<BBSRecord> records = guild.getBbsRecords();
+                List<BBSRecord> records = guild.getBbsRecords()
+                        .stream()
+                        .sorted(Comparator.comparingInt(BBSRecord::getIdForBbs))
+                        .collect(Collectors.toList());
                 final int PAGE_SIZE = GameConstants.GUILD_BBS_RECORDS_PER_PAGE;
                 if (page != 0 && page * PAGE_SIZE >= records.size()) {
                     chr.chatMessage("No more BBS records to show.");
@@ -5603,5 +5653,72 @@ public class WorldHandler {
         chr.consumeItem(crusaderCoin, coinCostList.get(itemIndexInShop));
         chr.addItemToInventory(itemId, itemQuantity);
         chr.dispose();
+    }
+
+    public static void handleUserMedalReissueRequest(Char chr, InPacket inPacket) {
+        int questId = inPacket.decodeInt();
+        int medalItemId = inPacket.decodeInt();
+        ScriptManagerImpl sm = chr.getScriptManager();
+        long actualMesoCost;
+        int count = 0;
+        if (sm.getQRValue(QuestConstants.MEDAL_REISSUE_QUEST).contains("count=")) {
+            String countString = sm.getQRValue(QuestConstants.MEDAL_REISSUE_QUEST).replace("count=", "");
+            count = Integer.parseInt(countString);
+        } else {
+            sm.createQuestWithQRValue(QuestConstants.MEDAL_REISSUE_QUEST, "");
+        }
+        switch (count) {
+            case 0:
+                actualMesoCost = 100;
+                break;
+            case 1:
+                actualMesoCost = 1000;
+                break;
+            case 2:
+                actualMesoCost = 10000;
+                break;
+            case 3:
+                actualMesoCost = 100000;
+                break;
+            default:
+                actualMesoCost = 1000000;
+                break;
+        }
+        if (!sm.hasQuestCompleted(questId)) {
+            log.error(String.format("Character %d tried to reissue a medal from a quest which they have not completed.", chr.getId()));
+
+        } else if (ItemData.getItemDeepCopy(medalItemId) == null || QuestData.getQuestInfoById(questId) == null) {
+            chr.write(UserLocal.medalReissueResult(MedalReissueResultType.Unknown, medalItemId));
+
+        } else if (chr.getMoney() < actualMesoCost) {
+            chr.write(UserLocal.medalReissueResult(MedalReissueResultType.NoMoney, medalItemId));
+
+        } else if (!chr.canHold(medalItemId)) {
+            chr.write(UserLocal.medalReissueResult(MedalReissueResultType.NoSlot, medalItemId));
+
+        } else if (chr.hasItem(medalItemId)) {
+            chr.write(UserLocal.medalReissueResult(MedalReissueResultType.AlreadyHas, medalItemId));
+
+        } else {
+            count++;
+            sm.setQRValue(QuestConstants.MEDAL_REISSUE_QUEST, "count=" + count);
+            chr.deductMoney(actualMesoCost);
+            chr.addItemToInventory(medalItemId, 1);
+            chr.write(UserLocal.medalReissueResult(MedalReissueResultType.Success, medalItemId));
+        }
+        chr.dispose();
+    }
+
+    public static void handleUserSkillPrepareRequest(Char chr, InPacket inPacket) {
+        int skillId = inPacket.decodeInt();
+        int startTime = inPacket.decodeInt();
+        int unknownInt = inPacket.decodeInt();
+
+        if (!chr.hasSkill(skillId)) {
+            return;
+        }
+
+        Skill skill = chr.getSkill(skillId);
+        chr.getField().broadcastPacket(UserRemote.skillPrepare(chr, skillId, (byte) skill.getCurrentLevel()), chr);
     }
 }

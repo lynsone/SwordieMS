@@ -1,8 +1,0 @@
-# 12400 | Ending Script
-
-sm.setSpeakerID(9010044)
-sm.sendNext("This is the time of year when monsters go dig in their monster closets and pull out all sorts of knick-knacks to carry around. Don't ask me why, I don't understand monster culture. All YOU need to know is that they're carrying around #i2430712##rUnidentified Artifacts#k, and those are worth a lot of points! In fact, if you get 1000 points in a day, you'll be #bcounted for participating#k! \n\nIf you join in for 8 days, there will be gifts galore! Oh, and remember that #bmonsters that are 11 or more levels lower, or 21 or more levels higher than you don't have any artifacts#k!")
-sm.sendSay("But let's get to the nitty-gritty.\nWhile you're out there getting your grubby mitts on Unidentified Artifacts, you might run into a cantankerous genie... the #bRhinojinn#k! Don't be too worried about him. He's got more genie-bark than genie-bite. The reason I'm bringing it up is that he drops #bRhinojinn Dust#k and THAT stuff is worth #r100 points#k!")
-sm.sendSay("Oh, one more thing! While you're out there, you might run into a #bRare Artifact#k! \n\nIf you find one, the #rArtifact Points you obtain will double for 30 minutes#k!")
-sm.sendSay("My goodness, I feel like I have a billion things to explain. I need to tell you about the #bcumulative Artifact Points#k you can get even after your daily check-in. \n\nIf you keep getting points after you hit the check-in goal, go down to my #rAntique Museum#k and trade them in for goods of all varieties!")
-sm.sendSayOkay("We finally made it through all the explaining! Now wake up, get out there, and go artifact crazy on those monsters!")

@@ -167,6 +167,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_SKILL_CANCEL_REQUEST:
                 WorldHandler.handleTemporaryStatResetRequest(c, inPacket);
                 break;
+            case USER_SKILL_PREPARE_REQUEST:
+                WorldHandler.handleUserSkillPrepareRequest(chr, inPacket);
+                break;
             case PONG:
                 LoginHandler.handlePong(c, inPacket);
                 break;
@@ -194,7 +197,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 LoginHandler.handleCheckDuplicatedID(c, inPacket);
                 break;
             case CREATE_NEW_CHARACTER:
-                LoginHandler.handleCreateCharacter(c, inPacket);
+                LoginHandler.handleCreateNewCharacter(c, inPacket);
                 break;
             case DELETE_CHARACTER:
                 LoginHandler.handleDeleteCharacter(c, inPacket);
@@ -221,7 +224,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case AUTH_HEARTBEAT:
                 break;
             case MIGRATE_IN:
-                WorldHandler.handleCharLogin(c, inPacket);
+                WorldHandler.handleMigrateIn(c, inPacket);
                 break;
             case USER_HIT:
                 c.getChr().getJobHandler().handleHit(c, inPacket);
@@ -295,6 +298,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_QUEST_REQUEST:
                 WorldHandler.handleUserQuestRequest(c, inPacket);
+                break;
+            case USER_COMPLETE_NPC_SPEECH:
+                WorldHandler.handleUserCompleteNpcSpeech(c, inPacket);
                 break;
             case ZERO_TAG:
                 WorldHandler.handleZeroTag(c, inPacket);
@@ -631,6 +637,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case CROSS_HUNTER_SHOP_REQUEST:
                 WorldHandler.handleCrossHunterShopRequest(chr, inPacket);
+                break;
+            case USER_MEDAL_REISSUE_REQUEST:
+                WorldHandler.handleUserMedalReissueRequest(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);
