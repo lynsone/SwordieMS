@@ -4,6 +4,7 @@ package net.swordie.ms.client.character.items;
  * Created on 20/9/2018.
  */
 public enum RequiredJob {
+    Beginner(-1),
     AnyJob(0),
     Warrior(0x1),
     Magician(0x2),

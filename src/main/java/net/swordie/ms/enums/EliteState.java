@@ -4,11 +4,10 @@ package net.swordie.ms.enums;
  * Created on 6/8/2018.
  */
 public enum EliteState {
-    NORMAL(0),
-    IDK(1),
-    ELITE_BOSS(2),
-    BONUS_STAGE(3),
-    ;
+    None(0),
+    EliteMob(1),
+    EliteBoss(2),
+    BonusStage(3);
 
     private int val;
 

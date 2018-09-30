@@ -13,8 +13,7 @@ public enum ClockType {
     StopWatch(6),
     PauseTimer(7),
     TimerInfoEx(8),
-    WithoutField(9),
-    ;
+    WithoutField(9);
 
     private byte val;
 
