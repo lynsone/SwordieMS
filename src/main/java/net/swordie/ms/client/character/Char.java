@@ -1260,7 +1260,7 @@ public class Char {
 		if (mask.isInMask(DBChar.DressUpInfo)) {
 			new DressUpInfo().encode(outPacket); // GW_DressUpInfo::Decode
 		}
-		if (mask.isInMask(DBChar.Unk2)) {
+		if (mask.isInMask(DBChar.MonsterCollection)) {
 			outPacket.encodeInt(1);
 			outPacket.encodeInt(0);
 			outPacket.encodeLong(0);
@@ -1309,12 +1309,12 @@ public class Char {
 			outPacket.encodeString("");
 
 		}
-		if (mask.isInMask(DBChar.Unk2)) { // Mushy: Monster Collection
-			int size = 0;
-			outPacket.encodeShort(size);
-			for (int i = 0; i < size; i++) {
-				outPacket.encodeInt(0); // same as above?
-				outPacket.encodeString("");
+		if (mask.isInMask(DBChar.MonsterCollection)) {
+			Set<MonsterCollectionExploration> mces = getAccount().getMonsterCollection().getMonsterCollectionExplorations();
+			outPacket.encodeShort(mces.size());
+			for (MonsterCollectionExploration mce : mces) {
+				outPacket.encodeInt(mce.getPosition());
+				outPacket.encodeString(mce.getValue(true));
 			}
 		}
 		boolean farmOnline = false;

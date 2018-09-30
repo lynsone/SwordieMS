@@ -2,19 +2,17 @@ package net.swordie.ms.client.character;
 
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
-import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.MonsterCollectionGroup;
 import net.swordie.ms.constants.MonsterCollectionRegion;
 import net.swordie.ms.constants.MonsterCollectionSession;
 import net.swordie.ms.loaders.MonsterCollectionData;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
-import org.hibernate.annotations.Fetch;
+import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Sjonnie
@@ -23,6 +21,7 @@ import java.util.Set;
 @Entity
 @Table(name = "monster_collections")
 public class MonsterCollection {
+    private static final int EXPLORATION_POSITION_START = 20;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +37,11 @@ public class MonsterCollection {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "collectionid")
     private Set<MonsterCollectionReward> monsterCollectionRewards = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "collectionid")
+    private Set<MonsterCollectionExploration> monsterCollectionExplorations = new HashSet<>();
+
 
     public void init(Char chr) {
         for (int mob : getMobs()) {
@@ -131,7 +135,7 @@ public class MonsterCollection {
 
     public MonsterCollectionGroup getGroup(int region, int session, int group) {
         if (getSession(region, session) != null) {
-            return getSession(session, region).getMonsterCollectionGroups().getOrDefault(group, null);
+            return getSession(region, session).getMonsterCollectionGroups().getOrDefault(group, null);
         }
         return null;
     }
@@ -146,5 +150,71 @@ public class MonsterCollection {
             return complete;
         }
         return group != null && group.getMobs().size() >= MonsterCollectionData.getRequiredMobs(region, session, groupID);
+    }
+
+    public MonsterCollectionExploration getExploration(int region, int session, int group) {
+        int collectionKey = region * 10000 + session * 100 + group;
+        return getMonsterCollectionExplorations().stream().filter(mce -> mce.getCollectionKey() == collectionKey)
+                .findAny().orElse(null);
+    }
+
+    public Set<MonsterCollectionExploration> getMonsterCollectionExplorations() {
+        return monsterCollectionExplorations;
+    }
+
+    public void setMonsterCollectionExplorations(Set<MonsterCollectionExploration> monsterCollectionExplorations) {
+        this.monsterCollectionExplorations = monsterCollectionExplorations;
+    }
+
+    public MonsterCollectionExploration createExploration(int region, int session, int group) {
+        int collectionKey = region * 10000 + session * 100 + group;
+        int minutes = MonsterCollectionData.getExplorationMinutes(region, session, group);
+        FileTime ft = FileTime.fromDate(LocalDateTime.now().plusMinutes(minutes));
+        MonsterCollectionExploration mce = new MonsterCollectionExploration(collectionKey, ft);
+        mce.setMonsterKey(String.format("%d:%d:%d:0", region, session, group));
+        mce.setPosition(getFirstOpenSlot());
+        return mce;
+    }
+
+    private int getFirstOpenSlot() {
+        List<MonsterCollectionExploration> mces = getMonsterCollectionExplorations().stream()
+                .sorted(Comparator.comparingInt(MonsterCollectionExploration::getPosition))
+                .collect(Collectors.toList());
+        int i;
+        for (i = 0; i < mces.size(); i++) {
+            MonsterCollectionExploration mce = mces.get(i);
+            int pos = i + EXPLORATION_POSITION_START;
+            if (mce.getPosition() != pos) {
+                return pos;
+            }
+        }
+        return EXPLORATION_POSITION_START + i;
+    }
+
+    public void addExploration(MonsterCollectionExploration mce) {
+        getMonsterCollectionExplorations().add(mce);
+    }
+
+    public void removeExploration(MonsterCollectionExploration mce) {
+        getMonsterCollectionExplorations().remove(mce);
+    }
+
+    private int getTotalAmountOfSlots() {
+        int num;
+        int mobs = getMobs().size();
+        if (mobs >= 600) {
+            num = 5;
+        } else if (mobs >= 300) {
+            num = 4;
+        } else if (mobs >= 150) {
+            num = 3;
+        } else {
+            num = 2;
+        }
+        return num;
+    }
+
+    public int getOpenExplorationSlots() {
+        return getTotalAmountOfSlots() - getMonsterCollectionExplorations().size();
     }
 }

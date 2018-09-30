@@ -108,7 +108,6 @@ import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import org.python.google.common.collect.Comparators;
 
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
@@ -4890,6 +4889,26 @@ public class WorldHandler {
         int region = inPacket.decodeInt();
         int session = inPacket.decodeInt();
         int group = inPacket.decodeInt();
+        int key = region * 10000 + session * 100 + group;
+        Account account = chr.getAccount();
+        MonsterCollection mc = account.getMonsterCollection();
+        MonsterCollectionExploration mce = mc.getExploration(region, session, group);
+        boolean complete = mc.isComplete(region, session, group);
+        if (complete && mce == null) {
+            // starting an exploration
+            if (mc.getOpenExplorationSlots() <= 0) {
+                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.NotEnoughExplorationSlots, null, 0));
+                return;
+            }
+            mce = mc.createExploration(region, session, group);
+            mc.addExploration(mce);
+            chr.write(UserLocal.collectionRecordMessage(mce.getPosition(), mce.getValue(true)));
+            chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.ExploreBegin, null, 0));
+        } else {
+            // trying to start an incomplete/already exploring group
+            chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.NoMonstersForExploring, null, 0));
+        }
+        chr.dispose(); // still required even if you send a collection result
     }
 
     public static void handleMonsterCollectionCompleteRewardReq(Char chr, InPacket inPacket) {
@@ -4899,21 +4918,38 @@ public class WorldHandler {
         int group = inPacket.decodeInt();
         int exploreIndex = inPacket.decodeInt();
         MonsterCollection mc = chr.getAccount().getMonsterCollection();
-        if (reqType == 0) { // group
-            MonsterCollectionGroup mcs = mc.getGroup(region, session, group);
-            if (mcs != null && !mcs.isRewardClaimed() && mc.isComplete(region, session, group)) {
-                Tuple<Integer, Integer> rewardInfo = MonsterCollectionData.getReward(region, session, group);
-                Item item = ItemData.getItemDeepCopy(rewardInfo.getLeft());
-                item.setQuantity(rewardInfo.getRight());
-                chr.addItemToInventory(item);
-                mcs.setRewardClaimed(true);
-                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
-            } else if (mcs != null && mcs.isRewardClaimed()) {
-                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.AlreadyClaimedReward, null, 0));
-            } else {
-                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CompleteCollectionBeforeClaim, null, 0));
-            }
+        switch (reqType) {
+            case 0: // group
+                MonsterCollectionGroup mcs = mc.getGroup(region, session, group);
+                if (mcs != null && !mcs.isRewardClaimed() && mc.isComplete(region, session, group)) {
+                    Tuple<Integer, Integer> rewardInfo = MonsterCollectionData.getReward(region, session, group);
+                    Item item = ItemData.getItemDeepCopy(rewardInfo.getLeft());
+                    item.setQuantity(rewardInfo.getRight());
+                    chr.addItemToInventory(item);
+                    mcs.setRewardClaimed(true);
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
+                } else if (mcs != null && mcs.isRewardClaimed()) {
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.AlreadyClaimedReward, null, 0));
+                } else {
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CompleteCollectionBeforeClaim, null, 0));
+                }
+                break;
+            case 4: // exploration
+                MonsterCollectionExploration mce = mc.getExploration(region, session, group);
+                if (mce != null && mce.getEndDate().isExpired()) {
+                    mc.removeExploration(mce);
+                    chr.write(UserLocal.collectionRecordMessage(mce.getPosition(), mce.getValue(false)));
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
+                } else {
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.TryAgainInAMoment, null, 0));
+                }
+                break;
+            default:
+                log.warn("Unhandled MonsterCollectionCompleteRewardReq type " + reqType);
+                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.TryAgainInAMoment, null, 0));
+
         }
+        chr.dispose(); // still required even if you send a collection result
     }
 
     public static void handleGroupMessage(Char chr, InPacket inPacket) {
