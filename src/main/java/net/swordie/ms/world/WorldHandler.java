@@ -2278,12 +2278,17 @@ public class WorldHandler {
             return;
         }
         Field field = chr.getField();
-        int directionNode = inPacket.decodeInt();
 
-        String script = field.getDirectionInfoScript(directionNode);
+        int node = inPacket.decodeInt();
+        List<String> directionNode = field.getDirectionNode(node);
+        if (directionNode == null) {
+            return;
+        }
+        String script = directionNode.get(chr.getCurrentDirectionNode(node));
         if (script == null) {
             return;
         }
+        chr.increaseCurrentDirectionNode(node);
         chr.getScriptManager().setCurNodeEventEnd(false);
         chr.getScriptManager().startScript(field.getId(), script, ScriptType.Field);
     }

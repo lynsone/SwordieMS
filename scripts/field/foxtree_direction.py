@@ -109,7 +109,7 @@ elif sm.hasQuest(38011):
     sm.flipDialoguePlayerAsSpeaker()
     sm.sendSay("Why are you doing this to me? Maaaaan, Silver's going to be spitting fire when he finds out...")
 
-    chr.addSkill(25001000, -1, -1)
+    chr.addSkill(25001000, 0, 0)
     chr.addSkill(25001002, 1, 25)
     sm.giveExp(1800)
     sm.giveItem(1353100)

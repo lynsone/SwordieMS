@@ -82,7 +82,7 @@ public class Field {
     private List<OpenGate> openGateList = new ArrayList<>();
     private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean isChannelField;
-    private Map<Integer, String> directionInfo;
+    private Map<Integer, List<String>> directionInfo;
     private Clock clock;
 
     public Field(int fieldID) {
@@ -974,6 +974,7 @@ public class Field {
     }
 
     public void execUserEnterScript(Char chr) {
+        chr.clearCurrentDirectionNode();
         if(getOnUserEnter() == null || getOnUserEnter().equalsIgnoreCase("")) {
             return;
         }
@@ -1274,20 +1275,20 @@ public class Field {
         }
     }
 
-    public Map<Integer, String> getDirectionInfo() {
+    public Map<Integer, List<String>> getDirectionInfo() {
         return directionInfo;
     }
 
-    public void setDirectionInfo(Map<Integer, String> directionInfo) {
+    public void setDirectionInfo(Map<Integer, List<String>> directionInfo) {
         this.directionInfo = directionInfo;
     }
 
-    public String getDirectionInfoScript(int node) {
+    public List<String> getDirectionNode(int node) {
         return directionInfo.getOrDefault(node, null);
     }
 
-    public void addDirectionInfo(int node, String script) {
-        directionInfo.put(node, script);
+    public void addDirectionInfo(int node, List<String> scripts) {
+        directionInfo.put(node, scripts);
     }
 
     public Clock getClock() {

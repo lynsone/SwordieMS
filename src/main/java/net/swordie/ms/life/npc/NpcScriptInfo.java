@@ -29,6 +29,7 @@ public class NpcScriptInfo {
 	private boolean zeroBeta;
 	private int dlgType;
 	private int defaultSelect;
+	private String[] selectText;
 	private int templateID;
 
 	public NpcScriptInfo deepCopy() {
@@ -62,6 +63,7 @@ public class NpcScriptInfo {
 		nsi.zeroBeta = zeroBeta;
 		nsi.dlgType = dlgType;
 		nsi.defaultSelect = defaultSelect;
+		nsi.selectText = selectText;
 		nsi.templateID = templateID;
 		return nsi;
 	}
@@ -258,6 +260,13 @@ public class NpcScriptInfo {
 		return defaultSelect;
 	}
 
+	public void setSelectText(String[] selectText) {
+		this.selectText = selectText;
+	}
+
+	public String[] getSelectText() {
+		return selectText;
+	}
     public void addParam(Param param) {
 		setParam((byte) (getParam() | param.getVal()));
 	}

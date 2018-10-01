@@ -1,8 +1,8 @@
 # Hidden Street : Before the Final Battle (927020080)
 sm.lockInGameUI(True)
-sm.showScene("Effect.wz/Direction8.img", "lightningTutorial", "Scene1")
+sm.forcedInput(0)
+sm.reservedEffect("Effect/Direction8.img/lightningTutorial/Scene0")
+sm.sendDelay(3300)
 
-sm.invokeAfterDelay(5000, "showFadeTransition", 0, 500, 1500)
-
-sm.invokeAfterDelay(5500, "lockInGameUI", False)
-sm.invokeAfterDelay(5500, "warp", 927020070)
+sm.lockInGameUI(False)
+sm.warp(927020000, 0)

@@ -126,7 +126,10 @@ public class ScriptMan {
                 outPacket.encodeInt(nsi.getDlgType());
                 if (nsi.getDlgType() <= 0 || nsi.getDlgType() == 1) {
                     outPacket.encodeInt(nsi.getDefaultSelect());
-                    outPacket.encodeInt(0);
+                    outPacket.encodeInt(nsi.getSelectText().length);
+                    for (String selectText : nsi.getSelectText()) {
+                        outPacket.encodeString(selectText);
+                    }
                 }
                 break;
         }

@@ -513,10 +513,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public int sendAskSelectMenu(int dlgType, int defaultSelect) {
-		// Dialog Type 0 = Luminous (Dark/Light)
-		// Dialog Type 1 = Demon (DA/DS)
+		return sendAskSelectMenu(dlgType, defaultSelect, new String[]{});
+	}
+
+	public int sendAskSelectMenu(int dlgType, int defaultSelect, String[] text) {
 		getNpcScriptInfo().setDlgType(dlgType);
 		getNpcScriptInfo().setDefaultSelect(defaultSelect);
+		getNpcScriptInfo().setSelectText(text);
 		return sendGeneralSay("", AskSelectMenu);
 	}
 
@@ -985,6 +988,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	public int getAmountOfMobsInField(int fieldid) {
 		Field field = FieldData.getFieldById(fieldid);
 		return field.getMobs().size();
+	}
+
+	public void killMobs() {
+		List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+		for (Mob mob : mobs) {
+			mob.die();
+		}
 	}
 
 	public void showWeatherNoticeToField(String text, WeatherEffNoticeType type) {
@@ -2092,6 +2102,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void avatarLookSet(int[] equipIDs) {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.avatarLookSet(equipIDs)));
+	}
+
+	public void faceOff(int faceItemID) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.faceOff(faceItemID)));
 	}
 
 	// Clock methods ---------------------------------------------------------------------------------------------------
