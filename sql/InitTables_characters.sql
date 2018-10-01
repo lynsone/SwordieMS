@@ -744,7 +744,7 @@ create table monster_collection_mobs (
 create table monster_collection_explorations (
 	id bigint not null auto_increment,
     collectionid int,
-    sessionid int,
+    collectionkey int,
     monsterkey varchar(255),
     endDate datetime(3),
     position int,
