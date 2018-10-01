@@ -28,7 +28,9 @@ sm.sendSay("The Black Mage has cursed me! His dark power has corrupted my heart!
 sm.sendSay("But why now? Has the fiend broken free of his prison?!")
 sm.sendSay("What can I do? The power of light is lost to me... ")
 
-if sm.sendAskSelectMenu(0, 0, MENU_TEXT) == 0:
+answer = sm.sendAskSelectMenu(0, 0, MENU_TEXT)
+if answer == 0:
+    # Light Side
     sm.playExclSoundWithDownBGM("Voice.img/Luminous_M/2", 100)
     sm.sendNext("I will not be swept away by this darkness. I will save Lania and this world... Even if it means my destruction.")
     sm.levelUntil(10)
@@ -48,7 +50,19 @@ if sm.sendAskSelectMenu(0, 0, MENU_TEXT) == 0:
     sm.giveAndEquip(1052496)
     sm.giveAndEquip(1072701)
     sm.giveAndEquip(1102443)
-# TODO: sniff the dark side.
+else:
+    # Dark Side
+    sm.sendNext("Is this how the Black Mage understood the world? I see now that everyone else is beneath me!")
+    sm.sendSay("My soul was almost lost to the power of darkness. I see its appeal, but I would not have it erode my entire being. I will learn to harness it, and make it my own. ")
+    sm.sendSay("But first, I must master my new magic. My old weapons of Light will now be tools of the Dark.")
+    sm.giveAndEquip(1212001)
+    sm.giveAndEquip(1352400)
+    sm.giveItem(2001502, 30)
+    sm.giveItem(2001506, 30)
+    sm.startQuest(25560)
+    sm.completeQuest(25560)
+    sm.giveExp(1280)
+    sm.sendSay("Yes, it feels good to have a weapon in my hands once more. Now, who shall I test my new powers on first...")
 
 sm.lockInGameUI(False)
 sm.removeNpc(LANIA)

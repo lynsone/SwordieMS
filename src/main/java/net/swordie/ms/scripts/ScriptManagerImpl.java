@@ -2233,6 +2233,8 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(User.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
 
+	public void blindEffect(boolean blind) { chr.write(User.effect(Effect.blindEffect(blind))); }
+
 	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
 		chr.write(User.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));
 	}
@@ -2322,6 +2324,10 @@ public class ScriptManagerImpl implements ScriptManager {
 			addLevel(1);
 			level++;
 		}
+	}
+
+	public void ballonMsg(String message) {
+		chr.write(UserLocal.ballonMsg(message));
 	}
 
 	private ScriptMemory getMemory() {

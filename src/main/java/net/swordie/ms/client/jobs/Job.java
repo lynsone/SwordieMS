@@ -610,14 +610,25 @@ public abstract class Job {
 
 	public void handleLevelUp() {
 		short level = chr.getLevel();
-		if (level > 10) chr.addStat(Stat.ap, 5);
+		Map<Stat, Object> stats = new HashMap<>();
+		if (level > 10) {
+			chr.addStat(Stat.ap, 5);
+			stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
+		} else {
+			if (level >= 6) {
+				chr.addStat(Stat.str, 4);
+				chr.addStat(Stat.dex, 1);
+			} else {
+				chr.addStat(Stat.str, 5);
+			}
+			stats.put(Stat.str, (short) chr.getStat(Stat.str));
+			stats.put(Stat.dex, (short) chr.getStat(Stat.dex));
+		}
 		int sp = SkillConstants.getBaseSpByLevel(level);
 		if ((level % 10) % 3 == 0 && level > 100) {
 			sp *= 2; // double sp on levels ending in 3/6/9
 		}
 		chr.addSpToJobByCurrentLevel(sp);
-		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.ap, (short) chr.getStat(Stat.ap));
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
 		byte linkSkillLevel = (byte) SkillConstants.getLinkSkillLevelByCharLevel(level);
 		int linkSkillID = SkillConstants.getOriginalOfLinkedSkill(SkillConstants.getLinkSkillByJob(chr.getJob()));
@@ -657,7 +668,14 @@ public abstract class Job {
 				break;
 			}
 			case 20: {
-				String message = "#b[Guide] Upgrade#k\r\n\r\n";
+				String message;
+				if (chr.getJob() == JobConstants.JobEnum.THIEF.getJobId() && chr.getSubJob() == 1) {
+					message = "#b[Guide] 1.5th Job Advancement#k\r\n\r\n";
+					message += "You've reached level 20 and are ready for your #b[1.5th Job Advancement]#k!\r\n\r\n";
+					message += "Complete the #r[Job Advancement]#k quest to unlock your 1.5th job advancement!\r\n";
+					chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));
+				}
+				message = "#b[Guide] Upgrade#k\r\n\r\n";
 				message += "You've reached level 20, and can now use #b[Scroll Enhancement]#k!\r\n\r\n";
 				message += "Accept the quest #bDo You Know About Scroll Enhancements?#k from the Quest Notifier!\r\n";
 				chr.write(UserLocal.addPopupSay(9010000, 6000, message, "FarmSE.img/boxResult"));

@@ -397,6 +397,7 @@ public class Char {
 		characterStat.setSkin(skin);
 		characterStat.setFace(items.length > 0 ? items[0] : 0);
 		characterStat.setHair(items.length > 1 ? items[1] : 0);
+		characterStat.setSubJob(curSelectedSubJob);
 		setFieldInstanceType(CHANNEL);
 		ranking = new Ranking();
 		pets = new ArrayList<>();
