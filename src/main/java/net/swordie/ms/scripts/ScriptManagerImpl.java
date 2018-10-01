@@ -2327,7 +2327,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void ballonMsg(String message) {
-		chr.write(UserLocal.ballonMsg(message));
+		chr.write(UserLocal.ballonMsg(message, 100, 3, null));
 	}
 
 	private ScriptMemory getMemory() {

@@ -3960,7 +3960,7 @@ public class Char {
 		this.nextRandomPortalTime = nextRandomPortalTime;
 	}
 
-	public void clearCurrentDirectionNode() { this.currentDirectionNode = new HashMap<>(); }
+	public void clearCurrentDirectionNode() { this.currentDirectionNode.clear(); }
 
 	public int getCurrentDirectionNode(int node) {
 		Integer direction = currentDirectionNode.getOrDefault(node, null);

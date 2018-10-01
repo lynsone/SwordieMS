@@ -460,14 +460,16 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket ballonMsg(String message) {
+    public static OutPacket ballonMsg(String message, int width, int timeOut, Position position) {
         OutPacket outPacket = new OutPacket(OutHeader.BALLOMSG);
 
         outPacket.encodeString(message);
-        outPacket.encodeShort(100);
-        outPacket.encodeShort(3);
-        outPacket.encodeByte(1);
-
+        outPacket.encodeShort(width);// 100
+        outPacket.encodeShort(timeOut);// 3
+        outPacket.encodeByte(position == null);
+        if (position != null) {
+            outPacket.encodePosition(position);
+        }
         return outPacket;
     }
 }
