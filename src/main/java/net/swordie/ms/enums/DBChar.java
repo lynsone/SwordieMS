@@ -49,7 +49,7 @@ public enum DBChar {
     MemorialCubeInfo(0x8000000000L),
     LikePoint(0x40000000000L),
     RunnerGameRecord(0x2000000000000L),
-    Unk2(0x4000000000000L),
+    MonsterCollection(0x4000000000000L),
     Unk3(0x10000000000L),
     Unk4(0x100000000000L),
     Unk(0x200000000000L),
