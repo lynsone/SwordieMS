@@ -134,7 +134,7 @@ public class QuestManager {
                     QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
                     if (qi != null) {
                         for (QuestReward qr : qi.getQuestRewards()) {
-                            if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0 || qr instanceof QuestBuffItemReward && ((QuestBuffItemReward) qr).getStatus() == 0) {
+                            if ((qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) || (qr instanceof QuestBuffItemReward && ((QuestBuffItemReward) qr).getStatus() == 0)) {
                                 qr.giveReward(getChr());
                             }
                         }
