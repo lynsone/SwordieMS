@@ -774,7 +774,7 @@ create table accounts (
 	msg2 tinyint default 0,
 	purchaseexp tinyint default 0,
 	pblockreason tinyint default 3,
-	chatunblockdate long,
+	chatunblockdate bigint default 0,
 	hascensorednxloginid boolean default 0,
 	gradecode tinyint default 0,
 	censorednxloginid varchar(255),
