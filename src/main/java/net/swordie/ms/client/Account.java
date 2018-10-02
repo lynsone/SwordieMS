@@ -50,7 +50,7 @@ public class Account {
     private String pic;
     private int characterSlots;
     @Convert(converter = FileTimeConverter.class)
-    private FileTime creationDate;
+    private FileTime creationDate = FileTime.currentTime();
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
@@ -77,7 +77,7 @@ public class Account {
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
     @Convert(converter = FileTimeConverter.class)
-    private FileTime banExpireDate;
+    private FileTime banExpireDate = FileTime.fromType(FileTime.Type.ZERO_TIME);
     private String banReason;
 
     public Account(String name, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
