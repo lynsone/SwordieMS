@@ -3,6 +3,7 @@ package net.swordie.ms.client.character.quest;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.quest.requirement.QuestStartCompletionRequirement;
 import net.swordie.ms.client.character.quest.requirement.QuestStartRequirement;
+import net.swordie.ms.client.character.quest.reward.QuestBuffItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestReward;
 import net.swordie.ms.connection.packet.Effect;
@@ -133,7 +134,7 @@ public class QuestManager {
                     QuestInfo qi = QuestData.getQuestInfoById(quest.getQRKey());
                     if (qi != null) {
                         for (QuestReward qr : qi.getQuestRewards()) {
-                            if (qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) {
+                            if ((qr instanceof QuestItemReward && ((QuestItemReward) qr).getStatus() == 0) || (qr instanceof QuestBuffItemReward && ((QuestBuffItemReward) qr).getStatus() == 0)) {
                                 qr.giveReward(getChr());
                             }
                         }

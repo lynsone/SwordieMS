@@ -358,6 +358,8 @@ public class Char {
 	private boolean battleRecordOn;
 	@Transient
 	private long nextRandomPortalTime;
+    @Transient
+    private Map<Integer, Integer> currentDirectionNode;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -395,6 +397,7 @@ public class Char {
 		characterStat.setSkin(skin);
 		characterStat.setFace(items.length > 0 ? items[0] : 0);
 		characterStat.setHair(items.length > 1 ? items[1] : 0);
+		characterStat.setSubJob(curSelectedSubJob);
 		setFieldInstanceType(CHANNEL);
 		ranking = new Ranking();
 		pets = new ArrayList<>();
@@ -429,6 +432,7 @@ public class Char {
 				999999999,
 		};
 		monsterParkCount = 0;
+		currentDirectionNode = new HashMap<>();
 		potentials = new HashSet<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
@@ -3638,7 +3642,7 @@ public class Char {
 		addSkill(skill);
 		write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
 	}
-
+	
 	public long getRuneCooldown() {
 		return runeStoneCooldown;
 	}
@@ -3954,5 +3958,24 @@ public class Char {
 
 	public void setNextRandomPortalTime(long nextRandomPortalTime) {
 		this.nextRandomPortalTime = nextRandomPortalTime;
+	}
+
+	public void clearCurrentDirectionNode() { this.currentDirectionNode.clear(); }
+
+	public int getCurrentDirectionNode(int node) {
+		Integer direction = currentDirectionNode.getOrDefault(node, null);
+		if (direction == null) {
+			currentDirectionNode.put(node, 0);
+		}
+		return currentDirectionNode.get(node);
+	}
+
+	public void increaseCurrentDirectionNode(int node) {
+		Integer direction = currentDirectionNode.getOrDefault(node, null);
+		if (direction == null) {
+			currentDirectionNode.put(node, 1);
+		} else {
+			currentDirectionNode.put(node, direction + 1);
+		}
 	}
 }

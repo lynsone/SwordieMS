@@ -65,12 +65,8 @@ public class Luminous extends Job {
     public static final int ARMAGEDDON = 27121052; //Stun debuff
 
     private int[] addedSkills = new int[] {
-            SUNFIRE,
-            ECLIPSE,
             EQUILIBRIUM,
             //EQUILIBRIUM2,
-            INNER_LIGHT,
-            FLASH_BLINK,
             CHANGE_LIGHT_DARK
     };
 
@@ -538,5 +534,11 @@ public class Luminous extends Job {
             chr.write(User.effect(Effect.skillSpecial(skill.getSkillId())));
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(skill.getSkillId())));
         }
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        chr.getAvatarData().getCharacterStat().setPosMap(927020080);
     }
 }

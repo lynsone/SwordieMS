@@ -5,6 +5,7 @@ MASTEMA = 2159307
 SKILLS = [30011109, 30010110, 30010185]
 
 sm.lockInGameUI(True)
+sm.curNodeEventEnd(True)
 for i in range(3):
     if not sm.hasSkill(SKILLS[i]):
         sm.giveSkill(SKILLS[i])
@@ -12,7 +13,6 @@ for i in range(3):
 sm.forcedInput(0)
 sm.spawnNpc(MASTEMA, 1430, 50)
 sm.showNpcSpecialActionByTemplateId(MASTEMA, "summon", 0)
-# here goes field value if I am not wrong ("mastema", "objId").
 sm.showFieldEffect("demonSlayer/back", 0)
 sm.showFieldEffect("demonSlayer/text0", 0)
 sm.sendDelay(500)

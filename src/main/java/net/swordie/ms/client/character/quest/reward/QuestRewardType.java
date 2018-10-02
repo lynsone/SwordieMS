@@ -11,7 +11,8 @@ public enum QuestRewardType {
     EXP(0),
     ITEM(1),
     MONEY(2),
-    POP(3)
+    POP(3),
+    BUFFITEM(4)
     ;
 
     private byte val;
@@ -28,7 +29,8 @@ public enum QuestRewardType {
         return o instanceof QuestExpReward ? EXP :
                 o instanceof QuestItemReward ? ITEM :
                 o instanceof QuestMoneyReward ? MONEY :
-                o instanceof QuestPopReward ? POP : null;
+                o instanceof QuestPopReward ? POP :
+                o instanceof QuestBuffItemReward ? BUFFITEM : null;
     }
 
     public static QuestRewardType getQPRTByVal(byte val) {
@@ -47,6 +49,8 @@ public enum QuestRewardType {
                 return (QuestReward) new QuestMoneyReward().load(dis);
             case POP:
                 return (QuestReward) new QuestPopReward().load(dis);
+            case BUFFITEM:
+                return (QuestReward) new QuestBuffItemReward().load(dis);
             default:
                 return null;
         }

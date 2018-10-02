@@ -1929,21 +1929,18 @@ public class WorldHandler {
             int answer = 0;
             boolean hasAnswer = false;
             String ans = null;
-            if (nmt == NpcMessageType.InGameDirectionsAnswer) {
+            if (nmt == NpcMessageType.AskIngameDirection) {
                 InGameDirectionAsk answerType = InGameDirectionAsk.getByVal(action);
                 if (answerType == null || answerType == InGameDirectionAsk.NOT) {
                     return;
                 }
                 boolean success = inPacket.decodeByte() == 1;// bSuccess
-                int answerVal = 0;
-                if (success) {
-                    if (answerType == InGameDirectionAsk.CAMERA_MOVE_TIME) {
-                        answerVal = inPacket.decodeInt();
-                        chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(answerVal)));
-                        return;
-                    }
-                    chr.getScriptManager().handleAction(nmt, (byte) answerType.getVal(), answerVal);
+                if (answerType == InGameDirectionAsk.CAMERA_MOVE_TIME && success) {
+                    int answerVal = inPacket.decodeInt();
+                    chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(answerVal)));
+                    return;
                 }
+                chr.getScriptManager().handleAction(nmt, (byte) 1, answerType.getVal());
                 return;
             }
             if (nmt == NpcMessageType.AskText && action == 1) {
@@ -2281,12 +2278,17 @@ public class WorldHandler {
             return;
         }
         Field field = chr.getField();
-        int directionNode = inPacket.decodeInt();
 
-        String script = field.getDirectionInfoScript(directionNode);
+        int node = inPacket.decodeInt();
+        List<String> directionNode = field.getDirectionNode(node);
+        if (directionNode == null) {
+            return;
+        }
+        String script = directionNode.get(chr.getCurrentDirectionNode(node));
         if (script == null) {
             return;
         }
+        chr.increaseCurrentDirectionNode(node);
         chr.getScriptManager().setCurNodeEventEnd(false);
         chr.getScriptManager().startScript(field.getId(), script, ScriptType.Field);
     }
