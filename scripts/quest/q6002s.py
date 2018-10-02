@@ -1,7 +1,0 @@
-# 6002 | Starting Script
-
-sm.setSpeakerID(2060005)
-sm.sendNext("Yes? Thank you very much. My name is #p2060005# and I'm a monster tamer. I look after monsters and study how we can both exist peacefully in the Maple World. I want to prove that monsters can live with humans, if they don't attack them of course. That's why I show people tamed monsters. They're actually quite friendly once tamed. The tricky part is just getting them not to bite off your hand, which can be difficult, I admit. ")
-sm.sendSay("But people just don't like to look at them, and my work wasn't having the impact I wanted. So, I researched another way for others to view monsters as tamable creatures--by riding them. What do you think? I hope it will work!")
-sm.sendSay("My studies are nearly finished. When I finish with #t4031507#, humans can travel simply by riding monsters. However, a few days ago, these weird, yet fascinating creatures broke into my home and learned of my research! I fear what may happen if the secret gets into the wrong hands--this is not for power but for peaceful coexistence of humans and monsters. I fear that if they find my lab and then my notes, they might turn the monsters even more vicious!")
-sm.sendSayOkay("So would you help me? I want you to protect Oinkers and gather #b5 #t4031507##k. Don't forget to find #b5 #t4031508##k too. Thanks--I will see that you are rewarded for your help!")

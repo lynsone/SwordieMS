@@ -615,11 +615,18 @@ public class ScriptManagerImpl implements ScriptManager {
 				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
 	}
 
-	@Override
 	public void addSP(int amount) {
+		addSP(amount, false);
+	}
+
+	@Override
+	public void addSP(int amount, boolean jobAdv) {
 		byte jobLevel = (byte) JobConstants.getJobLevel(chr.getJob());
 		int currentSP = chr.getAvatarData().getCharacterStat().getExtendSP().getSpByJobLevel(jobLevel);
 		setSP(currentSP + amount);
+		if (jobAdv) {
+			chr.write(WvsContext.incSpMessage(chr.getJob(), (byte) amount));
+		}
 	}
 
 	@Override
@@ -678,8 +685,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void addMaxHP(int amount) {
-		int currentMHP = chr.getAvatarData().getCharacterStat().getMaxHp();
-		setMaxHP(currentMHP + amount);
+		chr.addStatAndSendPacket(Stat.mhp, amount);
 	}
 
 	@Override
@@ -693,8 +699,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void addMaxMP(int amount) {
-		int currentMMP = chr.getAvatarData().getCharacterStat().getMaxMp();
-		setMaxHP(currentMMP + amount);
+		chr.addStatAndSendPacket(Stat.mmp, amount);
 	}
 
 	@Override
@@ -1670,7 +1675,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			quest = QuestData.createQuestFromId(id);
 		}
 		quest.setCompletedTime(FileTime.currentTime());
-		quest.setStatus(QuestStatus.COMPLETE);
+		quest.setStatus(QuestStatus.Completed);
 		qm.addQuest(quest);
 		chr.write(WvsContext.questRecordMessage(quest));
 		chr.chatMessage(String.format("Quest %d completed by completeQuestNoRewards", id));
@@ -1701,20 +1706,24 @@ public class ScriptManagerImpl implements ScriptManager {
 		return chr.getQuestManager().hasQuestCompleted(id);
 	}
 
-	public void createQuestWithQRValue(int questId, String qrValue) {
-		createQuestWithQRValue(chr, questId, qrValue);
+	public void createQuestWithQRValue(int questId, String qrValue, boolean ex) {
+		createQuestWithQRValue(chr, questId, qrValue, ex);
 	}
 
-	public void createQuestWithQRValue(Char character, int questId, String qrValue) {
+	public void createQuestWithQRValue(int questId, String qrValue) {
+		createQuestWithQRValue(chr, questId, qrValue, true);
+	}
+
+	public void createQuestWithQRValue(Char character, int questId, String qrValue, boolean ex) {
 		QuestManager qm = character.getQuestManager();
 		Quest quest = qm.getQuests().get(questId);
 		if (quest == null) {
-			quest = new Quest(questId, QuestStatus.STARTED);
+			quest = new Quest(questId, QuestStatus.Started);
 			quest.setQrValue(qrValue);
 			qm.addCustomQuest(quest);
 		}
 		quest.setQrValue(qrValue);
-		updateQRValue(questId);
+		updateQRValue(questId, ex);
 	}
 
 	public void deleteQuest(int questId) {
@@ -1742,37 +1751,47 @@ public class ScriptManagerImpl implements ScriptManager {
 		return quest.getQRValue();
 	}
 
-	public void setQRValue(int questId, String qrValue) {
-		setQRValue(chr, questId, qrValue);
+	public void setQRValue(int questId, String qrValue) { setQRValue(questId, qrValue, true);}
+
+	public void setQRValue(int questId, String qrValue, boolean ex) {
+		setQRValue(chr, questId, qrValue, ex);
 	}
 
-	public void setQRValue(Char character, int questId, String qrValue) {
+	public void setQRValue(Char character, int questId, String qrValue, boolean ex) {
 		Quest quest = chr.getQuestManager().getQuests().get(questId);
 		quest.setQrValue(qrValue);
-		updateQRValue(questId);
+		updateQRValue(questId, ex);
 	}
 
 	public void addQRValue(int questId, String qrValue) {
+		addQRValue(questId, qrValue, true);
+	}
+
+	public void addQRValue(int questId, String qrValue, boolean ex) {
 		String qrVal = getQRValue(questId);
 		if (qrVal.equals("") || qrVal.equals("Quest is Null")) {
 			createQuestWithQRValue(questId, qrValue);
 			return;
 		}
 		setQRValue(questId, qrValue + ";" + qrVal);
-		updateQRValue(questId);
+		updateQRValue(questId, ex);
 	}
 
 	public boolean isComplete(int questID) {
 		return chr.getQuestManager().isComplete(questID);
 	}
 
-	public void updateQRValue(int questId) {
+	public void updateQRValue(int questId, boolean ex) {
 		Quest quest = chr.getQuestManager().getQuests().get(questId);
 		if (quest == null) {
 			log.error(String.format("The user does not have the quest %d.", questId));
 			return;
 		}
-		chr.write(WvsContext.questRecordExMessage(quest));
+		if (ex) {
+			chr.write(WvsContext.questRecordExMessage(quest));
+		} else {
+			chr.write(WvsContext.questRecordMessage(quest));
+		}
 	}
 
 
@@ -2036,11 +2055,14 @@ public class ScriptManagerImpl implements ScriptManager {
 				new Position(x, y), 0, 1, false, 0)));
 	}
 
-	public void showBalloonMsgOnNpc(String path, int duration, int templateID) {
+	public void showBalloonMsgOnNpc(String path, int duration, int x, int y, int templateID) {
 		int objectID = getNpcObjectIdByTemplateId(templateID);
 		if (objectID == 0) return;
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.effectPlay(path, duration,
-				new Position(0, -150), 0, objectID, false, 0)));
+				new Position(x, y), 0, objectID, false, 0)));
+	}
+	public void showBalloonMsgOnNpc(String path, int duration, int templateID) {
+		showBalloonMsgOnNpc(path, duration, 0, -100, templateID);
 	}
 
 	public void showNpcEffectOnPosition(String path, int x, int y, int templateID) {
@@ -2065,7 +2087,9 @@ public class ScriptManagerImpl implements ScriptManager {
         return (int) response;
 	}
 
-
+	public void avatarLookSet(int[] equipIDs) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.avatarLookSet(equipIDs)));
+	}
 
 	// Clock methods ---------------------------------------------------------------------------------------------------
 
@@ -2112,7 +2136,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			QuestManager qm = chr.getQuestManager();
 			Quest q = qm.getQuests().getOrDefault(7291, null);
 			if (q == null) {
-				q = new Quest(7291, QuestStatus.STARTED);
+				q = new Quest(7291, QuestStatus.Started);
 				qm.addQuest(q);
 			}
 			DamageSkinSaveData dssd = DamageSkinSaveData.getByItemID(itemID);
@@ -2152,8 +2176,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
 
-	public void blind(int enable, int x, int color, int time) { chr.write(CField.fieldEffect(FieldEffect.blind(enable, x, color, 0, 0, time))); }
+	public void blind(int enable, int x, int color, int time) { blind(enable, x, color, 0, 0, time); }
 
+	public void blind(int enable, int x, int color, int unk1, int unk2, int time) { chr.write(CField.fieldEffect(FieldEffect.blind(enable, x, color, unk1, unk2, time))); }
 	@Override
 	public int getRandomIntBelow(int upBound) {
 		return new Random().nextInt(upBound);
@@ -2184,6 +2209,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
 	}
+
+	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(User.effect(Effect.reservedEffectRepeat(effectPath, start))); }
+
+	public void reservedEffectRepeat(String effectPath) { reservedEffectRepeat(effectPath, true); }
 
 	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(User.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
 
@@ -2261,6 +2290,21 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void addPopUpSay(int npcID, int duration, String message, String effect) {
 		chr.write(UserLocal.addPopupSay(npcID, duration, message, effect));
+	}
+
+	public void moveParticleEff(String type, int startX, int startY, int endX, int endY, int moveTime, int totalCount, int oneSprayMin, int oneSprayMax) {
+		chr.write(UserLocal.moveParticleEff(type, new Position(startX, startY), new Position(endX, endY), moveTime, totalCount, oneSprayMin, oneSprayMax));
+	}
+
+	public void levelUntil(int toLevel) {
+		short level = chr.getLevel();
+		if (level >= toLevel) {
+		    return;
+        }
+		while (level < toLevel) {
+			addLevel(1);
+			level++;
+		}
 	}
 
 	private ScriptMemory getMemory() {

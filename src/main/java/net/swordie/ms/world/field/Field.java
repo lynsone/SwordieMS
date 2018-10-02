@@ -757,12 +757,12 @@ public class Field {
         Life life = getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             if (petID >= 0) {
-                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.PET_PICKUP, pickupUserID, life.getObjectId(),
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.PetPickup, pickupUserID, life.getObjectId(),
                         (short) 0, petID, 0));
             } else if (pickupUserID != 0) {
                 broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
             } else {
-                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.FADE, pickupUserID, life.getObjectId(),
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.Fade, pickupUserID, life.getObjectId(),
                         (short) 0, 0, 0));
             }
             removeLife(dropID, fromSchedule);
@@ -840,7 +840,7 @@ public class Field {
         }
         // Check for collision items such as exp orbs from combo kills
         if (!isTradable) {
-            broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FADE_AWAY));
+            broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FadeAway));
         } else if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
         } else {
@@ -1138,7 +1138,7 @@ public class Field {
 
     public boolean canSpawnElite() {
         return isChannelField()
-                && (getEliteState() == null || getEliteState() == EliteState.NORMAL)
+                && (getEliteState() == null || getEliteState() == EliteState.None)
                 && getNextEliteSpawnTime() < System.currentTimeMillis();
     }
 

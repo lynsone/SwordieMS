@@ -4,6 +4,7 @@ drop table if exists linkskills;
 drop table if exists accounts;
 drop table if exists monster_collection_rewards;
 drop table if exists monster_collection_mobs;
+drop table if exists monster_collection_explorations;
 drop table if exists monster_collections;
 drop table if exists macroskills;
 drop table if exists macros;
@@ -737,6 +738,16 @@ create table monster_collection_mobs (
 	id int not null auto_increment,
     collectionid int,
     mobid int,
+    primary key (id)
+);
+
+create table monster_collection_explorations (
+	id bigint not null auto_increment,
+    collectionid int,
+    collectionkey int,
+    monsterkey varchar(255),
+    endDate datetime(3),
+    position int,
     primary key (id)
 );
 
