@@ -4027,9 +4027,9 @@ public class Char {
 
 	public boolean sendLieDetector(boolean force) {
 		// LD ran too recently (15 min)
-		/*if (!force && lastLieDetector != 0 && System.currentTimeMillis() - lastLieDetector < 900_000L) {
+		if (!force && lastLieDetector != 0 && System.currentTimeMillis() - lastLieDetector < 900_000L) {
 			return false;
-		}*/
+		}
 
 		// TODO: don't allow more than 3 refreshes
 
