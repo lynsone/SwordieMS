@@ -25,6 +25,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.util.AntiMacro;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import org.apache.log4j.LogManager;
@@ -958,6 +959,30 @@ public class WvsContext {
         outPacket.encodeInt(type.getVal());
         outPacket.encodeInt(arg1);
         outPacket.encodeInt(arg2);
+
+        return outPacket;
+    }
+
+    public static OutPacket antiMacroResult(final byte[] image, byte nNotificationType, byte nAntiMacroType) {
+        OutPacket outPacket = new OutPacket(OutHeader.ANTI_MACRO_RESULT);
+
+        outPacket.encodeByte(nNotificationType);
+        outPacket.encodeByte(nAntiMacroType);
+
+        if (nNotificationType == AntiMacro.NotificationType.LieDetector.getVal()) {
+            outPacket.encodeByte(1); // non-zero = 1 minute
+            outPacket.encodeByte(0); // zero = 1 minute
+
+            if (image == null) {
+                outPacket.encodeInt(0);
+            } else {
+                outPacket.encodeInt(image.length);
+                outPacket.encodeArr(image);
+            }
+        } else if (nNotificationType == AntiMacro.NotificationType.Detected.getVal() ||
+                nNotificationType == AntiMacro.NotificationType.Passed.getVal()) {
+            outPacket.encodeString(""); // unused?
+        }
 
         return outPacket;
     }

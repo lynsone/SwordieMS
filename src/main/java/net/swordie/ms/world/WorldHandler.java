@@ -3227,6 +3227,33 @@ public class WorldHandler {
         c.getChr().getMacros().addAll(macros); // don't set macros directly, as a new row will be made in the DB
     }
 
+    public static void handleUserAntiMacroQuestionResult(Client c, InPacket inPacket) {
+        short length = inPacket.decodeShort();
+        Char chr = c.getChr();
+
+        if (length > 0) {
+            String answer = inPacket.decodeString(length);
+
+            if (answer.length() < 6 || !answer.equalsIgnoreCase(chr.getLieDetectorAnswer())) {
+                chr.failedLieDetector();
+            } else {
+                chr.passedLieDetector();
+            }
+        } else {
+            chr.failedLieDetector();
+            chr.dispose();
+        }
+    }
+
+    public static void handleUserAntiMacroRefreshResult(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+
+        // attempting to refresh while there's no LD
+        if (chr.getLieDetectorAnswer().length() > 0) {
+            chr.sendLieDetector(true);
+        }
+    }
+
     public static void handleUserCreateHolidomRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
@@ -3917,6 +3944,7 @@ public class WorldHandler {
     }
 
     public static void handleUserMigrateToCashShopRequest(Client c, InPacket inPacket) {
+        c.getChr().punishLieDetectorEvasion();
         CashShop cs = Server.getInstance().getCashShop();
         c.write(Stage.setCashShop(c.getChr(), cs));
         c.write(CCashShop.loadLockerDone(c.getChr().getAccount()));
@@ -4865,9 +4893,10 @@ public class WorldHandler {
     }
 
     public static void handleUserMapTransferRequest(Char chr, InPacket inPacket) {
+        chr.punishLieDetectorEvasion();
+
         byte mtType = inPacket.decodeByte();
         byte itemType = inPacket.decodeByte();
-
 
         MapTransferType mapTransferType = MapTransferType.getByVal(mtType);
         switch (mapTransferType) {

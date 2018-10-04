@@ -72,8 +72,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.persistence.*;
+import java.awt.*;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -81,6 +84,7 @@ import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import static net.swordie.ms.enums.ChatType.SpeakerChannel;
 import static net.swordie.ms.enums.ChatType.SystemNotice;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
@@ -360,6 +364,11 @@ public class Char {
 	private long nextRandomPortalTime;
     @Transient
     private Map<Integer, Integer> currentDirectionNode;
+	@Transient
+	private String lieDetectorAnswer = "";
+	@Transient
+	private long lastLieDetector = 0;
+	// TOOD: count and log lie detector passes and fails
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -3105,6 +3114,7 @@ public class Char {
 	}
 
 	public void logout() {
+		punishLieDetectorEvasion();
 		log.info("Logging out " + getName());
 		if (getField().getForcedReturn() != GameConstants.NO_MAP_ID) {
 			setFieldID(getField().getForcedReturn());
@@ -3977,5 +3987,79 @@ public class Char {
 		} else {
 			currentDirectionNode.put(node, direction + 1);
 		}
+	}
+
+	public void punishLieDetectorEvasion() {
+		if (getLieDetectorAnswer().length() > 0) {
+			failedLieDetector();
+		}
+	}
+
+	public String getLieDetectorAnswer() {
+		return lieDetectorAnswer;
+	}
+
+	public void setLieDetectorAnswer(String answer) {
+		lieDetectorAnswer = answer;
+	}
+
+	public void failedLieDetector() {
+		setLieDetectorAnswer("");
+		chatMessage(SpeakerChannel, "You have failed the Lie Detector test.");
+
+		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.NotificationType.Detected.getVal(), AntiMacro.AntiMacroType.Admin.getVal()));
+
+		// TODO: handle fail
+	}
+
+	public void passedLieDetector() {
+		setLieDetectorAnswer("");
+		chatMessage(SpeakerChannel, "You have passed the Lie Detector test!");
+
+		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.NotificationType.Passed.getVal(), AntiMacro.AntiMacroType.Admin.getVal()));
+
+		// TODO: handle pass
+	}
+
+	public boolean sendLieDetector() {
+		return sendLieDetector(false);
+	}
+
+	public boolean sendLieDetector(boolean force) {
+		// LD ran too recently (15 min)
+		/*if (!force && lastLieDetector != 0 && System.currentTimeMillis() - lastLieDetector < 900_000L) {
+			return false;
+		}*/
+
+		// TODO: don't allow more than 3 refreshes
+
+		lieDetectorAnswer = "";
+		String font = AntiMacro.FONTS[Util.getRandom(AntiMacro.FONTS.length - 1)];
+
+		String options = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+		for (int i = 1; i <= 6; i++) {
+			if (Util.getRandom(1) == 0) {
+				options = options.toUpperCase();
+			} else {
+				options = options.toLowerCase();
+			}
+
+			lieDetectorAnswer += options.charAt(Util.getRandom(options.length() - 1));
+		}
+
+		try {
+			AntiMacro am = new AntiMacro(font, lieDetectorAnswer);
+			lastLieDetector = System.currentTimeMillis();
+
+			byte[] image = am.generateImage(196, 44, Color.BLACK, AntiMacro.getRandomColor());
+			getClient().write(WvsContext.antiMacroResult(image, AntiMacro.NotificationType.LieDetector.getVal(), AntiMacro.AntiMacroType.Admin.getVal()));
+		} catch (IOException|FontFormatException e) {
+			e.printStackTrace();
+
+			return false;
+		}
+
+		return true;
 	}
 }
