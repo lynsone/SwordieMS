@@ -82,7 +82,7 @@ public class Field {
     private List<OpenGate> openGateList = new ArrayList<>();
     private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean isChannelField;
-    private Map<Integer, String> directionInfo;
+    private Map<Integer, List<String>> directionInfo;
     private Clock clock;
 
     public Field(int fieldID) {
@@ -757,12 +757,12 @@ public class Field {
         Life life = getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             if (petID >= 0) {
-                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.PET_PICKUP, pickupUserID, life.getObjectId(),
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.PetPickup, pickupUserID, life.getObjectId(),
                         (short) 0, petID, 0));
             } else if (pickupUserID != 0) {
                 broadcastPacket(DropPool.dropLeaveField(dropID, pickupUserID));
             } else {
-                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.FADE, pickupUserID, life.getObjectId(),
+                broadcastPacket(DropPool.dropLeaveField(DropLeaveType.Fade, pickupUserID, life.getObjectId(),
                         (short) 0, 0, 0));
             }
             removeLife(dropID, fromSchedule);
@@ -840,7 +840,7 @@ public class Field {
         }
         // Check for collision items such as exp orbs from combo kills
         if (!isTradable) {
-            broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FADE_AWAY));
+            broadcastPacket(DropPool.dropEnterField(drop, posFrom, 0, DropEnterType.FadeAway));
         } else if(drop.getItem() != null && ItemConstants.isCollisionLootItem(drop.getItem().getItemId())) {
             broadcastPacket(DropPool.dropEnterFieldCollisionPickUp(drop, posFrom, 0));
         } else {
@@ -974,6 +974,7 @@ public class Field {
     }
 
     public void execUserEnterScript(Char chr) {
+        chr.clearCurrentDirectionNode();
         if(getOnUserEnter() == null || getOnUserEnter().equalsIgnoreCase("")) {
             return;
         }
@@ -1138,7 +1139,7 @@ public class Field {
 
     public boolean canSpawnElite() {
         return isChannelField()
-                && (getEliteState() == null || getEliteState() == EliteState.NORMAL)
+                && (getEliteState() == null || getEliteState() == EliteState.None)
                 && getNextEliteSpawnTime() < System.currentTimeMillis();
     }
 
@@ -1274,20 +1275,20 @@ public class Field {
         }
     }
 
-    public Map<Integer, String> getDirectionInfo() {
+    public Map<Integer, List<String>> getDirectionInfo() {
         return directionInfo;
     }
 
-    public void setDirectionInfo(Map<Integer, String> directionInfo) {
+    public void setDirectionInfo(Map<Integer, List<String>> directionInfo) {
         this.directionInfo = directionInfo;
     }
 
-    public String getDirectionInfoScript(int node) {
+    public List<String> getDirectionNode(int node) {
         return directionInfo.getOrDefault(node, null);
     }
 
-    public void addDirectionInfo(int node, String script) {
-        directionInfo.put(node, script);
+    public void addDirectionInfo(int node, List<String> scripts) {
+        directionInfo.put(node, scripts);
     }
 
     public Clock getClock() {

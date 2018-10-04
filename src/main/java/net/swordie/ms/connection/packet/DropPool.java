@@ -21,20 +21,20 @@ public class DropPool {
     }
 
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID, boolean canBePickedUpByPet) {
-        return DropPool.dropEnterField(drop, DropEnterType.NO_ANIMATION, 100, 0, 100,
+        return DropPool.dropEnterField(drop, DropEnterType.Instant, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 0, false, canBePickedUpByPet);
     }
 
     public static OutPacket dropEnterFieldCollisionPickUp(Drop drop, Position dropPosition, int charID) {
-        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
+        return DropPool.dropEnterField(drop, DropEnterType.Floating, 100, 0, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 1, false, false);
     }
 
     public static OutPacket dropEnterField(Drop drop, Position dropPositionFrom, Position dropPositionTo, int charID,
                                            boolean canBePickedUpByPet) {
-        return DropPool.dropEnterField(drop, DropEnterType.FLOATING, 100, 0, 100,
+        return DropPool.dropEnterField(drop, DropEnterType.Floating, 100, 0, 100,
                 (byte) 2, dropPositionTo, charID, dropPositionFrom, 0, true, (short) 0, false,
                 (byte) 0, 0, false, canBePickedUpByPet);
     }
@@ -86,11 +86,11 @@ public class DropPool {
     }
 
     public static OutPacket dropLeaveField(int dropID, int charID) {
-        return dropLeaveField(DropLeaveType.CHAR_PICKUP_1, charID, dropID, (short) 0, 0, 0);
+        return dropLeaveField(DropLeaveType.CharPickup1, charID, dropID, (short) 0, 0, 0);
     }
 
     public static OutPacket dropExplodeField(int dropID) {
-        return dropLeaveField(DropLeaveType.DELAYED_PICKUP, 0, dropID, (short) 0, 0, 0);
+        return dropLeaveField(DropLeaveType.DelayedPickup, 0, dropID, (short) 0, 0, 0);
     }
 
     public static OutPacket dropLeaveField(DropLeaveType dropLeaveType, int pickupID, int dropID, short delay, int petID, int key) {
@@ -100,18 +100,18 @@ public class DropPool {
         outPacket.encodeInt(dropID);
 
         switch(dropLeaveType) {
-            case CHAR_PICKUP_1:
-            case CHAR_PICKUP_2:
+            case CharPickup1:
+            case CharPickup2:
                 outPacket.encodeInt(pickupID);
                 break;
-            case PET_PICKUP:
+            case PetPickup:
                 outPacket.encodeInt(pickupID);
                 outPacket.encodeInt(petID);
                 break;
-            case DELAYED_PICKUP:
+            case DelayedPickup:
                 outPacket.encodeShort(delay);
                 break;
-            case ABSORB:
+            case Absorb:
                 outPacket.encodeInt(key);
                 break;
         }

@@ -1,6 +1,5 @@
 package net.swordie.ms.loaders;
 
-import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.constants.MonsterCollectionGroup;
 import net.swordie.ms.constants.MonsterCollectionRegion;
@@ -26,6 +25,19 @@ public class MonsterCollectionData {
 
     private static Map<Integer, MonsterCollectionRegion> monsterCollectionInfo = new HashMap<>();
     private static Map<Integer, Triple<Integer, Integer, Integer>> monsterInfo = new HashMap<>();
+    // reward from group -> hours for exploration
+    private static Map<Integer, Integer> rewardToMinutes = new HashMap<>();
+    // reward from group -> (reward id, chance)
+    private static Map<Integer, Tuple<Integer, Integer>> explorationRewards = new HashMap<>();
+
+    static {
+        rewardToMinutes.put(2434929, 30);
+        rewardToMinutes.put(2434930, 60 * 3);
+        rewardToMinutes.put(2434931, 60 * 12);
+        rewardToMinutes.put(2434932, 60 * 24);
+        rewardToMinutes.put(2434958, 60 * 3);
+        rewardToMinutes.put(2434959, 60 * 3);
+    }
 
     public static void loadFromSQL() {
         long start = System.currentTimeMillis();
@@ -96,5 +108,10 @@ public class MonsterCollectionData {
         }
         MonsterCollectionGroup mcg = getGroup(region, session, group);
         return new Tuple<>(mcg.getReward(), mcg.getRewardQuantity());
+    }
+
+    public static int getExplorationMinutes(int region, int session, int group) {
+        int reward = getGroup(region, session, group).getReward();
+        return rewardToMinutes.get(reward);
     }
 }

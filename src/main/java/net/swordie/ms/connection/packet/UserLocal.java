@@ -456,6 +456,20 @@ public class UserLocal {
         outPacket.encodeShort(totalCount);
         outPacket.encodeShort(oneSprayMin);
         outPacket.encodeShort(oneSprayMax);
+
+        return outPacket;
+    }
+
+    public static OutPacket ballonMsg(String message, int width, int timeOut, Position position) {
+        OutPacket outPacket = new OutPacket(OutHeader.BALLOMSG);
+
+        outPacket.encodeString(message);
+        outPacket.encodeShort(width);// 100
+        outPacket.encodeShort(timeOut);// 3
+        outPacket.encodeByte(position == null);
+        if (position != null) {
+            outPacket.encodePosition(position);
+        }
         return outPacket;
     }
 }

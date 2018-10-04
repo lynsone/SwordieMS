@@ -4,12 +4,9 @@ package net.swordie.ms.enums;
  * Created on 12/13/2017.
  */
 public enum CharSelectType {
-
-    IN_ALBA(39),
-    CLIENT_ALREADY_RUNNING(55),
-    HAVING_TROUBLE_LOGGING_IN(67),
-
-    ;
+    InAlba(39),
+    ClientAlreadyRunning(55),
+    HavingTroubleLoggingIn(67);
 
     private byte val;
 

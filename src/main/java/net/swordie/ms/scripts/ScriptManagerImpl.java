@@ -512,6 +512,16 @@ public class ScriptManagerImpl implements ScriptManager {
 		return sendGeneralSay("", AskSlideMenu);
 	}
 
+	public int sendAskSelectMenu(int dlgType, int defaultSelect) {
+		return sendAskSelectMenu(dlgType, defaultSelect, new String[]{});
+	}
+
+	public int sendAskSelectMenu(int dlgType, int defaultSelect, String[] text) {
+		getNpcScriptInfo().setDlgType(dlgType);
+		getNpcScriptInfo().setDefaultSelect(defaultSelect);
+		getNpcScriptInfo().setSelectText(text);
+		return sendGeneralSay("", AskSelectMenu);
+	}
 
 
 	// Start of param methods ------------------------------------------------------------------------------------------
@@ -750,10 +760,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		giveSkill(skillId, 1);
 	}
 
+	public void giveSkill(int skillId, int slv) { giveSkill(skillId, slv, slv); }
+
 	@Override
-	public void giveSkill(int skillId, int slv) {
-		chr.addSkill(skillId, slv, slv);
-	}
+	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
 
 	public int getSkillByItem() {
 		return getSkillByItem(getParentID());
@@ -978,6 +988,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	public int getAmountOfMobsInField(int fieldid) {
 		Field field = FieldData.getFieldById(fieldid);
 		return field.getMobs().size();
+	}
+
+	public void killMobs() {
+		List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+		for (Mob mob : mobs) {
+			mob.die();
+		}
 	}
 
 	public void showWeatherNoticeToField(String text, WeatherEffNoticeType type) {
@@ -1671,7 +1688,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			quest = QuestData.createQuestFromId(id);
 		}
 		quest.setCompletedTime(FileTime.currentTime());
-		quest.setStatus(QuestStatus.COMPLETE);
+		quest.setStatus(QuestStatus.Completed);
 		qm.addQuest(quest);
 		chr.write(WvsContext.questRecordMessage(quest));
 		chr.chatMessage(String.format("Quest %d completed by completeQuestNoRewards", id));
@@ -1714,7 +1731,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		QuestManager qm = character.getQuestManager();
 		Quest quest = qm.getQuests().get(questId);
 		if (quest == null) {
-			quest = new Quest(questId, QuestStatus.STARTED);
+			quest = new Quest(questId, QuestStatus.Started);
 			quest.setQrValue(qrValue);
 			qm.addCustomQuest(quest);
 		}
@@ -1949,7 +1966,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int moveCamera(boolean back, int speed, int x, int y) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
         Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
         if (response == null) {
@@ -1968,7 +1985,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int zoomCamera(int inZoomDuration, int scale, int x, int y) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, new Position(x, y))));
         Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
         if (response == null) {
@@ -1988,7 +2005,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int sendDelay(int delay) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
@@ -2087,6 +2104,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.avatarLookSet(equipIDs)));
 	}
 
+	public void faceOff(int faceItemID) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.faceOff(faceItemID)));
+	}
+
 	// Clock methods ---------------------------------------------------------------------------------------------------
 
 	public Clock createStopWatch(int seconds) {
@@ -2132,7 +2153,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			QuestManager qm = chr.getQuestManager();
 			Quest q = qm.getQuests().getOrDefault(7291, null);
 			if (q == null) {
-				q = new Quest(7291, QuestStatus.STARTED);
+				q = new Quest(7291, QuestStatus.Started);
 				qm.addQuest(q);
 			}
 			DamageSkinSaveData dssd = DamageSkinSaveData.getByItemID(itemID);
@@ -2212,6 +2233,8 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(User.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
 
+	public void blindEffect(boolean blind) { chr.write(User.effect(Effect.blindEffect(blind))); }
+
 	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
 		chr.write(User.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));
 	}
@@ -2270,7 +2293,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int playVideoByScript(String videoPath) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.CompletedVideo);
+		getNpcScriptInfo().setMessageType(NpcMessageType.PlayMovieClip);
 		chr.write(UserLocal.videoByScript(videoPath, false));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
@@ -2301,6 +2324,10 @@ public class ScriptManagerImpl implements ScriptManager {
 			addLevel(1);
 			level++;
 		}
+	}
+
+	public void ballonMsg(String message) {
+		chr.write(UserLocal.ballonMsg(message, 100, 3, null));
 	}
 
 	private ScriptMemory getMemory() {

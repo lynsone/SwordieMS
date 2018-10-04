@@ -1,5 +1,3 @@
-sm.lockInGameUI(True)
-
 sm.showFieldEffect("demonSlayer/whiteOut", 0)
 sm.sendDelay(1950)
 

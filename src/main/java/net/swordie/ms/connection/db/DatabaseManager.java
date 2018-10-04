@@ -118,6 +118,7 @@ public class DatabaseManager {
                 MonsterCollectionMobInfo.class,
                 MonsterCollection.class,
                 MonsterCollectionReward.class,
+                MonsterCollectionExploration.class,
                 Alliance.class,
                 DropInfo.class,
         };

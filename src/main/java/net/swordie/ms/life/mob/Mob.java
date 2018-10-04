@@ -1205,8 +1205,8 @@ public class Mob extends Life {
                 mob.setPosition(getPosition().deepCopy());
                 mob.setHomePosition(getPosition().deepCopy());
                 field.spawnLife(mob, null);
-                field.setEliteState(EliteState.ELITE_BOSS);
-                field.broadcastPacket(CField.eliteState(EliteState.ELITE_BOSS, false, GameConstants.ELITE_BOSS_BGM,
+                field.setEliteState(EliteState.EliteBoss);
+                field.broadcastPacket(CField.eliteState(EliteState.EliteBoss, false, GameConstants.ELITE_BOSS_BGM,
                         null, null));
             } else if (field.getKilledElites() >= GameConstants.ELITE_MOB_DARK_NOTIFICATION) {
                 msg = "You feel something in the dark energy...";
@@ -1215,8 +1215,8 @@ public class Mob extends Life {
             }
             getField().broadcastPacket(WvsContext.weatherEffectNotice(WeatherEffNoticeType.EliteBoss, msg, 8000)); // 8 seconds
         } else if (getEliteType() == 3) {
-            field.broadcastPacket(CField.eliteState(EliteState.NORMAL, true, null, null, null));
-            field.setEliteState(EliteState.NORMAL);
+            field.broadcastPacket(CField.eliteState(EliteState.None, true, null, null, null));
+            field.setEliteState(EliteState.None);
         }
         setChanged();
         notifyObservers();

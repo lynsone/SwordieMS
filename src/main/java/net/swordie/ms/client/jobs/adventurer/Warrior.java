@@ -408,7 +408,7 @@ public class Warrior extends Beginner {
         field = c.getChr().getField();
         evilEye.setFlyMob(true);
         evilEye.setMoveAbility(MoveAbility.Fly.getVal());
-        evilEye.setAssistType(AssistType.BUFFING.getVal());
+        evilEye.setAssistType(AssistType.Buffing.getVal());
         evilEye.setAttackActive(true);
         field.spawnSummon(evilEye);
 

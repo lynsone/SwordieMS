@@ -108,7 +108,6 @@ import org.apache.log4j.LogManager;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import org.python.google.common.collect.Comparators;
 
 import javax.script.ScriptException;
 import java.lang.reflect.InvocationTargetException;
@@ -275,7 +274,7 @@ public class WorldHandler {
                 chr.chatMessage(Expedition, "Unknown command \"" + command + "\"");
             }
         } else {
-            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatUserType.USER, msg, false, 0, c.getWorldId()));
+            chr.getField().broadcastPacket(User.chat(chr.getId(), ChatUserType.User, msg, false, 0, c.getWorldId()));
         }
     }
 
@@ -1930,21 +1929,18 @@ public class WorldHandler {
             int answer = 0;
             boolean hasAnswer = false;
             String ans = null;
-            if (nmt == NpcMessageType.InGameDirectionsAnswer) {
+            if (nmt == NpcMessageType.AskIngameDirection) {
                 InGameDirectionAsk answerType = InGameDirectionAsk.getByVal(action);
                 if (answerType == null || answerType == InGameDirectionAsk.NOT) {
                     return;
                 }
                 boolean success = inPacket.decodeByte() == 1;// bSuccess
-                int answerVal = 0;
-                if (success) {
-                    if (answerType == InGameDirectionAsk.CAMERA_MOVE_TIME) {
-                        answerVal = inPacket.decodeInt();
-                        chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(answerVal)));
-                        return;
-                    }
-                    chr.getScriptManager().handleAction(nmt, (byte) answerType.getVal(), answerVal);
+                if (answerType == InGameDirectionAsk.CAMERA_MOVE_TIME && success) {
+                    int answerVal = inPacket.decodeInt();
+                    chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(answerVal)));
+                    return;
                 }
+                chr.getScriptManager().handleAction(nmt, (byte) 1, answerType.getVal());
                 return;
             }
             if (nmt == NpcMessageType.AskText && action == 1) {
@@ -2282,12 +2278,17 @@ public class WorldHandler {
             return;
         }
         Field field = chr.getField();
-        int directionNode = inPacket.decodeInt();
 
-        String script = field.getDirectionInfoScript(directionNode);
+        int node = inPacket.decodeInt();
+        List<String> directionNode = field.getDirectionNode(node);
+        if (directionNode == null) {
+            return;
+        }
+        String script = directionNode.get(chr.getCurrentDirectionNode(node));
         if (script == null) {
             return;
         }
+        chr.increaseCurrentDirectionNode(node);
         chr.getScriptManager().setCurNodeEventEnd(false);
         chr.getScriptManager().startScript(field.getId(), script, ScriptType.Field);
     }
@@ -4224,9 +4225,9 @@ public class WorldHandler {
         boolean gradeDown = !locked && Util.succeedProp(GameConstants.BASE_CHAR_POT_DOWN_RATE);
         byte grade = cpm.getGrade();
         // update grades
-        if (grade < CharPotGrade.LEGENDARY.ordinal() && gradeUp) {
+        if (grade < CharPotGrade.Legendary.ordinal() && gradeUp) {
             grade++;
-        } else if (grade > CharPotGrade.RARE.ordinal() && gradeDown) {
+        } else if (grade > CharPotGrade.Rare.ordinal() && gradeDown) {
             grade--;
         }
         // set new potentials that weren't locked
@@ -4890,6 +4891,26 @@ public class WorldHandler {
         int region = inPacket.decodeInt();
         int session = inPacket.decodeInt();
         int group = inPacket.decodeInt();
+        int key = region * 10000 + session * 100 + group;
+        Account account = chr.getAccount();
+        MonsterCollection mc = account.getMonsterCollection();
+        MonsterCollectionExploration mce = mc.getExploration(region, session, group);
+        boolean complete = mc.isComplete(region, session, group);
+        if (complete && mce == null) {
+            // starting an exploration
+            if (mc.getOpenExplorationSlots() <= 0) {
+                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.NotEnoughExplorationSlots, null, 0));
+                return;
+            }
+            mce = mc.createExploration(region, session, group);
+            mc.addExploration(mce);
+            chr.write(UserLocal.collectionRecordMessage(mce.getPosition(), mce.getValue(true)));
+            chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.ExploreBegin, null, 0));
+        } else {
+            // trying to start an incomplete/already exploring group
+            chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.NoMonstersForExploring, null, 0));
+        }
+        chr.dispose(); // still required even if you send a collection result
     }
 
     public static void handleMonsterCollectionCompleteRewardReq(Char chr, InPacket inPacket) {
@@ -4899,21 +4920,38 @@ public class WorldHandler {
         int group = inPacket.decodeInt();
         int exploreIndex = inPacket.decodeInt();
         MonsterCollection mc = chr.getAccount().getMonsterCollection();
-        if (reqType == 0) { // group
-            MonsterCollectionGroup mcs = mc.getGroup(region, session, group);
-            if (mcs != null && !mcs.isRewardClaimed() && mc.isComplete(region, session, group)) {
-                Tuple<Integer, Integer> rewardInfo = MonsterCollectionData.getReward(region, session, group);
-                Item item = ItemData.getItemDeepCopy(rewardInfo.getLeft());
-                item.setQuantity(rewardInfo.getRight());
-                chr.addItemToInventory(item);
-                mcs.setRewardClaimed(true);
-                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
-            } else if (mcs != null && mcs.isRewardClaimed()) {
-                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.AlreadyClaimedReward, null, 0));
-            } else {
-                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CompleteCollectionBeforeClaim, null, 0));
-            }
+        switch (reqType) {
+            case 0: // group
+                MonsterCollectionGroup mcs = mc.getGroup(region, session, group);
+                if (mcs != null && !mcs.isRewardClaimed() && mc.isComplete(region, session, group)) {
+                    Tuple<Integer, Integer> rewardInfo = MonsterCollectionData.getReward(region, session, group);
+                    Item item = ItemData.getItemDeepCopy(rewardInfo.getLeft());
+                    item.setQuantity(rewardInfo.getRight());
+                    chr.addItemToInventory(item);
+                    mcs.setRewardClaimed(true);
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
+                } else if (mcs != null && mcs.isRewardClaimed()) {
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.AlreadyClaimedReward, null, 0));
+                } else {
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CompleteCollectionBeforeClaim, null, 0));
+                }
+                break;
+            case 4: // exploration
+                MonsterCollectionExploration mce = mc.getExploration(region, session, group);
+                if (mce != null && mce.getEndDate().isExpired()) {
+                    mc.removeExploration(mce);
+                    chr.write(UserLocal.collectionRecordMessage(mce.getPosition(), mce.getValue(false)));
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.CollectionCompletionRewardSuccess, null, 0));
+                } else {
+                    chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.TryAgainInAMoment, null, 0));
+                }
+                break;
+            default:
+                log.warn("Unhandled MonsterCollectionCompleteRewardReq type " + reqType);
+                chr.write(WvsContext.monsterCollectionResult(MonsterCollectionResultType.TryAgainInAMoment, null, 0));
+
         }
+        chr.dispose(); // still required even if you send a collection result
     }
 
     public static void handleGroupMessage(Char chr, InPacket inPacket) {
@@ -5569,7 +5607,7 @@ public class WorldHandler {
                     chr.write(CField.blowWeather(5120118, "Looks like we all arrived in one piece. Now, get out of here before those pesky things start bothering you again."));
                     Quest quest = chr.getQuestManager().getQuestById(32628);
                     if (quest == null) {
-                        quest = new Quest(32628, QuestStatus.STARTED);
+                        quest = new Quest(32628, QuestStatus.Started);
                         chr.getQuestManager().addQuest(quest);
                     }
                     quest.setProperty("guard1", "1");// needed to complete quest
@@ -5638,20 +5676,30 @@ public class WorldHandler {
 
         int crusaderCoin = 4310029;
         List<Integer> coinCostList = Arrays.asList(50, 40, 60, 255, 170, 85, 170, 85, 10);
+        List<Integer> itemList = Arrays.asList(1132111, 1152069, 1122157, 1012331, 1022148, 1032156, 1122208, 1132182, 2030026);
 
-        if (!chr.hasItemCount(crusaderCoin, (coinCostList.get(itemIndexInShop)) * itemQuantity)) {
+        if (!itemList.contains(itemId)) {
+            log.error(String.format("Character %d tried to trade an item {%d} that is not in the shop list.", chr.getId(), itemId));
+
+        } else if (itemList.get(itemIndexInShop) != itemId) {
+            log.error(String.format("Character %d tried to trade an item {%d} that is not in the given position {%d}.", chr.getId(), itemId, itemIndexInShop));
+
+        } else if (ItemConstants.isEquip(itemId) && itemQuantity > 1) {
+            log.error(String.format("Character %d tried to get a quantity {%d} that is more than 1 Silent Crusade equip {%d}.", chr.getId(), itemQuantity, itemId));
+
+        } else if (itemIndexInShop >= itemList.size()) {
+            log.error(String.format("Character %d tried to get an item from a shopIndex {%d} that is more than or equal to the amount of items in the shop {%d}.", chr.getId(), itemIndexInShop, itemList.size()));
+
+        } else if (!chr.hasItemCount(crusaderCoin, (coinCostList.get(itemIndexInShop)) * itemQuantity)) {
             chr.chatMessage("You don't have enough Crusader Coins.");
-            chr.dispose();
-            return;
-        }
-        if (!chr.canHold(itemId)) {
-            chr.chatMessage("You don't have any inventory space.");
-            chr.dispose();
-            return;
-        }
 
-        chr.consumeItem(crusaderCoin, coinCostList.get(itemIndexInShop));
-        chr.addItemToInventory(itemId, itemQuantity);
+        } else if (!chr.canHold(itemId)) {
+            chr.chatMessage("You don't have any inventory space.");
+
+        } else {
+            chr.consumeItem(crusaderCoin, coinCostList.get(itemIndexInShop));
+            chr.addItemToInventory(itemList.get(itemIndexInShop), 1);
+        }
         chr.dispose();
     }
 
@@ -5684,8 +5732,11 @@ public class WorldHandler {
                 actualMesoCost = 1000000;
                 break;
         }
-        if (!sm.hasQuestCompleted(questId)) {
-            log.error(String.format("Character %d tried to reissue a medal from a quest which they have not completed.", chr.getId()));
+        if (QuestData.getQuestInfoById(questId).getMedalItemId() != medalItemId || !(ItemConstants.isMedal(medalItemId))) {
+            log.error(String.format("Character %d tried to reissue an item {%d} that isn't a medal or tried to reissue a medal from a quest {%d} that doesn't give the given medal", chr.getId(), medalItemId, questId));
+
+        } else if (!sm.hasQuestCompleted(questId)) {
+            log.error(String.format("Character %d tried to reissue a medal from a quest {} which they have not completed.", chr.getId(), questId));
 
         } else if (ItemData.getItemDeepCopy(medalItemId) == null || QuestData.getQuestInfoById(questId) == null) {
             chr.write(UserLocal.medalReissueResult(MedalReissueResultType.Unknown, medalItemId));
@@ -5703,7 +5754,7 @@ public class WorldHandler {
             count++;
             sm.setQRValue(QuestConstants.MEDAL_REISSUE_QUEST, "count=" + count);
             chr.deductMoney(actualMesoCost);
-            chr.addItemToInventory(medalItemId, 1);
+            chr.addItemToInventory(QuestData.getQuestInfoById(questId).getMedalItemId(), 1);
             chr.write(UserLocal.medalReissueResult(MedalReissueResultType.Success, medalItemId));
         }
         chr.dispose();

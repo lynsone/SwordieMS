@@ -4,6 +4,7 @@ drop table if exists linkskills;
 drop table if exists accounts;
 drop table if exists monster_collection_rewards;
 drop table if exists monster_collection_mobs;
+drop table if exists monster_collection_explorations;
 drop table if exists monster_collections;
 drop table if exists macroskills;
 drop table if exists macros;
@@ -740,6 +741,16 @@ create table monster_collection_mobs (
     primary key (id)
 );
 
+create table monster_collection_explorations (
+	id bigint not null auto_increment,
+    collectionid int,
+    collectionkey int,
+    monsterkey varchar(255),
+    endDate datetime(3),
+    position int,
+    primary key (id)
+);
+
 create table monster_collection_rewards (
 	region int,
     session int,
@@ -763,7 +774,7 @@ create table accounts (
 	msg2 tinyint default 0,
 	purchaseexp tinyint default 0,
 	pblockreason tinyint default 3,
-	chatunblockdate long,
+	chatunblockdate bigint default 0,
 	hascensorednxloginid boolean default 0,
 	gradecode tinyint default 0,
 	censorednxloginid varchar(255),
