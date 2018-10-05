@@ -8,15 +8,25 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 public class AntiMacro {
-    public enum NotificationType {
-        Unknown(6), // decodes a string, when combined with MacroType.Admin also saves a screenshot from the user and sends to the server
-        LieDetector(7),
-        Detected(8),
-        Passed(10);
+    public enum AntiMacroResultType {
+        AntiMacroReq_Fail_InvalidCharacterName(0),
+        AntiMacroReq_Fail_NotAttack(1),
+        AntiMacroReq_Fail_NotAvailableTime(2),
+        AntiMacroReq_Fail_SolvingQuestion(3),
+        AntiMacroReq_Fail_CreateImageError(4),
+        AntiMacroReq_Pended(5),
+        AntiMacroReq_Success(6),
+
+        AntiMacroRes(7),
+        AntiMacroRes_Fail(8),
+        AntiMacroRes_TargetFail(9),
+        AntiMacroRes_Success(10),
+        AntiMacroRes_TargetSuccess(11),
+        AntiMacroRes_Reward(12);
 
         private int val;
 
-        NotificationType(int val) {
+        AntiMacroResultType(int val) {
             this.val = val;
         }
 
@@ -26,9 +36,20 @@ public class AntiMacro {
     }
 
     public enum AntiMacroType {
-        Default(0),
-        Timebomb(1),
-        Admin(4);
+        AntiMacroRequestNone(0),
+        AntiMacroResult_Answer(0),
+        AntiMacroRequest_No_Msg(0),
+        AntiMacroRequestForCreateCharacter(1),
+        AntiMacroResult_Refresh(1),
+        AntiMacroRequest_Incorrect_Msg(1),
+        AntiMacroAdminRequest(2),
+        AntiMacroRequestForDeleteCharacter(2),
+        AntiMacroResult_Cancel(2),
+        AntiMacroAutoRequest(3),
+        AntiMacroFieldRequest(4),
+        AntiMacroBombRequest(2),
+        AntiMacroGlobalRequest(6),
+        AntiMacroTypeNum(6);
 
         private int val;
 

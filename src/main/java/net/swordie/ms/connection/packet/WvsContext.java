@@ -963,15 +963,19 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket antiMacroResult(final byte[] image, byte nNotificationType, byte nAntiMacroType) {
+    public static OutPacket antiMacroResult(final byte[] image, byte notificationType, byte antiMacroType) {
+        return antiMacroResult(image, notificationType, antiMacroType, (byte) 0, (byte) 1);
+    }
+
+    public static OutPacket antiMacroResult(final byte[] image, byte notificationType, byte antiMacroType, byte first, byte refreshAntiMacroCount) {
         OutPacket outPacket = new OutPacket(OutHeader.ANTI_MACRO_RESULT);
 
-        outPacket.encodeByte(nNotificationType);
-        outPacket.encodeByte(nAntiMacroType);
+        outPacket.encodeByte(notificationType);
+        outPacket.encodeByte(antiMacroType);
 
-        if (nNotificationType == AntiMacro.NotificationType.LieDetector.getVal()) {
-            outPacket.encodeByte(1); // non-zero = 1 minute
-            outPacket.encodeByte(0); // zero = 1 minute
+        if (notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes.getVal()) {
+            outPacket.encodeByte(first);
+            outPacket.encodeByte(refreshAntiMacroCount);
 
             if (image == null) {
                 outPacket.encodeInt(0);
@@ -979,8 +983,8 @@ public class WvsContext {
                 outPacket.encodeInt(image.length);
                 outPacket.encodeArr(image);
             }
-        } else if (nNotificationType == AntiMacro.NotificationType.Detected.getVal() ||
-                nNotificationType == AntiMacro.NotificationType.Passed.getVal()) {
+        } else if (notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes_Fail.getVal() ||
+                notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes_Success.getVal()) {
             outPacket.encodeString(""); // unused?
         }
 

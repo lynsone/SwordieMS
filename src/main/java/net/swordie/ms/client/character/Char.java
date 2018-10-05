@@ -4007,7 +4007,7 @@ public class Char {
 		setLieDetectorAnswer("");
 		chatMessage(SpeakerChannel, "You have failed the Lie Detector test.");
 
-		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.NotificationType.Detected.getVal(), AntiMacro.AntiMacroType.Admin.getVal()));
+		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.AntiMacroResultType.AntiMacroRes_Fail.getVal(), AntiMacro.AntiMacroType.AntiMacroFieldRequest.getVal()));
 
 		// TODO: handle fail
 	}
@@ -4016,7 +4016,7 @@ public class Char {
 		setLieDetectorAnswer("");
 		chatMessage(SpeakerChannel, "You have passed the Lie Detector test!");
 
-		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.NotificationType.Passed.getVal(), AntiMacro.AntiMacroType.Admin.getVal()));
+		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.AntiMacroResultType.AntiMacroRes_Success.getVal(), AntiMacro.AntiMacroType.AntiMacroFieldRequest.getVal()));
 
 		// TODO: handle pass
 	}
@@ -4053,7 +4053,7 @@ public class Char {
 			lastLieDetector = System.currentTimeMillis();
 
 			byte[] image = am.generateImage(196, 44, Color.BLACK, AntiMacro.getRandomColor());
-			getClient().write(WvsContext.antiMacroResult(image, AntiMacro.NotificationType.LieDetector.getVal(), AntiMacro.AntiMacroType.Admin.getVal()));
+			getClient().write(WvsContext.antiMacroResult(image, AntiMacro.AntiMacroResultType.AntiMacroRes.getVal(), AntiMacro.AntiMacroType.AntiMacroFieldRequest.getVal()));
 		} catch (IOException|FontFormatException e) {
 			e.printStackTrace();
 
