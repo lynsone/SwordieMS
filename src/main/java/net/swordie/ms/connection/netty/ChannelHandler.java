@@ -135,6 +135,12 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_MACRO_SYS_DATA_MODIFIED:
                 WorldHandler.handleUserMacroSysDataModified(c, inPacket);
                 break;
+            case USER_ANTI_MACRO_QUESTION_RESULT:
+                WorldHandler.handleUserAntiMacroQuestionResult(c, inPacket);
+                break;
+            case USER_ANTI_MACRO_REFRESH_REQUEST:
+                WorldHandler.handleUserAntiMacroRefreshResult(c, inPacket);
+                break;
             case USER_ACTIVATE_DAMAGE_SKIN:
                 WorldHandler.handleUserActivateDamageSkin(c, inPacket);
                 break;

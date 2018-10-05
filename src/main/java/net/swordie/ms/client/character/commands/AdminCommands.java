@@ -1542,11 +1542,40 @@ public class AdminCommands {
         }
     }
 
+    // lie detector
+    public static class LD extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 1) {
+                chr.chatMessage(SpeakerChannel, "Not enough args! Use !ld <name> or !ld @me to test.");
+                return;
+            }
+
+            String name = args[1];
+            Char chrToLD = chr;
+
+            if (!name.equals("@me")) {
+                chrToLD = Server.getInstance().getWorldById(chr.getClient().getWorldId()).getCharByName(name);
+
+                if (chrToLD == null) {
+                    chr.chatMessage(SpeakerChannel, String.format("Character '%s' is not online.", name));
+                    return;
+                }
+            }
+
+            if (chrToLD.sendLieDetector()) {
+                chr.chatMessage(SpeakerChannel, String.format("Sent lie detector to '%s'.", chrToLD.getName()));
+            } else {
+                chr.chatMessage(SpeakerChannel, "Lie detector failed.");
+            }
+        }
+    }
+
     public static class Ban extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
                 chr.chatMessage(SpeakerChannel, "Not enough args! Use !ban <name> <amount> <min/hour/day/year> <reason>");
+                return;
             }
             String name = args[1];
             int amount = Integer.parseInt(args[2]);
@@ -1621,6 +1650,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             if (args.length < 1) {
                 chr.chatMessage(SpeakerChannel, "Invalid args. Use !findportal <id/name>");
+                return;
             }
             Field field = chr.getField();
             Portal portal;
